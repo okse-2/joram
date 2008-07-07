@@ -49,7 +49,7 @@ import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.agent.Debug;
+import fr.dyade.aaa.util.Debug;
 
 /**
  * The <code>JavaMailUtil</code> class giv utils to get, send, ...
@@ -156,10 +156,13 @@ public class JavaMailUtil {
     buf.append("replyDestType=" + msg.replyToType() + "\n");
     buf.append("deliveryCount=" + msg.getDeliveryCount() + "\n");
     buf.append("denied=" + msg.getDenied() + "\n");
-    buf.append("deletedDest=" + msg.getDeletedDest() + "\n");
-    buf.append("expired=" + msg.getExpired() + "\n");
-    buf.append("notWriteable=" + msg.getNotWriteable() + "\n");
-    buf.append("undeliverable=" + msg.getUndeliverable() + "\n");
+    buf.append("deletedDest=" + msg.getProperty("JMS_JORAM_DELETEDDEST") + "\n");
+    buf.append("expired=" + msg.getProperty("JMS_JORAM_EXPIRED") + "\n");
+    buf.append("notWriteable=" + msg.getProperty("JMS_JORAM_NOTWRITABLE") + "\n");
+    buf.append("undeliverable=" + msg.getProperty("JMS_JORAM_UNDELIVERABLE") + "\n");
+    buf.append("adminDeleted=" + msg.getProperty("JMS_JORAM_ADMINDELETED") + "\n");
+    buf.append("queueFull=" + msg.getProperty("JMS_JORAM_QUEUEFULL") + "\n");
+    buf.append("unexpectedError=" + msg.getProperty("JMS_JORAM_UNEXPECTEDERROR") + "\n");
  
     mbp.setText(buf.toString());
     return mbp;
@@ -244,15 +247,18 @@ public class JavaMailUtil {
                      prop.getProperty("replyDestType",replyDestType));
     msg.setDeliveryCount(ConversionHelper.toInt(prop.getProperty("deliveryCount","0")));
     msg.setDenied(ConversionHelper.toBoolean(prop.getProperty("denied","false")));
-    msg.setDeletedDest(ConversionHelper.toBoolean(prop.getProperty("deletedDest","false")));
-    msg.setExpired(ConversionHelper.toBoolean(prop.getProperty("expired","false")));
-    msg.setNotWriteable(ConversionHelper.toBoolean(prop.getProperty("notWriteable","false")));
-    msg.setUndeliverable(ConversionHelper.toBoolean(prop.getProperty("undeliverable","false")));
+    msg.setProperty("JMS_JORAM_DELETEDDEST", new Boolean(prop.getProperty("deletedDest")));
+    msg.setProperty("JMS_JORAM_EXPIRED", new Boolean(prop.getProperty("expired")));
+    msg.setProperty("JMS_JORAM_NOTWRITABLE", new Boolean(prop.getProperty("notWriteable")));
+    msg.setProperty("JMS_JORAM_UNDELIVERABLE", new Boolean(prop.getProperty("undeliverable")));
+    msg.setProperty("JMS_JORAM_ADMINDELETED", new Boolean(prop.getProperty("adminDeleted")));
+    msg.setProperty("JMS_JORAM_QUEUEFULL", new Boolean(prop.getProperty("queueFull")));
+    msg.setProperty("JMS_JORAM_UNEXPECTEDERROR", new Boolean(prop.getProperty("unexpectedError")));
     
 //        msg.setOptionalHeader((Hashtable) h.getProperty("optionalHeader"));
 //        msg.setProperties((Hashtable) h.getProperty("properties"));
     
-    msg.setText((String) prop.getProperty("mailMessage"));
+    msg.setText(prop.getProperty("mailMessage"));
     
     return msg;
   }

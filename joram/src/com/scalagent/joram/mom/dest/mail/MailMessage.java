@@ -22,8 +22,6 @@
  */
 package com.scalagent.joram.mom.dest.mail;
 
-import org.objectweb.joram.shared.excepts.MessageValueException;
-import org.objectweb.joram.shared.messages.ConversionHelper;
 import org.objectweb.joram.shared.messages.Message;
 
 
@@ -169,58 +167,6 @@ public class MailMessage {
   }
 
   /**
-   * <code>true</code> if the message target destination is deleted.
-   * @return deleted destination
-   */
-  public boolean getDeletedDest() {
-    boolean deleted = false;
-    try {
-      deleted = ConversionHelper.toBoolean(sharedMsg.getProperty("JMS_JORAM_DELETEDDEST"));
-    } catch (MessageValueException exc1) {
-      return false;
-    }
-    return deleted;
-  }
-
-  /**
-   * <code>true</code> if the message expired.
-   * @return expired
-   */
-  public boolean getExpired() {
-    boolean expired = false;
-    try {
-      expired = ConversionHelper.toBoolean(sharedMsg.getProperty("JMS_JORAM_EXPIRED"));
-    } catch (MessageValueException exc1) {
-      return false;
-    }
-    return expired;
-  }
-
-  /**
-   * <code>true</code> if the message could not be written on the dest.
-   * @return written on the destination
-   */
-  public boolean getNotWriteable() {
-    boolean notWriteable = false;
-    try {
-      notWriteable = ConversionHelper.toBoolean(sharedMsg.getProperty("JMS_JORAM_NOTWRITABLE"));
-    } catch (MessageValueException exc1) {
-      return false;
-    }
-    return notWriteable;
-  }
-
-  public boolean getUndeliverable() {
-    boolean undeliverable = false;
-    try {
-      undeliverable = ConversionHelper.toBoolean(sharedMsg.getProperty("JMS_JORAM_UNDELIVERABLE"));
-    } catch (MessageValueException exc1) {
-      return false;
-    }
-    return undeliverable;
-  }
-
-  /**
    * <code>true</code> if the message is considered as undeliverable.
    * @param name
    * @return property value
@@ -324,35 +270,12 @@ public class MailMessage {
   }
 
   /**
-   * <code>true</code> if the message target destination is deleted.
-   * @param deletedDest
+   * Sets a message property.
+   * @param propName the property name
+   * @param propValue the property value
    */
-  public void setDeletedDest(boolean deletedDest) {
-    sharedMsg.setProperty("JMS_JORAM_DELETEDDEST", new Boolean(deletedDest));
-  }
-
-  /**
-   * <code>true</code> if the message expired.
-   * @param expired
-   */
-  public void setExpired(boolean expired) {
-    sharedMsg.setProperty("JMS_JORAM_EXPIRED", new Boolean(expired));
-  }
-
-  /**
-   * <code>true</code> if the message could not be written on the dest.
-   * @param notWriteable
-   */
-  public void setNotWriteable(boolean notWriteable) {
-    sharedMsg.setProperty("JMS_JORAM_NOTWRITABLE", new Boolean(notWriteable));
-  }
-
-  /**
-   * <code>true</code> if the message is considered as undeliverable.
-   * @param undeliverable
-   */
-  public void setUndeliverable(boolean undeliverable) {
-     sharedMsg.setProperty("JMS_JORAM_UNDELIVERABLE", new Boolean(undeliverable));
+  public void setProperty(String propName, Object propValue) {
+    sharedMsg.setProperty(propName, propValue);
   }
 
   /**
