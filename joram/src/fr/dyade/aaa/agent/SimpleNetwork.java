@@ -281,6 +281,11 @@ public class SimpleNetwork extends StreamNetwork {
                 continue;
               }
               
+              currentTimeMillis = System.currentTimeMillis();
+              if ((msg.not.expiration > 0L) && (msg.not.expiration < currentTimeMillis)) {
+                throw new ExpirationExceededException();
+              }
+              
               try {
                 send(socket, msg, currentTimeMillis);
               } catch (IOException exc) {
