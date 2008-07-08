@@ -27,7 +27,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Enumeration;
 
-import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -184,12 +184,9 @@ public class FtpThread extends Thread {
                                         clone.getSharedMessage()));
       
     } catch (Exception exc) {
-      ClientMessages deadM = new ClientMessages(clientContext, requestId);
-      msg.setObjectProperty("JMS_JORAM_NOTWRITABLE", Boolean.TRUE);
-      msg.getSharedMessage().expiration = 0;
-      deadM.addMessage(msg.getSharedMessage());
-      if (dmqId != null)
-        Channel.sendTo(dmqId, deadM);
+      DMQManager dmqManager = new DMQManager(dmqId, destId);
+      dmqManager.addDeadMessage(msg.getSharedMessage(), DMQManager.UNEXPECTED_ERROR);
+      dmqManager.sendToDMQ();
     }
   }
 

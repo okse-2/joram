@@ -34,7 +34,7 @@ import javax.management.openmbean.TabularData;
 
 import org.objectweb.joram.mom.dest.QueueImpl;
 import org.objectweb.joram.mom.messages.Message;
-import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.client.ConsumerMessages;
 import org.objectweb.joram.shared.selectors.Selector;
@@ -42,7 +42,6 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.util.Debug;
 
 /**
@@ -491,15 +490,18 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     // Browsing the messages one by one.
     Message message;
     String msgId;
+    DMQManager dmqManager = null;
     for (Enumeration e = newMessages.elements(); e.hasMoreElements();) {
       message = (Message) e.nextElement();
       msgId = message.getIdentifier();
 
       // test nbMaxMsg
       if (nbMaxMsg > -1 && nbMaxMsg <= messageIds.size()) {
-        ClientMessages deadMessages = new ClientMessages();
-        deadMessages.addMessage(message.getFullMessage());
-        sendToDMQ(deadMessages);
+        if (dmqManager == null) {
+          dmqManager = new DMQManager(dmqId, null);
+        }
+        nbMsgsSentToDMQSinceCreation++;
+        dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.QUEUE_FULL);
         continue;
       }
 
@@ -523,6 +525,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, this + ": added msg " + msgId + " for delivery.");
       }
+    }
+    if (dmqManager != null) {
+      dmqManager.sendToDMQ();
     }
   }
 
@@ -555,7 +560,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     int insertionIndex = -1;
     int prior;
     Vector deliverables = new Vector();
-    ClientMessages deadMessages = null;
+    DMQManager dmqManager = null;
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, " -> messageIds.size() = " + messageIds.size());
@@ -616,10 +621,11 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
               message.setDeliveryCount(deliveryAttempts.intValue() +1);
               message.setRedelivered();
             }
-            if (deadMessages == null)
-              deadMessages = new ClientMessages();
-            message.setExpiration(0);
-            deadMessages.addMessage(message.getFullMessage());
+            if (dmqManager == null) {
+              dmqManager = new DMQManager(dmqId, null);
+            }
+            nbMsgsSentToDMQSinceCreation++;
+            dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.EXPIRED);
           }
         } else {
           // Message has already been deleted.
@@ -671,10 +677,10 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
               message.setRedelivered();
             }
             
-            if (deadMessages == null)
-              deadMessages = new ClientMessages();
-            message.setExpiration(0);
-            deadMessages.addMessage(message.getFullMessage());
+            if (dmqManager == null) {
+              dmqManager = new DMQManager(dmqId, null);
+            }
+            dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.EXPIRED);
           }
         } else {
           // Message has already been deleted.
@@ -712,8 +718,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     }
    
     // Sending the dead messages to the DMQ, if any:
-    if (deadMessages != null)
-      sendToDMQ(deadMessages);
+    if (dmqManager != null)
+      dmqManager.sendToDMQ();
 
     // Finally, returning the reply or null:
     if (! deliverables.isEmpty()) {
@@ -769,11 +775,11 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
       logger.log(BasicLevel.DEBUG, this + ".deny(" + denies + ')');
     String id;
     Message message;
-    ClientMessages deadMessages = null;
     int deliveryAttempts = 1;
     int i;
     String currentId;
     long currentO;
+    DMQManager dmqManager = null;
 
     denyLoop:
     while (denies.hasMoreElements()) {
@@ -782,14 +788,14 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
       String deliveredMsgId = (String)deliveredIds.remove(id);
       if (deliveredMsgId == null) {
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, this + ": cannot denies message: " + id);
+          logger.log(BasicLevel.DEBUG, this + ": cannot deny message: " + id);
 
         continue denyLoop;
       }
       save();
       
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, this + ": denies message: " + id);
+        logger.log(BasicLevel.DEBUG, this + ": deny message: " + id);
       
       message = (Message) messagesTable.get(id);
       
@@ -800,16 +806,15 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
       if (value != null)
         deliveryAttempts = value.intValue() + 1;
       
-      // If maximum delivery attempts reached, the message is no more
+      // If maximum delivery attempts is reached, the message is no more
       // deliverable to this subscriber.
       if (isUndeliverable(deliveryAttempts)) {
         deniedMsgs.remove(id);
         message.setDeliveryCount(deliveryAttempts);
-        message.getHeaderMessage().setProperty("JMS_JORAM_UNDELIVERABLE", Boolean.TRUE);
-        message.setExpiration(0);
-        if (deadMessages == null)
-          deadMessages = new ClientMessages();
-        deadMessages.addMessage(message.getFullMessage());
+        if (dmqManager == null)
+          dmqManager = new DMQManager(dmqId, null);
+        nbMsgsSentToDMQSinceCreation++;
+        dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.UNDELIVERABLE);
         
         message.acksCounter--;
         if (message.acksCounter == 0)
@@ -853,8 +858,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     }
 
     // Sending dead messages to the DMQ, if needed:
-    if (deadMessages != null)
-      sendToDMQ(deadMessages);
+    if (dmqManager != null)
+      dmqManager.sendToDMQ();
 
   }
 
@@ -884,20 +889,6 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
       return deliveryAttempts == QueueImpl.getDefaultThreshold().intValue();
     return false;
   }
-
-  /**
-   * Method used for sending messages to the appropriate dead message queue.
-   */
-  private void sendToDMQ(ClientMessages messages) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Dead messages sent to DMQ: " + messages);
-    nbMsgsSentToDMQSinceCreation += messages.getMessages().size();
-    if (dmqId != null) {
-      Channel.sendTo(dmqId, messages);
-    } else if (QueueImpl.getDefaultDMQId() != null) {
-      Channel.sendTo(QueueImpl.getDefaultDMQId(), messages);
-    }
-  }
   
   public long getNbMsgsSentToDMQSinceCreation() {
     return nbMsgsSentToDMQSinceCreation;
@@ -926,25 +917,27 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     Message message = removeMessage(msgId);
     save();
     if (message != null) {
-      ClientMessages deadMessages = new ClientMessages();
-      deadMessages.addMessage(message.getFullMessage());
-      sendToDMQ(deadMessages);
+      DMQManager dmqManager = new DMQManager(dmqId, null);
+      nbMsgsSentToDMQSinceCreation++;
+      dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.ADMIN_DELETED);
+      dmqManager.sendToDMQ();
     }
   }
 
   public void clear() {
-    ClientMessages deadMessages = null;
+    DMQManager dmqManager = null;
     for (int i = 0; i < messageIds.size(); i++) {
       String msgId = (String)messageIds.elementAt(i);
       Message message = removeMessage(msgId);
       if (message != null) {
-        if (deadMessages == null)
-          deadMessages = new ClientMessages();
-        deadMessages.addMessage(message.getFullMessage());
+        if (dmqManager == null)
+          dmqManager = new DMQManager(dmqId, null);
+        nbMsgsSentToDMQSinceCreation++;
+        dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.ADMIN_DELETED);
       }
     }
-    if (deadMessages != null)
-      sendToDMQ(deadMessages);
+    if (dmqManager != null)
+      dmqManager.sendToDMQ();
     messageIds.clear();
     save();
   }
