@@ -292,8 +292,8 @@ public final class Message implements Serializable {
 //   }
 
   /**
-   * Returns <code>true</code> if the message is valid.
-   * If the message is no longer valid set the expired flag true.
+   * Returns <code>true</code> if the message is valid. The message is valid if
+   * not expired.
    *
    * @param currentTime	The current time to verify the expiration time.
    */
