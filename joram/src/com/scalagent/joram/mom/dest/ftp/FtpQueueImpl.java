@@ -28,6 +28,7 @@ import java.util.Properties;
 
 import org.objectweb.joram.mom.dest.QueueImpl;
 import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -205,7 +206,8 @@ public class FtpQueueImpl extends QueueImpl {
                                   path);
       t.start();
     } else {
-      DMQManager dmqManager = new DMQManager(not.getDMQId());
+      DMQManager dmqManager = new DMQManager(not.getDMQId(), dmqId, getId());
+      nbMsgsSentToDMQSinceCreation++;
       dmqManager.addDeadMessage(msg, DMQManager.NOT_WRITEABLE);
       dmqManager.sendToDMQ();
     }
