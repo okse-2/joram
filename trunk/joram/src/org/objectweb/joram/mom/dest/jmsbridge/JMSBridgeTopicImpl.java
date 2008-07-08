@@ -34,6 +34,7 @@ import org.objectweb.joram.mom.messages.Message;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.SubscribeRequest;
 import org.objectweb.joram.mom.notifications.UnsubscribeRequest;
+import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -224,8 +225,9 @@ public class JMSBridgeTopicImpl extends TopicImpl {
       } catch (Exception exc) {
         outTable.remove(message.getIdentifier());
         if (dmqManager == null) {
-          dmqManager = new DMQManager();
+          dmqManager = new DMQManager(dmqId, getId());
         }
+        nbMsgsSentToDMQSinceCreation++;
         dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.UNEXPECTED_ERROR);
       }
     }
@@ -261,8 +263,9 @@ public class JMSBridgeTopicImpl extends TopicImpl {
       } catch (Exception exc) {
         outTable.remove(message.getIdentifier());
         if (dmqManager == null) {
-          dmqManager = new DMQManager(not.getDMQId());
+          dmqManager = new DMQManager(not.getDMQId(), dmqId, getId());
         }
+        nbMsgsSentToDMQSinceCreation++;
         dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.UNDELIVERABLE);
       }
     }

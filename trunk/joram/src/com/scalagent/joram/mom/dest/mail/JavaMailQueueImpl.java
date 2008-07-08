@@ -30,6 +30,7 @@ import org.objectweb.joram.mom.dest.Queue;
 import org.objectweb.joram.mom.dest.QueueImpl;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.SpecialAdminRequest;
+import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.admin.SpecialAdmin;
 import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.joram.shared.messages.Message;
@@ -445,8 +446,9 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
           javaMailUtil.sendJavaMail(si, new MailMessage(msg));
         } catch (Exception exc) {
           if (dmqManager == null) {
-            dmqManager = new DMQManager(not.getDMQId());
+            dmqManager = new DMQManager(not.getDMQId(), dmqId, getId());
           }
+          nbMsgsSentToDMQSinceCreation++;
           dmqManager.addDeadMessage(msg, DMQManager.UNEXPECTED_ERROR);
           logger.log(BasicLevel.WARN, "JavaMailQueueImpl.sendJavaMail", exc);
         }

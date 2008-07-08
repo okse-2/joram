@@ -48,6 +48,7 @@ import org.objectweb.joram.mom.notifications.SetRightRequest;
 import org.objectweb.joram.mom.notifications.SpecialAdminRequest;
 import org.objectweb.joram.mom.proxies.SendRepliesNot;
 import org.objectweb.joram.mom.proxies.SendReplyNot;
+import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.joram.shared.messages.Message;
@@ -120,7 +121,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
 
   protected long nbMsgsReceiveSinceCreation = 0;
   protected long nbMsgsDeliverSinceCreation = 0;
-  protected long nbMsgsSendToDMQSinceCreation = 0;
+  protected long nbMsgsSentToDMQSinceCreation = 0;
 
   /**
    * Constructs a <code>DestinationImpl</code>.
@@ -439,7 +440,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     Hashtable stats = new Hashtable();
     stats.put("nbMsgsReceiveSinceCreation", new Long(getNbMsgsReceiveSinceCreation()));
     stats.put("nbMsgsDeliverSinceCreation", new Long(getNbMsgsDeliverSinceCreation()));
-    stats.put("nbMsgsSendToDMQSinceCreation", new Long(getNbMsgsSendToDMQSinceCreation()));
+    stats.put("nbMsgsSendToDMQSinceCreation", new Long(getNbMsgsSentToDMQSinceCreation()));
     stats.put("creationDate", new Long(creationDate));
     return stats;
   }
@@ -463,10 +464,11 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     // If sender is not a writer, sending the messages to the DMQ, and
     // throwing an exception:
     if (!isWriter(from)) {
-      DMQManager dmqManager = new DMQManager(not.getDMQId());
+      DMQManager dmqManager = new DMQManager(not.getDMQId(), dmqId, getId());
       Message msg;
       for (Enumeration msgs = not.getMessages().elements(); msgs.hasMoreElements();) {
         msg = (Message) msgs.nextElement();
+        nbMsgsSentToDMQSinceCreation++;
         dmqManager.addDeadMessage(msg, DMQManager.NOT_WRITEABLE);
       }
       dmqManager.sendToDMQ();
@@ -682,7 +684,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     out.writeLong(creationDate);
     out.writeLong(nbMsgsReceiveSinceCreation);
     out.writeLong(nbMsgsDeliverSinceCreation);
-    out.writeLong(nbMsgsSendToDMQSinceCreation);
+    out.writeLong(nbMsgsSentToDMQSinceCreation);
   }
 
   private void readObject(java.io.ObjectInputStream in)
@@ -697,7 +699,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     creationDate = in.readLong();
     nbMsgsReceiveSinceCreation = in.readLong();
     nbMsgsDeliverSinceCreation = in.readLong();
-    nbMsgsSendToDMQSinceCreation = in.readLong();
+    nbMsgsSentToDMQSinceCreation = in.readLong();
   }
 
   // DestinationMBean interface
@@ -754,9 +756,9 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
   }
 
   /**
-   * Return the unique identifier of DMQ set for this destnation if any.
+   * Return the unique identifier of DMQ set for this destination if any.
    *
-   * @return the unique identifier of DMQ set for this destnation if any;
+   * @return the unique identifier of DMQ set for this destination if any;
    *	     null otherwise.
    */
   public String getDMQId() {
@@ -809,8 +811,8 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    *
    * @return the number of erroneous messages forwarded to the DMQ.
    */
-  public long getNbMsgsSendToDMQSinceCreation() {
-    return nbMsgsSendToDMQSinceCreation;
+  public long getNbMsgsSentToDMQSinceCreation() {
+    return nbMsgsSentToDMQSinceCreation;
   }
 
   protected void replyToTopic(
@@ -839,158 +841,5 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
   }
   
   public abstract void destinationAdminRequestNot(AgentId from, DestinationAdminRequestNot not);
-
-  /**
-   * The <code>DMQManager</code> is made to stock the dead messages before sending them to the dead
-   * message queue, only if such a queue is defined.
-   */
-  protected class DMQManager {
-
-    /**
-     * If the message expired before delivery.
-     **/
-    public static final short EXPIRED = 0;
-    
-    /**
-     * If the target destination of the message did not accept the sender as a
-     * WRITER.
-     **/
-    public static final short NOT_WRITEABLE = 1;
-
-    /**
-     * If the number of delivery attempts of the message overtook the threshold.
-     **/
-    public static final short UNDELIVERABLE = 2;
-    
-    /**
-     * If the message has been deleted by an admin request.
-     */
-    public static final short ADMIN_DELETED = 3;
-    
-    /**
-     * If the target destination of the message could not be found.
-     */
-    public static final short DELETED_DEST = 4;
-
-    /**
-     * If the queue has reached its max number of messages.
-     */
-    public static final short QUEUE_FULL = 5;
-
-    /**
-     * If an unexpected error happened during delivery.
-     */
-    public static final short UNEXPECTED_ERROR = 6;
-
-    private ClientMessages deadMessages = null;
-    private AgentId destDmqId = null;
-
-    /**
-     * Creates a DMQManager.
-     * 
-     * @param dmqId
-     *          Identifier of the dead message queue to use. If <code>null</code>, destination DMQ
-     *          is used if it exists, else default DMQ is used. If none exists, dead messages will
-     *          be lost.
-     */
-    public DMQManager(AgentId dmqId) {
-      if (dmqId != null) {
-        // Sending the dead messages to the provided DMQ
-        destDmqId = dmqId;
-      } else if (DestinationImpl.this.dmqId != null) {
-        // Sending the dead messages to the destination's DMQ
-        destDmqId = DestinationImpl.this.dmqId;
-      } else {
-        // Sending the dead messages to the server's default DMQ
-        destDmqId = QueueImpl.getDefaultDMQId();
-      }
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, this.getClass().getName() + " " + getId() + " created, destDmqId: "
-            + destDmqId);
-    }
-
-    /**
-     * Creates a DMQManager. Destination DMQ is used if it exists, else default DMQ is used. If none
-     * exists, dead messages will be lost.
-     */
-    public DMQManager() {
-      this(null);
-    }
-
-    /**
-     * Stocks a dead message waiting to be sent to the DMQ. If no DMQ was found
-     * at creation time, the message is lost.
-     * 
-     * @param mess
-     *          The message to stock
-     * @param reason
-     *          The reason explaining why the message has to be send to the DMQ.
-     *          It can be one of the following: <code>EXPIRED</code>,
-     *          <code>NOT_WRITEABLE</code>, <code>UNDELIVERABLE</code>,
-     *          <code>ADMIN_DELETED</code>, <code>DELETED_DEST</code>,
-     *          <code>QUEUE_FULL</code> or <code>UNEXPECTED_ERROR</code>.
-     */
-    public void addDeadMessage(Message mess, short reason) {
-      if (destDmqId != null) {
-        
-        switch (reason) {
-        case EXPIRED:
-          mess.setProperty("JMS_JORAM_EXPIRED", Boolean.TRUE);
-          mess.setProperty("JMS_JORAM_EXPIRATIONDATE", new Long(mess.expiration));
-          break;
-        case NOT_WRITEABLE:
-          mess.setProperty("JMS_JORAM_NOTWRITABLE", Boolean.TRUE);
-          break;
-        case UNDELIVERABLE:
-          mess.setProperty("JMS_JORAM_UNDELIVERABLE", Boolean.TRUE);
-          break;
-        case ADMIN_DELETED:
-          mess.setProperty("JMS_JORAM_ADMINDELETED", Boolean.TRUE);
-          break;
-        case DELETED_DEST:
-          mess.setProperty("JMS_JORAM_DELETEDDEST", Boolean.TRUE);
-          break;
-        case QUEUE_FULL:
-          mess.setProperty("JMS_JORAM_QUEUEFULL", Boolean.TRUE);
-          break;
-        case UNEXPECTED_ERROR:
-          mess.setProperty("JMS_JORAM_UNEXPECTEDERROR", Boolean.TRUE);
-          break;
-        default:
-          break;
-        }
-        
-        if (deadMessages == null) {
-          deadMessages = new ClientMessages();
-        }
-        mess.expiration = 0;
-        deadMessages.addMessage(mess);
-      }
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, this.getClass().getName() + ", addDeadMessage for dmq: " + destDmqId
-            + ". Msg: " + mess);
-    }
-
-    /**
-     * Sends previously stocked messages to the appropriate DMQ.
-     */
-    public void sendToDMQ() {
-      if (deadMessages != null) {
-        deadMessages.setExpiration(0);
-        nbMsgsSendToDMQSinceCreation += deadMessages.getMessages().size();
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, this.getClass().getName() + ", sendToDMQ " + destDmqId);
-        if (destDmqId != null && !destDmqId.equals(getId())) {
-          forward(destDmqId, deadMessages);
-        } else {
-          // Else it means that the dead message queue is
-          // the queue itself: drop the messages.
-          if (logger.isLoggable(BasicLevel.WARN))
-            logger.log(BasicLevel.WARN, this.getClass().getName()
-                + ", can't send to itself, messages dropped");
-        }
-      }
-    }
-  }
   
 }

@@ -58,6 +58,7 @@ import org.objectweb.joram.mom.notifications.SetRightRequest;
 import org.objectweb.joram.mom.notifications.SetThreshRequest;
 import org.objectweb.joram.mom.notifications.TopicMsgsReply;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
+import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.admin.ClearQueue;
 import org.objectweb.joram.shared.admin.DeleteQueueMessage;
 import org.objectweb.joram.shared.admin.GetQueueMessage;
@@ -237,7 +238,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         messages.remove(index);
 
         if (dmqManager == null)
-          dmqManager = new DMQManager();
+          dmqManager = new DMQManager(dmqId, getId());
+        nbMsgsSentToDMQSinceCreation++;
         dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.EXPIRED);
 
         if (logger.isLoggable(BasicLevel.DEBUG))
@@ -680,7 +682,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
           if (isUndeliverable(message)) {
             message.delete();
             if (dmqManager == null)
-              dmqManager = new DMQManager();
+              dmqManager = new DMQManager(dmqId, getId());
+            nbMsgsSentToDMQSinceCreation++;
             dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.UNDELIVERABLE);
           } else {
             // Else, putting the message back into the deliverables vector:
@@ -725,7 +728,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       if (isUndeliverable(message)) {
         message.delete();
         if (dmqManager == null)
-          dmqManager = new DMQManager();
+          dmqManager = new DMQManager(dmqId, getId());
         dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.UNDELIVERABLE);
       } else {
         // Else, putting the message back into the deliverables vector:
@@ -831,7 +834,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       if (message.getIdentifier().equals(request.getMessageId())) {
         messages.removeElementAt(i);
         message.delete();
-        DMQManager dmqManager = new DMQManager();
+        DMQManager dmqManager = new DMQManager(dmqId, getId());
+        nbMsgsSentToDMQSinceCreation++;
         dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.ADMIN_DELETED);
         dmqManager.sendToDMQ();
         break;
@@ -846,10 +850,11 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
                        String requestMsgId,
                        String replyMsgId) {
     if (messages.size() > 0) {
-      DMQManager dmqManager = new DMQManager();
+      DMQManager dmqManager = new DMQManager(dmqId, getId());
       for (int i = 0; i < messages.size(); i++) {
         Message message = (Message) messages.elementAt(i);
         message.delete();
+        nbMsgsSentToDMQSinceCreation++;
         dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.ADMIN_DELETED);
       }
       dmqManager.sendToDMQ();
@@ -986,7 +991,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         if (isUndeliverable(message)) {
           message.delete();
           if (dmqManager == null)
-            dmqManager = new DMQManager();
+            dmqManager = new DMQManager(dmqId, getId());
+          nbMsgsSentToDMQSinceCreation++;
           dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.UNDELIVERABLE);
         } else {
           // Else, putting it back into the deliverables vector:
@@ -1032,9 +1038,10 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     // Sending the remaining messages to the DMQ, if needed:
     if (! messages.isEmpty()) {
       Message message;
-      DMQManager dmqManager = new DMQManager();
+      DMQManager dmqManager = new DMQManager(dmqId, getId());
       while (! messages.isEmpty()) {
         message = (Message) messages.remove(0);
+        nbMsgsSentToDMQSinceCreation++;
         dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.DELETED_DEST);
       }
       dmqManager.sendToDMQ();
@@ -1083,7 +1090,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
   protected final synchronized void addMessage(Message message) {
 
     if (nbMaxMsg > -1 && nbMaxMsg <= messages.size()) {
-      DMQManager dmqManager = new DMQManager();
+      DMQManager dmqManager = new DMQManager(dmqId, getId());
+      nbMsgsSentToDMQSinceCreation++;
       dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.QUEUE_FULL);
       dmqManager.sendToDMQ();
       return;
@@ -1409,7 +1417,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
   }
 
   public long getNbMsgsReceiveSinceCreation() {
-    return nbMsgsSendToDMQSinceCreation + nbMsgsDeliverSinceCreation + getPendingMessageCount();
+    return nbMsgsSentToDMQSinceCreation + nbMsgsDeliverSinceCreation + getPendingMessageCount();
   }
   
   protected void handleExpiredNot(AgentId from, ExpiredNot not) {

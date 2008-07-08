@@ -42,6 +42,7 @@ import org.objectweb.joram.mom.notifications.QueueClusterNot;
 import org.objectweb.joram.mom.notifications.ReceiveRequest;
 import org.objectweb.joram.mom.notifications.SpecialAdminRequest;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
+import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.admin.AddQueueCluster;
 import org.objectweb.joram.shared.admin.ListClusterQueue;
