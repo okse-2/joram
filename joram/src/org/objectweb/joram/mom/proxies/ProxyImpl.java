@@ -64,6 +64,7 @@ import org.objectweb.joram.mom.notifications.TopicMsgsReply;
 import org.objectweb.joram.mom.notifications.UnsubscribeRequest;
 import org.objectweb.joram.mom.notifications.UserAdminRequestNot;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
+import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.admin.ClearSubscription;
 import org.objectweb.joram.shared.admin.DeleteSubscriptionMessage;
 import org.objectweb.joram.shared.admin.GetSubscription;
@@ -2128,24 +2129,22 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
           proxyAgent.setSave();
           dmqId = null;
           for (Enumeration keys = subsTable.keys(); keys.hasMoreElements();)
-            ((ClientSubscription)
-               subsTable.get(keys.nextElement())).setDMQId(null);
+            ((ClientSubscription) subsTable.get(keys.nextElement())).setDMQId(null);
         }
         // Sending the messages again if not coming from the default DMQ:
         if (QueueImpl.getDefaultDMQId() != null && !agId.equals(QueueImpl.getDefaultDMQId())) {
-          // Setting 'deletedDest' attribute for each message
-          for (Enumeration msgs = ((ClientMessages) req).getMessages().elements();
-               msgs.hasMoreElements();) {
+          DMQManager dmqManager = new DMQManager(dmqId, null);
+          Enumeration msgs = ((ClientMessages) req).getMessages().elements();
+          while (msgs.hasMoreElements()) {
             org.objectweb.joram.shared.messages.Message msg = (org.objectweb.joram.shared.messages.Message) msgs.nextElement();
-            msg.setProperty("JMS_JORAM_DELETEDDEST", Boolean.TRUE);
-            msg.expiration = 0;
+            nbMsgsSentToDMQSinceCreation++;
+            dmqManager.addDeadMessage(msg, DMQManager.DELETED_DEST);
           }
-          sendToDMQ((ClientMessages) req);
+          dmqManager.sendToDMQ();
         }
 
         DestinationException exc;
-        exc = new DestinationException("Destination " + agId +
-                                       " does not exist.");
+        exc = new DestinationException("Destination " + agId + " does not exist.");
         MomExceptionReply mer = new MomExceptionReply(req.getRequestId(), exc);
         try {
           setCtx(req.getClientContext());
@@ -2487,20 +2486,6 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     proxyAgent.sendToClient(key, reply);
   }
 
-  /**
-   * Method used for sending messages to the appropriate dead message queue.
-   */
-  private void sendToDMQ(ClientMessages messages) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Dead messages sent to DMQ: " + messages);
-    nbMsgsSentToDMQSinceCreation += messages.getMessages().size();
-    if (dmqId != null) {
-      proxyAgent.sendNot(dmqId, messages);
-    } else if (QueueImpl.getDefaultDMQId() != null) {
-      proxyAgent.sendNot(QueueImpl.getDefaultDMQId(), messages);
-    }
-  }
-
   void cleanPendingMessages(long currentTime) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
@@ -2509,7 +2494,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     
     String id = null;
     Message message = null;
-    ClientMessages deadMessages = null;
+    DMQManager dmqManager = null;
 
     for (Enumeration ids = messagesTable.keys(); ids.hasMoreElements(); ) {
       id = (String) ids.nextElement();
@@ -2521,10 +2506,10 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       if (message.durableAcksCounter > 0)
         message.delete();
 
-      if (deadMessages == null)
-        deadMessages = new ClientMessages();
-      message.setExpiration(0);
-      deadMessages.addMessage(message.getFullMessage());
+      if (dmqManager == null)
+        dmqManager = new DMQManager(dmqId, null);
+      nbMsgsSentToDMQSinceCreation++;
+      dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.EXPIRED);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG,
@@ -2537,7 +2522,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     }
     
     // If needed, sending the dead messages to the DMQ:
-    if (deadMessages != null) sendToDMQ(deadMessages);
+    if (dmqManager != null)
+      dmqManager.sendToDMQ();
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
