@@ -66,7 +66,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
   }
 
   /**
-   *  Number of try at stage 1, default value is 30.
+   *  Number of try at stage 1, default value is 5.
    *  This value can be adjusted for all network components by setting
    * <code>WDNbRetryLevel1</code> global property or for a particular
    * network by setting <code>\<DomainName\>.WDNbRetryLevel1</code>
@@ -75,7 +75,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    *  Theses properties can be fixed either from <code>java</code> launching
    * command, or in <code>a3servers.xml</code> configuration file.
    */
-  int  WDNbRetryLevel1 = 30;
+  int  WDNbRetryLevel1 = 5;
 
   /**
    * Gets the WDNbRetryLevel1 value.
@@ -97,7 +97,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
 
   /**
    *  Period of time in ms between two connection try at stage 1, default
-   * value is WDActivationPeriod divided by 2.
+   * value is WDActivationPeriod.
    *  This value can be adjusted for all network components by setting
    * <code>WDRetryPeriod1</code> global property or for a particular
    * network by setting <code>\<DomainName\>.WDRetryPeriod1</code>
@@ -105,8 +105,12 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * <p>
    *  Theses properties can be fixed either from <code>java</code> launching
    * command, or in <code>a3servers.xml</code> configuration file.
+   * <p>
+   *  Be careful, in most Network components setting this value to a value
+   * less than WDActivationPeriod is useless. In the same way, the real try
+   * period is depending of the connection timeout.
    */
-  long WDRetryPeriod1 = WDActivationPeriod/2;
+  long WDRetryPeriod1 = WDActivationPeriod;
 
   /**
    * Gets the WDRetryPeriod1 value.
@@ -127,7 +131,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
   }
 
   /**
-   *  Number of try at stage 2, default value is 55.
+   *  Number of try at stage 2, default value is 30.
    *  This value can be adjusted for all network components by setting
    * <code>WDNbRetryLevel2</code> global property or for a particular
    * network by setting <code>\<DomainName\>.WDNbRetryLevel2</code>
@@ -136,7 +140,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    *  Theses properties can be fixed either from <code>java</code> launching
    * command, or in <code>a3servers.xml</code> configuration file.
    */
-  int  WDNbRetryLevel2 = 55;
+  int  WDNbRetryLevel2 = 30;
 
   /**
    * Gets the WDNbRetryLevel2 value.
@@ -158,7 +162,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
 
   /**
    *  Period of time in ms between two connection try at stage 2, default
-   * value is 5000L (5 seconds).
+   * value is 10000L (10 seconds).
    *  This value can be adjusted for all network components by setting
    * <code>WDRetryPeriod2</code> global property or for a particular
    * network by setting <code>\<DomainName\>.WDRetryPeriod2</code>
@@ -166,8 +170,12 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * <p>
    *  Theses properties can be fixed either from <code>java</code> launching
    * command, or in <code>a3servers.xml</code> configuration file.
+   * <p>
+   *  Be careful, in most Network components setting this value to a value
+   * less than WDActivationPeriod is useless. In the same way, the real try
+   * period is depending of the connection timeout.
    */
-  long WDRetryPeriod2 = 5000L;
+  long WDRetryPeriod2 = 10000L;
 
   /**
    * Gets the WDRetryPeriod2 value.
@@ -197,6 +205,10 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * <p>
    *  Theses properties can be fixed either from <code>java</code> launching
    * command, or in <code>a3servers.xml</code> configuration file.
+   * <p>
+   *  Be careful, in most Network components setting this value to a value
+   * less than WDActivationPeriod is useless. In the same way, the real try
+   * period is depending of the connection timeout.
    */
   long WDRetryPeriod3 = 60000L;
 
