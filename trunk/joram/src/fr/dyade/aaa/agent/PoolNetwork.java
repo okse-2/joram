@@ -46,19 +46,91 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * class that manages multiple connection.
  */
 public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
-  /** */
+  /** Daemon listening for connection from other servers. */
   WakeOnConnection wakeOnConnection = null; 
-  /** */
+  /**
+   * Components handling communication with other servers.
+   * There is a NetSession component for each server in the domain.
+   */
   NetSession sessions[] = null;
-  /** */
+  /** Daemon sending message to others servers. */
   Dispatcher dispatcher = null;
-  /** */
+  /** Daemon handling the messages for inacessible servers. */
   WatchDog watchDog = null;
 
-  int nbMaxCnx;
-  int nbActiveCnx = 0;
   NetSession activeSessions[];
   long current = 0L;
+
+  /**
+   * Defines the maximum number of concurrent connected sessions.
+   * <p>
+   * Default value is 5, value less than 1 are unauthorized.
+   * <p>
+   *  This value can be adjusted for all network components by setting
+   * <code>nbMaxCnx</code> global property or for a particular network
+   * by setting <code>\<DomainName\>.nbMaxCnx</code> specific property.
+   * <p>
+   *  Theses properties can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
+   */
+  int nbMaxCnx;
+
+  /**
+   * Returns the maximum number of concurrent connected sessions.
+   *
+   * @return	the number of concurrent connected sessions.
+   */
+  public int getNbMaxActiveSession() {
+    return nbMaxCnx;
+  }
+
+  /** The number of concurrent connected sessions. */
+  int nbActiveCnx = 0;
+
+  /**
+   * Returns the number of currently connected sessions.
+   *
+   * @return	the number of currently connected sessions.
+   */
+  public int getNbActiveSession() {
+    return nbActiveCnx;
+  }
+    
+  /**
+   *  Defines in milliseconds the maximum idle period permitted before reseting
+   * the connection.
+   * <p>
+   *  The timeout must be > 0. A timeout of zero is interpreted as an infinite
+   * timeout. Default value is 300000 (5 minutes), value less than 1000 are
+   * unauthorized.
+   * <p>
+   *  This value can be adjusted for all network components by setting
+   * <code>IdleTimeout</code> global property or for a particular network
+   * by setting <code>\<DomainName\>.IdleTimeout</code> specific property.
+   * <p>
+   *  Theses properties can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
+   */
+  long IdleTimeout = 300000L;
+
+  /**
+   * Returns the maximum idle period permitted before reseting the connection.
+   *
+   * @return the maximum idle period permitted before reseting the connection.
+   */
+  public long getIdleTimeout() {
+    return IdleTimeout;
+  }
+
+  /**
+   * Sets the maximum idle period permitted before reseting the connection.
+   *
+   * @param the maximum idle period permitted before reseting the connection.
+   */
+  public void setIdleTimeout(long idleTimeout) {
+    if (idleTimeout > 1000L)
+      this.IdleTimeout = idleTimeout;
+  }
 
   /**
    * Creates a new network component.
@@ -93,6 +165,32 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     wakeOnConnection = new WakeOnConnection(getName(), logmon);
     dispatcher = new Dispatcher(getName(), logmon);
     watchDog = new WatchDog(getName(), logmon);
+  }
+
+  /**
+   * Set the properties of the network.
+   * Inherited from Network class, can be extended by subclasses.
+   */
+  public void setProperties() throws Exception {
+    logmon.log(BasicLevel.DEBUG, domain + ", PoolNetwork.setProperties()");
+    super.setProperties();
+
+    try {
+      nbMaxCnx = AgentServer.getInteger(getName() + ".nbMaxCnx").intValue();
+    } catch (Exception exc) {
+      try {
+        nbMaxCnx = AgentServer.getInteger("PoolNetwork.nbMaxCnx").intValue();
+      } catch (Exception exc2) {
+        nbMaxCnx = 5;
+      }
+    }
+    if (nbMaxCnx < 1) nbMaxCnx = 5;
+
+    IdleTimeout = Long.getLong("IdleTimeout",
+                               IdleTimeout).longValue();
+    IdleTimeout = Long.getLong(domain + ".IdleTimeout",
+                               IdleTimeout).longValue();
+    if (IdleTimeout < 1000L) IdleTimeout = 5000L;
   }
 
   /**
@@ -203,15 +301,6 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
    */
   public void start() throws Exception {
     logmon.log(BasicLevel.DEBUG, getName() + ", starting");
-    try {
-      nbMaxCnx = AgentServer.getInteger(getName() + ".nbMaxCnx").intValue();
-    } catch (Exception exc) {
-      try {
-        nbMaxCnx = AgentServer.getInteger("PoolNetwork.nbMaxCnx").intValue();
-      } catch (Exception exc2) {
-        nbMaxCnx = 5;
-      }
-    }
 
     try {
       if (isRunning())
@@ -304,24 +393,6 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
    */
   final NetSession getSession(short sid) {
     return sessions[index(sid)];
-  }
-
-  /**
-   * Returns the maximum number of concurrent connected sessions.
-   *
-   * @return	the number of concurrent connected sessions.
-   */
-  public int getNbMaxActiveSession() {
-    return nbMaxCnx;
-  }
-
-  /**
-   * Returns the number of currently connected sessions.
-   *
-   * @return	the number of currently connected sessions.
-   */
-  public int getNbActiveSession() {
-    return nbActiveCnx;
   }
 
   /**
@@ -537,8 +608,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
           canStop = true;
 
           if (this.logmon.isLoggable(BasicLevel.DEBUG))
-            this.logmon.log(BasicLevel.DEBUG,
-                            this.getName() + ", waiting message");
+            this.logmon.log(BasicLevel.DEBUG, this.getName() + ", waiting message");
           try {
             msg = qout.get();
           } catch (InterruptedException exc) {
@@ -604,7 +674,9 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
                 if ((sessions[sid].sendList.size() > 0) && (! sessions[sid].running)) {
                   // Try to start the session in order to send waiting messages.
                   sessions[sid].start(currentTimeMillis);
-                } else if (currentTimeMillis > (sessions[sid].getLastReceived() + 300000L) && sessions[sid].running) {
+                } else if ((IdleTimeout > 0) &&
+                           (currentTimeMillis > (sessions[sid].getLastReceived() + IdleTimeout)) &&
+                           sessions[sid].running) {
                   // The session  is inactive since a long time, may be the connection is down,
                   // try to stop the session.
                   sessions[sid].stop();
@@ -804,6 +876,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
            ((server.last + WDRetryPeriod2) < currentTimeMillis)) ||
           ((server.last + WDRetryPeriod3) < currentTimeMillis)) {
         if (localStart()) {
+          // The physical connection is established, starts the corresponding session
+          // then sends all waiting messages.
           startEnd();
         } else {
           server.last = currentTimeMillis;
@@ -1090,7 +1164,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       nis = null;
       nos = null;
     }
-
+    
     /**
      * Removes the acknowledged notification from waiting list.
      * Be careful, messages in sendList are not always in stamp order.
@@ -1168,6 +1242,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
             logmon.log(BasicLevel.ERROR, getName() + ": cannot removes expired notification " + msg.from
                        + ", " + msg.not, exc);
           }
+          return;
         }
       } else {
         nbAckSent += 1;
@@ -1176,8 +1251,13 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       if (sock == null) {
         // If there is no connection between local and destination server,
         // try to make one!
-        start(currentTimeMillis);
+        if (server.retry == 0) {
+          // If server.retry is higher than 0, the Watchdog will regularly try
+          // to connect, don't block the Dispatcher.
+          start(currentTimeMillis);
+        }
       } else {
+        // Writes the message on the corresponding connection.
         transmit(msg, currentTimeMillis);
       }
     }
