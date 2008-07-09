@@ -19,7 +19,26 @@
 package fr.dyade.aaa.agent;
 
 public interface PoolNetworkMBean extends NetworkMBean {
+  /**
+   * Gets the maximum number of active session.
+   *
+   * @return	the maximum number of active session.
+   */
   public int getNbMaxActiveSession();
 
+  /**
+   * Gets the number of active session.
+   *
+   * @return	the number of active session.
+   */
   public int getNbActiveSession();
+
+  /**
+   * Gets the number of waiting messages to send for this session.
+   *
+   * @return	the number of waiting messages.
+   */
+  public long getIdleTimeout();
+
+  public void setIdleTimeout(long idleTimeout);
 }
