@@ -46,7 +46,7 @@ import com.scalagent.scheduler.*;
  * <code>DONE</code> status. If it fails it switches to <code>FAIL</code>
  * status. If the agent task execution is asked stop, via a
  * <code>EventKill</code> notification, the agent status switches to
- * <code>KILL</code>, aknowledging the stop request, then to <code>STOP</code>,
+ * <code>KILL</code>, acknowledging the stop request, then to <code>STOP</code>,
  * when execution has actually stopped.
  * <p>
  * An agent in <code>FAIL</code> or <code>STOP</code> status may be restarted
@@ -180,7 +180,7 @@ public abstract class Task extends fr.dyade.aaa.scbean.AbstractSCBean {
     status = Status.NONE;
     this.parent = parent;
     errorMessage = null;
-    conditions = null;
+    this.conditions = null;
     setConditions(conditions);
   }
 
