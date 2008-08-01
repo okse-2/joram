@@ -211,6 +211,9 @@ public class DeadMQueueImpl extends QueueImpl {
     Message msg;
     QueueMsgReply notMsg;
 
+    long current = System.currentTimeMillis();
+    cleanWaitingRequest(current);
+
     // Processing each request as long as there are deliverable messages:
     while (! messages.isEmpty() && index < requests.size()) { 
       notRec = (ReceiveRequest) requests.get(index);
