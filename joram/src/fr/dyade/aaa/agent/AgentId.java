@@ -52,7 +52,7 @@ final class AgentIdStamp implements Serializable {
   private int remote;
 
   /**
-   * Initializes <code>AgentIdStamp</code> classe.
+   * Initializes <code>AgentIdStamp</code> class.
    *
    * @exception IOException		IO problem during loading.
    * @exception ClassNotFoundException	should never happened
@@ -241,10 +241,12 @@ public final class AgentId implements Serializable {
   public static int JoramAdminStamp = 10;
   /** Reserved stamp for JORAM administration proxy <code>AgentId</code>. */
   public static int JoramAdminPxStamp = 11;
-  /** Reserved stamp for JMS topic <code>AgentId</code> in charge ofsending control events. */
+  /** Reserved stamp for JMS topic <code>AgentId</code> in charge of sending control events. */
   public static int ControlTopicStamp = 12;
   /** Reserved stamp for the server reconfiguration agent <code>AgentId</code> . */
   public static int ServerConfigStamp = 13;
+  /** Reserved stamp for ResourceAgent. */
+  public static int ResourceAgentStamp = 14;
   /** Maximum reserved stamp for well known services. */
   public static int MaxWKSIdStamp = 1024;
   /** Maximum reserved stamp. */
