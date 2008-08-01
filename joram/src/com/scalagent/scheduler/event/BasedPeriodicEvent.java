@@ -29,11 +29,6 @@ package com.scalagent.scheduler.event;
 public class BasedPeriodicEvent extends PeriodicEvent
   implements BasedDiaryEvent {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
    * Default constructor.
    * Creates an event to be initialized by the field accessors.
    */

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -40,11 +40,13 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * 
  */
 public class JMXServer implements MXServer, Serializable {
-  
   public MBeanServer mxserver = null;
+  public String domain = null;
 
-  public JMXServer(MBeanServer mxserver) {
+  public JMXServer(MBeanServer mxserver,
+                   String domain) {
     this.mxserver = mxserver;
+    this.domain = domain;
     MXWrapper.setMXServer(this);
   }
 
@@ -58,30 +60,22 @@ public class JMXServer implements MXServer, Serializable {
       // Prior JDK1.5 (with JMXRI implementation).
       this.mxserver = MBeanServerFactory.createMBeanServer("AgentServer");
     }
+    this.domain = "AgentServer";
     MXWrapper.setMXServer(this);
   }
 
   public void registerMBean(Object bean,
                             String domain,
                             String name) throws Exception {
-    StringBuffer strbuf = new StringBuffer();
-    strbuf.append(domain).append(':').append(name);
-    registerMBean(bean, strbuf.toString());
-  }
+    if (mxserver == null) return;
 
-  public void unregisterMBean(String domain,
-                              String name) throws Exception {
     StringBuffer strbuf = new StringBuffer();
     strbuf.append(domain);
-    strbuf.append(':').append(name);
-    unregisterMBean(strbuf.toString());
-  }
+    if (name != null)
+      strbuf.append(':').append(name);
 
-  public void registerMBean(Object bean, String fullName) throws Exception {
-    if (mxserver == null)
-      return;
     try {
-      mxserver.registerMBean(bean, new ObjectName(fullName));
+      mxserver.registerMBean(bean, new ObjectName(strbuf.toString()));
     } catch (InstanceAlreadyExistsException exc) {
       // The MBean is already under the control of the MBean server.
       throw exc;
@@ -98,11 +92,16 @@ public class JMXServer implements MXServer, Serializable {
     }
   }
 
-  public void unregisterMBean(String fullName) throws Exception {
-    if (mxserver == null)
-      return;
+  public void unregisterMBean(String domain,
+                              String name) throws Exception {
+    if (mxserver == null) return;
+
+    StringBuffer strbuf = new StringBuffer();
+    strbuf.append(domain);
+    strbuf.append(':').append(name);
+
     try {
-      mxserver.unregisterMBean(new ObjectName(fullName));
+      mxserver.unregisterMBean(new ObjectName(strbuf.toString()));
     } catch (InstanceNotFoundException exc) {
       // The MBean is not registered in the MBean server.
       throw exc;

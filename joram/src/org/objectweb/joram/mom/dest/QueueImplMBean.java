@@ -41,7 +41,7 @@ public interface QueueImplMBean extends DestinationImplMBean {
   /**
    * Returns  the threshold value of this queue, -1 if not set.
    *
-   * @return the threshold value of this queue; -1 if not set.
+   * @return the threshold valcdue of this queue; -1 if not set.
    */
   int getThreshold();
 
@@ -52,6 +52,13 @@ public interface QueueImplMBean extends DestinationImplMBean {
    *                  previous value.
    */
   void setThreshold(int threshold);
+
+  /**
+   * Returns the number of messages received since creation time.
+   *
+   * @return The number of received messages.
+   */
+  int getMessageCounter();
 
   /**
    * Returns the number of waiting requests in the queue.

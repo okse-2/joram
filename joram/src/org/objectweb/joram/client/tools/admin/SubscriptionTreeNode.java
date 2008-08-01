@@ -29,11 +29,6 @@ import org.objectweb.joram.client.jms.admin.*;
 
 class SubscriptionTreeNode extends DefaultMutableTreeNode
     implements AdminTreeNode {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   private AdminController c;
   
   private Subscription sub;
@@ -101,11 +96,6 @@ class SubscriptionTreeNode extends DefaultMutableTreeNode
 
   
   private class ClearSubscriptionAction extends AbstractAction {
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
 
     public ClearSubscriptionAction() {
       super("Clear", AdminToolConstants.trashIcon);

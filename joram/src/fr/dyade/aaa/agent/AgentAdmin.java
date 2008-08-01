@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2002 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -22,6 +22,7 @@
 package fr.dyade.aaa.agent;
 
 import java.util.*;
+import java.lang.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -31,14 +32,7 @@ import fr.dyade.aaa.admin.script.*;
 import fr.dyade.aaa.agent.conf.*;
 
 
-/**
- * The <code>AgentAdmin</code> allows the administration of the AgentServer
- * through scripts.
- */
 final public class AgentAdmin extends Agent {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
   static Logger logmon;
 
   // current operation
@@ -61,21 +55,12 @@ final public class AgentAdmin extends Agent {
   /** server id counter */
   private short maxId = 0;
 
-  /**
-   * Get default AgentId of AgentAdmin for specified AgentServer.
-   * 
-   * @param serverId the id of specified AgentServer.
-   * @return the default AgentId of AgentAdmin for specified AgentServer.
-   */
+  /** get default AgentId of AgentAdmin */
   public static AgentId getDefault(short serverId) {
     return new AgentId(serverId, serverId, AgentId.AdminIdStamp);
   }
 
-  /**
-   * Get default AgentId of AgentAdmin for local AgentServer.
-   * 
-   * @return the default AgentId of AgentAdmin for local AgentServer.
-   */
+  /** get AgentId of AgentServer */
   public static AgentId getDefault() {
     return getDefault(AgentServer.getServerId());
   }

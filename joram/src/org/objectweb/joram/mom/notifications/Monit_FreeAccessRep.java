@@ -31,10 +31,6 @@ import java.util.Vector;
  */
 public class Monit_FreeAccessRep extends AdminReply
 {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /** <code>true</code> if READ access is free. */
   private boolean freeReading;
   /** <code>true</code> if WRITE access is free. */

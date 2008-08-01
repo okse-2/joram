@@ -27,11 +27,6 @@ import java.util.*;
 public class RemoveServerCmd extends ServerCmd implements Serializable {
 
  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-/**
   * remove persistent server
   *
   * @param name      persistent server name

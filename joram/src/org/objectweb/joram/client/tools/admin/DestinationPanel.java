@@ -41,11 +41,6 @@ import org.objectweb.joram.client.jms.Topic;
  * Window>Preferences>Java>Code Generation>Code and Comments
  */
 public class DestinationPanel extends JPanel {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   private final AdminController c;
 
   private Destination dest = null;

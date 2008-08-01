@@ -26,11 +26,6 @@ import java.io.*;
 
 public class NatCmdException extends ExceptionCmd {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   public NatCmdException(Throwable exc) {
     super(exc);
   }

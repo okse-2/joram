@@ -32,10 +32,6 @@ import java.util.Vector;
  * to a client <code>BrowseRequest</code> by sending a vector of its messages.
  */
 public class BrowseReply extends AbstractReply {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /** The message contained in the queue. */
   private Message message = null;
   /** The messages contained in the queue. */

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,18 +23,12 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 /**
  * A <code>DeleteUser</code> instance requests the deletion of a user proxy
  * on a given server.
  */
 public class DeleteUser extends AdminRequest {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1914179540965247852L;
 
   /** Name of the user to delete. */
   private String userName;
@@ -52,8 +46,6 @@ public class DeleteUser extends AdminRequest {
     this.proxId = proxId;
   }
 
-  public DeleteUser() { }
-  
   /** Returns the name of the user to delete. */
   public String getUserName() {
     return userName;
@@ -62,19 +54,5 @@ public class DeleteUser extends AdminRequest {
   /** Returns the identifier of the user's proxy. */
   public String getProxId() {
     return proxId;
-  }
-  
-  protected int getClassId() {
-    return DELETE_USER;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    userName = StreamUtil.readStringFrom(is);
-    proxId = StreamUtil.readStringFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    StreamUtil.writeTo(userName, os);
-    StreamUtil.writeTo(proxId, os);
   }
 }

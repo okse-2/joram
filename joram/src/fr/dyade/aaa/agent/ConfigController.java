@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
@@ -70,8 +70,6 @@ public class ConfigController {
 
   private Vector startScript;
 
-  private Hashtable envProperties;
-
   ConfigController() throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
@@ -133,7 +131,6 @@ public class ConfigController {
     newServers = new Vector();
     startScript = new Vector();
     stopScript = new Vector();
-    envProperties = new Hashtable();
     setStatus(Status.CONFIG);    
   }
 
@@ -153,8 +150,6 @@ public class ConfigController {
       
       addNewServers();
 
-      addEnvProperties();
-
       start();
 
       commit();
@@ -169,16 +164,6 @@ public class ConfigController {
     }
   }
 
-  private void addEnvProperties() {
-    Enumeration keys = envProperties.keys();
-    Enumeration values = envProperties.elements();
-    while (keys.hasMoreElements()) {
-      String name = (String)keys.nextElement();
-      String value = (String)values.nextElement();
-      System.setProperty(name, value);
-    }
-  }
-
   private void commit() {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
@@ -188,8 +173,11 @@ public class ConfigController {
       Transaction transaction = AgentServer.getTransaction();
       transaction.begin();
       a3cmlConfig.save();
-      transaction.save(new Short(serverCounter), SERVER_COUNTER);      
-      transaction.commit(true);
+      transaction.save(
+        new Short(serverCounter),
+        SERVER_COUNTER);      
+      transaction.commit();
+      transaction.release();
     } catch (Exception exc) {
       throw new Error(exc.toString());
     }
@@ -485,36 +473,11 @@ public class ConfigController {
     
     if (server.sid == AgentServer.getServerId()) {
       startScript.add(
-        new ReconfigureServerNetworkCmd(domainName, new Integer(port)));
+        new ReconfigureServerNetworkCmd(domainName, port));
     } else {
       startScript.add(
         new ReconfigureClientNetworkCmd(
-          server.sid, domainName, new Integer(port)));
-    }
-  }
-  
-  public void setNetworkProperties(String serverName, String domainName, Integer port)
-      throws Exception {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "ConfigController.setNetworkPort("
-          + serverName + ',' + domainName + ',' + port + ')');
-    checkStatus(Status.CONFIG);
-    
-    A3CMLServer server = a3cmlConfig.getServer(serverName);
-    A3CMLNetwork network = server.getNetwork(domainName);
-    if (port != null) {
-      if (network != null) {
-        network.port = port.intValue();
-      } else {
-        throw new Exception("Unknown network");
-      }
-    }
-    // else the port is not reconfigured
-    
-    if (server.sid == AgentServer.getServerId()) {
-      startScript.add(new ReconfigureServerNetworkCmd(domainName, port));
-    } else {
-      startScript.add(new ReconfigureClientNetworkCmd(server.sid, domainName, port));
+          server.sid, domainName, port));
     }
   }
 
@@ -540,7 +503,6 @@ public class ConfigController {
     checkStatus(Status.CONFIG);
     a3cmlConfig.addProperty(
       new A3CMLProperty(propName, value));
-    envProperties.put(propName, value);
   }
 
   public void setServerProperty(String serverName,
@@ -550,13 +512,12 @@ public class ConfigController {
       logger.log(BasicLevel.DEBUG, 
                  "ConfigController.setServerProperty(" + 
                  serverName + ',' + 
-                 propName + ',' + 
+                 propName + +',' + 
                  value + ')');
     checkStatus(Status.CONFIG);
     A3CMLServer server = a3cmlConfig.getServer(serverName);
     server.addProperty(new A3CMLProperty(propName,
                                          value));
-    envProperties.put(propName, value);
   }
 
   public void setServerNat(String serverName,
@@ -628,10 +589,6 @@ public class ConfigController {
   }
 
   public void removeServer(String serverName) throws Exception {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 "ConfigController.removeServer(" + 
-                 serverName + ')');
     checkStatus(Status.CONFIG);
     try {
       A3CMLServer server = a3cmlConfig.getServer(serverName);
@@ -694,11 +651,7 @@ public class ConfigController {
   }
   
   private void stopNetwork(String domainName) throws Exception {
-    // In order to ensure idempotency we must check
-    // that the consumer is still there.
-    if (AgentServer.getConsumer(domainName) != null) {
-      AgentServer.removeConsumer(domainName);
-    }
+    AgentServer.removeConsumer(domainName);
   }
 
   private void stopService(String serviceClassName) throws Exception {
@@ -714,15 +667,15 @@ public class ConfigController {
     A3CMLNetwork a3cmlNetwork = a3cmlServer.getNetwork(domainName);
     if (a3cmlNetwork == null) throw new Exception(
       "Unknown network " + domainName);
-    Network network;
     try {
-      network = (Network) AgentServer.getConsumer(domainName);
+      Network network =      
+        (Network) AgentServer.getConsumer(domainName);
+      network.start();
     } catch (Exception exc) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "", exc);
       A3CMLDomain a3cmlDomain = 
         (A3CMLDomain) a3cmlConfig.getDomain(domainName);        
-      network = (Network) Class.forName(a3cmlDomain.network).newInstance();
+      Network network = 
+        (Network) Class.forName(a3cmlDomain.network).newInstance();
       short[] domainSids = new short[a3cmlDomain.servers.size()];
       for (int i = 0; i < domainSids.length; i++) {
         domainSids[i] = 
@@ -736,12 +689,12 @@ public class ConfigController {
       network.init(a3cmlDomain.name, 
                    a3cmlNetwork.port, 
                    domainSids);
+      network.start();
     }
-    network.start();
   }
 
   private void reconfigureServerNetwork(String domainName,
-      Integer port) throws Exception {
+                                        int port) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
                  "ConfigController.reconfigureServerNetwork(" + 
@@ -750,16 +703,13 @@ public class ConfigController {
     Network network =
       (Network) AgentServer.getConsumer(domainName);
     network.stop();
-    if (port != null) {
-      network.setPort(port.intValue());
-    }
-    network.setProperties();
+    network.setPort(port);
     network.start();
   }
 
   private void reconfigureClientNetwork(short sid, 
                                         String domainName,
-                                        Integer port) throws Exception {
+                                        int port) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
                  "ConfigController.reconfigureClientNetwork(" + 
@@ -769,23 +719,10 @@ public class ConfigController {
     A3CMLServer a3cmlServer = a3cmlConfig.getServer(sid);
     ServerDesc serverDesc = 
       AgentServer.getServerDesc(sid);
-    if (port != null && domainName.equals(serverDesc.getDomainName())) {
+    if (domainName.equals(serverDesc.getDomainName())) {
       serverDesc.updateSockAddr(
         serverDesc.getHostname(),
-        port.intValue());
-    }
-    
-    // Reset the properties values
-    Network network;
-    try {
-      network = (Network) AgentServer.getConsumer(domainName);
-    } catch (Exception exc) {
-      // Network is not found. Means that the server
-      // is not connected to this domain.
-      network = null;
-    }
-    if (network != null) {
-      network.setProperties();
+        port);
     }
   }
 
@@ -820,9 +757,6 @@ public class ConfigController {
       } else {
         throw new Error("Unknown gateway type: " + desc.domain);
       }
-    } else {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, " -> desc = " + desc);
     }
   }
 
@@ -864,12 +798,12 @@ public class ConfigController {
   static class ReconfigureClientNetworkCmd {
     public short sid;
     public String domainName;
-    public Integer port;
+    public int port;
     
     public ReconfigureClientNetworkCmd(
       short sid,
       String domainName,
-      Integer port) {
+      int port) {
       this.sid = sid;
       this.domainName = domainName;
       this.port = port;
@@ -878,11 +812,11 @@ public class ConfigController {
 
   static class ReconfigureServerNetworkCmd {
     public String domainName;
-    public Integer port;
+    public int port;
     
     public ReconfigureServerNetworkCmd(
       String domainName,
-      Integer port) {
+      int port) {
       this.domainName = domainName;
       this.port = port;
     }

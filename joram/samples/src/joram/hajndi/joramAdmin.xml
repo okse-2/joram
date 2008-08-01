@@ -4,7 +4,7 @@
   <AdminModule>
     <haConnect url="hajoram://localhost:2560,localhost:2561"
                name="root"
-              password="root"/>
+               password="root"/>
   </AdminModule>
   
 

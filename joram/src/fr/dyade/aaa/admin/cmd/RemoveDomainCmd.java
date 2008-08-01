@@ -27,11 +27,6 @@ import java.util.*;
 public class RemoveDomainCmd extends DomainCmd implements Serializable {
 
  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-/**
   * remove domain
   *
   * @param name          domain name

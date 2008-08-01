@@ -24,7 +24,7 @@ package org.objectweb.joram.mom.proxies;
 
 import fr.dyade.aaa.agent.*;
 
-import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.joram.mom.dest.*;
 import org.objectweb.joram.mom.proxies.AdminNotification;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
@@ -121,14 +121,16 @@ public class ConnectionManager {
    */
   public static void init(String args, boolean firstTime) 
     throws Exception {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                "ConnectionManager.init(" + args + ',' + firstTime + ')');    
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG,
+        "ConnectionManager.init(" + args + ',' + firstTime + ')');    
+
     if (! firstTime) return;
 
     AdminTopic adminTopic = new AdminTopic();
     adminTopic.deploy();
-    
+
     inFlow = Integer.getInteger("ConnectionManager.inFlow", inFlow).intValue();
 
     if (args != null) {
@@ -169,11 +171,11 @@ public class ConnectionManager {
    * Stops the <code>ConnectionManager</code> service.
    */ 
   public static void stopService() {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "ConnectionManager.stop()");
-
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG,
+        "ConnectionManager.stop()");
     if (timer != null)
       timer.cancel();
-    timer = null;
   }
 }

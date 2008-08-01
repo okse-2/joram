@@ -17,21 +17,22 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent Distributed Technologies
- * Contributor(s): 
  */
 package fr.dyade.aaa.jndi2.ha;
 
-import java.net.*;
+import java.net.ServerSocket;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import fr.dyade.aaa.agent.*;
+import org.objectweb.util.monolog.api.BasicLevel;
+
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.jndi2.distributed.ReplicationEntryPoint;
 import fr.dyade.aaa.jndi2.distributed.ReplicationManager;
-import fr.dyade.aaa.jndi2.server.*;
-
-import org.objectweb.util.monolog.api.BasicLevel;
+import fr.dyade.aaa.jndi2.server.AgentEntryPoint;
+import fr.dyade.aaa.jndi2.server.Container;
+import fr.dyade.aaa.jndi2.server.Trace;
 
 public class HADistributedJndiServer {
 

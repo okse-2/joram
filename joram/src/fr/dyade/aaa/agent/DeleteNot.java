@@ -29,10 +29,6 @@ package fr.dyade.aaa.agent;
 public class DeleteNot extends Notification {
 
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-  /**
    * the agent identified by 'reply' will receive a DeleteAck
    * when destruction complete
    */

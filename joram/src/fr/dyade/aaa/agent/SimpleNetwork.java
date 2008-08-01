@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -22,19 +22,15 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.ConnectException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
+import java.io.*;
+import java.net.*;
+import java.util.Vector;
 import java.util.Enumeration;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.Daemon;
+import fr.dyade.aaa.util.*;
 
 /**
  *  <code>SimpleNetwork</code> is a simple implementation of
@@ -42,7 +38,7 @@ import fr.dyade.aaa.util.Daemon;
  * a time.
  */
 public class SimpleNetwork extends StreamNetwork {
-  /** FIFO list of all messages to be sent by the watch-dog thread. */
+  /** FIFO list of all messages to be sent by the watch-dog thead. */
   MessageVector sendList;
 
   private JGroups jgroups = null;
@@ -57,7 +53,8 @@ public class SimpleNetwork extends StreamNetwork {
       //  Deletes the processed notification
       qout.remove(ack.getStamp());
       ack.delete();
-      AgentServer.getTransaction().commit(true);
+      AgentServer.getTransaction().commit();
+      AgentServer.getTransaction().release();
       if (this.logmon.isLoggable(BasicLevel.DEBUG))
         this.logmon.log(BasicLevel.DEBUG,
                         this.getName() + ", ackMsg(...) done.");
@@ -164,7 +161,7 @@ public class SimpleNetwork extends StreamNetwork {
 //   }
 
   final class NetServerOut extends Daemon {
-    NetworkOutputStream nos = null;
+    MessageOutputStream nos = null;
 
     NetServerOut(String name, Logger logmon) {
       super(name + ".NetServerOut");
@@ -178,13 +175,15 @@ public class SimpleNetwork extends StreamNetwork {
     protected void shutdown() {}
 
     public void run() {
+      int ret;
       Message msg = null;
       short msgto;
       ServerDesc server = null;
+      InputStream is = null;
 
       try {
         try {
-          nos = new NetworkOutputStream();
+          nos = new MessageOutputStream();
         } catch (IOException exc) {
           logmon.log(BasicLevel.FATAL,
                      getName() + ", cannot start.");
@@ -215,14 +214,13 @@ public class SimpleNetwork extends StreamNetwork {
             msgto = msg.getDest();
             
             Socket socket = null;
-            ExpiredNot expiredNot = null;
             try {
               if (this.logmon.isLoggable(BasicLevel.DEBUG))
                 this.logmon.log(BasicLevel.DEBUG,
                                 this.getName() + ", try to send message -> " +
                                 msg + "/" + msgto);
 
-              if ((msg.not.expiration > 0L) &&
+              if ((msg.not.expiration > 0) &&
                   (msg.not.expiration < currentTimeMillis)) {
                 throw new ExpirationExceededException();
               }
@@ -281,11 +279,6 @@ public class SimpleNetwork extends StreamNetwork {
                 continue;
               }
               
-              currentTimeMillis = System.currentTimeMillis();
-              if ((msg.not.expiration > 0L) && (msg.not.expiration < currentTimeMillis)) {
-                throw new ExpirationExceededException();
-              }
-              
               try {
                 send(socket, msg, currentTimeMillis);
               } catch (IOException exc) {
@@ -304,26 +297,13 @@ public class SimpleNetwork extends StreamNetwork {
               // Remove the message (see below), may be we have to post an
               // error notification to sender.
             } catch (ExpirationExceededException exc) {
-              if (msg.not.deadNotificationAgentId != null) {
-                if (logmon.isLoggable(BasicLevel.DEBUG)) {
-                  logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification1 "
-                      + msg.from
-                      + ", " + msg.not + " to " + msg.not.deadNotificationAgentId);
-                }
-                expiredNot = new ExpiredNot(msg.not, msg.from, msg.to);
-              } else {
-                if (logmon.isLoggable(BasicLevel.DEBUG)) {
-                  logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification " + msg.from
-                      + ", " + msg.not);
-                }
-              }
+              if (logmon.isLoggable(BasicLevel.DEBUG))
+                logmon.log(BasicLevel.DEBUG,
+                           getName() + ": removes expired notification " +
+                           msg.from + ", " + msg.not);
             }
 
             AgentServer.getTransaction().begin();
-            if (expiredNot != null) {
-              Channel.post(Message.alloc(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot));
-              Channel.validate();
-            }
             //  Suppress the processed notification from message queue,
             // and deletes it.
             qout.pop();
@@ -332,7 +312,8 @@ public class SimpleNetwork extends StreamNetwork {
               jgroups.send(new JGroupsAckMsg(msg));
             msg.delete();
             msg.free();
-            AgentServer.getTransaction().commit(true);
+            AgentServer.getTransaction().commit();
+            AgentServer.getTransaction().release();
           }
         }
       } catch (Exception exc) {
@@ -353,7 +334,7 @@ public class SimpleNetwork extends StreamNetwork {
      *
      * @exception IOException unrecoverable exception during transaction.
      */
-    void watchdog(long currentTimeMillis) throws Exception {
+    void watchdog(long currentTimeMillis) throws IOException {
 //       this.logmon.log(BasicLevel.DEBUG,
 //                       this.getName() + " watchdog().");
 
@@ -364,7 +345,7 @@ public class SimpleNetwork extends StreamNetwork {
       ServerDesc server = null;
 
       for (int i=0; i<sendList.size(); i++) {
-        Message msg = sendList.getMessageAt(i);
+        Message msg = (Message) sendList.getMessageAt(i);
         short msgto = msg.getDest();
 
         if (this.logmon.isLoggable(BasicLevel.DEBUG))
@@ -374,28 +355,15 @@ public class SimpleNetwork extends StreamNetwork {
                           " from " + msg.from +
                           " to " + msg.to);
 
-        if ((msg.not.expiration > 0L) &&
+        if ((msg.not.expiration > 0) &&
             (msg.not.expiration < currentTimeMillis)) {
-          
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG,
+                       getName() + ": removes expired notification " +
+                       msg.from + ", " + msg.not);
+
           // Remove the message.
           AgentServer.getTransaction().begin();
-
-          if (msg.not.deadNotificationAgentId != null) {
-            if (logmon.isLoggable(BasicLevel.DEBUG)) {
-              logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification2 " + msg.from
-                  + ", "
-                  + msg.not + " to " + msg.not.deadNotificationAgentId);
-            }
-            ExpiredNot expiredNot = new ExpiredNot(msg.not, msg.from, msg.to);
-            Channel.post(Message.alloc(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot));
-            Channel.validate();
-          } else {
-            if (logmon.isLoggable(BasicLevel.DEBUG)) {
-              logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification " + msg.from + ", "
-                  + msg.not);
-            }
-          }
-
           // Deletes the processed notification
           sendList.removeMessageAt(i); i--;
 // AF: A reprendre.
@@ -404,7 +372,8 @@ public class SimpleNetwork extends StreamNetwork {
 //             jgroups.send(new JGroupsAckMsg(msg));
           msg.delete();
           msg.free();
-          AgentServer.getTransaction().commit(true);
+          AgentServer.getTransaction().commit();
+          AgentServer.getTransaction().release();
         }
 
         try {
@@ -424,7 +393,8 @@ public class SimpleNetwork extends StreamNetwork {
 //             jgroups.send(new JGroupsAckMsg(msg));
           msg.delete();
           msg.free();
-          AgentServer.getTransaction().commit(true);
+          AgentServer.getTransaction().commit();
+          AgentServer.getTransaction().release();
 
           continue;
         }
@@ -433,12 +403,6 @@ public class SimpleNetwork extends StreamNetwork {
           // The server has already been tested during this round
           continue;
         }
-
-        this.logmon.log(BasicLevel.DEBUG,
-                        this.getName() + server.active + ',' +
-                        server.retry + ',' +
-                        server.last + ',' +
-                        currentTimeMillis);
 
         if ((server.active) ||
             ((server.retry < WDNbRetryLevel1) && 
@@ -491,30 +455,34 @@ public class SimpleNetwork extends StreamNetwork {
 //             jgroups.send(new JGroupsAckMsg(msg));
           msg.delete();
           msg.free();
-          AgentServer.getTransaction().commit(true);
+          AgentServer.getTransaction().commit();
+          AgentServer.getTransaction().release();
+        } else {
+          // Set last in order to avoid the sending of following messages to
+          // same server.
+          server.last = currentTimeMillis +1;
         }
       }
     }
 
-    void send(Socket socket,
-              Message msg,
-              long currentTimeMillis) throws IOException {
+    public void send(Socket socket,
+                     Message msg,
+                     long currentTimeMillis) throws IOException {
+      int ret;
       InputStream is = null;
-      OutputStream os = null;
 
       try {
-        os = socket.getOutputStream();
         // Send the message,
         if (this.logmon.isLoggable(BasicLevel.DEBUG))
           this.logmon.log(BasicLevel.DEBUG,
                           this.getName() + ", write message");
-        nos.writeMessage(os, msg, currentTimeMillis);
+        nos.writeMessage(socket, msg, currentTimeMillis);
         // and wait the acknowledge.
         if (this.logmon.isLoggable(BasicLevel.DEBUG))
           this.logmon.log(BasicLevel.DEBUG,
                           this.getName() + ", wait ack");
         is = socket.getInputStream();
-        if (is.read() == -1)
+        if ((ret = is.read()) == -1)
           throw new ConnectException("Connection broken");
 
         if (this.logmon.isLoggable(BasicLevel.DEBUG))
@@ -522,7 +490,7 @@ public class SimpleNetwork extends StreamNetwork {
                           this.getName() + ", receive ack");
       } finally {
         try {
-          os.close();
+          socket.getOutputStream().close();
         } catch (Exception exc) {}
         try {
           is.close();
@@ -539,7 +507,6 @@ public class SimpleNetwork extends StreamNetwork {
 
     NetServerIn(String name, Logger logmon) throws IOException {
       super(name + ".NetServerIn");
-      // Create the listen socket in order to verify the port availability.
       listen = createServerSocket();
       // Overload logmon definition in Daemon
       this.logmon = logmon;
@@ -550,7 +517,6 @@ public class SimpleNetwork extends StreamNetwork {
       try {
 	listen.close();
       } catch (Exception exc) {}
-      listen = null;
     }
 
     protected void shutdown() {
@@ -559,17 +525,11 @@ public class SimpleNetwork extends StreamNetwork {
 
     public void run() {
       Socket socket = null;
-      InputStream is = null;
       OutputStream os = null;
+      ObjectInputStream ois = null;
+      byte[] iobuf = new byte[29];
 
       try {
-        // After a stop we needs to create anew the listen socket.
-        if (listen == null) {
-          // creates a server socket listening on configured port
-          listen = createServerSocket();
-        }
-
-        NetworkInputStream nis = new NetworkInputStream();
 	while (running) {
 	  try {
 	    canStop = true;
@@ -591,109 +551,125 @@ public class SimpleNetwork extends StreamNetwork {
               this.logmon.log(BasicLevel.DEBUG,
                               this.getName() + ", connected");
 
-            // Read the message,
-            os = socket.getOutputStream();
-            is = socket.getInputStream();
-     
-            Message msg = nis.readMessage(is);
+	    // Read the message,
+	    os = socket.getOutputStream();
+            InputStream is = socket.getInputStream();
+
+            Message msg = Message.alloc();
+            int n = 0;
+            do {
+              int count = is.read(iobuf, n, Message.LENGTH +4 - n);
+              if (count < 0) throw new EOFException();
+              n += count;
+            } while (n < (Message.LENGTH +4));
+
+            // Reads boot timestamp of source server
+            int boot = ((iobuf[0] & 0xFF) << 24) +
+              ((iobuf[1] & 0xFF) << 16) +
+              ((iobuf[2] & 0xFF) <<  8) +
+              ((iobuf[3] & 0xFF) <<  0);
+            
+            int idx = msg.readFromBuf(iobuf, 4);
+
+            // Reads notification attributes
+            boolean persistent = ((iobuf[idx] & Message.PERSISTENT) == 0)?false:true;
+            boolean detachable = ((iobuf[idx] & Message.DETACHABLE) == 0)?false:true;
+
+            // Reads notification object
+            ois = new ObjectInputStream(is);
+            msg.not = (Notification) ois.readObject();
+            if (msg.not.expiration > 0)
+              msg.not.expiration += System.currentTimeMillis();
+            msg.not.persistent = persistent;
+            msg.not.detachable = detachable;
+            msg.not.detached = false;
 
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
               this.logmon.log(BasicLevel.DEBUG,
                               this.getName() + ", msg received");
 
+            testBootTS(msg.getSource(), boot);
             deliver(msg);
-        
+
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
               this.logmon.log(BasicLevel.DEBUG, this.getName() + ", send ack");
 
-            // then send the acknowledge.
-            os.write(0);
+	    // then send the acknowledge.
+	    os.write(0);
             os.flush();
 	  } catch (Exception exc) {
             this.logmon.log(BasicLevel.ERROR, 
                             this.getName() + ", closed", exc);
 	  } finally {
-            nis.clean();
 	    try {
 	      os.close();
 	    } catch (Exception exc) {}
 	    os = null;
 	    try {
-	      is.close();
+	      ois.close();
 	    } catch (Exception exc) {}
-	    is = null;
+	    ois = null;
 	    try {
 	      socket.close();
 	    } catch (Exception exc) {}
 	    socket = null;
 	  }
 	}
-      } catch (IOException exc) {
-        this.logmon.log(BasicLevel.ERROR,
-                        this.getName() + ", bad socket initialisation", exc);
       } finally {
         finish();
       }
     }
   }
 
-  final class NetworkOutputStream extends BufferedMessageOutputStream {
-    NetworkOutputStream() throws IOException {
-      super();
+  /**
+   * Class used to send messages through a TCP stream.
+   */
+  final class MessageOutputStream extends ByteArrayOutputStream {
+    private ObjectOutputStream oos = null;
+    private OutputStream os = null;
+
+    MessageOutputStream() throws IOException {
+      super(256);
+      oos = new ObjectOutputStream(this);
+      count = 0;
+      buf[Message.LENGTH +4] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF);
+      buf[Message.LENGTH +5] = (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF);
+      buf[Message.LENGTH +6] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF);
+      buf[Message.LENGTH +7] = (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF);
     }
 
-    /**
-     * Writes the protocol header to this output stream.
-     */
-    protected void writeHeader() {
-      writeInt(getBootTS());
-    }
-
-    /**
-     * Writes a message to the output stream of the socket.
-     * Be careful, the buffer must be large enough to contain the header.
-     *
-     * @param sock	      The output socket.
-     * @param msg 	      The message to write out.
-     * @param currentTimeMillis The current time in milliseconds, this
-     *        parameter is used to the handling of notification expiration.
-     */
-    void writeMessage(OutputStream os,
+    void writeMessage(Socket sock,
                       Message msg,
                       long currentTimeMillis) throws IOException {
-      out = os;
-      writeMessage(msg, currentTimeMillis);
-    }
-  }
+      os = sock.getOutputStream();
 
-  final class NetworkInputStream extends BufferedMessageInputStream {
-    NetworkInputStream() {
-      super();
-    }
+      // Writes boot timestamp of source server
+      buf[0] = (byte) (getBootTS() >>>  24);
+      buf[1] = (byte) (getBootTS() >>>  16);
+      buf[2] = (byte) (getBootTS() >>>  8);
+      buf[3] = (byte) (getBootTS() >>>  0);
 
-    // The boot timestamp of the incoming message.
-    int boot;
+      int idx = msg.writeToBuf(buf, 4);
+      // Writes notification attributes
+      buf[idx++] = (byte) ((msg.not.persistent?Message.PERSISTENT:0) |
+                           (msg.not.detachable?Message.DETACHABLE:0));
 
-    /**
-     * Reads the protocol header from this output stream.
-     */
-    protected void readHeader() throws IOException {
-      readFully(Message.LENGTH +4);
-      // Reads boot timestamp of source server
-      boot = readInt();
-    }
+      // Be careful, the stream header is hard-written in buf
+      count = Message.LENGTH +8;
 
-    /**
-     * Reads the message from the input stream.
-     *
-     * @param is the input stream.
-     * @return the incoming message.
-     */
-    Message readMessage(InputStream is) throws Exception {
-      this.is = is;
-      Message msg = readMessage();
-      testBootTS(msg.getSource(), boot);
-      return msg;
+      try {
+        if (msg.not.expiration > 0)
+          msg.not.expiration -= currentTimeMillis;
+        oos.writeObject(msg.not);
+        oos.reset();
+        oos.flush();
+        os.write(buf, 0, count);;
+        os.flush();
+      } finally {
+        if (msg.not.expiration > 0)
+          msg.not.expiration += currentTimeMillis;
+        count = 0;
+      }
     }
   }
 }

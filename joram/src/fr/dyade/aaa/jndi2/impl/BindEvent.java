@@ -26,10 +26,6 @@ import javax.naming.CompositeName;
 
 public class BindEvent extends UpdateEvent {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private Object object;
 
   public BindEvent(CompositeName compositeName,NamingContextId updatedContextId,

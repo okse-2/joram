@@ -25,13 +25,13 @@ package org.objectweb.joram.client.jms.admin;
 
 import java.util.Hashtable;
 
-import javax.naming.NamingException;
-import javax.naming.Reference;
-import javax.naming.StringRefAddr;
+import javax.naming.*;
+import javax.jms.JMSException;
 
 import org.objectweb.joram.client.jms.FactoryParameters;
-import org.objectweb.joram.shared.JoramTracing;
+
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.shared.JoramTracing;
 
 /**
  * Implements the <code>javax.jms.ConnectionFactory</code> interface.
@@ -40,7 +40,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
   /** Object containing the factory's parameters. */
   protected FactoryParameters params;
 
-  /** Reliable class name, for example use by ssl. */
+  /** Reliable class name, for exemple use by ssl. */
   protected String reliableClass = null;
 
   /**
@@ -70,7 +70,6 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
 
   /**
    * Constructs an empty <code>ConnectionFactory</code>.
-   * Needed by ObjectFactory.
    */
   public AbstractConnectionFactory() {
     params = new FactoryParameters();
@@ -154,8 +153,6 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
 
   /** Sets the clustered naming reference of a connection factory. */
   public void toReference(Reference ref, String prefix) {
-    if (prefix == null) prefix = "cf";
-
     params.toReference(ref, prefix);
     ref.add(new StringRefAddr(prefix + ".reliableClass", reliableClass));
   }
@@ -167,14 +164,12 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
 
   /** Restores the administered object from a clustered naming reference. */
   public void fromReference(Reference ref, String prefix) {
-    if (prefix == null) prefix = "cf";
-
     reliableClass = (String) ref.get(prefix + ".reliableClass").getContent();
     params.fromReference(ref, prefix);
   }
 
   /**
-   * Codes a <code>ConnectionFactory</code> as a Hashtable for traveling
+   * Codes a <code>ConnectionFactory</code> as a Hashtable for travelling
    * through the SOAP protocol.
    */
   public Hashtable code() {

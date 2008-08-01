@@ -26,10 +26,6 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class CreateDomainDialog extends JDialog {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private static CreateDomainDialog dialog;
   private static JLabel nameLabel;
   private static JLabel portLabel;

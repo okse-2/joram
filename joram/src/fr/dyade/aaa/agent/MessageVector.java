@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2005 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,6 +20,8 @@
  * Contributor(s): 
  */
 package fr.dyade.aaa.agent;
+
+import java.io.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -294,35 +296,6 @@ final class MessageVector implements MessageQueue {
   }
 
   /**
-   *  Removes the first messages with a timestamp less than the specified one.
-   * Be careful with the use of this method, in particular it does not take in
-   * account the multiples incoming nodes.
-   */
-  synchronized Message removeExpired(long currentTimeMillis) {
-    if (validated == 0) return null;
-    
-    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG,
-                 logmsg + "removeExpired - " + currentTimeMillis);
-
-    for (int i = 0; i<validated; i++) {
-      Message msg = getMessageAt(i);
-      if ((msg.not.expiration > 0) &&
-          (currentTimeMillis >= msg.not.expiration)) {
-        removeMessageAt(i);
-        validated -= 1;
-    
-        if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
-          logmon.log(BasicLevel.DEBUG, logmsg + "remove #" + msg.getStamp());
-
-        return msg;
-      }
-    }
-
-    return null;
-  }
-
-  /**
    * Inserts the specified message to this <code>MessageVector</code> at
    * the specified index. Each component in this vector with an index greater
    * or equal to the specified index is shifted upward.
@@ -485,7 +458,8 @@ final class MessageVector implements MessageQueue {
      * @return The message to which this reference refers.
      */
     public Message getMessage() {
-      return null != ref ? ref : (Message) this.get();
+      if (ref != null) return ref;
+      return (Message) get();
     }
 
     /**
@@ -531,13 +505,8 @@ final class MessageVector implements MessageQueue {
   }
 
   final class TransactionError extends Error {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     TransactionError(Throwable cause) {
-      super(cause.getMessage());
+      super(cause);
     }
   }
 }

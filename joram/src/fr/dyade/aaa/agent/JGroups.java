@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2005 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -22,24 +22,24 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.util.Vector;
+import java.util.*;
+import java.io.*;
 
-import org.jgroups.Address;
-import org.jgroups.Channel;
-import org.jgroups.ChannelClosedException;
-import org.jgroups.ChannelException;
-import org.jgroups.JChannel;
-import org.jgroups.MembershipListener;
-import org.jgroups.Message;
-import org.jgroups.MessageListener;
-import org.jgroups.View;
-import org.jgroups.blocks.PullPushAdapter;
-import org.jgroups.util.Util;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
+
+import org.jgroups.MembershipListener;
+import org.jgroups.MessageListener;
+import org.jgroups.Message;
+import org.jgroups.Channel;
+import org.jgroups.JChannel;
+import org.jgroups.Address;
+import org.jgroups.View;
+import org.jgroups.blocks.*;
+import org.jgroups.util.Util;
+import org.jgroups.ChannelException;
+import org.jgroups.ChannelClosedException;
+import org.jgroups.ChannelNotConnectedException;
 
 /**
  *  Implementation of JGroups in order to improve HA.
@@ -67,8 +67,8 @@ final class JGroups
     nbClusterExpected = AgentServer.getInteger("nbClusterExpected", nbClusterExpected).intValue();
   }
 
-  void init(short sid) throws Exception {
-    channelName = "HAJGroups#" + sid;
+  void init(String name) throws Exception {
+    channelName = "HAJGroups." + name;
 
     lock = new Object();
 
@@ -104,7 +104,7 @@ final class JGroups
 
   void disconnect() {
     if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "disconnect()");
+      logmon.log(BasicLevel.DEBUG, "disconnect()");//NTA tmp
     if (channel != null) {
       channel.disconnect();
       channel = null;
@@ -139,43 +139,25 @@ final class JGroups
     t.start();
   }
 
-  void send(Serializable obj) throws Exception {
-    if (channel == null) {
-      logmon.log(BasicLevel.ERROR,
-                 AgentServer.getName() + "JGroups send(" + obj + ") -> on null channel.");
-      return;
-    }
+  void send(Serializable message) throws Exception {
+    if (channel == null) return;
     
     if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG,"JGroups send(" + obj + ")");
+      logmon.log(BasicLevel.DEBUG,"JGroups send(" + message + ")");
 
-//     byte[] buf = null;
-//     try {
-//       ByteArrayOutputStream bos = new ByteArrayOutputStream(256);
-
-//       ObjectOutputStream oos = new ObjectOutputStream(bos);
-//       oos.writeObject(obj);
-//       buf = bos.toByteArray();
-//       oos.flush();
-//     } catch(Exception exc) {
-//       logmon.log(BasicLevel.ERROR,"JGroups send message", exc);
-//       throw exc;
-//     }
-//     if (buf == null) return;
-
-//     Message msg = new Message(null, null, buf);
-
-    if (obj instanceof fr.dyade.aaa.agent.Message) {
-      fr.dyade.aaa.agent.Message m = (fr.dyade.aaa.agent.Message) obj;
-      if (m.not == null)
-        logmon.log(BasicLevel.ERROR,
-                   AgentServer.getName() + "JGroups send null not " + m);
-      if (m.not.detachable)
-        logmon.log(BasicLevel.ERROR,
-                   AgentServer.getName() + "JGroups send detachable not " + m);
+    byte[] buf = null;
+    try {
+      ByteArrayOutputStream bos = new ByteArrayOutputStream(256);
+      ObjectOutputStream oos = new ObjectOutputStream(bos);
+      oos.writeObject(message);
+      buf = bos.toByteArray();
+      oos.flush();
+    } catch(Exception e) {
+      logmon.log(BasicLevel.ERROR,"JGroups send message",e);
+      throw e;
     }
-
-    Message msg = new Message(null, null, obj);
+    if (buf == null) return;
+    Message msg = new Message(null, null, buf);
     synchronized (lock) {
       channel.send(msg);
       lock.wait();
@@ -183,26 +165,10 @@ final class JGroups
   }
   
   void sendTo(Address dst, Serializable obj) throws Exception {
-    if (channel == null) {
-      logmon.log(BasicLevel.ERROR,
-                 "JGroups sendTo(" + dst + ", " + obj + ") -> on null channel.");
-      return;
-    }
-
+    if (channel == null) return;
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,"JGroups sendTo(" + dst + "," + obj + ")");
-
-    if (obj instanceof fr.dyade.aaa.agent.Message) {
-      fr.dyade.aaa.agent.Message m = (fr.dyade.aaa.agent.Message) obj;
-      if (m.not == null)
-        logmon.log(BasicLevel.ERROR,
-                   AgentServer.getName() + "JGroups send null not " + m);
-      if (m.not.detachable)
-        logmon.log(BasicLevel.ERROR,
-                   AgentServer.getName() + "JGroups send detachable not " + m);
-    }
-
-    channel.send(dst, myAddr, obj);
+    channel.send(dst,myAddr,obj);
   }
 
   Address getCoordinatorAddr() {
@@ -246,17 +212,6 @@ final class JGroups
         if ((obj instanceof fr.dyade.aaa.agent.Message) ||
             (obj instanceof JGroupsAckMsg) ||
             (obj instanceof HAStateReply)) {
-
-          if (obj instanceof fr.dyade.aaa.agent.Message) {
-            fr.dyade.aaa.agent.Message m = (fr.dyade.aaa.agent.Message) obj;
-            if (m.not == null)
-              logmon.log(BasicLevel.ERROR,
-                         AgentServer.getName() + "JGroups recv own null not " + m);
-            if (m.not.detachable)
-              logmon.log(BasicLevel.ERROR,
-                         AgentServer.getName() + "JGroups recv own detachable not " + m);
-          }
-
           synchronized (lock) {
             lock.notify();
           }
@@ -288,14 +243,6 @@ final class JGroups
         if (state != RUNNING) return;
 
         fr.dyade.aaa.agent.Message m = (fr.dyade.aaa.agent.Message) obj;
-
-        if (m.not == null)
-          logmon.log(BasicLevel.ERROR,
-                     AgentServer.getName() + "JGroups recv null not " + m);
-        if (m.not.detachable)
-          logmon.log(BasicLevel.ERROR,
-                     AgentServer.getName() + "JGroups recv detachable not " + m);
-
         if ((network != null) &&
             (m.from.getTo() != AgentServer.getServerId())) {
           network.deliver(m);

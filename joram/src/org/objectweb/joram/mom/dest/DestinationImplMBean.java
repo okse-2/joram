@@ -128,5 +128,5 @@ public interface DestinationImplMBean {
    *
    * @return the number of erroneous messages forwarded to the DMQ.
    */
-  long getNbMsgsSentToDMQSinceCreation();
+  long getNbMsgsSendToDMQSinceCreation();
 }

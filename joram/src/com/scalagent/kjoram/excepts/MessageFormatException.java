@@ -26,11 +26,6 @@ package com.scalagent.kjoram.excepts;
 public class MessageFormatException extends JMSException
 {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
    * Constructs a <code>MessageFormatException</code> instance.
    */
   public MessageFormatException(String info)

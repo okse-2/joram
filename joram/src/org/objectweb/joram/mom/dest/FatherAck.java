@@ -33,10 +33,6 @@ import org.objectweb.joram.mom.notifications.SetFatherRequest;
  */
 class FatherAck extends Notification
 {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /** The originial client request. */
   SetFatherRequest request;
   /** The original requester. */

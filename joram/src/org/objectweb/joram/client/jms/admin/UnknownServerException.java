@@ -24,11 +24,6 @@
 package org.objectweb.joram.client.jms.admin;
 
 public class UnknownServerException extends AdminException {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   public UnknownServerException(String info) {
     super(info);
   }

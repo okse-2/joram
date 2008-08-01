@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,18 +23,12 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 /**
  * A <code>DeleteDestination</code> instance requests the deletion of
  * a given destination.
  */
 public class DeleteDestination extends AdminRequest {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = -6222589997734342867L;
 
   /** Identifier of the destination to delete. */
   private String id;
@@ -47,23 +41,9 @@ public class DeleteDestination extends AdminRequest {
   public DeleteDestination(String id) {
     this.id = id;
   }
-  
-  public DeleteDestination() { }
 
   /** Returns the identifier of the destination to delete. */
   public String getId() {
     return id;
-  }
-  
-  protected int getClassId() {
-    return DELETE_DESTINATION;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    id = StreamUtil.readStringFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    StreamUtil.writeTo(id, os);
   }
 }

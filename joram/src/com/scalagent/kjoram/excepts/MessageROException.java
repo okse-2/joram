@@ -30,11 +30,6 @@ package com.scalagent.kjoram.excepts;
 public class MessageROException extends MessageException
 {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
    * Constructs a <code>MessageROException</code> instance.
    */
   public MessageROException(String info)

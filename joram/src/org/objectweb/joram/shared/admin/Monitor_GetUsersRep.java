@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,20 +22,14 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Enumeration;
 import java.util.Hashtable;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
 
 /**
  * A <code>Monitor_GetUsersRep</code> instance replies to a get users,
  * readers or writers monitoring request.
  */
 public class Monitor_GetUsersRep extends Monitor_Reply {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1147816939347665384L;
 
   /** Table holding the users identifications. */
   private Hashtable users;
@@ -55,40 +49,5 @@ public class Monitor_GetUsersRep extends Monitor_Reply {
   /** Returns the users table. */
   public Hashtable getUsers() {
     return users;
-  }
-  
-  protected int getClassId() {
-    return MONITOR_GET_USERS_REP;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);   
-    int size = StreamUtil.readIntFrom(is);
-    if (size == -1) {
-      users = null;
-    } else {
-      users = new Hashtable(size*4/3);
-      for (int i=0; i< size; i++) {
-        String key = StreamUtil.readStringFrom(is);
-        String value = StreamUtil.readStringFrom(is);
-        users.put(key, value);
-      }
-    }
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);   
-    if (users == null) {
-      StreamUtil.writeTo(-1, os);
-    } else {
-      int size = users.size();
-      StreamUtil.writeTo(size, os);
-      for (Enumeration keys = users.keys(); keys.hasMoreElements(); ) {
-        String key = (String) keys.nextElement();
-        StreamUtil.writeTo(key, os);
-        String value = (String) users.get(key);
-        StreamUtil.writeTo(value, os);
-      }
-    }
   }
 }

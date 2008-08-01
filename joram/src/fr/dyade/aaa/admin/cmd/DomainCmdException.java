@@ -26,11 +26,6 @@ import java.io.*;
 
 public class DomainCmdException extends ExceptionCmd {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   public DomainCmdException(Throwable exc) {
     super(exc);
   }

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,28 +17,22 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent Distributed Technologies
+ * Initial developer(s): Frederic Maistre (Bull)
  * Contributor(s):
  */
 package org.objectweb.joram.shared.excepts;
-
-import org.objectweb.joram.shared.client.MomExceptionReply;
 
 /**
  * A <code>StateException</code> is thrown by a destination or a proxy when
  * processing a request in an invalid state.
  */
-public class StateException extends MomException {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
+public class StateException extends MomException
+{
   /**
    * Constructs a <code>Statexception</code> instance.
    */
-  public StateException(String info) {
+  public StateException(String info)
+  {
     super(info);
-    type = MomExceptionReply.StateException;
   }
 }

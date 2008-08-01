@@ -39,10 +39,6 @@ import org.objectweb.joram.shared.JoramTracing;
  * Implements the <code>javax.jms.TemporaryQueue</code> interface.
  */
 public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private final static String TMP_QUEUE_TYPE = "queue.tmp";
 
   public static boolean isTemporaryQueue(String type) {

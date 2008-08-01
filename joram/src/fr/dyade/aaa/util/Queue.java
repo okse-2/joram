@@ -20,7 +20,8 @@
  */
 package fr.dyade.aaa.util;
 
-import java.util.Vector;
+import java.io.*;
+import java.util.*;
 
 /**
  * The <code>Queue</code> class implements a First-In-First-Out 
@@ -35,10 +36,6 @@ import java.util.Vector;
  * the <code>start()</code> method.
  */
 public class Queue extends Vector {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /**
    * <code>true</code> if a producer called the <code>stop()</code>
    * method.

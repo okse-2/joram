@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,24 +21,18 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-import java.util.Enumeration;
+import java.util.*;
+import java.io.*;
+
+import fr.dyade.aaa.agent.conf.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.agent.conf.A3CML;
-import fr.dyade.aaa.agent.conf.A3CMLConfig;
-import fr.dyade.aaa.agent.conf.A3CMLDomain;
-import fr.dyade.aaa.agent.conf.A3CMLNetwork;
-import fr.dyade.aaa.agent.conf.A3CMLServer;
-import fr.dyade.aaa.agent.conf.A3CMLService;
-
 public class ServerConfigHelper {
-  private static Logger logger =
-    Debug.getLogger(ServerConfigHelper.class.getName());
+
+  private static Logger logger = Debug.getLogger(
+    "fr.dyade.aaa.agent.ServerConfigHelper");
 
   private boolean autoCommit;
 
@@ -47,15 +41,14 @@ public class ServerConfigHelper {
   }
 
   public boolean addDomain(String domainName,
-                           String network,
                            int routerId,
                            int port) 
     throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 "ServerConfigHelper.addDomain(" + domainName + ',' +
-                 network + ','
-                 + routerId + ',' + 
+                 "ServerConfigHelper.addDomain(" + 
+                 domainName +
+                 ',' + routerId + ',' + 
                  port + ')');
 
     // Check configuration consistency (may fail)
@@ -67,7 +60,9 @@ public class ServerConfigHelper {
       throw new Exception("Server not found: " + routerId);
     
     // Update the configuration (can't fail)
-    A3CMLDomain domain = new A3CMLDomain(domainName, network);
+    A3CMLDomain domain = new A3CMLDomain(
+      domainName, 
+      fr.dyade.aaa.agent.SimpleNetwork.class.getName());
     a3cmlConfig.addDomain(domain);
     A3CMLServer a3cmlServer = a3cmlConfig.getServer((short)routerId);
     domain.addServer(a3cmlServer);
@@ -81,17 +76,17 @@ public class ServerConfigHelper {
     boolean res = false;
     if (routerId == AgentServer.getServerId()) {
       // Create and start the run-time entities (may fail)
-      Network net = 
-        (Network) Class.forName(network).newInstance();
-      AgentServer.addConsumer(domainName, net);
+      Network network = 
+        (Network) fr.dyade.aaa.agent.SimpleNetwork.class.newInstance();
+      AgentServer.addConsumer(domainName, network);
       
       try {
         short[] sids = new short[1];
         sids[0] = (short)routerId;
-        net.init(domainName, 
+        network.init(domainName, 
                      port, 
                      sids);
-        net.start();
+        network.start();
       } catch (Exception exc) {
         if (logger.isLoggable(BasicLevel.ERROR))
           logger.log(BasicLevel.ERROR, "", exc);
@@ -207,10 +202,7 @@ public class ServerConfigHelper {
     AgentServer.initServerDesc(serverDesc, server);
     if (serverDesc.gateway == serverDesc.sid) {
       if (serverDesc.domain instanceof Network) {
-        Network net = (Network) serverDesc.domain;
-        net.stop();
-        net.addServer((short)sid);
-        net.start();
+        ((Network) serverDesc.domain).addServer((short)sid);
       } else {
         throw new Error("Unknown gateway type: " + 
                         serverDesc.domain);
@@ -249,10 +241,8 @@ public class ServerConfigHelper {
         AgentServer.removeServerDesc((short)sid);
       
       if (servDesc.domain instanceof Network) {
-        Network net = (Network) servDesc.domain;
-        net.stop();
-        net.delServer(servDesc.sid);
-        net.start();
+        Network nw = (Network) servDesc.domain;
+        nw.delServer(servDesc.sid);
       }
       
       for (Enumeration e = AgentServer.elementsServerDesc(); 
@@ -341,33 +331,18 @@ public class ServerConfigHelper {
   }
 
   public static class ServerIdAlreadyUsedException extends Exception {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public ServerIdAlreadyUsedException(String info) {
       super(info);
     }
   }
   
   public static class NameAlreadyUsedException extends Exception {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public NameAlreadyUsedException(String info) {
       super(info);
     }
   }
 
   public static class StartFailureException extends Exception {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public StartFailureException(String info) {
       super(info);
     }

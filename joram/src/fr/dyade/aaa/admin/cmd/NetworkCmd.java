@@ -26,11 +26,6 @@ import java.util.*;
 
 public class NetworkCmd implements AdminCmd, Serializable {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   public String serverName;
 
   public String domain;

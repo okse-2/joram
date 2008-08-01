@@ -35,11 +35,6 @@ public class EmptyQueueException extends RuntimeException {
 
 
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
    * Constructs a new <code>EmptyQueueException</code> with no detail message.
    */
   public EmptyQueueException() {}

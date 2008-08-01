@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -24,56 +24,35 @@
  */
 package org.objectweb.joram.client.jms.admin;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.Reader;
 import java.io.FileReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.FileNotFoundException;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Properties;
 import java.util.Vector;
 
-import javax.jms.JMSException;
-import javax.jms.JMSSecurityException;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
-import javax.jms.TemporaryTopic;
-import javax.jms.TopicConnection;
+import javax.jms.*;
 
 import org.objectweb.joram.client.jms.Destination;
+import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.Topic;
+import org.objectweb.joram.client.jms.TopicConnectionFactory;
+import org.objectweb.joram.client.jms.Message;
 import org.objectweb.joram.client.jms.ha.local.TopicHALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory;
 import org.objectweb.joram.client.jms.local.TopicLocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
+import org.objectweb.joram.shared.admin.*;
+
 import org.objectweb.joram.shared.JoramTracing;
-import org.objectweb.joram.shared.admin.AddDomainRequest;
-import org.objectweb.joram.shared.admin.AddServerRequest;
-import org.objectweb.joram.shared.admin.AdminReply;
-import org.objectweb.joram.shared.admin.AdminRequest;
-import org.objectweb.joram.shared.admin.GetConfigRequest;
-import org.objectweb.joram.shared.admin.GetDomainNames;
-import org.objectweb.joram.shared.admin.GetDomainNamesRep;
-import org.objectweb.joram.shared.admin.GetLocalServer;
-import org.objectweb.joram.shared.admin.GetLocalServerRep;
-import org.objectweb.joram.shared.admin.Monitor_GetDMQSettings;
-import org.objectweb.joram.shared.admin.Monitor_GetDMQSettingsRep;
-import org.objectweb.joram.shared.admin.Monitor_GetDestinations;
-import org.objectweb.joram.shared.admin.Monitor_GetDestinationsRep;
-import org.objectweb.joram.shared.admin.Monitor_GetServersIds;
-import org.objectweb.joram.shared.admin.Monitor_GetServersIdsRep;
-import org.objectweb.joram.shared.admin.Monitor_GetUsers;
-import org.objectweb.joram.shared.admin.Monitor_GetUsersRep;
-import org.objectweb.joram.shared.admin.RemoveDomainRequest;
-import org.objectweb.joram.shared.admin.RemoveServerRequest;
-import org.objectweb.joram.shared.admin.SetDefaultDMQ;
-import org.objectweb.joram.shared.admin.SetDefaultThreshold;
-import org.objectweb.joram.shared.admin.StopServerRequest;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -103,13 +82,15 @@ public class AdminModule {
   /** The requestor for sending the synchronous requests. */
   private static AdminRequestor requestor;
 
-  /** AdminMessage sent to the platform. */
-  private static AdminMessage requestMsg;
-  /** AdminMessage received from the platform. */
-  private static AdminMessage replyMsg;
+  /** ObjectMessage sent to the platform. */
+  private static ObjectMessage requestMsg;
+  /** ObjectMessage received from the platform. */
+  private static ObjectMessage replyMsg;
 
   /** Reply object received from the platform. */
   protected static AdminReply reply;
+
+  private static int requestCounter;
 
   private static long requestTimeout =
       Long.getLong(REQUEST_TIMEOUT_PROP,
@@ -379,7 +360,7 @@ public class AdminModule {
     throws ConnectException, AdminException {
     addServer(sid,
               hostName, domainName, port, serverName,
-              new String[]{}, new String[]{});
+              null, null);
   }
 
   /**
@@ -441,9 +422,11 @@ public class AdminModule {
   /**
    * Adds a domain to the platform.
    *
-   * @param domainName Name of the added domain.
-   * @param sid Id of the router server that gives access to the added domain.
-   * @param port Listening port in the added domain of the router server.
+   * @param domainName Name of the added domain
+   * @param sid Id of the router server that
+   *            gives access to the added domain
+   * @param port Listening port in the added domain of the
+   *             router server
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
@@ -454,29 +437,6 @@ public class AdminModule {
     throws ConnectException, AdminException {
     doRequest(new AddDomainRequest(
                 domainName,
-                sid,
-                port));
-  }
-
-  /**
-   * Adds a domain to the platform using a specific network component.
-   *
-   * @param domainName Name of the added domain.
-   * @param network    Classname of the network component to use.
-   * @param sid Id of the router server that gives access to the added domain.
-   * @param port Listening port in the added domain of the router server.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  If the request fails.
-   */
-  public static void addDomain(String domainName,
-                               String network,
-                               int sid,
-                               int port)
-    throws ConnectException, AdminException {
-    doRequest(new AddDomainRequest(
-                domainName,
-                network,
                 sid,
                 port));
   }
@@ -519,27 +479,9 @@ public class AdminModule {
    * @exception AdminException  If the request fails.
    */
   public static void setDefaultDMQ(int serverId, DeadMQueue dmq)
-  throws ConnectException, AdminException {
-    if (dmq != null) {
+    throws ConnectException, AdminException
+    {
       doRequest(new SetDefaultDMQ(serverId, dmq.getName()));
-    }
-  }
-  
-  /**
-   * Sets a given dead message queue as the default DMQ for a given server
-   * (<code>null</code> for unsetting previous DMQ).
-   * <p>
-   * The request fails if the target server does not belong to the platform.
-   *
-   * @param serverId  The identifier of the server.
-   * @param dmqId  The dmqId (AgentId) to be set as the default one.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  If the request fails.
-   */
-  public static void setDefaultDMQId(int serverId, String dmqId)
-    throws ConnectException, AdminException {
-      doRequest(new SetDefaultDMQ(serverId, dmqId));
     }
 
   /**
@@ -552,24 +494,11 @@ public class AdminModule {
    * @exception AdminException  Never thrown.
    */
   public static void setDefaultDMQ(DeadMQueue dmq)
-    throws ConnectException, AdminException {
+    throws ConnectException, AdminException
+    {
       setDefaultDMQ(localServer, dmq);
     }
 
-  /**
-   * Sets a given dead message queue as the default DMQ for the local server
-   * (<code>null</code> for unsetting previous DMQ).
-   *
-   * @param dmqId  The dmqId (AgentId) to be set as the default one.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
-   */
-  public static void setDefaultDMQId(String dmqId)
-    throws ConnectException, AdminException {
-      setDefaultDMQId(localServer, dmqId);
-    }
-  
   /**
    * Sets a given value as the default threshold for a given server (-1 for
    * unsetting previous value).
@@ -697,12 +626,16 @@ public class AdminModule {
    * @exception AdminException  If the request fails.
    */
   public static DeadMQueue getDefaultDMQ(int serverId)
-    throws ConnectException, AdminException {
-    String reply = getDefaultDMQId(serverId);
-    if (reply == null)
+    throws ConnectException, AdminException
+    {
+      Monitor_GetDMQSettings request = new Monitor_GetDMQSettings(serverId);
+      Monitor_GetDMQSettingsRep reply;
+      reply = (Monitor_GetDMQSettingsRep) doRequest(request);
+
+      if (reply.getDMQName() == null)
         return null;
       else
-        return new DeadMQueue(reply);
+        return new DeadMQueue(reply.getDMQName());
     }
 
   /**
@@ -713,41 +646,9 @@ public class AdminModule {
    * @exception AdminException  Never thrown.
    */
   public static DeadMQueue getDefaultDMQ()
-    throws ConnectException, AdminException {
+    throws ConnectException, AdminException
+    {
       return getDefaultDMQ(localServer);
-    }
-  
-  /**
-   * Returns the default dead message queue for the local server, null if not
-   * set.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
-   */
-  public static String getDefaultDMQId()
-    throws ConnectException, AdminException {
-      return getDefaultDMQId(localServer);
-    }
-  
-  /**
-   * Returns the default dead message queue for a given server, null if not
-   * set.
-   * <p>
-   * The request fails if the target server does not belong to the platform.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  If the request fails.
-   */
-  public static String getDefaultDMQId(int serverId)
-    throws ConnectException, AdminException {
-      Monitor_GetDMQSettings request = new Monitor_GetDMQSettings(serverId);
-      Monitor_GetDMQSettingsRep reply;
-      reply = (Monitor_GetDMQSettingsRep) doRequest(request);
-
-      if (reply.getDMQName() == null)
-        return null;
-      else
-        return reply.getDMQName();
     }
 
   /**
@@ -983,8 +884,9 @@ public class AdminModule {
       timeout = requestTimeout;
 
     try {
-      replyMsg = (AdminMessage) requestor.request(request, timeout);
-      reply = (AdminReply) replyMsg.getAdminMessage();
+      replyMsg = (ObjectMessage) requestor.request(
+        request, timeout);
+      reply = (AdminReply) replyMsg.getObject();
 
       if (! reply.succeeded()) {
         switch (reply.getErrorCode()) {
@@ -1022,6 +924,7 @@ public class AdminModule {
   }
 
   public static class AdminRequestor {
+    private javax.jms.TopicConnection cnx;
     private javax.jms.TopicSession sess;
     private javax.jms.Topic topic;
     private TemporaryTopic tmpTopic;
@@ -1030,7 +933,9 @@ public class AdminModule {
 
     public AdminRequestor(javax.jms.TopicConnection cnx)
       throws JMSException {
-      sess = cnx.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+      this.cnx = cnx;
+      sess = cnx.createTopicSession(
+        false, Session.AUTO_ACKNOWLEDGE);
       topic = sess.createTopic("#AdminTopic");
       producer = sess.createProducer(topic);
       tmpTopic = sess.createTemporaryTopic();
@@ -1045,8 +950,7 @@ public class AdminModule {
           "AdminModule.AdminRequestor.request(" +
           request + ',' + timeout + ')');
 
-      requestMsg = new AdminMessage();
-      requestMsg.setAdminMessage(request);
+      requestMsg = sess.createObjectMessage(request);
       requestMsg.setJMSReplyTo(tmpTopic);
       producer.send(requestMsg);
       String correlationId = requestMsg.getJMSMessageID();

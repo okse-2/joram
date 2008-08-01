@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -42,9 +42,9 @@ import org.objectweb.joram.shared.client.CnxConnectRequest;
 import org.objectweb.joram.shared.client.CnxStartRequest;
 import org.objectweb.joram.shared.client.CnxStopRequest;
 import org.objectweb.joram.shared.client.ConsumerSubRequest;
+
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
-
 import fr.dyade.aaa.util.Debug;
 
 /**
@@ -96,33 +96,14 @@ public class Connection implements javax.jms.Connection {
   /** Connection meta data. */
   private ConnectionMetaData metaData = null;
 
-  class AtomicCounter {
-    long value;
-    StringBuffer strbuf;
-    int initial;
-
-    AtomicCounter(String prefix) {
-      value = 0;
-      strbuf = new StringBuffer(prefix.length() + 20);
-      strbuf.append(prefix);
-      initial = strbuf.length();
-    }
-
-    synchronized String nextValue() {
-      strbuf.setLength(initial);
-      strbuf.append(value++);
-      return strbuf.toString();
-    }
-  }
-
   /** Sessions counter. */
-  private AtomicCounter sessionsC;
+  private int sessionsC = 0;
 
   /** Messages counter. */
-  private AtomicCounter messagesC;
+  private int messagesC = 0;
 
   /** Subscriptions counter. */
-  private AtomicCounter subsC;
+  private int subsC = 0;
 
   /** Client's agent proxy identifier. */
   String proxyId;
@@ -191,12 +172,7 @@ public class Connection implements javax.jms.Connection {
     CnxConnectReply rep = (CnxConnectReply) requestor.request(req);
     proxyId = rep.getProxyId();
     key = rep.getCnxKey();
-
-    sessionsC = new AtomicCounter("c" + key + 's');
-    messagesC =
-      new AtomicCounter("ID:" + proxyId.substring(1) + 'c' + key + 'm');
-    subsC = new AtomicCounter("c"  + key + "sub");
-
+    
     stringImage = "Cnx:" + proxyId + ':' + key;
     hashCode = stringImage.hashCode();
 
@@ -240,101 +216,29 @@ public class Connection implements javax.jms.Connection {
     return factoryParameters.txPendingTimer;
   }
   
-  /** 
-   *  Indicates whether the messages produced are asynchronously sent
-   * or not (without or with acknowledgement).
-   * <p>
-   *  This attribute is inherited from FactoryParameters, by default false. 
-   *
-   * @return true if messages produced are asynchronously sent.
-   *
-   * @see FactoryParameters.asyncSend
-   * @see Session.asyncSend
-   */
   final boolean getAsyncSend() {
     return factoryParameters.asyncSend;
   }
   
-  /**
-   *  Get the maximum number of messages that can be read at once from a queue
-   * for this Connection.
-   * <p>
-   *  This attribute is inherited from FactoryParameters, default value is 1.
-   * 
-   * @return    The maximum number of messages that can be read at once from
-   *            a queue.
-   *
-   * @see FactoryParameters.queueMessageReadMax
-   * @see Session.queueMessageReadMax
-   */
   final int getQueueMessageReadMax() {
     return factoryParameters.queueMessageReadMax;
   }
   
-  /**
-   *  Get the maximum number of acknowledgements that can be buffered when
-   * using Session.DUPS_OK_ACKNOWLEDGE mode for this Connection.
-   * <p>
-   *  This attribute is inherited from FactoryParameters, default value is 0.
-   *
-   * @return The Maximum number of acknowledgements that can be buffered when
-   *         using Session.DUPS_OK_ACKNOWLEDGE mode.
-   *
-   * @see FactoryParameters.topicAckBufferMax
-   * @see Session.setTopicAckBufferMax
-   */
   final int getTopicAckBufferMax() {
     return factoryParameters.topicAckBufferMax;
   }
   
-  /**
-   * Get the threshold of passivation for this Connection.
-   * <p>
-   * This threshold is the maximum messages number over which the
-   * subscription is passivated.
-   * <p>
-   *  This attribute is inherited from FactoryParameters, default value is
-   * Integer.MAX_VALUE.
-   *
-   * @return The maximum messages number over which the subscription
-   *         is passivated.
-   *
-   * @see FactoryParameters.topicPassivationThreshold
-   * @see Session.setTopicPassivationThreshold
-   */
+  final int getTopicActivationThreshold() {
+    return factoryParameters.topicActivationThreshold;
+  }
+
   final int getTopicPassivationThreshold() {
     return factoryParameters.topicPassivationThreshold;
   }
   
   /**
-   * Get the threshold of activation for this Connection.
-   * <p>
-   * This threshold is the minimum messages number below which
-   * the subscription is activated.
-   * <p>
-   *  This attribute is inherited from FactoryParameters, default value is 0.
-   *
-   * @return The minimum messages number below which the subscription
-   *         is activated.
-   *
-   * @see FactoryParameters.topicActivationThreshold
-   * @see Session.setTopicActivationThreshold
-   */
-  final int getTopicActivationThreshold() {
-    return factoryParameters.topicActivationThreshold;
-  }
-
-  final String getOutLocalAddress() {
-    return factoryParameters.outLocalAddress;
-  }
-
-  final int getOutLocalPort() {
-    return factoryParameters.outLocalPort;
-  }
-  
-  /**
-   * Checks if the connection is closed. If true raises an
-   * IllegalStateException.
+   * Checks if the connecion is closed. If true
+   * raises an IllegalStateException.
    */
   final protected synchronized void checkClosed() throws IllegalStateException {
     if (status == Status.CLOSE ||  mtpx.isClosed()) 
@@ -430,7 +334,7 @@ public class Connection implements javax.jms.Connection {
         durable = true;
       }
       requestor.request(new ConsumerSubRequest(((Destination) dest).getName(),
-          targetName, selector, false, durable, false));
+          targetName, selector, false, durable));
     }
     
     MultiSessionConsumer msc =
@@ -591,7 +495,7 @@ public class Connection implements javax.jms.Connection {
       if (status == Status.STOP)
         return;
     }
-    
+
     // At this point, the server won't deliver messages anymore,
     // the connection just waits for the sessions to have finished their
     // processings.
@@ -603,7 +507,7 @@ public class Connection implements javax.jms.Connection {
       Session session = (Session) sessions.get(i);
       session.stop();
     }
-    
+
     synchronized (this) {
       if (status == Status.STOP)
         return;
@@ -628,7 +532,7 @@ public class Connection implements javax.jms.Connection {
       logger.log(
         BasicLevel.DEBUG, 
         newTrace(".close()"));
-
+    
     closer.close();
   }
 
@@ -731,18 +635,27 @@ public class Connection implements javax.jms.Connection {
   }
 
   /** Returns a new session identifier. */
-  String nextSessionId() {
-    return sessionsC.nextValue();
+  synchronized String nextSessionId() {
+    if (sessionsC == Integer.MAX_VALUE)
+      sessionsC = 0;
+    sessionsC++;
+    return "c" + key + "s" + sessionsC;
   }
  
   /** Returns a new message identifier. */
-  String nextMessageId() {
-    return messagesC.nextValue();
+  synchronized String nextMessageId() {
+    if (messagesC == Integer.MAX_VALUE)
+      messagesC = 0;
+    messagesC++;
+    return "ID:" + proxyId.substring(1) + "c" + key + "m" + messagesC;
   }
 
   /** Returns a new subscription name. */
-  String nextSubName() {
-    return subsC.nextValue();
+  synchronized String nextSubName() {
+    if (subsC == Integer.MAX_VALUE)
+      subsC = 0;
+    subsC++;
+    return "c"  + key + "sub" + subsC;
   }
 
   /**

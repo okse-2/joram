@@ -38,10 +38,6 @@ import fr.dyade.aaa.agent.conf.*;
  * @see fr.dyade.aaa.agent.ServerDesc
  */
 public class StartScript implements Serializable {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /** vector of StartAdminCmd */
   private Vector commands = null;
   /** hashtable of server description */

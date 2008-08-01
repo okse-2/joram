@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,18 +22,13 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 /**
  * A <code>Monitor_GetFatherRep</code> instance holds the identifier of a 
  * topic's hierarchical father.
  */
-public class Monitor_GetFatherRep extends Monitor_Reply {
-  private static final long serialVersionUID = 1L;
+public class Monitor_GetFatherRep extends Monitor_Reply
+{
+  private static final long serialVersionUID = 796689495158803046L;
   /** Identifier of the hierarchical father. */
   private String fatherId;
 
@@ -43,28 +38,15 @@ public class Monitor_GetFatherRep extends Monitor_Reply {
    *
    * @param fatherId  Identifier of the hierarchical father.
    */
-  public Monitor_GetFatherRep(String fatherId) {
+  public Monitor_GetFatherRep(String fatherId)
+  {
     this.fatherId = fatherId;
   }
 
-  public Monitor_GetFatherRep() { }
-  
-  /** Returns the identifier of the hierarchical father. */
-  public String getFatherId() {
-    return fatherId;
-  }
-  
-  protected int getClassId() {
-    return MONITOR_GET_FATHER_REP;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    fatherId = StreamUtil.readStringFrom(is);
-  }
 
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    StreamUtil.writeTo(fatherId, os);
+  /** Returns the identifier of the hierarchical father. */
+  public String getFatherId()
+  {
+    return fatherId;
   }
 }

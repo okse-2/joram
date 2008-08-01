@@ -30,19 +30,18 @@ import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.QueueConnection;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 
+import java.util.Vector;
+
+import javax.naming.NamingException;
+
 
 /**
  * An <code>XAQueueTcpConnectionFactory</code> instance is a factory of
  * TCP connections for XA PTP communication.
  */
 public class XAQueueTcpConnectionFactory
-             extends org.objectweb.joram.client.jms.XAQueueConnectionFactory {
-  
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
+             extends org.objectweb.joram.client.jms.XAQueueConnectionFactory
+{
   /**
    * Constructs an <code>XAQueueTcpConnectionFactory</code> instance.
    * This empty constructor is needed for JNDI.
@@ -50,14 +49,15 @@ public class XAQueueTcpConnectionFactory
   public XAQueueTcpConnectionFactory() {
     super();
   }
-  
+
   /**
    * Constructs an <code>XAQueueTcpConnectionFactory</code> instance.
    *
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */
-  public XAQueueTcpConnectionFactory(String host, int port) {
+  public XAQueueTcpConnectionFactory(String host, int port)
+  {
     super(host, port);
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
@@ -24,25 +24,21 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.IOException;
-import java.net.BindException;
-import java.net.ConnectException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
+import java.io.*;
+import java.util.Vector;
+import java.util.Enumeration;
 import java.net.Socket;
 import java.net.ServerSocket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.ConnectException;
 import java.net.BindException;
-import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.Enumeration;
+import java.net.SocketException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.SocketAddress;
-import fr.dyade.aaa.util.SocketFactory;
 
 /**
  *  <code>StreamNetwork</code> is a base implementation of <code>Network</code>
@@ -86,17 +82,17 @@ public abstract class StreamNetwork extends Network {
    *  Enable SO_LINGER with the specified linger time in seconds, if the
    * value is less than 0 then it disables SO_LINGER. Default value is -1.
    *  This value can be adjusted for all network components by setting
-   * <code>SoLinger</code> global property or for a particular network
-   * by setting <code>\<DomainName\>.SoLinger</code> specific property.
+   * <code>TcpNoDelay</code> global property or for a particular network
+   * by setting <code>\<DomainName\>.TcpNoDelay</code> specific property.
    * <p>
    *  Theses properties can be fixed either from <code>java</code> launching
    * command, or in <code>a3servers.xml</code> configuration file.
    */
   int SoLinger = -1;
   /**
-   *  Enable/disable SO_TIMEOUT with the specified timeout in milliseconds.
+   *  Enable/disabl SO_TIMEOUT with the specified timeout in milliseconds.
    * The timeout must be > 0. A timeout of zero is interpreted as an infinite
-   * timeout. Default value is 0.
+   * timeout.
    *  This value can be adjusted for all network components by setting
    * <code>SoTimeout</code> global property or for a particular network
    * by setting <code>\<DomainName\>.SoTimeout</code> specific property.
@@ -105,69 +101,6 @@ public abstract class StreamNetwork extends Network {
    * command, or in <code>a3servers.xml</code> configuration file.
    */
   int SoTimeout = 0;
-  /**
-   *  Defines in milliseconds the timeout used during socket connection.
-   * The timeout must be > 0. A timeout of zero is interpreted as an infinite
-   * timeout. Default value is 0.
-   *  This value can be adjusted for all network components by setting
-   * <code>ConnectTimeout</code> global property or for a particular network
-   * by setting <code>\<DomainName\>.ConnectTimeout</code> specific property.
-   * <p>
-   *  Theses properties can be fixed either from <code>java</code> launching
-   * command, or in <code>a3servers.xml</code> configuration file.
-   */
-  int ConnectTimeout = 0;
-
-  /**
-   *  The local address the listen ServerSocket is bound to. A null address
-   * will assign the wildcard address. Default value is null.
-   *  This value can be adjusted for all network components by setting
-   * <code>InLocalAddress</code> global property or for a particular network
-   * by setting <code>\<DomainName\>.InLocalAddress</code> specific property.
-   * <p>
-   *  Theses properties can be fixed either from <code>java</code> launching
-   * command, or in <code>a3servers.xml</code> configuration file.
-   */
-  InetAddress inLocalAddr = null;
-
-  /**
-   *  The local port the sockets are bound to. A valid port value is between 0
-   * and 65535. A port number of zero will let the system pick up an ephemeral
-   * port in a bind operation. Default value is 0.
-   *  This value can be adjusted for all network components by setting
-   * <code>OutLocalPort</code> global property or for a particular network
-   * by setting <code>\<DomainName\>.OutLocalPort</code> specific property.
-   * <p>
-   *  Theses properties can be fixed either from <code>java</code> launching
-   * command, or in <code>a3servers.xml</code> configuration file.
-   */
-  int outLocalPort = 0;
-
-  /**
-   *  The local address the sockets are bound to. A null address will assign
-   * the wildcard address. Default value is null.
-   *  This value can be adjusted for all network components by setting
-   * <code>OutLocalAddress</code> global property or for a particular network
-   * by setting <code>\<DomainName\>.OutLocalAddress</code> specific property.
-   * <p>
-   *  Theses properties can be fixed either from <code>java</code> launching
-   * command, or in <code>a3servers.xml</code> configuration file.
-   */
-  InetAddress outLocalAddr = null;
-
-  /**
-   * Allows to define a specific factory for socket in order to by-pass
-   * compatibility problem between JDK version.
-   * Currently there is two factories, The default factory one for JDK
-   * since 1.4, and "fr.dyade.aaa.util.SocketFactory13" for JDK prior to 1.4.
-   *  This value can be adjusted for all network components by setting
-   * <code>SocketFactory</code> global property or for a particular network
-   * by setting <code>\<DomainName\>.SocketFactory</code> specific property.
-   * <p>
-   *  Theses properties can be fixed either from <code>java</code> launching
-   * command, or in <code>a3servers.xml</code> configuration file.
-   */
-  SocketFactory socketFactory = null;
 
   /** Creates a new Network component */
   public StreamNetwork() {
@@ -177,70 +110,30 @@ public abstract class StreamNetwork extends Network {
   /**
    * Initializes a new <tt>StreamNetwork</tt> component.
    *
+   * @see Network
+   *
    * @param name	The domain name.
    * @param port	The listen port.
    * @param servers	The list of servers directly accessible from this
    *			network interface.
-   *
-   * @see Network
    */
   public void init(String name, int port, short[] servers) throws Exception {
     super.init(name, port, servers);
-  }
-  
-  /**
-   * Set the properties of the network.
-   * Inherited from Network class, can be extended by subclasses.
-   */
-  public void setProperties() throws Exception {
-    logmon.log(BasicLevel.DEBUG, domain + ", StreamNetwork.setProperties()");
-    super.setProperties();
 
     CnxRetry = Integer.getInteger("CnxRetry", CnxRetry).intValue();
-    CnxRetry = Integer.getInteger(domain + ".CnxRetry", CnxRetry).intValue();
+    CnxRetry = Integer.getInteger(name + ".CnxRetry", CnxRetry).intValue();
 
     backlog = Integer.getInteger("backlog", backlog).intValue();
-    backlog = Integer.getInteger(domain + ".backlog", backlog).intValue();
+    backlog = Integer.getInteger(name + ".backlog", backlog).intValue();
 
-    TcpNoDelay = Boolean.getBoolean(domain + ".TcpNoDelay");
+    TcpNoDelay = Boolean.getBoolean(name + ".TcpNoDelay");
     if (! TcpNoDelay) TcpNoDelay = Boolean.getBoolean("TcpNoDelay");
 
     SoLinger = Integer.getInteger("SoLinger", SoLinger).intValue();
-    SoLinger = Integer.getInteger(domain + ".SoLinger", SoLinger).intValue();
+    SoLinger = Integer.getInteger(name + ".SoLinger", SoLinger).intValue();
 
     SoTimeout = Integer.getInteger("SoTimeout", SoTimeout).intValue();
-    SoTimeout = Integer.getInteger(domain + ".SoTimeout", SoTimeout).intValue();
-
-    ConnectTimeout = Integer.getInteger("ConnectTimeout",
-                                        ConnectTimeout).intValue();
-    ConnectTimeout = Integer.getInteger(domain + ".ConnectTimeout",
-                                        ConnectTimeout).intValue();
-
-    String inLocalAddressStr = null;
-    inLocalAddressStr = System.getProperty("InLocalAddress",
-                                           inLocalAddressStr);
-    inLocalAddressStr = System.getProperty(domain + ".InLocalAddress",
-                                           inLocalAddressStr);
-    if (inLocalAddressStr != null)
-      inLocalAddr = InetAddress.getByName(inLocalAddressStr);
-
-    String outLocalAddressStr = null;
-    outLocalAddressStr = System.getProperty("OutLocalAddress",
-                                           outLocalAddressStr);
-    outLocalAddressStr = System.getProperty(domain + ".OutLocalAddress",
-                                           outLocalAddressStr);
-    if (outLocalAddressStr != null)
-      outLocalAddr = InetAddress.getByName(outLocalAddressStr);
-
-    outLocalPort = Integer.getInteger("OutLocalPort",
-                                      outLocalPort).intValue();
-    outLocalPort = Integer.getInteger(domain + ".OutLocalPort",
-                                      outLocalPort).intValue();
-
-    String sfcn = System.getProperty("SocketFactory",
-                                     SocketFactory.DefaultFactory);
-    sfcn = System.getProperty(domain + ".SocketFactory", sfcn);
-    socketFactory = SocketFactory.getFactory(sfcn);
+    SoTimeout = Integer.getInteger(name + ".SoTimeout", SoTimeout).intValue();
   }
 
   /**
@@ -308,9 +201,9 @@ public abstract class StreamNetwork extends Network {
   }
 
   /**
-   *  This method creates and returns a socket connected to a ServerSocket
-   * at the specified network address and port. It may be overloaded in
-   * subclass, in order to use particular implementation of sockets.
+   *  This method creates and returns a socket connected to a ServerSocket at
+   * the specified network address and port. It may be overloaded in subclass,
+   * in order to create particular subclasses of sockets.
    * <p>
    *  Due to polymorphism of both factories and sockets, different kinds of
    * sockets can be used by the same application code. The sockets returned
@@ -318,19 +211,17 @@ public abstract class StreamNetwork extends Network {
    * Socket</a>, so that they can directly expose new APIs for features such
    * as compression, security, or firewall tunneling.
    *
-   * @param addr	the server address.
+   * @param host	the server host.
    * @param port	the server port.
    * @return		a socket connected to a ServerSocket at the specified
    *			network address and port.
    *
    * @exception IOException	if the connection can't be established
    */
-  Socket createSocket(InetAddress addr, int port) throws IOException {
-    if (addr == null) throw new UnknownHostException();
-
-    return socketFactory.createSocket(addr, port,
-                                      outLocalAddr, outLocalPort,
-                                      ConnectTimeout);
+  Socket createSocket(InetAddress host, int port) throws IOException {
+    if (host == null)
+      throw new UnknownHostException();
+    return new Socket(host, port);
   }
 
   /**
@@ -366,7 +257,7 @@ public abstract class StreamNetwork extends Network {
    * @exception IOException	for networking errors
    */
   ServerSocket createServerSocket(int port) throws IOException {
-    return new ServerSocket(port, backlog, inLocalAddr);
+    return new ServerSocket(port, backlog);
   }
 
   /**

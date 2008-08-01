@@ -38,10 +38,6 @@ public class Queue extends Vector
 {
 
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-  /**
    * <code>true</code> if a producer called the <code>stop()</code>
    * method.
    */

@@ -32,10 +32,6 @@ import org.objectweb.joram.shared.excepts.MomException;
 public class ExceptionReply extends AbstractReply
 {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-  /**
    * The <code>MomException</code> which occured when processing the request.
    */
   private MomException except;

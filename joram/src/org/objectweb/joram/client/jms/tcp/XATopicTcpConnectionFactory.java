@@ -20,7 +20,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Contributor(s): Nicolas Tachker (ScalAgent)
  */
 package org.objectweb.joram.client.jms.tcp;
 
@@ -30,6 +30,9 @@ import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.TopicConnection;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 
+import java.util.Vector;
+
+import javax.naming.NamingException;
 
 
 /**
@@ -37,13 +40,8 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
  * TCP connections for XA Pub/Sub communication.
  */
 public class XATopicTcpConnectionFactory
-             extends org.objectweb.joram.client.jms.XATopicConnectionFactory {
-  
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
+             extends org.objectweb.joram.client.jms.XATopicConnectionFactory
+{
   /**
    * Constructs an <code>XATopicTcpConnectionFactory</code> instance.
    * This empty constructor is needed for JNDI.
@@ -51,7 +49,7 @@ public class XATopicTcpConnectionFactory
   public XATopicTcpConnectionFactory() {
     super();
   }
-  
+
   /**
    * Constructs an <code>XATopicTcpConnectionFactory</code> instance.
    *

@@ -50,10 +50,6 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * sending and the source of messages it receives.
  */
 public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private final static String TOPIC_TYPE = "topic";
 
   public static boolean isTopic(String type) {

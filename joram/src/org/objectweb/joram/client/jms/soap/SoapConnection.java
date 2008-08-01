@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -49,7 +49,7 @@ import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.shared.client.*;
 import org.objectweb.joram.client.jms.connection.RequestChannel;
 
-import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.client.jms.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -218,7 +218,8 @@ public class SoapConnection
    *
    * @exception IllegalStateException  If the SOAP service fails.
    */
-  public synchronized void send(AbstractJmsRequest request) throws Exception {
+  public synchronized void send(AbstractJmsRequest request)
+    throws Exception {
     Hashtable h = request.soapCode();
 
     // Setting the call's parameters:
@@ -259,7 +260,9 @@ public class SoapConnection
    * @exception IllegalStateException  If the SOAP service fails.
    */
   private void connect(FactoryParameters factParams, String name,
-                       String password) throws JMSException {
+                       String password)
+               throws JMSException
+  {
     // Setting the timer values:
     long startTime = System.currentTimeMillis();
     long endTime = startTime + factParams.connectingTimer * 1000;
@@ -390,7 +393,12 @@ public class SoapConnection
     
     try {
       Hashtable h = (Hashtable) resp.getReturnValue().getValue();
-      reply = (AbstractJmsReply) AbstractJmsMessage.soapDecode(h);
+            
+      String className = (String) h.get("className");
+      Class clazz = Class.forName(className);
+      Class [] classParam = { new Hashtable().getClass() };
+      Method m = clazz.getMethod("soapDecode",classParam);
+      reply = (AbstractJmsReply) m.invoke(null,new Object[]{h});
     } catch (Exception exc) {
       throw new IOException(exc.getMessage());
     }

@@ -24,10 +24,6 @@ import java.io.*;
  * The class <code>A3CMLNetwork</code> describes a network component.
  */
 public class A3CMLNetwork implements Serializable {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   public String domain = null;
   public int port = -1;
 

@@ -31,10 +31,6 @@ import org.objectweb.joram.client.jms.admin.*;
 class ServerTreeNode extends DefaultMutableTreeNode
     implements AdminTreeNode
 {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private AdminController c;
   private Server serverDesc;
   private DestinationRootTreeNode destRoot;
@@ -163,11 +159,6 @@ class ServerTreeNode extends DefaultMutableTreeNode
   }
 
   private class CreateDestinationAction extends AbstractAction {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public CreateDestinationAction() {
       super("Create Destination...");
     }
@@ -195,11 +186,6 @@ class ServerTreeNode extends DefaultMutableTreeNode
 
   private class StopServerAction extends AbstractAction
   {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public StopServerAction()
       {
         super("Stop Server", AdminToolConstants.stopIcon);
@@ -224,11 +210,6 @@ class ServerTreeNode extends DefaultMutableTreeNode
   }
 
   private class CreateUserAction extends AbstractAction {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public CreateUserAction() {
       super("Create User...");
     }
@@ -268,11 +249,6 @@ class ServerTreeNode extends DefaultMutableTreeNode
   }
 
   private class CreateDomainAction extends AbstractAction {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public CreateDomainAction() {
       super("Create Domain...");
     }
@@ -298,11 +274,6 @@ class ServerTreeNode extends DefaultMutableTreeNode
   }
 
   private class DeleteServerAction extends AbstractAction {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public DeleteServerAction() {
       super("Delete Server");
     }

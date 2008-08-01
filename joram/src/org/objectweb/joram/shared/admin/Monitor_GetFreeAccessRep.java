@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,18 +22,12 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 /**
  * A <code>Monitor_GetFreeAccessRep</code> instance carries the free access
  * settings of a destination.
  */
 public class Monitor_GetFreeAccessRep extends Monitor_Reply {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = -2836960153340068909L;
 
   /** <code>true</code> if READ access is free. */
   private boolean freeReading;
@@ -51,8 +45,6 @@ public class Monitor_GetFreeAccessRep extends Monitor_Reply {
     this.freeWriting = freeWriting;
   }
 
-  public Monitor_GetFreeAccessRep() { }
-  
   /** Returns <code>true</code> if READ access is free. */
   public boolean getFreeReading() {
     return freeReading;
@@ -61,21 +53,5 @@ public class Monitor_GetFreeAccessRep extends Monitor_Reply {
   /** Returns <code>true</code> if WRITE access is free. */
   public boolean getFreeWriting() {
     return freeWriting;
-  }
-  
-  protected int getClassId() {
-    return MONITOR_GET_FREE_ACCESS_REP;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    freeReading = StreamUtil.readBooleanFrom(is);
-    freeWriting = StreamUtil.readBooleanFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    StreamUtil.writeTo(freeReading, os);
-    StreamUtil.writeTo(freeWriting, os);
   }
 }

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -22,12 +22,6 @@
  * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.shared.admin;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
 
 /**
  * A <code>SetRight</code> instance requests a given right to be granted to a
@@ -51,8 +45,6 @@ public abstract class SetRight extends AdminRequest {
     this.destId = destId;
   }
 
-  public SetRight() { }
-  
   /** Returns the identifier of the future reader's proxy. */
   public String getUserProxId() {
     return userProxId;
@@ -61,19 +53,5 @@ public abstract class SetRight extends AdminRequest {
   /** Returns the identifier of the destination. */
   public String getDestId() {
     return destId;
-  }
-  
-  protected int getClassId() {
-    return SET_RIGHT;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    userProxId = StreamUtil.readStringFrom(is);
-    destId = StreamUtil.readStringFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    StreamUtil.writeTo(userProxId, os);
-    StreamUtil.writeTo(destId, os);
   }
 }

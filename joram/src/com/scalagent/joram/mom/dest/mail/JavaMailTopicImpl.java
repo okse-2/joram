@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,33 +22,35 @@
  */
 package com.scalagent.joram.mom.dest.mail;
 
-import java.util.Enumeration;
-import java.util.Properties;
-import java.util.Vector;
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import javax.mail.*;
+import javax.mail.internet.*;
 
+import org.objectweb.joram.mom.notifications.*;
+import org.objectweb.joram.shared.excepts.*;
+import org.objectweb.joram.shared.messages.*;
+import org.objectweb.joram.shared.selectors.*;
+import org.objectweb.joram.mom.dest.*;
 import org.objectweb.joram.mom.dest.Topic;
-import org.objectweb.joram.mom.dest.TopicImpl;
-import org.objectweb.joram.mom.notifications.ClientMessages;
-import org.objectweb.joram.mom.notifications.SpecialAdminRequest;
-import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.admin.SpecialAdmin;
-import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.joram.shared.messages.Message;
-import org.objectweb.joram.shared.selectors.Selector;
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.agent.Notification;
+
 import fr.dyade.aaa.util.Debug;
+import org.objectweb.util.monolog.api.Logger;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.mom.MomTracing;
 
 /**
  * The <code>JavaMailTopicImpl</code> class implements the MOM topic behaviour,
  * basically storing messages and delivering them upon clients requests.
  */
 public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBean {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
   public static Logger logger = Debug.getLogger(JavaMailTopicImpl.class.getName());
 
   private String smtpServer = null;
@@ -73,17 +75,20 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
   /**
    * Constructs a <code>JavaMailTopicImpl</code> instance.
    *
+   * @param destId  	Identifier of the agent hosting the topic.
    * @param adminId  	Identifier of the administrator of the topic.
    * @param prop	Properties to configure the topic.
    */
-  public JavaMailTopicImpl(AgentId adminId,
+  public JavaMailTopicImpl(AgentId destId, 
+                           AgentId adminId,
                            Properties prop) {
-    super(adminId, prop);
+    super(destId, adminId, prop);
     setProperties(prop);
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 "--- " + this + " JavaMailTopicImpl.<init>: " +
+                 "--- " + this +
+                 " JavaMailTopicImpl : " +
                  "\nsenderInfos=" + senderInfos +
                  "\npopServer=" + popServer +
                  "\npopUser=" + popUser +
@@ -115,30 +120,6 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
     popUser = prop.getProperty("popUser", popUser);
     popPassword = prop.getProperty("popPassword", popPassword);
     expunge = Boolean.valueOf(prop.getProperty("expunge")).booleanValue();
-  }
- 
-  /**
-   * Initializes the destination.
-   * 
-   * @param firstTime   true when first called by the factory
-   */
-  public void initialize(boolean firstTime) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "initialize(" + firstTime + ')');
-    
-    super.initialize(firstTime);
-
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 "--- " + this +
-                 " JavaMailTopicImpl.initialize: " +
-                 "\nsenderInfos=" + senderInfos +
-                 "\npopServer=" + popServer +
-                 "\npopUser=" + popUser +
-                 "\npopPeriod=" + popPeriod +
-                 "\nexpunge=" + expunge);
-
-    javaMailUtil = new JavaMailUtil();
   }
 
   // ==================================================
@@ -311,7 +292,7 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
    * @param server 	The pop server or null for unsetting previous value.
    */
   public void setPopServer(String server) {
-    this.popServer = server;
+    this.popServer = popServer;
   }
 
   /**
@@ -374,7 +355,15 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
   // ==================================================
 
   public String toString() {
-    return "JavaMailTopicImpl:" + getId().toString();
+    return "JavaMailTopicImpl:" + destId.toString();
+  }
+
+  protected void specialProcess(Notification not) {
+    if (not instanceof ClientMessages) {
+      doProcess((ClientMessages) not);
+      super.doProcess((ClientMessages) not);
+    } else
+      super.specialProcess(not);
   }
 
   protected Object specialAdminProcess(SpecialAdminRequest not) 
@@ -385,7 +374,9 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
       
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, 
-                   "--- " + this + " specialAdminProcess : " + req);
+                   "--- " + this +
+                   " specialAdminProcess : " +
+                   req);
       if (req instanceof AddSenderInfo)
         addSenderInfo(((AddSenderInfo) req).si,
                       ((AddSenderInfo) req).index);
@@ -400,11 +391,15 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
         
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, 
-                   "--- " + this + " specialAdminProcess senderInfos=" + senderInfos);
+                   "--- " + this +
+                   " specialAdminProcess senderInfos=" +
+                   senderInfos);
     } catch (Exception exc) {
       if (logger.isLoggable(BasicLevel.WARN))
         logger.log(BasicLevel.WARN, 
-                   "--- " + this + " specialAdminProcess", exc);
+                   "--- " + this +
+                   " specialAdminProcess",
+                   exc);
       throw new RequestException(exc.getMessage());
     }
     return "done";
@@ -434,33 +429,33 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
       senderInfos.set(index,newSi);
   }
 
-  public ClientMessages preProcess(AgentId from, ClientMessages not) {
-    DMQManager dmqManager = null;
-    for (Enumeration msgs = not.getMessages().elements(); msgs.hasMoreElements();) {
+  protected void doProcess(ClientMessages not) {
+    for (Enumeration msgs = not.getMessages().elements();
+         msgs.hasMoreElements();) {
       Message msg = (Message) msgs.nextElement();
       SenderInfo si = match(msg);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "--- " + this + " match=" + (si != null));
+        logger.log(BasicLevel.DEBUG, 
+                   "--- " + this +
+                   " match=" + (si!=null));
       if (si != null) {
         try {
-          javaMailUtil.sendJavaMail(si, new MailMessage(msg));
+          javaMailUtil.sendJavaMail(si,msg);
         } catch (Exception exc) {
-          if (dmqManager == null) {
-            dmqManager = new DMQManager(not.getDMQId(), dmqId, getId());
-          }
-          nbMsgsSentToDMQSinceCreation++;
-          dmqManager.addDeadMessage(msg, DMQManager.UNEXPECTED_ERROR);
-
-          if (logger.isLoggable(BasicLevel.WARN))
-            logger.log(BasicLevel.WARN, "JavaMailTopicImpl.sendJavaMail", exc);
+          ClientMessages deadM = 
+            new ClientMessages(not.getClientContext(), 
+                               not.getRequestId());
+          
+          deadM.addMessage(msg);
+          sendToDMQ(deadM,not.getDMQId());
+          
+          logger.log(BasicLevel.WARN,
+                     "JavaMailTopicImpl.sendJavaMail", 
+                     exc);
         }
       }
     }
-    if (dmqManager != null) {
-      dmqManager.sendToDMQ();
-    }
-    return not;
   }
   
   protected SenderInfo match(Message msg) {
@@ -484,27 +479,30 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
       for (int i = 0; i < msgs.length; i++) {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, 
-                     "--- " + this + " doPop : msgs[" + i + "] = " + msgs[i]);
+                     "--- " + this +
+                     " doPop : msgs[" + i + "] = " + msgs[i]);
         try {
           count++;
           Properties prop = javaMailUtil.getMOMProperties(msgs[i]);
-          MailMessage m = 
+          Message m = 
             javaMailUtil.createMessage(prop,
-                                       getId().toString()+"mail_"+count,
+                                       destId.toString()+"mail_"+count,
                                        Topic.getDestinationType(),
-                                       getId().toString(),
+                                       destId.toString(),
                                        Topic.getDestinationType());
-          publish(m.getSharedMessage());
+          publish(m);
 
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, 
-                       "--- " + this + " doPop : publish m = " + m);
+                       "--- " + this +
+                       " doPop : publish m = " + m);
           if (expunge)
             toExpunge.add(msgs[i]);
         } catch (Exception exc) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, 
-                       "--- " + this + " doPop", exc);
+                       "--- " + this +
+                       " doPop", exc);
           continue;
         }
       }
@@ -517,13 +515,31 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
   private void publish(Message msg) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 "--- " + this + " publish msg=" + msg);
+                 "--- " + this +
+                 " publish msg=" + msg);
 
     Vector messages = new Vector();
     messages.add(msg);
     ClientMessages cm = new ClientMessages(-1,-1,messages);
     // not use channel.sendTo(...) because from=#0.0.0
-    //javaMailTopic.send(getId(),cm);
-    forward(getId(),cm);
+    //javaMailTopic.send(destId,cm);
+    Channel.sendTo(destId,cm);
+  }
+
+  private void readObject(java.io.ObjectInputStream in)
+    throws IOException, ClassNotFoundException {
+
+    in.defaultReadObject();
+
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+                 "--- " + this +
+                 " JavaMailTopicImpl.readObject : " +
+                 "\nsenderInfos=" + senderInfos +
+                 "\npopServer=" + popServer +
+                 "\npopUser=" + popUser +
+                 "\npopPeriod=" + popPeriod +
+                 "\nexpunge=" + expunge);
+    javaMailUtil = new JavaMailUtil();
   }
 }

@@ -13,8 +13,6 @@ if $cygwin; then
   [ -n "$CLASSPATH" ] && CLASSPATH=`cygpath --path --unix "$CLASSPATH"`
 fi
 
-echo $JORAM_HOME
-
 # Verify if JORAM_HOME is well defined
 if [ ! -r "$JORAM_HOME"/samples/bin/admin.sh ]; then
   echo "The JORAM_HOME environment variable is not defined correctly"
@@ -34,12 +32,12 @@ JORAM_LIBS=$JORAM_HOME/ship/lib
 RUN_DIR=$JORAM_HOME/samples/run
 
 # Building the Classpath
-CLASSPATH=$JORAM_LIBS/joram-client.jar
-CLASSPATH=$CLASSPATH:$JORAM_LIBS/joram-mom.jar
+CLASSPATH=$JORAM_LIBS/joram-mom.jar
 CLASSPATH=$CLASSPATH:$JORAM_LIBS/joram-shared.jar
-CLASSPATH=$CLASSPATH:$JORAM_LIBS/JCup.jar
 CLASSPATH=$CLASSPATH:$JORAM_LIBS/jakarta-regexp-1.2.jar
+CLASSPATH=$CLASSPATH:$JORAM_LIBS/JCup.jar
 CLASSPATH=$CLASSPATH:$JORAM_LIBS/ow_monolog.jar
+CLASSPATH=$CLASSPATH:$JORAM_LIBS/jmxri.jar
 CLASSPATH=$CLASSPATH:$RUN_DIR
 
 mkdir $RUN_DIR
@@ -55,7 +53,5 @@ if $cygwin; then
   CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
 fi
 
-echo $CLASSPATH
-
 echo "== Launching a non persistent server#0 =="
-cd $RUN_DIR; exec "${JAVA_HOME}"/bin/java -classpath $CLASSPATH fr.dyade.aaa.agent.AgentServer 0 ./s0
+cd $RUN_DIR; exec $JAVA_HOME/bin/java -classpath $CLASSPATH fr.dyade.aaa.agent.AgentServer 0 ./s0

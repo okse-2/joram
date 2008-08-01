@@ -19,6 +19,8 @@
 package fr.dyade.aaa.util.management;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+import org.objectweb.util.monolog.api.LoggerFactory;
 
 import fr.dyade.aaa.util.Debug;
 
@@ -71,27 +73,6 @@ public final class MXWrapper {
       BasicLevel.INFO, "unregisterMBean: " + name + " -> " + mxserver);
 
     mxserver.unregisterMBean(domain, name);
-  }
-  
-  public static void registerMBean(Object bean, String fullName) throws Exception {
-    if (mxserver == null)
-      return;
-
-    Debug.getLogger("fr.dyade.aaa.util.management").log(BasicLevel.INFO,
-        "registerMBean: " + fullName + " -> " + mxserver);
-
-    mxserver.registerMBean(bean, fullName);
-  }
-
-  public static void unregisterMBean(String fullName) throws Exception {
-    if (mxserver == null)
-      return;
-
-    Debug.getLogger("fr.dyade.aaa.util.management").log(BasicLevel.INFO,
-        "unregisterMBean: " + fullName + " -> " + mxserver);
-
-    
-    mxserver.unregisterMBean(fullName);
   }
 
   public static void setMXServer(MXServer server) {

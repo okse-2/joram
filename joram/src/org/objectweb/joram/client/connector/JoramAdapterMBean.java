@@ -25,7 +25,6 @@ package org.objectweb.joram.client.connector;
 import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.JoramAdminMBean;
 
-import java.net.ConnectException;
 import java.util.List;
 
 public interface JoramAdapterMBean
@@ -98,9 +97,4 @@ public interface JoramAdapterMBean
 
   public void removeDestination(String name) throws AdminException;
 
-  public void setDefaultDMQId(int serverId, String dmqId) throws ConnectException, AdminException;
-  
-  public String getDefaultDMQId(int serverId) throws ConnectException, AdminException;
-  
-  public String getDefaultDMQId() throws ConnectException, AdminException;
 }
