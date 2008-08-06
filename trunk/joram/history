@@ -1,4 +1,15 @@
 +==============================================================================
+| 2008/08/06 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+----------------------------------------------------------------
+1. PoolNetwork:
+  - Add parallelism to send message (PoolSender).
+  - modify active sessions
+  - synchronize open and close sessions
+  - fix set nbMaxCnx.
+  - add number of buffering messages (Sender in PoolNetwork)
+2. Network:
+  - log setProperties.
++==============================================================================
 | 2008/07/04 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  DMQ now behaves like a standard queue. This allows DMQ chaining.
