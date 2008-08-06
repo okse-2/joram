@@ -193,7 +193,8 @@ public abstract class StreamNetwork extends Network {
    * Inherited from Network class, can be extended by subclasses.
    */
   public void setProperties() throws Exception {
-    logmon.log(BasicLevel.DEBUG, domain + ", StreamNetwork.setProperties()");
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, domain + ", StreamNetwork.setProperties()");
     super.setProperties();
 
     CnxRetry = Integer.getInteger("CnxRetry", CnxRetry).intValue();
@@ -241,6 +242,31 @@ public abstract class StreamNetwork extends Network {
                                      SocketFactory.DefaultFactory);
     sfcn = System.getProperty(domain + ".SocketFactory", sfcn);
     socketFactory = SocketFactory.getFactory(sfcn);
+    
+    if (logmon.isLoggable(BasicLevel.DEBUG)) {
+      StringBuffer strbuf = new StringBuffer();
+      strbuf.append(" setProperties(");
+      strbuf.append("CnxRetry=");
+      strbuf.append(CnxRetry);
+      strbuf.append(", backlog=");
+      strbuf.append(backlog);
+      strbuf.append(", TcpNoDelay=");
+      strbuf.append(TcpNoDelay);
+      strbuf.append(", SoLinger=");
+      strbuf.append(SoLinger);
+      strbuf.append(", SoTimeout=");
+      strbuf.append(SoTimeout);
+      strbuf.append(", ConnectTimeout=");
+      strbuf.append(ConnectTimeout);
+      strbuf.append(", inLocalAddressStr=");
+      strbuf.append(inLocalAddressStr);
+      strbuf.append(", outLocalAddressStr=");
+      strbuf.append(outLocalAddressStr);
+      strbuf.append(", sfcn=");
+      strbuf.append(sfcn);
+      strbuf.append(')');
+      logmon.log(BasicLevel.DEBUG, getName() + strbuf.toString());
+    }
   }
 
   /**
