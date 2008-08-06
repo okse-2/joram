@@ -433,7 +433,8 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * Can be extended by subclasses.
    */
   public void setProperties() throws Exception {
-    logmon.log(BasicLevel.DEBUG, domain + ", Network.setProperties()");
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, domain + ", Network.setProperties()");
 
     WDActivationPeriod = Long.getLong("WDActivationPeriod",
                                       WDActivationPeriod).longValue();
@@ -464,6 +465,26 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
                                   WDRetryPeriod3).longValue();
     WDRetryPeriod3 = Long.getLong(domain + ".WDRetryPeriod3",
                                   WDRetryPeriod3).longValue();
+    
+    if (logmon.isLoggable(BasicLevel.DEBUG)) {
+      StringBuffer strbuf = new StringBuffer();
+      strbuf.append(" setProperties(");
+      strbuf.append("WDActivationPeriod=");
+      strbuf.append(WDActivationPeriod);
+      strbuf.append(", WDNbRetryLevel1=");
+      strbuf.append(WDNbRetryLevel1);
+      strbuf.append(", WDRetryPeriod1=");
+      strbuf.append(WDRetryPeriod1);
+      strbuf.append(", WDNbRetryLevel2=");
+      strbuf.append(WDNbRetryLevel2);
+      strbuf.append(", WDRetryPeriod2=");
+      strbuf.append(WDRetryPeriod2);
+      strbuf.append(", WDRetryPeriod3=");
+      strbuf.append(WDRetryPeriod3);
+      strbuf.append(')');
+      logmon.log(BasicLevel.DEBUG,
+                 getName() + strbuf.toString());
+    }
   }
 
   /**
