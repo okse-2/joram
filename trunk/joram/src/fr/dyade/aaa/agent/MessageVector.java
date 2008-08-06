@@ -307,7 +307,8 @@ final class MessageVector implements MessageQueue {
 
     for (int i = 0; i<validated; i++) {
       Message msg = getMessageAt(i);
-      if ((msg.not.expiration > 0) &&
+      if ((msg.not != null) && 
+          (msg.not.expiration > 0) &&
           (currentTimeMillis >= msg.not.expiration)) {
         removeMessageAt(i);
         validated -= 1;
