@@ -73,4 +73,12 @@ public interface NetSessionWrapperMBean {
    * @return the time in milliseconds of last message received.
    */
   public long getLastReceived();
+  
+  
+  /**
+   * Returns the number of buffering messages to sent since last reboot.
+   *
+   * @return  the number of buffering messages to sent since last reboot.
+   */
+  public int getNbBufferingMessageToSent();
 }
