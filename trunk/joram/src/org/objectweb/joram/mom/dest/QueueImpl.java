@@ -59,6 +59,7 @@ import org.objectweb.joram.mom.notifications.SetThreshRequest;
 import org.objectweb.joram.mom.notifications.TopicMsgsReply;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.mom.util.DMQManager;
+import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.admin.ClearQueue;
 import org.objectweb.joram.shared.admin.DeleteQueueMessage;
 import org.objectweb.joram.shared.admin.GetQueueMessage;
@@ -240,7 +241,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         if (dmqManager == null)
           dmqManager = new DMQManager(dmqId, getId());
         nbMsgsSentToDMQSinceCreation++;
-        dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.EXPIRED);
+        dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.EXPIRED);
 
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, "Removes expired message " + message.getIdentifier(), new Exception());
@@ -684,7 +685,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
             if (dmqManager == null)
               dmqManager = new DMQManager(dmqId, getId());
             nbMsgsSentToDMQSinceCreation++;
-            dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.UNDELIVERABLE);
+            dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.UNDELIVERABLE);
           } else {
             // Else, putting the message back into the deliverables vector:
             storeMessage(message);
@@ -729,7 +730,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         message.delete();
         if (dmqManager == null)
           dmqManager = new DMQManager(dmqId, getId());
-        dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.UNDELIVERABLE);
+        dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.UNDELIVERABLE);
       } else {
         // Else, putting the message back into the deliverables vector:
         storeMessage(message);
@@ -819,8 +820,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     } else {
       
       replyToTopic(
-        new org.objectweb.joram.shared.admin.AdminReply(
-          false, "Message not found: " + message.getIdentifier()),
+        new org.objectweb.joram.shared.admin.AdminReply(false, "Message not found."),
         replyTo, requestMsgId, replyMsgId);
     }
   }
@@ -836,7 +836,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         message.delete();
         DMQManager dmqManager = new DMQManager(dmqId, getId());
         nbMsgsSentToDMQSinceCreation++;
-        dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.ADMIN_DELETED);
+        dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.ADMIN_DELETED);
         dmqManager.sendToDMQ();
         break;
       }
@@ -855,7 +855,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         Message message = (Message) messages.elementAt(i);
         message.delete();
         nbMsgsSentToDMQSinceCreation++;
-        dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.ADMIN_DELETED);
+        dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.ADMIN_DELETED);
       }
       dmqManager.sendToDMQ();
       messages.clear();
@@ -993,7 +993,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
           if (dmqManager == null)
             dmqManager = new DMQManager(dmqId, getId());
           nbMsgsSentToDMQSinceCreation++;
-          dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.UNDELIVERABLE);
+          dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.UNDELIVERABLE);
         } else {
           // Else, putting it back into the deliverables vector:
           storeMessage(message);
@@ -1042,7 +1042,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       while (! messages.isEmpty()) {
         message = (Message) messages.remove(0);
         nbMsgsSentToDMQSinceCreation++;
-        dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.DELETED_DEST);
+        dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.DELETED_DEST);
       }
       dmqManager.sendToDMQ();
     }
@@ -1092,7 +1092,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     if (nbMaxMsg > -1 && nbMaxMsg <= messages.size()) {
       DMQManager dmqManager = new DMQManager(dmqId, getId());
       nbMsgsSentToDMQSinceCreation++;
-      dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.QUEUE_FULL);
+      dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.QUEUE_FULL);
       dmqManager.sendToDMQ();
       return;
     }
@@ -1423,16 +1423,12 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
   protected void handleExpiredNot(AgentId from, ExpiredNot not) {
     Notification expiredNot = not.getExpiredNot();
     Vector messages;
-    ClientMessages clientMessages;
     // ClientMessages and TopicMsgsReply are the notifications which can expire in the networks.
     // QueueMsgReply can't expire due to protocol limitations
     if (expiredNot instanceof ClientMessages) {
       messages = ((ClientMessages) expiredNot).getMessages();
-      clientMessages = (ClientMessages) expiredNot;
     } else if (expiredNot instanceof TopicMsgsReply) {
       messages = ((TopicMsgsReply) expiredNot).getMessages();
-      clientMessages = new ClientMessages(((TopicMsgsReply) expiredNot).getClientContext(),
-          ((TopicMsgsReply) expiredNot).getCorrelationId(), messages);
     } else {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "Expired notification holds an unknown notification: "
@@ -1440,13 +1436,13 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       return;
     }
     
-    for (Iterator iterator = messages.iterator(); iterator.hasNext();) {
-      org.objectweb.joram.shared.messages.Message msg = (org.objectweb.joram.shared.messages.Message) iterator.next();
-      msg.setProperty("JMS_JORAM_EXPIRED", Boolean.TRUE);
-      msg.setProperty("JMS_JORAM_EXPIRATIONDATE", new Long(msg.expiration));
-      msg.expiration = 0;
+    // Let senderId to null because we want to explicitly send messages to the queue itself.
+    DMQManager dmqManager = new DMQManager(getId(), null);
+    Iterator iterator = messages.iterator();
+    while (iterator.hasNext()) {
+      dmqManager.addDeadMessage((org.objectweb.joram.shared.messages.Message) iterator.next(),
+          MessageErrorConstants.EXPIRED);
     }
-    
-    doClientMessages(from, clientMessages);
+    dmqManager.sendToDMQ();
   }
 }
