@@ -49,6 +49,7 @@ import org.objectweb.joram.mom.notifications.SpecialAdminRequest;
 import org.objectweb.joram.mom.proxies.SendRepliesNot;
 import org.objectweb.joram.mom.proxies.SendReplyNot;
 import org.objectweb.joram.mom.util.DMQManager;
+import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.joram.shared.messages.Message;
@@ -469,7 +470,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       for (Enumeration msgs = not.getMessages().elements(); msgs.hasMoreElements();) {
         msg = (Message) msgs.nextElement();
         nbMsgsSentToDMQSinceCreation++;
-        dmqManager.addDeadMessage(msg, DMQManager.NOT_WRITEABLE);
+        dmqManager.addDeadMessage(msg, MessageErrorConstants.NOT_WRITEABLE);
       }
       dmqManager.sendToDMQ();
       throw new AccessException("WRITE right not granted");

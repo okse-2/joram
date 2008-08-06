@@ -65,6 +65,7 @@ import org.objectweb.joram.mom.notifications.UnsubscribeRequest;
 import org.objectweb.joram.mom.notifications.UserAdminRequestNot;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.mom.util.DMQManager;
+import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.admin.ClearSubscription;
 import org.objectweb.joram.shared.admin.DeleteSubscriptionMessage;
 import org.objectweb.joram.shared.admin.GetSubscription;
@@ -2138,7 +2139,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
           while (msgs.hasMoreElements()) {
             org.objectweb.joram.shared.messages.Message msg = (org.objectweb.joram.shared.messages.Message) msgs.nextElement();
             nbMsgsSentToDMQSinceCreation++;
-            dmqManager.addDeadMessage(msg, DMQManager.DELETED_DEST);
+            dmqManager.addDeadMessage(msg, MessageErrorConstants.DELETED_DEST);
           }
           dmqManager.sendToDMQ();
         }
@@ -2509,7 +2510,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       if (dmqManager == null)
         dmqManager = new DMQManager(dmqId, null);
       nbMsgsSentToDMQSinceCreation++;
-      dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.EXPIRED);
+      dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.EXPIRED);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG,

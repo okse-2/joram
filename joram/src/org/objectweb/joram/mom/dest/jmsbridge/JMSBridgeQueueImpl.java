@@ -35,6 +35,7 @@ import org.objectweb.joram.mom.notifications.QueueMsgReply;
 import org.objectweb.joram.mom.notifications.ReceiveRequest;
 import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.joram.shared.selectors.Selector;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -263,7 +264,7 @@ public class JMSBridgeQueueImpl extends QueueImpl {
         outTable.remove(message.getIdentifier());
         DMQManager dmqManager = new DMQManager(not.getDMQId(), dmqId, getId());
         nbMsgsSentToDMQSinceCreation++;
-        dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.UNEXPECTED_ERROR);
+        dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.UNEXPECTED_ERROR);
         dmqManager.sendToDMQ();
       }
     }
