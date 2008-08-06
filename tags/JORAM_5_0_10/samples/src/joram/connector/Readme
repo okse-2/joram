@@ -1,0 +1,46 @@
+Use Connector
+			    
+			    
+See sample : Test1.java 
+
+First instantiate JoramAdapter. 
+
+To run JoramAdapter using start() method, you need : 
+	
+	- An implementation of javax.resource.spi.BootstrapContext 
+(see ResourceBootstrapContext.java). Then BootstrapContext need an implementation of  javax.resource.spi.work.WorkManager (see Jworker.java). In the implementation of  WorkManager there are a pool of thread.
+	
+	- A configuration file of joram (see samples/config/joramAdmin.xml)
+
+Then run JoramAdapter using start() method.
+
+You can use a Context to lookup destination (Queue, Topic).
+
+Instantiate a ManagedConnectionFactoryImpl and specifie JoramAdapter use setResourceAdapter() method.
+ManagedConnectionFactoryImpl's instance enable you to create a ManagedConnectionImpl.
+With a ManagedConnectionImpl you can get a connection using getConnection() method : OutboundConnection.
+Then with an OutboundConnection you can create an OutboundSession.
+With an OutboundSession you can create :
+				OutboundProducer
+				OutboundConsumer
+
+With OutboundProducer you can use send() method to send a message and with OutboundConsumer you can use receive() method to receive messages sent by OutboundProducer.
+
+
+
+If you want to use a listener, you need to use endpointActivation() method of JoramAdapter. This method instantiate an InboundConsumer.
+So you need to implement : javax.resource.spi.endpoint.MessageEndpointFactory and javax.resource.spi.endpoint.MessageEndpoint
+The first allow you to create the second with createEndpoint() method. see (MessagePointFactory.java). createEndpoint() is called in InboundSession.java to allow the activation of listener.
+The second implement onMessage() method. see  (MessagePoint.java)
+
+Instantiate ActivationSpecImpl (spec) and fix parameter :
+	spec.setResourceAdapter(ja);
+	spec.setDestinationType("javax.jms.Queue"); or spec.setDestinationType("javax.jms.Topic");
+	spec.setDestination("sampleQueue"); or spec.setDestination("sampleTopic");
+then use the endpointActivation() method of JoramAdapter.
+Finally send messages with OutboundProducer, and messages are automatically received on method onMessage.
+
+
+
+
+
