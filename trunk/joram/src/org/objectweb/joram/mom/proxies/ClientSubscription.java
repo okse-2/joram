@@ -36,6 +36,7 @@ import org.objectweb.joram.mom.dest.QueueImpl;
 import org.objectweb.joram.mom.messages.Message;
 import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.client.ConsumerMessages;
 import org.objectweb.joram.shared.selectors.Selector;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -501,7 +502,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
           dmqManager = new DMQManager(dmqId, null);
         }
         nbMsgsSentToDMQSinceCreation++;
-        dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.QUEUE_FULL);
+        dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.QUEUE_FULL);
         continue;
       }
 
@@ -625,7 +626,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
               dmqManager = new DMQManager(dmqId, null);
             }
             nbMsgsSentToDMQSinceCreation++;
-            dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.EXPIRED);
+            dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.EXPIRED);
           }
         } else {
           // Message has already been deleted.
@@ -680,7 +681,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
             if (dmqManager == null) {
               dmqManager = new DMQManager(dmqId, null);
             }
-            dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.EXPIRED);
+            dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.EXPIRED);
           }
         } else {
           // Message has already been deleted.
@@ -814,7 +815,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
         if (dmqManager == null)
           dmqManager = new DMQManager(dmqId, null);
         nbMsgsSentToDMQSinceCreation++;
-        dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.UNDELIVERABLE);
+        dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.UNDELIVERABLE);
         
         message.acksCounter--;
         if (message.acksCounter == 0)
@@ -919,7 +920,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     if (message != null) {
       DMQManager dmqManager = new DMQManager(dmqId, null);
       nbMsgsSentToDMQSinceCreation++;
-      dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.ADMIN_DELETED);
+      dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.ADMIN_DELETED);
       dmqManager.sendToDMQ();
     }
   }
@@ -933,7 +934,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
         if (dmqManager == null)
           dmqManager = new DMQManager(dmqId, null);
         nbMsgsSentToDMQSinceCreation++;
-        dmqManager.addDeadMessage(message.getFullMessage(), DMQManager.ADMIN_DELETED);
+        dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.ADMIN_DELETED);
       }
     }
     if (dmqManager != null)

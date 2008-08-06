@@ -28,6 +28,7 @@ import java.net.URL;
 import java.util.Enumeration;
 
 import org.objectweb.joram.mom.util.DMQManager;
+import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -185,7 +186,7 @@ public class FtpThread extends Thread {
       
     } catch (Exception exc) {
       DMQManager dmqManager = new DMQManager(dmqId, destId);
-      dmqManager.addDeadMessage(msg.getSharedMessage(), DMQManager.UNEXPECTED_ERROR);
+      dmqManager.addDeadMessage(msg.getSharedMessage(), MessageErrorConstants.UNEXPECTED_ERROR);
       dmqManager.sendToDMQ();
     }
   }

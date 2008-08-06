@@ -31,6 +31,7 @@ import org.objectweb.joram.mom.dest.TopicImpl;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.SpecialAdminRequest;
 import org.objectweb.joram.mom.util.DMQManager;
+import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.admin.SpecialAdmin;
 import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.joram.shared.messages.Message;
@@ -450,7 +451,7 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
             dmqManager = new DMQManager(not.getDMQId(), dmqId, getId());
           }
           nbMsgsSentToDMQSinceCreation++;
-          dmqManager.addDeadMessage(msg, DMQManager.UNEXPECTED_ERROR);
+          dmqManager.addDeadMessage(msg, MessageErrorConstants.UNEXPECTED_ERROR);
 
           if (logger.isLoggable(BasicLevel.WARN))
             logger.log(BasicLevel.WARN, "JavaMailTopicImpl.sendJavaMail", exc);
