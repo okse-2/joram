@@ -1,7 +1,30 @@
+/*
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2008 - ScalAgent Distributed Technologies
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
+ *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
+ */
 package org.objectweb.joram.mom.util;
 
 import org.objectweb.joram.mom.dest.QueueImpl;
 import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -15,42 +38,6 @@ import fr.dyade.aaa.util.Debug;
  * them to the dead message queue, only if such a queue is defined.
  */
 public class DMQManager {
-
-  /**
-   * If the message expired before delivery.
-   **/
-  public static final short EXPIRED = 0;
-
-  /**
-   * If the target destination of the message did not accept the sender as a
-   * WRITER.
-   **/
-  public static final short NOT_WRITEABLE = 1;
-
-  /**
-   * If the number of delivery attempts of the message overtook the threshold.
-   **/
-  public static final short UNDELIVERABLE = 2;
-
-  /**
-   * If the message has been deleted by an admin request.
-   */
-  public static final short ADMIN_DELETED = 3;
-
-  /**
-   * If the target destination of the message could not be found.
-   */
-  public static final short DELETED_DEST = 4;
-
-  /**
-   * If the queue has reached its max number of messages.
-   */
-  public static final short QUEUE_FULL = 5;
-
-  /**
-   * If an unexpected error happened during delivery.
-   */
-  public static final short UNEXPECTED_ERROR = 6;
 
   private ClientMessages deadMessages = null;
   
@@ -119,29 +106,46 @@ public class DMQManager {
   public void addDeadMessage(Message mess, short reason) {
 
     if (destDmqId != null) {
+
+      String ERROR_COUNT = "JMS_JORAM_ERRORCOUNT";
+      Integer errorCount = (Integer) mess.getProperty(ERROR_COUNT);
+      if (errorCount == null) {
+        errorCount = new Integer(1);
+      } else {
+        errorCount = new Integer(errorCount.intValue() + 1);
+      }
+      String causePropertyName = "JMS_JORAM_ERRORCAUSE_" + errorCount;
+      String codePropertyName = "JMS_JORAM_ERRORCODE_" + errorCount;
+      mess.setProperty(ERROR_COUNT, errorCount);
       
       switch (reason) {
-      case EXPIRED:
-        mess.setProperty("JMS_JORAM_EXPIRED", Boolean.TRUE);
-        mess.setProperty("JMS_JORAM_EXPIRATIONDATE", new Long(mess.expiration));
+      case MessageErrorConstants.EXPIRED:
+        mess.setProperty(causePropertyName, "Expired at " + mess.expiration);
+        mess.setProperty(codePropertyName, new Short(MessageErrorConstants.EXPIRED));
         break;
-      case NOT_WRITEABLE:
-        mess.setProperty("JMS_JORAM_NOTWRITABLE", Boolean.TRUE);
+      case MessageErrorConstants.NOT_WRITEABLE:
+        mess.setProperty(causePropertyName, "Destination is not writable");
+        mess.setProperty(codePropertyName, new Short(MessageErrorConstants.NOT_WRITEABLE));
         break;
-      case UNDELIVERABLE:
-        mess.setProperty("JMS_JORAM_UNDELIVERABLE", Boolean.TRUE);
+      case MessageErrorConstants.UNDELIVERABLE:
+        mess.setProperty(causePropertyName, "Undeliverable after " + mess.deliveryCount + " tries");
+        mess.setProperty(codePropertyName, new Short(MessageErrorConstants.UNDELIVERABLE));
         break;
-      case ADMIN_DELETED:
-        mess.setProperty("JMS_JORAM_ADMINDELETED", Boolean.TRUE);
+      case MessageErrorConstants.ADMIN_DELETED:
+        mess.setProperty(causePropertyName, "Message deleted by an admin");
+        mess.setProperty(codePropertyName, new Short(MessageErrorConstants.ADMIN_DELETED));
         break;
-      case DELETED_DEST:
-        mess.setProperty("JMS_JORAM_DELETEDDEST", Boolean.TRUE);
+      case MessageErrorConstants.DELETED_DEST:
+        mess.setProperty(causePropertyName, "Deleted destination");
+        mess.setProperty(codePropertyName, new Short(MessageErrorConstants.DELETED_DEST));
         break;
-      case QUEUE_FULL:
-        mess.setProperty("JMS_JORAM_QUEUEFULL", Boolean.TRUE);
+      case MessageErrorConstants.QUEUE_FULL:
+        mess.setProperty(causePropertyName, "Queue full");
+        mess.setProperty(codePropertyName, new Short(MessageErrorConstants.QUEUE_FULL));
         break;
-      case UNEXPECTED_ERROR:
-        mess.setProperty("JMS_JORAM_UNEXPECTEDERROR", Boolean.TRUE);
+      case MessageErrorConstants.UNEXPECTED_ERROR:
+        mess.setProperty(causePropertyName, "Unexpected error");
+        mess.setProperty(codePropertyName, new Short(MessageErrorConstants.UNEXPECTED_ERROR));
         break;
       default:
         break;
