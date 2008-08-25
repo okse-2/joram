@@ -23,24 +23,26 @@
  */
 package soap;
 
-import javax.jms.*;
-import javax.naming.*;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.MessageProducer;
+import javax.jms.Queue;
+import javax.jms.Session;
+import javax.jms.TextMessage;
+import javax.naming.Context;
+import javax.naming.InitialContext;
 
-/**
- */
-public class SoapProducer
-{
-  static Context ictx = null; 
+public class SoapProducer {
+  static Context ictx = null;
 
-  public static void main(String[] args) throws Exception
-  {
+  public static void main(String[] args) throws Exception {
+  
     System.out.println();
-    System.out.println("Produces messages on the queue and on the topic...");
+    System.out.println("Produces messages on the queue...");
 
     ictx = new InitialContext();
     ConnectionFactory cf = (ConnectionFactory) ictx.lookup("soapCf");
     Queue queue = (Queue) ictx.lookup("queue");
-    Topic topic = (Topic) ictx.lookup("topic");
     ictx.close();
 
     Connection cnx = cf.createConnection();
@@ -50,10 +52,9 @@ public class SoapProducer
 
     TextMessage msg = sess.createTextMessage();
 
-    for (int i = 1; i < 11; i++) {
+    for (int i = 1; i <= 10; i++) {
       msg.setText("Soap test " + i);
       producer.send(queue, msg);
-      producer.send(topic, msg);
       System.out.println("SOAP test " + i);
     }
 
