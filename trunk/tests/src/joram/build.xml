@@ -233,7 +233,6 @@ description=" --> launch all exceptionlistener tests">
     <ant dir="." antfile="build.xml" target="noreg.test19"/>
     <ant dir="." antfile="build.xml" target="noreg.test20"/>
     <ant dir="." antfile="build.xml" target="noreg.test21"/>
-    <ant dir="." antfile="build.xml" target="noreg.test24"/>
     <ant dir="." antfile="build.xml" target="noreg.test25"/>
     <ant dir="." antfile="build.xml" target="noreg.test31"/>
     <ant dir="." antfile="build.xml" target="noreg.test32"/>
@@ -2755,18 +2754,6 @@ description=" --> launch all exceptionlistener tests">
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jvmargs" value="-Dsid=0"/>
-    </antcall>
-  </target>
-
-  <target name="noreg.test24" depends="init.a3props,compile"
-          description=" --> Test closure of connection on stop server">
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.noreg.Test24"/>
-      <param name="jndiconf" value="noreg/jndi.properties"/>
-      <param name="a3conf" value="noreg/a3servers1.xml"/>
-      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="jvmargs" value=""/>
     </antcall>
   </target>
 
