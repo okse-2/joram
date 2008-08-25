@@ -335,7 +335,8 @@ public class FactoryParameters implements java.io.Serializable {
     h.put(prefix + ".topicPassivationThreshold", new Integer(topicPassivationThreshold));
     h.put(prefix + ".topicActivationThreshold", new Integer(topicActivationThreshold));
     h.put(prefix + ".outLocalPort", new Integer(outLocalPort));
-    h.put(prefix + ".outLocalAddress", outLocalAddress);
+    if (outLocalAddress != null)
+      h.put(prefix + ".outLocalAddress", outLocalAddress);
 
     return h;
   }
