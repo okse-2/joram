@@ -32,11 +32,14 @@ import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 
+import joram.framework.BaseTestCase;
+
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.shared.MessageErrorConstants;
 
 import fr.dyade.aaa.agent.AgentServer;
 
@@ -57,14 +60,14 @@ class ExcList20 implements ExceptionListener {
 }
 
 class MsgList20B implements MessageListener {
-    public void onMessage(Message msg) {
-	try {
-	   Test20.assertEquals(true,msg.getBooleanProperty("JMS_JORAM_EXPIRED"));
-	
-	} catch(Exception exc) {
-	    exc.printStackTrace();
-	}
+  public void onMessage(Message msg) {
+    try {
+      BaseTestCase.assertEquals(1, msg.getIntProperty("JMS_JORAM_ERRORCOUNT"));
+      BaseTestCase.assertEquals(MessageErrorConstants.EXPIRED, msg.getIntProperty("JMS_JORAM_ERRORCODE_1"));
+    } catch (Exception exc) {
+      exc.printStackTrace();
     }
+  }
 }
 
 /**

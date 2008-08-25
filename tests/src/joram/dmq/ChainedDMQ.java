@@ -40,6 +40,7 @@ import joram.framework.TestCase;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.shared.MessageErrorConstants;
 
 /**
  * Some messages with a TTL are sent to a queue. When they are expired, they go
@@ -115,24 +116,28 @@ public class ChainedDMQ extends TestCase {
       // Check some message properties on DMQ 0
       consumer = session.createConsumer(dmqueue0);
       msg = (TextMessage) consumer.receive();
-      assertTrue(msg.getBooleanProperty("JMS_JORAM_EXPIRED"));
-      System.out.println("Expired at: " + msg.getLongProperty("JMS_JORAM_EXPIRATIONDATE"));
-      assertFalse(msg.getBooleanProperty("JMS_JORAM_NOTWRITABLE"));
-      assertFalse(msg.getBooleanProperty("JMS_JORAM_UNDELIVERABLE"));
-      assertFalse(msg.getBooleanProperty("JMS_JORAM_ADMINDELETED"));
-      assertFalse(msg.getBooleanProperty("JMS_JORAM_DELETEDDEST"));
-      assertFalse(msg.getBooleanProperty("JMS_JORAM_QUEUEFULL"));
+      assertEquals(1, msg.getIntProperty("JMS_JORAM_ERRORCOUNT"));
+      assertEquals(MessageErrorConstants.EXPIRED, msg.getShortProperty("JMS_JORAM_ERRORCODE_1"));
+      
+      System.out.println(" ");
+      System.out.println("Message on DMQ0:");
+      System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_1"));
 
       // Check some message properties on DMQ 3
       consumer = session.createConsumer(dmqueue3);
       msg = (TextMessage) consumer.receive();
-      assertTrue(msg.getBooleanProperty("JMS_JORAM_EXPIRED"));
-      System.out.println("Expired at: " + msg.getLongProperty("JMS_JORAM_EXPIRATIONDATE"));
-      assertFalse(msg.getBooleanProperty("JMS_JORAM_NOTWRITABLE"));
-      assertFalse(msg.getBooleanProperty("JMS_JORAM_UNDELIVERABLE"));
-      assertFalse(msg.getBooleanProperty("JMS_JORAM_ADMINDELETED"));
-      assertFalse(msg.getBooleanProperty("JMS_JORAM_DELETEDDEST"));
-      assertTrue(msg.getBooleanProperty("JMS_JORAM_QUEUEFULL"));
+      assertEquals(4, msg.getIntProperty("JMS_JORAM_ERRORCOUNT"));
+      assertEquals(MessageErrorConstants.EXPIRED, msg.getShortProperty("JMS_JORAM_ERRORCODE_1"));
+      assertEquals(MessageErrorConstants.QUEUE_FULL, msg.getShortProperty("JMS_JORAM_ERRORCODE_2"));
+      assertEquals(MessageErrorConstants.QUEUE_FULL, msg.getShortProperty("JMS_JORAM_ERRORCODE_3"));
+      assertEquals(MessageErrorConstants.QUEUE_FULL, msg.getShortProperty("JMS_JORAM_ERRORCODE_4"));
+
+      System.out.println(" ");
+      System.out.println("Message on DMQ3:");
+      System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_1"));
+      System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_2"));
+      System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_3"));
+      System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_4"));
 
     } catch (Throwable exc) {
       exc.printStackTrace();

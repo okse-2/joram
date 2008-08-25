@@ -42,6 +42,7 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.shared.MessageErrorConstants;
 
 /**
  * Test that a message body is not deleted on a DMQ after server restart
@@ -100,7 +101,8 @@ public class Test_DMQ_Body extends TestCase {
         TextMessage msg1 = (TextMessage) messages.nextElement();
         System.out.println("message expired !");
         //test messages
-        assertEquals(true, msg1.getBooleanProperty("JMS_JORAM_EXPIRED"));
+        assertEquals(1, msg1.getIntProperty("JMS_JORAM_ERRORCOUNT"));
+        assertEquals(MessageErrorConstants.EXPIRED, msg1.getIntProperty("JMS_JORAM_ERRORCODE_1"));
         assertEquals(msg.getJMSMessageID(), msg1.getJMSMessageID());
         assertEquals(msg.getJMSType(), msg1.getJMSType());
         assertEquals("test not delete", msg1.getText());
@@ -126,7 +128,8 @@ public class Test_DMQ_Body extends TestCase {
 
       while (messages.hasMoreElements()) {
         TextMessage msg1 = (TextMessage) messages.nextElement();
-        assertEquals(true, msg1.getBooleanProperty("JMS_JORAM_EXPIRED"));
+        assertEquals(1, msg1.getIntProperty("JMS_JORAM_ERRORCOUNT"));
+        assertEquals(MessageErrorConstants.EXPIRED, msg1.getIntProperty("JMS_JORAM_ERRORCODE_1"));
         assertEquals(msg.getJMSMessageID(), msg1.getJMSMessageID());
         assertEquals(msg.getJMSType(), msg1.getJMSType());
         assertEquals("test not delete", msg1.getText());
