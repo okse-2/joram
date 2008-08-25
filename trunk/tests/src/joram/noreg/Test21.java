@@ -39,6 +39,7 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.shared.MessageErrorConstants;
 
 import fr.dyade.aaa.agent.AgentServer;
 
@@ -64,19 +65,23 @@ class MsgList21B implements MessageListener {
     nbReceived++;
     try {
       int index = msg.getIntProperty("Index");
+      BaseTestCase.assertEquals(msg.getIntProperty("JMS_JORAM_ERRORCOUNT"), 1);
       if (index == 0) {
-        BaseTestCase.assertTrue(msg.getBooleanProperty("JMS_JORAM_UNDELIVERABLE"));
+        BaseTestCase.assertEquals(msg.getShortProperty("JMS_JORAM_ERRORCODE_1"), MessageErrorConstants.UNDELIVERABLE);
         System.out.println("msg#" + index + ", Undeliverable message: "
-            + msg.getIntProperty("JMSXDeliveryCount"));
+            + msg.getStringProperty("JMS_JORAM_ERRORCAUSE_1"));
       } else if (index == 1) {
-        BaseTestCase.assertTrue(msg.getBooleanProperty("JMS_JORAM_NOTWRITABLE"));
-        System.out.println("msg#" + index + ", Non writable destination.");
+        BaseTestCase.assertEquals(msg.getShortProperty("JMS_JORAM_ERRORCODE_1"), MessageErrorConstants.NOT_WRITEABLE);
+        System.out.println("msg#" + index + ", Non writable destination: "
+            + msg.getStringProperty("JMS_JORAM_ERRORCAUSE_1"));
       } else if (index == 2) {
-        BaseTestCase.assertTrue(msg.getBooleanProperty("JMS_JORAM_DELETEDDEST"));
-        System.out.println("msg#" + index + ", Destination does not exist.");
+        BaseTestCase.assertEquals(msg.getShortProperty("JMS_JORAM_ERRORCODE_1"), MessageErrorConstants.DELETED_DEST);
+        System.out.println("msg#" + index + ", Destination does not exist: "
+            + msg.getStringProperty("JMS_JORAM_ERRORCAUSE_1"));
       } else if (index == 3) {
-        BaseTestCase.assertTrue(msg.getBooleanProperty("JMS_JORAM_ADMINDELETED"));
-        System.out.println("msg#" + index + ", An admin has deleted the message.");
+        BaseTestCase.assertEquals(msg.getShortProperty("JMS_JORAM_ERRORCODE_1"), MessageErrorConstants.ADMIN_DELETED);
+        System.out.println("msg#" + index + ", An admin has deleted the message: "
+            + msg.getStringProperty("JMS_JORAM_ERRORCAUSE_1"));
       } else {
         BaseTestCase.assertTrue(false);
       }
@@ -110,11 +115,10 @@ public class Test21 extends BaseTest{
 	    AgentServer.start();
 
 	    Thread.sleep(1000L);
-	    short sid = Integer.getInteger("sid", 0).shortValue();
 
 	    AdminModule.connect("localhost", 16010, "root", "root", 60);
 
-	    User user = User.create("anonymous", "anonymous");
+	    User.create("anonymous", "anonymous");
 	    Queue queue1 = Queue.create(0);
 	    Queue queue2 = Queue.create(0);
 	    Queue queue3 = Queue.create(0);

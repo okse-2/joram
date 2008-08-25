@@ -35,6 +35,7 @@ import javax.naming.InitialContext;
 import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
+import org.objectweb.joram.shared.MessageErrorConstants;
 
 /**
  * Test that a message is delete on a queue when time expired. Use a deadqueue to verify 
@@ -97,7 +98,8 @@ public class Test_Exp_Q extends TestCase {
 	    
 	    // but the message is in the deadqueue
 	     msg1= consumer_dead.receive(3000);
-		 assertEquals(true, msg1.getBooleanProperty("JMS_JORAM_EXPIRED"));
+	     assertEquals(1, msg1.getIntProperty("JMS_JORAM_ERRORCOUNT"));
+	     assertEquals(MessageErrorConstants.EXPIRED, msg1.getIntProperty("JMS_JORAM_ERRORCODE_1"));
 		 assertEquals(msg.getJMSMessageID(),msg1.getJMSMessageID());
 		 assertEquals(msg.getJMSType(),msg1.getJMSType());
 		 assertEquals(msg.getJMSDestination(),msg1.getJMSDestination());

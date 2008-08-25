@@ -37,6 +37,7 @@ import javax.jms.TemporaryQueue;
 import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.User;
 
 /**
  * Testing:
@@ -62,9 +63,7 @@ public class ClientTest8 extends TestCase {
       AdminModule.connect("localhost", 2560,
                           "root", "root", 60);
 
-      org.objectweb.joram.client.jms.admin.User user = 
-        org.objectweb.joram.client.jms.admin.User.create(
-          "anonymous", "anonymous", 0);
+      User.create("anonymous", "anonymous", 0);
 
       ConnectionFactory cf = 
         org.objectweb.joram.client.jms.tcp.TcpConnectionFactory.create(
@@ -75,8 +74,7 @@ public class ClientTest8 extends TestCase {
       connection.setExceptionListener(
         new ExceptionListener() {
             public void onException(JMSException exc) {
-		// System.out.println("BUG -> " + exc);
-		excp=exc;
+              excp = exc;
             }
           });
       

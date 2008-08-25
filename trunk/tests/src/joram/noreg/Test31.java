@@ -38,6 +38,7 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
+import org.objectweb.joram.shared.MessageErrorConstants;
 
 import fr.dyade.aaa.agent.AgentServer;
 
@@ -136,13 +137,11 @@ public class Test31 extends joram.framework.TestCase implements MessageListener{
     }
    
   }
- public synchronized void onMessage(Message msg) {
-    int index = -1;
+
+  public synchronized void onMessage(Message msg) {
     try {
-      
-	assertTrue( msg.getBooleanProperty("JMS_JORAM_EXPIRED"));
-      
-     
+      assertEquals(1, msg.getIntProperty("JMS_JORAM_ERRORCOUNT"));
+      assertEquals(MessageErrorConstants.EXPIRED, msg.getIntProperty("JMS_JORAM_ERRORCODE_1"));
     } catch (JMSException exc) {
       exc.printStackTrace();
     }

@@ -41,6 +41,7 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.shared.MessageErrorConstants;
 
 
 /**
@@ -105,13 +106,9 @@ public class Test2_Queue extends TestCase {
 
       // Check some message properties
       msg = (TextMessage) consumerdq1.receive(500);
-      assertTrue(msg.getBooleanProperty("JMS_JORAM_EXPIRED"));
-      System.out.println("Expired at: " + msg.getLongProperty("JMS_JORAM_EXPIRATIONDATE"));
-      assertFalse(msg.getBooleanProperty("JMS_JORAM_NOTWRITABLE"));
-      assertFalse(msg.getBooleanProperty("JMS_JORAM_UNDELIVERABLE"));
-      assertFalse(msg.getBooleanProperty("JMS_JORAM_ADMINDELETED"));
-      assertFalse(msg.getBooleanProperty("JMS_JORAM_DELETEDDEST"));
-      assertFalse(msg.getBooleanProperty("JMS_JORAM_QUEUEFULL"));
+      assertEquals(1, msg.getIntProperty("JMS_JORAM_ERRORCOUNT"));
+      assertEquals(MessageErrorConstants.EXPIRED, msg.getShortProperty("JMS_JORAM_ERRORCODE_1"));
+      System.out.println("Expired at: " + msg.getStringProperty("JMS_JORAM_ERRORCAUSE_1"));
 
       // the server containing the queue is stopped
       stopAgentServer((short) 1);
@@ -139,13 +136,9 @@ public class Test2_Queue extends TestCase {
       // Check some message properties
       MessageConsumer consumerdq0 = sessionp.createConsumer(dmqueue0);
       msg = (TextMessage) consumerdq0.receive(500);
-      assertTrue(msg.getBooleanProperty("JMS_JORAM_EXPIRED"));
-      System.out.println("Expired at: " + msg.getLongProperty("JMS_JORAM_EXPIRATIONDATE"));
-      assertFalse(msg.getBooleanProperty("JMS_JORAM_NOTWRITABLE"));
-      assertFalse(msg.getBooleanProperty("JMS_JORAM_UNDELIVERABLE"));
-      assertFalse(msg.getBooleanProperty("JMS_JORAM_ADMINDELETED"));
-      assertFalse(msg.getBooleanProperty("JMS_JORAM_DELETEDDEST"));
-      assertFalse(msg.getBooleanProperty("JMS_JORAM_QUEUEFULL"));
+      assertEquals(1, msg.getIntProperty("JMS_JORAM_ERRORCOUNT"));
+      assertEquals(MessageErrorConstants.EXPIRED, msg.getShortProperty("JMS_JORAM_ERRORCODE_1"));
+      System.out.println("Expired at: " + msg.getStringProperty("JMS_JORAM_ERRORCAUSE_1"));
       
       cnx.close();
       cnxCons.close();

@@ -34,6 +34,7 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
+import org.objectweb.joram.shared.MessageErrorConstants;
 
 import fr.dyade.aaa.agent.AgentServer;
 
@@ -102,7 +103,10 @@ public class Test46 extends BaseTest {
 		assertEquals(i,index);
 		index = msg.getIntProperty("Index");
 		
-		assertTrue(msg.getBooleanProperty("JMS_JORAM_UNDELIVERABLE"));
+	    assertEquals(1, msg.getIntProperty("JMS_JORAM_ERRORCOUNT"));
+        assertEquals(MessageErrorConstants.UNDELIVERABLE, msg.getShortProperty("JMS_JORAM_ERRORCODE_1"));
+        System.out.println("Cause: " + msg.getStringProperty("JMS_JORAM_ERRORCAUSE_1"));
+	      
         assertEquals(3, msg.getIntProperty("JMSXDeliveryCount"));
         //System.out.println("msg#" + index + ", Undeliverable message: " + msg.getIntProperty("JMSXDeliveryCount"));
 	    }
