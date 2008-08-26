@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 1996 - 2000 SCALAGENT
+ * Copyright (C) 1996 - 2008 ScalAgent Distributed Technologies
+
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,22 +20,17 @@
 
 package fr.dyade.aaa.agent;
 
-import fr.dyade.aaa.agent.conf.*;
 import fr.dyade.aaa.admin.script.*;
 
 /**
- * AdminRequestNot is a notification to
- * configure A3CMLConfig.
+ * AdminRequestNot is a notification to configure A3CMLConfig.
  *
  * @see Script
  * @see AgentAdmin
  * @see AdminReplyNot
  */
 public class AdminRequestNot extends Notification {
-
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   /** configuration script. */
   public Script script = null;
