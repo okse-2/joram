@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,10 +20,6 @@
  * Contributor(s): 
  */
 package com.scalagent.scheduler.proxy;
-
-import java.io.*;
-import java.net.*;
-import fr.dyade.aaa.agent.*;
 
 /**
  * A <code>SchedulerProxy</code> agent provides a command line interface to 
