@@ -18,10 +18,17 @@
  */
 package fr.dyade.aaa.agent;
 
+import java.io.ByteArrayInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.io.Serializable;
+import java.util.zip.GZIPInputStream;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.BinaryDump;
 
 /**
  * Class used to recv messages through a stream.
@@ -58,6 +65,23 @@ public abstract class MessageInputStream extends InputStream {
    * the contained  input stream.
    */
   protected int pos;
+
+  protected boolean compressedFlows = false;
+  
+  /**
+   * Default logger for MessageInputStream.
+   */
+  protected static Logger logmon = null;
+  
+  /**
+   * Returns default logger for MessageInputStream.
+   * @return default logger for MessageInputStream.
+   */
+  protected static Logger getLogger() {
+    if (logmon == null)
+      logmon = Debug.getLogger("fr.dyade.aaa.agent.MessageInputStream");
+    return logmon;
+  }
 
   /**
    * Creates a <code>MessageInputStream</code>.
@@ -162,7 +186,14 @@ public abstract class MessageInputStream extends InputStream {
    * @param msg The message to complete.
    */
   protected final void readMessageHeader(Message msg) throws IOException {
+    if (getLogger().isLoggable(BasicLevel.DEBUG))
+      getLogger().log(BasicLevel.DEBUG, "readMessageHeader()");
+    
     readFully(Message.LENGTH);
+    
+    if (getLogger().isLoggable(BasicLevel.DEBUG))
+      getLogger().log(BasicLevel.DEBUG, "readMessageHeader-1 : " + BinaryDump.toHex(buf, pos, Message.LENGTH));
+    
     // Reads sender's AgentId
     msg.from = new AgentId(readShort(), readShort(), readInt());
     // Reads adressee's AgentId
@@ -173,6 +204,9 @@ public abstract class MessageInputStream extends InputStream {
     msg.dest = readShort();
     // Reads stamp of message
     msg.stamp = readInt();
+    
+    if (getLogger().isLoggable(BasicLevel.DEBUG))
+      getLogger().log(BasicLevel.DEBUG, "readMessageHeader returns");
   }
 
   /**
@@ -181,6 +215,9 @@ public abstract class MessageInputStream extends InputStream {
    * @return the incoming message.
    */
   protected final Message readMessage() throws Exception {
+    if (getLogger().isLoggable(BasicLevel.DEBUG))
+      getLogger().log(BasicLevel.DEBUG, "readMessage()");
+    
     readHeader();
 
     Message msg = Message.alloc();
@@ -190,18 +227,51 @@ public abstract class MessageInputStream extends InputStream {
 
     if (opt != Message.NULL) {
       // Reads notification object
-      ObjectInputStream ois = new ObjectInputStream(this);
+      ObjectInputStream ois = null;
+      if (compressedFlows) {
+        readFully(4);
+        int length = readInt();
+        
+        if (getLogger().isLoggable(BasicLevel.DEBUG))
+          getLogger().log(BasicLevel.DEBUG, "readMessage - length=" + length);
+        
+        byte[] buf = new byte[length];
+        int n = 0;
+        do {
+          int count = read(buf, n, length - n);
+          if (count < 0) throw new EOFException();
+          n += count;
+        } while (n < length);
+        ois = new ObjectInputStream(new GZIPInputStream(new ByteArrayInputStream(buf)));
+      } else {
+        ois = new ObjectInputStream(this);
+      }
+      
+      if (getLogger().isLoggable(BasicLevel.DEBUG))
+        getLogger().log(BasicLevel.DEBUG, "readMessage - 2");
+      
       msg.not = (Notification) ois.readObject();
+      
+      if (getLogger().isLoggable(BasicLevel.DEBUG))
+        getLogger().log(BasicLevel.DEBUG, "readMessage - 3");
+      
       if (msg.not.expiration > 0)
         msg.not.expiration += System.currentTimeMillis();
       msg.optFromByte(opt);
       msg.not.detached = false;
-      // Skips the remaining TC_RESET byte
-      read();
+      if (!compressedFlows)
+        // Skips the remaining TC_RESET byte
+        read();
+      
+      if (getLogger().isLoggable(BasicLevel.DEBUG))
+        getLogger().log(BasicLevel.DEBUG, "readMessage - 4");
     } else {
       msg.not = null;
     }
 
+    if (getLogger().isLoggable(BasicLevel.DEBUG))
+      getLogger().log(BasicLevel.DEBUG, "readMessage returns");
+    
     return msg;
   }
 
