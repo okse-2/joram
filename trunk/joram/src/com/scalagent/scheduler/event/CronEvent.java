@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,6 @@ package com.scalagent.scheduler.event;
 
 import java.util.*;
 
-import fr.dyade.aaa.agent.*;
 import com.scalagent.scheduler.*;
 
 /**
@@ -40,10 +39,9 @@ import com.scalagent.scheduler.*;
  * @see		ScheduleEvent
  */
 public class CronEvent extends ScheduleEvent {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+  
   /** minutes of hour */
   private static final int CRON_MN = 0;
   /** hours of day */
