@@ -21,7 +21,6 @@
 package fr.dyade.aaa.agent;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 
 import fr.dyade.aaa.util.Pool;
