@@ -45,8 +45,7 @@ public final class Pool {
 
   public final synchronized void freeElement(Object obj) {
     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG)) {
-      logmon.log(BasicLevel.DEBUG,
-                 logmsg + "freeElement " + obj);
+      logmon.log(BasicLevel.DEBUG, logmsg + "freeElement " + obj);
     }
     // If there is enough free element, let the gc get this element. 
     if (elementCount == elementData.length) {
