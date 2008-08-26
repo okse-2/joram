@@ -22,13 +22,11 @@
 package fr.dyade.aaa.agent;
 
 import java.io.*;
-import java.net.*;
 import java.util.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.agent.*;
 import fr.dyade.aaa.agent.conf.*;
 
 public class SCAdminBase {
