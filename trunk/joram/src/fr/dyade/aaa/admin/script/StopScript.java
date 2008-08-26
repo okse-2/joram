@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,8 +21,7 @@
  */
 package fr.dyade.aaa.admin.script;
 
-import java.lang.*;
-import java.io.*;
+import java.io.Serializable;
 import java.util.*;
 import fr.dyade.aaa.admin.cmd.*;
 import fr.dyade.aaa.agent.conf.*;
@@ -37,9 +36,7 @@ import fr.dyade.aaa.agent.conf.*;
  * @see A3CMLConfig
  */
 public class StopScript implements Serializable {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   /** vector of StopAdminCmd */
   private Vector commands = null;
@@ -73,13 +70,11 @@ public class StopScript implements Serializable {
     return commands.size();
   }
 
-  public Object elementAt(int i) 
-    throws ArrayIndexOutOfBoundsException {
+  public Object elementAt(int i) throws ArrayIndexOutOfBoundsException {
     return commands.elementAt(i);
   }
 
   public String toString() {
     return commands.toString();
   }
-
 }
