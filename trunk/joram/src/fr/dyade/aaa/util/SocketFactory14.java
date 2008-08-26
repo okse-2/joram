@@ -26,9 +26,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.io.IOException;
 
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
 /**
  * This class implements the SocketFactory interface for JDK since 1.4.
  */
