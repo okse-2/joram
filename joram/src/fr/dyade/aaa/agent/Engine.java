@@ -384,19 +384,17 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
         try {
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG,
-                       getName() + ", loads fixed agent" +
-                       fixedAgentIdList.elementAt(i));
+                       getName() + ", loads fixed agent" + fixedAgentIdList.elementAt(i));
           Agent ag = load((AgentId) fixedAgentIdList.elementAt(i));
           i += 1;
         } catch (Exception exc) {
           logmon.log(BasicLevel.ERROR,
-                     getName() + ", can't restore fixed agent" + 
-                     fixedAgentIdList.elementAt(i), exc);
+                     getName() + ", can't restore fixed agent" +  fixedAgentIdList.elementAt(i), exc);
           fixedAgentIdList.removeElementAt(i);
         }
       }
     } catch (IOException exc) {
-      logmon.log(BasicLevel.ERROR, getName() + ", can't initialize");
+      logmon.log(BasicLevel.ERROR, getName() + ", can't initialize", exc);
       throw exc;
     }
     logmon.log(BasicLevel.DEBUG, getName() + ", initialized");
