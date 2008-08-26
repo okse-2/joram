@@ -28,8 +28,6 @@ import java.util.*;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.agent.*;
-
 public class SCAdminHelper {
   /** Hashtable that contain all <code>Process</code> of running AgentServer */
   protected Hashtable ASP = null;
