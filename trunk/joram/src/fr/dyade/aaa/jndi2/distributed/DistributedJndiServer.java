@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,18 +21,13 @@
  */
 package fr.dyade.aaa.jndi2.distributed;
 
-import java.io.*;
 import java.util.*;
 import java.net.*;
-import javax.naming.*;
 
-import fr.dyade.aaa.jndi2.msg.*;
-import fr.dyade.aaa.jndi2.impl.*;
 import fr.dyade.aaa.jndi2.server.*;
 import fr.dyade.aaa.jndi2.server.Trace;
-import fr.dyade.aaa.util.*;
+
 import fr.dyade.aaa.agent.*;
-//import fr.dyade.aaa.agent.conf.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
