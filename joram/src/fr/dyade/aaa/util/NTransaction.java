@@ -615,7 +615,6 @@ public final class NTransaction implements Transaction, NTransactionMBean {
    */
   public final void saveByteArray(byte[] buf,
                                   String dirName, String name) throws IOException {
-    Context ctx = (Context) perThreadContext.get();
     saveInLog(buf,
               dirName, name,
               ((Context) perThreadContext.get()).log, true, false);
