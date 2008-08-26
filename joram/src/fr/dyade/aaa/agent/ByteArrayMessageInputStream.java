@@ -19,9 +19,6 @@
 package fr.dyade.aaa.agent;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
 
 /**
  * Class used to recv messages through a stream in a byte array.

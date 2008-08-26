@@ -20,9 +20,6 @@ package fr.dyade.aaa.agent;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamConstants;
-import java.io.Serializable;
 
 /**
  * Class used to write messages into a byte array.
