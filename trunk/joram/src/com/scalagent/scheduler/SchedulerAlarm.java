@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,7 +24,6 @@ package com.scalagent.scheduler;
 import fr.dyade.aaa.agent.*;
 
 import java.io.*;
-import java.util.Date;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
