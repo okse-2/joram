@@ -36,20 +36,17 @@ import org.objectweb.util.monolog.api.Logger;
 
 public class ConfigController {
 
-  public final static String ADMIN_SERVER = 
-      "fr.dyade.aaa.agent.ADMIN_SERVER";
+  public final static String ADMIN_SERVER = "fr.dyade.aaa.agent.ADMIN_SERVER";
 
   public final static String SERVER_COUNTER = "serverCounter";
 
-  private static Logger logger = Debug.getLogger(
-    "fr.dyade.aaa.agent.ConfigController");
+  private static Logger logger = Debug.getLogger("fr.dyade.aaa.agent.ConfigController");
 
   public static class Status {
     public static final int FREE = 0;
     public static final int CONFIG = 1;
 
-    public static String[] names = {
-      "FREE", "CONFIG"};
+    public static String[] names = {"FREE", "CONFIG"};
     
     public static String toString(int status) {
       return names[status];
@@ -766,9 +763,7 @@ public class ConfigController {
                  sid + ',' + 
                  domainName + ',' + 
                  port + ')');
-    A3CMLServer a3cmlServer = a3cmlConfig.getServer(sid);
-    ServerDesc serverDesc = 
-      AgentServer.getServerDesc(sid);
+    ServerDesc serverDesc = AgentServer.getServerDesc(sid);
     if (port != null && domainName.equals(serverDesc.getDomainName())) {
       serverDesc.updateSockAddr(
         serverDesc.getHostname(),
@@ -796,13 +791,8 @@ public class ConfigController {
                  "ConfigController.startService(" + 
                  serviceClassName + ',' + 
                  args + ')');
-    A3CMLServer a3cmlServer = 
-      a3cmlConfig.getServer(AgentServer.getServerId());
-    ServiceManager.register(
-     serviceClassName, args);
-    ServiceDesc desc = 
-      (ServiceDesc) ServiceManager.manager.registry.get(
-        serviceClassName);
+    ServiceManager.register(serviceClassName, args);
+    ServiceDesc desc = (ServiceDesc) ServiceManager.manager.registry.get(serviceClassName);
     if (desc.running) return;
     ServiceManager.start(desc);
   }
