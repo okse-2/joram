@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,16 +22,11 @@ import java.io.*;
 import java.util.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.Transaction;
-import fr.dyade.aaa.agent.Debug;
 import fr.dyade.aaa.agent.AgentServer;
 
 public class A3CMLConfig implements Serializable {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   /** Hashtable of all domains */

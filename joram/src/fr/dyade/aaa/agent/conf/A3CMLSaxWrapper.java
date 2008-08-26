@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2004 ScalAgent Distributed Technologies 
+ * Copyright (C) 2002-2008 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,12 +19,8 @@
 package fr.dyade.aaa.agent.conf;
 
 import java.io.*;
-import java.util.*;
-
-import fr.dyade.aaa.agent.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -185,9 +181,9 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
    *	unspecialized error
    */
   public void startElement(String uri,
-			   String localName,
-			   String rawName,
-			   Attributes atts) throws SAXException {
+                           String localName,
+                           String rawName,
+                           Attributes atts) throws SAXException {
     String name = rawName;
 
     if (Log.logger.isLoggable(BasicLevel.DEBUG))
@@ -260,7 +256,7 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
       } else if (name.equals(A3CML.ELT_JVM_ARGS)) {
         jvmArgs = atts.getValue(A3CML.ATT_VALUE);
       } else {
-	throw new SAXException("unknown element \"" + name + "\"");
+        throw new SAXException("unknown element \"" + name + "\"");
       }
     }
   }
@@ -277,8 +273,8 @@ public class A3CMLSaxWrapper extends DefaultHandler implements A3CMLWrapper {
    *	unspecialized error
    */
   public void endElement(String uri,
-			 String localName,
-			 String rawName) throws SAXException {
+                         String localName,
+                         String rawName) throws SAXException {
     String name = rawName;
 
     if (Log.logger.isLoggable(BasicLevel.DEBUG))
