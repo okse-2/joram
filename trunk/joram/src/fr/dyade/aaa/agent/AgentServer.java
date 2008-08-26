@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
@@ -926,15 +926,24 @@ public final class AgentServer {
       serverId = sid; 
 
       tgroup = new ThreadGroup(getName()) {
-          public void uncaughtException(Thread t, Throwable e) {
-            if (logmon.isLoggable(BasicLevel.WARN)) {
-              logmon.log(BasicLevel.WARN,
+        public void uncaughtException(Thread t, Throwable e) {
+          if (e instanceof VirtualMachineError) {
+            if (logmon.isLoggable(BasicLevel.FATAL)) {
+              logmon.log(BasicLevel.FATAL,
                          "Abnormal termination for " +
                          t.getThreadGroup().getName() + "." + t.getName(),
                          e);
+              // AF: Should be AgentServer.stop() ?
+              System.exit();
+            }
+          } else {
+            if (logmon.isLoggable(BasicLevel.WARN)) {
+              logmon.log(BasicLevel.WARN,
+                         "Abnormal termination for " + t.getThreadGroup().getName() + "." + t.getName(), e);
             }
           }
-        };
+        }
+      };
    
       //  Try to get transaction type from disk, then initialize the rigth
       // transaction manager and get the configuration.
@@ -1029,7 +1038,6 @@ public final class AgentServer {
         try {
           String tname = getProperty("Transaction",
                                      "fr.dyade.aaa.util.NTransaction");
-          Class tclass = Class.forName(tname);
           transaction = (Transaction) Class.forName(tname).newInstance();
         } catch (Exception exc) {
           logmon.log(BasicLevel.FATAL,
@@ -1304,7 +1312,7 @@ public final class AgentServer {
         // stop and reset..
         status.value = Status.STOPPED;
       }
-      throw new Exception(t);
+      throw new Exception(t.getMessage());
     }
 
     synchronized(status) {
