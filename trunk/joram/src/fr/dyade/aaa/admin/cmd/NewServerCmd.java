@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,33 +21,29 @@
  */
 package fr.dyade.aaa.admin.cmd;
 
-import java.io.*;
-import java.util.*;
+import java.io.Serializable;
 
 public class NewServerCmd extends ServerCmd implements Serializable {
-
- /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
-/**
-  * create new persistent server
-  *
-  * @param name      persistent server name
-  * @param hostname  host name
-  */
+  /**
+   * create new persistent server
+   *
+   * @param name      persistent server name
+   * @param hostname  host name
+   */
   public NewServerCmd(String name, String hostname) {
     super(name,hostname);
   }
 
- /**
-  * create new persistent server
-  *
-  * @param name      persistent server name
-  * @param hostname  host name
-  * @param sid       persistent server id
-  */
+  /**
+   * create new persistent server
+   *
+   * @param name      persistent server name
+   * @param hostname  host name
+   * @param sid       persistent server id
+   */
   public NewServerCmd(String name, String hostname,Short sid) {
     super(name,hostname,sid);
   }

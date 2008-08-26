@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,23 +22,20 @@
 package fr.dyade.aaa.admin.cmd;
 
 import java.io.*;
-import java.util.*;
 
 public class UnsetServerPropertyCmd extends UnsetPropertyCmd implements Serializable {
-
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+
   public String serverName = null;
 
- /**
-  * unset server property
-  *
-  * @param serverName  server name
-  * @param name        property name
-  * @param value       property value
-  */
+  /**
+   * unset server property
+   *
+   * @param serverName  server name
+   * @param name        property name
+   * @param value       property value
+   */
   public UnsetServerPropertyCmd(String serverName, 
                                 String name, 
                                 String value) {
