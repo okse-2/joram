@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,22 +21,18 @@
  */
 package fr.dyade.aaa.admin.cmd;
 
-import java.io.*;
-import java.util.*;
+import java.io.Serializable;
 
 public class NewDomainCmd extends DomainCmd implements Serializable {
-
- /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
-/**
-  * create new domain
-  *
-  * @param name          domain name
-  * @param networkClass  network class
-  */
+  /**
+   * create new domain
+   *
+   * @param name          domain name
+   * @param networkClass  network class
+   */
   public NewDomainCmd(String name, String networkClass) {
     super(name,networkClass);
   }

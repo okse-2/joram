@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,24 +21,21 @@
  */
 package fr.dyade.aaa.admin.cmd;
 
-import java.io.*;
-import java.util.*;
+import java.io.Serializable;
 
 public class StartServiceCmd implements StartAdminCmd, Serializable {
-
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+
   public String className = null;
   public String args = null;
 
- /**
-  * start service
-  *
-  * @param className  class name
-  * @param args       args
-  */
+  /**
+   * start service
+   *
+   * @param className  class name
+   * @param args       args
+   */
   public StartServiceCmd(String className, String args) {
     this.className = className;
     this.args = args;
