@@ -226,7 +226,7 @@ public abstract class Daemon implements Runnable {
   protected abstract void close();
 
   /**
-   * Interupts a thread that waits for long periods. In some cases, we must
+   * Interrupts a thread that waits for long periods. In some cases, we must
    * use application specific tricks. For example, if a thread is waiting on
    * a known socket, we have to close the socket to cause the thread to return
    * immediately. Unfortunately, there really isn't any technique that works
@@ -250,13 +250,19 @@ public abstract class Daemon implements Runnable {
 
   /**
    * Forces the daemon to stop executing. This method notifies thread that
-   * it should stop running, if the thread is waiting it is first interupted
-   * then the shutdown method is called to close all ressources.
+   * it should stop running, if the thread is waiting it is first interrupted
+   * then the shutdown method is called to close all resources.
    */
   public synchronized void stop() {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + ", stops.");
     running = false;
+    
+    // Be careful, if this method is called by the thread itself the code below
+    // cause a deadlock. Simply set running to false then return so the daemon should
+    // terminate.
+    if (Thread.currentThread() == thread) return;
+    
     if (thread != null) {
       while (thread.isAlive()) {
         if (canStop) {
