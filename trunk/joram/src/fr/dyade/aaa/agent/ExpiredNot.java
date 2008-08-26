@@ -28,7 +28,6 @@ package fr.dyade.aaa.agent;
  * @see #setDeadNotificationAgentId(fr.dyade.aaa.agent.AgentId)
  */
 public class ExpiredNot extends Notification {
-  
   /** Define serialVersionUID for interoperability. */
   private static final long serialVersionUID = 1L;
 
