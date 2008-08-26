@@ -604,7 +604,6 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
    * Class used to send messages with UDP packets.
    */
   final class DatagramOutputStream extends MessageOutputStream {
-
     private int datagramStamp;
     private int size;
     
@@ -637,11 +636,11 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
         try {
           MXWrapper.registerMBean(serverInfo, "AgentServer", getMBeanName(addr.toString().replace(':', '#')));
         } catch (Exception exc) {
-          logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
+          getLogger().log(BasicLevel.ERROR, getName() + " jmx failed", exc);
         }
         serversInfo.put(addr, serverInfo);
-        if (logmon.isLoggable(BasicLevel.DEBUG)) {
-          logmon.log(BasicLevel.DEBUG, getName() + ", starting handshake.");
+        if (getLogger().isLoggable(BasicLevel.DEBUG)) {
+          getLogger().log(BasicLevel.DEBUG, getName() + ", starting handshake.");
         }
         handShake(addr);
       } else {
@@ -830,7 +829,7 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
   final class NetworkInputStream extends BufferedMessageInputStream {
     NetworkInputStream(InputStream is) {
       super();
-      this.is = is;
+      this.in = is;
     }
 
     /**
