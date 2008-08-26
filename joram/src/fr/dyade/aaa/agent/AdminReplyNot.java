@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1996 - 2000 SCALAGENT
+ * Copyright (C) 1996 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,8 +23,7 @@ import fr.dyade.aaa.admin.cmd.ExceptionCmd;
 import fr.dyade.aaa.admin.script.*;
 
 /**
- * AdminReplyNot is a notification. It's
- * a reply of AdminRequestNot.
+ * AdminReplyNot is a notification. It's a reply of AdminRequestNot.
  *
  * @see StartScript
  * @see StopScript
@@ -32,10 +31,7 @@ import fr.dyade.aaa.admin.script.*;
  * @see AdminRequestNot
  */
 public class AdminReplyNot extends Notification {
-
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   /** exception catch in configuration */
   public ExceptionCmd exc = null;
