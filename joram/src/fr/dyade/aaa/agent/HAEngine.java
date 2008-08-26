@@ -23,14 +23,11 @@
 package fr.dyade.aaa.agent;
 
 import java.io.*;
-import java.util.Hashtable;
 import java.util.Enumeration;
 import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.util.*;
 
 /**
  *  Implementation of Engine that used JGroups in order to improve 
@@ -191,13 +188,6 @@ final class HAEngine extends Engine {
 
   volatile boolean needToSync = false;
   volatile Vector requestor = null;
-
-  static private final byte[] OOS_STREAM_HEADER = {
-    (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF),
-    (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF),
-    (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF),
-    (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF)
-  };
 
   /**
    * Get the current state of Engine: agents, messages, etc.
