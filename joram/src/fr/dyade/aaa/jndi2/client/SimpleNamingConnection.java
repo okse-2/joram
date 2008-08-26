@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -31,7 +31,6 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.jndi2.msg.*;
-import fr.dyade.aaa.util.SocketAddress;
 import fr.dyade.aaa.util.SocketFactory;
 
 public class SimpleNamingConnection implements NamingConnection {
@@ -84,19 +83,15 @@ public class SimpleNamingConnection implements NamingConnection {
   public void init(String hostName, int port, Hashtable env) {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
-                       "SimpleNamingConnection.init(" + 
-                       hostName + ',' + 
-                       port + ',' + 
-                       env + ')');
+                       "SimpleNamingConnection.init(" + hostName + ',' + port + ',' + env + ')');
+    
     this.hostName = hostName;
     this.port = port;
     this.env = env;
 
-    connectTimeout = Integer.getInteger(TIMEOUT_PROPERTY,
-                                        connectTimeout).intValue();
+    connectTimeout = Integer.getInteger(TIMEOUT_PROPERTY, connectTimeout).intValue();
 
-    String sfcn = System.getProperty(SOCKET_FACTORY_PROPERTY,
-                                     SocketFactory.DefaultFactory);
+    String sfcn = System.getProperty(SOCKET_FACTORY_PROPERTY, SocketFactory.DefaultFactory);
     socketFactory = SocketFactory.getFactory(sfcn);
   }
 
@@ -119,6 +114,7 @@ public class SimpleNamingConnection implements NamingConnection {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
                        "SimpleNamingConnection.invoke(" + request + ')');
+    
     open();
     try {
       ioCtrl.writeObject(request);
