@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,8 +23,6 @@ package com.scalagent.scheduler;
 
 import java.io.*;
 import java.util.*;
-import fr.dyade.aaa.agent.*;
-
 
 /**
  * Implements a double linked list of <code>ScheduleEvent</code> objects.
@@ -41,10 +39,9 @@ import fr.dyade.aaa.agent.*;
  * @see		ScheduleEvent
  */
 public class ScheduleItem implements Serializable {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+  
   /** may be of a derived class */
   ScheduleEvent event;
   /** next schedule date */
