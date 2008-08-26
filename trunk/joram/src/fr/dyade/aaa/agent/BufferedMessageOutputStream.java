@@ -20,9 +20,10 @@ package fr.dyade.aaa.agent;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamConstants;
-import java.io.Serializable;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+
+import fr.dyade.aaa.util.BinaryDump;
 
 /**
  * Class used to send messages through a stream using buffering.
@@ -66,6 +67,9 @@ public abstract class BufferedMessageOutputStream extends MessageOutputStream {
    * Writes the internal buffer in underlying output stream.
    */
   private final void drain() throws IOException {
+    if (getLogger().isLoggable(BasicLevel.DEBUG))
+      getLogger().log(BasicLevel.DEBUG, "drain() - count=" + count + ", buf=" + BinaryDump.toHex(buf, 0, count));
+    
     if (count > 0) {
       out.write(buf, 0, count);
       count = 0;
@@ -104,6 +108,10 @@ public abstract class BufferedMessageOutputStream extends MessageOutputStream {
       // If the request length exceeds the size of the output buffer, flush
       // the output buffer and then write the data directly.
       drain();
+      
+      if (getLogger().isLoggable(BasicLevel.DEBUG))
+        getLogger().log(BasicLevel.DEBUG, "write(" + len + ')');
+      
       out.write(b, off, len);
       return;
     }

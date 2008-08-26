@@ -21,8 +21,8 @@ package fr.dyade.aaa.agent;
 import java.io.IOException;
 import java.io.EOFException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
+
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * Class used to recv messages through a stream using buffering.
@@ -33,7 +33,7 @@ public abstract class BufferedMessageInputStream extends MessageInputStream {
   /**
    * The underlying input stream to be read. 
    */
-  protected InputStream is = null;
+  protected InputStream in = null;
 
   /**
    * Creates a <code>BufferedMessageInputStream</code> that uses a buffer
@@ -69,10 +69,16 @@ public abstract class BufferedMessageInputStream extends MessageInputStream {
    * Fills the empty buffer with more data.
    */
   private final void fill() throws IOException {
+    if (getLogger().isLoggable(BasicLevel.DEBUG))
+      getLogger().log(BasicLevel.DEBUG, "fill()");
+    
     pos = 0;
-    count = is.read(buf, 0, buf.length);
+    count = in.read(buf, 0, buf.length);
     if (count < 0)
       count = 0;
+    
+    if (getLogger().isLoggable(BasicLevel.DEBUG))
+      getLogger().log(BasicLevel.DEBUG, "fill() - count=" + count);
   }
 
   /**
@@ -88,6 +94,9 @@ public abstract class BufferedMessageInputStream extends MessageInputStream {
    * @exception  IOException  if an I/O error occurs.
    */
   public final int read() throws IOException {
+    if (getLogger().isLoggable(BasicLevel.DEBUG))
+      getLogger().log(BasicLevel.DEBUG, "read()");
+    
     if (pos >= count) {
       fill();
       if (pos >= count)
@@ -122,6 +131,9 @@ public abstract class BufferedMessageInputStream extends MessageInputStream {
    * <code>b.length - off</code>
    */
   public final int read(byte b[], int off, int len) throws IOException {
+    if (getLogger().isLoggable(BasicLevel.DEBUG))
+      getLogger().log(BasicLevel.DEBUG, "read(" + len + ')');
+    
     if ((off | len | (off + len) | (b.length - (off + len))) < 0)
       throw new IndexOutOfBoundsException();
     if (len == 0) return 0;
@@ -136,19 +148,26 @@ public abstract class BufferedMessageInputStream extends MessageInputStream {
       if (n >= len)
         return n;
       // if not closed but no bytes available, return
-      if (is != null && is.available() <= 0)
+      if (in != null && in.available() <= 0)
         return n;
     }
   }
 
   private final int read1(byte[] b, int off, int len) throws IOException {
+    if (getLogger().isLoggable(BasicLevel.DEBUG))
+      getLogger().log(BasicLevel.DEBUG, "read1(" + len + ')');
+    
     int avail = count - pos;
     if (avail <= 0) {
       // If the requested length is at least as large as the buffer, do not
       // bother to copy the bytes into the local buffer.
       // In this way buffered streams will cascade harmlessly.
-      if (len >= buf.length)
-        return is.read(b, off, len);
+      if (len >= buf.length) {
+        if (getLogger().isLoggable(BasicLevel.DEBUG))
+          getLogger().log(BasicLevel.DEBUG, "returns read(" + len + ')');
+        
+        return in.read(b, off, len);
+      }
       fill();
       avail = count - pos;
       if (avail <= 0) return -1;
@@ -156,6 +175,10 @@ public abstract class BufferedMessageInputStream extends MessageInputStream {
     int cnt = (avail < len) ? avail : len;
     System.arraycopy(buf, pos, b, off, cnt);
     pos += cnt;
+    
+    if (getLogger().isLoggable(BasicLevel.DEBUG))
+      getLogger().log(BasicLevel.DEBUG, "read1() returns " + cnt);
+    
     return cnt;
   }
 
@@ -164,6 +187,9 @@ public abstract class BufferedMessageInputStream extends MessageInputStream {
    * when length bytes are available or if end of stream is reached.
    */
   protected final void readFully(int length) throws IOException {
+    if (getLogger().isLoggable(BasicLevel.DEBUG))
+      getLogger().log(BasicLevel.DEBUG, "readFully(" + length + ')');
+    
     int valid = count - pos;
     if (valid < length) {
       // There is not enough byte in the buffer
@@ -180,10 +206,16 @@ public abstract class BufferedMessageInputStream extends MessageInputStream {
       }
 
       do {
-        int nb = is.read(buf, count, buf.length - count);
+        if (getLogger().isLoggable(BasicLevel.DEBUG))
+          getLogger().log(BasicLevel.DEBUG, "read(" + count + ')');
+        
+        int nb = in.read(buf, count, buf.length - count);
         if (nb < 0) throw new EOFException();
         count += nb;
       } while (count < length);
     }
+    
+    if (getLogger().isLoggable(BasicLevel.DEBUG))
+      getLogger().log(BasicLevel.DEBUG, "readFully returns - count=" + count);
   }
 }
