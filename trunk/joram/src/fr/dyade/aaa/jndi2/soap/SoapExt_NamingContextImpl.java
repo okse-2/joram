@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,9 +27,7 @@ import fr.dyade.aaa.jndi2.client.NamingContextImpl;
 import fr.dyade.aaa.jndi2.client.Trace;
 
 import org.apache.soap.Constants;
-import org.apache.soap.Fault;
 import org.apache.soap.SOAPException;
-import org.apache.soap.encoding.soapenc.BeanSerializer;
 import org.apache.soap.rpc.Call;
 import org.apache.soap.rpc.Parameter;
 import org.apache.soap.rpc.Response;
@@ -55,8 +53,7 @@ import org.objectweb.util.monolog.api.Logger;
  * <code>NamingContextImpl</code> calling a JNDI SOAP service's methods
  * rather than using a TCP connection for interacting with the JNDI server.
  */
-public class SoapExt_NamingContextImpl extends NamingContextImpl
-{
+public class SoapExt_NamingContextImpl extends NamingContextImpl {
   /** SOAP service's URL. */
   private URL serviceUrl;
   /** Call object used for binding requests. */
@@ -81,29 +78,27 @@ public class SoapExt_NamingContextImpl extends NamingContextImpl
    * @exception NamingException  If the SOAP service could not be initialized.
    */
   public SoapExt_NamingContextImpl(String soapHost, int soapPort,
-                                   String jndiHost, int jndiPort)
-         throws NamingException
-  {
+                                   String jndiHost, int jndiPort) throws NamingException {
     super();
 
     // Building the service URL:
     try {
-      serviceUrl = new URL("http://" + soapHost + ":" + soapPort
-                           + "/soap/servlet/rpcrouter");
+      serviceUrl = new URL("http://" + soapHost + ":" + soapPort + "/soap/servlet/rpcrouter");
+    } catch (MalformedURLException exc) {
+      // Should never happen
     }
-    catch (MalformedURLException exc) {}
 
     // Deploying and starting the service:
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, "Starting the SOAP service on host "
-                                         + soapHost
-                                         + " listening on port "
-                                         + soapPort);
+      Trace.logger.log(BasicLevel.DEBUG,
+                       "Starting the SOAP service on host "
+                       + soapHost
+                       + " listening on port "
+                       + soapPort);
     try {
       ServiceManagerClient smc = new ServiceManagerClient(serviceUrl);
       smc.deploy(getDeploymentDescriptor());
-    }
-    catch (Exception exc) {
+    } catch (Exception exc) {
       NamingException nEx =
         new NamingException("Could not deploy the SOAP service");
       nEx.setRootCause(exc);
@@ -126,8 +121,7 @@ public class SoapExt_NamingContextImpl extends NamingContextImpl
 
     try {
       Response resp = initCall.invoke(serviceUrl,"");
-    }
-    catch (Exception exc) {}
+    } catch (Exception exc) {}
 
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, "SOAP service initialized.");
