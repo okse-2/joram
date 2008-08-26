@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,8 +20,6 @@
  * Contributor(s): 
  */
 package com.scalagent.scheduler.util;
-
-import java.util.* ;
 
 import fr.dyade.aaa.agent.* ;
 import com.scalagent.scheduler.* ;
@@ -49,7 +47,6 @@ public class Client extends Agent {
 
   /** cron like string representing the event scheduling date */
   private String frequency ;
-
 
   /**
     * Creates an agent to be configured.
