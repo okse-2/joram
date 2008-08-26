@@ -853,7 +853,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     Message msg = null;
 
     int readFrom(InputStream is, int length) throws Exception {
-      this.is = is;
+      this.in = is;
       if (length == 8) {
         readHeader();
         msg = null;
