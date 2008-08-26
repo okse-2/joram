@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,36 +21,35 @@
  */
 package fr.dyade.aaa.admin.script;
 
-import java.lang.*;
-import java.io.*;
-import java.util.*;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Vector;
 import fr.dyade.aaa.admin.cmd.*;
 import fr.dyade.aaa.agent.conf.*;
 
 /**
- * Script contains an AdminCmd vector. Each commands permits to
- * create/remove domain, network, server and set/unset property or
- * jvm argument in A3CMLConfig (configuration).
+ *  Script contains an AdminCmd vector. Each commands permits to create/remove
+ * a domain, a network, or a server and set/unset property or a JVM argument in
+ * A3CMLConfig (configuration).
  *
  * @see fr.dyade.aaa.agent.AgentAdmin
  * @see AdminCmd
  * @see A3CMLConfig
  */
 public class Script implements Serializable, Cloneable {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+
   /** AdminCmd Vector */
   private Vector commands = null;
   /** create new configuration */
   public boolean newConfig = false;
 
- /**
-  * Script
-  *
-  * @see AgentAdmin
-  */
+  /**
+   * Script
+   *
+   * @see AgentAdmin
+   */
   public Script() {
     commands = new Vector();
   }
@@ -79,8 +78,7 @@ public class Script implements Serializable, Cloneable {
     return commands.size();
   }
 
-  public Object elementAt(int i) 
-    throws ArrayIndexOutOfBoundsException {
+  public Object elementAt(int i) throws ArrayIndexOutOfBoundsException {
     return commands.elementAt(i);
   }
 
