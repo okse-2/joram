@@ -18,11 +18,15 @@
  */
 package fr.dyade.aaa.agent;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamConstants;
-import java.io.Serializable;
+import java.util.zip.GZIPOutputStream;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 /**
  * Class used to send messages through a stream.
@@ -49,6 +53,23 @@ public abstract class MessageOutputStream extends OutputStream {
    */
   protected int count;
 
+  protected boolean compressedFlows = false;
+  
+  /**
+   * Default logger for MessageOutputStream.
+   */
+  protected static Logger logmon = null;
+  
+  /**
+   * Returns default logger for MessageOutputStream.
+   * @return Default logger for MessageOutputStream.
+   */
+  protected static Logger getLogger() {
+    if (logmon == null)
+      logmon = Debug.getLogger("fr.dyade.aaa.agent.MessageOutputStream");
+    return logmon;
+  }
+  
   // ObjectStream constants needed to reinitialize the ObjectOutputStream.
   private static final byte STREAM_MAGIC1 =
     (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF);
@@ -81,7 +102,8 @@ public abstract class MessageOutputStream extends OutputStream {
       throw new IllegalArgumentException("Buffer size <= 0");
     buf = new byte[size];
 
-    oos = new ObjectOutputStream(this);
+    if (! compressedFlows)
+      oos = new ObjectOutputStream(this);
     count = 0;
   }
 
@@ -108,8 +130,8 @@ public abstract class MessageOutputStream extends OutputStream {
   }
 
   /**
-   * Writes <code>len</code> bytes from the specified byte array 
-   * starting at offset <code>off</code> to this output stream.
+   * Writes <code>len</code> bytes from the specified byte array starting
+   * at offset <code>off</code> to this output stream.
    *
    * @param      b     the data.
    * @param      off   the start offset in the data.
@@ -146,7 +168,7 @@ public abstract class MessageOutputStream extends OutputStream {
    * Writes the protocol header to this output stream.
    * This method must be overloaded in subclass.
    */
-  abstract protected void writeHeader();
+  abstract protected void writeHeader() throws IOException;
 
   /**
    * Writes the message header datas to the buffer.
@@ -154,6 +176,9 @@ public abstract class MessageOutputStream extends OutputStream {
    * @param msg The message to write out.
    */
   protected final void writeMessageHeader(Message msg) {
+    if (getLogger().isLoggable(BasicLevel.DEBUG))
+      getLogger().log(BasicLevel.DEBUG, "writeMessageHeader()");
+    
     // Writes sender's AgentId
     writeShort(msg.from.from);
     writeShort(msg.from.to);
@@ -168,6 +193,9 @@ public abstract class MessageOutputStream extends OutputStream {
     writeShort(msg.dest);
     // Writes stamp of message
     writeInt(msg.stamp);
+    
+    if (getLogger().isLoggable(BasicLevel.DEBUG))
+      getLogger().log(BasicLevel.DEBUG, "writeMessageHeader returns");
   }
 
   /**
@@ -180,6 +208,9 @@ public abstract class MessageOutputStream extends OutputStream {
    */
   protected final void writeMessage(Message msg,
                                     long time) throws IOException {
+    if (getLogger().isLoggable(BasicLevel.DEBUG))
+      getLogger().log(BasicLevel.DEBUG, "writeMessage()");
+    
     // Writes the protocol specific datas.
     writeHeader();
 
@@ -188,9 +219,15 @@ public abstract class MessageOutputStream extends OutputStream {
       writeMessageHeader(msg);
 
       if (msg.not == null) {
+        if (getLogger().isLoggable(BasicLevel.DEBUG))
+          getLogger().log(BasicLevel.DEBUG, "writeMessage - 1");
+        
         buf[count++] = Message.NULL;
         flush();
       } else {
+        if (getLogger().isLoggable(BasicLevel.DEBUG))
+          getLogger().log(BasicLevel.DEBUG, "writeMessage - 2");
+        
         // Writes notification attributes
         buf[count++] = msg.optToByte();
 
@@ -199,20 +236,43 @@ public abstract class MessageOutputStream extends OutputStream {
             msg.not.expiration -= time;
 
           // Writes a serializable object to this output stream.
+          if (compressedFlows) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            GZIPOutputStream gzipos = new GZIPOutputStream(baos);
+            
+            oos = new ObjectOutputStream(gzipos);
+            oos.writeObject(msg.not);
 
-          // Write the STREAM_MAGIC constant
-          buf[count++] = STREAM_MAGIC1;
-          buf[count++] = STREAM_MAGIC2;
-          // Write the STREAM_VERSION constant
-          buf[count++] = STREAM_VERSION1;
-          buf[count++] = STREAM_VERSION2;
+            // Be careful, the reset writes a TC_RESET byte
+            oos.reset();
+            // The OOS flush call the flush of this output stream.
+            oos.flush();
+            gzipos.finish();
+            gzipos.flush();
+            
+            if (getLogger().isLoggable(BasicLevel.DEBUG))
+              getLogger().log(BasicLevel.DEBUG, "writeNotification - size=" + baos.size());
 
-          oos.writeObject(msg.not);
+            writeInt(baos.size());
+            baos.writeTo(this);
+            
+            flush();
+            
+            oos = null;
+          } else {
+            // Write the STREAM_MAGIC constant
+            buf[count++] = STREAM_MAGIC1;
+            buf[count++] = STREAM_MAGIC2;
+            // Write the STREAM_VERSION constant
+            buf[count++] = STREAM_VERSION1;
+            buf[count++] = STREAM_VERSION2;
+            oos.writeObject(msg.not);
 
-          // Be careful, the reset writes a TC_RESET byte
-          oos.reset();
-          // The OOS flush call the flush of this output stream.
-          oos.flush();
+            // Be careful, the reset writes a TC_RESET byte
+            oos.reset();
+            // The OOS flush call the flush of this output stream.
+            oos.flush();
+          }
         } finally {
           if ((msg.not != null) && (msg.not.expiration > 0))
             msg.not.expiration += time;
@@ -221,5 +281,8 @@ public abstract class MessageOutputStream extends OutputStream {
     } else {
       flush();
     }
+    
+    if (getLogger().isLoggable(BasicLevel.DEBUG))
+      getLogger().log(BasicLevel.DEBUG, "writeMessage returns");
   }
 }
