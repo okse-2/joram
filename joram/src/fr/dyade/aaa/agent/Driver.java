@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -22,7 +22,6 @@ package fr.dyade.aaa.agent;
 
 import java.io.*;
 import java.util.*;
-import fr.dyade.aaa.util.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
