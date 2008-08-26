@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
@@ -30,11 +30,6 @@ import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.ServerSocket;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.ConnectException;
-import java.net.BindException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
@@ -246,25 +241,17 @@ public abstract class StreamNetwork extends Network {
     if (logmon.isLoggable(BasicLevel.DEBUG)) {
       StringBuffer strbuf = new StringBuffer();
       strbuf.append(" setProperties(");
-      strbuf.append("CnxRetry=");
-      strbuf.append(CnxRetry);
-      strbuf.append(", backlog=");
-      strbuf.append(backlog);
-      strbuf.append(", TcpNoDelay=");
-      strbuf.append(TcpNoDelay);
-      strbuf.append(", SoLinger=");
-      strbuf.append(SoLinger);
-      strbuf.append(", SoTimeout=");
-      strbuf.append(SoTimeout);
-      strbuf.append(", ConnectTimeout=");
-      strbuf.append(ConnectTimeout);
-      strbuf.append(", inLocalAddressStr=");
-      strbuf.append(inLocalAddressStr);
-      strbuf.append(", outLocalAddressStr=");
-      strbuf.append(outLocalAddressStr);
-      strbuf.append(", sfcn=");
-      strbuf.append(sfcn);
+      strbuf.append("CnxRetry=").append(CnxRetry);
+      strbuf.append(", backlog=").append(backlog);
+      strbuf.append(", TcpNoDelay=").append(TcpNoDelay);
+      strbuf.append(", SoLinger=").append(SoLinger);
+      strbuf.append(", SoTimeout=").append(SoTimeout);
+      strbuf.append(", ConnectTimeout=").append(ConnectTimeout);
+      strbuf.append(", inLocalAddressStr=").append(inLocalAddressStr);
+      strbuf.append(", outLocalAddressStr=").append(outLocalAddressStr);
+      strbuf.append(", sfcn=").append(sfcn);
       strbuf.append(')');
+      
       logmon.log(BasicLevel.DEBUG, getName() + strbuf.toString());
     }
   }
