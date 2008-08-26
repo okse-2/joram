@@ -65,9 +65,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * @see Channel
  */
 public abstract class Agent implements AgentMBean, Serializable {
-  /**
-   * 
-   */
+  /** Define serialVersionUID for interoperability. */
   static final long serialVersionUID = 1L;
 
   /**
@@ -532,7 +530,7 @@ public abstract class Agent implements AgentMBean, Serializable {
     try {
       MXWrapper.registerMBean(this, "AgentServer", getMBeanName());
     } catch (Exception exc) {
-      logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
+      logmon.log(BasicLevel.WARN, getName() + " jmx failed", exc);
     }
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -681,7 +679,7 @@ public abstract class Agent implements AgentMBean, Serializable {
     try {
       MXWrapper.unregisterMBean("AgentServer", getMBeanName());
     } catch (Exception exc) {
-      logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
+      logmon.log(BasicLevel.WARN, getName() + " jmx failed", exc);
     }
   }
 }
