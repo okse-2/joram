@@ -415,15 +415,15 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     logmon = Debug.getLogger(Debug.A3Network + '.' + name);
     logmon.log(BasicLevel.INFO, name + ", initialized");
 
-    // Set the properties of the network.
-    setProperties();
-
     // Sorts the array of server ids into ascending numerical order.
     Arrays.sort(servers);
 
     this.servers = servers;
     this.serversFN = name + "Servers";
     this.bootTSFN = name + "BootTS";
+
+    // Set the properties of the network.
+    setProperties();
 
     restore();
   }
@@ -711,10 +711,9 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     int fromIdx = index(source);
 
     if (boot != bootTS[fromIdx]) {
-      if (logmon.isLoggable(BasicLevel.WARN))
+      if ((bootTS[fromIdx] != -1) && (logmon.isLoggable(BasicLevel.WARN)))
         logmon.log(BasicLevel.WARN,
-                   getName() + ", reset stamp #" + source + ", "
-                   + bootTS[fromIdx] + " -> " + boot);
+                   getName() + ", reset stamp #" + source + ", " + bootTS[fromIdx] + " -> " + boot);
 
       bootTS[fromIdx] = boot;
       AgentServer.getTransaction().save(bootTS, bootTSFN);
