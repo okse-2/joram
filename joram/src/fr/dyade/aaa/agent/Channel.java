@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -25,8 +25,6 @@ import java.util.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.util.*;
 
 /**
  * Class <code>Channel</code> realizes the interface for sending messages.
@@ -92,8 +90,7 @@ public class Channel {
    * @exception IOException
    *	error when accessing the local persistent storage
    */
-  public final static void sendTo(AgentId to,
-				  Notification not) {
+  public final static void sendTo(AgentId to, Notification not) {
 //     try {
 //       EngineThread thread = (EngineThread) Thread.currentThread();
 //       // Use the engine's sendTo method that push message in temporary queue
