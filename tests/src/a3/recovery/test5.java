@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2001 ScalAgent Distributed Technologies
+ * Copyright (C)  2001 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s):ScalAgent D.T.
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
 
@@ -37,7 +37,7 @@ public class test5 extends TestCase {
 
   protected void setUp() throws Exception {
     pause = Long.getLong("pause", pause).longValue();
-    timeout = pause +1200000L;
+    timeout = pause +120000L;
     Test5Agent agent = new Test5Agent();
     agent.deploy();
     Channel.sendTo(agent.getId(), new Notification());
@@ -62,7 +62,7 @@ class Test5Agent extends Agent {
 
   public void react(AgentId from, Notification not) {
     try {
-	System.out.println("state"+state);
+      System.out.println("state"+state);
       switch (state) {
       case 0:
         TestCase.assertTrue("step#" + state, from.isNullId());
@@ -72,16 +72,16 @@ class Test5Agent extends Agent {
         Echo agent = new Echo(test5.remote);
         echo = agent.getId();
         agent.deploy(getId());
-	
-	// 1st message should be sent quickly when connection occured, and
-	// others should be sent slowly in order to permit to remote node
-	// acknowledge the first one during this time. So in PoolCnxNetwork
-	// prior to 1.17 a synchronization bug occured.
-	sendTo(echo, new Test5Not(10));
-	sendTo(echo, new Test5Not(50000));
-	sendTo(echo, new Test5Not(50000));
-	sendTo(echo, new Test5Not(50000));
-	sendTo(echo, new Test5Not(50000));
+
+        // 1st message should be sent quickly when connection occured, and
+        // others should be sent slowly in order to permit to remote node
+        // acknowledge the first one during this time. So in PoolCnxNetwork
+        // prior to 1.17 a synchronization bug occured.
+        sendTo(echo, new Test5Not(10));
+        sendTo(echo, new Test5Not(50000));
+        sendTo(echo, new Test5Not(50000));
+        sendTo(echo, new Test5Not(50000));
+        sendTo(echo, new Test5Not(50000));
 
         sendTo(getId(), new Notification());
         break;
@@ -92,7 +92,7 @@ class Test5Agent extends Agent {
                               "fr.dyade.aaa.agent.Notification");
         Thread.currentThread().sleep(test5.pause);
         TestCase.startAgentServer(test5.remote);
- 
+
         break;
       case 2:
         TestCase.assertEquals("step#" + state,
