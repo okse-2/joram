@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2007 ScalAgent Distributed Technologies
+ * Copyright (C)  2007 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,10 +20,11 @@
  * Initial developer(s):ScalAgent D.T.
  * Contributor(s): 
  */
-
 package a3.test;
 
 import java.util.Vector;
+import java.util.Hashtable;
+
 import fr.dyade.aaa.agent.*;
 
 public class Receiver extends Agent implements ReceiverMBean {
@@ -37,6 +38,7 @@ public class Receiver extends Agent implements ReceiverMBean {
     id = receiver.getId();
     receiver.bounce = Integer.getInteger("bounce", 10).intValue();
     receiver.payload = Integer.getInteger("payload", 10000).intValue();
+    receiver.pause = Integer.getInteger("pause", 5000).intValue();
     receiver.deploy();
 
     AgentServer.start();
@@ -47,7 +49,9 @@ public class Receiver extends Agent implements ReceiverMBean {
   public Receiver(short serverId) {
     super(serverId);
     running = true;
-    ids = new Vector();
+    nbTokens = 0;
+    ids = new Vector<AgentId>();
+    tokens = new Hashtable<AgentId, Token>();
   }
 
   int bounce;
@@ -67,23 +71,44 @@ public class Receiver extends Agent implements ReceiverMBean {
   }
 
   public void setPayload(int payload) {
-    this .payload = payload;
+    this.payload = payload;
   }
 
-  int tokens;
+  int pause;
 
-  public int getTokens() {
-    return tokens;
+  public int getPause() {
+    return pause;
+  }
+
+  public void setPause(int pause) {
+    this.pause = pause;
+  }
+
+  int nbTokens;
+
+  public int getNbTokens() {
+    return nbTokens;
+  }
+
+  int nbErrors;
+
+  public int getNbErrors() {
+    return nbErrors;
+  }
+
+  public int getNbSenders() {
+    return tokens.size();
   }
 
   public void reset() {
-    tokens = 0;
+    nbTokens = 0;
+    nbErrors = 0;
   }
 
   public void start() {
     running = true;
     while (! ids.isEmpty()) {
-      sendTo((AgentId) ids.remove(0), new Token(bounce, payload));
+      sendTo(ids.remove(0), new Token(bounce, payload, pause));
     }
   }
 
@@ -91,18 +116,27 @@ public class Receiver extends Agent implements ReceiverMBean {
     running = false;
   }
 
-  Vector ids;
+  Vector<AgentId> ids;
+  Hashtable<AgentId, Token> tokens;
 
   public void react(AgentId from, Notification not) {
     try {
       if (not instanceof Token) {
         Token token = (Token) not;
 
-        System.out.println("recv#" + token.bounce + " from " + from);
+        nbTokens += 1;
+
+        Token last = tokens.put(from, token);
+        if ((last != null) &&
+            (last.bounce != 0) &&
+            (last.bounce != token.bounce +1)) {
+          System.out.println("ERROR recv#" + token.bounce + " from " + from);
+          nbErrors += 1;
+        }
 
         if (token.bounce == 0) {
           if (running)
-            sendTo(from, new Token(bounce, payload));
+            sendTo(from, new Token(bounce, payload, pause));
           else
             ids.addElement(from);
         }
