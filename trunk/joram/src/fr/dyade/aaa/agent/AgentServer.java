@@ -934,7 +934,7 @@ public final class AgentServer {
                          t.getThreadGroup().getName() + "." + t.getName(),
                          e);
               // AF: Should be AgentServer.stop() ?
-              System.exit();
+              System.exit(-1);
             }
           } else {
             if (logmon.isLoggable(BasicLevel.WARN)) {
