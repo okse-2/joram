@@ -40,7 +40,6 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.Daemon;
-import fr.dyade.aaa.util.Queue;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
@@ -65,16 +64,44 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
   WatchDog watchDog = null;
 
   NetSession activeSessions[];
-  long current = 0L;
 
+  /**
+   * Defines if the streams between servers are compressed or not.
+   * <p>
+   * Default value is false, be careful in a domain all servers must use
+   * the same definition.
+   * <p>
+   *  This value can be adjusted for all network components by setting
+   * <code>PoolNetwork.compressedFlows</code> global property or for a
+   * particular network by setting <code>\<DomainName\>.compressedFlows</code>
+   * specific property.
+   * <p>
+   *  Theses properties can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
+   */
+  boolean compressedFlows = false;
+  
+  /**
+   * Returns if the stream between servers are compressed or not.
+   *
+   * @return  true if the streams between servers are compressed, false
+   *               otherwise.
+   */
+  public boolean getCompressedFlows() {
+    return compressedFlows;
+  }
+  
   /**
    * Defines the maximum number of concurrent connected sessions.
    * <p>
-   * Default value is 5, value less than 1 are unauthorized.
+   * By default this property is set to the number of servers of the domain
+   * (excepting the current server). Setting this value needs precautions to
+   * avoid unexpected connection lost. Value less than 1 are unauthorized.
    * <p>
    *  This value can be adjusted for all network components by setting
-   * <code>nbMaxCnx</code> global property or for a particular network
-   * by setting <code>\<DomainName\>.nbMaxCnx</code> specific property.
+   * <code>PoolNetwork.nbMaxCnx</code> global property or for a particular
+   * network by setting <code>\<DomainName\>.nbMaxCnx</code> specific
+   * property.
    * <p>
    *  Theses properties can be fixed either from <code>java</code> launching
    * command, or in <code>a3servers.xml</code> configuration file.
@@ -107,7 +134,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
    * the connection.
    * <p>
    *  The timeout must be > 0. A timeout of zero is interpreted as an infinite
-   * timeout. Default value is 300000 (5 minutes), value less than 1000 are
+   * timeout. Default value is 60000 (1 minute), value less than 1000 are
    * unauthorized.
    * <p>
    *  This value can be adjusted for all network components by setting
@@ -117,7 +144,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
    *  Theses properties can be fixed either from <code>java</code> launching
    * command, or in <code>a3servers.xml</code> configuration file.
    */
-  long IdleTimeout = 300000L;
+  long IdleTimeout = 60000L;
 
   /**
    * Returns the maximum idle period permitted before reseting the connection.
@@ -136,6 +163,49 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
   public void setIdleTimeout(long idleTimeout) {
     if (idleTimeout > 1000L)
       this.IdleTimeout = idleTimeout;
+  }
+  
+  /**
+   * Defines the default value for maximum number of message sent and non
+   * acknowledged on a connection.
+   * <p>
+   * By default this value is set to -1 and there is no flow control.
+   * <p>
+   *  This value can be adjusted for all network components by setting the
+   * <code>MaxMessageInFlow</code> global property or for a particular network
+   * by setting \<DomainName\>.MaxMessageInFlow</code> specific property.
+   * <p>
+   *  For a particular network the value can be defined finely for a the connection
+   * with a particular remote server by setting <code>MaxMessageInFlow_N</code> or
+   * \<DomainName\>.MaxMessageInFlow_N</code>.
+   * <p>
+   *  Theses properties can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
+   */
+  int defaultMaxMessageInFlow = -1;
+
+  /**
+   * Defines the maximum number of free senders in the pool.
+   * <p>
+   * By default this value is set to the same value than <code>nbMaxCnx</code>,
+   * value less than 1 are unauthorized.
+   * <p>
+   *  This value can be adjusted for all network components by setting the
+   * <code>nbMaxFreeSender</code> global property or for a particular network
+   * by setting \<DomainName\>.nbMaxFreeSender</code> specific property.
+   * <p>
+   *  Theses properties can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
+   */
+  int nbMaxFreeSender;
+
+  /**
+   * Returns the maximum number of free senders in the pool.
+   *
+   * @return  the number of free senders in the pool.
+   */
+  public int getNbMaxFreeSender() {
+    return nbMaxFreeSender;
   }
 
   /**
@@ -171,7 +241,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     wakeOnConnection = new WakeOnConnection(getName(), logmon);
     dispatcher = new Dispatcher(getName(), logmon);
     watchDog = new WatchDog(getName(), logmon);
-    poolSender = new PoolSender(getName(), logmon);
+    poolSender = new PoolSender(getName(), nbMaxFreeSender);
   }
 
   /**
@@ -189,25 +259,36 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       try {
         nbMaxCnx = AgentServer.getInteger("PoolNetwork.nbMaxCnx").intValue();
       } catch (Exception exc2) {
-        nbMaxCnx = 5;
+        nbMaxCnx = servers.length -1;
       }
     }
-    if (nbMaxCnx < 1) nbMaxCnx = 5;
+    if (nbMaxCnx < 1) nbMaxCnx = servers.length -1;
 
-    IdleTimeout = Long.getLong("IdleTimeout",
-                               IdleTimeout).longValue();
-    IdleTimeout = Long.getLong(domain + ".IdleTimeout",
-                               IdleTimeout).longValue();
+    nbMaxFreeSender = AgentServer.getInteger("nbMaxFreeSender", nbMaxCnx).intValue();
+    nbMaxFreeSender = AgentServer.getInteger(domain + ".nbMaxFreeSender", nbMaxFreeSender).intValue();
+    if (nbMaxFreeSender < 1) nbMaxFreeSender = nbMaxCnx;
+    
+    IdleTimeout = Long.getLong("IdleTimeout", IdleTimeout).longValue();
+    IdleTimeout = Long.getLong(domain + ".IdleTimeout", IdleTimeout).longValue();
     if (IdleTimeout < 1000L) IdleTimeout = 5000L;
+    
+    defaultMaxMessageInFlow = AgentServer.getInteger("maxMessageInFlow", defaultMaxMessageInFlow).intValue();
+    defaultMaxMessageInFlow = AgentServer.getInteger(domain + ".maxMessageInFlow", defaultMaxMessageInFlow).intValue();
+  
+    String value = System.getProperty(domain + ".compressedFlows");
+    if (value == null) value = System.getProperty("compressedFlows");
+    compressedFlows = Boolean.valueOf(value).booleanValue();
     
     if (logmon.isLoggable(BasicLevel.DEBUG)) {
       StringBuffer strbuf = new StringBuffer();
       strbuf.append(" setProperties(");
-      strbuf.append("nbMaxCnx=");
-      strbuf.append(nbMaxCnx);
-      strbuf.append(", IdleTimeout=");
-      strbuf.append(IdleTimeout);
+      strbuf.append("nbMaxCnx=").append(nbMaxCnx);
+      strbuf.append(", nbMaxFreeSender=").append(nbMaxFreeSender);
+      strbuf.append(", IdleTimeout=").append(IdleTimeout);
+      strbuf.append(", defaultMaxMessageInFlow=").append(defaultMaxMessageInFlow);
+      strbuf.append(", compressedFlows=").append(compressedFlows);
       strbuf.append(')');
+      
       logmon.log(BasicLevel.DEBUG, getName() + strbuf.toString());
     }
   }
@@ -364,7 +445,6 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     if (wakeOnConnection != null) wakeOnConnection.stop();
     if (dispatcher != null) dispatcher.stop();
     if (watchDog != null) watchDog.stop();
-    if (poolSender != null) poolSender.stop();
     
     // Stop all active sessions
     for (int i=0; i<activeSessions.length; i++) {
@@ -374,6 +454,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     }
     nbActiveCnx = 0;
 
+    if (poolSender != null) poolSender.stop();
+    
     // Unregister all sesion's MBean
     for (int i=0; i<sessions.length; i++) {
       if (sessions[i] != null) {
@@ -397,8 +479,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
   public boolean isRunning() {
     if ((wakeOnConnection != null) && wakeOnConnection.isRunning() &&
         (dispatcher != null) && dispatcher.isRunning() &&
-        (watchDog != null) && watchDog.isRunning() && 
-        (poolSender != null) && poolSender.isRunning())
+        (watchDog != null) && watchDog.isRunning())
       return true;
 
     return false;
@@ -424,6 +505,26 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
    */
   final boolean isSessionRunning(short sid) {
     return sessions[index(sid)].isRunning();
+  }
+  
+  /**
+   * Gets the maximum number of message sent and non acknowledged.
+   * 
+   * @param sid the server id of remote server.
+   * @return  the maximum number of message sent and non acknowledged.
+   */
+  final int getMaxMessageInFlow(short sid) {
+    return sessions[index(sid)].getMaxMessageInFlow();
+  }
+  
+  /**
+   * Sets the maximum number of message sent and non acknowledged.
+   * 
+   * @param sid the server id of remote server.
+   * @param maxMessageInFlow  the maximum number of message sent and non acknowledged.
+   */
+  void setMaxMessageInFlow(short sid, int maxMessageInFlow) {
+    sessions[index(sid)].setMaxMessageInFlow(maxMessageInFlow);
   }
 
   /**
@@ -592,8 +693,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
             } catch (IOException exc) {
               if (running)
                 this.logmon.log(BasicLevel.ERROR,
-                                this.getName() +
-                                ", error during waiting connection", exc);
+                                this.getName() + ", error during waiting connection", exc);
               continue;
             }
             canStop = false;
@@ -689,9 +789,10 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
           canStop = false;
           if (! running) break;
 
-          // Send the message
-          Sender sender = poolSender.getSender(msg.getDest());         
-          sender.send(msg.getDest(), msg);
+          // Send the message: Get a sender in the pool and gives the message to transmit.
+          // It must be done in an unique operation to avoid the release of the sender between
+          // the getSender and the Sender.send methods.
+          poolSender.send(msg);
 
           qout.pop();
           Thread.yield();
@@ -732,8 +833,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
             try {
               lock.wait(WDActivationPeriod);
               if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                this.logmon.log(BasicLevel.DEBUG,
-                                this.getName() + ", activated");
+                this.logmon.log(BasicLevel.DEBUG, this.getName() + ", activated");
             } catch (InterruptedException exc) {
               continue;
             }
@@ -742,29 +842,63 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 
             long currentTimeMillis = System.currentTimeMillis();
 
-            for (int sid=0; sid<sessions.length; sid++) {
-              if (sessions[sid] != null) {
-                if ((sessions[sid].sendList.size() > 0) && (! sessions[sid].running)) {
-                  // Try to start the session in order to send waiting messages.
-                  sessions[sid].start(currentTimeMillis);
-                } else if ((IdleTimeout > 0) &&
-                           (currentTimeMillis > (sessions[sid].getLastReceived() + IdleTimeout)) &&
-                           sessions[sid].running) {
-                  // The session  is inactive since a long time, may be the connection is down,
-                  // try to stop the session.
-                  sessions[sid].stop();
+            try {
+              for (int sid=0; sid<sessions.length; sid++) {
+                if (sessions[sid] != null) {
+                  if ((sessions[sid].sendList.size() > 0) && (! sessions[sid].running)) {
+                    // Try to start the session in order to send waiting messages.
+                    sessions[sid].start(currentTimeMillis);
+                  } else if ((IdleTimeout > 0) && sessions[sid].running &&
+                      (currentTimeMillis > (sessions[sid].last + IdleTimeout))) {
+                    // The session  is inactive since a long time, may be the connection is down,
+                    // try to stop the session.
+                    sessions[sid].stop();
+                  }
                 }
               }
+            } catch (Exception exc) {
+              this.logmon.log(BasicLevel.ERROR, this.getName(), exc);
             }
           }
         }
       } finally {
+        this.logmon.log(BasicLevel.WARN, this.getName() + ", ended");
         finish();
       }
     }
   }
 
-  class QueueSender extends Queue {
+  class MessageList extends Vector {
+    /**
+     * Insert the message in the Vector depending of its stamp.
+     * @param msg
+     */
+    public synchronized void insertMessage(Object waiting[]) {
+      modCount++;
+
+      Message msg = null;
+      for (int i=0; i<waiting.length; i++) {
+        msg = (Message) waiting[i];
+
+        logmon.log(BasicLevel.WARN, getName() + ", insert msg (" + msg + ')');
+
+        int idx = 0;
+        while (idx < elementCount) {
+          if (((Message) elementData[idx]).stamp > msg.stamp) break;
+          idx++;
+        }
+        insertElementAt(msg, idx);
+      }
+    }
+    
+    /**
+     *  Verify that there is not already an acknowledge corresponding to the
+     * specified message.
+     * 
+     * @param msg The received message to acknowledge.
+     * @return    true if the ack corresponding to the specified message is
+     *            already in the queue, false otherwise.
+     */
     public synchronized boolean containsAck(Message msg) {
       if (msg.not != null) return false;
       Iterator it = this.iterator();
@@ -778,62 +912,74 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       }
       return false;
     }
-
   }
   
   final class Sender extends Daemon {
-    short sessionIndex = -1;
-    QueueSender msgToSend;
+    MessageList msgToSend;
     PoolSender poolSender;
-    Object lock;
-    int maxMsgToSendSize;
+    
+    NetSession session = null;
+    
+    /**
+     *  The session of this sender is in a connection phase (between PoolSender.reset
+     * in NetSession.localStart or NetSession.remoteStart, and PoolSender.restart in
+     * NetSession.startEnd).
+     *  At the beginning of this phase the waiting messages in NetSession.sendList are
+     * inserted in the Sender.msgToSend list, the sender should no longer try to send
+     * messages.
+     */
+    public boolean restart = false;
+    /**
+     *  This attribute indicates that the daemon is in a waiting phase. When restart is true
+     * the daemon will no longer send messages, so the PoolSender.restart method can copy
+     * messages from NetSession.sendList to Sender.msgToSend list.
+     */
+    public boolean waiting = false;
     
     Sender(String name, Logger logmon, PoolSender poolSender) {
       super(name + ".sender");
       // Overload logmon definition in Daemon
       this.logmon = logmon;
-      lock = new Object();
       this.poolSender = poolSender;
-      msgToSend = new QueueSender();
-      maxMsgToSendSize = 50000;//NTA 
+      msgToSend = new MessageList();
     }
 
     protected void close() {}
 
-    protected void shutdown() {}
+    protected void shutdown() {
+      if (this.logmon.isLoggable(BasicLevel.DEBUG))
+        this.logmon.log(BasicLevel.DEBUG, this.getName() + ", shutdown.");      
+      synchronized (this) {
+        if (this.logmon.isLoggable(BasicLevel.DEBUG))
+          this.logmon.log(BasicLevel.DEBUG, this.getName() + ", shutdown - 1.");
+        // Wake up the daemon so it can die.
+        notify();
+        try {
+          wait(100);
+        } catch (InterruptedException e) { }
+      }
+    }
 
-    void send(short sessionIndex, Message msg) {
+    synchronized void send(Message msg) {
       if (msg != null) {
         if (msg.not == null) {
           if (! msgToSend.containsAck(msg)) {
-            msgToSend.push(msg);
+            msgToSend.addElement(msg);
           } else {
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
-              this.logmon.log(BasicLevel.DEBUG,
-                  this.getName() + "msgToSend.containsAck " + msg);
+              this.logmon.log(BasicLevel.DEBUG, this.getName() + "msgToSend.containsAck " + msg);
           }
         } else {
-          msgToSend.push(msg);
+          msgToSend.addElement(msg);
         }
       }
-      synchronized (lock) {
-        this.sessionIndex = sessionIndex;
-        lock.notify();
-      }
+     
       if (this.logmon.isLoggable(BasicLevel.DEBUG))
-        this.logmon.log(BasicLevel.DEBUG,
-                        this.getName() + ", send Sender[" + sessionIndex + "] notify run. msgToSend=" + msgToSend);
+          this.logmon.log(BasicLevel.DEBUG,
+                          this.getName() + ", send [" + session.sid + "] notify run, msgToSend=" + msgToSend);
       
-      while (msgToSend.size() > maxMsgToSendSize) {
-        try {
-          Thread.sleep(1000);
-        } catch (InterruptedException e) {
-        }
-      }
-    }
-    
-    Sender getSender() {
-      return this;
+      // Wake up the daemon so it will send the message.
+      notify();
     }
     
     public void run() {
@@ -841,153 +987,257 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         while (running) {
           canStop = true;
 
-          if (this.logmon.isLoggable(BasicLevel.DEBUG))
-            this.logmon.log(BasicLevel.DEBUG,
-                            this.getName() + ", run Sender[" + sessionIndex + "] lock waiting message.");
-          synchronized (lock) {
+          synchronized (this) {
             try {
-              lock.wait();
+              if (msgToSend.isEmpty() || restart) {
+                if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                  this.logmon.log(BasicLevel.DEBUG, this.getName() + ", waits message.");
+                waiting = true;
+                wait();
+                if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                  this.logmon.log(BasicLevel.DEBUG, this.getName() + ", trace1.");
+                if (restart) continue;
+                if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                  this.logmon.log(BasicLevel.DEBUG, this.getName() + ", trace2.");
+              }
             } catch (InterruptedException e) {
+              if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                this.logmon.log(BasicLevel.DEBUG, this.getName() + ", trace3.");
               continue;
+            } finally {
+              if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                this.logmon.log(BasicLevel.DEBUG, this.getName() + ", trace4.");
+              waiting = false;
             }
           }
-
-          // Send message 
-          getSession(sessionIndex).send(msgToSend);
-          poolSender.release(getSender());
-
+          
           canStop = false;
           if (! running) break;
-          
-          Thread.yield();
 
-          if (this.logmon.isLoggable(BasicLevel.DEBUG))
-            this.logmon.log(BasicLevel.DEBUG,
-                this.getName() + ", run Sender[" + sessionIndex + "] unlock.");
+          if (session == null) {
+            this.logmon.log(BasicLevel.ERROR,
+                            this.getName() + ", Sender[null] notified, msgToSend=" + msgToSend);
+            continue;
+          }
+          
+          if (session.sock == null) {
+            // If there is no connection between local and destination server,
+            // try to make one!
+            if (session.server.retry == 0) {
+              // Avoid deadlock with a concurrent connection setting
+              waiting = true;
+              // If server.retry is higher than 0, the watchdog daemon will regularly try
+              // to connect, don't block the Dispatcher.
+              session.start(System.currentTimeMillis());
+            }
+//            // Be careful, don't send the current message it will be sent in order with all
+//            // other messages from sendList.
+//            continue;
+          }
+
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG, getName() + ", send(" + msgToSend + ')');
+          
+          // Send a message 
+          if (! msgToSend.isEmpty())
+            session.send((Message) msgToSend.remove(0));
+
+          // Release this sender if needed
+          waiting = true;
+          if (! restart)
+            poolSender.release(this);
         }
       } finally {
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG, getName() + ", ends");
         finish();
       }
     }
   }
 
   final class PoolSender {
-    int nbSender = 5;
-    Sender senders[] = null;
-    int freeTab[] = null;
     String name;
     
-    PoolSender(String name, Logger logmon) {
+    /** Number of free senders */
+    int nbFree = 0;
+    /** Array containing free senders */
+    Sender free[] = null;
+    
+    Vector senders = null;
+    
+    /** Number of allocated senders since staring */
+    int count = 0;
+    
+    PoolSender(String name, int nbMaxFreeSender) {
       this.name = name;
-      nbSender = Integer.getInteger("PSNbSender", nbMaxCnx).intValue();
-      freeTab = new int[nbSender];
-      senders = new Sender[nbSender];
-      for (int i = 0; i < nbSender; i++) {
-        senders[i] = new Sender(name + '_' + i, logmon, this);
-        freeTab[i] = -1;
-        senders[i].start();
-      }
+      free = new Sender[nbMaxFreeSender];
+      senders = new Vector();
     }
     
-    synchronized Sender getSender(int sessionIndex) {
+    /**
+     * Returns a sender associated to the specified remote server.
+     * This method is private and should be use only by synchronized methods
+     * restart and send.
+     * 
+     * @param sid the id of remote server.
+     * @return    the sender associated to the specified remote server.
+     */
+    private Sender getSender(short sid) {
       if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, getName() + ", getSender(" + sessionIndex + ')');
-      while (true) {
-        for (int i = 0; i < nbSender; i++) {
-          if (freeTab[i] == -1 || freeTab[i] == sessionIndex) {
-            freeTab[i] = sessionIndex;
-            if (logmon.isLoggable(BasicLevel.DEBUG))
-              logmon.log(BasicLevel.DEBUG, getName() + ", getSender sender = " + senders[i] + 
-                  ", freeTab["+i+"]=" + freeTab[i]);
-            if (!senders[i].isRunning()) {
-              try {
-                if (logmon.isLoggable(BasicLevel.DEBUG))
-                  logmon.log(BasicLevel.DEBUG, getName() + ", getSender: restart sender=" + sessionIndex);
-                senders[i].start();
-              } catch (Exception e) {
-                if (logmon.isLoggable(BasicLevel.DEBUG))
-                  logmon.log(BasicLevel.DEBUG, getName() + ", getSender: exception in restart sender=" + sessionIndex);
-              }
+        logmon.log(BasicLevel.DEBUG, getName() + ", getSender(" + sid + ')');
+      
+      NetSession session = getSession(sid);
+      if (session.sender == null) {
+        if (nbFree == 0) {
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG, getName() + ", creates a Sender (" + sid + ')');
+
+          Sender sender = new Sender(name + '_' + count++, logmon, this);
+          senders.add(sender);
+          sender.session = session;
+          session.sender = sender;
+          sender.start();
+        } else {
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG, getName() + ", alloc a Sender (" + sid + ')');
+
+          nbFree -= 1;
+          Sender sender = free[nbFree];
+          free[nbFree] = null; /* to let gc do its work */
+
+          sender.session = session;
+          session.sender = sender;
+        }
+      }
+      
+      if (! session.sender.isRunning()) {
+        logmon.log(BasicLevel.WARN, getName() + ", start anew sender (" + sid + ')');
+        session.sender.start();
+      }
+      
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, getName() + ", getSender returns " + session.sender.getName());
+
+      return session.sender;
+    }
+    
+    synchronized void reset(short sid) {
+      logmon.log(BasicLevel.INFO, getName() + ", reset(" + sid + ')');
+      
+      Sender sender = getSender(sid);
+      // 
+      sender.restart = true;
+      
+      if (! sender.isCurrentThread()) {
+        synchronized (sender) {
+          while (!sender.waiting) {
+            try {
+              if (logmon.isLoggable(BasicLevel.DEBUG))
+                logmon.log(BasicLevel.DEBUG, getName() + ", waits sender.");
+              sender.wait(10);
+            } catch (InterruptedException e) {
+              continue;
             }
-            return senders[i];
           }
         }
-        raisePool();
       }
+      
+      // Inserts all non acknowledged messages in msgTosent list so they can be
+      // sent by the sender daemon.
+      // TODO: We have also to keep and transmit  the stamp of last received
+      // message in order to avoid useless transmission from the remote server.
+      if (sender.session.sendList.size() > 0) {
+        Object[] waiting = sender.session.sendList.toArray();
+        sender.session.sendList.clear();
+        logmon.log(BasicLevel.DEBUG,
+                   getName() + ", reset - " + waiting.length + " waiting messages");
+        sender.msgToSend.insertMessage(waiting);
+      }
+      logmon.log(BasicLevel.WARN, getName() + ", reset end (" + sid + ')');
     }
     
-    boolean release(Sender sender) {
-      for (int i = 0; i < nbSender; i++) {
-        if (sender.equals(senders[i]) && sender.msgToSend.isEmpty()) {
-          freeTab[i] = -1;
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG, getName() + ", release sender = " + sender);
-          return true;
-        }
-      }
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, getName() + ", NO release sender = " + sender);
-      return false;
-    }
+    synchronized void restart(short sid) {
+      logmon.log(BasicLevel.INFO, getName() + ", restart(" + sid + ')');
 
-    void raisePool() {
+      Sender sender = getSender(sid);
+      logmon.log(BasicLevel.DEBUG,
+                 getName() + ", restart sender=" + sender + ", msgToSend=" + sender.msgToSend);
+      sender.restart = false;
+      // Wake up the daemon if needed
+      if (!sender.msgToSend.isEmpty())
+        sender.send(null);
+    }
+    
+    synchronized void send(Message msg) {
       if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, getName() + ", raisePool.");
-      int newNbSender = nbSender + 2;
-      int newFreeTab[] = new int[newNbSender];
-      Sender newSenders[] = new Sender[newNbSender];
-      for (int i = 0; i < nbSender; i++) {
-        newFreeTab[i] = freeTab[i];
-        newSenders[i] = senders[i];
+        logmon.log(BasicLevel.DEBUG, getName() + ", send(" + msg + ')');
+      
+      Sender sender = getSender(msg.getDest());
+      sender.send(msg);
+    }
+    
+    synchronized void release(Sender sender) {
+      if (sender.msgToSend.isEmpty() && !sender.restart) {
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG, getName() + ", release sender (" + sender.session.sid + ')');
+
+        sender.session.sender = null;
+        // If there is enough free element, let the gc get this element. 
+        if (nbFree == free.length) {
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG, getName() + ", free sender (" + sender.session.sid + ')');
+          sender.session = null;
+          // Be careful, this method is called by the sender itself so calling the
+          // stop method will cause a deadlock. 
+          sender.stop();
+          senders.remove(sender);
+          return;
+        }
+
+        sender.session = null;
+        free[nbFree++] = sender;
       }
-      for (int i = nbSender; i < newNbSender; i++) {
-        newSenders[i] = new Sender(name + '_' + i, logmon, this);
-        newFreeTab[i] = -1;
-        newSenders[i].start();
-      }
-      freeTab = newFreeTab;
-      senders = newSenders;
-      nbSender = newNbSender;
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, getName() + ", newNbSender = " + nbSender);
     }
     
     public void stop() {
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, getName() + "poolSender.stop()");
-      for (int i = 0; i < nbSender; i++) {
-        if (senders[i] != null) {
-          senders[i].stop();
-          freeTab[i] = -1;
+      
+      // Stops all senders associated to a network session.
+      for (int i=0; i<sessions.length; i++) {
+        if ((sessions[i] != null) && (sessions[i].sender != null)) {
+          Sender sender = sessions[i].sender;
+          sessions[i].sender = null;
+          sender.session = null;
+          sender.stop(); 
+          
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG, getName() + "senders["+i+"].stop() done.");
         }
       }
-    }
-    
-    public void stop(Sender sender) {
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, getName() + ", poolSender.stop(" + sender + ')');
-      if (release(sender))
-        sender.stop();
-    }
-    
-    /**
-     * Tests if this daemon is alive.
-     * @return  true if this daemon is alive; false otherwise.
-     */
-    public boolean isRunning() {
-      for (int i = 0; i < nbSender; i++) {
-        if (senders[i] != null && senders[i].isRunning())
-          continue;
-        else 
-          return false;
+      // Stops free sender kept in the pool.
+      while (nbFree > 0) {
+        nbFree -= 1;
+        free[nbFree].stop(); free[nbFree] = null;
+        
       }
-      return true;
     }
   }
 
+  /**
+   * The class NetSession controls the connection with a particular server.
+   * <p>
+   * Each NetSession object is dedicated to the handling of the connection with a
+   * server, at a time a session can be either active (with a TCP connection and a
+   * receiver thread) or passive. Currently the number of active NetSession is limited,
+   * this number can be adjust through the nbMaxCnx property.
+   * <p>
+   * The message sending is handled by dynamically Sender components.
+   */
   final class NetSession implements Runnable {
+    // TODO: Use MessageVector component for sendList and msgToSent in order to allow
+    // the swapping of waiting messages.
+    
     /** Destination server id */
     private short sid;
     /**
@@ -1023,15 +1273,52 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     /** The communication socket. */
     private Socket sock = null;
 
+    /**
+     * Sender component needed to send messages.
+     * It is kept here so the PoolSender can retrieve allocated sender, this
+     * attribute should not be used directly (instead use PoolSender.getSender
+     * method).
+     */
+    Sender sender = null;
+    
+    /**
+     * Maximum number of message sent and non acknowledged.
+     */
+    int maxMessageInFlow = -1;
+    
+    /**
+     * Gets the maximum number of message sent and non acknowledged.
+     * 
+     * @return  the maximum number of message sent and non acknowledged.
+     */
+    int getMaxMessageInFlow() {
+      return maxMessageInFlow;
+    }
+    
+    /**
+     * Sets the maximum number of message sent and non acknowledged.
+     * 
+     * @param maxMessageInFlow  the maximum number of message sent and non acknowledged.
+     */
+    void setMaxMessageInFlow(int maxMessageInFlow) {
+      this.maxMessageInFlow = maxMessageInFlow;
+    }
+    
     NetworkInputStream nis = null;
     NetworkOutputStream nos = null;
 
-    /** */
+    /**
+     *  List of all sent messages waiting for an acknowledge from the remote server.
+     * These messages are sent anew after a reconnection.
+     */
     private MessageVector sendList;
 
+    /**
+     *  Time in milliseconds of last use of this session, this attribute is set during
+     * connection, then updated at each sending or receiving. It is used to choose unused
+     * sessions.
+     */
     private long last = 0L;
-    
-    private Object transmitLock;
 
     public String toString() {
       return toString(new StringBuffer()).toString();
@@ -1055,7 +1342,9 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       canStop = false;
       thread = null;
       
-      transmitLock = new Object();
+      maxMessageInFlow = AgentServer.getInteger("maxMessageInFlow_" + sid, defaultMaxMessageInFlow).intValue();
+      maxMessageInFlow = AgentServer.getInteger(domain + ".maxMessageInFlow_" + sid, maxMessageInFlow).intValue();
+
       sendList = new MessageVector();
     }
 
@@ -1154,14 +1443,14 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     long getLastReceived() {
       return lastReceived;
     }
-    
+        
     /**
      * Returns the number of buffering messages to sent since last reboot.
      *
      * @return  the number of buffering messages to sent since last reboot.
      */
     int getNbBufferingMessageToSent() {
-      Sender sender = poolSender.getSender(sid);
+//      Sender sender = poolSender.getSender(sid);
       if (sender == null || sender.msgToSend == null)
         return 0;
       return sender.msgToSend.size();
@@ -1179,7 +1468,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
      */
     void start(long currentTimeMillis) {
       if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, getName() + ", started");
+        logmon.log(BasicLevel.DEBUG, getName() + ", starting");
 
       if (((server.retry < WDNbRetryLevel1) && 
            ((server.last + WDRetryPeriod1) < currentTimeMillis)) ||
@@ -1191,9 +1480,20 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
           // then sends all waiting messages.
           startEnd();
         } else {
+          // TODO: May be we should not set these values if a start is in progress..
           server.last = currentTimeMillis;
           server.retry += 1;
         }
+
+        //  Try to send all waiting messages. As this.sock is no longer null
+        // so we must do a copy a waiting messages. New messages will be send
+        // directly in send method.
+        //  Be careful, in a very limit case a message can be sent 2 times:
+        // added in sendList after sock setting and before array copy, il will
+        // be transmit in send method and below. However there is no problem,
+        // the copy will be discarded on remote node and 2 ack messages will
+        // be received on local node.
+        poolSender.restart(sid);
       }
     }
 
@@ -1202,6 +1502,16 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         logmon.log(BasicLevel.DEBUG, getName() + ", remotely started");
 
       if (remoteStart(sock, boot)) startEnd();
+
+      //  Try to send all waiting messages. As this.sock is no longer null
+      // so we must do a copy a waiting messages. New messages will be send
+      // directly in send method.
+      //  Be careful, in a very limit case a message can be sent 2 times:
+      // added in sendList after sock setting and before array copy, il will
+      // be transmit in send method and below. However there is no problem,
+      // the copy will be discarded on remote node and 2 ack messages will
+      // be received on local node.
+      poolSender.restart(sid);
     }
 
     /**
@@ -1235,6 +1545,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
           return false;
         }
 
+        poolSender.reset(sid);
+ 
         // Set the local attribute in order to block all others local attempts.
         this.local = true;
       }
@@ -1252,18 +1564,21 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         AgentServer.getTransaction().commit(true);
 
         try {
-          NetworkInputStream nis = new NetworkInputStream(sock.getInputStream());
           NetworkOutputStream nos = new NetworkOutputStream(sock.getOutputStream());
+          NetworkInputStream nis = new NetworkInputStream(sock.getInputStream());
           this.nis = nis;
           this.nos = nos;
+
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG, getName() + ", connection done");
         } catch (Exception exc) {
           throw exc;
         }
       } catch (Exception exc) {
         if (logmon.isLoggable(BasicLevel.WARN))
-          logmon.log(BasicLevel.WARN,
-                     getName() + ", connection refused.", exc);
-        // TODO: Try it later, may be a a connection is in progress...
+          logmon.log(BasicLevel.DEBUG, getName() + ", connection aborted", exc);
+        
+        // Try it later, may be a a connection is in progress...
         try {
           sock.getOutputStream().close();
         } catch (Exception exc2) {}
@@ -1321,13 +1636,15 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 
         writeAck(sock.getOutputStream());
 
+        poolSender.reset(sid);
+
         AgentServer.getTransaction().begin();
         testBootTS(sid, boot);
         AgentServer.getTransaction().commit(true);
 
         try {
-          NetworkInputStream nis = new NetworkInputStream(sock.getInputStream());
           NetworkOutputStream nos = new NetworkOutputStream(sock.getOutputStream());
+          NetworkInputStream nis = new NetworkInputStream(sock.getInputStream());
           this.nis = nis;
           this.nos = nos;
         } catch (Exception exc) {
@@ -1401,7 +1718,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
           activeSessions[idx].stop();
           activeSessions[idx] = this;
         }
-        last = current++;
+        last = System.currentTimeMillis();
       }
       thread = new Thread(this, getName());
       thread.setDaemon(false);
@@ -1412,57 +1729,6 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, getName() + ", connection started");
-
-      //  Try to send all waiting messages. As this.sock is no longer null
-      // so we must do a copy a waiting messages. New messages will be send
-      // directly in send method.
-      //  Be careful, in a very limit case a message can be sent 2 times:
-      // added in sendList after sock setting and before array copy, il will
-      // be transmit in send method and below. However there is no problem,
-      // the copy will be discarded on remote node and 2 ack messages will
-      // be received on local node.
-      Object[] waiting = sendList.toArray();
-      logmon.log(BasicLevel.DEBUG,
-                 getName() + ", send " + waiting.length + " waiting messages");
-
-      synchronized(transmitLock) {
-        Message msg = null;
-        long currentTimeMillis = System.currentTimeMillis();
-        for (int i=0; i<waiting.length; i++) {
-          msg = (Message) waiting[i];
-          if ((msg.not != null) && (msg.not.expiration > 0) && (msg.not.expiration < currentTimeMillis)) {
-            try {
-              ExpiredNot expiredNot = null;
-              if (msg.not.deadNotificationAgentId != null) {
-                if (logmon.isLoggable(BasicLevel.DEBUG)) {
-                  logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification " + msg.from + ", "
-                      + msg.not + " to " + msg.not.deadNotificationAgentId);
-                }
-                expiredNot = new ExpiredNot(msg.not, msg.from, msg.to);
-              } else {
-                if (logmon.isLoggable(BasicLevel.DEBUG)) {
-                  logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification " + msg.from + ", "
-                      + msg.not);
-                }
-              }
-              doAck(msg.getStamp(), expiredNot);
-            } catch (Exception exc) {
-              logmon.log(BasicLevel.ERROR, getName() + ": cannot remove expired notification " + msg.from
-                  + ", " + msg.not, exc);
-            }
-          } else {
-            transmit(msg, currentTimeMillis);
-          }
-        }
-      }
-      
-      // wake up Sender
-      Sender sender = poolSender.getSender(this.getRemoteSID());
-      if (!sender.msgToSend.isEmpty()) {
-        if (logmon.isLoggable(BasicLevel.DEBUG))
-          logmon.log(BasicLevel.DEBUG, getName() + ", startEnd wake up Sender.");
-        sender.send(this.getRemoteSID(), null);
-      }
     }
 
     /**
@@ -1473,6 +1739,11 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, getName() + ", stops.");
+
+      // Be careful, if this method is called by the thread itself the code below
+      // cause a deadlock. Simply set running to false then return so the daemon should
+      // terminate.
+      if (Thread.currentThread() == thread) return;
 
       while ((thread != null) && thread.isAlive()) {
         if (canStop) {
@@ -1505,8 +1776,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       try {
         sock.close();
       } catch (Exception exc) {}
-      sock = null;
-
+      // The sock attribute is set to null in the finally clause of NetSession.run(),
+      // so it avoids start of session before the thread ending.
       nis = null;
       nos = null;
     }
@@ -1514,11 +1785,14 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     /**
      * Removes the acknowledged notification from waiting list.
      * Be careful, messages in sendList are not always in stamp order.
-     * Its method should not be synchronized, it scans the list from
+     * This method should not be synchronized, it scans the list from
      * begin to end, and it removes always the first element. Other
      * methods using sendList just adds element at the end.
+     * 
+     * @param ack         The stamp of acknowledged message to remove.
+     * @throws Exception  Error during the message deletion.
      */
-    final private void doAck(int ack, ExpiredNot expiredNot) throws Exception {
+    final private void doAck(int ack) throws Exception {
       Message msg = null;
 
       if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -1526,132 +1800,145 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 
       try {
         //  Suppress the acknowledged notification from waiting list,
-        // and deletes it.
+        // then deletes it.
         msg = sendList.removeMessage(ack);
+        
         AgentServer.getTransaction().begin();
-        if (expiredNot != null) {
-          Channel.post(Message.alloc(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot));
-          Channel.validate();
-        }
         msg.delete();
         msg.free();
         AgentServer.getTransaction().commit(true);
-
       } catch (NoSuchElementException exc) {
-        logmon.log(BasicLevel.WARN,
-                   getName() + ", can't ack, unknown msg#" + ack);
+        logmon.log(BasicLevel.WARN, getName() + ", can't ack, unknown msg#" + ack);
       } catch (Exception e) {
         if (logmon.isLoggable(BasicLevel.WARN))
-          logmon.log(BasicLevel.WARN,
-                     getName() + ", exception during doAck : msg#" + ack);
+          logmon.log(BasicLevel.WARN, getName() + ", exception during doAck : msg#" + ack);
         throw e;
       }
     }
     
     /**
+     * Removes the expired message, if needed an ExpiredNot is sent to the
+     * deadNotificationAgentId specified.
+     * 
+     * @param msg         The message to remove.
+     * @throws Exception  
+     */
+    final private void removeExpired(Message msg) {
+      int stamp = msg.getStamp();
+      
+      try {
+        //  Suppress the acknowledged notification from waiting list,
+        // and deletes it.
+        sendList.removeMessage(stamp);
+      } catch (NoSuchElementException exc) {
+        logmon.log(BasicLevel.WARN,
+                   getName() + ", can't removes unknown expired msg#" + stamp);
+      }
+      
+      try {
+        AgentServer.getTransaction().begin();
+
+        ExpiredNot expiredNot = null;
+        if (msg.not.deadNotificationAgentId != null) {
+          if (logmon.isLoggable(BasicLevel.DEBUG)) {
+            logmon.log(BasicLevel.DEBUG,
+                       getName() + ": forward expired notification " + msg.from + ", " + msg.not + " to " + msg.not.deadNotificationAgentId);
+          }
+          expiredNot = new ExpiredNot(msg.not, msg.from, msg.to);
+        } else {
+          if (logmon.isLoggable(BasicLevel.DEBUG)) {
+            logmon.log(BasicLevel.DEBUG,
+                       getName() + ": removes expired notification " + msg.from + ", " + msg.not);
+          }
+        }
+        
+        if (expiredNot != null) {
+          Channel.post(Message.alloc(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot));
+          Channel.validate();
+        }
+        
+        msg.delete();
+        msg.free();
+        
+        AgentServer.getTransaction().commit(true);
+      } catch (Exception exc) {
+        if (logmon.isLoggable(BasicLevel.WARN))
+          logmon.log(BasicLevel.WARN,
+                     getName() + ", exception in removeExpired msg#" + stamp, exc);
+      }
+    }
+
+    /**
+     * Sends a message to the corresponding remote server.
      * Be careful, its method should not be synchronized (in that case, the
      * overall synchronization of the connection -method start- can dead-lock).
+     * 
+     * @param msg The message to send.
      */
-    final void send(Queue msgs) {
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, getName() + ", send(" + msgs + ')');
-      Message msg = null;
-      try {
-        msg = (Message) msgs.get();
-        if (logmon.isLoggable(BasicLevel.DEBUG))
-          logmon.log(BasicLevel.DEBUG, getName() + ", send get msg = " + msg);
-      } catch (InterruptedException e1) {
-        if (logmon.isLoggable(BasicLevel.DEBUG))
-          logmon.log(BasicLevel.DEBUG, getName() + ", InterruptedException");
-        return;
-      }
-      while (msg != null) {
-        if (logmon.isLoggable(BasicLevel.DEBUG)) {
-          if (msg.not != null) {
-            logmon.log(BasicLevel.DEBUG,
-                getName() + ", send msg#" + msg.getStamp());
-          } else {
-            logmon.log(BasicLevel.DEBUG,
-                getName() + ", send ack#" + msg.getStamp());
-          }
-        }
-        
-        long currentTimeMillis = System.currentTimeMillis();
-
+    final void send(Message msg) {
+      if (logmon.isLoggable(BasicLevel.DEBUG)) {
         if (msg.not != null) {
-          sendList.addElement(msg);
-          msgs.pop();
-          nbMessageSent += 1;
-          if ((msg.not.expiration > 0) &&
-              (msg.not.expiration < currentTimeMillis)) {
-            try {
-              ExpiredNot expiredNot = null;
-              if (msg.not.deadNotificationAgentId != null) {
-                if (logmon.isLoggable(BasicLevel.DEBUG)) {
-                  logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification " + msg.from + ", "
-                      + msg.not + " to " + msg.not.deadNotificationAgentId);
-                }
-                expiredNot = new ExpiredNot(msg.not, msg.from, msg.to);
-              } else {
-                if (logmon.isLoggable(BasicLevel.DEBUG)) {
-                  logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification " + msg.from + ", "
-                      + msg.not);
-                }
-              }
-              doAck(msg.getStamp(), expiredNot);
-            } catch (Exception exc) {
-              logmon.log(BasicLevel.ERROR, getName() + ": cannot removes expired notification " + msg.from
-                  + ", " + msg.not, exc);
-            }          
-            try {
-              msg = (Message) msgs.get();
-              if (logmon.isLoggable(BasicLevel.DEBUG))
-                logmon.log(BasicLevel.DEBUG, getName() + ", send get msg = " + msg);
-            } catch (InterruptedException e) {
-              if (logmon.isLoggable(BasicLevel.DEBUG))
-                logmon.log(BasicLevel.DEBUG, getName() + ", InterruptedException", e);
-              break;
-            }
-            continue;
-          }
+          logmon.log(BasicLevel.DEBUG, getName() + ", send msg#" + msg.getStamp());
         } else {
-          nbAckSent += 1;
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG, getName() + ", msgs.pop stamp=" + msg.getStamp());
-          msgs.pop();
+          logmon.log(BasicLevel.DEBUG,  getName() + ", send ack#" + msg.getStamp());
+        }
+      }
+
+      long currentTimeMillis = System.currentTimeMillis();
+
+      if (msg.not != null) {
+        nbMessageSent += 1;
+        sendList.addElement(msg);
+
+        if ((msg.not.expiration > 0) && (msg.not.expiration < currentTimeMillis)) {
+          removeExpired(msg);
+          return;
+        }
+      } else {
+        nbAckSent += 1;
+      }
+
+      if (sock != null) {
+        // Writes the message on the corresponding connection.
+        if (maxMessageInFlow > 0) {
+          while (sendList.size() > maxMessageInFlow) {
+            // Waits for acknowledges from remote server.
+            try {
+              if (logmon.isLoggable(BasicLevel.DEBUG))
+                logmon.log(BasicLevel.DEBUG, getName() + ", transmit waits -> sendList.size=" + sendList.size());
+              Thread.sleep(100L);
+              
+              // If the connection is broken don't wait anymore.
+              if (sock == null) return;
+            } catch (InterruptedException exc) {}
+          }
         }
 
-        if (sock == null) {
-          // If there is no connection between local and destination server,
-          // try to make one!
-          if (server.retry == 0) {
-            // If server.retry is higher than 0, the Watchdog will regularly try
-            // to connect, don't block the Dispatcher.
-            start(currentTimeMillis);
-          }
-        } else {
-          // Writes the message on the corresponding connection.
-          synchronized(transmitLock) {
-            transmit(msg, currentTimeMillis);
-          }
+        if (logmon.isLoggable(BasicLevel.DEBUG)) {
+          if (msg.not != null)
+            logmon.log(BasicLevel.DEBUG, getName() + ", transmit(msg#" + msg.stamp + ", " + currentTimeMillis + ')');
+          else
+            logmon.log(BasicLevel.DEBUG, getName() + ", transmit(ack#" + msg.stamp + ", " + currentTimeMillis + ')');
         }
-        
+
+        last = currentTimeMillis;
         try {
-          msg = (Message) msgs.get();
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG, getName() + ", send get msg = " + msg);
-        } catch (InterruptedException e) {
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG, getName() + ", InterruptedException", e);
-          break;
+          nos.writeMessage(msg, currentTimeMillis);
+        } catch (IOException exc) {
+          logmon.log(BasicLevel.WARN,
+                     getName() + ", exception in sending message " + msg, exc);
+          close();
+        } catch (NullPointerException exc) {
+          // The stream is closed
+          logmon.log(BasicLevel.WARN,
+                     getName() + ", exception in sending message " + msg);
         }
       }
     }
 
     final private void ack(int stamp) throws Exception {
       if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG,
-                   getName() + ", set ack msg#" + stamp);
+        logmon.log(BasicLevel.DEBUG, getName() + ", set ack msg#" + stamp);
 
       Message ack = Message.alloc(AgentId.localId,
                                   AgentId.localId(server.sid),
@@ -1662,30 +1949,6 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 
       qout.push(ack);
       qout.validate();
-    }
-
-    final private boolean transmit(Message msg, long currentTimeMillis) {
-      if (logmon.isLoggable(BasicLevel.DEBUG)) {
-        if (msg.not != null)
-          logmon.log(BasicLevel.DEBUG, getName() + ", transmit(msg#" + msg.stamp + ", " + currentTimeMillis + ')');
-        else
-          logmon.log(BasicLevel.DEBUG, getName() + ", transmit(ack#" + msg.stamp + ", " + currentTimeMillis + ')');
-      }
-      last = current++;
-      try {
-        nos.writeMessage(msg, currentTimeMillis);
-      } catch (IOException exc) {
-        logmon.log(BasicLevel.ERROR,
-                   getName() + ", exception in sending message " + msg, exc);
-        close();
-        return false;
-      } catch (NullPointerException exc) {
-        // The stream is closed, exits !
-        logmon.log(BasicLevel.ERROR,
-            getName() + ", NullPointerException in sending message " + msg, exc);
-        return false;
-      }
-      return true;
     }
     
     /**
@@ -1736,16 +1999,20 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 
           // Receives a valid message, set timestamp.
           lastReceived = System.currentTimeMillis();
+          last = lastReceived;
           
           //  Keep message stamp in order to acknowledge it (be careful,
           // the message get a new stamp when it is delivered).
           int stamp = msg.getStamp();
           if (msg.not != null) {
             nbMessageReceived += 1;
+            // Deliver the message
             deliver(msg);
+            // then send an acknowledge
             ack(stamp);
           } else {
-            doAck(stamp, null);
+            // removes the acknowledged message.
+            doAck(stamp);
           }
 
           Thread.yield();
@@ -1765,16 +2032,20 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 
         running = false;
         close();
+        // Avoid a session starting befor the end of this thread.
+        sock = null;
       }
     }
-
+    
     /**
      * Class used to read messages through a stream.
      */
     final class NetworkInputStream extends BufferedMessageInputStream {
-      NetworkInputStream(InputStream is) {
+      
+      NetworkInputStream(InputStream is) throws IOException {
         super();
-        this.is = is;
+        this.in = is;
+        this.compressedFlows = compressedFlows;
       }
 
       /**
@@ -1787,12 +2058,15 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
      * Class used to send messages through a stream.
      */
     final class NetworkOutputStream extends BufferedMessageOutputStream {
+      OutputStream os = null;
+      
       NetworkOutputStream(OutputStream os) throws IOException {
         super();
         this.out = os;
+        this.compressedFlows = compressedFlows;
       }
 
-      protected void writeHeader() {}
+      protected void writeHeader() throws IOException {}
     }
   }
 
@@ -1835,8 +2109,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       ((iobuf[4] & 0xFF) <<  8) + ((iobuf[5] & 0xFF) <<  0);
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, getName() + ", readBoot from #" + boot.sid +
-                 " -> " + boot.boot);
+      logmon.log(BasicLevel.DEBUG,
+                 getName() + ", readBoot from #" + boot.sid + " -> " + boot.boot);
 
     return boot;
   }
@@ -1886,6 +2160,24 @@ final class NetSessionWrapper implements NetSessionWrapperMBean {
    */
   public short getRemoteSID() {
     return sid;
+  }
+  
+  /**
+   * Gets the maximum number of message sent and non acknowledged.
+   * 
+   * @return  the maximum number of message sent and non acknowledged.
+   */
+  public int getMaxMessageInFlow() {
+    return network.getMaxMessageInFlow(sid);
+  }
+  
+  /**
+   * Sets the maximum number of message sent and non acknowledged.
+   * 
+   * @param maxMessageInFlow  the maximum number of message sent and non acknowledged.
+   */
+  public void setMaxMessageInFlow(int maxMessageInFlow) {
+    network.setMaxMessageInFlow(sid, maxMessageInFlow);
   }
 
   /**
