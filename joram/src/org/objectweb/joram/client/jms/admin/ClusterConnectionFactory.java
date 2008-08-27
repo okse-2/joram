@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2007 France Telecom
  *
  * This library is free software; you can redistribute it and/or
@@ -30,12 +30,10 @@ import javax.jms.Connection;
 
 import java.util.Hashtable;
 import java.util.Enumeration;
-import java.util.Properties;
 import java.util.Map;
 import java.util.Random;
 
 import org.objectweb.joram.client.jms.ConnectionFactory;
-import org.objectweb.joram.client.jms.admin.AdministeredObject;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.joram.shared.JoramTracing;
@@ -44,11 +42,9 @@ import org.objectweb.joram.shared.JoramTracing;
  * A base class for clustered connection factories.
  */
 public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.admin.AdministeredObject implements javax.jms.ConnectionFactory {
-
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+  
   protected Hashtable cluster = null;
 
   /** 
