@@ -1,6 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s): Nicolas Tachker (Bull SA)
+ * Contributor(s): Nicolas Tachker (ScalAgent D.T.)
  */
 package org.objectweb.joram.client.connector;
 
@@ -27,7 +28,6 @@ import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 import javax.naming.Reference;
 import javax.resource.spi.ConnectionManager;
-import javax.resource.spi.ConnectionRequestInfo;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -37,12 +37,10 @@ import org.objectweb.util.monolog.api.BasicLevel;
  */
 public class OutboundConnectionFactory implements javax.jms.ConnectionFactory,
                                                   java.io.Serializable,
-                                                  javax.resource.Referenceable
-{
-  /**
-   * 
-   */
+                                                  javax.resource.Referenceable {
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+  
   /** Central manager for outbound connectivity. */
   protected ManagedConnectionFactoryImpl mcf;
   /** Manager for connection pooling. */

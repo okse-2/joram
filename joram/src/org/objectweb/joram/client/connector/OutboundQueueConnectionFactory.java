@@ -26,7 +26,6 @@ import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 import javax.resource.spi.ConnectionManager;
-import javax.resource.spi.ConnectionRequestInfo;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -38,11 +37,8 @@ public class OutboundQueueConnectionFactory
              extends OutboundConnectionFactory
              implements javax.jms.QueueConnectionFactory,
                         java.io.Serializable,
-                        javax.resource.Referenceable
-{
-  /**
-   * 
-   */
+                        javax.resource.Referenceable {
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   /**
