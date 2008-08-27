@@ -55,7 +55,6 @@ public class Test_DMQ_Body extends TestCase {
 
   public void run() {
     try {
-      System.out.println("server start");
       startAgentServer((short) 0);
 
       admin();
@@ -63,26 +62,19 @@ public class Test_DMQ_Body extends TestCase {
 
       Context ictx = new InitialContext();
       Queue queue = (Queue) ictx.lookup("queue");
-      DeadMQueue dq = (DeadMQueue) ictx.lookup("dq");
-
       ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cf");
       ictx.close();
 
       Connection cnx = cf.createConnection();
-
-      // create a connection for the deadqueue
-      Connection cnx_dead = cf.createConnection();
+      // create a connection 
       Session sessionp = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
       Session sessionc = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      // create a session for the deadqueue
-      Session sessioncdead = cnx_dead.createSession(false, Session.AUTO_ACKNOWLEDGE);
       cnx.start();
-      cnx_dead.start();
+
       // create a producer and a consumer
       MessageProducer producer = sessionp.createProducer(queue);
       MessageConsumer consumer = sessionc.createConsumer(queue);
-      // create a consumer attach to the deadqueue
-
+ 
       // create a message send to the queue by the pruducer 
       TextMessage msg = sessionp.createTextMessage("test not delete");
       producer.setTimeToLive(1000L);
@@ -90,62 +82,60 @@ public class Test_DMQ_Body extends TestCase {
 
       // sleep to be safe that the message expired
       Thread.sleep(1500L);
-      // The receive reaction will send the message in the DMQ
+      // The receive reaction will send the message in the DMQ it is not
+      // already done.
       assertEquals(null, consumer.receive(100));
-
-      QueueBrowser browserDmq = sessioncdead.createBrowser(dq);
-      Enumeration messages = browserDmq.getEnumeration();
-      assertTrue(messages.hasMoreElements());
-
-      while (messages.hasMoreElements()) {
-        TextMessage msg1 = (TextMessage) messages.nextElement();
-        System.out.println("message expired !");
-        //test messages
-        assertEquals(1, msg1.getIntProperty("JMS_JORAM_ERRORCOUNT"));
-        assertEquals(MessageErrorConstants.EXPIRED, msg1.getIntProperty("JMS_JORAM_ERRORCODE_1"));
-        assertEquals(msg.getJMSMessageID(), msg1.getJMSMessageID());
-        assertEquals(msg.getJMSType(), msg1.getJMSType());
-        assertEquals("test not delete", msg1.getText());
-      }
-
+      
       cnx.close();
+      
+      test(msg);
+      
       stopAgentServer((short) 0);
       Thread.sleep(2000);
       startAgentServer((short) 0);
-      ictx = new InitialContext();
-      dq = (DeadMQueue) ictx.lookup("dq");
-      cf = (ConnectionFactory) ictx.lookup("cf");
-      ictx.close();
-
-      cnx_dead = cf.createConnection();
-      sessioncdead = cnx_dead.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      cnx_dead.start();
-
-      browserDmq = sessioncdead.createBrowser(dq);
-      messages = browserDmq.getEnumeration();
-
-      assertTrue(messages.hasMoreElements());
-
-      while (messages.hasMoreElements()) {
-        TextMessage msg1 = (TextMessage) messages.nextElement();
-        assertEquals(1, msg1.getIntProperty("JMS_JORAM_ERRORCOUNT"));
-        assertEquals(MessageErrorConstants.EXPIRED, msg1.getIntProperty("JMS_JORAM_ERRORCODE_1"));
-        assertEquals(msg.getJMSMessageID(), msg1.getJMSMessageID());
-        assertEquals(msg.getJMSType(), msg1.getJMSType());
-        assertEquals("test not delete", msg1.getText());
-      }
-
-      cnx_dead.close();
+      Thread.sleep(2000);
+      
+      test(msg);
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);
     } finally {
-      System.out.println("Server stop ");
       stopAgentServer((short) 0);
       endTest();
     }
   }
 
+  public void test(TextMessage msg) throws Exception {
+    InitialContext ictx = new InitialContext();
+    DeadMQueue dq = (DeadMQueue) ictx.lookup("dq");
+    ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cf");
+    ictx.close();
+
+    Connection cnx_dead = cf.createConnection();
+    Session sessioncdead = cnx_dead.createSession(false, Session.AUTO_ACKNOWLEDGE);
+    cnx_dead.start();
+
+    QueueBrowser browserDmq = sessioncdead.createBrowser(dq);
+    Enumeration messages = browserDmq.getEnumeration();
+    
+    assertTrue(messages.hasMoreElements());
+
+    TextMessage msg1 = (TextMessage) messages.nextElement();
+
+    assertEquals(1, msg1.getIntProperty("JMS_JORAM_ERRORCOUNT"));
+    assertEquals(MessageErrorConstants.EXPIRED, msg1.getIntProperty("JMS_JORAM_ERRORCODE_1"));
+    
+    System.out.println("msg#" + msg1.getJMSMessageID() + " " + msg1.getStringProperty("JMS_JORAM_ERRORCAUSE_1"));
+
+    assertEquals(msg.getJMSMessageID(), msg1.getJMSMessageID());
+    assertEquals(msg.getJMSType(), msg1.getJMSType());
+    assertEquals(msg.getText(), msg1.getText());
+
+    assertFalse(messages.hasMoreElements());
+    
+    cnx_dead.close();
+  }
+  
   /**
    * Admin : Create queue and a user anonymous use jndi
    */
