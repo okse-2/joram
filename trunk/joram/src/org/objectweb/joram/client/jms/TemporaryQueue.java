@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,12 +23,8 @@
  */
 package org.objectweb.joram.client.jms;
 
-import java.util.Vector;
-import java.util.Hashtable;
-
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
-import javax.naming.NamingException;
 
 import org.objectweb.joram.shared.client.TempDestDeleteRequest;
 
@@ -39,10 +35,9 @@ import org.objectweb.joram.shared.JoramTracing;
  * Implements the <code>javax.jms.TemporaryQueue</code> interface.
  */
 public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+  
   private final static String TMP_QUEUE_TYPE = "queue.tmp";
 
   public static boolean isTemporaryQueue(String type) {
@@ -68,8 +63,7 @@ public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue {
   }
 
   /** Returns a String image of the queue. */
-  public String toString()
-  {
+  public String toString() {
     return "TempQueue:" + agentId;
   }
 
@@ -79,8 +73,7 @@ public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue {
    * @exception IllegalStateException  If the connection is closed or broken.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public void delete() throws JMSException
-  {
+  public void delete() throws JMSException {
     if (cnx == null)
       throw new JMSSecurityException("Forbidden call as this TemporaryQueue"
                                      + " does not belong to this connection.");
@@ -103,8 +96,7 @@ public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue {
    * Returns the connection this temporary queue belongs to,
    * <code>null</code> if not known.
    */
-  public Connection getCnx()
-  {
+  public Connection getCnx() {
     return cnx;
   }
 }
