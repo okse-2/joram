@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -26,12 +26,10 @@ package org.objectweb.joram.client.jms;
 
 import java.net.ConnectException;
 import java.util.Vector;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
  
 import javax.jms.JMSException;
-import javax.naming.NamingException;
 
 import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
@@ -50,10 +48,9 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * sending and the source of messages it receives.
  */
 public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+
   private final static String TOPIC_TYPE = "topic";
 
   public static boolean isTopic(String type) {
@@ -103,8 +100,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
   public static Topic create(int serverId,
                              String name,
                              String className,
-                             Properties prop)
-    throws ConnectException, AdminException {
+                             Properties prop) throws ConnectException, AdminException {
     Topic topic = new Topic();
     doCreate(serverId, name, className, prop, topic, TOPIC_TYPE);
 
@@ -135,8 +131,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    */
   public static Topic create(int serverId,
                              String className,
-                             Properties prop)
-                throws ConnectException, AdminException {
+                             Properties prop) throws ConnectException, AdminException {
     return create(serverId, null, className, prop);
   }
 
@@ -153,8 +148,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public static Topic create(int serverId, Properties prop)
-                throws ConnectException, AdminException {
+  public static Topic create(int serverId, Properties prop) throws ConnectException, AdminException {
     return create(serverId, "org.objectweb.joram.mom.dest.Topic", prop);
   }
 
@@ -173,8 +167,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public static Topic create(int serverId, String name)
-                throws ConnectException, AdminException {
+  public static Topic create(int serverId, String name) throws ConnectException, AdminException {
     return create(serverId, name, "org.objectweb.joram.mom.dest.Topic", null);
   }
 
@@ -191,14 +184,13 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public static Topic create(String name)
-                throws ConnectException, AdminException {
+  public static Topic create(String name) throws ConnectException, AdminException {
     return create(AdminModule.getLocalServerId(),
                   name,
                   "org.objectweb.joram.mom.dest.Topic",
                   null);
   }
- 
+
   /**
    * Admin method creating and deploying a topic on a given server.
    * <p>
@@ -210,8 +202,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public static Topic create(int serverId)
-                throws ConnectException, AdminException {
+  public static Topic create(int serverId) throws ConnectException, AdminException {
     return create(serverId, null, "org.objectweb.joram.mom.dest.Topic", null);
   }
 
@@ -236,8 +227,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public Topic getHierarchicalFather() throws ConnectException, AdminException
-  {
+  public Topic getHierarchicalFather() throws ConnectException, AdminException {
     Monitor_GetFather request = new Monitor_GetFather(agentId);
     Monitor_GetFatherRep reply =
       (Monitor_GetFatherRep) AdminModule.doRequest(request);
@@ -257,8 +247,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public List getClusterFellows() throws ConnectException, AdminException
-  {
+  public List getClusterFellows() throws ConnectException, AdminException {
     Monitor_GetCluster request = new Monitor_GetCluster(agentId);
     Monitor_GetClusterRep reply =
       (Monitor_GetClusterRep) AdminModule.doRequest(request);
@@ -280,21 +269,18 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public int getSubscriptions() throws ConnectException, AdminException
-  {
+  public int getSubscriptions() throws ConnectException, AdminException {
     Monitor_GetSubscriptions request = new Monitor_GetSubscriptions(agentId);
     Monitor_GetNumberRep reply =
       (Monitor_GetNumberRep) AdminModule.doRequest(request);
     return reply.getNumber();
   }
 
-  public String[] getSubscriberIds() 
-    throws AdminException, ConnectException {
-      GetSubscriberIdsRep reply = 
-        (GetSubscriberIdsRep)AdminModule.doRequest(
-          new GetSubscriberIds(agentId));
-      return reply.getSubscriberIds();
-    }
+  public String[] getSubscriberIds() throws AdminException, ConnectException {
+    GetSubscriberIdsRep reply = 
+      (GetSubscriberIdsRep)AdminModule.doRequest(new GetSubscriberIds(agentId));
+    return reply.getSubscriberIds();
+  }
 
   /**
    * Adds a topic into the cluster this topic belongs to.
@@ -309,12 +295,8 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public void addClusteredTopic(Topic addedTopic)
-    throws ConnectException, AdminException
-  {
-    AdminModule.doRequest(
-      new SetCluster(agentId,
-                     addedTopic.getName()));
+  public void addClusteredTopic(Topic addedTopic) throws ConnectException, AdminException {
+    AdminModule.doRequest(new SetCluster(agentId, addedTopic.getName()));
   }
 
   /**
@@ -326,9 +308,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public void removeFromCluster()
-    throws ConnectException, AdminException
-  {
+  public void removeFromCluster() throws ConnectException, AdminException {
     AdminModule.doRequest(new UnsetCluster(agentId));
   }
 
@@ -344,12 +324,10 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public void setParent(Topic parent)
-    throws ConnectException, AdminException {
+  public void setParent(Topic parent) throws ConnectException, AdminException {
     if (parent == null)
       unsetParent();
-    AdminModule.doRequest(
-      new SetFather(parent.getName(), agentId));
+    AdminModule.doRequest(new SetFather(parent.getName(), agentId));
   }
 
   /**
@@ -361,8 +339,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public void unsetParent()
-         throws ConnectException, AdminException  {
+  public void unsetParent() throws ConnectException, AdminException {
     AdminModule.doRequest(new UnsetFather(agentId));
   }
 }
