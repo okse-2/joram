@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.objectweb.joram.mom.dest.AdminTopic;
 import org.objectweb.joram.mom.notifications.GetProxyIdNot;
 import org.objectweb.joram.mom.proxies.AckedQueue;
 import org.objectweb.joram.mom.proxies.GetConnectionNot;
@@ -145,7 +146,7 @@ public class TcpConnectionListener extends Daemon {
   private void acceptConnection() throws Exception {
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgProxy.log(BasicLevel.DEBUG, 
-                                "TcpConnectionListener.acceptConnection()");
+      "TcpConnectionListener.acceptConnection()");
 
     Socket sock = serverSocket.accept();
     String inaddr = sock.getInetAddress().getHostAddress();
@@ -167,33 +168,31 @@ public class TcpConnectionListener extends Daemon {
       int len = StreamUtil.readIntFrom(is);
       String userName = StreamUtil.readStringFrom(is);
       if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-	JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
+        JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
                                   " -> read userName = " + userName);
       String userPassword = StreamUtil.readStringFrom(is);
       if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-	JoramTracing.dbgProxy.log(BasicLevel.DEBUG, 
+        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, 
                                   " -> read userPassword = " + userPassword);
       int key = StreamUtil.readIntFrom(is);
       if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-	JoramTracing.dbgProxy.log(BasicLevel.DEBUG, " -> read key = " + key);
+        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, " -> read key = " + key);
       int heartBeat = 0;
       if (key == -1) {
-	heartBeat = StreamUtil.readIntFrom(is);
-	if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-	JoramTracing.dbgProxy.log(BasicLevel.DEBUG, 
-                                  " -> read heartBeat = " + heartBeat);
+        heartBeat = StreamUtil.readIntFrom(is);
+        if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgProxy.log(BasicLevel.DEBUG, 
+                                    " -> read heartBeat = " + heartBeat);
       }
 
       GetProxyIdNot gpin = new GetProxyIdNot(userName, userPassword, inaddr);
       AgentId proxyId;
       try {
-        gpin.invoke(new AgentId(AgentServer.getServerId(),
-                                AgentServer.getServerId(),
-                                AgentId.JoramAdminStamp));
+        gpin.invoke(AdminTopic.getDefault());
         proxyId = gpin.getProxyId();
       } catch (Exception exc) {
         if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-	  JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
+          JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
         StreamUtil.writeTo(1, nos);
         StreamUtil.writeTo(exc.getMessage(), nos);
         nos.send();
@@ -218,7 +217,7 @@ public class TcpConnectionListener extends Daemon {
         try {
           gcn.invoke(proxyId);
         } catch (Exception exc) {
-	  if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
             JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
           StreamUtil.writeTo(1, nos);
           StreamUtil.writeTo(exc.getMessage(), nos);
@@ -244,7 +243,7 @@ public class TcpConnectionListener extends Daemon {
       sock.setSoTimeout(0);
 
       TcpConnection tcpConnection = new TcpConnection(ioctrl, proxyId,
-          replyQueue, key, proxyService, heartBeat == 0);
+                                                      replyQueue, key, proxyService, heartBeat == 0);
       tcpConnection.start();
     } catch (Exception exc) {
       if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))

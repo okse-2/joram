@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -28,7 +28,6 @@ import java.net.*;
 import java.util.*;
 
 import fr.dyade.aaa.agent.*;
-import fr.dyade.aaa.util.*;
 
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -41,8 +40,7 @@ public class TcpProxyService {
    * Name the property that allow to fix the TCP SO_TIMEOUT property for the
    * client's connections.
    */
-  public static final String SO_TIMEOUT_PROP = 
-      "org.objectweb.joram.mom.proxies.tcp.soTimeout";
+  public static final String SO_TIMEOUT_PROP = "org.objectweb.joram.mom.proxies.tcp.soTimeout";
 
   /**
    * Default value for the TCP SO_TIMEOUT property.
@@ -53,8 +51,7 @@ public class TcpProxyService {
    * Name the property that allow to fix the pool size for the
    * connection's listener.
    */
-  public static final String POOL_SIZE_PROP = 
-      "org.objectweb.joram.mom.proxies.tcp.poolSize";
+  public static final String POOL_SIZE_PROP = "org.objectweb.joram.mom.proxies.tcp.poolSize";
 
   /**
    * Default value for the pool size.
@@ -65,8 +62,7 @@ public class TcpProxyService {
    * Name the property that allow to fix the TCP BACKLOG property for the
    * client's connections.
    */
-  public static final String BACKLOG_PROP = 
-      "org.objectweb.joram.mom.proxies.tcp.backlog";
+  public static final String BACKLOG_PROP = "org.objectweb.joram.mom.proxies.tcp.backlog";
 
   /**
    * Default value for the TCP BACKLOG property.
@@ -78,8 +74,10 @@ public class TcpProxyService {
    */
   public static final int DEFAULT_PORT = 16010;
 
+  /**
+   * Default IP address for binding the listen socket.
+   */
   public static final String DEFAULT_BINDADDRESS = "0.0.0.0"; // all
-
 
   /**
    * The proxy service reference (used to stop it).

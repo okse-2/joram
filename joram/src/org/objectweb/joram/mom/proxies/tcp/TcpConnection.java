@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,9 +22,6 @@
 package org.objectweb.joram.mom.proxies.tcp;
 
 import org.objectweb.joram.mom.proxies.*;
-
-import java.net.*;
-import java.io.*;
 
 import org.objectweb.joram.shared.JoramTracing;
 

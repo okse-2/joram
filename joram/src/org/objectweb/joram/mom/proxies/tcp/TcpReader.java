@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 2004 - France Telecom R&D
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,12 +27,8 @@ import java.io.IOException;
 
 import org.objectweb.joram.mom.proxies.CloseConnectionNot;
 import org.objectweb.joram.mom.proxies.ConnectionManager;
-import org.objectweb.joram.mom.proxies.FlowControl;
-import org.objectweb.joram.mom.proxies.MultiCnxSync;
 import org.objectweb.joram.mom.proxies.ProxyMessage;
-import org.objectweb.joram.mom.proxies.RequestNot;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
-import org.objectweb.joram.shared.client.ProducerMessages;
 
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -46,7 +42,6 @@ import fr.dyade.aaa.agent.Channel;
  * the user's proxy.
  */
 public class TcpReader extends Daemon {
-
   /**
    * The TCP connection that started this reader.
    */

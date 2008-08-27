@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,16 +22,12 @@
  */
 package org.objectweb.joram.mom.proxies.tcp;
 
-import fr.dyade.aaa.agent.*;
-import fr.dyade.aaa.util.*;
-
 import java.net.*;
 import java.util.*;
 import java.io.FileInputStream;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import javax.net.ServerSocketFactory;
-import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.TrustManager;
@@ -51,7 +47,6 @@ public class SSLTcpProxyService extends TcpProxyService {
   private final static String KS_PASS = "org.objectweb.joram.keystorepass";
   private final static String KS_TYPE = "org.objectweb.joram.keystoretype";
   private final static String SSLCONTEXT = "org.objectweb.joram.sslCtx";
-
 
   /**
    * Initializes the SSLTCP entry point by creating a
@@ -103,8 +98,7 @@ public class SSLTcpProxyService extends TcpProxyService {
     super(serverSocket,poolSize,timeout);
   }
 
-  private static ServerSocketFactory createServerSocketFactory() 
-    throws Exception {
+  private static ServerSocketFactory createServerSocketFactory() throws Exception {
     char[] keyStorePass =  System.getProperty(KS_PASS, "jorampass").toCharArray();
     String keystoreFile = System.getProperty(KS, "./joram_ks");
     String sslContext = System.getProperty(SSLCONTEXT, "SSL");
@@ -113,7 +107,7 @@ public class SSLTcpProxyService extends TcpProxyService {
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
                                 "SSLTcpProxyService.createServerSocketFactory:" +
-                                keystoreFile + ':' + keyStorePass);
+                                keystoreFile + ':' + new String(keyStorePass));
 
     KeyStore keystore = KeyStore.getInstance(ksType);
     keystore.load(new FileInputStream(keystoreFile), keyStorePass);
