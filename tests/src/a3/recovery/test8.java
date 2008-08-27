@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2001 ScalAgent Distributed Technologies
+ * Copyright (C)  2001 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,11 +17,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s):ScalAgent D.T.
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
-
-
 package a3.recovery;
 
 import java.util.*;
@@ -46,8 +44,8 @@ public class test8 extends TestCase {
   static int ended = 2;
 
   protected void setUp() throws Exception {
-    int bounce = Integer.getInteger("bounce", 250).intValue();
-    timeout = 500L * bounce;
+    int bounce = Integer.getInteger("bounce", 1000).intValue();
+    timeout = 100L * bounce;
     timeout = Long.getLong("timeout", timeout).longValue();
     
     timer = new Timer(true);
@@ -63,11 +61,11 @@ public class test8 extends TestCase {
     ping2.bounce = bounce;
     ping2.deploy();
 
-    timer.schedule(new PingTask(ping1.getId(), new StartNot()), 6500L, 15000L);
-    timer.schedule(new PingTask(ping1.getId(), new StopNot()), 20000L, 15000L);
+    timer.schedule(new PingTask(ping1.getId(), new StartNot()), 2500L, 10000L);
+    timer.schedule(new PingTask(ping1.getId(), new StopNot()), 11000L, 10000L);
 
     timer.schedule(new PingTask(ping2.getId(), new StartNot()), 500L, 5000L);
-    timer.schedule(new PingTask(ping2.getId(), new StopNot()), 4500L, 5000L);
+    timer.schedule(new PingTask(ping2.getId(), new StopNot()), 4000L, 5000L);
   }
 
   protected void tearDown() {
@@ -134,25 +132,24 @@ public class test8 extends TestCase {
           startAgentServer(remote, null, jvmargs);
         } else if (not instanceof StopNot) {
           if (rand.nextBoolean()) {
-	    System.out.println("stop " + remote + " - " + bounce);
+            System.out.println("stop " + remote + " - " + bounce);
             TestCase.stopAgentServer(remote);
           } else {
-	    System.out.println("crash " + remote + " - " + bounce);
+            System.out.println("crash " + remote + " - " + bounce);
             TestCase.crashAgentServer(remote);
-	  }
-	  if( remote == 1 ){
-	   nbStopTask0++;
-	  }else if( remote == 2){
-	      nbStopTask1++;
-	  }
-	  
-	  if(nbStopTask0 > 2 && nbStopTask1 >2 ) endTest();
+          }
+          if( remote == 1 ){
+            nbStopTask0++;
+          }else if( remote == 2){
+            nbStopTask1++;
+          }
+
+          if(nbStopTask0 > 2 && nbStopTask1 >2 ) endTest();
         } else {
-	  if ((bounce %50) == 0)
+          if ((bounce %50) == 0)
             System.out.println("bounce[" + remote + "]: " + bounce);
           assertTrue(from.equals(pong));
-          assertEquals(not.getClass().getName(),
-                       "a3.recovery.test8$Ball");
+          assertEquals(not.getClass().getName(), "a3.recovery.test8$Ball");
           if (not instanceof Ball) {
             Ball ball = (Ball) not;
             assertEquals(ball.bounce, bounce);
