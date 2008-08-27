@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -26,8 +26,6 @@ package org.objectweb.joram.client.jms;
 import javax.jms.IllegalStateException;
 import javax.jms.MessageFormatException;
 import javax.jms.JMSException;
-
-import org.objectweb.joram.shared.client.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.joram.shared.JoramTracing;
