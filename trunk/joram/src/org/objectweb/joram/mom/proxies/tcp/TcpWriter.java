@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2004 ScalAgent Distributed Technologies
- * Copyright (C) 2004 - France Telecom R&D
+ * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,7 +24,6 @@
 package org.objectweb.joram.mom.proxies.tcp;
 
 import java.io.*;
-import java.net.*;
 
 import org.objectweb.joram.mom.proxies.*;
 import org.objectweb.joram.shared.client.MomExceptionReply;
@@ -40,10 +39,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * socket. 
  */
 public class TcpWriter extends Daemon {
-  
   /**
-   * The TCP connection that started
-   * this writer.
+   * The TCP connection that started this writer.
    */
   private TcpConnection tcpConnection;
 
