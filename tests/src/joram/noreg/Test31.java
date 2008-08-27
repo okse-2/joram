@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -42,8 +42,6 @@ import org.objectweb.joram.shared.MessageErrorConstants;
 
 import fr.dyade.aaa.agent.AgentServer;
 
-
-
 /**
  * test use TTL
  *
@@ -52,7 +50,7 @@ public class Test31 extends joram.framework.TestCase implements MessageListener{
   public static void main (String args[]) throws Exception {
       new Test31().run();
   }
-    public void run(){
+  public void run(){
     Connection cnx = null;
     try {
       AgentServer.init((short) 0, "s0", null);
@@ -111,14 +109,14 @@ public class Test31 extends joram.framework.TestCase implements MessageListener{
 
       Thread.sleep(5000L);
       //System.out.println("Messages in queue: " + dest.getPendingMessages() + ", " + new Date());
-      assertEquals(1,dest.getPendingMessages());
-      
+      assertEquals(1, dest.getPendingMessages());
+
       //System.out.println("sends msg#4 (ttl=1s): " + new Date());
       prod.setTimeToLive(1000L);
       msg = session1.createMessage();
       msg.setIntProperty("index", 4);
       prod.send(msg);
-      
+
       Thread.sleep(5000L);
 
       msg = cons.receive();
@@ -128,14 +126,13 @@ public class Test31 extends joram.framework.TestCase implements MessageListener{
 
       AdminModule.disconnect();
       cnx.close();
-    }catch(Throwable exc){
-	exc.printStackTrace();
-	error(exc);
+    } catch(Throwable exc){
+      exc.printStackTrace();
+      error(exc);
     } finally {
-	AgentServer.stop();
-	endTest();
+      AgentServer.stop();
+      endTest();
     }
-   
   }
 
   public synchronized void onMessage(Message msg) {
