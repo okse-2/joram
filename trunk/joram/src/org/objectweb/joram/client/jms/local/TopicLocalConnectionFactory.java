@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,29 +23,23 @@
  */
 package org.objectweb.joram.client.jms.local;
 
+import javax.jms.JMSException;
 import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.TopicConnection;
-
-import javax.naming.NamingException;
+import org.objectweb.joram.client.jms.TopicConnectionFactory;
 
 /**
  * A <code>TopicLocalConnectionFactory</code> instance is a factory of
  * local connections for Pub/Sub communication.
  */
-public class TopicLocalConnectionFactory
-    extends org.objectweb.joram.client.jms.TopicConnectionFactory {
-
-  /**
-   * 
-   */
+public class TopicLocalConnectionFactory extends TopicConnectionFactory {
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
-
 
   /**
    * Constructs an empty <code>TopicLocalConnectionFactory</code> instance.
    */
-  public TopicLocalConnectionFactory()
-  {
+  public TopicLocalConnectionFactory() {
     super("localhost", -1);
   }
 
@@ -54,10 +48,8 @@ public class TopicLocalConnectionFactory
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.TopicConnection
-         createTopicConnection(String name, String password)
-         throws javax.jms.JMSException
-  {
+  public javax.jms.TopicConnection createTopicConnection(String name,
+                                                         String password) throws JMSException {
     LocalConnection lc = new LocalConnection(name, password);
     return new TopicConnection(params, lc);
   }
@@ -67,20 +59,17 @@ public class TopicLocalConnectionFactory
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.Connection createConnection(String name, String password)
-                              throws javax.jms.JMSException
-  {
+  public javax.jms.Connection createConnection(String name,
+                                               String password) throws JMSException {
     LocalConnection lc = new LocalConnection(name, password);
     return new Connection(params, lc);
   }
-
 
   /**
    * Admin method creating a <code>javax.jms.TopicConnectionFactory</code>
    * instance for creating local connections.
    */ 
-  public static javax.jms.TopicConnectionFactory create()
-  {
+  public static javax.jms.TopicConnectionFactory create() {
     return new TopicLocalConnectionFactory();
   }
 }

@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,44 +23,35 @@
  */
 package org.objectweb.joram.client.jms.local;
 
+import javax.jms.JMSException;
 import org.objectweb.joram.client.jms.XAConnection;
 import org.objectweb.joram.client.jms.XAQueueConnection;
+import org.objectweb.joram.client.jms.XAQueueConnectionFactory;
 import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.QueueConnection;
-
-import javax.naming.NamingException;
 
 /**
  * An <code>XAQueueLocalConnectionFactory</code> instance is a factory of
  * local connections for XA PTP communication.
  */
-public class XAQueueLocalConnectionFactory
-    extends org.objectweb.joram.client.jms.XAQueueConnectionFactory
-{
-  /**
-   * 
-   */
+public class XAQueueLocalConnectionFactory extends XAQueueConnectionFactory {
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
-
 
   /**
    * Constructs an <code>XAQueueLocalConnectionFactory</code> instance.
    */
-  public XAQueueLocalConnectionFactory()
-  {
+  public XAQueueLocalConnectionFactory() {
     super("localhost", -1);
   }
-
 
   /**
    * Method inherited from the <code>XAQueueConnectionFactory</code> class.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.XAQueueConnection
-         createXAQueueConnection(String name, String password)
-         throws javax.jms.JMSException
-  {
+  public javax.jms.XAQueueConnection createXAQueueConnection(String name,
+                                                             String password) throws JMSException {
     LocalConnection lc = new LocalConnection(name, password);
     return new XAQueueConnection(params, lc);
   }
@@ -70,10 +61,8 @@ public class XAQueueLocalConnectionFactory
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.XAConnection
-         createXAConnection(String name, String password)
-         throws javax.jms.JMSException
-  {
+  public javax.jms.XAConnection createXAConnection(String name,
+                                                   String password) throws JMSException {
     LocalConnection lc = new LocalConnection(name, password);
     return new XAConnection(params, lc);
   }
@@ -83,10 +72,8 @@ public class XAQueueLocalConnectionFactory
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.QueueConnection
-         createQueueConnection(String name, String password)
-         throws javax.jms.JMSException
-  {
+  public javax.jms.QueueConnection createQueueConnection(String name,
+                                                         String password) throws JMSException {
     LocalConnection lc = new LocalConnection(name, password);
     return new QueueConnection(params, lc);
   }
@@ -96,9 +83,8 @@ public class XAQueueLocalConnectionFactory
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.Connection createConnection(String name, String password)
-         throws javax.jms.JMSException
-  {
+  public javax.jms.Connection createConnection(String name,
+                                               String password) throws JMSException {
     LocalConnection lc = new LocalConnection(name, password);
     return new Connection(params, lc);
   }
@@ -108,8 +94,7 @@ public class XAQueueLocalConnectionFactory
    * Admin method creating a <code>javax.jms.XAQueueConnectionFactory</code>
    * instance for creating local connections.
    */ 
-  public static javax.jms.XAQueueConnectionFactory create()
-  {
+  public static javax.jms.XAQueueConnectionFactory create() {
     return new XAQueueLocalConnectionFactory();
   }
 }
