@@ -452,7 +452,7 @@ public class Session implements javax.jms.Session {
    * @see setTopicPassivationThreshold
    */
   public void setTopicPassivationThreshold(int topicPassivationThreshold) {
-    topicPassivationThreshold = topicPassivationThreshold;
+    this.topicPassivationThreshold = topicPassivationThreshold;
   }
 
   /**
@@ -503,7 +503,7 @@ public class Session implements javax.jms.Session {
    * @see getTopicActivationThreshold
    */
   public void setTopicActivationThreshold(int topicActivationThreshold) {
-    topicActivationThreshold = topicActivationThreshold;
+    this.topicActivationThreshold = topicActivationThreshold;
   }
 
   /**
@@ -1122,7 +1122,6 @@ public class Session implements javax.jms.Session {
       for (int i = 0; i < load; i++) {
         org.objectweb.joram.shared.messages.Message momMsg = 
           (org.objectweb.joram.shared.messages.Message) repliesIn.pop();
-        String msgId = momMsg.id;
         
         onMessage(momMsg, messageConsumerListener);
       }
@@ -1956,10 +1955,9 @@ public class Session implements javax.jms.Session {
    * Called by:
    * - method run (application server thread) synchronized
    */
-  private void ackMessage(String targetName, 
+  private void ackMessage(String targetName,
                           String msgId,
-                          boolean queueMode) 
-    throws JMSException {
+                          boolean queueMode) throws JMSException {
     ConsumerAckRequest ack = new ConsumerAckRequest(targetName, queueMode);
     ack.addId(msgId);
     mtpx.sendRequest(ack);
@@ -1977,12 +1975,8 @@ public class Session implements javax.jms.Session {
                            boolean queueMode) 
     throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, 
-        "Session.denyMessage(" + 
-        targetName + ',' + 
-        msgId + ',' + 
-        queueMode + ')');
+      logger.log(BasicLevel.DEBUG, 
+                 "Session.denyMessage(" + targetName + ',' + msgId + ',' + queueMode + ')');
     ConsumerDenyRequest cdr = new ConsumerDenyRequest(
       targetName, msgId, queueMode);
     if (queueMode) {
