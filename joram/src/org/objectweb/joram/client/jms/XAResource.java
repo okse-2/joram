@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -24,7 +24,6 @@
  */
 package org.objectweb.joram.client.jms;
 
-import javax.jms.JMSException;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.Xid;
 
@@ -47,7 +46,6 @@ public class XAResource implements javax.transaction.xa.XAResource {
   /** The session producing and consuming messages. */
   Session sess;
  
-
   /**
    * Constructs an XA resource representing a given session.
    */
@@ -57,10 +55,8 @@ public class XAResource implements javax.transaction.xa.XAResource {
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                 " XAResource rm = " + rm + 
-                                 ", sess = " + sess);
+                                 " XAResource rm = " + rm + ", sess = " + sess);
   }
-
 
   /**
    * Enlists this resource in a given transaction.

@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
- * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -25,13 +25,24 @@
  */
 package org.objectweb.joram.client.jms;
 
+import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.IllegalStateException;
-import javax.jms.TransactionInProgressException;
-
-import org.objectweb.joram.shared.client.*;
-
-import org.objectweb.util.monolog.api.BasicLevel;
+import javax.jms.Destination;
+import javax.jms.MapMessage;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.ObjectMessage;
+import javax.jms.Queue;
+import javax.jms.StreamMessage;
+import javax.jms.TextMessage;
+import javax.jms.Topic;
+import javax.jms.QueueBrowser;
+import javax.jms.MessageProducer;
+import javax.jms.MessageConsumer;
+import javax.jms.TopicSubscriber;
+import javax.jms.TemporaryTopic;
+import javax.jms.TemporaryQueue;
 
 /**
  * Implements the <code>javax.jms.XASession</code> interface.
@@ -44,7 +55,6 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * by this XA wrapper.
  */
 public class XASession implements javax.jms.XASession {
-
   /** The XA resource representing the session to the transaction manager. */
   private javax.transaction.xa.XAResource xaResource;
   
@@ -63,8 +73,7 @@ public class XASession implements javax.jms.XASession {
    */
   public XASession(Connection cnx, 
                    Session sess, 
-                   XAResourceMngr rm)
-    throws JMSException {
+                   XAResourceMngr rm) throws JMSException {
     this.sess = sess;
     xaResource = new XAResource(rm, sess);
   }
@@ -74,8 +83,7 @@ public class XASession implements javax.jms.XASession {
   }
 
    /** Returns a String image of this session. */
-  public String toString()
-  {
+  public String toString() {
     return "XASess:" + sess.getId();
   }
   
@@ -84,14 +92,12 @@ public class XASession implements javax.jms.XASession {
    *
    * @exception IllegalStateException  If the session is closed.
    */
-  public javax.jms.Session getSession() throws JMSException
-  {
+  public javax.jms.Session getSession() throws JMSException {
     return sess;
   }
  
   /** API method. */  
-  public javax.transaction.xa.XAResource getXAResource()
-  {
+  public javax.transaction.xa.XAResource getXAResource() {
     return xaResource;
   }
 
@@ -100,90 +106,71 @@ public class XASession implements javax.jms.XASession {
    *
    * @exception IllegalStateException  If the session is closed.
    */
-  public boolean getTransacted() throws JMSException
-  {
+  public boolean getTransacted() throws JMSException {
     return sess.getTransacted();
   }
 
   /**
    * Delegates the call to the wrapped JMS session.
    */
-  public javax.jms.QueueBrowser
-         createBrowser(javax.jms.Queue queue, String selector)
-         throws JMSException
-  {
+  public QueueBrowser createBrowser(Queue queue,
+                                              String selector) throws JMSException {
     return sess.createBrowser(queue, selector);
   }
 
   /**
    * Delegates the call to the wrapped JMS session.
    */
-  public javax.jms.QueueBrowser createBrowser(javax.jms.Queue queue)
-         throws JMSException
-  {
+  public QueueBrowser createBrowser(Queue queue) throws JMSException {
     return sess.createBrowser(queue);
   }
 
   /**
    * Delegates the call to the wrapped JMS session.
    */
-  public javax.jms.MessageProducer createProducer(javax.jms.Destination dest)
-         throws JMSException
-  {
+  public MessageProducer createProducer(Destination dest) throws JMSException {
     return sess.createProducer(dest);
   }
 
   /**
    * Delegates the call to the wrapped JMS session.
    */
-  public javax.jms.MessageConsumer
-         createConsumer(javax.jms.Destination dest,
-                        String selector,
-                        boolean noLocal)
-         throws JMSException
-  {
+  public MessageConsumer createConsumer(Destination dest,
+                                        String selector,
+                                        boolean noLocal) throws JMSException {
     return sess.createConsumer(dest, selector, noLocal);
   }
 
   /**
    * Delegates the call to the wrapped JMS session.
    */
-  public javax.jms.MessageConsumer
-         createConsumer(javax.jms.Destination dest, String selector)
-         throws JMSException
-  {
+  public MessageConsumer createConsumer(Destination dest,
+                                        String selector) throws JMSException {
     return sess.createConsumer(dest, selector);
   }
 
   /**
    * Delegates the call to the wrapped JMS session.
    */
-  public javax.jms.MessageConsumer createConsumer(javax.jms.Destination dest)
-         throws JMSException
-  {
+  public MessageConsumer createConsumer(Destination dest) throws JMSException {
     return sess.createConsumer(dest);
   }
 
   /**
    * Delegates the call to the wrapped JMS session.
    */
-  public javax.jms.TopicSubscriber
-         createDurableSubscriber(javax.jms.Topic topic,
-                                 String name,
-                                 String selector,
-                                 boolean noLocal)
-         throws JMSException
-  {
+  public TopicSubscriber createDurableSubscriber(Topic topic,
+                                                 String name,
+                                                 String selector,
+                                                 boolean noLocal) throws JMSException {
     return sess.createDurableSubscriber(topic, name, selector, noLocal);
   }
 
   /**
    * Delegates the call to the wrapped JMS session.
    */
-  public javax.jms.TopicSubscriber
-         createDurableSubscriber(javax.jms.Topic topic, String name)
-         throws JMSException
-  {
+  public TopicSubscriber createDurableSubscriber(Topic topic,
+                                                 String name) throws JMSException {
     return sess.createDurableSubscriber(topic, name);
   }
 
@@ -193,8 +180,7 @@ public class XASession implements javax.jms.XASession {
    *
    * @exception IllegalStateException  Systematically thrown.
    */
-  public void commit() throws JMSException
-  {
+  public void commit() throws JMSException {
     throw new IllegalStateException("Forbidden call on an XA session.");
   }
 
@@ -204,8 +190,7 @@ public class XASession implements javax.jms.XASession {
    *
    * @exception IllegalStateException  Systematically thrown.
    */
-  public void rollback() throws JMSException
-  {
+  public void rollback() throws JMSException {
     throw new IllegalStateException("Forbidden call on an XA session.");
   }
 
@@ -215,8 +200,7 @@ public class XASession implements javax.jms.XASession {
    *
    * @exception IllegalStateException  Systematically thrown.
    */
-  public void recover() throws JMSException
-  {
+  public void recover() throws JMSException {
     throw new IllegalStateException("Forbidden call on an XA session.");
   }
 
@@ -235,86 +219,67 @@ public class XASession implements javax.jms.XASession {
     sess.run();
   }
 
-  public void unsubscribe(String name)
-    throws JMSException {
+  public void unsubscribe(String name) throws JMSException {
     sess.unsubscribe(name);
   }
 
-  public synchronized javax.jms.TemporaryQueue createTemporaryQueue() 
-    throws JMSException {
+  public synchronized TemporaryQueue createTemporaryQueue() throws JMSException {
     return sess.createTemporaryQueue();
   }
 
-  public synchronized javax.jms.TemporaryTopic createTemporaryTopic() 
-    throws JMSException {
+  public synchronized TemporaryTopic createTemporaryTopic() throws JMSException {
     return sess.createTemporaryTopic();
   }
 
-  public synchronized javax.jms.Topic createTopic(
-    String topicName) 
-    throws JMSException {
+  public synchronized Topic createTopic(String topicName) throws JMSException {
     return sess.createTopic(topicName);
   }
 
-  public javax.jms.Queue createQueue(String queueName) 
-    throws JMSException {
+  public Queue createQueue(String queueName) throws JMSException {
     return sess.createQueue(queueName);
   }
 
-  public void setMessageListener(
-    javax.jms.MessageListener messageListener)
-    throws JMSException {
+  public void setMessageListener(MessageListener messageListener)throws JMSException {
     sess.setMessageListener(messageListener);
   }
 
-  public javax.jms.MessageListener 
-      getMessageListener() 
-    throws JMSException {
+  public MessageListener getMessageListener() throws JMSException {
     return sess.getMessageListener();
   }
 
-  public int getAcknowledgeMode() 
-    throws JMSException {
+  public int getAcknowledgeMode() throws JMSException {
     return sess.getAcknowledgeMode();
   }
 
-  public javax.jms.TextMessage createTextMessage() 
-    throws JMSException {
+  public TextMessage createTextMessage() throws JMSException {
     return sess.createTextMessage();
   }
 
-  public javax.jms.TextMessage createTextMessage(String text)
-    throws JMSException {
+  public TextMessage createTextMessage(String text) throws JMSException {
     return sess.createTextMessage(text);
   }
 
-  public javax.jms.StreamMessage createStreamMessage()
-    throws JMSException {
+  public StreamMessage createStreamMessage() throws JMSException {
     return sess.createStreamMessage();
   }
 
-  public javax.jms.ObjectMessage createObjectMessage()
-    throws JMSException {
+  public ObjectMessage createObjectMessage() throws JMSException {
     return sess.createObjectMessage();
   }
 
-  public javax.jms.ObjectMessage createObjectMessage(java.io.Serializable obj)
-    throws JMSException {
+  public ObjectMessage createObjectMessage(java.io.Serializable obj) throws JMSException {
     return sess.createObjectMessage(obj);
   }
 
-  public javax.jms.Message createMessage() 
-    throws JMSException {
+  public Message createMessage() throws JMSException {
     return sess.createMessage();
   }
 
-  public javax.jms.MapMessage createMapMessage()
-    throws JMSException {
+  public MapMessage createMapMessage() throws JMSException {
     return sess.createMapMessage();
   }
 
-  public javax.jms.BytesMessage createBytesMessage()
-    throws JMSException {
+  public BytesMessage createBytesMessage() throws JMSException {
     return sess.createBytesMessage();
   }
 }
