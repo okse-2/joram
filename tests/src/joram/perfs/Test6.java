@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Freyssinet Andre (ScalAgent D.T.)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): Badolle Fabien (ScalAgent D.T.)
  */
 package joram.perfs;
@@ -133,7 +133,7 @@ public class Test6 extends BaseTest {
 	    ConnectionFactory cf2 = createConnectionFactory(baseclass);
 	    ((org.objectweb.joram.client.jms.ConnectionFactory)cf2).getParameters().multiThreadSync = multiThreadSync;
 	    ((org.objectweb.joram.client.jms.ConnectionFactory)cf2).getParameters().multiThreadSyncDelay = multiThreadSyncDelay;
-	    ((org.objectweb.joram.client.jms.ConnectionFactory)cf2).getParameters().multiThreadSyncThreshold = NbSender;
+	    ((org.objectweb.joram.client.jms.ConnectionFactory)cf2).getParameters().multiThreadSyncThreshold = NbSender/2;
 	    
 	    Connection cnx2 = null;
 	    if (! multiCnx) {
@@ -177,6 +177,7 @@ public class Test6 extends BaseTest {
 	    for (int i=0; i<NbReceiver; i++) {
 		dt3 += (receiver[i].last - receiver[i].start);
 		dt4 += receiver[i].travel;
+                System.out.println("errors=" + receiver[i].xxx);
 	    }
 	    
 	    long NbMsg = NbMsgPerRound * NbRound * NbSender;

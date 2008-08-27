@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Freyssinet Andre (ScalAgent D.T.)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): Badolle Fabien (ScalAgent D.T.)
  */
 package joram.perfs;
@@ -108,7 +108,11 @@ public class Receiver extends BaseTest implements MessageListener {
   long start = 0L;
   long last = 0L;
 
+  int xxx = 0;
+
   public synchronized void onMessage(Message m) {
+    boolean excok = false;
+
     try {
       BytesMessage msg = (BytesMessage) m;
 
@@ -116,6 +120,10 @@ public class Receiver extends BaseTest implements MessageListener {
       if (counter == 0) start = last;
 
       int index = msg.getIntProperty("index");
+      if (index == -1) {
+        xxx += 1;
+        throw new IllegalStateException();
+      }
       counter += 1;
 
       if (index == 0) {
@@ -130,6 +138,8 @@ public class Receiver extends BaseTest implements MessageListener {
         sess.commit();
 
       travel += (last - msg.getLongProperty("time"));
+    } catch (IllegalStateException exc) {
+      throw exc;
     } catch (Throwable exc) {
       exc.printStackTrace();
     }
