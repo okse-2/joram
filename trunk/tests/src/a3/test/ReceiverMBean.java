@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2007 ScalAgent Distributed Technologies
+ * Copyright (C)  2007 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,12 +17,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s):ScalAgent D.T.
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
-
-
-
 package a3.test;
 
 import fr.dyade.aaa.agent.*;
@@ -34,7 +31,13 @@ public interface ReceiverMBean extends AgentMBean {
   public int getPayload();
   public void setPayload(int payload);
 
-  public int getTokens();
+  public int getPause();
+  public void setPause(int pause);
+
+  public int getNbTokens();
+  public int getNbErrors();
+  public int getNbSenders();
+
   public void reset();
 
   public void start();

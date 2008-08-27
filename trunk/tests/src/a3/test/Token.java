@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2007 ScalAgent Distributed Technologies
+ * Copyright (C)  2007 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,11 +17,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s):ScalAgent D.T.
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
-
-
 package a3.test;
 
 import fr.dyade.aaa.agent.*;
@@ -29,10 +27,12 @@ import fr.dyade.aaa.agent.*;
 public class Token extends Notification {
   public int bounce;
   public byte[] ballast;
+  public int pause;
 
-  public Token(int bounce, int size) {
+  public Token(int bounce, int size, int pause) {
     this.bounce = bounce;
     this.ballast = new byte[size];
+    this.pause = pause;
   }
 
   public StringBuffer toString(StringBuffer output) {
@@ -40,6 +40,7 @@ public class Token extends Notification {
     super.toString(output);
     output.append(",bounce=").append(bounce);
     output.append(",size=").append(ballast.length);
+    output.append(",pause=").append(pause);
     output.append(')');
     
     return output;
