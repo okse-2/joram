@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -29,14 +29,12 @@ import java.net.URL;
 import java.util.Timer;
 import java.util.Vector;
 import java.util.Hashtable;
-import java.lang.reflect.Method;
 
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 
 import org.apache.soap.Constants;
-import org.apache.soap.Fault;
 import org.apache.soap.SOAPException;
 import org.apache.soap.encoding.SOAPMappingRegistry;
 import org.apache.soap.encoding.soapenc.BeanSerializer;
@@ -49,17 +47,13 @@ import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.shared.client.*;
 import org.objectweb.joram.client.jms.connection.RequestChannel;
 
-import org.objectweb.joram.shared.JoramTracing;
-import org.objectweb.util.monolog.api.BasicLevel;
-
 /**
  * A <code>SoapConnection</code> links a Joram client and a Joram platform
  * with HTTP connections.
  * <p>
  * Requests and replies travel through the connections in SOAP (XML) format.
  */
-public class SoapConnection 
-    implements RequestChannel { 
+public class SoapConnection implements RequestChannel { 
   /** The user's name */
   private String name;
   
@@ -90,8 +84,7 @@ public class SoapConnection
    */
   public SoapConnection(FactoryParameters factParams2, 
                         String name2,
-                        String password2) throws JMSException
-  {
+                        String password2) throws JMSException {
     factParams = factParams2;
     name = name2;
     password = password2;
@@ -258,8 +251,7 @@ public class SoapConnection
    * @exception JMSSecurityException  If the user identification is incorrrect.
    * @exception IllegalStateException  If the SOAP service fails.
    */
-  private void connect(FactoryParameters factParams, String name,
-                       String password) throws JMSException {
+  private void connect(FactoryParameters factParams, String name, String password) throws JMSException {
     // Setting the timer values:
     long startTime = System.currentTimeMillis();
     long endTime = startTime + factParams.connectingTimer * 1000;

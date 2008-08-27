@@ -1,8 +1,8 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 Bull SA
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,32 +20,23 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (ScalAgent)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms.soap;
 
+import javax.jms.JMSException;
+
 import org.objectweb.joram.client.jms.Connection;
-import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.client.jms.TopicConnection;
+import org.objectweb.joram.client.jms.TopicConnectionFactory;
 import org.objectweb.joram.client.jms.admin.AdminModule;
-
-import java.util.Vector;
-
-import javax.naming.NamingException;
-import javax.naming.Reference;
-import javax.naming.StringRefAddr;
-
 
 /**
  * A <code>TopicSoapConnectionFactory</code> instance is a factory of
  * SOAP connections for Pub/Sub communication.
  */
-public class TopicSoapConnectionFactory
-             extends org.objectweb.joram.client.jms.TopicConnectionFactory
-{
-  /**
-   * 
-   */
+public class TopicSoapConnectionFactory extends TopicConnectionFactory {
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   /**
@@ -56,8 +47,7 @@ public class TopicSoapConnectionFactory
    * @param timeout  Duration in seconds during which a SOAP connection might
    *          be inactive before being considered as dead (0 for never).
    */
-  public TopicSoapConnectionFactory(String host, int port, int timeout)
-  {
+  public TopicSoapConnectionFactory(String host, int port, int timeout) {
     super(host, port);
     params.cnxPendingTimer = timeout * 1000;
   }
@@ -65,9 +55,7 @@ public class TopicSoapConnectionFactory
   /**
    * Constructs an empty <code>TopicSoapConnectionFactory</code> instance.
    */
-  public TopicSoapConnectionFactory()
-  {}
-
+  public TopicSoapConnectionFactory() {}
 
   /**
    * Method inherited from the <code>TopicConnectionFactory</code> class.
@@ -75,10 +63,8 @@ public class TopicSoapConnectionFactory
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.TopicConnection
-         createTopicConnection(String name, String password)
-         throws javax.jms.JMSException
-  {
+  public javax.jms.TopicConnection createTopicConnection(String name,
+                                                         String password) throws JMSException {
     return new TopicConnection(params,
                                new SoapConnection(params, name, password));
   }
@@ -89,9 +75,8 @@ public class TopicSoapConnectionFactory
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.Connection createConnection(String name, String password)
-                              throws javax.jms.JMSException
-  {
+  public javax.jms.Connection createConnection(String name,
+                                               String password) throws JMSException {
     return new Connection(params, new SoapConnection(params, name, password));
   }
 
@@ -104,9 +89,7 @@ public class TopicSoapConnectionFactory
    * @param timeout  Duration in seconds during which a SOAP connection might
    *          be inactive before being considered as dead (0 for never).
    */ 
-  public static javax.jms.TopicConnectionFactory
-                create(String host, int port, int timeout)
-  {
+  public static javax.jms.TopicConnectionFactory create(String host, int port, int timeout) {
     return new TopicSoapConnectionFactory(host, port, timeout);
   }
 
@@ -119,9 +102,7 @@ public class TopicSoapConnectionFactory
    *
    * @exception ConnectException  If the admin connection is closed or broken.
    */ 
-  public static javax.jms.TopicConnectionFactory create(int timeout)
-                throws java.net.ConnectException
-  {
+  public static javax.jms.TopicConnectionFactory create(int timeout) throws java.net.ConnectException {
     return create(AdminModule.getLocalHost(), 
                   AdminModule.getLocalPort(),
                   timeout);
