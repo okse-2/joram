@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,12 +22,10 @@
  */
 package org.objectweb.joram.shared.client;
 
-import java.io.Externalizable;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 
-import org.objectweb.joram.shared.stream.Streamable;
 import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.joram.shared.excepts.MomException;
 
@@ -36,10 +34,9 @@ import org.objectweb.joram.shared.excepts.MomException;
  * to send a <code>MomException</code> back to a JMS client.
  */
 public final class MomExceptionReply extends AbstractJmsReply {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+
   public static final int MomException = 1;
   public static final int AccessException = 2;
   public static final int DestinationException = 3;
