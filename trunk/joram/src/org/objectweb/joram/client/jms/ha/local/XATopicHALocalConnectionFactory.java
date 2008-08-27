@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,35 +18,29 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): David Feliot (ScalAgent DT)
+ * Initial developer(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms.ha.local;
 
+import javax.jms.JMSException;
 import org.objectweb.joram.client.jms.XAConnection;
 import org.objectweb.joram.client.jms.XATopicConnection;
 import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.TopicConnection;
-
-import javax.naming.NamingException;
+import org.objectweb.joram.client.jms.XATopicConnectionFactory;
 
 /**
  * An <code>XATopicHALocalConnectionFactory</code> instance is a factory of
  * local connections for XA Pub/Sub HA communication.
  */
-public class XATopicHALocalConnectionFactory
-    extends org.objectweb.joram.client.jms.XATopicConnectionFactory
-{
-  /**
-   * 
-   */
+public class XATopicHALocalConnectionFactory extends XATopicConnectionFactory {
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
-
 
   /**
    * Constructs an <code>XATopicLocalConnectionFactory</code> instance.
    */
-  public XATopicHALocalConnectionFactory()
-  {
+  public XATopicHALocalConnectionFactory() {
     super("", -1);
   }
 
@@ -55,10 +49,8 @@ public class XATopicHALocalConnectionFactory
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.XATopicConnection
-      createXATopicConnection(String name, String password)
-    throws javax.jms.JMSException
-  {
+  public javax.jms.XATopicConnection createXATopicConnection(String name,
+                                                             String password) throws JMSException {
     HALocalConnection lc = new HALocalConnection(name, password);
     return new XATopicConnection(params, lc);
   }
@@ -68,10 +60,8 @@ public class XATopicHALocalConnectionFactory
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.XAConnection
-      createXAConnection(String name, String password)
-    throws javax.jms.JMSException
-  {
+  public javax.jms.XAConnection createXAConnection(String name,
+                                                   String password) throws JMSException {
     HALocalConnection lc = new HALocalConnection(name, password);
     return new XAConnection(params, lc);
   }
@@ -81,10 +71,8 @@ public class XATopicHALocalConnectionFactory
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.TopicConnection
-      createTopicConnection(String name, String password)
-    throws javax.jms.JMSException
-  {
+  public javax.jms.TopicConnection createTopicConnection(String name,
+                                                         String password) throws JMSException {
     HALocalConnection lc = new HALocalConnection(name, password);
     return new TopicConnection(params, lc);
   }
@@ -95,20 +83,17 @@ public class XATopicHALocalConnectionFactory
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.Connection createConnection(String name, String password)
-    throws javax.jms.JMSException
-  {
+  public javax.jms.Connection createConnection(String name,
+                                               String password) throws JMSException {
     HALocalConnection lc = new HALocalConnection(name, password);
     return new Connection(params, lc);
   }
-
 
   /**
    * Admin method creating a <code>javax.jms.XATopicConnectionFactory</code>
    * instance for creating local connections.
    */ 
-  public static javax.jms.XATopicConnectionFactory create()
-  {
+  public static javax.jms.XATopicConnectionFactory create() {
     return new XATopicHALocalConnectionFactory();
   }
 }

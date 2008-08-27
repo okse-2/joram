@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,12 +25,12 @@ import java.util.*;
 
 import javax.jms.*;
 
-import org.objectweb.joram.client.jms.*;
-import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.local.*;
 import org.objectweb.joram.shared.client.*;
 import org.objectweb.joram.mom.proxies.*;
 import org.objectweb.joram.mom.notifications.*;
+import org.objectweb.joram.mom.dest.AdminTopic;
+
 import org.objectweb.joram.client.jms.connection.RequestChannel;
 
 import fr.dyade.aaa.agent.*;
@@ -38,8 +38,7 @@ import fr.dyade.aaa.agent.*;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
-public class HALocalConnection 
-    implements RequestChannel {
+public class HALocalConnection implements RequestChannel {
   
   public final static int NONE = 0;
   public final static int INIT = 1;
@@ -49,13 +48,10 @@ public class HALocalConnection
 
   private static int status;
   
-  public static void init(String args, boolean firstTime) 
-    throws Exception {
+  public static void init(String args, boolean firstTime) throws Exception {
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
-        BasicLevel.DEBUG,
-        "HALocalConnection.init(" + 
-        args + ',' + firstTime + ')');
+      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
+                                "HALocalConnection.init(" + args + ',' + firstTime + ')');
 
     synchronized (lock) {
       status = INIT;
@@ -65,14 +61,14 @@ public class HALocalConnection
 
   public static void waitForStart() {
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
-        BasicLevel.DEBUG,
-        "HALocalConnection.waitForStart()");
+      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
+                                "HALocalConnection.waitForStart()");
+    
     synchronized (lock) {
-      while (status == NONE) {      
-	try {
-	  lock.wait();
-	} catch (InterruptedException exc) {}
+      while (status == NONE) {
+        try {
+          lock.wait();
+        } catch (InterruptedException exc) {}
       }
      
       if (status == INIT) {
@@ -80,9 +76,7 @@ public class HALocalConnection
         GetProxyIdListNot gpin = new GetProxyIdListNot();
         AgentId[] proxyIds;
         try {
-          gpin.invoke(new AgentId(AgentServer.getServerId(),
-                                  AgentServer.getServerId(),
-                                  AgentId.JoramAdminStamp));
+          gpin.invoke(AdminTopic.getDefault());
           proxyIds = gpin.getIds();
           ResetCollocatedConnectionsNot rccn = 
           new ResetCollocatedConnectionsNot();
@@ -91,8 +85,7 @@ public class HALocalConnection
           }
           status = RUN;
         } catch (Exception exc) {
-          JoramTracing.dbgClient.log(
-            BasicLevel.ERROR, "", exc);
+          JoramTracing.dbgClient.log(BasicLevel.ERROR, "", exc);
           throw new Error(exc.toString());
         }
       }
