@@ -58,9 +58,9 @@
 
   <target name="tests"
           description=" --> launch tests: base, recovery, perf">
-    <ant dir="." antfile="build.xml" target="tests.a3base"/>
-    <ant dir="." antfile="build.xml" target="tests.a3recovery"/>
-    <ant dir="." antfile="build.xml" target="tests.a3perf"/>
+    <ant dir="." antfile="build.xml" target="tests.base"/>
+    <ant dir="." antfile="build.xml" target="tests.recovery"/>
+    <ant dir="." antfile="build.xml" target="tests.perf"/>
   </target>
 
   <target name="tests.http"
@@ -69,7 +69,7 @@
     <ant dir="." antfile="build.xml" target="tests.http.recovery"/>
   </target>
 
-  <target name="tests.a3base">
+  <target name="tests.base">
     <ant dir="." antfile="build.xml" target="test1.base"/>
     <ant dir="." antfile="build.xml" target="test2.base"/>
     <ant dir="." antfile="build.xml" target="test3.base"/>
@@ -84,6 +84,8 @@
     <ant dir="." antfile="build.xml" target="test15.base"/>
     <ant dir="." antfile="build.xml" target="test18.base"/>
     <ant dir="." antfile="build.xml" target="test19.base"/>
+    <ant dir="." antfile="build.xml" target="test20.base"/>
+  	<ant dir="." antfile="build.xml" target="test21.base"/>
   </target>
 
   <target name="tests.http.base">
@@ -97,7 +99,7 @@
     <ant dir="." antfile="build.xml" target="test17.http.base"/>
   </target>
 
-  <target name="tests.a3recovery">
+  <target name="tests.recovery">
     <ant dir="." antfile="build.xml" target="test1.recovery"/>
     <ant dir="." antfile="build.xml" target="test2.recovery"/>
     <ant dir="." antfile="build.xml" target="test3.recovery"/>
@@ -123,7 +125,7 @@
     <ant dir="." antfile="build.xml" target="test10.http.recovery"/>
   </target>
 
-  <target name="tests.a3perf">
+  <target name="tests.perf">
     <ant dir="." antfile="build.xml" target="test1.perf"/>
     <ant dir="." antfile="build.xml" target="test2.perf"/>
     <ant dir="." antfile="build.xml" target="test5.perf"/>
@@ -145,6 +147,10 @@
              token="@transaction@" value="${transaction}"/>
     <replace file="${test.dir}/a3servers.xml"
              token="@network@" value="${network}"/>
+    <replace file="${test.dir}/a3servers.xml"
+             token="@nbMaxCnx@" value="${nbMaxCnx}"/>
+  	<replace file="${test.dir}/a3servers.xml"
+           	 token="@compressedFlows@" value="${compressedFlows}"/>
 
     <copy file="a3debug.cfg" tofile="${test.dir}/a3debug.cfg"/>
   </target>
@@ -154,8 +160,10 @@
       -  in specific target.
      -->
     <property name="engine" value="fr.dyade.aaa.agent.Engine"/>
-    <property name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
+    <property name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
     <property name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+    <property name="nbMaxCnx" value="5"/>
+    <property name="compressedFlows" value="false"/>
   </target>
 
   <!-- Empty target used for undefined postinit handling (see test.run target) -->
@@ -648,12 +656,133 @@
   <target name="test19.base" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.base.test19"/>
-      <param name="testid" value="1"/>
+      <param name="testid" value="test19.base"/>
       <param name="a3conf" value="base/a3servers2.xml"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
 
+  <!-- Test notification sending during agentInitialize -->
+  <target name="test20.base" depends="init.a3props,compile">
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.base.test20"/>
+      <param name="testid" value="test20.base"/>
+      <param name="a3conf" value="base/a3servers2.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
+
+	<!-- Test ping-pong with numerous servers -->
+  <target name="test21.base" depends="test21A.base,test21B.base"/>
+
+  <!-- Test ping-pong with numerous servers (more than nbMaxCnx)-->
+  <target name="test21A.base" depends="test21A-1.base,test21A-2.base,test21A-3.base,test21A-4.base"/>
+	
+  <!-- Test ping-pong with numerous servers -->
+  <target name="test21A-1.base" depends="init.a3props,compile">
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.base.test21"/>
+      <param name="testid" value="test21A-1.base"/>
+      <param name="a3conf" value="base/a3servers21a.xml"/>
+      <param name="nbMaxCnx" value="5"/>
+      <param name="compressedFlows" value="false"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
+	
+  <!-- Test ping-pong with numerous servers and compressed flows -->
+  <target name="test21A-2.base" depends="init.a3props,compile">
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.base.test21"/>
+      <param name="testid" value="test21A-2.base"/>
+      <param name="a3conf" value="base/a3servers21a.xml"/>
+      <param name="nbMaxCnx" value="5"/>
+      <param name="compressedFlows" value="true"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
+
+  <!-- Test ping-pong with numerous servers, 2 domains and a router -->
+  <target name="test21A-3.base" depends="init.a3props,compile">
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.base.test21"/>
+      <param name="testid" value="test21A-3.base"/>
+      <param name="a3conf" value="base/a3servers21c.xml"/>
+      <param name="nbMaxCnx" value="3"/>
+      <param name="compressedFlows" value="false"/>
+      <param name="jvmargs" value="-DRouter=true"/>
+    </antcall>
+  </target>
+
+  <!-- Test ping-pong with numerous servers and compressed flows, 2 domains and a router -->
+  <target name="test21A-4.base" depends="init.a3props,compile">
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.base.test21"/>
+      <param name="testid" value="test21A-4.base"/>
+      <param name="a3conf" value="base/a3servers21c.xml"/>
+      <param name="nbMaxCnx" value="3"/>
+      <param name="compressedFlows" value="true"/>
+      <param name="jvmargs" value="-DRouter=true"/>
+    </antcall>
+  </target>
+
+	<!-- Test ping-pong with numerous servers (less than nbMaxCnx)-->
+  <target name="test21B.base" depends="test21B-1.base,test21B-2.base,test21B-3.base,test21B-4.base"/>
+	
+  <!-- Test ping-pong with numerous servers -->
+  <target name="test21B-1.base" depends="init.a3props,compile">
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.base.test21"/>
+      <param name="testid" value="test21B-1.base"/>
+      <param name="a3conf" value="base/a3servers21a.xml"/>
+      <param name="nbMaxCnx" value="10"/>
+      <param name="compressedFlows" value="false"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
+	
+  <!-- Test ping-pong with numerous servers and compressed flows -->
+  <target name="test21B-2.base" depends="init.a3props,compile">
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.base.test21"/>
+      <param name="testid" value="test21B-2.base"/>
+      <param name="a3conf" value="base/a3servers21a.xml"/>
+      <param name="nbMaxCnx" value="10"/>
+      <param name="compressedFlows" value="true"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
+
+  <!-- Test ping-pong with numerous servers, 2 domains and a router -->
+  <target name="test21B-3.base" depends="init.a3props,compile">
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.base.test21"/>
+      <param name="testid" value="test21B-3.base"/>
+      <param name="a3conf" value="base/a3servers21c.xml"/>
+      <param name="nbMaxCnx" value="6"/>
+      <param name="compressedFlows" value="false"/>
+      <param name="jvmargs" value="-DRouter=true"/>
+    </antcall>
+  </target>
+
+  <!-- Test ping-pong with numerous servers and compressed flows, 2 domains and a router -->
+  <target name="test21B-4.base" depends="init.a3props,compile">
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.base.test21"/>
+      <param name="testid" value="test21B-4.base"/>
+      <param name="a3conf" value="base/a3servers21c.xml"/>
+      <param name="nbMaxCnx" value="6"/>
+      <param name="compressedFlows" value="true"/>
+      <param name="jvmargs" value="-DRouter=true"/>
+    </antcall>
+  </target>
+
+  <!--
+     - test for real distributed test.
+     -
+     - a3servers1.xml -> HttpNetwork
+     - a3servers2.xml -> PoolNetwork
+     -->
   <target name="test.init">
     <antcall target="init.test" inheritAll="true">
       <param name="a3conf" value="test/a3servers1.xml"/>
@@ -680,10 +809,86 @@
     </java>
   </target>
 
-  <target name="test.sender2" depends="init">
+  <target name="test.sender2" depends="init,compile,test.init">
     <java classname="a3.test.Sender"
           failonerror="no" fork="yes"
           dir="${test.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <arg line="2 ./s2"/>
+    </java>
+  </target>
+
+  <target name="test.restart1" depends="init">
+    <java classname="fr.dyade.aaa.agent.AgentServer"
+          failonerror="no" fork="yes"
+          dir="${test.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <arg line="1 ./s1"/>
+    </java>
+  </target>
+
+  <target name="test.restart2" depends="init">
+    <java classname="fr.dyade.aaa.agent.AgentServer"
+          failonerror="no" fork="yes"
+          dir="${test.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <arg line="2 ./s2"/>
+    </java>
+  </target>
+
+  <!--
+     - test for CSSI.
+     -->
+  <target name="cssi.init" depends="init,compile">
+    <antcall target="init.test" inheritAll="true">
+      <param name="a3conf" value="cssi/a3servers.xml"/>
+    </antcall>
+    <mkdir dir="${test.dir}/server0"/>
+    <mkdir dir="${test.dir}/server1"/>
+    <mkdir dir="${test.dir}/server2"/>
+  </target>
+
+  <target name="cssi.sender" depends="init">
+    <delete file="${test.dir}/server0/s0/lock"/>
+    <java classname="a3.cssi.Sender"
+          failonerror="no" fork="yes"
+          dir="${test.dir}/server0">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <arg line="0 ./s0"/>
+    </java>
+  </target>
+
+  <target name="cssi.server0" depends="init">
+    <delete file="${test.dir}/server0/s0/lock"/>
+    <java classname="fr.dyade.aaa.agent.AgentServer"
+          failonerror="no" fork="yes"
+          dir="${test.dir}/server0">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <arg line="0 ./s0"/>
+    </java>
+  </target>
+
+  <target name="cssi.server1" depends="init">
+    <delete file="${test.dir}/server1/s1/lock"/>
+    <java classname="fr.dyade.aaa.agent.AgentServer"
+          failonerror="no" fork="yes"
+          dir="${test.dir}/server1">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <arg line="1 ./s1"/>
+    </java>
+  </target>
+
+  <target name="cssi.server2" depends="init">
+    <delete file="${test.dir}/server2/s2/lock"/>
+    <java classname="fr.dyade.aaa.agent.AgentServer"
+          failonerror="no" fork="yes"
+          dir="${test.dir}/server2">
       <classpath path="${project.class.path}"/>
       <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
       <arg line="2 ./s2"/>
@@ -818,22 +1023,27 @@
   <target name="test5.recovery" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.recovery.test5"/>
-      <param name="testid" value="1"/>
+      <param name="testid" value="test5.recovery"/>
       <param name="a3conf" value="recovery/a3servers1.xml"/>
       <param name="jvmargs" value="-Dpause=20000"/>
     </antcall>
   </target>
 
-  <target name="test5.http.recovery" depends="init.a3props,compile">
+  <target name="test5.http.recovery" depends="test5.http-a.recovery,test5.http-b.recovery"/>
+
+  <target name="test5.http-a.recovery" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.recovery.test5"/>
-      <param name="testid" value="1.http-a"/>
+      <param name="testid" value="test5.http-a.recovery"/>
       <param name="a3conf" value="recovery/a3servers1.http.1.xml"/>
       <param name="jvmargs" value="-Dpause=20000"/>
     </antcall>
+  </target>
+
+  <target name="test5.http-b.recovery" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.recovery.test5"/>
-      <param name="testid" value="1.http-b"/>
+      <param name="testid" value="test5.http-b.recovery"/>
       <param name="a3conf" value="recovery/a3servers1.http.2.xml"/>
       <param name="jvmargs" value="-Dpause=20000"/>
     </antcall>
@@ -975,17 +1185,19 @@
 
   <!-- 1 domain, HttpNetwork -->
   <target name="test10.http.recovery" depends="test10a.http.recovery,test10b.http.recovery"/>
+
   <target name="test10a.http.recovery" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.recovery.test10"/>
-      <param name="testid" value="1a"/>
+      <param name="testid" value="test10a.http.recovery"/>
       <param name="a3conf" value="recovery/a3servers1.http.1.xml"/>
     </antcall>
   </target>
+
   <target name="test10b.http.recovery" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.recovery.test10"/>
-      <param name="testid" value="1b"/>
+      <param name="testid" value="test10b.http.recovery"/>
       <param name="a3conf" value="recovery/a3servers1.http.2.xml"/>
     </antcall>
   </target>
@@ -1090,10 +1302,6 @@
       <param name="jvmargs" value="-DNbNode=2"/>
     </antcall>
   </target>
-
-
-
-
 
   <target name="httpinit">
     <antcall target="init.test" inheritAll="true">
