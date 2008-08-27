@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -44,7 +44,6 @@ import org.objectweb.joram.mom.proxies.SendReplyNot;
 import org.objectweb.joram.mom.proxies.ProxyAgentItf;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 
-
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.AgentId;
@@ -55,7 +54,6 @@ import fr.dyade.aaa.agent.UnknownNotificationException;
 import fr.dyade.aaa.util.Timer;
 import fr.dyade.aaa.util.TimerTask;
 
-import fr.dyade.aaa.util.Queue;
 import fr.dyade.aaa.util.management.MXWrapper;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -64,9 +62,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * Class of a user proxy agent.
  */
 public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   /**
