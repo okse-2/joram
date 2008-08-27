@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,29 +23,23 @@
  */
 package org.objectweb.joram.client.jms.local;
 
+import javax.jms.JMSException;
 import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.QueueConnection;
-
-import javax.naming.NamingException;
+import org.objectweb.joram.client.jms.QueueConnectionFactory;
 
 /**
  * A <code>QueueLocalConnectionFactory</code> instance is a factory of
  * local connections for PTP communication.
  */
-public class QueueLocalConnectionFactory
-    extends org.objectweb.joram.client.jms.QueueConnectionFactory
-{
-  /**
-   * 
-   */
+public class QueueLocalConnectionFactory extends QueueConnectionFactory {
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
-
 
   /**
    * Constructs a <code>QueueLocalConnectionFactory</code> instance.
    */
-  public QueueLocalConnectionFactory()
-  {
+  public QueueLocalConnectionFactory() {
     super("localhost", -1);
   }
 
@@ -54,10 +48,8 @@ public class QueueLocalConnectionFactory
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.QueueConnection
-      createQueueConnection(String name, String password)
-    throws javax.jms.JMSException
-  {
+  public javax.jms.QueueConnection createQueueConnection(String name,
+                                                         String password) throws JMSException {
     LocalConnection lc = new LocalConnection(name, password);
     return new QueueConnection(params, lc);
   }
@@ -67,20 +59,17 @@ public class QueueLocalConnectionFactory
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.Connection createConnection(String name, String password)
-    throws javax.jms.JMSException
-  {
+  public javax.jms.Connection createConnection(String name,
+                                               String password) throws JMSException {
     LocalConnection lc = new LocalConnection(name, password);
     return new Connection(params, lc);
   }
 
-  
   /**
    * Admin method creating a <code>javax.jms.QueueConnectionFactory</code>
    * instance for creating local connections.
    */ 
-  public static javax.jms.QueueConnectionFactory create()
-  {
+  public static javax.jms.QueueConnectionFactory create() {
     return new QueueLocalConnectionFactory();
   }
 }

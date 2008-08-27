@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,21 +23,17 @@
  */
 package org.objectweb.joram.client.jms.local;
 
+import javax.jms.JMSException;
 import org.objectweb.joram.client.jms.Connection;
-
-import javax.naming.NamingException;
+import org.objectweb.joram.client.jms.ConnectionFactory;
 
 /**
  * A <code>LocalConnectionFactory</code> instance is a factory of
  * local connections.
  */
-public class LocalConnectionFactory
-    extends org.objectweb.joram.client.jms.ConnectionFactory {
-  /**
-   * 
-   */
+public class LocalConnectionFactory extends ConnectionFactory {
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
-
 
   /**
    * Constructs a <code>QueueLocalConnectionFactory</code> instance.
@@ -52,13 +48,11 @@ public class LocalConnectionFactory
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.Connection
-      createConnection(String name, String password)
-    throws javax.jms.JMSException {
+  public javax.jms.Connection createConnection(String name,
+                                               String password) throws JMSException {
     LocalConnection lc = new LocalConnection(name, password);
     return new Connection(params, lc);
   }
-
 
   /**
    * Admin method creating a <code>javax.jms.ConnectionFactory</code>

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,17 +30,13 @@ import org.objectweb.joram.client.jms.connection.RequestChannel;
 import org.objectweb.joram.mom.proxies.StandardConnectionContext;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
-import org.objectweb.joram.shared.client.ProducerMessages;
+import org.objectweb.joram.mom.dest.AdminTopic;
 import org.objectweb.joram.mom.notifications.GetProxyIdNot;
 import org.objectweb.joram.mom.proxies.ConnectionManager;
-import org.objectweb.joram.mom.proxies.FlowControl;
-import org.objectweb.joram.mom.proxies.MultiCnxSync;
 import org.objectweb.joram.mom.proxies.OpenConnectionNot;
-import org.objectweb.joram.mom.proxies.RequestNot;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.agent.Channel;
 
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -59,8 +55,7 @@ public class LocalConnection implements RequestChannel {
                          String password) throws JMSException {
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                "LocalConnection.<init>(" + userName +
-                                ',' + password + ')');
+                                "LocalConnection.<init>(" + userName + ',' + password + ')');
 
     this.userName = userName;
     this.password = password;
@@ -91,9 +86,7 @@ public class LocalConnection implements RequestChannel {
 
     GetProxyIdNot gpin = new GetProxyIdNot(userName, password, null);
     try {
-      gpin.invoke(new AgentId(AgentServer.getServerId(),
-                              AgentServer.getServerId(),
-                              AgentId.JoramAdminStamp));
+      gpin.invoke(AdminTopic.getDefault());
       proxyId = gpin.getProxyId();
     } catch (Exception exc) {
       if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
