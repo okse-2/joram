@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,12 +23,9 @@
  */
 package org.objectweb.joram.client.jms;
 
-import java.util.Vector;
-import java.util.Hashtable;
 
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
-import javax.naming.NamingException;
 
 import org.objectweb.joram.shared.client.TempDestDeleteRequest;
 
@@ -38,12 +35,10 @@ import org.objectweb.joram.shared.JoramTracing;
 /**
  * Implements the <code>javax.jms.TemporaryTopic</code> interface.
  */
-public class TemporaryTopic extends Topic implements javax.jms.TemporaryTopic
-{
-  /**
-   * 
-   */
+public class TemporaryTopic extends Topic implements javax.jms.TemporaryTopic {
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+  
   private final static String TMP_TOPIC_TYPE = "topic.tmp";
 
   public static boolean isTemporaryTopic(String type) {

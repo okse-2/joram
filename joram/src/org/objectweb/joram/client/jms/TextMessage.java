@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -22,8 +22,6 @@
  * Contributor(s):ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms;
-
-import org.objectweb.joram.shared.excepts.*;
 
 import javax.jms.JMSException;
 import javax.jms.MessageNotWriteableException;
