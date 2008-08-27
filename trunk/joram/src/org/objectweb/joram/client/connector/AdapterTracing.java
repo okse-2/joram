@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -18,13 +19,11 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s): Nicolas Tachker (Bull SA)
+ * Contributor(s): Nicolas Tachker (ScalAgent D.T.)
  */
 package org.objectweb.joram.client.connector;
 
 import fr.dyade.aaa.util.Debug;
-
-import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 
@@ -33,10 +32,8 @@ import org.objectweb.util.monolog.api.Logger;
  */
 public class AdapterTracing {
   public static Logger dbgAdapter = null;
-  private static boolean initialized = false;
   
   static {
-    dbgAdapter =
-      Debug.getLogger("org.objectweb.joram.client.connector.Adapter");
+    dbgAdapter = Debug.getLogger("org.objectweb.joram.client.connector.Adapter");
   }
 }
