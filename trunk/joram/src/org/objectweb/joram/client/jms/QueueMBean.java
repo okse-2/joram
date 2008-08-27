@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent DT)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
 package org.objectweb.joram.client.jms;
@@ -30,10 +30,6 @@ import java.net.ConnectException;
 import org.objectweb.joram.client.jms.admin.AdminException;
 
 public interface QueueMBean extends DestinationMBean {
-
-  /** Returns a String image of the queue. */
-  public String toString();
-
   public void setNbMaxMsg(int nbMaxMsg)
     throws ConnectException, AdminException;
 
