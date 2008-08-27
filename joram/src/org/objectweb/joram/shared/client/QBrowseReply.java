@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,15 +23,12 @@
  */
 package org.objectweb.joram.shared.client;
 
-import java.io.Externalizable;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.util.Vector;
 
 import org.objectweb.joram.shared.messages.Message;
-import org.objectweb.joram.shared.stream.Streamable;
-import org.objectweb.joram.shared.stream.StreamUtil;
 
 /**
  * A <code>QBrowseReply</code> instance is used by a JMS client proxy for
@@ -39,10 +36,9 @@ import org.objectweb.joram.shared.stream.StreamUtil;
  * actually replying to a client <code>QBrowseRequest</code>.
  */
 public final class QBrowseReply extends AbstractJmsReply {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+
   /** The vector of messages carried by this reply. */
   private Vector messages = null;
 
@@ -61,22 +57,6 @@ public final class QBrowseReply extends AbstractJmsReply {
 
   protected int getClassId() {
     return QBROWSE_REPLY;
-  }
-
-  /**
-   * Constructs an empty <code>QBrowseReply</code>.
-   */
-  private QBrowseReply(int correlationId) {
-    super(correlationId);
-  }
-
-  /**
-   * Constructs a <code>QBrowseReply</code>.
-   */
-  private QBrowseReply(int correlationId, Message message) {
-    super(correlationId);
-    messages = new Vector();
-    messages.addElement(message);
   }
 
   /**

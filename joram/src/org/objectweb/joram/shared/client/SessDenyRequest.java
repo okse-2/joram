@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,14 +23,12 @@
  */
 package org.objectweb.joram.shared.client;
 
-import java.io.Externalizable;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 
 import java.util.Vector;
 
-import org.objectweb.joram.shared.stream.Streamable;
 import org.objectweb.joram.shared.stream.StreamUtil;
 
 /**
@@ -38,10 +36,9 @@ import org.objectweb.joram.shared.stream.StreamUtil;
  * for denying the messages it consumed.
  */
 public final class SessDenyRequest extends AbstractJmsRequest {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+
   /** Vector of message identifiers. */
   private Vector ids;
 
