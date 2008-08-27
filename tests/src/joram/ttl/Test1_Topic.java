@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s):  (ScalAgent D.T.)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): Badolle Fabien (ScalAgent D.T.)
  */
 package joram.ttl;
@@ -71,18 +71,16 @@ public class Test1_Topic extends TestCase {
       ictx.close();
 
       Connection cnx = cf0.createConnection();
-      Connection cnxCons = cf1.createConnection();
       Session sessionp = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      Session sessionc = cnxCons.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      MessageProducer producer = sessionp.createProducer(topic);
       cnx.start();
+      
+      Connection cnxCons = cf1.createConnection();
+      Session sessionc = cnxCons.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      TopicSubscriber consumer = sessionc.createDurableSubscriber(topic, "top");
       cnxCons.start();
 
-      TopicSubscriber consumer = sessionc.createDurableSubscriber(topic, "top");
-      MessageProducer producer = sessionp.createProducer(topic);
-
       TextMessage msg = null;
-      TextMessage msg1 = null;
-
       for (int j = 0; j < 3; j++) {
         msg = sessionp.createTextMessage();
         msg.setText("messagedist#" + j);
@@ -91,10 +89,11 @@ public class Test1_Topic extends TestCase {
 
       // Waiting for the messages to be out of date
       Thread.sleep(4000);
-
-      msg1 = (TextMessage) consumer.receive(1000);
+      TextMessage msg1 = (TextMessage) consumer.receive(1000);
       assertEquals(null, msg1);
 
+      cnxCons.stop();
+      
       // Messages should be present on the DMQ
       AdminModule.connect("localhost", 2560, "root", "root", 60);
       assertEquals(3, dmqueue1.getPendingMessages());
@@ -102,29 +101,27 @@ public class Test1_Topic extends TestCase {
 
       // the server containing the queue is stopped
       stopAgentServer((short) 1);
-      Thread.sleep(1000);
+      Thread.sleep(2000);
 
       for (int j = 0; j < 10; j++) {
         msg = sessionp.createTextMessage();
         msg.setText("messagedist#" + j);
-        producer.send(msg, Message.DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY, 2000);
+        producer.send(msg, Message.DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY, 1000);
       }
 
       // Waiting for the messages to be out of date
-      Thread.sleep(4000);
-      
+      Thread.sleep(10000);
       startAgentServer((short) 1);
-      
+      Thread.sleep(2000);
+
       // No additional messages should be present on the DMQ1, they should have
       // been sent to DMQ0 before traveling on the network
       AdminModule.connect("localhost", 2560, "root", "root", 60);
-      assertEquals(3, dmqueue1.getPendingMessages());
       assertEquals(10, dmqueue0.getPendingMessages());
+      assertEquals(3, dmqueue1.getPendingMessages());
       AdminModule.disconnect();
 
       cnx.close();
-      cnxCons.close();
-
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);

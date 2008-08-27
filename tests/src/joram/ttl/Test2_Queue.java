@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,8 +17,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s):  (ScalAgent D.T.)
- * Contributor(s): Badolle Fabien (ScalAgent D.T.)
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s):
  */
 package joram.ttl;
 
@@ -42,7 +42,6 @@ import org.objectweb.joram.client.jms.admin.DeadMQueue;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.shared.MessageErrorConstants;
-
 
 /**
  * Test ttl on a distributed architecture. Use 2 servers. The producer is
@@ -74,15 +73,16 @@ public class Test2_Queue extends TestCase {
       ictx.close();
 
       Connection cnx = cf0.createConnection();
-      Connection cnxCons = cf1.createConnection();
       Session sessionp = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      Session sessionc = cnxCons.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      MessageProducer producer = sessionp.createProducer(queue);
+      MessageConsumer consumerdq0 = sessionp.createConsumer(dmqueue0);
       cnx.start();
-      cnxCons.start();
-
+      
+      Connection cnxCons = cf1.createConnection();
+      Session sessionc = cnxCons.createSession(false, Session.AUTO_ACKNOWLEDGE);
       MessageConsumer consumer = sessionc.createConsumer(queue);
       MessageConsumer consumerdq1 = sessionc.createConsumer(dmqueue1);
-      MessageProducer producer = sessionp.createProducer(queue);
+      cnxCons.start();
 
       TextMessage msg = null;
 
@@ -106,24 +106,27 @@ public class Test2_Queue extends TestCase {
 
       // Check some message properties
       msg = (TextMessage) consumerdq1.receive(500);
+      
       assertEquals(1, msg.getIntProperty("JMS_JORAM_ERRORCOUNT"));
-      assertEquals(MessageErrorConstants.EXPIRED, msg.getShortProperty("JMS_JORAM_ERRORCODE_1"));
-      System.out.println("Expired at: " + msg.getStringProperty("JMS_JORAM_ERRORCAUSE_1"));
+      assertEquals(MessageErrorConstants.EXPIRED, msg.getIntProperty("JMS_JORAM_ERRORCODE_1"));
+      System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_1"));
 
+      cnxCons.close();
+      
       // the server containing the queue is stopped
       stopAgentServer((short) 1);
-      Thread.sleep(1000);
+      Thread.sleep(2000);
       
       for (int j = 0; j < 10; j++) {
         msg = sessionp.createTextMessage();
         msg.setText("messagedist#" + j);
-        producer.send(msg, Message.DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY, 2000);
+        producer.send(msg, Message.DEFAULT_DELIVERY_MODE, Message.DEFAULT_PRIORITY, 1000);
       }
 
       // Waiting for the messages to be out of date
-      Thread.sleep(4000);
-
+      Thread.sleep(10000);
       startAgentServer((short) 1);
+      Thread.sleep(2000);
 
       // No additional messages should be present on the DMQ1, they should have
       // been sent to DMQ0 before traveling on the network
@@ -134,14 +137,12 @@ public class Test2_Queue extends TestCase {
       AdminModule.disconnect();
       
       // Check some message properties
-      MessageConsumer consumerdq0 = sessionp.createConsumer(dmqueue0);
       msg = (TextMessage) consumerdq0.receive(500);
       assertEquals(1, msg.getIntProperty("JMS_JORAM_ERRORCOUNT"));
-      assertEquals(MessageErrorConstants.EXPIRED, msg.getShortProperty("JMS_JORAM_ERRORCODE_1"));
-      System.out.println("Expired at: " + msg.getStringProperty("JMS_JORAM_ERRORCAUSE_1"));
+      assertEquals(MessageErrorConstants.EXPIRED, msg.getIntProperty("JMS_JORAM_ERRORCODE_1"));
+      System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_1"));
       
       cnx.close();
-      cnxCons.close();
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);
