@@ -23,24 +23,20 @@
 package org.objectweb.joram.client.jms;
 
 import org.objectweb.joram.client.jms.admin.AdminException;
-import java.util.List;
-import javax.jms.JMSException;
 import java.net.ConnectException;
 
 public interface TopicMBean extends DestinationMBean {
-
-
-  /** Returns a String image of the topic. */
-  public String toString();
-
   /**
    * Monitoring method returning the number of users that subscribes on
    * this topic.
    * If a client has many subscriptions it is only counted once.
    */
-  public int getSubscriptions()
-    throws ConnectException, AdminException;
+  public int getSubscriptions() throws ConnectException, AdminException;
 
-  public String[] getSubscriberIds()
-    throws AdminException, ConnectException;
+  /**
+   * Monitoring method returning an array containing the ids of users that
+   * subscribes on this topic.
+   * If a client has many subscriptions its ids appears once.
+   */
+  public String[] getSubscriberIds() throws AdminException, ConnectException;
 }
