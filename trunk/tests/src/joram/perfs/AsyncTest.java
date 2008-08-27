@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,11 +17,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Feliot David (ScalAgent D.T.)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): Badolle Fabien (ScalAgent D.T.)
  */
-
-
 package joram.perfs;
 
 import java.io.File;
@@ -36,12 +34,12 @@ import javax.naming.InitialContext;
 import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
-
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.Topic;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 /**
- * @author feliot
- *
- *
+ * 
  */
 public class AsyncTest extends TestCase {
 
@@ -50,61 +48,55 @@ public class AsyncTest extends TestCase {
   public static void main(String[] args) {
     new AsyncTest().run();
   }
-  
+
   private Destination dest;
-  
+
   private ConnectionFactory cf;
-  
+
   private ConnectionFactory asyncSendCf;
-  
+
   private Connection connection;
-  
+
   public void run() {
     try {
-	writeIntoFile("==================== start test =====================");
+      writeIntoFile("==================== start test =====================");
       startAgentServer((short) 0, (File) null,
-          new String[] { "-DTransaction=fr.dyade.aaa.util.NullTransaction" });
-      
+                       new String[] { "-DTransaction=fr.dyade.aaa.util.NullTransaction" });
+
       startAgentServer((short) 1, (File) null,
-          new String[] { "-DTransaction=fr.dyade.aaa.util.NullTransaction" });
+                       new String[] { "-DTransaction=fr.dyade.aaa.util.NullTransaction" });
 
       AdminModule.connect("localhost", 2560, "root", "root", 60);
 
-      org.objectweb.joram.client.jms.admin.User user = org.objectweb.joram.client.jms.admin.User
-          .create("anonymous", "anonymous", 0);
+      User user = User.create("anonymous", "anonymous", 0);
 
-      org.objectweb.joram.client.jms.Topic localTopic = org.objectweb.joram.client.jms.Topic
-          .create(0);
+      Topic localTopic = Topic.create(0);
       localTopic.setFreeReading();
       localTopic.setFreeWriting();
-      
-      org.objectweb.joram.client.jms.Topic remoteTopic = org.objectweb.joram.client.jms.Topic
-      .create(1);
+
+      Topic remoteTopic = Topic.create(1);
       remoteTopic.setFreeReading();
       remoteTopic.setFreeWriting();
 
-      cf = org.objectweb.joram.client.jms.tcp.TcpConnectionFactory
-          .create("localhost", 2560);
-      
-      asyncSendCf = org.objectweb.joram.client.jms.tcp.TcpConnectionFactory
-          .create("localhost", 2560);
-      ((org.objectweb.joram.client.jms.tcp.TcpConnectionFactory) asyncSendCf)
-       	  .getParameters().asyncSend = true;
-      
+      cf = TcpConnectionFactory.create("localhost", 2560);
+
+      asyncSendCf = TcpConnectionFactory.create("localhost", 2560);
+      ((TcpConnectionFactory) asyncSendCf).getParameters().asyncSend = true;
+
       InitialContext ictx = new InitialContext();
       ictx.bind("asyncSendCf", asyncSendCf);
-      
+
       // test the JNDI storage
       asyncSendCf = (ConnectionFactory)ictx.lookup("asyncSendCf");
-      
+
       dest = localTopic;
-      
+
       test();
-      
+
       dest = remoteTopic;
-      
+
       test();
-      
+
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);
@@ -119,7 +111,7 @@ public class AsyncTest extends TestCase {
     connection = cf.createConnection("anonymous", "anonymous");
 
     connection.start();
-    
+
     // Check that Session.setAsyncSend() works
     // System.out.println("-- Async --");
     writeIntoFile("-- Async --");
@@ -143,10 +135,10 @@ public class AsyncTest extends TestCase {
     writeIntoFile("-- Async --");
     send(false);
     transactedSend(false);
-    
+
     connection.close();
   }
-    
+
   private void send(boolean asyncSend) throws Exception {
     Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
     if (asyncSend) {
@@ -165,12 +157,12 @@ public class AsyncTest extends TestCase {
     long end = System.currentTimeMillis();
 
     session.close();
-    
+
     long res = end - start;
     //    System.out.println("Sent " + LOOP_NB + " messages: " + res);
     writeIntoFile("| Sent " + LOOP_NB + " messages: " + res);
   }
-  
+
   private void transactedSend(boolean asyncSend) throws Exception {
     Session session = connection.createSession(true, -1);
     if (asyncSend) {
@@ -191,7 +183,7 @@ public class AsyncTest extends TestCase {
     long end = System.currentTimeMillis();
 
     session.close();
-    
+
     long res = end - start;
     //System.out.println("Transacted sent " + LOOP_NB + " messages: " + res);
     writeIntoFile("| Transacted sent " + LOOP_NB + " messages: " + res);
