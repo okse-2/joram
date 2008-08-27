@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 2003 - 2004 Bull SA
  *
@@ -29,11 +29,11 @@ import java.util.*;
 import org.objectweb.joram.shared.client.*;
 import org.objectweb.joram.shared.excepts.*;
 import org.objectweb.joram.mom.proxies.*;
+import org.objectweb.joram.mom.dest.AdminTopic;
 import org.objectweb.joram.mom.notifications.*;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.util.Queue;
 
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -83,17 +83,15 @@ public class SoapProxyService {
                            String userPassword, 
                            int heartBeat) throws Exception {
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
-        BasicLevel.DEBUG, "SoapProxyService.setConnection(" + 
-        userName + ',' + 
-        userPassword + ',' + 
-        heartBeat + ')');
+      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
+                                "SoapProxyService.setConnection(" + 
+                                userName + ',' + 
+                                userPassword + ',' + 
+                                heartBeat + ')');
 
     GetProxyIdNot gpin = new GetProxyIdNot(userName, userPassword, null);
     AgentId proxyId;
-    gpin.invoke(new AgentId(AgentServer.getServerId(),
-                            AgentServer.getServerId(),
-                            AgentId.JoramAdminStamp));
+    gpin.invoke(AdminTopic.getDefault());
     proxyId = gpin.getProxyId();
     
     OpenConnectionNot ocn = new OpenConnectionNot(false, heartBeat);	
