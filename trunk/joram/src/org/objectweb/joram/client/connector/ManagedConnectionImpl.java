@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s): Nicolas Tachker (Bull SA)
+ * Contributor(s): Nicolas Tachker (ScalAgent D.T.)
  *                 Florent Benoit (Bull SA)
  */
 package org.objectweb.joram.client.connector;
@@ -39,7 +39,6 @@ import javax.resource.spi.IllegalStateException;
 import javax.resource.spi.LocalTransactionException;
 import javax.resource.spi.ManagedConnectionMetaData;
 import javax.resource.spi.ResourceAdapterInternalException;
-import javax.resource.spi.SecurityException;
 import javax.transaction.xa.XAResource;
 
 import java.io.PrintWriter;
@@ -55,8 +54,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 public class ManagedConnectionImpl
              implements javax.resource.spi.ManagedConnection,
                         javax.resource.spi.LocalTransaction,
-                        javax.jms.ExceptionListener
-{
+                        javax.jms.ExceptionListener {
   /** Central adapter authority. */
   private JoramAdapter ra;
 

@@ -1,6 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,7 +27,6 @@ import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 import javax.resource.spi.ConnectionManager;
-import javax.resource.spi.ConnectionRequestInfo;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -38,11 +38,8 @@ public class OutboundTopicConnectionFactory
              extends OutboundConnectionFactory
              implements javax.jms.TopicConnectionFactory,
                         java.io.Serializable,
-                        javax.resource.Referenceable
-{
-  /**
-   * 
-   */
+                        javax.resource.Referenceable {
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   /**
