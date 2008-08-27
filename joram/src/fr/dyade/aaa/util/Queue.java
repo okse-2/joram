@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -35,10 +35,9 @@ import java.util.Vector;
  * the <code>start()</code> method.
  */
 public class Queue extends Vector {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+  
   /**
    * <code>true</code> if a producer called the <code>stop()</code>
    * method.
@@ -52,7 +51,6 @@ public class Queue extends Vector {
     super();
     start();
   }
-
 
   /**
    * Pushes an item at the end of this queue. 
@@ -68,29 +66,6 @@ public class Queue extends Vector {
     notify();
   }
 
-
-  /**
-   * Removes and returns the object at the top of this queue.
-   *
-   * @return  The object at the top of this queue.
-   * @exception  EmptyQueueException  If the queue is empty.
-   */
-  public synchronized Object pop() {
-    Object obj;
-    
-    if (size() == 0)
-      throw new EmptyQueueException();
-    
-    obj =elementAt(0);
-    removeElementAt(0);
-
-    if (stopping && size() == 0)
-      notify();
-
-    return obj;
-  }
-
-
   /**
    * Waits for an object to be pushed in the queue, and eventually returns
    * it without removing it.
@@ -104,12 +79,48 @@ public class Queue extends Vector {
     return elementAt(0);
   }
 
+  /**
+   * Removes and returns the object at the top of this queue.
+   *
+   * @return  The object at the top of this queue.
+   * @exception  EmptyQueueException  If the queue is empty.
+   */
+  public synchronized Object pop() {
+    if (size() == 0)
+      throw new EmptyQueueException();
+    
+    Object obj = elementAt(0);
+    removeElementAt(0);
+
+    if (stopping && size() == 0)
+      notify();
+
+    return obj;
+  }
+  
+  /**
+   * Waits for an object to be pushed in the queue, then removes and returns
+   * the object at the top of this queue.
+   *
+   * @return  The object at the top of this queue. 
+   */
+  public synchronized Object getAndPop() throws InterruptedException {
+    while (size() == 0)
+      wait();
+
+    Object obj = elementAt(0);
+    removeElementAt(0);
+
+    if (stopping && size() == 0)
+      notify();
+
+    return obj;
+  }
 
   /** Authorizes the use of the queue by producers. */
   public void start() {
     stopping = false;
   }
-
 
   /**
    * Stops the queue by returning when it is empty and prohibiting any
