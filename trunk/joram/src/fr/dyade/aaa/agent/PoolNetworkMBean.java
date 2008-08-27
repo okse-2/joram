@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,6 +32,13 @@ public interface PoolNetworkMBean extends NetworkMBean {
    * @return	the number of active session.
    */
   public int getNbActiveSession();
+  
+  /**
+   * Returns the maximum number of free senders in the pool.
+   *
+   * @return  the number of free senders in the pool.
+   */
+  public int getNbMaxFreeSender();
 
   /**
    * Gets the number of waiting messages to send for this session.
