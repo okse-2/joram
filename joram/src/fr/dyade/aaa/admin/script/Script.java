@@ -23,6 +23,7 @@ package fr.dyade.aaa.admin.script;
 
 import java.io.Serializable;
 import java.util.Enumeration;
+import java.util.NoSuchElementException;
 import java.util.Vector;
 import fr.dyade.aaa.admin.cmd.*;
 import fr.dyade.aaa.agent.conf.*;
