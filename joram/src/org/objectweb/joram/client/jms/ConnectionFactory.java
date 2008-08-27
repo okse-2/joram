@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2007 France Telecom R&D
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -25,20 +25,17 @@
  */
 package org.objectweb.joram.client.jms;
 
-import javax.naming.*;
 import javax.jms.JMSException;
 
 import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.joram.shared.JoramTracing;
-
 /**
  * Implements the <code>javax.jms.ConnectionFactory</code> interface.
  */
-public abstract class ConnectionFactory
-                extends AbstractConnectionFactory
-                implements javax.jms.ConnectionFactory {
+public abstract class ConnectionFactory extends AbstractConnectionFactory implements javax.jms.ConnectionFactory {
+  /** define serialVersionUID for interoperability */
+  private static final long serialVersionUID = 1L;
+
   /**
    * Constructs a <code>ConnectionFactory</code> dedicated to a given server.
    *
