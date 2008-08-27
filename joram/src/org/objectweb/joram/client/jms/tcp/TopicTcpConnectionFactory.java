@@ -1,8 +1,8 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2004 Bull SA
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,30 +20,23 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (ScalAgent)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms.tcp;
 
+import javax.jms.JMSException;
+
 import org.objectweb.joram.client.jms.Connection;
-import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.client.jms.TopicConnection;
+import org.objectweb.joram.client.jms.TopicConnectionFactory;
 import org.objectweb.joram.client.jms.admin.AdminModule;
-
-import java.util.Vector;
-
-import javax.naming.NamingException;
-
 
 /**
  * A <code>TopicTcpConnectionFactory</code> instance is a factory of
  * TCP connections for Pub/Sub communication.
  */
-public class TopicTcpConnectionFactory
-             extends org.objectweb.joram.client.jms.TopicConnectionFactory
-{
-  /**
-   * 
-   */
+public class TopicTcpConnectionFactory extends TopicConnectionFactory {
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   /**
@@ -52,16 +45,14 @@ public class TopicTcpConnectionFactory
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */
-  public TopicTcpConnectionFactory(String host, int port)
-  {
+  public TopicTcpConnectionFactory(String host, int port) {
     super(host, port);
   }
 
   /**
    * Constructs an empty <code>TopicTcpConnectionFactory</code> instance.
    */
-  public TopicTcpConnectionFactory()
-  {}
+  public TopicTcpConnectionFactory() {}
 
   /**
    * Method inherited from the <code>TopicConnectionFactory</code> class.
@@ -69,14 +60,10 @@ public class TopicTcpConnectionFactory
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.TopicConnection
-      createTopicConnection(String name, String password)
-    throws javax.jms.JMSException {
+  public javax.jms.TopicConnection createTopicConnection(String name,
+                                                         String password) throws JMSException {
     return new TopicConnection(params, 
-                               new TcpConnection(params, 
-                                                 name, 
-                                                 password,
-                                                 reliableClass));
+                               new TcpConnection(params, name, password, reliableClass));
   }
 
   /**
@@ -85,13 +72,10 @@ public class TopicTcpConnectionFactory
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.Connection createConnection(String name, String password)
-    throws javax.jms.JMSException {
+  public javax.jms.Connection createConnection(String name,
+                                               String password) throws JMSException {
     return new Connection(params, 
-                          new TcpConnection(params, 
-                                            name, 
-                                            password,
-                                            reliableClass));
+                          new TcpConnection(params, name, password, reliableClass));
   }
 
 
@@ -102,11 +86,8 @@ public class TopicTcpConnectionFactory
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */ 
-  public static javax.jms.TopicConnectionFactory 
-      create(String host, int port) {
-    return create(host, 
-                  port, 
-                  "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
+  public static javax.jms.TopicConnectionFactory create(String host, int port) {
+    return create(host,  port, "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
   }
 
   /**
@@ -117,10 +98,9 @@ public class TopicTcpConnectionFactory
    * @param port  Server's listening port.
    * @param reliableClass  Reliable class name.
    */ 
-  public static javax.jms.TopicConnectionFactory 
-      create(String host, 
-             int port,
-             String reliableClass) {
+  public static javax.jms.TopicConnectionFactory create(String host, 
+                                                        int port,
+                                                        String reliableClass) {
     TopicTcpConnectionFactory cf = new TopicTcpConnectionFactory(host, port);
     cf.setReliableClass(reliableClass);
     return cf;
@@ -132,9 +112,7 @@ public class TopicTcpConnectionFactory
    *
    * @exception ConnectException  If the admin connection is closed or broken.
    */ 
-  public static javax.jms.TopicConnectionFactory create()
-                throws java.net.ConnectException 
-  {
+  public static javax.jms.TopicConnectionFactory create() throws java.net.ConnectException {
     return create(AdminModule.getLocalHost(), AdminModule.getLocalPort());
   }
 }

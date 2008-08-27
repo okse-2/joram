@@ -1,8 +1,8 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2004 Bull SA
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,17 +20,15 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): Nicolas Tachker (ScalAgent)
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms.tcp;
 
+import javax.jms.JMSException;
+
 import org.objectweb.joram.client.jms.Connection;
-import org.objectweb.joram.client.jms.FactoryParameters;
+import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.admin.AdminModule;
-
-import java.util.Vector;
-
-import javax.naming.NamingException;
 
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -39,10 +37,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * A <code>TcpConnectionFactory</code> instance is a factory of
  * TCP connections.
  */
-public class TcpConnectionFactory extends org.objectweb.joram.client.jms.ConnectionFactory {
-  /**
-   * 
-   */
+public class TcpConnectionFactory extends ConnectionFactory {
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   /**
@@ -66,18 +62,14 @@ public class TcpConnectionFactory extends org.objectweb.joram.client.jms.Connect
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.Connection createConnection(String name, String password)
-    throws javax.jms.JMSException {
+  public javax.jms.Connection createConnection(String name,
+                                               String password) throws JMSException {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, 
-                                 "TcpConnectionFactory.createConnection(" + 
-                                 name + ',' + password + ") reliableClass=" + reliableClass);
+                                 "TcpConnectionFactory.createConnection(" + name + ',' + password + ") reliableClass=" + reliableClass);
 
     return new Connection(params, 
-                          new TcpConnection(params, 
-                                            name, 
-                                            password, 
-                                            reliableClass));
+                          new TcpConnection(params, name, password, reliableClass));
   }
 
   /**
@@ -88,9 +80,7 @@ public class TcpConnectionFactory extends org.objectweb.joram.client.jms.Connect
    * @param port  Server's listening port.
    */ 
   public static javax.jms.ConnectionFactory create(String host, int port) {
-    return create(host, 
-                  port, 
-                  "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
+    return create(host, port, "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
   }
 
   /**
@@ -101,15 +91,12 @@ public class TcpConnectionFactory extends org.objectweb.joram.client.jms.Connect
    * @param port           Server's listening port.
    * @param reliableClass  Reliable class name.
    */ 
-  public static javax.jms.ConnectionFactory 
-      create(String host, 
-             int port,
-             String reliableClass) {
+  public static javax.jms.ConnectionFactory create(String host, int port,
+                                                   String reliableClass) {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG, 
-        "TcpConnectionFactory.create(" + 
-        host + ',' + port + ',' + reliableClass +')');
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, 
+                                 "TcpConnectionFactory.create(" + host + ',' + port + ',' + reliableClass +')');
+    
     TcpConnectionFactory cf = new TcpConnectionFactory(host, port);
     cf.setReliableClass(reliableClass);
     return cf;
@@ -121,9 +108,7 @@ public class TcpConnectionFactory extends org.objectweb.joram.client.jms.Connect
    *
    * @exception ConnectException  If the admin connection is closed or broken.
    */ 
-  public static javax.jms.ConnectionFactory create() 
-                throws java.net.ConnectException
-  {
+  public static javax.jms.ConnectionFactory create() throws java.net.ConnectException {
     return create(AdminModule.getLocalHost(), AdminModule.getLocalPort());
   }
 }
