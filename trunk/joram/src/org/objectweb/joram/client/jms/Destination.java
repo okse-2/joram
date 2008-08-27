@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -51,9 +51,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * Implements the <code>javax.jms.Destination</code> interface and provides
  * JORAM specific administration and monitoring methods.
  */
-public abstract class Destination
-  extends AdministeredObject
-  implements javax.jms.Destination, DestinationMBean {
+public abstract class Destination extends AdministeredObject implements javax.jms.Destination, DestinationMBean {
   /** Identifier of the agent destination. */
   protected String agentId;
 
