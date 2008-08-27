@@ -22,7 +22,6 @@
 package fr.dyade.aaa.util;
 
 import java.io.*;
-import java.util.*;
 
 import org.objectweb.util.monolog.api.*;
 
