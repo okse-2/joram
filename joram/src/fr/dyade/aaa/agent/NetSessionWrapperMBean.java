@@ -30,7 +30,21 @@ public interface NetSessionWrapperMBean {
    *
    * @return	the server identification of remote host.
    */
+  
   public short getRemoteSID();
+  /**
+   * Gets the maximum number of message sent and non acknowledged.
+   * 
+   * @return  the maximum number of message sent and non acknowledged.
+   */
+  public int getMaxMessageInFlow();
+  
+  /**
+   * Sets the maximum number of message sent and non acknowledged.
+   * 
+   * @param maxMessageInFlow  the maximum number of message sent and non acknowledged.
+   */
+  public void setMaxMessageInFlow(int maxMessageInFlow);
 
   /**
    * Tests if the session is connected.
