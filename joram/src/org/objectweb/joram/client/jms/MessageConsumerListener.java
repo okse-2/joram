@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -28,13 +28,11 @@ import javax.jms.MessageListener;
 import javax.jms.JMSException;
 
 import org.objectweb.joram.shared.client.AbstractJmsReply;
-import org.objectweb.joram.shared.client.ConsumerCloseSubRequest;
 import org.objectweb.joram.shared.client.ConsumerMessages;
 import org.objectweb.joram.shared.client.ConsumerSetListRequest;
 import org.objectweb.joram.shared.client.ConsumerUnsetListRequest;
 import org.objectweb.joram.shared.client.ConsumerAckRequest;
 import org.objectweb.joram.shared.client.ActivateConsumerRequest;
-import org.objectweb.joram.shared.client.ConsumerUnsubRequest;
 import org.objectweb.joram.client.jms.connection.ReplyListener;
 import org.objectweb.joram.client.jms.connection.AbortedRequestException;
 import org.objectweb.joram.client.jms.connection.RequestMultiplexer;
@@ -51,8 +49,7 @@ import fr.dyade.aaa.util.Debug;
  */
 abstract class MessageConsumerListener implements ReplyListener {
   
-  public static Logger logger = 
-    Debug.getLogger(MessageConsumerListener.class.getName());
+  public static Logger logger = Debug.getLogger(MessageConsumerListener.class.getName());
 
   /**
    * Status of the message consumer listener.
