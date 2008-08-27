@@ -83,8 +83,7 @@ public class Script implements Serializable, Cloneable {
     return commands.elementAt(i);
   }
 
-  public Object firstElement() 
-    throws NoSuchElementException {
+  public Object firstElement() throws NoSuchElementException {
     return commands.firstElement();
   }
 
