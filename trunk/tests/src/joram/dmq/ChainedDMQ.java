@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s):  (ScalAgent D.T.)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): Badolle Fabien (ScalAgent D.T.)
  */
 package joram.dmq;
@@ -117,28 +117,79 @@ public class ChainedDMQ extends TestCase {
       consumer = session.createConsumer(dmqueue0);
       msg = (TextMessage) consumer.receive();
       assertEquals(1, msg.getIntProperty("JMS_JORAM_ERRORCOUNT"));
-      assertEquals(MessageErrorConstants.EXPIRED, msg.getShortProperty("JMS_JORAM_ERRORCODE_1"));
-      
-      System.out.println(" ");
-      System.out.println("Message on DMQ0:");
+      assertEquals(MessageErrorConstants.EXPIRED, msg.getIntProperty("JMS_JORAM_ERRORCODE_1"));
       System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_1"));
+      consumer.close();
+      
+      // Check some message properties on DMQ 1
+      consumer = session.createConsumer(dmqueue1);
+      msg = (TextMessage) consumer.receive();
+      assertEquals(2, msg.getIntProperty("JMS_JORAM_ERRORCOUNT"));
+      assertEquals(MessageErrorConstants.EXPIRED, msg.getIntProperty("JMS_JORAM_ERRORCODE_1"));
+      System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_1"));
+      assertEquals(MessageErrorConstants.QUEUE_FULL, msg.getIntProperty("JMS_JORAM_ERRORCODE_2"));
+      System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_2"));
+      consumer.close();
+
+      // Check some message properties on DMQ 2
+      consumer = session.createConsumer(dmqueue2);
+      msg = (TextMessage) consumer.receive();
+      assertEquals(3, msg.getIntProperty("JMS_JORAM_ERRORCOUNT"));
+      assertEquals(MessageErrorConstants.EXPIRED, msg.getIntProperty("JMS_JORAM_ERRORCODE_1"));
+      System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_1"));
+      assertEquals(MessageErrorConstants.QUEUE_FULL, msg.getIntProperty("JMS_JORAM_ERRORCODE_2"));
+      System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_2"));
+      assertEquals(MessageErrorConstants.QUEUE_FULL, msg.getIntProperty("JMS_JORAM_ERRORCODE_3"));
+      System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_3"));
+      consumer.close();
 
       // Check some message properties on DMQ 3
       consumer = session.createConsumer(dmqueue3);
       msg = (TextMessage) consumer.receive();
       assertEquals(4, msg.getIntProperty("JMS_JORAM_ERRORCOUNT"));
-      assertEquals(MessageErrorConstants.EXPIRED, msg.getShortProperty("JMS_JORAM_ERRORCODE_1"));
-      assertEquals(MessageErrorConstants.QUEUE_FULL, msg.getShortProperty("JMS_JORAM_ERRORCODE_2"));
-      assertEquals(MessageErrorConstants.QUEUE_FULL, msg.getShortProperty("JMS_JORAM_ERRORCODE_3"));
-      assertEquals(MessageErrorConstants.QUEUE_FULL, msg.getShortProperty("JMS_JORAM_ERRORCODE_4"));
-
-      System.out.println(" ");
-      System.out.println("Message on DMQ3:");
+      assertEquals(MessageErrorConstants.EXPIRED, msg.getIntProperty("JMS_JORAM_ERRORCODE_1"));
       System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_1"));
+      assertEquals(MessageErrorConstants.QUEUE_FULL, msg.getIntProperty("JMS_JORAM_ERRORCODE_2"));
       System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_2"));
+      assertEquals(MessageErrorConstants.QUEUE_FULL, msg.getIntProperty("JMS_JORAM_ERRORCODE_3"));
       System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_3"));
+      assertEquals(MessageErrorConstants.QUEUE_FULL, msg.getIntProperty("JMS_JORAM_ERRORCODE_4"));
       System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_4"));
+      consumer.close();
 
+      // Check some message properties on DMQ 4
+      consumer = session.createConsumer(dmqueue4);
+      msg = (TextMessage) consumer.receive();
+      assertEquals(5, msg.getIntProperty("JMS_JORAM_ERRORCOUNT"));
+      assertEquals(MessageErrorConstants.EXPIRED, msg.getIntProperty("JMS_JORAM_ERRORCODE_1"));
+      System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_1"));
+      assertEquals(MessageErrorConstants.QUEUE_FULL, msg.getIntProperty("JMS_JORAM_ERRORCODE_2"));
+      System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_2"));
+      assertEquals(MessageErrorConstants.QUEUE_FULL, msg.getIntProperty("JMS_JORAM_ERRORCODE_3"));
+      System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_3"));
+      assertEquals(MessageErrorConstants.QUEUE_FULL, msg.getIntProperty("JMS_JORAM_ERRORCODE_4"));
+      System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_4"));
+      assertEquals(MessageErrorConstants.QUEUE_FULL, msg.getIntProperty("JMS_JORAM_ERRORCODE_5"));
+      System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_5"));
+      consumer.close();
+
+      // Check some message properties on DMQ 5
+      consumer = session.createConsumer(dmqueue5);
+      msg = (TextMessage) consumer.receive();
+      assertEquals(6, msg.getIntProperty("JMS_JORAM_ERRORCOUNT"));
+      assertEquals(MessageErrorConstants.EXPIRED, msg.getIntProperty("JMS_JORAM_ERRORCODE_1"));
+      System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_1"));
+      assertEquals(MessageErrorConstants.QUEUE_FULL, msg.getIntProperty("JMS_JORAM_ERRORCODE_2"));
+      System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_2"));
+      assertEquals(MessageErrorConstants.QUEUE_FULL, msg.getIntProperty("JMS_JORAM_ERRORCODE_3"));
+      System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_3"));
+      assertEquals(MessageErrorConstants.QUEUE_FULL, msg.getIntProperty("JMS_JORAM_ERRORCODE_4"));
+      System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_4"));
+      assertEquals(MessageErrorConstants.QUEUE_FULL, msg.getIntProperty("JMS_JORAM_ERRORCODE_5"));
+      System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_5"));
+      assertEquals(MessageErrorConstants.QUEUE_FULL, msg.getIntProperty("JMS_JORAM_ERRORCODE_6"));
+      System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_6"));
+      consumer.close();
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);
@@ -187,7 +238,11 @@ public class ChainedDMQ extends TestCase {
     queue.setFreeReading();
     queue.setFreeWriting();
     dmqueue0.setFreeReading();
+    dmqueue1.setFreeReading();
+    dmqueue2.setFreeReading();
     dmqueue3.setFreeReading();
+    dmqueue4.setFreeReading();
+    dmqueue5.setFreeReading();
 
     queue.setDMQ(dmqueue0);
 
