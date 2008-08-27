@@ -32,7 +32,7 @@ public class test14 extends TestCase {
   }
 
   protected void setUp() throws Exception {
-    timeout = 10000L;
+    timeout = 15000L;
 
     startAgentServer((short) 1);
 
