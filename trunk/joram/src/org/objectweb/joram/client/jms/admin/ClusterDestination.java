@@ -32,7 +32,6 @@ import javax.naming.*;
 
 import java.net.ConnectException;
 import java.util.Hashtable;
-import java.util.Properties;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Random;
@@ -46,10 +45,9 @@ import org.objectweb.joram.shared.admin.SetWriter;
  * A base class for clustered destinations.
  */
 public class ClusterDestination extends Destination {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+  
   protected Hashtable cluster = null;
 
   /**

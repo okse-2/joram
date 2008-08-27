@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2007 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -23,14 +23,7 @@
  */
 package org.objectweb.joram.client.jms.admin;
 
-import org.objectweb.joram.client.jms.Destination;
-import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.shared.admin.*;
-
-import java.net.ConnectException;
 import java.util.Hashtable;
-import java.util.Enumeration;
-import java.util.Properties;
 
 import javax.jms.JMSException;
 
@@ -38,9 +31,7 @@ import javax.jms.JMSException;
  * this is a sample.
  */
 public class ClusterTopic extends ClusterDestination implements javax.jms.Topic {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   /** 
