@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2006 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -59,13 +59,10 @@ public class ManagedConnectionFactoryImpl
              implements javax.resource.spi.ManagedConnectionFactory,
                         javax.resource.spi.ResourceAdapterAssociation,
                         javax.resource.spi.ValidatingManagedConnectionFactory,
-                        java.io.Serializable
-{
-  /**
-   * 
-   */
+                        java.io.Serializable {
+  /** Define serialVersionUID for interoperability. */
   private static final long serialVersionUID = 1L;
-  
+
   /** Out stream for error logging and tracing. */
   protected transient PrintWriter out = null;
 
@@ -131,7 +128,7 @@ public class ManagedConnectionFactoryImpl
    *
    */
   public int multiThreadSyncDelay = -1;
-  
+
   /**
    * This is the local IP address on which the TCP connection is activated. The
    * value can either be a machine name, such as "java.sun.com", or a textual
@@ -161,7 +158,7 @@ public class ManagedConnectionFactoryImpl
   public int getTxPendingTimer() {
     return txPendingTimer;
   }
-  
+
   public boolean isAsyncSend() {
     return asyncSend;
   }
@@ -216,7 +213,7 @@ public class ManagedConnectionFactoryImpl
    * @exception ResourceException  Never thrown.
    */
   public Object createConnectionFactory(ConnectionManager cxManager)
-    throws ResourceException {
+  throws ResourceException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createConnectionFactory(" + cxManager + ")");
 
@@ -266,9 +263,9 @@ public class ManagedConnectionFactoryImpl
    *                                   reason.
    */
   public ManagedConnection
-      createManagedConnection(Subject subject,
-                              ConnectionRequestInfo cxRequest)
-    throws ResourceException {
+  createManagedConnection(Subject subject,
+                          ConnectionRequestInfo cxRequest)
+  throws ResourceException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                     this + " createManagedConnection(" + subject +
@@ -289,7 +286,7 @@ public class ManagedConnectionFactoryImpl
     else {
       if (! (cxRequest instanceof ConnectionRequest)) {
         if (out != null)
-            out.print("Provided ConnectionRequestInfo instance is not a JORAM object.");
+          out.print("Provided ConnectionRequestInfo instance is not a JORAM object.");
         throw new ResourceException("Provided ConnectionRequestInfo instance "
                                     + "is not a JORAM object.");
       }
@@ -302,8 +299,8 @@ public class ManagedConnectionFactoryImpl
     XAConnection cnx = null;
 
     if (collocated) {
-        hostName = "localhost";
-        serverPort = -1;
+      hostName = "localhost";
+      serverPort = -1;
     }
 
     if (isHa) {
@@ -335,15 +332,15 @@ public class ManagedConnectionFactoryImpl
                                       this + " createManagedConnection cnx = " + cnx);
     } catch (IllegalStateException exc) {
       if (out != null)
-          out.print("Could not access the JORAM server: " + exc);
+        out.print("Could not access the JORAM server: " + exc);
       throw new CommException("Could not access the JORAM server: " + exc);
     } catch (JMSSecurityException exc) {
-        if (out != null)
-            out.print("Invalid user identification: " + exc);
+      if (out != null)
+        out.print("Invalid user identification: " + exc);
       throw new SecurityException("Invalid user identification: " + exc);
     } catch (JMSException exc) {
-        if (out != null)
-            out.print("Failed connecting process: " + exc);
+      if (out != null)
+        out.print("Failed connecting process: " + exc);
       throw new ResourceException("Failed connecting process: " + exc);
     }
 
@@ -372,10 +369,10 @@ public class ManagedConnectionFactoryImpl
    *                               invalid.
    */
   public ManagedConnection
-      matchManagedConnections(Set connectionSet,
-                              Subject subject,
-                              ConnectionRequestInfo cxRequest)
-    throws ResourceException {
+  matchManagedConnections(Set connectionSet,
+                          Subject subject,
+                          ConnectionRequestInfo cxRequest)
+  throws ResourceException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                     this + " matchManagedConnections(" + connectionSet +
@@ -396,9 +393,9 @@ public class ManagedConnectionFactoryImpl
       }
 
       if (cxRequest instanceof QueueConnectionRequest)
-          mode = "PTP";
+        mode = "PTP";
       else if (cxRequest instanceof TopicConnectionRequest)
-          mode = "PubSub";
+        mode = "PubSub";
 
       userName = ((ConnectionRequest) cxRequest).getUserName();
     }
@@ -412,8 +409,8 @@ public class ManagedConnectionFactoryImpl
     int serverPort = this.serverPort;
 
     if (collocated) {
-        hostName = "localhost";
-        serverPort = -1;
+      hostName = "localhost";
+      serverPort = -1;
     }
 
 
@@ -445,8 +442,7 @@ public class ManagedConnectionFactoryImpl
    * Sets the log writer for this <code>ManagedConnectionFactoryImpl</code>
    * instance.
    */
-  public void setLogWriter(PrintWriter out) throws ResourceException
-  {
+  public void setLogWriter(PrintWriter out) throws ResourceException {
     this.out = out;
   }
 
@@ -454,25 +450,22 @@ public class ManagedConnectionFactoryImpl
    * Gets the log writer of this <code>ManagedConnectionFactoryImpl</code>
    * instance.
    */
-  public PrintWriter getLogWriter() throws ResourceException
-  {
+  public PrintWriter getLogWriter() throws ResourceException {
     return out;
   }
 
   /** Returns a code depending on the managed factory configuration. */
-  public int hashCode()
-  {
+  public int hashCode() {
     return ("Unified:"
-            + hostName
-            + ":"
-            + serverPort
-            + "-"
-            + userName).hashCode();
+        + hostName
+        + ":"
+        + serverPort
+        + "-"
+        + userName).hashCode();
   }
 
   /** Compares managed factories according to their configuration. */
-  public boolean equals(Object o)
-  {
+  public boolean equals(Object o) {
     if (! (o instanceof ManagedConnectionFactoryImpl)
         || o instanceof ManagedQueueConnectionFactoryImpl
         || o instanceof ManagedTopicConnectionFactoryImpl)
@@ -504,8 +497,7 @@ public class ManagedConnectionFactoryImpl
    *
    * @exception ResourceException  If the adapter could not be set.
    */
-  public void setResourceAdapter(ResourceAdapter ra)
-    throws ResourceException {
+  public void setResourceAdapter(ResourceAdapter ra) throws ResourceException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                     this + " setResourceAdapter(" + ra + ")");
@@ -552,8 +544,7 @@ public class ManagedConnectionFactoryImpl
   /**
    * From a set of managed connections, returns the set of invalid ones.
    */
-  public Set getInvalidConnections(Set connectionSet)
-    throws ResourceException {
+  public Set getInvalidConnections(Set connectionSet) throws ResourceException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                     this + " getInvalidConnections(" + connectionSet + ")");
@@ -561,22 +552,21 @@ public class ManagedConnectionFactoryImpl
     Iterator it = connectionSet.iterator();
     ManagedConnectionImpl managedCx;
 
+    java.util.HashSet invalidConnections = new java.util.HashSet();
     while (it.hasNext()) {
       try {
         managedCx = (ManagedConnectionImpl) it.next();
-        if (managedCx.isValid())
-          connectionSet.remove(managedCx);
+        if (!managedCx.isValid())
+          invalidConnections.add(managedCx);
       }
       catch (ClassCastException exc) {}
     }
 
-    return connectionSet;
+    return invalidConnections; 
   }
 
   /** Deserializing method. */
-  private void readObject(java.io.ObjectInputStream in)
-          throws java.io.IOException, ClassNotFoundException
-  {
+  private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
     in.defaultReadObject();
   }
 
@@ -584,71 +574,61 @@ public class ManagedConnectionFactoryImpl
   // --- JavaBean setter and getter methods ---
   // ------------------------------------------
 
-  public void setCollocated(java.lang.Boolean collocated)
-  {
+  public void setCollocated(Boolean collocated) {
     this.collocated = collocated.booleanValue();
   }
 
-  public void setHostName(java.lang.String hostName)
-  {
+  public void setHostName(String hostName) {
     this.hostName = hostName;
   }
 
-  public void setServerPort(java.lang.Integer serverPort)
-  {
+  public void setServerPort(Integer serverPort) {
     this.serverPort = serverPort.intValue();
   }
 
-  public void setUserName(java.lang.String userName)
-  {
+  public void setUserName(String userName) {
     this.userName = userName;
   }
 
-  public void setPassword(java.lang.String password)
-  {
+  public void setPassword(String password) {
     this.password = password;
   }
 
-  public java.lang.Boolean getCollocated()
-  {
+  public Boolean getCollocated() {
     return new Boolean(collocated);
   }
 
-  public java.lang.String getHostName()
-  {
+  public String getHostName() {
     return hostName;
   }
 
-  public java.lang.Integer getServerPort()
-  {
+  public Integer getServerPort() {
     return new Integer(serverPort);
   }
 
-  public java.lang.String getUserName()
-  {
+  public String getUserName() {
     return userName;
   }
 
-  public java.lang.String getPassword()
-  {
+  public String getPassword() {
     return password;
   }
-  
-  public java.lang.String getOutLocalAddress() {
+
+  public String getOutLocalAddress() {
     return outLocalAddress;
   }
 
-  public java.lang.Integer getOutLocalPort() {
+  public Integer getOutLocalPort() {
     return new Integer(outLocalPort);
   }
 
-  public void setOutLocalAddress(java.lang.String outLocalAddress) {
+  public void setOutLocalAddress(String outLocalAddress) {
     this.outLocalAddress = null;
     if ((outLocalAddress != null) && (outLocalAddress.length() > 0))
       this.outLocalAddress = outLocalAddress;
   }
 
-  public void setOutLocalPort(java.lang.Integer outLocalPort) {
+  public void setOutLocalPort(Integer outLocalPort) {
     this.outLocalPort = outLocalPort.intValue();
   }
 }
