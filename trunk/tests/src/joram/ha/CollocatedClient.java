@@ -28,11 +28,13 @@ import java.io.PrintWriter;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
-import javax.jms.TopicSubscriber;
+import javax.jms.MessageConsumer;
 import javax.jms.TextMessage;
 
 import org.objectweb.joram.client.jms.Session;
 import org.objectweb.joram.client.jms.ha.local.HALocalConnectionFactory;
+import org.objectweb.joram.client.jms.Destination;
+import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 
 import joram.framework.TestCase;
@@ -49,10 +51,20 @@ public class CollocatedClient extends TestCase {
     AgentServer.start();
 
     File file = new File("traces" + System.currentTimeMillis() + ".txt");
-    PrintWriter pw = new PrintWriter(new FileOutputStream(file));
+    PrintWriter pw = new PrintWriter(new FileOutputStream(file), true);
     
     AdminModule.connect("localhost", 2560, "root", "root", 60);
-    Topic topic = Topic.create(0, "topic");
+
+    String name = System.getProperty("name", "topic");
+    Destination dest = null;
+    if (name.equals("queue")) {
+      dest = Queue.create(0, "queue");
+    } else {
+      dest = Topic.create(0, "topic");
+    }
+
+    pw.println("Destination " + dest);
+
     AdminModule.disconnect();    
 
     HALocalConnectionFactory cf = new HALocalConnectionFactory();
@@ -62,8 +74,7 @@ public class CollocatedClient extends TestCase {
     session.setTopicPassivationThreshold(150);
     session.setTopicAckBufferMax(10);
 
-    TopicSubscriber tsub = session.createDurableSubscriber(topic, "test");
-//  MessageConsumer tsub = session.createConsumer(topic);
+    MessageConsumer cons = session.createConsumer(dest);
     cnx.start();
  
     int i = 0;
@@ -72,7 +83,7 @@ public class CollocatedClient extends TestCase {
     pw.println("client#" + args[2] + " start - " + start);
     pw.flush();
     while (true) {
-      TextMessage msg = (TextMessage) tsub.receive();
+      TextMessage msg = (TextMessage) cons.receive();
       int idx2 = msg.getIntProperty("index");
       if ((idx != -1) && (idx2 != idx +1)) {
         pw.println("Message lost #" + (idx +1) + " - " + idx2);
