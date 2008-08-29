@@ -31,7 +31,7 @@
     <ant dir="." antfile="build.xml" target="tests.ha"/>
     <ant dir="." antfile="build.xml" target="tests.recovery"/>
     <ant dir="." antfile="build.xml" target="tests.dist"/>
-    <ant dir="." antfile="build.xml" target="test.admin"/>
+    <ant dir="." antfile="build.xml" target="tests.admin"/>
     <ant dir="." antfile="build.xml" target="tests.client"/>
     <ant dir="." antfile="build.xml" target="tests.local"/>
     <ant dir="." antfile="build.xml" target="tests.dursub"/>
@@ -58,7 +58,11 @@
     <ant dir="." antfile="build.xml" target="base.test_Q_MText"/>
     <ant dir="." antfile="build.xml" target="base.test_T_MText"/>
     <ant dir="." antfile="build.xml" target="base.test_Q_MObj"/>
+    <ant dir="." antfile="build.xml" target="base.test_Q_MObjNull"/>
+    <ant dir="." antfile="build.xml" target="base.test_Q_MObjBA"/>
     <ant dir="." antfile="build.xml" target="base.test_T_MObj"/>
+    <ant dir="." antfile="build.xml" target="base.test_T_MObjNull"/>
+    <ant dir="." antfile="build.xml" target="base.test_T_MObjBA"/>
     <ant dir="." antfile="build.xml" target="base.test_Q_MByte"/>
     <ant dir="." antfile="build.xml" target="base.test_T_MByte"/>
     <ant dir="." antfile="build.xml" target="base.test_Q_MMap"/>
@@ -112,7 +116,12 @@ description=" --> launch all exceptionlistener tests">
           description=" --> launch all ha tests">
     <ant dir="." antfile="build.xml" target="ha.test1"/>
     <ant dir="." antfile="build.xml" target="ha.test2"/>
-  </target>
+    <!-- ant dir="." antfile="build.xml" target="ha.test3"/ -->
+    <ant dir="." antfile="build.xml" target="ha.test4-1"/>
+    <ant dir="." antfile="build.xml" target="ha.test4-2"/>
+    <ant dir="." antfile="build.xml" target="ha.test5-1"/>
+    <ant dir="." antfile="build.xml" target="ha.test5-2"/>
+    </target>
 
   <target name="tests.recovery"
           description=" --> launch all recovery tests">
@@ -230,6 +239,7 @@ description=" --> launch all exceptionlistener tests">
     <ant dir="." antfile="build.xml" target="noreg.test15"/>
     <ant dir="." antfile="build.xml" target="noreg.test16"/>
     <ant dir="." antfile="build.xml" target="noreg.test17"/>
+    <ant dir="." antfile="build.xml" target="noreg.test18"/>
     <ant dir="." antfile="build.xml" target="noreg.test19"/>
     <ant dir="." antfile="build.xml" target="noreg.test20"/>
     <ant dir="." antfile="build.xml" target="noreg.test21"/>
@@ -247,6 +257,8 @@ description=" --> launch all exceptionlistener tests">
     <ant dir="." antfile="build.xml" target="noreg.test50"/>
     <ant dir="." antfile="build.xml" target="noreg.test51"/>
     <ant dir="." antfile="build.xml" target="noreg.test56"/>
+    <!-- ant dir="." antfile="build.xml" target="noreg.test57"/ -->
+    <!-- ant dir="." antfile="build.xml" target="noreg.test59"/ -->
   </target>
 
   <target name="tests.xa"
@@ -401,6 +413,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test if the message receive is the same that the message sent, with queue">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_Q_M"/>
       <param name="className" value="joram.base.Test_Q_M"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -413,6 +426,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test if the message receive is the same that the message sent, with topic">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_T_M"/>
       <param name="className" value="joram.base.Test_T_M"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -425,6 +439,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test if the text message receive is the same that the message sent, with queue">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_Q_MText"/>
       <param name="className" value="joram.base.Test_Q_MText"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -437,6 +452,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test if the text message receive is the same that the message sent, with topic">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_T_MText"/>
       <param name="className" value="joram.base.Test_T_MText"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -444,10 +460,12 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
+	
   <target name="base.test_Q_MObj" depends="init.a3props,compile"
-          description=" --> test if the object message receive is the same that the message sent, with queue">
+          description=" --> test if the object message receive is the same that the message sent (use a String), with queue">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_Q_MObj"/>
       <param name="className" value="joram.base.Test_Q_MObj"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -455,10 +473,38 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
-  <target name="base.test_T_MObj" depends="init.a3props,compile"
-          description=" --> test if the object message receive is the same that the message sent, with topic">
+
+  <target name="base.test_Q_MObjNull" depends="init.a3props,compile"
+          description=" --> test if the object message receive is the same that the message sent (use a null object), with queue">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_Q_MObjNull"/>
+      <param name="className" value="joram.base.Test_Q_MObjNull"/>
+      <param name="jndiconf" value="base/jndi.properties"/>
+      <param name="a3conf" value="base/a3servers1.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="base.test_Q_MObjBA" depends="init.a3props,compile"
+          description=" --> test if the object message receive is the same that the message sent (use a byte[]), with queue">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_Q_MObjBA"/>
+      <param name="className" value="joram.base.Test_Q_MObjBA"/>
+      <param name="jndiconf" value="base/jndi.properties"/>
+      <param name="a3conf" value="base/a3servers1.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="base.test_T_MObj" depends="init.a3props,compile"
+          description=" --> test if the object message receive is the same that the message sent (use a String), with topic">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_T_MObj"/>
       <param name="className" value="joram.base.Test_T_MObj"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -466,10 +512,38 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
+
+  <target name="base.test_T_MObjNull" depends="init.a3props,compile"
+          description=" --> test if the object message receive is the same that the message sent (use a null object), with topic">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_T_MObjNull"/>
+      <param name="className" value="joram.base.Test_T_MObjNull"/>
+      <param name="jndiconf" value="base/jndi.properties"/>
+      <param name="a3conf" value="base/a3servers1.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="base.test_T_MObjBA" depends="init.a3props,compile"
+          description=" --> test if the object message receive is the same that the message sent (use a byte[]), with topic">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_T_MObjBA"/>
+      <param name="className" value="joram.base.Test_T_MObjBA"/>
+      <param name="jndiconf" value="base/jndi.properties"/>
+      <param name="a3conf" value="base/a3servers1.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
   <target name="base.test_Q_MByte" depends="init.a3props,compile"
           description=" --> test if the byte message receive is the same that the message sent, with queue">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_Q_MByte"/>
       <param name="className" value="joram.base.Test_Q_MByte"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -481,6 +555,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test if the byte message receive is the same that the message sent, with topic">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_T_MByte"/>
       <param name="className" value="joram.base.Test_T_MByte"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -492,6 +567,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test if the Map message receive is the same that the message sent, with queue">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_Q_MMap"/>
       <param name="className" value="joram.base.Test_Q_MMap"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -503,6 +579,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test if the Map message receive is the same that the message sent, with topic">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_T_MMap"/>
       <param name="className" value="joram.base.Test_T_MMap"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -514,6 +591,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test if the Stream message receive is the same that the message sent, with queue">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_Q_MStream"/>
       <param name="className" value="joram.base.Test_Q_MStream"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -525,6 +603,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test if the Stream message receive is the same that the message sent, with topic">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_T_MStream"/>
       <param name="className" value="joram.base.Test_T_MStream"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -536,6 +615,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test if the message properties are transmit with a queue">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_property_Q"/>
       <param name="className" value="joram.base.Test_property_Q"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -547,6 +627,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test if the message properties are transmit with a topic">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_property_T"/>
       <param name="className" value="joram.base.Test_property_T"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -558,6 +639,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test the message selector with a queue">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_Selector_Q"/>
       <param name="className" value="joram.base.Test_Selector_Q"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -569,6 +651,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test the message selector with a topic">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_Selector_T"/>
       <param name="className" value="joram.base.Test_Selector_T"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -580,6 +663,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test the functioning of Temporary Queue">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_Temp_Q"/>
       <param name="className" value="joram.base.Test_Temp_Q"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -591,6 +675,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test the functioning of Temporary Topic">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_Temp_T"/>
       <param name="className" value="joram.base.Test_Temp_T"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -602,6 +687,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> tests delete temporay topic when connection close">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_Temp_T2"/>
       <param name="className" value="joram.base.Test_Temp_T2"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -613,6 +699,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test the functioning of browser with Queue">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_Brows_Q"/>
       <param name="className" value="joram.base.Test_Brows_Q"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -626,6 +713,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test the functioning of message listener">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_MsgList_T"/>
       <param name="className" value="joram.base.Test_MsgList_T"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -638,6 +726,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test the message expiration with a queue">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_Exp_Q"/>
       <param name="className" value="joram.base.Test_Exp_Q"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -650,6 +739,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test that a message body is not delete on a Dqueue when restart server">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_DMQ_Body"/>
       <param name="className" value="joram.base.Test_DMQ_Body"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -661,6 +751,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test client_acknowledgement with one message and  with a queue">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_CAck1_Q"/>
       <param name="className" value="joram.base.Test_CAck1_Q"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -672,6 +763,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test client_acknowledgement with one message and  with a topic">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_CAck1_T"/>
       <param name="className" value="joram.base.Test_CAck1_T"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -683,6 +775,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test client_acknowledgement with three messages, one acknowledgement and  with a queue.">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_CAck2_Q"/>
       <param name="className" value="joram.base.Test_CAck2_Q"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -694,6 +787,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test client_acknowledgement with three messages, one acknowledgement and with a topic">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_CAck2_T"/>
       <param name="className" value="joram.base.Test_CAck2_T"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -705,6 +799,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test client_acknowledgement. The message is redelivred when a session is close not a consumer">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_CAck3_Q"/>
       <param name="className" value="joram.base.Test_CAck3_Q"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -716,6 +811,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test transcated session method with a queue.">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_Trans_Q"/>
       <param name="className" value="joram.base.Test_Trans_Q"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -728,6 +824,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test transcated session method with a topic.">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_Trans_T"/>
       <param name="className" value="joram.base.Test_Trans_T"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -740,6 +837,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test ExceptionListener with a queue.">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_ExcpList_Q"/>
       <param name="className" value="joram.base.Test_ExcpList_Q"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -751,6 +849,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test ExceptionListener with a topic.">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_ExcpList_T"/>
       <param name="className" value="joram.base.Test_ExcpList_T"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -763,6 +862,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> check send and receive message with 500 queue">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_Multi_Q"/>
       <param name="className" value="joram.base.Test_Multi_Q"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
@@ -776,6 +876,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test ha with 2 active server.">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.ha.HATest"/>
+      <param name="testid" value="ha.test1"/>
       <param name="jndiconf" value="ha/jndi.properties"/>
       <param name="a3conf" value="ha/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -787,9 +888,126 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test ha with 1 active server.">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.ha.HATest2"/>
+      <param name="testid" value="ha.test2"/>
       <param name="jndiconf" value="ha/jndi.properties"/>
       <param name="a3conf" value="ha/a3servers.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="ha.test3" depends="compile"
+          description=" --> test ha with important message load.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.ha.HATest3"/>
+      <param name="testid" value="ha.test3"/>
+      <param name="jndiconf" value="ha/jndi.properties"/>
+      <param name="a3conf" value="ha/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="ha.test4-1" depends="compile"
+          description=" --> test ha with a colocated client (Topic).">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.ha.HATest4"/>
+      <param name="testid" value="ha.test4-1"/>
+      <param name="jndiconf" value="ha/jndi.properties"/>
+      <param name="a3conf" value="ha/a3servers.xml"/>
+      <param name="jvmargs"
+             value="-DnbRound=250 -DmsgPerRound=50 -Dpause=500 -Dname=topic"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="ha.test4-2" depends="compile"
+          description=" --> test ha with a colocated client (Queue).">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.ha.HATest4"/>
+      <param name="testid" value="ha.test4-2"/>
+      <param name="jndiconf" value="ha/jndi.properties"/>
+      <param name="a3conf" value="ha/a3servers.xml"/>
+      <param name="jvmargs"
+             value="-DnbRound=100 -DmsgPerRound=50 -Dpause=1000 -Dname=queue"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="ha.test4-1.long" depends="compile"
+          description=" --> test ha with a colocated client.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.ha.HATest4"/>
+      <param name="testid" value="ha.test4.long"/>
+      <param name="jndiconf" value="ha/jndi.properties"/>
+      <param name="a3conf" value="ha/a3servers.xml"/>
+      <param name="jvmargs"
+             value="-DnbRound=1000 -DmsgPerRound=100 -Dpause=1000 -Dname=topic"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="ha.test4-2.long" depends="compile"
+          description=" --> test ha with a colocated client.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.ha.HATest4"/>
+      <param name="testid" value="ha.test4.long"/>
+      <param name="jndiconf" value="ha/jndi.properties"/>
+      <param name="a3conf" value="ha/a3servers.xml"/>
+      <param name="jvmargs"
+             value="-DnbRound=1000 -DmsgPerRound=100 -Dpause=1000 -Dname=queue"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="ha.test5-1" depends="compile"
+          description=" --> test ha with a TCP client.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.ha.HATest5"/>
+      <param name="testid" value="ha.test5-1"/>
+      <param name="jndiconf" value="ha/jndi.properties"/>
+      <param name="a3conf" value="ha/a3servers.xml"/>
+      <param name="jvmargs"
+             value="-DnbRound=250 -DmsgPerRound=50 -Dpause=500 -Dname=topic"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="ha.test5-2" depends="compile"
+          description=" --> test ha with a TCP client.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.ha.HATest5"/>
+      <param name="testid" value="ha.test5-2"/>
+      <param name="jndiconf" value="ha/jndi.properties"/>
+      <param name="a3conf" value="ha/a3servers.xml"/>
+      <param name="jvmargs"
+             value="-DnbRound=100 -DmsgPerRound=50 -Dpause=1000 -Dname=queue"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="ha.test5-1.long" depends="compile"
+          description=" --> test ha with a TCP client.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.ha.HATest5"/>
+      <param name="testid" value="ha.test5.long"/>
+      <param name="jndiconf" value="ha/jndi.properties"/>
+      <param name="a3conf" value="ha/a3servers.xml"/>
+      <param name="jvmargs"
+             value="-DnbRound=1000 -DmsgPerRound=100 -Dpause=1000 -Dname=topic"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="ha.test5-2.long" depends="compile"
+          description=" --> test ha with a TCP client.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.ha.HATest5"/>
+      <param name="testid" value="ha.test5.long"/>
+      <param name="jndiconf" value="ha/jndi.properties"/>
+      <param name="a3conf" value="ha/a3servers.xml"/>
+      <param name="jvmargs"
+             value="-DnbRound=1000 -DmsgPerRound=100 -Dpause=1000 -Dname=queue"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -989,10 +1207,13 @@ description=" --> launch all exceptionlistener tests">
 
   <!-- test admin -->
 
-  <target name="test.admin" depends="init.a3props,compile"
+  <target name="tests.admin" depends="admin.test1"/>
+
+  <target name="admin.test1" depends="init.a3props,compile"
           description=" --> test admin configuration">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.admin.AdminTest1"/>
+      <param name="testid" value="admin.test1"/>
       <param name="jndiconf" value="admin/jndi.properties"/>
       <param name="a3conf" value="admin/a3servers1.xml"/>
       <param name="jvmargs" value=""/>
@@ -1672,20 +1893,6 @@ description=" --> launch all exceptionlistener tests">
 
   <!-- Queue and topic statistics -->
 
-  <target name="init.test6props">
-    <property name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
-    <property name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
-    <property name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-    <property name="engine" value="fr.dyade.aaa.agent.Engine"/>
-    <property name="MsgTransient" value="false"/>
-    <property name="SubDurable" value="false"/>
-    <property name="Transacted" value="false"/>
-    <property name="NbRound" value="100"/>
-    <property name="NbMsgPerRound" value="100"/>
-    <property name="NbProdCons" value="1"/>
-    <property name="MsgSize" value="25"/>
-  </target>
-
   <target name="perf.test6"
           description=" --> statistics for queue and topic">
     <antcall target="perf.test6-1"/>
@@ -1907,74 +2114,81 @@ description=" --> launch all exceptionlistener tests">
   <target name="perf.test6-3"
           description=" --> Configurable performance test">
     <antcall target="perf.test6-x" inheritAll="true">
-      <param name="testid" value="3"/>
-      <param name="Destination"
-             value="org.objectweb.joram.client.jms.Topic"/>
+      <param name="testid" value="perf.test6-3"/>
       <!-- param name="Destination"
-             value="org.objectweb.joram.client.jms.Queue"/ -->
+             value="org.objectweb.joram.client.jms.Topic"/ -->
+      <param name="Destination"
+             value="org.objectweb.joram.client.jms.Queue"/>
       <param name="transaction"
              value="fr.dyade.aaa.util.NTransaction"/>
       <!-- param name="transaction"
              value="fr.dyade.aaa.util.NullTransaction"/ -->
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <!-- param name="engine" value="fr.dyade.aaa.agent.GCEngine"/ -->
-      <param name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
-      <!-- param name="BaseClass" value="joram.perfs.TcpBaseTest"/ -->
-      <param name="MsgTransient" value="true"/>
-      <param name="SubDurable" value="false"/>
-      <param name="Transacted" value="true"/>
-      <param name="NbRound" value="1000"/>
+      <param name="BaseClass" value="joram.perfs.TcpBaseTest"/>
+      <!-- param name="BaseClass" value="joram.perfs.ColocatedBaseTest"/ -->
+      <param name="MsgTransient" value="false"/>
+      <param name="SubDurable" value="true"/>
+      <param name="Transacted" value="false"/>
+      <param name="NbRound" value="100"/>
       <param name="NbMsgPerRound" value="100"/>
       <param name="NbProdCons" value="1"/>
-      <param name="MsgSize" value="25"/>
-      </antcall>
-   </target>
+      <param name="MsgSize" value="100000"/>
+    </antcall>
+  </target>
 
   <!-- Generic launcher for performance tests  -->
+
+  <target name="init.test6props">
+    <property name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
+    <property name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
+    <property name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+    <property name="engine" value="fr.dyade.aaa.agent.Engine"/>
+    <property name="MsgTransient" value="false"/>
+    <property name="SubDurable" value="false"/>
+    <property name="Transacted" value="false"/>
+    <property name="NbRound" value="100"/>
+    <property name="NbMsgPerRound" value="100"/>
+    <property name="NbProdCons" value="1"/>
+    <property name="MsgSize" value="50"/>
+  </target>
 
   <target name="perf.test6-x" depends="init.test6props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test6"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
-      <param name="jvmargs" value="-DDestination=${Destination} -DBaseClass=${BaseClass} -DTransacted=${Transacted} -DNbSender=${NbProdCons} -DNbReceiver=${NbProdCons} -DNbDestination=${NbProdCons} -DNbRound=${NbRound} -DNbMsgPerRound=${NbMsgPerRound} -DMsgSize=${MsgSize} -DMsgTransient=${MsgTransient} -DSubDurable=${SubDurable}"/>
+      <param name="jvmargs" value="-DNTLogFileSize=32 -DNTLogMemorySize=4096 -DDestination=${Destination} -DBaseClass=${BaseClass} -DTransacted=${Transacted} -DNbSender=${NbProdCons} -DNbReceiver=${NbProdCons} -DNbDestination=${NbProdCons} -DNbRound=${NbRound} -DNbMsgPerRound=${NbMsgPerRound} -DMsgSize=${MsgSize} -DMsgTransient=${MsgTransient} -DSubDurable=${SubDurable}"/>
     </antcall>
   </target>
 
   <!-- YJP specific launcher for performance tests  -->
 
-  <target name="test6-yjp.perf">
+  <target name="test6-yjp.perf" depends="compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test6"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
-      <param name="jvmargs" value="-agentlib:yjpagent=port=12000 -DDestination=org.objectweb.joram.client.jms.Queue -DBaseClass=joram.perfs.ColocatedBaseTest  -DMsgTransient=false -DSubDurable=true-DTransacted=false -DNbSender=1 -DNbReceiver=1 -DNbDestination=1 -DNbRound=10000 -DNbMsgPerRound=100 -DMsgSize=25"/>
+      <param name="jvmargs" value="-agentlib:yjpagent=onexit=memory,disablej2ee,noj2ee,tracing,alloc,dir=c:\MySnapshots -DDestination=org.objectweb.joram.client.jms.Queue -DBaseClass=joram.perfs.ColocatedBaseTest -DMsgTransient=false -DSubDurable=true -DTransacted=false -DNbSender=1 -DNbReceiver=1 -DNbDestination=1 -DNbRound=100 -DNbMsgPerRound=100 -DMsgSize=25"/>
+    </antcall>
+  </target>
+
+  <!-- HPROF specific launcher for performance tests  -->
+
+  <target name="test6-hp.perf" depends="compile">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.perfs.Test6"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="perfs/jndi.properties"/>
+      <param name="a3conf" value="perfs/a3servers1.xml"/>
+      <param name="jvmargs" value="-agentlib:hprof=cpu=samples -DDestination=org.objectweb.joram.client.jms.Queue -DBaseClass=joram.perfs.TcpBaseTest -DMsgTransient=false -DSubDurable=true -DTransacted=false -DNbSender=1 -DNbReceiver=1 -DNbDestination=1 -DNbRound=100 -DNbMsgPerRound=100 -DMsgSize=100000"/>
     </antcall>
   </target>
 
   <!-- Queue and topic statistics in multi-sender mode -->
-
-  <target name="init.test6Mprops">
-    <property name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
-    <property name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
-    <property name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-    <property name="engine" value="fr.dyade.aaa.agent.Engine"/>
-    <property name="MsgTransient" value="false"/>
-    <property name="SubDurable" value="true"/>
-    <property name="Transacted" value="false"/>
-    <property name="NbRound" value="100"/>
-    <property name="NbMsgPerRound" value="100"/>
-    <property name="NbSender" value="20"/>
-    <property name="NbReceiver" value="1"/>
-    <property name="MsgSize" value="25"/>
-    <property name="dupsOk" value="false"/>
-    <property name="queueMessageReadMax" value="1000"/>
-    <property name="topicAckBufferMax" value="1000"/>
-    <property name="multiThreadSyncDelay" value="1"/>
-    <property name="multiCnx" value="false"/>
-  </target>
 
   <target name="perf.test6M"
           description="Queue and topic statistics in multi-sender mode">
@@ -2055,7 +2269,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="MsgTransient" value="true"/>
       <param name="SubDurable" value="false"/>
       <param name="Transacted" value="true"/>
-      <param name="NbRound" value="1000"/>
+      <param name="NbRound" value="100"/>
       <param name="NbMsgPerRound" value="100"/>
       <param name="NbSender" value="20"/>
       <param name="NbReceiver" value="1"/>
@@ -2069,6 +2283,26 @@ description=" --> launch all exceptionlistener tests">
   </target>
 
   <!-- Generic launcher for performance tests in multi-sender mode -->
+
+  <target name="init.test6Mprops">
+    <property name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
+    <property name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
+    <property name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+    <property name="engine" value="fr.dyade.aaa.agent.Engine"/>
+    <property name="MsgTransient" value="false"/>
+    <property name="SubDurable" value="true"/>
+    <property name="Transacted" value="false"/>
+    <property name="NbRound" value="10"/>
+    <property name="NbMsgPerRound" value="100"/>
+    <property name="NbSender" value="20"/>
+    <property name="NbReceiver" value="1"/>
+    <property name="MsgSize" value="25"/>
+    <property name="dupsOk" value="false"/>
+    <property name="queueMessageReadMax" value="100"/>
+    <property name="topicAckBufferMax" value="100"/>
+    <property name="multiThreadSyncDelay" value="1"/>
+    <property name="multiCnx" value="false"/>
+  </target>
 
   <target name="perf.test6M-x" depends="init.test6Mprops,compile">
     <antcall target="test.run" inheritAll="true">
@@ -2355,23 +2589,31 @@ description=" --> launch all exceptionlistener tests">
 
   <!-- start noreg -->
 
-  <target name="noreg.test3" depends="init.a3props,compile"
-          description=" --> Test transfert with big messages">
+  <target name="noreg.test3" depends="noreg.test3-1,noreg.test3-2"/>
+
+  <target name="noreg.test3-1" depends="init.a3props,compile"
+          description=" --> Test Queue with big messages">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test3"/>
+      <param name="testid" value="noreg.test3-1"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Queue -DMsgSize=5000 -DMsgPerCommit=1 -DNbMsg=10"/>
+      <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Queue -DMsgSize=256 -DMsgPerCommit=1 -DNbMsg=10"/>
     </antcall>
+  </target>
+
+  <target name="noreg.test3-2" depends="init.a3props,compile"
+          description=" --> Test Topic with big messages">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test3"/>
+      <param name="testid" value="noreg.test3-2"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Topic -DMsgSize=5000 -DMsgPerCommit=4 -DNbMsg=10"/>
+      <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Topic -DMsgSize=512 -DMsgPerCommit=1 -DNbMsg=100"/>
     </antcall>
   </target>
 
@@ -2615,8 +2857,8 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test close during receive and start consumer cnx during producer send. option : queue or topic and  Tcp or local ">
     <ant dir="." antfile="build.xml" target="test16-1.noreg"/>
     <ant dir="." antfile="build.xml" target="test16-2.noreg"/>
-    <ant dir="." antfile="build.xml" target="test16-3.noreg"/>
-    <ant dir="." antfile="build.xml" target="test16-4.noreg"/>
+    <!-- ant dir="." antfile="build.xml" target="test16-3.noreg"/ -->
+    <!-- ant dir="." antfile="build.xml" target="test16-4.noreg"/ -->
   </target>
 
 
@@ -2627,10 +2869,11 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="testid" value="1"/>
+      <param name="testid" value="test16-1.noreg"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Topic -DBaseClass=joram.noreg.TcpBaseTest"/>
     </antcall>
   </target>
+	
   <target name="test16-2.noreg" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test16"/>
@@ -2638,10 +2881,11 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="testid" value="2"/>
+      <param name="testid" value="test16-2.noreg"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Queue -DBaseClass=joram.noreg.TcpBaseTest"/>
     </antcall>
   </target>
+	
   <target name="test16-3.noreg" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test16"/>
@@ -2649,10 +2893,11 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="testid" value="3"/>
+      <param name="testid" value="test16-3.noreg"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Topic -DBaseClass=joram.noreg.ColocatedBaseTest"/>
     </antcall>
   </target>
+	
   <target name="test16-4.noreg" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test16"/>
@@ -2660,19 +2905,18 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="testid" value="4"/>
+      <param name="testid" value="test16-4.noreg"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Queue -DBaseClass=joram.noreg.ColocatedBaseTest"/>
     </antcall>
   </target>
 
-  <target name="noreg.test17" depends="test17-1.noreg,test17-2.noreg,test17-3.noreg,test17-4.noreg"
+  <target name="noreg.test17"
           description=" --> test close and start consumer cnx during producer send. option : queue or topic and  Tcp or local ">
     <ant dir="." antfile="build.xml" target="test17-1.noreg"/>
     <ant dir="." antfile="build.xml" target="test17-2.noreg"/>
-    <ant dir="." antfile="build.xml" target="test17-3.noreg"/>
-    <ant dir="." antfile="build.xml" target="test17-4.noreg"/>
+    <!-- ant dir="." antfile="build.xml" target="test17-3.noreg"/ -->
+    <!-- ant dir="." antfile="build.xml" target="test17-4.noreg"/ -->
   </target>
-
 
   <target name="test17-1.noreg" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
@@ -2681,10 +2925,11 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="testid" value="1"/>
+      <param name="testid" value="test17-1.noreg"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Topic -DBaseClass=joram.noreg.TcpBaseTest"/>
     </antcall>
   </target>
+	
   <target name="test17-2.noreg" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test17"/>
@@ -2692,10 +2937,11 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="testid" value="2"/>
+      <param name="testid" value="test17-2.noreg"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Queue -DBaseClass=joram.noreg.TcpBaseTest"/>
     </antcall>
   </target>
+	
   <target name="test17-3.noreg" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test17"/>
@@ -2703,10 +2949,11 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="testid" value="3"/>
+      <param name="testid" value="test17-3.noreg"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Topic -DBaseClass=joram.noreg.ColocatedBaseTest"/>
     </antcall>
   </target>
+	
   <target name="test17-4.noreg" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test17"/>
@@ -2714,12 +2961,41 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="testid" value="4"/>
+      <param name="testid" value="test17-4.noreg"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Queue -DBaseClass=joram.noreg.ColocatedBaseTest"/>
     </antcall>
   </target>
 
+  <target name="noreg.test18"
+          description=" --> test exception listener activation during close. option:  Tcp or local ">
+    <ant dir="." antfile="build.xml" target="test18-1.noreg"/>
+    <!-- ant dir="." antfile="build.xml" target="test18-2.noreg"/ -->
+  </target>
 
+
+  <target name="test18-1.noreg" depends="init.a3props,compile">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.noreg.Test18"/>
+      <param name="jndiconf" value="noreg/jndi.properties"/>
+      <param name="a3conf" value="noreg/a3servers1.xml"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="testid" value="test18-1.noreg"/>
+      <param name="jvmargs" value="-DBaseClass=joram.noreg.TcpBaseTest"/>
+    </antcall>
+  </target>
+	
+  <target name="test18-2.noreg" depends="init.a3props,compile">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.noreg.Test18"/>
+      <param name="jndiconf" value="noreg/jndi.properties"/>
+      <param name="a3conf" value="noreg/a3servers1.xml"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="testid" value="test18-2.noreg"/>
+      <param name="jvmargs" value="-DBaseClass=joram.noreg.ColocatedBaseTest"/>
+    </antcall>
+  </target>
 
   <target name="noreg.test19" depends="init.a3props,compile"
           description=" --> test delete temptopic on onMessage()">
@@ -2841,6 +3117,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
+	
   <target name="noreg.test45" depends="init.a3props,compile"
           description=" --> test TTL. With a topic and durable subscrber">
     <antcall target="test.run" inheritAll="true">
@@ -2919,10 +3196,52 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test createQueue method">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test56"/>
+      <param name="testid" value="noreg.test56"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
+
+  <target name="noreg.test57" depends="noreg.test57-1,noreg.test57-2"/>
+
+  <target name="noreg.test57-1" depends="init.a3props,compile"
+          description=" --> Test server restart with a lot of big messages">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.noreg.Test57"/>
+      <param name="testid" value="noreg.test57"/>
+      <param name="jndiconf" value="noreg/jndi.properties"/>
+      <param name="a3conf" value="noreg/a3servers1.xml"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Queue -DMsgSize=256 -DNbMsg=239"/>
+    </antcall>
+  </target>
+
+  <target name="noreg.test57-2" depends="init.a3props,compile"
+          description=" --> Test server restart with a lot of big messages">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.noreg.Test57"/>
+      <param name="testid" value="noreg.test57"/>
+      <param name="jndiconf" value="noreg/jndi.properties"/>
+      <param name="a3conf" value="noreg/a3servers1.xml"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jvmargs" value="-DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef -DDestination=org.objectweb.joram.client.jms.Queue -DMsgSize=256 -DNbMsg=5000"/>
+    </antcall>
+  </target>
+
+  <target name="noreg.test59" depends="init.a3props,compile"
+          description=" --> Test about receive with timeout on DMQ (FT)">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.noreg.Test59"/>
+      <param name="testid" value="noreg.test59"/>
+      <param name="jndiconf" value="noreg/jndi.properties"/>
+      <param name="a3conf" value="noreg/a3servers1.xml"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
@@ -3116,7 +3435,7 @@ description=" --> launch all exceptionlistener tests">
   </target>
 
   <target name="bridge.test4" depends="init.a3props,compile"
-          description=" --> producer on bridge queue ans consumer on foreign queue">
+          description=" --> producer on bridge queue and consumer on foreign queue">
       <antcall target="bridge.test" inheritAll="true">
         <param name="testid" value="bridge.test4"/>
         <param name="adminClassName" value="joram.bridge.Admin"/>
@@ -3129,7 +3448,7 @@ description=" --> launch all exceptionlistener tests">
         <param name="jvmadminArgs" value=""/>
       </antcall>
   </target>
-  
+
   <target name="bridge.test5" depends="init.a3props,compile"
           description=" --> producer on bridge queue and subscriber on foreign topic">
       <antcall target="bridge.test" inheritAll="true">
@@ -3264,7 +3583,7 @@ description=" --> launch all exceptionlistener tests">
         <param name="jvmadminArgs" value=""/>
       </antcall>
   </target>
- 
+
   <target name="bridge.xatest4" depends="init.a3props,compile"
           description=" --> subscriber on XA foreign topic and publisher on bridge topic">
       <antcall target="bridge.test" inheritAll="true">
@@ -3362,6 +3681,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> send message specified schedulerdate : first in futur, second in pass">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.schedqueue.Test1"/>
+      <param name="testid" value="schedqueue.test1"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="schedqueue/jndi.properties"/>
@@ -3374,6 +3694,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> send two message, first with schedulerdate > of second message schedulerdate. check receive the second before the fisrt">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.schedqueue.Test2"/>
+      <param name="testid" value="schedqueue.test1"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="schedqueue/jndi.properties"/>
@@ -3413,6 +3734,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="cluster.testQ1" depends="init.a3props,compile"
           description=" --> test simple cluster queue with producer on receiver on the same queue">
     <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="cluster.testQ1"/>
       <param name="className" value="joram.cluster.TestQ1"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
@@ -3425,6 +3747,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="cluster.testQ2" depends="init.a3props,compile"
           description=" --> producer on queue 2, receiver on queue 0 and 1, check two receiver receive messaga">
     <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="cluster.testQ2"/>
       <param name="className" value="joram.cluster.TestQ2"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
@@ -3437,6 +3760,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="cluster.testQ3" depends="init.a3props,compile"
           description=" -->  fix big period and check no recieve any message ">
     <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="cluster.testQ3"/>
       <param name="className" value="joram.cluster.TestQ3"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
@@ -3449,6 +3773,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="cluster.testQ4" depends="init.a3props,compile"
           description=" --> check producThreshold property">
     <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="cluster.testQ4"/>
       <param name="className" value="joram.cluster.TestQ4"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
@@ -3462,6 +3787,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="cluster.testQ5" depends="init.a3props,compile"
           description=" --> check consumThreshold property ">
     <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="cluster.testQ5"/>
       <param name="className" value="joram.cluster.TestQ5"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
@@ -3477,6 +3803,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="hierarchical.test1" depends="init.a3props,compile"
           description=" --> test hierarchical topic">
     <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="hierarchical.test1"/>
       <param name="className" value="joram.hierarchical.Test1"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
@@ -3529,7 +3856,7 @@ description=" --> launch all exceptionlistener tests">
 
   <!--  start dmq tests -->
   <target name="dmq.TestDmq1" depends="init.a3props,compile"
-          description=" --> check threshold of specigik queue and user">
+          description=" --> check threshold of specific queue and user">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="joram.dmq.TestDmq1"/>
