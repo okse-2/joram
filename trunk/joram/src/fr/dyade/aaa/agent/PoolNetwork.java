@@ -44,14 +44,15 @@ import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  *  <code>PoolNetwork</code> is an implementation of <code>StreamNetwork</code>
- * class that manages multiple connection.
+ * class that manages multiple connection in a pool paradigm way.
  */
 public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
   /** Daemon listening for connection from other servers. */
   WakeOnConnection wakeOnConnection = null; 
   /**
    * Components handling communication with other servers.
-   * There is a NetSession component for each server in the domain.
+   * There is a NetSession component for each server in the domain, some
+   * are 'active' (i.e connected).
    */
   NetSession sessions[] = null;
   /** Daemon sending message to others servers. */
@@ -63,6 +64,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
   /** Daemon handling the messages for inaccessible servers. */
   WatchDog watchDog = null;
 
+  /** Array of active (i.e. connected) sessions. */
   NetSession activeSessions[];
 
   /**
@@ -138,8 +140,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
    * unauthorized.
    * <p>
    *  This value can be adjusted for all network components by setting
-   * <code>IdleTimeout</code> global property or for a particular network
-   * by setting <code>\<DomainName\>.IdleTimeout</code> specific property.
+   * <code>PoolNetwork.IdleTimeout</code> global property or for a particular
+   * network by setting <code>\<DomainName\>.IdleTimeout</code> specific property.
    * <p>
    *  Theses properties can be fixed either from <code>java</code> launching
    * command, or in <code>a3servers.xml</code> configuration file.
@@ -172,12 +174,12 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
    * By default this value is set to -1 and there is no flow control.
    * <p>
    *  This value can be adjusted for all network components by setting the
-   * <code>MaxMessageInFlow</code> global property or for a particular network
-   * by setting \<DomainName\>.MaxMessageInFlow</code> specific property.
+   * <code>PoolNetwork.maxMessageInFlow</code> global property or for a particular
+   * network by setting \<DomainName\>.maxMessageInFlow</code> specific property.
    * <p>
    *  For a particular network the value can be defined finely for a the connection
-   * with a particular remote server by setting <code>MaxMessageInFlow_N</code> or
-   * \<DomainName\>.MaxMessageInFlow_N</code>.
+   * with a particular remote server by setting <code>PoolNetwork.maxMessageInFlow_N</code>
+   * or \<DomainName\>.maxMessageInFlow_N</code>.
    * <p>
    *  Theses properties can be fixed either from <code>java</code> launching
    * command, or in <code>a3servers.xml</code> configuration file.
@@ -191,8 +193,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
    * value less than 1 are unauthorized.
    * <p>
    *  This value can be adjusted for all network components by setting the
-   * <code>nbMaxFreeSender</code> global property or for a particular network
-   * by setting \<DomainName\>.nbMaxFreeSender</code> specific property.
+   * <code>PoolNetwork.nbMaxFreeSender</code> global property or for a particular
+   * network by setting \<DomainName\>.nbMaxFreeSender</code> specific property.
    * <p>
    *  Theses properties can be fixed either from <code>java</code> launching
    * command, or in <code>a3servers.xml</code> configuration file.
@@ -264,19 +266,19 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     }
     if (nbMaxCnx < 1) nbMaxCnx = servers.length -1;
 
-    nbMaxFreeSender = AgentServer.getInteger("nbMaxFreeSender", nbMaxCnx).intValue();
+    nbMaxFreeSender = AgentServer.getInteger("PoolNetwork.nbMaxFreeSender", nbMaxCnx).intValue();
     nbMaxFreeSender = AgentServer.getInteger(domain + ".nbMaxFreeSender", nbMaxFreeSender).intValue();
     if (nbMaxFreeSender < 1) nbMaxFreeSender = nbMaxCnx;
     
-    IdleTimeout = Long.getLong("IdleTimeout", IdleTimeout).longValue();
+    IdleTimeout = Long.getLong("PoolNetwork.IdleTimeout", IdleTimeout).longValue();
     IdleTimeout = Long.getLong(domain + ".IdleTimeout", IdleTimeout).longValue();
     if (IdleTimeout < 1000L) IdleTimeout = 5000L;
     
-    defaultMaxMessageInFlow = AgentServer.getInteger("maxMessageInFlow", defaultMaxMessageInFlow).intValue();
+    defaultMaxMessageInFlow = AgentServer.getInteger("PoolNetwork.maxMessageInFlow", defaultMaxMessageInFlow).intValue();
     defaultMaxMessageInFlow = AgentServer.getInteger(domain + ".maxMessageInFlow", defaultMaxMessageInFlow).intValue();
   
     String value = System.getProperty(domain + ".compressedFlows");
-    if (value == null) value = System.getProperty("compressedFlows");
+    if (value == null) value = System.getProperty("PoolNetwork.compressedFlows");
     compressedFlows = Boolean.valueOf(value).booleanValue();
     
     if (logmon.isLoggable(BasicLevel.DEBUG)) {
@@ -1342,7 +1344,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       canStop = false;
       thread = null;
       
-      maxMessageInFlow = AgentServer.getInteger("maxMessageInFlow_" + sid, defaultMaxMessageInFlow).intValue();
+      maxMessageInFlow = AgentServer.getInteger("PoolNetwork.maxMessageInFlow_" + sid, defaultMaxMessageInFlow).intValue();
       maxMessageInFlow = AgentServer.getInteger(domain + ".maxMessageInFlow_" + sid, maxMessageInFlow).intValue();
 
       sendList = new MessageVector();
