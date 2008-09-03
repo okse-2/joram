@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,12 +22,15 @@
  */
 package joram.reconf;
 
-
 import java.io.File;
 
 import joram.framework.TestCase;
 
+import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.NameAlreadyUsedException;
+import org.objectweb.joram.client.jms.admin.StartFailureException;
+import org.objectweb.joram.client.jms.admin.User;
 
 /**
  * Testing: server reconfiguration
@@ -40,16 +43,12 @@ public class ReconfTest2 extends TestCase {
 
   public void run() {
     try {
-      startAgentServer(
-        (short)0, (File)null, 
-        new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
+      startAgentServer((short) 0, (File) null,
+          new String[] { "-DTransaction=fr.dyade.aaa.util.NullTransaction" });
 
-      AdminModule.connect("localhost", 2560,
-                          "root", "root", 60);
+      AdminModule.connect("localhost", 2560, "root", "root", 60);
 
-      org.objectweb.joram.client.jms.admin.User user = 
-        org.objectweb.joram.client.jms.admin.User.create(
-          "anonymous", "anonymous", 0);
+      User.create("anonymous", "anonymous", 0);
 
       //System.out.println("Add domain D0");
 
@@ -57,10 +56,10 @@ public class ReconfTest2 extends TestCase {
       try {
         AdminModule.addDomain("D0", 0, 99999999);
       } catch (Exception exc) {
-	  //System.out.println("Expected error: " + exc);
+        //System.out.println("Expected error: " + exc);
         e = exc;
       }
-      assertTrue("Exception expected: port out of range", e instanceof org.objectweb.joram.client.jms.admin.StartFailureException);
+      assertTrue("Exception expected: port out of range", e instanceof StartFailureException);
 
       //System.out.println("Retry adding domain D0");
       AdminModule.addDomain("D0", 0, 17770);
@@ -70,51 +69,47 @@ public class ReconfTest2 extends TestCase {
       try {
         AdminModule.addDomain("D0", 0, 17770);
       } catch (Exception exc) {
-	  //System.out.println("Expected error: " + exc);
+        //System.out.println("Expected error: " + exc);
         e2 = exc;
       }
-      assertTrue("Exception expected: domain name already used", e2 instanceof org.objectweb.joram.client.jms.admin.NameAlreadyUsedException);
+      assertTrue("Exception expected: domain name already used", e2 instanceof NameAlreadyUsedException);
 
       //System.out.println("Add server s1");
-      AdminModule.addServer(1, "localhost", "D0", 17771, "s1",new String[]{""},
-          new String[]{""});
+      AdminModule.addServer(1, "localhost", "D0", 17771, "s1");
 
       Exception e3 = null;
       //System.out.println("try to remove D0");
       try {
         AdminModule.removeDomain("D0");
       } catch (Exception exc) {
-	  //System.out.println("Expected error: " + exc);
+        //System.out.println("Expected error: " + exc);
         e3 = exc;
       }
-      assertTrue("Exception expected: domain contains more than 1 server", 
-                 e3 instanceof org.objectweb.joram.client.jms.admin.AdminException);
-      
-      ReconfTest.startServer((short)1, "s1");
+      assertTrue("Exception expected: domain contains more than 1 server", e3 instanceof AdminException);
 
-      ReconfTest.checkQueue((short)1);
+      ReconfTest.startServer((short) 1, "s1");
+
+      ReconfTest.checkQueue((short) 1);
 
       //System.out.println("Add domain D1");
       AdminModule.addDomain("D1", 1, 18770);
 
       //System.out.println("Add server s2");
-      AdminModule.addServer(2, "localhost", "D1", 18771, "s2",new String[]{""},
-          new String[]{""}); 
+      AdminModule.addServer(2, "localhost", "D1", 18771, "s2");
 
-      ReconfTest.startServer((short)2, "s2");
+      ReconfTest.startServer((short) 2, "s2");
 
-      ReconfTest.checkQueue((short)2);
+      ReconfTest.checkQueue((short) 2);
 
       //System.out.println("Remove server s1");
       Exception e4 = null;
       try {
         AdminModule.removeServer(1);
       } catch (Exception exc) {
-	  //System.out.println("Expected error: " + exc);
+        //System.out.println("Expected error: " + exc);
         e4 = exc;
       }
-      assertTrue("Exception expected: server belongs to more than 1 domain", 
-                 e4 instanceof org.objectweb.joram.client.jms.admin.AdminException );
+      assertTrue("Exception expected: server belongs to more than 1 domain", e4 instanceof AdminException);
 
       // First stop the server because it must be reachable
       // in order to be stopped.
@@ -140,13 +135,14 @@ public class ReconfTest2 extends TestCase {
 
       //System.out.println("Remove domain D0");
       AdminModule.removeDomain("D0");
+      
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);
     } finally {
       System.out.println("Stop server s0");
-      stopAgentServer((short)0);
-      endTest();     
+      stopAgentServer((short) 0);
+      endTest();
     }
   }
 
