@@ -2047,7 +2047,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       NetworkInputStream(InputStream is) throws IOException {
         super();
         this.in = is;
-        this.compressedFlows = compressedFlows;
+        this.compressedFlows = getCompressedFlows();
       }
 
       /**
@@ -2065,7 +2065,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       NetworkOutputStream(OutputStream os) throws IOException {
         super();
         this.out = os;
-        this.compressedFlows = compressedFlows;
+        this.compressedFlows = getCompressedFlows();
       }
 
       protected void writeHeader() throws IOException {}
