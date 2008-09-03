@@ -31,12 +31,10 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -137,7 +135,7 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
     MessageBuilder messageIncomingBuilder;
     
     /** A FIFO list to store sent messages waiting to be acked. */
-    List messagesToAck = Collections.synchronizedList(new LinkedList());
+    LinkedList messagesToAck = new LinkedList();
     
     /** Tells if the server responded to the handshake message. */
     boolean handshaken = false; 
@@ -156,6 +154,8 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
     
     /** Number of NACK sent. Used for monitoring. **/
     int nackCount;
+    
+    Object lock = new Object();
 
     public int getNextPacketNumber() {
       return nextPacketNumber;
@@ -277,7 +277,17 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
               socket.receive(packet);
             } catch (SocketException exc) {
               if (logmon.isLoggable(BasicLevel.DEBUG)) {
-                logmon.log(BasicLevel.DEBUG, this.getName() + ", waiting messages interruption ");
+                logmon.log(BasicLevel.DEBUG, this.getName() + ", waiting messages has been interrupted ", exc);
+              }
+              if (running && socket.isClosed()) {
+                socket = new DatagramSocket(port);
+                socket.setReceiveBufferSize(socketReceiveBufferSize);
+                socket.setSendBufferSize(socketSendBufferSize);
+                if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                  logmon.log(BasicLevel.DEBUG, this.getName()
+                      + ", socket reinitialized: buffer sizes: Receive:" + socket.getReceiveBufferSize()
+                      + " Send:" + socket.getSendBufferSize());
+                }
               }
               continue;
             }
@@ -343,17 +353,19 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
 
             // Suppress the acked notifications from waiting list and delete the messages.
             AgentServer.getTransaction().begin();
-            while (!srvInfo.messagesToAck.isEmpty()
-                && ((MessageAndIndex) srvInfo.messagesToAck.get(0)).index
-                    + ((MessageAndIndex) srvInfo.messagesToAck.get(0)).size - 1 <= ackUpTo) {
-              if (logmon.isLoggable(BasicLevel.DEBUG)) {
-                logmon.log(BasicLevel.DEBUG, getName() + ", clean message "
-                    + ((MessageAndIndex) srvInfo.messagesToAck.get(0)).msg);
-              }
-              MessageAndIndex msgi = (MessageAndIndex) srvInfo.messagesToAck.remove(0);
+            synchronized (srvInfo.lock) {
+              while (!srvInfo.messagesToAck.isEmpty()
+                  && ((MessageAndIndex) srvInfo.messagesToAck.getFirst()).index
+                      + ((MessageAndIndex) srvInfo.messagesToAck.getFirst()).size - 1 <= ackUpTo) {
+                if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                  logmon.log(BasicLevel.DEBUG, getName() + ", clean message "
+                      + ((MessageAndIndex) srvInfo.messagesToAck.getFirst()).msg);
+                }
+                MessageAndIndex msgi = (MessageAndIndex) srvInfo.messagesToAck.removeFirst();
 
-              msgi.msg.delete();
-              msgi.msg.free();
+                msgi.msg.delete();
+                msgi.msg.free();
+              }
             }
             AgentServer.getTransaction().commit(true);
 
@@ -431,7 +443,7 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
       
       short remotesid = (short) (((buf[8] & 0xF) << 8) + ((buf[9] & 0xF) << 0));
       
-      synchronized (srvInfo.messagesToAck) {
+      synchronized (srvInfo.lock) {
         
         srvInfo.handshaken = true;
         srvInfo.lastPacketReceived = 1;
@@ -441,7 +453,7 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
         
         int diff = 0;
         if (srvInfo.messagesToAck.size() > 0) {
-          MessageAndIndex msgi = (MessageAndIndex) srvInfo.messagesToAck.get(0);
+          MessageAndIndex msgi = (MessageAndIndex) srvInfo.messagesToAck.getFirst();
           diff = msgi.index - 2;
         }
         Iterator iterMessages = srvInfo.messagesToAck.iterator();
@@ -647,10 +659,10 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
         serverInfo = (ServerInfo) serversInfo.get(addr);
       }
       
-      synchronized (serverInfo.messagesToAck) {
+      synchronized (serverInfo.lock) {
         size = 0;
         writeMessage(serverInfo, addr, serverInfo.nextPacketNumber, msg, currentTimeMillis);
-        serverInfo.messagesToAck.add(new MessageAndIndex(msg, serverInfo.nextPacketNumber, size));
+        serverInfo.messagesToAck.addLast(new MessageAndIndex(msg, serverInfo.nextPacketNumber, size));
         serverInfo.nextPacketNumber = datagramStamp;
       }
       this.serverInfo = null;
@@ -892,7 +904,7 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
               SocketAddress addr = (SocketAddress) enuAddr.nextElement();
               ServerInfo servInfo = (ServerInfo) serversInfo.get(addr);
               
-              synchronized (servInfo.messagesToAck) {
+              synchronized (servInfo.lock) {
                 
                 if (!hasBeenForced
                     && !((servInfo.retry < WDNbRetryLevel1)
@@ -903,7 +915,7 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
                 
                 // If the message to send is the same as last one.
                 if (!servInfo.messagesToAck.isEmpty()) {
-                  if (servInfo.lastMsgSentNumber == ((MessageAndIndex) servInfo.messagesToAck.get(0)).msg.stamp) {
+                  if (servInfo.lastMsgSentNumber == ((MessageAndIndex) servInfo.messagesToAck.getFirst()).msg.stamp) {
                     servInfo.retry++;
                     // If it's the 5th time, consider that the connection is lost (ie handshake needed again)
                     if (servInfo.retry > 4) {
@@ -913,7 +925,7 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
                       servInfo.handshaken = false;
                     }
                   } else {
-                    servInfo.lastMsgSentNumber = ((MessageAndIndex) servInfo.messagesToAck.get(0)).msg.stamp;
+                    servInfo.lastMsgSentNumber = ((MessageAndIndex) servInfo.messagesToAck.getFirst()).msg.stamp;
                   }
                 }
                 
