@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -49,7 +49,7 @@ public final class JTransaction implements Transaction, JTransactionMBean {
      * 
      */
     private static final long serialVersionUID = 1L;
-    
+
     String dirName;
     String name;
     int type;
@@ -105,7 +105,7 @@ public final class JTransaction implements Transaction, JTransactionMBean {
 
     // Read the log, then...
     int oldPhase = FREE;
-    
+
     logFile = new RandomAccessFile(new File(dir, LOG), "rw");
     log = new Hashtable();
     if (logFile.length() != 0) {
@@ -114,21 +114,21 @@ public final class JTransaction implements Transaction, JTransactionMBean {
 
       // Test the stop status then complete commit or rollback if needed
       if (oldPhase == COMMIT) {
-	int op;
-	String name;
-	while (!(name = logFile.readUTF()).equals("")) {
+        int op;
+        String name;
+        while (!(name = logFile.readUTF()).equals("")) {
           String dirName = logFile.readUTF();
           if (dirName.length() == 0) dirName = null;
           Object key = OperationKey.newKey(dirName, name);
-	  op = logFile.read();
-	  if (op == SAVE) {
-	    byte buf[] = new byte[logFile.readInt()];
-	    logFile.readFully(buf);
-	    log.put(key, new Operation(SAVE, dirName, name, buf));
-	  } else {
-	    log.put(key, new Operation(op, dirName, name));
-	  }
-	}
+          op = logFile.read();
+          if (op == SAVE) {
+            byte buf[] = new byte[logFile.readInt()];
+            logFile.readFully(buf);
+            log.put(key, new Operation(SAVE, dirName, name, buf));
+          } else {
+            log.put(key, new Operation(op, dirName, name));
+          }
+        }
       }
       _commit();
     }
@@ -166,7 +166,7 @@ public final class JTransaction implements Transaction, JTransactionMBean {
   public synchronized void begin() throws IOException {
     while (phase != FREE) {
       try {
-	wait();
+        wait();
       } catch (InterruptedException exc) {
       }
     }
@@ -177,8 +177,8 @@ public final class JTransaction implements Transaction, JTransactionMBean {
   public String[] getList(String prefix) {
     return dir.list(new StartWithFilter(prefix));
   }
-  
-  public final void create(Serializable obj, String name) throws IOException {
+
+  public void create(Serializable obj, String name) throws IOException {
     save(obj, null, name);
   }
 
@@ -186,12 +186,12 @@ public final class JTransaction implements Transaction, JTransactionMBean {
     save(obj, null, name);
   }
 
-  public final void create(Serializable obj,
+  public void create(Serializable obj,
                      String dirName, String name) throws IOException {
     save(obj, dirName, name);
   }
 
-  public final void save(Serializable obj, String dirName, String name) throws IOException {
+  public void save(Serializable obj, String dirName, String name) throws IOException {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     ObjectOutputStream oos = new ObjectOutputStream(bos);
     oos.writeObject(obj);
@@ -231,7 +231,7 @@ public final class JTransaction implements Transaction, JTransactionMBean {
     return load(null, name);
   }
 
-  public final Object load(String dirName, String name) throws IOException, ClassNotFoundException {
+  public Object load(String dirName, String name) throws IOException, ClassNotFoundException {
     Object obj;
 
     if (phase == RUN) {
@@ -239,15 +239,15 @@ public final class JTransaction implements Transaction, JTransactionMBean {
       Object key = OperationKey.newKey(dirName, name);
       Operation op = (Operation) log.get(key);
       if (op != null) {
-	if (op.type == SAVE) {
-	  ByteArrayInputStream bis = new ByteArrayInputStream(op.value);
-	  ObjectInputStream ois = new ObjectInputStream(bis);
-	  
-	  return ois.readObject();
-	} else if (op.type == DELETE) {
-	  // The object is no longer alive
-	  return null;
-	}
+        if (op.type == SAVE) {
+          ByteArrayInputStream bis = new ByteArrayInputStream(op.value);
+          ObjectInputStream ois = new ObjectInputStream(bis);
+
+          return ois.readObject();
+        } else if (op.type == DELETE) {
+          // The object is no longer alive
+          return null;
+        }
       }
     }
 
@@ -260,12 +260,12 @@ public final class JTransaction implements Transaction, JTransactionMBean {
         file = new File(parentDir, name);
       }
       FileInputStream fis = new FileInputStream(file);
-      
+
       // I'm not sure we can directly read the object without use
       // a ByteArrayInputStream.
       ObjectInputStream ois = new ObjectInputStream(fis);
       obj = ois.readObject();
-      
+
       fis.close();
     } catch (FileNotFoundException exc) {
       return null;
@@ -284,12 +284,12 @@ public final class JTransaction implements Transaction, JTransactionMBean {
       Object key = OperationKey.newKey(dirName, name);
       Operation op = (Operation) log.get(key);
       if (op != null) {
-	if (op.type == SAVE) {
+        if (op.type == SAVE) {
           return op.value;
-	} else if (op.type == DELETE) {
-	  // The object is no longer alive
-	  return null;
-	}
+        } else if (op.type == DELETE) {
+          // The object is no longer alive
+          return null;
+        }
       }
     }
 
@@ -320,7 +320,7 @@ public final class JTransaction implements Transaction, JTransactionMBean {
     delete(null, name);
   }
 
-  public final void delete(String dirName, String name) {
+  public void delete(String dirName, String name) {
     if (phase == RUN) {
       // We are during a transaction mark the object deleted in the log.
       Object key = OperationKey.newKey(dirName, name);
@@ -351,7 +351,7 @@ public final class JTransaction implements Transaction, JTransactionMBean {
         children.length == 0) {
       dir.delete();
       if (dir.getAbsolutePath().length() > 
-          this.dir.getAbsolutePath().length()) {
+      this.dir.getAbsolutePath().length()) {
         deleteDir(dir.getParentFile());
       }
     }
@@ -360,7 +360,7 @@ public final class JTransaction implements Transaction, JTransactionMBean {
   public synchronized void commit(boolean release) throws IOException {
     if (phase != RUN)
       throw new NotActiveException("Can not commit inexistent transaction.");
-    
+
     // Save the log to disk
     logFile.seek(4L);
     for (Enumeration e = log.elements(); e.hasMoreElements(); ) {
@@ -373,8 +373,8 @@ public final class JTransaction implements Transaction, JTransactionMBean {
       }
       logFile.writeByte(op.type);
       if (op.type == SAVE) {
-	logFile.writeInt(op.value.length);
-	logFile.write(op.value);
+        logFile.writeInt(op.value.length);
+        logFile.write(op.value);
       }
     }
     logFile.writeUTF("");
@@ -404,10 +404,10 @@ public final class JTransaction implements Transaction, JTransactionMBean {
           }
           file = new File(parentDir, op.name);
         }
-	FileOutputStream fos = new FileOutputStream(file);
-	fos.write(op.value);
-	fos.getFD().sync();
-	fos.close();
+        FileOutputStream fos = new FileOutputStream(file);
+        fos.write(op.value);
+        fos.getFD().sync();
+        fos.close();
       } else if (op.type == DELETE) {
         File file;
         if (op.dirName == null) {
@@ -420,17 +420,17 @@ public final class JTransaction implements Transaction, JTransactionMBean {
           deleteDir(parentDir);
         } 
       } else {
-	throw new InvalidObjectException("Unknow object in log.");
+        throw new InvalidObjectException("Unknow object in log.");
       }
     }
   }
 
-//   public synchronized void rollback() throws IOException {
-//     if (phase != RUN)
-//       throw new NotActiveException("Can not rollback inexistent transaction.");
-//     setPhase(ROLLBACK);
-//     log.clear();
-//   }
+  //   public synchronized void rollback() throws IOException {
+  //     if (phase != RUN)
+  //       throw new NotActiveException("Can not rollback inexistent transaction.");
+  //     setPhase(ROLLBACK);
+  //     log.clear();
+  //   }
 
   public synchronized void release() throws IOException {
     if ((phase != COMMIT) && (phase != ROLLBACK))
@@ -449,7 +449,8 @@ public final class JTransaction implements Transaction, JTransactionMBean {
   public synchronized void stop() {
     while (phase != FREE) {
       try {
-	wait();
+        // Wait for the transaction subsystem to be free
+        wait();
       } catch (InterruptedException exc) {
       }
     }
@@ -460,14 +461,8 @@ public final class JTransaction implements Transaction, JTransactionMBean {
    * It waits all transactions termination, the module will be initialized
    * anew before reusing it.
    */
-  public final synchronized void close() {
-    while (phase != FREE) {
-      // Wait for the transaction subsystem to be free
-      try {
-        wait();
-      } catch (InterruptedException exc) {
-      }
-    }
+  public synchronized void close() {
+    stop();
 
     try {
       setPhase(FINALIZE);
@@ -490,8 +485,7 @@ public final class JTransaction implements Transaction, JTransactionMBean {
     private String dirName;
     private String name;
 
-    private OperationKey(String dirName,
-                        String name) {
+    private OperationKey(String dirName, String name) {
       this.dirName = dirName;
       this.name = name;
     }
