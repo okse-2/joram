@@ -18,6 +18,11 @@
  */
 package fr.dyade.aaa.agent;
 
+/**
+ * JMX interface of the PoolNetwork component.
+ * This interface only reports global indicators of the component, each
+ * NetSession has its own JMX interface.
+ */
 public interface PoolNetworkMBean extends NetworkMBean {
   /**
    * Gets the maximum number of active session.
@@ -47,5 +52,18 @@ public interface PoolNetworkMBean extends NetworkMBean {
    */
   public long getIdleTimeout();
 
+  /**
+   * Sets the maximum idle period permitted before reseting the connection.
+   *
+   * @param the maximum idle period permitted before reseting the connection.
+   */
   public void setIdleTimeout(long idleTimeout);
+  
+  /**
+   * Returns if the stream between servers are compressed or not.
+   *
+   * @return  true if the streams between servers are compressed, false
+   *               otherwise.
+   */
+  public boolean getCompressedFlows();
 }
