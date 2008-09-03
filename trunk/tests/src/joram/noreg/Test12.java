@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,7 @@ package joram.noreg;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.ExceptionListener;
+import javax.jms.IllegalStateException;
 import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -32,6 +33,8 @@ import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
+
+import joram.framework.BaseTestCase;
 
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
@@ -41,121 +44,161 @@ import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import fr.dyade.aaa.agent.AgentServer;
 
 class ExcList12 implements ExceptionListener {
-    String name = null;
+  String name = null;
+  int nbInvalidDestExc;
+  int nbIllegalStateExc;
 
-    ExcList12(String name) {
-	this.name = name;
-    }
+  ExcList12(String name) {
+    this.name = name;
+  }
 
-    public void onException(JMSException exc) {
-	if (exc instanceof InvalidDestinationException) {
-	    System.err.println(name + " InvalidDestinationException OK");
-	    Test12.assertTrue(exc instanceof InvalidDestinationException);
-	} else {
-	   
-	    exc.printStackTrace();
-	}
+  public void onException(JMSException exc) {
+    if (exc instanceof InvalidDestinationException) {
+      nbInvalidDestExc++;
+    } else if (exc instanceof IllegalStateException) {
+      nbIllegalStateExc++;
+    } else {
+      BaseTestCase.error(exc);
     }
+  }
 }
 
 class MsgList12 implements MessageListener {
-    public synchronized void onMessage(Message msg) {
-	try {
-	    System.out.println("Receive OK");
-	} catch (Throwable exc) {
-	    exc.printStackTrace();
-	}
-    }
+  int nbReceived;
+
+  public synchronized void onMessage(Message msg) {
+    nbReceived++;
+  }
 }
 
 /**
- * check send message on delete queue thrown an exception if there are one server launch
+ * Check exceptions on message.send() when queue has been deleted. Two different
+ * behaviors are expected if the queue is local and synchronous or
+ * remote/asynchronous.
  */
-public class Test12 extends BaseTest{
-    public static void main (String args[]) throws Exception {
-	new Test12().run();
+public class Test12 extends BaseTest {
+  public static void main(String args[]) throws Exception {
+    new Test12().run();
+  }
+
+  public void run() {
+    try {
+      AgentServer.init((short) 0, "s0", null);
+      AgentServer.start();
+
+      Thread.sleep(1000L);
+      short sid = Integer.getInteger("sid", 0).shortValue();
+      boolean asynchronous = Boolean.getBoolean("async");
+
+      if (sid != 0) {
+        joram.framework.TestCase.startAgentServer(sid);
+      }
+      System.out.println((sid == 0) ? "local" : "remote");
+      System.out.println("async: " + asynchronous);
+
+      AdminModule.connect("localhost", 16010, "root", "root", 60);
+
+      User.create("anonymous", "anonymous", 0);
+
+      Queue queue = Queue.create(sid);
+      queue.setFreeReading();
+      queue.setFreeWriting();
+
+      ConnectionFactory cf = TcpConnectionFactory.create("localhost", 16010);
+
+      Connection cnx1 = cf.createConnection();
+      ExcList12 receiverExcListener = new ExcList12("Receiver");
+      cnx1.setExceptionListener(receiverExcListener);
+      Session sess1 = cnx1.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      MessageConsumer cons = sess1.createConsumer(queue);
+      MsgList12 msgListener = new MsgList12();
+      cons.setMessageListener(msgListener);
+      cnx1.start();
+
+      Connection cnx2 = cf.createConnection();
+      ExcList12 senderExcListener = new ExcList12("Sender");
+      cnx2.setExceptionListener(senderExcListener);
+      Session sess2 = cnx2.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      ((org.objectweb.joram.client.jms.Session) sess2).setAsyncSend(asynchronous);
+      MessageProducer producer = sess2.createProducer(queue);
+      cnx2.start();
+
+      // Send 2 messages
+      Message msg = sess2.createMessage();
+      producer.send(msg);
+      msg = sess2.createMessage();
+      producer.send(msg);
+
+      Thread.sleep(1000);
+      assertEquals(2, msgListener.nbReceived);
+
+      // Delete the topic
+      queue.delete();
+
+      // Receivers should have been notified of topic deletion.
+      Thread.sleep(1000);
+      assertEquals(1, receiverExcListener.nbInvalidDestExc);
+
+      // Send one message
+      msg = sess2.createMessage();
+      Exception expectedException = null;
+      try {
+        ((org.objectweb.joram.client.jms.MessageProducer) producer).send(msg);
+      } catch (Exception exc) {
+        expectedException = exc;
+      }
+      // The exception must have been caught only if the topic was local.
+      // If remote or asynchronous, the exception listener should receive the exception.
+      Thread.sleep(1000);
+      if (sid == 0 && !asynchronous) {
+        assertTrue(expectedException instanceof InvalidDestinationException);
+        assertEquals(0, senderExcListener.nbInvalidDestExc);
+      } else {
+        assertNull(expectedException);
+        assertEquals(1, senderExcListener.nbInvalidDestExc);
+      }
+
+      Thread.sleep(1000L);
+
+      // Send a second message
+      expectedException = null;
+      msg = sess2.createMessage();
+      try {
+        producer.send(msg);
+      } catch (Exception exc) {
+        expectedException = exc;
+      }
+      // The exception must have been caught only if the topic was local.
+      // If remote or asynchronous, the exception listener should receive the exception.
+      Thread.sleep(1000);
+      if (sid == 0 && !asynchronous) {
+        assertTrue(expectedException instanceof InvalidDestinationException);
+        assertEquals(0, senderExcListener.nbInvalidDestExc);
+      } else {
+        assertNull(expectedException);
+        assertEquals(2, senderExcListener.nbInvalidDestExc);
+      }
+
+      Thread.sleep(1000L);
+      cnx1.close();
+      cnx2.close();
+
+      Thread.sleep(1000L);
+      // The exception listeners should have been notified of the close
+      assertEquals(1, senderExcListener.nbIllegalStateExc);
+      assertEquals(1, receiverExcListener.nbIllegalStateExc);
+
+      AdminModule.disconnect();
+
+      if (sid != 0)
+        joram.framework.TestCase.stopAgentServer(sid);
+
+    } catch (Throwable exc) {
+      exc.printStackTrace();
+      error(exc);
+    } finally {
+      AgentServer.stop();
+      endTest();
     }
-    public void run(){
-	try{
-	    AgentServer.init((short) 0, "s0", null);
-	    AgentServer.start();
-
-	    Thread.sleep(1000L);
-	    short sid = Integer.getInteger("sid", 0).shortValue();
-
-	    if (sid != 0)
-		joram.framework.TestCase.startAgentServer(sid);
-
-	    AdminModule.connect("localhost", 16010, "root", "root", 60);
-
-	    User user = User.create("anonymous", "anonymous", 0);
-
-	    Queue queue = Queue.create(sid);
-	    queue.setFreeReading();
-	    queue.setFreeWriting();
-
-	    ConnectionFactory cf =  TcpConnectionFactory.create("localhost", 16010);
-
-	    Connection cnx1 = cf.createConnection();
-	    cnx1.setExceptionListener(new ExcList12("Receiver"));
-	    Session sess1 = cnx1.createSession(false, Session.AUTO_ACKNOWLEDGE);
-	    MessageConsumer cons = sess1.createConsumer(queue);
-	    cons.setMessageListener(new MsgList12());
-	    cnx1.start();
-
-	    Connection cnx2 = cf.createConnection();
-	    cnx2.setExceptionListener(new ExcList12("Sender"));
-	    Session sess2 = cnx2.createSession(false, Session.AUTO_ACKNOWLEDGE);
-	    MessageProducer producer = sess2.createProducer(queue);
-	    cnx2.start();
-
-	    Message msg = sess2.createMessage();
-	    producer.send(msg);
-
-	    msg = sess2.createMessage();
-	    producer.send(msg);
-
-	    queue.delete();
-
-	    msg = sess2.createMessage();
-	    try {
-		producer.send(msg);
-	    } catch (InvalidDestinationException exc) {
-		if (sid == 0) {
-		    //System.err.println("InvalidDestinationException OK");
-		} else {
-		    exc.printStackTrace();
-		}
-	    }
-
-	    Thread.sleep(1000L);
-
-	    msg = sess2.createMessage();
-	    try {
-		producer.send(msg);
-	    } catch (InvalidDestinationException exc) {
-		if (sid == 0) {
-		    // System.err.println("InvalidDestinationException OK");
-		   
-		} else {
-		    exc.printStackTrace();
-		}
-	    }
-
-	    cnx1.close();
-	    cnx2.close();
-
-	    if (sid != 0)
-		joram.framework.TestCase.stopAgentServer(sid);
-  
-	    AdminModule.disconnect();
-
-	}catch(Throwable exc){
-	    exc.printStackTrace();
-	    error(exc);
-	}finally{
-	    AgentServer.stop();
-	    endTest();
-	}
-    }
+  }
 }
