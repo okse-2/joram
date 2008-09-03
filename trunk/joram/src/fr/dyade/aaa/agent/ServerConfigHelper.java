@@ -37,8 +37,8 @@ import fr.dyade.aaa.agent.conf.A3CMLServer;
 import fr.dyade.aaa.agent.conf.A3CMLService;
 
 public class ServerConfigHelper {
-  private static Logger logger =
-    Debug.getLogger(ServerConfigHelper.class.getName());
+  
+  private static Logger logger = Debug.getLogger(ServerConfigHelper.class.getName());
 
   private boolean autoCommit;
 
@@ -83,6 +83,10 @@ public class ServerConfigHelper {
       // Create and start the run-time entities (may fail)
       Network net = 
         (Network) Class.forName(network).newInstance();
+      
+      // GS: Network name is set earlier than normal to have a well formed name
+      // for the MBean in addConsumer method.
+      net.name = AgentServer.getName() + '.' + domainName;
       AgentServer.addConsumer(domainName, net);
       
       try {
@@ -184,8 +188,7 @@ public class ServerConfigHelper {
       throw new ServerIdAlreadyUsedException(
         "Server id already used: " + sid);
     
-    A3CMLDomain domain = 
-        (A3CMLDomain) a3cmlConfig.getDomain(domainName);
+    A3CMLDomain domain = a3cmlConfig.getDomain(domainName);
     
     A3CMLServer server = new A3CMLServer((short)sid, name, hostName);
     a3cmlConfig.addServer(server);
