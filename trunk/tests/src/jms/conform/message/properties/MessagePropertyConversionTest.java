@@ -1133,8 +1133,8 @@ public class MessagePropertyConversionTest extends PTPTestCase {
     try {
       Message message = senderSession.createMessage();
       // store a value that can't be converted to long
-      message.setBooleanProperty("true", true);
-      message.getLongProperty("true");
+      message.setBooleanProperty("prop", true);
+      message.getLongProperty("prop");
       fail("§3.5.4 The unmarked cases [of Table 0-4] should raise a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
