@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,13 +22,23 @@
  */
 package joram.reconf;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
+import javax.jms.Session;
+import javax.jms.TextMessage;
+
 import joram.framework.TestCase;
 
-import java.io.*;
-import java.util.*;
-import javax.jms.*;
-
+import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 /**
  * Testing: server reconfiguration
@@ -41,79 +51,74 @@ public class ReconfTest3 extends TestCase {
 
   public void run() {
     try {
-      startAgentServer(
-        (short)0, (File)null, 
-        new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
+      startAgentServer((short) 0, (File) null,
+          new String[] { "-DTransaction=fr.dyade.aaa.util.NullTransaction" });
 
-      startAgentServer(
-        (short)1, (File)null, 
-        new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
+      startAgentServer((short) 1, (File) null,
+          new String[] { "-DTransaction=fr.dyade.aaa.util.NullTransaction" });
 
       System.out.println("waiting");
       Thread.sleep(1000L);
 
-      AdminModule.connect("localhost", 2560,
-                          "root", "root", 60);
+      AdminModule.connect("localhost", 2560, "root", "root", 60);
 
-      org.objectweb.joram.client.jms.admin.User user = 
-        org.objectweb.joram.client.jms.admin.User.create(
-          "anonymous", "anonymous", 0);
+      User.create("anonymous", "anonymous", 0);
 
-      checkQueue((short)1);
+      checkQueue((short) 1);
 
       System.out.println("Add server s2");
       AdminModule.addServer(2, "localhost", "D0", 17772, "s2");
-      
-      startServer((short)2, "s2");
 
-      checkQueue((short)2);
-      checkQueue((short)1);
+      startServer((short) 2, "s2");
+
+      checkQueue((short) 2);
+      checkQueue((short) 1);
 
       // First stop the server because it must be reachable
       // in order to be stopped.
-//       System.out.println("Stop server s2");
+      //       System.out.println("Stop server s2");
       AdminModule.stopServer(2);
-//       System.out.println("Server s2 stopped");
+      //       System.out.println("Server s2 stopped");
 
       // Then clean the configuration: 
       // the server is not reachable
       // anymore.
       System.out.println("Remove server s2");
       AdminModule.removeServer(2);
-//       System.out.println("Server s2 removed");
+      //       System.out.println("Server s2 removed");
 
-      checkQueue((short)1);
+      checkQueue((short) 1);
 
       System.out.println("Add server s3");
       AdminModule.addServer(3, "localhost", "D0", 17773, "s3");
-      
-      startServer((short)3, "s3");
 
-      checkQueue((short)3);
-      checkQueue((short)1);
+      startServer((short) 3, "s3");
+
+      checkQueue((short) 3);
+      checkQueue((short) 1);
 
       // First stop the server because it must be reachable
       // in order to be stopped.
-//       System.out.println("Stop server s3");
+      //       System.out.println("Stop server s3");
       AdminModule.stopServer(3);
-//       System.out.println("Server s3 stopped");
+      //       System.out.println("Server s3 stopped");
 
       // Then clean the configuration: 
       // the server is not reachable
       // anymore.
       System.out.println("Remove server s3");
       AdminModule.removeServer(3);
-//       System.out.println("Server s3 removed");
+      //       System.out.println("Server s3 removed");
 
-      checkQueue((short)1);
+      checkQueue((short) 1);
 
-//       System.out.println("Stop server s1");
+      //       System.out.println("Stop server s1");
       AdminModule.stopServer(1);
-//       System.out.println("Server s1 stopped");
+      //       System.out.println("Server s1 stopped");
 
       System.out.println("Remove server s1");
       AdminModule.removeServer(1);
-//       System.out.println("Server s1 removed");
+      //       System.out.println("Server s1 removed");
 
       System.out.println("Remove domain D0");
       AdminModule.removeDomain("D0");
@@ -122,8 +127,8 @@ public class ReconfTest3 extends TestCase {
       error(exc);
     } finally {
       System.out.println("Stop server s0");
-      stopAgentServer((short)0);
-      endTest();     
+      stopAgentServer((short) 0);
+      endTest();
     }
   }
 
@@ -139,43 +144,35 @@ public class ReconfTest3 extends TestCase {
     pw.flush();
     pw.close();
     fos.close();
-    
-//     System.out.println("Start server " + serverName);
-    startAgentServer(
-      sid, sdir, 
-      new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
+
+    //     System.out.println("Start server " + serverName);
+    startAgentServer(sid, sdir, new String[] { "-DTransaction=fr.dyade.aaa.util.NullTransaction" });
   }
 
   public static void checkQueue(short sid) throws Exception {
-//     System.out.println("Create queue on site " + sid);
-    org.objectweb.joram.client.jms.Queue queue = 
-      org.objectweb.joram.client.jms.Queue.create(sid);
+    //     System.out.println("Create queue on site " + sid);
+    Queue queue = Queue.create(sid);
     queue.setFreeReading();
     queue.setFreeWriting();
-    
-    ConnectionFactory cf = 
-      org.objectweb.joram.client.jms.tcp.TcpConnectionFactory.create(
-        "localhost", 2560);
-    
-    Connection connection = cf.createConnection(
-      "anonymous", "anonymous");
+
+    ConnectionFactory cf = TcpConnectionFactory.create("localhost", 2560);
+
+    Connection connection = cf.createConnection("anonymous", "anonymous");
     connection.start();
 
-    Session session = connection.createSession(
-      false,
-      Session.AUTO_ACKNOWLEDGE);
-    
+    Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
     MessageProducer producer = session.createProducer(queue);
     TextMessage msg = session.createTextMessage("testcheck");
-    
-//     System.out.println("send msg");
+
+    //     System.out.println("send msg");
     producer.send(msg);
-    
+
     MessageConsumer consumer = session.createConsumer(queue);
-    
-//     System.out.println("receive msg");
-    msg = (TextMessage)consumer.receive();
-    assertEquals("testcheck",msg.getText());
+
+    //     System.out.println("receive msg");
+    msg = (TextMessage) consumer.receive();
+    assertEquals("testcheck", msg.getText());
     connection.close();
   }
 }
