@@ -1,6 +1,12 @@
 +==============================================================================
+| 2008/08/06 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Changed message error properties. JMS_JORAM_ERRORCOUNT, JMS_JORAM_ERRORCAUSE_X
+ and JMS_JORAM_ERRORCODE_X are now used instead of old JMS_JORAM_DELETEDDEST,
+ JMS_JORAM_NOTWRITABLE, JMS_JORAM_EXPIRED, JMS_JORAM_UNDELIVERABLE.
++==============================================================================
 | 2008/08/06 | Nicolas Tachker - ScalAgent Distributed Technologies 
-+------------+----------------------------------------------------------------
++------------+-----------------------------------------------------------------
 1. PoolNetwork:
   - Add parallelism to send message (PoolSender).
   - modify active sessions
