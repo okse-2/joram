@@ -959,7 +959,7 @@ final public class AgentAdmin extends Agent {
       // l'AgentServer.
       if (a3cmlConfig == null)
         a3cmlConfig = AgentServer.getConfig();
-      A3CMLServer current = a3cmlConfig.getServer(AgentServer.getServerId());
+//    A3CMLServer current = a3cmlConfig.getServer(AgentServer.getServerId());
       A3CMLServer server = a3cmlConfig.getServer(cmd.sid);
       ServerDesc desc = AgentServer.getServerDesc(server.sid);
 
