@@ -250,17 +250,17 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * is used as index for internal tables.
    */
   protected short[] servers;
-  /** Filename for servers storage */
+  /** Filename for servers storage. */
   transient protected String serversFN = null;
   /** Logical timestamp information for messages in domain, stamp[idxLS)]
    * for messages sent, and stamp[index(id] for messages received.
    */
   private int[] stamp;
-  /** Buffer used to optimise transactions*/
+  /** Buffer used to optimize transactions. */
   private byte[] stampbuf = null;
   /** */
   private int[] bootTS = null;
-  /** Filename for boot time stamp storage */
+  /** Filename for boot time stamp storage. */
   transient protected String bootTSFN = null;
  
   /** The component's name as it appears in logging. */
@@ -321,7 +321,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
 
   /**
    * Insert a message in the <code>MessageQueue</code>.
-   * This method is used during initialisation to restore the component
+   * This method is used during initialization to restore the component
    * state from persistent storage.
    *
    * @param msg		the message
@@ -392,7 +392,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * Initializes a new network component. This method is used in order to
    * easily creates and configure a Network component from a class name.
    * So we can use the <code>Class.newInstance()</code> method for create
-   * (whitout any parameter) the component, then we can initialize it with
+   * (without any parameter) the component, then we can initialize it with
    * this method.<br>
    * This method initializes the logical clock for the domain.
    *
@@ -788,13 +788,13 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
       AgentServer.getTransaction().release();
     } else {
 //    it's an already delivered message, we have just to re-send an
-//    aknowledge (see below).
+//    acknowledge (see below).
       AgentServer.getTransaction().commit(true);
     }
   }
 
   /**
-   * Deletes the component, removes all persistent datas. The component
+   * Deletes the component, removes all persistent data. The component
    * may have been previously stopped, and removed from MessageConsumer
    * list.
    * This operation use Transaction calls, you may use commit to validate it.
