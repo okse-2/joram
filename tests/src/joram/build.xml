@@ -202,8 +202,10 @@ description=" --> launch all exceptionlistener tests">
 
   <target name="tests.reconf"
           description=" --> launch all reconf tests">
+    <ant dir="." antfile="build.xml" target="reconf.test-base"/>
     <ant dir="." antfile="build.xml" target="reconf.test"/>
-    <ant dir="." antfile="build.xml" target="reconf.test1"/>
+    <ant dir="." antfile="build.xml" target="reconf.test2"/>
+    <ant dir="." antfile="build.xml" target="reconf.test3"/>
   </target>
 
   <target name="tests.perf"
@@ -1799,6 +1801,17 @@ description=" --> launch all exceptionlistener tests">
 
   <!--  test reconf -->
 
+  <target name="reconf.test-base" depends="init.a3props,compile"
+          description=" --> test reconfiguration server">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.reconf.ReconfTestBase"/>
+      <param name="jndiconf" value="reconf/jndi.properties"/>
+      <param name="a3conf" value="reconf/a3servers.xml"/>
+      <param name="args" value=""/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
+  
   <target name="reconf.test" depends="init.a3props,compile"
           description=" --> test reconfiguration server">
     <antcall target="test.run" inheritAll="true">
@@ -1810,12 +1823,23 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 
-  <target name="reconf.test1" depends="init.a3props,compile"
+  <target name="reconf.test2" depends="init.a3props,compile"
           description=" --> test reconfiguration server with exception">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.reconf.ReconfTest2"/>
       <param name="jndiconf" value="reconf/jndi.properties"/>
       <param name="a3conf" value="reconf/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+  
+  <target name="reconf.test3" depends="init.a3props,compile"
+          description=" --> test reconfiguration server">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.reconf.ReconfTest3"/>
+      <param name="jndiconf" value="reconf/jndi.properties"/>
+      <param name="a3conf" value="reconf/a3servers3.xml"/>
       <param name="jvmargs" value=""/>
       <param name="args" value=""/>
     </antcall>
