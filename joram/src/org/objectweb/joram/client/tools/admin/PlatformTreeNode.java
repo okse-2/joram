@@ -21,15 +21,12 @@
  */
 package org.objectweb.joram.client.tools.admin;
 
-import java.util.*;
 import java.io.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.tree.*;
 
 import org.objectweb.joram.client.jms.admin.*;
-
-import org.objectweb.util.monolog.api.*;
 
 class PlatformTreeNode extends DefaultMutableTreeNode
     implements AdminTreeNode {

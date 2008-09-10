@@ -26,13 +26,11 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.util.Iterator;
-import javax.jms.*;
 
 import org.objectweb.joram.client.jms.admin.*;
 
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.client.jms.Topic;
 
 /**
  * @author afedoro

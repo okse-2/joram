@@ -21,8 +21,6 @@
  */
 package org.objectweb.joram.client.tools.admin;
 
-import java.io.*;
-import java.util.*;
 import javax.swing.*;
 import javax.swing.tree.*;
 import java.awt.event.*;

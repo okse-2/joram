@@ -27,14 +27,10 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.tree.*;
 import javax.jms.*;
-import java.util.List;
-import java.util.Iterator;
 import java.net.ConnectException;
 
 import org.objectweb.joram.client.jms.admin.*;
-import org.objectweb.joram.client.jms.tcp.*;
 import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.client.jms.Topic;
 
 import org.objectweb.util.monolog.api.*;
 
@@ -455,22 +451,17 @@ public class AdminTool extends JFrame
         SubscriptionRootTreeNode subRootTn = 
           (SubscriptionRootTreeNode)subTn.getParent();
         UserTreeNode userTn = (UserTreeNode)subRootTn.getParent();
-        ServerTreeNode serverTn = userTn.getParentServerTreeNode();
-        // subscriptionPanel.setSubscription(subtn.getSubscription());
+//         ServerTreeNode serverTn = userTn.getParentServerTreeNode();
+//         subscriptionPanel.setSubscription(subtn.getSubscription());
 //         subscriptionPanel.setServerId(serverTn.getServerId());
 //         subscriptionPanel.setUserName(userTn.getUserName());
 //         subscriptionPanel.loadMessageIds();
 //         ((CardLayout) editPanel.getLayout()).show(editPanel, "subscription");
         if (subTn.getChildCount() == 0) {
-          String[] ids = userTn.getUser().getMessageIds(
-            subTn.getSubscription().getName());
+          String[] ids = userTn.getUser().getMessageIds(subTn.getSubscription().getName());
           for (int i = 0; i < ids.length; i++) {
-            MessageTreeNode msgNode = new MessageTreeNode(
-              c, ids[i]);
-            c.getAdminTreeModel().insertNodeInto(
-              msgNode, 
-              subTn,
-              subTn.getChildCount());
+            MessageTreeNode msgNode = new MessageTreeNode(c, ids[i]);
+            c.getAdminTreeModel().insertNodeInto(msgNode, subTn, subTn.getChildCount());
           }
         }
       } else if (selection instanceof MessageTreeNode) {
@@ -484,10 +475,8 @@ public class AdminTool extends JFrame
           SubscriptionRootTreeNode subRootTn = 
             (SubscriptionRootTreeNode)subTn.getParent();
           UserTreeNode userTn = (UserTreeNode)subRootTn.getParent();
-          ServerTreeNode serverTn = userTn.getParentServerTreeNode();
-          msg = userTn.getUser().readMessage(
-            subTn.getSubscription().getName(), 
-            msgTn.getMessageId());
+//        ServerTreeNode serverTn = userTn.getParentServerTreeNode();
+          msg = userTn.getUser().readMessage(subTn.getSubscription().getName(), msgTn.getMessageId());
         } else {
           MessageRootTreeNode msgRootTn = 
             (MessageRootTreeNode)parentTn;
