@@ -1,0 +1,207 @@
+/*
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 France Telecom R&D
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
+ *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s):
+ */
+package org.objectweb.joram.mom.dest;
+
+import java.io.*;
+import java.util.*;
+
+import org.objectweb.joram.mom.notifications.*;
+import org.objectweb.joram.shared.excepts.*;
+import org.objectweb.joram.shared.messages.*;
+import org.objectweb.joram.shared.selectors.*;
+import org.objectweb.joram.mom.dest.*;
+import org.objectweb.joram.shared.admin.*;
+
+import org.objectweb.joram.shared.messages.Message;
+
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.agent.UnknownNotificationException;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.mom.MomTracing;
+
+/**
+ * The <code>HAQueueImpl</code> class implements the ...
+ */
+public class HAQueueImpl extends QueueImpl {
+  protected Vector cluster;
+
+  /**
+   * Constructs a <code>HAQueueImpl</code> instance.
+   *
+   * @param destId  Identifier of the agent hosting the queue.
+   * @param adminId  Identifier of the administrator of the queue.
+   */
+  public HAQueueImpl(AgentId destId, AgentId adminId, Properties prop) {
+    super(destId, adminId, prop);
+
+    cluster = new Vector();
+    cluster.add(destId);
+  }
+
+  public String toString() {
+    return "HAQueueImpl:" + destId.toString();
+  }
+
+  /**
+   * Distributes the received notifications to the appropriate reactions.
+   *
+   * @exception UnknownNotificationException  When receiving an unexpected
+   *              notification.
+   */
+  public void react(AgentId from, Notification not)
+    throws UnknownNotificationException {
+
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "--- " + this +
+                                    " react(" + from + "," + not + ")");
+
+    if (not instanceof AckJoinQueueCluster)
+      doReact((AckJoinQueueCluster) not);
+    else if (not instanceof JoinQueueCluster)
+      doReact((JoinQueueCluster) not);
+    else if (not instanceof LeaveQueueCluster)
+      removeQueueCluster(((LeaveQueueCluster) not).removeQueue);
+    else if (not instanceof SetRightQueueCluster)
+      doReact((SetRightQueueCluster) not);
+    else
+      super.react(from, not);
+  }
+
+  /** 
+   * use to add or remove ClusterQueue to cluster. 
+   */
+  public Object specialAdminProcess(SpecialAdminRequest not) 
+    throws RequestException {
+
+    Object ret = null;
+    try {
+      SpecialAdmin req = not.getRequest();
+      
+      if (req instanceof AddQueueCluster) {
+        addQueueCluster(((AddQueueCluster) req).joiningQueue);
+      } else if (req instanceof RemoveQueueCluster) {
+        sendToCluster(new LeaveQueueCluster(removeQueue));
+        cluster.clear();
+      } else if(req instanceof ListClusterQueue) {
+        return cluster;
+      }
+    } catch (Exception exc) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+        MomTracing.dbgDestination.log(BasicLevel.WARN, 
+                                      "--- " + this +
+                                      " specialAdminProcess",
+                                      exc);
+      throw new RequestException(exc.getMessage());
+    }
+    return ret;
+  }
+ 
+  /**
+   *  send to joiningQueue a JoinQueueCluster not.
+   */
+  protected void addQueueCluster(String joiningQueue) {
+    AgentId id = AgentId.fromString(joiningQueue);
+    if (cluster.contains(id)) return;
+
+//    clusters.put(id,new Float(rateOfFlow));
+
+    Channel.sendTo(id, new JoinHAQueue(cluster));
+  }
+
+  /** 
+   * removeQueue leave the cluster.
+   */
+  protected void removeQueueCluster(String removeQueue) {
+    AgentId id = AgentId.fromString(removeQueue);
+    cluster.remove(id);
+  }
+  
+  /** 
+   * overload doProcess(ClientMessages) store all msgId in timeTable and
+   * visitTable, store message and deliver message if consumer wait.
+   *
+   * call factorCheck to evaluate the loading factor, activity, ... and
+   * send message to cluster if need.
+   */
+  protected void doProcess(ClientMessages not) {
+    receiving = true;
+   
+    Message msg;
+    // Storing each received message:
+    for (Enumeration msgs = not.getMessages().elements();
+         msgs.hasMoreElements();) {
+
+      msg = (Message) msgs.nextElement();
+      msg.order = arrivalsCounter++;
+      storeMessage(msg);
+    }
+
+    // Lauching a delivery sequence:
+    deliverMessages(0);
+    receiving = false;
+  }
+
+  /**
+   * new queue come in cluster, update clusters.
+   * and spread to clusters the AckjoiningQueue.
+   */
+  protected void doReact(JoinQueueCluster not) {
+    for (Enumeration e = not.clusters.keys(); e.hasMoreElements(); ) {
+      AgentId id = (AgentId) e.nextElement();
+      if (! clusters.containsKey(id))
+        clusters.put(id,not.clusters.get(id));
+    }
+
+    sendToCluster(new AckJoinQueueCluster(cluster));
+  }
+
+  protected void doReact(AckJoinQueueCluster not) {
+    for (Enumeration e = not.clusters.keys(); e.hasMoreElements(); ) {
+      AgentId id = (AgentId) e.nextElement();
+      if (! clusters.containsKey(id))
+        clusters.put(id,not.clusters.get(id));
+    }
+  }
+
+  /**
+   * send to all queue in cluster.
+   */
+  protected void sendToCluster(QueueClusterNot not) {
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+                                    "--- " + this + 
+                                    " ClusterQueueImpl.sendToCluster(" + not + ")");
+
+    if (clusters.size() < 2) return;
+
+    for (Enumeration e = clusters.keys(); e.hasMoreElements(); ) {
+      AgentId id = (AgentId) e.nextElement();
+      if (! id.equals(destId))
+        Channel.sendTo(id,not);
+    }
+  }
+}
