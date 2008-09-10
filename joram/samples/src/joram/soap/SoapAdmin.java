@@ -24,39 +24,43 @@
  */
 package soap;
 
-import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.admin.*;
+import org.objectweb.joram.client.jms.*;
 import org.objectweb.joram.client.jms.soap.TopicSoapConnectionFactory;
+
 
 /**
  * Administers a platform for the soap samples.
  */
-public class SoapAdmin {
-
-  public static void main(String[] args) throws Exception {
-    
+public class SoapAdmin
+{
+  public static void main(String[] args) throws Exception
+  {
     System.out.println();
     System.out.println("Soap administration...");
 
-    TopicSoapConnectionFactory soapCf = (TopicSoapConnectionFactory) TopicSoapConnectionFactory.create(
-        "localhost", 8080, 60);
+    TopicSoapConnectionFactory soapCf = (TopicSoapConnectionFactory)
+      TopicSoapConnectionFactory.create("localhost", 8080, 60);
     soapCf.getParameters().connectingTimer = 60;
 
     AdminModule.connect(soapCf, "root", "root");
 
-    Queue queue = Queue.create(0);
+    Queue queue = (Queue) Queue.create(0);
+    Topic topic = (Topic) Topic.create(0);
 
-    User.create("anonymous", "anonymous", 1);
+    User soapUser = User.create("anonymous", "anonymous", 1);
 
     queue.setFreeReading();
     queue.setFreeWriting();
+    topic.setFreeReading();
+    topic.setFreeWriting();
 
     AdminModule.disconnect();
 
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     jndiCtx.bind("soapCf", soapCf);
     jndiCtx.bind("queue", queue);
+    jndiCtx.bind("topic", topic);
     jndiCtx.close();
 
     System.out.println("Admin finished.");

@@ -16,7 +16,6 @@ import org.objectweb.joram.client.jms.Topic;
 
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.*;
-import fr.dyade.aaa.agent.conf.*;
 
 public class Activator implements BundleActivator {
 

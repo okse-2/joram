@@ -33,7 +33,7 @@ import org.objectweb.util.monolog.api.Logger;
  * <p>
  * This OutputStream is a combination between a ByteArrayOutputStream and a
  * BufferedOutputStream. It allows the replacement of the underlying stream and
- * the serialization of object through an internal ObjectOutputStream.
+ * the serialisation of object through an internal ObjectOutputStream.
  * <p>
  * Be careful this OutputStream is not synchronized.
  */

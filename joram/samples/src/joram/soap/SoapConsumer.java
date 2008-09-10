@@ -23,32 +23,35 @@
  */
 package soap;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.MessageConsumer;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-import javax.naming.Context;
-import javax.naming.InitialContext;
+import javax.jms.*;
+import javax.naming.*;
 
-public class SoapConsumer {
-  
-  static Context ictx = null;
+/**
+ */
+public class SoapConsumer
+{
+  static Context ictx = null; 
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws Exception
+  {
     System.out.println();
-    System.out.println("Consumes messages on the queue...");
+    System.out.println("Consumes messages on the queue and on the topic...");
 
     ictx = new InitialContext();
     ConnectionFactory cf = (ConnectionFactory) ictx.lookup("soapCf");
     Queue queue = (Queue) ictx.lookup("queue");
+    Topic topic = (Topic) ictx.lookup("topic");
     ictx.close();
 
     Connection cnx = cf.createConnection();
     Session qSess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+    Session tSess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
     MessageConsumer qConsumer = qSess.createConsumer(queue);
+    MessageConsumer tConsumer = tSess.createConsumer(topic);
+
+    tConsumer.setMessageListener(new MsgListener());
+
     cnx.start();
 
     TextMessage msg;
@@ -58,6 +61,22 @@ public class SoapConsumer {
       System.out.println("Message received from queue: " + msg.getText());
     }
 
+    System.in.read();
     cnx.close();
+  }
+}
+
+class MsgListener implements MessageListener
+{
+  public void onMessage(Message msg)
+  {
+    try {
+      if (msg instanceof TextMessage)
+        System.out.println("Message received from topic: " 
+                           +((TextMessage) msg).getText());
+    }
+    catch (Exception exc) {
+      System.out.println("Exception in listener: " + exc);
+    }
   }
 }

@@ -142,7 +142,7 @@ public class ClusterQueueImpl extends QueueImpl {
         timeThreshold = period;
       }
     }
-    
+
     loadingFactor = new LoadingFactor(this,
                                       producThreshold,
                                       consumThreshold,
@@ -152,7 +152,7 @@ public class ClusterQueueImpl extends QueueImpl {
     visitTable = new Hashtable();
     clusterDeliveryCount = 0;
   }
-  
+
   /**
    * Initializes the destination.
    * 
@@ -161,7 +161,7 @@ public class ClusterQueueImpl extends QueueImpl {
   public void initialize(boolean firstTime) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "initialize(" + firstTime + ')');
-    
+
     super.initialize(firstTime);
 
     if (firstTime) {
@@ -173,24 +173,22 @@ public class ClusterQueueImpl extends QueueImpl {
   public String toString() {
     return "ClusterQueueImpl:" + getId().toString();
   }
- 
+
   /**
    * use to add or remove ClusterQueue to cluster. 
    * 
    * @param not
    */
   public Object specialAdminProcess(SpecialAdminRequest not) 
-    throws RequestException {
+  throws RequestException {
 
     Object ret = null;
     try {
       SpecialAdmin req = not.getRequest();
-      
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
-                                      "--- " + this +
-                                      " specialAdminProcess : " +
-                                      req);
+
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, 
+                   "--- " + this + " specialAdminProcess : " + req);
 
       if (req instanceof AddQueueCluster) {
         addQueueCluster(((AddQueueCluster) req).joiningQueue,
@@ -202,16 +200,14 @@ public class ClusterQueueImpl extends QueueImpl {
         ret = doList((ListClusterQueue) req);
       }
     } catch (Exception exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-        JoramTracing.dbgDestination.log(BasicLevel.WARN, 
-                                      "--- " + this +
-                                      " specialAdminProcess",
-                                      exc);
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN, 
+                   "--- " + this + " specialAdminProcess", exc);
       throw new RequestException(exc.getMessage());
     }
     return ret;
   }
-  
+
   /**
    * return the cluster list (vector).
    * 
@@ -224,7 +220,7 @@ public class ClusterQueueImpl extends QueueImpl {
       vect.add(e.nextElement().toString());
     return vect;
   }
- 
+
   /**
    * send to joiningQueue a JoinQueueCluster not.
    * 
@@ -235,14 +231,11 @@ public class ClusterQueueImpl extends QueueImpl {
     AgentId id = AgentId.fromString(joiningQueue);
     if (clusters.containsKey(id)) return;
 
-//    clusters.put(id,new Float(rateOfFlow));
+    //    clusters.put(id,new Float(rateOfFlow));
 
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                    "--- " + this +
-                                    " ClusterQueueImpl.addQueueCluster in " + getId() +
-                                    "\njoiningQueue=" + joiningQueue +
-                                    "\nclusters=" + clusters);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "--- " + this + " ClusterQueueImpl.addQueueCluster in " + getId() + "\njoiningQueue=" + joiningQueue + "\nclusters=" + clusters);
 
     forward(id,
             new JoinQueueCluster(loadingFactor.getRateOfFlow(),
@@ -251,7 +244,7 @@ public class ClusterQueueImpl extends QueueImpl {
                                  freeReading,
                                  freeWriting));
   }
-  
+
   /**
    * broadcast to cluster the removeQueue. 
    * 
@@ -279,14 +272,11 @@ public class ClusterQueueImpl extends QueueImpl {
         visit.remove(id);
     }
 
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                    "--- " + this +
-                                    " ClusterQueueImpl.removeQueueCluster in " + getId() +
-                                    "\nremoveQueue=" + removeQueue +
-                                    "\nclusters=" + clusters);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "--- " + this + " ClusterQueueImpl.removeQueueCluster in " + getId() + "\nremoveQueue=" + removeQueue + "\nclusters=" + clusters);
   }
-  
+
   /**
    * overload preProcess(AgentId, ClientMessages)
    * store all msgId in timeTable and visitTable.
@@ -295,17 +285,16 @@ public class ClusterQueueImpl extends QueueImpl {
    * @param not
    */
   public ClientMessages preProcess(AgentId from, ClientMessages not) {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
-                                    "--- " + this + 
-                                    " " + not);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+                 "--- " + this +  " " + not);
     receiving = true;
     long date = System.currentTimeMillis();
-    
+
     Message msg;
     // Storing each received message:
     for (Enumeration msgs = not.getMessages().elements();
-         msgs.hasMoreElements();) {
+    msgs.hasMoreElements();) {
       msg = new Message((org.objectweb.joram.shared.messages.Message) msgs.nextElement());
       msg.order = arrivalsCounter++;
       storeMsgIdInTimeTable(msg.getIdentifier(),
@@ -314,7 +303,7 @@ public class ClusterQueueImpl extends QueueImpl {
     }
     return not;
   }
-  
+
   /**
    * call factorCheck to evaluate the loading factor,
    * activity, ... and send message to cluster if need.
@@ -337,9 +326,10 @@ public class ClusterQueueImpl extends QueueImpl {
    * @param not
    */
   public void wakeUpNot(WakeUpNot not) {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "--- " + this + " ClusterQueueImpl.wakeUpNot(" + not
-          + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "--- " + this + " ClusterQueueImpl.wakeUpNot(" + not + ")");
+    
     super.wakeUpNot(not);
 
     if (clusters.size() > 1)
@@ -407,11 +397,11 @@ public class ClusterQueueImpl extends QueueImpl {
       visitTable.put(msgId,vT.get(msgId));
     }
 
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                    "--- " + this +
-                                    " ClusterQueueImpl.lBCycleLife(" + not + ")" +
-                                    "\nvisitTable=" + clusters);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "--- " + this +
+                 " ClusterQueueImpl.lBCycleLife(" + not + ")" +
+                 "\nvisitTable=" + clusters);
     ClientMessages cm = not.getClientMessages();
     if (cm != null)
       doClientMessages(from, cm);
@@ -443,18 +433,18 @@ public class ClusterQueueImpl extends QueueImpl {
     freeWriting = freeWriting | not.freeWriting;
 
     sendToCluster(
-      new AckJoinQueueCluster(loadingFactor.getRateOfFlow(),
-                              clusters,
-                              clients,
-                              freeReading,
-                              freeWriting));
-  
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                    "--- " + this +
-                                    " ClusterQueueImpl.joinQueueCluster(" + not + ")" +
-                                    "\nclusters=" + clusters +
-                                    "\nclients=" + clients);
+                  new AckJoinQueueCluster(loadingFactor.getRateOfFlow(),
+                                          clusters,
+                                          clients,
+                                          freeReading,
+                                          freeWriting));
+
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "--- " + this +
+                 " ClusterQueueImpl.joinQueueCluster(" + not + ")" +
+                 "\nclusters=" + clusters +
+                 "\nclients=" + clients);
   }
 
   /**
@@ -479,13 +469,13 @@ public class ClusterQueueImpl extends QueueImpl {
 
     freeReading = freeReading | not.freeReading;
     freeWriting = freeWriting | not.freeWriting;
-  
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                    "--- " + this +
-                                    " ClusterQueueImpl.ackJoinQueueCluster(" + not + ")" +
-                                    "\nclusters=" + clusters +
-                                    "\nclients=" + clients);
+
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "--- " + this +
+                 " ClusterQueueImpl.ackJoinQueueCluster(" + not + ")" +
+                 "\nclusters=" + clusters +
+                 "\nclients=" + clients);
   }
 
   /**
@@ -493,10 +483,10 @@ public class ClusterQueueImpl extends QueueImpl {
    * @param not ReceiveRequest
    */
   public void receiveRequest(ReceiveRequest not) {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                    "--- " + this + 
-                                    " ClusterQueueImpl.receiveRequest(" + not + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "--- " + this + 
+                 " ClusterQueueImpl.receiveRequest(" + not + ")");
 
     //loadingFactor.setWait();
 
@@ -515,11 +505,11 @@ public class ClusterQueueImpl extends QueueImpl {
    * @throws UnknownNotificationException
    */
   public void lBMessageGive(AgentId from, LBMessageGive not) 
-    throws UnknownNotificationException {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
-                                    "--- " + this +
-                                    " ClusterQueueImpl.lBMessageGive(" + from + "," + not + ")");
+  throws UnknownNotificationException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+                 "--- " + this +
+                 " ClusterQueueImpl.lBMessageGive(" + from + "," + not + ")");
 
     clusters.put(from,new Float(not.getRateOfFlow()));
 
@@ -535,11 +525,11 @@ public class ClusterQueueImpl extends QueueImpl {
    * @param not   LBMessageHope
    */
   public void lBMessageHope(AgentId from, LBMessageHope not) {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                    "--- " + this + 
-                                    " ClusterQueueImpl.lBMessageHope(" + from + "," + not + ")");
-    
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "--- " + this + 
+                 " ClusterQueueImpl.lBMessageHope(" + from + "," + not + ")");
+
     clusters.put(from,new Float(not.getRateOfFlow()));
 
     int hope = not.getNbMsg();
@@ -550,12 +540,12 @@ public class ClusterQueueImpl extends QueueImpl {
     // If needed, sending the dead messages to the DMQ:
     if (dmqManager != null)
       dmqManager.sendToDMQ();
-    
+
     if (loadingFactor.getRateOfFlow() < 1) {
       int possibleGive = getPendingMessageCount() - getWaitingRequestCount();
       LBMessageGive msgGive = 
         new LBMessageGive(waitAfterClusterReq,loadingFactor.getRateOfFlow());
-      
+
       // get client messages, hope or possible give.
       ClientMessages cm = null;
       if (possibleGive > hope) {
@@ -566,16 +556,16 @@ public class ClusterQueueImpl extends QueueImpl {
 
       msgGive.setClientMessages(cm);
       msgGive.setRateOfFlow(
-        loadingFactor.evalRateOfFlow(getPendingMessageCount(), getWaitingRequestCount()));
-      
+                            loadingFactor.evalRateOfFlow(getPendingMessageCount(), getWaitingRequestCount()));
+
       // send notification contains ClientMessages.
       forward(from, msgGive);
-      
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
-                                      "--- " + this +
-                                      " ClusterQueueImpl.lBMessageHope LBMessageHope : nbMsgSend = " + 
-                                      cm.getMessages().size());
+
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, 
+                   "--- " + this +
+                   " ClusterQueueImpl.lBMessageHope LBMessageHope : nbMsgSend = " + 
+                   cm.getMessages().size());
     }
   }
 
@@ -593,7 +583,7 @@ public class ClusterQueueImpl extends QueueImpl {
     if (cm != null) {
       // set information in cluster
       for (Enumeration e = cm.getMessages().elements();
-           e.hasMoreElements(); ) {
+      e.hasMoreElements(); ) {
         org.objectweb.joram.shared.messages.Message message = 
           (org.objectweb.joram.shared.messages.Message) e.nextElement();
         monitoringMsgSendToCluster(message.id);
@@ -601,7 +591,7 @@ public class ClusterQueueImpl extends QueueImpl {
     }
     return cm;
   }
-  
+
   /**
    * get mom message, delete if remove = true.
    * add cluster monitoring value.
@@ -617,17 +607,17 @@ public class ClusterQueueImpl extends QueueImpl {
     }
     return msg;
   }
-  
+
   /**
    * send to all queue in cluster.
    * 
    * @param not
    */
   protected void sendToCluster(QueueClusterNot not) {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                    "--- " + this + 
-                                    " ClusterQueueImpl.sendToCluster(" + not + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "--- " + this + 
+                 " ClusterQueueImpl.sendToCluster(" + not + ")");
 
     if (clusters.size() < 2) return;
 
@@ -686,7 +676,7 @@ public class ClusterQueueImpl extends QueueImpl {
     visitTable.remove(msgId);
     clusterDeliveryCount++;
   }
-  
+
   /**
    * 
    * @param waitAfterClusterReq
@@ -695,7 +685,7 @@ public class ClusterQueueImpl extends QueueImpl {
     this.waitAfterClusterReq = waitAfterClusterReq;
     loadingFactor.validityPeriod = waitAfterClusterReq;
   }
-  
+
   /**
    * 
    * @param producThreshold
@@ -703,7 +693,7 @@ public class ClusterQueueImpl extends QueueImpl {
   public void setProducThreshold(int producThreshold) {
     loadingFactor.producThreshold = producThreshold;
   }
-  
+
   /**
    * 
    * @param consumThreshold
@@ -711,7 +701,7 @@ public class ClusterQueueImpl extends QueueImpl {
   public void setConsumThreshold(int consumThreshold) {
     loadingFactor.consumThreshold = consumThreshold;
   }
-  
+
   /**
    * 
    * @param autoEvalThreshold

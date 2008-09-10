@@ -1,7 +1,6 @@
 package com.scalagent.joram.osgi.test;
 
 import java.io.*;
-import java.util.Properties;
 
 import org.osgi.framework.*;
 

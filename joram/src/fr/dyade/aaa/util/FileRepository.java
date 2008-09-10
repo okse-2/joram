@@ -21,11 +21,7 @@
  */
 package fr.dyade.aaa.util;
 
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 
 /**
  *  This class allows to use a filesystem directory as repository with the
@@ -183,10 +179,12 @@ final class FileRepository implements Repository {
    * Deletes the corresponding objects in repository.
    */
   public void delete(String dirName, String name) throws IOException {
+    File file;
     if (dirName == null) {
       if (! new File(dir, name).delete()) baddeleted += 1;
     } else {
       File parentDir = new File(dir, dirName);
+      file = new File(parentDir, name);
       if (! new File(parentDir, name).delete()) baddeleted += 1;
       deleteDir(parentDir);
     }

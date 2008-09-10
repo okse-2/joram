@@ -1300,7 +1300,7 @@ public final class AgentServer {
     } catch (Exception exc) {
       logmon.log(BasicLevel.ERROR, getName() + "Cannot start", exc);
       synchronized(status) {
-        // AF: Will be replaced by a BAD_STARTED status allowing the
+        // TODO AF: Will be replaced by a BAD_STARTED status allowing the
         // stop and reset..
         status.value = Status.STOPPED;
       }
@@ -1308,7 +1308,7 @@ public final class AgentServer {
     } catch (Throwable t) {
       logmon.log(BasicLevel.ERROR, getName() + "Cannot start", t);
       synchronized(status) {
-        // AF: Will be replaced by a BAD_STARTED status allowing the
+        // TODO AF: Will be replaced by a BAD_STARTED status allowing the
         // stop and reset..
         status.value = Status.STOPPED;
       }

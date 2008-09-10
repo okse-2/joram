@@ -93,10 +93,7 @@ public class ClusterQueue extends Queue {
       ((ClusterQueueImpl) destImpl).lBMessageHope(from, (LBMessageHope) not);
     else if (not instanceof LBCycleLife)
       ((ClusterQueueImpl) destImpl).lBCycleLife(from, (LBCycleLife) not);
-    else if (not instanceof WakeUpNot) {
-      super.react(from, not);
-      ((ClusterQueueImpl) destImpl).wakeUpNot((WakeUpNot) not);
-    } else {
+    else {
       super.react(from, not);
     }
   }

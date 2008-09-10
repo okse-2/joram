@@ -873,7 +873,10 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
   class MessageList extends Vector {
     /**
      * Insert the message in the Vector depending of its stamp.
-     * @param msg
+     * This method is used after a connection restart in order to insert messages
+     * already sent but not acknowledged in the list of messages to send.
+     * 
+     * @param waiting An array containing the messages to insert in the list.
      */
     public synchronized void insertMessage(Object waiting[]) {
       modCount++;
@@ -886,7 +889,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 
         int idx = 0;
         while (idx < elementCount) {
-          if (((Message) elementData[idx]).stamp > msg.stamp) break;
+          Message current = (Message) elementData[idx];
+          if ((current.not != null) && (current.stamp > msg.stamp)) break;
           idx++;
         }
         insertElementAt(msg, idx);
@@ -894,26 +898,56 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     }
     
     /**
-     *  Verify that there is not already an acknowledge corresponding to the
-     * specified message.
+     *  Inserts the specified acknowledge at the right place at the beginning of
+     * the list.
      * 
-     * @param msg The received message to acknowledge.
+     * @param ack The received message to acknowledge.
      * @return    true if the ack corresponding to the specified message is
      *            already in the queue, false otherwise.
      */
-    public synchronized boolean containsAck(Message msg) {
-      if (msg.not != null) return false;
-      Iterator it = this.iterator();
-      while (it.hasNext()) {
-        Message m = (Message) it.next();
-        if (msg.from.equals(m.from) &&
-            msg.to.equals(m.to) &&
-            msg.stamp == m.stamp) {
-          return true;
+    public synchronized void insertAck(Message ack) {
+      modCount++;
+
+      logmon.log(BasicLevel.WARN, getName() + ", insert ack (" + ack + ')');
+
+      int idx = 0;
+      while (idx < elementCount) {
+        Message current = (Message) elementData[idx];
+        if ((current.not == null) && (current.stamp == ack.stamp)) {
+          // The acknowledge is already in the list
+          return;
         }
+        if ((current.not != null) || (current.stamp > ack.stamp)) {
+          // There is no more acknowledge in the list or the current acknowledge
+          // has a bigger stamp
+          break;
+        }
+        idx++;
       }
-      return false;
+      insertElementAt(ack, idx);
     }
+    
+//    /**
+//     *  Verify that there is not already an acknowledge corresponding to the
+//     * specified message.
+//     * 
+//     * @param msg The received message to acknowledge.
+//     * @return    true if the ack corresponding to the specified message is
+//     *            already in the queue, false otherwise.
+//     */
+//    public synchronized boolean containsAck(Message msg) {
+//      if (msg.not != null) return false;
+//      Iterator it = this.iterator();
+//      while (it.hasNext()) {
+//        Message m = (Message) it.next();
+//        if (msg.from.equals(m.from) &&
+//            msg.to.equals(m.to) &&
+//            msg.stamp == m.stamp) {
+//          return true;
+//        }
+//      }
+//      return false;
+//    }
   }
   
   final class Sender extends Daemon {
@@ -965,12 +999,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     synchronized void send(Message msg) {
       if (msg != null) {
         if (msg.not == null) {
-          if (! msgToSend.containsAck(msg)) {
-            msgToSend.addElement(msg);
-          } else {
-            if (this.logmon.isLoggable(BasicLevel.DEBUG))
-              this.logmon.log(BasicLevel.DEBUG, this.getName() + "msgToSend.containsAck " + msg);
-          }
+          msgToSend.insertAck(msg);
         } else {
           msgToSend.addElement(msg);
         }
@@ -1041,8 +1070,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
             logmon.log(BasicLevel.DEBUG, getName() + ", send(" + msgToSend + ')');
           
           // Send a message 
-          if (! msgToSend.isEmpty())
-            session.send((Message) msgToSend.remove(0));
+          if (! msgToSend.isEmpty()) session.send();
 
           // Release this sender if needed
           waiting = true;
@@ -1146,7 +1174,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       
       // Inserts all non acknowledged messages in msgTosent list so they can be
       // sent by the sender daemon.
-      // TODO: We have also to keep and transmit  the stamp of last received
+      // TODO: We have also to keep and transmit the stamp of last received
       // message in order to avoid useless transmission from the remote server.
       if (sender.session.sendList.size() > 0) {
         Object[] waiting = sender.session.sendList.toArray();
@@ -1871,39 +1899,22 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     }
 
     /**
-     * Sends a message to the corresponding remote server.
-     * Be careful, its method should not be synchronized (in that case, the
-     * overall synchronization of the connection -method start- can dead-lock).
+     * Try to send the first message of the list to the corresponding remote server.
+     * Be careful, its method should not be synchronized (in that case, the overall
+     * synchronization of the connection -method start- can dead-lock).
      * 
      * @param msg The message to send.
      */
-    final void send(Message msg) {
-      if (logmon.isLoggable(BasicLevel.DEBUG)) {
-        if (msg.not != null) {
-          logmon.log(BasicLevel.DEBUG, getName() + ", send msg#" + msg.getStamp());
-        } else {
-          logmon.log(BasicLevel.DEBUG,  getName() + ", send ack#" + msg.getStamp());
-        }
-      }
-
-      long currentTimeMillis = System.currentTimeMillis();
-
-      if (msg.not != null) {
-        nbMessageSent += 1;
-        sendList.addElement(msg);
-
-        if ((msg.not.expiration > 0) && (msg.not.expiration < currentTimeMillis)) {
-          removeExpired(msg);
-          return;
-        }
-      } else {
-        nbAckSent += 1;
-      }
-
+    final void send() {
       if (sock != null) {
-        // Writes the message on the corresponding connection.
+        Message msg = null;
+        long currentTimeMillis = System.currentTimeMillis();
+
         if (maxMessageInFlow > 0) {
-          while (sendList.size() > maxMessageInFlow) {
+          // The flow control is activated, verify the number of messages waiting
+          // for an acknowledge.
+          msg = (Message) sender.msgToSend.firstElement();
+          while ((sock != null) && ((msg.not != null)) && (sendList.size() > maxMessageInFlow)) {
             // Waits for acknowledges from remote server.
             try {
               if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -1913,7 +1924,33 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
               // If the connection is broken don't wait anymore.
               if (sock == null) return;
             } catch (InterruptedException exc) {}
+            // Get anew the first message of the list, it may be an outgoing acknowledge. 
+            msg = (Message) sender.msgToSend.firstElement();
           }
+        }
+
+        if (sock == null) return;
+        
+        msg = (Message) sender.msgToSend.remove(0);
+
+        if (logmon.isLoggable(BasicLevel.DEBUG)) {
+          if (msg.not != null) {
+            logmon.log(BasicLevel.DEBUG, getName() + ", send msg#" + msg.getStamp());
+          } else {
+            logmon.log(BasicLevel.DEBUG,  getName() + ", send ack#" + msg.getStamp());
+          }
+        }
+
+        if (msg.not != null) {
+          nbMessageSent += 1;
+          sendList.addElement(msg);
+
+          if ((msg.not.expiration > 0) && (msg.not.expiration < currentTimeMillis)) {
+            removeExpired(msg);
+            return;
+          }
+        } else {
+          nbAckSent += 1;
         }
 
         if (logmon.isLoggable(BasicLevel.DEBUG)) {
@@ -1923,6 +1960,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
             logmon.log(BasicLevel.DEBUG, getName() + ", transmit(ack#" + msg.stamp + ", " + currentTimeMillis + ')');
         }
 
+        // Writes the message on the corresponding connection.
         last = currentTimeMillis;
         try {
           nos.writeMessage(msg, currentTimeMillis);
@@ -1934,6 +1972,23 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
           // The stream is closed
           logmon.log(BasicLevel.WARN,
                      getName() + ", exception in sending message " + msg);
+        }
+      } else {
+        Message msg = (Message) sender.msgToSend.remove(0);
+
+        long currentTimeMillis = System.currentTimeMillis();
+
+        // The connection is down just insert the message in sendList
+        if (msg.not != null) {
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG, getName() + ", move msg#" + msg.getStamp() + " to sendList");
+          
+          sendList.addElement(msg);
+
+          if ((msg.not.expiration > 0) && (msg.not.expiration < currentTimeMillis)) {
+            removeExpired(msg);
+            return;
+          }
         }
       }
     }
