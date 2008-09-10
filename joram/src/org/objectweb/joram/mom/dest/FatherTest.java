@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.mom.dest;
 
@@ -31,12 +31,10 @@ import org.objectweb.joram.mom.notifications.SetFatherRequest;
  * A <code>FatherTest</code> instance is a notification sent by a topic 
  * for checking if an other topic may be its hierarchical father.
  */
-class FatherTest extends Notification
-{
-  /**
-   * 
-   */
+class FatherTest extends Notification {
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+  
   /** The original client request. */
   SetFatherRequest request;
   /** The original requester. */
@@ -48,8 +46,7 @@ class FatherTest extends Notification
    * @param request  The original client request.
    * @param requester  The original requester.
    */
-  FatherTest(SetFatherRequest request, AgentId requester)
-  {
+  FatherTest(SetFatherRequest request, AgentId requester) {
     this.request = request;
     this.requester = requester;
   }
