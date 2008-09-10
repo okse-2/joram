@@ -1,4 +1,18 @@
 +==============================================================================
+| 2008/09/10 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix in PoolNetwork: avoid deadlock with low value of flow-control.
++==============================================================================
+| 2008/08/29 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix in RA: avoid a thread leak during the cleaning of invalid connections.
++==============================================================================
+| 2008/08/27 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+1. Bug fix: correctly set topicActivationThreshold and topicPassivationThreshold
+attributes in Joram JMS Session.
+2. Adds compression and flow control in PoolNetwork.
++==============================================================================
 | 2008/08/06 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Changed message error properties. JMS_JORAM_ERRORCOUNT, JMS_JORAM_ERRORCAUSE_X
