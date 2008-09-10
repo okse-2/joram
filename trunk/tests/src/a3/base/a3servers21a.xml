@@ -5,7 +5,7 @@
   <property name="Transaction" value="@transaction@"/>
   
   <property name="PoolNetwork.nbMaxCnx" value="@nbMaxCnx@"/>
-  <property name="compressedFlows" value="@compressedFlows@"/>
+  <property name="PoolNetwork.compressedFlows" value="@compressedFlows@"/>
   
   <domain name="D1" network="@network@"/>
 
