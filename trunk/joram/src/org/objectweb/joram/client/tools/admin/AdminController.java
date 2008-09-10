@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.Enumeration;
 import java.net.ConnectException;
 import javax.naming.*;
-import javax.swing.*;
-import java.awt.event.*;
 import javax.swing.tree.*;
 import javax.jms.*;
 
@@ -53,7 +51,6 @@ public class AdminController
   private DefaultTreeModel jndiTreeModel;
   private MutableTreeNode jndiRoot;
 
-  private String namedCtx = "";
   private Context ctx = null;
 
   private boolean jndiConnected = false;
@@ -72,8 +69,7 @@ public class AdminController
   private static final String STR_ADMIN_DISCONNECTED = "Disconnected";
   private static final String STR_JNDI_DISCONNECTED = "Disconnected";
 
-  public AdminController()
-  {
+  public AdminController() {
     adminRoot = new PlatformTreeNode(this, STR_ADMIN_DISCONNECTED);
     adminTreeModel = new DefaultTreeModel(adminRoot, true);
 
@@ -81,8 +77,7 @@ public class AdminController
     jndiTreeModel = new DefaultTreeModel(jndiRoot, true);
   }
 
-  public void setControllerEventListener(ControllerEventListener l)
-  {
+  public void setControllerEventListener(ControllerEventListener l) {
   	this.gui = l;
   }
 
@@ -90,9 +85,7 @@ public class AdminController
   
   protected DefaultTreeModel getJndiTreeModel() { return jndiTreeModel; }
 
-  public void connectJndi(String host, int port, String ctxName) throws NamingException
-  {
-    namedCtx = ctxName;
+  public void connectJndi(String host, int port, String ctxName) throws NamingException {
     
     Hashtable env = new Hashtable();
     env.put(PROP_JNDI_FACTORY,
@@ -110,8 +103,7 @@ public class AdminController
     refreshJndiData();
   }
 
-  public void refreshJndiData() throws NamingException
-  {
+  public void refreshJndiData() throws NamingException {
     cleanupJndiTree();
  
     for (NamingEnumeration e = ctx.list(""); e.hasMore();) {
@@ -258,17 +250,12 @@ public class AdminController
     throws ConnectException, AdminException {
     if (Log.logger.isLoggable(BasicLevel.DEBUG))
       Log.logger.log(BasicLevel.DEBUG, 
-                     "AdminController.refreshAdminData(" + 
-                     serverTreeNode + ')');
-    List destList;
-    List userList;
+                     "AdminController.refreshAdminData(" + serverTreeNode + ')');
     try {
-      updateDestinations(
-        serverTreeNode.getServerId(),
-        serverTreeNode.getDestinationRoot());
-      updateUsers(
-        serverTreeNode.getServerId(),
-        serverTreeNode.getUserRoot());
+      updateDestinations(serverTreeNode.getServerId(),
+                         serverTreeNode.getDestinationRoot());
+      updateUsers(serverTreeNode.getServerId(),
+                  serverTreeNode.getUserRoot());
     } catch (AdminException exc) {
       if (Log.logger.isLoggable(BasicLevel.WARN))
         Log.logger.log(BasicLevel.WARN, "", exc);
@@ -465,10 +452,9 @@ public class AdminController
         (SubscriptionRootTreeNode)subTn.getParent();
       UserTreeNode userTn = 
         (UserTreeNode)subRootTn.getParent();
-      ServerTreeNode serverTn = userTn.getParentServerTreeNode();
-      userTn.getUser().deleteMessage(
-        subTn.getSubscription().getName(),
-        msgTn.getMessageId());
+//      ServerTreeNode serverTn = userTn.getParentServerTreeNode();
+      userTn.getUser().deleteMessage(subTn.getSubscription().getName(),
+                                     msgTn.getMessageId());
     } else {
       MessageRootTreeNode msgRootTn = 
         (MessageRootTreeNode)parentTn;
@@ -485,9 +471,8 @@ public class AdminController
     SubscriptionRootTreeNode subRootTn = 
       (SubscriptionRootTreeNode)subTn.getParent();
     UserTreeNode userTn = (UserTreeNode)subRootTn.getParent();
-    ServerTreeNode serverTn = userTn.getParentServerTreeNode();
-    userTn.getUser().clearSubscription(
-      subTn.getSubscription().getName());
+//    ServerTreeNode serverTn = userTn.getParentServerTreeNode();
+    userTn.getUser().clearSubscription(subTn.getSubscription().getName());
     while(subTn.getChildCount() > 0) {
       MessageTreeNode msgTn = (MessageTreeNode)subTn.getChildAt(0);
       adminTreeModel.removeNodeFromParent(msgTn);

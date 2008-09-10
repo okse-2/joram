@@ -1,6 +1,5 @@
 package org.objectweb.joram.client.tools.admin;
 
-import java.util.*;
 import javax.swing.*;
 import javax.swing.tree.*;
 
