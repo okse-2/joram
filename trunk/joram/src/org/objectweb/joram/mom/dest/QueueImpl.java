@@ -241,6 +241,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         if (dmqManager == null)
           dmqManager = new DMQManager(dmqId, getId());
         nbMsgsSentToDMQSinceCreation++;
+        message.delete();
         dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.EXPIRED);
 
         if (logger.isLoggable(BasicLevel.DEBUG))
@@ -351,14 +352,18 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         persistedMsg = (Message) persistedMsgs.remove(0);
         consId = (AgentId) consumers.get(persistedMsg.getIdentifier());
         if (consId == null) {
-          addMessage(persistedMsg);
+          if (!addMessage(persistedMsg)) {
+            persistedMsg.delete();
+          }
         } else if (isLocal(consId)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG,
                        " -> deny " + persistedMsg.getIdentifier());
           consumers.remove(persistedMsg.getIdentifier());
           contexts.remove(persistedMsg.getIdentifier());
-          addMessage(persistedMsg);
+          if (!addMessage(persistedMsg)) {
+            persistedMsg.delete();
+          }
         } else {
           deliveredMsgs.put(persistedMsg.getIdentifier(), persistedMsg);
         }
@@ -614,7 +619,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
 
   private void acknowledge(String msgId) {
     Message msg = (Message) deliveredMsgs.remove(msgId);
-    if ((msg != null) && msg.getPersistent()) {
+    if ((msg != null) && msg.isPersistent()) {
       // state change, so save.
       setSave();
     }
@@ -688,7 +693,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
             dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.UNDELIVERABLE);
           } else {
             // Else, putting the message back into the deliverables vector:
-            storeMessage(message);
+            storeMessageHeader(message);
           }
 
           if (logger.isLoggable(BasicLevel.DEBUG))
@@ -730,10 +735,11 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
         message.delete();
         if (dmqManager == null)
           dmqManager = new DMQManager(dmqId, getId());
+        nbMsgsSentToDMQSinceCreation++;
         dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.UNDELIVERABLE);
       } else {
         // Else, putting the message back into the deliverables vector:
-        storeMessage(message);
+        storeMessageHeader(message);
       }
 
       if (logger.isLoggable(BasicLevel.DEBUG))
@@ -743,7 +749,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     if (dmqManager != null)
       dmqManager.sendToDMQ();
 
-    // Lauching a delivery sequence:
+    // Launching a delivery sequence:
     deliverMessages(0);
   }
 
@@ -994,7 +1000,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
           dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.UNDELIVERABLE);
         } else {
           // Else, putting it back into the deliverables vector:
-          storeMessage(message);
+          storeMessageHeader(message);
         }
 
         if (logger.isLoggable(BasicLevel.WARN))
@@ -1039,6 +1045,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       DMQManager dmqManager = new DMQManager(dmqId, getId());
       while (! messages.isEmpty()) {
         message = (Message) messages.remove(0);
+        message.delete();
         nbMsgsSentToDMQSinceCreation++;
         dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.DELETED_DEST);
       }
@@ -1072,27 +1079,48 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    *
    * @param message  The message to store.
    */
-  protected final synchronized void storeMessage(Message message) {   
-    addMessage(message);
-
-    // Persisting the message.
-    setMsgTxName(message);
-    message.save();
-
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "Message " + message.getIdentifier() + " stored.");
-
+  protected final synchronized void storeMessage(Message message) {
+    if (addMessage(message)) {
+      // Persisting the message.
+      setMsgTxName(message);
+      message.save();
+      message.releaseFullMessage();
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "Message " + message.getIdentifier() + " stored.");
+    }
+  }
+  
+  /**
+   * Actually stores a message header in the deliverables vector.
+   * 
+   * @param message
+   *          The message to store.
+   */
+  protected final synchronized void storeMessageHeader(Message message) {
+    if (addMessage(message)) {
+      // Persisting the message.
+      message.saveHeader();
+      message.releaseFullMessage();
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "Message " + message.getIdentifier() + " stored.");
+    }
   }
 
-  protected final synchronized void addMessage(Message message) {
+  /**
+   * Adds a message in the list of messages to deliver.
+   * 
+   * @param message
+   *          the message to add.
+   * @return true if the message has been added. false if the queue is full.
+   */
+  protected final synchronized boolean addMessage(Message message) {
 
     if (nbMaxMsg > -1 && nbMaxMsg <= messages.size()) {
       DMQManager dmqManager = new DMQManager(dmqId, getId());
       nbMsgsSentToDMQSinceCreation++;
       dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.QUEUE_FULL);
       dmqManager.sendToDMQ();
-      return;
+      return false;
     }
 
     if (messages.isEmpty()) {
@@ -1144,6 +1172,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       }
       messages.insertElementAt(message, i);
     }
+    return true;
   }
 
   /**
