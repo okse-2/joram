@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -89,7 +89,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * its provider-specific address is returned.
    * <p>
    *  The request fails if the target server does not belong to the platform,
-   * or if the destination deployement fails server side.
+   * or if the destination deployment fails server side.
    *
    * @param serverId   The identifier of the server where deploying the queue.
    * @param name       The name of the queue.
@@ -113,8 +113,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
     try {
       MXWrapper.registerMBean(queue, "joramClient", buff.toString());
     } catch (Exception e) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "registerMBean", e);
+      JoramTracing.dbgClient.log(BasicLevel.ERROR, "registerMBean", e);
     }
     return queue;
   }
@@ -123,7 +122,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * Admin method creating and deploying a queue on a given server.
    * <p>
    * The request fails if the target server does not belong to the platform,
-   * or if the destination deployement fails server side.
+   * or if the destination deployment fails server side.
    *
    * @param serverId   The identifier of the server where deploying the queue.
    * @param className  The queue class name.
@@ -141,10 +140,10 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
 
   /**
    * Admin method creating and deploying a queue on a given server.
-   * It creates a Joram's standart queue.
+   * It creates a Joram's standard queue.
    * <p>
    * The request fails if the target server does not belong to the platform,
-   * or if the destination deployement fails server side.
+   * or if the destination deployment fails server side.
    *
    * @param serverId   The identifier of the server where deploying the queue.
    * @param prop       The queue properties.
@@ -164,7 +163,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * case, its provider-specific address is returned.
    * <p>
    * The request fails if the target server does not belong to the platform,
-   * or if the destination deployement fails server side.
+   * or if the destination deployment fails server side.
    *
    * @param serverId  The identifier of the server where deploying the queue.
    * @param name      The queue name. 
@@ -183,7 +182,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * on the given server, if it does not exist it is created. In any case,
    * its provider-specific address is returned.
    * <p>
-   * The request fails if the destination deployement fails server side.
+   * The request fails if the destination deployment fails server side.
    *
    * @param name      The queue name. 
    *
@@ -202,7 +201,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * Admin method creating and deploying a queue on a given server.
    * <p>
    * The request fails if the target server does not belong to the platform,
-   * or if the destination deployement fails server side.
+   * or if the destination deployment fails server side.
    *
    * @param serverId   The identifier of the server where deploying the queue.
    *
@@ -217,7 +216,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
   /**
    * Admin method creating and deploying a queue on the local server. 
    * <p>
-   * The request fails if the destination deployement fails server side.
+   * The request fails if the destination deployment fails server side.
    *
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
