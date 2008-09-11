@@ -24,15 +24,29 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.*;
-import java.util.*;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 import org.objectweb.util.monolog.api.LoggerFactory;
 
-import fr.dyade.aaa.util.*;
-import fr.dyade.aaa.agent.conf.*;
+import fr.dyade.aaa.agent.conf.A3CML;
+import fr.dyade.aaa.agent.conf.A3CMLCluster;
+import fr.dyade.aaa.agent.conf.A3CMLConfig;
+import fr.dyade.aaa.agent.conf.A3CMLDomain;
+import fr.dyade.aaa.agent.conf.A3CMLNat;
+import fr.dyade.aaa.agent.conf.A3CMLNetwork;
+import fr.dyade.aaa.agent.conf.A3CMLProperty;
+import fr.dyade.aaa.agent.conf.A3CMLServer;
+import fr.dyade.aaa.agent.conf.A3CMLService;
+import fr.dyade.aaa.util.Timer;
+import fr.dyade.aaa.util.Transaction;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
@@ -42,9 +56,9 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * {@link Channel <code>Channel</code>},
  * {@link Network <code>Network</code>s}.
  * This class contains the main method for AgentServer, for example to
- * acivate a server you have to run this class with two parameters: the
- * server id. and the path of the root of persistancy. You can also use
- * a specialized main calling methods initi and start.
+ * activate a server you have to run this class with two parameters: the
+ * server id. and the path of the root of persistency. You can also use
+ * a specialized main calling methods init and start.
  * <p><hr>
  * To start the agents server an XML configuration file describing the
  * architecture of the agent platform is needed. By default, this file is 
@@ -70,7 +84,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * <li>A service can be declared on any of these servers by inserting a
  * <code>service</code> element describing it.
  * </ul>
- * <li>Additonnaly, you can define property for the global configuration
+ * <li>Additionally, you can define property for the global configuration
  * or for a particular server, it depends where you define it: in the
  * <code>config</code> element or in a server one.
  * </ul>
@@ -160,7 +174,7 @@ public final class AgentServer {
    * Static reference to the engine. Used in <code>Channel.sendTo</code> to
    * know if the method is called from a react or no.
    * <p><hr>
-   * AF: I think we must supress this dependency in order to be able to run
+   * AF: I think we must suppress this dependency in order to be able to run
    * multiples engine.
    */
   static Engine engine = null;
@@ -248,14 +262,29 @@ public final class AgentServer {
 
   static void removeConsumer(String domain) {
     MessageConsumer cons = (MessageConsumer) consumers.remove(domain);
-    if (cons != null) cons.stop();
-
-    try {
-      MXWrapper.unregisterMBean("AgentServer",
-                                "server=" + getName() + ",cons=" + cons.getName());
-    } catch (Exception exc) {
-      logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
+    if (cons != null) {
+      cons.stop();
+      try {
+        MXWrapper.unregisterMBean("AgentServer", "server=" + getName() + ",cons=" + cons.getName());
+      } catch (Exception exc) {
+        logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
+      }
     }
+  }
+  
+  /**
+   * Timer provided by the agent server.
+   */
+  private static Timer timer;
+
+  /**
+   * Returns a shared timer provided by the agent server.
+   */
+  public static final Timer getTimer() {
+    if (timer == null) {
+      timer = new Timer();
+    }
+    return timer;
   }
 
   /** Static reference to the configuration. */
@@ -588,7 +617,7 @@ public final class AgentServer {
                    "engine [" + engine + "] is not a HAEngine");
     }
 
-    // Search alls directly accessible domains.
+    // Search all directly accessible domains.
     for (Enumeration n = root.networks.elements();
 	 n.hasMoreElements();) {
       A3CMLNetwork network = (A3CMLNetwork) n.nextElement();
@@ -757,7 +786,7 @@ public final class AgentServer {
    * agents may be created and deployed, and notifications may be sent using
    * the <code>Channel</code> <code>sendTo</code> function.
    *
-   * @param args	lauching arguments, the first one is the server id
+   * @param args	launching arguments, the first one is the server id
    *			and the second one the persistency directory.
    * @return		number of arguments consumed in args
    *
@@ -981,7 +1010,7 @@ public final class AgentServer {
       // There are two steps because the configuration step needs the
       // transaction components to be initialized.
       if (transaction != null) {
-        // Try to read the serialiazed configuration (trough transaction)
+        // Try to read the serialized configuration (through transaction)
         try {
           a3config = A3CMLConfig.load();
         } catch (Exception exc) {
@@ -1064,7 +1093,7 @@ public final class AgentServer {
         logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
       }
 
-      // save A3CMLConfig (May be we can omit it in some case).
+      // save A3CMLConfig (Maybe we can omit it in some case).
       a3config.save();
 
       try {
@@ -1330,7 +1359,7 @@ public final class AgentServer {
    * if this method is called from a server's thread it should result a
    * dead-lock.
    *
-   * @param sync	If true the stop is precessed synchronous, otherwise
+   * @param sync	If true the stop is processed synchronously, otherwise
    *			a thread is created and the method returns.
    */
   public static void stop(boolean sync) {
@@ -1344,7 +1373,7 @@ public final class AgentServer {
    * if this method is called from a server's thread it should result a
    * dead-lock.
    *
-   * @param sync	If true the stop is precessed synchronous, otherwise
+   * @param sync	If true the stop is processed synchronously, otherwise
    *			a thread is created and the method returns.
    * @param delay       if sync is false then the thread in charge of
    *                    stopping the server waits this delay before
@@ -1409,6 +1438,10 @@ public final class AgentServer {
     }
 
     try {
+      if (timer != null)
+        timer.cancel();
+      timer = null;
+      
       // If the server is part of an HA group stops the JGroup component
       if (jgroups != null) jgroups.disconnect();
 
