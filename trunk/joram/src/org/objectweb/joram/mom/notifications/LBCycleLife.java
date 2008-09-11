@@ -23,9 +23,8 @@
  */
 package org.objectweb.joram.mom.notifications;
 
-import org.objectweb.joram.mom.notifications.ClientMessages;
 import java.util.Hashtable;
-import java.util.Vector;
+import java.util.List;
 
 public class LBCycleLife extends QueueClusterNot {
 
@@ -66,8 +65,7 @@ public class LBCycleLife extends QueueClusterNot {
    * @param msgId
    * @param visit
    */
-  public void putInVisitTable(String msgId,
-                              Vector visit) {
+  public void putInVisitTable(String msgId, List visit) {
     visitTable.put(msgId,visit);
   }
 
