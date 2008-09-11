@@ -1343,13 +1343,13 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
   /**
    * Method implementing the JMS proxy reaction to an
-   * <code>XACnxCommit</code> request commiting the operations performed
+   * <code>XACnxCommit</code> request committing the operations performed
    * in a given transaction.
    * <p>
    * This method actually processes the objects sent at the prepare phase,
    * and acknowledges the request.
    * 
-   * @exception StateException  If commiting an unknown transaction.
+   * @exception StateException  If committing an unknown transaction.
    */
   private void doReact(XACnxCommit req) throws StateException {
     Xid xid = new Xid(req.getBQ(), req.getFI(), req.getGTI());
@@ -1974,6 +1974,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         // Persisting the message.
         setMsgTxName(message);
         message.save();
+        message.releaseFullMessage();
       }
     } 
 
@@ -1982,7 +1983,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       sub = (ClientSubscription) subsTable.get(subName);
       if (sub == null) continue;
 
-      // If the subscription is active, lauching a delivery sequence.
+      // If the subscription is active, launching a delivery sequence.
       if (sub.getActive()) {
         ConsumerMessages consM = sub.deliver();
         
