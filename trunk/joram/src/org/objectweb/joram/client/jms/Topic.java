@@ -87,7 +87,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * its provider-specific address is returned.
    * <p>
    *  The request fails if the target server does not belong to the platform,
-   * or if the destination deployement fails server side.
+   * or if the destination deployment fails server side.
    *
    * @param serverId   The identifier of the server where deploying the topic.
    * @param name       The name of the topic.
@@ -110,8 +110,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
     try {
       MXWrapper.registerMBean(topic, "joramClient", buff.toString());
     } catch (Exception e) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "registerMBean", e);
+      JoramTracing.dbgClient.log(BasicLevel.ERROR, "registerMBean", e);
     }
     return topic;
   }
@@ -120,7 +119,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * Admin method creating and deploying a topic on a given server.
    * <p>
    * The request fails if the target server does not belong to the platform,
-   * or if the destination deployement fails server side.
+   * or if the destination deployment fails server side.
    *
    * @param serverId   The identifier of the server where deploying the topic.
    * @param className  The topic class name.
@@ -137,10 +136,10 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
 
   /**
    * Admin method creating and deploying a topic on a given server.
-   * It creates a Jorram's standart topic.
+   * It creates a Jorram's standard topic.
    * <p>
    * The request fails if the target server does not belong to the platform,
-   * or if the destination deployement fails server side.
+   * or if the destination deployment fails server side.
    *
    * @param serverId   The identifier of the server where deploying the topic.
    * @param prop       The topic properties.
@@ -159,7 +158,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * case, its provider-specific address is returned.
    * <p>
    * The request fails if the target server does not belong to the platform,
-   * or if the destination deployement fails server side.
+   * or if the destination deployment fails server side.
    *
    * @param serverId  The identifier of the server where deploying the topic.
    * @param name      The topic name. 
@@ -177,7 +176,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * on the given server, if it does not exist it is created. In any case,
    * its provider-specific address is returned.
    * <p>
-   * The request fails if the destination deployement fails server side.
+   * The request fails if the destination deployment fails server side.
    *
    * @param name      The topic name. 
    *
@@ -195,7 +194,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * Admin method creating and deploying a topic on a given server.
    * <p>
    * The request fails if the target server does not belong to the platform,
-   * or if the destination deployement fails server side.
+   * or if the destination deployment fails server side.
    *
    * @param serverId   The identifier of the server where deploying the topic.
    *
@@ -209,7 +208,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
   /**
    * Admin method creating and deploying a topic on the local server. 
    * <p>
-   * The request fails if the destination deployement fails server side.
+   * The request fails if the destination deployment fails server side.
    *
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
@@ -319,7 +318,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * The request fails if one of the topics does not exist or can't be part
    * of a hierarchy.
    *
-   * @param parent
+   * @param parent the topic which will be parent. null to remove previous parent.
    *
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
@@ -327,7 +326,8 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
   public void setParent(Topic parent) throws ConnectException, AdminException {
     if (parent == null)
       unsetParent();
-    AdminModule.doRequest(new SetFather(parent.getName(), agentId));
+    else
+      AdminModule.doRequest(new SetFather(parent.getName(), agentId));
   }
 
   /**
