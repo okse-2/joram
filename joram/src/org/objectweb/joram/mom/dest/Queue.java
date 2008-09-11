@@ -41,19 +41,15 @@ import org.objectweb.joram.mom.notifications.ReceiveRequest;
 import org.objectweb.joram.mom.notifications.SetNbMaxMsgRequest;
 import org.objectweb.joram.mom.notifications.SetThreshRequest;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
-import org.objectweb.joram.mom.proxies.ConnectionManager;
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.BagSerializer;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.ExpiredNot;
 import fr.dyade.aaa.agent.Notification;
-import fr.dyade.aaa.util.Timer;
-import fr.dyade.aaa.util.TimerTask;
+import fr.dyade.aaa.agent.WakeUpTask;
 
 /**
  * A <code>Queue</code> agent is an agent hosting a MOM queue, and which
@@ -86,7 +82,7 @@ public class Queue extends Destination implements BagSerializer {
     return new QueueImpl(adminId, prop);
   }
 
-  private transient Task task;
+  private transient WakeUpTask task;
 
   /**
    * Gives this agent an opportunity to initialize after having been deployed,
@@ -99,8 +95,8 @@ public class Queue extends Destination implements BagSerializer {
    */
   protected void agentInitialize(boolean firstTime) throws Exception {
     super.agentInitialize(firstTime);
-    task = new Task(getId());
-    task.schedule();
+    task = new WakeUpTask(getId(), WakeUpNot.class);
+    task.schedule(((QueueImpl) destImpl).getPeriod());
   }
   
   /**
@@ -138,8 +134,8 @@ public class Queue extends Destination implements BagSerializer {
 //        ((QueueImpl)destImpl).destinationAdminRequestNot(from, (DestinationAdminRequestNot) not);
       else if (not instanceof WakeUpNot) {
         if (task == null)
-          task = new Task(getId());
-        task.schedule();
+          task = new WakeUpTask(getId(), WakeUpNot.class);
+        task.schedule(((QueueImpl) destImpl).getPeriod());
         ((QueueImpl)destImpl).wakeUpNot((WakeUpNot) not);
       }else
         super.react(from, not);
@@ -164,37 +160,5 @@ public class Queue extends Destination implements BagSerializer {
   public void writeBag(ObjectOutputStream out)
     throws IOException {
     ((QueueImpl) destImpl).writeBag(out);
-  }
-
-  private class Task extends TimerTask {
-    private AgentId to;
-
-    private Task(AgentId to) {
-      this.to = to;
-    }
-
-    /** Method called when the timer expires. */
-    public void run() {
-      try {
-        Channel.sendTo(to, new WakeUpNot());
-      } catch (Exception e) {}
-    }
-
-    public void schedule() {
-      long period = ((QueueImpl) destImpl).getPeriod();
-      if (period != -1) {
-        try {
-          Timer timer = ConnectionManager.getTimer();
-          timer.schedule(this, period);
-        } catch (Exception exc) {
-          if( (!AgentServer.isHAServer()) ||
-              (AgentServer.isHAServer() && AgentServer.isMasterHAServer()) ){
-            if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-              JoramTracing.dbgDestination.log(BasicLevel.WARN,
-                                              "--- " + this + " Queue(...)", exc);
-          }
-        }
-      }
-    }
   }
 }
