@@ -126,6 +126,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   
   /** the number of erroneous messages forwarded to the DMQ */
   protected long nbMsgsSentToDMQSinceCreation = 0;
+  
+  /** the number of delivered messages */
+  protected long nbMsgsDeliveredSinceCreation = 0;
 
   /**
    * Constructs a <code>ClientSubscription</code> instance.
@@ -153,8 +156,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
                      boolean noLocal,
                      AgentId dmqId,
                      Integer threshold,
-                     Hashtable messagesTable)
-  {
+                     Hashtable messagesTable) {
     this.proxyId = proxyId;
     this.contextId = contextId;
     this.subRequestId = reqId;
@@ -207,51 +209,47 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
 //      return buff.toString();
 //    }
 
-  public String toString()
-  {
+  public String toString() {
     return "ClientSubscription" + proxyId + name;
   }
 
-
   /** Returns the subscription's context identifier. */
-  public int getContextId()
-  {
+  public int getContextId() {
     return contextId;
   }
 
   /** Returns the identifier of the subscribing request. */
-  public int getSubRequestId()
-  {
+  public int getSubRequestId() {
     return subRequestId;
   }
 
   /** Returns the name of the subscription. */
-  public String getName()
-  {
+  public String getName() {
     return name;
   }
 
   /** Returns the identifier of the subscription topic. */
-  public AgentId getTopicId()
-  {
+  public AgentId getTopicId() {
     return topicId;
+  }
+  
+  /** Returns the identifier of the subscription topic. */
+  public String getTopicIdAsString() {
+    return topicId.toString();
   }
 
   /** Returns the selector. */
-  public String getSelector()
-  {
+  public String getSelector() {
     return selector;
   }
 
   /** Returns <code>true</code> if the subscription is durable. */
-  public boolean getDurable()
-  {
+  public boolean getDurable() {
     return durable;
   }
 
   /** Returns <code>true</code> if the subscription is active. */
-  public boolean getActive()
-  {
+  public boolean getActive() {
     return active;
   }
 
@@ -309,8 +307,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    */
   void reinitialize(Hashtable messagesTable,
                     Vector persistedMessages,
-                    boolean denyDeliveredMessages)
-  {
+                    boolean denyDeliveredMessages) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "ClientSubscription[" + this + "].reinitialize()");
     
@@ -366,8 +363,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
                   int reqId,
                   AgentId topicId,
                   String selector,
-                  boolean noLocal)
-  {
+                  boolean noLocal) {
     this.contextId = contextId;
     this.subRequestId = reqId;
     this.topicId = topicId;
@@ -387,7 +383,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
       logger.log(BasicLevel.DEBUG, this + ": reactivated.");
   }
 
-  /** De-activates the subscription, denies the non acknowledgded messages. */  
+  /** De-activates the subscription, denies the non acknowledged messages. */  
   void deactivate() {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "ClientSubscription.deactivate()");
@@ -416,8 +412,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    *
    * @param requestId  Identifier of the listener request.
    */   
-  void setListener(int requestId)
-  {
+  void setListener(int requestId) {
     this.requestId = requestId;
     toListener = true;
 
@@ -426,8 +421,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   }
 
   /** Unsets the listener. */
-  void unsetListener()
-  {
+  void unsetListener() {
     requestId = -1;
     toListener = false;
 
@@ -465,15 +459,13 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   }
 
   /** Sets the subscription's dead message queue identifier. */
-  void setDMQId(AgentId dmqId)
-  {
+  void setDMQId(AgentId dmqId) {
     this.dmqId = dmqId;
     save();
   }
 
   /** Sets the subscription's threshold value. */
-  void setThreshold(Integer threshold)
-  {
+  void setThreshold(Integer threshold) {
     this.threshold = threshold;
     save();
   }
@@ -513,7 +505,6 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
 
         // It's the first delivery, adds the message to the proxy's table
         if (message.acksCounter == 0)
-
           messagesTable.put(msgId, message);
         
         message.acksCounter++;
@@ -604,7 +595,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
               }
             }
             lastPrior = message.getPriority();
-            deliverables.insertElementAt(message.getFullMessage().clone(), insertionIndex);
+            deliverables.add(insertionIndex, message.getFullMessage().clone());
 
             if (logger.isLoggable(BasicLevel.DEBUG))
               logger.log(BasicLevel.DEBUG, this + ": message " + id + " added for delivery.");
@@ -681,6 +672,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
             if (dmqManager == null) {
               dmqManager = new DMQManager(dmqId, null);
             }
+            nbMsgsSentToDMQSinceCreation++;
             dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.EXPIRED);
           }
         } else {
@@ -724,6 +716,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
 
     // Finally, returning the reply or null:
     if (! deliverables.isEmpty()) {
+      nbMsgsDeliveredSinceCreation += deliverables.size();
       ConsumerMessages consM = new ConsumerMessages(requestId,
                                                     deliverables,
                                                     name,
@@ -756,15 +749,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     
     // Message may be null if it is not valid anymore
     if (msg != null) {
-      msg.acksCounter--;
-      if (msg.acksCounter == 0)
-        messagesTable.remove(id);
-      if (durable) {
-        msg.durableAcksCounter--;
-        
-        if (msg.durableAcksCounter == 0)
-          msg.delete();
-      }
+      decrAckCounters(id, msg);
     }
   }
 
@@ -816,16 +801,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
           dmqManager = new DMQManager(dmqId, null);
         nbMsgsSentToDMQSinceCreation++;
         dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.UNDELIVERABLE);
-        
-        message.acksCounter--;
-        if (message.acksCounter == 0)
-          messagesTable.remove(id);
-        
-        if (durable) {
-          message.durableAcksCounter--;
-          if (message.durableAcksCounter == 0)
-            message.delete();
-        }
+        decrAckCounters(id, message);
       } else {
         // Else, putting it back to the deliverables vector according to its
         // original delivery order, and adding a new entry for it in the
@@ -895,6 +871,10 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     return nbMsgsSentToDMQSinceCreation;
   }
 
+  public long getNbMsgsDeliveredSinceCreation() {
+    return nbMsgsDeliveredSinceCreation;
+  }
+
   public TabularData getMessagesTabularData() throws Exception {
     return MessageJMXWrapper.createTabularDataSupport(messagesTable.elements());
   }
@@ -952,16 +932,20 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   Message removeMessage(String msgId) {
     Message message = (Message) messagesTable.get(msgId);
     if (message != null) {
-      message.acksCounter--;
-      if (message.acksCounter == 0)
-        messagesTable.remove(msgId);
-      if (durable) {
-        message.durableAcksCounter--;
-        if (message.durableAcksCounter == 0)
-          message.delete();
-      }
+      decrAckCounters(msgId, message);
     }
     return message;
+  }
+
+  private void decrAckCounters(String msgId, Message message) {
+    message.acksCounter--;
+    if (message.acksCounter == 0)
+      messagesTable.remove(msgId);
+    if (durable) {
+      message.durableAcksCounter--;
+      if (message.durableAcksCounter == 0)
+        message.delete();
+    }
   }
   
   private void save() {

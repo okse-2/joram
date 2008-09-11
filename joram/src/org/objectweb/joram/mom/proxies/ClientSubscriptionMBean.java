@@ -2,8 +2,6 @@ package org.objectweb.joram.mom.proxies;
 
 import javax.management.openmbean.TabularData;
 
-import fr.dyade.aaa.agent.AgentId;
-
 public interface ClientSubscriptionMBean {
 
   /**
@@ -47,7 +45,7 @@ public interface ClientSubscriptionMBean {
   /**
    * Returns the identifier of the subscription topic.
    */
-  public AgentId getTopicId();
+  public String getTopicIdAsString();
 
   /**
    * Returns the selector.
@@ -94,14 +92,22 @@ public interface ClientSubscriptionMBean {
    * @return the number of erroneous messages forwarded to the DMQ.
    */
   public long getNbMsgsSentToDMQSinceCreation();
-  
+
+  /**
+   * Returns the number of messages delivered to the client since creation time
+   * of this subscription.
+   * 
+   * @return the number of delivered messages.
+   */
+  public long getNbMsgsDeliveredSinceCreation();
+
   /**
    * Returns the description of a particular pending message. The message is
    * pointed out through its unique identifier. The description includes the
    * type and priority of the message.
    * 
    * @param msgId
-   *            The unique message's identifier.
+   *          The unique message's identifier.
    * @return the description of the message.
    */
   public TabularData getMessagesTabularData() throws Exception;
