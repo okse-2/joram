@@ -23,9 +23,11 @@ package com.scalagent.jmx;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.Set;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
+import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
@@ -115,4 +117,17 @@ public class JMXServer implements MXServer, Serializable {
       throw exc;
     }
   }
+  
+  public Object getAttribute(ObjectName objectName, String attribute) throws Exception {
+    return mxserver.getAttribute(objectName, attribute);
+  }
+  
+  public MBeanAttributeInfo[] getAttributes(ObjectName objectName) throws Exception {
+    return mxserver.getMBeanInfo(objectName).getAttributes();
+  }
+  
+  public Set queryNames(ObjectName objectName) {
+    return mxserver.queryNames(objectName, null);
+  }
+  
 }
