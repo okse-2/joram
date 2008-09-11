@@ -22,18 +22,18 @@
  */
 package org.objectweb.joram.mom.proxies;
 
-import fr.dyade.aaa.agent.*;
+import java.util.Hashtable;
+import java.util.StringTokenizer;
 
+import org.objectweb.joram.mom.dest.AdminTopic;
 import org.objectweb.joram.shared.JoramTracing;
-import org.objectweb.joram.mom.dest.*;
-import org.objectweb.joram.mom.proxies.AdminNotification;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.JmsRequestGroup;
 import org.objectweb.joram.shared.client.ProducerMessages;
-
 import org.objectweb.util.monolog.api.BasicLevel;
 
-import java.util.*;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Channel;
 
 /**
  * A <code>ConnectionManager</code> is started as a service in each
@@ -95,23 +95,8 @@ public class ConnectionManager {
   public static int inFlow = -1;
 
   /**
-   * Timer provided by the connection manager.
-   */
-  private static fr.dyade.aaa.util.Timer timer;
-
-  /**
-   * Returns the timer provided by the connection manager.
-   */
-  public final static fr.dyade.aaa.util.Timer getTimer() {
-    if (timer == null) {
-      timer = new fr.dyade.aaa.util.Timer();
-    }
-    return timer;
-  }
-
-  /**
    * Initializes the connection manager as a service.
-   * Creates and deploys the aministration topic, the connection manager
+   * Creates and deploys the administration topic, the connection manager
    * agent and if requested the  administration user proxy.
    *
    * @param args name and password of the administrator (optional).
@@ -171,9 +156,5 @@ public class ConnectionManager {
   public static void stopService() {
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "ConnectionManager.stop()");
-
-    if (timer != null)
-      timer.cancel();
-    timer = null;
   }
 }
