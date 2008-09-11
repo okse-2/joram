@@ -43,10 +43,11 @@ import fr.dyade.aaa.util.Transaction;
  * The <code>Message</code> class actually provides the transport facility
  * for the data exchanged during MOM operations.
  * <p>
- * A message content is always wrapped as a bytes array, it is charaterized
+ * A message content is always wrapped as a bytes array, it is characterized
  * by properties and "header" fields.
  */
 public final class Message implements Serializable {
+  
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
@@ -58,15 +59,16 @@ public final class Message implements Serializable {
    * subscribers before having been fully consumed by them (field used
    * by JMS proxies).
    * Be careful, this field is not saved but set to 0 during message
-   * loading then claculated during the proxy initialisation.
+   * loading then calculated during the proxy initialization.
    */
   public transient int acksCounter;
+  
   /**
    * The number of acknowledgements a message still expects from its 
    * durable subscribers before having been fully consumed by them (field used
    * by JMS proxies).
    * Be careful, this field is not saved but set to 0 during message
-   * loading then claculated during the proxy initialisation.
+   * loading then calculated during the proxy initialization.
    */
   public transient int durableAcksCounter;
 
@@ -74,36 +76,38 @@ public final class Message implements Serializable {
    * Reference to the MOM message.
    */
   private transient org.objectweb.joram.shared.messages.Message msg;
-  /**
-   * SoftReference to the body of the MOM message.
-   */
-  private transient SoftReference body = null;
-  /** <code>true</code> if the body is empty. */
-  private transient boolean nobody;
   
+  /** SoftReference to the body of the MOM message. */
+  private transient SoftReference bodySoftRef = null;
+  
+  /** <code>true</code> if soft reference is used for the message. */
+  private transient boolean soft;
+
+  private static final boolean globalUseSoftRef = Boolean.parseBoolean(AgentServer
+      .getProperty("org.objectweb.joram.mom.messages.SWAPALLOWED"));
+
   /**
    * Constructs a <code>Message</code> instance.
    */
   public Message(org.objectweb.joram.shared.messages.Message msg) {
-    this(msg, false);
+    this.msg = msg;
+    // Soft reference can be used only if message is persistent and has a body.
+    Boolean msgUseSoftRef = (Boolean) msg.getProperty("JMS_JORAM_SWAPALLOWED");
+    if (msgUseSoftRef != null) {
+      this.soft = msgUseSoftRef.booleanValue() && msg.persistent && msg.body != null;
+    } else {
+      this.soft = globalUseSoftRef && msg.persistent && msg.body != null;
+    }
   }
   
-  /**
-   * Constructs a <code>Message</code> instance with .
-   */
-  public Message(org.objectweb.joram.shared.messages.Message msg, boolean soft) {
-    this.msg = msg;
-    nobody = (msg.body == null);
-    if (soft & !nobody)
-      body = new SoftReference(msg.body);
-  }
-
   /**
    * Returns the contained message eventually without the body.
    * 
    * @return The contained message.
    */
   public org.objectweb.joram.shared.messages.Message getHeaderMessage() {
+    if (JoramTracing.dbgMessage.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgMessage.log(BasicLevel.DEBUG, "MessagePersistenceModule.getHeaderMessage()" + msg);
   	return msg;
   }
 
@@ -114,18 +118,42 @@ public final class Message implements Serializable {
    * @return The contained message.
    */
   public org.objectweb.joram.shared.messages.Message getFullMessage() {
-    // AF: be careful if the message has no body
-    if (msg.body != null)
+    if (JoramTracing.dbgMessage.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgMessage.log(BasicLevel.DEBUG, "MessagePersistenceModule.getFullMessage() " + txname);
+    // The message can be soft but releaseFullMessage has not been called !
+    if (!soft || msg.body != null)
       return msg;
 
-    if (body != null)
-      msg.body = (byte[]) body.get();
-
-    if (msg.body != null) {
-      // Try lo load the body from repository
+    if (bodySoftRef != null) {
+      msg.body = (byte[]) bodySoftRef.get();
+      bodySoftRef = null;
+      if (msg.body != null) {
+        return msg;
+      }
     }
     
-  	return msg;
+    // Try to load the body from repository
+    try {
+      msg.body = AgentServer.getTransaction().loadByteArray(txname + "B");
+      if (JoramTracing.dbgMessage.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgMessage.log(BasicLevel.DEBUG, "Loaded body: " + msg.body);
+      bodySoftRef = null;
+    } catch (Exception exc) {
+      JoramTracing.dbgMessage.log(BasicLevel.ERROR, "Body of message named [" + txname
+          + "] could not be loaded", exc);
+    }
+    return msg;
+  }
+
+  /**
+   * Creates a soft reference instead of a hard one linking to the body of the
+   * contained message. The message must have been saved previously.
+   */
+  public void releaseFullMessage() {
+    if (soft) {
+      bodySoftRef = new SoftReference(msg.body);
+      msg.body = null;
+    }
   }
   
   /** Returns the message type. */
@@ -144,7 +172,7 @@ public final class Message implements Serializable {
   }
 
   /** Returns <code>true</code> if the message is persistent. */
-  public boolean getPersistent() {
+  public boolean isPersistent() {
     return msg.persistent;
   }
 
@@ -252,7 +280,7 @@ public final class Message implements Serializable {
 
 //   /**
 //    * Sets an object as the body of the message. 
-//    * AF: Used to wrap addministration message !!
+//    * AF: Used to wrap administration message !!
 //    *
 //    * @exception IOException  In case of an error while setting the object.
 //    */
@@ -274,7 +302,7 @@ public final class Message implements Serializable {
 
 //   /**
 //    * Returns the object body of the message.
-//    * AF: Used to wrap addministration message !!
+//    * AF: Used to wrap administration message !!
 //    *
 //    * @exception IOException  In case of an error while getting the object.
 //    * @exception ClassNotFoundException  If the object class is unknown.
@@ -316,34 +344,73 @@ public final class Message implements Serializable {
     if (JoramTracing.dbgMessage.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgMessage.log(BasicLevel.DEBUG,
                                   "Message.load:" + txname);
-
     Message msg = (Message) AgentServer.getTransaction().load(txname);
     msg.txname = txname;
-
     return msg;
   }
 
   public void save() {
     if (JoramTracing.dbgMessage.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgMessage.log(BasicLevel.DEBUG,
-                                  "Message.save:" + txname);
+      JoramTracing.dbgMessage.log(BasicLevel.DEBUG, "Message.save:" + txname);
 
-    if (! getPersistent()) return;
-    try {
-      AgentServer.getTransaction().save(this, txname);
-    } catch (IOException exc) {
-      JoramTracing.dbgMessage.log(BasicLevel.ERROR,
-                                  "Message named [" + txname + "] could not be saved", exc);
+    if (!isPersistent())
+      return;
+    if (soft) {
+      byte[] body = msg.body;
+      // sets the body to null to save it in an other file
+      msg.body = null;
+      try {
+        AgentServer.getTransaction().save(this, txname);
+      } catch (IOException exc) {
+        JoramTracing.dbgMessage.log(BasicLevel.ERROR, "Message named [" + txname + "] could not be saved", exc);
+      }
+      // save the body
+      try {
+        AgentServer.getTransaction().saveByteArray(body, txname + "B");
+      } catch (IOException exc) {
+        JoramTracing.dbgMessage.log(BasicLevel.ERROR, "Message named [" + txname + "] could not be saved", exc);
+      }
+      msg.body = body;
+    } else {
+      try {
+        AgentServer.getTransaction().save(this, txname);
+      } catch (IOException exc) {
+        JoramTracing.dbgMessage.log(BasicLevel.ERROR, "Message named [" + txname + "] could not be saved", exc);
+      }
+    }
+  }
+  
+  public void saveHeader() {
+    if (JoramTracing.dbgMessage.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgMessage.log(BasicLevel.DEBUG, "Message.saveHeader:" + txname);
+
+    if (!isPersistent())
+      return;
+    if (soft) {
+      byte[] body = msg.body;
+      // sets the body to null to not save it
+      msg.body = null;
+      try {
+        AgentServer.getTransaction().save(this, txname);
+      } catch (IOException exc) {
+        JoramTracing.dbgMessage.log(BasicLevel.ERROR, "Message named [" + txname + "] could not be saved", exc);
+      }
+      msg.body = body;
+    } else {
+      save();
     }
   }
 
   public void delete() {
     if (JoramTracing.dbgMessage.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgMessage.log(BasicLevel.DEBUG,
-                                  "Message.delete:" + txname);
+      JoramTracing.dbgMessage.log(BasicLevel.DEBUG, "Message.delete:" + txname);
 
-    if (! getPersistent()) return;
+    if (!isPersistent())
+      return;
     AgentServer.getTransaction().delete(txname);
+    if (soft) {
+      AgentServer.getTransaction().delete(txname + "B");
+    }
   }
 
   /** Loads all persisted messages. */
@@ -360,17 +427,19 @@ public final class Message implements Serializable {
 
     // Retrieving the messages individually persisted.
     for (int i = 0; i < names.length; i++) {
-      try {
-        Message msg = (Message) tx.load(names[i]);
-        msg.txname = names[i];
-
-        if (JoramTracing.dbgMessage.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgMessage.log(BasicLevel.DEBUG,
-                                      "loadAll: names[" + i + "] = " + msg);
-        messages.add(msg);
-      } catch (Exception exc) {
-        JoramTracing.dbgMessage.log(BasicLevel.ERROR,
-                                    "Message named [" + names[i] + "] could not be loaded", exc);
+      if (names[i].charAt(names[i].length() - 1) != 'B') {
+        try {
+          Message msg = (Message) tx.load(names[i]);
+          msg.txname = names[i];
+  
+          if (JoramTracing.dbgMessage.isLoggable(BasicLevel.DEBUG))
+            JoramTracing.dbgMessage.log(BasicLevel.DEBUG,
+                                        "loadAll: names[" + i + "] = " + msg);
+          messages.add(msg);
+        } catch (Exception exc) {
+          JoramTracing.dbgMessage.log(BasicLevel.ERROR,
+                                      "Message named [" + names[i] + "] could not be loaded", exc);
+        }
       }
     }
     return messages;
@@ -390,28 +459,25 @@ public final class Message implements Serializable {
     // Deleting the message.
     for (int i = 0; i < names.length; i++) {
       tx.delete(names[i]);
+      tx.delete(names[i] + "B");
     }
   }
 
-  /** ***** ***** ***** ***** ***** ***** ***** *****
+  /* ***** ***** ***** ***** ***** ***** ***** *****
    * Serializable interface
    * ***** ***** ***** ***** ***** ***** ***** ***** */
-
-  public final static int SIZE = Integer.MAX_VALUE;
-
   private void writeObject(ObjectOutputStream out) throws IOException {
     out.writeLong(order);
+    out.writeBoolean(soft);
+    
     msg.writeHeaderTo(out);
-    if ((msg.body != null) && (msg.body.length > SIZE)) {
-      StreamUtil.writeTo((byte[]) null, out);
-    } else {
-      StreamUtil.writeTo(msg.body, out);
-    }
+    StreamUtil.writeTo(msg.body, out);
   }
 
   private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
     order = in.readLong();
-
+    soft = in.readBoolean();
+    
     acksCounter = 0;
     durableAcksCounter = 0;
 
