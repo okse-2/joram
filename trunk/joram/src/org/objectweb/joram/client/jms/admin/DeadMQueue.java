@@ -80,8 +80,7 @@ public class DeadMQueue extends Queue {
     try {
       MXWrapper.registerMBean(dmq, "joramClient", buff.toString());
     } catch (Exception e) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "registerMBean", e);
+      JoramTracing.dbgClient.log(BasicLevel.ERROR, "registerMBean", e);
     }
     return dmq;
   }
