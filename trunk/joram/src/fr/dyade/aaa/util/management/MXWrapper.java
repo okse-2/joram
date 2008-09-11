@@ -18,7 +18,13 @@
  */
 package fr.dyade.aaa.util.management;
 
+import java.util.Set;
+
+import javax.management.MBeanAttributeInfo;
+import javax.management.ObjectName;
+
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.Debug;
 
@@ -31,9 +37,12 @@ public final class MXWrapper {
   public final static String ServerImpl = "MXServer";
 
   public static MXServer mxserver = null;
+  
+  private static Logger logger = Debug.getLogger("fr.dyade.aaa.util.management");
 
   public static void init() {
-    if (mxserver != null) return;
+    if (mxserver != null)
+      return;
 
     String mxname = System.getProperty(ServerImpl);
 
@@ -44,31 +53,28 @@ public final class MXWrapper {
       if ((mxname != null) && (mxname.length() > 0))
         Class.forName(mxname).newInstance();
     } catch (Exception exc) {
-      Debug.getLogger("fr.dyade.aaa.util.management").log(
-        BasicLevel.ERROR, "can't instantiate MXServer: " + mxname, exc);
+      logger.log(BasicLevel.ERROR, "can't instantiate MXServer: " + mxname, exc);
     }
 
-    Debug.getLogger("fr.dyade.aaa.util.management").log(
-      BasicLevel.INFO, "MXWrapper.ServerImpl -> " + mxname);
+    if (logger.isLoggable(BasicLevel.INFO))
+      logger.log(BasicLevel.INFO, "MXWrapper.ServerImpl -> " + mxname);
   }
 
-  public static void registerMBean(Object bean,
-                                   String domain,
-                                   String name) throws Exception {
-    if (mxserver == null) return;
+  public static void registerMBean(Object bean, String domain, String name) throws Exception {
+    if (mxserver == null)
+      return;
 
-    Debug.getLogger("fr.dyade.aaa.util.management").log(
-      BasicLevel.INFO, "registerMBean: " + name + " -> " + mxserver);
+    if (logger.isLoggable(BasicLevel.INFO))
+      logger.log(BasicLevel.INFO, "registerMBean: " + name + " -> " + mxserver);
 
     mxserver.registerMBean(bean, domain, name);
   }
 
-  public static void unregisterMBean(String domain, 
-                                     String name) throws Exception {
+  public static void unregisterMBean(String domain, String name) throws Exception {
     if (mxserver == null) return;
 
-    Debug.getLogger("fr.dyade.aaa.util.management").log(
-      BasicLevel.INFO, "unregisterMBean: " + name + " -> " + mxserver);
+    if (logger.isLoggable(BasicLevel.INFO))
+    logger.log(BasicLevel.INFO, "unregisterMBean: " + name + " -> " + mxserver);
 
     mxserver.unregisterMBean(domain, name);
   }
@@ -77,8 +83,8 @@ public final class MXWrapper {
     if (mxserver == null)
       return;
 
-    Debug.getLogger("fr.dyade.aaa.util.management").log(BasicLevel.INFO,
-        "registerMBean: " + fullName + " -> " + mxserver);
+    if (logger.isLoggable(BasicLevel.INFO))
+      logger.log(BasicLevel.INFO, "registerMBean: " + fullName + " -> " + mxserver);
 
     mxserver.registerMBean(bean, fullName);
   }
@@ -87,16 +93,15 @@ public final class MXWrapper {
     if (mxserver == null)
       return;
 
-    Debug.getLogger("fr.dyade.aaa.util.management").log(BasicLevel.INFO,
-        "unregisterMBean: " + fullName + " -> " + mxserver);
-
+    if (logger.isLoggable(BasicLevel.INFO))
+      logger.log(BasicLevel.INFO, "unregisterMBean: " + fullName + " -> " + mxserver);
     
     mxserver.unregisterMBean(fullName);
   }
 
   public static void setMXServer(MXServer server) {
-    Debug.getLogger("fr.dyade.aaa.util.management").log(
-      BasicLevel.INFO, "setMXServer: " + server);
+    if (logger.isLoggable(BasicLevel.INFO))
+      logger.log(BasicLevel.INFO, "setMXServer: " + server);
 
     mxserver = server;
   }
@@ -104,4 +109,29 @@ public final class MXWrapper {
   public static MXServer getMXServer() {
     return mxserver;
   }
+  
+  public static Object getAttribute(ObjectName objectName, String attribute) {
+    try {
+      return mxserver.getAttribute(objectName, attribute);
+    } catch (Exception exc) {
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN, " getAttribute " + attribute + " on " + objectName + " error.", exc);
+    }
+    return null;
+  }
+  
+  public static MBeanAttributeInfo[] getAttributes(ObjectName objectName) {
+    try {
+      return mxserver.getAttributes(objectName);
+    } catch (Exception exc) {
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.ERROR, " getAttributes  on " + objectName + " error.", exc);
+    }
+    return new MBeanAttributeInfo[0];
+  }
+  
+  public static Set queryNames(ObjectName objectName) {
+      return mxserver.queryNames(objectName);
+  }
+  
 }

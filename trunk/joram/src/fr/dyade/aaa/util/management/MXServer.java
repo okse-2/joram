@@ -18,6 +18,11 @@
  */
 package fr.dyade.aaa.util.management;
 
+import java.util.Set;
+
+import javax.management.MBeanAttributeInfo;
+import javax.management.ObjectName;
+
 public interface MXServer {
   public void registerMBean(Object bean, String domain, String name) throws Exception;
 
@@ -26,4 +31,11 @@ public interface MXServer {
   public void registerMBean(Object bean, String fullName) throws Exception;
 
   public void unregisterMBean(String fullName) throws Exception;
+  
+  public Object getAttribute(ObjectName objectName, String attribute) throws Exception;
+  
+  public MBeanAttributeInfo[] getAttributes(ObjectName objectName) throws Exception;
+  
+  public Set queryNames(ObjectName objectName);
+  
 }
