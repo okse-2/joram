@@ -1,7 +1,23 @@
 +==============================================================================
+| 2008/09/11 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ - New MonitoringTopic: a special topic used to monitor any parameter accessible
+ with JMX.
+ - SoftReference can be used for messages waiting on the JORAM server using
+ org.objectweb.joram.mom.messages.SWAPALLOWED property.
+ - Bug fix: Message blocked in one queue of a cluster queue after visiting
+ others.
+ - Bug fix: nbMaxCnx now adjust dynamically to the number of servers in
+ PoolNetwork if not fixed.
+ - Various bug fixes.
++==============================================================================
 | 2008/09/10 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Bug fix in PoolNetwork: avoid deadlock with low value of flow-control.
++==============================================================================
+| 2008/09/03 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: Restarting of the UDPNetwork error.
 +==============================================================================
 | 2008/08/29 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
@@ -66,7 +82,7 @@ attributes in Joram JMS Session.
 +==============================================================================
 | 2008/04/14 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
-1. Joram adminsitration:
+1. Joram administration:
    - Remove static public access to AdminTopicImpl object.
    - Change way to retrieve AdminTopic id.
 2. NTransaction:
