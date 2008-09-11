@@ -31,8 +31,6 @@ import org.objectweb.joram.mom.notifications.LBCycleLife;
 import org.objectweb.joram.mom.notifications.LBMessageGive;
 import org.objectweb.joram.mom.notifications.LBMessageHope;
 import org.objectweb.joram.mom.notifications.LeaveQueueCluster;
-import org.objectweb.joram.mom.notifications.ReceiveRequest;
-import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -84,19 +82,13 @@ public class ClusterQueue extends Queue {
       ((ClusterQueueImpl) destImpl).joinQueueCluster((JoinQueueCluster) not);
     else if (not instanceof LeaveQueueCluster)
       ((ClusterQueueImpl) destImpl).removeQueueCluster(((LeaveQueueCluster) not).removeQueue);
-    else if (not instanceof ReceiveRequest) {
-      super.react(from, not);
-      ((ClusterQueueImpl) destImpl).receiveRequest((ReceiveRequest) not);
-    } else if (not instanceof LBMessageGive)
+    else if (not instanceof LBMessageGive)
       ((ClusterQueueImpl) destImpl).lBMessageGive(from, (LBMessageGive) not);
     else if (not instanceof LBMessageHope)
       ((ClusterQueueImpl) destImpl).lBMessageHope(from, (LBMessageHope) not);
     else if (not instanceof LBCycleLife)
       ((ClusterQueueImpl) destImpl).lBCycleLife(from, (LBCycleLife) not);
-    else if (not instanceof WakeUpNot) {
-      super.react(from, not);
-      ((ClusterQueueImpl) destImpl).wakeUpNot((WakeUpNot) not);
-    } else {
+    else {
       super.react(from, not);
     }
   }
