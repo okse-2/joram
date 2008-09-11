@@ -49,6 +49,7 @@
     <ant dir="." antfile="build.xml" target="tests.dmq"/>
     <ant dir="." antfile="build.xml" target="tests.ttl"/>
     <ant dir="." antfile="build.xml" target="tests.sub"/>
+    <ant dir="." antfile="build.xml" target="tests.monitoring"/>
   </target>
 
   <target name="tests.messages"
@@ -342,8 +343,15 @@ description=" --> launch all exceptionlistener tests">
   </target>
 
   <target name="tests.sub"
-          description=" --> lauch all sub tests">
+          description=" --> launch all sub tests">
     <ant dir="." antfile="build.xml" target="sub.Sub"/>
+  </target>
+  
+  <target name="tests.monitoring"
+          description=" --> launch all monitoring tests">
+    <ant dir="." antfile="build.xml" target="monit.Test"/>
+    <ant dir="." antfile="build.xml" target="monit.Test2"/>
+  	<ant dir="." antfile="build.xml" target="monit.Test3"/>
   </target>
 
   <!--
@@ -2748,6 +2756,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> check send message on delete topic thrown an exception if there are one server launch">
     <ant dir="." antfile="build.xml" target="test11a.noreg"/>
     <ant dir="." antfile="build.xml" target="test11b.noreg"/>
+    <ant dir="." antfile="build.xml" target="test11c.noreg"/>
   </target>
 
 
@@ -2759,6 +2768,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="noreg.Test11-a"/>
     </antcall>
   </target>
   <target name="test11b.noreg" depends="init.a3props,compile">
@@ -2768,8 +2778,19 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers3.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
       <param name="jvmargs" value="-Dsid=1"/>
+      <param name="testid" value="noreg.Test11-b"/>
+    </antcall>
+  </target>
+  <target name="test11c.noreg" depends="init.a3props,compile">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.noreg.Test11"/>
+      <param name="jndiconf" value="noreg/jndi.properties"/>
+      <param name="a3conf" value="noreg/a3servers3.xml"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jvmargs" value="-Dasync=true"/>
+      <param name="testid" value="noreg.Test11-c"/>
     </antcall>
   </target>
 
@@ -2777,6 +2798,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> check send message on delete queue thrown an exception if there are one server launch">
     <ant dir="." antfile="build.xml" target="test12a.noreg"/>
     <ant dir="." antfile="build.xml" target="test12b.noreg"/>
+    <ant dir="." antfile="build.xml" target="test12c.noreg"/>
   </target>
 
 
@@ -2788,6 +2810,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="noreg.Test12-a"/>
     </antcall>
   </target>
   <target name="test12b.noreg" depends="init.a3props,compile">
@@ -2797,8 +2820,19 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers3.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
       <param name="jvmargs" value="-Dsid=1"/>
+      <param name="testid" value="noreg.Test12-b"/>
+    </antcall>
+  </target>
+  <target name="test12c.noreg" depends="init.a3props,compile">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.noreg.Test12"/>
+      <param name="jndiconf" value="noreg/jndi.properties"/>
+      <param name="a3conf" value="noreg/a3servers3.xml"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jvmargs" value="-Dasync=true"/>
+      <param name="testid" value="noreg.Test12-c"/>
     </antcall>
   </target>
 
@@ -3769,7 +3803,7 @@ description=" --> launch all exceptionlistener tests">
   </target>
 
   <target name="cluster.testQ2" depends="init.a3props,compile"
-          description=" --> producer on queue 2, receiver on queue 0 and 1, check two receiver receive messaga">
+          description=" --> producer on queue 2, receiver on queue 0 and 1, check two receiver receive messages">
     <antcall target="test.run" inheritAll="true">
       <param name="testid" value="cluster.testQ2"/>
       <param name="className" value="joram.cluster.TestQ2"/>
@@ -4013,22 +4047,37 @@ description=" --> launch all exceptionlistener tests">
   </target>
   <!-- end SUB tests -->
 
-
-  <target name="txt.test" depends="init.a3props,compile"
-          description=" --> test TXT Polymedia">
-    <antcall target="deleteTestDir"/>
-    <mkdir dir="${test.dir}"/>
-    <copy file="txt/joram.properties" tofile="${test.dir}/joram.properties"/>
-    <copy file="txt/log4j.xml" tofile="${test.dir}/log4j.xml"/>
-    <mkdir dir="${test.dir}/persistent"/>
-    <copy todir="${test.dir}/persistent">
-      <fileset dir="txt/persistent"/>
-    </copy>
-    <java classname="joram.txt.Test" failonerror="no" fork="yes" maxmemory="256m" dir="${test.dir}">
-      <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
-      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
-    </java>
+  <target name="monit.Test" depends="init.a3props,compile"
+          description=" --> Simple monitoring">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.monitoring.TestMonitoringTopic"/>
+      <param name="jndiconf" value="monitoring/jndi.properties"/>
+      <param name="a3conf" value="monitoring/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+  
+  <target name="monit.Test2" depends="init.a3props,compile"
+          description=" --> Tests changing monitoring properties">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.monitoring.TestMonitoringTopic2"/>
+      <param name="jndiconf" value="monitoring/jndi.properties"/>
+      <param name="a3conf" value="monitoring/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+  
+  <target name="monit.Test3" depends="init.a3props,compile"
+          description=" --> Tests monitoring as a service.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.monitoring.TestMonitoringTopic3"/>
+      <param name="jndiconf" value="monitoring/jndi.properties"/>
+      <param name="a3conf" value="monitoring/a3servers2.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
   </target>
 
 </project>
