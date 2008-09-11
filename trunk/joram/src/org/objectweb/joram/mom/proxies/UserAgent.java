@@ -30,33 +30,26 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import org.objectweb.joram.mom.notifications.WakeUpNot;
+import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.CnxCloseRequest;
 import org.objectweb.joram.shared.client.JmsRequestGroup;
+import org.objectweb.joram.shared.client.MomExceptionReply;
 import org.objectweb.joram.shared.client.ProducerMessages;
 import org.objectweb.joram.shared.client.ServerReply;
-import org.objectweb.joram.shared.client.MomExceptionReply;
 import org.objectweb.joram.shared.excepts.MomException;
-
-import org.objectweb.joram.mom.proxies.ProxyImpl;
-import org.objectweb.joram.mom.proxies.SendReplyNot;
-import org.objectweb.joram.mom.proxies.ProxyAgentItf;
-import org.objectweb.joram.mom.notifications.WakeUpNot;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.Agent;
-import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.BagSerializer;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownNotificationException;
-
-import fr.dyade.aaa.util.Timer;
-import fr.dyade.aaa.util.TimerTask;
-
+import fr.dyade.aaa.agent.WakeUpTask;
 import fr.dyade.aaa.util.management.MXWrapper;
-import org.objectweb.joram.shared.JoramTracing;
-import org.objectweb.util.monolog.api.BasicLevel;
 
 /** 
  * Class of a user proxy agent.
@@ -109,7 +102,7 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
     keyCounter = 0;
   }
 
-  private transient CleaningTask cleaningTask;
+  private transient WakeUpTask cleaningTask;
 
   /** (Re)initializes the agent when (re)loading. */
   public void agentInitialize(boolean firstTime) throws Exception {
@@ -119,8 +112,8 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
 
     super.agentInitialize(firstTime);
     proxyImpl.initialize(firstTime);
-    cleaningTask = new CleaningTask();
-    cleaningTask.schedule();
+    cleaningTask = new WakeUpTask(getId(), WakeUpNot.class);
+    cleaningTask.schedule(proxyImpl.getPeriod());
     try {
     MXWrapper.registerMBean(proxyImpl, "Joram#"+AgentServer.getServerId(), getMBeanName());
     } catch (Exception exc) {
@@ -190,8 +183,8 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
       }
 
       if (cleaningTask == null)
-        cleaningTask = new CleaningTask();
-      cleaningTask.schedule();
+        cleaningTask = new WakeUpTask(getId(), WakeUpNot.class);
+      cleaningTask.schedule(proxyImpl.getPeriod());
 
 
     } else {
@@ -468,7 +461,7 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
 
     public void start() {
       try {
-        ConnectionManager.getTimer().schedule(this, timeout);
+        AgentServer.getTimer().schedule(this, timeout);
       } catch (Exception exc) {
         throw new Error(exc.toString());
       }
@@ -476,34 +469,6 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
 
     public void touch() {
       lastRequestDate = System.currentTimeMillis();
-    }
-  }
-
-  class CleaningTask extends TimerTask {
-    CleaningTask() {}
-    
-    /** Method called when the timer expires. */
-    public void run() {
-      sendTo(getId(), new WakeUpNot());
-    }
- 
-    public void schedule() {
-      // Don't schedule CleaningTask on HA slaves.
-      if (AgentServer.isHAServer() && ! AgentServer.isMasterHAServer())
-        return;
-
-      long period = proxyImpl.getPeriod();
-
-      if (period != -1) {
-        try {
-          Timer timer = ConnectionManager.getTimer();
-          timer.schedule(this, period);
-        } catch (Exception exc) {
-          if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-            JoramTracing.dbgDestination.log(BasicLevel.WARN,
-                                            "--- " + this + " Proxy(...)", exc);     
-	}
-      }
     }
   }
 
