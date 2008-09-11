@@ -58,14 +58,14 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
   /** Daemon sending message to others servers. */
   Dispatcher dispatcher = null;
   
-  /** sender deamon use by NetSession to send message. */
+  /** sender daemon use by NetSession to send message. */
   PoolSender poolSender = null;
   
   /** Daemon handling the messages for inaccessible servers. */
   WatchDog watchDog = null;
 
-  /** Array of active (i.e. connected) sessions. */
-  NetSession activeSessions[];
+  /** Synchronized vector of active (i.e. connected) sessions. */
+  Vector activeSessions;
 
   /**
    * Defines if the streams between servers are compressed or not.
@@ -92,20 +92,19 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
   public boolean getCompressedFlows() {
     return compressedFlows;
   }
-  
+
   /**
    * Defines the maximum number of concurrent connected sessions.
    * <p>
-   * By default this property is set to the number of servers of the domain
-   * (excepting the current server). Setting this value needs precautions to
-   * avoid unexpected connection lost. Value less than 1 are unauthorized.
+   * By default this property is set to -1 to dynamically adjust to the number
+   * of servers of the domain (excepting the current server). Setting this value
+   * needs precautions to avoid unexpected connection loss.
    * <p>
-   *  This value can be adjusted for all network components by setting
+   * This value can be adjusted for all network components by setting
    * <code>PoolNetwork.nbMaxCnx</code> global property or for a particular
-   * network by setting <code>\<DomainName\>.nbMaxCnx</code> specific
-   * property.
+   * network by setting <code>\<DomainName\>.nbMaxCnx</code> specific property.
    * <p>
-   *  Theses properties can be fixed either from <code>java</code> launching
+   * Theses properties can be fixed either from <code>java</code> launching
    * command, or in <code>a3servers.xml</code> configuration file.
    */
   int nbMaxCnx;
@@ -119,16 +118,13 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     return nbMaxCnx;
   }
 
-  /** The number of concurrent connected sessions. */
-  int nbActiveCnx = 0;
-
   /**
    * Returns the number of currently connected sessions.
    *
    * @return	the number of currently connected sessions.
    */
   public int getNbActiveSession() {
-    return nbActiveCnx;
+    return activeSessions.size();
   }
     
   /**
@@ -189,8 +185,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
   /**
    * Defines the maximum number of free senders in the pool.
    * <p>
-   * By default this value is set to the same value than <code>nbMaxCnx</code>,
-   * value less than 1 are unauthorized.
+   * By default this value is set to <code>2</code>,
+   * values less than 1 are unauthorized.
    * <p>
    *  This value can be adjusted for all network components by setting the
    * <code>PoolNetwork.nbMaxFreeSender</code> global property or for a particular
@@ -221,7 +217,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
    * Initializes a new network component. This method is used in order to
    * easily creates and configure a Network component from a class name.
    * So we can use the <code>Class.newInstance()</code> method for create
-   * (whitout any parameter) the component, then we can initialize it with
+   * (whithout any parameter) the component, then we can initialize it with
    * this method.<br>
    * This method initializes the logical clock for the domain.
    *
@@ -261,14 +257,14 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       try {
         nbMaxCnx = AgentServer.getInteger("PoolNetwork.nbMaxCnx").intValue();
       } catch (Exception exc2) {
-        nbMaxCnx = servers.length -1;
+        nbMaxCnx = -1;
       }
     }
-    if (nbMaxCnx < 1) nbMaxCnx = servers.length -1;
 
-    nbMaxFreeSender = AgentServer.getInteger("PoolNetwork.nbMaxFreeSender", nbMaxCnx).intValue();
+    nbMaxFreeSender = AgentServer.getInteger("PoolNetwork.nbMaxFreeSender", 2).intValue();
     nbMaxFreeSender = AgentServer.getInteger(domain + ".nbMaxFreeSender", nbMaxFreeSender).intValue();
-    if (nbMaxFreeSender < 1) nbMaxFreeSender = nbMaxCnx;
+    if (nbMaxFreeSender < 1)
+      nbMaxFreeSender = 2;
     
     IdleTimeout = Long.getLong("PoolNetwork.IdleTimeout", IdleTimeout).longValue();
     IdleTimeout = Long.getLong(domain + ".IdleTimeout", IdleTimeout).longValue();
@@ -304,7 +300,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     if (logmon.isLoggable(BasicLevel.DEBUG)) {
       StringBuffer strbuf = new StringBuffer();
       for (int i=0; i<servers.length; i++) {
-        strbuf.append("\n\t").append(sessions[i]);
+        strbuf.append("\n\t").append("server#" + servers[i] + " -> " + sessions[i]);
       }
       logmon.log(BasicLevel.DEBUG,
                  getName() + " before addServer:" + strbuf.toString());
@@ -344,7 +340,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     } catch (Exception exc) {
       logmon.log(BasicLevel.FATAL, getName() + " addServer failed", exc);
     }
-    logmon.log(BasicLevel.FATAL, getName() + " addServer ok", new Exception());
+    logmon.log(BasicLevel.DEBUG, getName() + " addServer ok");
   }
 
   /**
@@ -421,7 +417,11 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         }
       }
 
-      activeSessions = new NetSession[nbMaxCnx];
+      if (nbMaxCnx != -1) {
+        activeSessions = new Vector(nbMaxCnx);
+      } else {
+        activeSessions = new Vector(servers.length - 1);
+      }
 
       wakeOnConnection.start();
       dispatcher.start();
@@ -447,18 +447,10 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     if (wakeOnConnection != null) wakeOnConnection.stop();
     if (dispatcher != null) dispatcher.stop();
     if (watchDog != null) watchDog.stop();
-    
-    // Stop all active sessions
-    for (int i=0; i<activeSessions.length; i++) {
-      if (activeSessions[i] != null)
-        activeSessions[i].stop();
-      activeSessions[i] = null;
-    }
-    nbActiveCnx = 0;
 
     if (poolSender != null) poolSender.stop();
     
-    // Unregister all sesion's MBean
+    // Unregister all session's MBean
     for (int i=0; i<sessions.length; i++) {
       if (sessions[i] != null) {
         try {
@@ -467,8 +459,12 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         } catch (Exception exc) {
           logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
         }
+        if (sessions[i].isRunning()) {
+          sessions[i].stop();
+        }
       }
     }
+    activeSessions.clear();
     logmon.log(BasicLevel.DEBUG, getName() + ", stopped");
   }
 
@@ -1049,6 +1045,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
           if (! restart)
             poolSender.release(this);
         }
+      } catch (Exception exc) {
+        logmon.log(BasicLevel.ERROR, getName(), exc);
       } finally {
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG, getName() + ", ends");
@@ -1521,17 +1519,17 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
      * initiate a connection from the local server. The corresponding code
      * on remote server is the method <a href="#remoteStart()">remoteStart</a>.
      * Its method creates the socket, initiates the network connection, and
-     * negociates with remote server.<p><hr>
-     *  Its method can be overidden in order to change the connection protocol
-     * (introduces authentification by example, or uses SSL), but must respect
-     * somes conditions:<ul>
+     * negotiates with remote server.<p><hr>
+     *  Its method can be overridden in order to change the connection protocol
+     * (introduces authentication by example, or uses SSL), but must respect
+     * some conditions:<ul>
      * <li>send a Boot object after the initialization of object streams (it
      * is waiting by the wakeOnConnection thread),
      * <li>wait for an acknowledge,
      * <li>set the sock, ois and oos attributes at the end if the connection
      * is correct.
      * </ul><p>
-     *  In order to overide the protocol, we have to implements its method,
+     *  In order to override the protocol, we have to implements its method,
      * with the remoteStart and the transmit methods.
      *
      * @return	true if the connection is established, false otherwise.
@@ -1685,43 +1683,36 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       server.active = true;
       server.retry = 0;
 
-      synchronized(activeSessions) {
-        
-        for (int i = 0; i < nbMaxCnx; i++) {
-          if (activeSessions[i] != null && !activeSessions[i].running) {
-            activeSessions[i] = null;
-            nbActiveCnx--;
-          }
+      for (int i = activeSessions.size() - 1; i >= 0; i--) {
+        NetSession session = (NetSession) activeSessions.get(i);
+        if (!session.running) {
+          activeSessions.remove(i);
         }
-        
-        if (nbActiveCnx < nbMaxCnx) {
-          // Insert the current session in the first free active pool.
-          for (int i = 0; i < nbMaxCnx; i++) {
-            if (activeSessions[i] == null) {
-              activeSessions[i] = this;
-              nbActiveCnx++;
-              break;
-            }
-          }
-        } else {
-          // Search the last recently used session in the pool.
-          long min = Long.MAX_VALUE;
-          int idx = -1;
-          for (int i=0; i<nbMaxCnx; i++) {
-            if (activeSessions[i].last < min) {
-              idx = i;
-              min = activeSessions[i].last;
-            }
-          }
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG, 
-                getName() + ", Kill session " + activeSessions[idx] + ",  and insert new one.");
-          // Kill choosed session and insert new one
-          activeSessions[idx].stop();
-          activeSessions[idx] = this;
-        }
-        last = System.currentTimeMillis();
       }
+
+      if (nbMaxCnx == -1 || activeSessions.size() < nbMaxCnx) {
+        // Insert the current session in the active pool.
+        activeSessions.add(this);
+      } else {
+        // Search the last recently used session in the pool.
+        long min = Long.MAX_VALUE;
+        int idx = -1;
+        for (int i = 0; i < activeSessions.size(); i++) {
+          NetSession session = (NetSession) activeSessions.get(i);
+          if (session.last < min) {
+            idx = i;
+            min = session.last;
+          }
+        }
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG, getName() + ", Kill session " + activeSessions.get(idx)
+              + ",  and insert new one.");
+        // Kill chosen session and insert new one
+        ((NetSession) activeSessions.get(idx)).stop();
+        activeSessions.set(idx, this);
+      }
+      
+      last = System.currentTimeMillis();
       thread = new Thread(this, getName());
       thread.setDaemon(false);
 
