@@ -204,18 +204,22 @@ public class MonitoringTopicImpl extends TopicImpl implements MonitoringTopicImp
       
       try {
         Set mBeans = MXWrapper.queryNames(new ObjectName(mbeanName));
-        for (Iterator iterator = mBeans.iterator(); iterator.hasNext();) {
-          ObjectName mBean = (ObjectName) iterator.next();
-          StringTokenizer st = new StringTokenizer(mbeanAttr, ",");
-          while (st.hasMoreTokens()) {
-            String token = st.nextToken();
-            if (token.equals("*")) {
-              MBeanAttributeInfo[] attributes = MXWrapper.getAttributes(mBean);
-              for (int i = 0; i < attributes.length; i++) {
-                setMessageProperty(message, mBean, attributes[i].getName());
+        if (mBeans != null) {
+          for (Iterator iterator = mBeans.iterator(); iterator.hasNext();) {
+            ObjectName mBean = (ObjectName) iterator.next();
+            StringTokenizer st = new StringTokenizer(mbeanAttr, ",");
+            while (st.hasMoreTokens()) {
+              String token = st.nextToken();
+              if (token.equals("*")) {
+                MBeanAttributeInfo[] attributes = MXWrapper.getAttributes(mBean);
+                if (attributes != null) {
+                  for (int i = 0; i < attributes.length; i++) {
+                    setMessageProperty(message, mBean, attributes[i].getName());
+                  }
+                }
+              } else {
+                setMessageProperty(message, mBean, token.trim());
               }
-            } else {
-              setMessageProperty(message, mBean, token.trim());
             }
           }
         }

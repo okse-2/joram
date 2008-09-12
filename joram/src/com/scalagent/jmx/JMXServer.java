@@ -119,14 +119,23 @@ public class JMXServer implements MXServer, Serializable {
   }
   
   public Object getAttribute(ObjectName objectName, String attribute) throws Exception {
+    if (mxserver == null) {
+      return null;
+    }
     return mxserver.getAttribute(objectName, attribute);
   }
   
   public MBeanAttributeInfo[] getAttributes(ObjectName objectName) throws Exception {
+    if (mxserver == null) {
+      return null;
+    }
     return mxserver.getMBeanInfo(objectName).getAttributes();
   }
   
   public Set queryNames(ObjectName objectName) {
+    if (mxserver == null) {
+      return null;
+    }
     return mxserver.queryNames(objectName, null);
   }
   
