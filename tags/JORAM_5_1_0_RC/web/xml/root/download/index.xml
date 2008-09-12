@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="joram-team@ow2.org">JORAM team</author>
+    <title>Download</title>
+    <filename>index.xml</filename>
+    <pathtoroot>..</pathtoroot>
+  </properties>
+
+  <body>
+
+    <s1 name="Downloading...">
+      <s2 name="JORAM source and binary packages">
+	<p>The JORAM source and binary packages are available from the
+        ObjectWeb Forge file repository page.</p>
+      
+	<p>The latest release packages are:</p>
+	<ul>
+	  <li><code>joram-5.*.tgz</code>, including JORAM client and MOM
+        libraries, the graphical tool library, the J2ME kJORAM client library and the JORAM
+        samples sources;</li>
+	  <li><code>joram-5.*-src.tgz</code>, including JORAM client and MOM
+        sources, the graphical tool sources, the J2ME kJORAM client sources and the JORAM samples
+        sources;</li>
+	  <li><code>joram-jonasadapter-5.*.rar</code> ,JCA Adapter for Jonas </li>
+	  <li><code>joram-raconfig-5.*.tgz</code>, facilities enabling configuration of JCA rars.</li>
+	  <li><code>joram-5.*-RA.rar</code>, the resource adapter for a collocated JORAM server within any J2EE 1.4 compliant 
+		application server.</li>
+	  <li><code>joram-5.*-remoteRA.rar</code>, the resource adapter for any J2EE 1.4 application server with a non collocated 
+		JORAM server (possibly running remotely).</li>
+	</ul>
+ 
+	<p>The license agreement is displayed before the download can start.
+      <a href="http://forge.objectweb.org/project/showfiles.php?group_id=4">
+      Click here to start the download process</a>.</p>
+	
+	<p>Note: all the packages are available as .tgz files. To unzip these
+      files, just go where you want to install JORAM, and unzip it. You can
+      use gunzip and tar tools on unix-like systems, or winzip utility on
+      Windows. Please consult the <strong>
+      JORAM documentation</strong> for installation instructions and a tutorial.</p>
+      </s2>
+
+      <s2 name="JORAM CVS code base">
+	<p>For getting the latest stable JORAM version, or for the current
+    development release, you have to use <a href="http://forge.objectweb.org/cvs/?group_id=4">CVS</a>.</p>
+
+	<p>JORAM and kJORAM are available by checking out the <strong>joram</strong> module.</p>
+
+	<p>The latest stable release tag is <strong>JORAM_5_0_9</strong>. For 
+    getting the current development release (potentially unstable), check
+    out joram with no tag.</p>
+        <p>A snapshot is generated each day at 00:00 AM CEST: <a href="http://forge.objectweb.org/cvssnapshots/joram-cvs-latest.tar.gz">Download the last CVS snapshot</a>.</p>
+      </s2>
+    </s1>
+  </body>
+</document>
