@@ -1,0 +1,102 @@
+
+        I - Compilation de Joram
+        ========================
+
+2) Creation d'une livraison binaire de Joram
+--------------------------------------------
+
+cd <JORAM_DIR>/joram/src
+ant clean ship
+
+
+        II - Compilation de Xoram
+        =========================
+
+Attention, il faut modifier les makefiles pour choisir la cible de compilation,
+Windows/Cygwin ou Linux. 
+
+cd <JORAM_DIR>/xoram/src
+make clean xoram
+
+        III - Test de Xoram
+        ===================
+
+1) Compilation des tests
+------------------------
+
+Window#1: cd <JORAM_DIR>/xoram/src
+Window#1: make clean tests
+
+
+2) Lancement de Joram
+---------------------
+
+Window#2: cd <JORAM_DIR>/joram/samples/src/joram
+Window#2: ant clean compile
+Window#2: ant reset single_server
+          --> AgentServer#0 started: OK
+
+3) Administration de Joram
+--------------------------
+  Les exemples fournis dans le répertoire tests/base de xoram utilisent
+les objets administrés du sample 'classic' de Joram. Nous réutilisons donc
+la classe d'administration de cet exemple.
+
+Window#3: cd <JORAM_DIR>/joram/samples/src/joram
+Window#3: ant classic_admin
+
+4) Lancement des exemples
+-------------------------
+Window#1: export LD_LIBRARY_PATH=<JORAM_DIR>/xoram/src
+
+Window#1: cd <JORAM_DIR>/xoram/src
+
+Window#1: ../tests/base/test1.exe
+connected -> 0
+##### Cnx state(1): 1
+##### Cnx state(0): 0
+##### Cnx state(1): 1
+##### Cnx state(0): 0
+##### bye
+
+Window#1: ../tests/base/test2.exe
+connected -> 1
+##### Message sent on queue: ID:0.0.1028c1m1
+##### Message received: ID:0.0.1028c1m1
+
+Window#1: ../tests/base/test3.exe
+connected -> 2
+##### Message sent on topic: ID:0.0.1028c2m1
+##### Message received: ID:0.0.1028c2m1
+
+Window#1: ../tests/base/test5.exe
+connected -> 4
+##### Message sent on queue: ID:0.0.1028c4m1
+##### Message sent on topic: ID:0.0.1028c4m2
+##### Message received: ID:0.0.1028c4m1
+##### Message received: ID:0.0.1028c4m2
+
+Window#1: ../tests/base/test6.exe
+connected -> 5
+##### Message sent on queue: ID:0.0.1028c5m1
+##### Message sent on queue: ID:0.0.1028c5m2
+##### Message sent on queue: ID:0.0.1028c5m3
+##### Message sent on queue: ID:0.0.1028c5m4
+##### Message sent on queue: ID:0.0.1028c5m5
+##### Message sent on topic: ID:0.0.1028c5m6
+##### Message received: ID:0.0.1028c5m1
+##### Message received: ID:0.0.1028c5m6
+##### Message received: ID:0.0.1028c5m2
+##### Message received: ID:0.0.1028c5m3
+##### Message received: ID:0.0.1028c5m4
+##### Message received: ID:0.0.1028c5m5
+
+Window#1: ../tests/base/test7.exe
+connected -> 6
+##### Message sent on queue: ID:0.0.1028c6m1
+##### Message sent on queue: ID:0.0.1028c6m2
+##### Message sent on queue: ID:0.0.1028c6m3
+##### Message sent on queue: ID:0.0.1028c6m4
+##### Message sent on queue: ID:0.0.1028c6m5
+##### Message sent on topic: ID:0.0.1028c6m6
+##### Message received: ID:0.0.1028c6m1
