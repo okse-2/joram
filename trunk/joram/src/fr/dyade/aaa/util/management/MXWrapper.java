@@ -111,6 +111,9 @@ public final class MXWrapper {
   }
   
   public static Object getAttribute(ObjectName objectName, String attribute) {
+    if (mxserver == null) {
+      return null;
+    }
     try {
       return mxserver.getAttribute(objectName, attribute);
     } catch (Exception exc) {
@@ -121,17 +124,23 @@ public final class MXWrapper {
   }
   
   public static MBeanAttributeInfo[] getAttributes(ObjectName objectName) {
+    if (mxserver == null) {
+      return null;
+    }
     try {
       return mxserver.getAttributes(objectName);
     } catch (Exception exc) {
       if (logger.isLoggable(BasicLevel.WARN))
         logger.log(BasicLevel.ERROR, " getAttributes  on " + objectName + " error.", exc);
     }
-    return new MBeanAttributeInfo[0];
+    return null;
   }
   
   public static Set queryNames(ObjectName objectName) {
-      return mxserver.queryNames(objectName);
+    if (mxserver == null) {
+      return null;
+    }
+    return mxserver.queryNames(objectName);
   }
   
 }
