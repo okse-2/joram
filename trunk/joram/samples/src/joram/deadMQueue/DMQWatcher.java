@@ -23,34 +23,35 @@
  */
 package deadMQueue;
 
-import javax.jms.*;
-import javax.naming.*;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.MessageConsumer;
+import javax.jms.Queue;
+import javax.jms.Session;
+import javax.naming.Context;
+import javax.naming.InitialContext;
 
 /**
  * Listens to the dead message queues.
  */
-public class DMQWatcher
-{
-  static Context ictx = null; 
+public class DMQWatcher {
+  
+  static Context ictx = null;
 
-  public static void main(String[] args) throws Exception
-  {
-    System.out.println();
-    System.out.println("Listens to the dead message queues...");
+  public static void main(String[] args) throws Exception {
+    
+    System.out.println("Listens to the dead message queue...");
 
     ictx = new InitialContext();
-    Queue userDmq = (Queue) ictx.lookup("userDmq");
-    Queue destDmq = (Queue) ictx.lookup("destDmq");
+    Queue destDmq = (Queue) ictx.lookup("dmq");
     ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cnxFact");
     ictx.close();
 
     Connection cnx = cf.createConnection("dmq", "dmq");
 
-    Session session = cnx.createSession(true, 0);
-    MessageConsumer userWatcher = session.createConsumer(userDmq);
+    Session session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
     MessageConsumer destWatcher = session.createConsumer(destDmq);
-    userWatcher.setMessageListener(new DMQListener("User DMQ"));
-    destWatcher.setMessageListener(new DMQListener("Dest DMQ"));
+    destWatcher.setMessageListener(new DMQListener());
 
     cnx.start();
 

@@ -23,58 +23,66 @@
  */
 package deadMQueue;
 
-import org.objectweb.joram.client.jms.admin.*;
-
-import javax.jms.*;
-import javax.naming.*;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.DeliveryMode;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
+import javax.jms.Queue;
+import javax.jms.Session;
+import javax.jms.TextMessage;
+import javax.naming.Context;
+import javax.naming.InitialContext;
 
 /**
  * Producer/Consumer generating dead messages.
  */
-public class DMQClient
-{
-  static Context ictx = null; 
+public class DMQClient {
 
-  public static void main(String[] args) throws Exception
-  {
+  static Context ictx = null;
+
+  public static void main(String[] args) throws Exception {
+    
     ictx = new InitialContext();
     Queue queue = (Queue) ictx.lookup("queue");
-    Topic topic = (Topic) ictx.lookup("topic");
+    
     ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cnxFact");
     ictx.close();
 
     Connection cnx = cf.createConnection();
     Session prodSession = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
     Session consSession = cnx.createSession(true, 0);
-    MessageProducer qProducer = prodSession.createProducer(queue);
-    MessageProducer tProducer = prodSession.createProducer(topic);
     
+    MessageProducer qProducer = prodSession.createProducer(queue);
     MessageConsumer qConsumer = consSession.createConsumer(queue);
-    MessageConsumer tConsumer = consSession.createConsumer(topic);
 
     cnx.start();
 
     TextMessage msg = prodSession.createTextMessage();
 
-    // Producing expired messages:
+    // Producing messages with a very short time to live: 1 ms.
     msg.setText("Expiry test");
-    qProducer.send(msg, javax.jms.DeliveryMode.NON_PERSISTENT, 4, 1);
-    tProducer.send(msg, javax.jms.DeliveryMode.NON_PERSISTENT, 4, 1);
+    qProducer.send(msg, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, 1);
+    
+    // Waiting for the message to be expired.
+    Thread.sleep(100);
 
     qConsumer.receiveNoWait();
-    tConsumer.receiveNoWait();
 
+    
     // Producing "undeliverable" messages: 
     msg.setText("Undeliverability test");
     qProducer.send(msg);
-    tProducer.send(msg);
+    
     qConsumer.receive();
-    tConsumer.receive();
     consSession.rollback();
+    
     qConsumer.receive();
-    tConsumer.receive();
     consSession.rollback();
-
+    
+    consSession.commit();
+    
     cnx.close();
   }
 }
