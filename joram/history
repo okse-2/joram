@@ -1,4 +1,8 @@
 +==============================================================================
+| 2008/09/11 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ - shared.Message : serialVersionUID = 2L
++==============================================================================
 | 2008/09/11 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  - New MonitoringTopic: a special topic used to monitor any parameter accessible
