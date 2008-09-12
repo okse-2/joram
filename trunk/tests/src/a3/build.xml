@@ -86,6 +86,7 @@
     <ant dir="." antfile="build.xml" target="test19.base"/>
     <ant dir="." antfile="build.xml" target="test20.base"/>
   	<ant dir="." antfile="build.xml" target="test21.base"/>
+  	<ant dir="." antfile="build.xml" target="test22.base"/>
   </target>
 
   <target name="tests.http.base">
@@ -151,6 +152,8 @@
              token="@nbMaxCnx@" value="${nbMaxCnx}"/>
   	<replace file="${test.dir}/a3servers.xml"
            	 token="@compressedFlows@" value="${compressedFlows}"/>
+  	<replace file="${test.dir}/a3servers.xml"
+           	 token="@maxMessageInFlow@" value="${maxMessageInFlow}"/>
 
     <copy file="a3debug.cfg" tofile="${test.dir}/a3debug.cfg"/>
   </target>
@@ -164,6 +167,7 @@
     <property name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
     <property name="nbMaxCnx" value="5"/>
     <property name="compressedFlows" value="false"/>
+    <property name="maxMessageInFlow" value="10"/>
   </target>
 
   <!-- Empty target used for undefined postinit handling (see test.run target) -->
@@ -773,6 +777,111 @@
       <param name="a3conf" value="base/a3servers21c.xml"/>
       <param name="nbMaxCnx" value="6"/>
       <param name="compressedFlows" value="true"/>
+      <param name="jvmargs" value="-DRouter=true"/>
+    </antcall>
+  </target>
+
+	<!-- Test ping-pong with numerous servers -->
+  <target name="test22.base" depends="test22A.base,test22B.base"/>
+
+  <!-- Test ping-pong with numerous servers (more than nbMaxCnx)-->
+  <target name="test22A.base" depends="test22A-1.base,test22A-2.base,test22A-3.base,test22A-4.base"/>
+	
+  <!-- Test ping-pong with numerous servers -->
+  <target name="test22A-1.base" depends="init.a3props,compile">
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.base.test22"/>
+      <param name="testid" value="test22A-1.base"/>
+      <param name="a3conf" value="base/a3servers22a.xml"/>
+      <param name="nbMaxCnx" value="5"/>
+      <param name="maxMessageInFlow" value="10"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
+	
+  <!-- Test ping-pong with numerous servers and compressed flows -->
+  <target name="test22A-2.base" depends="init.a3props,compile">
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.base.test22"/>
+      <param name="testid" value="test22A-2.base"/>
+      <param name="a3conf" value="base/a3servers22a.xml"/>
+      <param name="nbMaxCnx" value="5"/>
+      <param name="maxMessageInFlow" value="2"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
+
+  <!-- Test ping-pong with numerous servers, 2 domains and a router -->
+  <target name="test22A-3.base" depends="init.a3props,compile">
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.base.test22"/>
+      <param name="testid" value="test22A-3.base"/>
+      <param name="a3conf" value="base/a3servers22c.xml"/>
+      <param name="nbMaxCnx" value="3"/>
+      <param name="maxMessageInFlow" value="10"/>
+      <param name="jvmargs" value="-DRouter=true"/>
+    </antcall>
+  </target>
+
+  <!-- Test ping-pong with numerous servers and compressed flows, 2 domains and a router -->
+  <target name="test22A-4.base" depends="init.a3props,compile">
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.base.test22"/>
+      <param name="testid" value="test22A-4.base"/>
+      <param name="a3conf" value="base/a3servers22c.xml"/>
+      <param name="nbMaxCnx" value="3"/>
+      <param name="maxMessageInFlow" value="2"/>
+      <param name="jvmargs" value="-DRouter=true"/>
+    </antcall>
+  </target>
+
+	<!-- Test ping-pong with numerous servers (less than nbMaxCnx)-->
+  <target name="test22B.base" depends="test22B-1.base,test22B-2.base,test22B-3.base,test22B-4.base"/>
+	
+  <!-- Test ping-pong with numerous servers -->
+  <target name="test22B-1.base" depends="init.a3props,compile">
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.base.test22"/>
+      <param name="testid" value="test22B-1.base"/>
+      <param name="a3conf" value="base/a3servers22a.xml"/>
+      <param name="nbMaxCnx" value="10"/>
+      <param name="maxMessageInFlow" value="10"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
+	
+  <!-- Test ping-pong with numerous servers and compressed flows -->
+  <target name="test22B-2.base" depends="init.a3props,compile">
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.base.test22"/>
+      <param name="testid" value="test22B-2.base"/>
+      <param name="a3conf" value="base/a3servers22a.xml"/>
+      <param name="nbMaxCnx" value="10"/>
+      <param name="maxMessageInFlow" value="2"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
+
+  <!-- Test ping-pong with numerous servers, 2 domains and a router -->
+  <target name="test22B-3.base" depends="init.a3props,compile">
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.base.test22"/>
+      <param name="testid" value="test22B-3.base"/>
+      <param name="a3conf" value="base/a3servers22c.xml"/>
+      <param name="nbMaxCnx" value="6"/>
+      <param name="maxMessageInFlow" value="10"/>
+      <param name="jvmargs" value="-DRouter=true"/>
+    </antcall>
+  </target>
+
+  <!-- Test ping-pong with numerous servers and compressed flows, 2 domains and a router -->
+  <target name="test22B-4.base" depends="init.a3props,compile">
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.base.test22"/>
+      <param name="testid" value="test22B-4.base"/>
+      <param name="a3conf" value="base/a3servers22c.xml"/>
+      <param name="nbMaxCnx" value="6"/>
+      <param name="maxMessageInFlow" value="2"/>
       <param name="jvmargs" value="-DRouter=true"/>
     </antcall>
   </target>
