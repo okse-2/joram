@@ -290,7 +290,7 @@ public class User extends AdministeredObject implements UserMBean {
    */
   public void setNbMaxMsg(String subName, int nbMaxMsg)
     throws ConnectException, AdminException {
-    Subscription sub = getSubscription(subName);
+//  TODO: Subscription sub = getSubscription(subName);
     AdminModule.doRequest(new SetNbMaxMsg(proxyId, nbMaxMsg, subName));
   } 
 
@@ -306,7 +306,7 @@ public class User extends AdministeredObject implements UserMBean {
    */
   public int getNbMaxMsg(String subName) 
     throws ConnectException, AdminException {
-    Subscription sub = getSubscription(subName);
+//  TODO: Subscription sub = getSubscription(subName);
     Monitor_GetNbMaxMsg request = new Monitor_GetNbMaxMsg(proxyId, subName);
     Monitor_GetNbMaxMsgRep reply;
     reply = (Monitor_GetNbMaxMsgRep) AdminModule.doRequest(request);
@@ -371,39 +371,28 @@ public class User extends AdministeredObject implements UserMBean {
    *
    * @exception ConnectException  If the admin connection is not established.
    */
-  public Subscription getSubscription(String subName) 
-    throws AdminException, ConnectException {
-    GetSubscriptionRep reply = 
-      (GetSubscriptionRep)AdminModule.doRequest(
-        new GetSubscription(proxyId, subName));
-    return new Subscription(
-      subName,
-      reply.getTopicId(),
-      reply.getMessageCount(),
-      reply.getDurable());
+  public Subscription getSubscription(String subName) throws AdminException, ConnectException {
+    GetSubscriptionRep reply = (GetSubscriptionRep) AdminModule.doRequest(new GetSubscription(proxyId, subName));
+    return new Subscription(subName,
+                            reply.getTopicId(),
+                            reply.getMessageCount(),
+                            reply.getDurable());
   }
 
-  public String getSubscriptionString(String subName) 
-    throws AdminException, ConnectException {
-    Subscription sub = getSubscription(subName);
-    return sub.toString();
+  public String getSubscriptionString(String subName) throws AdminException, ConnectException {
+    return getSubscription(subName).toString();
   }
 
-  public String[] getMessageIds(String subName) 
-    throws AdminException, ConnectException {
-    GetSubscriptionMessageIdsRep reply = 
-      (GetSubscriptionMessageIdsRep)AdminModule.doRequest(
-        new GetSubscriptionMessageIds(proxyId, subName));
+  public String[] getMessageIds(String subName) throws AdminException, ConnectException {
+    GetSubscriptionMessageIdsRep reply = (GetSubscriptionMessageIdsRep) AdminModule.doRequest(new GetSubscriptionMessageIds(proxyId, subName));
     return reply.getMessageIds();
   }
 
   public Message readMessage(String subName,
                              String msgId) throws AdminException, ConnectException, JMSException {
-    GetSubscriptionMessageRep reply = 
-      (GetSubscriptionMessageRep) AdminModule.doRequest(
-        new GetSubscriptionMessage(proxyId,
-                                   subName,
-                                   msgId));
+    GetSubscriptionMessageRep reply = (GetSubscriptionMessageRep) AdminModule.doRequest(new GetSubscriptionMessage(proxyId,
+                                                                                                                   subName,
+                                                                                                                   msgId));
     return Message.wrapMomMessage(null, reply.getMessage());
   }
 
