@@ -7,12 +7,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
@@ -101,7 +101,7 @@ void Message::setCorrelationID(char* correlationId) {
  * Returns <code>true</code> if the message is persistent.
  */
 int Message::getDeliveryMode() {
-  if (persistent) 
+  if (persistent)
     return DeliveryMode::PERSISTENT;
   else
     return DeliveryMode::NON_PERSISTENT;
@@ -216,7 +216,7 @@ void Message::setTimestamp(long long timestamp) {
 // ==================================================
 
 void Message::clearProperties() {
-  if (properties != (Properties*) NULL) { 
+  if (properties != (Properties*) NULL) {
     delete properties;
     properties = (Properties*) NULL;
   }
@@ -319,7 +319,7 @@ void Message::setDoubleProperty(char* name, double value) {
   checkPropertyName(name);
   if (properties == (Properties*) NULL)
     properties = new Properties();
-  
+
   properties->setDoubleProperty(name, value);
 }
 
@@ -420,7 +420,6 @@ void Message::writeTo(OutputStream* os) throw (IOException) {
   int b = 0;
 
   os->writeInt(type);					// AF: Should be a byte
-  os->writeByteArray(body, length);
 
   os->writeProperties(optionalHeader);			// Should be null !!
   os->writeProperties(properties);			// Should be null !!
@@ -444,6 +443,7 @@ void Message::writeTo(OutputStream* os) throw (IOException) {
 /*   b = b | (notWriteable?notWriteableFlag:0); */
 /*   b = b | (undeliverable?undeliverableFlag:0); */
   os->writeInt(b);					// AF: Should be a byte
+  os->writeByteArray(body, length);
 }
 
 /**
@@ -456,7 +456,6 @@ void Message::readFrom(InputStream* is) throw (IOException) {
   char* typeStr;
 
   is->readInt(&type);
-  length = is->readByteArray(&body);
   optionalHeader = is->readProperties();
   properties = is->readProperties();
   is->readString(&id);
@@ -480,6 +479,7 @@ void Message::readFrom(InputStream* is) throw (IOException) {
   /*   expired = ((b & expiredFlag) != 0); */
   /*   notWriteable = ((b & notWriteableFlag) != 0); */
   /*   undeliverable = ((b & undeliverableFlag) != 0); */
+  length = is->readByteArray(&body);
 }
 
 /**
