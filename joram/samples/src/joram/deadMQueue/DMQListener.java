@@ -23,31 +23,26 @@
  */
 package deadMQueue;
 
-import javax.jms.*;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.TextMessage;
 
 /**
  * Implements the <code>javax.jms.MessageListener</code> interface.
  */
-public class DMQListener implements MessageListener
-{
-  String ident;
-
-  public DMQListener(String ident)
-  {
-    this.ident = ident;
-  }
-
-
-  public void onMessage(javax.jms.Message msg)
-  {
-    System.out.println("Listener got from " + ident + ":");
+public class DMQListener implements MessageListener {
+  
+  public void onMessage(Message msg) {
+    System.out.println(" ");
+    System.out.println("DMQ watcher got a message:");
     try {
       if (msg instanceof TextMessage)
         System.out.println(((TextMessage) msg).getText());
-
-      System.out.println("Delivery count: "
-                         + msg.getIntProperty("JMSXDeliveryCount"));
+      System.out.println("Delivery count: " + msg.getIntProperty("JMSXDeliveryCount"));
+      System.out.println(msg.getStringProperty("JMS_JORAM_ERRORCAUSE_1"));
+    } catch (JMSException jE) {
+      jE.printStackTrace();
     }
-    catch (JMSException jE) {}
   }
 }

@@ -24,55 +24,46 @@
  */
 package deadMQueue;
 
-import org.objectweb.joram.client.jms.admin.*;
-import org.objectweb.joram.client.jms.*;
-import org.objectweb.joram.client.jms.tcp.*;
+import javax.jms.ConnectionFactory;
+
+import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.DeadMQueue;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 /**
  * Administers an agent server for the deadMQueue samples.
  */
-public class DMQAdmin
-{
-  public static void main(String[] args) throws Exception
-  {
+public class DMQAdmin {
+
+  public static void main(String[] args) throws Exception {
+    
     System.out.println();
     System.out.println("DMQ administration...");
 
     AdminModule.connect("root", "root", 60);
 
-    Queue queue = (Queue) Queue.create(0);
-    Topic topic = (Topic) Topic.create(0);
+    Queue queue = Queue.create(0);
 
-    DeadMQueue userDmq = (DeadMQueue) DeadMQueue.create(0);
-    DeadMQueue destDmq = (DeadMQueue) DeadMQueue.create(0);
+    DeadMQueue dmq = (DeadMQueue) DeadMQueue.create(0);
 
-    User ano = User.create("anonymous", "anonymous", 0);
-    User dmq = User.create("dmq", "dmq", 0);
+    User anoUser = User.create("anonymous", "anonymous", 0);
+    User dmqUser = User.create("dmq", "dmq", 0);
 
-    javax.jms.ConnectionFactory cnxFact =
-      TcpConnectionFactory.create("localhost", 16010);
+    ConnectionFactory cnxFact = TcpConnectionFactory.create("localhost", 16010);
 
-    ano.setDMQ(userDmq);
-    queue.setDMQ(destDmq);
-    topic.setDMQ(destDmq);
-
-    ano.setThreshold(2);
+    queue.setDMQ(dmq);
     queue.setThreshold(2);
-
     queue.setFreeReading();
     queue.setFreeWriting();
-    topic.setFreeReading();
-    topic.setFreeWriting();
-    userDmq.setReader(dmq);
-    userDmq.setWriter(dmq);
-    destDmq.setReader(dmq);
-    destDmq.setWriter(dmq);
+    
+    dmq.setReader(dmqUser);
+    dmq.setWriter(dmqUser);
 
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     jndiCtx.bind("queue", queue);
-    jndiCtx.bind("topic", topic);
-    jndiCtx.bind("userDmq", userDmq);
-    jndiCtx.bind("destDmq", destDmq);
+    jndiCtx.bind("dmq", dmq);
     jndiCtx.bind("cnxFact", cnxFact);
     jndiCtx.close();
 
