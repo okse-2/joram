@@ -22,6 +22,8 @@
  */
 package org.objectweb.joram.mom.util;
 
+import java.util.Date;
+
 import org.objectweb.joram.mom.dest.QueueImpl;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.shared.MessageErrorConstants;
@@ -120,7 +122,7 @@ public class DMQManager {
       
       switch (reason) {
       case MessageErrorConstants.EXPIRED:
-        mess.setProperty(causePropertyName, "Expired at " + mess.expiration);
+        mess.setProperty(causePropertyName, "Expired at " + new Date(mess.expiration));
         mess.setProperty(codePropertyName, new Short(MessageErrorConstants.EXPIRED));
         break;
       case MessageErrorConstants.NOT_WRITEABLE:
