@@ -49,7 +49,7 @@ import fr.dyade.aaa.util.Transaction;
 public final class Message implements Serializable {
   
   /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2L;
 
   /** Arrival position of this message on its queue or proxy. */
   transient public long order;
