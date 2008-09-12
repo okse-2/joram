@@ -1198,6 +1198,42 @@
       <classpath path="${project.class.path}"/>
     </java>
   </target>
+  
+  <!-- **************************************************
+       * Monitoring sample
+       ************************************************** -->
+  <!-- Setup the monitoring configuration -->
+  <target name="monitoring_admin" depends="init"
+          description="--> Runs administration stuff for monitoring sample">
+    <java classname="monitoring.MonitoringAdmin"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+  
+  <!-- Runs the producer client -->
+  <target name="monitoring_producer" depends="init"
+    description="--> Starts a Producer client">
+    <java classname="monitoring.Producer" failonerror="no" fork="yes" dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
 
+  <!-- Runs the consumer client -->
+  <target name="monitoring_consumer" depends="init"
+    description="--> Starts a Consumer client">
+    <java classname="monitoring.Consumer" failonerror="no" fork="yes" dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+  
+  <!-- Runs the monitoring -->
+  <target name="monitoring_monitor" depends="init"
+    description="--> Starts a monitoring client">
+    <java classname="monitoring.Monitor" failonerror="no" fork="yes" dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
 
 </project>
