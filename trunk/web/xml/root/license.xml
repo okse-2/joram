@@ -25,25 +25,22 @@
 
     <s1 name="Other licenses">
    
-      <p>JORAM includes softwares not provided by the ObjectWeb consortium
-         and covered by the following licenses:</p>
+      <p>JORAM includes softwares not provided by the ObjectWeb consortium and covered by the following licenses:</p>
 
       <ul>
         <li>The <a href="http://www.apache.org/LICENSE">Apache Software License, Version 1.1</a> covers:</li>
         <ul>
-          <li>the <a href="http://jakarta.apache.org/regexp/">Regexp</a>
-          regular expression parser, used in JORAM message selection
-          feature.</li>
-          <li>the Apache's implementation of
-          <a href="http://ws.apache.org/soap/">SOAP</a>, used by JORAM
-          SOAP proxy.</li>
+          <li>the <a href="http://jakarta.apache.org/regexp/">Regexp</a> regular expression parser, used in JORAM message selection feature.</li>
+          <li>the Apache's implementation of <a href="http://ws.apache.org/soap/">SOAP</a>, used by JORAM SOAP proxy.</li>
         </ul>
       </ul>
       <ul>
-        <li>The <a href="http://www.cs.princeton.edu/~appel/modern/java/CUP/#LICENSE">CUP Parser Generator Copyright Notice, License, and Disclaimer</a> covers the <a href="http://www.cs.princeton.edu/~appel/modern/java/CUP/">JavaCup</a> Java parser generator, used in the message selection feature.</li>
+        <li>The <a href="http://www.cs.princeton.edu/~appel/modern/java/CUP/#LICENSE">CUP Parser Generator Copyright Notice, License, and Disclaimer</a>
+        covers the <a href="http://www.cs.princeton.edu/~appel/modern/java/CUP/">JavaCup</a> Java parser generator, used in the message selection feature.</li>
       </ul>
       <ul>
-        <li>The <a href="http://kxml.enhydra.org/software/license/index.html">Enhydra PUBLIC LICENSE</a> covers the <a href="http://kxml.enhydra.org/">kXML</a> J2ME XML parser, used by kJORAM for communicating with the JORAM platform.</li>
+        <li>The <a href="http://kxml.enhydra.org/software/license/index.html">Enhydra PUBLIC LICENSE</a> covers the
+        <a href="http://kxml.enhydra.org/">kXML</a> J2ME XML parser, used by kJORAM for communicating with the JORAM platform.</li>
       </ul>
       
     </s1>
