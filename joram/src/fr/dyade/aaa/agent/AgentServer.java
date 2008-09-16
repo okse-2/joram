@@ -1061,7 +1061,11 @@ public final class AgentServer {
       setProperties(serverId, clusterId);
 
       // Initializes the JMX Wrapper
-      MXWrapper.init();
+      try {
+        MXWrapper.init();
+      } catch (Exception exc) {
+        logmon.log(BasicLevel.ERROR, "can't instantiate MXServer.", exc);
+      }
 
       if (transaction == null) {
         try {
