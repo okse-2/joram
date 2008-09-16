@@ -11,30 +11,63 @@
   </properties>
 
   <body>
-    <s1 name="JORAM maintenance release 5.0.9 (April 22, 2008)">
-      <p>Joram 5.0.9 is available in the CVS repository with tag JORAM_5_0_9.
+    <s1 name="JORAM release 5.1.0 (September 16, 2008)">
+      <p>Joram 5.1.0 is available in the SVN repository with tag JORAM_5_1_0.
        This release provides many features and changes:</p>
-      <s2 name="New features and improvments">
-	<ul>
-	  <li>Adds a new UDP based network component.</li>
-	  <li>Adds JMX based administration for JNDI implementation.</li>
-	  <li>Enhancement in JMX use in an OSGI environment.</li>
-	  <li>RA behavior in an HA colocated mode.</li>
-	  <li>Javadoc and logging enhancements.</li>
-	</ul>
+      <s2 name="New features and improvements">
+      <ul>
+        <li>Improves DMQ behavior and handling of faulty messages,</li>
+        <li>Adds message swap in/out facility,</li>
+        <li>Supplies the MonitoringTopic,</li>
+        <li>Adds flow control and compression in PoolNetwork component,</li>
+        <li>Releases a new J2ME MIDP client,</li>
+        <li>Javadoc and logging enhancements.</li>
+      </ul>
       </s2>
       <s2 name="Bug fixes">
-	<ul>
-          <li>NTransaction: No longer call System.exit in case of fatal errors.</li>
-          <li>JNDI: don't freeze the server in case of context loosing..</li>
-	</ul>
+      <ul>
+        <li>Removes a thread leak with the JCA connector.</li>
+        <li>Message blocked in one queue of a cluster queue after visiting  others</li>
+        <li>correctly set topicActivationThreshold and topicPassivationThreshold attributes in Joram JMS Session.</li>
+        <li>Restarting of the UDPNetwork error.</li>
+     </ul>
+      </s2>
+    </s1>
+
+    <s1 name="JORAM maintenance release 4.3.34 (August 1st, 2008)">
+      <p>Joram 4.3.34 is available in the SVN repository with tag JORAM_4_3_34.</p>
+      <s2 name="This release only provides bug fixes:">
+      <ul>
+        <li>Cleans out-of-date requests and improves Consumer.receiveNoWait behavior.</li>
+        <li>HA handling in JCA connector.</li>
+      </ul>
+      </s2>
+    </s1>  
+  
+    <s1 name="JORAM maintenance release 5.0.9 (April 22, 2008)">
+      <p>Joram 5.0.9 is available in the SVN repository with tag JORAM_5_0_9.
+       This release provides many features and changes:</p>
+      <s2 name="New features and improvements">
+      <ul>
+        <li>Adds a new UDP based network component.</li>
+        <li>Adds JMX based administration for JNDI implementation.</li>
+        <li>Enhancement in JMX use in an OSGI environment.</li>
+        <li>RA behavior in an HA colocated mode.</li>
+        <li>Javadoc and logging enhancements.</li>
+      </ul>
+      </s2>
+      <s2 name="Bug fixes">
+      <ul>
+        <li>NTransaction: No longer call System.exit in case of fatal errors.</li>
+        <li>JNDI: don't freeze the server in case of context loosing..</li>
+      </ul>
       </s2>
     </s1>
 
     <s1 name="JORAM maintenance release 5.0.8 (February 12, 2008)">
-      <p>Joram 5.0.8 is available in the CVS repository with tag JORAM_5_0_8.
+      <p>Joram 5.0.8 is available in the SVN repository with tag JORAM_5_0_8.
        This release provides many features and changes:</p>
-      <s2 name="New features and improvments">
+      <s2 name="New features and improvements">
 	<ul>
 	  <li>Allows to choose the network component when adding a domain.</li>
 	  <li>New HADistributedJndiServer component.</li>
@@ -55,10 +88,10 @@
     </s1>
 
     <s1 name="JORAM maintenance release 4.3.32 (February 12, 2008)">
-      <p>Joram 4.3.32 is available in the CVS repository with tag JORAM_4_3_32.
+      <p>Joram 4.3.32 is available in the SVN repository with tag JORAM_4_3_32.
        This version is bundled in <a href="http://jonas.ow2.org/">Jonas 4.9</a>.
        This release provides many features and changes:</p>
-      <s2 name="New features and improvments">
+      <s2 name="New features and improvements">
 	<ul>
 	  <li>New HADistributedJndiServer component.</li>
 	  <li>Allows administration through HA connection in XML Script.</li>
@@ -76,9 +109,9 @@
     </s1>
 
     <s1 name="JORAM maintenance release 5.0.7 (December 19, 2007)">
-      <p>Joram 5.0.7 is available in the CVS repository with tag JORAM_5_0_7.
+      <p>Joram 5.0.7 is available in the SVN repository with tag JORAM_5_0_7.
        This release provides many features and changes:</p>
-      <s2 name="New features and improvments">
+      <s2 name="New features and improvements">
 	<ul>
 	  <li>Add MySQLDBTransaction and DerbyDBTransaction.</li>
           <li>Best handling of TTL and priority of the JMS messages.</li>
@@ -101,9 +134,9 @@
     </s1>
 
     <s1 name="JORAM release 5.0.6 (September 25, 2007)">
-      <p>Joram 5.0 is available in the CVS repository with tag JORAM_5_0_6.
+      <p>Joram 5.0 is available in the SVN repository with tag JORAM_5_0_6.
        This release provides many features and changes:</p>
-      <s2 name="New features and improvments">
+      <s2 name="New features and improvements">
 	<ul>
 	  <li>New serialisation mechanism between client and server to allow
               the C/C++ client API: Xoram.</li>
@@ -125,10 +158,10 @@
     </s1>
 
     <s1 name="JORAM maintenance release 4.3.30 (September 25, 2007)">
-      <p>This is a maintenance release. It is available in the CVS repository 
+      <p>This is a maintenance release. It is available in the SVN repository 
       with tag JORAM_4_3_30.
       This release provides the following fixes and changes:</p>
-      <s2 name="New features and improvments">
+      <s2 name="New features and improvements">
 	<ul>
 	  <li>Implements loose coupling for distributed JNDI.</li>
 	</ul>
@@ -143,7 +176,7 @@
     </s1>
 
     <s1 name="JORAM maintenance release 4.3.28 (April 26, 2007)">
-      <p>This is a maintenance release. It is available in the CVS repository 
+      <p>This is a maintenance release. It is available in the SVN repository 
       with tag JORAM_4_3_28.
       This release provides the following fixes and changes:</p>
       <s2 name="Bug fixes">
@@ -155,10 +188,10 @@
     </s1>
 
     <s1 name="JORAM maintenance release 4.3.26 (March 27, 2007)">
-      <p>This is a maintenance release. It is available in the CVS repository 
+      <p>This is a maintenance release. It is available in the SVN repository 
       with tag JORAM_4_3_26.
       This release provides the following fixes and changes:</p>
-      <s2 name="New features and improvments">
+      <s2 name="New features and improvements">
 	<ul>
           <li>Adds clustering facilities in administered objects: connection factories and destinations.</li>
           <li>Use of inheritance and reflection for generic handling of JNDI references.</li>
@@ -168,7 +201,7 @@
     </s1>
 
     <s1 name="JORAM maintenance release 4.3.25 (March 08, 2007)">
-      <p>This is a maintenance release. It is available in the CVS repository 
+      <p>This is a maintenance release. It is available in the SVN repository 
       with tag JORAM_4_3_25. This version is bundled in Jonas 4.8.5.
       This maintenance release provides the following fixes and changes:</p>
       <s2 name="Bug fixes">
@@ -190,7 +223,7 @@
     </s1>
 
     <s1 name="JORAM maintenance release 4.3.22 (February 26, 2007)">
-      <p>This is a maintenance release. It is available in the CVS repository 
+      <p>This is a maintenance release. It is available in the SVN repository 
       with tag JORAM_4_3_22. This version is bundled in Jonas 4.8.4.
       This maintenance release provides the following fixes and changes:</p>
       <s2 name="Bug fixes">
@@ -204,7 +237,7 @@
     </s1>
 
     <s1 name="JORAM maintenance release 4.3.21 (September 20, 2006)">
-      <p>This is a maintenance release. It is available in the CVS repository 
+      <p>This is a maintenance release. It is available in the SVN repository 
       with tag JORAM_4_3_21. This version is bundled in Jonas 4.8 and Petals 1.0.
       This maintenance release provides the following fixes and changes:</p>
       <s2 name="Bug fixes">
@@ -218,10 +251,10 @@
     </s1>
 
     <s1 name="JORAM maintenance release 4.3.20 (August 03, 2006)">
-      <p>This is a maintenance release. It is available in the CVS repository 
+      <p>This is a maintenance release. It is available in the SVN repository 
       with tag JORAM_4_3_20. This version is bundled in Jonas 4.8. This
       maintenance release provides the following fixes and changes:</p>
-      <s2 name="New features and improvments">
+      <s2 name="New features and improvements">
 	<ul>
 	  <li>Allows activation of HA mode with Joram RA.</li>
 	  <li>Dynamic loading of configuration file through the MBean.</li>
@@ -235,14 +268,14 @@
     </s1>
 
     <s1 name="JORAM maintenance release 4.3.19 (July 11, 2006)">
-      <p>This is a maintenance release. It is available in the CVS repository 
+      <p>This is a maintenance release. It is available in the SVN repository 
       with tag JORAM_4_3_19. This version is bundled in Jonas 4.7.5. This
       maintenance release provides the following fixes and changes:</p>
-      <s2 name="New features and improvments">
+      <s2 name="New features and improvements">
 	<ul>
 	  <li>XML export facilities for Joram's configuration.</li>
 	  <li>Periodic cleaning task for queues.</li>
-	  <li>Many improvments about JCA connector.</li>
+	  <li>Many improvements about JCA connector.</li>
 	</ul>
       </s2>
       <s2 name="Bug fixes">
@@ -254,10 +287,10 @@
     </s1>
 
     <s1 name="JORAM maintenance release 4.3.18 (May 31, 2006)">
-      <p>This is a maintenance release. It is available in the CVS repository 
+      <p>This is a maintenance release. It is available in the SVN repository 
       with tag JORAM_4_3_18. This maintenance release provides the following
       fixes and changes:</p>
-      <s2 name="New features and improvments">
+      <s2 name="New features and improvements">
 	<ul>
 	  <li>Changes NTransaction to expose a repository interface; provides a File and DB implementation.</li>
 	  <li>Adds a DBTransaction implementation of Transaction interface.</li>
@@ -276,9 +309,9 @@ connector onException method.</li>
     </s1>
 
     <s1 name="JORAM maintenance release 4.3.14 (March 19, 2006)">
-      <p>This is a maintenance release. It is available in the CVS repository 
+      <p>This is a maintenance release. It is available in the SVN repository 
       with tag JORAM_4_3_14. This maintenance release provides the following fixes and changes.</p>
-      <s2 name="New features and improvments">
+      <s2 name="New features and improvements">
 	<ul>
 	  <li>Adds SchedulerQueue.</li>
 	  <li>Adds handling of expiration time in MOM.</li>
@@ -294,9 +327,9 @@ connector onException method.</li>
     </s1>
 
     <s1 name="JORAM maintenance release 4.3.12 (January 19, 2006)">
-      <p>This is a maintenance release. It is available in the CVS repository 
+      <p>This is a maintenance release. It is available in the SVN repository 
       with tag JORAM_4_3_12. This maintenance release provides the following fixes and changes.</p>
-      <s2 name="New features and improvments">
+      <s2 name="New features and improvements">
 	<ul>
 	  <li>Allows to bind Joram to a single IP address in multi-homed host. An optional IP address can be passed in argument of the Joram TCP or SSL service. Thank's to Alex Porras (MediaOcean) for its contribution.</li>
 	  <li>Allows multiples 'client' in an Http(s)Network, the unique 'listen' server routes messages between 'client' servers.</li>
@@ -317,9 +350,9 @@ connector onException method.</li>
     </s1>
 
     <s1 name="JORAM maintenance release 4.3.10 (November 3, 2005)">
-      <p>This is a maintenance release. It is available in the CVS repository 
+      <p>This is a maintenance release. It is available in the SVN repository 
       with tag JORAM_4_3_10. This maintenance release provides the following fixes and changes.</p>
-      <s2 name="New features and improvments">
+      <s2 name="New features and improvements">
 	<ul>
 	  <li>Basic XML scripting capabilities: it allows creation, deployment and JNDI binding of Destinations, Users and ConnectionFactories.</li>
 	  <li>Adds PoolNetwork component in default packaging.</li>
@@ -334,7 +367,7 @@ connector onException method.</li>
     </s1>
 
     <s1 name="JORAM maintenance release 4.3.9 (October 25, 2005)">
-      <p>This is a maintenance release. It is available in the CVS repository 
+      <p>This is a maintenance release. It is available in the SVN repository 
       with tag JORAM_4_3_9. This maintenance release essentially provides a bug fix, it is embedded in the last JOnAS build (4.6.1).</p>
       <s2 name="Bug fixes">
 	<ul>
@@ -344,9 +377,9 @@ connector onException method.</li>
     </s1>
 
     <s1 name="JORAM maintenance release 4.3.8 (October 20, 2005)">
-      <p>This is a maintenance release. It is available in the CVS repository 
+      <p>This is a maintenance release. It is available in the SVN repository 
       with tag JORAM_4_3_8. This maintenance release provides the following fixes and changes.</p>
-      <s2 name="New features and improvments">
+      <s2 name="New features and improvements">
 	<ul>
 	  <li>Automatically process provider major and minor Version.</li>
 	  <li>Use default version number from build.properties.</li>
@@ -372,13 +405,13 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
     </s1>
 
     <s1 name="JORAM maintenance release 4.3.4 (August 3, 2005)">
-      <p>This is a maintenance release. It is available in the CVS repository 
+      <p>This is a maintenance release. It is available in the SVN repository 
       with tag JORAM_4_3_4. This maintenance release provides the following fixes and changes.</p>
-      <s2 name="New features and improvments">
+      <s2 name="New features and improvements">
 	<ul>
 	  <li>Performance improvements: management of transient message, saving of messages and agents.</li>
 	  <li>Updates JGroups version.</li>
-	  <li>Many JMX improvments.</li>
+	  <li>Many JMX improvements.</li>
 	</ul>
       </s2>
       <s2 name="Bug fixes">
@@ -390,7 +423,7 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
     </s1>
 
     <s1 name="JORAM maintenance release 4.3.1 (June 3, 2005)">
-      <p>This is a maintenance release. It is available in the CVS repository 
+      <p>This is a maintenance release. It is available in the SVN repository 
       with tag JORAM_4_3_1. This maintenance release provides the following fixes and changes.</p>
       <s2 name="Bug fixes">
 	<ul>
@@ -403,12 +436,12 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
     </s1>
 
     <s1 name="JORAM 4.3 (May 17, 2005)">
-      <p>The Joram 4.3 final release is available in the CVS repository with the tag JORAM_4_3_0. 
+      <p>The Joram 4.3 final release is available in the SVN repository with the tag JORAM_4_3_0. 
          It provides a lot of fixes and improvements.</p>
       <s2 name="New features">
 	<ul>
 	  <li>extended JMX management,</li>
-	  <li>Performance improvments,</li>
+	  <li>Performance improvements,</li>
 	  <li>Handling of large message transmission (called swap out mode),</li>
 	  <li>Complete SSL support with handling of encrypted client to server communications.</li>
 	</ul>
@@ -416,7 +449,7 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
     </s1>
 
     <s1 name="JORAM maintenance release 4.2.3 (May 13, 2005)">
-      <p>This is a maintenance release, the last one before version 4.3. It is available in the CVS repository 
+      <p>This is a maintenance release, the last one before version 4.3. It is available in the SVN repository 
       with tag JORAM_4_2_3. This maintenance release provides the following fixes and changes compare to the 4.2.0 
       version (bug and fixes of maintenance release 4.2.1 and 4.2.2 are hereafter included)</p>
       <s2 name="Bug fixes">
@@ -435,7 +468,7 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
     </s1>
 
     <s1 name="JORAM 4.2 (March 31, 2005)">
-      <p>The Joram 4.2 final release is available in the CVS repository with the tag JORAM_4_2_0. 
+      <p>The Joram 4.2 final release is available in the SVN repository with the tag JORAM_4_2_0. 
          It provides a lot of fixes and improvements.</p>
       <p> The documentation has been updated and is available for <a href="../download/index.html">download</a>.</p>
 
@@ -446,7 +479,7 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
 	  <li>Upgraded JDK 1.5 support</li>
 	  <li>JAMT : support for dynamic configuration of the JORAM platform</li>
 	  <li>Administration module: new operations to read/delete messages from subscriptions and queues.</li>
-	  <li>Network communications: Many improvments and bug-fixes in NGNetwork.</li>
+	  <li>Network communications: Many improvements and bug-fixes in NGNetwork.</li>
 	  <li>Joram RA: Add util to configure the joram adapter resource. create new jar joram-config.jar 
               and joram-raconfig.jar. modify ship.adapter, ship.remoteadapter and ship.jonasadapter.
               update jonas-ra.xml.</li>
@@ -467,7 +500,7 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
     </s1>
 
     <s1 name="JORAM 4.2 RC2 (March 11, 2005)">
-      <p>The Joram 4.2 release candidate 2 is available in the CVS repository with the tag JORAM_4_2_RC2. 
+      <p>The Joram 4.2 release candidate 2 is available in the SVN repository with the tag JORAM_4_2_RC2. 
          It provides a lot of fixes and improvements.</p>
 
       <s2 name="New Features and Improvments ">
@@ -477,7 +510,7 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
 	  <li>Upgraded JDK 1.5 support</li>
 	  <li>JAMT : support for dynamic configuration of the JORAM platform</li>
 	  <li>Administration module: new operations to read/delete messages from subscriptions and queues.</li>
-	  <li>Network communications: Many improvments and bug-fixes in NGNetwork.</li>
+	  <li>Network communications: Many improvements and bug-fixes in NGNetwork.</li>
 	  <li>Joram RA: Add util to configure the joram adapter resource. create new jar joram-config.jar 
               and joram-raconfig.jar. modify ship.adapter, ship.remoteadapter and ship.jonasadapter.
               update jonas-ra.xml.</li>
@@ -500,7 +533,7 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
     </s1>
 
     <s1 name="JORAM 4.2 RC1 (January 10, 2005)">
-      <p>The Joram 4.2 release candidate 1 is available in the CVS repository with the tag JORAM_4_2_RC1. 
+      <p>The Joram 4.2 release candidate 1 is available in the SVN repository with the tag JORAM_4_2_RC1. 
          It provides  new features as high-avaibility, dynamic configuration, and a lot of fixes
          and improvements.</p>
       <p>The updated documentation, packaged version for download and more detailed announcement will be 
@@ -525,7 +558,7 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
     </s1>
 
     <s1 name="JORAM_4_1_5 (January 7, 2005)">
-      <p>This maintenance release is available in the CVS repository with the tag JORAM_4_1_5.
+      <p>This maintenance release is available in the SVN repository with the tag JORAM_4_1_5.
          It provides minors new features as dynamic configuration of logging and support for Java 1.5 or JMX.
          Except an important failure it should be the last 4.1.x version, the next release will be the 4.2 RC1 
          with high-avaibility and numerous improvements.</p>
@@ -541,7 +574,7 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
     </s1>
 
     <s1 name="JORAM_4_1_4 (December 22, 2004)">
-      <p>This maintenance release is available in the CVS repository with the tag JORAM_4_1_4.  
+      <p>This maintenance release is available in the SVN repository with the tag JORAM_4_1_4.  
 	This release contains some minor features and bug fixes (see below the history file).</p>
       <p> It is also available for <a href="../download/index.html">download</a> and the documentation has been slightly updated.</p>
       <s2 name="Configuration improvements">
@@ -561,7 +594,7 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
     </s1>
 
     <s1 name="JORAM_4_1_2 (November 9, 2004)">
-      <p>This maintenance release is available in the CVS repository with the tag JORAM_4_1_2.  
+      <p>This maintenance release is available in the SVN repository with the tag JORAM_4_1_2.  
 	This release contains some minor features and bug fixes (see below the history file).</p>
       <p> It is also available for <a href="../download/index.html">download</a> and the documentation has been slightly updated.</p>
       <s2 name="Performance enhancements">
@@ -583,7 +616,7 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
     </s1>
 		
     <s1 name="JORAM_4_1_1 (October 13, 2004)">
-      <p>This maintenance release is available in the CVS repository with the tag JORAM_4_1_1.  
+      <p>This maintenance release is available in the SVN repository with the tag JORAM_4_1_1.  
 	This release contains some minor features and bug fixes (see below the history file).</p>
       <p> It is also available for <a href="../download/index.html">download</a> and the documentation has been slightly updated.</p>
       <s2 name="New features and updates">
@@ -620,7 +653,7 @@ MOM; clone the MessagePersistent and correctly set the message field.</li>
       </s2>
     </s1>
     <s1 name="JORAM_4_0_5 (August 2, 2004)">
-      <p>This maintenance version is integrated in the latest JOnAS release available on CVS (JOnAS 4.1.3).
+      <p>This maintenance version is integrated in the latest JOnAS release available on SVN (JOnAS 4.1.3).
 	This maintenance version succesfully passed the JMS test Suite of the J2EE 1.4 TCK</p>
     </s1>
     <s1 name="CVS base, no tag">
