@@ -23,11 +23,6 @@ import java.util.Set;
 import javax.management.MBeanAttributeInfo;
 import javax.management.ObjectName;
 
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.util.Debug;
-
 public final class MXWrapper {
   /**
    *  Name of the property that allow to configure the JMX server proxy: it
@@ -38,71 +33,38 @@ public final class MXWrapper {
 
   public static MXServer mxserver = null;
   
-  private static Logger logger = Debug.getLogger("fr.dyade.aaa.util.management");
-
-  public static void init() {
+  public static void init() throws Exception {
     if (mxserver != null)
       return;
-
     String mxname = System.getProperty(ServerImpl);
-
-    // Be careful, do not call Debug.getLogger before initializing the
-    // MXServer (see Debug.init).
-
-    try {
-      if ((mxname != null) && (mxname.length() > 0))
-        Class.forName(mxname).newInstance();
-    } catch (Exception exc) {
-      logger.log(BasicLevel.ERROR, "can't instantiate MXServer: " + mxname, exc);
-    }
-
-    if (logger.isLoggable(BasicLevel.INFO))
-      logger.log(BasicLevel.INFO, "MXWrapper.ServerImpl -> " + mxname);
+    if ((mxname != null) && (mxname.length() > 0))
+      Class.forName(mxname).newInstance();
   }
 
   public static void registerMBean(Object bean, String domain, String name) throws Exception {
     if (mxserver == null)
       return;
-
-    if (logger.isLoggable(BasicLevel.INFO))
-      logger.log(BasicLevel.INFO, "registerMBean: " + name + " -> " + mxserver);
-
     mxserver.registerMBean(bean, domain, name);
   }
 
   public static void unregisterMBean(String domain, String name) throws Exception {
     if (mxserver == null) return;
-
-    if (logger.isLoggable(BasicLevel.INFO))
-    logger.log(BasicLevel.INFO, "unregisterMBean: " + name + " -> " + mxserver);
-
     mxserver.unregisterMBean(domain, name);
   }
   
   public static void registerMBean(Object bean, String fullName) throws Exception {
     if (mxserver == null)
       return;
-
-    if (logger.isLoggable(BasicLevel.INFO))
-      logger.log(BasicLevel.INFO, "registerMBean: " + fullName + " -> " + mxserver);
-
     mxserver.registerMBean(bean, fullName);
   }
 
   public static void unregisterMBean(String fullName) throws Exception {
     if (mxserver == null)
       return;
-
-    if (logger.isLoggable(BasicLevel.INFO))
-      logger.log(BasicLevel.INFO, "unregisterMBean: " + fullName + " -> " + mxserver);
-    
     mxserver.unregisterMBean(fullName);
   }
 
   public static void setMXServer(MXServer server) {
-    if (logger.isLoggable(BasicLevel.INFO))
-      logger.log(BasicLevel.INFO, "setMXServer: " + server);
-
     mxserver = server;
   }
 
@@ -110,30 +72,18 @@ public final class MXWrapper {
     return mxserver;
   }
   
-  public static Object getAttribute(ObjectName objectName, String attribute) {
+  public static Object getAttribute(ObjectName objectName, String attribute) throws Exception {
     if (mxserver == null) {
       return null;
     }
-    try {
-      return mxserver.getAttribute(objectName, attribute);
-    } catch (Exception exc) {
-      if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN, " getAttribute " + attribute + " on " + objectName + " error.", exc);
-    }
-    return null;
+    return mxserver.getAttribute(objectName, attribute);
   }
   
-  public static MBeanAttributeInfo[] getAttributes(ObjectName objectName) {
+  public static MBeanAttributeInfo[] getAttributes(ObjectName objectName) throws Exception {
     if (mxserver == null) {
       return null;
     }
-    try {
-      return mxserver.getAttributes(objectName);
-    } catch (Exception exc) {
-      if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.ERROR, " getAttributes  on " + objectName + " error.", exc);
-    }
-    return null;
+    return mxserver.getAttributes(objectName);
   }
   
   public static Set queryNames(ObjectName objectName) {

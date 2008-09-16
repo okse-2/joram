@@ -211,11 +211,16 @@ public class MonitoringTopicImpl extends TopicImpl implements MonitoringTopicImp
             while (st.hasMoreTokens()) {
               String token = st.nextToken();
               if (token.equals("*")) {
-                MBeanAttributeInfo[] attributes = MXWrapper.getAttributes(mBean);
-                if (attributes != null) {
-                  for (int i = 0; i < attributes.length; i++) {
-                    setMessageProperty(message, mBean, attributes[i].getName());
+                try {
+                  MBeanAttributeInfo[] attributes = MXWrapper.getAttributes(mBean);
+                  if (attributes != null) {
+                    for (int i = 0; i < attributes.length; i++) {
+                      setMessageProperty(message, mBean, attributes[i].getName());
+                    }
                   }
+                } catch (Exception exc) {
+                  if (logger.isLoggable(BasicLevel.WARN))
+                    logger.log(BasicLevel.ERROR, " getAttributes  on " + mBean + " error.", exc);
                 }
               } else {
                 setMessageProperty(message, mBean, token.trim());
@@ -233,15 +238,20 @@ public class MonitoringTopicImpl extends TopicImpl implements MonitoringTopicImp
   }
   
   private void setMessageProperty(Message message, ObjectName mbeanName, String attrName) {
-    Object monit = MXWrapper.getAttribute(mbeanName, attrName);
-    if (monit != null) {
-      if (monit instanceof Boolean || monit instanceof Byte || monit instanceof Short
-          || monit instanceof Integer || monit instanceof Long || monit instanceof Float
-          || monit instanceof Double || monit instanceof String) {
-        message.setProperty(mbeanName + "," + attrName, monit);
-      } else {
-        message.setProperty(mbeanName + "," + attrName, monit.toString());
+    try {
+      Object monit = MXWrapper.getAttribute(mbeanName, attrName);
+      if (monit != null) {
+        if (monit instanceof Boolean || monit instanceof Byte || monit instanceof Short
+            || monit instanceof Integer || monit instanceof Long || monit instanceof Float
+            || monit instanceof Double || monit instanceof String) {
+          message.setProperty(mbeanName + "," + attrName, monit);
+        } else {
+          message.setProperty(mbeanName + "," + attrName, monit.toString());
+        }
       }
+    } catch (Exception exc) {
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN, " getAttribute " + attrName + " on " + mbeanName + " error.", exc);
     }
   }
   
