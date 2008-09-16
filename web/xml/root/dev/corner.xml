@@ -32,12 +32,12 @@
     <ul>
       <li>The <connect href="versions.xml">code updates</connect>
           page provides in-depth descriptions of the evolutions of the
-          CVS code base.</li>
+          SVN code base.</li>
     </ul>
     <ul>
       <li>The <a href="http://forge.objectweb.org/cvs/?group_id=4">
-          CVS Forge page</a> allows you to get JORAM through CVS, browse
-          the updates, differencies, etc.</li>
+          SVN Forge page</a> allows you to get JORAM through SVN, browse
+          the updates, differences, etc.</li>
     </ul>
     </s1>
 
