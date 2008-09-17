@@ -14,25 +14,29 @@
 
   <s1 name="Road map">
   
-    <subtitle>J2ME light Client</subtitle>
+    <s2 name="J2ME light Client">
     <p>After the C/C++ client library, a new MIDP client allowing Joram
     access from J2ME device will be released in September.</p>
+    </s2>
 
-    <subtitle>AMQP</subtitle>
+    <s2 name="AMQP">
     <p>Thank's to third party users, the Joram team should announce soon the
     support of AMQP in Joram. It will allow the use of Joram from many client
     interfaceS and langages.</p>
+    </s2>
     
-    <subtitle>Security model</subtitle>
+    <s2 name="Security model">
     <p>A new security implementation with authentication based on JAAS LoginModule
     and User/Role access control rights.</p>
-
+    </s2>
+    
   </s1>
 
   <s1 name="Call for contributions">
 
-    <subtitle>Tutorials and documentation</subtitle>
+    <s2 name="Tutorials and documentation">
     <p>If you wish to contribute a translation, feel free to contact us.</p>
+    </s2>
 
   </s1>
 

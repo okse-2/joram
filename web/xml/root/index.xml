@@ -15,7 +15,7 @@
     <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
 
       <subtitle>JORAM has been made available for download since May 2000.</subtitle>
-
+      
     <table border="0">
   	<tr>
 	    <td><img src="images/joram.jpg" alt="JORAM logo" height="132" width="287" border="0" hspace="2"/></td>
@@ -23,16 +23,18 @@
 	  </tr>
     </table>
       
-      <p><strong>JORAM</strong> incorporates a 100% pure Java
-      implementation of <strong>JMS 1.1</strong> (Java Message Service API
-      released by Sun Microsystem, Inc.). It provides access to a really
-      distributed MOM (Message Oriented Middleware), built on top of the
-      <a href="http://www.scalagent.com/">ScalAgent</a> agents based
-      platform.</p>
-      <p>JORAM is an <strong>open source</strong> software released under
-      the <strong>LGPL</strong> license.</p>
-      <p>JORAM is used by JOnAS to undergo the J2EE 1.4 certification, and has passed all tests concerning JMS 1.1
-      certification in this TCK.</p>
+      <p><strong>JORAM</strong> incorporates a 100% pure Java implementation of <strong>JMS 1.1</strong>
+      (Java Message Service API released by Sun Microsystem, Inc.) specification. It provides access to a
+      really distributed MOM (Message Oriented Middleware), built on top of the
+      <a href="http://www.scalagent.com/">ScalAgent D.T.</a> agents based platform.</p>
+      
+      <p>JORAM is a mature project started in 1999, it is an <strong>open source</strong> software released under
+      the <strong>LGPL</strong> license since May 2000.</p>
+      <p>It provides a production ready distributed MOM already used within many critical operational applications.</p>
+      <p>Professional Support is available from <a href="http://www.scalagent.com/pages/en/products/joram-support.htm">Scalagent D.T.</a>.</p>
+
+      <p>Stable versions of JORAM are JMS 1.1 certified. Moreover JORAM is used by JOnAS to undergo the J2EE 1.4 certification,
+      and has passed all tests concerning JMS 1.1 certification in this J2EE TCK.</p>
    
       <s2 name="Latest News">
       	<subtitle>September 16, 2008: JORAM 5.1.0 is released</subtitle>
@@ -48,7 +50,7 @@
         </ul>
       	<p>It is tagged in SVN (JORAM_5_1_0), the complete list of changes can be viewed either in
       	<a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
-      	<a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/trunk/joram/history">CVS history</a>.</p>
+      	<a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/trunk/joram/history">SVN history</a>.</p>
 
 	      <subtitle>August 1st, 2008: JORAM 4.3.34 is released</subtitle>
       	<p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically
