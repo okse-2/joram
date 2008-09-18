@@ -83,8 +83,20 @@ public final class Message implements Serializable {
   /** <code>true</code> if soft reference is used for the message. */
   private transient boolean soft;
 
-  private static final boolean globalUseSoftRef = Boolean.parseBoolean(AgentServer
-      .getProperty("org.objectweb.joram.mom.messages.SWAPALLOWED"));
+  /**
+   *  Defines if the swapping mechanism is globally activated for messages
+   * in this server.
+   * <p>
+   *  Default value is false.
+   * <p>
+   *  Note: the message swapping can be finely configured using the 
+   * <code>JMS_JORAM_SWAPALLOWED</code> property of the JMS message.
+   * <p>
+   *  Theses properties can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
+   */
+  private static final boolean globalUseSoftRef =
+    Boolean.getBoolean("org.objectweb.joram.mom.messages.SWAPALLOWED");
 
   /**
    * Constructs a <code>Message</code> instance.
