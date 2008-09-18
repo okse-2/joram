@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="joram-team@ow2.org">joram-team</author>
+    <title>Developers' corner</title>
+    <filename>corner.xml</filename>
+    <pathtoroot>..</pathtoroot>
+  </properties>
+
+  <body>
+
+    <s1 name="Welcome at the developers' corner">
+  
+    <p>Many people from various origins have contributed to JORAM, and
+    new contributors are always welcome.</p>
+    <p>A contribution can be the development of a new feature, but also
+    new or improved documentation, suggestions, feedbacks, debugging.</p>
+    <p>Simply send your ideas, documents and developments (if any) to the 
+    <a href="mailto:joram-team@ow2.org">joram team</a> .</p>
+    <p></p>
+
+    <p>The following resources are proposed to the advanced users and
+       developers:</p>
+    <ul>
+      <li>The <connect href="roadMap.xml">road map</connect> presents the
+          expected Joram evolutions. It also contains some calls to 
+          contributions.</li>
+    </ul>
+    <ul>
+      <li>The <connect href="versions.xml">code updates</connect>
+          page provides in-depth descriptions of the evolutions of the
+          SVN code base.</li>
+    </ul>
+    <ul>
+      <li>The <a href="http://forge.objectweb.org/cvs/?group_id=4">
+          SVN Forge page</a> allows you to get JORAM through SVN, browse
+          the updates, differences, etc.</li>
+    </ul>
+    </s1>
+
+  </body>
+
+</document>

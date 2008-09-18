@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE project SYSTEM '../../common/dtd/project.dtd'>
+
+<project>
+  <title>JORAM</title>
+
+  <description>JORAM (Java Open Reliable Asynchronous Messaging) is an open source implementation of the JMS (Java Message Service) API.</description>
+
+  <keywords>JORAM,Java,Open,Reliable,Asynchronous,Messaging,JMS,Java,Message,Service,message,oriented,middleware,MOM,agent,Agents,Anytime,Anywhere,AAA,platform,ScalAgent,open,source,free,software,LGPL</keywords>
+
+  <body>    
+    <menu>
+      <legend>Project Links</legend>
+      <menuitem><a href="index.html">Home</a></menuitem>
+      <menuitem><a href="technical.html">Specification</a></menuitem>
+      <menuitem><a href="download/index.html">Download</a></menuitem>
+      <menuitem><a href="doc/index.html">Documentation</a></menuitem>
+      <menuitem><a href="license.html">Licenses</a></menuitem>
+      <menuitem><a href="history.html">History</a></menuitem>
+    </menu>
+
+    <menu>
+      <legend>Developers' Corner</legend>
+      <menuitem><a href="dev/corner.html">Welcome</a></menuitem>
+      <menuitem><connect href="dev/roadMap.xml">Road map</connect></menuitem>
+      <menuitem><connect href="dev/versions.xml">Code updates</connect></menuitem>
+      <menuitem><a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram">SVN repository</a></menuitem>
+      <menuitem><a href="http://forge.objectweb.org/projects/joram">ObjectWeb Forge site</a></menuitem>
+    </menu>
+
+    <menu>
+      <legend>Support</legend>
+      <menuitem><a href="mailing.html">Free mailing lists</a></menuitem>
+      <menuitem><a href="support.html">Professional Support</a></menuitem>
+      <menuitem><a href="http://wiki.objectweb.org/joram">Wiki</a></menuitem>
+    </menu>
+    
+    <menu>
+      <legend>Community</legend>
+      <menuitem><a href="team.html">Team</a></menuitem>
+      <menuitem><a href="partners.html">Partners</a></menuitem>
+      <menuitem><a href="contacts.html">Contacts</a></menuitem>
+    </menu>
+
+  </body>
+</project>
