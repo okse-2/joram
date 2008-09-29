@@ -34,14 +34,13 @@ import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 
 import org.objectweb.joram.client.jms.Connection;
+import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.ConsumerMessages;
 import org.objectweb.joram.shared.client.MomExceptionReply;
 import org.objectweb.joram.shared.client.PingRequest;
 import org.objectweb.joram.shared.client.SessDenyRequest;
-
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 public class RequestMultiplexer {
@@ -98,6 +97,7 @@ public class RequestMultiplexer {
     } catch (Exception exc) {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", exc);
+      if (timer != null) timer.cancel();
       throw new JMSException(exc.toString());
     }
     
@@ -382,8 +382,7 @@ public class RequestMultiplexer {
       exceptionListener.onException(jmsExc);
   }
 
-  public void schedule(TimerTask task,
-                       long period) {
+  public void schedule(TimerTask task, long period) {
     if (timer != null) {
       try {
         timer.schedule(task, period);
@@ -393,7 +392,7 @@ public class RequestMultiplexer {
       }
     }
   }
-  
+
   public void setDemultiplexerDaemonName(String name) {
     demtpx.setName(name);
   }
@@ -516,7 +515,8 @@ public class RequestMultiplexer {
     }
 
     public void start() throws Exception {
-      timer.schedule(this, heartBeat, heartBeat);
+      if (timer != null)
+        timer.schedule(this, heartBeat, heartBeat);
     }
   }
 
