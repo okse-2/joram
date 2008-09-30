@@ -110,7 +110,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
     try {
       MXWrapper.registerMBean(topic, "joramClient", buff.toString());
     } catch (Exception e) {
-      JoramTracing.dbgClient.log(BasicLevel.ERROR, "registerMBean", e);
+      JoramTracing.dbgClient.log(BasicLevel.WARN, "registerMBean", e);
     }
     return topic;
   }
