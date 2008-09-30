@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -113,12 +113,9 @@ public class User extends AdministeredObject implements UserMBean {
     try {
       MXWrapper.registerMBean(user,
                               "joramClient",
-                              "type=User,name="+name+
-                              "["+user.getProxyId()+"]");
+                              "type=User,name="+ name + "[" + user.getProxyId() + "]");
     } catch (Exception e) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                   "registerMBean",e);
+      JoramTracing.dbgClient.log(BasicLevel.WARN, "registerMBean",e);
     }
     return user;
   }
