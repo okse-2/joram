@@ -113,7 +113,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
     try {
       MXWrapper.registerMBean(queue, "joramClient", buff.toString());
     } catch (Exception e) {
-      JoramTracing.dbgClient.log(BasicLevel.ERROR, "registerMBean", e);
+      JoramTracing.dbgClient.log(BasicLevel.WARN, "registerMBean", e);
     }
     return queue;
   }
