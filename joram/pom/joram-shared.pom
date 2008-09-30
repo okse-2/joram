@@ -2,7 +2,7 @@
 <!--
  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  - JORAM: Java(TM) Open Reliable Asynchronous Messaging
- - Copyright (C) 2007 - ScalAgent Distributed Technologies
+ - Copyright (C) 2007 - 2008 ScalAgent Distributed Technologies
  - Copyright (C) 2007 - Bull S.A.S.
  -
  - This library is free software; you can redistribute it and/or
@@ -21,7 +21,7 @@
  - USA
  -
  - Initial developer(s): Guillaume Sauthier (Bull S.A.S)
- - Contributor(s):
+ - Contributor(s): ScalAgent Distributed Technologies
  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -52,6 +52,11 @@
       <groupId>org.objectweb.monolog</groupId>
       <artifactId>monolog</artifactId>
       <version>2.1.8</version>
+    </dependency>
+    <dependency>
+      <groupId>org.objectweb.joram</groupId>
+      <artifactId>jcup</artifactId>
+      <version>@VERSION@</version>
     </dependency>
   </dependencies>
 </project>
