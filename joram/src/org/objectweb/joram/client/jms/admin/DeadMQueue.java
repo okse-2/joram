@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms.admin;
 
@@ -80,7 +80,7 @@ public class DeadMQueue extends Queue {
     try {
       MXWrapper.registerMBean(dmq, "joramClient", buff.toString());
     } catch (Exception e) {
-      JoramTracing.dbgClient.log(BasicLevel.ERROR, "registerMBean", e);
+      JoramTracing.dbgClient.log(BasicLevel.WARN, "registerMBean", e);
     }
     return dmq;
   }
