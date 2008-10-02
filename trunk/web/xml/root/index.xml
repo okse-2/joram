@@ -37,6 +37,19 @@
       and has passed all tests concerning JMS 1.1 certification in this J2EE TCK.</p>
    
       <s2 name="Latest News">
+	      <subtitle>November 19th and 20th, 2008: JORAM Training Session, Grenoble, France</subtitle>
+	      <p>A two-day training session about JORAM is scheduled in Grenoble; it will be delivered in french language.</p>
+	      <p>The session is entitled "Design and Deploy a Distributed JORAM Messaging System".</p>
+	      <p>This training session is targeted at architects and system designers that intend to integrate  the JORAM component
+	      within a global distributed solution. It includes a significant part of  experimentations and case studies based on
+	      real-world application scenarios.</p>
+	      <p>The session is conducted by ScalAgent Distributed Technologies, the leading developer of the JORAM component. We
+	      offer to share our expertise through a training session aiming at providing the key knowledge to use and deploy a JORAM
+	      system that fits your own requirements. This two-day session details the design principles of JORAM and describes the
+	      best practices that will enable to take advantage of its advanced properties for complex networked environments.</p>
+	      <p>Detailed information about this training session is available online
+	      <a href="http://www.scalagent.com/pages/fr/datasheet/0709-JORAM-formation.pdf">(PDF, in french only)</a></p>
+
       	<subtitle>September 16, 2008: JORAM 5.1.0 is released</subtitle>
       	<p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
       	<p>It introduces many improvements and some bug fixes:</p>
@@ -75,12 +88,6 @@
 	      <p>It is tagged in SVN (JORAM_4_3_32), the complete list of changes can be viewed either in
 	      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
 	      <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/tags/JORAM_4_3_32/joram/history?rev=2159">SVN history</a>.</p>
-
-	      <subtitle>September 27th and 28th, 2007: JORAM Training Session, Grenoble, France</subtitle>
-	      <p>A two-day training session on JORAM is scheduled and will be delivered in french language. The session is entitled "Design and Deploy a Distributed JORAM Messaging System".</p>
-	      <p>This training session is targeted at architects and system designers that intend to integrate  the JORAM component within a global distributed solution. It includes a significant part of  experimentations and case studies based on real-world application scenarios.</p>
-	      <p>The session is conducted by ScalAgent Distributed Technologies, the leading developer of the JORAM component. We offer to share our expertise through a training session that provides the key knowledge to use and deploy a JORAM system that fits your requirements. This two-day session details the design principles of JORAM and describes the best practices to take advantage of its advanced properties in complex networked environments.</p>
-	      <p>Detailed information about this training session is available online <a href="http://www.scalagent.com/pages/fr/datasheet/0709-JORAM-formation.pdf">(PDF, in french only)</a></p>
 
         <subtitle>January 18, 2006</subtitle>
         <p>JORAM is acknowledged as the best open source MOM implementation, according to
