@@ -446,6 +446,13 @@ public class RequestMultiplexer {
           }
           canStop = false; 
           route(reply);
+          if (!running && isClosed()) {
+            if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+              JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                         "DemultiplexerDaemon ended and Socket closed.");
+            onExceptionRunner oer = new onExceptionRunner(new Exception("DemultiplexerDaemon ended and Socket closed."));
+            new Thread(oer).start();
+          }
         }
       } finally {
         finish();
