@@ -1243,6 +1243,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="client.test8"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1255,6 +1256,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="client.test13"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1267,6 +1269,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="client.test18"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1279,6 +1282,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="client.mcun"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1312,6 +1316,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="client.topic2"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1324,6 +1329,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="client.qrmax"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1336,6 +1342,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="client.close1"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1348,6 +1355,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="client.close4"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1360,6 +1368,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="client.close3"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1372,6 +1381,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="client.close2"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1384,6 +1394,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="client.test5"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1396,6 +1407,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="client.rqueue"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1408,6 +1420,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="client.tmpq"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1420,6 +1433,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="client.recover"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1432,6 +1446,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="client.servexc"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1444,6 +1459,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="client.cnxclose1"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1456,6 +1472,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="client.cnxclose3"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1468,6 +1485,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="client.cnxclose2"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1481,6 +1499,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
       <param name="args" value=""/>
+      <param name="testid" value="client.cnxclose"/>
     </antcall>
   </target>
 
@@ -1492,6 +1511,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="client.empty"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1504,6 +1524,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="client.redelivery"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1516,6 +1537,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="client.rollback"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1528,6 +1550,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="client.nowait"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -2877,6 +2900,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="testid" value="test15-1.noreg"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Topic -DBaseClass=joram.noreg.TcpBaseTest"/>
     </antcall>
   </target>
@@ -2887,6 +2911,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="testid" value="test15-2.noreg"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Queue -DBaseClass=joram.noreg.TcpBaseTest"/>
     </antcall>
   </target>
@@ -2897,6 +2922,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="testid" value="test15-3.noreg"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Topic -DBaseClass=joram.noreg.ColocatedBaseTest"/>
     </antcall>
   </target>
@@ -2907,6 +2933,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="testid" value="test15-4.noreg"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Queue -DBaseClass=joram.noreg.ColocatedBaseTest"/>
     </antcall>
   </target>
@@ -3063,6 +3090,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="testid" value="noreg.test19"/>
       <param name="jvmargs" value="-Dsid=0"/>
     </antcall>
   </target>
@@ -3075,6 +3103,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="testid" value="noreg.test20"/>
       <param name="jvmargs" value="-Dsid=0"/>
     </antcall>
   </target>
@@ -3087,6 +3116,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="testid" value="noreg.test21"/>
       <param name="jvmargs" value="-Dsid=0"/>
     </antcall>
   </target>
@@ -3099,6 +3129,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="testid" value="noreg.test25"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
@@ -3111,6 +3142,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
+      <param name="testid" value="noreg.test31"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
@@ -3123,6 +3155,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
+      <param name="testid" value="noreg.test32"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
@@ -3135,6 +3168,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
+      <param name="testid" value="noreg.test35"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
@@ -3148,6 +3182,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
+      <param name="testid" value="noreg.test39"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
@@ -3160,6 +3195,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
+      <param name="testid" value="noreg.test40"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
@@ -3172,6 +3208,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
+      <param name="testid" value="noreg.test41"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
@@ -3185,6 +3222,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers3.xml"/>
+      <param name="testid" value="noreg.test45"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
@@ -3198,6 +3236,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers3.xml"/>
+      <param name="testid" value="noreg.test46"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
@@ -3210,6 +3249,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
+      <param name="testid" value="noreg.test48"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
@@ -3222,6 +3262,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
+      <param name="testid" value="noreg.test49"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
@@ -3234,6 +3275,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
+      <param name="testid" value="noreg.test50"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
@@ -3246,6 +3288,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
+      <param name="testid" value="noreg.test51"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
@@ -3259,6 +3302,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
+      <param name="testid" value="noreg.test56"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
@@ -3274,6 +3318,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="testid" value="noreg.test57-1"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Queue -DMsgSize=256 -DNbMsg=239"/>
     </antcall>
   </target>
@@ -3287,6 +3332,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="testid" value="noreg.test57-2"/>
       <param name="jvmargs" value="-DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef -DDestination=org.objectweb.joram.client.jms.Queue -DMsgSize=256 -DNbMsg=5000"/>
     </antcall>
   </target>
@@ -3300,6 +3346,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="testid" value="noreg.test59"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
