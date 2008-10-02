@@ -1,4 +1,8 @@
 +==============================================================================
+| 2008/10/02 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+Bug fix: DemultiplexerDaemon: always call onException on closed connection.
++==============================================================================
 | 2008/09/29 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  - RequestMultiplexer: cancel timer on connect exception.
