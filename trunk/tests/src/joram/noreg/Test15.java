@@ -60,64 +60,74 @@ public class Test15 extends BaseTest {
   static Destination dest;
 
   public static void main (String args[]) throws Exception {
-    startServer();
-
-    String baseclass = "joram.noreg.ColocatedBaseTest";
-    baseclass = System.getProperty("BaseClass", baseclass);
-
-    String destclass =  "org.objectweb.joram.client.jms.Queue";
-    destclass =  System.getProperty("Destination", destclass);
-
-    Thread.sleep(500L);
-    AdminConnect(baseclass);
-
-    User user = User.create("anonymous", "anonymous", 0);
-    dest = createDestination(destclass);
-    dest.setFreeReading();
-    dest.setFreeWriting();
-
-    cf =  createConnectionFactory(baseclass);
-    AdminModule.disconnect();
-
-    Connection cnx2 = cf.createConnection();
-    Session sess2 = cnx2.createSession(false, Session.AUTO_ACKNOWLEDGE);
-    MessageProducer producer = sess2.createProducer(dest);
-    cnx2.start();
-
-    Sender15 sender = new Sender15(cnx2, sess2, producer);
-    new Thread(sender).start();
-
-    ExcList15 exclst = new ExcList15("Receiver");
-
-    int nb1 = 0; int nb2 = 0; int idx = 0;
-    for (int i=0; i<100; i++) {
-//       System.out.println("connecting#" + i);
-      Connection cnx1 = cf.createConnection();
-      cnx1.setExceptionListener(exclst);
-      Session sess1 = cnx1.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      MessageConsumer cons = sess1.createConsumer(dest);
-      cnx1.start();
-//       System.out.println("connected#" + i);
-      for (int j=0; j<50; j++) {
-        Message msg = cons.receive();
-        nb2 += 1;
-        int index = msg.getIntProperty("index");
-        if (index != idx) {
-//         System.out.println("recv#" + idx + '/' + index);
-          nb1 += 1;
-        }
-        idx = index +1;
-      }
-//       System.out.println("end recv#" + i);
-      cnx1.close();
-//       System.out.println("closed#" + i);
+    new Test15().run();
     }
+  
+  public void run() {
+    try {
+      startServer();
 
-    sender.stop();
-    System.out.println("Test OK: " + exclst.nbexc + ", " + nb1 + ", " + nb2);
+      String baseclass = "joram.noreg.ColocatedBaseTest";
+      baseclass = System.getProperty("BaseClass", baseclass);
 
-    AgentServer.stop();
-    System.exit(0);
+      String destclass =  "org.objectweb.joram.client.jms.Queue";
+      destclass =  System.getProperty("Destination", destclass);
+
+      Thread.sleep(500L);
+      AdminConnect(baseclass);
+
+      User user = User.create("anonymous", "anonymous", 0);
+      dest = createDestination(destclass);
+      dest.setFreeReading();
+      dest.setFreeWriting();
+
+      cf =  createConnectionFactory(baseclass);
+      AdminModule.disconnect();
+
+      Connection cnx2 = cf.createConnection();
+      Session sess2 = cnx2.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      MessageProducer producer = sess2.createProducer(dest);
+      cnx2.start();
+
+      Sender15 sender = new Sender15(cnx2, sess2, producer);
+      new Thread(sender).start();
+
+      ExcList15 exclst = new ExcList15("Receiver");
+
+      int nb1 = 0; int nb2 = 0; int idx = 0;
+      for (int i=0; i<100; i++) {
+        //       System.out.println("connecting#" + i);
+        Connection cnx1 = cf.createConnection();
+        cnx1.setExceptionListener(exclst);
+        Session sess1 = cnx1.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        MessageConsumer cons = sess1.createConsumer(dest);
+        cnx1.start();
+        //       System.out.println("connected#" + i);
+        for (int j=0; j<50; j++) {
+          Message msg = cons.receive();
+          nb2 += 1;
+          int index = msg.getIntProperty("index");
+          if (index != idx) {
+            //         System.out.println("recv#" + idx + '/' + index);
+            nb1 += 1;
+          }
+          idx = index +1;
+        }
+        //       System.out.println("end recv#" + i);
+        cnx1.close();
+        //       System.out.println("closed#" + i);
+      }
+
+      sender.stop();
+      System.out.println("Test OK: " + exclst.nbexc + ", " + nb1 + ", " + nb2);
+
+    } catch(Throwable exc) {
+      exc.printStackTrace();
+      error(exc);
+    } finally{
+      AgentServer.stop();
+      endTest();
+    }
   }
 }
 
