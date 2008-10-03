@@ -6,12 +6,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
@@ -156,11 +156,25 @@ class AdminRequest : public AbstractAdminMessage {
   AdminRequest();
   ~AdminRequest();
 
-  // ==================================================
-  // Streamable interface
-  // ==================================================
-  virtual void writeTo(OutputStream *os) throw (IOException);
-  virtual void readFrom(InputStream *is) throw (IOException);
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
+
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  void writeTo(OutputStream* os) throw(IOException);
+
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  void readFrom(InputStream* is) throw(IOException);
 };
 
 class AdminReply : public AbstractAdminMessage {
@@ -191,7 +205,7 @@ class AdminReply : public AbstractAdminMessage {
    *                 successful request.
    * @param info  Information to carry.
    */
-  AdminReply(boolean success, 
+  AdminReply(boolean success,
              char* info);
 
   /**
@@ -202,7 +216,7 @@ class AdminReply : public AbstractAdminMessage {
    * @param errorCode error code defining the type of the error
    * @param info  Information to carry.
    */
-  AdminReply(boolean success, 
+  AdminReply(boolean success,
              int errorCode,
              char* info);
 
@@ -224,11 +238,25 @@ class AdminReply : public AbstractAdminMessage {
     return errorCode;
   }
 
-  // ==================================================
-  // Streamable interface
-  // ==================================================
-  virtual void writeTo(OutputStream *os) throw (IOException);
-  virtual void readFrom(InputStream *is) throw (IOException);
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
+
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  void writeTo(OutputStream* os) throw(IOException);
+
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  void readFrom(InputStream* is) throw(IOException);
 };
 
 class CreateDestinationRequest : public AdminRequest {
@@ -241,7 +269,7 @@ class CreateDestinationRequest : public AdminRequest {
 
   /** Name of the class to be instanciated. */
   char* className;
- 
+
   /** Properties needed to create destination object. */
   Properties* props;
 
@@ -282,13 +310,31 @@ class CreateDestinationRequest : public AdminRequest {
     return expectedType;
   }
 
-  // ==================================================
-  // Streamable interface
-  // ==================================================
-  virtual void writeTo(OutputStream *os) throw (IOException);
-  virtual void readFrom(InputStream *is) throw (IOException);
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
+
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  void writeTo(OutputStream* os) throw(IOException);
+
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  void readFrom(InputStream* is) throw(IOException);
 };
 
+/**
+ * A <code>CreateDestinationReply</code> instance replies to a
+ * destination creation request, produced by the AdminTopic.
+ */
 class CreateDestinationReply : public AdminReply {
  private:
   /** Identifier of the created destination. */
@@ -298,7 +344,13 @@ class CreateDestinationReply : public AdminReply {
 
  public:
   CreateDestinationReply();
-  CreateDestinationReply(char* id, 
+  /**
+     * Constructs a <code>CreateDestinationReply</code> instance.
+     *
+     * @param id  The id of the created destination.
+     * @param info  Related information.
+     */
+  CreateDestinationReply(char* id,
                          char* name,
                          char* type,
                          char* info);
@@ -317,34 +369,77 @@ class CreateDestinationReply : public AdminReply {
     return type;
   }
 
-  // ==================================================
-  // Streamable interface
-  // ==================================================
-  virtual void writeTo(OutputStream *os) throw (IOException);
-  virtual void readFrom(InputStream *is) throw (IOException);
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
+
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  void writeTo(OutputStream* os) throw(IOException);
+
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  void readFrom(InputStream* is) throw(IOException);
 };
 
 
+/**
+ * A <code>DeleteDestination</code> instance requests the deletion of
+ * a given destination.
+ */
 class DeleteDestination : public AdminRequest {
  private:
+  /** Identifier of the destination to delete. */
   char* id;
 
  public:
   DeleteDestination();
+  /**
+   * Constructs a <code>DeleteDestination</code> instance.
+   *
+   * @param id  The identifier of the destination to delete.
+   */
   DeleteDestination(char* id);
   ~DeleteDestination();
 
+  /** Returns the identifier of the destination to delete. */
   char* getId() {
     return id;
   }
 
-  // ==================================================
-  // Streamable interface
-  // ==================================================
-  virtual void writeTo(OutputStream *os) throw (IOException);
-  virtual void readFrom(InputStream *is) throw (IOException);
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
+
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  void writeTo(OutputStream* os) throw(IOException);
+
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  void readFrom(InputStream* is) throw(IOException);
 };
 
+/**
+ * A <code>CreateUserRequest</code> instance requests the creation of a JMS
+ * user proxy.
+ */
 class CreateUserRequest : public AdminRequest {
  private:
   /** Id of the server where deploying the proxy. */
@@ -358,11 +453,18 @@ class CreateUserRequest : public AdminRequest {
 
  public:
   CreateUserRequest();
-  
+
+  /**
+   * Constructs a <code>CreateUserRequest</code> instance.
+   *
+   * @param userName  The name of the user.
+   * @param userPass  The password of the user.
+   * @param serverId  The id of the server where deploying its proxy.
+   */
   CreateUserRequest(char* userName,
                     char* userPass,
                     int serverId);
-  
+
   ~CreateUserRequest();
 
   /** Returns the id of the server where deploying its proxy. */
@@ -380,13 +482,31 @@ class CreateUserRequest : public AdminRequest {
     return userPass;
   }
 
-  // ==================================================
-  // Streamable interface
-  // ==================================================
-  virtual void writeTo(OutputStream *os) throw (IOException);
-  virtual void readFrom(InputStream *is) throw (IOException);
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
+
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  void writeTo(OutputStream* os) throw(IOException);
+
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  void readFrom(InputStream* is) throw(IOException);
 };
 
+/**
+ * A <code>CreateUserReply</code> instance replies to a user creation request,
+ * produced by the AdminTopic.
+ */
 class CreateUserReply : public AdminReply {
  private:
   /** Identifier of the user's proxy. */
@@ -394,7 +514,13 @@ class CreateUserReply : public AdminReply {
 
  public:
   CreateUserReply();
-  CreateUserReply(char* id, 
+  /**
+   * Constructs a <code>CreateUserReply</code> instance.
+   *
+   * @param id  The id of the created proxy.
+   * @param info  Related information.
+   */
+  CreateUserReply(char* id,
                   char* info);
   ~CreateUserReply();
 
@@ -403,37 +529,83 @@ class CreateUserReply : public AdminReply {
     return id;
   }
 
-  // ==================================================
-  // Streamable interface
-  // ==================================================
-  virtual void writeTo(OutputStream *os) throw (IOException);
-  virtual void readFrom(InputStream *is) throw (IOException);
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
+
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  void writeTo(OutputStream* os) throw(IOException);
+
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  void readFrom(InputStream* is) throw(IOException);
 };
 
+/**
+ * A <code>DeleteUser</code> instance requests the deletion of a user proxy
+ * on a given server.
+ */
 class DeleteUser : public AdminRequest {
  private:
+  /** Name of the user to delete. */
   char* userName;
+  /** Identifier of the user's proxy. */
   char* proxyId;
 
  public:
   DeleteUser();
+  /**
+   * Constructs a <code>DeleteUser</code> instance.
+   *
+   * @param userName  The name of the user to delete.
+   * @param proxId  The identifier of the user's proxy.
+   */
   DeleteUser(char* userName, char* proxyId);
   ~DeleteUser();
 
+  /** Returns the name of the user to delete. */
   char* getUserName() {
     return userName;
   }
 
+  /** Returns the identifier of the user's proxy. */
   char* getProxyId() {
     return proxyId;
   }
-  // ==================================================
-  // Streamable interface
-  // ==================================================
-  virtual void writeTo(OutputStream *os) throw (IOException);
-  virtual void readFrom(InputStream *is) throw (IOException);
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
+
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  void writeTo(OutputStream* os) throw(IOException);
+
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  void readFrom(InputStream* is) throw(IOException);
 };
 
+/**
+ * A <code>SetDefaultDMQ</code> instance requests to set a given DMQ as the
+ * default DMQ for a given server.
+ */
 class SetDefaultDMQ : public AdminRequest {
  private:
   /** Identifier of the server the DMQ is set for. */
@@ -443,6 +615,12 @@ class SetDefaultDMQ : public AdminRequest {
 
  public:
   SetDefaultDMQ();
+  /**
+   * Constructs a <code>SetDefaultDMQ</code> instance.
+   *
+   * @param serverId  Identifier of the server the DMQ is set for.
+   * @param dmqId  Identifier of the DMQ.
+   */
   SetDefaultDMQ(int serverId, char* dmqId);
   ~SetDefaultDMQ();
 
@@ -456,13 +634,31 @@ class SetDefaultDMQ : public AdminRequest {
     return dmqId;
   }
 
-  // ==================================================
-  // Streamable interface
-  // ==================================================
-  virtual void writeTo(OutputStream *os) throw (IOException);
-  virtual void readFrom(InputStream *is) throw (IOException);
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
+
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  void writeTo(OutputStream* os) throw(IOException);
+
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  void readFrom(InputStream* is) throw(IOException);
 };
 
+/**
+ * A <code>SetDestinationDMQ</code> instance requests to set a given DMQ as
+ * the DMQ for a given destination.
+ */
 class SetDestinationDMQ : public AdminRequest {
   private:
   /** Identifier of the destination the DMQ is set for. */
@@ -480,7 +676,7 @@ class SetDestinationDMQ : public AdminRequest {
   SetDestinationDMQ(char* destId, char* dmqId);
   SetDestinationDMQ();
   ~SetDestinationDMQ();
-  
+
   /** Returns the identifier of the destination the DMQ is set for. */
   char* getDestId() {
     return destId;
@@ -491,13 +687,31 @@ class SetDestinationDMQ : public AdminRequest {
     return dmqId;
   }
 
-  // ==================================================
-  // Streamable interface
-  // ==================================================
-  virtual void writeTo(OutputStream *os) throw (IOException);
-  virtual void readFrom(InputStream *is) throw (IOException);
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
+
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  void writeTo(OutputStream* os) throw(IOException);
+
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  void readFrom(InputStream* is) throw(IOException);
 };
 
+/**
+ * A <code>SetRight</code> instance requests a given right to be granted to a
+ * given user.
+ */
 class SetRight : public AdminRequest {
  private:
   /** Identifier of the user's proxy, <code>null</code> for all users. */
@@ -516,24 +730,42 @@ class SetRight : public AdminRequest {
   SetRight(char* userProxId, char* destId);
   SetRight();
   ~SetRight();
-  
+
   /** Returns the identifier of the future reader's proxy. */
  char* getUserProxId() {
     return userProxId;
   }
-  
+
   /** Returns the identifier of the destination. */
   char* getDestId() {
     return destId;
   }
 
-  // ==================================================
-  // Streamable interface
-  // ==================================================
-  virtual void writeTo(OutputStream *os) throw (IOException);
-  virtual void readFrom(InputStream *is) throw (IOException);
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
+
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  void writeTo(OutputStream* os) throw(IOException);
+
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  void readFrom(InputStream* is) throw(IOException);
 };
 
+/**
+ * A <code>SetReader</code> instance requests the authorization for a given
+ * user to be a reader on a given destination.
+ */
 class SetReader : public SetRight {
   public:
   /**
@@ -546,13 +778,31 @@ class SetReader : public SetRight {
   SetReader();
   ~SetReader();
 
-  // ==================================================
-  // Streamable interface
-  // ==================================================
-  virtual void writeTo(OutputStream *os) throw (IOException);
-  virtual void readFrom(InputStream *is) throw (IOException);
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
+
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  void writeTo(OutputStream* os) throw(IOException);
+
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  void readFrom(InputStream* is) throw(IOException);
 };
 
+/**
+ * A <code>SetWriter</code> instance requests the authorization for a given
+ * user to be a writer on a given destination.
+ */
 class SetWriter : public SetRight {
   public:
   /**
@@ -565,13 +815,31 @@ class SetWriter : public SetRight {
   SetWriter();
   ~SetWriter();
 
-  // ==================================================
-  // Streamable interface
-  // ==================================================
-  virtual void writeTo(OutputStream *os) throw (IOException);
-  virtual void readFrom(InputStream *is) throw (IOException);
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
+
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  void writeTo(OutputStream* os) throw(IOException);
+
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  void readFrom(InputStream* is) throw(IOException);
 };
 
+/**
+ * An <code>UnsetReader</code> instance requests to unset a given user as
+ * a reader on a given destination.
+ */
 class UnsetReader : public SetRight {
   public:
   /**
@@ -584,13 +852,31 @@ class UnsetReader : public SetRight {
   UnsetReader();
   ~UnsetReader();
 
-  // ==================================================
-  // Streamable interface
-  // ==================================================
-  virtual void writeTo(OutputStream *os) throw (IOException);
-  virtual void readFrom(InputStream *is) throw (IOException);
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
+
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  void writeTo(OutputStream* os) throw(IOException);
+
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  void readFrom(InputStream* is) throw(IOException);
 };
 
+/**
+ * An <code>UnsetWriter</code> instance requests to unset a given user as
+ * a writer on a destination.
+ */
 class UnsetWriter : public SetRight {
   public:
   /**
@@ -603,11 +889,25 @@ class UnsetWriter : public SetRight {
   UnsetWriter();
   ~UnsetWriter();
 
-  // ==================================================
-  // Streamable interface
-  // ==================================================
-  virtual void writeTo(OutputStream *os) throw (IOException);
-  virtual void readFrom(InputStream *is) throw (IOException);
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
+
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  void writeTo(OutputStream* os) throw(IOException);
+
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  void readFrom(InputStream* is) throw(IOException);
 };
 
 class AdminMessage : public Message {
