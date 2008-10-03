@@ -7,12 +7,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
@@ -33,6 +33,10 @@ class AbstractReply;
 
 //class UnknownClass {};
 
+/**
+ * An <code>AbstractMessage</code> is a message exchanged between a
+ * Xoram client and its (Joram) proxy.
+ */
 class AbstractMessage : Streamable {
  protected:
   int classid;
@@ -93,29 +97,39 @@ class AbstractMessage : Streamable {
   static AbstractMessage* read(InputStream *is) throw (IOException);
 };
 
+/**
+ * An <code>AbstractRequest</code> is a request sent by a Xoram client
+ * to its (Joram) proxy.
+ */
 class AbstractRequest : public AbstractMessage {
  protected:
-  /** 
-   * Identifier of the request. 
+  /**
+   * Identifier of the request.
    */
   int requestId;
 
   /**
-   * The request target is either a destination agent name, or a subscription 
+   * The request target is either a destination agent name, or a subscription
    * name.
    */
   char* target;
 
  public:
   AbstractRequest();
+  /**
+   * Constructs an <code>AbstractRequest</code>.
+   *
+   * @param target  String identifier of the request target, either a queue
+   *          name, or a subscription name.
+   */
   AbstractRequest(char* target);
   ~AbstractRequest();
 
-  /** 
-   * Sets the request identifier. 
+  /**
+   * Sets the request identifier.
    */
   void setRequestId(int requestId);
-  
+
   /** Returns the request identifier. */
   int getRequestId();
 
@@ -125,14 +139,31 @@ class AbstractRequest : public AbstractMessage {
   /** Returns the request target name.  */
   char* getTarget();
 
-  // ==================================================
-  // Streamable interface
-  // ==================================================
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
 
-  virtual void writeTo(OutputStream *os) throw (IOException);
-  virtual void readFrom(InputStream *is) throw (IOException);
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  void writeTo(OutputStream* os) throw(IOException);
+
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  void readFrom(InputStream* is) throw(IOException);
 };
 
+/**
+ * An <code>AbstractReply</code> is sent by a Joram proxy to a Xoram client as a
+ * reply to an <code>AbstractRequest</code>.
+ */
 class AbstractReply : public AbstractMessage {
  protected:
   /** Identifier of the replied request. */
@@ -141,6 +172,11 @@ class AbstractReply : public AbstractMessage {
  public:
   AbstractReply();
 
+  /**
+   * Constructs an <code>AbstractReply</code>.
+   *
+   * @param correlationId  Identifier of the replied request.
+   */
   AbstractReply(int correlationId);
 
   /** Sets the replied request identifier. */
@@ -149,20 +185,45 @@ class AbstractReply : public AbstractMessage {
   /** Returns the replied request identifier. */
   int getCorrelationId();
 
-  // ==================================================
-  // Streamable interface
-  // ==================================================
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
 
-  virtual void writeTo(OutputStream *os) throw (IOException);
-  virtual void readFrom(InputStream *is) throw (IOException);
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  void writeTo(OutputStream* os) throw(IOException);
+
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  void readFrom(InputStream* is) throw(IOException);
 };
 
+/**
+ * A <code>CnxConnectRequest</code> is sent by an opening
+ * <code>Connection</code>.
+ */
 class CnxConnectRequest : public AbstractRequest {
  public:
+  /**
+   * Constructs a <code>CnxConnectRequest</code>.
+   */
   CnxConnectRequest();
   ~CnxConnectRequest();
 };
 
+/**
+ * A <code>CnxConnectReply</code> is sent by a Joram proxy as a reply to a
+ * connection <code>CnxConnectRequest</code> and holds the connection's key
+ * and the proxy identifier.
+ */
 class CnxConnectReply : public AbstractReply {
  private:
   /** The connection's key. */
@@ -173,14 +234,20 @@ class CnxConnectReply : public AbstractReply {
 
  public:
   CnxConnectReply();
-
+  /**
+   * Constructs a <code>CnxConnectReply</code>.
+   *
+   * @param req  The replied request.
+   * @param cnxKey  The connection's key.
+   * @param proxyId  The proxy's identifier.
+   */
   CnxConnectReply(CnxConnectRequest req, int cnxKey, char*  proxyId);
 
   ~CnxConnectReply();
 
   /** Sets the connection key. */
   void setCnxKey(int cnxKey);
- 
+
   /** Returns the connection's key. */
   int getCnxKey();
 
@@ -190,40 +257,74 @@ class CnxConnectReply : public AbstractReply {
   /** Returns the proxy's identifier */
   char* getProxyId();
 
-  // ==================================================
-  // Streamable interface
-  // ==================================================
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
 
-  virtual void writeTo(OutputStream *os) throw (IOException);
-  virtual void readFrom(InputStream *is) throw (IOException);
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  void writeTo(OutputStream* os) throw(IOException);
+
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  void readFrom(InputStream* is) throw(IOException);
 };
 
+/**
+ * A <code>CnxStartRequest</code> request is sent by a starting
+ * <code>Connection</code>.
+ */
 class CnxStartRequest : public AbstractRequest {
  public:
+  /** Constructs a <code>CnxStartRequest</code> instance. */
   CnxStartRequest();
   ~CnxStartRequest();
 };
 
+/**
+ * A <code>CnxStopRequest</code> is sent by a stopping <code>Connection</code>.
+ */
 class CnxStopRequest : public AbstractRequest {
  public:
+  /** Constructs a <code>CnxStopRequest</code> instance. */
   CnxStopRequest();
   ~CnxStopRequest();
 };
 
+/**
+ * A <code>CnxCloseRequest</code> is sent by a closing connection.
+ */
 class CnxCloseRequest : public AbstractRequest {
  public:
+  /** Constructs a <code>CnxCloseRequest</code> instance. */
   CnxCloseRequest();
   ~CnxCloseRequest();
 };
 
+/**
+ * A <code>CnxCloseReply</code> replies to a <code>CnxCloseRequest</code>.
+ */
 class CnxCloseReply : public AbstractReply {
  public:
+  /** Constructs a <code>CnxCloseReply</code> instance. */
   CnxCloseReply();
   ~CnxCloseReply();
 };
 
 class Message;
 
+/**
+ * A <code>ProducerMessages</code> instance is sent by a
+ * <code>MessageProducer</code> when sending messages.
+ */
 class ProducerMessages : public AbstractRequest {
  private:
   /** The wrapped messages. */
@@ -288,6 +389,10 @@ class ProducerMessages : public AbstractRequest {
   virtual void readFrom(InputStream* is) throw(IOException);
 };
 
+/**
+ * A <code>ConsumerReceiveRequest</code> is sent by a
+ * <code>MessageConsumer</code> when requesting a message.
+ */
 class ConsumerReceiveRequest : public AbstractRequest {
  private:
   /** The selector for filtering messages. */
@@ -343,6 +448,10 @@ class ConsumerReceiveRequest : public AbstractRequest {
   virtual void readFrom(InputStream* is) throw(IOException);
 };
 
+/**
+ * A <code>ConsumerMessages</code> is used by a Joram proxy for sending messages
+ * to a consumer.
+ */
 class ConsumerMessages : public AbstractReply {
  private:
   /** Wrapped messages. */
@@ -414,7 +523,7 @@ class ConsumerMessages : public AbstractReply {
   /** Returns <code>true</code> if the messages come from a queue. */
     boolean getQueueMode();
 
-    void setQueueMode(boolean queueMode); 
+    void setQueueMode(boolean queueMode);
 
   /* ***** ***** ***** ***** *****
    * Streamable interface
@@ -457,7 +566,7 @@ class ConsumerSubRequest : public AbstractRequest {
 
   /** <code>true</code> if the subscription is durable. */
   boolean durable;
-  
+
   /** <code>true</code> if the subscription is asynchrone. */
   boolean asyncSub;
 
@@ -480,7 +589,7 @@ class ConsumerSubRequest : public AbstractRequest {
                      char* selector,
                      boolean noLocal,
                      boolean durable);
-                     
+
                        /**
    * Constructs a <code>ConsumerSubRequest</code>.
    *
@@ -593,7 +702,7 @@ class ConsumerAckRequest : public AbstractRequest {
    *          a queue.
    */
   ConsumerAckRequest(char* targetName, boolean queueMode);
-  
+
   ~ConsumerAckRequest();
 
   /** Sets the vector of identifiers. */
@@ -692,7 +801,7 @@ class ConsumerDenyRequest : public AbstractRequest {
   void setDoNotAck(boolean doNotAck);
 
   /**
-   * Returns <code>true</code> if the request must not be acked by the 
+   * Returns <code>true</code> if the request must not be acked by the
    * server.
    */
   boolean getDoNotAck();
@@ -848,7 +957,7 @@ class SessDenyRequest : public AbstractRequest {
   void setDoNotAck(boolean doNotAck);
 
   /**
-   * Returns <code>true</code> if the request must not be acked by the 
+   * Returns <code>true</code> if the request must not be acked by the
    * server.
    */
   boolean getDoNotAck();
@@ -1071,7 +1180,7 @@ class GetAdminTopicReply : public AbstractReply {
    */
   void readFrom(InputStream* is) throw(IOException);
 };
- 
+
 /**
  * A <code>TempDestDeleteRequest</code>
  */
@@ -1090,8 +1199,10 @@ class TempDestDeleteRequest : public AbstractRequest {
   ~TempDestDeleteRequest();
 };
 
-
-
+/**
+ * A <code>SessCreateTDReply</code> is used by a JMS proxy for replying
+ * to a <code>SessCreate&lt;TQ/TT&gt;Request</code>.
+ */
 class SessCreateTDReply : public AbstractReply {
  private:
   char* agentId;
@@ -1139,8 +1250,13 @@ class SessCreateTDReply : public AbstractReply {
   void readFrom(InputStream* is) throw(IOException);
 };
 
+/**
+ * A <code>SessCreateTTRequest</code> is sent by a <code>TopicSession</code>
+ * for creating a <code>TemporaryTopic</code>.
+ */
 class SessCreateTTRequest : public AbstractRequest {
  public:
+  /** Constructs a <code>SessCreateTTRequest</code> instance. */
   SessCreateTTRequest();
   ~SessCreateTTRequest();
 };
