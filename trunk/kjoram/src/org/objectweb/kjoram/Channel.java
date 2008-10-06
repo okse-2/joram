@@ -40,11 +40,33 @@ public abstract class Channel {
 
   int key;
 
+  /**
+   * Open connection, InputStream and OutputStream.
+   * 
+   * @throws IOException
+   */
   public abstract void connect() throws IOException;
 
+  /**
+   * Sending a request through the TCP connection.
+   * 
+   * @param obj
+   * @throws IOException
+   */
   public abstract void send(AbstractRequest obj) throws IOException;
 
+  /**
+   * Receive an abstract reply.
+   * 
+   * @return
+   * @throws Exception
+   */
   public abstract AbstractReply receive() throws Exception;
 
+  /**
+   * Closes the TCP connection.
+   * 
+   * @throws IOException
+   */
   public abstract void close() throws IOException;
 }

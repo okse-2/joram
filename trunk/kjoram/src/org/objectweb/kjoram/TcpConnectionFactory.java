@@ -29,33 +29,68 @@ public class TcpConnectionFactory {
   public String dfltLogin = "anonymous";
   public String dfltPassword = "anonymous";
   
+  /**
+   * default connection factory with localhost and 16010.
+   */
   public TcpConnectionFactory() {
     dfltHost = "localhost";
     dfltPort = 16010;
   }
 
+  /**
+   * @param host
+   * @param port
+   */
   public TcpConnectionFactory(String host, int port) {
     dfltHost = host;
     dfltPort = port;
   }
 
-  //   Creates a connection with the specified user identity.
+  /**
+   * Creates a connection with the specified user identity.
+   * 
+   * @return Connection.
+   * @throws JoramException
+   */
   public Connection createConnection() throws JoramException {
     return createConnection(dfltLogin, dfltPassword, dfltHost, dfltPort);
   }
-  
-  //   Creates a connection with the specified user identity.
+   
+  /**
+   * Creates a connection with the specified user identity.
+   * 
+   * @param user
+   * @param pass
+   * @return Connection.
+   * @throws JoramException
+   */
   public Connection createConnection(String user, String pass) throws JoramException {
     return createConnection(user, pass, dfltHost, dfltPort);
   }
-
-  //   Creates a connection to the specified server.
+ 
+  /**
+   * Creates a connection to the specified server.
+   * 
+   * @param host
+   * @param port
+   * @return Connection.
+   * @throws JoramException
+   */
   public Connection createConnection(String host, int port) throws JoramException {
     return createConnection(dfltLogin, dfltPassword, host, port);
   }
-
-  //   Creates a connection to the specified server with the specified
-  //   user identity.
+ 
+  /**
+   *  Creates a connection to the specified server with the specified
+   *  user identity.
+   *  
+   * @param user
+   * @param pass
+   * @param host
+   * @param port
+   * @return Connection.
+   * @throws JoramException
+   */
   public Connection createConnection(String user, String pass, String host, int port) throws JoramException {
     return new Connection(new TcpChannel(user, pass, host, port));
   }

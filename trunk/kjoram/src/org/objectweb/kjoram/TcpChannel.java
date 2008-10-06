@@ -62,6 +62,12 @@ public class TcpChannel extends Channel {
   int unackCounter;
   Vector pendingMessages;
 
+  /**
+   * @param user
+   * @param pass
+   * @param host
+   * @param port
+   */
   public TcpChannel(String user, String pass, String host, int port) {
     this.user = user;
     this.pass = pass;
@@ -84,6 +90,9 @@ public class TcpChannel extends Channel {
     in = null;
   }
 
+  /* (non-Javadoc)
+   * @see org.objectweb.kjoram.Channel#connect()
+   */
   public void connect() throws IOException {
     if (status != INIT) throw new IOException("Bad status");
     status = CONNECTING;
@@ -148,6 +157,11 @@ public class TcpChannel extends Channel {
     status = CONNECTED;
   }
 
+  /**
+   * Sending a request through the TCP connection.
+   *
+   * @exception IllegalStateException  If the connection is broken.
+   */
   public void send(AbstractRequest request) throws IOException {
     if (status != CONNECTED) throw new IOException("Connection closed");
 
@@ -163,6 +177,12 @@ public class TcpChannel extends Channel {
     }
   }
 
+  /**
+   * @param id
+   * @param counter
+   * @param request
+   * @throws IOException
+   */
   void doSend(long id, long counter, AbstractRequest request) throws IOException {
     if (status != CONNECTED) throw new IOException("Bad status");
 
@@ -175,6 +195,9 @@ public class TcpChannel extends Channel {
     out.writeTo(sockout);
   }
 
+  /* (non-Javadoc)
+   * @see org.objectweb.kjoram.Channel#receive()
+   */
   public AbstractReply receive() throws Exception {
     if (status != CONNECTED) throw new IOException("Bad status");
 
@@ -217,10 +240,9 @@ public class TcpChannel extends Channel {
     }
   }
 
+  /** Closes the TCP connection. */
   public void close() throws IOException {
     sockin.close();
     sockout.close();
-// AF: TODO
-//    close(sock);
   }
 }

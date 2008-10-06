@@ -28,6 +28,10 @@ import java.io.IOException;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
+/**
+ * An <code>AbstractAdminMessage</code> is a message exchanged between a
+ * Admin kjoram client and its proxy.
+ */
 public abstract class AbstractAdminMessage implements Streamable {
   public static Logger logger = Debug.getLogger(AbstractAdminMessage.class.getName());
   

@@ -32,12 +32,28 @@ public class Topic extends Destination {
   }
   
   /**
-   * Creates a Queue object.
+   * Creates a Topic object.
    */
   public Topic(String uid, String name) {
     super(uid, Destination.TOPIC, name);
   }
   
+  /**
+   *  Admin method creating and deploying (or retrieving) a topic on a
+   * given server. First a destination with the specified name is searched
+   * on the given server, if it does not exist it is created. In any case,
+   * its provider-specific address is returned.
+   * <p>
+   *  The request fails if the target server does not belong to the platform,
+   * or if the destination deployment fails server side.
+   *
+   * @param serverId   The identifier of the server where deploying the topic.
+   * @param name       The name of the topic.
+   * @param className  The topic class name.
+   * @param prop       The topic properties.
+   * @return the topic.
+   * @throws JoramException
+   */
   public static Topic createTopic(int serverId,
       String name,
       String className,
@@ -47,16 +63,54 @@ public class Topic extends Destination {
     return topic;
   }
 
+  /**
+   * Admin method creating and deploying a topic on a given server.
+   * <p>
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployment fails server side.
+   *
+   * @param serverId   The identifier of the server where deploying the topic.
+   * @param className  The topic class name.
+   * @param prop       The topic properties.
+   * @return the topic.
+   * @throws JoramException
+   */
   public static Topic createTopic(int serverId,
       String className,
       Properties prop) throws JoramException {
     return createTopic(serverId, null, className, prop);
   }
 
+  /**
+   * Admin method creating and deploying a topic on a given server.
+   * It creates a Jorram's standard topic.
+   * <p>
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployment fails server side.
+   *
+   * @param serverId   The identifier of the server where deploying the topic.
+   * @param prop       The topic properties.
+   * @return the topic.
+   * @throws JoramException
+   */
   public static Topic createTopic(int serverId, Properties prop) throws JoramException { 
     return createTopic(serverId, "org.objectweb.joram.mom.dest.Topic", prop);
   }
 
+  /**
+   * Admin method creating and deploying (or retrieving) a topic on a given
+   * server with a given name. First a destination with the specified name is
+   * searched on the given server, if it does not exist it is created. In any
+   * case, its provider-specific address is returned.
+   * <p>
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployment fails server side.
+   *
+   * @param serverId  The identifier of the server where deploying the topic.
+   * @param name      The topic name. 
+   * @return the topic
+   * @throws JoramException
+   */
   public static Topic createTopic(int serverId, String name) throws JoramException {
     return createTopic(serverId, 
         name, 
@@ -64,14 +118,44 @@ public class Topic extends Destination {
         null);
   }
 
+  /**
+   * Admin method creating and deploying (or retrieving) a topic on the
+   * local server. First a destination with the specified name is searched
+   * on the given server, if it does not exist it is created. In any case,
+   * its provider-specific address is returned.
+   * <p>
+   * The request fails if the destination deployment fails server side.
+   *
+   * @param name      The topic name. 
+   * @return the topic
+   * @throws JoramException
+   */
   public static Topic createTopic(String name) throws JoramException {
     return  createTopic(0, name);
   }
 
+  /**
+   * Admin method creating and deploying a topic on a given server.
+   * <p>
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployment fails server side.
+   *
+   * @param serverId   The identifier of the server where deploying the topic.
+   * @return the topic.
+   * @throws JoramException
+   */
   public static Topic createTopic(int serverId) throws JoramException {
     return  createTopic(0, (String) null);
   }
 
+  /**
+   * Admin method creating and deploying a topic on the local server. 
+   * <p>
+   * The request fails if the destination deployment fails server side.
+   * 
+   * @return the topic.
+   * @throws JoramException
+   */
   public static Topic createTopic() throws JoramException {
     return  createTopic(0);
   }

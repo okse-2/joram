@@ -26,7 +26,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 /**
- * Implements the <code>javax.jms.TemporaryTopic</code> interface.
+ * 
  */
 public class TemporaryTopic extends Topic {
   public static Logger logger = Debug.getLogger(Session.class.getName());
@@ -59,7 +59,7 @@ public class TemporaryTopic extends Topic {
   }
 
   /**
-   * API method.
+   *  delete a temporary topic.
    *
    * @exception IllegalStateException  If the connection is closed or broken.
    * @exception JMSException  If the request fails for any other reason.

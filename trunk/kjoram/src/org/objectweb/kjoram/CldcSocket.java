@@ -29,20 +29,33 @@ import java.io.OutputStream;
 import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 
-
+/**
+ * CLDC socket support.
+ */
 public class CldcSocket implements TcpSocket {
 
+  /** the stream connection. */
   private StreamConnection connection;
 
+
+  /* (non-Javadoc)
+   * @see org.objectweb.kjoram.TcpSocket#connect(java.lang.String, int)
+   */
   public void connect(String host, int port) throws IOException {
     connection = (StreamConnection) Connector.open("socket://" + host + ':' + port, Connector.READ_WRITE, true);
     //StreamConnection connection = (StreamConnection) Connector.open("http://" + host + ':' + port, Connector.READ_WRITE, true);
   }
 
+  /* (non-Javadoc)
+   * @see org.objectweb.kjoram.TcpSocket#getInputStream()
+   */
   public InputStream getInputStream() throws IOException {
     return connection.openInputStream();
   }
 
+  /* (non-Javadoc)
+   * @see org.objectweb.kjoram.TcpSocket#getOutputStream()
+   */
   public OutputStream getOutputStream() throws IOException {
     return connection.openOutputStream();
   }

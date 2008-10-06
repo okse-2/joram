@@ -33,7 +33,25 @@ public class Queue extends Destination {
     super(uid, Destination.QUEUE, name);
   }
 
-  public static Queue createQueue(int serverId,
+  /**
+   *  Admin method creating and deploying (or retrieving) a queue on a
+   * given server. First a destination with the specified name is searched
+   * on the given server, if it does not exist it is created. In any case,
+   * its provider-specific address is returned.
+   * <p>
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployment fails server side.
+   *
+   * @param serverId   The identifier of the server where deploying the queue.
+   * @param name       The name of the queue.
+   * @param className  The MOM's queue class name.
+   * @param prop       The queue properties.
+   *
+   * @exception JoramException  If the admin connection is closed or broken.
+   *                            If the request fails.
+   */
+  public static Queue createQueue(
+      int serverId,
       String name,
       String className,
       Properties prop) throws JoramException {
@@ -42,16 +60,63 @@ public class Queue extends Destination {
     return queue;
   }
 
-  public static Queue createQueue(int serverId,
+  /**
+   *  Admin method creating and deploying (or retrieving) a queue on a
+   * given server. First a destination with the specified name is searched
+   * on the given server, if it does not exist it is created. In any case,
+   * its provider-specific address is returned.
+   * <p>
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployment fails server side.
+   *
+   * @param serverId   The identifier of the server where deploying the queue.
+   * @param className  The MOM's queue class name.
+   * @param prop       The queue properties.
+   *
+   * @exception JoramException  If the admin connection is closed or broken.
+   *                            If the request fails.
+   */
+  public static Queue createQueue(
+      int serverId,
       String className,
       Properties prop) throws JoramException {
     return createQueue(serverId, null, className, prop);
   }
 
+  /**
+   *  Admin method creating and deploying (or retrieving) a queue on a
+   * given server. First a destination with the specified name is searched
+   * on the given server, if it does not exist it is created. In any case,
+   * its provider-specific address is returned.
+   * <p>
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployment fails server side.
+   *
+   * @param serverId   The identifier of the server where deploying the queue.
+   * @param prop       The queue properties.
+   *
+   * @exception JoramException  If the admin connection is closed or broken.
+   *                            If the request fails.
+   */
   public static Queue createQueue(int serverId, Properties prop) throws JoramException { 
     return createQueue(serverId, "org.objectweb.joram.mom.dest.Queue", prop);
   }
 
+  /**
+   *  Admin method creating and deploying (or retrieving) a queue on a
+   * given server. First a destination with the specified name is searched
+   * on the given server, if it does not exist it is created. In any case,
+   * its provider-specific address is returned.
+   * <p>
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployment fails server side.
+   *
+   * @param serverId   The identifier of the server where deploying the queue.
+   * @param name       The name of the queue.
+   *
+   * @exception JoramException  If the admin connection is closed or broken.
+   *                            If the request fails.
+   */
   public static Queue createQueue(int serverId, String name) throws JoramException {
     return createQueue(serverId, 
         name, 
@@ -59,14 +124,54 @@ public class Queue extends Destination {
         null);
   }
 
+  /**
+   *  Admin method creating and deploying (or retrieving) a queue on a
+   * given server. First a destination with the specified name is searched
+   * on the given server, if it does not exist it is created. In any case,
+   * its provider-specific address is returned.
+   * <p>
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployment fails server side.
+   *
+   * @param name       The name of the queue.
+   *
+   * @exception JoramException  If the admin connection is closed or broken.
+   *                            If the request fails.
+   */
   public static Queue createQueue(String name) throws JoramException {
     return  createQueue(0, name);
   }
 
+  /**
+   *  Admin method creating and deploying (or retrieving) a queue on a
+   * given server. First a destination with the specified name is searched
+   * on the given server, if it does not exist it is created. In any case,
+   * its provider-specific address is returned.
+   * <p>
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployment fails server side.
+   *
+   * @param serverId   The identifier of the server where deploying the queue.
+   *
+   * @exception JoramException  If the admin connection is closed or broken.
+   *                            If the request fails.
+   */
   public static Queue createQueue(int serverId) throws JoramException {
     return  createQueue(0, (String) null);
   }
 
+  /**
+   *  Admin method creating and deploying (or retrieving) a queue on a
+   * given server. First a destination with the specified name is searched
+   * on the given server, if it does not exist it is created. In any case,
+   * its provider-specific address is returned.
+   * <p>
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployment fails server side.
+   *
+   * @exception JoramException  If the admin connection is closed or broken.
+   *                            If the request fails.
+   */
   public static Queue createQueue() throws JoramException {
     return  createQueue(0);
   }

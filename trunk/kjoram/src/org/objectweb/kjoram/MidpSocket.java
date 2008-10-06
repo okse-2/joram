@@ -33,15 +33,24 @@ import javax.microedition.io.SocketConnection;
 public class MidpSocket implements TcpSocket {
   private SocketConnection connection;
 
+  /* (non-Javadoc)
+   * @see org.objectweb.kjoram.TcpSocket#connect(java.lang.String, int)
+   */
   public void connect(String host, int port) throws IOException {
     connection = (SocketConnection) Connector.open("socket://" + host + ':' + port);
     connection.setSocketOption(SocketConnection.LINGER, 5);
   }
 
+  /* (non-Javadoc)
+   * @see org.objectweb.kjoram.TcpSocket#getInputStream()
+   */
   public InputStream getInputStream() throws IOException {
     return connection.openInputStream();
   }
 
+  /* (non-Javadoc)
+   * @see org.objectweb.kjoram.TcpSocket#getOutputStream()
+   */
   public OutputStream getOutputStream() throws IOException {
     return connection.openOutputStream();
   }

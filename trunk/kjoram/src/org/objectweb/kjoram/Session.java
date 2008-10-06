@@ -24,6 +24,9 @@ package org.objectweb.kjoram;
 
 import java.util.Vector;
 
+import javax.jms.IllegalStateException;
+import javax.jms.JMSException;
+
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -115,6 +118,16 @@ public class Session extends Daemon {
     }
   }
   
+  /**
+   * Opens a session.
+   *
+   * @param cnx  The connection the session belongs to.
+   * @param transacted  <code>true</code> for a transacted session.
+   * @param acknowledgeMode  1 (auto), 2 (client) or 3 (dups ok).
+   * @param mtpx request multiplexer.
+   *
+   * @exception JMSException  In case of an invalid acknowledge mode.
+   */
   public Session(Connection cnx, 
       boolean transacted,
       int acknowledgeMode,
@@ -147,7 +160,13 @@ public class Session extends Daemon {
       return mtpx;
   }
 
-
+  /**
+   * Creates a topic identity given a Topic name. 
+   * @param   topicName the name of this Topic
+   * @return  a Topic with the given name
+   * @exception JoramException  If the session is closed.
+   *                            If the topic creation failed.
+   */
   public Topic createTopic(String topicName) throws JoramException {
     // Checks if the topic to retrieve is the administration topic:
     if (topicName.equals("#AdminTopic")) {
@@ -161,6 +180,14 @@ public class Session extends Daemon {
     return new Topic(topicName, topicName);
   }
 
+  /**
+   * Creates a TemporaryTopic object. 
+   * Its lifetime will be that of the Connection unless it is deleted earlier.
+   * 
+   * @return a temporary topic identity 
+   * @exception JoramException  If the session is closed or if the connection is broken.
+   *                            If the request fails for any other reason.
+   */
   public TemporaryTopic createTemporaryTopic() throws JoramException {
     SessCreateTDReply reply =
       (SessCreateTDReply) requestor.request(new SessCreateTTRequest());
@@ -457,7 +484,17 @@ public class Session extends Daemon {
   /*   } */
   }
 
-   public void send(Message msg, Destination dest,
+  /**
+   * Called by MessageProducer.
+   * 
+   * @param msg
+   * @param dest
+   * @param deliveryMode
+   * @param priority
+   * @param timeToLive
+   * @throws JoramException
+   */
+  public void send(Message msg, Destination dest,
                      int deliveryMode,
                      int priority,
                      long timeToLive) throws JoramException {
@@ -492,14 +529,32 @@ public class Session extends Daemon {
     }
   }
 
+  /**
+   * Called here and by sub-classes.
+   */
   public void addProducer(MessageProducer prod) {
     producers.addElement(prod);
   }
 
+  /**
+   * Called by MessageProducer.
+   */
   public void closeProducer(MessageProducer prod) {
     producers.removeElement(prod);
   }
 
+  /**
+   * Called by MessageConsumer.
+   *
+   * @param timeOut1
+   * @param timeOut2
+   * @param cons
+   * @param targetName
+   * @param selector
+   * @param queueMode
+   * @return Message
+   * @throws JoramException
+   */
   public Message receive(long timeOut1, long timeOut2,
                             MessageConsumer cons,
                             String targetName,
@@ -572,10 +627,16 @@ public class Session extends Daemon {
       }
   }
 
+  /**
+   * Called here and by sub-classes.
+   */
   public void addConsumer(MessageConsumer cons) {
     consumers.addElement(cons);
   }
 
+  /**
+   * Called by MessageConsumer.
+   */
   public void closeConsumer(MessageConsumer cons) throws JoramException {
     consumers.removeElement(cons);
 
