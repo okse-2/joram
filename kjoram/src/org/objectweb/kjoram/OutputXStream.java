@@ -27,10 +27,10 @@ import java.io.IOException;
 import java.util.Vector;
 
 public class OutputXStream extends XStream {
-  // The number of valid bytes in the buffer. 
+  /** The number of valid bytes in the buffer. */ 
   protected int count;
 
-  // The buffer where data is stored. 
+  /** The buffer where data is stored. */ 
   protected byte buffer[];
 
   protected void resize(int len) {

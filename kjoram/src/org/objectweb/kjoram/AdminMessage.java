@@ -22,7 +22,6 @@
  */
 package org.objectweb.kjoram;
 
-import java.io.IOException;
 
 /**
  * 
@@ -43,7 +42,7 @@ public final class AdminMessage extends Message {
    * Sets an AbstractAdminMessage as the body of the message. 
    * 
    * @param adminMsg  admin message
-   * @throws IOException 
+   * @throws Exception 
    */
   public void setAdminMessage(AbstractAdminMessage adminMsg) throws Exception {
     type = ADMIN;
@@ -54,6 +53,11 @@ public final class AdminMessage extends Message {
     out.toBuffer(body);
   }
   
+  /**
+   * Get an AbstractAdminMessage as the body of the message. 
+   * 
+   * @throws Exception 
+   */
   public AbstractAdminMessage getAdminMessage() throws Exception {
     if (body == null) return null;
     InputXStream in = new InputXStream(body, body.length);

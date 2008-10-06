@@ -22,7 +22,15 @@
  */
 package org.objectweb.kjoram;
 
+/**
+ * A MessageListener object is used to receive asynchronously delivered messages. 
+ */
 public interface MessageListener {
 
+  /**
+   * Passes a message to the listener. 
+   * 
+   * @param msg the message passed to the listener
+   */
   public void onMessage(Message msg);
 }

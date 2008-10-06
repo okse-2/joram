@@ -27,6 +27,10 @@ import java.io.IOException;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
+/**
+ * An <code>AbstractMessage</code> is a message exchanged between a
+ * kjoram client and its proxy.
+ */
 public abstract class AbstractMessage implements Streamable {
   public static Logger logger = Debug.getLogger(AbstractMessage.class.getName());
   protected final static int NULL_CLASS_ID = -1;

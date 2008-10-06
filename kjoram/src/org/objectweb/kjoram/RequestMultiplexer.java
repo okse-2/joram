@@ -59,9 +59,9 @@ public class RequestMultiplexer extends Daemon {
  
   private ExceptionListener exceptionListener;
 
-  /**
-   * The date of the last request
-   */
+//  /**
+//   * The date of the last request
+//   */
 //  private volatile long lastRequestDate;
   
   

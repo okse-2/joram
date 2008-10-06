@@ -27,7 +27,29 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public interface TcpSocket {
+  
+  /**
+   * open the connection.
+   * 
+   * @param host Joram server host name.
+   * @param port Joram server port.
+   * @throws IOException
+   */
   public void connect(String host, int port) throws IOException;
+  
+  /**
+   * get the connection input stream.
+   * 
+   * @return connection input stream.
+   * @throws IOException
+   */
   public InputStream getInputStream() throws IOException;
+  
+  /**
+   * get the connection output stream.
+   * 
+   * @return connection output stream.
+   * @throws IOException
+   */
   public OutputStream getOutputStream() throws IOException;
 }

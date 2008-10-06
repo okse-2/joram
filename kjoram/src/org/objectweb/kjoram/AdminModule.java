@@ -22,17 +22,20 @@
  */
 package org.objectweb.kjoram;
 
+import java.net.ConnectException;
+
+import org.objectweb.joram.client.jms.admin.AdminException;
+
+/**
+ * The <code>AdminModule</code> class allows to set an administrator
+ * connection to a given JORAM server, and provides administration and
+ * monitoring methods at a server/platform level.
+ */
 public class AdminModule {
+  /** The connection used to link the administrator and the platform. */
   public static Connection cnx;
+  /** The requestor for sending the synchronous requests. */
   public static AdminRequestor requestor;
-  
-  public AdminModule(
-      String hostName,
-      int port,
-      String name,
-      String password) {
-    
-  }
   
   public static class AdminRequestor {
     Connection cnx;
@@ -174,7 +177,15 @@ public class AdminModule {
       
     return reply;
   }
-
+  
+  /**
+   * Method actually sending an <code>AdminRequest</code> instance to
+   * the platform and getting an <code>AdminReply</code> instance.
+   *
+   * @exception JoramException  If the connection to the platform fails,
+   *                            If the platform's reply is invalid, or if
+   *                            the request failed.
+   */
   public static AdminReply doRequest(AdminRequest request) throws JoramException {
     return doRequest(request, 120000);
   }

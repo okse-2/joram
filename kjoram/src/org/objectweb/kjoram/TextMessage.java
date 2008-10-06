@@ -40,7 +40,6 @@ public final class TextMessage extends Message {
 
   /**
    * Sets a String as the body of the message.
-   * API method.
    *
    * @exception MessageNotWriteableException  When trying to set the text
    *              if the message body is read-only.
@@ -58,7 +57,6 @@ public final class TextMessage extends Message {
 
   /**
    * Returns the text body of the message.
-   * API method.
    *
    * @exception JMSException  Actually never thrown.
    */
