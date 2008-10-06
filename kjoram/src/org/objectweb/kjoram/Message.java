@@ -192,7 +192,7 @@ public class Message implements Streamable {
    * Sets the correlation ID for the message.
    */
   void setCorrelationID(String correlationID) {
-    this.correlationId = correlationId;
+    this.correlationId = correlationID;
   }
          
   /**
