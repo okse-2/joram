@@ -24,9 +24,6 @@ package org.objectweb.kjoram;
 
 import java.util.Vector;
 
-import javax.jms.IllegalStateException;
-import javax.jms.JMSException;
-
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
