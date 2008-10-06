@@ -22,10 +22,6 @@
  */
 package org.objectweb.kjoram;
 
-import java.net.ConnectException;
-
-import org.objectweb.joram.client.jms.admin.AdminException;
-
 /**
  * The <code>AdminModule</code> class allows to set an administrator
  * connection to a given JORAM server, and provides administration and
