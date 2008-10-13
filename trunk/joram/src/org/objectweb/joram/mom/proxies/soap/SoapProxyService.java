@@ -24,20 +24,25 @@
  */
 package org.objectweb.joram.mom.proxies.soap;
 
-import java.util.*;
+import java.util.Hashtable;
 
-import org.objectweb.joram.shared.client.*;
-import org.objectweb.joram.shared.excepts.*;
-import org.objectweb.joram.mom.proxies.*;
 import org.objectweb.joram.mom.dest.AdminTopic;
-import org.objectweb.joram.mom.notifications.*;
+import org.objectweb.joram.mom.notifications.GetProxyIdNot;
+import org.objectweb.joram.mom.proxies.ConnectionManager;
+import org.objectweb.joram.mom.proxies.OpenConnectionNot;
+import org.objectweb.joram.mom.proxies.StandardConnectionContext;
+import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.shared.client.AbstractJmsMessage;
+import org.objectweb.joram.shared.client.AbstractJmsReply;
+import org.objectweb.joram.shared.client.AbstractJmsRequest;
+import org.objectweb.joram.shared.client.CnxCloseReply;
+import org.objectweb.joram.shared.excepts.StateException;
+import org.objectweb.joram.shared.security.Identity;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.util.Queue;
-
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.joram.shared.JoramTracing;
 
 /**
  * The <code>SoapProxyService</code> class implements the SOAP service
@@ -73,23 +78,22 @@ public class SoapProxyService {
    * Service method: returns the identifier of a given user connection, 
    * or -1 if it is not a valid user of the SOAP proxy.
    *
-   * @param userName User's name.
-   * @param userPassword User's password.
+   * @param identityMap Map of the user Identity.
    * @param heartBeat
    * @return connection identifier
    * @exception Exception  If the proxy is not deployed.
    */
-  public int setConnection(String userName, 
-                           String userPassword, 
+  public int setConnection(Hashtable identityMap, 
                            int heartBeat) throws Exception {
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                "SoapProxyService.setConnection(" + 
-                                userName + ',' + 
-                                userPassword + ',' + 
-                                heartBeat + ')');
+      JoramTracing.dbgProxy.log(
+        BasicLevel.DEBUG, "SoapProxyService.setConnection(" + 
+        identityMap + ',' + 
+        heartBeat + ')');
 
-    GetProxyIdNot gpin = new GetProxyIdNot(userName, userPassword, null);
+    Identity identity = (Identity) Identity.soapDecode(identityMap);
+    
+    GetProxyIdNot gpin = new GetProxyIdNot(identity, null);
     AgentId proxyId;
     gpin.invoke(AdminTopic.getDefault());
     proxyId = gpin.getProxyId();
@@ -101,7 +105,7 @@ public class SoapProxyService {
       (StandardConnectionContext) ocn.getConnectionContext();
     ProxyConnectionContext pcc =
       new ProxyConnectionContext(proxyId, (Queue)cc.getQueue());
-    connections.put(new ConnectionKey(userName, cc.getKey()), pcc);
+    connections.put(new ConnectionKey(identity.getUserName(), cc.getKey()), pcc);
     
     return cc.getKey();
   }
