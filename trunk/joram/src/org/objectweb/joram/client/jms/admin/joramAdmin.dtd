@@ -36,18 +36,18 @@
   password      CDATA "root"
   cnxTimer      CDATA "60"
   reliableClass CDATA "org.objectweb.joram.client.jms.tcp.ReliableTcpClient"
-  indentityClass CDATA "org.objectweb.joram.shared.security.SimpleIdentity">
+  identityClass CDATA "org.objectweb.joram.shared.security.SimpleIdentity">
 
 <!ELEMENT collocatedConnect EMPTY>
 <!ATTLIST collocatedConnect
         name     CDATA "root"
         password CDATA "root"
-        indentityClass CDATA "org.objectweb.joram.shared.security.SimpleIdentity">
+        identityClass CDATA "org.objectweb.joram.shared.security.SimpleIdentity">
 
 <!ELEMENT ConnectionFactory (tcp | local | hatcp | halocal | soap | jndi)*>
 <!ATTLIST ConnectionFactory
 	class CDATA #REQUIRED
-	indentityClass CDATA "org.objectweb.joram.shared.security.SimpleIdentity">
+	identityClass CDATA "org.objectweb.joram.shared.security.SimpleIdentity">
 
 <!ELEMENT tcp EMPTY>
 <!ATTLIST tcp
@@ -88,7 +88,7 @@
   threshold CDATA "-1"
   dmq      CDATA ""
   serverId CDATA "0"
-  indentityClass CDATA "org.objectweb.joram.shared.security.SimpleIdentity">
+  identityClass CDATA "org.objectweb.joram.shared.security.SimpleIdentity">
 
 <!ELEMENT Destination (property | reader | writer | freeReader | freeWriter | jndi)*>
 <!ATTLIST Destination
