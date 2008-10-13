@@ -27,6 +27,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.security.KeyStore;
 import java.security.SecureRandom;
+
 import javax.net.SocketFactory;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -58,7 +59,7 @@ public class ReliableSSLTcpClient extends ReliableTcpClient {
     
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                 "ReliableSSLTcpClient[" + name + ',' + key + "].createSocket(" + hostname + "," + port
+                                 "ReliableSSLTcpClient[" + identity + ',' + key + "].createSocket(" + hostname + "," + port
           + ") on interface " + outLocalAddrStr + ":" + outLocalPort);
 
     SocketFactory socketFactory = createSocketFactory();

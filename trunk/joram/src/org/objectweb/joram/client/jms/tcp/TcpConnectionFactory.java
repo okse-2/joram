@@ -67,9 +67,10 @@ public class TcpConnectionFactory extends ConnectionFactory {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, 
                                  "TcpConnectionFactory.createConnection(" + name + ',' + password + ") reliableClass=" + reliableClass);
-
+    
+    initIdentity(name, password);
     return new Connection(params, 
-                          new TcpConnection(params, name, password, reliableClass));
+                          new TcpConnection(params, identity, reliableClass));
   }
 
   /**

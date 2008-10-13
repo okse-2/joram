@@ -66,10 +66,10 @@ public class XATcpConnectionFactory
   public javax.jms.XAConnection
       createXAConnection(String name, String password)
     throws javax.jms.JMSException {
+    initIdentity(name, password);
     return new XAConnection(params,
                             new TcpConnection(params, 
-                                              name, 
-                                              password,
+                                              identity,
                                               reliableClass));
   }
   

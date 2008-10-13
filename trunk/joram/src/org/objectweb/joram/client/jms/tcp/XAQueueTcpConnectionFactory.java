@@ -71,10 +71,10 @@ public class XAQueueTcpConnectionFactory
   public javax.jms.XAQueueConnection
       createXAQueueConnection(String name, String password)
     throws javax.jms.JMSException {
+    initIdentity(name, password);
     return new XAQueueConnection(params,
                                  new TcpConnection(params, 
-                                                   name, 
-                                                   password,
+                                                   identity,
                                                    reliableClass));
   }
 
@@ -87,10 +87,10 @@ public class XAQueueTcpConnectionFactory
   public javax.jms.XAConnection
       createXAConnection(String name, String password)
     throws javax.jms.JMSException {
+    initIdentity(name, password);
     return new XAConnection(params,
                             new TcpConnection(params, 
-                                              name, 
-                                              password,
+                                              identity,
                                               reliableClass));
   }
 
@@ -103,10 +103,10 @@ public class XAQueueTcpConnectionFactory
   public javax.jms.QueueConnection
       createQueueConnection(String name, String password)
     throws javax.jms.JMSException {
+    initIdentity(name, password);
     return new QueueConnection(params,
                                new TcpConnection(params, 
-                                                 name, 
-                                                 password,
+                                                 identity,
                                                  reliableClass));
   }
 
@@ -118,10 +118,10 @@ public class XAQueueTcpConnectionFactory
    */
   public javax.jms.Connection createConnection(String name, String password)
     throws javax.jms.JMSException {
+    initIdentity(name, password);
     return new Connection(params,
                           new TcpConnection(params, 
-                                            name, 
-                                            password,
+                                            identity,
                                             reliableClass));
   }
 
