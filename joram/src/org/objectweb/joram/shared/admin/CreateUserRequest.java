@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2003 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.shared.stream.StreamUtil;
 
 /**
@@ -36,10 +37,8 @@ import org.objectweb.joram.shared.stream.StreamUtil;
 public class CreateUserRequest extends AdminRequest {
   private static final long serialVersionUID = 1L;
 
-  /** Name of the user. */
-  private String userName;
-  /** Password of the user. */
-  private String userPass;
+  /** Identity contain Name of the user and password or Subjet */
+  private Identity identity;
   /** Id of the server where deploying the proxy. */
   private int serverId;
 
@@ -50,22 +49,19 @@ public class CreateUserRequest extends AdminRequest {
    * @param userPass  The password of the user.
    * @param serverId  The id of the server where deploying its proxy.
    */
-  public CreateUserRequest(String userName, String userPass, int serverId) {
-    this.userName = userName;
-    this.userPass = userPass;
+  public CreateUserRequest(Identity identity, int serverId) {
+    this.identity = identity;
     this.serverId = serverId;
   }
 
   public CreateUserRequest() { }
   
-  /** Returns the name of the user to create. */
-  public String getUserName() {
-    return userName;
-  }
-  
-  /** Returns the password of the user. */
-  public String getUserPass() {
-    return userPass;
+  /**
+   * @return identity (contains the name and 
+   * password or Subject of the user to create).
+   */
+  public Identity getIdentity() {
+    return identity;
   }
 
   /** Returns the id of the server where deploying its proxy. */
@@ -79,13 +75,15 @@ public class CreateUserRequest extends AdminRequest {
   
   public void readFrom(InputStream is) throws IOException {
     serverId = StreamUtil.readIntFrom(is);
-    userName = StreamUtil.readStringFrom(is);
-    userPass = StreamUtil.readStringFrom(is);
+    try {
+      identity = Identity.read(is);
+    } catch (Exception e) {
+      throw new IOException(e.getClass() + ":: " + e.getMessage());
+    }
   }
 
   public void writeTo(OutputStream os) throws IOException {
     StreamUtil.writeTo(serverId, os);
-    StreamUtil.writeTo(userName, os);
-    StreamUtil.writeTo(userPass, os);
+    Identity.write(identity, os);
   }
 }

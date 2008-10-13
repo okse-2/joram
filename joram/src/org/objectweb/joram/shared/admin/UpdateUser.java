@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.shared.stream.StreamUtil;
 
 /**
@@ -40,27 +41,22 @@ public class UpdateUser extends AdminRequest {
   private String userName;
   /** Identifier of the user's proxy. */
   private String proxId;
-  /** New name of the user. */
-  private String newName;
-  /** New password of the user. */
-  private String newPass;
+  /** Identity contain Name of the new user and new password or new Subjet */
+  private Identity newIdentity;
 
   /**
    * Constructs an <code>UpdateUser</code> instance.
    *
-   * @param userName  The name of the user.
-   * @param proxId  Identifier of the user's proxy.
-   * @param newName  The new name of the user.
-   * @param newPass  The new password of the user.
+   * @param userName     The name of the user.
+   * @param proxId       Identifier of the user's proxy.
+   * @param newIdentity  The new identity of the user.
    */
   public UpdateUser(String userName, 
                     String proxId,
-                    String newName,
-                    String newPass) {
+                    Identity newIdentity) {
     this.userName = userName;
     this.proxId = proxId;
-    this.newName = newName;
-    this.newPass = newPass;
+    this.newIdentity = newIdentity;
   }
 
   public UpdateUser() { }
@@ -75,14 +71,9 @@ public class UpdateUser extends AdminRequest {
     return proxId;
   }
 
-  /** Returns the new name of the user. */
-  public String getNewName() {
-    return newName;
-  }
-  
-  /** Returns the new password of the user. */
-  public String getNewPass() {
-    return newPass;
+  /** Returns the new identity of the user. */
+  public Identity getNewIdentity() {
+    return newIdentity;
   }
   
   protected int getClassId() {
@@ -92,14 +83,16 @@ public class UpdateUser extends AdminRequest {
   public void readFrom(InputStream is) throws IOException {
     userName = StreamUtil.readStringFrom(is);
     proxId  = StreamUtil.readStringFrom(is);
-    newName  = StreamUtil.readStringFrom(is);
-    newPass  = StreamUtil.readStringFrom(is);
+    try {
+      newIdentity = Identity.read(is);
+    } catch (Exception e) {
+      throw new IOException(e.getClass() + ":: " + e.getMessage());
+    }
   }
 
   public void writeTo(OutputStream os) throws IOException {
     StreamUtil.writeTo(userName, os);
     StreamUtil.writeTo(proxId, os);
-    StreamUtil.writeTo(newName, os);
-    StreamUtil.writeTo(newPass, os);
+    Identity.write(newIdentity, os);
   }
 }
