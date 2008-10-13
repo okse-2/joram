@@ -34,6 +34,7 @@ import org.objectweb.joram.client.jms.connection.RequestChannel;
 import org.objectweb.joram.client.jms.tcp.ReliableTcpClient;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
+import org.objectweb.joram.shared.security.Identity;
 
 public class HATcpConnection 
     implements RequestChannel {
@@ -44,21 +45,18 @@ public class HATcpConnection
    * Creates a <code>HATcpConnection</code> instance.
    *
    * @param params  Factory parameters.
-   * @param name  Name of user.
-   * @param password  Password of user.
+   * @param identity
    *
    * @exception JMSSecurityException  If the user identification is incorrrect.
    * @exception IllegalStateException  If the server is not reachable.
    */
   public HATcpConnection(String url,
                          FactoryParameters params, 
-                         String name,
-                         String password) 
+                         Identity identity) 
     throws JMSException {
     this(url,
          params, 
-         name,
-         password,
+         identity,
          "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
   }
   
@@ -70,8 +68,7 @@ public class HATcpConnection
    * Creates a <code>HATcpConnection</code> instance.
    *
    * @param params  Factory parameters.
-   * @param name  Name of user.
-   * @param password  Password of user.
+   * @param identity
    * @param reliableClass  reliable class name.
    *
    * @exception JMSSecurityException  If the user identification is incorrrect.
@@ -79,8 +76,7 @@ public class HATcpConnection
    */
   public HATcpConnection(String url,
                          FactoryParameters params, 
-                         String name,
-                         String password,
+                         Identity identity,
                          String reliableClass) 
     throws JMSException {
     try {
@@ -106,8 +102,7 @@ public class HATcpConnection
       throw jmsExc;
     }
     tcpClient.init(params, 
-                   name,
-                   password,
+                   identity,
                    true);
     StringTokenizer tokenizer = new StringTokenizer(url, "/:,");
     if (! tokenizer.hasMoreElements()) 

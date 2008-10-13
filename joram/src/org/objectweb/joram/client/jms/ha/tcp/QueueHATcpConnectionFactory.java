@@ -53,13 +53,13 @@ public class QueueHATcpConnectionFactory
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
   public javax.jms.QueueConnection
-      createQueueConnection(String name, String password)
-    throws javax.jms.JMSException
-    {
-      HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, name, password, reliableClass);
-      return new QueueConnection(params, lc);
-    }
+  createQueueConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HATcpConnection lc = new HATcpConnection(
+        getParameters().getUrl(), params, identity, reliableClass);
+    return new QueueConnection(params, lc);
+  }
 
   /**
    * Method inherited from the <code>ConnectionFactory</code> class.
@@ -68,13 +68,13 @@ public class QueueHATcpConnectionFactory
    * @exception IllegalStateException  If the server is not listening.
    */
   public javax.jms.Connection
-      createConnection(String name, String password)
-    throws javax.jms.JMSException
-    {
-      HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, name, password, reliableClass);
-      return new Connection(params, lc);
-    }
+  createConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HATcpConnection lc = new HATcpConnection(
+        getParameters().getUrl(), params, identity, reliableClass);
+    return new Connection(params, lc);
+  }
 
   /**
    * Admin method creating a <code>javax.jms.ConnectionFactory</code>

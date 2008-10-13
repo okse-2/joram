@@ -62,13 +62,13 @@ public class XAQueueHATcpConnectionFactory
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
   public javax.jms.XAQueueConnection
-      createXAQueueConnection(String name, String password)
-    throws javax.jms.JMSException
-    {
-      HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, name, password, reliableClass);
-      return new XAQueueConnection(params, lc);
-    }
+  createXAQueueConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HATcpConnection lc = new HATcpConnection(
+        getParameters().getUrl(), params, identity, reliableClass);
+    return new XAQueueConnection(params, lc);
+  }
 
   /**
    * Method inherited from the <code>XAConnectionFactory</code> class.
@@ -76,13 +76,13 @@ public class XAQueueHATcpConnectionFactory
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
   public javax.jms.XAConnection
-      createXAConnection(String name, String password)
-    throws javax.jms.JMSException
-    {
-      HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, name, password, reliableClass);
-      return new XAConnection(params, lc);
-    }
+  createXAConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HATcpConnection lc = new HATcpConnection(
+        getParameters().getUrl(), params, identity, reliableClass);
+    return new XAConnection(params, lc);
+  }
 
   /**
    * Method inherited from the <code>QueueConnectionFactory</code> class.
@@ -90,13 +90,13 @@ public class XAQueueHATcpConnectionFactory
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
   public javax.jms.QueueConnection
-      createQueueConnection(String name, String password)
-    throws javax.jms.JMSException
-    {
-      HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, name, password, reliableClass);
-      return new QueueConnection(params, lc);
-    }
+  createQueueConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HATcpConnection lc = new HATcpConnection(
+        getParameters().getUrl(), params, identity, reliableClass);
+    return new QueueConnection(params, lc);
+  }
 
   /**
    * Method inherited from the <code>ConnectionFactory</code> class.
@@ -104,12 +104,12 @@ public class XAQueueHATcpConnectionFactory
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
   public javax.jms.Connection createConnection(String name, String password)
-    throws javax.jms.JMSException
-    {
-      HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, name, password, reliableClass);
-      return new Connection(params, lc);
-    }
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HATcpConnection lc = new HATcpConnection(
+        getParameters().getUrl(), params, identity, reliableClass);
+    return new Connection(params, lc);
+  }
 
 
   /**
