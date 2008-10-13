@@ -74,6 +74,7 @@ import org.objectweb.joram.shared.admin.RemoveServerRequest;
 import org.objectweb.joram.shared.admin.SetDefaultDMQ;
 import org.objectweb.joram.shared.admin.SetDefaultThreshold;
 import org.objectweb.joram.shared.admin.StopServerRequest;
+import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -131,7 +132,7 @@ public class AdminModule {
       exc.printStackTrace();
     }
   }
-
+    
   /**
    * Opens a connection dedicated to administering with the Joram server
    * which parameters are wrapped by a given
@@ -149,9 +150,35 @@ public class AdminModule {
                              String name,
                              String password)
     throws ConnectException, AdminException {
+    connect(cnxFact, name, password, Identity.SIMPLE_IDENTITY_CLASS);
+    }
+  
+  /**
+   * Opens a connection dedicated to administering with the Joram server
+   * which parameters are wrapped by a given
+   * <code>TopicConnectionFactory</code>.
+   *
+   * @param cnxFact  The TopicConnectionFactory to use for connecting.
+   * @param name  Administrator's name.
+   * @param password  Administrator's password.
+   * @param identityClass identity class name.
+   *
+   * @exception ConnectException  If connecting fails.
+   * @exception AdminException  If the administrator identification is
+   *              incorrect.
+   */
+  public static void connect(javax.jms.TopicConnectionFactory cnxFact,
+                             String name,
+                             String password,
+                             String identityClass)
+    throws ConnectException, AdminException {
     if (cnx != null)
       return;
+    
+    //  set identity className
+    ((AbstractConnectionFactory) cnxFact).setIdentityClassName(identityClass);
 
+    
     try {
       cnx = cnxFact.createTopicConnection(name, password);
       requestor = new AdminRequestor(cnx);
@@ -235,6 +262,35 @@ public class AdminModule {
                              int cnxTimer,
                              String reliableClass)
     throws UnknownHostException, ConnectException, AdminException {
+    connect(hostName, port, hostName, password, cnxTimer, reliableClass, Identity.SIMPLE_IDENTITY_CLASS);
+  }
+  
+  /**
+   * Opens a TCP connection with the Joram server running on a given host and
+   * listening to a given port.
+   *
+   * @param host  The name or IP address of the host the server is running on.
+   * @param port  The number of the port the server is listening to.
+   * @param name  Administrator's name.
+   * @param password  Administrator's password.
+   * @param cnxTimer  Timer in seconds during which connecting to the server
+   *          is attempted.
+   * @param reliableClass  Reliable class name.
+   * @param identityClass identity class name.
+   *
+   * @exception UnknownHostException  If the host is invalid.
+   * @exception ConnectException  If connecting fails.
+   * @exception AdminException  If the administrator identification is
+   *              incorrect.
+   */
+  public static void connect(String hostName,
+                             int port,
+                             String name,
+                             String password,
+                             int cnxTimer,
+                             String reliableClass,
+                             String identityClass)
+    throws UnknownHostException, ConnectException, AdminException {
     javax.jms.TopicConnectionFactory cnxFact =null;
 
     if (isHa) {
@@ -248,7 +304,7 @@ public class AdminModule {
     ((org.objectweb.joram.client.jms.ConnectionFactory)
      cnxFact).getParameters().connectingTimer = cnxTimer;
 
-    connect(cnxFact, name, password);
+    connect(cnxFact, name, password, identityClass);
   }
 
   /**
@@ -292,7 +348,7 @@ public class AdminModule {
     throws UnknownHostException, ConnectException, AdminException {
     connect("localhost", 16010, name, password, cnxTimer, reliableClass);
   }
-
+  
   /**
    * Opens a connection with the collocated JORAM server.
    *
@@ -305,11 +361,27 @@ public class AdminModule {
    */
   public static void collocatedConnect(String name, String password)
          throws ConnectException, AdminException {
+    collocatedConnect(name, password, Identity.SIMPLE_IDENTITY_CLASS);
+  }
+
+  /**
+   * Opens a connection with the collocated JORAM server.
+   *
+   * @param name  Administrator's name.
+   * @param password  Administrator's password.
+   * @param identityClass identity class name.
+   *
+   * @exception ConnectException  If connecting fails.
+   * @exception AdminException  If the administrator identification is
+   *              incorrect.
+   */
+  public static void collocatedConnect(String name, String password, String identityClass)
+         throws ConnectException, AdminException {
     JoramTracing.dbgClient.log(BasicLevel.DEBUG, "isHa=" + isHa);
     if (isHa) {
-      connect(TopicHALocalConnectionFactory.create(), name, password);
+      connect(TopicHALocalConnectionFactory.create(), name, password, identityClass);
     } else {
-      connect(TopicLocalConnectionFactory.create(), name, password);
+      connect(TopicLocalConnectionFactory.create(), name, password, identityClass);
     }
   }
 

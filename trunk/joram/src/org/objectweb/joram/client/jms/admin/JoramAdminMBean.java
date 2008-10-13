@@ -60,7 +60,13 @@ public interface JoramAdminMBean {
     throws AdminException;
 
   public void createUser(String name, String password, int serverId)
+  throws AdminException;
+  
+  public void createUser(String name, String password, int serverId, String identityClass)
     throws AdminException;
+  
+  public void createUser(String name, String password, String identityClass)
+  throws AdminException;
 
   public Destination createQueue(String name)
     throws AdminException;

@@ -23,21 +23,44 @@
  */
 package org.objectweb.joram.client.jms.admin;
 
-import java.util.Vector;
+import java.net.ConnectException;
 import java.util.Hashtable;
 import java.util.List;
-import java.net.ConnectException;
-
-import javax.naming.*;
+import java.util.Vector;
 
 import javax.jms.JMSException;
+import javax.naming.NamingException;
+import javax.naming.Reference;
+import javax.naming.StringRefAddr;
+
+import org.objectweb.joram.client.jms.Message;
+import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.shared.admin.AdminReply;
+import org.objectweb.joram.shared.admin.ClearSubscription;
+import org.objectweb.joram.shared.admin.CreateUserReply;
+import org.objectweb.joram.shared.admin.CreateUserRequest;
+import org.objectweb.joram.shared.admin.DeleteSubscriptionMessage;
+import org.objectweb.joram.shared.admin.DeleteUser;
+import org.objectweb.joram.shared.admin.GetSubscription;
+import org.objectweb.joram.shared.admin.GetSubscriptionMessage;
+import org.objectweb.joram.shared.admin.GetSubscriptionMessageIds;
+import org.objectweb.joram.shared.admin.GetSubscriptionMessageIdsRep;
+import org.objectweb.joram.shared.admin.GetSubscriptionMessageRep;
+import org.objectweb.joram.shared.admin.GetSubscriptionRep;
+import org.objectweb.joram.shared.admin.GetSubscriptions;
+import org.objectweb.joram.shared.admin.GetSubscriptionsRep;
+import org.objectweb.joram.shared.admin.Monitor_GetDMQSettings;
+import org.objectweb.joram.shared.admin.Monitor_GetDMQSettingsRep;
+import org.objectweb.joram.shared.admin.Monitor_GetNbMaxMsg;
+import org.objectweb.joram.shared.admin.Monitor_GetNbMaxMsgRep;
+import org.objectweb.joram.shared.admin.SetNbMaxMsg;
+import org.objectweb.joram.shared.admin.SetUserDMQ;
+import org.objectweb.joram.shared.admin.SetUserThreshold;
+import org.objectweb.joram.shared.admin.UpdateUser;
+import org.objectweb.joram.shared.security.Identity;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.util.management.MXWrapper;
-import org.objectweb.joram.client.jms.Message;
-import org.objectweb.joram.shared.admin.*;
-
-import org.objectweb.joram.shared.JoramTracing;
-import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * The <code>User</code> class is a utility class needed for administering
@@ -107,17 +130,7 @@ public class User extends AdministeredObject implements UserMBean {
    */ 
   public static User create(String name, String password, int serverId)
     throws ConnectException, AdminException {
-    AdminReply reply = AdminModule.doRequest(
-      new CreateUserRequest(name, password, serverId));
-    User user = new User(name, ((CreateUserReply) reply).getProxId());
-    try {
-      MXWrapper.registerMBean(user,
-                              "joramClient",
-                              "type=User,name="+ name + "[" + user.getProxyId() + "]");
-    } catch (Exception e) {
-      JoramTracing.dbgClient.log(BasicLevel.WARN, "registerMBean",e);
-    }
-    return user;
+    return create(name, password, serverId, Identity.SIMPLE_IDENTITY_CLASS);
   }
   
   /**
@@ -136,7 +149,64 @@ public class User extends AdministeredObject implements UserMBean {
    */ 
   public static User create(String name, String password)
          throws ConnectException, AdminException {
-    return create(name, password, AdminModule.getLocalServerId());
+    return create(name, password, AdminModule.getLocalServerId(), Identity.SIMPLE_IDENTITY_CLASS);
+  }
+  
+  /**
+   * Admin method creating a user for a given server and instanciating the
+   * corresponding <code>User</code> object.
+   * <p>
+   * If the user has already been set on this server, the method simply
+   * returns the corresponding <code>User</code> object. Its fails if the
+   * target server does not belong to the platform, or if a proxy could not
+   * be deployed server side for a new user. 
+   *
+   * @param name  Name of the user.
+   * @param password  Password of the user.
+   * @param serverId  The identifier of the user's server.
+   * @param identityClassName user/password or JAAS... (delault SimpleIdentity).
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */ 
+  public static User create(String name, String password, int serverId, String identityClassName)
+    throws ConnectException, AdminException {
+    Identity identity = createIdentity(name, password, identityClassName);
+    AdminReply reply = AdminModule.doRequest(
+      new CreateUserRequest(identity, serverId));
+    User user = new User(name, ((CreateUserReply) reply).getProxId());
+    try {
+      MXWrapper.registerMBean(user,
+                              "joramClient",
+                              "type=User,name="+ name + "[" + user.getProxyId() + "]");
+    } catch (Exception e) {
+      JoramTracing.dbgClient.log(BasicLevel.WARN, "registerMBean",e);
+    }
+    return user;
+  }
+  
+  /**
+   * Create a user Identity.
+   * 
+   * @param user              Name of the user.
+   * @param passwd            Password of the user.
+   * @param identityClassName identity class name (simple, jaas).
+   * @return identity user Identity.
+   * @throws AdminException
+   */
+  private static Identity createIdentity(String user, String passwd, String identityClassName) throws AdminException {
+    Identity identity = null;
+    try {
+      Class clazz = Class.forName(identityClassName);
+      identity = (Identity) clazz.newInstance();
+      if (passwd != null)
+        identity.setIdentity(user, passwd);
+      else
+        identity.setUserName(user);
+    } catch (Exception e) {
+      throw new AdminException(e.getMessage());
+    }
+    return identity;
   }
   
   /**
@@ -153,7 +223,26 @@ public class User extends AdministeredObject implements UserMBean {
    */
   public void update(String newName, String newPassword)
     throws ConnectException, AdminException {
-    AdminModule.doRequest(new UpdateUser(name, proxyId, newName, newPassword));
+    update(newName, newPassword, Identity.SIMPLE_IDENTITY_CLASS);
+  }
+  
+  /**
+   * Admin method updating this user identification.
+   * <p>
+   * The request fails if the user does not exist server side, or if the new
+   * identification is already taken by a user on the same server.
+   *
+   * @param newName  The new name of the user.
+   * @param newPassword  The new password of the user.
+   * @param identityClassName user/password or JAAS... (delault SimpleIdentity).
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void update(String newName, String newPassword, String identityClassName)
+    throws ConnectException, AdminException {
+    Identity newIdentity = createIdentity(newName, newPassword, identityClassName);
+    AdminModule.doRequest(new UpdateUser(name, proxyId, newIdentity));
     name = newName;
   }
 

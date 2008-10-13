@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -36,6 +36,7 @@ import javax.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.util.management.MXWrapper;
@@ -91,12 +92,20 @@ public class JoramAdmin
     platformAdmin = new PlatformAdmin(name,password);
     registerMBean();
   }
+  
+  public JoramAdmin(javax.jms.TopicConnectionFactory cnxFact,
+      String name,
+      String password)
+  throws ConnectException, AdminException {
+    this(cnxFact, name, password, Identity.SIMPLE_IDENTITY_CLASS);
+  }
 
   public JoramAdmin(javax.jms.TopicConnectionFactory cnxFact,
                     String name,
-                    String password)
+                    String password,
+                    String identityClassName)
     throws ConnectException, AdminException {
-    platformAdmin = new PlatformAdmin(cnxFact,name,password);
+    platformAdmin = new PlatformAdmin(cnxFact,name,password,identityClassName);
     registerMBean();
   }
 
@@ -330,7 +339,7 @@ public class JoramAdmin
   public void createUser(String name, String password)
     throws AdminException {
     try {
-      User.create(name,password);
+      User.create(name, password);
     } catch (ConnectException exc) {
       throw new AdminException("createUser() failed: admin connection "
                                + "has been lost.");
@@ -345,7 +354,37 @@ public class JoramAdmin
   public void createUser(String name, String password, int serverId)
     throws AdminException {
     try {
-      User.create(name,password,serverId);
+      User.create(name, password, serverId, Identity.SIMPLE_IDENTITY_CLASS);
+    } catch (ConnectException exc) {
+      throw new AdminException("createUser() failed: admin connection "
+                               + "has been lost.");
+    }
+  }
+  
+  /**
+   * Creates or retrieves a user on the underlying JORAM server.
+   *
+   * @exception AdminException   If the creation fails.
+   */
+  public void createUser(String name, String password, String identityClass) 
+  throws AdminException {
+    try {
+      User.create(name, password, AdminModule.getLocalServerId(), identityClass);
+    } catch (ConnectException exc) {
+      throw new AdminException("createUser() failed: admin connection "
+                               + "has been lost.");
+    }
+  }
+  
+  /**
+   * Creates or retrieves a user on the underlying JORAM server.
+   *
+   * @exception AdminException   If the creation fails.
+   */
+  public void createUser(String name, String password, int serverId, String identityClass)
+    throws AdminException {
+    try {
+      User.create(name, password, serverId, identityClass);
     } catch (ConnectException exc) {
       throw new AdminException("createUser() failed: admin connection "
                                + "has been lost.");

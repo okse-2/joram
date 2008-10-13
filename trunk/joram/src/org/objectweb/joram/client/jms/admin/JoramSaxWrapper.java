@@ -50,6 +50,7 @@ import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.Destination;
 
 import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -159,6 +160,8 @@ public class JoramSaxWrapper extends DefaultHandler {
   static final String ATT_THRESHOLD = "threshold";
   /** Syntaxic name for location attribute */
   static final String ATT_LOCATION = "location";
+  /** Syntaxic name for identity class attribute */
+  static final String ATT_IDENTITYCLASS = "identityClass";
 
   static final String DFLT_LISTEN_HOST = "localhost";
   static final int DFLT_LISTEN_PORT = 16010;
@@ -184,6 +187,7 @@ public class JoramSaxWrapper extends DefaultHandler {
   String user = null;
   String type = null;
   Properties properties = null;
+  String identityClass = null;
 
   String jndiName = null;
   Hashtable toBind = new Hashtable();
@@ -353,6 +357,10 @@ public class JoramSaxWrapper extends DefaultHandler {
               cnxTimer = Integer.parseInt(value);
             // Get the protocol implementation.
             reliableClass = atts.getValue(ATT_RELIABLECLASS);
+            // Get identity class name.
+            identityClass = atts.getValue(ATT_IDENTITYCLASS);
+            if (!isSet(identityClass))
+              identityClass = Identity.SIMPLE_IDENTITY_CLASS;
           } catch (NumberFormatException exc) {
             throw new Exception("bad value for port: " +
                                 atts.getValue(ATT_PORT) +
@@ -382,6 +390,10 @@ public class JoramSaxWrapper extends DefaultHandler {
               cnxTimer = 60;
             else
               cnxTimer = Integer.parseInt(value);
+            // Get identity class name.
+            identityClass = atts.getValue(ATT_IDENTITYCLASS);
+            if (!isSet(identityClass))
+              identityClass = Identity.SIMPLE_IDENTITY_CLASS;
           } catch (NumberFormatException exc) {
             throw new Exception("cnxTimer: " +
                                 atts.getValue(ATT_CNXTIMER));
@@ -397,6 +409,10 @@ public class JoramSaxWrapper extends DefaultHandler {
           password = atts.getValue(ATT_PASSWORD);
           if (!isSet(password))
             password = AbstractConnectionFactory.getDefaultRootPassword();
+          // Get identity class name.
+          identityClass = atts.getValue(ATT_IDENTITYCLASS);
+          if (!isSet(identityClass))
+            identityClass = Identity.SIMPLE_IDENTITY_CLASS;
         } catch (Exception exc) {
           throw new SAXException(exc.getMessage(), exc);
         }
@@ -405,6 +421,7 @@ public class JoramSaxWrapper extends DefaultHandler {
           name = atts.getValue(ATT_NAME);
           className = atts.getValue(ATT_CLASSNAME);
           if (!isSet(className)) className = DFLT_CF;
+          identityClass = atts.getValue(ATT_IDENTITYCLASS);
         } catch (Exception exc) {
           throw new SAXException(exc.getMessage(), exc);
         }
@@ -507,6 +524,7 @@ public class JoramSaxWrapper extends DefaultHandler {
               threshold = -1;
             else
               threshold = Integer.parseInt(value);
+            identityClass = atts.getValue(ATT_IDENTITYCLASS);
           } catch (NumberFormatException exc) {
             throw new Exception("bad value for serverId: " +
                                 atts.getValue(ATT_SERVERID));
@@ -673,7 +691,7 @@ public class JoramSaxWrapper extends DefaultHandler {
                        password + "," +
                        cnxTimer + "," +
                        reliableClass + ")");
-          AdminModule.connect(host,port,name,password,cnxTimer,reliableClass);
+          AdminModule.connect(host,port,name,password,cnxTimer,reliableClass,identityClass);
         } else if (rawName.equals(ELT_HACONNECT)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "AdminModule.haConnect(" +
@@ -684,16 +702,20 @@ public class JoramSaxWrapper extends DefaultHandler {
           javax.jms.TopicConnectionFactory tcf =
             TopicHATcpConnectionFactory.create(url);
           ((ConnectionFactory) tcf).getParameters().connectingTimer = cnxTimer;
-          AdminModule.connect(tcf, name, password);
+          AdminModule.connect(tcf, name, password,identityClass);
         } else if (rawName.equals(ELT_COLLOCATEDCONNECT)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "AdminModule.collocatedConnect(" +
                        name + "," +
                        password + ")");
-          AdminModule.collocatedConnect(name,password);
+          AdminModule.collocatedConnect(name,password,identityClass);
         } else if (rawName.equals(ELT_CONNECTIONFACTORY)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "cf \""+ name + "\"= " + obj);
+          // set identity className
+          if (isSet(identityClass)) 
+            ((org.objectweb.joram.client.jms.admin.AbstractConnectionFactory) obj)
+            .setIdentityClassName(identityClass);
           // Bind the ConnectionFactory in JNDI.
           // Be Careful, currently only one binding is handled.
           if (isSet(jndiName))
@@ -701,9 +723,9 @@ public class JoramSaxWrapper extends DefaultHandler {
           jndiName = null;
           // Register the CF in order to handle it later (cluster, etc.)
           if (isSet(name)) cfs.put(name, obj);
-
           className = null;
           obj = null;
+          identityClass = null;
         } else if (rawName.equals(ELT_TCP)) {
           Class clazz = Class.forName(className);
           Class [] classParams = {new String().getClass(),
@@ -759,7 +781,8 @@ public class JoramSaxWrapper extends DefaultHandler {
                        password + "," +
                        serverId + ")");
           if (! isSet(login)) login = name;
-          User user = User.create(login, password, serverId);
+          if (! isSet(identityClass)) identityClass = Identity.SIMPLE_IDENTITY_CLASS;
+          User user = User.create(login, password, serverId, identityClass);
           users.put(name, user);
 
           if (threshold > 0)

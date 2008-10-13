@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -74,8 +74,17 @@ public class PlatformAdmin
   public PlatformAdmin(javax.jms.TopicConnectionFactory cnxFact,
                        String name,
                        String password) 
-    throws ConnectException, AdminException {
+  throws ConnectException, AdminException {
     connect(cnxFact,name,password);
+    registerMBean();
+  }
+  
+  public PlatformAdmin(javax.jms.TopicConnectionFactory cnxFact,
+                       String name,
+                       String password,
+                       String identityClassName) 
+    throws ConnectException, AdminException {
+    connect(cnxFact,name,password,identityClassName);
     registerMBean();
   }
 
@@ -122,7 +131,29 @@ public class PlatformAdmin
     throws ConnectException, AdminException {
     AdminModule.connect(cnxFact,name,password);
   }
-
+  
+  /**
+   * Opens a connection dedicated to administering with the Joram server
+   * which parameters are wrapped by a given
+   * <code>TopicConnectionFactory</code>.
+   *
+   * @param cnxFact  The TopicConnectionFactory to use for connecting.
+   * @param name  Administrator's name.
+   * @param password  Administrator's password.
+   * @param indentityClass identity class name.
+   *
+   * @exception ConnectException  If connecting fails.
+   * @exception AdminException  If the administrator identification is
+   *              incorrect.
+   */
+  public void connect(javax.jms.TopicConnectionFactory cnxFact, 
+                      String name,
+                      String password,
+                      String indentityClass)
+    throws ConnectException, AdminException {
+    AdminModule.connect(cnxFact,name,password,indentityClass);
+  }
+   
   /**
    * Opens a TCP connection with the Joram server running on a given host and
    * listening to a given port.
@@ -148,6 +179,35 @@ public class PlatformAdmin
                       String reliableClass)
     throws UnknownHostException, ConnectException, AdminException {
     AdminModule.connect(hostName,port,name,password,cnxTimer,reliableClass);
+  }
+  
+  /**
+   * Opens a TCP connection with the Joram server running on a given host and
+   * listening to a given port.
+   *
+   * @param host  The name or IP address of the host the server is running on.
+   * @param port  The number of the port the server is listening to.
+   * @param name  Administrator's name.
+   * @param password  Administrator's password.
+   * @param cnxTimer  Timer in seconds during which connecting to the server
+   *          is attempted.
+   * @param reliableClass  Reliable class name.
+   * @param indentityClass identity class name.
+   *
+   * @exception UnknownHostException  If the host is invalid.
+   * @exception ConnectException  If connecting fails.
+   * @exception AdminException  If the administrator identification is
+   *              incorrect.
+   */
+  public void connect(String hostName,
+                      int port,
+                      String name,
+                      String password,
+                      int cnxTimer,
+                      String reliableClass,
+                      String indentityClass)
+    throws UnknownHostException, ConnectException, AdminException {
+    AdminModule.connect(hostName,port,name,password,cnxTimer,reliableClass,indentityClass);
   }
   
   /**
@@ -191,6 +251,22 @@ public class PlatformAdmin
   public void collocatedConnect(String name, String password)
     throws ConnectException, AdminException {
     AdminModule.collocatedConnect(name,password);
+  }
+  
+  /**
+   * Opens a connection with the collocated JORAM server.
+   *
+   * @param name  Administrator's name.
+   * @param password  Administrator's password.
+   * @param indentityClass identity class name.
+   *
+   * @exception ConnectException  If connecting fails.
+   * @exception AdminException  If the administrator identification is
+   *              incorrect.
+   */
+  public void collocatedConnect(String name, String password, String indentityClass)
+    throws ConnectException, AdminException {
+    AdminModule.collocatedConnect(name,password,indentityClass);
   }
 
   /** Closes the administration connection. */
