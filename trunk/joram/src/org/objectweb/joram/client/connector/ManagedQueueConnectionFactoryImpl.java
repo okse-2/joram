@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2006 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -43,6 +43,7 @@ import javax.resource.spi.ManagedConnection;
 import javax.resource.spi.SecurityException;
 import javax.security.auth.Subject;
 
+import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 import org.objectweb.joram.client.jms.ha.local.XAHALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.local.XAQueueHALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
@@ -148,6 +149,7 @@ public class ManagedQueueConnectionFactoryImpl
 
     String userName;
     String password;
+    String identityClass;
 
     String hostName = this.hostName;
     int serverPort = this.serverPort;
@@ -157,6 +159,7 @@ public class ManagedQueueConnectionFactoryImpl
     if (cxRequest == null) {
       userName = this.userName;
       password = this.password;
+      identityClass = this.identityClass; 
     }
     else {
       if (! (cxRequest instanceof ConnectionRequest)) {
@@ -168,6 +171,7 @@ public class ManagedQueueConnectionFactoryImpl
 
       userName = ((ConnectionRequest) cxRequest).getUserName();
       password = ((ConnectionRequest) cxRequest).getPassword();
+      identityClass = ((ConnectionRequest) cxRequest).getIdentityClass();
     }
 
     XAConnection cnx = null;
@@ -185,16 +189,19 @@ public class ManagedQueueConnectionFactoryImpl
               if (cxRequest instanceof QueueConnectionRequest) {
                 XAQueueConnectionFactory factory = XAQueueHATcpConnectionFactory.create(ra.haURL);
                 setParameters(factory);
+                ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
                 cnx = factory.createXAQueueConnection(userName, password);
               } else {
                 XAConnectionFactory factory = XAHATcpConnectionFactory.create(ra.haURL);
                 setParameters(factory);
+                ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
                 cnx = factory.createXAConnection(userName, password);
               }
             } else {          
               if (cxRequest instanceof QueueConnectionRequest) {
                 XAQueueConnectionFactory factory = XAQueueHALocalConnectionFactory.create();
                 setParameters(factory);
+                ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
                 cnx = factory.createXAQueueConnection(userName, password);
               } else {
                 XAConnectionFactory factory = XAHALocalConnectionFactory.create();
@@ -207,10 +214,12 @@ public class ManagedQueueConnectionFactoryImpl
             if (cxRequest instanceof QueueConnectionRequest) {
               XAQueueConnectionFactory factory = XAQueueHATcpConnectionFactory.create(urlHa);
               setParameters(factory);
+              ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
               cnx = factory.createXAQueueConnection(userName, password);
             } else {
               XAConnectionFactory factory = XAHATcpConnectionFactory.create(urlHa);
               setParameters(factory);
+              ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
               cnx = factory.createXAConnection(userName, password);
             }
           }
@@ -219,20 +228,24 @@ public class ManagedQueueConnectionFactoryImpl
                 if (cxRequest instanceof QueueConnectionRequest) {
                     XAQueueConnectionFactory factory = XAQueueLocalConnectionFactory.create();
                     setParameters(factory);
+                    ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
                     cnx = factory.createXAQueueConnection(userName, password);
                 } else {
                     XAConnectionFactory factory = XALocalConnectionFactory.create();
                     setParameters(factory);
+                    ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
                     cnx = factory.createXAConnection(userName, password);
                 }
             } else {
                 if (cxRequest instanceof QueueConnectionRequest) {
                     XAQueueConnectionFactory factory = XAQueueTcpConnectionFactory.create(hostName, serverPort);
                     setParameters(factory);
+                    ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
                     cnx = factory.createXAQueueConnection(userName, password);
                 } else {
                     XAConnectionFactory factory = XATcpConnectionFactory.create(hostName, serverPort);
                     setParameters(factory);
+                    ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
                     cnx = factory.createXAConnection(userName, password);
                 }
             }

@@ -110,7 +110,7 @@ public class OutboundConnectionFactory implements javax.jms.ConnectionFactory,
 
     try {
       ConnectionRequest cxRequest =
-        new ConnectionRequest(userName, password);
+        new ConnectionRequest(userName, password, mcf.getIdentityClass());
 
       if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
         AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 

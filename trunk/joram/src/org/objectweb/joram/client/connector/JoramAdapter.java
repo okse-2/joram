@@ -60,7 +60,9 @@ import javax.transaction.xa.XAResource;
 import org.objectweb.joram.client.jms.ConnectionMetaData;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
+import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 import org.objectweb.joram.client.jms.admin.AdminException;
+import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
 import org.objectweb.joram.client.jms.admin.JoramAdmin;
 import org.objectweb.joram.client.jms.admin.User;
@@ -72,6 +74,7 @@ import org.objectweb.joram.client.jms.local.TopicLocalConnectionFactory;
 import org.objectweb.joram.client.jms.local.XALocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
+import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import com.scalagent.jmx.JMXServer;
@@ -137,6 +140,7 @@ public class JoramAdapter
   /** Root name. */
   String rootName = "root";
   String rootPasswd = "root";
+  String identityClass = Identity.SIMPLE_IDENTITY_CLASS;
 
   /** Identifier of the JORAM server to start. */
   short serverId = 0;
@@ -682,8 +686,9 @@ public class JoramAdapter
 
       String userName = specImpl.getUserName();
       String password = specImpl.getPassword();
+      String identityClass = specImpl.getIdentityClass();
 
-      createUser(userName, password);
+      createUser(userName, password, identityClass);
 
       XAConnectionFactory connectionFactory = null;
 
@@ -731,6 +736,9 @@ public class JoramAdapter
         .getParameters().topicActivationThreshold = topicActivationThreshold;
       }
 
+      // set identity class for this connectionFactory.
+      ((AbstractConnectionFactory) connectionFactory).setIdentityClassName(identityClass);
+      
       XAConnection cnx =
         connectionFactory.createXAConnection(userName, password);
 
@@ -806,7 +814,6 @@ public class JoramAdapter
 
     ActivationSpecImpl specImpl;
     String userName;
-    String password;
     XAConnectionFactory connectionFactory = null;
     XAConnection connection;
     Vector resources = new Vector();
@@ -831,7 +838,8 @@ public class JoramAdapter
 
         // The connection does not already exist: creating it.
         if (! connections.containsKey(userName)) {
-          password = specImpl.getPassword();
+          String password = specImpl.getPassword();
+          String identityClass = specImpl.getIdentityClass();
 
           if (isHa) {
             if (collocated) {
@@ -857,6 +865,9 @@ public class JoramAdapter
           ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().cnxPendingTimer = cnxPendingTimer;
           ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().txPendingTimer = txPendingTimer;
 
+          // set identity class for this connectionFactory.
+          ((AbstractConnectionFactory) connectionFactory).setIdentityClassName(identityClass);
+          
           connection =
             connectionFactory.createXAConnection(userName, password);
 
@@ -993,10 +1004,48 @@ public class JoramAdapter
    *
    * @exception AdminException   If the creation fails.
    */
-  public void createUser(String name, String password,
-                         int serverId) throws AdminException {
+  public void createUser(String name, String password, String identityClass)
+    throws AdminException {
     try {
-      User.create(name, password,serverId);
+      User.create(name, password, AdminModule.getLocalServerId(), identityClass);
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
+        AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
+                                      "  - User [" + name + "] has been created.");
+    }
+    catch (ConnectException exc) {
+      throw new AdminException("createUser() failed: admin connection "
+                               + "has been lost.");
+    }
+  }
+  
+  /**
+   * Creates or retrieves a user on the underlying JORAM server.
+   *
+   * @exception AdminException   If the creation fails.
+   */
+  public void createUser(String name, String password, int serverId, String identityClass)
+    throws AdminException {
+    try {
+      User.create(name, password, serverId, identityClass);
+      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
+        AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
+                                      "  - User [" + name + "] has been created.");
+    }
+    catch (ConnectException exc) {
+      throw new AdminException("createUser() failed: admin connection "
+                               + "has been lost.");
+    }
+  }
+
+  /**
+   * Creates or retrieves a user on the underlying JORAM server.
+   *
+   * @exception AdminException   If the creation fails.
+   */
+  public void createUser(String name, String password, int serverId)
+    throws AdminException {
+    try {
+      User.create(name, password, serverId);
       if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
         AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
                                       "  - User [" + name + "] has been created.");
@@ -1005,7 +1054,7 @@ public class JoramAdapter
                                + "has been lost.");
     }
   }
-
+  
   /**
    * Creates a non managed connection factory and binds it to JNDI.
    */
@@ -1094,8 +1143,8 @@ public class JoramAdapter
 
       ((org.objectweb.joram.client.jms.ConnectionFactory) factory)
       .getParameters().connectingTimer = 60;
-
-      joramAdmin = new JoramAdmin(factory, rootName, rootPasswd);
+      
+      joramAdmin = new JoramAdmin(factory, rootName, rootPasswd, identityClass);
     } catch (ConnectException exc) {
       throw new AdminException("Admin connection can't be established: "
                                + exc.getMessage());
@@ -1344,10 +1393,14 @@ public class JoramAdapter
   public void setRootName(String rn) {
     rootName = rn;
   }
+  
   public void setRootPasswd(String rp) { 
     rootPasswd = rp;
   }
 
+  public void setIdentityClass(String identityClass) { 
+    this.identityClass = identityClass;
+  }
 
   public void setClusterId(Short clusterId) {
     this.clusterId = clusterId.shortValue();
@@ -1443,6 +1496,10 @@ public class JoramAdapter
     return rootPasswd;
   }
 
+  public String getIdentityClass() {
+    return identityClass;
+  }
+  
   public String getServerName() {
     return serverName;
   }

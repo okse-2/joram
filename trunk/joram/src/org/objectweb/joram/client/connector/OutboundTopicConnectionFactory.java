@@ -96,7 +96,7 @@ public class OutboundTopicConnectionFactory
 
     try {
       TopicConnectionRequest cxRequest =
-        new TopicConnectionRequest(userName, password);
+        new TopicConnectionRequest(userName, password, mcf.getIdentityClass());
 
       Object o = cxManager.allocateConnection(mcf, cxRequest);
 

@@ -1,6 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2008 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,6 +20,7 @@
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
  * Contributor(s): Nicolas Tachker (Bull SA)
+ *                 ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.connector;
 
@@ -28,8 +30,7 @@ package org.objectweb.joram.client.connector;
  * request for performing unified messaging.
  */
 public class ConnectionRequest
-             implements javax.resource.spi.ConnectionRequestInfo
-{
+             implements javax.resource.spi.ConnectionRequestInfo {
   /** 
    * Identification of the user requesting a connection to the
    * underlying JORAM server.
@@ -40,6 +41,10 @@ public class ConnectionRequest
    * underlying JORAM server.
    */
   protected String password;
+  /**
+   * identification class for user.
+   */
+  protected String identityClass;
 
 
   /**
@@ -47,11 +52,12 @@ public class ConnectionRequest
    *
    * @param userName  Name of the user requesting a connection.
    * @param password  Password of the user requesting a connection.
+   * @param identityClass identity class name
    */
-  public ConnectionRequest(String userName, String password)
-  {
+  public ConnectionRequest(String userName, String password, String identityClass) {
     this.userName = userName;
     this.password = password;
+    this.identityClass = identityClass;
   } 
 
 
@@ -73,6 +79,12 @@ public class ConnectionRequest
     return password;
   }
 
+  /**
+   * @return identity class name.
+   */
+  public String getIdentityClass() {
+    return identityClass;
+  }
 
   /**
    * Compares <code>ConnectionRequest</code> instances wrapped users

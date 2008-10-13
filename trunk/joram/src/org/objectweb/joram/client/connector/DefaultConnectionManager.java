@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -36,6 +36,7 @@ import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.resource.spi.SecurityException;
 
+import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
@@ -85,13 +86,16 @@ public class DefaultConnectionManager
     
     String userName;
     String password;
+    String identityClass;
     
     if (cxRequest == null) {
       userName = ((ManagedConnectionFactoryImpl) mcf).getUserName();
       password = ((ManagedConnectionFactoryImpl) mcf).getPassword();
+      identityClass = ((ManagedConnectionFactoryImpl) mcf).getIdentityClass();
     } else {
       userName = ((ConnectionRequest) cxRequest).getUserName();
       password = ((ConnectionRequest) cxRequest).getPassword();
+      identityClass = ((ConnectionRequest) cxRequest).getIdentityClass();
     }
     
     String hostName = ((ManagedConnectionFactoryImpl) mcf).getHostName();
@@ -104,18 +108,21 @@ public class DefaultConnectionManager
           QueueTcpConnectionFactory.create(hostName, serverPort);
         setFactoryParameters((org.objectweb.joram.client.jms.ConnectionFactory) factory,
                              (ManagedConnectionFactoryImpl) mcf);
+        ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
         return factory.createQueueConnection(userName, password);
       } else if (cxRequest instanceof TopicConnectionRequest) {
         TopicConnectionFactory factory =
           TopicTcpConnectionFactory.create(hostName, serverPort);
         setFactoryParameters((org.objectweb.joram.client.jms.ConnectionFactory) factory,
                              (ManagedConnectionFactoryImpl) mcf);
+        ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
         return factory.createTopicConnection(userName, password);
       } else {
         ConnectionFactory factory =
           TcpConnectionFactory.create(hostName, serverPort);
         setFactoryParameters((org.objectweb.joram.client.jms.ConnectionFactory) factory,
                              (ManagedConnectionFactoryImpl) mcf);
+        ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
         return factory.createConnection(userName, password);
       }
     } catch (IllegalStateException exc) {

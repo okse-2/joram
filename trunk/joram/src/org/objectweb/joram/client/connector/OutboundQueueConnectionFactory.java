@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2008 - ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -95,7 +96,7 @@ public class OutboundQueueConnectionFactory
 
     try {
       QueueConnectionRequest cxRequest =
-        new QueueConnectionRequest(userName, password);
+        new QueueConnectionRequest(userName, password, mcf.getIdentityClass());
 
       Object o = cxManager.allocateConnection(mcf, cxRequest);
 

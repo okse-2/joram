@@ -1,6 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2008 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,6 +28,7 @@ import javax.resource.spi.IllegalStateException;
 import javax.resource.spi.InvalidPropertyException;
 import javax.resource.spi.ResourceAdapter;
 
+import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -64,6 +66,8 @@ public class ActivationSpecImpl
   private String userName = "anonymous";
   /** User password. */
   private String password = "anonymous";
+  /** identity class name. */
+  String identityClass = Identity.SIMPLE_IDENTITY_CLASS;
 
   /** Message selector. */
   private String messageSelector = null;
@@ -192,6 +196,11 @@ public class ActivationSpecImpl
     this.password = password;
   }
 
+  /** set the identity class name. */
+  public void setIdentityClass(String identityClass) {
+    this.identityClass = identityClass;
+  }
+  
   /** Sets the message selector. */
   public void setMessageSelector(String messageSelector)
   {
@@ -250,6 +259,11 @@ public class ActivationSpecImpl
     return password;
   }
 
+  /** Returns the identity class name. */
+  public String getIdentityClass() {
+    return identityClass;  
+  }
+  
   /** Returns the message selector. */
   public String getMessageSelector()
   {
