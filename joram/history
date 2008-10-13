@@ -1,6 +1,12 @@
 +==============================================================================
 | 2008/10/13 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
+ - Re architecture authentication capability.
+ - set by default user/password authentication (SimpleIdentity).
+ - add JAAS authentication based on JOnAS remoteLoginModule (JonasIdentity).
++==============================================================================
+| 2008/10/13 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
 Bug fix: FactoryParameters:
   add reference if outLocalAddress != null.
 +==============================================================================
