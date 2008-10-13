@@ -27,6 +27,7 @@ import javax.jms.*;
 
 import org.objectweb.joram.client.jms.local.*;
 import org.objectweb.joram.shared.client.*;
+import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.mom.proxies.*;
 import org.objectweb.joram.mom.notifications.*;
 import org.objectweb.joram.mom.dest.AdminTopic;
@@ -92,26 +93,21 @@ public class HALocalConnection implements RequestChannel {
     }
   }
 
-  private String userName;
-  
-  private String password;
+  private Identity identity;
   
   private LocalConnection localConnection;
 
-  public HALocalConnection(
-    String userName2, String password2) throws JMSException {
+  public HALocalConnection(Identity identity) throws JMSException {
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgProxy.log(
         BasicLevel.DEBUG,
-        "HALocalConnection.<init>(" + 
-        userName + ',' + password + ')');
+        "HALocalConnection.<init>(" + identity + ')');
     waitForStart();
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgProxy.log(
         BasicLevel.DEBUG,
         " -> create the local connection");
-    userName = userName2;
-    password = password2;
+    this.identity = identity;
   }
   
   public void setTimer(Timer timer) {
@@ -119,7 +115,7 @@ public class HALocalConnection implements RequestChannel {
   }
   
   public void connect() throws Exception {
-    localConnection = new LocalConnection(userName, password);
+    localConnection = new LocalConnection(identity);
     localConnection.connect();
   }
   

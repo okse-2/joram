@@ -22,11 +22,12 @@
  */
 package org.objectweb.joram.client.jms.ha.local;
 
-import javax.jms.JMSException;
-import org.objectweb.joram.client.jms.XAConnection;
-import org.objectweb.joram.client.jms.XAQueueConnection;
+import javax.jms.JMSSecurityException;
+
 import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.QueueConnection;
+import org.objectweb.joram.client.jms.XAConnection;
+import org.objectweb.joram.client.jms.XAQueueConnection;
 import org.objectweb.joram.client.jms.XAQueueConnectionFactory;
 
 /**
@@ -49,9 +50,10 @@ public class XAQueueHALocalConnectionFactory extends XAQueueConnectionFactory {
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.XAQueueConnection createXAQueueConnection(String name,
-                                                             String password) throws JMSException {
-    HALocalConnection lc = new HALocalConnection(name, password);
+  public javax.jms.XAQueueConnection createXAQueueConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HALocalConnection lc = new HALocalConnection(identity);
     return new XAQueueConnection(params, lc);
   }
 
@@ -60,9 +62,10 @@ public class XAQueueHALocalConnectionFactory extends XAQueueConnectionFactory {
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.XAConnection createXAConnection(String name,
-                                                   String password) throws JMSException {
-    HALocalConnection lc = new HALocalConnection(name, password);
+  public javax.jms.XAConnection createXAConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HALocalConnection lc = new HALocalConnection(identity);
     return new XAConnection(params, lc);
   }
 
@@ -71,9 +74,10 @@ public class XAQueueHALocalConnectionFactory extends XAQueueConnectionFactory {
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.QueueConnection createQueueConnection(String name,
-                                                         String password) throws JMSException {
-    HALocalConnection lc = new HALocalConnection(name, password);
+  public javax.jms.QueueConnection createQueueConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HALocalConnection lc = new HALocalConnection(identity);
     return new QueueConnection(params, lc);
   }
 
@@ -82,9 +86,10 @@ public class XAQueueHALocalConnectionFactory extends XAQueueConnectionFactory {
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.Connection createConnection(String name,
-                                               String password) throws JMSException {
-    HALocalConnection lc = new HALocalConnection(name, password);
+  public javax.jms.Connection createConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HALocalConnection lc = new HALocalConnection(identity);
     return new Connection(params, lc);
   }
 
