@@ -45,10 +45,12 @@ import javax.resource.spi.SecurityException;
 import javax.security.auth.Subject;
 
 import org.objectweb.joram.client.jms.FactoryParameters;
+import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 import org.objectweb.joram.client.jms.ha.local.XAHALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
 import org.objectweb.joram.client.jms.local.XALocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
+import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -84,6 +86,8 @@ public class ManagedConnectionFactoryImpl
   String userName = "anonymous";
   /** Default user password. */
   String password = "anonymous";
+  /** Default identityClass*/
+  String identityClass = Identity.SIMPLE_IDENTITY_CLASS;
 
   /**
    * Duration in seconds during which connecting is attempted (connecting
@@ -232,7 +236,7 @@ public class ManagedConnectionFactoryImpl
 
     OutboundConnectionFactory factory =
       new OutboundConnectionFactory(this, null);
-
+    
     Reference ref =
       new Reference(factory.getClass().getName(),
                     "org.objectweb.joram.client.connector.ObjectFactoryImpl",
@@ -241,6 +245,7 @@ public class ManagedConnectionFactoryImpl
     ref.add(new StringRefAddr("serverPort", "" + serverPort));
     ref.add(new StringRefAddr("userName", userName));
     ref.add(new StringRefAddr("password", password));
+    ref.add(new StringRefAddr("identityClass", identityClass));
 
     factory.setReference(ref);
     return factory;
@@ -273,6 +278,7 @@ public class ManagedConnectionFactoryImpl
 
     String userName;
     String password;
+    String identityClass;
 
     String hostName = this.hostName;
     int serverPort = this.serverPort;
@@ -282,8 +288,8 @@ public class ManagedConnectionFactoryImpl
     if (cxRequest == null) {
       userName = this.userName;
       password = this.password;
-    }
-    else {
+      identityClass = this.identityClass;
+    } else {
       if (! (cxRequest instanceof ConnectionRequest)) {
         if (out != null)
           out.print("Provided ConnectionRequestInfo instance is not a JORAM object.");
@@ -293,6 +299,7 @@ public class ManagedConnectionFactoryImpl
 
       userName = ((ConnectionRequest) cxRequest).getUserName();
       password = ((ConnectionRequest) cxRequest).getPassword();
+      identityClass = ((ConnectionRequest) cxRequest).getIdentityClass();
     }
 
     XAConnectionFactory factory;
@@ -323,6 +330,8 @@ public class ManagedConnectionFactoryImpl
     }
 
     setParameters(factory);
+    
+    ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
 
     try {
       cnx = factory.createXAConnection(userName, password);
@@ -594,7 +603,11 @@ public class ManagedConnectionFactoryImpl
     this.password = password;
   }
 
-  public Boolean getCollocated() {
+  public void setIdentityClass(java.lang.String identityClass) {
+    this.identityClass = identityClass;  
+  }
+  
+  public java.lang.Boolean getCollocated() {
     return new Boolean(collocated);
   }
 
@@ -613,8 +626,12 @@ public class ManagedConnectionFactoryImpl
   public String getPassword() {
     return password;
   }
-
-  public String getOutLocalAddress() {
+  
+  public java.lang.String getIdentityClass() {
+    return identityClass;
+  }
+  
+  public java.lang.String getOutLocalAddress() {
     return outLocalAddress;
   }
 

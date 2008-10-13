@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2006 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -43,6 +43,7 @@ import javax.resource.spi.ManagedConnection;
 import javax.resource.spi.SecurityException;
 import javax.security.auth.Subject;
 
+import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 import org.objectweb.joram.client.jms.ha.local.XAHALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.local.XATopicHALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
@@ -148,6 +149,7 @@ public class ManagedTopicConnectionFactoryImpl
 
     String userName;
     String password;
+    String identityClass;
 
     String hostName = this.hostName;
     int serverPort = this.serverPort;
@@ -157,6 +159,7 @@ public class ManagedTopicConnectionFactoryImpl
     if (cxRequest == null) {
       userName = this.userName;
       password = this.password;
+      identityClass = this.identityClass;
     }
     else {
       if (! (cxRequest instanceof ConnectionRequest)) {
@@ -168,6 +171,7 @@ public class ManagedTopicConnectionFactoryImpl
 
       userName = ((ConnectionRequest) cxRequest).getUserName();
       password = ((ConnectionRequest) cxRequest).getPassword();
+      identityClass = ((ConnectionRequest) cxRequest).getIdentityClass();
     }
 
     XAConnection cnx = null;
@@ -184,20 +188,24 @@ public class ManagedTopicConnectionFactoryImpl
             if (cxRequest instanceof TopicConnectionRequest) {
               XATopicConnectionFactory factory = XATopicHATcpConnectionFactory.create(ra.haURL);
               setParameters(factory);
+              ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
               cnx = factory.createXATopicConnection(userName, password);
             } else {
               XAConnectionFactory factory = XAHATcpConnectionFactory.create(ra.haURL);
               setParameters(factory);
+              ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
               cnx = factory.createXAConnection(userName, password);
             }
           } else {
             if (cxRequest instanceof TopicConnectionRequest) {
               XATopicConnectionFactory factory = XATopicHALocalConnectionFactory.create();
               setParameters(factory);
+              ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
               cnx = factory.createXATopicConnection(userName, password);
             } else {
               XAConnectionFactory factory = XAHALocalConnectionFactory.create();
               setParameters(factory);
+              ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
               cnx = factory.createXAConnection(userName, password);
             }
           }
@@ -206,10 +214,12 @@ public class ManagedTopicConnectionFactoryImpl
           if (cxRequest instanceof TopicConnectionRequest) {
             XATopicConnectionFactory factory = XATopicHATcpConnectionFactory.create(urlHa);
             setParameters(factory);
+            ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
             cnx = factory.createXATopicConnection(userName, password);
           } else {
             XAConnectionFactory factory = XAHATcpConnectionFactory.create(urlHa);
             setParameters(factory);
+            ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
             cnx = factory.createXAConnection(userName, password);
           }
         }
@@ -218,20 +228,24 @@ public class ManagedTopicConnectionFactoryImpl
           if (cxRequest instanceof TopicConnectionRequest) {
             XATopicConnectionFactory factory = XATopicLocalConnectionFactory.create();
             setParameters(factory);
+            ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
             cnx = factory.createXATopicConnection(userName, password);
           } else {
             XAConnectionFactory factory = XALocalConnectionFactory.create();
             setParameters(factory);
+            ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
             cnx = factory.createXAConnection(userName, password);
           }
         } else {
           if (cxRequest instanceof TopicConnectionRequest) {
             XATopicConnectionFactory factory = XATopicTcpConnectionFactory.create(hostName, serverPort);
             setParameters(factory);
+            ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
             cnx = factory.createXATopicConnection(userName, password);
           } else {
             XAConnectionFactory factory = XATcpConnectionFactory.create(hostName, serverPort);
             setParameters(factory);
+            ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
             cnx = factory.createXAConnection(userName, password);
           }
         }
