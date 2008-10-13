@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -36,7 +36,7 @@ public final class ConsumerSubRequest extends AbstractJmsRequest {
   /**
    * 
    */
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2L;
   /** The subscription's name. */
   private String subName;
   
