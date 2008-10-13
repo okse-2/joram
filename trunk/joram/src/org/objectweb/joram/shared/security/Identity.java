@@ -1,0 +1,237 @@
+/*
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2008 ScalAgent Distributed Technologies
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
+ *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s):
+ */
+package org.objectweb.joram.shared.security;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.io.OutputStream;
+import java.util.Hashtable;
+
+import javax.jms.JMSException;
+
+import org.objectweb.joram.shared.stream.StreamUtil;
+import org.objectweb.joram.shared.stream.Streamable;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.Debug;
+
+/**
+ *
+ */
+public abstract class Identity implements Externalizable, Streamable {
+  
+  public static Logger logger = Debug.getLogger(Identity.class.getName());
+  
+  /**
+   * Get the user name.
+   * @return username.
+   */
+  public abstract String getUserName();
+  
+  /**
+   * set user name.
+   * @param userName
+   */
+  public abstract void setUserName(String userName);
+  
+  /**
+   * get password or subject in jaas mode.
+   * @return password or subject.
+   */
+  public abstract Object getCredential();
+   
+  /**
+   * set the identity.
+   * @param user
+   * @param passwd
+   * @throws JMSException
+   */
+  public abstract void setIdentity(String user, String passwd) throws JMSException;
+  
+  /**
+   * check the identity.
+   * @return true if ok
+   * @throws Exception
+   */
+  public abstract boolean check(Identity identity) throws Exception;
+  
+  /** separate identity class name and root name. */
+  private static final String SEPARATE_CHAR = ":";
+  
+  /**
+   * @param rootName 
+   * @return identity class name.
+   */
+  public static String getRootIdentityClass(String rootName) {
+    String identityClassName = Identity.SIMPLE_IDENTITY_CLASS;
+    int index = rootName.indexOf(SEPARATE_CHAR);
+    if (index > 0) {
+      identityClassName = rootName.substring(0, index);
+      rootName = rootName.substring(index+1, rootName.length()); 
+    }
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+          "getRootIdentityClass: identityClassName = " + identityClassName);  
+    return identityClassName;
+  }
+  
+  /**
+   * 
+   * @param rootName
+   * @return the rootName without Identity class name.
+   */
+  public static String getRootName(String rootName) {
+    String root = rootName;
+    int index = rootName.indexOf(SEPARATE_CHAR);
+    if (index > 0) {
+      root = root.substring(index+1, rootName.length()); 
+    }
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+          "getRootName: rootName = " + root);  
+    return root;
+  }
+  
+  public static final String SIMPLE_IDENTITY_CLASS = "org.objectweb.joram.shared.security.SimpleIdentity";
+  public static final String JONAS_IDENTITY_ClASS = "org.objectweb.joram.shared.security.jaas.JonasIdentity";
+  protected final static int NULL_CLASS_ID = -1;
+  protected final static int SIMPLE_IDENTITY = 0;
+  protected final static int JONAS_IDENTITY = 1;
+  
+  protected int classid;
+
+  protected static final String[] classnames = {
+    SIMPLE_IDENTITY_CLASS,
+    JONAS_IDENTITY_ClASS
+  };
+  
+  protected abstract int getClassId();
+
+  /**
+   * Constructs an <code>Identity</code>.
+   */
+  public Identity() {
+    classid = getClassId();
+  }
+
+  /** ***** ***** ***** ***** ***** ***** ***** *****
+   * Interface needed for soap serialization
+   * ***** ***** ***** ***** ***** ***** ***** ***** */
+
+  /**
+   *
+   * @exception IOException
+   */
+  public Hashtable soapCode() throws IOException {
+    Hashtable h = new Hashtable();
+    h.put("classname", getClass().getName());
+
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    writeTo(baos);
+    baos.flush();
+    h.put("bytecontent", baos.toByteArray());
+    baos.close();
+
+    return h;
+  }
+
+  /**
+   *
+   * @exception ClassNotFound
+   * @exception InstantiationException
+   * @exception IllegalAccessException
+   * @exception IOException
+   */
+  public static Object soapDecode(Hashtable h) throws Exception {
+    Identity identity = null;
+    ByteArrayInputStream bais = null;
+
+    try {
+      String classname = (String) h.get("classname");
+      identity = (Identity) Class.forName(classname).newInstance();
+      byte[] content = (byte[]) h.get("bytecontent");
+      bais = new ByteArrayInputStream(content);
+      identity.readFrom(bais);
+    } finally {
+      bais.close();
+    }
+
+    return identity;
+  }
+
+  /** ***** ***** ***** ***** ***** ***** ***** *****
+   * Externalizable interface
+   * ***** ***** ***** ***** ***** ***** ***** ***** */
+
+  public final void writeExternal(ObjectOutput out) throws IOException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,  "Identity.writeExternal: " + out);
+    writeTo((OutputStream) out);
+  }
+
+  public final void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,  "Identity.readExternal: " + in);
+    readFrom((InputStream) in);
+  }
+
+  /** ***** ***** ***** ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** ***** ***** ***** */
+
+  static public void write(Identity identity,
+                           OutputStream os) throws IOException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,  "Identity.write: " + identity);
+
+    if (identity == null) {
+      StreamUtil.writeTo(NULL_CLASS_ID, os);
+    } else {
+      StreamUtil.writeTo(identity.getClassId(), os);
+      identity.writeTo(os);
+    }
+  }
+
+  static public Identity read(InputStream is) 
+  throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    int classid = -1;
+    Identity identity = null;
+
+    classid = StreamUtil.readIntFrom(is);
+    if (classid != NULL_CLASS_ID) {
+      identity = (Identity) Class.forName(classnames[classid]).newInstance();
+      identity.readFrom(is);
+    }
+
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Identity.read: " + identity);
+
+    return identity;
+  }
+}
