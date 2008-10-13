@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -33,6 +33,7 @@ import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.client.jms.connection.RequestChannel;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
+import org.objectweb.joram.shared.security.Identity;
 
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -51,19 +52,16 @@ public class TcpConnection implements RequestChannel {
    * Creates a <code>TcpConnection</code> instance.
    *
    * @param params  Factory parameters.
-   * @param name  Name of user.
-   * @param password  Password of user.
+   * @param identity
    *
    * @exception JMSSecurityException  If the user identification is incorrrect.
    * @exception IllegalStateException  If the server is not reachable.
    */
   public TcpConnection(FactoryParameters params, 
-                       String name,
-                       String password) 
+                       Identity identity) 
     throws JMSException {
     this(params,
-         name,
-         password,
+         identity,
          "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
   }
 
@@ -71,16 +69,14 @@ public class TcpConnection implements RequestChannel {
    * Creates a <code>TcpConnection</code> instance.
    *
    * @param params  Factory parameters.
-   * @param name  Name of user.
-   * @param password  Password of user.
+   * @param identity 
    * @param reliableClass  reliable class name.
    *
    * @exception JMSSecurityException  If the user identification is incorrrect.
    * @exception IllegalStateException  If the server is not reachable.
    */
   public TcpConnection(FactoryParameters params, 
-                       String name,
-                       String password,
+                       Identity identity,
                        String reliableClass) 
     throws JMSException {
 
@@ -88,7 +84,7 @@ public class TcpConnection implements RequestChannel {
       JoramTracing.dbgClient.log(
         BasicLevel.DEBUG, 
         "TcpConnection.<init>(" + params + ',' +
-        name + ',' + password + ',' + reliableClass +')');
+        identity + ',' + reliableClass +')');
 
     if (reliableClass == null ||
         reliableClass.equals("") ||
@@ -118,8 +114,7 @@ public class TcpConnection implements RequestChannel {
       throw jmsExc;
     }
     tcpClient.init(params, 
-                   name,
-                   password,
+                   identity,
                    params.cnxPendingTimer > 0);
     tcpClient.addServerAddress(
       params.getHost(),

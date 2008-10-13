@@ -73,10 +73,10 @@ public class XATopicTcpConnectionFactory
   public javax.jms.XATopicConnection
       createXATopicConnection(String name, String password)
     throws javax.jms.JMSException {
+    initIdentity(name, password);
     return new XATopicConnection(params, 
                                  new TcpConnection(params, 
-                                                   name, 
-                                                   password,
+                                                   identity,
                                                    reliableClass));
   }
 
@@ -89,10 +89,10 @@ public class XATopicTcpConnectionFactory
   public javax.jms.XAConnection
       createXAConnection(String name, String password)
     throws javax.jms.JMSException {
+    initIdentity(name, password);
     return new XAConnection(params,
                             new TcpConnection(params, 
-                                              name, 
-                                              password,
+                                              identity,
                                               reliableClass));
   }
 
@@ -105,10 +105,10 @@ public class XATopicTcpConnectionFactory
   public javax.jms.TopicConnection
       createTopicConnection(String name, String password)
     throws javax.jms.JMSException {
+    initIdentity(name, password);
     return new TopicConnection(params, 
                                new TcpConnection(params, 
-                                                 name, 
-                                                 password,
+                                                 identity,
                                                  reliableClass));
   }
 
@@ -120,10 +120,10 @@ public class XATopicTcpConnectionFactory
    */
   public javax.jms.Connection createConnection(String name, String password)
     throws javax.jms.JMSException {
+    initIdentity(name, password);
     return new Connection(params,
                           new TcpConnection(params, 
-                                            name, 
-                                            password,
+                                            identity,
                                             reliableClass));
   }
 

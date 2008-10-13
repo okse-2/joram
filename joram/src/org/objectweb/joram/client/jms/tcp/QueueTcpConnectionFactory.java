@@ -24,7 +24,10 @@
  */
 package org.objectweb.joram.client.jms.tcp;
 
+import java.net.ConnectException;
+
 import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
 
 import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.QueueConnection;
@@ -62,8 +65,11 @@ public class QueueTcpConnectionFactory extends QueueConnectionFactory {
    */
   public javax.jms.QueueConnection createQueueConnection(String name,
                                                          String password) throws JMSException {
+    initIdentity(name, password);
     return new QueueConnection(params,
-                               new TcpConnection(params, name, password, reliableClass));
+                               new TcpConnection(params, 
+                                                 identity,
+                                                 reliableClass));
   }
 
   /**
@@ -74,8 +80,11 @@ public class QueueTcpConnectionFactory extends QueueConnectionFactory {
    */
   public javax.jms.Connection createConnection(String name,
                                                String password) throws JMSException {
+    initIdentity(name, password);
     return new Connection(params,
-                          new TcpConnection(params, name, password, reliableClass));
+                          new TcpConnection(params, 
+                                            identity,
+                                            reliableClass));
   }
 
   /**

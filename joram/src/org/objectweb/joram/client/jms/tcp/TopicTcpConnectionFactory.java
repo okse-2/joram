@@ -62,8 +62,11 @@ public class TopicTcpConnectionFactory extends TopicConnectionFactory {
    */
   public javax.jms.TopicConnection createTopicConnection(String name,
                                                          String password) throws JMSException {
+    initIdentity(name, password);
     return new TopicConnection(params, 
-                               new TcpConnection(params, name, password, reliableClass));
+                               new TcpConnection(params, 
+                                                 identity,
+                                                 reliableClass));
   }
 
   /**
@@ -74,8 +77,11 @@ public class TopicTcpConnectionFactory extends TopicConnectionFactory {
    */
   public javax.jms.Connection createConnection(String name,
                                                String password) throws JMSException {
+    initIdentity(name, password);
     return new Connection(params, 
-                          new TcpConnection(params, name, password, reliableClass));
+                          new TcpConnection(params, 
+                                            identity,
+                                            reliableClass));
   }
 
 
