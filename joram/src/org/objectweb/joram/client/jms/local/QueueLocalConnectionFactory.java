@@ -23,7 +23,8 @@
  */
 package org.objectweb.joram.client.jms.local;
 
-import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
+
 import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.QueueConnection;
 import org.objectweb.joram.client.jms.QueueConnectionFactory;
@@ -48,9 +49,10 @@ public class QueueLocalConnectionFactory extends QueueConnectionFactory {
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.QueueConnection createQueueConnection(String name,
-                                                         String password) throws JMSException {
-    LocalConnection lc = new LocalConnection(name, password);
+  public javax.jms.QueueConnection createQueueConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    LocalConnection lc = new LocalConnection(identity);
     return new QueueConnection(params, lc);
   }
 
@@ -59,9 +61,10 @@ public class QueueLocalConnectionFactory extends QueueConnectionFactory {
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.Connection createConnection(String name,
-                                               String password) throws JMSException {
-    LocalConnection lc = new LocalConnection(name, password);
+  public javax.jms.Connection createConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    LocalConnection lc = new LocalConnection(identity);
     return new Connection(params, lc);
   }
 

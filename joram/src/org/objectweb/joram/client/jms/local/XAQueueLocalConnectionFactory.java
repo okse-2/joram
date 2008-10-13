@@ -23,12 +23,13 @@
  */
 package org.objectweb.joram.client.jms.local;
 
-import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
+
+import org.objectweb.joram.client.jms.Connection;
+import org.objectweb.joram.client.jms.QueueConnection;
 import org.objectweb.joram.client.jms.XAConnection;
 import org.objectweb.joram.client.jms.XAQueueConnection;
 import org.objectweb.joram.client.jms.XAQueueConnectionFactory;
-import org.objectweb.joram.client.jms.Connection;
-import org.objectweb.joram.client.jms.QueueConnection;
 
 /**
  * An <code>XAQueueLocalConnectionFactory</code> instance is a factory of
@@ -50,9 +51,10 @@ public class XAQueueLocalConnectionFactory extends XAQueueConnectionFactory {
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.XAQueueConnection createXAQueueConnection(String name,
-                                                             String password) throws JMSException {
-    LocalConnection lc = new LocalConnection(name, password);
+  public javax.jms.XAQueueConnection createXAQueueConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    LocalConnection lc = new LocalConnection(identity);
     return new XAQueueConnection(params, lc);
   }
 
@@ -61,9 +63,10 @@ public class XAQueueLocalConnectionFactory extends XAQueueConnectionFactory {
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.XAConnection createXAConnection(String name,
-                                                   String password) throws JMSException {
-    LocalConnection lc = new LocalConnection(name, password);
+  public javax.jms.XAConnection createXAConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    LocalConnection lc = new LocalConnection(identity);
     return new XAConnection(params, lc);
   }
 
@@ -72,9 +75,10 @@ public class XAQueueLocalConnectionFactory extends XAQueueConnectionFactory {
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.QueueConnection createQueueConnection(String name,
-                                                         String password) throws JMSException {
-    LocalConnection lc = new LocalConnection(name, password);
+  public javax.jms.QueueConnection createQueueConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    LocalConnection lc = new LocalConnection(identity);
     return new QueueConnection(params, lc);
   }
 
@@ -83,9 +87,10 @@ public class XAQueueLocalConnectionFactory extends XAQueueConnectionFactory {
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.Connection createConnection(String name,
-                                               String password) throws JMSException {
-    LocalConnection lc = new LocalConnection(name, password);
+  public javax.jms.Connection createConnection(String name, String password)
+         throws javax.jms.JMSException {
+    initIdentity(name, password);
+    LocalConnection lc = new LocalConnection(identity);
     return new Connection(params, lc);
   }
 

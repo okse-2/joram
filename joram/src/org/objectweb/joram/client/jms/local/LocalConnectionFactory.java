@@ -23,7 +23,8 @@
  */
 package org.objectweb.joram.client.jms.local;
 
-import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
+
 import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.ConnectionFactory;
 
@@ -48,9 +49,10 @@ public class LocalConnectionFactory extends ConnectionFactory {
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.Connection createConnection(String name,
-                                               String password) throws JMSException {
-    LocalConnection lc = new LocalConnection(name, password);
+  public javax.jms.Connection createConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    LocalConnection lc = new LocalConnection(identity);
     return new Connection(params, lc);
   }
 

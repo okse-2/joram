@@ -27,38 +27,33 @@ import java.util.Timer;
 import javax.jms.JMSException;
 
 import org.objectweb.joram.client.jms.connection.RequestChannel;
-import org.objectweb.joram.mom.proxies.StandardConnectionContext;
-import org.objectweb.joram.shared.client.AbstractJmsReply;
-import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.mom.dest.AdminTopic;
 import org.objectweb.joram.mom.notifications.GetProxyIdNot;
 import org.objectweb.joram.mom.proxies.ConnectionManager;
 import org.objectweb.joram.mom.proxies.OpenConnectionNot;
+import org.objectweb.joram.mom.proxies.StandardConnectionContext;
+import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.shared.client.AbstractJmsReply;
+import org.objectweb.joram.shared.client.AbstractJmsRequest;
+import org.objectweb.joram.shared.security.Identity;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 
-import org.objectweb.joram.shared.JoramTracing;
-import org.objectweb.util.monolog.api.BasicLevel;
-
 public class LocalConnection implements RequestChannel {
   
-  private String userName;
-  
-  private String password;
+  private Identity identity;
 
   private AgentId proxyId;
 
   private StandardConnectionContext ctx;
 
-  public LocalConnection(String userName,
-                         String password) throws JMSException {
+  public LocalConnection(Identity identity) throws JMSException {
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                "LocalConnection.<init>(" + userName + ',' + password + ')');
-
-    this.userName = userName;
-    this.password = password;
+                                "LocalConnection.<init>(" + identity + ')');
+    this.identity = identity;
   }
   
   public void setTimer(Timer timer) {
@@ -84,7 +79,7 @@ public class LocalConnection implements RequestChannel {
                                   "LocalConnection.connect(), server is not started: " + AgentServer.getStatusInfo() + '.');
     }
 
-    GetProxyIdNot gpin = new GetProxyIdNot(userName, password, null);
+    GetProxyIdNot gpin = new GetProxyIdNot(identity, null);
     try {
       gpin.invoke(AdminTopic.getDefault());
       proxyId = gpin.getProxyId();

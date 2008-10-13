@@ -23,7 +23,8 @@
  */
 package org.objectweb.joram.client.jms.local;
 
-import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
+
 import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.TopicConnection;
 import org.objectweb.joram.client.jms.TopicConnectionFactory;
@@ -48,9 +49,10 @@ public class TopicLocalConnectionFactory extends TopicConnectionFactory {
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.TopicConnection createTopicConnection(String name,
-                                                         String password) throws JMSException {
-    LocalConnection lc = new LocalConnection(name, password);
+  public javax.jms.TopicConnection createTopicConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    LocalConnection lc = new LocalConnection(identity);
     return new TopicConnection(params, lc);
   }
 
@@ -59,9 +61,10 @@ public class TopicLocalConnectionFactory extends TopicConnectionFactory {
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.Connection createConnection(String name,
-                                               String password) throws JMSException {
-    LocalConnection lc = new LocalConnection(name, password);
+  public javax.jms.Connection createConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    LocalConnection lc = new LocalConnection(identity);
     return new Connection(params, lc);
   }
 

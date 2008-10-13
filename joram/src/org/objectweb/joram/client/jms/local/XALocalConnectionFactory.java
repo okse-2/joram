@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -52,9 +52,10 @@ public class XALocalConnectionFactory
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
   public javax.jms.XAConnection
-      createXAConnection(String name, String password)
-    throws javax.jms.JMSException {
-    LocalConnection lc = new LocalConnection(name, password);
+  createXAConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    LocalConnection lc = new LocalConnection(identity);
     return new XAConnection(params, lc);
   }
 
