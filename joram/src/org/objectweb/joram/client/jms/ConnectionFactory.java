@@ -26,6 +26,7 @@
 package org.objectweb.joram.client.jms;
 
 import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
 
 import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 
