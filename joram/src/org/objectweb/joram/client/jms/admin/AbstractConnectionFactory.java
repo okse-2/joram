@@ -25,12 +25,14 @@ package org.objectweb.joram.client.jms.admin;
 
 import java.util.Hashtable;
 
+import javax.jms.JMSException;
 import javax.naming.NamingException;
 import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 
 import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -42,6 +44,11 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
 
   /** Reliable class name, for example use by ssl. */
   protected String reliableClass = null;
+  
+  /** Authentication identity. */
+  protected Identity identity = null;
+  
+  protected String identityClassName = Identity.SIMPLE_IDENTITY_CLASS;
 
   /**
    * Constructs a <code>ConnectionFactory</code> dedicated to a given server.
@@ -51,7 +58,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
    */
   public AbstractConnectionFactory(String host, int port) {
     params = new FactoryParameters(host, port);
-
+    
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created.");
   }
@@ -63,7 +70,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
    */
   public AbstractConnectionFactory(String url) {
     params = new FactoryParameters(url);
-
+    
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created.");
   }
@@ -76,6 +83,52 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
     params = new FactoryParameters();
   }
 
+  
+  private boolean isSetIdentityClassName = false;
+  /**
+   * set indentity class name
+   * @param identityClassName default Identity.SIMPLE_IDENTITY_CLASS (user/passwd).
+   */
+  public void setIdentityClassName(String identityClassName) {
+    this.identityClassName = identityClassName;
+    isSetIdentityClassName = true;
+  }
+  
+  /**
+   * initialize the user identity.
+   * @param user    user name
+   * @param passwd  user password
+   * @throws JMSException
+   */
+  protected void initIdentity(String user, String passwd) throws JMSException {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "initIdentity("+ user + ", ****)");
+    try {
+      if (!isSetIdentityClassName) {
+        identityClassName = 
+          System.getProperty("org.objectweb.joram.Identity", 
+              Identity.SIMPLE_IDENTITY_CLASS);
+      }
+      Class clazz = Class.forName(identityClassName);
+      identity = (Identity) clazz.newInstance();
+      identity.setIdentity(user, passwd);
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "initIdentity : identity = " + identity);
+    } catch (ClassNotFoundException e) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+        JoramTracing.dbgClient.log(BasicLevel.ERROR, "EXCEPTION:: initIdentity", e);
+      throw new JMSException(e.getClass() + ":: " + e.getMessage());
+    } catch (InstantiationException e) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+        JoramTracing.dbgClient.log(BasicLevel.ERROR, "EXCEPTION:: initIdentity", e);
+      throw new JMSException(e.getClass() + ":: " + e.getMessage());
+    } catch (IllegalAccessException e) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+        JoramTracing.dbgClient.log(BasicLevel.ERROR, "EXCEPTION:: initIdentity", e);
+      throw new JMSException(e.getClass() + ":: " + e.getMessage());
+    }
+  }
+  
   public void setReliableClass(String reliableClass) {
     this.reliableClass = reliableClass;
   }
@@ -158,6 +211,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
 
     params.toReference(ref, prefix);
     ref.add(new StringRefAddr(prefix + ".reliableClass", reliableClass));
+    ref.add(new StringRefAddr(prefix + ".identityClassName", identityClassName));
   }
 
   /** Restores the administered object from a naming reference. */
@@ -170,6 +224,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
     if (prefix == null) prefix = "cf";
 
     reliableClass = (String) ref.get(prefix + ".reliableClass").getContent();
+    setIdentityClassName((String) ref.get(prefix + ".identityClassName").getContent());
     params.fromReference(ref, prefix);
   }
 
@@ -184,6 +239,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
   public Hashtable code(Hashtable h, String prefix) {
     if (reliableClass != null)
       h.put(prefix + ".reliableClass", reliableClass);
+    h.put(prefix + ".identityClassName", identityClassName);
     return params.code(h, prefix);
   }
 
@@ -197,6 +253,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
 
   public void decode(Hashtable h, String prefix) {
     reliableClass = (String) h.get(prefix + ".reliableClass");
+    identityClassName = (String) h.get(prefix + ".identityClassName");
     params.decode(h, prefix);
   }
 }
