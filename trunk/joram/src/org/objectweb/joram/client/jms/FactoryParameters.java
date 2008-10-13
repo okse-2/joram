@@ -26,6 +26,7 @@ package org.objectweb.joram.client.jms;
 
 import java.util.Hashtable;
 
+import javax.naming.RefAddr;
 import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 
@@ -271,7 +272,8 @@ public class FactoryParameters implements java.io.Serializable {
     ref.add(new StringRefAddr(prefix + ".topicActivationThreshold", 
                               new Integer(topicActivationThreshold).toString()));
     ref.add(new StringRefAddr(prefix + ".outLocalPort", new Integer(outLocalPort).toString()));
-    ref.add(new StringRefAddr(prefix + ".outLocalAddress", outLocalAddress));
+    if (outLocalAddress != null)
+      ref.add(new StringRefAddr(prefix + ".outLocalAddress", outLocalAddress));
   }
 
 //   public void fromReference(Reference ref) {
@@ -305,7 +307,9 @@ public class FactoryParameters implements java.io.Serializable {
     topicPassivationThreshold = new Integer((String) ref.get(prefix + ".topicPassivationThreshold").getContent()).intValue();
     topicActivationThreshold = new Integer((String) ref.get(prefix + ".topicActivationThreshold").getContent()).intValue();
     outLocalPort = new Integer((String) ref.get(prefix + ".outLocalPort").getContent()).intValue();
-    outLocalAddress = (String) ref.get(prefix + ".outLocalAddress").getContent();
+    RefAddr outLocalAddressRef = ref.get(prefix + ".outLocalAddress");
+    if (outLocalAddressRef != null)
+      outLocalAddress = (String) outLocalAddressRef.getContent();
   }
 
   public Hashtable code(Hashtable h, String prefix) {
