@@ -1,4 +1,9 @@
 +==============================================================================
+| 2008/10/13 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+Bug fix: FactoryParameters:
+  add reference if outLocalAddress != null.
++==============================================================================
 | 2008/10/02 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
 Bug fix: DemultiplexerDaemon: always call onException on closed connection.
