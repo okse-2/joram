@@ -62,13 +62,13 @@ public class XATopicHATcpConnectionFactory
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
   public javax.jms.XATopicConnection
-      createXATopicConnection(String name, String password)
-    throws javax.jms.JMSException
-    {
-      HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, name, password, reliableClass);
-      return new XATopicConnection(params, lc);
-    }
+  createXATopicConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HATcpConnection lc = new HATcpConnection(
+        getParameters().getUrl(), params, identity, reliableClass);
+    return new XATopicConnection(params, lc);
+  }
 
   /**
    * Method inherited from the <code>XAConnectionFactory</code> class.
@@ -76,13 +76,13 @@ public class XATopicHATcpConnectionFactory
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
   public javax.jms.XAConnection
-      createXAConnection(String name, String password)
-    throws javax.jms.JMSException
-    {
-      HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, name, password, reliableClass);
-      return new XAConnection(params, lc);
-    }
+  createXAConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HATcpConnection lc = new HATcpConnection(
+        getParameters().getUrl(), params, identity, reliableClass);
+    return new XAConnection(params, lc);
+  }
 
   /**
    * Method inherited from the <code>TopicConnectionFactory</code> class.
@@ -90,13 +90,13 @@ public class XATopicHATcpConnectionFactory
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
   public javax.jms.TopicConnection
-      createTopicConnection(String name, String password)
-    throws javax.jms.JMSException
-    {
-      HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, name, password, reliableClass);
-      return new TopicConnection(params, lc);
-    }
+  createTopicConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HATcpConnection lc = new HATcpConnection(
+        getParameters().getUrl(), params, identity, reliableClass);
+    return new TopicConnection(params, lc);
+  }
 
   /**
    * Method inherited from the <code>ConnectionFactory</code> class.
@@ -105,12 +105,12 @@ public class XATopicHATcpConnectionFactory
    * @exception IllegalStateException  If the server is not listening.
    */
   public javax.jms.Connection createConnection(String name, String password)
-    throws javax.jms.JMSException
-    {
-      HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, name, password, reliableClass);
-      return new Connection(params, lc);
-    }
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HATcpConnection lc = new HATcpConnection(
+        getParameters().getUrl(), params, identity, reliableClass);
+    return new Connection(params, lc);
+  }
 
 
   /**

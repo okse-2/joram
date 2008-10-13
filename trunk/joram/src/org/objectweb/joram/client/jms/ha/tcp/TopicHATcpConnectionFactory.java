@@ -53,13 +53,13 @@ public class TopicHATcpConnectionFactory
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
   public javax.jms.TopicConnection
-      createTopicConnection(String name, String password)
-    throws javax.jms.JMSException
-    {
-      HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, name, password, reliableClass);
-      return new TopicConnection(params, lc);
-    }
+  createTopicConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HATcpConnection lc = new HATcpConnection(
+        getParameters().getUrl(), params, identity, reliableClass);
+    return new TopicConnection(params, lc);
+  }
 
   /**
    * Method inherited from the <code>ConnectionFactory</code> class.
@@ -69,10 +69,10 @@ public class TopicHATcpConnectionFactory
    */
   public javax.jms.Connection
       createConnection(String name, String password)
-    throws javax.jms.JMSException
-    {
+    throws javax.jms.JMSException {
+    initIdentity(name, password);
       HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, name, password, reliableClass);
+        getParameters().getUrl(), params, identity, reliableClass);
       return new Connection(params, lc);
     }
 

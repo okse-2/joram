@@ -63,8 +63,9 @@ public class HATcpConnectionFactory
   public javax.jms.Connection
       createConnection(String name, String password)
     throws javax.jms.JMSException {
+    initIdentity(name, password);
       HATcpConnection lc = new HATcpConnection(
-        params.getUrl(), params, name, password, reliableClass);
+        params.getUrl(), params, identity, reliableClass);
       return new Connection(params, lc);
     }
 

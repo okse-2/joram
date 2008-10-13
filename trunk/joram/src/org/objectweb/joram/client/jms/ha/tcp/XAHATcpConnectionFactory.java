@@ -59,8 +59,9 @@ public class XAHATcpConnectionFactory
   public javax.jms.XAConnection
       createXAConnection(String name, String password)
     throws javax.jms.JMSException {
+    initIdentity(name, password);
       HATcpConnection lc = new HATcpConnection(
-        params.getUrl(), params, name, password, reliableClass);
+        params.getUrl(), params, identity, reliableClass);
       return new XAConnection(params, lc);
     }
 
