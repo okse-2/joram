@@ -83,6 +83,9 @@ public class RAConfig {
     String path = null;
     String newFileName = null;
     String oldFileName = null;
+    String rootName = null;
+    String rootPasswd = null;
+    String identityClass = null;
 
     int command = -1;
 
@@ -124,6 +127,12 @@ public class RAConfig {
           newFileName = args[i+2];
           oldFileName = args[i+3];
           i = i + 3;
+        } else if (args[i].equals("-urpi")) {
+          command = 7;
+          rootName = args[i+1];
+          rootPasswd = args[i+2];
+          identityClass = args[i+3];
+          i = i + 3;
         } else if (args[i].equals("-conf")) {
           confDir = args[i+1];
           i = i + 2;
@@ -151,7 +160,7 @@ public class RAConfig {
     case 2: // updateRAR
       if (raProperties == null)
         usage();
-      raconfig.updateRAR(raProperties);
+      raconfig.updateRAR(raProperties, true);
       break;
     case 3: // extractFile
       if (extractFile != null) {
@@ -190,6 +199,13 @@ public class RAConfig {
       } else
         usage();
       break;
+    case 7: // update rootName rootPasswd identityClass
+      if (rootName == null 
+          || rootPasswd == null
+          || identityClass == null)
+        usage();
+      raconfig.updateRootName(rarName, rootName, rootPasswd, identityClass);
+      break;
     default:
       usage();
       break;
@@ -219,6 +235,8 @@ public class RAConfig {
     buff.append("\nExpert: extract ra.xml and a3servers.xml (joram-config.jar), modify and update jar/rar.");
     buff.append("\n  extract file from RAR        : java RAconfig -rar rarName -x fileName");
     buff.append("\n  update RAR                   : java RAconfig -rar rarName -uz path newFileName oldFileName");
+    buff.append("\n");
+    buff.append("\nchange rootName rootPass       : java RAconfig -rar rarName -urpi rootName rootPasswd identityClass");
     buff.append("\n");
     buff.append("\n  extract file from JAR        : java RAconfig -jar jarName -x fileName");
     buff.append("\n  update JAR                   : java RAconfig -jar jarName -uz path newFileName oldFileName");
@@ -540,10 +558,52 @@ public class RAConfig {
     // create temporary raProperty file
     String tempFile = "ra.properties_tmp";
     createFile(tempFile,buff.toString());
-    updateRAR(tmpDir + tempFile);
+    updateRAR(tmpDir + tempFile, true);
     new File(tmpDir + tempFile).delete();
   }
 
+  /**
+   * update host/port in ra.xml and a3server.xml in RAR.
+   * @param rarName   rar file name
+   * @param rootName  new root name
+   * @param rootPasswd  new RootPasswd
+   * @param identityClass  new IdentityClass
+   * @param serverId  server Id
+   */
+  private void updateRootName(String rarName,
+                              String rootName,
+                              String rootPasswd,
+                              String identityClass) throws Exception {
+    if (debug)
+      System.out.println("RAConfig.updateRootName(" + rarName +
+                         "," + rootName +
+                         "," + rootPasswd +
+                         "," + identityClass + ")");
+    else if (verbose)
+      System.out.println("update (ra.xml) in \"" + rarName +
+                         "\" with RootName=" + rootName +
+                         " RootPasswd=" + rootPasswd +
+                         " IdentityClass=" + identityClass);
+
+    // update ra.xml file
+    File file = new File(rarName);
+    StringBuffer buff = new StringBuffer();
+    buff.append("RAR_NAME  ");
+    buff.append(file.getAbsolutePath());
+    buff.append("\n[org.objectweb.joram.client.connector.JoramAdapter]");
+    buff.append("\nRootName  ");
+    buff.append(rootName);
+    buff.append("\nRootPasswd  ");
+    buff.append(rootPasswd);
+    buff.append("\nIdentityClass  ");
+    buff.append(identityClass);
+    // create temporary raProperty file
+    String tempFile = "ra.properties_tmp";
+    createFile(tempFile,buff.toString());
+    updateRAR(tmpDir + tempFile, false);
+    new File(tmpDir + tempFile).delete();
+  }
+  
   /**
    * update A3SERVERS_XML file
    * @param rarName   rar file name
@@ -687,8 +747,6 @@ public class RAConfig {
     BufferedReader reader = new BufferedReader(fileReader);
     boolean end = false;
     String line;
-    StringTokenizer tokenizer;
-    String firstToken;
     StringBuffer buff = new StringBuffer();
     int i = -1;
 
@@ -784,7 +842,7 @@ public class RAConfig {
    * update RA_XML file
    * @param raProperties   ra.properties file
    */
-  private void updateRAR(String raProperties) throws Exception {
+  private void updateRAR(String raProperties, boolean updateA3servers) throws Exception {
     if (debug)
       System.out.println("RAConfig.updateRAR(" + raProperties + ")");
 
@@ -851,25 +909,27 @@ public class RAConfig {
     // update rar
     updateZIP(rarName,RA_XML, tmpDir + "ra.xml",RA_XML);
 
-    // update a3servers.xml (host and port).
-    prop = (Hashtable) map.get("org.objectweb.joram.client.connector.JoramAdapter");
-    if (prop != null) {
-      if (debug)
-        System.out.println("RAConfig.updateRAR : prop = " + prop);
-      String host = (String) prop.get("HostName");
-      short serverId = -1;
-      String sid = (String) prop.get("ServerId");
-      if (sid != null)
-        serverId = new Short(sid).shortValue();
-      else {
+    if (updateA3servers) {
+      // update a3servers.xml (host and port).
+      prop = (Hashtable) map.get("org.objectweb.joram.client.connector.JoramAdapter");
+      if (prop != null) {
         if (debug)
-          System.out.println("RAConfig.updateRAR : ServerId not found in ra.properties");
-      }
-      String port = (String) prop.get("ServerPort");
-      if (host != null && host.length() > 0
-          && port != null && port.length() > 0
-          && serverId >= 0) {
-        updateA3Servers(rarName,host,port,serverId);
+          System.out.println("RAConfig.updateRAR : prop = " + prop);
+        String host = (String) prop.get("HostName");
+        short serverId = -1;
+        String sid = (String) prop.get("ServerId");
+        if (sid != null)
+          serverId = new Short(sid).shortValue();
+        else {
+          if (debug)
+            System.out.println("RAConfig.updateRAR : ServerId not found in ra.properties");
+        }
+        String port = (String) prop.get("ServerPort");
+        if (host != null && host.length() > 0
+            && port != null && port.length() > 0
+            && serverId >= 0) {
+          updateA3Servers(rarName,host,port,serverId);
+        }
       }
     }
     new File(tmpDir + "ra.xml").delete();
