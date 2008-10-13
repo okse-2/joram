@@ -22,11 +22,12 @@
  */
 package org.objectweb.joram.client.jms.ha.local;
 
-import javax.jms.JMSException;
-import org.objectweb.joram.client.jms.XAConnection;
-import org.objectweb.joram.client.jms.XATopicConnection;
+import javax.jms.JMSSecurityException;
+
 import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.TopicConnection;
+import org.objectweb.joram.client.jms.XAConnection;
+import org.objectweb.joram.client.jms.XATopicConnection;
 import org.objectweb.joram.client.jms.XATopicConnectionFactory;
 
 /**
@@ -49,9 +50,10 @@ public class XATopicHALocalConnectionFactory extends XATopicConnectionFactory {
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.XATopicConnection createXATopicConnection(String name,
-                                                             String password) throws JMSException {
-    HALocalConnection lc = new HALocalConnection(name, password);
+  public javax.jms.XATopicConnection createXATopicConnection(String name, String password)
+    throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HALocalConnection lc = new HALocalConnection(identity);
     return new XATopicConnection(params, lc);
   }
 
@@ -60,9 +62,10 @@ public class XATopicHALocalConnectionFactory extends XATopicConnectionFactory {
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.XAConnection createXAConnection(String name,
-                                                   String password) throws JMSException {
-    HALocalConnection lc = new HALocalConnection(name, password);
+  public javax.jms.XAConnection createXAConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HALocalConnection lc = new HALocalConnection(identity);
     return new XAConnection(params, lc);
   }
 
@@ -71,9 +74,10 @@ public class XATopicHALocalConnectionFactory extends XATopicConnectionFactory {
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.TopicConnection createTopicConnection(String name,
-                                                         String password) throws JMSException {
-    HALocalConnection lc = new HALocalConnection(name, password);
+  public javax.jms.TopicConnection createTopicConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HALocalConnection lc = new HALocalConnection(identity);
     return new TopicConnection(params, lc);
   }
 
@@ -83,9 +87,10 @@ public class XATopicHALocalConnectionFactory extends XATopicConnectionFactory {
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.Connection createConnection(String name,
-                                               String password) throws JMSException {
-    HALocalConnection lc = new HALocalConnection(name, password);
+  public javax.jms.Connection createConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HALocalConnection lc = new HALocalConnection(identity);
     return new Connection(params, lc);
   }
 

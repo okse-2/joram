@@ -22,7 +22,8 @@
  */
 package org.objectweb.joram.client.jms.ha.local;
 
-import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
+
 import org.objectweb.joram.client.jms.XAConnection;
 
 /**
@@ -39,15 +40,16 @@ public class XAHALocalConnectionFactory extends org.objectweb.joram.client.jms.X
   public XAHALocalConnectionFactory() {
     super("", -1);
   }
-
+  
   /**
    * Method inherited from the <code>XAConnectionFactory</code> class.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.XAConnection createXAConnection(String name,
-                                                   String password) throws JMSException {
-    HALocalConnection lc = new HALocalConnection(name, password);
+  public javax.jms.XAConnection createXAConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HALocalConnection lc = new HALocalConnection(identity);
     return new XAConnection(params, lc);
   }
 

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -41,11 +41,10 @@ public class QueueHALocalConnectionFactory
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
   public javax.jms.QueueConnection
-         createQueueConnection(String name, String password)
-         throws javax.jms.JMSException
-  {
-    HALocalConnection lc = new HALocalConnection(
-      name, password);    
+  createQueueConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HALocalConnection lc = new HALocalConnection(identity);    
     return new QueueConnection(params, lc);
   }
 
@@ -56,11 +55,10 @@ public class QueueHALocalConnectionFactory
    * @exception IllegalStateException  If the server is not listening.
    */
   public javax.jms.Connection
-      createConnection(String name, String password)
-    throws javax.jms.JMSException
-  {
-    HALocalConnection lc = new HALocalConnection(
-      name, password);
+  createConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HALocalConnection lc = new HALocalConnection(identity);
     return new Connection(params, lc);
   }
 
