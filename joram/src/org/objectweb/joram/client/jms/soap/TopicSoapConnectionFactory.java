@@ -24,7 +24,9 @@
  */
 package org.objectweb.joram.client.jms.soap;
 
-import javax.jms.JMSException;
+import java.net.ConnectException;
+
+import javax.jms.JMSSecurityException;
 
 import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.TopicConnection;
@@ -55,7 +57,8 @@ public class TopicSoapConnectionFactory extends TopicConnectionFactory {
   /**
    * Constructs an empty <code>TopicSoapConnectionFactory</code> instance.
    */
-  public TopicSoapConnectionFactory() {}
+  public TopicSoapConnectionFactory() {
+  }
 
   /**
    * Method inherited from the <code>TopicConnectionFactory</code> class.
@@ -63,10 +66,10 @@ public class TopicSoapConnectionFactory extends TopicConnectionFactory {
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.TopicConnection createTopicConnection(String name,
-                                                         String password) throws JMSException {
-    return new TopicConnection(params,
-                               new SoapConnection(params, name, password));
+  public javax.jms.TopicConnection createTopicConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    return new TopicConnection(params, new SoapConnection(params, identity));
   }
 
   /**
@@ -75,9 +78,10 @@ public class TopicSoapConnectionFactory extends TopicConnectionFactory {
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.Connection createConnection(String name,
-                                               String password) throws JMSException {
-    return new Connection(params, new SoapConnection(params, name, password));
+  public javax.jms.Connection createConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    return new Connection(params, new SoapConnection(params, identity));
   }
 
   /**

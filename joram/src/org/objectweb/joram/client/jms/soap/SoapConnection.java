@@ -26,9 +26,9 @@ package org.objectweb.joram.client.jms.soap;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Hashtable;
 import java.util.Timer;
 import java.util.Vector;
-import java.util.Hashtable;
 
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
@@ -42,10 +42,36 @@ import org.apache.soap.rpc.Call;
 import org.apache.soap.rpc.Parameter;
 import org.apache.soap.rpc.Response;
 import org.apache.soap.util.xml.QName;
-
 import org.objectweb.joram.client.jms.FactoryParameters;
-import org.objectweb.joram.shared.client.*;
 import org.objectweb.joram.client.jms.connection.RequestChannel;
+import org.objectweb.joram.shared.client.AbstractJmsMessage;
+import org.objectweb.joram.shared.client.AbstractJmsReply;
+import org.objectweb.joram.shared.client.AbstractJmsRequest;
+import org.objectweb.joram.shared.client.CnxCloseReply;
+import org.objectweb.joram.shared.client.CnxCloseRequest;
+import org.objectweb.joram.shared.client.CnxConnectReply;
+import org.objectweb.joram.shared.client.CnxConnectRequest;
+import org.objectweb.joram.shared.client.CnxStartRequest;
+import org.objectweb.joram.shared.client.CnxStopRequest;
+import org.objectweb.joram.shared.client.ConsumerAckRequest;
+import org.objectweb.joram.shared.client.ConsumerCloseSubRequest;
+import org.objectweb.joram.shared.client.ConsumerDenyRequest;
+import org.objectweb.joram.shared.client.ConsumerReceiveRequest;
+import org.objectweb.joram.shared.client.ConsumerSetListRequest;
+import org.objectweb.joram.shared.client.ConsumerSubRequest;
+import org.objectweb.joram.shared.client.ConsumerUnsetListRequest;
+import org.objectweb.joram.shared.client.ConsumerUnsubRequest;
+import org.objectweb.joram.shared.client.GetAdminTopicReply;
+import org.objectweb.joram.shared.client.GetAdminTopicRequest;
+import org.objectweb.joram.shared.client.QBrowseRequest;
+import org.objectweb.joram.shared.client.ServerReply;
+import org.objectweb.joram.shared.client.SessAckRequest;
+import org.objectweb.joram.shared.client.SessCreateTDReply;
+import org.objectweb.joram.shared.client.SessCreateTQRequest;
+import org.objectweb.joram.shared.client.SessCreateTTRequest;
+import org.objectweb.joram.shared.client.SessDenyRequest;
+import org.objectweb.joram.shared.client.TempDestDeleteRequest;
+import org.objectweb.joram.shared.security.Identity;
 
 /**
  * A <code>SoapConnection</code> links a Joram client and a Joram platform
@@ -54,10 +80,8 @@ import org.objectweb.joram.client.jms.connection.RequestChannel;
  * Requests and replies travel through the connections in SOAP (XML) format.
  */
 public class SoapConnection implements RequestChannel { 
-  /** The user's name */
-  private String name;
-  
-  private String password;
+  /** The user's identity */
+  private Identity identity;
   
   private FactoryParameters factParams;
 
@@ -76,18 +100,15 @@ public class SoapConnection implements RequestChannel {
    * Creates a <code>SoapConnection</code> instance.
    *
    * @param params  Factory parameters.
-   * @param name  Name of user.
-   * @param password  Password of user.
+   * @param identity
    *
-   * @exception JMSSecurityException  If the user identification is incorrrect.
+   * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not reachable.
    */
   public SoapConnection(FactoryParameters factParams2, 
-                        String name2,
-                        String password2) throws JMSException {
+                        Identity identity) throws JMSException {
     factParams = factParams2;
-    name = name2;
-    password = password2;
+    this.identity = identity;
   }
   
   public void setTimer(Timer timer) {
@@ -95,7 +116,7 @@ public class SoapConnection implements RequestChannel {
   }
   
   public void connect() throws Exception {
-    connect(factParams, name, password);
+    connect(factParams, identity);
 
     // Building the Call object for sending the requests:
     SOAPMappingRegistry mappingReg = new SOAPMappingRegistry();
@@ -216,7 +237,7 @@ public class SoapConnection implements RequestChannel {
 
     // Setting the call's parameters:
     Vector params = new Vector();
-    params.addElement(new Parameter("name", String.class, name, null));
+    params.addElement(new Parameter("name", String.class, identity.getUserName(), null));
     params.add(new Parameter("cnxId", Integer.class,
                              new Integer(cnxId), null));
     params.add(new Parameter("map", Hashtable.class, h, null));
@@ -244,14 +265,13 @@ public class SoapConnection implements RequestChannel {
   /**
    * Actually tries to set a first SOAP connection with the server.
    *
-   * @param params  Factory parameters.
-   * @param name  The user's name.
-   * @param password  The user's password.
+   * @param params   Factory parameters.
+   * @param identity identity.
    *
-   * @exception JMSSecurityException  If the user identification is incorrrect.
+   * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the SOAP service fails.
    */
-  private void connect(FactoryParameters factParams, String name, String password) throws JMSException {
+  private void connect(FactoryParameters factParams, Identity identity) throws JMSException {
     // Setting the timer values:
     long startTime = System.currentTimeMillis();
     long endTime = startTime + factParams.connectingTimer * 1000;
@@ -278,8 +298,13 @@ public class SoapConnection implements RequestChannel {
     checkCall.setEncodingStyleURI(Constants.NS_URI_SOAP_ENC);
 
     Vector params = new Vector();
-    params.addElement(new Parameter("name", String.class, name, null));
-    params.addElement(new Parameter("password", String.class, password, null));
+    Hashtable h;
+    try {
+      h = identity.soapCode();
+    } catch (IOException e) {
+      throw new JMSException("EXCEPTION:: connect identity.soapCode(): " + e.getMessage());
+    }
+    params.add(new Parameter("identityMap", Hashtable.class, h, null));
     params.addElement(new Parameter("timeout",
                                     Integer.class,
                                     new Integer(factParams.cnxPendingTimer),
@@ -362,7 +387,7 @@ public class SoapConnection implements RequestChannel {
 
   public AbstractJmsReply receive() throws Exception {
     Vector params = new Vector();
-    params.addElement(new Parameter("name", String.class, name, null));
+    params.addElement(new Parameter("name", String.class, identity.getUserName(), null));
     params.addElement(new Parameter("cnxId", int.class, new Integer(cnxId), null));    
     receiveCall.setParams(params);
     

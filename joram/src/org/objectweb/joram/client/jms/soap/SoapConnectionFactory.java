@@ -24,7 +24,9 @@
  */
 package org.objectweb.joram.client.jms.soap;
 
-import javax.jms.JMSException;
+import java.net.ConnectException;
+
+import javax.jms.JMSSecurityException;
 
 import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.ConnectionFactory;
@@ -63,9 +65,10 @@ public class SoapConnectionFactory extends ConnectionFactory {
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.Connection createConnection(String name,
-                                               String password) throws JMSException {
-    return new Connection(params, new SoapConnection(params, name, password));
+  public javax.jms.Connection createConnection(String name, String password)
+  throws javax.jms.JMSException {
+    initIdentity(name, password);
+    return new Connection(params, new SoapConnection(params, identity));
   }
 
   /**
