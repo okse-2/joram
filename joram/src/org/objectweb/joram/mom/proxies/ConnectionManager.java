@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France-Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -25,11 +25,13 @@ package org.objectweb.joram.mom.proxies;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 
+import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.mom.dest.AdminTopic;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.JmsRequestGroup;
 import org.objectweb.joram.shared.client.ProducerMessages;
+import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.AgentId;
@@ -121,9 +123,11 @@ public class ConnectionManager {
       String initialAdminPass = null;
       StringTokenizer st = new StringTokenizer(args);
 
-      if (st.countTokens() >= 2) {
-        initialAdminName = st.nextToken();
-        initialAdminPass = st.nextToken();        
+      if (st.countTokens() >= 1) {
+        initialAdminName = st.nextToken();     
+      } 
+      if (st.hasMoreTokens()) {
+        initialAdminPass = st.nextToken();   
       }
       
       // AF: deprecated, will be deleted.
@@ -135,21 +139,51 @@ public class ConnectionManager {
         }
       }
 
-      if (initialAdminName != null && initialAdminPass != null) {
+      if (initialAdminName != null) {
         UserAgent userAgent = new UserAgent(AgentId.JoramAdminPxStamp);
         userAgent.deploy();
 
+        Identity identity = 
+          createIdentity(Identity.getRootName(initialAdminName), 
+              initialAdminPass, 
+              Identity.getRootIdentityClass(initialAdminName));
         AdminNotification adminNot =
-          new AdminNotification(
-            userAgent.getId(),
-            initialAdminName,
-            initialAdminPass);
+          new AdminNotification(userAgent.getId(), identity);
 
         Channel.sendTo(adminTopic.getId(), adminNot);
       }
     }
   }
 
+  /**
+   * Create an admin Identity.
+   * 
+   * @param adminName         Name of the admin.
+   * @param adminPassword     Password of the admin.
+   * @param identityClassName identity class name.
+   * @return identity  admin Identity.
+   * @throws AdminException
+   */
+  private static Identity createIdentity(
+      String adminName, 
+      String adminPassword, 
+      String identityClassName) throws AdminException {
+    Identity identity = null;
+    try {
+      Class clazz = Class.forName(identityClassName);
+      identity = (Identity) clazz.newInstance();
+      if (adminPassword != null)
+        identity.setIdentity(adminName, adminPassword);
+      else
+        identity.setUserName(adminName);
+    } catch (Exception e) {
+      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.ERROR))
+        JoramTracing.dbgProxy.log(BasicLevel.ERROR, "EXCEPTION:: ConnectionManager.createIdentity: ", e);
+      throw new AdminException(e.getMessage());
+    }
+    return identity;
+  }
+  
   /**
    * Stops the <code>ConnectionManager</code> service.
    */ 

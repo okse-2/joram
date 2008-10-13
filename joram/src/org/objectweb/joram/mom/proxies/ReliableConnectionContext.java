@@ -27,11 +27,11 @@ package org.objectweb.joram.mom.proxies;
 
 import java.io.Serializable;
 
-import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
-import org.objectweb.joram.shared.client.MomExceptionReply;
 import org.objectweb.joram.shared.client.CnxCloseRequest;
+import org.objectweb.joram.shared.client.MomExceptionReply;
+import org.objectweb.joram.shared.excepts.MomException;
 
 /**
  *
