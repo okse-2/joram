@@ -32,6 +32,8 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
+import javax.jms.JMSSecurityException;
+
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.ClusterRequest;
 import org.objectweb.joram.mom.notifications.DestinationAdminRequestNot;
@@ -146,6 +148,7 @@ import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.joram.shared.messages.Message;
+import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.Agent;
@@ -240,24 +243,37 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    *              or does not have any proxy deployed.
    * @see org.objectweb.joram.mom.proxies.ConnectionManager
    */
-  public AgentId getProxyId(String name,
-                            String pass,
+  public AgentId getProxyId(Identity identity,
                             String inaddr) throws Exception {
-    String userPass = null;
-    AgentId userProxId = null;
 
-    userPass = (String) usersTable.get(name);
-    if (userPass != null) {
-      if (! userPass.equals(pass))
-        throw new Exception("Invalid password for user [" + name + "]");
-      userProxId = (AgentId) proxiesTable.get(name);
-      if (userProxId == null)
-        throw new Exception("No proxy deployed for user [" + name + "]");
+    AgentId userProxId = null;
+    Identity userIdentity = (Identity) usersTable.get(identity.getUserName());
+    if (userIdentity == null) {
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "User [" + identity.getUserName() + "] does not exist");
+      throw new JMSSecurityException("User [" + identity.getUserName() + "] does not exist");
+    }
+
+    if (identity instanceof Identity) {
+      if (! identity.check(userIdentity)) {
+        if (logger.isLoggable(BasicLevel.ERROR))
+          logger.log(BasicLevel.ERROR, "identity check failed.");
+        throw new JMSSecurityException("identity check failed.");
+      } else {        
+        userProxId = (AgentId) proxiesTable.get(identity.getUserName());
+        if (userProxId == null) {
+          if (logger.isLoggable(BasicLevel.ERROR))
+            logger.log(BasicLevel.ERROR, "No proxy deployed for user [" + identity.getUserName() + "]");
+          throw new JMSSecurityException("No proxy deployed for user [" + identity.getUserName() + "]");
+        }
 
       return userProxId;
+      }
+    } else {
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "Bad Auth must be instanceof Identity :: identity = " + identity);
+      throw new JMSSecurityException("Bad Auth must be instanceof Identity :: identity = " + identity);
     }
-    else
-      throw new Exception("User [" + name + "] does not exist");
   }
 
   /** Method used by proxies for retrieving their name. */
@@ -272,12 +288,12 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   }
 
   /** Method used by proxies for retrieving their password. */
-  public String getPassword(AgentId proxyId) {
+  public Object getPassword(AgentId proxyId) {
     String name;
     for (Enumeration e = proxiesTable.keys(); e.hasMoreElements();) {
       name = (String) e.nextElement();
       if (proxyId.equals(proxiesTable.get(name)))
-        return (String) usersTable.get(name);
+        return usersTable.get(name);
     }
     return null;
   }
@@ -293,17 +309,23 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * notification notifying of the creation of an admin proxy.
    */
   public void AdminNotification(AgentId from, AdminNotification adminNot) {
-    String name = adminNot.getName();
-    String pass = adminNot.getPass();
+    Identity identity = adminNot.getIdentity();
 
-    usersTable.put(name, pass);
-    proxiesTable.put(name, adminNot.getProxyId());
+    try {
+      //identity.validate();
 
-    clients.put(adminNot.getProxyId(), new Integer(READWRITE));
-   
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, name + " successfully"
-                                    + " set as admin client.");
+      usersTable.put(identity.getUserName(), identity);
+      proxiesTable.put(identity.getUserName(), adminNot.getProxyId());
+
+      clients.put(adminNot.getProxyId(), new Integer(READWRITE));
+
+      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, identity.getUserName() + " successfully"
+            + " set as admin client.");
+    } catch (Exception e) {
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "Exception:: ", e);
+    }
   }
 
   /**
@@ -358,8 +380,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
   public void GetProxyIdNot(GetProxyIdNot not) {
     try {
-      AgentId proxyId = getProxyId(not.getUserName(), 
-				   not.getPassword(),
+      AgentId proxyId = getProxyId(not.getIdentity(), 
                                    not.getInAddr());
       not.Return(proxyId);
     } catch (Exception exc) {
@@ -1260,29 +1281,43 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   public void doProcess(CreateUserRequest request,
                          AgentId replyTo,
                          String msgId)
-               throws UnknownServerException, RequestException
-  {
+               throws UnknownServerException, RequestException {
     if (checkServerId(request.getServerId())) {
       // If this server is the target server, process the request.
-      String name = request.getUserName();
-      String pass = request.getUserPass();
+      Identity identity = request.getIdentity();
+      String name = identity.getUserName();
 
       AgentId proxId = (AgentId) proxiesTable.get(name);
       String info;
 
       // The user has already been set. 
       if (proxId != null) {
-        if (!pass.equals(usersTable.get(name))) {
-          throw new RequestException("User [" + name + "] already exists"
-                                     + " but with a different password.");
-        }
-        info = strbuf.append("Request [").append(request.getClass().getName())
-          .append("], processed by AdminTopic on server [").append(serverId)
-          .append("], successful [true]: proxy [").append(proxId.toString())
-          .append("] of user [").append(name)
-          .append("] has been retrieved").toString();
+       Identity userIdentity = (Identity) usersTable.get(name);
+       if (logger.isLoggable(BasicLevel.INFO))
+         logger.log(BasicLevel.INFO, "User [" + name + "] already exists : " + userIdentity);
+       try {
+         if (! identity.check(userIdentity)) {
+           throw new RequestException("User [" + name + "] already exists"
+               + " but with a different password.");
+         } 
+       } catch (Exception e) {
+         throw new RequestException("User [" + name + "] already exists :: Exception :" + e.getMessage());
+       }
+       info = strbuf.append("Request [").append(request.getClass().getName())
+        .append("], processed by AdminTopic on server [").append(serverId)
+        .append("], successful [true]: proxy [").append(proxId.toString())
+        .append("] of user [").append(name)
+        .append("] has been retrieved").toString();
         strbuf.setLength(0);
       } else {
+//        try {
+//          if (! identity.validate()) {
+//            throw new RequestException("User [" + name + "] security validate failed.");
+//          }
+//        } catch (Exception e) {
+//          throw new RequestException(e.getMessage());
+//        }
+
         UserAgent proxy = new UserAgent();
         if (name != null) {
           proxy.name = name;
@@ -1291,7 +1326,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
         try {
           proxy.deploy();
-          usersTable.put(name, request.getUserPass());
+          usersTable.put(name, identity);
           proxiesTable.put(name, proxy.getId());
   
           info = strbuf.append("Request [").append(request.getClass().getName())
@@ -1350,8 +1385,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(UpdateUser request,
                          AgentId replyTo,
                          String msgId)
-               throws RequestException, UnknownServerException
-  {
+               throws RequestException, UnknownServerException {
     String name = request.getUserName();
     AgentId proxId = AgentId.fromString(request.getProxId());
 
@@ -1363,24 +1397,24 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       if (! usersTable.containsKey(name))
         throw new RequestException("User [" + name + "] does not exist");
 
-      String newName = request.getNewName();
+      Identity newIdentity = request.getNewIdentity();
       // If the new name is already taken by an other user than the modified
       // one:
-      if (! newName.equals(name)
-          && (usersTable.containsKey(newName)))
-        throw new RequestException("Name [" + newName + "] already used");
+      if (! newIdentity.getUserName().equals(name)
+          && (usersTable.containsKey(newIdentity.getUserName())))
+        throw new RequestException("Name [" + newIdentity.getUserName() + "] already used");
 
       if (usersTable.containsKey(name)) {
         usersTable.remove(name);
         proxiesTable.remove(name);
-        usersTable.put(newName, request.getNewPass());
-        proxiesTable.put(newName, proxId);
+        usersTable.put(newIdentity.getUserName(), newIdentity);
+        proxiesTable.put(newIdentity.getUserName(), proxId);
       }
 
       info = strbuf.append("Request [").append(request.getClass().getName())
         .append("], processed by AdminTopic on server [").append(serverId)
         .append("], successful [true]: user [").append(name)
-        .append("] has been updated to [").append(newName).
+        .append("] has been updated to [").append(newIdentity.getUserName()).
         append("]").toString();
       strbuf.setLength(0);
 
