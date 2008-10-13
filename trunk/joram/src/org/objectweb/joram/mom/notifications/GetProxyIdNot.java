@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,6 +23,8 @@
  */
 package org.objectweb.joram.mom.notifications;
 
+import org.objectweb.joram.shared.security.Identity;
+
 import fr.dyade.aaa.agent.*;
 
 /**
@@ -35,26 +37,17 @@ public class GetProxyIdNot extends SyncNotification {
    */
   private static final long serialVersionUID = 1L;
 
-  private String userName;
-
-  private String password;
+  private Identity identity;
 
   private String inaddr;
 
-  public GetProxyIdNot(String userName,
-		       String password,
-                       String inaddr) {
-    this.userName = userName;
-    this.password = password;
+  public GetProxyIdNot(Identity identity, String inaddr) {
+    this.identity = identity;
     this.inaddr = inaddr;
   }
 
-  public final String getUserName() {
-    return userName;
-  }
-
-  public final String getPassword() {
-    return password;
+  public final Identity getIdentity() {
+    return identity;
   }
 
   public final String getInAddr() {
