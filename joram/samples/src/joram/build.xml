@@ -136,6 +136,37 @@
     </antcall>
   </target>
 
+  <!-- Initializes the jaas configuration -->
+  <target name="jaas_init" depends="init">
+    <mkdir dir="${run.dir}"/>
+    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
+    <copy file="${conf.dir}/jndi.properties"
+          tofile="${run.dir}/jndi.properties"
+          overwrite="true"/>
+    <copy file="${conf.dir}/jaas_a3servers.xml"
+          tofile="${run.dir}/a3servers.xml"
+          overwrite="true"/>
+    <copy file="${src.dir}/jaas/jaas.config"
+          tofile="${run.dir}/jaas.config"
+          overwrite="true"/>
+    <copy file="${src.dir}/jaas/keystore"
+          tofile="${run.dir}/keystore"
+          overwrite="true"/>
+    <copy file="${src.dir}/jaas/carol.properties"
+          tofile="${run.dir}/carol.properties"
+          overwrite="true"/>
+  </target>
+
+  <!-- Start a jaas server -->
+  <target name="jaas_server" depends="jaas_init"
+          description="--> Starts a JAAS server.">
+    <antcall target="server">
+      <param name="sid" value="0"/>
+    </antcall>
+  </target>
+
+
   <!-- **************************************************
        * Classic Samples
        ************************************************** -->
@@ -275,6 +306,54 @@
     <java classname="classic.Browser" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- **************************************************
+       * JAAS Samples
+       ************************************************** -->
+
+  <!-- Setup the classic configuration -->
+  <target name="jaas_admin" depends="init"
+          description="--> Runs a jaas administration">
+    <java classname="jaas.ClassicAdmin"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Djava.security.auth.login.config=${run.dir}/jaas.config -Djava.naming.factory.initial=org.objectweb.carol.jndi.spi.MultiOrbInitialContextFactory" />
+    </java>
+  </target>
+
+  <!-- Setup the classic configuration -->
+  <target name="jaas_adminxml" depends="init"
+          description="--> Runs a jaas administration XML">
+    <copy file="${src.dir}/jaas/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
+    <java classname="org.objectweb.joram.client.jms.admin.AdminModule"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="./joramAdmin.xml"/>
+      <jvmarg line="-Djava.security.auth.login.config=${run.dir}/jaas.config -Djava.naming.factory.initial=org.objectweb.carol.jndi.spi.MultiOrbInitialContextFactory" />
+    </java>
+  </target>
+
+  <!-- Runs the classic sender client -->
+  <target name="jaas_sender" depends="init"
+    description="--> Starts a jaas Sender client">
+    <java classname="jaas.Sender" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Djava.security.auth.login.config=${run.dir}/jaas.config -Djava.naming.factory.initial=org.objectweb.carol.jndi.spi.MultiOrbInitialContextFactory" />
+    </java>
+  </target>
+
+  <!-- Runs the classic receiver client -->
+  <target name="jaas_receiver" depends="init"
+    description="--> Starts a jaas Receiver client">
+    <java classname="jaas.Receiver" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Djava.security.auth.login.config=${run.dir}/jaas.config -Djava.naming.factory.initial=org.objectweb.carol.jndi.spi.MultiOrbInitialContextFactory" />
     </java>
   </target>
 
