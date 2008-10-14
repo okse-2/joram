@@ -262,7 +262,7 @@ public class AdminModule {
                              int cnxTimer,
                              String reliableClass)
     throws UnknownHostException, ConnectException, AdminException {
-    connect(hostName, port, hostName, password, cnxTimer, reliableClass, Identity.SIMPLE_IDENTITY_CLASS);
+    connect(hostName, port, name, password, cnxTimer, reliableClass, Identity.SIMPLE_IDENTITY_CLASS);
   }
   
   /**
