@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 CSSI
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
