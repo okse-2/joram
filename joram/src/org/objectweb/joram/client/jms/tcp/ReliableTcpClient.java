@@ -292,7 +292,6 @@ public class ReliableTcpClient {
     } else {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> reopen connection " + identity + ',' + key);
-      StreamUtil.writeTo(baos.size(), os);
       baos.writeTo(os);
       os.flush();
 
