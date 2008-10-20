@@ -72,6 +72,7 @@
       <include name="org/objectweb/joram/shared/client/**/*.java"/>
       <include name="org/objectweb/joram/shared/excepts/**/*.java"/>
       <include name="org/objectweb/joram/shared/messages/**/*.java"/>
+      <!-- include name="org/objectweb/joram/shared/security/**/*.java"/ -->
     	<include name="org/objectweb/joram/shared/security/SimpleIdentity.java"/>
 
       <include name="org/objectweb/joram/client/**/*.java"/>
@@ -105,7 +106,7 @@
     <property name="version" value="${joram.version}"/>
   </target>
 
-  <!-- Builds all needed jars, except kjoram (needs 1.1 compiler) -->
+  <!-- Builds all needed jars -->
   <target name="build.joram" depends="init.joram,compile"
       description="--> Builds Joram server and client jars.">
     <mkdir dir="${build.dir}/META-INF"/>
@@ -256,39 +257,6 @@
       </fileset>
       <fileset dir="${src.dir}">
         <include name="org/objectweb/joram/client/tools/admin/icons/*.png"/>
-      </fileset>
-    </jar>
-  </target>
-
-  <!-- Builds kjoram (needs 1.1 compiler) -->
-  <target name="build.kjoram" depends="init.joram, prepare"
-      description="--> Builds kjoram jars.">
-    <mkdir dir="${obj.dir}/kobj"/>
-    <!-- Compilation phase -->
-    <javac source="1.3" target="1.1"
-           bootclasspath="${lib.dir}/cldcapi11.jar"
-           classpath="${lib.dir}/ow_util_log_api.jar"
-           srcdir="${src.dir}:${obj.dir}/kobj"
-           destdir="${obj.dir}/kobj"
-           debug="on"
-           deprecation="${deprecation}"
-           optimize="false"
-           nowarn="${nowarn}"
-           verbose="${verbose}">
-      <include name="org/objectweb/joram/kclient/*.java"/>
-    </javac>
-    <!-- jars building -->
-    <jar jarfile="${build.dir}/joram-kclient.jar">
-      <manifest>
-        <attribute name="Implementation-Title" value="kJoram"/>
-        <attribute name="Implementation-Version" value="${version}"/> 
-        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
-      </manifest>
-      <metainf dir="${licenses.dir}">
-        <include name="NOTICE.TXT"/>
-      </metainf>
-      <fileset dir="${obj.dir}/kobj">
-        <include name="**/*.class"/>
       </fileset>
     </jar>
   </target>
