@@ -1,4 +1,10 @@
 +==============================================================================
+| 2008/10/20 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ - add a Collector destination (first URL Collector).
+ - remove the SOAP kjoram version (com.scalagent. kjoram, kjndi and ksoap).
+ - The new kJoram version move in joram/kjoram project.
++==============================================================================
 | 2008/10/13 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  - Re architecture authentication capability.
