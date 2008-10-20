@@ -116,6 +116,7 @@ public class ManagedQueueConnectionFactoryImpl
     ref.add(new StringRefAddr("serverPort", "" + serverPort));
     ref.add(new StringRefAddr("userName", userName));
     ref.add(new StringRefAddr("password", password));
+    ref.add(new StringRefAddr("identityClass", identityClass));
 
     factory.setReference(ref);
     return factory;
