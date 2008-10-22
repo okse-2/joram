@@ -1315,4 +1315,15 @@
     </java>
   </target>
 
+  <!-- Initializes the distributed configuration -->
+   <target name="cron" depends="init">
+     <mkdir dir="${run.dir}"/>
+     <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
+     <java classname="cron.CronTest"
+           failonerror="no" fork="yes"
+           dir="${run.dir}">
+       <classpath path="${project.class.path}"/>
+     </java>     
+  </target>
+  
 </project>
