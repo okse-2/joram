@@ -29,8 +29,6 @@ import org.objectweb.joram.mom.dest.Queue;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import com.scalagent.scheduler.Condition;
-
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Debug;
 import fr.dyade.aaa.agent.Notification;
@@ -71,8 +69,8 @@ public class SchedulerQueue extends Queue {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
           "SchedulerQueue.react(" + from + ',' + not + ')');
-    if (not instanceof Condition) {
-      ((SchedulerQueueImpl) destImpl).condition((Condition) not);
+    if (not instanceof SchedulerQueueNot) {
+      ((SchedulerQueueImpl) destImpl).condition((SchedulerQueueNot) not);
     } else
       super.react(from, not);
   }

@@ -32,13 +32,11 @@ import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import com.scalagent.scheduler.AddConditionListener;
-import com.scalagent.scheduler.Condition;
-import com.scalagent.scheduler.RemoveConditionListener;
 import com.scalagent.scheduler.ScheduleEvent;
 import com.scalagent.scheduler.Scheduler;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.Debug;
 
 public class SchedulerQueueImpl extends QueueImpl {
@@ -51,6 +49,8 @@ public class SchedulerQueueImpl extends QueueImpl {
   public static final String SCHEDULE_DATE = "scheduleDate";
 
   public static final String SCHEDULED = "scheduled";
+  
+  private Scheduler scheduler = null;
 
   /**
    * Constructs a <code>SchedulerQueueImpl</code> instance.
@@ -74,10 +74,17 @@ public class SchedulerQueueImpl extends QueueImpl {
       msg = (org.objectweb.joram.shared.messages.Message) msgs.nextElement();
       long scheduleDate = getScheduleDate(msg);
       if (scheduleDate < 0) return;
-      //DF: to improve
-      // two notifs are necessary to subscribe
-      forward(Scheduler.getDefault(), new AddConditionListener(msg.id));
-      forward(Scheduler.getDefault(), new ScheduleEvent(msg.id, new Date(scheduleDate)));
+      // schedule a task
+      try {
+        if (scheduler == null)
+          scheduler = new Scheduler(AgentServer.getTimer());
+        scheduler.scheduleEvent(
+            new ScheduleEvent(msg.id, new Date(scheduleDate)), 
+            new SchedulerQueueTask(getId()));
+      } catch (Exception e) {
+        if (logger.isLoggable(BasicLevel.ERROR))
+          logger.log(BasicLevel.ERROR, "EXCEPTION :: SchedulerQueueImpl.postProcess(" + not + ')', e);
+      }
     }
   }
 
@@ -93,7 +100,7 @@ public class SchedulerQueueImpl extends QueueImpl {
     }
   }
 
-  public void condition(Condition not) {
+  public void condition(SchedulerQueueNot not) {
     String msgId = not.name;
     for (int i = 0; i < messages.size(); i++) {
       Message msg = (Message) messages.elementAt(i);
@@ -101,9 +108,6 @@ public class SchedulerQueueImpl extends QueueImpl {
         try {
           msg.setObjectProperty(SCHEDULED, "" + System.currentTimeMillis());
         } catch (Exception exc) {}
-        // Must remove the condition
-        forward(Scheduler.getDefault(), 
-                new RemoveConditionListener(msg.getIdentifier()));
         break;
       }
     }
