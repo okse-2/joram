@@ -1315,7 +1315,7 @@
     </java>
   </target>
 
-  <!-- Initializes the distributed configuration -->
+  <!-- cron test -->
    <target name="cron" depends="init">
      <mkdir dir="${run.dir}"/>
      <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
