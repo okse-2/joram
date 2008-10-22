@@ -90,7 +90,6 @@
 
       <!-- Begin - Needed for JORAM Scheduler destinations -->
       <include name="com/scalagent/scheduler/*.java"/>
-      <include name="com/scalagent/scheduler/event/*.java"/>
       <include name="com/scalagent/joram/mom/dest/scheduler/*.java"/>
       <!-- End - Needed for JORAM Scheduler destinations -->
     </patternset>
@@ -157,7 +156,7 @@
         <include name="fr/dyade/aaa/jndi2/soap/JndiSoapService.class"/>
         <include name="org/objectweb/joram/mom/**/*.class"/>
         <include name="com/scalagent/joram/mom/**/*.class"/>
-        <include name="com/scalagent/scheduler/**/*.class"/>
+        <include name="com/scalagent/scheduler/*.class"/>
       </fileset>
     </jar>
     <jar jarfile="${build.dir}/joram-client.jar">
