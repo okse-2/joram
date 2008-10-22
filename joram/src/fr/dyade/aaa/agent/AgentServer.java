@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2004 - France Telecom R&D
+ * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -1333,7 +1333,7 @@ public final class AgentServer {
     } catch (Exception exc) {
       logmon.log(BasicLevel.ERROR, getName() + "Cannot start", exc);
       synchronized(status) {
-        // AF: Will be replaced by a BAD_STARTED status allowing the
+        // TODO AF: Will be replaced by a BAD_STARTED status allowing the
         // stop and reset..
         status.value = Status.STOPPED;
       }
@@ -1341,7 +1341,7 @@ public final class AgentServer {
     } catch (Throwable t) {
       logmon.log(BasicLevel.ERROR, getName() + "Cannot start", t);
       synchronized(status) {
-        // AF: Will be replaced by a BAD_STARTED status allowing the
+        // TODO AF: Will be replaced by a BAD_STARTED status allowing the
         // stop and reset..
         status.value = Status.STOPPED;
       }
@@ -1469,8 +1469,6 @@ public final class AgentServer {
       
       // Stop all services.
       ServiceManager.stop();
-      // Stop all drivers
-      Driver.stopAll();
 
       // Wait for all threads before stop the TM !!
       while (true) {
