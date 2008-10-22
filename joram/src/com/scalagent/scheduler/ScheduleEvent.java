@@ -21,39 +21,32 @@
  */
 package com.scalagent.scheduler;
 
-import java.util.*;
-import fr.dyade.aaa.agent.*;
+import java.io.Serializable;
+import java.util.Date;
 
 /**
- * Base class for notifications requesting a scheduling to a
- * <code>Scheduler</code> agent. The event holds a name which is the name of
- * the condition the scheduler is requested to send.
+ * Base class for event requesting a scheduling to a
+ * <code>Scheduler</code>.
  * <p>
- * The base class implements a one shot scheduling. A positive
- * <code>Condition</code> notification is sent at the event start date, and a
- * negative one is sent when the not null duration expires.
- * This is true as long as the <code>Scheduler</code> agent is active at
- * (about) the scheduling date and time. If the agent server was down at that
- * time, the outdated event is triggered only if its
- * <code>outdatedRestart</code> field is true.
+ * The base class implements a one shot scheduling. 
+ * This is true as long as the <code>Scheduler</code> is active at (about) 
+ * the scheduling date and time. If it was down at that time, the outdated 
+ * event is triggered only if its <code>outdatedRestart</code> field is true.
  * <p>
- * This class is also used by the <code>Scheduler</code> agent to keep the
+ * This class is also used by the <code>Scheduler</code> to keep the
  * request until it is complete.
  *
  * @see		Scheduler
- * @see		Condition
  */
-public class ScheduleEvent extends Notification {
+public class ScheduleEvent implements Serializable {
   /**
    * 
    */
   private static final long serialVersionUID = 1L;
-  /** event and condition name */
+  /** event name */
   protected String name;
   /** event scheduling date */
   protected Date date;
-  /** event duration in seconds */
-  protected long duration;
   /** execute outdated event on restart */
   protected boolean outdatedRestart;
 
@@ -61,15 +54,13 @@ public class ScheduleEvent extends Notification {
   /**
    * Creates an item.
    *
-   * @param name		event and condition name
-   * @param date		event scheduling date
-   * @param duration		event duration in seconds
+   * @param name		    event name
+   * @param date		    event scheduling date
    * @param outdatedRestart	execute outdated event on restart
    */
-  public ScheduleEvent(String name, Date date, long duration, boolean outdatedRestart) {
+  public ScheduleEvent(String name, Date date, boolean outdatedRestart) {
     this.name = name;
     this.date = date;
-    this.duration = duration;
     this.outdatedRestart = outdatedRestart;
   }
 
@@ -77,26 +68,13 @@ public class ScheduleEvent extends Notification {
    * Creates an item with a default value for <code>outdatedRestart</code>.
    * <p>
    * <code>outdatedRestart</code> is given a <code>true</code> value when
-   * <code>duration</code> value is <code>0</code>.
    *
-   * @param name		event and condition name
-   * @param date		event scheduling date
-   * @param duration		event duration in seconds
-   */
-  public ScheduleEvent(String name, Date date, long duration) {
-    this(name, date, duration, duration == 0);
-  }
-
-  /**
-   * Creates an item with null duration.
-   *
-   * @param name		event and condition name
-   * @param date		event scheduling date
+   * @param name		    event name
+   * @param date		    event scheduling date
    */
   public ScheduleEvent(String name, Date date) {
-    this(name, date, 0);
+    this(name, date, true);
   }
-
 
   /**
    * Provides a string image for this object.
@@ -104,14 +82,10 @@ public class ScheduleEvent extends Notification {
    * @return	a string image for this object
    */
   public StringBuffer toString(StringBuffer output) {
-    output.append('(');
-    output.append(super.toString(output));
-    output.append(",name=");
+    output.append("ScheduleEvent (name=");
     output.append(name);
     output.append(",date=");
     output.append(date);
-    output.append(",duration=");
-    output.append(duration);
     output.append(",outdatedRestart=");
     output.append(outdatedRestart);
     output.append(')');
@@ -119,18 +93,27 @@ public class ScheduleEvent extends Notification {
   }
 
   /**
+   * Provides a string image for this object.
+   * 
+   * @return event string representation
+   */
+  public String toString() {
+    StringBuffer buff = new StringBuffer();
+    return toString(buff).toString();
+  }
+  
+  /**
    * Returns the next scheduling date after current date given as parameter. The
-   * new date must be strictly greater than the current date. A
-   * <code>null</code> date leads to the scheduler deleting the event.
+   * new date must be strictly greater than the current date.
+   * A <code>null</code> date leads to the scheduler deleting the event.
    * <p>
    * This function should be overloaded in derived classes to actually implement
    * recurrent scheduling.
    * 
-   * @param now
-   *          current date
+   * @param now current date
    * @return next scheduling date after now
    */
-  Date nextDate(Date now) {
+  protected Date nextDate(Date now) {
     if (date == null)
       return null;
     if (date.after(now))
