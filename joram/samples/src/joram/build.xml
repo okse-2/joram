@@ -1315,6 +1315,38 @@
     </java>
   </target>
 
+  <!-- **************************************************
+       * Collector sample
+       ************************************************** -->
+  <!-- Setup the collector configuration -->
+  <target name="collector_admin" depends="init"
+          description="--> Runs administration stuff for collector sample">
+    <java classname="collector.CollectorAdmin"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+  
+  <!-- Runs the producer client -->
+  <target name="collector_producer" depends="init"
+    description="--> Starts a collector Producer client">
+    <java classname="collector.Producer" failonerror="no" fork="yes" dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the consumer client -->
+  <target name="collector_consumer" depends="init"
+    description="--> Starts a collector Consumer client">
+    <java classname="collector.Consumer" failonerror="no" fork="yes" dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+   
+  <!-- **************************************************
+       * Cron sample
+       ************************************************** -->
   <!-- cron test -->
    <target name="cron" depends="init">
      <mkdir dir="${run.dir}"/>
