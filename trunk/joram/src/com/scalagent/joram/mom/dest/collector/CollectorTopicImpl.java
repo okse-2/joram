@@ -40,7 +40,7 @@ import fr.dyade.aaa.agent.WakeUpTask;
  * The <code>CollectorTopicImpl</code> class implements the MOM collector topic behavior,
  * basically distributing the received messages to subscribers.
  */
-public class CollectorTopicImpl extends TopicImpl implements CollectorDestination {
+public class CollectorTopicImpl extends TopicImpl implements CollectorDestination, CollectorTopicImplMBean {
 
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
@@ -113,6 +113,29 @@ public class CollectorTopicImpl extends TopicImpl implements CollectorDestinatio
     if (! period.equals(prop.getProperty("collector.period"))) {
       // execute collector wake up.
       collectorWakeUp();
+    }
+  }
+  /**
+   * add a property (used by MBean).
+   * 
+   * @param key
+   * @param value
+   * @see com.scalagent.joram.mom.dest.collector.CollectorQueueImplMBean#addProperty(java.lang.String, java.lang.String)
+   */
+  public void setProperty(String key, String value) {
+    if (this.prop == null) 
+      return;
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,"setProperty(" + key + ", " + value + ')');
+
+    if (key.equals("collector.period")) {
+      if (! value.equals(prop.getProperty("collector.period"))) {
+        this.prop.setProperty(key, value);
+        collectorWakeUp();
+      }
+    } else {
+      this.prop.setProperty(key, value);
+      setProperties(this.prop);
     }
   }
   
