@@ -48,8 +48,8 @@ public class Producer {
     Message msg = sess.createMessage();
     msg.setStringProperty("collector.expirationMessage", "0");
     msg.setStringProperty("collector.persistentMessage", "true");
-    msg.setStringProperty("collector.period", "60000");
-    msg.setStringProperty("collector.url", "file:///test.txt");
+    msg.setStringProperty("collector.period", "30000");
+    msg.setStringProperty("collector.url", "http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/trunk/joram/history");
     msg.setStringProperty("collector.type", "5");
     msg.setStringProperty("com.scalagent.joram.mom.dest.collector.ClassName", "com.scalagent.joram.mom.dest.collector.URLCollector");
     producer.send(queue, msg);
