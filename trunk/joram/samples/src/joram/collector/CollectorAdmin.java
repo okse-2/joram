@@ -28,6 +28,7 @@ import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.shared.messages.Message;
 
 
 /**
@@ -47,7 +48,7 @@ public class CollectorAdmin {
     prop.setProperty("collector.persistentMessage", "true");
     prop.setProperty("collector.period", "300000");
     prop.setProperty("collector.url", url);
-    prop.setProperty("collector.type", "5");
+    prop.setProperty("collector.type", "" + Message.BYTES);
     prop.setProperty("com.scalagent.joram.mom.dest.collector.ClassName", "com.scalagent.joram.mom.dest.collector.URLCollector");
     
     Queue queue = Queue.create(0, "queue", "com.scalagent.joram.mom.dest.collector.CollectorQueue", prop);
