@@ -92,6 +92,10 @@
       <include name="com/scalagent/scheduler/*.java"/>
       <include name="com/scalagent/joram/mom/dest/scheduler/*.java"/>
       <!-- End - Needed for JORAM Scheduler destinations -->
+      
+      <!-- Begin - Needed for JORAM Collector destinations -->
+      <include name="com/scalagent/joram/mom/dest/collector/*.java"/>
+      <!-- End - Needed for JORAM Collector destinations -->
     </patternset>
 
     <!-- Specific classpath needed for compilation -->
