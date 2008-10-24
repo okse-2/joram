@@ -26,7 +26,7 @@ import com.rabbitmq.client.AMQP.BasicProperties;
 
 public interface DeliveryListener extends Listener {
 
-  public void handleDelivery(String consumerTag, long deliveryTag, boolean redelivered, String exchange,
+  public void handleDelivery(long deliveryTag, boolean redelivered, String exchange,
       String routingKey, BasicProperties properties, byte[] body);
   
 }

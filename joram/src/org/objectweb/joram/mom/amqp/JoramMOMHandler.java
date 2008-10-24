@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.joram.mom.amqp.proxy.request.AccessRequestNot;
+import org.objectweb.joram.mom.amqp.proxy.request.BasicCancelNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicConsumeNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicGetNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicPublishNot;
@@ -35,6 +36,7 @@ import org.objectweb.joram.mom.amqp.proxy.request.ExchangeDeleteNot;
 import org.objectweb.joram.mom.amqp.proxy.request.QueueBindNot;
 import org.objectweb.joram.mom.amqp.proxy.request.QueueDeclareNot;
 import org.objectweb.joram.mom.amqp.proxy.request.QueueDeleteNot;
+import org.objectweb.joram.mom.amqp.proxy.request.QueuePurgeNot;
 
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.GetResponse;
@@ -67,9 +69,9 @@ public class JoramMOMHandler implements MOMHandler {
 
   public AMQP.Access.RequestOk accessRequest(String realm, boolean exclusive, boolean passive,
       boolean active, boolean write, boolean read, int channelNumber) throws Exception {
-    AccessRequestNot acessRequest = new AccessRequestNot(channelNumber, realm, exclusive, passive, active,
+    AccessRequestNot accessRequest = new AccessRequestNot(channelNumber, realm, exclusive, passive, active,
         write, read);
-    AMQP.Access.RequestOk accessRes = acessRequest.accessRequest(proxy.getId());
+    AMQP.Access.RequestOk accessRes = accessRequest.accessRequest(proxy.getId());
     return accessRes;
   }
 
@@ -78,16 +80,16 @@ public class JoramMOMHandler implements MOMHandler {
 
   }
 
-  public void basicCancel(String consumerTag) {
-    // TODO Auto-generated method stub
-
+  public void basicCancel(String consumerTag, int channelNumber) throws Exception {
+    BasicCancelNot basicCancel = new BasicCancelNot(channelNumber, consumerTag);
+    basicCancel.basicCancel(proxy.getId());
   }
 
   public AMQP.Basic.ConsumeOk basicConsume(String queue, boolean noAck, String consumerTag, boolean noLocal,
       boolean exclusive, int ticket, int channelNumber) throws Exception {
     BasicConsumeNot basicConsume = new BasicConsumeNot(channelNumber, ticket,
         queue, true, consumerTag,
-        new DeliverMessageConsumer(channelNumber));
+        new DeliverMessageConsumer(channelNumber, consumerTag));
     AMQP.Basic.ConsumeOk basicConsumeOk = basicConsume.basicConsume(proxy.getId());
     return basicConsumeOk;
   }
@@ -109,6 +111,12 @@ public class JoramMOMHandler implements MOMHandler {
         publishRequest.getHeader(),
         publishRequest.body);
     Channel.sendTo(proxy.getId(), basicPublish);
+    
+    // Let some time for the message to go the the exchange then the queue.
+    try {
+      Thread.sleep(50);
+    } catch (Exception exc) {
+    }
   }
 
   public void close() {
@@ -166,16 +174,23 @@ public class JoramMOMHandler implements MOMHandler {
     AMQP.Queue.DeleteOk queueDeleteOk = queueDelete.queueDelete(proxy.getId());
     return queueDeleteOk;
   }
+
+  public void queuePurge(String queue, boolean nowait, int ticket, int channelNumber) throws Exception {
+    QueuePurgeNot queuePurge = new QueuePurgeNot(channelNumber, ticket, queue, nowait);
+    queuePurge.queuePurge(proxy.getId());
+  }
   
   class DeliverMessageConsumer implements DeliveryListener {
     
     private int channelNumber;
+    private String consumerTag;
 
-    public DeliverMessageConsumer(int channelNumber) {
+    public DeliverMessageConsumer(int channelNumber, String consumerTag) {
       this.channelNumber = channelNumber;
+      this.consumerTag = consumerTag;
     }
 
-    public void handleDelivery(String consumerTag, long deliveryTag, boolean redelivered, String exchange,
+    public void handleDelivery(long deliveryTag, boolean redelivered, String exchange,
         String routingKey, BasicProperties properties, byte[] body) {
       AMQP.Basic.Deliver deliver = new AMQImpl.Basic.Deliver(consumerTag, deliveryTag, redelivered, exchange,
           routingKey);

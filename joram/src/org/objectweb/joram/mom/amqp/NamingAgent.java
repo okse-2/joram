@@ -103,4 +103,11 @@ public class NamingAgent extends Agent {
     AgentServer.getTransaction().save(namingTable, namingStorageName);
   }
 
+  public void unbind(String name) throws Exception {
+    Object found = namingTable.remove(name);
+    if (found != null) {
+      saveNaming();
+    }
+  }
+
 }

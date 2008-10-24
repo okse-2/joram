@@ -20,49 +20,51 @@
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s):
  */
-package org.objectweb.joram.mom.amqp;
+package org.objectweb.joram.mom.amqp.proxy.request;
 
-import com.rabbitmq.client.AMQP.BasicProperties;
+import com.rabbitmq.client.AMQP;
 
-import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.SyncNotification;
 
-public class PublishNot extends Notification {
+public class QueuePurgeNot extends SyncNotification {
+
+  private int channelId;
+  private int ticket;
+  private String queue;
+  private boolean nowait;
   
-  private String routingKey;
-
-  private String exchange;
-  
-  private BasicProperties properties;
-  
-  private byte[] body;
-
-  /**
-   * @param routingKey
-   * @param exchange
-   * @param properties
-   * @param body
-   */
-  public PublishNot(String exchange, String routingKey, BasicProperties properties, byte[] body) {
+  public QueuePurgeNot(int channelId, int ticket, String queue, boolean nowait) {
     super();
-    this.routingKey = routingKey;
-    this.exchange = exchange;
-    this.properties = properties;
-    this.body = body;
+    this.channelId = channelId;
+    this.ticket = ticket;
+    this.queue = queue;
+    this.nowait = nowait;
   }
   
-  public byte[] getBody() {
-    return body;
+  public AMQP.Queue.PurgeOk queuePurge(AgentId proxyId) throws Exception {
+    Object[] res = invoke(proxyId);
+    return (AMQP.Queue.PurgeOk) res[0];
+  }
+
+  public void Return(AMQP.Queue.PurgeOk res) {
+    Return(new Object[] { res });
+  }
+
+  public int getChannelId() {
+    return channelId;
+  }
+
+  public int getTicket() {
+    return ticket;
+  }
+
+  public String getQueue() {
+    return queue;
   }
   
-  public BasicProperties getProperties() {
-    return properties;
+  public boolean isNowait() {
+    return nowait;
   }
-  
-  public String getRoutingKey() {
-    return routingKey;
-  }
-  
-  public String getExchange() {
-    return exchange;
-  }
+
 }

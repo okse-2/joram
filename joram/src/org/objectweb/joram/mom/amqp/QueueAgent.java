@@ -24,6 +24,7 @@ package org.objectweb.joram.mom.amqp;
 
 import java.io.Serializable;
 import java.util.LinkedList;
+import java.util.ListIterator;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -33,31 +34,19 @@ import com.rabbitmq.client.AMQP.BasicProperties;
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Notification;
-import fr.dyade.aaa.util.Daemon;
-import fr.dyade.aaa.util.Queue;
 
-/**
- * WARNING: the current implementation is limited
- * to:
- * - local and exclusive usage
- * - implicit delivery
- */
 public class QueueAgent extends Agent {
   
   public final static Logger logger = 
     fr.dyade.aaa.util.Debug.getLogger(QueueAgent.class.getName());
   
-  private Queue toDeliver;
+  private LinkedList toDeliver;
   
   private LinkedList consumers;
   
-  private MessageDispatcher messageDispatcher;
-  
   public QueueAgent() {
-    this.toDeliver = new Queue();
+    this.toDeliver = new LinkedList();
     this.consumers = new LinkedList();
-    this.messageDispatcher = new MessageDispatcher(this.getClass().getName() + ".MessageDispatcher");
-    this.messageDispatcher.start();
   }
   
   public void react(AgentId from, Notification not) throws Exception {
@@ -67,11 +56,17 @@ public class QueueAgent extends Agent {
       doReact((PublishNot) not);
     } else if (not instanceof ReceiveNot) {
       doReact((ReceiveNot) not);
+    } else if (not instanceof CancelNot) {
+      doReact((CancelNot) not);
+    } else if (not instanceof DeleteNot) {
+      doReact((DeleteNot) not, from);
+    } else if (not instanceof ClearQueueNot) {
+      doReact((ClearQueueNot) not);
     } else {
       super.react(from, not);
     }
   }
-  
+
   private void doReact(ReceiveNot not) {
     receive(not.getCallback());
   }
@@ -79,44 +74,109 @@ public class QueueAgent extends Agent {
   public void receive(GetListener consumer) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "QueueAgent.receive()");
-    consumers.addLast(new DeliverContext(consumer, false));
+    if (toDeliver.size() > 0) {
+      Message msg = (Message) toDeliver.removeFirst();
+      consumer.handleGet(0, false, msg.exchange, msg.routingKey, toDeliver.size(), msg.properties, msg.body);
+    } else {
+      // Blocking get
+      //      consumers.addLast(new DeliverContext(consumer));
+
+      // Get empty
+      consumer.handleGet(-1, false, null, null, 0, null, null);
+    }
+    
   }
 
   private void doReact(ConsumeNot not) {
-    consume(not.getCallback());
+    consume(not.getCallback(), not.getConsumerTag());
   }
 
-  public void consume(DeliveryListener consumer) {
+  public void consume(DeliveryListener consumer, String consumerTag) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "QueueAgent.consume()");
-    consumers.addLast(new DeliverContext(consumer, true));
+    while (toDeliver.size() > 0) {
+      Message msg = (Message) toDeliver.removeFirst();
+      consumer.handleDelivery(0, false, msg.exchange, msg.routingKey, msg.properties, msg.body);
+    }
+    consumers.addLast(new DeliverContext(consumer, consumerTag));
   }
   
   private void doReact(PublishNot not) {
-    publish(not.getProperties(), not.getBody());
+    publish(not.getExchange(), not.getRoutingKey(), not.getProperties(), not.getBody());
   }
   
-  public void publish(BasicProperties properties, byte[] body) {
+  public void publish(String exchange, String routingKey, BasicProperties properties, byte[] body) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "QueueAgent.publish(" + properties + ')');
-    toDeliver.push(new Message(properties, body));
+    
+    if (consumers.size() > 0) {
+      DeliverContext deliverContext = (DeliverContext) consumers.removeFirst();
+      Listener callback = deliverContext.getConsumer();
+      if (callback instanceof DeliveryListener) {
+        DeliveryListener consumer = (DeliveryListener) callback;
+        consumer.handleDelivery(0, false, exchange, routingKey, properties, body);
+      } else if (callback instanceof GetListener) {
+        GetListener consumer = (GetListener) callback;
+        consumer.handleGet(0, false, exchange, routingKey, toDeliver.size(), properties, body);
+      }
+      if (deliverContext.isSubscription) {
+        consumers.addLast(deliverContext);
+      }
+    } else {
+      toDeliver.addLast(new Message(exchange, routingKey, properties, body));
+    }
+  }
+
+  private void doReact(CancelNot not) {
+    cancel(not.getConsumerTag());
+  }
+
+  public void cancel(String consumerTag) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "QueueAgent.cancel()");
+    ListIterator iterator = consumers.listIterator();
+    while (iterator.hasNext()) {
+      DeliverContext deliverContext = (DeliverContext) iterator.next();
+      if (deliverContext.isSubscription && deliverContext.getConsumerTag().equals(consumerTag)) {
+        iterator.remove();
+      }
+    }
+  }
+
+  private void doReact(DeleteNot not, AgentId from) {
+    delete(from);
   }
   
+  private void doReact(ClearQueueNot not) {
+    toDeliver.clear();
+  }
+
   static class Message implements Serializable {
-    
+
+    private String exchange;
+    private String routingKey;
     private BasicProperties properties;
     private byte[] body;
-    
+
     /**
      * @param properties
      * @param body
      */
-    public Message(BasicProperties properties, byte[] body) {
-      super();
+    public Message(String exchange, String routingKey, BasicProperties properties, byte[] body) {
+      this.exchange = exchange;
+      this.routingKey = routingKey;
       this.properties = properties;
       this.body = body;
     }
-    
+
+    public String getExchange() {
+      return exchange;
+    }
+
+    public String getRoutingKey() {
+      return routingKey;
+    }
+
     public byte[] getBody() {
       return body;
     }
@@ -127,19 +187,31 @@ public class QueueAgent extends Agent {
   }
   
   
-  static class DeliverContext {
+  static class DeliverContext implements Serializable {
 
     private Listener consumer;
     private boolean isSubscription;
-
-    public DeliverContext(Listener consumer, boolean isSubscription) {
+    private String consumerTag;
+    
+    public DeliverContext(GetListener consumer) {
       super();
       this.consumer = consumer;
-      this.isSubscription = isSubscription;
+      this.isSubscription = false;
+    }
+
+    public DeliverContext(DeliveryListener consumer, String consumerTag) {
+      super();
+      this.consumer = consumer;
+      this.consumerTag = consumerTag;
+      this.isSubscription = true;
     }
 
     public Listener getConsumer() {
       return consumer;
+    }
+    
+    public String getConsumerTag() {
+      return consumerTag;
     }
 
     public boolean isSubscription() {
@@ -147,60 +219,5 @@ public class QueueAgent extends Agent {
     }
     
   }
-  
-  final class MessageDispatcher extends Daemon {
-
-    MessageDispatcher(String name) {
-      super(name + ".MessageDispatcher");
-    }
-
-    protected void close() {
-    }
-
-    protected void shutdown() {
-    }
-
-    public void run() {
-
-      try {
-        while (running) {
-          canStop = true;
-          Message msg = null;
-          try {
-            if (this.logmon.isLoggable(BasicLevel.DEBUG))
-              this.logmon.log(BasicLevel.DEBUG, this.getName() + ", waiting message");
-            msg = (Message) toDeliver.getAndPop();
-          } catch (InterruptedException exc) {
-            if (this.logmon.isLoggable(BasicLevel.DEBUG))
-              this.logmon.log(BasicLevel.DEBUG, this.getName() + ", interrupted");
-            continue;
-          }
-          canStop = false;
-          if (!running)
-            break;
-
-          DeliverContext deliverContext = (DeliverContext) consumers.removeFirst();
-          Listener callback = deliverContext.getConsumer();
-          if (callback instanceof DeliveryListener) {
-            DeliveryListener consumer = (DeliveryListener) callback;
-            consumer.handleDelivery("?", 0, false, "?", "?", msg.properties, msg.body);
-          } else if (callback instanceof GetListener) {
-            GetListener consumer = (GetListener) callback;
-            consumer.handleGet(0, false, "?", "?", toDeliver.size(), msg.properties, msg.body);
-          }
-          if (deliverContext.isSubscription) {
-            consumers.addLast(deliverContext);
-          }
-        }
-        
-      } catch (Exception exc) {
-        this.logmon.log(BasicLevel.FATAL, this.getName() + ", unrecoverable exception", exc);
-      } finally {
-        finish();
-      }
-    }
-  }
-  
-  
 
 }
