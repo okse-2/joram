@@ -36,12 +36,12 @@ public class FtpMessage {
 
   /**
    * Instantiates an <code>FtpMessage</code> wrapping a consumed
-   * MOM simple message.
+   * shared simple message.
    *
-   * @param momMsg  The MOM message to wrap.
+   * @param sharedMsg  The shared message to wrap.
    */
-  public FtpMessage(org.objectweb.joram.shared.messages.Message momMsg) {
-    this.sharedMsg = momMsg;
+  public FtpMessage(Message sharedMsg) {
+    this.sharedMsg = sharedMsg;
   } 
   
   /**
@@ -77,7 +77,7 @@ public class FtpMessage {
   }
   
   public Object clone() {
-    Message cloneShared = null;
+    Message cloneShared = (Message) sharedMsg.clone();
     return new FtpMessage(cloneShared);
   }
 
@@ -101,4 +101,10 @@ public class FtpMessage {
     return sharedMsg.properties.containsKey(key);
   }
 
+  public String toString() {
+    if (sharedMsg != null)
+      return sharedMsg.toString();
+    else 
+      return null;
+  }
 }
