@@ -84,6 +84,8 @@ public class FtpQueueImpl extends QueueImpl {
   }
 
   protected void setProperties(Properties prop) {
+    if (prop == null)
+      return;
     user = prop.getProperty("user", user);
     pass = prop.getProperty("pass", pass);
     path = prop.getProperty("path", path);
