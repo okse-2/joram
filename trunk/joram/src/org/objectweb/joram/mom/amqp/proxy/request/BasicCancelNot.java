@@ -20,34 +20,42 @@
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s):
  */
-package org.objectweb.joram.mom.amqp;
+package org.objectweb.joram.mom.amqp.proxy.request;
 
-import fr.dyade.aaa.agent.Notification;
+import com.rabbitmq.client.AMQP;
 
-/**
- * Transient notification.
- */
-public class ConsumeNot extends Notification {
-  
-  private DeliveryListener callback;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.SyncNotification;
+
+public class BasicCancelNot extends SyncNotification {
+
+  private int channelId;
   private String consumerTag;
   
   /**
+   * @param channelId
+   * @param ticket
+   * @param queue
+   * @param noAck
    * @param consumerTag
    * @param callback
    */
-  public ConsumeNot(DeliveryListener callback, String consumerTag) {
+  public BasicCancelNot(int channelId, String consumerTag) {
     super();
-    this.callback = callback;
     this.consumerTag = consumerTag;
-    persistent = false;
   }
-
-  public DeliveryListener getCallback() {
-    return callback;
-  }
-
+  
   public String getConsumerTag() {
     return consumerTag;
   }
+  
+  public AMQP.Basic.CancelOk basicCancel(AgentId proxyId) throws Exception {
+    Object[] res = invoke(proxyId);
+    return (AMQP.Basic.CancelOk) res[0];
+  }
+  
+  public void Return(AMQP.Basic.CancelOk res) {
+    Return(new Object[]{res});
+  }
+
 }

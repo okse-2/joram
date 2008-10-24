@@ -24,30 +24,10 @@ package org.objectweb.joram.mom.amqp;
 
 import fr.dyade.aaa.agent.Notification;
 
-/**
- * Transient notification.
- */
-public class ConsumeNot extends Notification {
+public class ClearQueueNot extends Notification {
   
-  private DeliveryListener callback;
-  private String consumerTag;
-  
-  /**
-   * @param consumerTag
-   * @param callback
-   */
-  public ConsumeNot(DeliveryListener callback, String consumerTag) {
+  public ClearQueueNot() {
     super();
-    this.callback = callback;
-    this.consumerTag = consumerTag;
-    persistent = false;
   }
 
-  public DeliveryListener getCallback() {
-    return callback;
-  }
-
-  public String getConsumerTag() {
-    return consumerTag;
-  }
 }

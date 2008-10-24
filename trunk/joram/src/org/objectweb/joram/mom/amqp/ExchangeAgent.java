@@ -29,6 +29,7 @@ import com.rabbitmq.client.AMQP.BasicProperties;
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.UnknownAgent;
 
 public abstract class ExchangeAgent extends Agent {
   
@@ -39,20 +40,30 @@ public abstract class ExchangeAgent extends Agent {
       doReact((PublishNot) not);
     } else if (not instanceof BindNot) {
       doReact((BindNot) not);
+    } else if (not instanceof DeleteNot) {
+      doReact((DeleteNot) not, from);
+    } else if (not instanceof UnknownAgent) {
+      doReact((UnknownAgent) not, from);
     } else {
       super.react(from, not);
     }
   }
-  
+
+  private void doReact(DeleteNot not, AgentId from) {
+    delete(from);
+  }
+
   private void doReact(PublishNot not) {
-    publish(not.getRoutingKey(), not.getProperties(), not.getBody());
+    publish(not.getExchange(), not.getRoutingKey(), not.getProperties(), not.getBody());
   }
   
   private void doReact(BindNot not) {
     bind(not.getQueue(), not.getRoutingKey(), not.getArguments());
   }
+
+  public abstract void doReact(UnknownAgent not, AgentId from);
   
-  public abstract void publish(String routingKey, BasicProperties properties, byte[] body);
+  public abstract void publish(String exchange, String routingKey, BasicProperties properties, byte[] body);
 
   public abstract void bind(String queue, String routingKey, Map arguments);
 

@@ -74,6 +74,8 @@ public interface MOMHandler {
   public AMQP.Queue.DeleteOk queueDelete(String queue, boolean ifUnused, boolean ifEmpty, boolean nowait,
       int ticket, int channelNumber) throws Exception;
   
+  public void queuePurge(String queue, boolean nowait, int ticket, int channelNumber) throws Exception;
+  
   /**
    * Bind a queue to an exchange.
    * @param queue the name of the queue
@@ -135,8 +137,9 @@ public interface MOMHandler {
   /**
    * Cancel a consumer.
    * @param consumerTag a client -or server- generated consumer tag to establish context
+   * @param channelNumber the channel the request came from
    */
-  public void basicCancel(String consumerTag);
+  public void basicCancel(String consumerTag, int channelNumber) throws Exception;
 
   /**
    * Declare an exchange.

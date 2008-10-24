@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.joram.mom.amqp.proxy.request.AccessRequestNot;
+import org.objectweb.joram.mom.amqp.proxy.request.BasicCancelNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicConsumeNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicGetNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicPublishNot;
@@ -36,17 +37,21 @@ import org.objectweb.joram.mom.amqp.proxy.request.ExchangeDeleteNot;
 import org.objectweb.joram.mom.amqp.proxy.request.QueueBindNot;
 import org.objectweb.joram.mom.amqp.proxy.request.QueueDeclareNot;
 import org.objectweb.joram.mom.amqp.proxy.request.QueueDeleteNot;
+import org.objectweb.joram.mom.amqp.proxy.request.QueuePurgeNot;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.AMQP.BasicProperties;
-import com.rabbitmq.client.AMQP.Exchange.DeleteOk;
+import com.rabbitmq.client.AMQP.Basic.CancelOk;
+import com.rabbitmq.client.AMQP.Queue.PurgeOk;
 import com.rabbitmq.client.impl.AMQImpl;
 
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.DeleteAck;
 import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.SyncNotification;
 
 public class ProxyAgent extends Agent {
   
@@ -65,6 +70,10 @@ public class ProxyAgent extends Agent {
   
   private int ticketCounter;
   
+  private Map consumers = new HashMap();
+  
+  private Map pendingRequests = new HashMap();
+  
   public void react(AgentId from, Notification not) throws Exception {
     // This agent is not persistent.
     setNoSave();
@@ -82,14 +91,20 @@ public class ProxyAgent extends Agent {
       doReact((QueueDeclareNot) not);
     } else if (not instanceof QueueDeleteNot) {
       doReact((QueueDeleteNot) not);
+    } else if (not instanceof QueuePurgeNot) {
+      doReact((QueuePurgeNot) not);
     } else if (not instanceof BasicConsumeNot) {
       doReact((BasicConsumeNot) not);
     } else if (not instanceof BasicGetNot) {
       doReact((BasicGetNot) not);
     } else if (not instanceof BasicPublishNot) {
       doReact((BasicPublishNot) not);
+    } else if (not instanceof BasicCancelNot) {
+      doReact((BasicCancelNot) not);
     } else if (not instanceof QueueBindNot) {
       doReact((QueueBindNot) not);
+    } else if (not instanceof DeleteAck) {
+      doReact((DeleteAck) not);
     } else {
       super.react(from, not);
     }
@@ -150,9 +165,17 @@ public class ProxyAgent extends Agent {
     // Check if the exchange already exists
     Object ref = NamingAgent.getSingleton().lookup(exchange);
     if (ref == null) {
-      String className = (String) arguments.get("joram.exchange.class.name");
-      Class exchangeClass = Class.forName(className);
-      ExchangeAgent exchangeAgent = (ExchangeAgent) exchangeClass.newInstance();
+      ExchangeAgent exchangeAgent;
+      if (type.equalsIgnoreCase("direct")) {
+        exchangeAgent = new DirectExchange();
+      } else if (type.equalsIgnoreCase("topic")) {
+        exchangeAgent = new TopicExchange();
+      } else if (type.equalsIgnoreCase("fanout")) {
+        exchangeAgent = new FanoutExchange();
+      } else {
+        Class exchangeClass = Class.forName(type);
+        exchangeAgent = (ExchangeAgent) exchangeClass.newInstance();
+      }
       exchangeAgent.setArguments(arguments);
       NamingAgent.getSingleton().bind(exchange, exchangeAgent.getId());
       exchangeAgent.deploy();
@@ -160,25 +183,24 @@ public class ProxyAgent extends Agent {
     return new AMQImpl.Exchange.DeclareOk();
   }
   
-  private void doReact(ExchangeDeleteNot not) {
-    AMQP.Exchange.DeleteOk res = exchangeDelete(
+  private void doReact(ExchangeDeleteNot not) throws Exception {
+    exchangeDelete(
         not.getChannelId(),
         not.getTicket(),
         not.getExchange(),
         not.isIfUnused(),
-        not.isNowait());
-    not.Return(res);
+        not.isNowait(),
+        not);
   }
 
-  public DeleteOk exchangeDelete(int channelId, int ticket, String exchange, boolean ifUnused, boolean nowait) {
-    // Check if the exchange exists
-    Object ref = NamingAgent.getSingleton().lookup(exchange);
-    if (ref != null) {
-      // TODO
-      // NamingAgent.getSingleton().unbind(exchange);
-      // exchangeAgent.delete();
+  public void exchangeDelete(int channelId, int ticket, String exchange, boolean ifUnused, boolean nowait,
+      ExchangeDeleteNot not) throws Exception {
+    AgentId exchangeId = (AgentId) NamingAgent.getSingleton().lookup(exchange);
+    if (exchangeId != null) {
+      NamingAgent.getSingleton().unbind(exchange);
+      pendingRequests.put(exchangeId, not);
+      sendTo(exchangeId, new DeleteNot());
     }
-    return new AMQImpl.Exchange.DeleteOk();
   }
 
   private void doReact(QueueDeclareNot not) throws Exception {
@@ -210,22 +232,41 @@ public class ProxyAgent extends Agent {
     return new AMQImpl.Queue.DeclareOk(queue, 0, 0);
   }
   
-  private void doReact(QueueDeleteNot not) {
-    AMQP.Queue.DeleteOk res = queueDelete(
+  private void doReact(QueueDeleteNot not) throws Exception {
+    queueDelete(
         not.getChannelId(),
         not.getTicket(),
         not.getQueue(),
         not.isIfUnused(),
         not.isIfEmpty(),
+        not.isNowait(),
+        not);
+  }
+  
+  public void queueDelete(int channelId, int ticket, String queue, boolean ifUnused, boolean ifEmpty,
+      boolean nowait, QueueDeleteNot not) throws Exception {
+    AgentId queueId = (AgentId) NamingAgent.getSingleton().lookup(queue);
+    if (queueId != null) {
+      NamingAgent.getSingleton().unbind(queue);
+      pendingRequests.put(queueId, not);
+      sendTo(queueId, new DeleteNot());
+    }
+  }
+
+  private void doReact(QueuePurgeNot not) {
+    AMQP.Queue.PurgeOk res = queuePurge(
+        not.getChannelId(),
+        not.getTicket(),
+        not.getQueue(),
         not.isNowait());
     not.Return(res);
   }
-  
-  public AMQP.Queue.DeleteOk queueDelete(int channelId, int ticket, String queue,
-      boolean ifUnused, boolean ifEmpty, boolean nowait) {
-    // TODO Auto-generated method stub
-    int msgCount = 0;
-    return new AMQImpl.Queue.DeleteOk(msgCount);
+
+  public PurgeOk queuePurge(int channelId, int ticket, String queue, boolean nowait) {
+    AgentId queueId = (AgentId) NamingAgent.getSingleton().lookup(queue);
+    ClearQueueNot purgeNot = new ClearQueueNot();
+    sendTo(queueId, purgeNot);
+    return new AMQImpl.Queue.PurgeOk();
   }
 
   private void doReact(BasicConsumeNot not) throws Exception {
@@ -243,9 +284,24 @@ public class ProxyAgent extends Agent {
       boolean noAck, String consumerTag, DeliveryListener callback)
       throws Exception {
     AgentId queueId = (AgentId) NamingAgent.getSingleton().lookup(queue);
-    ConsumeNot consumeNot = new ConsumeNot(callback);
+    ConsumeNot consumeNot = new ConsumeNot(callback, consumerTag);
     sendTo(queueId, consumeNot);
+    consumers.put(consumerTag, queueId);
     return new AMQImpl.Basic.ConsumeOk(consumerTag);
+  }
+  
+  private void doReact(BasicCancelNot not) {
+    AMQP.Basic.CancelOk res = basicCancel(not.getConsumerTag());
+    not.Return(res);
+  }
+
+  public CancelOk basicCancel(String consumerTag) {
+    AgentId queueId = (AgentId) consumers.remove(consumerTag);
+    if (queueId != null) {
+      CancelNot cancelNot = new CancelNot(consumerTag);
+      sendTo(queueId, cancelNot);
+    }
+    return new AMQImpl.Basic.CancelOk(consumerTag);
   }
 
   private void doReact(BasicGetNot not) {
@@ -277,7 +333,7 @@ public class ProxyAgent extends Agent {
       String routingKey, boolean mandatory, boolean immediate,
       BasicProperties props, byte[] body) throws Exception {
     AgentId exhangeId = (AgentId) NamingAgent.getSingleton().lookup(exchange);
-    PublishNot publishNot = new PublishNot(routingKey, props, body);
+    PublishNot publishNot = new PublishNot(exchange, routingKey, props, body);
     sendTo(exhangeId, publishNot);
   }
   
@@ -298,6 +354,19 @@ public class ProxyAgent extends Agent {
     BindNot bindNot = new BindNot(queue, routingKey, arguments);
     sendTo(exhangeId, bindNot);
     return new AMQImpl.Queue.BindOk();
+  }
+
+  private void doReact(DeleteAck not) {
+    SyncNotification syncNot = (SyncNotification) pendingRequests.get(not.agent);
+    if (syncNot instanceof QueueDeleteNot) {
+      // TODO msgCount
+      int msgCount = 0;
+      QueueDeleteNot deleteNot = (QueueDeleteNot) syncNot;
+      deleteNot.Return(new AMQImpl.Queue.DeleteOk(msgCount));
+    } else if (syncNot instanceof ExchangeDeleteNot) {
+      ExchangeDeleteNot deleteNot = (ExchangeDeleteNot) syncNot;
+      deleteNot.Return(new AMQImpl.Exchange.DeleteOk());
+    }
   }
 
 }
