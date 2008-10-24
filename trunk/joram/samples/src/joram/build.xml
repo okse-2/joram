@@ -1358,4 +1358,34 @@
      </java>     
   </target>
   
+  <!-- **************************************************
+       * FTP sample
+       ************************************************** -->
+  <!-- Setup the FTP configuration -->
+  <target name="ftp_admin" depends="init"
+          description="--> Runs administration stuff for FTP sample">
+    <java classname="ftp.FtpAdmin"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="anonymous anonymous"/>
+    </java>
+  </target>
+  
+  <!-- Runs the producer client -->
+  <target name="ftp_producer" depends="init"
+    description="--> Starts a FTP Producer client">
+    <java classname="ftp.Producer" failonerror="no" fork="yes" dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="ftp.kernel.org welcome.msg"/>
+    </java>
+  </target>
+
+  <!-- Runs the consumer client -->
+  <target name="ftp_receiver" depends="init"
+    description="--> Starts a FTP Receiver client">
+    <java classname="ftp.Receiver" failonerror="no" fork="yes" dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
 </project>
