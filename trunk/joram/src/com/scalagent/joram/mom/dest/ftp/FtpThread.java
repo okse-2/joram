@@ -81,6 +81,9 @@ public class FtpThread extends Thread {
 
 
   protected void doFtp(FtpMessage msg) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "doFtp(" + msg + ')');
+    
     String urlName = null;
     long crc = -1;
     boolean ack = false;
@@ -90,6 +93,9 @@ public class FtpThread extends Thread {
       crc = msg.getLongProperty(SharedObj.crc);
       ack = msg.getBooleanProperty(SharedObj.ack);
 
+//      if (logger.isLoggable(BasicLevel.DEBUG))
+//        logger.log(BasicLevel.DEBUG, "doFtp urlName = " + urlName + ", crc = " + crc + ", ack = " + ack);
+      
       URL url = new URL(urlName);
       String urlFileName = url.getFile();
       String fileName = null;
@@ -116,8 +122,8 @@ public class FtpThread extends Thread {
       
       
       String userInfo = url.getUserInfo();
-      String remoteUser = "anonymous";
-      String remotePass = "no@no.no";
+      String remoteUser = user;
+      String remotePass = pass;
       if (userInfo != null) {
         remoteUser = userInfo.substring(0,userInfo.indexOf(':'));
         remotePass = userInfo.substring(userInfo.indexOf(':')+1,userInfo.length());
@@ -208,8 +214,8 @@ public class FtpThread extends Thread {
     buf.append(requestId);
     buf.append(", user=");
     buf.append(user);
-    buf.append(", pass=");
-    buf.append(pass);
+    buf.append(", pass=***");
+    //buf.append(pass);
     buf.append(", path=");
     buf.append(path);
     buf.append(")");
