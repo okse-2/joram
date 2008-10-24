@@ -27,10 +27,10 @@ import java.util.Vector;
  * (FIFO) list of objects.
  * <p>
  * A queue is for the exclusive use of one single consumer, whereas many
- * producers may access it. It is ready for use after instanciation. A
+ * producers may access it. It is ready for use after instantiation. A
  * producer may wait for the queue to be empty by calling the
  * <code>stop()</code> method. This method returns when the queue is
- * actually empty, and prohibitis any further call to the <code>push</code>
+ * actually empty, and prohibits any further call to the <code>push</code>
  * method. To be able to use the queue again, it must be re-started through
  * the <code>start()</code> method.
  */
