@@ -361,7 +361,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     for (Enumeration keys = clients.keys(); keys.hasMoreElements();) {
       key = (AgentId) keys.nextElement();
       right = ((Integer) clients.get(key)).intValue();
-      rigths[i] = key.toString() + _rights[right -1];
+      rigths[i++] = key.toString() + _rights[right -1];
     }
 
     return rigths;
