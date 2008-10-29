@@ -39,7 +39,6 @@ import org.objectweb.joram.mom.amqp.proxy.request.QueueDeleteNot;
 import org.objectweb.joram.mom.amqp.proxy.request.QueuePurgeNot;
 
 import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.GetResponse;
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.impl.AMQImpl;
 
@@ -94,11 +93,10 @@ public class JoramMOMHandler implements MOMHandler {
     return basicConsumeOk;
   }
 
-  public GetResponse basicGet(String queue, boolean noAck, int ticket, int channelNumber) throws Exception {
+  public void basicGet(String queue, boolean noAck, int ticket, int channelNumber) throws Exception {
     BasicGetNot basicGetNot = new BasicGetNot(channelNumber, ticket, queue, noAck,
         new GetMessageConsumer(channelNumber));
     basicGetNot.basicGet(proxy.getId());
-    return null;
   }
 
   public void basicPublish(PublishRequest publishRequest, int channelNumber) throws Exception {
@@ -112,7 +110,7 @@ public class JoramMOMHandler implements MOMHandler {
         publishRequest.body);
     Channel.sendTo(proxy.getId(), basicPublish);
     
-    // Let some time for the message to go the the exchange then the queue.
+    // Let some time for the message to go to the exchange then the queue.
     try {
       Thread.sleep(50);
     } catch (Exception exc) {

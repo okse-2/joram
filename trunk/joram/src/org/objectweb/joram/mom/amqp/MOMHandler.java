@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.util.Map;
 
 import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.GetResponse;
 
 public interface MOMHandler {
 
@@ -96,11 +95,9 @@ public interface MOMHandler {
    * @param noAck true if no handshake is required
    * @param ticket an access ticket for the appropriate realm
    * @param channelNumber the channel the request came from
-   * @return a {@link GetResponse} containing the retrieved message data or null if the queue
-   *  has no messages available for the client
    * @throws Exception if an error is encountered
    */
-  public GetResponse basicGet(String queue, boolean noAck, int ticket, int channelNumber) throws Exception;
+  public void basicGet(String queue, boolean noAck, int ticket, int channelNumber) throws Exception;
 
   /**
    * Publish a message
