@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package deadMQueue;
 
@@ -28,6 +28,7 @@ import javax.jms.ConnectionFactory;
 import javax.jms.MessageConsumer;
 import javax.jms.Queue;
 import javax.jms.Session;
+import javax.jms.TextMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
@@ -35,27 +36,30 @@ import javax.naming.InitialContext;
  * Listens to the dead message queues.
  */
 public class DMQWatcher {
-  
-  static Context ictx = null;
-
   public static void main(String[] args) throws Exception {
-    
     System.out.println("Listens to the dead message queue...");
 
-    ictx = new InitialContext();
-    Queue destDmq = (Queue) ictx.lookup("dmq");
-    ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cnxFact");
+    Context ictx = new InitialContext();
+    Queue dmq = (Queue) ictx.lookup("dmq");
+    ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cf");
     ictx.close();
 
-    Connection cnx = cf.createConnection("dmq", "dmq");
+    Connection cnx = cf.createConnection("anonymous", "anonymous");
 
     Session session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-    MessageConsumer destWatcher = session.createConsumer(destDmq);
-    destWatcher.setMessageListener(new DMQListener());
+    MessageConsumer consumer = session.createConsumer(dmq);
 
     cnx.start();
+    
+    for (int i=0; i<3; i++) {
+      TextMessage msg = (TextMessage) consumer.receive();
+      System.out.println("\nreceives: " + msg.getText());
+      System.out.println("JMS_JORAM_ERRORCOUNT=" + msg.getIntProperty("JMS_JORAM_ERRORCOUNT"));
+      System.out.println("JMSXDeliveryCount=" + msg.getIntProperty("JMSXDeliveryCount"));
+      System.out.println("JMS_JORAM_ERRORCAUSE_1=" + msg.getStringProperty("JMS_JORAM_ERRORCAUSE_1"));
+      System.out.println("JMS_JORAM_ERRORCODE_1=" + msg.getStringProperty("JMS_JORAM_ERRORCODE_1"));
+    }
 
-    System.in.read();
     cnx.close();
   }
 }
