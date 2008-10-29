@@ -67,8 +67,8 @@ public class HeadersExchange extends ExchangeAgent {
   
   private Map bindings;
   
-  public HeadersExchange() {
-    super();
+  public HeadersExchange(String name, boolean durable) {
+    super(name, durable);
   }
 
   public void bind(String queue, String routingKey, Map arguments) {
@@ -134,7 +134,7 @@ public class HeadersExchange extends ExchangeAgent {
   }
 
   public void doReact(UnknownAgent not, AgentId from) {
-    // Queue must have been deleted
+    // Queue must have been deleted: remove it from bindings
     Iterator iteratorLists = bindings.values().iterator();
     while (iteratorLists.hasNext()) {
       List boundQueues = (List) iteratorLists.next();
@@ -146,7 +146,14 @@ public class HeadersExchange extends ExchangeAgent {
           break;
         }
       }
+      if (boundQueues.size() == 0) {
+        iteratorLists.remove();
+      }
     }
+  }
+
+  public boolean isUnused() {
+    return bindings.size() == 0;
   }
 
 }

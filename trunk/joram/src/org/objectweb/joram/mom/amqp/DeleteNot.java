@@ -24,10 +24,35 @@ package org.objectweb.joram.mom.amqp;
 
 import fr.dyade.aaa.agent.Notification;
 
+/**
+ * Notification sent to request an exchange or a queue deletion.
+ */
 public class DeleteNot extends Notification {
+  
+  private boolean ifUnused;
+  
+  // Used only for queue deletion
+  private boolean ifEmpty;
   
   public DeleteNot() {
     super();
   }
 
+  public DeleteNot(boolean ifUnused) {
+    this.ifUnused = ifUnused;
+  }
+
+  public DeleteNot(boolean ifUnused, boolean ifEmpty) {
+    this.ifUnused = ifUnused;
+    this.ifEmpty = ifEmpty;
+  }
+
+  public boolean isIfUnused() {
+    return ifUnused;
+  }
+
+  public boolean isIfEmpty() {
+    return ifEmpty;
+  }
+  
 }

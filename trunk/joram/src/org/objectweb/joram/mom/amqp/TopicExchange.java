@@ -51,16 +51,17 @@ public class TopicExchange extends ExchangeAgent {
 
   private Map bindings;
 
-  public TopicExchange() {
-    super();
+  public TopicExchange(String name, boolean durable) {
+    super(name, durable);
     bindings = new HashMap();
   }
 
-  public void bind(String queue, String routingPattern, Map arguments) {
+  public void bind(String queue, String routingKey, Map arguments) {
+    Pattern routingPattern = createPattern(routingKey);
     List boundQueues = (List) bindings.get(routingPattern);
     if (boundQueues == null) {
       boundQueues = new ArrayList();
-      bindings.put(createPattern(routingPattern), boundQueues);
+      bindings.put(routingPattern, boundQueues);
     }
     AgentId queueAgent = (AgentId) NamingAgent.getSingleton().lookup(queue);
     if (queueAgent != null && !boundQueues.contains(queueAgent)) {
@@ -94,7 +95,7 @@ public class TopicExchange extends ExchangeAgent {
   }
 
   public void doReact(UnknownAgent not, AgentId from) {
-    // Queue must have been deleted
+    // Queue must have been deleted: remove it from bindings
     Iterator iteratorLists = bindings.values().iterator();
     while (iteratorLists.hasNext()) {
       List boundQueues = (List) iteratorLists.next();
@@ -106,7 +107,14 @@ public class TopicExchange extends ExchangeAgent {
           break;
         }
       }
+      if (boundQueues.size() == 0) {
+        iteratorLists.remove();
+      }
     }
+  }
+
+  public boolean isUnused() {
+    return bindings.size() == 0;
   }
   
   public static void main(String[] args) {

@@ -44,8 +44,8 @@ public class FanoutExchange extends ExchangeAgent {
   
   private List boundQueues;
   
-  public FanoutExchange() {
-    super();
+  public FanoutExchange(String name, boolean durable) {
+    super(name, durable);
     boundQueues = new ArrayList();
   }
 
@@ -70,7 +70,7 @@ public class FanoutExchange extends ExchangeAgent {
   }
 
   public void doReact(UnknownAgent not, AgentId from) {
-    // Queue must have been deleted
+    // Queue must have been deleted: remove it from bindings
     Iterator it = boundQueues.iterator();
     while (it.hasNext()) {
       AgentId queue = (AgentId) it.next();
@@ -79,6 +79,10 @@ public class FanoutExchange extends ExchangeAgent {
         return;
       }
     }
+  }
+
+  public boolean isUnused() {
+    return boundQueues.size() == 0;
   }
 
 }

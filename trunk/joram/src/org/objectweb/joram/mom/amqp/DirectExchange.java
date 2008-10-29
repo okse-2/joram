@@ -52,8 +52,8 @@ public class DirectExchange extends ExchangeAgent {
   
   private Map bindings;
   
-  public DirectExchange() {
-    super();
+  public DirectExchange(String name, boolean durable) {
+    super(name, durable);
     bindings = new HashMap();
   }
 
@@ -86,7 +86,7 @@ public class DirectExchange extends ExchangeAgent {
   }
 
   public void doReact(UnknownAgent not, AgentId from) {
-    // Queue must have been deleted
+    // Queue must have been deleted: remove it from bindings
     Iterator iteratorLists = bindings.values().iterator();
     while (iteratorLists.hasNext()) {
       List boundQueues = (List) iteratorLists.next();
@@ -98,7 +98,14 @@ public class DirectExchange extends ExchangeAgent {
           break;
         }
       }
+      if (boundQueues.size() == 0) {
+        iteratorLists.remove();
+      }
     }
+  }
+
+  public boolean isUnused() {
+    return bindings.size() == 0;
   }
 
 }
