@@ -34,7 +34,6 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.GetResponse;
 import com.rabbitmq.client.Method;
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.AMQP.Basic.Deliver;
@@ -57,7 +56,7 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
   public static Logger logger = Debug.getLogger(AMQPConnectionListener.class.getName());
 
   /** The server socket listening to connections from the AMQP peer. */
-  private ServerSocket serverSocket;
+  private volatile ServerSocket serverSocket;
 
   /** Used to interact with the MOM. */
   private MOMHandler momHandler;
@@ -123,11 +122,13 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
   }
   
   private void sendMethodToPeer(Method method, int channelNumber) throws IOException {
-    System.out.println("send method : " + method);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "send method : " + method);
     queueOut.push(((com.rabbitmq.client.impl.Method) method).toFrame(channelNumber));
     classState = method.protocolClassId();
     methodState = method.protocolMethodId();
-    System.out.println("method sent");//NTA tmp
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "method sent");
   }
 
   /**
@@ -139,9 +140,11 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
    */
   private void sendHeaderToPeer(AMQP.BasicProperties header, long bodySize, int channelNumber)
       throws IOException {
-    System.out.println("sendHeaderToPeer = " + header);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "sendHeaderToPeer = " + header);
     queueOut.push(header.toFrame(channelNumber, bodySize));
-    System.out.println("sendHeaderToPeer done.  header = " + header);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "sendHeaderToPeer done.  header = " + header);
   }
 
   /**
@@ -153,10 +156,12 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
    */
   private void sendBodyToPeer(byte[] body, int channelNumber) throws IOException {
     if (body != null && body.length != 0) {
-      System.out.println("sendBodyToPeer = " + new String(body));
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "sendBodyToPeer = " + new String(body));
       queueOut.push(new Frame(AMQP.FRAME_BODY, channelNumber, body));
     }
-    System.out.println("sendBodyToPeer done.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "sendBodyToPeer done.");
   }
 
   /**
@@ -166,7 +171,8 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
    * @throws IOException
    */
   private void process(Frame frame) throws Exception {
-    System.out.println("\nproceed frame = " + frame);//NTA tmp
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "\nproceed frame = " + frame);
     int channelNumber = frame.channel;
     switch (frame.type) {
     case AMQP.FRAME_METHOD:
@@ -184,11 +190,13 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
       }
       momHandler.heartbeat(channelNumber);
       queueOut.push(new Frame(AMQP.FRAME_HEARTBEAT, channelNumber));
-      System.out.println("client FRAME_HEARTBEAT.");//NTA tmp
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "client FRAME_HEARTBEAT.");
       break;
 
     default:
-      System.out.println("+++++ process frame type nok : " + frame.type);//NTA tmp
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "+++++ process frame type nok : " + frame.type);
       if (logger.isLoggable(BasicLevel.WARN)) {
         logger.log(BasicLevel.WARN, "AMQPConnectionListener.process:: bad type " + frame);
       }
@@ -197,9 +205,11 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
   }
 
   private void invalidState(Method marshallingMethod) throws IOException {
-    System.out.println("BAD STATE (current classState = " + classState + ", methodState = " + methodState
+    if (logger.isLoggable(BasicLevel.ERROR))
+      logger.log(BasicLevel.ERROR, "BAD STATE (current classState = " + classState + ", methodState = "
+          + methodState
         + ") cState = " + marshallingMethod.protocolMethodId() + ", mState = "
-        + marshallingMethod.protocolMethodId() + " (" + marshallingMethod.protocolMethodName() + ')');//NTA tmp
+        + marshallingMethod.protocolMethodId() + " (" + marshallingMethod.protocolMethodName() + ')');
 
     throw new IOException("BAD STATE (current classState = " + classState + ", methodState = " + methodState
         + ") cState = " + marshallingMethod.protocolMethodId() + ", mState = "
@@ -208,7 +218,8 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
 
   private void doProcessMethod(Method method, int channelNumber) throws Exception {
     if (method != null) {
-      //System.out.println("+ doProcess marshallingMethod = " + marshallingMethod);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "+ doProcess marshallingMethod = " + method);
       switch (method.protocolClassId()) {
       /******************************************************
        * Class Connection
@@ -252,7 +263,8 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
           break;
 
         case AMQImpl.Connection.CloseOk.INDEX:
-          System.out.println("CLOSE_OK");//NTA tmp
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "CLOSE_OK");
           methodState = NO_STATE;
           classState = NO_STATE;
           break;
@@ -291,14 +303,16 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
 
         case AMQImpl.Channel.Close.INDEX:
           AMQImpl.Channel.Close close = (AMQImpl.Channel.Close) method;
-          System.out.println("Channel close : replyCode=" + close.replyCode + ", replyText="
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "Channel close : replyCode=" + close.replyCode + ", replyText="
               + close.replyText + ", classId=" + close.classId + ", methodId=" + close.methodId);
           channelContexts.remove(new Integer(channelNumber));
           sendMethodToPeer(new AMQImpl.Channel.CloseOk(), channelNumber);
           break;
 
         case AMQImpl.Channel.CloseOk.INDEX:
-          System.out.println("Channel CLOSE_OK");//NTA tmp
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "Channel CLOSE_OK");
           methodState = NO_STATE;
           classState = NO_STATE;
           break;
@@ -352,7 +366,9 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
               declare.getArguments(),
               declare.getTicket(),
               channelNumber);
-          sendMethodToPeer(declareOk, channelNumber);
+          if (declare.getNowait() == false) {
+            sendMethodToPeer(declareOk, channelNumber);
+          }
           break;
 
         case AMQImpl.Queue.Delete.INDEX:
@@ -364,7 +380,9 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
               delete.getNowait(),
               delete.getTicket(),
               channelNumber);
-          sendMethodToPeer(deleteOk, channelNumber);
+          if (delete.getNowait() == false) {
+            sendMethodToPeer(deleteOk, channelNumber);
+          }
           break;
 
         case AMQImpl.Queue.Bind.INDEX:
@@ -410,31 +428,32 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
 
         case AMQImpl.Basic.Get.INDEX:
           AMQP.Basic.Get get = (AMQP.Basic.Get) method;
-          GetResponse getResponse = momHandler.basicGet(get.getQueue(), get.getNoAck(), get.getTicket(),
-              channelNumber);
-          if (getResponse != null) {
-            sendMethodToPeer(new AMQImpl.Basic.GetOk(
-                getResponse.getEnvelope().getDeliveryTag(),
-                getResponse.getEnvelope()!=null,
-                getResponse.getEnvelope().getExchange(),
-                getResponse.getEnvelope().getRoutingKey(),
-                getResponse.getMessageCount()), channelNumber);
-            sendHeaderToPeer(getResponse.getProps(), getResponse.getBody().length, channelNumber);
-            sendBodyToPeer(getResponse.getBody(), channelNumber);
-          } else {
-            //            sendMethodToPeer(new AMQImpl.Basic.GetEmpty(), channelNumber);
-          }
+          momHandler.basicGet(get.getQueue(), get.getNoAck(), get.getTicket(), channelNumber);
+//          if (getResponse != null) {
+//            sendMethodToPeer(new AMQImpl.Basic.GetOk(
+//                getResponse.getEnvelope().getDeliveryTag(),
+//                getResponse.getEnvelope()!=null,
+//                getResponse.getEnvelope().getExchange(),
+//                getResponse.getEnvelope().getRoutingKey(),
+//                getResponse.getMessageCount()), channelNumber);
+//            sendHeaderToPeer(getResponse.getProps(), getResponse.getBody().length, channelNumber);
+//            sendBodyToPeer(getResponse.getBody(), channelNumber);
+//          } else {
+//            sendMethodToPeer(new AMQImpl.Basic.GetEmpty(), channelNumber);
+//          }
           break;
 
         case AMQImpl.Basic.Ack.INDEX:
           AMQP.Basic.Ack ack = (AMQP.Basic.Ack) method;
-          System.out.println("ACK = " + ack);
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "ACK = " + ack);
           momHandler.basicAck(ack.getDeliveryTag(), ack.getMultiple(), channelNumber);
           break;
 
         case AMQImpl.Basic.Consume.INDEX:
           AMQP.Basic.Consume consume = (AMQP.Basic.Consume) method;
-          System.out.println("consume = " + consume);
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "consume = " + consume);
           AMQP.Basic.ConsumeOk consumerOk = momHandler.basicConsume(
               consume.getQueue(),
               consume.getNoAck(),
@@ -443,15 +462,20 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
               consume.getExclusive(),
               consume.getTicket(),
               channelNumber);
-          sendMethodToPeer(consumerOk, channelNumber);
+          if (consume.getNowait() == false) {
+            sendMethodToPeer(consumerOk, channelNumber);
+          }
           break;
 
         case AMQImpl.Basic.Cancel.INDEX:
           AMQP.Basic.Cancel cancel = (AMQP.Basic.Cancel) method;
-          System.out.println("cancel consumerTag = " + cancel.getConsumerTag() + " nowait = "
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "cancel consumerTag = " + cancel.getConsumerTag() + " nowait = "
               + cancel.getNowait());
           momHandler.basicCancel(cancel.getConsumerTag(), channelNumber);
-          sendMethodToPeer(new AMQImpl.Basic.CancelOk(cancel.getConsumerTag()), channelNumber);
+          if (cancel.getNowait() == false) {
+            sendMethodToPeer(new AMQImpl.Basic.CancelOk(cancel.getConsumerTag()), channelNumber);
+          }
           break;
 
         default:
@@ -476,7 +500,9 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
               declare.getArguments(),
               declare.getTicket(),
               channelNumber);
-          sendMethodToPeer(new AMQImpl.Exchange.DeclareOk(), channelNumber);
+          if (declare.getNowait() == false) {
+            sendMethodToPeer(new AMQImpl.Exchange.DeclareOk(), channelNumber);
+          }
           break;
           
         case AMQImpl.Exchange.Delete.INDEX:
@@ -487,7 +513,9 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
               delete.getNowait(),
               delete.getTicket(),
               channelNumber);
-          sendMethodToPeer(new AMQImpl.Exchange.DeleteOk(), channelNumber);
+          if (delete.getNowait() == false) {
+            sendMethodToPeer(new AMQImpl.Exchange.DeleteOk(), channelNumber);
+          }
           break;
 
         default:
@@ -547,7 +575,8 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
     publishRequest.bodySize = header.readFrom(in);
     publishRequest.setHeader((BasicProperties) header);
 
-    System.out.println("=== MarshallingHeader = " + header);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "=== Header = " + header);
     if (publishRequest.bodySize == 0)
       try {
         momHandler.basicPublish(publishRequest, channelNumber);
@@ -571,7 +600,8 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
       
       // TODO gestion des fragments (faire des sends pour chaque body)
       publishRequest.body = body;
-      System.out.println("== body = " + new String(body));
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "== body = " + new String(body));
       if (publishRequest.bodyRead == publishRequest.bodySize) {
         try {
           momHandler.basicPublish(publishRequest, channelNumber);
@@ -612,8 +642,6 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
         sock.close();
         return;
       }
-
-      System.out.println("channelNumber = " + 0);
       sendConnectionStartMethod(0);
       
       netServerOut = new NetServerOut(this.getClass().getName());
@@ -666,7 +694,8 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
     buff.append(i);
     //    if (i != AMQP.PROTOCOL.MINOR)
     //      badProtocolHeader(buff.toString());
-    System.out.println("client protocol = " + buff.toString());
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "client protocol = " + buff.toString());
   }
 
   /**
@@ -684,8 +713,9 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
     classState = startMethod.protocolClassId();
     methodState = startMethod.protocolMethodId();
     Frame frame = ((com.rabbitmq.client.impl.Method) startMethod).toFrame(channelNumber);
-    frame.writeTo(new DataOutputStream(sock.getOutputStream()));
-    sock.getOutputStream().flush();
+    DataOutputStream dos = new DataOutputStream(sock.getOutputStream());
+    frame.writeTo(dos);
+    dos.flush();
   }
   
   public void handleDelivery(int channelNumber, Deliver deliver, BasicProperties header, byte[] body) {
