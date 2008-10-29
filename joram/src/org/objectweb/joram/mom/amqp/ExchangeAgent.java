@@ -28,12 +28,26 @@ import com.rabbitmq.client.AMQP.BasicProperties;
 
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.DeleteAck;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 
 public abstract class ExchangeAgent extends Agent {
   
-  public abstract void setArguments(Map arguments);
+  private String name;
+  private boolean durable;
+
+  public ExchangeAgent(String name, boolean durable) {
+    this.name = name;
+    this.durable = durable;
+  }
+  
+  protected void agentInitialize(boolean firstTime) throws Exception {
+    super.agentInitialize(firstTime);
+    if (!firstTime && !durable) {
+      delete();
+    }
+  }
   
   public void react(AgentId from, Notification not) throws Exception {
     if (not instanceof PublishNot) {
@@ -47,10 +61,18 @@ public abstract class ExchangeAgent extends Agent {
     } else {
       super.react(from, not);
     }
+    if (!durable) {
+      setNoSave();
+    }
   }
 
-  private void doReact(DeleteNot not, AgentId from) {
-    delete(from);
+  private void doReact(DeleteNot not, AgentId from) throws Exception {
+    if (not.isIfUnused() && !isUnused()) {
+      sendTo(from, new DeleteAck(getId()));
+    } else {
+      NamingAgent.getSingleton().unbind(name);
+      delete(from);
+    }
   }
 
   private void doReact(PublishNot not) {
@@ -60,11 +82,15 @@ public abstract class ExchangeAgent extends Agent {
   private void doReact(BindNot not) {
     bind(not.getQueue(), not.getRoutingKey(), not.getArguments());
   }
+  
+  public abstract void setArguments(Map arguments);
 
   public abstract void doReact(UnknownAgent not, AgentId from);
   
   public abstract void publish(String exchange, String routingKey, BasicProperties properties, byte[] body);
 
   public abstract void bind(String queue, String routingKey, Map arguments);
+  
+  public abstract boolean isUnused();
 
 }

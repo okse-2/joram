@@ -164,14 +164,16 @@ public class ProxyAgent extends Agent {
       Map arguments) throws Exception {
     // Check if the exchange already exists
     Object ref = NamingAgent.getSingleton().lookup(exchange);
-    if (ref == null) {
+    if (ref == null && !passive) {
       ExchangeAgent exchangeAgent;
       if (type.equalsIgnoreCase("direct")) {
-        exchangeAgent = new DirectExchange();
+        exchangeAgent = new DirectExchange(exchange, durable);
       } else if (type.equalsIgnoreCase("topic")) {
-        exchangeAgent = new TopicExchange();
+        exchangeAgent = new TopicExchange(exchange, durable);
       } else if (type.equalsIgnoreCase("fanout")) {
-        exchangeAgent = new FanoutExchange();
+        exchangeAgent = new FanoutExchange(exchange, durable);
+      } else if (type.equalsIgnoreCase("headers")) {
+        exchangeAgent = new HeadersExchange(exchange, durable);
       } else {
         Class exchangeClass = Class.forName(type);
         exchangeAgent = (ExchangeAgent) exchangeClass.newInstance();
@@ -197,9 +199,8 @@ public class ProxyAgent extends Agent {
       ExchangeDeleteNot not) throws Exception {
     AgentId exchangeId = (AgentId) NamingAgent.getSingleton().lookup(exchange);
     if (exchangeId != null) {
-      NamingAgent.getSingleton().unbind(exchange);
       pendingRequests.put(exchangeId, not);
-      sendTo(exchangeId, new DeleteNot());
+      sendTo(exchangeId, new DeleteNot(ifUnused));
     }
   }
 
@@ -224,8 +225,8 @@ public class ProxyAgent extends Agent {
           channelId + ',' + ticket + ',' + queue + ')');
     // Check if the queue already exists
     Object ref = NamingAgent.getSingleton().lookup(queue);
-    if (ref == null) {
-      QueueAgent queueAgent = new QueueAgent();
+    if (ref == null && !passive) {
+      QueueAgent queueAgent = new QueueAgent(queue, durable, autoDelete);
       NamingAgent.getSingleton().bind(queue, queueAgent.getId());
       queueAgent.deploy();
     }
@@ -247,9 +248,8 @@ public class ProxyAgent extends Agent {
       boolean nowait, QueueDeleteNot not) throws Exception {
     AgentId queueId = (AgentId) NamingAgent.getSingleton().lookup(queue);
     if (queueId != null) {
-      NamingAgent.getSingleton().unbind(queue);
       pendingRequests.put(queueId, not);
-      sendTo(queueId, new DeleteNot());
+      sendTo(queueId, new DeleteNot(ifUnused, ifEmpty));
     }
   }
 
@@ -266,7 +266,7 @@ public class ProxyAgent extends Agent {
     AgentId queueId = (AgentId) NamingAgent.getSingleton().lookup(queue);
     ClearQueueNot purgeNot = new ClearQueueNot();
     sendTo(queueId, purgeNot);
-    return new AMQImpl.Queue.PurgeOk();
+    return new AMQImpl.Queue.PurgeOk(0);
   }
 
   private void doReact(BasicConsumeNot not) throws Exception {
@@ -309,12 +309,10 @@ public class ProxyAgent extends Agent {
     not.Return();
   }
   
-  public AMQP.Basic.GetOk basicGet(int channelId, int ticket, String queueName, boolean noAck,
-      GetListener callback) {
+  public void basicGet(int channelId, int ticket, String queueName, boolean noAck, GetListener callback) {
     AgentId queueId = (AgentId) NamingAgent.getSingleton().lookup(queueName);
     ReceiveNot receiveNot = new ReceiveNot(callback);
     sendTo(queueId, receiveNot);
-    return new AMQImpl.Basic.GetOk(0, false, "?", "?", 0);
   }
 
   private void doReact(BasicPublishNot not) throws Exception {

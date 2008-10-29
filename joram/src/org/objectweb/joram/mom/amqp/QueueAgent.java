@@ -33,6 +33,7 @@ import com.rabbitmq.client.AMQP.BasicProperties;
 
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.DeleteAck;
 import fr.dyade.aaa.agent.Notification;
 
 public class QueueAgent extends Agent {
@@ -40,13 +41,29 @@ public class QueueAgent extends Agent {
   public final static Logger logger = 
     fr.dyade.aaa.util.Debug.getLogger(QueueAgent.class.getName());
   
+  private String name;
+  
+  private boolean durable;
+  
+  private boolean autodelete;
+  
   private LinkedList toDeliver;
   
   private LinkedList consumers;
   
-  public QueueAgent() {
+  public QueueAgent(String name, boolean durable, boolean autodelete) {
+    this.name = name;
+    this.durable = durable;
+    this.autodelete = autodelete;
     this.toDeliver = new LinkedList();
     this.consumers = new LinkedList();
+  }
+  
+  protected void agentInitialize(boolean firstTime) throws Exception {
+    super.agentInitialize(firstTime);
+    if (!firstTime && !durable) {
+      delete();
+    }
   }
   
   public void react(AgentId from, Notification not) throws Exception {
@@ -64,6 +81,9 @@ public class QueueAgent extends Agent {
       doReact((ClearQueueNot) not);
     } else {
       super.react(from, not);
+    }
+    if (!durable) {
+      setNoSave();
     }
   }
 
@@ -141,10 +161,25 @@ public class QueueAgent extends Agent {
         iterator.remove();
       }
     }
+    if (consumers.size() == 0 && autodelete) {
+      delete();
+    }
   }
 
-  private void doReact(DeleteNot not, AgentId from) {
-    delete(from);
+  private void doReact(DeleteNot not, AgentId from) throws Exception {
+    boolean hasToBeDeleted = true;
+    if (not.isIfEmpty() && toDeliver.size() > 0) {
+      hasToBeDeleted = false;
+    }
+    if (not.isIfUnused() && consumers.size() > 0) {
+      hasToBeDeleted = false;
+    }
+    if (hasToBeDeleted) {
+      NamingAgent.getSingleton().unbind(name);
+      delete(from);
+    } else {
+      sendTo(from, new DeleteAck(getId()));
+    }
   }
   
   private void doReact(ClearQueueNot not) {
