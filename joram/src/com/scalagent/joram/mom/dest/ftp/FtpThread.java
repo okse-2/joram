@@ -93,8 +93,8 @@ public class FtpThread extends Thread {
       crc = msg.getLongProperty(SharedObj.crc);
       ack = msg.getBooleanProperty(SharedObj.ack);
 
-//      if (logger.isLoggable(BasicLevel.DEBUG))
-//        logger.log(BasicLevel.DEBUG, "doFtp urlName = " + urlName + ", crc = " + crc + ", ack = " + ack);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "doFtp urlName = " + urlName + ", crc = " + crc + ", ack = " + ack);
       
       URL url = new URL(urlName);
       String urlFileName = url.getFile();
