@@ -26,10 +26,9 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
+import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
-
-import com.rabbitmq.client.AMQP.BasicProperties;
 
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;

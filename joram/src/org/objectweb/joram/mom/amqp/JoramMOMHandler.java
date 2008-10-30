@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.objectweb.joram.mom.amqp.marshalling.AMQP;
+import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 import org.objectweb.joram.mom.amqp.proxy.request.AccessRequestNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicCancelNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicConsumeNot;
@@ -37,10 +39,6 @@ import org.objectweb.joram.mom.amqp.proxy.request.QueueBindNot;
 import org.objectweb.joram.mom.amqp.proxy.request.QueueDeclareNot;
 import org.objectweb.joram.mom.amqp.proxy.request.QueueDeleteNot;
 import org.objectweb.joram.mom.amqp.proxy.request.QueuePurgeNot;
-
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.AMQP.BasicProperties;
-import com.rabbitmq.client.impl.AMQImpl;
 
 import fr.dyade.aaa.agent.Channel;
 
@@ -101,11 +99,11 @@ public class JoramMOMHandler implements MOMHandler {
 
   public void basicPublish(PublishRequest publishRequest, int channelNumber) throws Exception {
     BasicPublishNot basicPublish = new BasicPublishNot(channelNumber,
-        publishRequest.getPublish().getTicket(),
-        publishRequest.getPublish().getExchange(),
-        publishRequest.getPublish().getRoutingKey(),
-        publishRequest.getPublish().getMandatory(),
-        publishRequest.getPublish().getImmediate(),
+        publishRequest.getPublish().ticket,
+        publishRequest.getPublish().exchange,
+        publishRequest.getPublish().routingKey,
+        publishRequest.getPublish().mandatory,
+        publishRequest.getPublish().immediate,
         publishRequest.getHeader(),
         publishRequest.body);
     Channel.sendTo(proxy.getId(), basicPublish);
@@ -190,7 +188,7 @@ public class JoramMOMHandler implements MOMHandler {
 
     public void handleDelivery(long deliveryTag, boolean redelivered, String exchange,
         String routingKey, BasicProperties properties, byte[] body) {
-      AMQP.Basic.Deliver deliver = new AMQImpl.Basic.Deliver(consumerTag, deliveryTag, redelivered, exchange,
+      AMQP.Basic.Deliver deliver = new AMQP.Basic.Deliver(consumerTag, deliveryTag, redelivered, exchange,
           routingKey);
       consumer.handleDelivery(channelNumber, deliver, properties, body);
     }
@@ -206,7 +204,7 @@ public class JoramMOMHandler implements MOMHandler {
     
     public void handleGet(long deliveryTag, boolean redelivered, String exchange, String routingKey,
         int msgCount, BasicProperties properties, byte[] body) {
-      AMQP.Basic.GetOk getOk = new AMQImpl.Basic.GetOk(deliveryTag, redelivered, exchange, routingKey,
+      AMQP.Basic.GetOk getOk = new AMQP.Basic.GetOk(deliveryTag, redelivered, exchange, routingKey,
           msgCount);
       consumer.handleGet(channelNumber, getOk, properties, body);
     }

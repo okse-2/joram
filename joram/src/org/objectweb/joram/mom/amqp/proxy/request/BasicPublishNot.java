@@ -22,7 +22,7 @@
  */
 package org.objectweb.joram.mom.amqp.proxy.request;
 
-import com.rabbitmq.client.AMQP.BasicProperties;
+import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 
 import fr.dyade.aaa.agent.Notification;
 

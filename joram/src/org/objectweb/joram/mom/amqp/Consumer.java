@@ -22,10 +22,10 @@
  */
 package org.objectweb.joram.mom.amqp;
 
-import com.rabbitmq.client.AMQP.BasicProperties;
-import com.rabbitmq.client.AMQP.Basic.Deliver;
-import com.rabbitmq.client.AMQP.Basic.GetOk;
-import com.rabbitmq.client.AMQP.Basic.Return;
+import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
+import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.Deliver;
+import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.GetOk;
+import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.Return;
 
 public interface Consumer {
 

@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.rabbitmq.client.AMQP.BasicProperties;
+import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.UnknownAgent;

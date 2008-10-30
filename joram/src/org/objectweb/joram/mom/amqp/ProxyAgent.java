@@ -25,6 +25,10 @@ package org.objectweb.joram.mom.amqp;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.objectweb.joram.mom.amqp.marshalling.AMQP;
+import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
+import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.CancelOk;
+import org.objectweb.joram.mom.amqp.marshalling.AMQP.Queue.PurgeOk;
 import org.objectweb.joram.mom.amqp.proxy.request.AccessRequestNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicCancelNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicConsumeNot;
@@ -40,12 +44,6 @@ import org.objectweb.joram.mom.amqp.proxy.request.QueueDeleteNot;
 import org.objectweb.joram.mom.amqp.proxy.request.QueuePurgeNot;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
-
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.AMQP.BasicProperties;
-import com.rabbitmq.client.AMQP.Basic.CancelOk;
-import com.rabbitmq.client.AMQP.Queue.PurgeOk;
-import com.rabbitmq.client.impl.AMQImpl;
 
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
@@ -125,7 +123,7 @@ public class ProxyAgent extends Agent {
   }
   
   public AMQP.Channel.OpenOk channelOpen() {
-    return new AMQImpl.Channel.OpenOk();
+    return new AMQP.Channel.OpenOk();
   }
   
   private void doReact(AccessRequestNot not) throws Exception {
@@ -143,7 +141,7 @@ public class ProxyAgent extends Agent {
   public AMQP.Access.RequestOk accessRequest(int channelId, String realm,
       boolean exclusive, boolean passive, boolean active, boolean write,
       boolean read) throws Exception {
-    return new AMQImpl.Access.RequestOk(ticketCounter++);
+    return new AMQP.Access.RequestOk(ticketCounter++);
   }
   
   private void doReact(ExchangeDeclareNot not) throws Exception {
@@ -182,7 +180,7 @@ public class ProxyAgent extends Agent {
       NamingAgent.getSingleton().bind(exchange, exchangeAgent.getId());
       exchangeAgent.deploy();
     }
-    return new AMQImpl.Exchange.DeclareOk();
+    return new AMQP.Exchange.DeclareOk();
   }
   
   private void doReact(ExchangeDeleteNot not) throws Exception {
@@ -230,7 +228,7 @@ public class ProxyAgent extends Agent {
       NamingAgent.getSingleton().bind(queue, queueAgent.getId());
       queueAgent.deploy();
     }
-    return new AMQImpl.Queue.DeclareOk(queue, 0, 0);
+    return new AMQP.Queue.DeclareOk(queue, 0, 0);
   }
   
   private void doReact(QueueDeleteNot not) throws Exception {
@@ -266,7 +264,7 @@ public class ProxyAgent extends Agent {
     AgentId queueId = (AgentId) NamingAgent.getSingleton().lookup(queue);
     ClearQueueNot purgeNot = new ClearQueueNot();
     sendTo(queueId, purgeNot);
-    return new AMQImpl.Queue.PurgeOk(0);
+    return new AMQP.Queue.PurgeOk(0);
   }
 
   private void doReact(BasicConsumeNot not) throws Exception {
@@ -287,7 +285,7 @@ public class ProxyAgent extends Agent {
     ConsumeNot consumeNot = new ConsumeNot(callback, consumerTag);
     sendTo(queueId, consumeNot);
     consumers.put(consumerTag, queueId);
-    return new AMQImpl.Basic.ConsumeOk(consumerTag);
+    return new AMQP.Basic.ConsumeOk(consumerTag);
   }
   
   private void doReact(BasicCancelNot not) {
@@ -301,7 +299,7 @@ public class ProxyAgent extends Agent {
       CancelNot cancelNot = new CancelNot(consumerTag);
       sendTo(queueId, cancelNot);
     }
-    return new AMQImpl.Basic.CancelOk(consumerTag);
+    return new AMQP.Basic.CancelOk(consumerTag);
   }
 
   private void doReact(BasicGetNot not) {
@@ -351,7 +349,7 @@ public class ProxyAgent extends Agent {
     AgentId exhangeId = (AgentId) NamingAgent.getSingleton().lookup(exchange);
     BindNot bindNot = new BindNot(queue, routingKey, arguments);
     sendTo(exhangeId, bindNot);
-    return new AMQImpl.Queue.BindOk();
+    return new AMQP.Queue.BindOk();
   }
 
   private void doReact(DeleteAck not) {
@@ -360,10 +358,10 @@ public class ProxyAgent extends Agent {
       // TODO msgCount
       int msgCount = 0;
       QueueDeleteNot deleteNot = (QueueDeleteNot) syncNot;
-      deleteNot.Return(new AMQImpl.Queue.DeleteOk(msgCount));
+      deleteNot.Return(new AMQP.Queue.DeleteOk(msgCount));
     } else if (syncNot instanceof ExchangeDeleteNot) {
       ExchangeDeleteNot deleteNot = (ExchangeDeleteNot) syncNot;
-      deleteNot.Return(new AMQImpl.Exchange.DeleteOk());
+      deleteNot.Return(new AMQP.Exchange.DeleteOk());
     }
   }
 
