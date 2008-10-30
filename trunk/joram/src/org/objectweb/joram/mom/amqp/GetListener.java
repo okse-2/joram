@@ -22,7 +22,8 @@
  */
 package org.objectweb.joram.mom.amqp;
 
-import com.rabbitmq.client.AMQP.BasicProperties;
+import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
+
 
 public interface GetListener extends Listener {
 

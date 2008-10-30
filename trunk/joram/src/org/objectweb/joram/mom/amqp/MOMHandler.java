@@ -25,7 +25,7 @@ package org.objectweb.joram.mom.amqp;
 import java.io.IOException;
 import java.util.Map;
 
-import com.rabbitmq.client.AMQP;
+import org.objectweb.joram.mom.amqp.marshalling.AMQP;
 
 public interface MOMHandler {
 

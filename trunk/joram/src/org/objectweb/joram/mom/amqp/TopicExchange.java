@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.rabbitmq.client.AMQP.BasicProperties;
+import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.UnknownAgent;

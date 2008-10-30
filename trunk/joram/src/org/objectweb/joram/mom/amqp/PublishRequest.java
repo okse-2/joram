@@ -24,9 +24,9 @@ package org.objectweb.joram.mom.amqp;
 
 import java.io.Serializable;
 
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.AMQP.BasicProperties;
-import com.rabbitmq.client.AMQP.Basic.Publish;
+import org.objectweb.joram.mom.amqp.marshalling.AMQP;
+import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
+import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.Publish;
 
 public class PublishRequest implements Serializable {
   
@@ -56,7 +56,7 @@ public class PublishRequest implements Serializable {
     this.header = header;
   }
   
-  public AMQP.BasicProperties getHeader() {
+  public BasicProperties getHeader() {
     return header;
   }
 

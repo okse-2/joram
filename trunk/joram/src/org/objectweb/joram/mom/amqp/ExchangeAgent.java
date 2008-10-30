@@ -24,7 +24,7 @@ package org.objectweb.joram.mom.amqp;
 
 import java.util.Map;
 
-import com.rabbitmq.client.AMQP.BasicProperties;
+import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;

@@ -24,7 +24,7 @@ package org.objectweb.joram.mom.amqp.proxy.request;
 
 import java.util.HashMap;
 
-import com.rabbitmq.client.AMQP;
+import org.objectweb.joram.mom.amqp.marshalling.AMQP;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.SyncNotification;
