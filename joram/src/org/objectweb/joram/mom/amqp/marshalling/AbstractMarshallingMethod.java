@@ -82,13 +82,13 @@ public abstract class AbstractMarshallingMethod implements Streamable {
               marshallingClass.getMethodName(methodid)).newInstance();
           marshallingMethod.readFrom(in);
         } catch (InstantiationException e) {
-          throw new IOException(e);
+          throw new IOException(e.getMessage());
         } catch (IllegalAccessException e) {
-          throw new IOException(e);
+          throw new IOException(e.getMessage());
         } catch (ClassNotFoundException e) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG,"AbstractMarshallingMethod read :: Class NotFound", e);
-          throw new IOException(e);
+          throw new IOException(e.getMessage());
         }
       }
     }
