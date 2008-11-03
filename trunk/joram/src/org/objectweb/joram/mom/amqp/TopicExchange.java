@@ -69,6 +69,18 @@ public class TopicExchange extends ExchangeAgent {
     }
   }
 
+  public void unbind(String queue, String routingKey, Map arguments) {
+    Pattern routingPattern = createPattern(routingKey);
+    List boundQueues = (List) bindings.get(routingPattern);
+    if (boundQueues != null) {
+      AgentId queueAgent = (AgentId) NamingAgent.getSingleton().lookup(queue);
+      boundQueues.remove(queueAgent);
+      if (boundQueues.size() == 0) {
+        bindings.remove(routingPattern);
+      }
+    }
+  }
+
   public void publish(String exchange, String routingKey, BasicProperties properties, byte[] body) {
     Set destQueues = new HashSet();
     
@@ -117,87 +129,4 @@ public class TopicExchange extends ExchangeAgent {
     return bindings.size() == 0;
   }
   
-  public static void main(String[] args) {
-    // Tests
-    String routingPattern = "yo.zop.#.lol";
-    Pattern p = createPattern(routingPattern);
-    
-    String routingKey = "yo.zop.ert.zae.lol.lol";
-    Matcher m = p.matcher(routingKey);
-    System.out.println("true -> " + m.matches());
-
-    routingKey = "yo.zop.lol";
-    m = p.matcher(routingKey);
-    System.out.println("true -> " + m.matches());
-    
-    routingKey = "yo.zop.test.lol.edu";
-    m = p.matcher(routingKey);
-    System.out.println("false -> " + m.matches());
-    
-    routingKey = "yo.zop.ert.zae.lolAlol";
-    m = p.matcher(routingKey);
-    System.out.println("false -> " + m.matches());
-    
-    routingKey = "yoAzop.ert.zae.lol.lol";
-    m = p.matcher(routingKey);
-    System.out.println("false -> " + m.matches());
-    
-    // -------------------------
-    routingPattern = "yo.zop.#";
-    p = createPattern(routingPattern);
-    
-    routingKey = "yo.zop.ert.zae.lol.lol";
-    m = p.matcher(routingKey);
-    System.out.println("true -> " + m.matches());
-
-    routingKey = "yo.zop";
-    m = p.matcher(routingKey);
-    System.out.println("true -> " + m.matches());
-
-    routingKey = "yo.zop.test";
-    m = p.matcher(routingKey);
-    System.out.println("true -> " + m.matches());
-
-    routingKey = "yo.zopA";
-    m = p.matcher(routingKey);
-    System.out.println("false -> " + m.matches());
-
-    // -------------------------
-    routingPattern = "yo.zop.*";
-    p = createPattern(routingPattern);
-
-    routingKey = "yo.zop.ert.zae.lol.lol";
-    m = p.matcher(routingKey);
-    System.out.println("false -> " + m.matches());
-
-    routingKey = "yo.zop";
-    m = p.matcher(routingKey);
-    System.out.println("false -> " + m.matches());
-
-    routingKey = "yo.zop.test";
-    m = p.matcher(routingKey);
-    System.out.println("true -> " + m.matches());
-
-    routingKey = "yo.zopAa";
-    m = p.matcher(routingKey);
-    System.out.println("false -> " + m.matches());
-    
-    // -------------------------
-    routingPattern = "*.stock.#";
-    p = createPattern(routingPattern);
-
-    routingKey = "usd.stock";
-    m = p.matcher(routingKey);
-    System.out.println("true -> " + m.matches());
-
-    routingKey = "eur.stock.db";
-    m = p.matcher(routingKey);
-    System.out.println("true -> " + m.matches());
-
-    routingKey = "stock.nasdaq";
-    m = p.matcher(routingKey);
-    System.out.println("false -> " + m.matches());
-
-  }
-
 }

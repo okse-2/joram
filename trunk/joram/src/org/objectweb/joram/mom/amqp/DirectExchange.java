@@ -69,6 +69,17 @@ public class DirectExchange extends ExchangeAgent {
     }
   }
 
+  public void unbind(String queue, String routingKey, Map arguments) {
+    List boundQueues = (List) bindings.get(routingKey);
+    if (boundQueues != null) {
+      AgentId queueAgent = (AgentId) NamingAgent.getSingleton().lookup(queue);
+      boundQueues.remove(queueAgent);
+      if (boundQueues.size() == 0) {
+        bindings.remove(routingKey);
+      }
+    }
+  }
+
   public void publish(String exchange, String routingKey, BasicProperties properties, byte[] body) {
     List boundQueues = (List) bindings.get(routingKey);
     if (boundQueues != null) {

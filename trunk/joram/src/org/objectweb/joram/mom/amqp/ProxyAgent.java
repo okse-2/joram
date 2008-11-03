@@ -29,7 +29,9 @@ import org.objectweb.joram.mom.amqp.marshalling.AMQP;
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.CancelOk;
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Queue.PurgeOk;
+import org.objectweb.joram.mom.amqp.marshalling.AMQP.Queue.UnbindOk;
 import org.objectweb.joram.mom.amqp.proxy.request.AccessRequestNot;
+import org.objectweb.joram.mom.amqp.proxy.request.BasicAckNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicCancelNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicConsumeNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicGetNot;
@@ -42,6 +44,7 @@ import org.objectweb.joram.mom.amqp.proxy.request.QueueBindNot;
 import org.objectweb.joram.mom.amqp.proxy.request.QueueDeclareNot;
 import org.objectweb.joram.mom.amqp.proxy.request.QueueDeleteNot;
 import org.objectweb.joram.mom.amqp.proxy.request.QueuePurgeNot;
+import org.objectweb.joram.mom.amqp.proxy.request.QueueUnbindNot;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -63,8 +66,6 @@ public class ProxyAgent extends Agent {
   private String userName;
   
   private String password;
-  
-  private int channelCounter;
   
   private int ticketCounter;
   
@@ -99,8 +100,12 @@ public class ProxyAgent extends Agent {
       doReact((BasicPublishNot) not);
     } else if (not instanceof BasicCancelNot) {
       doReact((BasicCancelNot) not);
+    } else if (not instanceof BasicAckNot) {
+      doReact((BasicAckNot) not);
     } else if (not instanceof QueueBindNot) {
       doReact((QueueBindNot) not);
+    } else if (not instanceof QueueUnbindNot) {
+      doReact((QueueUnbindNot) not);
     } else if (not instanceof DeleteAck) {
       doReact((DeleteAck) not);
     } else {
@@ -282,7 +287,7 @@ public class ProxyAgent extends Agent {
       boolean noAck, String consumerTag, DeliveryListener callback)
       throws Exception {
     AgentId queueId = (AgentId) NamingAgent.getSingleton().lookup(queue);
-    ConsumeNot consumeNot = new ConsumeNot(callback, consumerTag);
+    ConsumeNot consumeNot = new ConsumeNot(callback, consumerTag, noAck);
     sendTo(queueId, consumeNot);
     consumers.put(consumerTag, queueId);
     return new AMQP.Basic.ConsumeOk(consumerTag);
@@ -309,7 +314,7 @@ public class ProxyAgent extends Agent {
   
   public void basicGet(int channelId, int ticket, String queueName, boolean noAck, GetListener callback) {
     AgentId queueId = (AgentId) NamingAgent.getSingleton().lookup(queueName);
-    ReceiveNot receiveNot = new ReceiveNot(callback);
+    ReceiveNot receiveNot = new ReceiveNot(callback, noAck);
     sendTo(queueId, receiveNot);
   }
 
@@ -328,11 +333,21 @@ public class ProxyAgent extends Agent {
   public void basicPublish(int channelId, int ticket, String exchange,
       String routingKey, boolean mandatory, boolean immediate,
       BasicProperties props, byte[] body) throws Exception {
-    AgentId exhangeId = (AgentId) NamingAgent.getSingleton().lookup(exchange);
+    AgentId exchangeId = (AgentId) NamingAgent.getSingleton().lookup(exchange);
     PublishNot publishNot = new PublishNot(exchange, routingKey, props, body);
-    sendTo(exhangeId, publishNot);
+    sendTo(exchangeId, publishNot);
   }
   
+  private void doReact(BasicAckNot not) {
+    basicAck(not.getChannelId(), not.getDeliveryTag(), not.isMultiple());
+    not.Return();
+  }
+  
+  public void basicAck(int channelId, long deliveryTag, boolean multiple) {
+    // TODO Auto-generated method stub
+    
+  }
+
   private void doReact(QueueBindNot not) throws Exception {
     AMQP.Queue.BindOk res = queueBind(
         not.getChannelId(),
@@ -345,11 +360,30 @@ public class ProxyAgent extends Agent {
   }
   
   public AMQP.Queue.BindOk queueBind(int channelId, int ticket, String queue, String exchange,
-      String routingKey, HashMap arguments) throws Exception {
-    AgentId exhangeId = (AgentId) NamingAgent.getSingleton().lookup(exchange);
+      String routingKey, Map arguments) throws Exception {
+    AgentId exchangeId = (AgentId) NamingAgent.getSingleton().lookup(exchange);
     BindNot bindNot = new BindNot(queue, routingKey, arguments);
-    sendTo(exhangeId, bindNot);
+    sendTo(exchangeId, bindNot);
     return new AMQP.Queue.BindOk();
+  }
+
+  private void doReact(QueueUnbindNot not) {
+    AMQP.Queue.UnbindOk res = queueUnbind(
+        not.getChannelId(),
+        not.getTicket(),
+        not.getQueue(),
+        not.getExchange(),
+        not.getRoutingKey(),
+        not.getArguments());
+    not.Return(res);
+  }
+
+  public UnbindOk queueUnbind(int channelId, int ticket, String queue, String exchange, String routingKey,
+      Map arguments) {
+    AgentId exchangeId = (AgentId) NamingAgent.getSingleton().lookup(exchange);
+    UnbindNot unbindNot = new UnbindNot(queue, routingKey, arguments);
+    sendTo(exchangeId, unbindNot);
+    return new AMQP.Queue.UnbindOk();
   }
 
   private void doReact(DeleteAck not) {

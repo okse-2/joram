@@ -35,7 +35,6 @@ import org.objectweb.joram.mom.amqp.marshalling.AMQP;
 import org.objectweb.joram.mom.amqp.marshalling.AMQPHelper;
 import org.objectweb.joram.mom.amqp.marshalling.AbstractMarshallingMethod;
 import org.objectweb.joram.mom.amqp.marshalling.Frame;
-import org.objectweb.joram.mom.amqp.marshalling.LongString;
 import org.objectweb.joram.mom.amqp.marshalling.LongStringHelper;
 import org.objectweb.joram.mom.amqp.marshalling.MarshallingBody;
 import org.objectweb.joram.mom.amqp.marshalling.MarshallingHeader;
@@ -184,7 +183,7 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
       doProcessMethod(AbstractMarshallingMethod.read(frame.getInputStream()), channelNumber);
       break;
     case AMQP.FRAME_HEADER:
-      doProcessHeader(frame, channelNumber);
+      doProcessHeader(MarshallingHeader.read(frame.getInputStream()), channelNumber);
       break;
     case AMQP.FRAME_BODY:
       doProcessBody(frame.getPayload(), channelNumber);
@@ -193,8 +192,7 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
       if (logger.isLoggable(BasicLevel.DEBUG)) {
         logger.log(BasicLevel.DEBUG, "client FRAME_HEARTBEAT.");
       }
-      momHandler.heartbeat(channelNumber);
-      queueOut.push(new Frame(AMQP.FRAME_HEARTBEAT, channelNumber));
+      queueOut.push(new Frame(AMQP.FRAME_HEARTBEAT, 0));
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "client FRAME_HEARTBEAT.");
       break;
@@ -404,6 +402,18 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
             sendMethodToPeer(new AMQP.Queue.BindOk(), channelNumber);
           break;
           
+        case AMQP.Queue.Unbind.INDEX:
+          AMQP.Queue.Unbind unbind = (AMQP.Queue.Unbind) method;
+          momHandler.queueUnbind(
+              unbind.queue,
+              unbind.exchange,
+              unbind.routingKey,
+              unbind.arguments,
+              unbind.ticket,
+              channelNumber);
+          sendMethodToPeer(new AMQP.Queue.UnbindOk(), channelNumber);
+          break;
+          
         case AMQP.Queue.Purge.INDEX:
           AMQP.Queue.Purge purge = (AMQP.Queue.Purge) method;
           momHandler.queuePurge(
@@ -571,16 +581,13 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
    * @param frame
    * @param channelNumber
    */
-  private void doProcessHeader(Frame frame, int channelNumber) throws IOException {
-    MarshallingHeader marshallingHeader = null;
-    marshallingHeader = AMQPHelper.readContentHeader(frame);
-
+  private void doProcessHeader(MarshallingHeader header, int channelNumber) throws IOException {
     PublishRequest publishRequest = (PublishRequest) channelContexts.get(new Integer(channelNumber));
-    publishRequest.bodySize = marshallingHeader.getBodySize();
-    publishRequest.setHeader(marshallingHeader.getBasicProperties());
+    publishRequest.bodySize = header.getBodySize();
+    publishRequest.setHeader(header.getBasicProperties());
 
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "=== Header = " + marshallingHeader.getBasicProperties());
+      logger.log(BasicLevel.DEBUG, "=== Header = " + header.getBasicProperties());
     if (publishRequest.bodySize == 0)
       try {
         momHandler.basicPublish(publishRequest, channelNumber);
