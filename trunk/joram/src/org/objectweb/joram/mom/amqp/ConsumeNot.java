@@ -31,15 +31,17 @@ public class ConsumeNot extends Notification {
   
   private DeliveryListener callback;
   private String consumerTag;
+  private boolean noAck;
   
   /**
    * @param consumerTag
    * @param callback
    */
-  public ConsumeNot(DeliveryListener callback, String consumerTag) {
+  public ConsumeNot(DeliveryListener callback, String consumerTag, boolean noAck) {
     super();
     this.callback = callback;
     this.consumerTag = consumerTag;
+    this.noAck = noAck;
     persistent = false;
   }
 
@@ -49,5 +51,9 @@ public class ConsumeNot extends Notification {
 
   public String getConsumerTag() {
     return consumerTag;
+  }
+
+  public boolean isNoAck() {
+    return noAck;
   }
 }
