@@ -1348,7 +1348,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, 
                    "QueueImpl.deliverMessages: notRec.getAutoAck() = " + notRec.getAutoAck()+
-                   "lsMessages = " + lsMessages);
+                   ", lsMessages = " + lsMessages);
 
       Iterator itMessages = lsMessages.iterator();
       while (itMessages.hasNext()) {
