@@ -32,8 +32,6 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
-import javax.jms.JMSSecurityException;
-
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.ClusterRequest;
 import org.objectweb.joram.mom.notifications.DestinationAdminRequestNot;
@@ -251,20 +249,20 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     if (userIdentity == null) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "User [" + identity.getUserName() + "] does not exist");
-      throw new JMSSecurityException("User [" + identity.getUserName() + "] does not exist");
+      throw new Exception("User [" + identity.getUserName() + "] does not exist");
     }
 
     if (identity instanceof Identity) {
       if (! identity.check(userIdentity)) {
         if (logger.isLoggable(BasicLevel.ERROR))
           logger.log(BasicLevel.ERROR, "identity check failed.");
-        throw new JMSSecurityException("identity check failed.");
+        throw new Exception("identity check failed.");
       } else {        
         userProxId = (AgentId) proxiesTable.get(identity.getUserName());
         if (userProxId == null) {
           if (logger.isLoggable(BasicLevel.ERROR))
             logger.log(BasicLevel.ERROR, "No proxy deployed for user [" + identity.getUserName() + "]");
-          throw new JMSSecurityException("No proxy deployed for user [" + identity.getUserName() + "]");
+          throw new Exception("No proxy deployed for user [" + identity.getUserName() + "]");
         }
 
       return userProxId;
@@ -272,7 +270,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "Bad Auth must be instanceof Identity :: identity = " + identity);
-      throw new JMSSecurityException("Bad Auth must be instanceof Identity :: identity = " + identity);
+      throw new Exception("Bad Auth must be instanceof Identity :: identity = " + identity);
     }
   }
 
