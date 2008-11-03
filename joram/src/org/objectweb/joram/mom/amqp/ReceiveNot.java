@@ -27,19 +27,26 @@ import fr.dyade.aaa.agent.Notification;
 public class ReceiveNot extends Notification {
   
   private GetListener callback;
+  
+  private boolean noAck;
 
   /**
    * @param consumerTag
    * @param callback
    */
-  public ReceiveNot(GetListener callback) {
+  public ReceiveNot(GetListener callback, boolean noAck) {
     super();
     this.callback = callback;
+    this.noAck = noAck;
     persistent = false;
   }
 
   public GetListener getCallback() {
     return callback;
+  }
+
+  public boolean isNoAck() {
+    return noAck;
   }
 
 }
