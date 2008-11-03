@@ -126,6 +126,10 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
         JoramTracing.dbgClient.log(BasicLevel.ERROR, "EXCEPTION:: initIdentity", e);
       throw new JMSException(e.getClass() + ":: " + e.getMessage());
+    } catch (Exception e) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+        JoramTracing.dbgClient.log(BasicLevel.ERROR, "EXCEPTION:: initIdentity", e);
+      throw new JMSException(e.getClass() + ":: " + e.getMessage());
     }
   }
   
