@@ -33,8 +33,4 @@ public class MalformedFrameException extends IOException {
   public MalformedFrameException(String reason) {
     super(reason);
   }
-  
-  public MalformedFrameException(String reason, Throwable e) {
-    super(reason, e);
-  }
 }
