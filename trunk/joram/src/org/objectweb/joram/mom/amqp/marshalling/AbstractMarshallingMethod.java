@@ -54,14 +54,14 @@ public abstract class AbstractMarshallingMethod implements Streamable {
     methodId = getMethodId();
   }
 
-  public static void write(AbstractMarshallingMethod msg, OutputStream os)
+  public static void write(AbstractMarshallingMethod method, OutputStream os)
       throws IOException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "AbstractMarshallingMethod.write(" + msg + ", " + os + ')');
+      logger.log(BasicLevel.DEBUG, "AbstractMarshallingMethod.write(" + method + ", " + os + ')');
     DataOutputStream out = new DataOutputStream(os);
-    AMQPStreamUtil.writeShort(msg.getClassId(), out);
-    AMQPStreamUtil.writeShort(msg.getMethodId(), out);
-    msg.writeTo(out);
+    AMQPStreamUtil.writeShort(method.getClassId(), out);
+    AMQPStreamUtil.writeShort(method.getMethodId(), out);
+    method.writeTo(out);
   }
 
   public static AbstractMarshallingMethod read(InputStream is)
