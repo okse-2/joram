@@ -22,7 +22,7 @@
  */
 package org.objectweb.joram.mom.amqp;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import fr.dyade.aaa.agent.Notification;
 
@@ -32,21 +32,21 @@ public class BindNot extends Notification {
   
   private String routingKey;
   
-  private HashMap arguments;
+  private Map arguments;
 
   /**
    * @param queue
    * @param routingKey
    * @param arguments
    */
-  public BindNot(String queue, String routingKey, HashMap arguments) {
+  public BindNot(String queue, String routingKey, Map arguments) {
     super();
     this.queue = queue;
     this.routingKey = routingKey;
     this.arguments = arguments;
   }
 
-  public HashMap getArguments() {
+  public Map getArguments() {
     return arguments;
   }
   public String getQueue() {

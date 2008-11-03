@@ -22,7 +22,7 @@
  */
 package org.objectweb.joram.mom.amqp.proxy.request;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import org.objectweb.joram.mom.amqp.marshalling.AMQP;
 
@@ -36,7 +36,7 @@ public class QueueBindNot extends SyncNotification {
   private String queue; 
   private String exchange;
   private String routingKey; 
-  private HashMap arguments;
+  private Map arguments;
   
   /**
    * @param channelId
@@ -47,7 +47,7 @@ public class QueueBindNot extends SyncNotification {
    * @param arguments
    */
   public QueueBindNot(int channelId, int ticket, String queue, String exchange,
-      String routingKey, HashMap arguments) {
+      String routingKey, Map arguments) {
     super();
     this.channelId = channelId;
     this.ticket = ticket;
@@ -60,7 +60,7 @@ public class QueueBindNot extends SyncNotification {
   public int getChannelId() {
     return channelId;
   }
-  public HashMap getArguments() {
+  public Map getArguments() {
     return arguments;
   }
   public String getExchange() {
