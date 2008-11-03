@@ -279,8 +279,8 @@ public final class Message implements Cloneable, Serializable, Streamable {
      ois = new ObjectInputStream(bais);
      obj = ois.readObject();
     } catch (Exception e) {
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgProxy.log(BasicLevel.ERROR, "ERROR: getObject()", e);
+      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "ERROR: getObject()", e);
       // Don't forget to rethrow the Exception
       throw e;
     } finally {
