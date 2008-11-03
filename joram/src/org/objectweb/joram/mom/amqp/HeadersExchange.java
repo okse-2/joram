@@ -83,6 +83,17 @@ public class HeadersExchange extends ExchangeAgent {
     }
   }
 
+  public void unbind(String queue, String routingKey, Map arguments) {
+    List boundQueues = (List) bindings.get(arguments);
+    if (boundQueues != null) {
+      AgentId queueAgent = (AgentId) NamingAgent.getSingleton().lookup(queue);
+      boundQueues.remove(queueAgent);
+      if (boundQueues.size() == 0) {
+        bindings.remove(arguments);
+      }
+    }
+  }
+
   public void publish(String exchange, String routingKey, BasicProperties properties, byte[] body) {
     Set destQueues = new HashSet();
     Iterator iteratorMaps = bindings.keySet().iterator();

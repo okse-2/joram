@@ -22,7 +22,6 @@
  */
 package org.objectweb.joram.mom.amqp;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.objectweb.joram.mom.amqp.marshalling.AMQP;
@@ -88,6 +87,10 @@ public interface MOMHandler {
    */
   public void queueBind(String queue, String exchange, boolean nowait, String routingKey, Map arguments,
       int ticket, int channelNumber) throws Exception;
+  
+
+  public void queueUnbind(String queue, String exchange, String routingKey, Map arguments, int ticket,
+      int channelNumber) throws Exception;
 
   /**
    * Retrieve a message from a queue.
@@ -173,8 +176,6 @@ public interface MOMHandler {
    * Closes the {@link MOMHandler}
    */
   public void close();
-
-  public void heartbeat(int channelNumber) throws IOException;
 
   public void setConsumer(Consumer consumer);
 

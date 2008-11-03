@@ -29,6 +29,7 @@ import java.util.Map;
 import org.objectweb.joram.mom.amqp.marshalling.AMQP;
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 import org.objectweb.joram.mom.amqp.proxy.request.AccessRequestNot;
+import org.objectweb.joram.mom.amqp.proxy.request.BasicAckNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicCancelNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicConsumeNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicGetNot;
@@ -39,6 +40,7 @@ import org.objectweb.joram.mom.amqp.proxy.request.QueueBindNot;
 import org.objectweb.joram.mom.amqp.proxy.request.QueueDeclareNot;
 import org.objectweb.joram.mom.amqp.proxy.request.QueueDeleteNot;
 import org.objectweb.joram.mom.amqp.proxy.request.QueuePurgeNot;
+import org.objectweb.joram.mom.amqp.proxy.request.QueueUnbindNot;
 
 import fr.dyade.aaa.agent.Channel;
 
@@ -71,10 +73,10 @@ public class JoramMOMHandler implements MOMHandler {
     AMQP.Access.RequestOk accessRes = accessRequest.accessRequest(proxy.getId());
     return accessRes;
   }
-
+  
   public void basicAck(long deliveryTag, boolean multiple, int channelNumber) throws Exception {
-    // TODO Auto-generated method stub
-
+    BasicAckNot basicAck = new BasicAckNot(channelNumber, deliveryTag, multiple);
+    basicAck.basicAck(proxy.getId());
   }
 
   public void basicCancel(String consumerTag, int channelNumber) throws Exception {
@@ -143,16 +145,18 @@ public class JoramMOMHandler implements MOMHandler {
     return tab;
   }
 
-  public void heartbeat(int channelNumber) throws IOException {
-    // TODO Auto-generated method stub
-
-  }
-
   public void queueBind(String queue, String exchange, boolean nowait, String routingKey, Map arguments,
       int ticket, int channelNumber) throws Exception {
     QueueBindNot queueBind = new QueueBindNot(channelNumber, ticket, queue, 
-        exchange, routingKey, new HashMap());
+        exchange, routingKey, arguments);
     queueBind.queueBind(proxy.getId());
+  }
+
+  public void queueUnbind(String queue, String exchange, String routingKey, Map arguments, int ticket,
+      int channelNumber) throws Exception {
+    QueueUnbindNot queueUnbind = new QueueUnbindNot(channelNumber, ticket, queue, exchange, routingKey,
+        arguments);
+    queueUnbind.queueUnbind(proxy.getId());
   }
 
   public AMQP.Queue.DeclareOk queueDeclare(String queueName, boolean passive, boolean durable,

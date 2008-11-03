@@ -54,6 +54,8 @@ public abstract class ExchangeAgent extends Agent {
       doReact((PublishNot) not);
     } else if (not instanceof BindNot) {
       doReact((BindNot) not);
+    } else if (not instanceof UnbindNot) {
+      doReact((UnbindNot) not);
     } else if (not instanceof DeleteNot) {
       doReact((DeleteNot) not, from);
     } else if (not instanceof UnknownAgent) {
@@ -83,6 +85,10 @@ public abstract class ExchangeAgent extends Agent {
     bind(not.getQueue(), not.getRoutingKey(), not.getArguments());
   }
   
+  private void doReact(UnbindNot not) {
+    unbind(not.getQueue(), not.getRoutingKey(), not.getArguments());
+  }
+  
   public abstract void setArguments(Map arguments);
 
   public abstract void doReact(UnknownAgent not, AgentId from);
@@ -90,6 +96,8 @@ public abstract class ExchangeAgent extends Agent {
   public abstract void publish(String exchange, String routingKey, BasicProperties properties, byte[] body);
 
   public abstract void bind(String queue, String routingKey, Map arguments);
+
+  public abstract void unbind(String queue, String routingKey, Map arguments);
   
   public abstract boolean isUnused();
 

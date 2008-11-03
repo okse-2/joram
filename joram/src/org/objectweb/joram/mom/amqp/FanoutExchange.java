@@ -56,6 +56,11 @@ public class FanoutExchange extends ExchangeAgent {
     }
   }
 
+  public void unbind(String queue, String routingKey, Map arguments) {
+    AgentId queueAgent = (AgentId) NamingAgent.getSingleton().lookup(queue);
+    boundQueues.remove(queueAgent);
+  }
+
   public void publish(String exchange, String routingKey, BasicProperties properties, byte[] body) {
     Iterator it = boundQueues.iterator();
     while (it.hasNext()) {
