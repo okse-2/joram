@@ -32,8 +32,6 @@ import java.io.ObjectOutput;
 import java.io.OutputStream;
 import java.util.Hashtable;
 
-import javax.jms.JMSException;
-
 import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.joram.shared.stream.Streamable;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -70,9 +68,9 @@ public abstract class Identity implements Externalizable, Streamable {
    * set the identity.
    * @param user
    * @param passwd
-   * @throws JMSException
+   * @throws Exception
    */
-  public abstract void setIdentity(String user, String passwd) throws JMSException;
+  public abstract void setIdentity(String user, String passwd) throws Exception;
   
   /**
    * check the identity.
@@ -209,7 +207,7 @@ public abstract class Identity implements Externalizable, Streamable {
                            OutputStream os) throws IOException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,  "Identity.write: " + identity);
-
+   
     if (identity == null) {
       StreamUtil.writeTo(NULL_CLASS_ID, os);
     } else {
