@@ -25,7 +25,6 @@ package org.objectweb.joram.mom.proxies;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 
-import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.mom.dest.AdminTopic;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
@@ -162,12 +161,12 @@ public class ConnectionManager {
    * @param adminPassword     Password of the admin.
    * @param identityClassName identity class name.
    * @return identity  admin Identity.
-   * @throws AdminException
+   * @throws Exception
    */
   private static Identity createIdentity(
       String adminName, 
       String adminPassword, 
-      String identityClassName) throws AdminException {
+      String identityClassName) throws Exception {
     Identity identity = null;
     try {
       Class clazz = Class.forName(identityClassName);
@@ -179,7 +178,7 @@ public class ConnectionManager {
     } catch (Exception e) {
       if (JoramTracing.dbgProxy.isLoggable(BasicLevel.ERROR))
         JoramTracing.dbgProxy.log(BasicLevel.ERROR, "EXCEPTION:: ConnectionManager.createIdentity: ", e);
-      throw new AdminException(e.getMessage());
+      throw new Exception(e.getMessage());
     }
     return identity;
   }
