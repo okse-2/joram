@@ -26,9 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import javax.jms.JMSException;
-import javax.jms.JMSSecurityException;
-
 import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -66,7 +63,7 @@ public class SimpleIdentity extends Identity {
   /* (non-Javadoc)
    * @see org.objectweb.joram.shared.security.Identity#setIdentity(java.lang.String, java.lang.String)
    */
-  public void setIdentity(String user, String passwd) throws JMSException {
+  public void setIdentity(String user, String passwd) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "setIdentity(" + user + ", ****)");
     this.user = user;
@@ -83,7 +80,7 @@ public class SimpleIdentity extends Identity {
     if (! (identity instanceof SimpleIdentity)) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "check : SimpleIdentity is not an instance of " + identity);
-      throw new JMSSecurityException("check : SimpleIdentity is not an instance of " + identity);
+      throw new Exception("check : SimpleIdentity is not an instance of " + identity);
     }
     
     if (! getUserName().equals(identity.getUserName())) {
@@ -91,7 +88,7 @@ public class SimpleIdentity extends Identity {
         logger.log(BasicLevel.ERROR, 
             "Invalid user [" + classnames[getClassId()] +':' + getUserName() + 
             "] wait [" + classnames[getClassId()] +':' + identity.getUserName() + "]");
-      throw new JMSSecurityException(
+      throw new Exception(
           "Invalid user [" + classnames[getClassId()] +':' + getUserName() + 
           "] wait [" + classnames[getClassId()] +':' + identity.getUserName() + "]");
     }
@@ -99,13 +96,13 @@ public class SimpleIdentity extends Identity {
       if (getCredential() instanceof String) {
         if (logger.isLoggable(BasicLevel.ERROR))
           logger.log(BasicLevel.ERROR, "Invalid password for user [" + identity.getUserName() + "]");
-        throw new JMSSecurityException("Invalid password for user [" + identity.getUserName() + "]");
+        throw new Exception("Invalid password for user [" + identity.getUserName() + "]");
       } else {
         if (logger.isLoggable(BasicLevel.ERROR))
           logger.log(BasicLevel.ERROR, 
               "Invalid authentication class for user [" + identity.getUserName() + 
               "] wait Identity class : " + classnames[getClassId()]);
-        throw new JMSSecurityException(
+        throw new Exception(
             "Invalid authentication class for user [" + identity.getUserName() + 
             "] wait Identity class : " + classnames[getClassId()]);
       }

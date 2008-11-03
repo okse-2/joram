@@ -52,8 +52,6 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Set;
 
-import javax.jms.JMSException;
-import javax.jms.JMSSecurityException;
 import javax.naming.Context;
 import javax.security.auth.Subject;
 import javax.security.auth.login.AccountExpiredException;
@@ -94,7 +92,7 @@ public class JonasIdentity extends Identity {
   /* (non-Javadoc)
    * @see org.objectweb.joram.shared.security.Identity#setIdentity(java.lang.String, java.lang.String)
    */
-  public void setIdentity(String user, String passwd) throws JMSException {
+  public void setIdentity(String user, String passwd) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "JonasIdentity.setIdentity(" + user + ", ****)");
 
@@ -107,7 +105,7 @@ public class JonasIdentity extends Identity {
     } catch (LoginException e) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "EXCEPTION setIdentity::",e);
-      throw new JMSException(e.getMessage());
+      throw new Exception(e.getMessage());
     }
 
     // Negotiate a login via this LoginContext
@@ -121,24 +119,24 @@ public class JonasIdentity extends Identity {
       if (subject == null) {
         if (logger.isLoggable(BasicLevel.ERROR))
           logger.log(BasicLevel.ERROR, "No subject for the user " + principal);
-        throw new JMSException("No subject for the user " + principal);
+        throw new Exception("No subject for the user " + principal);
       }
     } catch (AccountExpiredException e) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "Account expired for the user " + principal, e);
-      throw new JMSException("Account expired for the user " + principal, e.getMessage());
+      throw new Exception("Account expired for the user " + principal, e);
     } catch (CredentialExpiredException e) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "Credential expired for the user " + principal, e);
-      throw new JMSException("Credential expired for the user " + principal, e.getMessage());
+      throw new Exception("Credential expired for the user " + principal, e);
     } catch (FailedLoginException e) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "Failed Login for the user " + principal, e);
-      throw new JMSException("Failed Login for the user " + principal, e.getMessage());
+      throw new Exception("Failed Login for the user " + principal, e);
     } catch (LoginException e) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "Login exception for the user " + principal, e);
-      throw new JMSException("Login exception for the user " + principal, e.getMessage());
+      throw new Exception("Login exception for the user " + principal, e);
     }
   }
    
@@ -388,7 +386,7 @@ public class JonasIdentity extends Identity {
     if (! (identity instanceof JonasIdentity)) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "check : JonasIdentity is not an instance of " + identity);
-      throw new JMSSecurityException("check : JonasIdentity is not an instance of " + identity);
+      throw new Exception("check : JonasIdentity is not an instance of " + identity);
     }
 
     return validate();
