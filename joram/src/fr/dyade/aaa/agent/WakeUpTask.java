@@ -3,7 +3,6 @@ package fr.dyade.aaa.agent;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.Timer;
 import fr.dyade.aaa.util.TimerTask;
 
 /**
@@ -11,7 +10,7 @@ import fr.dyade.aaa.util.TimerTask;
  * to activate the agent.
  */
 public class WakeUpTask extends TimerTask {
-  
+
   private AgentId destId;
   private Logger logger;
   private Class wakeUpNot;
@@ -41,8 +40,7 @@ public class WakeUpTask extends TimerTask {
   /**
    * Schedules the wake up task for execution after the given period.
    * 
-   * @param period
-   *          Delay in ms before waking up.
+   * @param period Delay in ms before waking up.
    */
   public void schedule(long period) {
     // Don't schedule on HA slaves.
@@ -51,7 +49,7 @@ public class WakeUpTask extends TimerTask {
 
     if (period != -1) {
       try {
-        Timer timer = AgentServer.getTimer();
+        timer = AgentServer.getTimer();
         timer.schedule(this, period);
       } catch (Exception exc) {
         if (logger.isLoggable(BasicLevel.WARN))
