@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002 - ScalAgent Distributed Technologies
+ * Copyright (C) 2002 - 2008 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,15 +21,14 @@
 package fr.dyade.aaa.util;
 
 /**
- * The <code>TimerTask</code> class is the base class for implementing
- * tasks run by a <code>Timer</code> instance.
- *
+ * The <code>TimerTask</code> class is the base class for implementing tasks run
+ * by a <code>Timer</code> instance.
+ * 
  * @see Timer
  */
-public abstract class TimerTask
-{
+public abstract class TimerTask {
   /** The task's timer reference. */
-  Timer timer;
+  protected Timer timer;
   /** The task's wake up time. */
   long wakeupTime;
   /** <code>true</code> if the task is the next scheduled. */
@@ -40,9 +39,8 @@ public abstract class TimerTask
   /**
    * Cancels this task by removing it from the timer's tasks list, and
    * interrupting the timer thread if necessary.
-   */ 
-  public boolean cancel()
-  {
+   */
+  public boolean cancel() {
     synchronized (timer) {
       cancelled = true;
 
