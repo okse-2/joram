@@ -49,10 +49,10 @@ public class CollectorAdmin {
     prop.setProperty("collector.period", "300000");
     prop.setProperty("collector.url", url);
     prop.setProperty("collector.type", "" + Message.BYTES);
-    prop.setProperty("com.scalagent.joram.mom.dest.collector.ClassName", "com.scalagent.joram.mom.dest.collector.URLCollector");
+    prop.setProperty("collector.ClassName", "com.scalagent.joram.mom.dest.collector.URLCollector");
     
     Queue queue = Queue.create(0, "queue", "com.scalagent.joram.mom.dest.collector.CollectorQueue", prop);
-    //Topic topic = Topic.create(0, "topic", "com.scalagent.joram.mom.dest.collector.CollectorTopic", prop);
+//    Topic topic = Topic.create(0, "topic", "com.scalagent.joram.mom.dest.collector.CollectorTopic", prop);
     
     User.create("anonymous", "anonymous");
 
