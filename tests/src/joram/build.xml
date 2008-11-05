@@ -1110,7 +1110,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test  the DMQ recovery">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.recovery.Test8"/>
-      <param name="testid" value="1"/>
+      <param name="testid" value="recovery.test8-1"/>
       <param name="jndiconf" value="recovery/jndi.properties"/>
       <param name="a3conf" value="recovery/a3servers3.xml"/>
       <param name="jvmargs" value=""/>
@@ -1121,7 +1121,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test the DMQ recovery. DMQ is on other server">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.recovery.Test8_2"/>
-      <param name="testid" value="2"/>
+      <param name="testid" value="recovery.test8-2"/>
       <param name="jndiconf" value="recovery/jndi.properties"/>
       <param name="a3conf" value="recovery/a3servers3.xml"/>
       <param name="jvmargs" value=""/>
@@ -1132,7 +1132,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test the DMQ recovery">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.recovery.Test8_3"/>
-      <param name="testid" value="3"/>
+      <param name="testid" value="recovery.test8-3"/>
       <param name="jndiconf" value="recovery/jndi.properties"/>
       <param name="a3conf" value="recovery/a3servers3.xml"/>
       <param name="jvmargs" value=""/>
@@ -1147,7 +1147,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="recovery.test9-1" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.recovery.Test9"/>
-      <param name="testid" value="1"/>
+      <param name="testid" value="recovery.test9-1"/>
       <param name="jndiconf" value="recovery/jndi.properties"/>
       <param name="a3conf" value="recovery/a3servers4.xml"/>
       <param name="jvmargs" value="-DMsgSize=10240"/>
@@ -1158,7 +1158,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test recovery with several big message">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.recovery.Test9_2"/>
-      <param name="testid" value="2"/>
+      <param name="testid" value="recovery.test9-2"/>
       <param name="jndiconf" value="recovery/jndi.properties"/>
       <param name="a3conf" value="recovery/a3servers4.xml"/>
       <param name="jvmargs" value="-DMsgSize=10240"/>
@@ -1339,6 +1339,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="joram.client.ConnectionClose"/>
+      <param name="testid" value="client.close1"/>
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -1352,6 +1353,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="joram.client.ConnectionClose4"/>
+      <param name="testid" value="client.close4"/>
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -1365,6 +1367,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="joram.client.ConnectionClose3"/>
+      <param name="testid" value="client.close3"/>
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -1378,6 +1381,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="joram.client.ConnectionClose2"/>
+      <param name="testid" value="client.close2"/>
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -1391,6 +1395,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="joram.client.ClientTest"/>
+      <param name="testid" value="client.test5"/>
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -1404,6 +1409,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="joram.client.ClientTest10"/>
+      <param name="testid" value="client.rqueue"/>
       <param name="jndiconf" value="client/jndi.properties"/>
       <param name="a3conf" value="client/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -1847,6 +1853,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test reconfiguration server">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.reconf.ReconfTest"/>
+      <param name="testid" value="reconf.test"/>
       <param name="jndiconf" value="reconf/jndi.properties"/>
       <param name="a3conf" value="reconf/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -1858,6 +1865,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test reconfiguration server with exception">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.reconf.ReconfTest2"/>
+      <param name="testid" value="reconf.test1"/>
       <param name="jndiconf" value="reconf/jndi.properties"/>
       <param name="a3conf" value="reconf/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -1882,6 +1890,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="perf.asynctest" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.AsyncTest"/>
+      <param name="testid" value="perf.asynctest"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -1899,7 +1908,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test time between sender and receiver with queue or topic in NullTransaction">
     <antcall target="perf.test5-x" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
-      <param name="testid" value="1"/>
+      <param name="testid" value="perf.test5-1"/>
     </antcall>
   </target>
 
@@ -1907,7 +1916,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test time between sender and receiver with queue or topic in NTransaction">
     <antcall target="perf.test5-x" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="testid" value="2"/>
+      <param name="testid" value="perf.test5-2"/>
     </antcall>
   </target>
 
@@ -1970,7 +1979,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="perf.test6-1.1"
           description=" --> queue statistics: transient=false, colocated=true, transacted=false">
     <antcall target="perf.test6-x" inheritAll="true">
-      <param name="testid" value="1.1"/>
+      <param name="testid" value="perf.test6-1.1"/>
       <param name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
       <param name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
       <param name="MsgTransient" value="false"/>
@@ -1981,7 +1990,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="perf.test6-1.2"
           description=" --> queue statistics: transient=true, colocated=true, transacted=false">
     <antcall target="perf.test6-x" inheritAll="true">
-      <param name="testid" value="1.2"/>
+      <param name="testid" value="perf.test6-1.2"/>
       <param name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
       <param name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
       <param name="MsgTransient" value="true"/>
@@ -1992,7 +2001,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="perf.test6-1.3"
           description=" --> queue statistics: transient=false, colocated=false, transacted=false">
     <antcall target="perf.test6-x" inheritAll="true">
-      <param name="testid" value="1.3"/>
+      <param name="testid" value="perf.test6-1.3"/>
       <param name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
       <param name="BaseClass" value="joram.perfs.TcpBaseTest"/>
       <param name="MsgTransient" value="false"/>
@@ -2003,7 +2012,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="perf.test6-1.4"
           description=" --> queue statistics: transient=true, colocated=false, transacted=false">
     <antcall target="perf.test6-x" inheritAll="true">
-      <param name="testid" value="1.4"/>
+      <param name="testid" value="perf.test6-1.4"/>
       <param name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
       <param name="BaseClass" value="joram.perfs.TcpBaseTest"/>
       <param name="MsgTransient" value="true"/>
@@ -2014,7 +2023,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="perf.test6-1.5"
           description=" --> queue statistics: transient=false, colocated=true, transacted=true">
     <antcall target="perf.test6-x" inheritAll="true">
-      <param name="testid" value="1.5"/>
+      <param name="testid" value="perf.test6-1.5"/>
       <param name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
       <param name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
       <param name="MsgTransient" value="false"/>
@@ -2025,7 +2034,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="perf.test6-1.6"
           description=" --> queue statistics: transient=true, colocated=true, transacted=true">
     <antcall target="perf.test6-x" inheritAll="true">
-      <param name="testid" value="1.6"/>
+      <param name="testid" value="perf.test6-1.6"/>
       <param name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
       <param name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
       <param name="MsgTransient" value="true"/>
@@ -2036,7 +2045,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="perf.test6-1.7"
           description=" --> queue statistics: transient=false, colocated=false, transacted=true">
     <antcall target="perf.test6-x" inheritAll="true">
-      <param name="testid" value="1.7"/>
+      <param name="testid" value="perf.test6-1.7"/>
       <param name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
       <param name="BaseClass" value="joram.perfs.TcpBaseTest"/>
       <param name="MsgTransient" value="false"/>
@@ -2047,7 +2056,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="perf.test6-1.8"
           description=" --> queue statistics: transient=true, colocated=false, transacted=true">
     <antcall target="perf.test6-x" inheritAll="true">
-      <param name="testid" value="1.8"/>
+      <param name="testid" value="perf.test6-1.8"/>
       <param name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
       <param name="BaseClass" value="joram.perfs.TcpBaseTest"/>
       <param name="MsgTransient" value="true"/>
@@ -2071,7 +2080,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="perf.test6-2.1"
           description=" --> topic statistics: transient=false, durable=true, colocated=true, transacted=false">
     <antcall target="perf.test6-x" inheritAll="true">
-      <param name="testid" value="2.1"/>
+      <param name="testid" value="perf.test6-2.1"/>
       <param name="Destination" value="org.objectweb.joram.client.jms.Topic"/>
       <param name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
       <param name="MsgTransient" value="false"/>
@@ -2083,7 +2092,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="perf.test6-2.2"
           description=" --> topic statistics: transient=true, durable=false, colocated=true, transacted=false">
     <antcall target="perf.test6-x" inheritAll="true">
-      <param name="testid" value="2.2"/>
+      <param name="testid" value="perf.test6-2.2"/>
       <param name="Destination" value="org.objectweb.joram.client.jms.Topic"/>
       <param name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
       <param name="MsgTransient" value="true"/>
@@ -2095,7 +2104,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="perf.test6-2.3"
           description=" --> topic statistics: transient=false, durable=true, colocated=false, transacted=false">
     <antcall target="perf.test6-x" inheritAll="true">
-      <param name="testid" value="2.3"/>
+      <param name="testid" value="perf.test6-2.3"/>
       <param name="Destination" value="org.objectweb.joram.client.jms.Topic"/>
       <param name="BaseClass" value="joram.perfs.TcpBaseTest"/>
       <param name="MsgTransient" value="false"/>
@@ -2107,7 +2116,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="perf.test6-2.4"
           description=" --> topic statistics: transient=true, durable=false, colocated=false, transacted=false">
     <antcall target="perf.test6-x" inheritAll="true">
-      <param name="testid" value="2.4"/>
+      <param name="testid" value="perf.test6-2.4"/>
       <param name="Destination" value="org.objectweb.joram.client.jms.Topic"/>
       <param name="BaseClass" value="joram.perfs.TcpBaseTest"/>
       <param name="MsgTransient" value="true"/>
@@ -2119,7 +2128,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="perf.test6-2.5"
           description=" --> topic statistics: transient=false, durable=true, colocated=true, transacted=true">
     <antcall target="perf.test6-x" inheritAll="true">
-      <param name="testid" value="2.5"/>
+      <param name="testid" value="perf.test6-2.5"/>
       <param name="Destination" value="org.objectweb.joram.client.jms.Topic"/>
       <param name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
       <param name="MsgTransient" value="false"/>
@@ -2131,7 +2140,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="perf.test6-2.6"
           description=" --> topic statistics: transient=true, durable=true, colocated=true, transacted=true">
     <antcall target="perf.test6-x" inheritAll="true">
-      <param name="testid" value="2.6"/>
+      <param name="testid" value="perf.test6-2.6"/>
       <param name="Destination" value="org.objectweb.joram.client.jms.Topic"/>
       <param name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
       <param name="MsgTransient" value="true"/>
@@ -2143,7 +2152,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="perf.test6-2.7"
           description=" --> topic statistics: transient=false, durable=true, colocated=false, transacted=true">
     <antcall target="perf.test6-x" inheritAll="true">
-      <param name="testid" value="2.7"/>
+      <param name="testid" value="perf.test6-2.7"/>
       <param name="Destination" value="org.objectweb.joram.client.jms.Topic"/>
       <param name="BaseClass" value="joram.perfs.TcpBaseTest"/>
       <param name="MsgTransient" value="false"/>
@@ -2155,7 +2164,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="perf.test6-2.8"
           description=" --> topic statistics: transient=true, durable=true, colocated=false, transacted=true">
     <antcall target="perf.test6-x" inheritAll="true">
-      <param name="testid" value="2.8"/>
+      <param name="testid" value="perf.test6-2.8"/>
       <param name="Destination" value="org.objectweb.joram.client.jms.Topic"/>
       <param name="BaseClass" value="joram.perfs.TcpBaseTest"/>
       <param name="MsgTransient" value="true"/>
@@ -2165,47 +2174,53 @@ description=" --> launch all exceptionlistener tests">
    </target>
 
   <!-- Configurable performance test -->
-
   <target name="perf.test6-3"
           description=" --> Configurable performance test">
     <antcall target="perf.test6-x" inheritAll="true">
       <param name="testid" value="perf.test6-3"/>
-      <!-- param name="Destination"
-             value="org.objectweb.joram.client.jms.Topic"/ -->
       <param name="Destination"
-             value="org.objectweb.joram.client.jms.Queue"/>
+             value="org.objectweb.joram.client.jms.Topic"/>
+      <!-- param name="Destination"
+             value="org.objectweb.joram.client.jms.Queue"/ -->
       <param name="transaction"
              value="fr.dyade.aaa.util.NTransaction"/>
       <!-- param name="transaction"
              value="fr.dyade.aaa.util.NullTransaction"/ -->
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <!-- param name="engine" value="fr.dyade.aaa.agent.GCEngine"/ -->
-      <param name="BaseClass" value="joram.perfs.TcpBaseTest"/>
-      <!-- param name="BaseClass" value="joram.perfs.ColocatedBaseTest"/ -->
-      <param name="MsgTransient" value="false"/>
-      <param name="SubDurable" value="true"/>
+      <!-- param name="BaseClass" value="joram.perfs.TcpBaseTest"/ -->
+      <param name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
+      <param name="dupsOk" value="true"/>
+      <param name="queueMessageReadMax" value="100"/>
+      <param name="topicAckBufferMax" value="50"/>
+      <param name="implicitAck" value="true"/>
+      <param name="MsgTransient" value="true"/>
+      <param name="SubDurable" value="false"/>
       <param name="Transacted" value="false"/>
       <param name="NbRound" value="100"/>
       <param name="NbMsgPerRound" value="100"/>
       <param name="NbProdCons" value="1"/>
-      <param name="MsgSize" value="100000"/>
+      <param name="MsgSize" value="25"/>
     </antcall>
   </target>
 
   <!-- Generic launcher for performance tests  -->
-
   <target name="init.test6props">
     <property name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
     <property name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
     <property name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
     <property name="engine" value="fr.dyade.aaa.agent.Engine"/>
+    <property name="dupsOk" value="true"/>
+    <property name="queueMessageReadMax" value="100"/>
+    <property name="topicAckBufferMax" value="50"/>
+    <property name="implicitAck" value="true"/>
     <property name="MsgTransient" value="false"/>
     <property name="SubDurable" value="false"/>
     <property name="Transacted" value="false"/>
     <property name="NbRound" value="100"/>
     <property name="NbMsgPerRound" value="100"/>
     <property name="NbProdCons" value="1"/>
-    <property name="MsgSize" value="50"/>
+    <property name="MsgSize" value="25"/>
   </target>
 
   <target name="perf.test6-x" depends="init.test6props,compile">
@@ -2213,9 +2228,10 @@ description=" --> launch all exceptionlistener tests">
       <param name="className" value="joram.perfs.Test6"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
-      <param name="jvmargs" value="-DNTLogFileSize=32 -DNTLogMemorySize=4096 -DDestination=${Destination} -DBaseClass=${BaseClass} -DTransacted=${Transacted} -DNbSender=${NbProdCons} -DNbReceiver=${NbProdCons} -DNbDestination=${NbProdCons} -DNbRound=${NbRound} -DNbMsgPerRound=${NbMsgPerRound} -DMsgSize=${MsgSize} -DMsgTransient=${MsgTransient} -DSubDurable=${SubDurable}"/>
+      <param name="jvmargs" value="-DNTLogFileSize=32 -DNTLogMemorySize=4096 -DDestination=${Destination} -DBaseClass=${BaseClass} -DdupsOk=${dupsOk} -DqueueMessageReadMax=${queueMessageReadMax} -DtopicAckBufferMax=${topicAckBufferMax} -DimplicitAck=${implicitAck} -DMsgTransient=${MsgTransient} -DSubDurable=${SubDurable} -DTransacted=${Transacted} -DNbRound=${NbRound} -DNbMsgPerRound=${NbMsgPerRound} -DNbSender=${NbProdCons} -DNbReceiver=${NbProdCons} -DNbDestination=${NbProdCons} -DMsgSize=${MsgSize}"/>
     </antcall>
   </target>
+
 
   <!-- YJP specific launcher for performance tests  -->
 
