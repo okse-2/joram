@@ -298,7 +298,8 @@ public class User extends AdministeredObject implements UserMBean {
    * <p>
    * The request fails if the user is deleted server side.
    *
-   * @param threshold  The threshold value to be set.
+   * @param threshold  The threshold value to be set (-1 for unsetting
+   *                   previous value).
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
