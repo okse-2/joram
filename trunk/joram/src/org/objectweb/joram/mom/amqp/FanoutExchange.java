@@ -74,12 +74,12 @@ public class FanoutExchange extends ExchangeAgent {
 
   }
 
-  public void doReact(UnknownAgent not, AgentId from) {
+  public void doReact(UnknownAgent not) {
     // Queue must have been deleted: remove it from bindings
     Iterator it = boundQueues.iterator();
     while (it.hasNext()) {
       AgentId queue = (AgentId) it.next();
-      if (queue.equals(from)) {
+      if (queue.equals(not.agent)) {
         it.remove();
         return;
       }
