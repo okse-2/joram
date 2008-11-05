@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.mom.notifications;
 
@@ -30,12 +30,10 @@ import fr.dyade.aaa.agent.AgentId;
  * A <code>SetRightRequest</code> instance is used by a client agent
  * for setting users right on a destination.
  */
-public class SetRightRequest extends AdminRequest
-{
-  /**
-   * 
-   */
+public class SetRightRequest extends AdminRequest {
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+  
   /** Identifier of the user, <code>null</code> stands for all users. */
   private AgentId client;
   /**
@@ -54,8 +52,7 @@ public class SetRightRequest extends AdminRequest
    *          <code>null</code> for all users.
    * @param right  Right to grant, authorized values: -3, -2, -1, 1, 2, 3.
    */
-  public SetRightRequest(String id, AgentId client, int right)
-  {
+  public SetRightRequest(String id, AgentId client, int right) {
     super(id);
     this.client = client;
     this.right = right;
@@ -63,8 +60,7 @@ public class SetRightRequest extends AdminRequest
 
  
   /** Returns the AgentId of the client which right is set. */
-  public AgentId getClient()
-  {
+  public AgentId getClient() {
     return client;
   }
 
@@ -73,8 +69,7 @@ public class SetRightRequest extends AdminRequest
    * (un)setting a writing permission, (-)1 for (un)setting a reading
    * permission, and 0 for removing all the user's permissions.
    */
-  public int getRight()
-  {
+  public int getRight() {
     return right;
   }
 } 
