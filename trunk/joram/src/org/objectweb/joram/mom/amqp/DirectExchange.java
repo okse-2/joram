@@ -96,7 +96,7 @@ public class DirectExchange extends ExchangeAgent {
 
   }
 
-  public void doReact(UnknownAgent not, AgentId from) {
+  public void doReact(UnknownAgent not) {
     // Queue must have been deleted: remove it from bindings
     Iterator iteratorLists = bindings.values().iterator();
     while (iteratorLists.hasNext()) {
@@ -104,7 +104,7 @@ public class DirectExchange extends ExchangeAgent {
       Iterator iteratorQueues = boundQueues.iterator();
       while (iteratorQueues.hasNext()) {
         AgentId queue = (AgentId) iteratorQueues.next();
-        if (queue.equals(from)) {
+        if (queue.equals(not.agent)) {
           iteratorQueues.remove();
           break;
         }

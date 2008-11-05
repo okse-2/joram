@@ -59,7 +59,7 @@ public abstract class ExchangeAgent extends Agent {
     } else if (not instanceof DeleteNot) {
       doReact((DeleteNot) not, from);
     } else if (not instanceof UnknownAgent) {
-      doReact((UnknownAgent) not, from);
+      doReact((UnknownAgent) not);
     } else {
       super.react(from, not);
     }
@@ -91,7 +91,7 @@ public abstract class ExchangeAgent extends Agent {
   
   public abstract void setArguments(Map arguments);
 
-  public abstract void doReact(UnknownAgent not, AgentId from);
+  public abstract void doReact(UnknownAgent not);
   
   public abstract void publish(String exchange, String routingKey, BasicProperties properties, byte[] body);
 
