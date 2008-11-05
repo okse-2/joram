@@ -8,7 +8,6 @@
      <service class="org.objectweb.joram.mom.proxies.ConnectionManager" args="root root"/>
      <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" args="16010"/>
      <service class="fr.dyade.aaa.jndi2.server.JndiServer" args="16400"/>
-     <service class="com.scalagent.scheduler.Scheduler" args=""/>
   </server>
  </config>
 				  
