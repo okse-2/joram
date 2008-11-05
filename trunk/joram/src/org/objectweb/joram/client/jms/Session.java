@@ -63,12 +63,6 @@ import fr.dyade.aaa.util.Debug;
 public class Session implements javax.jms.Session {
 
   public static Logger logger = Debug.getLogger(Session.class.getName());
-  
-  
-  public static final String RECEIVE_ACK =
-      "org.objectweb.joram.client.jms.receiveAck";
-
-  public static boolean receiveAck = Boolean.getBoolean(RECEIVE_ACK);
 
   /**
    * Status of the session
@@ -265,18 +259,57 @@ public class Session implements javax.jms.Session {
    * Used to synchronize the method close()
    */
   private Closer closer;
+
+  /**
+   *  Indicates whether the messages consumed are implicitly acknowledged
+   * or not. When true messages are immediately removed from queue when
+   * delivered.
+   */
+  private boolean implicitAck;
   
+  /** 
+   *  Indicates whether the messages consumed are implicitly acknowledged
+   * or not. If true messages are immediately removed from queue when
+   * delivered.
+   * <p>
+   *  This attribute is inherited from Connection at initialization,
+   * by default false. 
+   *
+   * @return true if messages produced are implicitly acknowledged.
+   *
+   * @see FactoryParameters.implicitAck
+   */
+  public boolean isImplicitAck() {
+    return implicitAck;
+  }
+
+  /**
+   *  Sets implicit acknowledge for this session.
+   * <p>
+   *  Determines whether the messages produced are implicitly acknowledged
+   * or not. If set to true the messages are immediately removed from queue
+   * when delivered.
+   * <p>
+   *  This attribute is inherited from Connection at initialization,
+   * by default false. 
+   * 
+   * @param implicitAck if true sets implicit acknowledge for this session.
+   */
+  public void setImplicitAck(boolean implicitAck) {
+    this.implicitAck = implicitAck;
+  }
+
   /**
    *  Indicates whether the messages produced are asynchronously sent
-   * or not (without or with acknowledgement).
+   * or not (without or with acknowledgment).
    */
   private boolean asyncSend;
 
   /** 
    *  Indicates whether the messages produced are asynchronously sent
-   * or not (without or with acknowledgement).
+   * or not (without or with acknowledgment).
    * <p>
-   *  This attribute is inherited from Connection at initialisation,
+   *  This attribute is inherited from Connection at initialization,
    * by default false. 
    *
    * @return true if messages produced are asynchronously sent.
@@ -598,6 +631,7 @@ public class Session implements javax.jms.Session {
     
     // Retrieves default parameters from connection. The user can configure
     // the session through get/set methods.
+    implicitAck = cnx.getImplicitAck();
     asyncSend = cnx.getAsyncSend();
     queueMessageReadMax = cnx.getQueueMessageReadMax();
     topicAckBufferMax = cnx.getTopicAckBufferMax();
@@ -1676,13 +1710,11 @@ public class Session implements javax.jms.Session {
       ConsumerReceiveRequest request =
         new ConsumerReceiveRequest(targetName, selector, 
                                    requestTimeToLive, queueMode);
-      if (receiveAck) request.setReceiveAck(true);
+      if (implicitAck) request.setReceiveAck(true);
       reply = (ConsumerMessages) receiveRequestor.request(request, waitTimeOut);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(
-          BasicLevel.DEBUG, 
-          " -> reply = " + reply);
+        logger.log(BasicLevel.DEBUG, " -> reply = " + reply);
         
       synchronized (this) {
         // The session may have been 
@@ -1701,7 +1733,7 @@ public class Session implements javax.jms.Session {
             String msgId = msg.getJMSMessageID();;
             
             // Auto ack: acknowledging the message:
-            if (autoAck && ! receiveAck) {
+            if (autoAck && ! implicitAck) {
               ConsumerAckRequest req = new ConsumerAckRequest(targetName, queueMode);
               req.addId(msgId);
               mtpx.sendRequest(req);

@@ -36,21 +36,47 @@ import fr.dyade.aaa.util.SocketFactory;
  * A <code>FactoryParameters</code> instance holds a
  * <code>&lt;XA&gt;ConnectionFactory</code> configuration parameters.
  */
-public class FactoryParameters implements java.io.Serializable {
-  /**
-   * 
-   */
+public class FactoryParameters implements java.io.Serializable, Cloneable {
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   /** Name of host hosting the server to create connections with. */
   private String host;
+
+  /**
+   * Returns the name of host hosting the server to create connections with.
+   *
+   * @return The name of host hosting the server.
+   */
+  public String getHost() {
+    return host;
+  }
+
   /** Port to be used for accessing the server. */
   private int port;
 
   /**
-   * url to connect to joram ha
+   * Returns the port to be used for accessing the server.
+   *
+   * @return The port to be used for accessing the server.
+   */
+  public int getPort() {
+    return port;
+  }
+
+  /**
+   * url needed to connect to joram HA
    */
   private String url;
+
+  /**
+   * Returns the url to be used for accessing the server.
+   *
+   * @return The url to be used for accessing the server.
+   */
+  public String getUrl() {
+    return url;
+  }
 
   /**
    *  Enable/disable TCP_NODELAY (disable/enable Nagle's algorithm),
@@ -78,6 +104,8 @@ public class FactoryParameters implements java.io.Serializable {
    * Duration in seconds during which a JMS transacted (non XA) session might
    * be pending; above that duration the session is rolled back and closed;
    * the 0 value means "no timer".
+   * <p>
+   * The default value is 0 (no timer).
    */
   public int txPendingTimer = 0;
   /**
@@ -95,6 +123,13 @@ public class FactoryParameters implements java.io.Serializable {
    * since 1.4, and "fr.dyade.aaa.util.SocketFactory13" for JDK prior to 1.4.
    */
   public String socketFactory = SocketFactory.DefaultFactory;
+  
+  /**
+   *  Determines whether the messages consumed are implicitly acknowledged
+   * or not. When true messages are immediately removed from queue when
+   * delivered.
+   */
+  public boolean implicitAck;
 
   /**
    *  Determines whether the produced messages are asynchronously
@@ -196,35 +231,7 @@ public class FactoryParameters implements java.io.Serializable {
   /**
    * Constructs an empty <code>FactoryParameters</code>.
    */
-  public FactoryParameters() {
-  }
-
-  /**
-   * Returns the name of host hosting the server to create connections with.
-   *
-   * @return The name of host hosting the server.
-   */
-  public String getHost() {
-    return host;
-  }
-
-  /**
-   * Returns the port to be used for accessing the server.
-   *
-   * @return The port to be used for accessing the server.
-   */
-  public int getPort() {
-    return port;
-  }
-
-  /**
-   * Returns the url to be used for accessing the server.
-   *
-   * @return The url to be used for accessing the server.
-   */
-  public String getUrl() {
-    return url;
-  }
+  public FactoryParameters() {}
 
 //   public void toReference(Reference ref) {
 //     toReference(ref, "cf");
@@ -255,6 +262,8 @@ public class FactoryParameters implements java.io.Serializable {
 
     ref.add(new StringRefAddr(prefix + ".socketFactory", socketFactory));
 
+    ref.add(new StringRefAddr(prefix + ".implicitAck", 
+                              new Boolean(implicitAck).toString()));
     ref.add(new StringRefAddr(prefix + ".asyncSend", 
                               new Boolean(asyncSend).toString()));
     ref.add(new StringRefAddr(prefix + ".queueMessageReadMax", 
@@ -297,7 +306,8 @@ public class FactoryParameters implements java.io.Serializable {
     cnxPendingTimer = new Integer((String) ref.get(prefix + ".cnxPT").getContent()).intValue();
 
     socketFactory = (String) ref.get(prefix + ".socketFactory").getContent();
-
+    
+    implicitAck = new Boolean((String) ref.get(prefix + ".implicitAck").getContent()).booleanValue();
     asyncSend = new Boolean((String) ref.get(prefix + ".asyncSend").getContent()).booleanValue();
     queueMessageReadMax = new Integer((String) ref.get(prefix + ".queueMessageReadMax").getContent()).intValue();
     topicAckBufferMax = new Integer((String) ref.get(prefix + ".topicAckBufferMax").getContent()).intValue();
@@ -329,7 +339,8 @@ public class FactoryParameters implements java.io.Serializable {
     h.put(prefix + ".cnxPendingTimer", new Integer(cnxPendingTimer));
 
     h.put(prefix + ".socketFactory", socketFactory);
-
+    
+    h.put(prefix + ".implicitAck", new Boolean(implicitAck));
     h.put(prefix + ".asyncSend", new Boolean(asyncSend));
     h.put(prefix + ".queueMessageReadMax", new Integer(queueMessageReadMax));
     h.put(prefix + ".topicAckBufferMax", new Integer(topicAckBufferMax));
@@ -360,7 +371,8 @@ public class FactoryParameters implements java.io.Serializable {
     cnxPendingTimer = ((Integer) h.get(prefix + ".cnxPendingTimer")).intValue();
 
     socketFactory = (String) h.get(prefix + ".socketFactory");
-
+    
+    implicitAck = ((Boolean) h.get(prefix + ".implicitAck")).booleanValue();
     asyncSend = ((Boolean) h.get(prefix + ".asyncSend")).booleanValue();
     queueMessageReadMax = ((Integer) h.get(prefix + ".queueMessageReadMax")).intValue();
     topicAckBufferMax = ((Integer) h.get(prefix + ".topicAckBufferMax")).intValue();
@@ -373,6 +385,16 @@ public class FactoryParameters implements java.io.Serializable {
     outLocalAddress = (String) h.get(prefix + ".outLocalAddress");
   }
 
+  public Object clone() {
+    Object clone = null;
+    try {
+      clone = super.clone();
+    } catch (CloneNotSupportedException exc) {
+      // Unreachable
+    }
+    return clone;
+  }
+  
   public String toString() {
     return '(' + super.toString() +
       ",host=" + host +
@@ -381,6 +403,7 @@ public class FactoryParameters implements java.io.Serializable {
       ",connectingTimer=" + connectingTimer +
       ",txPendingTimer=" + txPendingTimer +
       ",cnxPendingTimer=" + cnxPendingTimer +
+      ",implicitAck=" + implicitAck +
       ",asyncSend=" + asyncSend +
       ",topicAckBufferMax=" + topicAckBufferMax +
       ",multiThreadSync=" + multiThreadSync +

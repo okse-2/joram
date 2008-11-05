@@ -169,7 +169,9 @@ public class Connection implements javax.jms.Connection {
       logger.log(BasicLevel.DEBUG, 
                  "Connection.<init>(" + factoryParameters +
                  ',' + requestChannel + ')');
-    this.factoryParameters = factoryParameters;
+    // We need to clone the FactoryParameter Object to avoid side-effect with
+    // external modifications.
+    this.factoryParameters = (FactoryParameters) factoryParameters.clone();
     mtpx = new RequestMultiplexer(this,
                                   requestChannel,
                                   factoryParameters.cnxPendingTimer);
@@ -236,10 +238,37 @@ public class Connection implements javax.jms.Connection {
     return (obj instanceof Connection) && (hashCode() == obj.hashCode()) && toString().equals(obj.toString());
   }
 
-  final long getTxPendingTimer() {
+  /**
+   *  Returns the duration in seconds during which a JMS transacted (non XA)
+   * session might be pending; above that duration the session is rolled back
+   * and closed; the 0 value means "no timer".
+   *
+   * @return the duration in seconds during which a JMS transacted (non XA)
+   * session might be pending.
+   *
+   * @see FactoryParameters.txPendingTimer
+   * @see Session.txPendingTimer
+   */
+  public final long getTxPendingTimer() {
     return factoryParameters.txPendingTimer;
   }
   
+  /** 
+   *  Indicates whether the messages consumed are implicitly acknowledged
+   * or not. If true messages are immediately removed from queue when
+   * delivered.
+   * <p>
+   *  This attribute is inherited from FactoryParameters, by default false.
+   *
+   * @return true if messages produced are implicitly acknowledged.
+   *
+   * @see FactoryParameters.implicitAck
+   * @see Session.implicitAck
+   */
+  public final boolean getImplicitAck() {
+    return factoryParameters.implicitAck;
+  }
+
   /** 
    *  Indicates whether the messages produced are asynchronously sent
    * or not (without or with acknowledgement).
@@ -251,7 +280,7 @@ public class Connection implements javax.jms.Connection {
    * @see FactoryParameters.asyncSend
    * @see Session.asyncSend
    */
-  final boolean getAsyncSend() {
+  public final boolean getAsyncSend() {
     return factoryParameters.asyncSend;
   }
   
@@ -267,7 +296,7 @@ public class Connection implements javax.jms.Connection {
    * @see FactoryParameters.queueMessageReadMax
    * @see Session.queueMessageReadMax
    */
-  final int getQueueMessageReadMax() {
+  public final int getQueueMessageReadMax() {
     return factoryParameters.queueMessageReadMax;
   }
   
@@ -283,7 +312,7 @@ public class Connection implements javax.jms.Connection {
    * @see FactoryParameters.topicAckBufferMax
    * @see Session.setTopicAckBufferMax
    */
-  final int getTopicAckBufferMax() {
+  public final int getTopicAckBufferMax() {
     return factoryParameters.topicAckBufferMax;
   }
   
@@ -302,7 +331,7 @@ public class Connection implements javax.jms.Connection {
    * @see FactoryParameters.topicPassivationThreshold
    * @see Session.setTopicPassivationThreshold
    */
-  final int getTopicPassivationThreshold() {
+  public final int getTopicPassivationThreshold() {
     return factoryParameters.topicPassivationThreshold;
   }
   
@@ -320,15 +349,33 @@ public class Connection implements javax.jms.Connection {
    * @see FactoryParameters.topicActivationThreshold
    * @see Session.setTopicActivationThreshold
    */
-  final int getTopicActivationThreshold() {
+  public final int getTopicActivationThreshold() {
     return factoryParameters.topicActivationThreshold;
   }
-
-  final String getOutLocalAddress() {
+  
+  /**
+   * Returns the local IP address on which the TCP connection is activated. 
+   * <p>
+   * This attribute is inherited from FactoryParameters.
+   *  
+   * @return the local IP address on which the TCP connection is activated.
+   *
+   * @see FactoryParameters.outLocalAddress
+   */
+  public final String getOutLocalAddress() {
     return factoryParameters.outLocalAddress;
   }
 
-  final int getOutLocalPort() {
+  /**
+   * Returns the local IP address port on which the TCP connection is activated
+   * <p>
+   * This attribute is inherited from FactoryParameters.
+   *  
+   * @return the local IP address port on which the TCP connection is activated.
+   *
+   * @see FactoryParameters.outLocalPort
+   */
+  public final int getOutLocalPort() {
     return factoryParameters.outLocalPort;
   }
   
