@@ -32,16 +32,23 @@ public class GetSubscriptionMessage extends SubscriptionAdminRequest {
   private static final long serialVersionUID = 1L;
 
   private String subName;
-
   private String msgId;
+  private boolean fullMessage;
 
-  public GetSubscriptionMessage(
-      String userId,
-      String subName,
-      String msgId) {
+  public GetSubscriptionMessage(String userId,
+                                String subName,
+                                String msgId) {
+    this(userId, subName, msgId, true);
+  }
+  
+  public GetSubscriptionMessage(String userId,
+                                String subName,
+                                String msgId,
+                                boolean fullMessage) {
     super(userId);
     this.subName = subName;
     this.msgId = msgId;
+    this.fullMessage = fullMessage;
   }
 
   public GetSubscriptionMessage() { }
@@ -54,6 +61,10 @@ public class GetSubscriptionMessage extends SubscriptionAdminRequest {
     return msgId;
   }
   
+  public final boolean getFullMessage() {
+    return fullMessage;
+  }
+
   protected int getClassId() {
     return GET_SUBSCRIPTION_MESSAGE;
   }
@@ -62,11 +73,13 @@ public class GetSubscriptionMessage extends SubscriptionAdminRequest {
     super.readFrom(is);
     subName = StreamUtil.readStringFrom(is);
     msgId = StreamUtil.readStringFrom(is);
+    fullMessage = StreamUtil.readBooleanFrom(is);
   }
 
   public void writeTo(OutputStream os) throws IOException {
     super.writeTo(os);
     StreamUtil.writeTo(subName, os);
     StreamUtil.writeTo(msgId, os);
+    StreamUtil.writeTo(fullMessage, os);
   }
 }

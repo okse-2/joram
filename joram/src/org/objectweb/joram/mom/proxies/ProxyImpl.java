@@ -2320,13 +2320,18 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     }
     if (cs != null) {
       String msgId = request.getMessageId();
+      
       Message message = null;
-      if (msgId != null) {
+      if (msgId != null)
         message = cs.getMessage(msgId);
-      }
+
       if (message != null) {
-        GetSubscriptionMessageRep reply = 
-          new GetSubscriptionMessageRep(message.getFullMessage());
+        GetSubscriptionMessageRep reply = null;
+        if (request.getFullMessage()) {
+          reply = new GetSubscriptionMessageRep(message.getFullMessage());
+        } else {
+          reply = new GetSubscriptionMessageRep(message.getHeaderMessage());
+        }
         replyToTopic(reply, replyTo, requestMsgId, replyMsgId);
       } else {
         replyToTopic(

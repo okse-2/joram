@@ -331,6 +331,13 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
     return reply.getNumber();
   }
 
+  /**
+   * Returns the identifiers of all messages in this queue.
+   * 
+   * @return The identifiers of all messages in this queue.
+   * 
+   * @see org.objectweb.joram.client.jms.QueueMBean#getMessageIds()
+   */
   public String[] getMessageIds() throws AdminException, ConnectException {
     GetQueueMessageIdsRep reply = 
       (GetQueueMessageIdsRep)AdminModule.doRequest(
@@ -338,18 +345,39 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
     return reply.getMessageIds();
   }
   
-  public javax.jms.Message readMessage(String msgId) throws AdminException, ConnectException, JMSException {
+  /**
+   * Returns a copy of the message.
+   * 
+   * @param msgId         THe identifier of the message.
+   * @return The message
+   * 
+   * @throws AdminException
+   * @throws ConnectException
+   * @throws JMSException
+   */
+  public javax.jms.Message getMessage(String msgId) throws AdminException, ConnectException, JMSException {
     GetQueueMessageRep reply = 
-      (GetQueueMessageRep)AdminModule.doRequest(
-        new GetQueueMessage(agentId, msgId));
+      (GetQueueMessageRep)AdminModule.doRequest(new GetQueueMessage(agentId, msgId, true));
     return Message.wrapMomMessage(null, reply.getMessage());
   }
-
+  
+  /**
+   * @deprecated
+   *
+   * @param msgId
+   * @return
+   * @throws AdminException
+   * @throws ConnectException
+   * @throws JMSException
+   */
+  public javax.jms.Message readMessage(String msgId) throws AdminException, ConnectException, JMSException {
+    return getMessage(msgId);
+  }
+  
   public String getMessageDigest(String msgId)
     throws AdminException, ConnectException, JMSException {
     GetQueueMessageRep reply = 
-      (GetQueueMessageRep)AdminModule.doRequest(
-        new GetQueueMessage(agentId, msgId));
+      (GetQueueMessageRep)AdminModule.doRequest(new GetQueueMessage(agentId, msgId, false));
     Message msg =  Message.wrapMomMessage(null, reply.getMessage());
     StringBuffer strbuf = new StringBuffer();
     strbuf.append("Message: ").append(msg.getJMSMessageID());
@@ -368,8 +396,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
   public Properties getMessageHeader(String msgId)
     throws AdminException, ConnectException, JMSException {
     GetQueueMessageRep reply = 
-      (GetQueueMessageRep)AdminModule.doRequest(
-        new GetQueueMessage(agentId, msgId));
+      (GetQueueMessageRep)AdminModule.doRequest(new GetQueueMessage(agentId, msgId, false));
     Message msg =  Message.wrapMomMessage(null, reply.getMessage());
 
     Properties prop = new Properties();
@@ -401,8 +428,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
   public Properties getMessageProperties(String msgId)
     throws AdminException, ConnectException, JMSException {
     GetQueueMessageRep reply = 
-      (GetQueueMessageRep)AdminModule.doRequest(
-        new GetQueueMessage(agentId, msgId));
+      (GetQueueMessageRep)AdminModule.doRequest(new GetQueueMessage(agentId, msgId, false));
     Message msg =  Message.wrapMomMessage(null, reply.getMessage());
 
     Properties prop = new Properties();
