@@ -41,10 +41,11 @@ import fr.dyade.aaa.agent.WakeUpTask;
  * basically storing messages and delivering them upon clients requests.
  */
 public class CollectorQueueImpl extends QueueImpl implements CollectorDestination, CollectorQueueImplMBean {
-
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+  
   public static Logger logger = Debug.getLogger(CollectorQueueImpl.class.getName());
+  
   public static final String DEFAULT_COLLECTOR = "com.scalagent.joram.mom.dest.collector.URLCollector";
   
   private Properties prop = null;
@@ -66,7 +67,7 @@ public class CollectorQueueImpl extends QueueImpl implements CollectorDestinatio
     setMessageExpiration(prop.getProperty("collector.expirationMessage"));
     setMessagePersistent(prop.getProperty("collector.persistentMessage"));
     
-    String className = prop.getProperty("com.scalagent.joram.mom.dest.collector.ClassName", DEFAULT_COLLECTOR);
+    String className = prop.getProperty("collector.ClassName", DEFAULT_COLLECTOR);
     Class clazz;
     try {
       clazz = Class.forName(className);
