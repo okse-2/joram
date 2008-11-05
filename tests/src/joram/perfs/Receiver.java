@@ -43,7 +43,8 @@ public class Receiver extends BaseTest implements MessageListener {
   boolean dupsOk;
   int queueMessageReadMax;
   int topicAckBufferMax;
-
+  boolean implicitAck;
+  
   Session sess;
   MessageConsumer cons;
   MessageProducer prod;
@@ -57,7 +58,8 @@ public class Receiver extends BaseTest implements MessageListener {
     dupsOk = Boolean.getBoolean("dupsOk");
     queueMessageReadMax = Integer.getInteger("queueMessageReadMax", 1).intValue();
     topicAckBufferMax = Integer.getInteger("topicAckBufferMax", 0).intValue();
-    
+    implicitAck = Boolean.getBoolean("implicitAck");
+
     int sessionMode;
     if (dupsOk) {
       sessionMode = Session.DUPS_OK_ACKNOWLEDGE;
@@ -68,6 +70,7 @@ public class Receiver extends BaseTest implements MessageListener {
     
     ((org.objectweb.joram.client.jms.Session)sess).setQueueMessageReadMax(queueMessageReadMax);
     ((org.objectweb.joram.client.jms.Session)sess).setTopicAckBufferMax(topicAckBufferMax);
+    ((org.objectweb.joram.client.jms.Session)sess).setImplicitAck(implicitAck);
     
     if (durable && dest instanceof Topic) {
       cons = sess.createDurableSubscriber((Topic)dest, "dursub");
@@ -120,10 +123,10 @@ public class Receiver extends BaseTest implements MessageListener {
       if (counter == 0) start = last;
 
       int index = msg.getIntProperty("index");
-      if (index == -1) {
-        xxx += 1;
-        throw new IllegalStateException();
-      }
+//      if (index == -1) {
+//        xxx += 1;
+//        throw new IllegalStateException();
+//      }
       counter += 1;
 
       if (index == 0) {
