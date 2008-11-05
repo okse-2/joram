@@ -1,4 +1,13 @@
 +==============================================================================
+| 2008/11/05 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+  No longer get full message in administration method when only header or
+ properties are required.
++==============================================================================
+| 2008/10/29 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix in DestinationImpl: returns all defined rights for MBean.
++==============================================================================
 | 2008/10/22 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  - Re architecture the Scheduler (remove the agent dependencies).
@@ -19,12 +28,11 @@
 +==============================================================================
 | 2008/10/13 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
-Bug fix: FactoryParameters:
-  add reference if outLocalAddress != null.
+ Bug fix: Correctly handle null value for outLocalAddress in FactoryParameters.
 +==============================================================================
 | 2008/10/02 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
-Bug fix: DemultiplexerDaemon: always call onException on closed connection.
+ Bug fix: always call onException on closed connection (DemultiplexerDaemon).
 +==============================================================================
 | 2008/09/29 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
@@ -35,7 +43,7 @@ Bug fix: DemultiplexerDaemon: always call onException on closed connection.
 +==============================================================================
 | 2008/09/11 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
- - shared.Message : serialVersionUID = 2L
+ - shared.Message : changes serialVersionUID value.
 +==============================================================================
 | 2008/09/11 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
