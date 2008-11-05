@@ -100,16 +100,16 @@ public class Sender extends BaseTest implements Runnable {
         content[i] = (byte) (i & 0xFF);
 
 
-          BytesMessage msg = sess1.createBytesMessage();
-          if (MsgTransient) {
-            msg.setJMSDeliveryMode(javax.jms.DeliveryMode.NON_PERSISTENT);
-            producer.setDeliveryMode(javax.jms.DeliveryMode.NON_PERSISTENT);
-          }
-          msg.writeBytes(content);
-          msg.setLongProperty("time", System.currentTimeMillis());
-          msg.setIntProperty("index", -1);
-          msg.setJMSReplyTo(topic);
-          producer.send(msg);
+//      BytesMessage msg = sess1.createBytesMessage();
+//      if (MsgTransient) {
+//        msg.setJMSDeliveryMode(javax.jms.DeliveryMode.NON_PERSISTENT);
+//        producer.setDeliveryMode(javax.jms.DeliveryMode.NON_PERSISTENT);
+//      }
+//      msg.writeBytes(content);
+//      msg.setLongProperty("time", System.currentTimeMillis());
+//      msg.setIntProperty("index", -1);
+//      msg.setJMSReplyTo(topic);
+//      producer.send(msg);
 
 
 
@@ -117,7 +117,7 @@ public class Sender extends BaseTest implements Runnable {
       for (int i=0; i<NbRound; i++) {
         long start = System.currentTimeMillis();
         for (int j=0; j<NbMsgPerRound; j++) {
-           msg = sess1.createBytesMessage();
+          BytesMessage msg = sess1.createBytesMessage();
           if (MsgTransient) {
             msg.setJMSDeliveryMode(javax.jms.DeliveryMode.NON_PERSISTENT);
             producer.setDeliveryMode(javax.jms.DeliveryMode.NON_PERSISTENT);
