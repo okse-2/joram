@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -82,6 +82,7 @@ public interface Transaction {
    * in a FREE 'ready to use' state.
    */
   void stop();
+  
   /**
    * Close the transaction module.
    * It waits all transactions termination, the module will be initialized
