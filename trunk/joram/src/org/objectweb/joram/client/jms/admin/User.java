@@ -26,6 +26,7 @@ package org.objectweb.joram.client.jms.admin;
 import java.net.ConnectException;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Properties;
 import java.util.Vector;
 
 import javax.jms.JMSException;
@@ -41,6 +42,8 @@ import org.objectweb.joram.shared.admin.CreateUserReply;
 import org.objectweb.joram.shared.admin.CreateUserRequest;
 import org.objectweb.joram.shared.admin.DeleteSubscriptionMessage;
 import org.objectweb.joram.shared.admin.DeleteUser;
+import org.objectweb.joram.shared.admin.GetQueueMessage;
+import org.objectweb.joram.shared.admin.GetQueueMessageRep;
 import org.objectweb.joram.shared.admin.GetSubscription;
 import org.objectweb.joram.shared.admin.GetSubscriptionMessage;
 import org.objectweb.joram.shared.admin.GetSubscriptionMessageIds;
@@ -471,16 +474,90 @@ public class User extends AdministeredObject implements UserMBean {
   }
 
   public String[] getMessageIds(String subName) throws AdminException, ConnectException {
-    GetSubscriptionMessageIdsRep reply = (GetSubscriptionMessageIdsRep) AdminModule.doRequest(new GetSubscriptionMessageIds(proxyId, subName));
+    GetSubscriptionMessageIdsRep reply =
+      (GetSubscriptionMessageIdsRep) AdminModule.doRequest(new GetSubscriptionMessageIds(proxyId, subName));
     return reply.getMessageIds();
   }
 
+  public Message getMessage(String subName,
+                            String msgId) throws AdminException, ConnectException, JMSException {
+    GetSubscriptionMessageRep reply = 
+      (GetSubscriptionMessageRep) AdminModule.doRequest(new GetSubscriptionMessage(proxyId, subName, msgId, true));
+    return Message.wrapMomMessage(null, reply.getMessage());
+  }
+  
+  public String getMessageDigest(String subName,
+                                 String msgId) throws AdminException, ConnectException, JMSException {
+    GetSubscriptionMessageRep reply = 
+      (GetSubscriptionMessageRep) AdminModule.doRequest(new GetSubscriptionMessage(proxyId, subName, msgId, true));
+    Message msg =  Message.wrapMomMessage(null, reply.getMessage());
+    
+    StringBuffer strbuf = new StringBuffer();
+    strbuf.append("Message: ").append(msg.getJMSMessageID());
+    strbuf.append("\n\tTo: ").append(msg.getJMSDestination());
+    strbuf.append("\n\tCorrelationId: ").append(msg.getJMSCorrelationID());
+    strbuf.append("\n\tDeliveryMode: ").append(msg.getJMSDeliveryMode());
+    strbuf.append("\n\tExpiration: ").append(msg.getJMSExpiration());
+    strbuf.append("\n\tPriority: ").append(msg.getJMSPriority());
+    strbuf.append("\n\tRedelivered: ").append(msg.getJMSRedelivered());
+    strbuf.append("\n\tReplyTo: ").append(msg.getJMSReplyTo());
+    strbuf.append("\n\tTimestamp: ").append(msg.getJMSTimestamp());
+    strbuf.append("\n\tType: ").append(msg.getJMSType());
+    return strbuf.toString();
+}
+
+  public Properties getMessageHeader(String subName,
+                                     String msgId) throws AdminException, ConnectException, JMSException {
+    GetSubscriptionMessageRep reply = 
+      (GetSubscriptionMessageRep) AdminModule.doRequest(new GetSubscriptionMessage(proxyId, subName, msgId, false));
+    Message msg =  Message.wrapMomMessage(null, reply.getMessage());
+
+    Properties prop = new Properties();
+    prop.setProperty("JMSMessageID", msg.getJMSMessageID());
+    prop.setProperty("JMSDestination", msg.getJMSDestination().toString());
+    if (msg.getJMSCorrelationID() != null)
+      prop.setProperty("JMSCorrelationID", msg.getJMSCorrelationID());
+    prop.setProperty("JMSDeliveryMode",
+                     new Integer(msg.getJMSDeliveryMode()).toString());
+    prop.setProperty("JMSExpiration",
+                     new Long(msg.getJMSExpiration()).toString());
+    prop.setProperty("JMSPriority",
+                     new Integer(msg.getJMSPriority()).toString());
+    prop.setProperty("JMSRedelivered",
+                     new Boolean(msg.getJMSRedelivered()).toString());
+    if (msg.getJMSReplyTo() != null)
+      prop.setProperty("JMSReplyTo", msg.getJMSReplyTo().toString());
+    prop.setProperty("JMSTimestamp",
+                     new Long(msg.getJMSTimestamp()).toString());
+    if (msg.getJMSType() != null)
+      prop.setProperty("JMSType", msg.getJMSType());
+
+    // Adds optional header properties
+    msg.getOptionalHeader(prop);
+
+    return prop;
+}
+
+public Properties getMessageProperties(String subName,
+                                       String msgId)
+  throws AdminException, ConnectException, JMSException {
+  GetSubscriptionMessageRep reply = 
+    (GetSubscriptionMessageRep) AdminModule.doRequest(new GetSubscriptionMessage(proxyId, subName, msgId, false));
+  Message msg =  Message.wrapMomMessage(null, reply.getMessage());
+
+  Properties prop = new Properties();
+  msg.getProperties(prop);
+
+  return prop;
+}
+
+  /**
+   * @deprecated
+   * @see org.objectweb.joram.client.jms.admin.UserMBean#readMessage(java.lang.String, java.lang.String)
+   */
   public Message readMessage(String subName,
                              String msgId) throws AdminException, ConnectException, JMSException {
-    GetSubscriptionMessageRep reply = (GetSubscriptionMessageRep) AdminModule.doRequest(new GetSubscriptionMessage(proxyId,
-                                                                                                                   subName,
-                                                                                                                   msgId));
-    return Message.wrapMomMessage(null, reply.getMessage());
+    return getMessage(subName, msgId);
   }
 
   public void deleteMessage(

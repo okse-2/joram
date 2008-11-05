@@ -32,16 +32,26 @@ public class GetQueueMessage extends QueueAdminRequest {
   private static final long serialVersionUID = 1L;
 
   private String msgId;
+  private boolean fullMessage;
 
   public GetQueueMessage(String queueId, String msgId) {
+    this(queueId, msgId, true);
+  }
+
+  public GetQueueMessage(String queueId, String msgId, boolean fullMessage) {
     super(queueId);
     this.msgId = msgId;
+    this.fullMessage = fullMessage;
   }
-  
-  public GetQueueMessage() { }
+ 
+  public GetQueueMessage() {}
   
   public final String getMessageId() {
     return msgId;
+  }
+  
+  public final boolean getFullMessage() {
+    return fullMessage;
   }
   
   protected int getClassId() {
@@ -51,10 +61,12 @@ public class GetQueueMessage extends QueueAdminRequest {
   public void readFrom(InputStream is) throws IOException {
     super.readFrom(is);
     msgId = StreamUtil.readStringFrom(is);
+    fullMessage = StreamUtil.readBooleanFrom(is);
   }
 
   public void writeTo(OutputStream os) throws IOException {
     super.writeTo(os);
     StreamUtil.writeTo(msgId, os);
+    StreamUtil.writeTo(fullMessage, os);
   }
 }

@@ -821,10 +821,15 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     }
 
     if (message != null) {
-      replyToTopic(new GetQueueMessageRep(message.getFullMessage()),
-                   replyTo, requestMsgId, replyMsgId);
+      GetQueueMessageRep reply = null;
+      if (request.getFullMessage()) {
+        reply = new GetQueueMessageRep(message.getFullMessage());
+      } else {
+        reply = new GetQueueMessageRep(message.getHeaderMessage());
+      }
+      replyToTopic(reply, replyTo, requestMsgId, replyMsgId);
     } else {
-      replyToTopic(new org.objectweb.joram.shared.admin.AdminReply(false, "Message not found."),
+      replyToTopic(new org.objectweb.joram.shared.admin.AdminReply(false, "Unknown message " + request.getMessageId()),
                    replyTo, requestMsgId, replyMsgId);
     }
   }

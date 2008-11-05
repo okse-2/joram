@@ -26,6 +26,8 @@ import org.objectweb.joram.client.jms.Message;
 import org.objectweb.joram.client.jms.admin.Subscription;
 import java.net.ConnectException;
 import java.util.List;
+import java.util.Properties;
+
 import javax.jms.JMSException;
 
 public interface UserMBean {
@@ -93,8 +95,14 @@ public interface UserMBean {
   public String[] getMessageIds(String subName)
     throws ConnectException, AdminException;
 
-  public Message readMessage(String subName, String msgId)
-    throws AdminException, ConnectException, JMSException;
+  public String getMessageDigest(String subName,
+                                 String msgId) throws AdminException, ConnectException, JMSException;
+
+  public Properties getMessageHeader(String subName,
+                                     String msgId) throws ConnectException, AdminException, JMSException;
+
+  public Properties getMessageProperties(String subName,
+                                         String msgId) throws ConnectException, AdminException, JMSException;
 
   public void deleteMessage(String subName, String msgId)
     throws AdminException, ConnectException;

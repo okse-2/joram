@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class SubscriptionAdminRequest extends UserAdminRequest {
+public abstract class SubscriptionAdminRequest extends UserAdminRequest {
   private static final long serialVersionUID = 1L;
 
   public SubscriptionAdminRequest(String userId) {
