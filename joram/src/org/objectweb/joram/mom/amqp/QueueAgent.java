@@ -23,7 +23,9 @@
 package org.objectweb.joram.mom.amqp;
 
 import java.io.Serializable;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
@@ -46,7 +48,11 @@ public class QueueAgent extends Agent {
   
   private boolean autodelete;
   
+  private long msgCounter;
+  
   private LinkedList toDeliver;
+  
+  private LinkedList toAck;
   
   private LinkedList consumers;
   
@@ -56,6 +62,7 @@ public class QueueAgent extends Agent {
     this.autodelete = autodelete;
     this.toDeliver = new LinkedList();
     this.consumers = new LinkedList();
+    this.toAck = new LinkedList();
   }
   
   protected void agentInitialize(boolean firstTime) throws Exception {
@@ -78,6 +85,10 @@ public class QueueAgent extends Agent {
       doReact((DeleteNot) not, from);
     } else if (not instanceof ClearQueueNot) {
       doReact((ClearQueueNot) not);
+    } else if (not instanceof AckNot) {
+      doReact((AckNot) not);
+    } else if (not instanceof RecoverNot) {
+      doReact((RecoverNot) not);
     } else {
       super.react(from, not);
     }
@@ -87,18 +98,24 @@ public class QueueAgent extends Agent {
   }
 
   private void doReact(ReceiveNot not) {
-    receive(not.getCallback());
+    receive(not.getChannelId(), not.getCallback(), not.getProxy(), not.isNoAck());
   }
   
-  public void receive(GetListener consumer) {
+  public void receive(int channelId, GetListener consumer, ProxyAgent proxy, boolean noAck) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "QueueAgent.receive()");
     if (toDeliver.size() > 0) {
       Message msg = (Message) toDeliver.removeFirst();
-      consumer.handleGet(0, false, msg.exchange, msg.routingKey, toDeliver.size(), msg.properties, msg.body);
+      if (!noAck) {
+        toAck.addLast(msg);
+      }
+      // TODO should be a notification sent to proxy
+      long deliveryTag = proxy.getDeliveryTag(getId(), channelId, msgCounter, noAck);
+      consumer.handleGet(deliveryTag, msg.redelivered, msg.exchange, msg.routingKey, toDeliver.size(),
+          msg.properties, msg.body);
     } else {
       // Blocking get
-      //      consumers.addLast(new DeliverContext(consumer));
+      // consumers.addLast(new DeliverContext(consumer, noAck));
 
       // Get empty
       consumer.handleGet(-1, false, null, null, 0, null, null);
@@ -107,42 +124,56 @@ public class QueueAgent extends Agent {
   }
 
   private void doReact(ConsumeNot not) {
-    consume(not.getCallback(), not.getConsumerTag());
+    consume(not.getChannelId(), not.getCallback(), not.getProxy(), not.getConsumerTag(), not.isNoAck());
   }
 
-  public void consume(DeliveryListener consumer, String consumerTag) {
+  public void consume(int channelId, DeliveryListener consumer, ProxyAgent proxy, String consumerTag,
+      boolean noAck) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "QueueAgent.consume()");
     while (toDeliver.size() > 0) {
       Message msg = (Message) toDeliver.removeFirst();
-      consumer.handleDelivery(0, false, msg.exchange, msg.routingKey, msg.properties, msg.body);
+      if (!noAck) {
+        toAck.addLast(msg);
+      }
+      // TODO should be a notification sent to proxy
+      long deliveryTag = proxy.getDeliveryTag(getId(), channelId, msgCounter, noAck);
+      consumer.handleDelivery(deliveryTag, msg.redelivered, msg.exchange, msg.routingKey, msg.properties,
+          msg.body);
     }
-    consumers.addLast(new DeliverContext(consumer, consumerTag));
+    consumers.addLast(new DeliverContext(channelId, proxy, consumer, consumerTag, noAck));
   }
   
   private void doReact(PublishNot not) {
-    publish(not.getExchange(), not.getRoutingKey(), not.getProperties(), not.getBody());
+    publish(not.getExchange(), not.getRoutingKey(), not.getProperties(), not.getBody(), false);
   }
   
-  public void publish(String exchange, String routingKey, BasicProperties properties, byte[] body) {
+  public void publish(String exchange, String routingKey, BasicProperties properties, byte[] body,
+      boolean redelivered) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "QueueAgent.publish(" + properties + ')');
-    
+
+    msgCounter++;
     if (consumers.size() > 0) {
       DeliverContext deliverContext = (DeliverContext) consumers.removeFirst();
+      if (!deliverContext.isNoAck()) {
+        toAck.addLast(new Message(exchange, routingKey, properties, body, msgCounter, redelivered));
+      }
       Listener callback = deliverContext.getConsumer();
+      long deliveryTag = deliverContext.proxy.getDeliveryTag(getId(), deliverContext.channelId, msgCounter,
+          deliverContext.noAck);
       if (callback instanceof DeliveryListener) {
         DeliveryListener consumer = (DeliveryListener) callback;
-        consumer.handleDelivery(0, false, exchange, routingKey, properties, body);
+        consumer.handleDelivery(deliveryTag, redelivered, exchange, routingKey, properties, body);
       } else if (callback instanceof GetListener) {
         GetListener consumer = (GetListener) callback;
-        consumer.handleGet(0, false, exchange, routingKey, toDeliver.size(), properties, body);
+        consumer.handleGet(deliveryTag, redelivered, exchange, routingKey, toDeliver.size(), properties, body);
       }
       if (deliverContext.isSubscription) {
         consumers.addLast(deliverContext);
       }
     } else {
-      toDeliver.addLast(new Message(exchange, routingKey, properties, body));
+      toDeliver.addLast(new Message(exchange, routingKey, properties, body, msgCounter, redelivered));
     }
   }
 
@@ -185,38 +216,67 @@ public class QueueAgent extends Agent {
     toDeliver.clear();
   }
 
+  private void doReact(AckNot not) {
+    ackMessages(not.getIdsToAck());
+  }
+
+  public void ackMessages(List idsToAck) {
+    // Both lists must be sorted
+    Iterator iterIds = idsToAck.iterator();
+    Iterator iterMsgs = toAck.iterator();
+    while (iterIds.hasNext()) {
+      long id = ((Long) iterIds.next()).longValue();
+      while (iterMsgs.hasNext()) {
+        Message msg = (Message) iterMsgs.next();
+        if (msg.deliveryTag == id) {
+          iterMsgs.remove();
+          break;
+        }
+      }
+    }
+  }
+  
+  private void doReact(RecoverNot not) {
+    recoverMessages(not.getIdsToRecover());
+  }
+
+  public void recoverMessages(List idsToRecover) {
+    // Both lists must be sorted
+    Iterator iterIds = idsToRecover.iterator();
+    Iterator iterMsgs = toAck.iterator();
+    while (iterIds.hasNext()) {     
+      long id = ((Long) iterIds.next()).longValue();
+      while (iterMsgs.hasNext()) {
+        Message msg = (Message) iterMsgs.next();
+        if (msg.deliveryTag == id) {
+          publish(msg.exchange, msg.routingKey, msg.properties, msg.body, true);
+          break;
+        }
+      }
+    }
+  }
+
   static class Message implements Serializable {
 
     private String exchange;
     private String routingKey;
     private BasicProperties properties;
     private byte[] body;
+    private long deliveryTag;
+    private boolean redelivered;
 
     /**
      * @param properties
      * @param body
      */
-    public Message(String exchange, String routingKey, BasicProperties properties, byte[] body) {
+    public Message(String exchange, String routingKey, BasicProperties properties, byte[] body,
+        long deliveryTag, boolean redelivered) {
       this.exchange = exchange;
       this.routingKey = routingKey;
       this.properties = properties;
       this.body = body;
-    }
-
-    public String getExchange() {
-      return exchange;
-    }
-
-    public String getRoutingKey() {
-      return routingKey;
-    }
-
-    public byte[] getBody() {
-      return body;
-    }
-    
-    public BasicProperties getProperties() {
-      return properties;
+      this.deliveryTag = deliveryTag;
+      this.redelivered = redelivered;
     }
   }
   
@@ -226,18 +286,28 @@ public class QueueAgent extends Agent {
     private Listener consumer;
     private boolean isSubscription;
     private String consumerTag;
+    private boolean noAck;
+    private ProxyAgent proxy;
+    private int channelId;
     
-    public DeliverContext(GetListener consumer) {
+    public DeliverContext(int channelId, ProxyAgent proxy, GetListener consumer, boolean noAck) {
       super();
       this.consumer = consumer;
       this.isSubscription = false;
+      this.noAck = noAck;
+      this.channelId = channelId;
+      this.proxy = proxy;
     }
 
-    public DeliverContext(DeliveryListener consumer, String consumerTag) {
+    public DeliverContext(int channelId, ProxyAgent proxy, DeliveryListener consumer, String consumerTag,
+        boolean noAck) {
       super();
       this.consumer = consumer;
       this.consumerTag = consumerTag;
       this.isSubscription = true;
+      this.noAck = noAck;
+      this.channelId = channelId;
+      this.proxy = proxy;
     }
 
     public Listener getConsumer() {
@@ -250,6 +320,10 @@ public class QueueAgent extends Agent {
 
     public boolean isSubscription() {
       return isSubscription;
+    }
+
+    public boolean isNoAck() {
+      return noAck;
     }
     
   }

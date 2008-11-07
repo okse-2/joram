@@ -34,6 +34,8 @@ import org.objectweb.joram.mom.amqp.proxy.request.BasicCancelNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicConsumeNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicGetNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicPublishNot;
+import org.objectweb.joram.mom.amqp.proxy.request.ChannelCloseNot;
+import org.objectweb.joram.mom.amqp.proxy.request.ConnectionCloseNot;
 import org.objectweb.joram.mom.amqp.proxy.request.ExchangeDeclareNot;
 import org.objectweb.joram.mom.amqp.proxy.request.ExchangeDeleteNot;
 import org.objectweb.joram.mom.amqp.proxy.request.QueueBindNot;
@@ -43,6 +45,7 @@ import org.objectweb.joram.mom.amqp.proxy.request.QueuePurgeNot;
 import org.objectweb.joram.mom.amqp.proxy.request.QueueUnbindNot;
 
 import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.util.Queue;
 
 public class JoramMOMHandler implements MOMHandler {
   
@@ -84,13 +87,11 @@ public class JoramMOMHandler implements MOMHandler {
     basicCancel.basicCancel(proxy.getId());
   }
 
-  public AMQP.Basic.ConsumeOk basicConsume(String queue, boolean noAck, String consumerTag, boolean noLocal,
-      boolean exclusive, int ticket, int channelNumber) throws Exception {
-    BasicConsumeNot basicConsume = new BasicConsumeNot(channelNumber, ticket,
-        queue, true, consumerTag,
-        new DeliverMessageConsumer(channelNumber, consumerTag));
-    AMQP.Basic.ConsumeOk basicConsumeOk = basicConsume.basicConsume(proxy.getId());
-    return basicConsumeOk;
+  public void basicConsume(String queue, boolean noAck, String consumerTag, boolean noLocal,
+      boolean exclusive, int ticket, boolean noWait, int channelNumber, Queue queueOut) throws Exception {
+    BasicConsumeNot basicConsume = new BasicConsumeNot(channelNumber, ticket, queue, noAck, consumerTag,
+        noWait, new DeliverMessageConsumer(channelNumber, consumerTag), queueOut);
+    basicConsume.basicConsume(proxy.getId());
   }
 
   public void basicGet(String queue, boolean noAck, int ticket, int channelNumber) throws Exception {
@@ -179,6 +180,17 @@ public class JoramMOMHandler implements MOMHandler {
     QueuePurgeNot queuePurge = new QueuePurgeNot(channelNumber, ticket, queue, nowait);
     queuePurge.queuePurge(proxy.getId());
   }
+
+  public void channelClose(int channelNumber) throws Exception {
+    ChannelCloseNot channelClose = new ChannelCloseNot(channelNumber);
+    channelClose.closeChannel(proxy.getId());
+  }
+
+  public void connectionClose() throws Exception {
+    ConnectionCloseNot channelClose = new ConnectionCloseNot();
+    channelClose.closeConnection(proxy.getId());
+  }
+  
   
   class DeliverMessageConsumer implements DeliveryListener {
     

@@ -20,46 +20,22 @@
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s):
  */
-package org.objectweb.joram.mom.amqp;
+package org.objectweb.joram.mom.amqp.proxy.request;
 
-import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.SyncNotification;
 
-public class ReceiveNot extends Notification {
+public class ConnectionCloseNot extends SyncNotification {
+
+  public ConnectionCloseNot() {
+  }
   
-  private int channelId;
-  private GetListener callback;
-  private ProxyAgent proxy;
-  private boolean noAck;
-
-  /**
-   * @param channelId
-   * @param consumerTag
-   * @param callback
-   * @param proxyAgent
-   */
-  public ReceiveNot(int channelId, GetListener callback, ProxyAgent proxyAgent, boolean noAck) {
-    super();
-    this.channelId = channelId;
-    this.callback = callback;
-    this.proxy = proxyAgent;
-    this.noAck = noAck;
-    persistent = false;
+  public void closeConnection(AgentId proxyId) throws Exception {
+    invoke(proxyId);
   }
-
-  public int getChannelId() {
-    return channelId;
-  }
-
-  public GetListener getCallback() {
-    return callback;
-  }
-
-  public boolean isNoAck() {
-    return noAck;
-  }
-
-  public ProxyAgent getProxy() {
-    return proxy;
+  
+  public void Return() {
+    Return(null);
   }
 
 }

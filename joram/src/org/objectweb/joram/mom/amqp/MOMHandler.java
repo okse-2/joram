@@ -26,6 +26,8 @@ import java.util.Map;
 
 import org.objectweb.joram.mom.amqp.marshalling.AMQP;
 
+import fr.dyade.aaa.util.Queue;
+
 public interface MOMHandler {
 
   /**
@@ -128,11 +130,13 @@ public interface MOMHandler {
    * @param noLocal flag set to true unless server local buffering is required
    * @param exclusive true if this is an exclusive consumer
    * @param ticket an access ticket for the appropriate realm
+   * @param noWait 
    * @param channelNumber the channel the request came from
+   * @param queueOut 
    * @return the consumerTag associated with the new consumer
    */
-  public AMQP.Basic.ConsumeOk basicConsume(String queue, boolean noAck, String consumerTag, boolean noLocal,
-      boolean exclusive, int ticket, int channelNumber) throws Exception;
+  public void basicConsume(String queue, boolean noAck, String consumerTag, boolean noLocal,
+      boolean exclusive, int ticket, boolean noWait, int channelNumber, Queue queueOut) throws Exception;
   
   /**
    * Cancel a consumer.
@@ -178,5 +182,9 @@ public interface MOMHandler {
   public void close();
 
   public void setConsumer(Consumer consumer);
+
+  public void channelClose(int channelNumber) throws Exception;
+
+  public void connectionClose() throws Exception;
 
 }
