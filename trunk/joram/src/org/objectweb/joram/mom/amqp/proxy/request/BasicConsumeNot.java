@@ -23,37 +23,44 @@
 package org.objectweb.joram.mom.amqp.proxy.request;
 
 import org.objectweb.joram.mom.amqp.DeliveryListener;
-import org.objectweb.joram.mom.amqp.marshalling.AMQP;
 
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.SyncNotification;
+import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.util.Queue;
 
-public class BasicConsumeNot extends SyncNotification {
+public class BasicConsumeNot extends Notification {
   
   private int channelId;
   private int ticket;
   private String queue;
   private boolean noAck;
   private String consumerTag;
+  private boolean noWait;
   private DeliveryListener callback;
-  
+  private Queue queueOut;
+
   /**
    * @param channelId
    * @param ticket
    * @param queue
    * @param noAck
    * @param consumerTag
+   * @param noWait
    * @param callback
+   * @param queueOut
    */
-  public BasicConsumeNot(int channelId, int ticket, String queue,
-      boolean noAck, String consumerTag, DeliveryListener callback) {
+  public BasicConsumeNot(int channelId, int ticket, String queue, boolean noAck, String consumerTag,
+      boolean noWait, DeliveryListener callback, Queue queueOut) {
     super();
     this.channelId = channelId;
     this.ticket = ticket;
     this.queue = queue;
     this.noAck = noAck;
     this.consumerTag = consumerTag;
+    this.noWait = noWait;
     this.callback = callback;
+    this.queueOut = queueOut;
   }
   
   public DeliveryListener getCallback() {
@@ -75,13 +82,16 @@ public class BasicConsumeNot extends SyncNotification {
     return ticket;
   }
   
-  public AMQP.Basic.ConsumeOk basicConsume(AgentId proxyId) throws Exception {
-    Object[] res = invoke(proxyId);
-    return (AMQP.Basic.ConsumeOk) res[0];
+  public void basicConsume(AgentId proxyId) throws Exception {
+    Channel.sendTo(proxyId, this);
   }
-  
-  public void Return(AMQP.Basic.ConsumeOk res) {
-    Return(new Object[]{res});
+
+  public boolean isNoWait() {
+    return noWait;
+  }
+
+  public Queue getQueueOut() {
+    return queueOut;
   }
 
 }

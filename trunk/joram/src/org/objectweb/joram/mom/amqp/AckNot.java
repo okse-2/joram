@@ -22,52 +22,21 @@
  */
 package org.objectweb.joram.mom.amqp;
 
+import java.util.List;
+
 import fr.dyade.aaa.agent.Notification;
 
-/**
- * Transient notification.
- */
-public class ConsumeNot extends Notification {
+public class AckNot extends Notification {
   
-  private int channelId;
-  private DeliveryListener callback;
-  private ProxyAgent proxy;
-  private String consumerTag;
-  private boolean noAck;
-
-  /**
-   * @param consumerTag
-   * @param callback
-   * @param proxyAgent
-   */
-  public ConsumeNot(int channelId, DeliveryListener callback, ProxyAgent proxyAgent, String consumerTag,
-      boolean noAck) {
+  private List idsToAck;
+  
+  public AckNot(List idsToAck) {
     super();
-    this.channelId = channelId;
-    this.callback = callback;
-    this.consumerTag = consumerTag;
-    this.noAck = noAck;
-    this.proxy = proxyAgent;
-    persistent = false;
+    this.idsToAck = idsToAck;
   }
 
-  public DeliveryListener getCallback() {
-    return callback;
+  public List getIdsToAck() {
+    return idsToAck;
   }
 
-  public String getConsumerTag() {
-    return consumerTag;
-  }
-
-  public boolean isNoAck() {
-    return noAck;
-  }
-
-  public ProxyAgent getProxy() {
-    return proxy;
-  }
-
-  public int getChannelId() {
-    return channelId;
-  }
 }

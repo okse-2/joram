@@ -22,10 +22,16 @@
  */
 package org.objectweb.joram.mom.amqp;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.objectweb.joram.mom.amqp.marshalling.AMQP;
+import org.objectweb.joram.mom.amqp.marshalling.AMQPHelper;
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.CancelOk;
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Queue.PurgeOk;
@@ -36,7 +42,9 @@ import org.objectweb.joram.mom.amqp.proxy.request.BasicCancelNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicConsumeNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicGetNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicPublishNot;
+import org.objectweb.joram.mom.amqp.proxy.request.ChannelCloseNot;
 import org.objectweb.joram.mom.amqp.proxy.request.ChannelOpenNot;
+import org.objectweb.joram.mom.amqp.proxy.request.ConnectionCloseNot;
 import org.objectweb.joram.mom.amqp.proxy.request.ConnectionStartOkNot;
 import org.objectweb.joram.mom.amqp.proxy.request.ExchangeDeclareNot;
 import org.objectweb.joram.mom.amqp.proxy.request.ExchangeDeleteNot;
@@ -53,6 +61,7 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.DeleteAck;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.SyncNotification;
+import fr.dyade.aaa.util.Queue;
 
 public class ProxyAgent extends Agent {
   
@@ -69,9 +78,16 @@ public class ProxyAgent extends Agent {
   
   private int ticketCounter;
   
+  // Links between consumer tags and queue ids
   private Map consumers = new HashMap();
   
   private Map pendingRequests = new HashMap();
+  
+  // Used to find queue from deliveryTag
+  private LinkedList deliveriesToAck = new LinkedList();
+  
+  private long tagCounter;
+  
   
   public void react(AgentId from, Notification not) throws Exception {
     // This agent is not persistent.
@@ -108,6 +124,10 @@ public class ProxyAgent extends Agent {
       doReact((QueueUnbindNot) not);
     } else if (not instanceof DeleteAck) {
       doReact((DeleteAck) not);
+    } else if (not instanceof ChannelCloseNot) {
+      doReact((ChannelCloseNot) not);
+    } else if (not instanceof ConnectionCloseNot) {
+      doReact((ConnectionCloseNot) not);
     } else {
       super.react(from, not);
     }
@@ -228,12 +248,17 @@ public class ProxyAgent extends Agent {
           channelId + ',' + ticket + ',' + queue + ')');
     // Check if the queue already exists
     Object ref = NamingAgent.getSingleton().lookup(queue);
+    String queueName = queue;
     if (ref == null && !passive) {
       QueueAgent queueAgent = new QueueAgent(queue, durable, autoDelete);
-      NamingAgent.getSingleton().bind(queue, queueAgent.getId());
       queueAgent.deploy();
+      if (queueName == null || queueName.equals("")) {
+        queueName = queueAgent.getAgentId();
+      }
+      NamingAgent.getSingleton().bind(queueName, queueAgent.getId());
     }
-    return new AMQP.Queue.DeclareOk(queue, 0, 0);
+    // TODO msgCount / consumerCount
+    return new AMQP.Queue.DeclareOk(queueName, 0, 0);
   }
   
   private void doReact(QueueDeleteNot not) throws Exception {
@@ -253,6 +278,7 @@ public class ProxyAgent extends Agent {
     if (queueId != null) {
       pendingRequests.put(queueId, not);
       sendTo(queueId, new DeleteNot(ifUnused, ifEmpty));
+      //      NamingAgent.getSingleton().unbind(name);
     }
   }
 
@@ -273,24 +299,28 @@ public class ProxyAgent extends Agent {
   }
 
   private void doReact(BasicConsumeNot not) throws Exception {
-    AMQP.Basic.ConsumeOk res = basicConsume(
+    basicConsume(
         not.getChannelId(),
         not.getTicket(),
         not.getQueue(),
         not.isNoAck(),
         not.getConsumerTag(),
-        not.getCallback());
-    not.Return(res);
+        not.isNoWait(),
+        not.getCallback(),
+        not.getQueueOut());
   }
   
-  public AMQP.Basic.ConsumeOk basicConsume(int channelId, int ticket, String queue,
-      boolean noAck, String consumerTag, DeliveryListener callback)
+  public void basicConsume(int channelId, int ticket, String queue,
+      boolean noAck, String consumerTag, boolean noWait, DeliveryListener callback, Queue queueOut)
       throws Exception {
     AgentId queueId = (AgentId) NamingAgent.getSingleton().lookup(queue);
-    ConsumeNot consumeNot = new ConsumeNot(callback, consumerTag, noAck);
+    ConsumeNot consumeNot = new ConsumeNot(channelId, callback, this, consumerTag, noAck);
     sendTo(queueId, consumeNot);
     consumers.put(consumerTag, queueId);
-    return new AMQP.Basic.ConsumeOk(consumerTag);
+    if (!noWait) {
+      // TODO The marshalling code should not be there
+      queueOut.push(AMQPHelper.writeMethod(new AMQP.Basic.ConsumeOk(consumerTag), channelId));
+    }
   }
   
   private void doReact(BasicCancelNot not) {
@@ -314,7 +344,7 @@ public class ProxyAgent extends Agent {
   
   public void basicGet(int channelId, int ticket, String queueName, boolean noAck, GetListener callback) {
     AgentId queueId = (AgentId) NamingAgent.getSingleton().lookup(queueName);
-    ReceiveNot receiveNot = new ReceiveNot(callback, noAck);
+    ReceiveNot receiveNot = new ReceiveNot(channelId, callback, this, noAck);
     sendTo(queueId, receiveNot);
   }
 
@@ -344,8 +374,38 @@ public class ProxyAgent extends Agent {
   }
   
   public void basicAck(int channelId, long deliveryTag, boolean multiple) {
-    // TODO Auto-generated method stub
-    
+    Iterator iter = deliveriesToAck.iterator();
+    if (!multiple) {
+      while (iter.hasNext()) {
+        DeliverContext delivery = (DeliverContext) iter.next();
+        if (delivery.deliveryTag == deliveryTag && delivery.channelId == channelId) {
+          List ackList = new ArrayList(1);
+          ackList.add(new Long(delivery.queueMsgId));
+          sendTo(delivery.queueId, new AckNot(ackList));
+          return;
+        }
+      }
+    } else {
+      Map deliveryMap = new HashMap();
+      while (iter.hasNext()) {
+        DeliverContext delivery = (DeliverContext) iter.next();
+        if (delivery.deliveryTag <= deliveryTag && delivery.channelId == channelId) {
+          List ackList = (List) deliveryMap.get(delivery.queueId);
+          if (ackList == null) {
+            ackList = new ArrayList();
+            deliveryMap.put(delivery.queueId, ackList);
+          }
+          ackList.add(new Long(delivery.queueMsgId));
+        } else if (delivery.deliveryTag > deliveryTag) {
+          break;
+        }
+      }
+      Iterator iterQueues = deliveryMap.keySet().iterator();
+      while (iterQueues.hasNext()) {
+        AgentId queueId = (AgentId) iterQueues.next();
+        sendTo(queueId, new AckNot((List) deliveryMap.get(queueId)));
+      }
+    }
   }
 
   private void doReact(QueueBindNot not) throws Exception {
@@ -396,6 +456,85 @@ public class ProxyAgent extends Agent {
     } else if (syncNot instanceof ExchangeDeleteNot) {
       ExchangeDeleteNot deleteNot = (ExchangeDeleteNot) syncNot;
       deleteNot.Return(new AMQP.Exchange.DeleteOk());
+    }
+  }
+  
+  private void doReact(ChannelCloseNot not) {
+    channelClose(not.getChannelId());
+    not.Return();
+  }
+  
+  public void channelClose(int channelId) {
+    // Recover non-acked messages on the channel
+    Iterator iter = deliveriesToAck.iterator();
+    Map recoverMap = new HashMap();
+    while (iter.hasNext()) {
+      DeliverContext delivery = (DeliverContext) iter.next();
+      if (delivery.channelId == channelId) {
+        List ackList = (List) recoverMap.get(delivery.queueId);
+        if (ackList == null) {
+          ackList = new ArrayList();
+          recoverMap.put(delivery.queueId, ackList);
+        }
+        ackList.add(new Long(delivery.queueMsgId));
+        iter.remove();
+      }
+    }
+    Iterator iterQueues = recoverMap.keySet().iterator();
+    while (iterQueues.hasNext()) {
+      AgentId queueId = (AgentId) iterQueues.next();
+      sendTo(queueId, new RecoverNot((List) recoverMap.get(queueId)));
+    }
+  }
+
+  private void doReact(ConnectionCloseNot not) {
+    connectionClose();
+    not.Return();
+  }
+
+  private void connectionClose() {
+    // Recover all non-acked messages
+    Iterator iter = deliveriesToAck.iterator();
+    Map recoverMap = new HashMap();
+    while (iter.hasNext()) {
+      DeliverContext delivery = (DeliverContext) iter.next();
+      List ackList = (List) recoverMap.get(delivery.queueId);
+      if (ackList == null) {
+        ackList = new ArrayList();
+        recoverMap.put(delivery.queueId, ackList);
+      }
+      ackList.add(new Long(delivery.queueMsgId));
+      iter.remove();
+    }
+    Iterator iterQueues = recoverMap.keySet().iterator();
+    while (iterQueues.hasNext()) {
+      AgentId queueId = (AgentId) iterQueues.next();
+      sendTo(queueId, new RecoverNot((List) recoverMap.get(queueId)));
+    }
+  }
+
+  public synchronized long getDeliveryTag(AgentId queueId, int channelId, long queueMsgId, boolean noAck) {
+    long deliveryTag = tagCounter++;
+    if (!noAck) {
+      deliveriesToAck.add(new DeliverContext(queueId, channelId, queueMsgId, deliveryTag));
+    }
+    return deliveryTag;
+  }
+  
+  
+  static class DeliverContext implements Serializable {
+
+    private AgentId queueId;
+    private int channelId;
+    private long queueMsgId;
+    private long deliveryTag;
+
+    public DeliverContext(AgentId queueId, int channelId, long queueMsgId, long deliveryTag) {
+      super();
+      this.queueId = queueId;
+      this.channelId = channelId;
+      this.queueMsgId = queueMsgId;
+      this.deliveryTag = deliveryTag;
     }
   }
 
