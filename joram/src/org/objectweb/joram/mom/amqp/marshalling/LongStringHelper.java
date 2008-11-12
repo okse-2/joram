@@ -26,8 +26,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-
-import org.apache.commons.lang.ArrayUtils;
+import java.util.Arrays;
 
 /**
  * Utility for working with {@link LongString}s.
@@ -47,14 +46,14 @@ public class LongStringHelper {
     public boolean equals(Object o) {
       if (o instanceof LongString) {
         LongString other = (LongString) o;
-        return ArrayUtils.isEquals(this.bytes, other.getBytes());
+        return Arrays.equals(this.bytes, other.getBytes());
       }
 
       return false;
     }
 
     public int hashCode() {
-      return ArrayUtils.hashCode(this.bytes);
+      return Arrays.hashCode(this.bytes);
     }
 
     public byte[] getBytes() {
