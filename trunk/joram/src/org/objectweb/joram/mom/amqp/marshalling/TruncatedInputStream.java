@@ -22,16 +22,15 @@
 
 package org.objectweb.joram.mom.amqp.marshalling;
 
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import org.apache.commons.io.input.ProxyInputStream;
 
 /**
  * Utility stream: proxies another stream, making it appear to be no longer than
  * a preset limit.
  */
-public class TruncatedInputStream extends ProxyInputStream {
+public class TruncatedInputStream extends FilterInputStream {
   private final long limit;
   private long counter = 0L;
   private long mark = 0L;
