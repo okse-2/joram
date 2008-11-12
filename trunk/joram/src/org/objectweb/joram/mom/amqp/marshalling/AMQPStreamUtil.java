@@ -67,8 +67,7 @@ public class AMQPStreamUtil {
 
       return LongStringHelper.asLongString(buffer);
     } else {
-      throw new UnsupportedOperationException(
-          "Very long strings not currently supported");
+      throw new UnsupportedOperationException("Very long strings not currently supported");
     }
   }
 
@@ -99,7 +98,7 @@ public class AMQPStreamUtil {
   
   public static final int readShort(DataInputStream in) throws IOException {
     clearBits();
-    return (int) in.readShort();
+    return in.readShort();
   }
 
   public static final int readLong(DataInputStream in) throws IOException {
@@ -114,7 +113,7 @@ public class AMQPStreamUtil {
 
   public static final byte readByte(DataInputStream in) throws IOException {
     clearBits();
-    return (byte) in.readByte();
+    return in.readByte();
   }
 
   public static final int readInt(DataInputStream in) throws IOException {
@@ -199,7 +198,7 @@ public class AMQPStreamUtil {
 
   public static final int readOctet(DataInputStream in) throws IOException {
     clearBits();
-    return (int) in.readUnsignedByte();
+    return in.readUnsignedByte();
   }
 
   public static final Date readTimestamp(DataInputStream in) throws IOException {
@@ -267,7 +266,7 @@ public class AMQPStreamUtil {
   public static final void writeByteArray(byte[] byteArray, DataOutputStream out) throws IOException {
     bitflush(out);
     if (byteArray == null) {
-      out.writeInt(-1);
+      out.writeInt(0);
     } else if (byteArray.length == 0) {
       out.writeInt(0);
     } else {
@@ -388,19 +387,19 @@ public class AMQPStreamUtil {
       throws IOException {
     bitflush(out);
     // AMQP uses POSIX time_t which is in seconds since the epoc
-    writeLonglong(((Date) timestamp).getTime() / 1000, out);
+    writeLonglong(timestamp.getTime() / 1000, out);
   }
 
-  public static int shortStrSize(String str)
+  private static int shortStrSize(String str)
       throws UnsupportedEncodingException {
     return str.getBytes("utf-8").length + 1;
   }
 
-  public static int longStrSize(String str) throws UnsupportedEncodingException {
+  private static int longStrSize(String str) throws UnsupportedEncodingException {
     return str.getBytes("utf-8").length + 4;
   }
 
-  public static long tableSize(Map table) throws UnsupportedEncodingException {
+  private static long tableSize(Map table) throws UnsupportedEncodingException {
     long acc = 0;
     for (Iterator entries = table.entrySet().iterator(); entries.hasNext();) {
       Map.Entry entry = (Map.Entry) entries.next();
@@ -428,17 +427,4 @@ public class AMQPStreamUtil {
 
     return acc;
   }
-  
-  /*
-  public static int copy(InputStream input, OutputStream output) throws IOException {
-    byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
-    int count = 0;
-    int n = 0;
-    while (-1 != (n = input.read(buffer))) {
-      output.write(buffer, 0, n);
-      count += n;
-    }
-    return count;
-  }
-  */
 }
