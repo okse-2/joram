@@ -173,7 +173,8 @@ public class AMQPService {
   }
 
   private void stop() {
-    System.out.println("stopping connection listener");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "stopping connection listener");
     try {
       if (serverSocket != null)
         serverSocket.close();
@@ -183,6 +184,7 @@ public class AMQPService {
     for (int i = 0; i < connectionListeners.length; i++) {
       connectionListeners[i].stop();
     }
-    System.out.println("stopped connection listener");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "stopped connection listener");
   }
 }
