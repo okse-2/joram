@@ -22,11 +22,11 @@
  */
 package org.objectweb.joram.mom.amqp.marshalling;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
+import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -37,11 +37,15 @@ import fr.dyade.aaa.util.Debug;
  * type, channel, size, payload, end.
  */
 public class Frame {
+  
   public static Logger logger = Debug.getLogger(Frame.class.getName());
+  
   /** type code AMQP.FRAME_XXX constants */
   private int type;
+  
   /** channel number, 0-65535 */
   private int channel;
+  
   /** payload bytes */
   private byte[] payload;
  
@@ -57,12 +61,12 @@ public class Frame {
     this.payload = payload;
   }
 
-  public static Frame readFrom(DataInputStream in) throws IOException {
-    int type = AMQPStreamUtil.readOctet(in);
+  public static Frame readFrom(InputStream in) throws IOException {
+    int type = StreamUtil.readUnsignedByteFrom(in);
     //int empty = AMQPStreamUtil.readInt(in);// empty spec: 0.8
-    int channel = AMQPStreamUtil.readShort(in);
-    byte[] payload = AMQPStreamUtil.readByteArray(in); 
-    int frameEndMarker = AMQPStreamUtil.readOctet(in);
+    int channel = StreamUtil.readShortFrom(in);
+    byte[] payload = StreamUtil.readByteArrayFrom(in);
+    int frameEndMarker = StreamUtil.readUnsignedByteFrom(in);
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
           "type = " + type + ", channel = " + channel + 
@@ -73,16 +77,12 @@ public class Frame {
     return new Frame(type, channel, payload);
   }
 
-  public static void writeTo(Frame frame, DataOutputStream out) throws IOException {
-    AMQPStreamUtil.writeOctet(frame.getType(), out);
+  public static void writeTo(Frame frame, OutputStream out) throws IOException {
+    StreamUtil.writeTo((byte) frame.getType(), out);
     //AMQPStreamUtil.writeInt(-1, out); // empty spec: 0.8
-    AMQPStreamUtil.writeShort(frame.getChannel(), out);
-    AMQPStreamUtil.writeByteArray(frame.getPayload(), out);
-    AMQPStreamUtil.writeOctet(AMQP.FRAME_END, out);
-  }
-
-  public DataInputStream getInputStream() {
-    return new DataInputStream(new ByteArrayInputStream(payload));
+    StreamUtil.writeTo((short) frame.getChannel(), out);
+    StreamUtil.writeTo(frame.getPayload(), out);
+    StreamUtil.writeTo((byte) AMQP.FRAME_END, out);
   }
 
   /**

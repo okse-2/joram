@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectweb.joram.mom.amqp.marshalling.AMQP;
-import org.objectweb.joram.mom.amqp.marshalling.AMQPHelper;
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.CancelOk;
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Queue.PurgeOk;
@@ -319,7 +318,7 @@ public class ProxyAgent extends Agent {
     consumers.put(consumerTag, queueId);
     if (!noWait) {
       // TODO The marshalling code should not be there
-      queueOut.push(AMQPHelper.writeMethod(new AMQP.Basic.ConsumeOk(consumerTag), channelId));
+      queueOut.push(new AMQP.Basic.ConsumeOk(consumerTag).toFrame(channelId));
     }
   }
   
