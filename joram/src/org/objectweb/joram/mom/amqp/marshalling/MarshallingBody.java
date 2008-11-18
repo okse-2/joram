@@ -22,62 +22,25 @@
  */
 package org.objectweb.joram.mom.amqp.marshalling;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.Debug;
 
-public class MarshallingBody {
+public class MarshallingBody implements FrameBuilder {
+  
   public static Logger logger = Debug.getLogger(MarshallingBody.class.getName());
 
   private byte[] binPayload;
-  
-  /**
-   * @param binPayload the binPayload to set
-   */
-  public void setBinPayload(byte[] binPayload) {
-    this.binPayload = binPayload;
-  }
-
-  /**
-   * @return the binPayload
-   */
-  public byte[] getBinPayload() {
-    return binPayload;
-  }
 
   /**
    * Constructs an <code>MarshallingBody</code>.
    */
-  public MarshallingBody() {
+  public MarshallingBody(byte[] binPayload) {
+    this.binPayload = binPayload;
   }
 
-  public static void write(MarshallingBody msg, OutputStream os)
-      throws IOException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "MarshallingBody.write(" + msg + ", " + os + ')');
-    DataOutputStream out = new DataOutputStream(os);
-    out.write(msg.getBinPayload());
-    //AMQPStreamUtil.writeOctet(AMQP.FRAME_END, out);
-    out.flush();
+  public Frame toFrame(int channelNumber) {
+    return new Frame(AMQP.FRAME_BODY, channelNumber, binPayload);
   }
 
-  public static MarshallingBody read(InputStream is, int bodySize)
-      throws IOException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "MarshallingBody.read(" + is + ", " + bodySize + ')');
-
-    MarshallingBody marshallingBody = new MarshallingBody();
-    DataInputStream in = new DataInputStream(is);
-    //System.out.println("* body available = " + in.available());
-    marshallingBody.binPayload = AMQPStreamUtil.readByteArray(in, bodySize);
-    //int frameEndMarker = AMQPStreamUtil.readOctet(in);
-    return marshallingBody;
-  }
 }

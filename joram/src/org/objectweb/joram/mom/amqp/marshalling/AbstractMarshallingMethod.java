@@ -22,58 +22,45 @@
  */
 package org.objectweb.joram.mom.amqp.marshalling;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.Debug;
 
-public abstract class AbstractMarshallingMethod implements Streamable {
+public abstract class AbstractMarshallingMethod implements FrameBuilder {
+  
   public static Logger logger = Debug.getLogger(AbstractMarshallingMethod.class.getName());
 
   public final static int NULL_METHOD_ID = -1;
 
   public abstract int getClassId();
   public abstract String getClassName();
-
-  public int methodId = -1;
-  public java.lang.String methodName;
-
   public abstract int getMethodId();
-  public abstract java.lang.String getMethodName();
+  public abstract String getMethodName();
+  public abstract void writeTo(AMQPOutputStream os) throws IOException;
+  public abstract void readFrom(AMQPInputStream is) throws IOException;
 
   /**
    * Constructs an <code>AbstractMarshallingMethod</code>.
    */
   public AbstractMarshallingMethod() {
-    methodId = getMethodId();
   }
 
-  public static void write(AbstractMarshallingMethod method, OutputStream os)
-      throws IOException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "AbstractMarshallingMethod.write(" + method + ", " + os + ')');
-    DataOutputStream out = new DataOutputStream(os);
-    AMQPStreamUtil.writeShort(method.getClassId(), out);
-    AMQPStreamUtil.writeShort(method.getMethodId(), out);
-    method.writeTo(out);
-  }
-
-  public static AbstractMarshallingMethod read(InputStream is)
+  public static AbstractMarshallingMethod read(byte[] payload)
       throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    AMQPInputStream in = new AMQPInputStream(new ByteArrayInputStream(payload));
+    
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "AbstractMarshallingMethod.readFrom: " + is);
+      logger.log(BasicLevel.DEBUG, "AbstractMarshallingMethod.readFrom: " + in);
 
     AbstractMarshallingMethod marshallingMethod = null;
-    DataInputStream in = new DataInputStream(is);
     AbstractMarshallingClass marshallingClass = AbstractMarshallingClass.read(in);
     if (marshallingClass != null) {
-      int methodid = AMQPStreamUtil.readShort(in);
+      int methodid = in.readShort();
       if (methodid != NULL_METHOD_ID) {
         try {
           if (logger.isLoggable(BasicLevel.DEBUG))
@@ -94,4 +81,17 @@ public abstract class AbstractMarshallingMethod implements Streamable {
     }
     return marshallingMethod;
   }
+  
+  public Frame toFrame(int channelNumber) throws IOException {
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "AbstractMarshallingMethod.write(" + this + ", " + bos + ')');
+
+    AMQPOutputStream stream = new AMQPOutputStream(bos);
+    stream.writeShort(getClassId());
+    stream.writeShort(getMethodId());
+    writeTo(stream);
+    return new Frame(AMQP.FRAME_METHOD, channelNumber, bos.toByteArray());
+  }
+  
 }

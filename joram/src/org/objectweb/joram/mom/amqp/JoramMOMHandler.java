@@ -102,7 +102,7 @@ public class JoramMOMHandler implements MOMHandler {
 
   public void basicPublish(PublishRequest publishRequest, int channelNumber) throws Exception {
     BasicPublishNot basicPublish = new BasicPublishNot(channelNumber,
-        publishRequest.getPublish().ticket,
+        publishRequest.getPublish().reserved1,
         publishRequest.getPublish().exchange,
         publishRequest.getPublish().routingKey,
         publishRequest.getPublish().mandatory,

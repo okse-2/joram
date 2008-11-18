@@ -22,32 +22,26 @@
  */
 package org.objectweb.joram.mom.amqp.marshalling;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.Externalizable;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.io.OutputStream;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.Debug;
 
-
-public abstract class AbstractMarshallingClass implements Externalizable, Streamable {
+public abstract class AbstractMarshallingClass {
+  
   public static Logger logger = Debug.getLogger(AbstractMarshallingClass.class.getName());
   
   protected final static int NULL_CLASS_ID = -1;
+  
   protected int classId;
-  static protected String className;
   
   protected abstract int getClassId();
+  
   protected abstract String getClassName();
   
-  protected abstract java.lang.String getMethodName(int id);
+  protected abstract String getMethodName(int id);
 
   /**
    * Constructs an <code>AbstractMarshallingClass</code>.
@@ -70,51 +64,17 @@ public abstract class AbstractMarshallingClass implements Externalizable, Stream
       return "";
     return AMQP.classnames[pos];  
   }
-  
-  /** ***** ***** ***** ***** ***** ***** ***** *****
-   * Externalizable interface
-   * ***** ***** ***** ***** ***** ***** ***** ***** */
 
-  public final void writeExternal(ObjectOutput out) throws IOException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,  "AbstractMarshallingClass.writeExternal: " + out);
-    writeTo((DataOutputStream) out);
-  }
-
-  public final void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,  "AbstractMarshallingClass.readExternal: " + in);
-    readFrom((DataInputStream)in);
-  }
-
-  /** ***** ***** ***** ***** ***** ***** ***** *****
-   * Streamable interface
-   * ***** ***** ***** ***** ***** ***** ***** ***** */
-
-  static public void write(AbstractMarshallingClass marshallingClass,
-                           OutputStream os) throws IOException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,  "AbstractMarshallingClass.write: " + marshallingClass);
-
-    DataOutputStream out = new DataOutputStream(os);
-    if (marshallingClass == null) {
-      AMQPStreamUtil.writeShort(NULL_CLASS_ID, out);
-    } else {
-      AMQPStreamUtil.writeShort(marshallingClass.getClassId(), out);
-      marshallingClass.writeTo(out);
-    }
-  }
-
-  static public AbstractMarshallingClass read(InputStream is) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+  static public AbstractMarshallingClass read(AMQPInputStream is) throws IOException, ClassNotFoundException,
+      InstantiationException, IllegalAccessException {
     int classid = -1;
     AbstractMarshallingClass marshallingClass = null;
 
-    classid = AMQPStreamUtil.readShort(new DataInputStream(is));
+    classid = is.readShort();
     if (classid != NULL_CLASS_ID) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG,  "AbstractMarshallingClass read Class : " + getClassName(classid));
       marshallingClass = (AbstractMarshallingClass) Class.forName(getClassName(classid)).newInstance();
-      marshallingClass.readFrom((DataInputStream) is);
     }
 
     if (logger.isLoggable(BasicLevel.DEBUG))

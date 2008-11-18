@@ -22,34 +22,27 @@
  */
 package org.objectweb.joram.mom.amqp.marshalling;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Map;
 
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
+import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.Debug;
 
-public class MarshallingHeader {
+public class MarshallingHeader implements FrameBuilder {
+  
   public static Logger logger = Debug.getLogger(MarshallingHeader.class.getName());
 
   protected final static int NULL_CLASS_ID = -1;
 
   private int classId = -1;
-  private int weight = -1;
   private long bodySize = -1;
-  private int propertyFlags = 0;
-  private Map propertyList = null;
-  
-  private String className = null;
   
   private BasicProperties basicProperties = null;
-  
   
   public int getClassId() {
     return classId;
@@ -63,31 +56,11 @@ public class MarshallingHeader {
   }
 
   /**
-   * @param classId the classId to set
+   * @param classId
+   *          the classId to set
    */
   public void setClassId(int classId) {
     this.classId = classId;
-  }
-  
-  /**
-   * @param propertyFlags the propertyFlags to set
-   */
-  public void setPropertyFlags(int propertyFlags) {
-    this.propertyFlags = propertyFlags;
-  }
-
-  /**
-   * @param propertyList the propertyList to set
-   */
-  public void setPropertyList(Map propertyList) {
-    this.propertyList = propertyList;
-  }
-
-  /**
-   * @param weight the weight to set
-   */
-  public void setWeight(int weight) {
-    this.weight = weight;
   }
 
   /**
@@ -97,27 +70,6 @@ public class MarshallingHeader {
     return bodySize;
   }
 
-  /**
-   * @return the propertyFlags
-   */
-  public int getPropertyFlags() {
-    return propertyFlags;
-  }
-
-  /**
-   * @return the weight
-   */
-  public int getWeight() {
-    return weight;
-  }
-
-  /**
-   * @return the propertyList
-   */
-  public Map getPropertyList() {
-    return propertyList;
-  }
-  
   /**
    * @return the basicProperties
    */
@@ -135,36 +87,26 @@ public class MarshallingHeader {
   /**
    * Constructs an <code>MarshallingHeader</code>.
    */
+  public MarshallingHeader(int classId, long bodySize, AMQP.Basic.BasicProperties basicProperties) {
+    this.classId = classId;
+    this.bodySize = bodySize;
+    this.basicProperties = basicProperties;
+  }
+  
   public MarshallingHeader() {
   }
 
-  public static void write(MarshallingHeader msg, OutputStream os)
-      throws IOException {
+  public static MarshallingHeader read(byte[] payload) throws IOException {
+    AMQPInputStream in = new AMQPInputStream(new ByteArrayInputStream(payload));
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "MarshallingHeader.write(" + msg + ", " + os + ')');
-    DataOutputStream out = new DataOutputStream(os);
-    AMQPStreamUtil.writeShort(msg.getClassId(), out);
-    AMQPStreamUtil.writeShort(msg.getWeight(), out);
-    AMQPStreamUtil.writeLonglong(msg.getBodySize(), out);
-    msg.basicProperties.writeTo(out);
-    out.flush();
-  }
-
-  public static MarshallingHeader read(InputStream is)
-      throws IOException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "MarshallingHeader.read(" + is + ')');
+      logger.log(BasicLevel.DEBUG, "MarshallingHeader.read(" + in + ')');
 
     MarshallingHeader marshallingHeader = new MarshallingHeader();
-    DataInputStream in = new DataInputStream(is);
-    int classid = AMQPStreamUtil.readShort(in);
+    int classid = in.readShort();
     if (classid != NULL_CLASS_ID) {
       marshallingHeader.classId = classid;
-      // just for Basic class.
-      marshallingHeader.className = new AMQP.Basic().getMethodName(classid);
-      // end just for Basic class.
-      marshallingHeader.weight = AMQPStreamUtil.readShort(in);
-      marshallingHeader.bodySize = AMQPStreamUtil.readLonglong(in);
+      in.readShort(); // Read weight : The weight field is unused and must be zero
+      marshallingHeader.bodySize = in.readLonglong();
       marshallingHeader.basicProperties = new BasicProperties();
       marshallingHeader.basicProperties.readFrom(in);
     }
@@ -175,17 +117,24 @@ public class MarshallingHeader {
     StringBuffer buff = new StringBuffer();
     buff.append("MarshallingHeader(classId=");
     buff.append(classId);
-    buff.append(",className=");
-    buff.append(className);
-    buff.append(",weight=");
-    buff.append(weight);
     buff.append(",bodySize=");
     buff.append(bodySize);
-    buff.append(",propertyFlags=");
-    buff.append(propertyFlags);
-    buff.append(",propertyList=");
-    buff.append(propertyList);
     buff.append(')');
     return buff.toString();
+  }
+
+  public Frame toFrame(int channelNumber) throws IOException {
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "MarshallingHeader.write(" + this + ", " + bos + ')');
+
+    StreamUtil.writeTo((short) getClassId(), bos);
+    StreamUtil.writeTo((short) 0, bos); // The weight field is unused and must be zero
+    StreamUtil.writeTo(getBodySize(), bos);
+    AMQPOutputStream stream = new AMQPOutputStream(bos);
+    basicProperties.writeTo(stream);
+    bos.flush();
+
+    return new Frame(AMQP.FRAME_HEADER, channelNumber, bos.toByteArray());
   }
 }
