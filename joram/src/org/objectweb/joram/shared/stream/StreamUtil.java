@@ -22,12 +22,11 @@
  */
 package org.objectweb.joram.shared.stream;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
 import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InvalidClassException;
-
+import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -115,6 +114,16 @@ public final class StreamUtil {
   public static byte readByteFrom(InputStream is) throws IOException {
     return (byte) is.read();
   }
+  
+  /**
+   * This method allows to restore a byte from the input stream.
+   *
+   * @param is  the stream to read data from in order to restore the object
+   * @return    the byte 
+   */
+  public static int readUnsignedByteFrom(InputStream is) throws IOException {
+    return is.read();
+  }
 
   /**
    * This  method allows to write a short to the output stream.
@@ -166,6 +175,18 @@ public final class StreamUtil {
     return (((buf[0] &0xFF) << 24) | ((buf[1] &0xFF) << 16) |
             ((buf[2] &0xFF) << 8) | (buf[3] &0xFF));
   }
+  
+  /**
+   * This method allows to restore an integer from the input stream.
+   *
+   * @param is  the stream to read data from in order to restore the object
+   * @return    the integer 
+   */
+  public static long readUnsignedIntFrom(InputStream is) throws IOException {
+    byte[] buf = readFully(4, is);
+    return (((buf[0] & 0xFFL) << 24) | ((buf[1] & 0xFF) << 16) |
+            ((buf[2] &0xFF) << 8) | (buf[3] &0xFF));
+  }
 
   /**
    * This  method allows to write a long to the output stream.
@@ -194,10 +215,9 @@ public final class StreamUtil {
    */
   public static long readLongFrom(InputStream is) throws IOException {
     byte[] buf = readFully(8, is);    
-    return ((((long) buf[0]) &0xFFL) << 56) | ((((long) buf[1]) &0xFFL) << 48) |
-      ((((long) buf[2]) &0xFFL) << 40) | ((((long) buf[3]) &0xFFL) << 32) |
-      ((((long) buf[4]) &0xFFL) << 24) | ((((long) buf[5]) &0xFFL) << 16) |
-      ((((long) buf[6]) &0xFFL) << 8) | (((long) buf[7]) &0xFFL);
+    return ((buf[0] & 0xFFL) << 56) | ((buf[1] & 0xFFL) << 48) | ((buf[2] & 0xFFL) << 40)
+        | ((buf[3] & 0xFFL) << 32) | ((buf[4] & 0xFFL) << 24) | ((buf[5] & 0xFFL) << 16)
+        | ((buf[6] & 0xFFL) << 8) | (buf[7] & 0xFFL);
   }
 
   /**
@@ -307,6 +327,19 @@ public final class StreamUtil {
    */
   public static byte[] readByteArrayFrom(InputStream is) throws IOException {
     int length = readIntFrom(is);
+    return readByteArrayFrom(is, length);
+  }
+
+  /**
+   * This method allows to restore a byte array from the input stream.
+   * 
+   * @param is
+   *          the stream to read data from in order to restore the object
+   * @param length
+   *          the length of bytes to read
+   * @return the byte array object or null
+   */
+  public static byte[] readByteArrayFrom(InputStream is, int length) throws IOException {
     if (length == -1) {
       return null;
     } else if (length == 0) {
