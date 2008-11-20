@@ -2418,7 +2418,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
-      <param name="jvmargs" value="-DNbMsg=5000 -DMsgSize=25 -Dorg.objectweb.joram.client.jms.queueMsgCount=50 -DNTLogFileSize=512 -DConnectionManager.inFlow=500/>"/>
+      <param name="jvmargs" value="-DNbMsg=5000 -DMsgSize=25 -Dorg.objectweb.joram.client.jms.queueMsgCount=50 -DNTLogFileSize=512 -DConnectionManager.inFlow=500"/>
     </antcall>
   </target>
   <target name="perf.test27_bis" depends="init.a3props,compile"
@@ -2429,7 +2429,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
-      <param name="jvmargs" value="-DNbMsg=500000 -DMsgSize=25 -Dorg.objectweb.joram.client.jms.queueMsgCount=50 -DNTLogFileSize=512 -DConnectionManager.inFlow=500/>"/>
+      <param name="jvmargs" value="-DNbMsg=500000 -DMsgSize=25 -Dorg.objectweb.joram.client.jms.queueMsgCount=50 -DNTLogFileSize=512 -DConnectionManager.inFlow=500"/>
     </antcall>
   </target>
 
