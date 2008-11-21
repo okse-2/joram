@@ -22,17 +22,21 @@
  */
 package org.objectweb.joram.mom.proxies.tcp;
 
-import java.io.*;
-import java.net.*;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.Socket;
 
+import org.objectweb.joram.mom.proxies.ProxyMessage;
 import org.objectweb.joram.shared.client.AbstractJmsMessage;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
-import org.objectweb.joram.mom.proxies.*;
 import org.objectweb.joram.shared.stream.StreamUtil;
-
-import fr.dyade.aaa.util.Debug;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.util.Debug;
 
 public class IOControl {
   public static Logger logger = Debug.getLogger(IOControl.class.getName());
@@ -55,7 +59,7 @@ public class IOControl {
     
   public IOControl(Socket sock,
 		   long inputCounter)  throws IOException {    
-    windowSize = Integer.getInteger(
+    windowSize = AgentServer.getInteger(
       fr.dyade.aaa.util.ReliableTcpConnection.WINDOW_SIZE_PROP_NAME,
       fr.dyade.aaa.util.ReliableTcpConnection.DEFAULT_WINDOW_SIZE).intValue();
     unackCounter = 0;

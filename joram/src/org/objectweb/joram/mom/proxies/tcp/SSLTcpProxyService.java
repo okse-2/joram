@@ -22,20 +22,24 @@
  */
 package org.objectweb.joram.mom.proxies.tcp;
 
-import java.net.*;
-import java.util.*;
 import java.io.FileInputStream;
+import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.security.KeyStore;
 import java.security.SecureRandom;
+import java.util.StringTokenizer;
+
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
+
+import fr.dyade.aaa.agent.AgentServer;
 
 /**
  * Starts a SSLTCP entry point for MOM clients.
@@ -63,7 +67,7 @@ public class SSLTcpProxyService extends TcpProxyService {
         BasicLevel.DEBUG, "SSLTcpProxyService.init(" + 
         args + ',' + firstTime + ')');
 
-    int port =  DEFAULT_PORT;;
+    int port = DEFAULT_PORT;
     String address = DEFAULT_BINDADDRESS;
     if (args != null) {
       StringTokenizer st = new StringTokenizer(args);      
@@ -73,7 +77,7 @@ public class SSLTcpProxyService extends TcpProxyService {
       }
     }
     
-    int backlog = Integer.getInteger(BACKLOG_PROP, DEFAULT_BACKLOG).intValue();
+    int backlog = AgentServer.getInteger(BACKLOG_PROP, DEFAULT_BACKLOG).intValue();
 
     // Create the socket here in order to throw an exception
     // if the socket can't be created (even if firstTime is false).
@@ -84,9 +88,9 @@ public class SSLTcpProxyService extends TcpProxyService {
         BasicLevel.DEBUG, "SSLTcpProxyService.init() - binding to address " + address + ", port " + port);
 
     serverSocket = createServerSocket(port, backlog, address);
-    int poolSize = Integer.getInteger(POOL_SIZE_PROP, DEFAULT_POOL_SIZE).intValue();
+    int poolSize = AgentServer.getInteger(POOL_SIZE_PROP, DEFAULT_POOL_SIZE).intValue();
 
-    int timeout = Integer.getInteger(SO_TIMEOUT_PROP, DEFAULT_SO_TIMEOUT).intValue();
+    int timeout = AgentServer.getInteger(SO_TIMEOUT_PROP, DEFAULT_SO_TIMEOUT).intValue();
     
     proxyService = new SSLTcpProxyService(serverSocket, poolSize, timeout);
     proxyService.start();

@@ -96,7 +96,7 @@ public final class Message implements Serializable {
    * command, or in <code>a3servers.xml</code> configuration file.
    */
   private static final boolean globalUseSoftRef =
-    Boolean.getBoolean("org.objectweb.joram.mom.messages.SWAPALLOWED");
+    AgentServer.getBoolean("org.objectweb.joram.mom.messages.SWAPALLOWED");
 
   /**
    * Constructs a <code>Message</code> instance.

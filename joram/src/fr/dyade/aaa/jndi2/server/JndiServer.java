@@ -23,11 +23,12 @@
  */
 package fr.dyade.aaa.jndi2.server;
 
-import java.net.*;
-
-import fr.dyade.aaa.agent.*;
+import java.net.ServerSocket;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
 
 /**
  * Class of a JNDI centralized server. This is an
@@ -56,9 +57,9 @@ public class JndiServer {
     // if the socket can't be created (even if firstTime is false).
     ServerSocket serverSocket = new ServerSocket(port);
 
-    int poolSize = Integer.getInteger(POOL_SIZE_PROP, DEFAULT_POOL_SIZE).intValue();
+    int poolSize = AgentServer.getInteger(POOL_SIZE_PROP, DEFAULT_POOL_SIZE).intValue();
 
-    int timeout = Integer.getInteger(SO_TIMEOUT_PROP, DEFAULT_SO_TIMEOUT).intValue();
+    int timeout = AgentServer.getInteger(SO_TIMEOUT_PROP, DEFAULT_SO_TIMEOUT).intValue();
 
     tcpServer = new TcpServer(serverSocket,
                               poolSize, timeout,

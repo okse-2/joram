@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Properties;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -163,6 +164,8 @@ public final class AgentServer {
   
   public final static String A3CMLWRP_PROPERTY = "fr.dyade.aaa.agent.A3CMLWrapper";
   public final static String DEFAULT_A3CMLWRP = "fr.dyade.aaa.agent.conf.A3CMLSaxWrapper";
+  
+  private final static Properties serverProperties = new Properties(System.getProperties());
 
   static ThreadGroup tgroup = null;
 
@@ -367,7 +370,7 @@ public final class AgentServer {
    * @return	   the value with the specified key value.
    */
   public static String getProperty(String key) {
-    return System.getProperty(key);
+    return serverProperties.getProperty(key);
   }
 
   /**
@@ -379,7 +382,7 @@ public final class AgentServer {
    * @return	   the value with the specified key value.
    */
   public static String getProperty(String key, String value) {
-    return System.getProperty(key, value);
+    return serverProperties.getProperty(key, value);
   }
 
   /**
@@ -391,7 +394,7 @@ public final class AgentServer {
    */
   public static Integer getInteger(String key) {
     try {
-      return Integer.getInteger(key);
+      return Integer.valueOf(serverProperties.getProperty(key));
     } catch (Exception exc) {
       return null;
     }
@@ -406,11 +409,52 @@ public final class AgentServer {
    * @return 	the Integer value of the property.
    */
   public static Integer getInteger(String key, int value) {
+    Integer result = getInteger(key);
+    return (result == null) ? new Integer(value) : result;
+  }
+
+  /**
+   * Determines the integer value of the server property with the specified
+   * name.
+   * 
+   * @param key
+   *          property name.
+   * @return the Integer value of the property.
+   */
+  public static Long getLong(String key) {
     try {
-      return Integer.getInteger(key, value);
+      return Long.valueOf(serverProperties.getProperty(key));
     } catch (Exception exc) {
       return null;
     }
+  }
+
+  /**
+   * Determines the long value of the server property with the specified name.
+   * 
+   * @param key
+   *          property name.
+   * @param value
+   *          a default value.
+   * @return the Integer value of the property.
+   */
+  public static Long getLong(String key, long value) {
+    Long result = getLong(key);
+    return (result == null) ? new Long(value) : result;
+  }
+
+  /**
+   * Determines the boolean value of the server property with the specified
+   * name.
+   * 
+   * @param key
+   *          property name.
+   * @param value
+   *          a default value.
+   * @return the Integer value of the property.
+   */
+  public static boolean getBoolean(String key) {
+    return Boolean.valueOf(serverProperties.getProperty(key)).booleanValue();
   }
 
   /** Static description of all known agent servers in ascending order. */
@@ -701,7 +745,7 @@ public final class AgentServer {
     if (a3config.properties != null) {
       for (Enumeration e = a3config.properties.elements(); e.hasMoreElements();) {
         A3CMLProperty p = (A3CMLProperty) e.nextElement();
-        System.getProperties().put(p.name, p.value);
+        serverProperties.put(p.name, p.value);
 
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,
@@ -722,7 +766,7 @@ public final class AgentServer {
         Enumeration e = cluster.properties.elements();
         do {
           A3CMLProperty p = (A3CMLProperty) e.nextElement();
-          System.getProperties().put(p.name,p.value);
+          serverProperties.put(p.name, p.value);
 
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG,
@@ -730,7 +774,8 @@ public final class AgentServer {
                        p.name + " = " + p.value);
         } while (e.hasMoreElements());
       }
-      server = cluster.getServer(cid);
+      if (cluster != null)
+        server = cluster.getServer(cid);
     } else {
       server = a3config.getServer(sid);
     }
@@ -740,7 +785,7 @@ public final class AgentServer {
       Enumeration e = server.properties.elements();
       do {
         A3CMLProperty p = (A3CMLProperty) e.nextElement();
-        System.getProperties().put(p.name,p.value);
+        serverProperties.put(p.name, p.value);
 
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,
@@ -748,6 +793,8 @@ public final class AgentServer {
                      p.name + " = " + p.value);
       } while (e.hasMoreElements());
     }
+    
+    System.setProperties(serverProperties);
   }
   
   public static class Status {
@@ -974,7 +1021,7 @@ public final class AgentServer {
         }
       };
    
-      //  Try to get transaction type from disk, then initialize the rigth
+      //  Try to get transaction type from disk, then initialize the right
       // transaction manager and get the configuration.
       File dir = new File(path);
       if (dir.exists() && dir.isDirectory()) {

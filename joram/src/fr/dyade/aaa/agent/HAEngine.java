@@ -22,12 +22,16 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Enumeration;
 import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
 /**
  *  Implementation of Engine that used JGroups in order to improve 
@@ -49,7 +53,7 @@ final class HAEngine extends Engine {
     qinFromExt = new Vector();
     requestor = new Vector();
     
-    timeout = Long.getLong(HA_TIMEOUT_PROPERTY, DEFAULT_HA_TIMEOUT).longValue();
+    timeout = AgentServer.getLong(HA_TIMEOUT_PROPERTY, DEFAULT_HA_TIMEOUT).longValue();
   }
 
   public void setJGroups(JGroups jgroups) {

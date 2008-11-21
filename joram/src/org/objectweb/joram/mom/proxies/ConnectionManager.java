@@ -34,6 +34,7 @@ import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.Channel;
 
 /**
@@ -48,10 +49,10 @@ public class ConnectionManager {
   public static final String MULTI_CNX_SYNC_DELAY =
     "org.objectweb.joram.mom.proxies.ConnectionManager.multiCnxSyncDelay";
   
-  private static boolean multiCnxSync = Boolean.getBoolean(MULTI_CNX_SYNC);
+  private static boolean multiCnxSync = AgentServer.getBoolean(MULTI_CNX_SYNC);
   
   private static long multiThreadSyncDelay = 
-    Long.getLong(MULTI_CNX_SYNC_DELAY, 1).longValue();
+    AgentServer.getLong(MULTI_CNX_SYNC_DELAY, 1).longValue();
   
   public static final void sendToProxy(AgentId proxyId, int cnxKey,
       AbstractJmsRequest req, Object msg) {
@@ -115,7 +116,7 @@ public class ConnectionManager {
     AdminTopic adminTopic = new AdminTopic();
     adminTopic.deploy();
     
-    inFlow = Integer.getInteger("ConnectionManager.inFlow", inFlow).intValue();
+    inFlow = AgentServer.getInteger("ConnectionManager.inFlow", inFlow).intValue();
 
     if (args != null) {
       String initialAdminName = null;

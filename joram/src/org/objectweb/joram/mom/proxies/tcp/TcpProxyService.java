@@ -24,13 +24,16 @@
  */
 package org.objectweb.joram.mom.proxies.tcp;
 
-import java.net.*;
-import java.util.*;
-
-import fr.dyade.aaa.agent.*;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
+
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
 
 /**
  * Starts a TCP entry point for MOM clients.
@@ -118,7 +121,7 @@ public class TcpProxyService {
       }
     }
     
-    int backlog = Integer.getInteger(BACKLOG_PROP, DEFAULT_BACKLOG).intValue();
+    int backlog = AgentServer.getInteger(BACKLOG_PROP, DEFAULT_BACKLOG).intValue();
 
     // Create the socket here in order to throw an exception
     // if the socket can't be created (even if firstTime is false).
@@ -135,9 +138,9 @@ public class TcpProxyService {
       serverSocket = new ServerSocket(port, backlog, InetAddress.getByName(address));
     }
 
-    int poolSize = Integer.getInteger(POOL_SIZE_PROP, DEFAULT_POOL_SIZE).intValue();
+    int poolSize = AgentServer.getInteger(POOL_SIZE_PROP, DEFAULT_POOL_SIZE).intValue();
 
-    int timeout = Integer.getInteger(SO_TIMEOUT_PROP, DEFAULT_SO_TIMEOUT).intValue();
+    int timeout = AgentServer.getInteger(SO_TIMEOUT_PROP, DEFAULT_SO_TIMEOUT).intValue();
 
     proxyService = new TcpProxyService(serverSocket, poolSize, timeout);
     proxyService.start();

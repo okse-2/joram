@@ -33,7 +33,6 @@ import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Vector;
 
@@ -267,15 +266,16 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     if (nbMaxFreeSender < 1)
       nbMaxFreeSender = 2;
     
-    IdleTimeout = Long.getLong("PoolNetwork.IdleTimeout", IdleTimeout).longValue();
-    IdleTimeout = Long.getLong(domain + ".IdleTimeout", IdleTimeout).longValue();
+    IdleTimeout = AgentServer.getLong("PoolNetwork.IdleTimeout", IdleTimeout).longValue();
+    IdleTimeout = AgentServer.getLong(domain + ".IdleTimeout", IdleTimeout).longValue();
     if (IdleTimeout < 1000L) IdleTimeout = 5000L;
     
     defaultMaxMessageInFlow = AgentServer.getInteger("PoolNetwork.maxMessageInFlow", defaultMaxMessageInFlow).intValue();
     defaultMaxMessageInFlow = AgentServer.getInteger(domain + ".maxMessageInFlow", defaultMaxMessageInFlow).intValue();
   
-    String value = System.getProperty(domain + ".compressedFlows");
-    if (value == null) value = System.getProperty("PoolNetwork.compressedFlows");
+    String value = AgentServer.getProperty(domain + ".compressedFlows");
+    if (value == null)
+      value = AgentServer.getProperty("PoolNetwork.compressedFlows");
     compressedFlows = Boolean.valueOf(value).booleanValue();
     
     if (logmon.isLoggable(BasicLevel.DEBUG)) {

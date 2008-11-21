@@ -35,6 +35,7 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.jndi2.impl.BindEvent;
 import fr.dyade.aaa.jndi2.impl.ChangeOwnerEvent;
+import fr.dyade.aaa.jndi2.impl.ContextRecord;
 import fr.dyade.aaa.jndi2.impl.CreateSubcontextEvent;
 import fr.dyade.aaa.jndi2.impl.DestroySubcontextEvent;
 import fr.dyade.aaa.jndi2.impl.MissingContextException;
@@ -43,11 +44,10 @@ import fr.dyade.aaa.jndi2.impl.NamingContext;
 import fr.dyade.aaa.jndi2.impl.NamingContextInfo;
 import fr.dyade.aaa.jndi2.impl.NotOwnerException;
 import fr.dyade.aaa.jndi2.impl.RebindEvent;
+import fr.dyade.aaa.jndi2.impl.Record;
 import fr.dyade.aaa.jndi2.impl.UnbindEvent;
 import fr.dyade.aaa.jndi2.impl.UpdateEvent;
 import fr.dyade.aaa.jndi2.impl.UpdateListener;
-import fr.dyade.aaa.jndi2.impl.Record;
-import fr.dyade.aaa.jndi2.impl.ContextRecord;
 import fr.dyade.aaa.jndi2.msg.ChangeOwnerRequest;
 import fr.dyade.aaa.jndi2.msg.CreateSubcontextRequest;
 import fr.dyade.aaa.jndi2.msg.JndiError;
@@ -136,7 +136,7 @@ public class ReplicationManager
 
   public void agentInitialize(boolean firstTime) throws Exception {
     if (firstTime) {
-	looseCoupling = Boolean.getBoolean(fr.dyade.aaa.jndi2.impl.ServerImpl.LOOSE_COUPLING);
+	looseCoupling = AgentServer.getBoolean(fr.dyade.aaa.jndi2.impl.ServerImpl.LOOSE_COUPLING);
 	if (serverIds.length > 0 && (!looseCoupling)) {
 	    rootOwnerId = 
 		DistributedJndiServer.getDefault(serverIds[0]);
