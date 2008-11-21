@@ -38,6 +38,7 @@ import javax.naming.NotContextException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
+import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.util.Transaction;
 
 public class ServerImpl {
@@ -89,7 +90,7 @@ public class ServerImpl {
     contextManager = new ContextManager(
       transaction, serverId, rootOwnerId);
     
-    looseCoupling = Boolean.getBoolean(LOOSE_COUPLING);
+    looseCoupling = AgentServer.getBoolean(LOOSE_COUPLING);
   }
 
   public void setUpdateListener(UpdateListener updateListener) {

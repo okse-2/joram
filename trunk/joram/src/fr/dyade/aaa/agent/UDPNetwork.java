@@ -239,8 +239,8 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
     protected NetServerIn(String name, Logger logmon) throws IOException {
       super(name + ".NetServerIn", logmon);
       socket = new DatagramSocket(port);
-      socket.setReceiveBufferSize(Integer.getInteger("UDPReceiveBufferSize", 1048576).intValue());
-      socket.setSendBufferSize(Integer.getInteger("UDPSendBufferSize", 8192).intValue());
+      socket.setReceiveBufferSize(AgentServer.getInteger("UDPReceiveBufferSize", 1048576).intValue());
+      socket.setSendBufferSize(AgentServer.getInteger("UDPSendBufferSize", 8192).intValue());
       if (logmon.isLoggable(BasicLevel.DEBUG)) {
         logmon.log(BasicLevel.DEBUG, this.getName() + ", socket buffer sizes: Receive:"
             + socket.getReceiveBufferSize() + " Send:" + socket.getSendBufferSize());

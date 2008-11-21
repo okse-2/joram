@@ -164,19 +164,17 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
   public void init(String name, int port, short[] servers) throws Exception {
     super.init(name, port, servers);
 
-    activationPeriod = Long.getLong("ActivationPeriod",
-                                    activationPeriod).longValue();
-    activationPeriod = Long.getLong(name + ".ActivationPeriod",
-                                    activationPeriod).longValue();
+    activationPeriod = AgentServer.getLong("ActivationPeriod", activationPeriod).longValue();
+    activationPeriod = AgentServer.getLong(name + ".ActivationPeriod", activationPeriod).longValue();
     
-    NbDaemon = Integer.getInteger("NbDaemon", NbDaemon).intValue();
-    NbDaemon = Integer.getInteger(name + ".NbDaemon", NbDaemon).intValue();
+    NbDaemon = AgentServer.getInteger("NbDaemon", NbDaemon).intValue();
+    NbDaemon = AgentServer.getInteger(name + ".NbDaemon", NbDaemon).intValue();
 
-    proxyhost = System.getProperty("proxyhost");
-    proxyhost = System.getProperty(name + ".proxyhost", proxyhost);
+    proxyhost = AgentServer.getProperty("proxyhost");
+    proxyhost = AgentServer.getProperty(name + ".proxyhost", proxyhost);
     if (proxyhost != null) {
-      proxyport = Integer.getInteger("proxyport", 8080).intValue();
-      proxyport = Integer.getInteger(name + ".proxyport", proxyport).intValue();
+      proxyport = AgentServer.getInteger("proxyport", 8080).intValue();
+      proxyport = AgentServer.getInteger(name + ".proxyport", proxyport).intValue();
       proxy = InetAddress.getByName(proxyhost);
     }
   }

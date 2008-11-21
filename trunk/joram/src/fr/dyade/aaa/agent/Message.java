@@ -23,10 +23,9 @@ package fr.dyade.aaa.agent;
 import java.io.IOException;
 import java.io.Serializable;
 
-import fr.dyade.aaa.util.Pool;
-
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.Pool;
 
 /**
  * The internal message structure.
@@ -286,7 +285,7 @@ final class Message implements Serializable {
   private static Pool pool = null;
 
   static {
-    int size = Integer.getInteger("fr.dyade.aaa.agent.Message$Pool.size", 150).intValue();
+    int size = AgentServer.getInteger("fr.dyade.aaa.agent.Message$Pool.size", 150).intValue();
     pool = new Pool("Message", size);
   }
 

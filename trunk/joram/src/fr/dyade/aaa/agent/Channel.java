@@ -20,8 +20,8 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -43,8 +43,7 @@ public class Channel {
    * @return	the corresponding <code>Channel</code>'s instance.
    */
   static Channel newInstance() throws Exception {
-    String cname = System.getProperty("Channel",
-                                      "fr.dyade.aaa.agent.Channel");
+    String cname = AgentServer.getProperty("Channel", "fr.dyade.aaa.agent.Channel");
     Class cclass = Class.forName(cname);
     channel = (Channel) cclass.newInstance();
     return channel;

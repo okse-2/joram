@@ -30,6 +30,7 @@ import java.util.StringTokenizer;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
+import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.util.Debug;
 
 public class AMQPService {
@@ -110,7 +111,7 @@ public class AMQPService {
       }
     }
  
-    int backlog = Integer.getInteger(BACKLOG_PROP, DEFAULT_BACKLOG).intValue();
+    int backlog = AgentServer.getInteger(BACKLOG_PROP, DEFAULT_BACKLOG).intValue();
     
     // Create the socket here in order to throw an exception
     // if the socket can't be created (even if firstTime is false).
@@ -126,8 +127,8 @@ public class AMQPService {
       serverSocket = new ServerSocket(port, backlog, InetAddress.getByName(address));
     }
 
-    int poolSize = Integer.getInteger(POOL_SIZE_PROP, DEFAULT_POOL_SIZE).intValue();
-    int timeout = Integer.getInteger(SO_TIMEOUT_PROP, DEFAULT_SO_TIMEOUT).intValue();
+    int poolSize = AgentServer.getInteger(POOL_SIZE_PROP, DEFAULT_POOL_SIZE).intValue();
+    int timeout = AgentServer.getInteger(SO_TIMEOUT_PROP, DEFAULT_SO_TIMEOUT).intValue();
 
     amqpService = new AMQPService(serverSocket, poolSize, timeout);
     amqpService.start();

@@ -32,7 +32,7 @@ final class GCEngine extends Engine {
   GCEngine() throws Exception {
     super();
 
-    NbMaxLoop = Integer.getInteger("NbMaxLoop", NbMaxLoop).intValue();
+    NbMaxLoop = AgentServer.getInteger("NbMaxLoop", NbMaxLoop).intValue();
     needToBeCommited = false;
   }
 

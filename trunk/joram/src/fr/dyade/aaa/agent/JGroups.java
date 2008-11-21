@@ -72,10 +72,10 @@ final class JGroups
 
     state = STARTING;
 
-    String addr = System.getProperty("JGroups.MCastAddr", "224.0.0.35");
-    String port = System.getProperty("JGroups.MCastPort", "25566");
+    String addr = AgentServer.getProperty("JGroups.MCastAddr", "224.0.0.35");
+    String port = AgentServer.getProperty("JGroups.MCastPort", "25566");
       
-    String props = System.getProperty(
+    String props = AgentServer.getProperty(
       "JGroupsProps",
       "UDP(mcast_addr=" + addr + 
       ";mcast_port=" + port + ";ip_ttl=32;" +

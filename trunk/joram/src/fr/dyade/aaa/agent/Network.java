@@ -436,34 +436,34 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, domain + ", Network.setProperties()");
 
-    WDActivationPeriod = Long.getLong("WDActivationPeriod",
+    WDActivationPeriod = AgentServer.getLong("WDActivationPeriod",
                                       WDActivationPeriod).longValue();
-    WDActivationPeriod = Long.getLong(domain + ".WDActivationPeriod",
+    WDActivationPeriod = AgentServer.getLong(domain + ".WDActivationPeriod",
                                       WDActivationPeriod).longValue();
 
-    WDNbRetryLevel1 = Integer.getInteger("WDNbRetryLevel1",
+    WDNbRetryLevel1 = AgentServer.getInteger("WDNbRetryLevel1",
                                          WDNbRetryLevel1).intValue();
-    WDNbRetryLevel1 = Integer.getInteger(domain + ".WDNbRetryLevel1",
+    WDNbRetryLevel1 = AgentServer.getInteger(domain + ".WDNbRetryLevel1",
                                          WDNbRetryLevel1).intValue();
 
-    WDRetryPeriod1 = Long.getLong("WDRetryPeriod1",
+    WDRetryPeriod1 = AgentServer.getLong("WDRetryPeriod1",
                                   WDRetryPeriod1).longValue();
-    WDRetryPeriod1 = Long.getLong(domain + ".WDRetryPeriod1",
+    WDRetryPeriod1 = AgentServer.getLong(domain + ".WDRetryPeriod1",
                                   WDRetryPeriod1).longValue();
 
-    WDNbRetryLevel2 = Integer.getInteger("WDNbRetryLevel2",
+    WDNbRetryLevel2 = AgentServer.getInteger("WDNbRetryLevel2",
                                          WDNbRetryLevel2).intValue();
-    WDNbRetryLevel2 = Integer.getInteger(domain + ".WDNbRetryLevel2",
+    WDNbRetryLevel2 = AgentServer.getInteger(domain + ".WDNbRetryLevel2",
                                          WDNbRetryLevel2).intValue();
 
-    WDRetryPeriod2 = Long.getLong("WDRetryPeriod2",
+    WDRetryPeriod2 = AgentServer.getLong("WDRetryPeriod2",
                                   WDRetryPeriod2).longValue();
-    WDRetryPeriod2 = Long.getLong(domain + ".WDRetryPeriod2",
+    WDRetryPeriod2 = AgentServer.getLong(domain + ".WDRetryPeriod2",
                                   WDRetryPeriod2).longValue();
 
-    WDRetryPeriod3 = Long.getLong("WDRetryPeriod3",
+    WDRetryPeriod3 = AgentServer.getLong("WDRetryPeriod3",
                                   WDRetryPeriod3).longValue();
-    WDRetryPeriod3 = Long.getLong(domain + ".WDRetryPeriod3",
+    WDRetryPeriod3 = AgentServer.getLong(domain + ".WDRetryPeriod3",
                                   WDRetryPeriod3).longValue();
     
     if (logmon.isLoggable(BasicLevel.DEBUG)) {

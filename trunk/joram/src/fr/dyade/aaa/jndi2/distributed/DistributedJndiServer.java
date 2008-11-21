@@ -21,16 +21,20 @@
  */
 package fr.dyade.aaa.jndi2.distributed;
 
-import java.util.*;
-import java.net.*;
-
-import fr.dyade.aaa.jndi2.server.*;
-import fr.dyade.aaa.jndi2.server.Trace;
-
-import fr.dyade.aaa.agent.*;
+import java.net.ServerSocket;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.jndi2.server.AgentEntryPoint;
+import fr.dyade.aaa.jndi2.server.Container;
+import fr.dyade.aaa.jndi2.server.JndiServer;
+import fr.dyade.aaa.jndi2.server.TcpEntryPoint;
+import fr.dyade.aaa.jndi2.server.TcpServer;
+import fr.dyade.aaa.jndi2.server.Trace;
 
 /**
  * Class of a JNDI server that belongs to a distributed JNDI
@@ -67,11 +71,11 @@ public class DistributedJndiServer {
     // if the socket can't be created (even if firstTime is false).
     ServerSocket serverSocket = new ServerSocket(port);
 
-    int poolSize = Integer.getInteger(
+    int poolSize = AgentServer.getInteger(
       JndiServer.POOL_SIZE_PROP, 
       JndiServer.DEFAULT_POOL_SIZE).intValue();
 
-    int timeout = Integer.getInteger(
+    int timeout = AgentServer.getInteger(
       JndiServer.SO_TIMEOUT_PROP,
       JndiServer.DEFAULT_SO_TIMEOUT).intValue();
 

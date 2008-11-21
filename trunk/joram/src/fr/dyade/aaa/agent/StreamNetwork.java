@@ -192,50 +192,42 @@ public abstract class StreamNetwork extends Network {
       logmon.log(BasicLevel.DEBUG, domain + ", StreamNetwork.setProperties()");
     super.setProperties();
 
-    CnxRetry = Integer.getInteger("CnxRetry", CnxRetry).intValue();
-    CnxRetry = Integer.getInteger(domain + ".CnxRetry", CnxRetry).intValue();
+    CnxRetry = AgentServer.getInteger("CnxRetry", CnxRetry).intValue();
+    CnxRetry = AgentServer.getInteger(domain + ".CnxRetry", CnxRetry).intValue();
 
-    backlog = Integer.getInteger("backlog", backlog).intValue();
-    backlog = Integer.getInteger(domain + ".backlog", backlog).intValue();
+    backlog = AgentServer.getInteger("backlog", backlog).intValue();
+    backlog = AgentServer.getInteger(domain + ".backlog", backlog).intValue();
 
-    TcpNoDelay = Boolean.getBoolean(domain + ".TcpNoDelay");
-    if (! TcpNoDelay) TcpNoDelay = Boolean.getBoolean("TcpNoDelay");
+    TcpNoDelay = AgentServer.getBoolean(domain + ".TcpNoDelay");
+    if (!TcpNoDelay)
+      TcpNoDelay = AgentServer.getBoolean("TcpNoDelay");
 
-    SoLinger = Integer.getInteger("SoLinger", SoLinger).intValue();
-    SoLinger = Integer.getInteger(domain + ".SoLinger", SoLinger).intValue();
+    SoLinger = AgentServer.getInteger("SoLinger", SoLinger).intValue();
+    SoLinger = AgentServer.getInteger(domain + ".SoLinger", SoLinger).intValue();
 
-    SoTimeout = Integer.getInteger("SoTimeout", SoTimeout).intValue();
-    SoTimeout = Integer.getInteger(domain + ".SoTimeout", SoTimeout).intValue();
+    SoTimeout = AgentServer.getInteger("SoTimeout", SoTimeout).intValue();
+    SoTimeout = AgentServer.getInteger(domain + ".SoTimeout", SoTimeout).intValue();
 
-    ConnectTimeout = Integer.getInteger("ConnectTimeout",
-                                        ConnectTimeout).intValue();
-    ConnectTimeout = Integer.getInteger(domain + ".ConnectTimeout",
-                                        ConnectTimeout).intValue();
+    ConnectTimeout = AgentServer.getInteger("ConnectTimeout", ConnectTimeout).intValue();
+    ConnectTimeout = AgentServer.getInteger(domain + ".ConnectTimeout", ConnectTimeout).intValue();
 
     String inLocalAddressStr = null;
-    inLocalAddressStr = System.getProperty("InLocalAddress",
-                                           inLocalAddressStr);
-    inLocalAddressStr = System.getProperty(domain + ".InLocalAddress",
-                                           inLocalAddressStr);
+    inLocalAddressStr = AgentServer.getProperty("InLocalAddress", inLocalAddressStr);
+    inLocalAddressStr = AgentServer.getProperty(domain + ".InLocalAddress", inLocalAddressStr);
     if (inLocalAddressStr != null)
       inLocalAddr = InetAddress.getByName(inLocalAddressStr);
 
     String outLocalAddressStr = null;
-    outLocalAddressStr = System.getProperty("OutLocalAddress",
-                                           outLocalAddressStr);
-    outLocalAddressStr = System.getProperty(domain + ".OutLocalAddress",
-                                           outLocalAddressStr);
+    outLocalAddressStr = AgentServer.getProperty("OutLocalAddress", outLocalAddressStr);
+    outLocalAddressStr = AgentServer.getProperty(domain + ".OutLocalAddress", outLocalAddressStr);
     if (outLocalAddressStr != null)
       outLocalAddr = InetAddress.getByName(outLocalAddressStr);
 
-    outLocalPort = Integer.getInteger("OutLocalPort",
-                                      outLocalPort).intValue();
-    outLocalPort = Integer.getInteger(domain + ".OutLocalPort",
-                                      outLocalPort).intValue();
+    outLocalPort = AgentServer.getInteger("OutLocalPort", outLocalPort).intValue();
+    outLocalPort = AgentServer.getInteger(domain + ".OutLocalPort", outLocalPort).intValue();
 
-    String sfcn = System.getProperty("SocketFactory",
-                                     SocketFactory.DefaultFactory);
-    sfcn = System.getProperty(domain + ".SocketFactory", sfcn);
+    String sfcn = AgentServer.getProperty("SocketFactory", SocketFactory.DefaultFactory);
+    sfcn = AgentServer.getProperty(domain + ".SocketFactory", sfcn);
     socketFactory = SocketFactory.getFactory(sfcn);
     
     if (logmon.isLoggable(BasicLevel.DEBUG)) {

@@ -338,12 +338,12 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     name = "Engine#" + AgentServer.getServerId();
 
     // Get the logging monitor from current server MonologLoggerFactory
-    logmon = Debug.getLogger(Debug.A3Engine +
-                             ".#" + AgentServer.getServerId());
-    logmon.log(BasicLevel.DEBUG,
-               getName() + " created [" + getClass().getName() + "].");
+    logmon = Debug.getLogger(Debug.A3Engine + ".#" + AgentServer.getServerId());
 
-    NbMaxAgents = Integer.getInteger("NbMaxAgents", NbMaxAgents).intValue();
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, getName() + " created [" + getClass().getName() + "].");
+
+    NbMaxAgents = AgentServer.getInteger("NbMaxAgents", NbMaxAgents).intValue();
     qin = new MessageVector(name, AgentServer.getTransaction().isPersistent());
     if (! AgentServer.getTransaction().isPersistent()) {
       NbMaxAgents = Integer.MAX_VALUE;
