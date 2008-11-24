@@ -148,6 +148,13 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
     return "ClusterConnectionFactory:" + cluster;
   }
 
+  /**
+   * @return the cluster hashtable.
+   */
+  public Hashtable getCluster() {
+    return cluster;
+  }
+  
   /** Sets the naming reference of an administered object. */
   public void toReference(Reference ref) throws NamingException {
     if (cluster == null) return;
