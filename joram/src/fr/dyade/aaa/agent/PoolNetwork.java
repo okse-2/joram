@@ -341,7 +341,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     } catch (Exception exc) {
       logmon.log(BasicLevel.FATAL, getName() + " addServer failed", exc);
     }
-    logmon.log(BasicLevel.DEBUG, getName() + " addServer ok");
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, getName() + " addServer ok");
   }
 
   /**
@@ -399,7 +400,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
    * Causes this network component to begin execution.
    */
   public void start() throws Exception {
-    logmon.log(BasicLevel.DEBUG, getName() + ", starting");
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, getName() + ", starting");
 
     try {
       if (isRunning())
@@ -431,7 +433,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       logmon.log(BasicLevel.ERROR, getName() + ", can't start", exc);
       throw exc;
     }
-    logmon.log(BasicLevel.DEBUG, getName() + ", started");
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, getName() + ", started");
   }
 
   /**
@@ -466,7 +469,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       }
     }
     activeSessions.clear();
-    logmon.log(BasicLevel.DEBUG, getName() + ", stopped");
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, getName() + ", stopped");
   }
 
   /**
@@ -746,7 +750,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
             // AF: This task should be run regularly.
             msg = qout.removeExpired(System.currentTimeMillis());
             if (msg != null) {
-              logmon.log(BasicLevel.DEBUG,
+              if (logmon.isLoggable(BasicLevel.DEBUG))
+                logmon.log(BasicLevel.DEBUG,
                   this.getName() + ", Handles expired message: " + msg);
 
               if (msg.not.deadNotificationAgentId != null) {
@@ -861,7 +866,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
           }
         }
       } finally {
-        this.logmon.log(BasicLevel.WARN, this.getName() + ", ended");
+        if (this.logmon.isLoggable(BasicLevel.DEBUG))
+          this.logmon.log(BasicLevel.WARN, this.getName() + ", ended");
         finish();
       }
     }
@@ -882,7 +888,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       for (int i=0; i<waiting.length; i++) {
         msg = (Message) waiting[i];
 
-        logmon.log(BasicLevel.WARN, getName() + ", insert msg (" + msg + ')');
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG, getName() + ", insert msg (" + msg + ')');
 
         int idx = 0;
         while (idx < elementCount) {
@@ -899,13 +906,12 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
      * the list.
      * 
      * @param ack The received message to acknowledge.
-     * @return    true if the ack corresponding to the specified message is
-     *            already in the queue, false otherwise.
      */
     public synchronized void insertAck(Message ack) {
       modCount++;
 
-      logmon.log(BasicLevel.WARN, getName() + ", insert ack (" + ack + ')');
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, getName() + ", insert ack (" + ack + ')');
 
       int idx = 0;
       while (idx < elementCount) {
@@ -1140,7 +1146,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       }
       
       if (! session.sender.isRunning()) {
-        logmon.log(BasicLevel.WARN, getName() + ", start anew sender (" + sid + ')');
+        if (logmon.isLoggable(BasicLevel.WARN))
+          logmon.log(BasicLevel.WARN, getName() + ", start anew sender (" + sid + ')');
         session.sender.start();
       }
       
@@ -1151,6 +1158,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     }
     
     synchronized void reset(short sid) {
+      if (logmon.isLoggable(BasicLevel.INFO))
       logmon.log(BasicLevel.INFO, getName() + ", reset(" + sid + ')');
       
       Sender sender = getSender(sid);
@@ -1178,19 +1186,23 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       if (sender.session.sendList.size() > 0) {
         Object[] waiting = sender.session.sendList.toArray();
         sender.session.sendList.clear();
-        logmon.log(BasicLevel.DEBUG,
-                   getName() + ", reset - " + waiting.length + " waiting messages");
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG,
+              getName() + ", reset - " + waiting.length + " waiting messages");
         sender.msgToSend.insertMessage(waiting);
       }
-      logmon.log(BasicLevel.WARN, getName() + ", reset end (" + sid + ')');
+      if (logmon.isLoggable(BasicLevel.WARN))
+        logmon.log(BasicLevel.WARN, getName() + ", reset end (" + sid + ')');
     }
     
     synchronized void restart(short sid) {
-      logmon.log(BasicLevel.INFO, getName() + ", restart(" + sid + ')');
+      if (logmon.isLoggable(BasicLevel.INFO))
+        logmon.log(BasicLevel.INFO, getName() + ", restart(" + sid + ')');
 
       Sender sender = getSender(sid);
-      logmon.log(BasicLevel.DEBUG,
-                 getName() + ", restart sender=" + sender + ", msgToSend=" + sender.msgToSend);
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
+            getName() + ", restart sender=" + sender + ", msgToSend=" + sender.msgToSend);
       sender.restart = false;
       // Wake up the daemon if needed
       if (!sender.msgToSend.isEmpty())
@@ -1830,7 +1842,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         msg.free();
         AgentServer.getTransaction().commit(true);
       } catch (NoSuchElementException exc) {
-        logmon.log(BasicLevel.WARN, getName() + ", can't ack, unknown msg#" + ack);
+        if (logmon.isLoggable(BasicLevel.WARN))
+          logmon.log(BasicLevel.WARN, getName() + ", can't ack, unknown msg#" + ack);
       } catch (Exception e) {
         if (logmon.isLoggable(BasicLevel.WARN))
           logmon.log(BasicLevel.WARN, getName() + ", exception during doAck : msg#" + ack);
@@ -1853,7 +1866,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         // and deletes it.
         sendList.removeMessage(stamp);
       } catch (NoSuchElementException exc) {
-        logmon.log(BasicLevel.WARN,
+        if (logmon.isLoggable(BasicLevel.WARN))
+          logmon.log(BasicLevel.WARN,
                    getName() + ", can't removes unknown expired msg#" + stamp);
       }
       
@@ -1957,11 +1971,13 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         try {
           nos.writeMessage(msg, currentTimeMillis);
         } catch (IOException exc) {
-          logmon.log(BasicLevel.WARN,
+          if (logmon.isLoggable(BasicLevel.WARN))
+            logmon.log(BasicLevel.WARN,
                      getName() + ", exception in sending message " + msg, exc);
           close();
         } catch (NullPointerException exc) {
           // The stream is closed
+          if (logmon.isLoggable(BasicLevel.WARN))
           logmon.log(BasicLevel.WARN,
                      getName() + ", exception in sending message " + msg);
         }
@@ -2077,7 +2093,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       } catch (Exception exc) {
         logmon.log(BasicLevel.ERROR, getName() + ", exited", exc);
       } finally {
-        logmon.log(BasicLevel.DEBUG, getName() + ", ends");
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG, getName() + ", ends");
 
         running = false;
         close();
