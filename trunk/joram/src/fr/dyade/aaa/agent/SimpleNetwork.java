@@ -29,7 +29,8 @@ import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -179,9 +180,7 @@ public class SimpleNetwork extends StreamNetwork {
 
     public void run() {
       Message msg = null;
-      short msgto;
-      ServerDesc server = null;
-
+      Set servers = new HashSet();
       try {
         try {
           nos = new NetworkOutputStream();
@@ -204,132 +203,145 @@ public class SimpleNetwork extends StreamNetwork {
           canStop = false;
           if (! running) break;
 
-          long currentTimeMillis = System.currentTimeMillis();
-          // Try to send waiting messages
-          watchdog(currentTimeMillis);
-
           if (msg != null) {
-            msgto = msg.getDest();
+            sendList.addMessage(msg);
+            qout.pop();
+          }
+          long currentTimeMillis = System.currentTimeMillis();
+          ServerDesc server = null;
 
-            Socket socket = null;
-            ExpiredNot expiredNot = null;
+          for (int i = 0; i < sendList.size(); i++) {
+            msg = sendList.getMessageAt(i);
+            short msgto = msg.getDest();
+
+            if (this.logmon.isLoggable(BasicLevel.DEBUG))
+              this.logmon.log(BasicLevel.DEBUG,
+                              this.getName() +
+                              ", check msg#" + msg.getStamp() +
+                              " from " + msg.from +
+                              " to " + msg.to);
+
+            if (msg.not.expiration > 0L && msg.not.expiration < currentTimeMillis) {
+              
+              // Remove the message.
+              AgentServer.getTransaction().begin();
+
+              if (msg.not.deadNotificationAgentId != null) {
+                if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                  logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification " + msg.from
+                      + ", " + msg.not + " to " + msg.not.deadNotificationAgentId);
+                }
+                ExpiredNot expiredNot = new ExpiredNot(msg.not, msg.from, msg.to);
+                Channel.post(Message.alloc(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot));
+                Channel.validate();
+              } else {
+                if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                  logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification " + msg.from + ", "
+                      + msg.not);
+                }
+              }
+
+              // Deletes the processed notification
+              sendList.removeMessageAt(i); i--;
+    // AF: A reprendre.
+//               // send ack in JGroups to delete msg
+//               if (jgroups != null)
+//                 jgroups.send(new JGroupsAckMsg(msg));
+              msg.delete();
+              msg.free();
+              AgentServer.getTransaction().commit(true);
+              continue;
+            }
+
             try {
-              if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                this.logmon.log(BasicLevel.DEBUG,
-                                this.getName() + ", try to send message -> " + msg + "/" + msgto);
-
-              if ((msg.not.expiration > 0L) &&
-                  (msg.not.expiration < currentTimeMillis)) {
-                throw new ExpirationExceededException();
-              }
-
-              // Can throw an UnknownServerException...
               server = AgentServer.getServerDesc(msgto);
-              try {
-                if ((! server.active) ||
-                    (server.last > currentTimeMillis)) {
-                  if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                    this.logmon.log(BasicLevel.DEBUG,
-                                    this.getName() + ", AgentServer#" + msgto + " is down");
-                  throw new ConnectException("AgentServer#" + msgto + " is down");
-                }
-
-                // Open the connection.
-                try {
-                  if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                    this.logmon.log(BasicLevel.DEBUG, this.getName() + ", try to connect");
-
-                  for (Enumeration e = server.getSockAddrs(); e.hasMoreElements();) {
-                    fr.dyade.aaa.util.SocketAddress sa = 
-                      (fr.dyade.aaa.util.SocketAddress) e.nextElement();
-                    try {
-                      server.moveToFirst(sa);
-                      socket = createSocket(server);
-                    } catch (IOException ioexc) {
-                      this.logmon.log(BasicLevel.DEBUG,
-                                      this.getName() + ", connection refused with addr=" + server.getAddr()+
-                                      " port=" +  server.getPort() +", try next element");
-                      continue;
-                    }
-                    if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                      this.logmon.log(BasicLevel.DEBUG, this.getName() + ", connected");
-                    break;
-                  }
-
-                  if (socket == null)
-                    socket = createSocket(server);
-                } catch (IOException exc) {
-                  this.logmon.log(BasicLevel.WARN,
-                                  this.getName() + ", connection refused", exc);
-                  server.active = false;
-                  server.last = System.currentTimeMillis();
-                  server.retry += 1;
-                  throw exc;
-                }
-                setSocketOption(socket);
-              } catch (IOException exc) {
-                this.logmon.log(BasicLevel.WARN,
-                                this.getName() + ", move msg in watchdog list", exc);
-                //  There is a connection problem, put the message in a
-                // waiting list.
-                sendList.addMessage(msg);
-                qout.pop();
-                continue;
-              }
-
-              currentTimeMillis = System.currentTimeMillis();
-              if ((msg.not.expiration > 0L) && (msg.not.expiration < currentTimeMillis)) {
-                throw new ExpirationExceededException();
-              }
-
-              try {
-                send(socket, msg, currentTimeMillis);
-              } catch (IOException exc) {
-                this.logmon.log(BasicLevel.WARN,
-                                this.getName() + ", move msg in watchdog list", exc);
-                //  There is a problem during network transaction, put the
-                // message in waiting list in order to retry later.
-                sendList.addMessage(msg);
-                qout.pop();
-                continue;
-              }
             } catch (UnknownServerException exc) {
               this.logmon.log(BasicLevel.ERROR,
                               this.getName() + ", can't send message: " + msg,
                               exc);
-              // Remove the message (see below), may be we have to post an
-              // error notification to sender.
-            } catch (ExpirationExceededException exc) {
-              if (msg.not.deadNotificationAgentId != null) {
-                if (logmon.isLoggable(BasicLevel.DEBUG)) {
-                  logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification1 "
-                             + msg.from
-                             + ", " + msg.not + " to " + msg.not.deadNotificationAgentId);
-                }
-                expiredNot = new ExpiredNot(msg.not, msg.from, msg.to);
-              } else {
-                if (logmon.isLoggable(BasicLevel.DEBUG)) {
-                  logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification " + msg.from
-                             + ", " + msg.not);
-                }
-              }
+              // Remove the message, may be we have to post an error
+              // notification to sender.
+              AgentServer.getTransaction().begin();
+              // Deletes the processed notification
+              sendList.removeMessageAt(i); i--;
+    // AF: A reprendre.
+//              // send ack in JGroups to delete msg
+//               if (jgroups != null)
+//                 jgroups.send(new JGroupsAckMsg(msg));
+              msg.delete();
+              msg.free();
+              AgentServer.getTransaction().commit(true);
+              continue;
             }
 
-            AgentServer.getTransaction().begin();
-            if (expiredNot != null) {
-              Channel.post(Message.alloc(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot));
-              Channel.validate();
+            if (servers.contains(server)) {
+              // The server has already been tested during this round
+              continue;
             }
-            //  Suppress the processed notification from message queue,
-            // and deletes it.
-            qout.pop();
-            // send ack in JGroups to delete msg
-            if (jgroups != null)
-              jgroups.send(new JGroupsAckMsg(msg));
-            msg.delete();
-            msg.free();
-            AgentServer.getTransaction().commit(true);
+
+            this.logmon.log(BasicLevel.DEBUG,
+                            this.getName() + server.active + ',' +
+                            server.retry + ',' +
+                            server.last + ',' +
+                            currentTimeMillis);
+
+            if ((server.active) ||
+                ((server.retry < WDNbRetryLevel1) && 
+                 ((server.last + WDRetryPeriod1) < currentTimeMillis)) ||
+                ((server.retry < WDNbRetryLevel2) &&
+                 ((server.last + WDRetryPeriod2) < currentTimeMillis)) ||
+                ((server.last + WDRetryPeriod3) < currentTimeMillis)) {
+              try {
+                if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                  this.logmon.log(BasicLevel.DEBUG,
+                                  this.getName() +
+                                  ", send msg#" + msg.getStamp());
+
+                // Open the connection.
+                Socket socket = createSocket(server);
+                // The connection is ok, reset active and retry flags.
+                server.active = true;
+                server.retry = 0;
+                server.last = currentTimeMillis;
+
+                setSocketOption(socket);
+
+                send(socket, msg, currentTimeMillis);
+              } catch (SocketException exc) {
+                if (this.logmon.isLoggable(BasicLevel.WARN))
+                  this.logmon.log(BasicLevel.WARN,
+                                  this.getName() + ", let msg in watchdog list",
+                                  exc);
+                server.active = false;
+                server.retry++;
+                server.last = currentTimeMillis;
+                
+                // Do not send following messages to this server
+                servers.add(server);
+                //  There is a connection problem, let the message in the
+                // waiting list.
+                continue;
+              } catch (Exception exc) {
+                this.logmon.log(BasicLevel.ERROR,
+                                this.getName() + ", error", exc);
+              }
+
+              AgentServer.getTransaction().begin();
+              //  Deletes the processed notification
+              sendList.removeMessageAt(i); i--;
+    // AF: A reprendre.
+//               // send ack in JGroups to delete msg
+//               if (jgroups != null)
+//                 jgroups.send(new JGroupsAckMsg(msg));
+              msg.delete();
+              msg.free();
+              AgentServer.getTransaction().commit(true);
+            } else {
+              // Do not send following messages to this server
+              servers.add(server);
+            }
           }
+          servers.clear();
         }
       } catch (Exception exc) {
         this.logmon.log(BasicLevel.FATAL,
@@ -342,159 +354,7 @@ public class SimpleNetwork extends StreamNetwork {
       }
     }
 
-//     /** The date of the last watchdog execution. */
-//     private long last = 0L;
-
-    /*
-     *
-     * @exception IOException unrecoverable exception during transaction.
-     */
-    void watchdog(long currentTimeMillis) throws Exception {
-//       this.logmon.log(BasicLevel.DEBUG,
-//                       this.getName() + " watchdog().");
-
-//       if (currentTimeMillis < (last + WDActivationPeriod))
-//         return;
-//       last = currentTimeMillis;
-
-      ServerDesc server = null;
-
-      for (int i=0; i<sendList.size(); i++) {
-        Message msg = sendList.getMessageAt(i);
-        short msgto = msg.getDest();
-
-        if (this.logmon.isLoggable(BasicLevel.DEBUG))
-          this.logmon.log(BasicLevel.DEBUG,
-                          this.getName() +
-                          ", check msg#" + msg.getStamp() +
-                          " from " + msg.from +
-                          " to " + msg.to);
-
-        if ((msg.not.expiration > 0L) &&
-            (msg.not.expiration < currentTimeMillis)) {
-          
-          // Remove the message.
-          AgentServer.getTransaction().begin();
-
-          if (msg.not.deadNotificationAgentId != null) {
-            if (logmon.isLoggable(BasicLevel.DEBUG)) {
-              logmon.log(BasicLevel.DEBUG, getName() + ": forward expired notification2 " + msg.from
-                  + ", "
-                  + msg.not + " to " + msg.not.deadNotificationAgentId);
-            }
-            ExpiredNot expiredNot = new ExpiredNot(msg.not, msg.from, msg.to);
-            Channel.post(Message.alloc(AgentId.localId, msg.not.deadNotificationAgentId, expiredNot));
-            Channel.validate();
-          } else {
-            if (logmon.isLoggable(BasicLevel.DEBUG)) {
-              logmon.log(BasicLevel.DEBUG, getName() + ": removes expired notification " + msg.from + ", "
-                  + msg.not);
-            }
-          }
-
-          // Deletes the processed notification
-          sendList.removeMessageAt(i); i--;
-// AF: A reprendre.
-//           // send ack in JGroups to delete msg
-//           if (jgroups != null)
-//             jgroups.send(new JGroupsAckMsg(msg));
-          msg.delete();
-          msg.free();
-          AgentServer.getTransaction().commit(true);
-        }
-
-        try {
-          server = AgentServer.getServerDesc(msgto);
-        } catch (UnknownServerException exc) {
-          this.logmon.log(BasicLevel.ERROR,
-                          this.getName() + ", can't send message: " + msg,
-                          exc);
-          // Remove the message, may be we have to post an error
-          // notification to sender.
-          AgentServer.getTransaction().begin();
-          // Deletes the processed notification
-          sendList.removeMessageAt(i); i--;
-// AF: A reprendre.
-//          // send ack in JGroups to delete msg
-//           if (jgroups != null)
-//             jgroups.send(new JGroupsAckMsg(msg));
-          msg.delete();
-          msg.free();
-          AgentServer.getTransaction().commit(true);
-
-          continue;
-        }
-
-        if (server.last > currentTimeMillis) {
-          // The server has already been tested during this round
-          continue;
-        }
-
-        this.logmon.log(BasicLevel.DEBUG,
-                        this.getName() + server.active + ',' +
-                        server.retry + ',' +
-                        server.last + ',' +
-                        currentTimeMillis);
-
-        if ((server.active) ||
-            ((server.retry < WDNbRetryLevel1) && 
-             ((server.last + WDRetryPeriod1) < currentTimeMillis)) ||
-            ((server.retry < WDNbRetryLevel2) &&
-             ((server.last + WDRetryPeriod2) < currentTimeMillis)) ||
-            ((server.last + WDRetryPeriod3) < currentTimeMillis)) {
-          try {
-            if (this.logmon.isLoggable(BasicLevel.DEBUG))
-              this.logmon.log(BasicLevel.DEBUG,
-                              this.getName() +
-                              ", send msg#" + msg.getStamp());
-
-            // Open the connection.
-            Socket socket = createSocket(server);
-            // The connection is ok, reset active and retry flags.
-            server.active = true;
-            server.retry = 0;
-            // Reset last in order to allow sending of following messages
-            // to the same server.
-            server.last = currentTimeMillis;
-
-            setSocketOption(socket);
-
-            send(socket, msg, currentTimeMillis);
-          } catch (SocketException exc) {
-            if (this.logmon.isLoggable(BasicLevel.WARN))
-              this.logmon.log(BasicLevel.WARN,
-                              this.getName() + ", let msg in watchdog list",
-                              exc);
-            server.active = false;
-            server.retry += 1;
-            // Set last in order to avoid the sending of following messages to
-            // same server.
-            server.last = currentTimeMillis +1;
-            //  There is a connection problem, let the message in the
-            // waiting list.
-            continue;
-          } catch (Exception exc) {
-            this.logmon.log(BasicLevel.ERROR,
-                            this.getName() + ", error", exc);
-          }
-
-          AgentServer.getTransaction().begin();
-          //  Deletes the processed notification
-          sendList.removeMessageAt(i); i--;
-// AF: A reprendre.
-//           // send ack in JGroups to delete msg
-//           if (jgroups != null)
-//             jgroups.send(new JGroupsAckMsg(msg));
-          msg.delete();
-          msg.free();
-          AgentServer.getTransaction().commit(true);
-        }
-      }
-    }
-
-    void send(Socket socket,
-              Message msg,
-              long currentTimeMillis) throws IOException {
+    void send(Socket socket, Message msg, long currentTimeMillis) throws IOException {
       InputStream is = null;
       OutputStream os = null;
 
