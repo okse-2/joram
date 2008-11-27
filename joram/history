@@ -1,4 +1,8 @@
 +==============================================================================
+| 2008/11/27 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: Using SimpleNetwork could lead to message loss in some rare cases.
++==============================================================================
 | 2008/11/05 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
   No longer get full message in administration method when only header or
