@@ -62,8 +62,7 @@ public final class ObjectMessage extends Message implements javax.jms.ObjectMess
    */
   public void setObject(Serializable obj) throws JMSException {
     if (RObody)
-      throw new MessageNotWriteableException("Can't set an object as the"
-                                             + " message body is read-only.");
+      throw new MessageNotWriteableException("Can't set an object as the message body is read-only.");
 
     try {
       clearBody();
@@ -84,45 +83,8 @@ public final class ObjectMessage extends Message implements javax.jms.ObjectMess
 
     try {
       return momMsg.getObject();
-    } catch (ClassNotFoundException cnfexc) {
-      ByteArrayInputStream bais = null;
-      ObjectInputStream ois = null;
-
-      try {
-        // Could not build serialized object: reason could be linked to 
-        // class loaders hierarchy in an application server.
-        class Specialized_OIS extends ObjectInputStream {
-          Specialized_OIS(InputStream is) throws IOException {
-            super(is);
-          }
-
-          protected Class resolveClass(ObjectStreamClass osc)
-            throws IOException, ClassNotFoundException {
-            String n = osc.getName();
-            return Class.forName(n, false,
-                                 Thread.currentThread().getContextClassLoader());
-          }
-        }
-
-        bais = new ByteArrayInputStream(momMsg.body);
-        ois = new Specialized_OIS(bais);
-        return (Serializable) ois.readObject(); 
-      } catch (Exception exc) {
-        MessageFormatException jE =
-          new MessageFormatException("Error while deserializing the wrapped object: " + exc);
-        throw jE;
-      } finally {
-        try {
-          ois.close();
-        } catch (Exception e) {}
-        try {
-          bais.close();
-        } catch (Exception e) {}
-      }
     } catch (Exception exc) {
-      MessageFormatException jE =
-        new MessageFormatException("Error while deserializing the wrapped object: " + exc);
-      throw jE;
-    }
+      throw new MessageFormatException("Error while deserializing the wrapped object: " + exc);
+     }
   }
 }

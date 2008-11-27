@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Hashtable;
@@ -273,16 +274,35 @@ public final class Message implements Cloneable, Serializable, Streamable {
     ByteArrayInputStream bais = null;
     ObjectInputStream ois = null;
     Object obj = null;
-
+    
     try {
-     bais = new ByteArrayInputStream(body);
-     ois = new ObjectInputStream(bais);
-     obj = ois.readObject();
-    } catch (Exception e) {
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "ERROR: getObject()", e);
+      try {
+        bais = new ByteArrayInputStream(body);
+        ois = new ObjectInputStream(bais);
+        obj = ois.readObject();
+      } catch (ClassNotFoundException cnfexc) {
+        // Could not build serialized object: reason could be linked to 
+        // class loaders hierarchy in an application server.
+        class Specialized_OIS extends ObjectInputStream {
+          Specialized_OIS(InputStream is) throws IOException {
+            super(is);
+          }
+
+          protected Class resolveClass(ObjectStreamClass osc) throws IOException, ClassNotFoundException {
+            String n = osc.getName();
+            return Class.forName(n, false, Thread.currentThread().getContextClassLoader());
+          }
+        }
+
+        bais = new ByteArrayInputStream(body);
+        ois = new Specialized_OIS(bais);
+        obj = ois.readObject(); 
+      }
+    } catch (Exception exc) {
+      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.ERROR))
+        JoramTracing.dbgProxy.log(BasicLevel.ERROR, "ERROR: getObject()", exc);
       // Don't forget to rethrow the Exception
-      throw e;
+      throw exc;
     } finally {
       try {
         ois.close();
