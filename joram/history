@@ -1,7 +1,17 @@
 +==============================================================================
+| 2008/11/28 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+  Fix a potential bug in JNDI: declare TcpRequestNot non persistent to avoid
+ a swap-out (This notification contains a socket and cannot be serialized).
++==============================================================================
+| 2008/11/27 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+  Bug fix: No longer generates an error message when a contextual class loader
+ is needed for ObjectMessage.getObject.
++==============================================================================
 | 2008/11/27 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
- Bug fix: Using SimpleNetwork could lead to message loss in some rare cases.
+  Bug fix: Using SimpleNetwork could lead to message loss in some rare cases.
 +==============================================================================
 | 2008/11/05 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
