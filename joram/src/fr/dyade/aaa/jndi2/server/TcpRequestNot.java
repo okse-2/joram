@@ -26,10 +26,8 @@ package fr.dyade.aaa.jndi2.server;
 import fr.dyade.aaa.agent.*;
 
 /**
- * This notification must only be used inside
- * an agent server. It implies that local 
- * notifications are only cloned (shallow) and
- * transmitted as objects.
+ *  This notification must only be used inside an agent server. Its content cannot be
+ * serialized so it is not persistent.
  */
 public class TcpRequestNot extends Notification {
   /** define serialVersionUID for interoperability */
@@ -38,6 +36,7 @@ public class TcpRequestNot extends Notification {
   private RequestContext ctx;
 
   public TcpRequestNot(RequestContext ctx) {
+    persistent = false;
     this.ctx = ctx;
   }
 
@@ -48,10 +47,8 @@ public class TcpRequestNot extends Notification {
   /**
    * Appends a string image for this object to the StringBuffer parameter.
    *
-   * @param output
-   *	buffer to fill in
-   * @return
-	<code>output</code> buffer is returned
+   * @param output  buffer to fill in
+   * @return        <code>output</code> buffer is returned
    */
   public StringBuffer toString(StringBuffer output) {
     output.append('(');
