@@ -43,41 +43,6 @@ public abstract class SocketFactory {
    * JDK since 1.4.
    */
   public static final String DefaultFactory = "fr.dyade.aaa.util.SocketFactory14";
-
-  private static String[] factoryClasses = {
-    DefaultFactory,
-    "fr.dyade.aaa.util.SocketFactory13"
-  };
-
-  private static SocketFactory factory;
-
-  /**
-   * Returns the SocketFactory singleton.
-   * 
-   * @return SocketFactory singleton.
-   * @throws Exception
-   */
-  public static SocketFactory getSocketFactory() throws Exception {
-    if (factory == null) {
-      // Tries to load the more recent version
-      Class clazz = null;
-      for (int i = 0; i < factoryClasses.length; i++) {
-        try {
-          clazz = Class.forName(factoryClasses[i]);
-        } catch (ClassNotFoundException exc) {
-          // continue
-        }
-      }
-      if (clazz != null) {
-        Method method = clazz.getMethod("getFactory", null);
-        factory = (SocketFactory) method.invoke(null, null);
-      } else {
-        throw new Exception("Socket factory class not found");
-      }
-    }
-    return factory;
-  } 
-  
   
   /**
    * Returns the SocketFactory singleton for the specified default class.
@@ -85,11 +50,7 @@ public abstract class SocketFactory {
    * @return The SocketFactory singleton for the default class.
    */
   public static SocketFactory getDefaultFactory() {
-    try {
-      return getFactory(DefaultFactory);
-    } catch (Exception e) {
-      return null;
-    }
+    return SocketFactory14.getFactory();
   }
 
   /**
@@ -143,4 +104,44 @@ public abstract class SocketFactory {
   public abstract Socket createSocket(InetAddress addr, int port,
                                       InetAddress localAddr, int localPort,
                                       int timeout) throws IOException;
+
+  // The code below seems to be used by the 'mediation' to retrieve the factory
+  // class in an 'historical' way..
+  
+  private static String[] factoryClasses = {
+    DefaultFactory,
+    "fr.dyade.aaa.util.SocketFactory13"
+  };
+
+  private static SocketFactory factory;
+
+  /**
+   * Returns the SocketFactory singleton.
+   * The implementation seems to be choose in an historical way defined by the
+   * factoryClasses  array.
+   * 
+   * @return SocketFactory singleton.
+   * @throws Exception
+   * @deprecated
+   */
+  public static SocketFactory getSocketFactory() throws Exception {
+    if (factory == null) {
+      // Tries to load the more recent version
+      Class clazz = null;
+      for (int i = 0; i < factoryClasses.length; i++) {
+        try {
+          clazz = Class.forName(factoryClasses[i]);
+        } catch (ClassNotFoundException exc) {
+          // continue
+        }
+      }
+      if (clazz != null) {
+        Method method = clazz.getMethod("getFactory", null);
+        factory = (SocketFactory) method.invoke(null, null);
+      } else {
+        throw new Exception("Socket factory class not found");
+      }
+    }
+    return factory;
+  } 
 }
