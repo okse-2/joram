@@ -22,6 +22,9 @@
  */
 package joram.perfs;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import javax.jms.BytesMessage;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -89,11 +92,13 @@ public class Sender extends BaseTest implements Runnable {
 
   long dt1 = 0L;
   long dt2 = 0L;
+  ArrayList arrayList = null;
 
   public void run() {
 
     try {
       long t1 = System.currentTimeMillis();
+      arrayList = new ArrayList();
 
       byte[] content = new byte[MsgSize];
       for (int i = 0; i< MsgSize; i++)
@@ -132,6 +137,10 @@ public class Sender extends BaseTest implements Runnable {
         long end = System.currentTimeMillis();
         dt1 += (end-start);
         listener.fxCtrl(i);
+        if (end-start > 0) {
+          //System.out.println("== " + ((1000L * (NbMsgPerRound)) / (end-start)) + "msg/s");//NTA tmp
+          arrayList.add(new Integer((int) ((1000L * (NbMsgPerRound)) / (end-start))));
+        }
       }
 
       listener.fxCtrl(NbRound);
@@ -146,7 +155,7 @@ public class Sender extends BaseTest implements Runnable {
 
     lock.exit();
   }
-
+  
   public static void main(String args[]) throws Exception {
     String baseclass = "joram.perfs.TcpBaseTest";
 

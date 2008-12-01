@@ -22,6 +22,8 @@
  */
 package joram.perfs;
 
+import java.util.Arrays;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 
@@ -131,6 +133,7 @@ public class Test6 extends BaseTest {
       writeIntoFile("multiCnx=" + multiCnx);
       writeIntoFile("----------------------------------------------------");
 
+
       ConnectionFactory cf =  createConnectionFactory(baseclass);
       Connection cnx1 = cf.createConnection();
 
@@ -144,7 +147,7 @@ public class Test6 extends BaseTest {
         cnx2 = cf2.createConnection();
         cnx2.start();
       }
-
+      
       Receiver receiver[] = new Receiver[NbReceiver];
       for (int i=0; i<NbReceiver; i++) {
         receiver[i] = new Receiver(cnx1, dest[i%NbDestination]);
@@ -192,7 +195,11 @@ public class Test6 extends BaseTest {
       writeIntoFile("| Mean travel time (ms)=" + (dt4/(NbMsg)));
       writeIntoFile("| Mean time = " +
                     ((t2-t1)*1000L) / (NbMsg) + "us per msg, " +
-                    ((1000L * (NbMsg)) / (t2-t1)) + "msg/s");
+                    ((1000L * (NbMsg)) / (t2-t1)) + "msg/s");     
+      int median = 0;
+      for (int s = 0; s < sender.length; s++)
+        median += getMedian(sender[s].arrayList.toArray());
+      writeIntoFile("| Median = " + median/sender.length + "msg/s");
       writeIntoFile("----------------------------------------------------");
     }catch(Throwable exc){
       exc.printStackTrace();
@@ -204,6 +211,25 @@ public class Test6 extends BaseTest {
       endTest(); 
     }
   }
+
+  public static int getMedian(Object[] array) {
+    final int EVEN_NUMBER_OF_ELEMENTS = 0;
+    Arrays.sort(array);
+    int result = array.length % 2;
+    int median = 0;
+    // Definition: Median is the Middle number in an odd number of entries array
+    // Median is the avg of the two number in the center of an even number array
+    if (result == EVEN_NUMBER_OF_ELEMENTS) {
+      int rightNumber = array.length / 2;
+      int leftNumber = rightNumber - 1;
+      median = ((Integer)array[rightNumber] + (Integer)array[leftNumber]) / 2;
+    } else { // Odd number of items, choose the center one
+      int rightNumber = array.length / 2;
+      median = (Integer) array[rightNumber];
+    }
+    return median;
+  }
+
 }
 class Lock {
   int count;
