@@ -33,11 +33,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.zip.GZIPInputStream;
+
+import org.objectweb.joram.client.jms.ConnectionMetaData;
 
 
 /**
@@ -727,6 +734,15 @@ public class BaseTestCase {
     current.endEnv();
     current.tearDown();
 
+    // computer information
+    writeSysInfo();
+    
+    // write Joram version
+    if (current.summary)
+      System.err.println("Joram " + ConnectionMetaData.providerVersion);
+    if (current.writer != null)
+      current.writer.println("| Joram " + ConnectionMetaData.providerVersion);
+    
     // TODO:
     if ((current.failures != null) || (current.errors != null)) {
       if (current.summary)
@@ -780,8 +796,9 @@ public class BaseTestCase {
         }
       }
     }
-
+    
     if (current.writer != null) {
+      current.writer.println("=================== next test =================================");
       current.writer.flush();
       current.writer.close();
     }
@@ -789,14 +806,43 @@ public class BaseTestCase {
     if (exit) System.exit(status);
   }
 
+  public static void writeSysInfo() {
+    InetAddress addr = null;
+    String hostname = null;
+    try {
+      addr = InetAddress.getLocalHost();
+      hostname = addr.getHostName();
+    } catch (UnknownHostException e) { }
 
-
-    public void writeIntoFile(String str){
-	if (current.writer != null) {
-	    current.writer.println(str);
-	    current.writer.flush();
-	}
+    OperatingSystemMXBean bean = ManagementFactory.getOperatingSystemMXBean();
+    if (current.summary) {
+      if (hostname != null)
+        System.err.println("hostname: " + hostname);
+      if (bean != null)
+        System.err.println(
+            "System: " + bean.getArch() +  
+            ", OS: " + bean.getName() +
+            ", Nb processor(s): " + bean.getAvailableProcessors());
     }
+    if (current.writer != null) {
+      current.writer.println("----------------------------------------------------");
+      if (hostname != null)
+        current.writer.println("| hostname: " + hostname);
+      if (bean != null)
+        current.writer.println(
+            "| System: " + bean.getArch() +  
+            ", OS: " + bean.getName() +
+            ", Nb processor(s): " + bean.getAvailableProcessors());
+      current.writer.println("| Date: " + new Date(System.currentTimeMillis()));
+    }
+  }
+  
+  public void writeIntoFile(String str){
+    if (current.writer != null) {
+      current.writer.println(str);
+      current.writer.flush();
+    }
+  }
 
   /**
    * Finalizes the generic environment for a class of tests.
