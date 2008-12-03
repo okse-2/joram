@@ -60,6 +60,7 @@ import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
+import org.objectweb.jonas.security.auth.JPrincipal;
 import org.objectweb.jonas.security.auth.JSigned;
 import org.objectweb.jonas.security.auth.callback.NoInputCallbackHandler;
 import org.objectweb.joram.shared.security.Identity;
@@ -83,12 +84,12 @@ public class JonasIdentity extends Identity {
   private static final String KEYSTORE_ALIAS = "joram.security.jaas.alias";
   private static final String UNTESTED_SIGNATURE = "joram.security.jaas.untestedSignature";
   private static final String UNSORT_ROLES = "joram.security.jaas.unsortRoles";
-  
+
   private String principal;
   private Subject subject = null;
   private LoginContext loginContext;
   private PublicKey publickey = null;
-  
+
   /* (non-Javadoc)
    * @see org.objectweb.joram.shared.security.Identity#setIdentity(java.lang.String, java.lang.String)
    */
@@ -97,6 +98,10 @@ public class JonasIdentity extends Identity {
       logger.log(BasicLevel.DEBUG, "JonasIdentity.setIdentity(" + user + ", ****)");
 
     principal = user;
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+          "JonasIdentity.setIdentity principal = " + principal);
+
     try {
       String jaasEntryName = System.getProperty("joram.security.jaas.entryName", JAAS_ENTRY_NAME);
       if (logger.isLoggable(BasicLevel.DEBUG))
@@ -121,6 +126,7 @@ public class JonasIdentity extends Identity {
           logger.log(BasicLevel.ERROR, "No subject for the user " + principal);
         throw new Exception("No subject for the user " + principal);
       }
+
     } catch (AccountExpiredException e) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "Account expired for the user " + principal, e);
@@ -139,14 +145,14 @@ public class JonasIdentity extends Identity {
       throw new Exception("Login exception for the user " + principal, e);
     }
   }
-   
+
   /**
    * @return
    */
   public Subject getSubject() {
     return subject; 
   }
-  
+
   /* (non-Javadoc)
    * @see org.objectweb.joram.shared.security.Identity#getCredential()
    */
@@ -167,14 +173,32 @@ public class JonasIdentity extends Identity {
   public String getUserName() {
     return principal;
   }
-  
+
   /* (non-Javadoc)
    * @see org.objectweb.joram.shared.security.Identity#setUserName(java.lang.String)
    */
   public void setUserName(String userName) {
     this.principal = userName;
   }
-  
+
+  private String getPrincipal() {
+    // Retrieve the principal (members of the Group.class)    
+    Set principals = subject.getPrincipals(Principal.class);
+    Iterator iterator = principals.iterator();
+    while (iterator.hasNext()) {
+      Principal principal = (Principal) iterator.next();
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "getPrincipal class = " + principal.getClass().getName());
+      // Signed group (empty group that contains a signature)?
+      if (principal instanceof JPrincipal) {
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "getPrincipal name = " + ((JPrincipal)principal).getName());
+        return ((Principal) principal).getName();
+      }
+    }
+    return null;
+  }
+
   /**
    * @return
    */
@@ -192,13 +216,13 @@ public class JonasIdentity extends Identity {
       Enumeration e = group.members();
       while (e.hasMoreElements()) {
         Principal p = (Principal) e.nextElement();
-        principalRoles.add( p.getName());
+        principalRoles.add(p.getName());
       }
     }
     return principalRoles.toArray();
   }
-  
-  
+
+
   /**
    * @return
    */
@@ -217,7 +241,7 @@ public class JonasIdentity extends Identity {
     }
     return null;
   }
-  
+
   /**
    * @throws Exception
    */
@@ -289,11 +313,11 @@ public class JonasIdentity extends Identity {
       initPublicKey();
     return publickey;
   }
-  
+
   private boolean validate() throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "validate(" + subject + ')');
-    
+
     if (Boolean.getBoolean(UNTESTED_SIGNATURE)) {
       if (logger.isLoggable(BasicLevel.WARN)) {
         logger.log(BasicLevel.WARN, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -302,40 +326,53 @@ public class JonasIdentity extends Identity {
       }
       return true;
     }
-    
+
     // Get public key
     PublicKey publickey = getPublicKey();
-    
-    return validate(publickey, principal, subject);
+
+    return validate(publickey, subject);
   }
 
-    private boolean validate(PublicKey publickey, String principal, Subject subject) throws Exception {
-      
+  private boolean validate(PublicKey publickey, Subject subject) throws Exception {
+
     // Build signature with data to validate (principal name + roles)
     Signature signature = null;
     try {
-        signature = Signature.getInstance("SHA1withDSA");
+      signature = Signature.getInstance("SHA1withDSA");
     } catch (NoSuchAlgorithmException e) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "EXCEPTION:: validate", e);
-        throw new Exception("Error while getting the algorithm 'SHA1withDSA' :" + e.getMessage());
+      throw new Exception("Error while getting the algorithm 'SHA1withDSA' :" + e.getMessage());
     }
 
     try {
-        signature.initVerify(publickey);
+      signature.initVerify(publickey);
     } catch (InvalidKeyException e) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "EXCEPTION:: validate", e);
-        throw new Exception("Cannot initialize the signature with the given public key:" + e.getMessage());
+      throw new Exception("Cannot initialize the signature with the given public key:" + e.getMessage());
     }
 
     // Add principal name
+    String principal = null;
     try {
-        signature.update(principal.getBytes());
+      //signature.update(principal.getBytes());
+      principal = getPrincipal();
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "validate principal = " + principal);
+
+      if (principal == null) {
+        if (logger.isLoggable(BasicLevel.ERROR))
+          logger.log(BasicLevel.ERROR, "EXCEPTION:: validate principal == null");
+        throw new Exception("Cannot add the bytes for the principal name '" + principal + "'");      
+      }
+
+      signature.update(principal.getBytes());
+
     } catch (SignatureException e) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "EXCEPTION:: validate", e);
-        throw new Exception("Cannot add the bytes for the principal name '" + principal + "' :" + e.getMessage());
+      throw new Exception("Cannot add the bytes for the principal name '" + principal + "' :" + e.getMessage());
     }
 
     // Add roles
@@ -345,44 +382,44 @@ public class JonasIdentity extends Identity {
       Arrays.sort(roles);
     }
     for (int r = 0; r < roles.length; r++) {
-        try {
-            signature.update(((String)roles[r]).getBytes());
-        } catch (SignatureException e) {
-          if (logger.isLoggable(BasicLevel.ERROR))
-            logger.log(BasicLevel.ERROR, "EXCEPTION:: validate", e);
-          throw new Exception("Cannot add the bytes for the role '" + roles[r] + "' : " + e.getMessage());
-        }
+      try {
+        signature.update(((String)roles[r]).getBytes());
+      } catch (SignatureException e) {
+        if (logger.isLoggable(BasicLevel.ERROR))
+          logger.log(BasicLevel.ERROR, "EXCEPTION:: validate", e);
+        throw new Exception("Cannot add the bytes for the role '" + roles[r] + "' : " + e.getMessage());
+      }
     }
 
     // Check signature
     boolean trusted = false;
     try {
-        trusted = signature.verify(getSignature());
+      trusted = signature.verify(getSignature());
     } catch (SignatureException e) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "EXCEPTION:: validate", e);
-        throw new Exception("The signature found in the identity '" + this + "' is invalid:" + e.getMessage());
+      throw new Exception("The signature found in the identity '" + this + "' is invalid:" + e.getMessage());
     }
 
     // Invalid signature !
     if (!trusted) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "validate trusted = false");
-        throw new Exception("The signature for the identity '" + this + "' has been altered by an unknown source.");
+      throw new Exception("The signature for the identity '" + this + "' has been altered by an unknown source.");
     }
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "validate trusted = " + trusted);
-    
+
     return trusted;
   }
-  
+
   /* (non-Javadoc)
    * @see org.objectweb.joram.shared.security.Identity#check(org.objectweb.joram.shared.security.Identity)
    */
   public boolean check(Identity identity) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "JonasIdentity.check(" + identity + ')');
-    
+
     if (! (identity instanceof JonasIdentity)) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "check : JonasIdentity is not an instance of " + identity);
@@ -391,7 +428,7 @@ public class JonasIdentity extends Identity {
 
     return validate();
   }
-  
+
   /**
    * remove unserialized object.
    * @param subject
@@ -426,7 +463,7 @@ public class JonasIdentity extends Identity {
     }
     return subjectSer;
   }
-  
+
   /* (non-Javadoc)
    * @see org.objectweb.joram.shared.stream.Streamable#readFrom(java.io.InputStream)
    */
@@ -465,7 +502,7 @@ public class JonasIdentity extends Identity {
     buff.append(')');
     return buff.toString();
   }
-  
+
   /* (non-Javadoc)
    * @see org.objectweb.joram.shared.stream.Streamable#writeTo(java.io.OutputStream)
    */
@@ -474,18 +511,18 @@ public class JonasIdentity extends Identity {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     ObjectOutputStream oos = new ObjectOutputStream(baos);
     try {
-    oos.writeObject(subject);
-    oos.flush();
-    StreamUtil.writeTo(baos.toByteArray(), os);
-    oos.close();
-    baos.close();
-  } finally {
-    try {
+      oos.writeObject(subject);
+      oos.flush();
+      StreamUtil.writeTo(baos.toByteArray(), os);
       oos.close();
-    } catch (IOException exc) {}
-    try {
       baos.close();
-    } catch (IOException exc) {}
-  }
+    } finally {
+      try {
+        oos.close();
+      } catch (IOException exc) {}
+      try {
+        baos.close();
+      } catch (IOException exc) {}
+    }
   }
 }
