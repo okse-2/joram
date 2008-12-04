@@ -16,7 +16,13 @@
   </target>
 
   <target name="tests.all"
-          description=" --> launch all joram tests">
+           description=" --> launch all joram tests">
+     <ant dir="." antfile="build.xml" target="tests.noperf.all"/>
+     <ant dir="." antfile="build.xml" target="tests.perf"/>
+   </target>
+    
+  <target name="tests.noperf.all"
+          description=" --> launch all no perf joram tests">
     <ant dir="." antfile="build.xml" target="tests.messages"/>
     <ant dir="." antfile="build.xml" target="tests.property"/>
     <ant dir="." antfile="build.xml" target="tests.selector"/>
@@ -37,7 +43,6 @@
     <ant dir="." antfile="build.xml" target="tests.dursub"/>
     <ant dir="." antfile="build.xml" target="tests.tcp"/>
     <ant dir="." antfile="build.xml" target="tests.reconf"/>
-    <ant dir="." antfile="build.xml" target="tests.perf"/>
     <ant dir="." antfile="build.xml" target="tests.noreg"/>
     <ant dir="." antfile="build.xml" target="tests.xa"/>
     <ant dir="." antfile="build.xml" target="tests.bridge"/>
