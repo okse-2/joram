@@ -40,81 +40,108 @@ public interface DestinationMBean {
   public boolean isQueue();
 
   /**
-   * Admin method removing this destination from the platform.
+   * Administration method removing this destination from the platform.
    */
-  public void delete()
-    throws ConnectException, AdminException, JMSException;
+  public void delete() throws ConnectException, AdminException, JMSException;
 
-  public void addReader(String proxyId)
-    throws ConnectException, AdminException;
+  /**
+   * Administration method setting a given user as a reader on this destination.
+   * 
+   * @param proxyId The unique identification of the user's proxy.
+   * 
+   * @exception ConnectException  If the administration connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public void addReader(String proxyId) throws ConnectException, AdminException;
 
-  public void addWriter(String proxyId)
-    throws ConnectException, AdminException;
+  /**
+   * Administration method setting a given user as a writer on this destination.
+   * 
+   * @param proxyId The unique identification of the user's proxy.
+   * 
+   * @exception ConnectException  If the administration connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public void addWriter(String proxyId) throws ConnectException, AdminException;
 
-  public void removeReader(String proxyId)
-    throws ConnectException, AdminException;
+  /**
+   * Administration method unsetting a given user as a reader on this destination.
+   * 
+   * @param proxyId The unique identification of the user's proxy.
+   * 
+   * @exception ConnectException  If the administration connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public void removeReader(String proxyId) throws ConnectException, AdminException;
 
-  public void removeWriter(String proxyId)
-    throws ConnectException, AdminException;
-
+  /**
+   * Administration method unsetting a given user as a writer on this destination.
+   * 
+   * @param proxyId The unique identification of the user's proxy.
+   * 
+   * @exception ConnectException  If the administration connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public void removeWriter(String proxyId) throws ConnectException, AdminException;
 
   /**
    * Monitoring method returning the list of all users that have a reading
    * permission on this destination, or an empty list if no specific readers
    * are set.
    */
-  public List getReaderList()
-    throws ConnectException, AdminException;
+  public List getReaderList() throws ConnectException, AdminException;
 
   /**
    * Monitoring method returning the list of all users that have a writing
    * permission on this destination, or an empty list if no specific writers
    * are set.
    */
-  public List getWriterList()
-    throws ConnectException, AdminException;
+  public List getWriterList() throws ConnectException, AdminException;
 
   /**
    * Monitoring method returning <code>true</code> if this destination
    * provides free READ access.
    */
-  public boolean isFreelyReadable()
-    throws ConnectException, AdminException;
+  public boolean isFreelyReadable() throws ConnectException, AdminException;
 
   /**
    * Monitoring method returning <code>true</code> if this destination
    * provides free WRITE access.
    */
-  public boolean isFreelyWriteable()
-    throws ConnectException, AdminException;
+  public boolean isFreelyWriteable() throws ConnectException, AdminException;
 
   /**
-   * Admin method setting free reading access to this destination.
+   * Administration method (un)setting free reading access to this destination.
    */
-  public void setFreelyReadable(boolean b)
-    throws ConnectException, AdminException;
+  public void setFreelyReadable(boolean b) throws ConnectException, AdminException;
 
   /**
-   * Admin method setting free writing access to this destination.
+   * Administration method (un)setting free writing access to this destination.
    */
-  public void setFreelyWriteable(boolean b)
-    throws ConnectException, AdminException;
+  public void setFreelyWriteable(boolean b) throws ConnectException, AdminException;
 
   /** 
    * Monitoring method returning the dead message queue id of this destination,
    * null if not set.
    */
-  public String getDMQId()
-    throws ConnectException, AdminException;
+  public String getDMQId() throws ConnectException, AdminException;
   
   /**
-   * Admin method setting or unsetting a dead message queue for this
+   * Admininistration method setting or unsetting a dead message queue for this
    * destination.
    */
-  public void setDMQId(String dmqId)
-    throws ConnectException, AdminException;
+  public void setDMQId(String dmqId) throws ConnectException, AdminException;
 
+  /**
+   * Return a set of statistic values from the destination.
+   * Be careful this method is deprecated and should be removed in future version,
+   * use getStatistics method in replacement.
+   * @deprecated
+   */
+  public Hashtable getStatistic() throws ConnectException, AdminException;
 
-  public Hashtable getStatistic() 
-    throws ConnectException, AdminException;
+  /**
+   * Return a set of statistic values from the destination.
+   */
+  public Hashtable getStatistics() throws ConnectException, AdminException;
 }
