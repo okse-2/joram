@@ -74,22 +74,28 @@ final class JGroups
 
     String addr = AgentServer.getProperty("JGroups.MCastAddr", "224.0.0.35");
     String port = AgentServer.getProperty("JGroups.MCastPort", "25566");
+    
+    String bind = AgentServer.getProperty("JGroups.MCastAddr");
+    
+    StringBuffer strbuf = new StringBuffer(1024);
+    strbuf.append("UDP(mcast_addr=").append(addr);
+    strbuf.append(";mcast_port=").append(port);
+    if (bind != null)
+      strbuf.append(";bind_addr=").append(bind);
+    strbuf.append(";ip_ttl=32;" +
+                  "mcast_send_buf_size=150000;mcast_recv_buf_size=80000):" +
+                  "PING(timeout=2000;num_initial_members=3):" +
+                  "MERGE2(min_interval=5000;max_interval=10000):" +
+                  "FD_SOCK:" +
+                  "VERIFY_SUSPECT(timeout=1500):" +
+                  "pbcast.NAKACK(gc_lag=50;retransmit_timeout=300,600,1200,2400,4800):" +
+                  "UNICAST(timeout=5000):" +
+                  "pbcast.STABLE(desired_avg_gossip=20000):" +
+                  "FRAG(frag_size=4096;down_thread=false;up_thread=false):" +
+                  "pbcast.GMS(join_timeout=5000;join_retry_timeout=2000;" +
+                  "shun=false;print_local_addr=true)");
       
-    String props = AgentServer.getProperty(
-      "JGroupsProps",
-      "UDP(mcast_addr=" + addr + 
-      ";mcast_port=" + port + ";ip_ttl=32;" +
-      "mcast_send_buf_size=150000;mcast_recv_buf_size=80000):" +
-      "PING(timeout=2000;num_initial_members=3):" +
-      "MERGE2(min_interval=5000;max_interval=10000):" +
-      "FD_SOCK:" +
-      "VERIFY_SUSPECT(timeout=1500):" +
-      "pbcast.NAKACK(gc_lag=50;retransmit_timeout=300,600,1200,2400,4800):" +
-      "UNICAST(timeout=5000):" +
-      "pbcast.STABLE(desired_avg_gossip=20000):" +
-      "FRAG(frag_size=4096;down_thread=false;up_thread=false):" +
-      "pbcast.GMS(join_timeout=5000;join_retry_timeout=2000;" +
-      "shun=false;print_local_addr=true)");
+    String props = System.getProperty("JGroupsProps", strbuf.toString());
 
     channel = new JChannel(props);
     channel.connect(channelName);
@@ -165,12 +171,16 @@ final class JGroups
 
     if (obj instanceof fr.dyade.aaa.agent.Message) {
       fr.dyade.aaa.agent.Message m = (fr.dyade.aaa.agent.Message) obj;
-      if (m.not == null)
+      if (m.not == null) {
         logmon.log(BasicLevel.ERROR,
                    AgentServer.getName() + "JGroups send null not " + m);
-      if (m.not.detachable)
+//        return;
+      } else
+      if (m.not.detachable) {
         logmon.log(BasicLevel.ERROR,
                    AgentServer.getName() + "JGroups send detachable not " + m);
+//        return;
+      }
     }
 
     Message msg = new Message(null, null, obj);
