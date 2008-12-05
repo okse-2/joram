@@ -469,18 +469,12 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     if (logmon.isLoggable(BasicLevel.DEBUG)) {
       StringBuffer strbuf = new StringBuffer();
       strbuf.append(" setProperties(");
-      strbuf.append("WDActivationPeriod=");
-      strbuf.append(WDActivationPeriod);
-      strbuf.append(", WDNbRetryLevel1=");
-      strbuf.append(WDNbRetryLevel1);
-      strbuf.append(", WDRetryPeriod1=");
-      strbuf.append(WDRetryPeriod1);
-      strbuf.append(", WDNbRetryLevel2=");
-      strbuf.append(WDNbRetryLevel2);
-      strbuf.append(", WDRetryPeriod2=");
-      strbuf.append(WDRetryPeriod2);
-      strbuf.append(", WDRetryPeriod3=");
-      strbuf.append(WDRetryPeriod3);
+      strbuf.append("WDActivationPeriod=").append(WDActivationPeriod);
+      strbuf.append(", WDNbRetryLevel1=").append(WDNbRetryLevel1);
+      strbuf.append(", WDRetryPeriod1=").append(WDRetryPeriod1);
+      strbuf.append(", WDNbRetryLevel2=").append(WDNbRetryLevel2);
+      strbuf.append(", WDRetryPeriod2=").append(WDRetryPeriod2);
+      strbuf.append(", WDRetryPeriod3=").append(WDRetryPeriod3);
       strbuf.append(')');
       logmon.log(BasicLevel.DEBUG,
                  getName() + strbuf.toString());
