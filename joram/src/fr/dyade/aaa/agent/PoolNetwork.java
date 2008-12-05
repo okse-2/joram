@@ -307,6 +307,10 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
                  getName() + " before addServer:" + strbuf.toString());
     }
 
+    // First we have to verify that the server is not already defined.
+    // Be careful, this test is already done in superclass.
+    if (index(id) >= 0) return;
+
     try {
       super.addServer(id);
 
@@ -358,6 +362,10 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       }
       logmon.log(BasicLevel.DEBUG, getName() + strbuf.toString());
     }
+
+    // First we have to verify that the server is defined.
+    // Be careful, this test is already done in superclass.
+    if (index(id) < 0) return;
 
     try {
       super.delServer(id);
@@ -496,8 +504,12 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
    * @return	the NetSession component handling the communication with the
    *            remote server.
    */
-  final NetSession getSession(short sid) {
-    return sessions[index(sid)];
+  final NetSession getSession(short sid) throws UnknownServerException {
+    try {
+      return sessions[index(sid)];
+    } catch (ArrayIndexOutOfBoundsException exc) {
+      throw new UnknownServerException("Server#" + sid + " is undefined");
+    }
   }
 
   /**
@@ -796,8 +808,13 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
           // Send the message: Get a sender in the pool and gives the message to transmit.
           // It must be done in an unique operation to avoid the release of the sender between
           // the getSender and the Sender.send methods.
-          poolSender.send(msg);
-
+          try {
+            poolSender.send(msg);
+          } catch (UnknownServerException exc) {
+            logmon.log(BasicLevel.ERROR,
+                       this.getName() + ", Cannot send message to unknown server", exc);
+          }
+          
           qout.pop();
           Thread.yield();
         }
@@ -1117,7 +1134,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
      * @param sid the id of remote server.
      * @return    the sender associated to the specified remote server.
      */
-    private Sender getSender(short sid) {
+    private Sender getSender(short sid) throws UnknownServerException {
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, getName() + ", getSender(" + sid + ')');
       
@@ -1157,7 +1174,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       return session.sender;
     }
     
-    synchronized void reset(short sid) {
+    synchronized void reset(short sid) throws UnknownServerException {
       if (logmon.isLoggable(BasicLevel.INFO))
       logmon.log(BasicLevel.INFO, getName() + ", reset(" + sid + ')');
       
@@ -1195,7 +1212,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         logmon.log(BasicLevel.WARN, getName() + ", reset end (" + sid + ')');
     }
     
-    synchronized void restart(short sid) {
+    synchronized void restart(short sid) throws UnknownServerException {
       if (logmon.isLoggable(BasicLevel.INFO))
         logmon.log(BasicLevel.INFO, getName() + ", restart(" + sid + ')');
 
@@ -1209,7 +1226,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         sender.send(null);
     }
     
-    synchronized void send(Message msg) {
+    synchronized void send(Message msg) throws UnknownServerException {
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, getName() + ", send(" + msg + ')');
       
@@ -1534,7 +1551,11 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         // be transmit in send method and below. However there is no problem,
         // the copy will be discarded on remote node and 2 ack messages will
         // be received on local node.
-        poolSender.restart(sid);
+        try {
+          poolSender.restart(sid);
+        } catch (UnknownServerException exc) {
+          // Should never happen!
+        }
       }
     }
 
@@ -1552,7 +1573,11 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       // be transmit in send method and below. However there is no problem,
       // the copy will be discarded on remote node and 2 ack messages will
       // be received on local node.
-      poolSender.restart(sid);
+      try {
+        poolSender.restart(sid);
+      } catch (UnknownServerException exc) {
+        // Should never happen!
+      }
     }
 
     /**
@@ -1586,7 +1611,11 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
           return false;
         }
 
-        poolSender.reset(sid);
+        try {
+          poolSender.reset(sid);
+        } catch (UnknownServerException exc) {
+          // Should never happen!
+        }
  
         // Set the local attribute in order to block all others local attempts.
         this.local = true;
@@ -1730,7 +1759,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
           activeSessions.remove(i);
         }
       }
-
+      
       if (nbMaxCnx == -1 || activeSessions.size() < nbMaxCnx) {
         // Insert the current session in the active pool.
         activeSessions.add(this);
