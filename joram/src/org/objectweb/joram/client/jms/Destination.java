@@ -77,7 +77,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
     return agentId;
   }
 
-  /** Returns the admin name of the destination. */
+  /** Returns the administration name of the destination. */
   public final String getAdminName() {
     return adminName;
   }
@@ -114,7 +114,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * Format the destination properties in a XML format
    * @param indent use this indent for prexifing XML representation.
    * @param serverId server id hosting the destination object
-   * @return returns a XML view of the queue (admin format)
+   * @return returns a XML view of the queue (administration format)
    * @throws ConnectException if the server is unreachable
    * @throws AdminException if an error occurs
    */
@@ -216,7 +216,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
       "com.scalagent.joram.mom.dest.scheduler.SchedulerQueue";
 
   /**
-   * Admin method creating or retrieving a destination with a given name on a
+   * Administration method creating or retrieving a destination with a given name on a
    * given server, and returning its identifier.
    * <p>
    * The request fails if the target server does not belong to the platform,
@@ -228,7 +228,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * @param className Name of the MOM destination class.
    * @param prop      Properties.
    *
-   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception ConnectException  If the administration connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
   protected static void doCreate(
@@ -261,14 +261,13 @@ public abstract class Destination extends AdministeredObject implements javax.jm
   }
 
   /**
-   * Admin method removing this destination from the platform.
+   * Administration method removing this destination from the platform.
    *
    * @exception AdminException    Never thrown.
-   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception ConnectException  If the administration connection is closed or broken.
    * @exception JMSException      Never thrown.
    */
-  public void delete()
-    throws ConnectException, AdminException, javax.jms.JMSException {
+  public void delete() throws ConnectException, AdminException, javax.jms.JMSException {
     AdminModule.doRequest(new DeleteDestination(getName()));
     if (MXWrapper.mxserver != null) {
       StringBuffer buff = new StringBuffer();
@@ -287,143 +286,175 @@ public abstract class Destination extends AdministeredObject implements javax.jm
   }
 
   /**
-   * Admin method setting free reading access to this destination.
+   * Administration method setting free reading access to this destination.
    * <p>
    * The request fails if this destination is deleted server side.
    *
-   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception ConnectException  If the administration connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public void setFreeReading() throws ConnectException, AdminException
-    {
-      AdminModule.doRequest(new SetReader(null, getName()));
-    }
+  public void setFreeReading() throws ConnectException, AdminException {
+    AdminModule.doRequest(new SetReader(null, getName()));
+  }
 
   /**
-   * Admin method setting free writing access to this destination.
+   * Administration method setting free writing access to this destination.
    * <p>
    * The request fails if this destination is deleted server side.
    *
-   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception ConnectException  If the administration connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public void setFreeWriting() throws ConnectException, AdminException
-    {
-      AdminModule.doRequest(new SetWriter(null, getName()));
-    }
+  public void setFreeWriting() throws ConnectException, AdminException {
+    AdminModule.doRequest(new SetWriter(null, getName()));
+  }
 
   /**
-   * Admin method unsetting free reading access to this destination.
+   * Administration method unsetting free reading access to this destination.
    * <p>
    * The request fails if this destination is deleted server side.
    *
-   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception ConnectException  If the administration connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public void unsetFreeReading() throws ConnectException, AdminException
-    {
-      AdminModule.doRequest(new UnsetReader(null, getName()));
-    }
+  public void unsetFreeReading() throws ConnectException, AdminException {
+    AdminModule.doRequest(new UnsetReader(null, getName()));
+  }
 
   /**
-   * Admin method unsetting free writing access to this destination.
+   * Administration method unsetting free writing access to this destination.
    * <p>
    * The request fails if this destination is deleted server side.
    *
-   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception ConnectException  If the administration connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public void unsetFreeWriting() throws ConnectException, AdminException
-    {
-      AdminModule.doRequest(new UnsetWriter(null, getName()));
-    }
+  public void unsetFreeWriting() throws ConnectException, AdminException {
+    AdminModule.doRequest(new UnsetWriter(null, getName()));
+  }
 
   /**
-   * Admin method setting a given user as a reader on this destination.
+   * Administration method setting a given user as a reader on this destination.
    * <p>
    * The request fails if this destination is deleted server side.
    *
    * @param user  User to be set as a reader.
    *
-   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception ConnectException  If the administration connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public void setReader(User user) throws ConnectException, AdminException
-    {
-      AdminModule.doRequest(new SetReader(user.getProxyId(), getName()));
-    }
+  public void setReader(User user) throws ConnectException, AdminException {
+    AdminModule.doRequest(new SetReader(user.getProxyId(), getName()));
+  }
 
-  /** used by MBean jmx */
-  public void addReader(String proxyId)
-    throws ConnectException, AdminException {
+  /**
+   * Administration method setting a given user as a reader on this destination.
+   * <p>
+   * This method should be only used by the JMX MBean.
+   * 
+   * @param proxyId The unique identification of the user's proxy.
+   * 
+   * @exception ConnectException  If the administration connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   *
+   * @see org.objectweb.joram.client.jms.DestinationMBean#addReader(java.lang.String)
+   */
+  public void addReader(String proxyId) throws ConnectException, AdminException {
     AdminModule.doRequest(new SetReader(proxyId, getName()));
   }
 
   /**
-   * Admin method setting a given user as a writer on this destination.
+   * Administration method setting a given user as a writer on this destination.
    * <p>
    * The request fails if this destination is deleted server side.
    *
    * @param user  User to be set as a writer.
    *
-   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception ConnectException  If the administration connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public void setWriter(User user) throws ConnectException, AdminException
-    {
-      AdminModule.doRequest(new SetWriter(user.getProxyId(), getName()));
-    }
+  public void setWriter(User user) throws ConnectException, AdminException {
+    AdminModule.doRequest(new SetWriter(user.getProxyId(), getName()));
+  }
 
-  /** used by MBean jmx */
-  public void addWriter(String proxyId)
-    throws ConnectException, AdminException {
+  /**
+   * Administration method setting a given user as a writer on this destination.
+   * <p>
+   * This method should be only used by the JMX MBean.
+   * 
+   * @param proxyId The unique identification of the user's proxy.
+   * 
+   * @exception ConnectException  If the administration connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   *
+   * @see org.objectweb.joram.client.jms.DestinationMBean#addWriter(java.lang.String)
+   */
+  public void addWriter(String proxyId) throws ConnectException, AdminException {
     AdminModule.doRequest(new SetWriter(proxyId, getName()));
   }
 
   /**
-   * Admin method unsetting a given user as a reader on this destination.
+   * Administration method unsetting a given user as a reader on this destination.
    * <p>
    * The request fails if this destination is deleted server side.
    *
    * @param user  Reader to be unset.
    *
-   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception ConnectException  If the administration connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public void unsetReader(User user)
-    throws ConnectException, AdminException {
+  public void unsetReader(User user) throws ConnectException, AdminException {
     AdminModule.doRequest(new UnsetReader(user.getProxyId(), getName()));
   }
 
-  /** used by MBean jmx */
-  public void removeReader(String proxyId)
-    throws ConnectException, AdminException {
+  /**
+   * Administration method unsetting a given user as a reader on this destination.
+   * <p>
+   * This method should be only used by the JMX MBean.
+   * 
+   * @param proxyId The unique identification of the user's proxy.
+   * 
+   * @exception ConnectException  If the administration connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   *
+   * @see org.objectweb.joram.client.jms.DestinationMBean#removeReader(java.lang.String)
+   */
+  public void removeReader(String proxyId) throws ConnectException, AdminException {
     AdminModule.doRequest(new UnsetReader(proxyId, getName()));
   }
 
   /**
-   * Admin method unsetting a given user as a writer on this destination.
+   * Administration method unsetting a given user as a writer on this destination.
    * <p>
    * The request fails if this destination is deleted server side.
    *
    * @param user  Writer to be unset.
    *
-   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception ConnectException  If the administration connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public void unsetWriter(User user)
-    throws ConnectException, AdminException {
+  public void unsetWriter(User user) throws ConnectException, AdminException {
     AdminModule.doRequest(new UnsetWriter(user.getProxyId(), getName()));
   }
 
-  /** used by MBean jmx */
-  public void removeWriter(String proxyId)
-    throws ConnectException, AdminException {
+  /**
+   * Administration method unsetting a given user as a writer on this destination.
+   * <p>
+   * This method should be only used by the JMX MBean.
+   * 
+   * @param proxyId The unique identification of the user's proxy.
+   * 
+   * @exception ConnectException  If the administration connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   *
+   * @see org.objectweb.joram.client.jms.DestinationMBean#removeWriter(java.lang.String)
+   */
+  public void removeWriter(String proxyId) throws ConnectException, AdminException {
     AdminModule.doRequest(new UnsetWriter(proxyId, getName()));
   }
 
   /**
-   * Admin method setting or unsetting a dead message queue for this
+   * Administration method setting or unsetting a dead message queue for this
    * destination.
    * <p>
    * The request fails if this destination is deleted server side.
@@ -433,7 +464,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    *
    * @exception IllegalArgumentException  If the DMQ is not a valid
    *              JORAM destination.
-   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception ConnectException  If the administration connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
   public void setDMQ(DeadMQueue dmq) throws ConnectException, AdminException {
@@ -444,7 +475,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
   }
   
   /**
-   * Admin method setting or unsetting a dead message queue for this
+   * Administration method setting or unsetting a dead message queue for this
    * destination.
    * <p>
    * The request fails if this destination is deleted server side.
@@ -454,15 +485,15 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    *
    * @exception IllegalArgumentException  If the DMQ is not a valid
    *              JORAM destination.
-   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception ConnectException  If the administration connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
   public void setDMQId(String dmqId) throws ConnectException, AdminException {
-      if (dmqId == null)
-        AdminModule.doRequest(new UnsetDestinationDMQ(getName()));
-      else
-        AdminModule.doRequest(new SetDestinationDMQ(getName(), dmqId));
-    }
+    if (dmqId == null)
+      AdminModule.doRequest(new UnsetDestinationDMQ(getName()));
+    else
+      AdminModule.doRequest(new SetDestinationDMQ(getName(), dmqId));
+  }
 
   /**
    * Monitoring method returning the list of all users that have a reading
@@ -471,31 +502,43 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * <p>
    * The request fails if the destination is deleted server side.
    *
-   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception ConnectException  If the administration connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public List getReaders() throws ConnectException, AdminException
-    {
-      Monitor_GetReaders request = new Monitor_GetReaders(getName());
-      Monitor_GetUsersRep reply =
-        (Monitor_GetUsersRep) AdminModule.doRequest(request);
+  public List getReaders() throws ConnectException, AdminException {
+    Monitor_GetReaders request = new Monitor_GetReaders(getName());
+    Monitor_GetUsersRep reply = (Monitor_GetUsersRep) AdminModule.doRequest(request);
 
-      Vector list = new Vector();
-      Hashtable users = reply.getUsers();
-      String name;
-      for (Enumeration names = users.keys(); names.hasMoreElements();) {
-        name = (String) names.nextElement();
-        list.add(new User(name, (String) users.get(name)));
-      }
-      return list;
-    }
-
-  /** used by MBean jmx */
-  public List getReaderList() throws ConnectException, AdminException {
     Vector list = new Vector();
-    List readers = getReaders();
-    for (ListIterator iterator = readers.listIterator(); iterator.hasNext(); ) {
-      list.add(iterator.next().toString());
+    Hashtable users = reply.getUsers();
+    String name;
+    for (Enumeration names = users.keys(); names.hasMoreElements();) {
+      name = (String) names.nextElement();
+      list.add(new User(name, (String) users.get(name)));
+    }
+    return list;
+  }
+
+  /**
+   * Monitoring method returning the list of all users that have a reading
+   * permission on this destination, or an empty list if no specific readers
+   * are set.
+   * <p>
+   * This method should be only used by the JMX MBean.
+   *
+   * @exception ConnectException  If the administration connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   * 
+   * @see org.objectweb.joram.client.jms.DestinationMBean#getReaderList()
+   */
+  public List getReaderList() throws ConnectException, AdminException {
+    Monitor_GetReaders request = new Monitor_GetReaders(getName());
+    Monitor_GetUsersRep reply = (Monitor_GetUsersRep) AdminModule.doRequest(request);
+    
+    Vector list = new Vector();
+    Hashtable users = reply.getUsers();
+    for (Enumeration names = users.keys(); names.hasMoreElements();) {
+      list.add((String) names.nextElement());
     }
     return list;
   }
@@ -507,31 +550,43 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * <p>
    * The request fails if the destination is deleted server side.
    *
-   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception ConnectException  If the administration connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public List getWriters() throws ConnectException, AdminException
-    {
-      Monitor_GetWriters request = new Monitor_GetWriters(getName());
-      Monitor_GetUsersRep reply =
-        (Monitor_GetUsersRep) AdminModule.doRequest(request);
+  public List getWriters() throws ConnectException, AdminException {
+    Monitor_GetWriters request = new Monitor_GetWriters(getName());
+    Monitor_GetUsersRep reply = (Monitor_GetUsersRep) AdminModule.doRequest(request);
 
-      Vector list = new Vector();
-      Hashtable users = reply.getUsers();
-      String name;
-      for (Enumeration names = users.keys(); names.hasMoreElements();) {
-        name = (String) names.nextElement();
-        list.add(new User(name, (String) users.get(name)));
-      }
-      return list;
-    }
-
-  /** used by MBean jmx */
-  public List getWriterList() throws ConnectException, AdminException {
     Vector list = new Vector();
-    List readers = getWriters();
-    for (ListIterator iterator = readers.listIterator(); iterator.hasNext(); ) {
-      list.add(iterator.next().toString());
+    Hashtable users = reply.getUsers();
+    String name;
+    for (Enumeration names = users.keys(); names.hasMoreElements();) {
+      name = (String) names.nextElement();
+      list.add(new User(name, (String) users.get(name)));
+    }
+    return list;
+  }
+
+  /**
+   * Monitoring method returning the list of all users that have a writing
+   * permission on this destination, or an empty list if no specific writers
+   * are set.
+   * <p>
+   * This method should be only used by the JMX MBean.
+   *
+   * @exception ConnectException  If the administration connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   * 
+   * @see org.objectweb.joram.client.jms.DestinationMBean#getWriterList()
+   */
+  public List getWriterList() throws ConnectException, AdminException {
+    Monitor_GetWriters request = new Monitor_GetWriters(getName());
+    Monitor_GetUsersRep reply = (Monitor_GetUsersRep) AdminModule.doRequest(request);
+
+    Vector list = new Vector();
+    Hashtable users = reply.getUsers();
+    for (Enumeration names = users.keys(); names.hasMoreElements();) {
+      list.add((String) names.nextElement());
     }
     return list;
   }
@@ -542,21 +597,30 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * <p>
    * The request fails if the destination is deleted server side.
    *
-   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception ConnectException  If the administration connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public boolean isFreelyReadable() throws ConnectException, AdminException
-    {
-      Monitor_GetFreeAccess request = new Monitor_GetFreeAccess(getName());
-      Monitor_GetFreeAccessRep reply;
-      reply = (Monitor_GetFreeAccessRep) AdminModule.doRequest(request);
+  public boolean isFreelyReadable() throws ConnectException, AdminException {
+    Monitor_GetFreeAccess request = new Monitor_GetFreeAccess(getName());
+    Monitor_GetFreeAccessRep reply;
+    reply = (Monitor_GetFreeAccessRep) AdminModule.doRequest(request);
 
-      return reply.getFreeReading();
-    }
+    return reply.getFreeReading();
+  }
 
-  /** used by MBean */
-  public void setFreelyReadable(boolean b)
-    throws ConnectException, AdminException {
+  /**
+   * Administration method (un)setting free reading access to this destination.
+   * <p>
+   * This method should be only used by the JMX MBean.
+   *
+   * @param b if true set the free reading access else disable.
+   * 
+   * @exception ConnectException  If the administration connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   * 
+   * @see org.objectweb.joram.client.jms.DestinationMBean#setFreelyReadable(boolean)
+   */
+  public void setFreelyReadable(boolean b) throws ConnectException, AdminException {
     if (b)
       setFreeReading();
     else
@@ -569,21 +633,30 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * <p>
    * The request fails if the destination is deleted server side.
    *
-   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception ConnectException  If the administration connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public boolean isFreelyWriteable() throws ConnectException, AdminException
-    {
-      Monitor_GetFreeAccess request = new Monitor_GetFreeAccess(getName());
-      Monitor_GetFreeAccessRep reply;
-      reply = (Monitor_GetFreeAccessRep) AdminModule.doRequest(request);
+  public boolean isFreelyWriteable() throws ConnectException, AdminException {
+    Monitor_GetFreeAccess request = new Monitor_GetFreeAccess(getName());
+    Monitor_GetFreeAccessRep reply;
+    reply = (Monitor_GetFreeAccessRep) AdminModule.doRequest(request);
 
-      return reply.getFreeWriting();
-    }
+    return reply.getFreeWriting();
+  }
 
-  /** used by MBean */
-  public void setFreelyWriteable(boolean b)
-    throws ConnectException, AdminException {
+  /**
+   * Administration method (un)setting free writing access to this destination.
+   * <p>
+   * This method should be only used by the JMX MBean.
+   *
+   * @param b if true set the free writing access else disable.
+   * 
+   * @exception ConnectException  If the administration connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   * 
+   * @see org.objectweb.joram.client.jms.DestinationMBean#setFreelyWriteable(boolean)
+   */
+  public void setFreelyWriteable(boolean b) throws ConnectException, AdminException {
     if (b)
       setFreeWriting();
     else
@@ -596,20 +669,20 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * <p>
    * The request fails if the destination is deleted server side.
    *
-   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception ConnectException  If the administration connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
   public DeadMQueue getDMQ() throws ConnectException, AdminException {
-      Monitor_GetDMQSettings request = new Monitor_GetDMQSettings(getName());
-      Monitor_GetDMQSettingsRep reply;
-      reply = (Monitor_GetDMQSettingsRep) AdminModule.doRequest(request);
+    Monitor_GetDMQSettings request = new Monitor_GetDMQSettings(getName());
+    Monitor_GetDMQSettingsRep reply;
+    reply = (Monitor_GetDMQSettingsRep) AdminModule.doRequest(request);
 
-      if (reply.getDMQName() == null) {
-        return null;
-      } else {
-        return new DeadMQueue(reply.getDMQName());
-      }
+    if (reply.getDMQName() == null) {
+      return null;
+    } else {
+      return new DeadMQueue(reply.getDMQName());
     }
+  }
 
   /**
    * Monitoring method returning the dead message queue id of this destination,
@@ -617,7 +690,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * <p>
    * The request fails if the destination is deleted server side.
    *
-   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception ConnectException  If the administration connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
   public String getDMQId() throws ConnectException, AdminException {
@@ -661,12 +734,24 @@ public abstract class Destination extends AdministeredObject implements javax.jm
     return realType.startsWith(resultingType);
   }
 
-  public Hashtable getStatistic()
-    throws ConnectException, AdminException {
-    Monitor_GetStat request =
-      new Monitor_GetStat(agentId);
-    Monitor_GetStatRep reply =
-      (Monitor_GetStatRep) AdminModule.doRequest(request);
+  /**
+   * Return a set of statistic values from the destination.
+   * 
+   * @see org.objectweb.joram.client.jms.DestinationMBean#getStatistic()
+   * @deprecated
+   */
+  public Hashtable getStatistic() throws ConnectException, AdminException {
+    return getStatistics();
+  }
+
+  /**
+   * Return a set of statistic values from the destination.
+   * 
+   * @see org.objectweb.joram.client.jms.DestinationMBean#getStatistics()
+   */
+  public Hashtable getStatistics() throws ConnectException, AdminException {
+    Monitor_GetStat request = new Monitor_GetStat(agentId);
+    Monitor_GetStatRep reply = (Monitor_GetStatRep) AdminModule.doRequest(request);
     return  reply.getStats();
   }
 
