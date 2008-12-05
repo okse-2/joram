@@ -36,7 +36,7 @@
   </target>
 
   <target name="tests.noperf.all" description=" --> launch all no perf tests">
-    <ant dir="." antfile="build.xml" target="tests.a3.all" />
+    <!-- ant dir="." antfile="build.xml" target="tests.a3.all" / -->
     <ant dir="." antfile="build.xml" target="tests.jndi.all" />
     <ant dir="." antfile="build.xml" target="tests.joram.noperf.all" />
     <ant dir="." antfile="build.xml" target="tests.jms.all" />
