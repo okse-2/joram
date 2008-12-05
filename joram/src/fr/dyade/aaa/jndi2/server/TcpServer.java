@@ -118,8 +118,8 @@ public class TcpServer {
             canStop = false;
             Thread.interrupted();
             if (running) {
-              Trace.logger.log(BasicLevel.DEBUG, this.getName()
-                  + ", error during accept", exc);
+              Trace.logger.log(BasicLevel.DEBUG,
+                               this.getName() + ", error during accept", exc);
               try {
                 Thread.sleep(1000);
               } catch (InterruptedException ie) {
@@ -136,9 +136,8 @@ public class TcpServer {
             break loop;
 
           if (Trace.logger.isLoggable(BasicLevel.DEBUG)) {
-            Trace.logger.log(BasicLevel.DEBUG, this.getName()
-                + ", connection from " + socket.getInetAddress() + ':'
-                + socket.getPort());
+            Trace.logger.log(BasicLevel.DEBUG,
+                             this.getName() + ", connection from " + socket.getInetAddress() + ':' + socket.getPort());
           }
 
           try {
