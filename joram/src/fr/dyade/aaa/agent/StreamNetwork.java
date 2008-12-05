@@ -241,6 +241,7 @@ public abstract class StreamNetwork extends Network {
       strbuf.append(", ConnectTimeout=").append(ConnectTimeout);
       strbuf.append(", inLocalAddressStr=").append(inLocalAddressStr);
       strbuf.append(", outLocalAddressStr=").append(outLocalAddressStr);
+      strbuf.append(", outLocalPort=").append(outLocalPort);
       strbuf.append(", sfcn=").append(sfcn);
       strbuf.append(')');
       

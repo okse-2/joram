@@ -749,8 +749,7 @@ public final class AgentServer {
 
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,
-                     getName() + " : Adds global property: " +
-                     p.name + " = " + p.value);
+                     getName() + " : Adds global property: " + p.name + " = " + p.value);
       }
     }
 
