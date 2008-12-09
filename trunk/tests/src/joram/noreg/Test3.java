@@ -35,90 +35,90 @@ import org.objectweb.joram.client.jms.admin.User;
 import fr.dyade.aaa.agent.AgentServer;
 
 /**
- * Test transfert with big messages
+ * Test transfer with big messages
  *
  */
 public class Test3 extends BaseTest {
-    static int MsgSize = 20*1024*1024;
-    static int NbMsg = 100;
-    static int MsgPerCommit = 10;
+  static int MsgSize = 20*1024*1024;
+  static int NbMsg = 100;
+  static int MsgPerCommit = 10;
 
-    static Destination dest = null;
-    static ConnectionFactory cf = null;
+  static Destination dest = null;
+  static ConnectionFactory cf = null;
 
-    static String host = "localhost";
-    static int port = 16010;
+  static String host = "localhost";
+  static int port = 16010;
 
-    public static void main(String[] args) throws Exception {
-	new Test3().run(args);
+  public static void main(String[] args) throws Exception {
+    new Test3().run(args);
+  }
+
+  public void run(String[] args) {
+    try{
+      if (! Boolean.getBoolean("ServerOutside"))
+        startServer();
+      writeIntoFile("===================== start test 3 =====================");
+      MsgSize = Integer.getInteger("MsgSize", MsgSize/1024).intValue() *1024;
+      NbMsg = Integer.getInteger("NbMsg", NbMsg).intValue();
+      MsgPerCommit = Integer.getInteger("MsgPerCommit", MsgPerCommit).intValue(); 
+      String destc = System.getProperty("Destination",
+      "org.objectweb.joram.client.jms.Queue");
+
+      host = System.getProperty("hostname", host);
+      port = Integer.getInteger("port", port).intValue();
+
+      writeIntoFile("----------------------------------------------------");
+      writeIntoFile("Destination: " + destc);
+      writeIntoFile("MsgSize: " + MsgSize);
+      writeIntoFile("MsgPerCommit: " + MsgPerCommit);
+      writeIntoFile("NbMsg: " + NbMsg);
+      writeIntoFile("----------------------------------------------------");
+
+      TcpBaseTest.AdminConnect();
+      cf = TcpBaseTest.createConnectionFactory();
+      dest = createDestination(destc);
+      User user = User.create("anonymous", "anonymous", 0);
+      dest.setFreeReading();
+      dest.setFreeWriting();
+      org.objectweb.joram.client.jms.admin.AdminModule.disconnect();
+
+      Connection cnx = cf.createConnection();
+      Session sess = cnx.createSession(true, Session.AUTO_ACKNOWLEDGE);
+      MessageProducer prod = sess.createProducer(dest);
+      MessageConsumer cons = sess.createConsumer(dest);
+      cnx.start();
+
+      byte[] content = new byte[MsgSize];
+      for (int i = 0; i< MsgSize; i++)
+        content[i] = (byte) (i & 0xFF);
+
+
+      for (int nb=0; nb<NbMsg; nb++) {
+        BytesMessage msg1 = sess.createBytesMessage();
+        msg1.writeBytes(content);
+        prod.send(msg1);
+        if ((nb % MsgPerCommit) == 0) {
+          //writeIntoFile(MsgPerCommit+" message sent ;message :" + nb);
+          sess.commit();
+        }
+      }
+
+      for (int nb=0; nb<NbMsg; nb++) {
+        BytesMessage msg1 = (BytesMessage) cons.receive();
+        if ((nb % MsgPerCommit) == 0) {
+          //writeIntoFile(MsgPerCommit+" message receive : " + nb);
+          sess.commit();
+        }
+      }
+    }catch(Throwable exc){
+      exc.printStackTrace();
+      error(exc);
+    }finally{
+      AgentServer.stop();
+      endTest();
     }
 
-    public void run(String[] args) {
-	try{
-	    if (! Boolean.getBoolean("ServerOutside"))
-		startServer();
-	    writeIntoFile("===================== start test 3 =====================");
-	    MsgSize = Integer.getInteger("MsgSize", MsgSize/1024).intValue() *1024;
-	    NbMsg = Integer.getInteger("NbMsg", NbMsg).intValue();
-	    MsgPerCommit = Integer.getInteger("MsgPerCommit", MsgPerCommit).intValue(); 
-	    String destc = System.getProperty("Destination",
-					      "org.objectweb.joram.client.jms.Queue");
-
-	    host = System.getProperty("hostname", host);
-	    port = Integer.getInteger("port", port).intValue();
-
-	    writeIntoFile("----------------------------------------------------");
-	    writeIntoFile("Destination: " + destc);
-	    writeIntoFile("MsgSize: " + MsgSize);
-	    writeIntoFile("MsgPerCommit: " + MsgPerCommit);
-	    writeIntoFile("NbMsg: " + NbMsg);
-	    writeIntoFile("----------------------------------------------------");
-
-	    TcpBaseTest.AdminConnect();
-	    cf = TcpBaseTest.createConnectionFactory();
-	    dest = createDestination(destc);
-	    User user = User.create("anonymous", "anonymous", 0);
-	    dest.setFreeReading();
-	    dest.setFreeWriting();
-	    org.objectweb.joram.client.jms.admin.AdminModule.disconnect();
-
-	    Connection cnx = cf.createConnection();
-	    Session sess = cnx.createSession(true, Session.AUTO_ACKNOWLEDGE);
-	    MessageProducer prod = sess.createProducer(dest);
-	    MessageConsumer cons = sess.createConsumer(dest);
-	    cnx.start();
-
-	    byte[] content = new byte[MsgSize];
-	    for (int i = 0; i< MsgSize; i++)
-		content[i] = (byte) (i & 0xFF);
-
-
-	    for (int nb=0; nb<NbMsg; nb++) {
-		BytesMessage msg1 = sess.createBytesMessage();
-		msg1.writeBytes(content);
-		prod.send(msg1);
-		if ((nb % MsgPerCommit) == 0) {
-		    writeIntoFile(MsgPerCommit+" message sent ;message :" + nb);
-		    sess.commit();
-		}
-	    }
-
-	    for (int nb=0; nb<NbMsg; nb++) {
-		BytesMessage msg1 = (BytesMessage) cons.receive();
-		if ((nb % MsgPerCommit) == 0) {
-		    writeIntoFile(MsgPerCommit+" message receive : " + nb);
-		    sess.commit();
-		}
-	    }
-	}catch(Throwable exc){
-	    exc.printStackTrace();
-	    error(exc);
-	}finally{
-	    AgentServer.stop();
-	    endTest();
-	}
-
-	System.exit(0);
-    }
+    System.exit(0);
+  }
 
 }
