@@ -43,9 +43,9 @@
 	    instructions and a tutorial.</p>
       </s2>
 
-      <s2 name="JORAM CVS code base">
-	    <p>For getting the latest stable JORAM version, or for the current
-     development release, you have to use <a href="http://forge.objectweb.org/cvs/?group_id=4">CVS</a>.</p>
+      <s2 name="JORAM SVN code base">
+	    <p>For getting the latest stable JORAM version, or for the current development release, you have to
+      use <a href="http://forge.objectweb.org/plugins/scmsvn/index.php?group_id=4">SVN</a>.</p>
 
 	    <p>Joram, Xoram (C/C++ client API) and kJoram (J2ME client API) are respectively available by checking out the
 	    <strong>joram</strong>,  <strong>xoram</strong> or <strong>kjoram</strong> modules. The <strong>tests</strong>
@@ -54,9 +54,13 @@
       <p>The latest stable release tag is <strong>JORAM_5_1_0</strong>. For getting the current development release
       (potentially unstable), check out joram with no tag.</p>
       
-      <p>A snapshot is generated each day at 00:00 AM CEST:
-      <a href="http://forge.objectweb.org/cvssnapshots/joram-cvs-latest.tar.gz">Download the last CVS snapshot</a>.</p>
-
+      <p>Snapshots of the SVN are generated each day at 00:00 AM CEST, they can be downloaded at:
+	    <ul>
+	      <li><a href="http://forge.objectweb.org/svnsnapshots/joram-joram-svn-latest.tar.gz">Joram</a>.</li>
+	      <li><a href="http://forge.objectweb.org/svnsnapshots/joram-kjoram-svn-latest.tar.gz">kJoram</a>.</li>
+	      <li><a href="http://forge.objectweb.org/svnsnapshots/joram-xoram-svn-latest.tar.gz">Xoram</a>.</li>
+	      <li><a href="http://forge.objectweb.org/svnsnapshots/joram-tests-svn-latest.tar.gz">Tests</a>.</li>
+	    </ul>
       </s2>
 
       <s2 name="Maven access">
