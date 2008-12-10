@@ -170,6 +170,8 @@ public class AMQPInputStream {
       return null;
 
     //    DataInputStream in = new DataInputStream(new TruncatedInputStream(in, arrayLength));
+    InputStream oldIn = in;
+    in = new TruncatedInputStream(this.in, arrayLength);
 
     int typeCode = StreamUtil.readUnsignedByteFrom(in);
     int count = StreamUtil.readIntFrom(in);
@@ -239,7 +241,8 @@ public class AMQPInputStream {
     if (in.available() > 0) {
       throw new IOException("Incorrect array size.");
     }
-
+    in = oldIn;
+    
     return value;
   }
 
