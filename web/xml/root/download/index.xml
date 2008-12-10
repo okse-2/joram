@@ -54,7 +54,7 @@
       <p>The latest stable release tag is <strong>JORAM_5_1_0</strong>. For getting the current development release
       (potentially unstable), check out joram with no tag.</p>
       
-      <p>Snapshots of the SVN are generated each day at 00:00 AM CEST, they can be downloaded at:
+      <p>Snapshots of the SVN are generated each day at 00:00 AM CEST, they are available at:</p>
 	    <ul>
 	      <li><a href="http://forge.objectweb.org/svnsnapshots/joram-joram-svn-latest.tar.gz">Joram</a>.</li>
 	      <li><a href="http://forge.objectweb.org/svnsnapshots/joram-kjoram-svn-latest.tar.gz">kJoram</a>.</li>
