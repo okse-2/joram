@@ -75,7 +75,7 @@ final class JGroups
     String addr = AgentServer.getProperty("JGroups.MCastAddr", "224.0.0.35");
     String port = AgentServer.getProperty("JGroups.MCastPort", "25566");
     
-    String bind = AgentServer.getProperty("JGroups.MCastAddr");
+    String bind = AgentServer.getProperty("JGroups.BindAddr");
     
     StringBuffer strbuf = new StringBuffer(1024);
     strbuf.append("UDP(mcast_addr=").append(addr);
