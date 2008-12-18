@@ -181,6 +181,11 @@ description=" --> launch all exceptionlistener tests">
     <ant dir="." antfile="build.xml" target="client.noloss_2"/>
   </target>
 
+  <target name="tests.connection"
+          description=" --> launch all connection tests">
+    <ant dir="." antfile="build.xml" target="connection.test1"/>
+  </target>
+
   <target name="tests.local"
           description=" --> launch all local tests">
     <ant dir="." antfile="build.xml" target="local.test"/>
@@ -1654,7 +1659,35 @@ description=" --> launch all exceptionlistener tests">
 
   <!-- fin test client -->
 
-  <!-- local test -->
+	<!-- connection tests -->
+  <target name="connection.test1" depends="connection.test1.1,connection.test1.2"/>
+	
+  <target name="connection.test1.1" depends="init.a3props,compile"
+          description=" --> Test connection close with a colocalised server">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="className" value="joram.connection.Test1"/>
+      <param name="jndiconf" value="connection/jndi.properties"/>
+      <param name="a3conf" value="connection/a3servers.xml"/>
+      <param name="jvmargs" value="-DBaseClass=joram.connection.ColocatedBaseTest"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+  <target name="connection.test1.2" depends="init.a3props,compile"
+          description=" --> Test connection close with a remote server">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="className" value="joram.connection.Test1"/>
+      <param name="jndiconf" value="connection/jndi.properties"/>
+      <param name="a3conf" value="connection/a3servers.xml"/>
+      <param name="jvmargs" value="-DBaseClass=joram.connection.TcpBaseTest"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+	
+	<!-- end connection tests -->
+
+  	<!-- local test -->
 
   <target name="local.test" depends="init.a3props,compile"
           description=" --> Test messages transmission with a local configuration">
@@ -2183,18 +2216,18 @@ description=" --> launch all exceptionlistener tests">
           description=" --> Configurable performance test">
     <antcall target="perf.test6-x" inheritAll="true">
       <param name="testid" value="perf.test6-3"/>
-      <param name="Destination"
-             value="org.objectweb.joram.client.jms.Topic"/>
       <!-- param name="Destination"
-             value="org.objectweb.joram.client.jms.Queue"/ -->
+             value="org.objectweb.joram.client.jms.Topic"/ -->
+      <param name="Destination"
+             value="org.objectweb.joram.client.jms.Queue"/>
       <param name="transaction"
              value="fr.dyade.aaa.util.NTransaction"/>
       <!-- param name="transaction"
              value="fr.dyade.aaa.util.NullTransaction"/ -->
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <!-- param name="engine" value="fr.dyade.aaa.agent.GCEngine"/ -->
-      <!-- param name="BaseClass" value="joram.perfs.TcpBaseTest"/ -->
-      <param name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
+      <param name="BaseClass" value="joram.perfs.TcpBaseTest"/>
+      <!-- param name="BaseClass" value="joram.perfs.ColocatedBaseTest"/ -->
       <param name="dupsOk" value="true"/>
       <param name="queueMessageReadMax" value="100"/>
       <param name="topicAckBufferMax" value="50"/>
@@ -2202,7 +2235,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="MsgTransient" value="true"/>
       <param name="SubDurable" value="false"/>
       <param name="Transacted" value="false"/>
-      <param name="NbRound" value="100"/>
+      <param name="NbRound" value="10000"/>
       <param name="NbMsgPerRound" value="100"/>
       <param name="NbProdCons" value="1"/>
       <param name="MsgSize" value="25"/>
