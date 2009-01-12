@@ -22,13 +22,14 @@
  */
 package mail;
 
-import org.objectweb.joram.client.jms.admin.*;
-import org.objectweb.joram.client.jms.*;
-import org.objectweb.joram.client.jms.tcp.*;
-import org.objectweb.joram.client.jms.Queue;
-
-import java.io.*;
+import java.io.FileInputStream;
 import java.util.Properties;
+
+import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.Topic;
+import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 public class MailAdmin {
   public static void main(String[] args) throws Exception {
@@ -48,7 +49,7 @@ public class MailAdmin {
 
     javax.jms.ConnectionFactory cf = TcpConnectionFactory.create("localhost", 16010);
 
-    User user = User.create("anonymous", "anonymous", 0);
+    User.create("anonymous", "anonymous", 0);
 
     queue.setFreeReading();
     queue.setFreeWriting();

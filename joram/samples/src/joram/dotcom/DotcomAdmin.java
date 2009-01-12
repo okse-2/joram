@@ -24,9 +24,12 @@
  */
 package dotcom;
 
-import org.objectweb.joram.client.jms.admin.*;
-import org.objectweb.joram.client.jms.*;
-import org.objectweb.joram.client.jms.tcp.*;
+import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.Topic;
+import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
 
 
 /**
@@ -34,10 +37,10 @@ import org.objectweb.joram.client.jms.tcp.*;
  * connecting to JORAM server, creating customer agents, creating topic
  * and creating queues.
  */
-public class DotcomAdmin 
-{
-  public static void main(String args[]) throws Exception
-  {
+public class DotcomAdmin {
+
+  public static void main(String args[]) throws Exception {
+    
     System.out.println();
     System.out.println("Dotcom administration...");
 
@@ -58,12 +61,12 @@ public class DotcomAdmin
     javax.jms.TopicConnectionFactory tcf =
       TopicTcpConnectionFactory.create("localhost", 16010);
 
-    Topic tOrders = (Topic) Topic.create(0);
-    Queue qItems = (Queue) Queue.create(0);
-    Queue qCheck = (Queue) Queue.create(0);
-    Queue qChecked = (Queue) Queue.create(0);
-    Queue qBills = (Queue) Queue.create(0);
-    Queue qDelivery = (Queue) Queue.create(0);
+    Topic tOrders = Topic.create(0);
+    Queue qItems = Queue.create(0);
+    Queue qCheck = Queue.create(0);
+    Queue qChecked = Queue.create(0);
+    Queue qBills = Queue.create(0);
+    Queue qDelivery = Queue.create(0);
 
     // Setting access permissions:
     tOrders.setWriter(web);

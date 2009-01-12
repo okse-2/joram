@@ -22,16 +22,17 @@
  */
 package ha;
 
-import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.Topic;
+import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory;
 
 
 public class HAAdmin {
-  public static void main(String[] args) 
-    throws Exception {
+  
+  public static void main(String[] args) throws Exception {
+    
     System.out.println();
     System.out.println("HA administration...");
 
@@ -41,8 +42,8 @@ public class HAAdmin {
     
     AdminModule.connect(tcf, "root", "root");
 
-    Topic topic = (Topic) Topic.create(0,"topic");
-    User user = User.create("anonymous", "anonymous");
+    Topic topic = Topic.create(0, "topic");
+    User.create("anonymous", "anonymous");
 
     topic.setFreeReading();
     topic.setFreeWriting();

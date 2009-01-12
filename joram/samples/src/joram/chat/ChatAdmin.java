@@ -25,9 +25,10 @@
  */
 package chat;
 
-import org.objectweb.joram.client.jms.admin.*;
-import org.objectweb.joram.client.jms.*;
-import org.objectweb.joram.client.jms.tcp.*;
+import org.objectweb.joram.client.jms.Topic;
+import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 /**
  * Launching JORAM administration:
@@ -37,10 +38,10 @@ import org.objectweb.joram.client.jms.tcp.*;
  * @email       jc@waeny.2y.net
  * @version     1.0
  */
-public class ChatAdmin
-{
-  public static void main(String args[]) throws Exception
-  {
+public class ChatAdmin {
+
+  public static void main(String args[]) throws Exception {
+    
     System.out.println();
     System.out.println("Chat administration phase... ");
 
@@ -51,10 +52,10 @@ public class ChatAdmin
     javax.jms.ConnectionFactory connFactory =
       TcpConnectionFactory.create("localhost", 16010);
 
-    Topic topic = (Topic) Topic.create(0);
+    Topic topic = Topic.create(0);
 
     // Creating an access for user anonymous:
-    User user = User.create("anonymous", "anonymous", 0);
+    User.create("anonymous", "anonymous", 0);
 
     // Setting free access to the topic:
     topic.setFreeReading();

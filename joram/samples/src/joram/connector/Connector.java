@@ -1,5 +1,3 @@
-
-
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2007 ScalAgent Distributed Technologies
@@ -24,15 +22,24 @@
  */
 package connector;
 
+import javax.jms.Queue;
+import javax.jms.TextMessage;
+import javax.jms.Topic;
+import javax.naming.Context;
+import javax.naming.InitialContext;
 
-import org.objectweb.joram.client.connector.*;
-import javax.naming.*;
-import javax.jms.*;
+import org.objectweb.joram.client.connector.ActivationSpecImpl;
+import org.objectweb.joram.client.connector.JoramAdapter;
+import org.objectweb.joram.client.connector.ManagedConnectionFactoryImpl;
+import org.objectweb.joram.client.connector.ManagedConnectionImpl;
+import org.objectweb.joram.client.connector.OutboundConnection;
+import org.objectweb.joram.client.connector.OutboundConsumer;
+import org.objectweb.joram.client.connector.OutboundProducer;
+import org.objectweb.joram.client.connector.OutboundSession;
 
-public class Connector 
-{
-  public static void main(String[] args) throws Exception
-  {
+public class Connector {
+
+  public static void main(String[] args) throws Exception {
 
       JWorkManager jw = new JWorkManager(1,4,5000);
       ResourceBootstrapContext bt=new ResourceBootstrapContext(jw);
@@ -64,13 +71,13 @@ public class Connector
       final OutboundSession os =(OutboundSession) oc.createSession(false,1);
       System.out.println("OutboundSession ok");
      
-      final OutboundProducer prod = (OutboundProducer) os.createProducer((Destination)queue);
-      final OutboundProducer prod1 = (OutboundProducer) os.createProducer((Destination)topic);
+      final OutboundProducer prod = (OutboundProducer) os.createProducer(queue);
+      final OutboundProducer prod1 = (OutboundProducer) os.createProducer(topic);
 
       System.out.println("OutboundProducer ok");
 
-      OutboundConsumer cons = (OutboundConsumer) os.createConsumer((Destination)queue);
-      OutboundConsumer cons1 = (OutboundConsumer) os.createConsumer((Destination)topic);	
+      OutboundConsumer cons = (OutboundConsumer) os.createConsumer(queue);
+      OutboundConsumer cons1 = (OutboundConsumer) os.createConsumer(topic);	
       System.out.println("OutboundConsumer ok");
 
       oc.start();

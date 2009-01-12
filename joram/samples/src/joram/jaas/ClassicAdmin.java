@@ -24,23 +24,29 @@ package jaas;
 
 import java.util.Properties;
 
-import org.objectweb.joram.client.jms.admin.*;
-import org.objectweb.joram.client.jms.*;
-import org.objectweb.joram.client.jms.tcp.*;
+import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.Topic;
+import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
 
 
 /**
  * Administers an agent server for the jaas samples.
  */
 public class ClassicAdmin {
+  
   public static void main(String[] args) throws Exception {
+    
     System.out.println();
     System.out.println("Classic administration...");
 
     AdminModule.connect("org.objectweb.joram.shared.security.jaas.JonasIdentity:root", "root", 60);
 
-    Queue queue = (Queue) Queue.create("queue");
-    Topic topic = (Topic) Topic.create("topic");
+    Queue queue = Queue.create("queue");
+    Topic topic = Topic.create("topic");
     
     User user = User.create("anonymous", null, 0, "org.objectweb.joram.shared.security.jaas.JonasIdentity");
 

@@ -22,22 +22,23 @@
  */
 package cluster.queue;
 
-import org.objectweb.joram.client.jms.admin.*;
-import org.objectweb.joram.client.jms.*;
-import org.objectweb.joram.client.jms.tcp.*;
-import org.objectweb.joram.shared.admin.*;
-import org.objectweb.joram.client.jms.Queue;
-
-import java.util.Properties;
 import java.util.Hashtable;
+import java.util.Properties;
+
+import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.admin.AdminHelper;
+import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.ClusterQueue;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory;
 
 /**
  * Administers three agent servers for the cluster sample.
  */
-public class ClusterAdminAdd
-{
-  public static void main(String[] args) throws Exception
-  {
+public class ClusterAdminAdd {
+
+  public static void main(String[] args) throws Exception {
+    
     System.out.println();
     System.out.println("Cluster administration Add ...");
 
@@ -56,8 +57,7 @@ public class ClusterAdminAdd
     String host = args[6];
     int port = new Integer(args[7]).intValue();
 
-    AdminModule admin = new AdminModule();
-    admin.connect(host,port,"root", "root", 60);
+    AdminModule.connect(host, port, "root", "root", 60);
 
     Queue queue = Queue.create(
       id,
@@ -92,7 +92,7 @@ public class ClusterAdminAdd
     jndiCtx.bind("queue"+sid, queue);
     jndiCtx.close();
 
-    admin.disconnect();
+    AdminModule.disconnect();
     System.out.println("Admins closed.");
   }
 }

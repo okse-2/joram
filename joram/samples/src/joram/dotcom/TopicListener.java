@@ -23,7 +23,7 @@
  */
 package dotcom;
 
-import javax.jms.*;
+import javax.jms.TopicSession;
 
 /**
  * Listener getting messages from a topic.
@@ -59,8 +59,8 @@ class TopicListener implements javax.jms.MessageListener {
   public void onMessage(javax.jms.Message msg) {
     try {
       // push incoming message into the queue
-      queue.push((ObjectMessage) msg);
-      // commiting the reception
+      queue.push(msg);
+      // Committing the reception
       session.commit() ;
       
     } catch (Exception exc) {
