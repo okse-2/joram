@@ -21,9 +21,7 @@
  */
 package fr.dyade.aaa.admin.cmd;
 
-import java.io.Serializable;
-
-public class NewDomainCmd extends DomainCmd implements Serializable {
+public class NewDomainCmd extends DomainCmd {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 

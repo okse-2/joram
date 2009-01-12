@@ -24,14 +24,11 @@
  */
 package org.objectweb.joram.client.connector;
 
-
 /**
  * A <code>QueueConnectionRequest</code> instance wraps a user connection
  * request for performing PTP messaging.
  */
-public class QueueConnectionRequest
-             extends ConnectionRequest
-             implements javax.resource.spi.ConnectionRequestInfo {
+public class QueueConnectionRequest extends ConnectionRequest {
   /**
    * Constructs a <code>QueueConnectionRequest</code> instance.
    *
@@ -43,10 +40,8 @@ public class QueueConnectionRequest
     super(userName, password, identityClass);
   } 
 
-
   /** Returns a code based on the wrapped user identity. */
-  public int hashCode()
-  {
+  public int hashCode() {
     return ("PTP:" + userName).hashCode();
   }
 }

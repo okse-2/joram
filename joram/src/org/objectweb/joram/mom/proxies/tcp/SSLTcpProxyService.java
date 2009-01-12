@@ -128,7 +128,7 @@ public class SSLTcpProxyService extends TcpProxyService {
 //    SecureRandom securerandom = null;
     ctx.init(kmf.getKeyManagers(),trustManagers,securerandom);
     
-    return (ServerSocketFactory) ctx.getServerSocketFactory();
+    return ctx.getServerSocketFactory();
   }
 
   private static ServerSocket createServerSocket(int port, int backlog, String address) throws Exception {
@@ -141,9 +141,9 @@ public class SSLTcpProxyService extends TcpProxyService {
       serverSocket = (SSLServerSocket) serverSocketFactory.createServerSocket(port, backlog, InetAddress.getByName(address));
     }
 
-    // require mutual authentification
+    // require mutual authentication
     serverSocket.setNeedClientAuth(true);
-    // request mutual authentification
+    // request mutual authentication
     //serverSocket.setWantClientAuth(true);
     String[] cipherTable = getCipherList();
     if (cipherTable != null && cipherTable.length > 0)

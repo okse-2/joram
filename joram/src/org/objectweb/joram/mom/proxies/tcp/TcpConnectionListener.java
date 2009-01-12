@@ -206,7 +206,7 @@ public class TcpConnectionListener extends Daemon {
         key = ctx.getKey();
         StreamUtil.writeTo(ctx.getKey(), nos);
         nos.send();
-        replyQueue = (AckedQueue) ctx.getQueue();
+        replyQueue = ctx.getQueue();
         ioctrl = new IOControl(sock);
       } else {
         GetConnectionNot gcn = new GetConnectionNot(key);

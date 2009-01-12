@@ -23,15 +23,21 @@
  */
 package org.objectweb.joram.client.jms;
 
-import org.objectweb.joram.shared.excepts.MessageValueException;
-
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Vector;
 
 import javax.jms.JMSException;
 import javax.jms.MessageFormatException;
 import javax.jms.MessageNotWriteableException;
 
+import org.objectweb.joram.shared.excepts.MessageValueException;
 import org.objectweb.joram.shared.messages.ConversionHelper;
 
 /**
@@ -42,17 +48,16 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
   private transient HashMap map;
 
   /**
-   * Instanciates a bright new <code>MapMessage</code>.
+   * Instantiates a bright new <code>MapMessage</code>.
    */
   MapMessage() {
     super();
-    momMsg.type = momMsg.MAP;
-
+    momMsg.type = org.objectweb.joram.shared.messages.Message.MAP;
     map = new HashMap();
   }
 
   /**
-   * Instanciates a <code>MapMessage</code> wrapping a consumed MOM
+   * Instantiates a <code>MapMessage</code> wrapping a consumed MOM
    * message containing an hashtable.
    *
    * @param sess  The consuming session.

@@ -34,11 +34,9 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * An <code>OutboundTopicConnectionFactory</code> instance is used for
  * getting a PubSub connection to an underlying JORAM server.
  */
-public class OutboundTopicConnectionFactory
-             extends OutboundConnectionFactory
-             implements javax.jms.TopicConnectionFactory,
-                        java.io.Serializable,
-                        javax.resource.Referenceable {
+public class OutboundTopicConnectionFactory extends OutboundConnectionFactory implements
+    javax.jms.TopicConnectionFactory {
+  
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
@@ -68,8 +66,7 @@ public class OutboundTopicConnectionFactory
    *                                   is not reachable.
    * @exception JMSException           Generic exception.
    */
-  public javax.jms.TopicConnection createTopicConnection() 
-    throws JMSException {
+  public javax.jms.TopicConnection createTopicConnection() throws JMSException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createTopicConnection()");
     
@@ -85,8 +82,7 @@ public class OutboundTopicConnectionFactory
    *                                   is not reachable.
    * @exception JMSException           Generic exception.
    */
-  public javax.jms.TopicConnection
-      createTopicConnection(String userName, String password)
+  public javax.jms.TopicConnection createTopicConnection(String userName, String password)
     throws JMSException {
 
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))

@@ -21,11 +21,15 @@
  */
 package org.objectweb.joram.client.tools.admin;
 
-import java.util.*;
-import javax.swing.*;
-import javax.swing.tree.*;
+import javax.swing.AbstractAction;
+import javax.swing.ImageIcon;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 
-import org.objectweb.joram.client.jms.admin.*;
+import org.objectweb.joram.client.jms.admin.Subscription;
 
 class SubscriptionTreeNode extends DefaultMutableTreeNode
     implements AdminTreeNode {

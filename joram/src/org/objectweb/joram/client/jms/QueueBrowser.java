@@ -23,18 +23,21 @@
  */
 package org.objectweb.joram.client.jms;
 
-import java.util.*;
+import java.util.Enumeration;
+import java.util.NoSuchElementException;
+import java.util.Vector;
 
-import javax.jms.InvalidSelectorException;
-import javax.jms.InvalidDestinationException;
 import javax.jms.IllegalStateException;
+import javax.jms.InvalidDestinationException;
+import javax.jms.InvalidSelectorException;
 import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
 
-import org.objectweb.joram.shared.client.*;
-import org.objectweb.joram.shared.selectors.ClientSelector;
-
-import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.shared.client.QBrowseReply;
+import org.objectweb.joram.shared.client.QBrowseRequest;
+import org.objectweb.joram.shared.selectors.ClientSelector;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * Implements the <code>javax.jms.QueueBrowser</code> interface.
@@ -136,8 +139,6 @@ public class QueueBrowser implements javax.jms.QueueBrowser {
       JoramTracing.dbgClient.log(BasicLevel.DEBUG,
                                  this + ": received an enumeration.");
 
-    // Processing the received messages
-    Vector messages = reply.getMessages();
     // Return an enumeration:
     return new QueueEnumeration(reply.getMessages());
   }

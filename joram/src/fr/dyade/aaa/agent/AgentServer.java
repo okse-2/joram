@@ -1034,9 +1034,9 @@ public final class AgentServer {
             transaction = (Transaction) tclass.newInstance();
           } catch (Exception exc) {
             logmon.log(BasicLevel.FATAL,
-                       getName() + ", can't instanciate transaction manager",
+                       getName() + ", can't instantiate transaction manager",
                        exc);
-            throw new Exception("Can't instanciate transaction manager");
+            throw new Exception("Can't instantiate transaction manager");
           } finally {
             if (dis != null) dis.close();
           }
@@ -1120,8 +1120,8 @@ public final class AgentServer {
           transaction = (Transaction) Class.forName(tname).newInstance();
         } catch (Exception exc) {
           logmon.log(BasicLevel.FATAL,
-                     getName() + ", can't instanciate transaction manager", exc);
-          throw new Exception("Can't instanciate transaction manager");
+                     getName() + ", can't instantiate transaction manager", exc);
+          throw new Exception("Can't instantiate transaction manager");
         }
 
         try {
@@ -1577,13 +1577,13 @@ public final class AgentServer {
     try {
       init(args);
     } catch (Throwable exc) {
-      System.out.println(getName() + "initialisation failed: " + ERRORSTRING);
+      System.out.println(getName() + "initialization failed: " + ERRORSTRING);
       System.out.println(exc.toString());
       System.out.println(ENDSTRING);
       if (logmon == null)
         logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer");
       logmon.log(BasicLevel.ERROR,
-                 getName() + " initialisation failed", exc);
+                 getName() + " initialization failed", exc);
       System.exit(1);
     }
 

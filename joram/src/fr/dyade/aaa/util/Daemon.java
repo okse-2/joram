@@ -26,7 +26,7 @@ import org.objectweb.util.monolog.api.Logger;
 
 /**
  * The Daemon class represents a basic active component in a server. It
- * provides usefull code to start and safely stop inner Thread.
+ * provides useful code to start and safely stop inner Thread.
  * <p>
  * Main loop of daemon:
  * <p><hr>
@@ -72,7 +72,7 @@ public abstract class Daemon implements Runnable {
   protected volatile boolean running;
   /**
    * Boolean variable used to stop the daemon properly. If this variable
-   * is true then the daemon is waiting for a long time and it can interupted,
+   * is true then the daemon is waiting for a long time and it can be interrupted,
    * else it handles a request and it will exit after (it tests the
    * <code>{@link #running running}</code> variable between
    * each reaction)

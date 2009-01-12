@@ -22,24 +22,24 @@
  */
 package org.objectweb.joram.client.connector.utils;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.LineNumberReader;
-import java.io.ByteArrayInputStream;
-import java.io.BufferedReader;
+import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
 import java.util.zip.ZipInputStream;
-import java.util.jar.JarFile;
+import java.util.zip.ZipOutputStream;
 
 import fr.dyade.aaa.agent.conf.A3CML;
 import fr.dyade.aaa.agent.conf.A3CMLConfig;
@@ -355,7 +355,7 @@ public class RAConfig {
       System.out.println("RAConfig.extractFromJAR(" + fileName +  "," + reader + ")");
 
     ZipInputStream stream = new ZipInputStream(reader);
-    ZipEntry currEntry = (ZipEntry) stream.getNextEntry();
+    ZipEntry currEntry = stream.getNextEntry();
     while (stream.available() > 0) {
       if (currEntry == null) break;
       if (currEntry.getName().equalsIgnoreCase(fileName)) {
@@ -367,7 +367,7 @@ public class RAConfig {
 
         return stream;
       }
-      currEntry = (ZipEntry) stream.getNextEntry();
+      currEntry = stream.getNextEntry();
     }
     // close the stream and return null if file not found.
     stream.close();
@@ -476,22 +476,6 @@ public class RAConfig {
       fos.close();
       bis.close();
     }
-  }
-
-  /**
-   * parse file name.
-   * @param fileName    file
-   * @throws Exception to throw if an Exception occurs
-   */
-  private String parse(String fileName) throws Exception {
-    if (debug)
-      System.out.println("RAConfig.parse(" + fileName + ")");
-    else if (verbose)
-      System.out.println("parse \"" + fileName + "\"");
-
-    Wrapper wrapper = new Wrapper(debug);
-    FileInputStream fis = new FileInputStream(fileName);
-    return wrapper.parse(fis);
   }
 
   /**

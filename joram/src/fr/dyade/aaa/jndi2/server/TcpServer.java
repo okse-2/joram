@@ -39,8 +39,6 @@ public class TcpServer {
 
   private Monitor monitors[];  
 
-  private int timeout;
-
   private AgentId serverId;
 
   public TcpServer(ServerSocket listen,
@@ -48,7 +46,6 @@ public class TcpServer {
                    int timeout,
                    AgentId serverId) {
     this.listen = listen;
-    this.timeout = timeout;
     this.monitors = new Monitor[poolSize];
     this.serverId = serverId;
     for (int i = 0; i < monitors.length; i++) {

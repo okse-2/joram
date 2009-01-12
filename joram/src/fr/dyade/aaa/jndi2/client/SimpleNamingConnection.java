@@ -22,15 +22,18 @@
  */
 package fr.dyade.aaa.jndi2.client;
 
-import java.net.*;
-import java.io.*;
-import java.util.*;
-import javax.naming.*;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.util.Hashtable;
+
+import javax.naming.NamingException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.jndi2.msg.*;
+import fr.dyade.aaa.jndi2.msg.IOControl;
+import fr.dyade.aaa.jndi2.msg.JndiReply;
+import fr.dyade.aaa.jndi2.msg.JndiRequest;
 import fr.dyade.aaa.util.SocketFactory;
 
 public class SimpleNamingConnection implements NamingConnection {

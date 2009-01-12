@@ -24,15 +24,25 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.util.*;
-import java.io.*;
-
-import fr.dyade.aaa.util.Transaction;
-
-import fr.dyade.aaa.agent.conf.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.agent.conf.A3CMLConfig;
+import fr.dyade.aaa.agent.conf.A3CMLDomain;
+import fr.dyade.aaa.agent.conf.A3CMLNat;
+import fr.dyade.aaa.agent.conf.A3CMLNetwork;
+import fr.dyade.aaa.agent.conf.A3CMLProperty;
+import fr.dyade.aaa.agent.conf.A3CMLServer;
+import fr.dyade.aaa.agent.conf.A3CMLService;
+import fr.dyade.aaa.util.Transaction;
 
 public class ConfigController {
 
@@ -449,8 +459,7 @@ public class ConfigController {
     A3CMLNetwork newNetwork = new A3CMLNetwork(domainName, port);    
     try {
       server.addNetwork(newNetwork);
-      A3CMLDomain domain = 
-        (A3CMLDomain) a3cmlConfig.getDomain(domainName);
+      A3CMLDomain domain = a3cmlConfig.getDomain(domainName);
       domain.addServer(server);
     } catch (Exception exc) {
       // Idempotent
@@ -717,8 +726,7 @@ public class ConfigController {
     } catch (Exception exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "", exc);
-      A3CMLDomain a3cmlDomain = 
-        (A3CMLDomain) a3cmlConfig.getDomain(domainName);        
+      A3CMLDomain a3cmlDomain = a3cmlConfig.getDomain(domainName);        
       network = (Network) Class.forName(a3cmlDomain.network).newInstance();
       short[] domainSids = new short[a3cmlDomain.servers.size()];
       for (int i = 0; i < domainSids.length; i++) {

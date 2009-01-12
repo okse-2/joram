@@ -193,7 +193,7 @@ public class JonasIdentity extends Identity {
       if (principal instanceof JPrincipal) {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, "getPrincipal name = " + ((JPrincipal)principal).getName());
-        return ((Principal) principal).getName();
+        return principal.getName();
       }
     }
     return null;

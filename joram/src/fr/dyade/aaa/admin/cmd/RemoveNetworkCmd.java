@@ -21,9 +21,7 @@
  */
 package fr.dyade.aaa.admin.cmd;
 
-import java.io.Serializable;
-
-public class RemoveNetworkCmd extends NetworkCmd implements Serializable {
+public class RemoveNetworkCmd extends NetworkCmd {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 

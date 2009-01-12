@@ -60,7 +60,6 @@ import fr.dyade.aaa.jndi2.server.RequestContext;
 import fr.dyade.aaa.jndi2.server.RequestManager;
 import fr.dyade.aaa.jndi2.server.Trace;
 
-
 public class ReplicationManager 
     extends RequestManager implements UpdateListener {
 
@@ -466,7 +465,7 @@ public class ReplicationManager
         AgentId newServerId = 
           (AgentId)initServers.elementAt(i);
         /** Modif */
-        if(! (rootOwnerId.equals( (AgentId)initServers.elementAt(i))))
+        if (!(rootOwnerId.equals(initServers.elementAt(i))))
           sendTo(newServerId, new InitJndiServerNot(
               localJndiServerIds, 
               localContexts,
@@ -521,7 +520,7 @@ public class ReplicationManager
             if (r == null)  
               nc.addRecord(record);
             if(record instanceof ContextRecord){
-              CompositeName parentPath = (CompositeName)contexts[i].getCompositeName();
+              CompositeName parentPath = contexts[i].getCompositeName();
               record_compositeName.put(record,parentPath);
             }
           }

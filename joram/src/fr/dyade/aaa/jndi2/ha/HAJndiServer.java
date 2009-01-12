@@ -21,13 +21,16 @@
  */
 package fr.dyade.aaa.jndi2.ha;
 
-import java.net.*;
-
-import fr.dyade.aaa.agent.*;
-import fr.dyade.aaa.jndi2.server.*;
+import java.net.ServerSocket;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.jndi2.server.AgentEntryPoint;
+import fr.dyade.aaa.jndi2.server.Container;
+import fr.dyade.aaa.jndi2.server.RequestManager;
+import fr.dyade.aaa.jndi2.server.Trace;
 
 public class HAJndiServer {
 

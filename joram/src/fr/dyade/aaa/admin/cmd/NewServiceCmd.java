@@ -21,9 +21,7 @@
  */
 package fr.dyade.aaa.admin.cmd;
 
-import java.io.Serializable;
-
-public class NewServiceCmd extends ServiceCmd implements Serializable {
+public class NewServiceCmd extends ServiceCmd {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 

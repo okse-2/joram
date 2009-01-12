@@ -58,24 +58,15 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * A <code>ManagedTopicConnectionFactoryImpl</code> instance manages
  * PubSub outbound connectivity to a given JORAM server.
  */
-public class ManagedTopicConnectionFactoryImpl
-             extends ManagedConnectionFactoryImpl
-             implements javax.resource.spi.ManagedConnectionFactory,
-                        javax.resource.spi.ResourceAdapterAssociation,
-                        javax.resource.spi.ValidatingManagedConnectionFactory,
-                        java.io.Serializable
-{
-  /**
-   * 
-   */
+public class ManagedTopicConnectionFactoryImpl extends ManagedConnectionFactoryImpl {
+
   private static final long serialVersionUID = 1L;
 
   /**
    * Constructs a <code>ManagedTopicConnectionFactoryImpl</code> instance.
    */
-  public ManagedTopicConnectionFactoryImpl()
-  {}
-
+  public ManagedTopicConnectionFactoryImpl() {
+  }
 
   /**
    * Method called by an application server (managed case) for creating an
@@ -85,8 +76,7 @@ public class ManagedTopicConnectionFactoryImpl
    *
    * @exception ResourceException  Never thrown.
    */
-  public Object createConnectionFactory(ConnectionManager cxManager)
-    throws ResourceException {
+  public Object createConnectionFactory(ConnectionManager cxManager) throws ResourceException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                     this + " createConnectionFactory(" + cxManager + ")");
@@ -100,8 +90,7 @@ public class ManagedTopicConnectionFactoryImpl
    *
    * @exception ResourceException  Never thrown.
    */
-  public Object createConnectionFactory()
-    throws ResourceException {
+  public Object createConnectionFactory() throws ResourceException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createConnectionFactory()");
 
@@ -139,10 +128,8 @@ public class ManagedTopicConnectionFactoryImpl
    *                                   or if connecting fails for any other
    *                                   reason.
    */
-  public ManagedConnection
-         createManagedConnection(Subject subject,
-                                 ConnectionRequestInfo cxRequest)
-    throws ResourceException {
+  public ManagedConnection createManagedConnection(Subject subject, ConnectionRequestInfo cxRequest)
+      throws ResourceException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                     this + " createManagedConnection(" + subject +
@@ -293,11 +280,8 @@ public class ManagedTopicConnectionFactoryImpl
    * @exception ResourceException  If the provided connection request info is
    *                               invalid.
    */
-  public ManagedConnection
-         matchManagedConnections(Set connectionSet,
-                                 Subject subject,
-                                 ConnectionRequestInfo cxRequest)
-    throws ResourceException {
+  public ManagedConnection matchManagedConnections(Set connectionSet, Subject subject,
+      ConnectionRequestInfo cxRequest) throws ResourceException {
 
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
@@ -355,8 +339,7 @@ public class ManagedTopicConnectionFactoryImpl
   }
 
   /** Returns a code depending on the managed factory configuration. */
-  public int hashCode()
-  {
+  public int hashCode() {
     return ("PubSub:"
             + hostName
             + ":"
@@ -366,8 +349,7 @@ public class ManagedTopicConnectionFactoryImpl
   }
 
   /** Compares managed factories according to their configuration. */
-  public boolean equals(Object o)
-  {
+  public boolean equals(Object o) {
     if (! (o instanceof ManagedTopicConnectionFactoryImpl))
       return false;
 

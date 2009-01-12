@@ -23,20 +23,22 @@
  */
 package org.objectweb.joram.client.jms.admin;
 
-import javax.naming.*;
-
-import javax.jms.JMSException;
-import javax.jms.Connection;
-
-import java.util.Hashtable;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Random;
 
-import org.objectweb.joram.client.jms.ConnectionFactory;
+import javax.jms.Connection;
+import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
+import javax.naming.NamingException;
+import javax.naming.RefAddr;
+import javax.naming.Reference;
+import javax.naming.StringRefAddr;
 
-import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * A base class for clustered connection factories.
@@ -230,7 +232,7 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
     for (int i=0; i<entries.length; i++) {
       strbuf.setLength(0);
       strbuf.append("CF#").append(i).append(".key");
-      h.put(strbuf.toString(), (String) entries[i].getKey());
+      h.put(strbuf.toString(), entries[i].getKey());
 
       ConnectionFactory cf = (ConnectionFactory) entries[i].getValue();
 

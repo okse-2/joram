@@ -22,8 +22,6 @@
  */
 package org.objectweb.joram.client.jms.admin;
 
-import org.objectweb.joram.client.jms.Message;
-import org.objectweb.joram.client.jms.admin.Subscription;
 import java.net.ConnectException;
 import java.util.List;
 import java.util.Properties;

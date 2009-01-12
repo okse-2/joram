@@ -1,11 +1,15 @@
 package com.scalagent.joram.osgi.test2;
 
-import java.io.*;
-import java.util.Properties;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.MessageProducer;
+import javax.jms.Queue;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 
-import org.osgi.framework.*;
-
-import javax.jms.*;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 import com.scalagent.joram.osgi.client.service.JoramClient;
 

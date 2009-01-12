@@ -87,7 +87,7 @@ public class Message implements javax.jms.Message {
   protected transient javax.jms.Destination jmsDest = null;
 
   /**
-   * Instanciates a <code>Message</code> wrapping a consumed
+   * Instantiates a <code>Message</code> wrapping a consumed
    * MOM simple message.
    *
    * @param session  The consuming session.

@@ -207,9 +207,9 @@ public class NamingContext implements NamingContextMBean, Serializable, Cloneabl
      for (int i=0; i < records.size(); i++) {
       Record r = (Record)records.elementAt(i);
       if (r instanceof ObjectRecord) 
-        array[i] = ((String)r.getName());
+        array[i] = r.getName();
       else
-        array[i] = "(javax.naming.Context)- " + ((String)r.getName());
+        array[i] = "(javax.naming.Context)- " + r.getName();
     }
     return array;    
   }

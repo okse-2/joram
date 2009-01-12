@@ -21,11 +21,20 @@
  */
 package org.objectweb.joram.client.tools.admin;
 
-import java.util.*;
-import javax.swing.*;
-import javax.swing.tree.*;
+import java.util.List;
+import java.util.Vector;
 
-import org.objectweb.joram.client.jms.admin.*;
+import javax.swing.AbstractAction;
+import javax.swing.ImageIcon;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+
+import org.objectweb.joram.client.jms.admin.DeadMQueue;
+import org.objectweb.joram.client.jms.admin.Server;
+import org.objectweb.joram.client.jms.admin.User;
 
 
 class ServerTreeNode extends DefaultMutableTreeNode
@@ -153,7 +162,7 @@ class ServerTreeNode extends DefaultMutableTreeNode
     for (int i = 0; i < userRoot.getChildCount(); i++){
       UserTreeNode utn = (UserTreeNode) userRoot.getChildAt(i);
       try {
-        User user = (User) utn.getUser();
+        User user = utn.getUser();
         rs.add(user);
       }
       catch (ClassCastException cce) {}

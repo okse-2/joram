@@ -21,18 +21,54 @@
  */
 package org.objectweb.joram.client.tools.admin;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.tree.*;
-import javax.jms.*;
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.net.ConnectException;
 
-import org.objectweb.joram.client.jms.admin.*;
-import org.objectweb.joram.client.jms.Queue;
+import javax.jms.Message;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JEditorPane;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTree;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeSelectionModel;
+import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 
-import org.objectweb.util.monolog.api.*;
+import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.admin.AdminException;
+import org.objectweb.joram.client.jms.admin.Subscription;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 public class AdminTool extends JFrame
     implements ControllerEventListener
@@ -476,14 +512,13 @@ public class AdminTool extends JFrame
             (SubscriptionRootTreeNode)subTn.getParent();
           UserTreeNode userTn = (UserTreeNode)subRootTn.getParent();
 //        ServerTreeNode serverTn = userTn.getParentServerTreeNode();
-          msg = userTn.getUser().readMessage(subTn.getSubscription().getName(), msgTn.getMessageId());
+          msg = userTn.getUser().getMessage(subTn.getSubscription().getName(), msgTn.getMessageId());
         } else {
           MessageRootTreeNode msgRootTn = 
             (MessageRootTreeNode)parentTn;
           QueueTreeNode queueTn = 
             (QueueTreeNode)msgRootTn.getParent();
-          msg = queueTn.getQueue().readMessage(
-            msgTn.getMessageId());
+          msg = queueTn.getQueue().getMessage(msgTn.getMessageId());
         }
         messagePanel.setMessage(msg);
         ((CardLayout) editPanel.getLayout()).show(editPanel, "message");

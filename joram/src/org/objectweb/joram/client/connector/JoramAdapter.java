@@ -298,7 +298,7 @@ public class JoramAdapter
   public synchronized void start(BootstrapContext ctx)
   throws ResourceAdapterInternalException {
     // set HA mode if needed
-    joramAdmin.setHa(isHa);
+    JoramAdmin.setHa(isHa);
 
     if (started)
       throw new ResourceAdapterInternalException("Adapter already started.");
@@ -1607,7 +1607,7 @@ public class JoramAdapter
    */
   public boolean executeXMLAdminJMX(String path)
   throws Exception {
-    boolean executeAdmin = joramAdmin.executeXMLAdmin(path);
+    boolean executeAdmin = JoramAdmin.executeXMLAdmin(path);
     adminConnect();
     return executeAdmin;
   }

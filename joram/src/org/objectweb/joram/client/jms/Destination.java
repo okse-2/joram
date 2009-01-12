@@ -32,18 +32,37 @@ import java.util.ListIterator;
 import java.util.Properties;
 import java.util.Vector;
 
-import javax.naming.*;
+import javax.jms.JMSException;
+import javax.naming.NamingException;
+import javax.naming.Reference;
+import javax.naming.StringRefAddr;
 
+import org.objectweb.joram.client.jms.admin.AdminException;
+import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.AdministeredObject;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
 import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.admin.AdministeredObject;
-import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.XmlSerializer;
-import org.objectweb.joram.shared.admin.*;
-
-import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.shared.admin.CreateDestinationReply;
+import org.objectweb.joram.shared.admin.CreateDestinationRequest;
+import org.objectweb.joram.shared.admin.DeleteDestination;
+import org.objectweb.joram.shared.admin.Monitor_GetDMQSettings;
+import org.objectweb.joram.shared.admin.Monitor_GetDMQSettingsRep;
+import org.objectweb.joram.shared.admin.Monitor_GetFreeAccess;
+import org.objectweb.joram.shared.admin.Monitor_GetFreeAccessRep;
+import org.objectweb.joram.shared.admin.Monitor_GetReaders;
+import org.objectweb.joram.shared.admin.Monitor_GetStat;
+import org.objectweb.joram.shared.admin.Monitor_GetStatRep;
+import org.objectweb.joram.shared.admin.Monitor_GetUsersRep;
+import org.objectweb.joram.shared.admin.Monitor_GetWriters;
+import org.objectweb.joram.shared.admin.SetDestinationDMQ;
+import org.objectweb.joram.shared.admin.SetReader;
+import org.objectweb.joram.shared.admin.SetWriter;
+import org.objectweb.joram.shared.admin.UnsetDestinationDMQ;
+import org.objectweb.joram.shared.admin.UnsetReader;
+import org.objectweb.joram.shared.admin.UnsetWriter;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.util.management.MXWrapper;
 

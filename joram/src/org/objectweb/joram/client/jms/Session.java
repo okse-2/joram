@@ -326,7 +326,7 @@ public class Session implements javax.jms.Session {
    *  Determines whether the messages produced are asynchronously sent
    * or not (without or with acknowledgement).
    * <p>
-   *  This attribute is inherited from Connection at initialisation,
+   *  This attribute is inherited from Connection at initialization,
    * by default false. 
    * 
    * @param asyncSend	if true sets asynchronous sending for this session.
@@ -338,7 +338,7 @@ public class Session implements javax.jms.Session {
   /**
    *  Maximum number of messages that can be read at once from a queue.
    * <p>
-   *  This attribute is inherited from Connection at initialisation,
+   *  This attribute is inherited from Connection at initialization,
    * default value is 1.
    *
    * @see FactoryParameters.queueMessageReadMax
@@ -349,7 +349,7 @@ public class Session implements javax.jms.Session {
    *  Get the maximum number of messages that can be read at once from a queue
    * for this Session.
    * <p>
-   *  This attribute is inherited from Connection at initialisation,
+   *  This attribute is inherited from Connection at initialization,
    * default value is 1.
    * 
    * @return    The maximum number of messages that can be read at once from
@@ -367,7 +367,7 @@ public class Session implements javax.jms.Session {
    *  Set the maximum number of messages that can be read at once from a queue
    * for this Session.
    * <p>
-   *  This attribute is inherited from Connection at initialisation,
+   *  This attribute is inherited from Connection at initialization,
    * default value is 1.
    * 
    * @param queueMessageReadMax	The maximum number of messages that can be
@@ -385,7 +385,7 @@ public class Session implements javax.jms.Session {
    *  Maximum number of acknowledgements that can be buffered when using
    * Session.DUPS_OK_ACKNOWLEDGE mode.
    * <p>
-   *  This attribute is inherited from Connection at initialisation,
+   *  This attribute is inherited from Connection at initialization,
    *  default value is 0.
    * 
    * @see FactoryParameters.topicAckBufferMax
@@ -396,7 +396,7 @@ public class Session implements javax.jms.Session {
    *  Get the maximum number of acknowledgements that can be buffered when
    * using Session.DUPS_OK_ACKNOWLEDGE mode for this session.
    * <p>
-   *  This attribute is inherited from Connection at initialisation,
+   *  This attribute is inherited from Connection at initialization,
    *  default value is 0.
    *
    * @return The Maximum number of acknowledgements that can be buffered when
@@ -414,7 +414,7 @@ public class Session implements javax.jms.Session {
    * Set the maximum number of acknowledgements that can be buffered when
    * using Session.DUPS_OK_ACKNOWLEDGE mode for this session.
    * <p>
-   *  This attribute is inherited from Connection at initialisation,
+   *  This attribute is inherited from Connection at initialization,
    *  default value is 0.
    *
    * @param topicAckBufferMax The Maximum number of acknowledgements that
@@ -430,16 +430,10 @@ public class Session implements javax.jms.Session {
   }
 
   /**
-   * Status boolean indicating whether the message input is activated or not
-   * for the message listeners.
-   */
-  private boolean passiveMsgInput;
-
-  /**
    *  This threshold is the maximum messages number over which the
    * subscription is passivated.
    * <p>
-   *  This attribute is inherited from Connection at initialisation,
+   *  This attribute is inherited from Connection at initialization,
    * default value is Integer.MAX_VALUE.
    *
    * @see FactoryParameters.topicPassivationThreshold
@@ -452,7 +446,7 @@ public class Session implements javax.jms.Session {
    * This threshold is the maximum messages number over which the
    * subscription is passivated.
    * <p>
-   *  This attribute is inherited from Connection at initialisation,
+   *  This attribute is inherited from Connection at initialization,
    * default value is Integer.MAX_VALUE.
    *
    * @return The maximum messages number over which the subscription
@@ -472,7 +466,7 @@ public class Session implements javax.jms.Session {
    * This threshold is the maximum messages number over which the
    * subscription is passivated.
    * <p>
-   *  This attribute is inherited from Connection at initialisation,
+   *  This attribute is inherited from Connection at initialization,
    * default value is Integer.MAX_VALUE.
    *
    * @param topicPassivationThreshold The maximum messages number over which
@@ -492,7 +486,7 @@ public class Session implements javax.jms.Session {
    * This threshold is the minimum messages number below which
    * the subscription is activated.
    * <p>
-   *  This attribute is inherited from Connection at initialisation,
+   *  This attribute is inherited from Connection at initialization,
    * default value is 0.
    *
    * @see FactoryParameters.topicActivationThreshold
@@ -505,7 +499,7 @@ public class Session implements javax.jms.Session {
    * This threshold is the minimum messages number below which
    * the subscription is activated.
    * <p>
-   *  This attribute is inherited from Connection at initialisation,
+   *  This attribute is inherited from Connection at initialization,
    * default value is 0.
    *
    * @see topicActivationThreshold
@@ -525,7 +519,7 @@ public class Session implements javax.jms.Session {
    * This threshold is the minimum messages number below which
    * the subscription is activated.
    * <p>
-   *  This attribute is inherited from Connection at initialisation,
+   *  This attribute is inherited from Connection at initialization,
    * default value is 0.
    *
    * @param topicActivationThreshold The minimum messages number below which
@@ -1196,7 +1190,7 @@ public class Session implements javax.jms.Session {
       logger.log(BasicLevel.DEBUG, "--- " + this
                                  + ": committing...");
 
-    // If the transaction was scheduled: cancelling.
+    // If the transaction was scheduled: canceling.
     if (scheduled) {
       closingTask.cancel();
       scheduled = false;
@@ -1278,7 +1272,7 @@ public class Session implements javax.jms.Session {
       logger.log(BasicLevel.DEBUG, "--- " + this
                                  + ": rolling back...");
 
-    // If the transaction was scheduled: cancelling.
+    // If the transaction was scheduled: canceling.
     if (scheduled) {
       closingTask.cancel();
       scheduled = false;
@@ -1503,7 +1497,7 @@ public class Session implements javax.jms.Session {
    * This method must be carefully used. When the session is stopped, the
    * connection might very well going on pushing deliveries in the
    * session's queue. If the session is never re-started, these deliveries
-   * will never be poped out, and this may lead to a situation of consumed
+   * will never be popped out, and this may lead to a situation of consumed
    * but never acknowledged messages.
    * <p>
    * This fatal situation never occurs as the <code>stop()</code> method is
@@ -1730,7 +1724,7 @@ public class Session implements javax.jms.Session {
           Vector msgs = reply.getMessages();
           if (msgs != null && ! msgs.isEmpty()) {
             Message msg = Message.wrapMomMessage(this, (org.objectweb.joram.shared.messages.Message) msgs.get(0));
-            String msgId = msg.getJMSMessageID();;
+            String msgId = msg.getJMSMessageID();
             
             // Auto ack: acknowledging the message:
             if (autoAck && ! implicitAck) {
@@ -1986,18 +1980,6 @@ public class Session implements javax.jms.Session {
   /**
    * Called by:
    * - method run (application server thread) synchronized
-   */
-  private void ackMessage(String targetName,
-                          String msgId,
-                          boolean queueMode) throws JMSException {
-    ConsumerAckRequest ack = new ConsumerAckRequest(targetName, queueMode);
-    ack.addId(msgId);
-    mtpx.sendRequest(ack);
-  }
-
-  /**
-   * Called by:
-   * - method run (application server thread) synchronized
    * - method onMessage (SessionDaemon thread) not synchronized
    * but no concurrent call except a close which first stops
    * SessionDaemon.
@@ -2185,24 +2167,6 @@ public class Session implements javax.jms.Session {
 
   public final boolean isAutoAck() {
     return autoAck;
-  }
-
-  private void activateMessageInput() throws JMSException {
-    for (int i = 0; i < consumers.size(); i++) {
-      MessageConsumer cons = 
-        (MessageConsumer) consumers.elementAt(i);
-      cons.activateMessageInput();
-    }
-    passiveMsgInput = false;
-  }
-
-  private void passivateMessageInput() throws JMSException {
-    for (int i = 0; i < consumers.size(); i++) {
-      MessageConsumer cons = 
-        (MessageConsumer) consumers.elementAt(i);
-      cons.passivateMessageInput();
-    }
-    passiveMsgInput = true;
   }
   
   /**

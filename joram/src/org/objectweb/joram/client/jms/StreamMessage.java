@@ -23,13 +23,18 @@
  */
 package org.objectweb.joram.client.jms;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
 
 import javax.jms.JMSException;
-import javax.jms.MessageFormatException;
-import javax.jms.MessageNotWriteableException;
-import javax.jms.MessageNotReadableException;
 import javax.jms.MessageEOFException;
+import javax.jms.MessageFormatException;
+import javax.jms.MessageNotReadableException;
+import javax.jms.MessageNotWriteableException;
 
 /**
  * Implements the <code>javax.jms.StreamMessage</code> interface.
@@ -42,7 +47,7 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
   /** The stream for reading the data. */
   private transient DataInputStream inputStream = null;
 
-  /** <code>true</code> if the message has been sent since its last modif. */
+  /** <code>true</code> if the message has been sent since its last modification. */
   private transient boolean prepared = false;
 
   private transient int available = 0;
@@ -61,14 +66,14 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
   private static final int NULL = 11;
 
   /**
-   * Instanciates a bright new <code>StreamMessage</code>.
+   * Instantiates a bright new <code>StreamMessage</code>.
    *
    * @exception JMSException  In case of an error while creating the output
    *              stream.
    */
   StreamMessage() throws JMSException {
     super();
-    momMsg.type = momMsg.STREAM;
+    momMsg.type = org.objectweb.joram.shared.messages.Message.STREAM;
 
     outputBuffer = new ByteArrayOutputStream();
     outputStream = new DataOutputStream(outputBuffer);
@@ -77,7 +82,7 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
   }
 
   /**
-   * Instanciates a <code>StreamMessage</code> wrapping a consumed
+   * Instantiates a <code>StreamMessage</code> wrapping a consumed
    * MOM message containing a stream of bytes.
    *
    * @param session  The consuming session.
@@ -328,7 +333,7 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
 
     try {
       outputStream.writeByte(SHORT);
-      outputStream.writeShort((int) value);
+      outputStream.writeShort(value);
     } catch (IOException ioE) {
       JMSException jE = new JMSException("Error while writing the value.");
       jE.setLinkedException(ioE);
@@ -915,7 +920,7 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
   }
 
   /**
-   * Method actually preparing the message for sending by transfering the
+   * Method actually preparing the message for sending by transferring the
    * local body into the wrapped MOM message.
    *
    * @exception MessageFormatException  If an error occurs while serializing.

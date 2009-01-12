@@ -1,23 +1,36 @@
 package org.objectweb.joram.client.jms.admin.server;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.util.List;
+import java.util.Random;
+
+import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.NameAlreadyUsedException;
+import org.objectweb.joram.client.jms.admin.Server;
+import org.objectweb.joram.client.jms.admin.StartFailureException;
+import org.objectweb.joram.client.jms.admin.UnknownServerException;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.mom.proxies.tcp.TcpProxyService;
 
 import fr.dyade.aaa.agent.AgentServer;
-
-import org.objectweb.joram.client.jms.admin.*;
-import org.objectweb.joram.mom.proxies.tcp.TcpProxyService;
 
 /**
  * This class starts a Joram server without almost any configuration.
  * It just needs to know an existing Joram server (host, port) and 
  * the root login. The existing server is usually "s0" from the base configuration.
- * These data are dpecified by 4 environment properties: ADMIN_HOST_NAME, 
- * ADMIN_PORT, ROOT_USER_NAME and ROOT_USER_PWD.
+ * These data are specified by 4 environment properties: ADMIN_HOST_NAME, 
+ * ADMIN_PORT, ROOT_USER_NAME and ROOT_USER_PWD.<br><br>
  *
  * This server uses the current directory to store some data. You can specify another
- * directory with the property BASE_DIR_PATH.
+ * directory with the property BASE_DIR_PATH.<br><br>
  * 
  * This new server is added into the first domain found in the Joram platform.
  * If no domain exists, a first domain D0 is created. Notice that this bootstrap
@@ -126,7 +139,7 @@ public class ZeroconfJoramServer {
         port1, 
         serverName,
         new String[]{"org.objectweb.joram.mom.proxies.tcp.TcpProxyService"},
-        new String[]{"" + port2});
+        new String[] { String.valueOf(port2) });
       
       String configXml = AdminModule.getConfiguration();
       File sconfig = new File(baseDir, A3_SERVERS_XML);
@@ -151,9 +164,7 @@ public class ZeroconfJoramServer {
       null);
     fr.dyade.aaa.agent.AgentServer.start();
     
-    org.objectweb.joram.client.jms.admin.User user = 
-      org.objectweb.joram.client.jms.admin.User.create(
-        "anonymous", "anonymous", serverId);
+    User.create("anonymous", "anonymous", serverId);
 
     AdminModule.disconnect();
   }

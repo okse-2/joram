@@ -21,15 +21,20 @@
  */
 package fr.dyade.aaa.jndi2.ha;
 
-import java.util.*;
-import java.io.*;
-
-import fr.dyade.aaa.agent.*;
-import fr.dyade.aaa.jndi2.server.*;
-import fr.dyade.aaa.jndi2.msg.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Hashtable;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.agent.BagSerializer;
+import fr.dyade.aaa.jndi2.msg.JndiReply;
+import fr.dyade.aaa.jndi2.server.LifeCycleListener;
+import fr.dyade.aaa.jndi2.server.RequestManager;
+import fr.dyade.aaa.jndi2.server.TcpRequestNot;
+import fr.dyade.aaa.jndi2.server.Trace;
 
 public class HARequestManager 
     implements LifeCycleListener, BagSerializer, java.io.Serializable {

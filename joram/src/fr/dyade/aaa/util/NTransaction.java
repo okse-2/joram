@@ -21,14 +21,26 @@
  */
 package fr.dyade.aaa.util;
 
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamConstants;
+import java.io.RandomAccessFile;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 /**
- *  The NTransaction class implements a transactionnal storage.
+ *  The NTransaction class implements a transactional storage.
  *  For efficiency it uses a file for its transaction journal, the final
  * storage is provided through the Repository interface on filesystem or
  * database.
@@ -198,7 +210,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
    * @return The status of the garbage thread.
    */
   public final boolean isGarbageRunning() {
-    // Currently there is no asynchnous garbage.
+    // Currently there is no asynchronous garbage.
     return false;
   }
 
@@ -209,7 +221,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
    *  Sets asynchronous garbage.
    *
    * @param async 	If true activates the asynchronous garbage,
-   *			deasctivates otherwise.
+   *			deactivates otherwise.
    */
   public void garbageAsync(boolean async) {
     if (async) {
@@ -649,7 +661,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
   }
 
   private final byte[] getFromLog(Hashtable log, Object key) throws IOException {
-    // Searchs in the log a new value for the object.
+    // Searches in the log a new value for the object.
     Operation op = (Operation) log.get(key);
     if (op != null) {
       if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
@@ -663,7 +675,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
   }
 
   private final byte[] getFromLog(String dirName, String name) throws IOException {
-    // First searchs in the logs a new value for the object.
+    // First searches in the logs a new value for the object.
     Object key = OperationKey.newKey(dirName, name);
     byte[] buf = getFromLog(((Context) perThreadContext.get()).log, key);
     if (buf != null) return buf;
@@ -684,7 +696,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
       logmon.log(BasicLevel.DEBUG,
                  "NTransaction, load(" + dirName + '/' + name + ")");
 
-    // First searchs in the logs a new value for the object.
+    // First searches in the logs a new value for the object.
     try {
       byte[] buf = getFromLog(dirName, name);
       if (buf == null) {
@@ -719,7 +731,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
       logmon.log(BasicLevel.DEBUG,
                  "NTransaction, loadByteArray(" + dirName + '/' + name + ")");
 
-    // First searchs in the logs a new value for the object.
+    // First searches in the logs a new value for the object.
     try {
       byte[] buf = getFromLog(dirName, name);
       if (buf != null) return buf;
@@ -899,7 +911,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
    */
   static final class LogFile extends ByteArrayOutputStream {
     /**
-     * Log of all operations already commited but not reported on disk.
+     * Log of all operations already committed but not reported on disk.
      */
     Hashtable log = null;
     /** log file */
@@ -942,18 +954,16 @@ public final class NTransaction implements Transaction, NTransactionMBean {
      */
     long garbageTimeOut = 0L;
 
-    /** Root directory of transaction storage */
-    private File dir = null;
-    /** Coherency lock filename */
+    /** Coherence lock filename */
     static private final String LockPathname = "lock";
-    /** Coherency lock file */
+    
+    /** Coherence lock file */
     private File lockFile = null;
 
     private Repository repository = null;
 
     LogFile(File dir, Repository repository) throws IOException {
       super(4 * Kb);
-      this.dir = dir;
       this.repository = repository;
 
       boolean nolock = Boolean.getBoolean("NTNoLockFile");
@@ -1024,7 +1034,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
             if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
               logmon.log(BasicLevel.DEBUG,
                          "NTransaction.init(), COMMIT=" + optype);
-          };
+          }
 
           if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG,

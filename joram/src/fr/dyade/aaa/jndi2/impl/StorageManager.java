@@ -64,8 +64,7 @@ public class StorageManager {
     if (contextCounterL == null) {
       contextCounter = 0;
     } else {
-      contextCounter = 
-        ((Long)contextCounterL).longValue();
+      contextCounter = contextCounterL.longValue();
     }
 
     // Load the context index

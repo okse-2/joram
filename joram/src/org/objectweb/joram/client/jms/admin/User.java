@@ -42,8 +42,6 @@ import org.objectweb.joram.shared.admin.CreateUserReply;
 import org.objectweb.joram.shared.admin.CreateUserRequest;
 import org.objectweb.joram.shared.admin.DeleteSubscriptionMessage;
 import org.objectweb.joram.shared.admin.DeleteUser;
-import org.objectweb.joram.shared.admin.GetQueueMessage;
-import org.objectweb.joram.shared.admin.GetQueueMessageRep;
 import org.objectweb.joram.shared.admin.GetSubscription;
 import org.objectweb.joram.shared.admin.GetSubscriptionMessage;
 import org.objectweb.joram.shared.admin.GetSubscriptionMessageIds;
@@ -116,7 +114,7 @@ public class User extends AdministeredObject implements UserMBean {
   }
   
   /**
-   * Admin method creating a user for a given server and instanciating the
+   * Admin method creating a user for a given server and instantiating the
    * corresponding <code>User</code> object.
    * <p>
    * If the user has already been set on this server, the method simply
@@ -137,7 +135,7 @@ public class User extends AdministeredObject implements UserMBean {
   }
   
   /**
-   * Admin method creating a user on the local server and instanciating the
+   * Admin method creating a user on the local server and instantiating the
    * corresponding <code>User</code> object.
    * <p>
    * If the user has already been set on this server, the method simply
@@ -156,7 +154,7 @@ public class User extends AdministeredObject implements UserMBean {
   }
   
   /**
-   * Admin method creating a user for a given server and instanciating the
+   * Admin method creating a user for a given server and instantiating the
    * corresponding <code>User</code> object.
    * <p>
    * If the user has already been set on this server, the method simply
@@ -167,7 +165,7 @@ public class User extends AdministeredObject implements UserMBean {
    * @param name  Name of the user.
    * @param password  Password of the user.
    * @param serverId  The identifier of the user's server.
-   * @param identityClassName user/password or JAAS... (delault SimpleIdentity).
+   * @param identityClassName user/password or JAAS... (default SimpleIdentity).
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
@@ -237,7 +235,7 @@ public class User extends AdministeredObject implements UserMBean {
    *
    * @param newName  The new name of the user.
    * @param newPassword  The new password of the user.
-   * @param identityClassName user/password or JAAS... (delault SimpleIdentity).
+   * @param identityClassName user/password or JAAS... (default SimpleIdentity).
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
@@ -596,7 +594,7 @@ public Properties getMessageProperties(String subName,
   }
 
   /**
-   * Codes an <code>User</code> instance as a Hashtable for travelling 
+   * Codes an <code>User</code> instance as a Hashtable for traveling 
    * through the SOAP protocol.
    */
   public Hashtable code() {
@@ -607,7 +605,7 @@ public Properties getMessageProperties(String subName,
   }
 
   /**
-   * Decodes an <code>User</code> which travelled through the SOAP protocol.
+   * Decodes an <code>User</code> which traveled through the SOAP protocol.
    */
   public void decode(Hashtable h) {
     name = (String) h.get("name");

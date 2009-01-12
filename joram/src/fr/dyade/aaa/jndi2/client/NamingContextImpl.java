@@ -23,13 +23,32 @@
  */
 package fr.dyade.aaa.jndi2.client;
 
-import java.util.*;
-import javax.naming.*;
+import java.util.Hashtable;
+
+import javax.naming.Binding;
+import javax.naming.CompositeName;
+import javax.naming.Context;
+import javax.naming.InvalidNameException;
+import javax.naming.Name;
+import javax.naming.NameParser;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.naming.Referenceable;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.jndi2.msg.*;
+import fr.dyade.aaa.jndi2.msg.BindRequest;
+import fr.dyade.aaa.jndi2.msg.CreateSubcontextRequest;
+import fr.dyade.aaa.jndi2.msg.DestroySubcontextRequest;
+import fr.dyade.aaa.jndi2.msg.JndiError;
+import fr.dyade.aaa.jndi2.msg.JndiReply;
+import fr.dyade.aaa.jndi2.msg.ListBindingsReply;
+import fr.dyade.aaa.jndi2.msg.ListBindingsRequest;
+import fr.dyade.aaa.jndi2.msg.ListReply;
+import fr.dyade.aaa.jndi2.msg.ListRequest;
+import fr.dyade.aaa.jndi2.msg.LookupReply;
+import fr.dyade.aaa.jndi2.msg.LookupRequest;
+import fr.dyade.aaa.jndi2.msg.UnbindRequest;
 
 public class NamingContextImpl implements Context {
 

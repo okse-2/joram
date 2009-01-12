@@ -111,7 +111,7 @@ public class TcpProxyService {
       JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
                                 "TcpProxyService.init(" + args + ',' + firstTime + ')');
 
-    port =  DEFAULT_PORT;;
+    port = DEFAULT_PORT;
     address = DEFAULT_BINDADDRESS;
     if (args != null) {
       StringTokenizer st = new StringTokenizer(args);      
@@ -156,11 +156,6 @@ public class TcpProxyService {
   }
 
   /**
-   * The listening server socket
-   */
-  private ServerSocket serverSocket;
-
-  /**
    * The list of opened connections
    */
   private Vector connections;
@@ -174,7 +169,6 @@ public class TcpProxyService {
   public TcpProxyService(ServerSocket serverSocket,
                          int poolSize,
                          int timeout) {
-    this.serverSocket = serverSocket;
     this.connections = new Vector();
     connectionListeners = new TcpConnectionListener[poolSize];
     for (int i = 0; i < poolSize; i++) {

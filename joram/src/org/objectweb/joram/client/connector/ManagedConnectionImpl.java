@@ -24,6 +24,9 @@
  */
 package org.objectweb.joram.client.connector;
 
+import java.io.PrintWriter;
+import java.util.Vector;
+
 import javax.jms.JMSException;
 import javax.jms.Session;
 import javax.jms.XAConnection;
@@ -40,9 +43,6 @@ import javax.resource.spi.LocalTransactionException;
 import javax.resource.spi.ManagedConnectionMetaData;
 import javax.resource.spi.ResourceAdapterInternalException;
 import javax.transaction.xa.XAResource;
-
-import java.io.PrintWriter;
-import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -209,7 +209,7 @@ public class ManagedConnectionImpl
 
     OutboundConnection newConn = (OutboundConnection) connection;
     newConn.managedCx = this;
-    newConn.xac = (org.objectweb.joram.client.jms.XAConnection) cnx;
+    newConn.xac = cnx;
   }
 
   /** Adds a connection event listener. */
@@ -301,7 +301,7 @@ public class ManagedConnectionImpl
               // set Session transacted = true
               sess.setTransacted(true);
 
-              session = (Session) new org.objectweb.joram.client.jms.XASession(
+              session = new org.objectweb.joram.client.jms.XASession(
                 (org.objectweb.joram.client.jms.Connection) outboundCnx.xac,
                 sess,
                 xaResourceMngr);

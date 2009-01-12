@@ -21,11 +21,13 @@
  */
 package fr.dyade.aaa.jndi2.ha;
 
-import fr.dyade.aaa.agent.*;
-import fr.dyade.aaa.jndi2.server.*;
-
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.jndi2.server.EntryPoint;
+import fr.dyade.aaa.jndi2.server.TcpRequestNot;
+import fr.dyade.aaa.jndi2.server.Trace;
 
 public class HAEntryPoint implements EntryPoint {
 

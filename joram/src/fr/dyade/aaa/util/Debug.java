@@ -21,9 +21,17 @@
  */
 package fr.dyade.aaa.util;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 
-import org.objectweb.util.monolog.api.*;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Level;
+import org.objectweb.util.monolog.api.Logger;
+import org.objectweb.util.monolog.api.LoggerFactory;
+import org.objectweb.util.monolog.api.MonologFactory;
 
 /**
  * This class handles the debug traces.
@@ -121,10 +129,7 @@ public class Debug {
     if (ldebugDir != null) {
       File debugFile = new File(ldebugDir, ldebugFileName);
       try {
-        if ((debugFile != null) &&
-            debugFile.exists() &&
-            debugFile.isFile() &&
-            (debugFile.length() != 0)) {
+        if (debugFile.exists() && debugFile.isFile() && (debugFile.length() != 0)) {
           ldebugFileName = debugFile.getPath();
         } else {
           throw new IOException();
@@ -140,7 +145,7 @@ public class Debug {
     try {
       System.setProperty(org.objectweb.util.monolog.Monolog.MONOLOG_FILE_NAME,
                          ldebugFileName);
-      factory = org.objectweb.util.monolog.Monolog.init();
+      factory = org.objectweb.util.monolog.Monolog.initialize();
       if (factory == null) {
         System.err.println("Error in Monolog initialization: null factory");
       } else {

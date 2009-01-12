@@ -35,22 +35,18 @@ import org.objectweb.joram.client.jms.Message;
 import org.objectweb.joram.client.jms.Session;
 import org.objectweb.joram.shared.admin.AbstractAdminMessage;
 
-/**
- * @author tachker
- *
- */
 public class AdminMessage extends Message {
 
   /**
-   * Instanciates a bright new <code>AdminMessage</code>.
+   * Instantiates a bright new <code>AdminMessage</code>.
    */
   public AdminMessage() {
     super();
-    momMsg.type = momMsg.ADMIN;
+    momMsg.type = org.objectweb.joram.shared.messages.Message.ADMIN;
   }
 
   /**
-   * Instanciates an <code>AdminMessage</code> wrapping a
+   * Instantiates an <code>AdminMessage</code> wrapping a
    * consumed MOM message containing a Admin message.
    *
    * @param session  The consuming session.
