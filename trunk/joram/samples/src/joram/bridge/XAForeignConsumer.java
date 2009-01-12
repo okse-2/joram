@@ -38,7 +38,9 @@ import org.objectweb.joram.client.jms.XidImpl;
  * Consumes messages on a foreign destination through the JORAM bridge.
  */
 public class XAForeignConsumer {
+  
   public static void main(String[] args) throws Exception {
+    
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     Destination foreignDest = (Destination) jndiCtx.lookup("foreignQueue");
     XAConnectionFactory foreignCF = (XAConnectionFactory) jndiCtx.lookup("foreignCF");
@@ -47,7 +49,7 @@ public class XAForeignConsumer {
     XAConnection foreignCnx = foreignCF.createXAConnection();
     XASession foreignSess = foreignCnx.createXASession();
     MessageConsumer foreignCons = foreignSess.createConsumer(foreignDest);
-    XAResource resource = ((XASession) foreignSess).getXAResource();
+    XAResource resource = foreignSess.getXAResource();
     foreignCnx.start();   
  
     Xid xid = new XidImpl(new byte[0], 1, new String(""+System.currentTimeMillis()).getBytes());

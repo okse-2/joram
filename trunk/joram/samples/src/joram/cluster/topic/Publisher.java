@@ -23,13 +23,21 @@
  */
 package cluster.topic;
 
-import javax.jms.*;
-import javax.naming.*;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.MessageProducer;
+import javax.jms.Session;
+import javax.jms.TextMessage;
+import javax.jms.Topic;
+import javax.naming.Context;
+import javax.naming.InitialContext;
 
 public class Publisher {
-  static Context ictx = null; ;
+  
+  static Context ictx = null;
 
   public static void main(String[] args) throws Exception {
+    
     ConnectionFactory cf = null;
     Topic dest = null;
 

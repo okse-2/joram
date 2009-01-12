@@ -43,9 +43,9 @@ public class FtpAdmin {
       prop = new Properties();
       prop.setProperty("user", args[0]);
       prop.setProperty("pass", args[1]);
-    }
-    if (args.length == 3) {
-      prop.setProperty("path", args[2]);
+      if (args.length == 3) {
+        prop.setProperty("path", args[2]);
+      }
     }
 
     if (args.length > 3) {

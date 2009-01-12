@@ -42,7 +42,7 @@ public class DMQAdmin {
 
     AdminModule.connect("root", "root", 60);
 
-    User anonymous = User.create("anonymous", "anonymous", 0);    
+    User.create("anonymous", "anonymous", 0);    
 
     ConnectionFactory cf = TcpConnectionFactory.create("localhost", 16010);
 

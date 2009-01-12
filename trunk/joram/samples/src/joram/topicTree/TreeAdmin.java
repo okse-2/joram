@@ -23,26 +23,27 @@
  */
 package topicTree;
 
-import org.objectweb.joram.client.jms.admin.*;
-import org.objectweb.joram.client.jms.*;
-import org.objectweb.joram.client.jms.tcp.*;
+import org.objectweb.joram.client.jms.Topic;
+import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 /**
  * Administers an agent server for the topic tree samples.
  */
-public class TreeAdmin
-{
-  public static void main(String[] args) throws Exception
-  {
+public class TreeAdmin {
+
+  public static void main(String[] args) throws Exception {
+    
     System.out.println();
     System.out.println("Tree administration...");
 
     AdminModule.connect("root", "root", 60);
 
-    Topic news = (Topic) Topic.create(0);
-    Topic business = (Topic) Topic.create(0);
-    Topic sports = (Topic) Topic.create(0);
-    Topic tennis = (Topic) Topic.create(0);
+    Topic news = Topic.create(0);
+    Topic business = Topic.create(0);
+    Topic sports = Topic.create(0);
+    Topic tennis = Topic.create(0);
 
     business.setParent(news);
     sports.setParent(news);
@@ -51,7 +52,7 @@ public class TreeAdmin
     javax.jms.ConnectionFactory cf =
       TcpConnectionFactory.create("localhost", 16010);
 
-    User user = User.create("anonymous", "anonymous", 0);
+    User.create("anonymous", "anonymous", 0);
 
     news.setFreeReading();
     news.setFreeWriting();

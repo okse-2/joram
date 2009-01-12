@@ -23,11 +23,19 @@
  */
 package chat;
 
-import javax.jms.*;
-import javax.naming.*;
-import java.io.*;
+import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.Properties;
+
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
+import javax.jms.Session;
+import javax.jms.TextMessage;
+import javax.jms.Topic;
+import javax.naming.InitialContext;
 
 /**
  * Launching Simple Chat:

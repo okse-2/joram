@@ -23,21 +23,20 @@
  */
 package connector;
 
-import javax.naming.*;
-import javax.jms.*;
-import javax.resource.spi.*;
 import java.lang.reflect.Method;
+
+import javax.resource.spi.UnavailableException;
 import javax.resource.spi.endpoint.MessageEndpoint;
 import javax.resource.spi.endpoint.MessageEndpointFactory;
 import javax.transaction.xa.XAResource;
 
 public class MessagePointFactory implements MessageEndpointFactory {
 
-    public MessageEndpoint createEndpoint(XAResource xaResource) throws UnavailableException {
-	return new MessagePoint() ;
-    }
+  public MessageEndpoint createEndpoint(XAResource xaResource) throws UnavailableException {
+    return new MessagePoint();
+  }
 
-    public boolean isDeliveryTransacted(Method method) throws NoSuchMethodException {
-	return false;
-    }
+  public boolean isDeliveryTransacted(Method method) throws NoSuchMethodException {
+    return false;
+  }
 }

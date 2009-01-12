@@ -22,32 +22,26 @@
  */
 package connector;
 
-import javax.naming.*;
-import javax.jms.*;
-import javax.resource.spi.*;
 import java.lang.reflect.Method;
+
+import javax.jms.Message;
+import javax.jms.TextMessage;
 import javax.resource.spi.endpoint.MessageEndpoint;
-import javax.resource.spi.endpoint.MessageEndpointFactory;
-import javax.transaction.xa.XAResource;
 
 public class MessagePoint implements MessageEndpoint,javax.jms.MessageListener {
  
-  public  void afterDelivery(){}
+  public void afterDelivery() {}
     
-  public  void beforeDelivery(Method method){}
+  public void beforeDelivery(Method method) {}
         
-  public  void release() {}
+  public void release() {}
 
-   
-    public void onMessage(Message m){
-     try{
-	 System.out.println("onMessage : msg :"+((TextMessage)m).getText());
-	
-     }catch(Exception exc){
-	 System.out.println("error : onMessage()"+exc);
-     }
+  public void onMessage(Message m) {
+    try {
+      System.out.println("onMessage : msg :" + ((TextMessage) m).getText());
+
+    } catch (Exception exc) {
+      System.out.println("error : onMessage()" + exc);
     }
-
-
-
+  }
 }

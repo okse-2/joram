@@ -23,25 +23,27 @@
  */
 package perfs;
 
-import org.objectweb.joram.client.jms.admin.*;
-import org.objectweb.joram.client.jms.*;
-import org.objectweb.joram.client.jms.tcp.*;
+import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.Topic;
+import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 /**
  */
-public class PerfsAdmin
-{
-  public static void main(String[] args) throws Exception
-  {
+public class PerfsAdmin {
+
+  public static void main(String[] args) throws Exception {
+    
     AdminModule.connect("root", "root", 60);
 
-    Queue queue = (Queue) Queue.create(0);
-    Topic topic = (Topic) Topic.create(0);
+    Queue queue = Queue.create(0);
+    Topic topic = Topic.create(0);
 
     javax.jms.ConnectionFactory cf =
       TcpConnectionFactory.create("localhost", 16010);
 
-    User user = User.create("anonymous", "anonymous", 0);
+    User.create("anonymous", "anonymous", 0);
 
     queue.setFreeReading();
     topic.setFreeReading();
