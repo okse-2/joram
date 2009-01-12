@@ -22,37 +22,35 @@
  */
 package org.objectweb.joram.client.jms.admin;
 
-import java.io.*;
-import java.util.*;
-
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
+import java.io.Reader;
+import java.lang.reflect.Method;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 import javax.naming.InitialContext;
 import javax.naming.NameAlreadyBoundException;
 import javax.naming.NamingException;
-
-import org.xml.sax.InputSource;
-import org.xml.sax.Attributes;
-import org.xml.sax.helpers.DefaultHandler;
-
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-
-import java.lang.reflect.Method;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 import org.objectweb.joram.client.jms.ConnectionFactory;
-import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.admin.DeadMQueue;
-import org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory;
+import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
-import org.objectweb.joram.client.jms.Destination;
-
+import org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * XML SAX Wrapper for Joram Admin configuration file.
@@ -1093,7 +1091,7 @@ public class JoramSaxWrapper extends DefaultHandler {
           buff = new StringBuffer();
           st = new StringTokenizer(name, "/");
         }
-        buff.append((String) st.nextToken());
+        buff.append(st.nextToken());
         while (st.hasMoreTokens()) {
           try {
             jndiCtx.createSubcontext(buff.toString());
@@ -1105,7 +1103,7 @@ public class JoramSaxWrapper extends DefaultHandler {
               logger.log(BasicLevel.WARN, "createSubcontext", exc);
           }
           buff.append("/");
-          buff.append((String) st.nextToken());
+          buff.append(st.nextToken());
         }
         jndiCtx.rebind(name, toBind.get(name));
       }

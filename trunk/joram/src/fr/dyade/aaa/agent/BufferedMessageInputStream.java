@@ -25,7 +25,7 @@ import java.io.InputStream;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
- * Class used to recv messages through a stream using buffering.
+ * Class used to receive messages through a stream using buffering.
  * <p>
  * Be careful this InputStream is not synchronized.
  */
@@ -59,7 +59,7 @@ public abstract class BufferedMessageInputStream extends MessageInputStream {
 
   /**
    * Resets the stream for a new use.
-   * Removes all datas.
+   * Removes all data.
    */
   protected final void clean() {
     pos = 0; count = 0;
@@ -194,12 +194,12 @@ public abstract class BufferedMessageInputStream extends MessageInputStream {
     if (valid < length) {
       // There is not enough byte in the buffer
       if (length > buf.length) {
-        // Allocate a new buffer then copy valid datas.
+        // Allocate a new buffer then copy valid data.
         byte[] newbuf = new byte[length];
         System.arraycopy(buf, pos, newbuf, 0, valid);
         buf = newbuf; pos = 0; count = valid;
       } else if ((pos + length) > buf.length) {
-        // Clear already read datas in order to allow the read of next.
+        // Clear already read data in order to allow the read of next.
         System.arraycopy(buf, pos, buf, 0, valid);
         pos = 0;
         count = valid;

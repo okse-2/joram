@@ -43,7 +43,7 @@ public interface MessageConsumer {
 
   /**
    * Insert a message in the <code>MessageQueue</code>.
-   * This method is used during initialisation to restore the component
+   * This method is used during initialization to restore the component
    * state from persistent storage.
    *
    * @param msg		the message
@@ -87,7 +87,7 @@ public interface MessageConsumer {
   void stop();
 
   /**
-   * Deletes the component, removes all persistent datas. The component
+   * Deletes the component, removes all persistent data. The component
    * may have been previously stopped, and removed from MessageConsumer
    * list.
    * This operation use Transaction calls, you may use commit to validate it.

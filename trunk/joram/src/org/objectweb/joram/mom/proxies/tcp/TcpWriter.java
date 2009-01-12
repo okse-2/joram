@@ -23,15 +23,15 @@
  */
 package org.objectweb.joram.mom.proxies.tcp;
 
-import java.io.*;
+import java.io.IOException;
 
-import org.objectweb.joram.mom.proxies.*;
-import org.objectweb.joram.shared.client.MomExceptionReply;
-
-import fr.dyade.aaa.util.*;
-
+import org.objectweb.joram.mom.proxies.AckedQueue;
+import org.objectweb.joram.mom.proxies.ProxyMessage;
 import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.joram.shared.client.MomExceptionReply;
 import org.objectweb.util.monolog.api.BasicLevel;
+
+import fr.dyade.aaa.util.Daemon;
 
 /**
  * The activity responsible for getting the replies
@@ -72,8 +72,7 @@ public class TcpWriter extends Daemon {
       JoramTracing.dbgProxy.log(BasicLevel.DEBUG,  "TcpWriter.run()");
     try {
       while (running) {
-        ProxyMessage msg =  
-          (ProxyMessage)replyQueue.get();
+        ProxyMessage msg = replyQueue.get();
         if ((msg.getObject() instanceof MomExceptionReply) &&
             (((MomExceptionReply) msg.getObject()).getType() == MomExceptionReply.HBCloseConnection)) {
           // Exception indicating that the connection

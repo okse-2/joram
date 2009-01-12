@@ -31,7 +31,7 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.util.BinaryDump;
 
 /**
- * Class used to recv messages through a stream.
+ * Class used to receive messages through a stream.
  * <p>
  * Be careful this InputStream is not synchronized.
  */
@@ -181,7 +181,7 @@ public abstract class MessageInputStream extends InputStream {
   abstract protected void readHeader() throws IOException;
 
   /**
-   * Reads the message header datas from the buffer.
+   * Reads the message header data from the buffer.
    *
    * @param msg The message to complete.
    */

@@ -26,8 +26,7 @@ package org.objectweb.joram.client.jms;
 
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
-
-import org.objectweb.util.monolog.api.BasicLevel;
+import javax.jms.JMSSecurityException;
 
 import org.objectweb.joram.client.jms.connection.RequestChannel;
 

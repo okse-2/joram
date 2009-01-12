@@ -435,7 +435,7 @@ public class Connection implements javax.jms.Connection {
     checkClosed();
     if (subName == null) 
       throw new JMSException("Invalid subscription name: " + subName);
-    return createConnectionConsumer((Destination) topic, subName, selector, sessPool, maxMessages);
+    return createConnectionConsumer(topic, subName, selector, sessPool, maxMessages);
   }
   
   private synchronized javax.jms.ConnectionConsumer

@@ -31,15 +31,15 @@ import javax.jms.MessageNotWriteableException;
  */
 public final class TextMessage extends Message implements javax.jms.TextMessage {
   /** 
-   * Instanciates a bright new <code>TextMessage</code>.
+   * Instantiates a bright new <code>TextMessage</code>.
    */
   TextMessage() {
     super();
-    momMsg.type = momMsg.TEXT;
+    momMsg.type = org.objectweb.joram.shared.messages.Message.TEXT;
   }
 
   /** 
-   * Instanciates a <code>TextMessage</code> wrapping a consumed
+   * Instantiates a <code>TextMessage</code> wrapping a consumed
    * MOM message containing a text.
    *
    * @param session  The consuming session.

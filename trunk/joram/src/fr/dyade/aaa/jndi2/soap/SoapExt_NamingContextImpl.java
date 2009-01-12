@@ -23,8 +23,15 @@
  */
 package fr.dyade.aaa.jndi2.soap;
 
-import fr.dyade.aaa.jndi2.client.NamingContextImpl;
-import fr.dyade.aaa.jndi2.client.Trace;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.Vector;
+
+import javax.naming.Context;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
 
 import org.apache.soap.Constants;
 import org.apache.soap.SOAPException;
@@ -33,19 +40,10 @@ import org.apache.soap.rpc.Parameter;
 import org.apache.soap.rpc.Response;
 import org.apache.soap.server.DeploymentDescriptor;
 import org.apache.soap.server.ServiceManagerClient;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Vector;
-import java.util.Hashtable;
-import java.util.Map;
-
-import javax.naming.Context;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.jndi2.client.NamingContextImpl;
+import fr.dyade.aaa.jndi2.client.Trace;
 
 
 /**

@@ -21,9 +21,7 @@
  */
 package fr.dyade.aaa.admin.cmd;
 
-import java.io.*;
-
-public class UnsetServerPropertyCmd extends UnsetPropertyCmd implements Serializable {
+public class UnsetServerPropertyCmd extends UnsetPropertyCmd {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 

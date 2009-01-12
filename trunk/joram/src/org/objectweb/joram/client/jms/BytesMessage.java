@@ -23,13 +23,18 @@
  */
 package org.objectweb.joram.client.jms;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
 
 import javax.jms.JMSException;
-import javax.jms.MessageFormatException;
-import javax.jms.MessageNotWriteableException;
-import javax.jms.MessageNotReadableException;
 import javax.jms.MessageEOFException;
+import javax.jms.MessageFormatException;
+import javax.jms.MessageNotReadableException;
+import javax.jms.MessageNotWriteableException;
 
 /**
  * Implements the <code>javax.jms.BytesMessage</code> interface.
@@ -45,18 +50,18 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
   private transient boolean prepared = false;
 
   /**
-   * Instanciates a bright new <code>BytesMessage</code>.
+   * Instantiates a bright new <code>BytesMessage</code>.
    */
   BytesMessage() {
     super();
-    momMsg.type = momMsg.BYTES;
+    momMsg.type = org.objectweb.joram.shared.messages.Message.BYTES;
 
     outputBuffer = new ByteArrayOutputStream();
     outputStream = new DataOutputStream(outputBuffer);
   }
 
   /**
-   * Instanciates a <code>BytesMessage</code> wrapping a consumed
+   * Instantiates a <code>BytesMessage</code> wrapping a consumed
    * MOM message containing a bytes array.
    *
    * @param sess  The consuming session.
@@ -536,7 +541,7 @@ public final class BytesMessage extends Message implements javax.jms.BytesMessag
     } catch (EOFException eofE) {
       // End of array has been reached:
     } catch (IOException ioE) {
-      // An error has occured!
+      // An error has occurred!
       JMSException jE = null;
       jE = new JMSException("Could not read the bytes array.");
       jE.setLinkedException(ioE);

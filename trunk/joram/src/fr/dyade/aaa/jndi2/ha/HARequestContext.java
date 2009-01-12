@@ -21,11 +21,13 @@
  */
 package fr.dyade.aaa.jndi2.ha;
 
-import fr.dyade.aaa.jndi2.msg.*;
-import fr.dyade.aaa.jndi2.server.*;
-
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.jndi2.msg.IOControl;
+import fr.dyade.aaa.jndi2.msg.JndiReply;
+import fr.dyade.aaa.jndi2.msg.JndiRequest;
+import fr.dyade.aaa.jndi2.server.RequestContext;
+import fr.dyade.aaa.jndi2.server.Trace;
 
 public class HARequestContext extends RequestContext {
   /** define serialVersionUID for interoperability */
@@ -39,7 +41,7 @@ public class HARequestContext extends RequestContext {
 
   private int id;
 
-  private transient HARequestManager manager;
+  //  private transient HARequestManager manager;
 
   HARequestContext(IOControl ioCtrl,
                    int id) throws Exception {
@@ -81,12 +83,12 @@ public class HARequestContext extends RequestContext {
     }
   }
 
-  private void close() {
-    // Closes the connection
-    ioCtrl.close();
-    if (manager != null)
-      manager.removeContext(id);
-  }
+  //  private void close() {
+  //    // Closes the connection
+  //    ioCtrl.close();
+  //    if (manager != null)
+  //      manager.removeContext(id);
+  //  }
   
   public String toString() {
     return '(' + super.toString() +

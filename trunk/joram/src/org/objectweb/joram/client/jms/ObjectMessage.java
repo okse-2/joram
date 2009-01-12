@@ -23,7 +23,7 @@
  */
 package org.objectweb.joram.client.jms;
 
-import java.io.*;
+import java.io.Serializable;
 
 import javax.jms.JMSException;
 import javax.jms.MessageFormatException;
@@ -34,15 +34,15 @@ import javax.jms.MessageNotWriteableException;
  */
 public final class ObjectMessage extends Message implements javax.jms.ObjectMessage {
   /**
-   * Instanciates a bright new <code>ObjectMessage</code>.
+   * Instantiates a bright new <code>ObjectMessage</code>.
    */
   ObjectMessage() {
     super();
-    momMsg.type = momMsg.OBJECT;
+    momMsg.type = org.objectweb.joram.shared.messages.Message.OBJECT;
   }
 
   /**
-   * Instanciates an <code>ObjectMessage</code> wrapping a
+   * Instantiates an <code>ObjectMessage</code> wrapping a
    * consumed MOM message containing an object.
    *
    * @param session  The consuming session.

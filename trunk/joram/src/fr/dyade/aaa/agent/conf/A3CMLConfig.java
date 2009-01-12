@@ -18,8 +18,15 @@
  */
 package fr.dyade.aaa.agent.conf;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -413,13 +420,13 @@ public class A3CMLConfig implements Serializable {
     A3CMLProperty prop = null;
     if (cid == AgentServer.NULL_ID) {
       A3CMLServer server = getServer(sid);
-      prop = (A3CMLProperty) server.getProperty(name);
+      prop = server.getProperty(name);
     } else {
       A3CMLCluster cluster = getCluster(sid);
       A3CMLServer server = cluster.getServer(cid);
-      prop = (A3CMLProperty) server.getProperty(name);
+      prop = server.getProperty(name);
       if (prop == null)
-        prop = (A3CMLProperty) cluster.getProperty(name);
+        prop = cluster.getProperty(name);
     }
     return prop;
   }
@@ -668,7 +675,7 @@ public class A3CMLConfig implements Serializable {
     // add global properties in domainConf.
     for (Enumeration p = properties.elements(); p.hasMoreElements(); ) {
       A3CMLProperty property = (A3CMLProperty) p.nextElement();
-      domainConf.addProperty(((A3CMLProperty) property).duplicate());
+      domainConf.addProperty(property.duplicate());
     }
 
     try {
@@ -676,7 +683,7 @@ public class A3CMLConfig implements Serializable {
       // add domain "ADMIN_DOMAIN" in domainConf.
       A3CMLDomain d0 = getDomain(AgentServer.ADMIN_DOMAIN);
       domainConf.addDomain(new A3CMLDomain(d0.name,d0.network));
-      A3CMLServer s0 = (A3CMLServer) domainConf.getServer(AgentServer.getServerId());
+      A3CMLServer s0 = domainConf.getServer(AgentServer.getServerId());
       d0 = domainConf.getDomain(AgentServer.ADMIN_DOMAIN);
       d0.addServer(s0);
       for (int i = 0; i < s0.networks.size(); ) {
@@ -745,7 +752,7 @@ public class A3CMLConfig implements Serializable {
     // add global properties in domainConf.
     for (Enumeration p = properties.elements(); p.hasMoreElements(); ) {
       A3CMLProperty property = (A3CMLProperty) p.nextElement();
-      domainConf.addProperty(((A3CMLProperty) property).duplicate());
+      domainConf.addProperty(property.duplicate());
     }
     
     try {
@@ -753,7 +760,7 @@ public class A3CMLConfig implements Serializable {
       // add domain "ADMIN_DOMAIN" in domainConf.
       A3CMLDomain d0 = getDomain(AgentServer.ADMIN_DOMAIN);
       domainConf.addDomain(new A3CMLDomain(d0.name,d0.network));
-      A3CMLServer s0 = (A3CMLServer) domainConf.getServer(AgentServer.getServerId());
+      A3CMLServer s0 = domainConf.getServer(AgentServer.getServerId());
       d0 = domainConf.getDomain(AgentServer.ADMIN_DOMAIN);
       d0.addServer(s0);
       for (int i = 0; i < s0.networks.size(); ) {

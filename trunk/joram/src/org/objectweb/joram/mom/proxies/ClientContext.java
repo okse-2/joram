@@ -24,17 +24,19 @@
  */
 package org.objectweb.joram.mom.proxies; 
 
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import fr.dyade.aaa.agent.AgentId;
+import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.XACnxPrepare;
-
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
+
+import fr.dyade.aaa.agent.AgentId;
 
 /**
  * The <code>ClientContext</code> class holds the data related to a client
@@ -251,7 +253,7 @@ class ClientContext implements java.io.Serializable {
                                 "ClientContext[" + proxyId + ':' + id + 
                                 "].setReply(" + requestId + ')');
     if (commitTable == null) return 0;
-    Integer ctxKey = (Integer)new Integer(requestId);
+    Integer ctxKey = new Integer(requestId);
     MultiReplyContext ctx = 
       (MultiReplyContext)commitTable.get(ctxKey);
     if (ctx == null) return 0;

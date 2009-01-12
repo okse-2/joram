@@ -23,14 +23,15 @@
  */
 package fr.dyade.aaa.jndi2.client;
 
-import java.util.*;
-import javax.naming.spi.*;
-import javax.naming.*;
+import java.util.Hashtable;
+import java.util.StringTokenizer;
 
-import fr.dyade.aaa.jndi2.client.NamingContextImpl;
+import javax.naming.CompositeName;
+import javax.naming.Context;
+import javax.naming.NamingException;
+import javax.naming.spi.InitialContextFactory;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
 public class NamingContextFactory implements InitialContextFactory {
   /**
@@ -107,21 +108,21 @@ public class NamingContextFactory implements InitialContextFactory {
       } else {        
         host = (String) env.get(SCN_HOST_PROPERTY);
         if (host == null)
-          host = (String) System.getProperty(SCN_HOST_PROPERTY);
+          host = System.getProperty(SCN_HOST_PROPERTY);
         if (host == null) 
           host = (String) env.get(JAVA_HOST_PROPERTY);
         if (host == null)
-          host = (String) System.getProperty(JAVA_HOST_PROPERTY);
+          host = System.getProperty(JAVA_HOST_PROPERTY);
         if (host == null)
           host = "localhost";
 
         String portStr = (String) env.get(SCN_PORT_PROPERTY);
         if (portStr == null)
-          portStr = (String) System.getProperty(SCN_PORT_PROPERTY);
+          portStr = System.getProperty(SCN_PORT_PROPERTY);
         if (portStr == null)
           portStr = (String) env.get(JAVA_PORT_PROPERTY);
         if (portStr == null)
-          portStr = (String) System.getProperty(JAVA_PORT_PROPERTY);
+          portStr = System.getProperty(JAVA_PORT_PROPERTY);
         if (portStr == null)
           portStr = "16400";
 

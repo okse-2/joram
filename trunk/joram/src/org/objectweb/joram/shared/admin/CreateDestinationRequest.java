@@ -43,7 +43,7 @@ public class CreateDestinationRequest extends AdminRequest {
   /** Name attributed to the destination. */
   private String name;
 
-  /** Name of the class to be instanciated. */
+  /** Name of the class to be instantiated. */
   private String className;
  
   /** Properties needed to create destination object. */
@@ -56,7 +56,7 @@ public class CreateDestinationRequest extends AdminRequest {
    *
    * @param serverId   The id of the server where deploying the destination.
    * @param name  Name attributed to the destination.
-   * @param className  Name of the class to be instanciated.
+   * @param className  Name of the class to be instantiated.
    */
   public CreateDestinationRequest(int serverId,
                                   String name,

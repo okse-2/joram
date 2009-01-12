@@ -1,19 +1,21 @@
 package com.scalagent.joram.osgi.client;
 
-import java.io.*;
-import java.util.*;
+import java.io.Reader;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Properties;
 
-import org.osgi.framework.*;
-
-import javax.naming.*;
+import javax.naming.Context;
+import javax.naming.InitialContext;
 
 import org.objectweb.joram.client.jms.ConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
-import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 
 public class Activator implements BundleActivator {
 

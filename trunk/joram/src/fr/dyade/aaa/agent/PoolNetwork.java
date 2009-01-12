@@ -728,7 +728,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         }
       } catch (IOException exc) {
         this.logmon.log(BasicLevel.ERROR,
-                        this.getName() + ", bad socket initialisation", exc);
+                        this.getName() + ", bad socket initialization", exc);
       } finally {
         finish();
       }

@@ -21,14 +21,56 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.util.*;
+import java.util.Enumeration;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.admin.cmd.*;
-import fr.dyade.aaa.admin.script.*;
-import fr.dyade.aaa.agent.conf.*;
+import fr.dyade.aaa.admin.cmd.AdminCmd;
+import fr.dyade.aaa.admin.cmd.DomainCmdException;
+import fr.dyade.aaa.admin.cmd.ExceptionCmd;
+import fr.dyade.aaa.admin.cmd.JvmArgsCmdException;
+import fr.dyade.aaa.admin.cmd.NatCmdException;
+import fr.dyade.aaa.admin.cmd.NetworkCmdException;
+import fr.dyade.aaa.admin.cmd.NewDomainCmd;
+import fr.dyade.aaa.admin.cmd.NewNetworkCmd;
+import fr.dyade.aaa.admin.cmd.NewServerCmd;
+import fr.dyade.aaa.admin.cmd.NewServiceCmd;
+import fr.dyade.aaa.admin.cmd.PropertyCmdException;
+import fr.dyade.aaa.admin.cmd.RemoveDomainCmd;
+import fr.dyade.aaa.admin.cmd.RemoveNetworkCmd;
+import fr.dyade.aaa.admin.cmd.RemoveServerCmd;
+import fr.dyade.aaa.admin.cmd.RemoveServiceCmd;
+import fr.dyade.aaa.admin.cmd.ServerCmdException;
+import fr.dyade.aaa.admin.cmd.ServiceCmdException;
+import fr.dyade.aaa.admin.cmd.SetJvmArgsCmd;
+import fr.dyade.aaa.admin.cmd.SetNetworkPortCmd;
+import fr.dyade.aaa.admin.cmd.SetPropertyCmd;
+import fr.dyade.aaa.admin.cmd.SetServerNatCmd;
+import fr.dyade.aaa.admin.cmd.SetServerPropertyCmd;
+import fr.dyade.aaa.admin.cmd.StartAdminCmd;
+import fr.dyade.aaa.admin.cmd.StartNetworkCmd;
+import fr.dyade.aaa.admin.cmd.StartServerCmd;
+import fr.dyade.aaa.admin.cmd.StartServiceCmd;
+import fr.dyade.aaa.admin.cmd.StopAdminCmd;
+import fr.dyade.aaa.admin.cmd.StopNetworkCmd;
+import fr.dyade.aaa.admin.cmd.StopServiceCmd;
+import fr.dyade.aaa.admin.cmd.UnsetJvmArgsCmd;
+import fr.dyade.aaa.admin.cmd.UnsetPropertyCmd;
+import fr.dyade.aaa.admin.cmd.UnsetServerNatCmd;
+import fr.dyade.aaa.admin.cmd.UnsetServerPropertyCmd;
+import fr.dyade.aaa.admin.script.Script;
+import fr.dyade.aaa.admin.script.StartScript;
+import fr.dyade.aaa.admin.script.StopScript;
+import fr.dyade.aaa.agent.conf.A3CMLConfig;
+import fr.dyade.aaa.agent.conf.A3CMLDomain;
+import fr.dyade.aaa.agent.conf.A3CMLNat;
+import fr.dyade.aaa.agent.conf.A3CMLNetwork;
+import fr.dyade.aaa.agent.conf.A3CMLProperty;
+import fr.dyade.aaa.agent.conf.A3CMLServer;
+import fr.dyade.aaa.agent.conf.A3CMLService;
 
 
 /**
@@ -600,7 +642,7 @@ final public class AgentAdmin extends Agent {
       
       if (!cmd.domain.equals("transient")) {
         // add server in domains
-        A3CMLDomain domain = (A3CMLDomain) a3cmlConfig.getDomain(cmd.domain);
+        A3CMLDomain domain = a3cmlConfig.getDomain(cmd.domain);
         domain.addServer(server);
         
         if (server.sid == AgentServer.getServerId()) {
@@ -881,10 +923,8 @@ final public class AgentAdmin extends Agent {
           }
           network.start();
         } else {
-          A3CMLDomain a3cmlDomain = 
-            (A3CMLDomain) a3cmlConfig.getDomain(cmd.domainName);
-          network = 
-            (Network) Class.forName(a3cmlDomain.network).newInstance();        
+          A3CMLDomain a3cmlDomain = a3cmlConfig.getDomain(cmd.domainName);
+          network = (Network) Class.forName(a3cmlDomain.network).newInstance();        
           short[] domainSids = new short[a3cmlDomain.servers.size()];
           for (int i = 0; i < domainSids.length; i++) {
             domainSids[i] = 

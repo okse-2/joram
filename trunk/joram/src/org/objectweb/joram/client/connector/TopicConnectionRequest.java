@@ -24,14 +24,12 @@
  */
 package org.objectweb.joram.client.connector;
 
-
 /**
  * A <code>TopicConnectionRequest</code> instance wraps a user connection
  * request for performing PubSub messaging.
  */
-public class TopicConnectionRequest
-             extends ConnectionRequest
-             implements javax.resource.spi.ConnectionRequestInfo {
+public class TopicConnectionRequest extends ConnectionRequest {
+  
   /**
    * Constructs a <code>TopicConnectionRequest</code> instance.
    *
@@ -43,10 +41,8 @@ public class TopicConnectionRequest
     super(userName, password, identityClass);
   } 
 
-
   /** Returns a code based on the wrapped user identity. */
-  public int hashCode()
-  {
+  public int hashCode() {
     return ("PubSub:" + userName).hashCode();
   }
 }

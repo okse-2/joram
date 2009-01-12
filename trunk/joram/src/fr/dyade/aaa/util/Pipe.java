@@ -19,7 +19,9 @@
  */
 package fr.dyade.aaa.util;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -118,7 +120,7 @@ public class Pipe {
         in = 0;
         out = 0;
       }
-      buffer[in++] = (byte[]) msg;
+      buffer[in++] = msg;
       if (in == size) in = 0;
       notify();
     } else {

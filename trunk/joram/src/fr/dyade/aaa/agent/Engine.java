@@ -385,7 +385,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG,
                        getName() + ", loads fixed agent" + fixedAgentIdList.elementAt(i));
-          Agent ag = load((AgentId) fixedAgentIdList.elementAt(i));
+          load((AgentId) fixedAgentIdList.elementAt(i));
           i += 1;
         } catch (Exception exc) {
           logmon.log(BasicLevel.ERROR,

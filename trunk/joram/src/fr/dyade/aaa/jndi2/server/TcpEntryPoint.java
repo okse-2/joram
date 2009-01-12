@@ -22,11 +22,11 @@
  */
 package fr.dyade.aaa.jndi2.server;
 
-import fr.dyade.aaa.agent.*;
-import fr.dyade.aaa.jndi2.msg.*;
-
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.jndi2.msg.JndiReply;
 
 public class TcpEntryPoint implements EntryPoint {
 

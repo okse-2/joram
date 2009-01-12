@@ -20,9 +20,9 @@ package fr.dyade.aaa.agent;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamConstants;
+import java.io.OutputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -171,7 +171,7 @@ public abstract class MessageOutputStream extends OutputStream {
   abstract protected void writeHeader() throws IOException;
 
   /**
-   * Writes the message header datas to the buffer.
+   * Writes the message header data to the buffer.
    *
    * @param msg The message to write out.
    */
@@ -211,11 +211,11 @@ public abstract class MessageOutputStream extends OutputStream {
     if (getLogger().isLoggable(BasicLevel.DEBUG))
       getLogger().log(BasicLevel.DEBUG, "writeMessage()");
     
-    // Writes the protocol specific datas.
+    // Writes the protocol specific data.
     writeHeader();
 
     if (msg != null) {
-      // Writes the message header datas.
+      // Writes the message header data.
       writeMessageHeader(msg);
 
       if (msg.not == null) {

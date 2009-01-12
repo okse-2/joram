@@ -153,7 +153,7 @@ public class ActivationSpecImpl
                                   + "resource adapter: "
                                   + ra.getClass().getName());
 
-    this.ra = (JoramAdapter) ra;
+    this.ra = ra;
   }
 
   /** Returns the resource adapter central authority instance. */

@@ -21,9 +21,10 @@
  */
 package org.objectweb.joram.client.tools.admin;
 
-import java.util.*;
-import javax.swing.*;
-import javax.swing.tree.*;
+import javax.swing.ImageIcon;
+import javax.swing.JPopupMenu;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 
 class UserRootTreeNode extends DefaultMutableTreeNode
     implements AdminTreeNode {

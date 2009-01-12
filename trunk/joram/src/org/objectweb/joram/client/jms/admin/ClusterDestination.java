@@ -24,22 +24,24 @@
  */
 package org.objectweb.joram.client.jms.admin;
 
-import org.objectweb.joram.client.jms.Destination;
-import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.client.jms.Topic;
-
-import javax.naming.*;
-
 import java.net.ConnectException;
-import java.util.Hashtable;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Random;
 
-import org.objectweb.util.monolog.api.BasicLevel;
+import javax.naming.NamingException;
+import javax.naming.RefAddr;
+import javax.naming.Reference;
+import javax.naming.StringRefAddr;
+
+import org.objectweb.joram.client.jms.Destination;
+import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.admin.SetReader;
 import org.objectweb.joram.shared.admin.SetWriter;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * A base class for clustered destinations.

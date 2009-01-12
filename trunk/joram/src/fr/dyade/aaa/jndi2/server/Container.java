@@ -22,17 +22,19 @@
  */
 package fr.dyade.aaa.jndi2.server;
 
-import java.util.*;
-import java.io.*;
-
-import fr.dyade.aaa.agent.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
-public class Container 
-    extends Agent 
-    implements BagSerializer {
+import fr.dyade.aaa.agent.Agent;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.BagSerializer;
+import fr.dyade.aaa.agent.Notification;
+
+public class Container extends Agent implements BagSerializer {
 
   /**
    * 

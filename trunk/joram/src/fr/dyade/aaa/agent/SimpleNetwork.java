@@ -484,7 +484,7 @@ public class SimpleNetwork extends StreamNetwork {
         }
       } catch (IOException exc) {
         this.logmon.log(BasicLevel.ERROR,
-                        this.getName() + ", bad socket initialisation", exc);
+                        this.getName() + ", bad socket initialization", exc);
       } finally {
         finish();
       }

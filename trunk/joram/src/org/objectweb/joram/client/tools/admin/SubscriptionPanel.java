@@ -21,12 +21,29 @@
  */
 package org.objectweb.joram.client.tools.admin;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-import org.objectweb.joram.client.jms.admin.*;
-import javax.jms.*;
+import javax.jms.Message;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JViewport;
+import javax.swing.ListSelectionModel;
+
+import org.objectweb.joram.client.jms.admin.Subscription;
+import org.objectweb.joram.client.jms.admin.User;
 
 public class SubscriptionPanel extends JPanel {
   /**
@@ -197,8 +214,7 @@ public class SubscriptionPanel extends JPanel {
   }
 
   public void loadMessage(String msgId) throws Exception {
-    Message msg = user.readMessage(
-      sub.getName(), msgId);
+    Message msg = user.getMessage(sub.getName(), msgId);
     msgDisplay.setText(msg.toString());
   }
 

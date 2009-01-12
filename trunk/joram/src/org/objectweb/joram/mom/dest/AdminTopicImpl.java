@@ -164,7 +164,7 @@ import fr.dyade.aaa.agent.conf.A3CMLNetwork;
 import fr.dyade.aaa.agent.conf.A3CMLServer;
 
 /**
- * The <code>AdminTopicImpl</code> class implements the admin topic behaviour,
+ * The <code>AdminTopicImpl</code> class implements the admin topic behavior,
  * basically processing administration requests.
  */
 public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBean {
@@ -994,7 +994,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   }
    
   /**
-   * Instanciating the destination class or retrieving the destination.
+   * Instantiating the destination class or retrieving the destination.
    * 
    * @param destName           destination Name
    * @param adminId            other admin (null for TopicAdmin)
@@ -1032,7 +1032,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       .append("], successful [true]: destination [")
       .append(destName).append("] has been retrieved");
     } else {
-      // Instanciating the destination class.
+      // Instantiating the destination class.
       Class clazz;
       String destType;
       try {
@@ -1050,11 +1050,11 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
         destType = (String)getTypeM.invoke(null, new Object[0]);
       } catch (Exception exc) {
         JoramTracing.dbgDestination.log(BasicLevel.ERROR,
-                                        "Could not instanciate Destination class [" + className + "]: ", exc);
+                                        "Could not instantiate Destination class [" + className + "]: ", exc);
         if (exc instanceof ClassCastException) {
           throw new RequestException("Class [" + className + "] is not a Destination class.");
         } else {
-          throw new RequestException("Could not instanciate Destination class [" + className + "]: " + exc);
+          throw new RequestException("Could not instantiate Destination class [" + className + "]: " + exc);
         }
       }
 
@@ -1089,7 +1089,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   }
 
   /**
-   * Instanciating the destination class or retrieving the destination
+   * Instantiating the destination class or retrieving the destination
    * and save Agent AdminTopic. (used by ScalAgent mediation)
    * 
    * @param destName           destination Name

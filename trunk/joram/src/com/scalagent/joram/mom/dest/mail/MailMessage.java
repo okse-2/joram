@@ -24,7 +24,6 @@ package com.scalagent.joram.mom.dest.mail;
 
 import org.objectweb.joram.shared.messages.Message;
 
-
 /**
  * A mail message encapsulates a proprietary message which is also used
  * for effective MOM transport facility.
@@ -40,7 +39,7 @@ public class MailMessage {
   }
 
   /**
-   * Instanciates a <code>MailMessage</code> wrapping a consumed
+   * Instantiates a <code>MailMessage</code> wrapping a consumed
    * MOM simple message.
    *
    * @param momMsg  The MOM message to wrap.

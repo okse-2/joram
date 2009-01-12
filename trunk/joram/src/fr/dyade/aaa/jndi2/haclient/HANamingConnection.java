@@ -22,17 +22,22 @@
  */
 package fr.dyade.aaa.jndi2.haclient;
 
-import java.net.*;
-import java.io.*;
-import java.util.*;
-import javax.naming.*;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import fr.dyade.aaa.jndi2.client.*;
+import javax.naming.NamingException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.jndi2.msg.*;
+import fr.dyade.aaa.jndi2.client.NamingConnection;
+import fr.dyade.aaa.jndi2.client.Trace;
+import fr.dyade.aaa.jndi2.msg.BindRequest;
+import fr.dyade.aaa.jndi2.msg.IOControl;
+import fr.dyade.aaa.jndi2.msg.JndiReadRequest;
+import fr.dyade.aaa.jndi2.msg.JndiReply;
+import fr.dyade.aaa.jndi2.msg.JndiRequest;
 
 public class HANamingConnection implements NamingConnection {
 

@@ -55,7 +55,7 @@ public class SoapProxyService {
   private Hashtable connections;
 
   /**
-   * Service method: called by the SOAP client for instanciating the SOAP
+   * Service method: called by the SOAP client for instantiating the SOAP
    * service and starting the embedded JORAM server.
    *
    * @param serverId  Identifier of the embedded server.
@@ -104,7 +104,7 @@ public class SoapProxyService {
     StandardConnectionContext cc =
       (StandardConnectionContext) ocn.getConnectionContext();
     ProxyConnectionContext pcc =
-      new ProxyConnectionContext(proxyId, (Queue)cc.getQueue());
+      new ProxyConnectionContext(proxyId, cc.getQueue());
     connections.put(new ConnectionKey(identity.getUserName(), cc.getKey()), pcc);
     
     return cc.getKey();
