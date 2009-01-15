@@ -400,22 +400,14 @@
         <attribute name="Implementation-Title" value="Joram"/>
         <attribute name="Implementation-Version" value="${version}"/> 
         <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+        <attribute name="Require-JOnAS-Services" value="joram"/>
       </manifest>
       <metainf dir="${licenses.dir}">
         <include name="NOTICE.TXT"/>
       </metainf>
       <fileset dir="${build.dir}">
-        <include name="joram-client.jar"/>
-        <include name="joram-connector.jar"/>
         <include name="joram-config.jar"/>
-        <include name="joram-mom.jar"/>
-        <include name="joram-shared.jar"/>
         <include name="META-INF/*.xml"/>
-      </fileset>
-      <fileset dir="${lib.dir}">
-        <include name="jakarta-regexp-1.2.jar"/>
-        <include name="JCup.jar"/>
-        <include name="ow_monolog.jar"/>
       </fileset>
     </jar>
     <delete file="${build.dir}/META-INF/ra.xml"/>
