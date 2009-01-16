@@ -686,7 +686,7 @@ public class JoramSaxWrapper extends DefaultHandler {
                        host + "," +
                        port + "," +
                        name + "," +
-                       password + "," +
+                       "***** ," +
                        cnxTimer + "," +
                        reliableClass + ")");
           AdminModule.connect(host,port,name,password,cnxTimer,reliableClass,identityClass);
@@ -695,7 +695,7 @@ public class JoramSaxWrapper extends DefaultHandler {
             logger.log(BasicLevel.DEBUG, "AdminModule.haConnect(" +
                        url + "," +
                        name + "," +
-                       password + "," +
+                       "***** ," +
                        cnxTimer + ")");
           javax.jms.TopicConnectionFactory tcf =
             TopicHATcpConnectionFactory.create(url);
@@ -705,7 +705,7 @@ public class JoramSaxWrapper extends DefaultHandler {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "AdminModule.collocatedConnect(" +
                        name + "," +
-                       password + ")");
+                       "*****)");
           AdminModule.collocatedConnect(name,password,identityClass);
         } else if (rawName.equals(ELT_CONNECTIONFACTORY)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
@@ -776,7 +776,7 @@ public class JoramSaxWrapper extends DefaultHandler {
             logger.log(BasicLevel.DEBUG, "User.create(" +
                        name + "," +
                        login + "," +
-                       password + "," +
+                       "*****," +
                        serverId + ")");
           if (! isSet(login)) login = name;
           if (! isSet(identityClass)) identityClass = Identity.SIMPLE_IDENTITY_CLASS;
