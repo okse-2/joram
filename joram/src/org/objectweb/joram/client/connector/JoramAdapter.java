@@ -634,33 +634,28 @@ public class JoramAdapter
       Method meth = listenerClass.getMethod("onMessage", parameters);
       transacted = endpointFactory.isDeliveryTransacted(meth);
     } catch (Exception exc) {
-      throw new ResourceException("Could not determine transactional "
-                                  + "context: " + exc);
+      throw new ResourceException("Could not determine transactional context: " + exc);
     }
 
     int maxWorks = 10;
     try {
       maxWorks = Integer.parseInt(specImpl.getMaxNumberOfWorks());
     } catch (Exception exc) {
-      throw new ResourceException("Invalid max number of works instances "
-                                  + "number: " + exc);
+      throw new ResourceException("Invalid max number of works instances number: " + exc);
     }
 
     int maxMessages = 10;
     try {
       maxMessages = Integer.parseInt(specImpl.getMaxMessages());
     } catch (Exception exc) {
-      throw new ResourceException("Invalid max messages "
-                                  + "number: " + exc);
+      throw new ResourceException("Invalid max messages number: " + exc);
     }
 
     int ackMode;
     try {
-      if (ActivationSpecImpl.AUTO_ACKNOWLEDGE.equals(specImpl
-                                                     .getAcknowledgeMode())) {
+      if (ActivationSpecImpl.AUTO_ACKNOWLEDGE.equals(specImpl.getAcknowledgeMode())) {
         ackMode = Session.AUTO_ACKNOWLEDGE;
-      } else if (ActivationSpecImpl.AUTO_ACKNOWLEDGE.equals(specImpl
-                                                            .getAcknowledgeMode())) {
+      } else if (ActivationSpecImpl.AUTO_ACKNOWLEDGE.equals(specImpl.getAcknowledgeMode())) {
         ackMode = Session.DUPS_OK_ACKNOWLEDGE;
       } else {
         ackMode = Session.AUTO_ACKNOWLEDGE;
@@ -675,14 +670,12 @@ public class JoramAdapter
     try {
       Destination dest;
 
-      if (destType.equals("javax.jms.Queue"))
+      if ("javax.jms.Queue".equals(destType))
         dest = createQueue(destName);
-      else if (destType.equals("javax.jms.Topic"))
+      else if ("javax.jms.Topic".equals(destType))
         dest = createTopic(destName);
       else
-        throw new NotSupportedException("Invalid destination type provided "
-                                        + "as activation parameter: "
-                                        + destType);
+        throw new NotSupportedException("Invalid destination type provided as activation parameter: " + destType);
 
       String userName = specImpl.getUserName();
       String password = specImpl.getPassword();

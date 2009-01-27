@@ -1,21 +1,32 @@
 +==============================================================================
+| 2009/01/27 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix potential NPE in JoramAdapter.endpointActivation method during the
+destination creation.
++==============================================================================
+| 2008/12/05 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix potential problems with unknown servers in case of dynamic reconfiguration
+(adding and removing servers).
+ Adds JGroups.MCastAddr property.
++==============================================================================
 | 2008/11/28 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
-  Fix a potential bug in JNDI: declare TcpRequestNot non persistent to avoid
+ Fix a potential bug in JNDI: declare TcpRequestNot non persistent to avoid
  a swap-out (This notification contains a socket and cannot be serialized).
 +==============================================================================
 | 2008/11/27 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
-  Bug fix: No longer generates an error message when a contextual class loader
+ Bug fix: No longer generates an error message when a contextual class loader
  is needed for ObjectMessage.getObject.
 +==============================================================================
 | 2008/11/27 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
-  Bug fix: Using SimpleNetwork could lead to message loss in some rare cases.
+ Bug fix: Using SimpleNetwork could lead to message loss in some rare cases.
 +==============================================================================
 | 2008/11/05 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
-  No longer get full message in administration method when only header or
+ No longer get full message in administration method when only header or
  properties are required.
 +==============================================================================
 | 2008/10/29 | Andre Freyssinet - ScalAgent Distributed Technologies 
