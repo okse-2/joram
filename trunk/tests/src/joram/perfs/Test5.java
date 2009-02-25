@@ -41,57 +41,58 @@ class ServerTest5 extends BaseTest {
   static ConnectionFactory cf = null;
 
   public static void main(String[] args) throws Exception {
-      new  ServerTest5().run();
+    new  ServerTest5().run();
   }
-    public void run(){
-	try{
-	    startServer();
-	    
-	    AdminConnect("joram.perfs.ColocatedBaseTest");
-	    sync = createDestination("org.objectweb.joram.client.jms.Queue", "SyncQ");
-	    cf =  createConnectionFactory("joram.perfs.ColocatedBaseTest");
-	    User user = User.create("anonymous", "anonymous", 0);
-	    sync.setFreeReading();
-	    sync.setFreeWriting();
-	    org.objectweb.joram.client.jms.admin.AdminModule.disconnect();
-	    
-	    NbClients = Integer.getInteger("NbClients", NbClients).intValue();
-	    Connection cnx = cf.createConnection();
-	    Session sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-	    MessageConsumer cons = sess.createConsumer(sync);
-	    cnx.start();
-	    
-	    int nbmsg = 0;
-	    long total = 0L;
-	    long travel = 0L;
-	    
-	    for (int i=0; i<NbClients; i++) {
-		try {
-		    Message msg = cons.receive();
-		    
-		    nbmsg += msg.getIntProperty("nbmsg");
-		    total += msg.getLongProperty("total");
-		    travel += msg.getLongProperty("travel");
-		} catch (Throwable exc) {
-		    exc.printStackTrace();
-		}
-	    }
-	    
-	    writeIntoFile("| Mean time = " + (total*1000L) / nbmsg + "us per msg, " + 
-			  ((nbmsg*1000L*NbClients)/total) + "msg/s\n" +
-			  "| Mean travel time = " + (travel / (NbClients*1000)) + "ms");
-	    
-	   
-	}catch(Throwable exc){
-	    exc.printStackTrace();
-	    error(exc);
-	}
-	finally {
-	    System.out.println("Server stop ");
-	    fr.dyade.aaa.agent.AgentServer.stop();
-	    endTest(); 
-	}
+  public void run(){
+    try{
+      startServer();
+
+      AdminConnect("joram.perfs.ColocatedBaseTest");
+      sync = createDestination("org.objectweb.joram.client.jms.Queue", "SyncQ");
+      cf =  createConnectionFactory("joram.perfs.ColocatedBaseTest");
+      User user = User.create("anonymous", "anonymous", 0);
+      sync.setFreeReading();
+      sync.setFreeWriting();
+      org.objectweb.joram.client.jms.admin.AdminModule.disconnect();
+
+      NbClients = Integer.getInteger("NbClients", NbClients).intValue();
+      Connection cnx = cf.createConnection();
+      
+      Session sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+
+      MessageConsumer cons = sess.createConsumer(sync);
+      cnx.start();
+
+      int nbmsg = 0;
+      long total = 0L;
+      long travel = 0L;
+
+      for (int i=0; i<NbClients; i++) {
+        try {
+          Message msg = cons.receive();
+
+          nbmsg += msg.getIntProperty("nbmsg");
+          total += msg.getLongProperty("total");
+          travel += msg.getLongProperty("travel");
+        } catch (Throwable exc) {
+          exc.printStackTrace();
+        }
+      }
+
+      writeIntoFile("| Mean time = " + (total*1000L) / nbmsg + "us per msg, " + 
+                    ((nbmsg*1000L*NbClients)/total) + "msg/s\n" +
+                    "| Mean travel time = " + (travel / (NbClients*1000)) + "ms");
+
+
+    } catch(Throwable exc){
+      exc.printStackTrace();
+      error(exc);
+    } finally {
+      System.out.println("Server stop ");
+      fr.dyade.aaa.agent.AgentServer.stop();
+      endTest(); 
     }
+  }
 }
 
 /**
@@ -116,103 +117,102 @@ public class Test5 extends BaseTest {
   static ConnectionFactory cf = null;
 
   public void run(String[] args)  {
-      try{
-	  NbCnx = Integer.getInteger("NbCnx", NbCnx).intValue();
-	  NbRound = Integer.getInteger("NbRound", NbRound).intValue();
-	  NbMsgPerRound = Integer.getInteger("NbMsgPerRound", NbMsgPerRound).intValue();
-	  MsgSize = Integer.getInteger("MsgSize", MsgSize).intValue();
-	  String destc = System.getProperty("Destination",
-					    "org.objectweb.joram.client.jms.Queue");
-	  host = System.getProperty("hostname", host);
-	  port = Integer.getInteger("port", port).intValue();
-	  String baseclass = "joram.perfs.TcpBaseTest";
-	  baseclass = System.getProperty("BaseClass", baseclass);
-	  AdminConnect(baseclass);
-	  dest = createDestination(destc);
-	  sync = createDestination("org.objectweb.joram.client.jms.Queue", "SyncQ");
-	  cf =  createConnectionFactory(baseclass);
-	  User user = User.create("anonymous", "anonymous", 0);
-	  dest.setFreeReading();
-	  dest.setFreeWriting();
-	  
-	  org.objectweb.joram.client.jms.admin.AdminModule.disconnect();
-	  
-	  Connection cnx = null;
-	  Session sess = null;
-	  MessageProducer producer = null;
-	  Receiver receiver = null;
-	  long total = 0L;
-	  for (int k=0; k<NbCnx; k++) {
-	      receiver = new Receiver();
-	      receiver.start();
-	      
-	      long t1 = System.currentTimeMillis();
-	      try {
-		  cnx = cf.createConnection();
-		  sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		  producer = sess.createProducer(dest);
-		  
-		  byte[] content = new byte[MsgSize];
-		  for (int i = 0; i< MsgSize; i++)
-		      content[i] = (byte) (i & 0xFF);
-		  
-		  for (int i=0; i<NbRound; i++) {
-		      long start = System.currentTimeMillis();
-		      for (int j=0; j<NbMsgPerRound; j++) {
-			  BytesMessage msg = sess.createBytesMessage();
-			  msg.writeBytes(content);
-			  msg.setLongProperty("time", System.currentTimeMillis());
-			  producer.send(msg);
-		      }
-		      long end = System.currentTimeMillis();
-		      receiver.fxCtrl(i);
-		  }
-	      } catch (Exception exc) {
-		  exc.printStackTrace();
-		  System.exit(-1);
-	      } finally {
-		  producer.close();
-		  sess.close();
-		  cnx.close();
-		  receiver.stop();
-	      }
-	      
-	      long t2 = System.currentTimeMillis();
-	      total += (t2 - t1);
-	      
-	      writeIntoFile("| Mean time " + destc + " = " +
-			    ((t2-t1)*1000L) / (NbRound*NbMsgPerRound) +
-			    "us per msg");
-	      
-	  }
-	  
-	  try {
-	      cnx = cf.createConnection();
-	      sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-	      producer = sess.createProducer(sync);
-	      cnx.start();
-	      
-	      Message msg = sess.createMessage();
-	      msg.setIntProperty("nbmsg", NbCnx*NbRound*NbMsgPerRound);
-	      msg.setLongProperty("total", total);
-	      msg.setLongProperty("travel", receiver.listener.travel);
-	      producer.send(msg);
-	  } catch (Exception exc) {
-	      exc.printStackTrace();
-	      System.exit(-1);
-	  } finally {
-	      producer.close();
-	      sess.close();
-	      cnx.close();
-	  }
-		 
-      }catch(Throwable exc){
-	  exc.printStackTrace();
-	  error(exc);
+    try{
+      NbCnx = Integer.getInteger("NbCnx", NbCnx).intValue();
+      NbRound = Integer.getInteger("NbRound", NbRound).intValue();
+      NbMsgPerRound = Integer.getInteger("NbMsgPerRound", NbMsgPerRound).intValue();
+      MsgSize = Integer.getInteger("MsgSize", MsgSize).intValue();
+      String destc = System.getProperty("Destination",
+      "org.objectweb.joram.client.jms.Queue");
+      host = System.getProperty("hostname", host);
+      port = Integer.getInteger("port", port).intValue();
+      String baseclass = "joram.perfs.TcpBaseTest";
+      baseclass = System.getProperty("BaseClass", baseclass);
+      AdminConnect(baseclass);
+      dest = createDestination(destc);
+      sync = createDestination("org.objectweb.joram.client.jms.Queue", "SyncQ");
+      cf =  createConnectionFactory(baseclass);
+      User user = User.create("anonymous", "anonymous", 0);
+      dest.setFreeReading();
+      dest.setFreeWriting();
+
+      org.objectweb.joram.client.jms.admin.AdminModule.disconnect();
+
+      Connection cnx = null;
+      Session sess = null;
+      MessageProducer producer = null;
+      Receiver receiver = null;
+      long total = 0L;
+      for (int k=0; k<NbCnx; k++) {
+        receiver = new Receiver();
+        receiver.start();
+
+        long t1 = System.currentTimeMillis();
+        try {
+          cnx = cf.createConnection();
+          sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+          producer = sess.createProducer(dest);
+
+          byte[] content = new byte[MsgSize];
+          for (int i = 0; i< MsgSize; i++)
+            content[i] = (byte) (i & 0xFF);
+
+          for (int i=0; i<NbRound; i++) {
+            long start = System.currentTimeMillis();
+            for (int j=0; j<NbMsgPerRound; j++) {
+              BytesMessage msg = sess.createBytesMessage();
+              msg.writeBytes(content);
+              msg.setLongProperty("time", System.currentTimeMillis());
+              producer.send(msg);
+            }
+            long end = System.currentTimeMillis();
+            receiver.fxCtrl(i);
+          }
+        } catch (Exception exc) {
+          exc.printStackTrace();
+          System.exit(-1);
+        } finally {
+          producer.close();
+          sess.close();
+          cnx.close();
+          receiver.stop();
+        }
+
+        long t2 = System.currentTimeMillis();
+        total += (t2 - t1);
+
+        writeIntoFile("| Mean time " + destc + " = " +
+                      ((t2-t1)*1000L) / (NbRound*NbMsgPerRound) +
+        "us per msg");
+
       }
-      finally {
-	  //end
+
+      try {
+        cnx = cf.createConnection();
+        sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        producer = sess.createProducer(sync);
+        cnx.start();
+
+        Message msg = sess.createMessage();
+        msg.setIntProperty("nbmsg", NbCnx*NbRound*NbMsgPerRound);
+        msg.setLongProperty("total", total);
+        msg.setLongProperty("travel", receiver.listener.travel);
+        producer.send(msg);
+      } catch (Exception exc) {
+        exc.printStackTrace();
+        System.exit(-1);
+      } finally {
+        producer.close();
+        sess.close();
+        cnx.close();
       }
+
+    } catch(Throwable exc){
+      exc.printStackTrace();
+      error(exc);
+    } finally {
+      //end
+    }
   }
 
 static class Receiver {
