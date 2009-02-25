@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -184,7 +184,6 @@ public class Test6 extends BaseTest {
       for (int i=0; i<NbReceiver; i++) {
         dt3 += (receiver[i].last - receiver[i].start);
         dt4 += receiver[i].travel;
-        System.out.println("errors=" + receiver[i].xxx);
       }
 
       long NbMsg = NbMsgPerRound * NbRound * NbSender;
@@ -201,11 +200,10 @@ public class Test6 extends BaseTest {
         median += getMedian(sender[s].arrayList.toArray());
       writeIntoFile("| Median = " + median/sender.length + "msg/s");
       writeIntoFile("----------------------------------------------------");
-    }catch(Throwable exc){
+    } catch(Throwable exc){
       exc.printStackTrace();
       error(exc);
-    }
-    finally {
+    } finally {
       System.out.println("Server stop ");
       fr.dyade.aaa.agent.AgentServer.stop();
       endTest(); 
