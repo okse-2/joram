@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2006 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -601,8 +601,7 @@ public class JoramAdapter
                                  ActivationSpec spec) throws ResourceException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                    this + " endpointActivation(" + endpointFactory +
-                                    ", " + spec + ")");
+                                    this + " endpointActivation(" + endpointFactory + ", " + spec + ")");
 
     if (! started)
       throw new IllegalStateException("Non started resource adapter.");
@@ -610,18 +609,14 @@ public class JoramAdapter
       throw new IllegalStateException("Stopped resource adapter.");
 
     if (! (spec instanceof ActivationSpecImpl))
-      throw new ResourceException("Provided ActivationSpec instance is not "
-                                  + "a JORAM activation spec.");
-
+      throw new ResourceException("Provided ActivationSpec instance is not a JORAM activation spec.");
     ActivationSpecImpl specImpl = (ActivationSpecImpl) spec;
 
     if (! specImpl.getResourceAdapter().equals(this))
-      throw new ResourceException("Supplied ActivationSpec instance "
-                                  + "associated to an other ResourceAdapter.");
+      throw new ResourceException("Supplied ActivationSpec instance associated to an other ResourceAdapter.");
 
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-      "Activating Endpoint on JORAM adapter.");
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, "Activating Endpoint on JORAM adapter.");
 
     boolean durable =
       specImpl.getSubscriptionDurability() != null
@@ -655,7 +650,7 @@ public class JoramAdapter
     try {
       if (ActivationSpecImpl.AUTO_ACKNOWLEDGE.equals(specImpl.getAcknowledgeMode())) {
         ackMode = Session.AUTO_ACKNOWLEDGE;
-      } else if (ActivationSpecImpl.AUTO_ACKNOWLEDGE.equals(specImpl.getAcknowledgeMode())) {
+      } else if (ActivationSpecImpl.DUPS_OK_ACKNOWLEDGE.equals(specImpl.getAcknowledgeMode())) {
         ackMode = Session.DUPS_OK_ACKNOWLEDGE;
       } else {
         ackMode = Session.AUTO_ACKNOWLEDGE;
@@ -683,57 +678,52 @@ public class JoramAdapter
 
       createUser(userName, password, identityClass);
 
-      XAConnectionFactory connectionFactory = null;
+      XAConnectionFactory cf = null;
+      org.objectweb.joram.client.jms.XAConnectionFactory connectionFactory = null;
 
       if (isHa) {
         if (collocated) {
-          if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-            AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, "haURL = " + haURL);
           if (haURL != null) {
-            connectionFactory = XAHATcpConnectionFactory.create(haURL);
+            cf = XAHATcpConnectionFactory.create(haURL);
           } else {
-            connectionFactory = XAHALocalConnectionFactory.create();
+            cf = XAHALocalConnectionFactory.create();
           }
         } else {
-          String urlHa = "hajoram://" + hostName + ":" + serverPort;
-          connectionFactory = XAHATcpConnectionFactory.create(urlHa);
+          cf = XAHATcpConnectionFactory.create("hajoram://" + hostName + ':' + serverPort);
         }
       }  else {
         if (collocated)
-          connectionFactory = XALocalConnectionFactory.create();
+          cf = XALocalConnectionFactory.create();
         else
-          connectionFactory = XATcpConnectionFactory.create(hostName, serverPort);
+          cf = XATcpConnectionFactory.create(hostName, serverPort);
       }
 
-      ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().connectingTimer = connectingTimer;
-      ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().cnxPendingTimer = cnxPendingTimer;
-      ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().txPendingTimer = txPendingTimer;
+      connectionFactory = (org.objectweb.joram.client.jms.XAConnectionFactory) cf;
+      
+      connectionFactory.getParameters().connectingTimer = connectingTimer;
+      connectionFactory.getParameters().cnxPendingTimer = cnxPendingTimer;
+      connectionFactory.getParameters().txPendingTimer = txPendingTimer;
 
       if (queueMessageReadMax > 0) {
-        ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory)
-        .getParameters().queueMessageReadMax = queueMessageReadMax;
+        connectionFactory.getParameters().queueMessageReadMax = queueMessageReadMax;
       }
 
       if (topicAckBufferMax > 0) {
-        ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory)
-        .getParameters().topicAckBufferMax = topicAckBufferMax;
+        connectionFactory.getParameters().topicAckBufferMax = topicAckBufferMax;
       }
 
       if (topicPassivationThreshold > 0) {
-        ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory)
-        .getParameters().topicPassivationThreshold = topicPassivationThreshold;
+        connectionFactory.getParameters().topicPassivationThreshold = topicPassivationThreshold;
       }
 
       if (topicActivationThreshold > 0) {
-        ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory)
-        .getParameters().topicActivationThreshold = topicActivationThreshold;
+        connectionFactory.getParameters().topicActivationThreshold = topicActivationThreshold;
       }
 
       // set identity class for this connectionFactory.
       ((AbstractConnectionFactory) connectionFactory).setIdentityClassName(identityClass);
       
-      XAConnection cnx =
-        connectionFactory.createXAConnection(userName, password);
+      XAConnection cnx = connectionFactory.createXAConnection(userName, password);
 
       if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
         AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
