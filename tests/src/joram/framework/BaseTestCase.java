@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -45,7 +45,6 @@ import java.util.Vector;
 import java.util.zip.GZIPInputStream;
 
 import org.objectweb.joram.client.jms.ConnectionMetaData;
-
 
 /**
  * Utilitary functions for all test cases.
@@ -322,9 +321,9 @@ public class BaseTestCase {
   /**
    * Asserts that two byte[] are equal.
    */
-  static public void assertEquals(byte[] tab1, byte[] tab2, int taille) {
+  static public void assertEquals(byte[] tab1, byte[] tab2, int size) {
       boolean ok=true;
-      for(int j=0; j< taille && ok==true;j++)
+      for(int j=0; j< size && ok==true;j++)
 	  if(tab1[j]!=tab2[j]){
 	      failNotEquals(null,tab1[j],tab2[j]);
 	      ok=false;
@@ -742,7 +741,7 @@ public class BaseTestCase {
       System.err.println("Joram " + ConnectionMetaData.providerVersion);
     if (current.writer != null)
       current.writer.println("| Joram " + ConnectionMetaData.providerVersion);
-    
+
     // TODO:
     if ((current.failures != null) || (current.errors != null)) {
       if (current.summary)
@@ -796,9 +795,8 @@ public class BaseTestCase {
         }
       }
     }
-    
+
     if (current.writer != null) {
-      current.writer.println("=================== next test =================================");
       current.writer.flush();
       current.writer.close();
     }
@@ -836,7 +834,7 @@ public class BaseTestCase {
       current.writer.println("| Date: " + new Date(System.currentTimeMillis()));
     }
   }
-  
+ 
   public void writeIntoFile(String str){
     if (current.writer != null) {
       current.writer.println(str);
