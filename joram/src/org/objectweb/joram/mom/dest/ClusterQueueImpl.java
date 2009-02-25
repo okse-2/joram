@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -59,7 +59,6 @@ import fr.dyade.aaa.agent.UnknownNotificationException;
  * delivering to an other cluster queue.
  */
 public class ClusterQueueImpl extends QueueImpl {
-
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
@@ -186,9 +185,7 @@ public class ClusterQueueImpl extends QueueImpl {
       
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, 
-                                      "--- " + this +
-                                      " specialAdminProcess : " +
-                                      req);
+                   "--- " + this + " specialAdminProcess : " + req);
 
       if (req instanceof AddQueueCluster) {
         addQueueCluster(((AddQueueCluster) req).joiningQueue,
@@ -202,9 +199,7 @@ public class ClusterQueueImpl extends QueueImpl {
     } catch (Exception exc) {
       if (logger.isLoggable(BasicLevel.WARN))
         logger.log(BasicLevel.WARN, 
-                                      "--- " + this +
-                                      " specialAdminProcess",
-                                      exc);
+                   "--- " + this + " specialAdminProcess", exc);
       throw new RequestException(exc.getMessage());
     }
     return ret;
@@ -233,14 +228,11 @@ public class ClusterQueueImpl extends QueueImpl {
     AgentId id = AgentId.fromString(joiningQueue);
     if (clusters.containsKey(id)) return;
 
-//    clusters.put(id,new Float(rateOfFlow));
+    //    clusters.put(id,new Float(rateOfFlow));
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
-                                    "--- " + this +
-                                    " ClusterQueueImpl.addQueueCluster in " + getId() +
-                                    "\njoiningQueue=" + joiningQueue +
-                                    "\nclusters=" + clusters);
+                 "--- " + this + " ClusterQueueImpl.addQueueCluster in " + getId() + "\njoiningQueue=" + joiningQueue + "\nclusters=" + clusters);
 
     forward(id,
             new JoinQueueCluster(loadingFactor.getRateOfFlow(),
@@ -279,10 +271,7 @@ public class ClusterQueueImpl extends QueueImpl {
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
-                                    "--- " + this +
-                                    " ClusterQueueImpl.removeQueueCluster in " + getId() +
-                                    "\nremoveQueue=" + removeQueue +
-                                    "\nclusters=" + clusters);
+                 "--- " + this + " ClusterQueueImpl.removeQueueCluster in " + getId() + "\nremoveQueue=" + removeQueue + "\nclusters=" + clusters);
   }
   
   /**
@@ -295,8 +284,7 @@ public class ClusterQueueImpl extends QueueImpl {
   public ClientMessages preProcess(AgentId from, ClientMessages not) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                                    "--- " + this + 
-                                    " " + not);
+                 "--- " + this +  " " + not);
     receiving = true;
     long date = System.currentTimeMillis();
     
@@ -336,8 +324,9 @@ public class ClusterQueueImpl extends QueueImpl {
    */
   public void wakeUpNot(WakeUpNot not) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "--- " + this + " ClusterQueueImpl.wakeUpNot(" + not
-          + ")");
+      logger.log(BasicLevel.DEBUG,
+                 "--- " + this + " ClusterQueueImpl.wakeUpNot(" + not + ")");
+    
     super.wakeUpNot(not);
 
     if (clusters.size() > 1)
@@ -413,9 +402,10 @@ public class ClusterQueueImpl extends QueueImpl {
     }
 
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "--- " + this +
-                                    " ClusterQueueImpl.lBCycleLife(" + not + ")" +
-                                    "\nvisitTable=" + clusters);
+      logger.log(BasicLevel.DEBUG,
+                 "--- " + this +
+                 " ClusterQueueImpl.lBCycleLife(" + not + ")" +
+                 "\nvisitTable=" + clusters);
     ClientMessages cm = not.getClientMessages();
     if (cm != null)
       doClientMessages(from, cm);
@@ -447,18 +437,18 @@ public class ClusterQueueImpl extends QueueImpl {
     freeWriting = freeWriting | not.freeWriting;
 
     sendToCluster(
-      new AckJoinQueueCluster(loadingFactor.getRateOfFlow(),
-                              clusters,
-                              clients,
-                              freeReading,
-                              freeWriting));
-  
+                  new AckJoinQueueCluster(loadingFactor.getRateOfFlow(),
+                                          clusters,
+                                          clients,
+                                          freeReading,
+                                          freeWriting));
+
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
-                                    "--- " + this +
-                                    " ClusterQueueImpl.joinQueueCluster(" + not + ")" +
-                                    "\nclusters=" + clusters +
-                                    "\nclients=" + clients);
+                 "--- " + this +
+                 " ClusterQueueImpl.joinQueueCluster(" + not + ")" +
+                 "\nclusters=" + clusters +
+                 "\nclients=" + clients);
   }
 
   /**
@@ -486,10 +476,10 @@ public class ClusterQueueImpl extends QueueImpl {
   
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
-                                    "--- " + this +
-                                    " ClusterQueueImpl.ackJoinQueueCluster(" + not + ")" +
-                                    "\nclusters=" + clusters +
-                                    "\nclients=" + clients);
+                 "--- " + this +
+                 " ClusterQueueImpl.ackJoinQueueCluster(" + not + ")" +
+                 "\nclusters=" + clusters +
+                 "\nclients=" + clients);
   }
 
   /**
@@ -500,8 +490,10 @@ public class ClusterQueueImpl extends QueueImpl {
     super.receiveRequest(from, not);
     
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "--- " + this + " ClusterQueueImpl.receiveRequest(" + not + ")");
-    
+      logger.log(BasicLevel.DEBUG,
+                 "--- " + this + 
+                 " ClusterQueueImpl.receiveRequest(" + not + ")");
+
     //loadingFactor.setWait();
 
     if (getWaitingRequestCount() > loadingFactor.consumThreshold)
@@ -522,8 +514,7 @@ public class ClusterQueueImpl extends QueueImpl {
     throws UnknownNotificationException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                                    "--- " + this +
-                                    " ClusterQueueImpl.lBMessageGive(" + from + "," + not + ")");
+                 "--- " + this + " ClusterQueueImpl.lBMessageGive(" + from + "," + not + ")");
 
     clusters.put(from,new Float(not.getRateOfFlow()));
 
@@ -541,9 +532,8 @@ public class ClusterQueueImpl extends QueueImpl {
   public void lBMessageHope(AgentId from, LBMessageHope not) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
-                                    "--- " + this + 
-                                    " ClusterQueueImpl.lBMessageHope(" + from + "," + not + ")");
-    
+                 "--- " + this + " ClusterQueueImpl.lBMessageHope(" + from + "," + not + ")");
+
     clusters.put(from,new Float(not.getRateOfFlow()));
 
     int hope = not.getNbMsg();
@@ -569,17 +559,16 @@ public class ClusterQueueImpl extends QueueImpl {
       }
 
       msgGive.setClientMessages(cm);
-      msgGive.setRateOfFlow(
-        loadingFactor.evalRateOfFlow(getPendingMessageCount(), getWaitingRequestCount()));
-      
+      msgGive.setRateOfFlow(loadingFactor.evalRateOfFlow(getPendingMessageCount(), getWaitingRequestCount()));
+
       // send notification contains ClientMessages.
       forward(from, msgGive);
       
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, 
-                                      "--- " + this +
-                                      " ClusterQueueImpl.lBMessageHope LBMessageHope : nbMsgSend = " + 
-                                      cm.getMessages().size());
+                   "--- " + this +
+                   " ClusterQueueImpl.lBMessageHope LBMessageHope : nbMsgSend = " + 
+                   cm.getMessages().size());
     }
   }
 
@@ -630,8 +619,8 @@ public class ClusterQueueImpl extends QueueImpl {
   protected void sendToCluster(QueueClusterNot not) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
-                                    "--- " + this + 
-                                    " ClusterQueueImpl.sendToCluster(" + not + ")");
+                 "--- " + this + 
+                 " ClusterQueueImpl.sendToCluster(" + not + ")");
 
     if (clusters.size() < 2) return;
 
@@ -667,8 +656,7 @@ public class ClusterQueueImpl extends QueueImpl {
    */
   private void storeMsgIdInVisitTable(String msgId, AgentId destId) {
     List alreadyVisit = (List) visitTable.get(msgId);
-    if (alreadyVisit == null)
-      alreadyVisit = new ArrayList();
+    if (alreadyVisit == null) alreadyVisit = new ArrayList();
     alreadyVisit.add(destId);
     visitTable.put(msgId, alreadyVisit);
   }
