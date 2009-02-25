@@ -27,7 +27,6 @@ import java.util.*;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.*;
-import fr.dyade.aaa.scbean.ListenerSet;
 import com.scalagent.scheduler.*;
 
 /**
@@ -85,7 +84,7 @@ import com.scalagent.scheduler.*;
  *
  * @see		StatusNotification
  */
-public abstract class Task extends fr.dyade.aaa.scbean.AbstractSCBean {
+public abstract class Task extends Agent {
   /**
    * Returns default log topic for agents. Its method should be overridden
    * in subclass in order to permit fine configuration of logging system.
@@ -272,8 +271,7 @@ public abstract class Task extends fr.dyade.aaa.scbean.AbstractSCBean {
       throw new IllegalArgumentException("null parent");
 
     if (this.parent != null) {
-      if (parent.equals(this.parent))
-	return;
+      if (parent.equals(this.parent)) return;
       throw new IllegalArgumentException("may not change task parent");
     }
 
