@@ -111,8 +111,8 @@ public class Receiver extends BaseTest implements MessageListener {
   long start = 0L;
   long last = 0L;
 
-  int xxx = 0;
-
+  long t1 = 0L;
+  
   public synchronized void onMessage(Message m) {
     boolean excok = false;
 
@@ -120,13 +120,9 @@ public class Receiver extends BaseTest implements MessageListener {
       BytesMessage msg = (BytesMessage) m;
 
       last = System.currentTimeMillis();
-      if (counter == 0) start = last;
+      if (counter == 0) start = t1 = last;
 
       int index = msg.getIntProperty("index");
-//      if (index == -1) {
-//        xxx += 1;
-//        throw new IllegalStateException();
-//      }
       counter += 1;
 
       if (index == 0) {
@@ -139,6 +135,12 @@ public class Receiver extends BaseTest implements MessageListener {
 
       if (transacted && (((counter%10) == 9) || (index == 0)))
         sess.commit();
+      
+      if ((counter%10000) == 9999) {
+        long x = 10000000L / (last - t1);
+        t1 = last;
+        System.out.println("#" + ((counter+1)/10000) + " x 10.000 msg -> " + x + " msg/s");
+      }
 
       travel += (last - msg.getLongProperty("time"));
     } catch (IllegalStateException exc) {

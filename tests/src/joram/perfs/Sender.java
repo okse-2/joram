@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -104,20 +104,8 @@ public class Sender extends BaseTest implements Runnable {
       for (int i = 0; i< MsgSize; i++)
         content[i] = (byte) (i & 0xFF);
 
-
-//      BytesMessage msg = sess1.createBytesMessage();
-//      if (MsgTransient) {
-//        msg.setJMSDeliveryMode(javax.jms.DeliveryMode.NON_PERSISTENT);
-//        producer.setDeliveryMode(javax.jms.DeliveryMode.NON_PERSISTENT);
-//      }
-//      msg.writeBytes(content);
-//      msg.setLongProperty("time", System.currentTimeMillis());
-//      msg.setIntProperty("index", -1);
-//      msg.setJMSReplyTo(topic);
-//      producer.send(msg);
-
-
-
+      long min = Long.MAX_VALUE;
+      long max = 0;
 
       for (int i=0; i<NbRound; i++) {
         long start = System.currentTimeMillis();
@@ -135,7 +123,11 @@ public class Sender extends BaseTest implements Runnable {
           if (transacted && ((j%10) == 9)) sess1.commit();
         }
         long end = System.currentTimeMillis();
-        dt1 += (end-start);
+        long dt = end - start;
+        if (dt < min) min = dt;
+        if (max < dt) max = dt;
+        dt1 += dt;
+        
         listener.fxCtrl(i);
         if (end-start > 0) {
           //System.out.println("== " + ((1000L * (NbMsgPerRound)) / (end-start)) + "msg/s");//NTA tmp
@@ -144,9 +136,11 @@ public class Sender extends BaseTest implements Runnable {
       }
 
       listener.fxCtrl(NbRound);
-
       long t2 = System.currentTimeMillis();
       dt2 = t2 - t1;
+
+      System.out.println("min=" + min + ", max=" + max);
+
     } catch (Exception exc) {
       exc.printStackTrace();
       System.exit(-1);
