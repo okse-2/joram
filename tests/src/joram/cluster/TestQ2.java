@@ -55,166 +55,167 @@ import org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory;
  */
 public class TestQ2 extends TestCase {
 
-   
-    public static void main(String[] args) {
-	new TestQ2().run();
+
+  public static void main(String[] args) {
+    new TestQ2().run();
+  }
+
+  public void run() {
+    try {
+      System.out.println("server start");
+      startAgentServer((short)0);
+      startAgentServer((short)1);
+      startAgentServer((short)2);
+
+      admin();
+      System.out.println("admin config ok");
+
+      Context  ictx = new InitialContext();
+      
+      Queue queue0 = (Queue) ictx.lookup("queue0");
+      Queue queue1 = (Queue) ictx.lookup("queue1");
+      Queue queue2 = (Queue) ictx.lookup("queue2");
+      
+      Destination clusterQueue = (Destination) ictx.lookup("clusterQueue");
+      
+      QueueConnectionFactory qcf0 = (QueueConnectionFactory) ictx.lookup("qcf0");
+      QueueConnectionFactory qcf1 = (QueueConnectionFactory) ictx.lookup("qcf1");
+      QueueConnectionFactory qcf2 = (QueueConnectionFactory) ictx.lookup("qcf2");
+
+      ictx.close();
+
+      MsgListenerCluster2 listener0 =new MsgListenerCluster2("recv0 ");
+      MsgListenerCluster2 listener1 =new MsgListenerCluster2("recv1 ");
+
+      Connection cnx0 = qcf0.createConnection("user0","user0");
+      Session sess0 = cnx0.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      MessageConsumer recv0 = sess0.createConsumer(queue0);
+      recv0.setMessageListener(listener0);
+
+      Connection cnx1 = qcf1.createConnection("user1","user1");
+      Session sess1 = cnx1.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      MessageConsumer recv1 = sess1.createConsumer(queue1);
+      recv1.setMessageListener(listener1);
+
+      Connection cnx2 = qcf2.createConnection("user2","user2");
+      Session sess2 = cnx2.createSession(false,Session.AUTO_ACKNOWLEDGE);
+      MessageProducer producer = sess2.createProducer(null);
+
+      System.setProperty("location", "2");
+
+      cnx0.start();
+      cnx1.start();
+      cnx2.start();
+
+      TextMessage msg = sess2.createTextMessage();
+
+      int j;
+      for (j = 0; j < 100; j++) {
+        msg.setText("Test number " + j);
+        producer.send(clusterQueue, msg);
+
+      }
+
+      int nbTry = 30;
+      while ((listener1.nbMsg + listener0.nbMsg) != j) {
+        Thread.sleep(1000);
+        if (nbTry-- == 0) break;
+      }
+      
+      System.out.println("listener0 / listener1 = " + listener1.nbMsg + " / " + listener0.nbMsg);
+      assertTrue((listener1.nbMsg + listener0.nbMsg) == j);
+
+
+      cnx0.close();
+      cnx1.close();
+      cnx2.close();  
+
+    } catch (Throwable exc) {
+      exc.printStackTrace();
+      error(exc);
+    } finally {
+      System.out.println("Server stop ");
+      stopAgentServer((short)0);
+      stopAgentServer((short)1);
+      stopAgentServer((short)2);
+      endTest(); 
     }
-          
-    public void run() {
-	try {
-	    System.out.println("server start");
-	    startAgentServer((short)0);
-	    startAgentServer((short)1);
-	    startAgentServer((short)2);
-	   
-	    admin();
-	    System.out.println("admin config ok");
-	    
-	    Context  ictx = new InitialContext();
-	    Queue queue0 = (Queue) ictx.lookup("queue0");
-	    QueueConnectionFactory qcf0 = (QueueConnectionFactory) ictx.lookup("qcf0");
-	    Queue queue1 = (Queue) ictx.lookup("queue1");
-	    QueueConnectionFactory qcf1 = (QueueConnectionFactory) ictx.lookup("qcf1");
+  }
 
-	    Destination clusterQueue = (Destination) ictx.lookup("clusterQueue");
-	    QueueConnectionFactory qcf2 = (QueueConnectionFactory) ictx.lookup("qcf2");
+  /**
+   * Admin : Create queue and a user anonymous
+   *   use jndi
+   */
+  public void admin() throws Exception {
+    // conexion 
+    AdminModule admin = new AdminModule();
+    admin.connect("root", "root", 60);
 
-	    Queue queue2 = (Queue) ictx.lookup("queue2");
-	     
-	    ictx.close();
+    Properties prop = new Properties();
+    prop.setProperty("period","5");
+    prop.setProperty("producThreshold","25");
+    prop.setProperty("consumThreshold","2");
+    prop.setProperty("autoEvalThreshold","true");
+    prop.setProperty("waitAfterClusterReq","100");
 
-	    MsgListenerCluster2 listener0 =new MsgListenerCluster2("recv0 ");
-	    MsgListenerCluster2 listener1 =new MsgListenerCluster2("recv1 ");
+    String ClusterQueueCN = "org.objectweb.joram.mom.dest.ClusterQueue";
 
-
-	    Connection cnx0 = qcf0.createConnection("user0","user0");
-	    Session sess0 = cnx0.createSession(false, Session.AUTO_ACKNOWLEDGE);
-	    MessageConsumer recv0 = sess0.createConsumer(queue0);
-	    recv0.setMessageListener(listener0);
-	   
-	    Connection cnx1 = qcf1.createConnection("user1","user1");
-	    Session sess1 = cnx1.createSession(false, Session.AUTO_ACKNOWLEDGE);
-	    MessageConsumer recv1 = sess1.createConsumer(queue1);
-	    recv1.setMessageListener(listener1);
+    Queue queue0 = Queue.create(0, null, ClusterQueueCN, prop);
+    Queue queue1 = Queue.create(1, null, ClusterQueueCN, prop);
+    Queue queue2 = Queue.create(2, null, ClusterQueueCN, prop);
 
 
 
-	    Connection cnx = qcf2.createConnection("user2","user2");
-	    Session sess = cnx.createSession(false,Session.AUTO_ACKNOWLEDGE);
-	    MessageProducer producer = sess.createProducer(null);
+    System.out.println("queue0 = " + queue0);
+    System.out.println("queue1 = " + queue1);
+    System.out.println("queue2 = " + queue2);
 
-	    
-	    System.setProperty("location","2");
-	    
-
-	    cnx0.start();
-	    cnx1.start();
-	    cnx.start();
-	  
-	    TextMessage msg = sess.createTextMessage();
-	  	    
-	    int j;
-	    for (j = 0; j < 15; j++) {
-		msg.setText("Test number " + j);
-		producer.send(clusterQueue, msg);
-	
-	    }
-	 
-	    Thread.sleep(10000);
-	    assertTrue(listener1.nbMsg >0);
-	    assertTrue(listener0.nbMsg >0);
-
-	   
-	    cnx0.close();
-	    cnx1.close();
-	    cnx.close();  
- 
-	} catch (Throwable exc) {
-	    exc.printStackTrace();
-	    error(exc);
-	} finally {
-	    System.out.println("Server stop ");
-	    stopAgentServer((short)0);
-	    stopAgentServer((short)1);
-	    stopAgentServer((short)2);
-	    endTest(); 
-	}
-    }
-    
-    /**
-     * Admin : Create queue and a user anonymous
-     *   use jndi
-     */
-    public void admin() throws Exception {
-	// conexion 
-	AdminModule admin = new AdminModule();
-	admin.connect("root", "root", 60);
-
-	Properties prop = new Properties();
-	prop.setProperty("period","5");
-	prop.setProperty("producThreshold","25");
-	prop.setProperty("consumThreshold","2");
-	prop.setProperty("autoEvalThreshold","true");
-	prop.setProperty("waitAfterClusterReq","100");
-
-	String ClusterQueueCN = "org.objectweb.joram.mom.dest.ClusterQueue";
-
-	Queue queue0 = Queue.create(0, null, ClusterQueueCN, prop);
-	Queue queue1 = Queue.create(1, null, ClusterQueueCN, prop);
-	Queue queue2 = Queue.create(2, null, ClusterQueueCN, prop);
-    
-
-	
-	System.out.println("queue0 = " + queue0);
-	System.out.println("queue1 = " + queue1);
-	System.out.println("queue2 = " + queue2);
-
-	User user0 = User.create("user0", "user0", 0);
-	User user1 = User.create("user1", "user1", 1);
-	User user2 = User.create("user2", "user2", 2);
+    User user0 = User.create("user0", "user0", 0);
+    User user1 = User.create("user1", "user1", 1);
+    User user2 = User.create("user2", "user2", 2);
 
 
-	javax.jms.QueueConnectionFactory cf0 =
-	    QueueTcpConnectionFactory.create("localhost", 16010);
-	javax.jms.QueueConnectionFactory cf1 =
-	    QueueTcpConnectionFactory.create("localhost", 16011);
-	javax.jms.QueueConnectionFactory cf2 =
-	    QueueTcpConnectionFactory.create("localhost", 16012);
+    javax.jms.QueueConnectionFactory cf0 =
+      QueueTcpConnectionFactory.create("localhost", 16010);
+    javax.jms.QueueConnectionFactory cf1 =
+      QueueTcpConnectionFactory.create("localhost", 16011);
+    javax.jms.QueueConnectionFactory cf2 =
+      QueueTcpConnectionFactory.create("localhost", 16012);
 
-	AdminHelper.setQueueCluster(queue0,queue1);
-	AdminHelper.setQueueCluster(queue0,queue2);
-    
-	queue0.addClusteredQueue(queue1);
-	queue0.addClusteredQueue(queue2);
-    
-	Hashtable h = new Hashtable();
-	h.put("0",queue0);
-	h.put("1",queue1);
-	h.put("2",queue2);
+    AdminHelper.setQueueCluster(queue0,queue1);
+    AdminHelper.setQueueCluster(queue0,queue2);
 
-	ClusterQueue clusterQueue = new ClusterQueue(h);
-	System.out.println("clusterQueue = " + clusterQueue);
+    queue0.addClusteredQueue(queue1);
+    queue0.addClusteredQueue(queue2);
 
-	clusterQueue.setReader(user0);
-	clusterQueue.setWriter(user0);
-	clusterQueue.setReader(user1);
-	clusterQueue.setWriter(user1);
-	clusterQueue.setReader(user2);
-	clusterQueue.setWriter(user2);
+    Hashtable h = new Hashtable();
+    h.put("0",queue0);
+    h.put("1",queue1);
+    h.put("2",queue2);
 
-	javax.naming.Context jndiCtx = new javax.naming.InitialContext();
-	jndiCtx.bind("qcf0", cf0);
-	jndiCtx.bind("qcf1", cf1);
-	jndiCtx.bind("qcf2", cf2);
-	jndiCtx.bind("clusterQueue", clusterQueue);
-	jndiCtx.bind("queue0", queue0);
-	jndiCtx.bind("queue1", queue1);
-	jndiCtx.bind("queue2", queue2);
-	jndiCtx.close();
+    ClusterQueue clusterQueue = new ClusterQueue(h);
+    System.out.println("clusterQueue = " + clusterQueue);
 
-	admin.disconnect();
+    clusterQueue.setReader(user0);
+    clusterQueue.setWriter(user0);
+    clusterQueue.setReader(user1);
+    clusterQueue.setWriter(user1);
+    clusterQueue.setReader(user2);
+    clusterQueue.setWriter(user2);
 
-    }
+    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
+    jndiCtx.bind("qcf0", cf0);
+    jndiCtx.bind("qcf1", cf1);
+    jndiCtx.bind("qcf2", cf2);
+    jndiCtx.bind("clusterQueue", clusterQueue);
+    jndiCtx.bind("queue0", queue0);
+    jndiCtx.bind("queue1", queue1);
+    jndiCtx.bind("queue2", queue2);
+    jndiCtx.close();
+
+    admin.disconnect();
+
+  }
 }
 
 
