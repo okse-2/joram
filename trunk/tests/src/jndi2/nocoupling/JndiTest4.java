@@ -100,7 +100,7 @@ public class JndiTest4 extends TestCase {
 	}
 
 
-	NamingEnumeration<Binding> namingEnumeration = ctx0.listBindings("");
+	NamingEnumeration namingEnumeration = ctx0.listBindings("");
 	while (namingEnumeration.hasMoreElements()) {
 	    // NameClassPair classPair = (NameClassPair) namingEnumeration.next(); 
 	    Binding classPair = (Binding) namingEnumeration.next();
