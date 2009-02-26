@@ -41,6 +41,7 @@ import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.client.AbstractJmsMessage;
 import org.objectweb.joram.shared.security.Identity;
+import org.objectweb.joram.shared.stream.MetaData;
 import org.objectweb.joram.shared.stream.StreamUtil;
 
 import fr.dyade.aaa.util.SocketFactory;
@@ -261,6 +262,10 @@ public class ReliableTcpClient {
     OutputStream os = socket.getOutputStream();
     InputStream is = socket.getInputStream();
 
+    // Writes the Joram magic number
+    baos.write(MetaData.joramMagic);
+    
+    // Writes the user identity
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, " -> write identity = " + identity);
     Identity.write(identity, baos);
