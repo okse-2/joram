@@ -37,6 +37,7 @@ import org.objectweb.joram.mom.proxies.OpenConnectionNot;
 import org.objectweb.joram.mom.proxies.ReliableConnectionContext;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.security.Identity;
+import org.objectweb.joram.shared.stream.MetaData;
 import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -86,7 +87,7 @@ public class TcpConnectionListener extends Daemon {
         BasicLevel.DEBUG, "TcpConnectionListener.run()");
 
     // Wait for the admin topic deployment.
-    // (a synchronization would be much better)
+    // AF: a synchronization would be much better.
     try {
       Thread.sleep(2000);
     } catch (InterruptedException exc) {
@@ -144,8 +145,7 @@ public class TcpConnectionListener extends Daemon {
    */
   private void acceptConnection() throws Exception {
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, 
-      "TcpConnectionListener.acceptConnection()");
+      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpConnectionListener.acceptConnection()");
 
     Socket sock = serverSocket.accept();
     String inaddr = sock.getInetAddress().getHostAddress();
@@ -164,6 +164,14 @@ public class TcpConnectionListener extends Daemon {
       InputStream is = sock.getInputStream();
       NetOutputStream nos = new NetOutputStream(sock);
 
+      byte[] magic = StreamUtil.readByteArrayFrom(is, 8);
+      for (int i=0; i<5; i++) {
+        if (magic[i] != MetaData.joramMagic[i])
+          throw new IllegalAccessException("Bad magic number:" + new String(magic, 0, 5) + magic[5] + '.' + magic[6] + '/' + magic[7]);
+      }
+      if (magic[7] != MetaData.joramMagic[7])
+        throw new IllegalAccessException("Bad protocol version number");
+      
       Identity identity = Identity.read(is);
       if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
@@ -241,7 +249,12 @@ public class TcpConnectionListener extends Daemon {
       TcpConnection tcpConnection = new TcpConnection(ioctrl, proxyId,
                                                       replyQueue, key, proxyService, heartBeat == 0);
       tcpConnection.start();
-    } catch (Exception exc) {
+    } catch (IllegalAccessException exc) {
+      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.ERROR))
+        JoramTracing.dbgProxy.log(BasicLevel.ERROR, "", exc);
+      sock.close();
+      throw exc;
+    } catch (IOException exc) {
       if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
       sock.close();
