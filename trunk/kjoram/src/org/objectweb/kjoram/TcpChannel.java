@@ -90,6 +90,8 @@ public class TcpChannel extends Channel {
     in = null;
   }
 
+  public final static byte[] magic = {'J', 'O', 'R', 'A', 'M', 5, 2, 52};
+
   /* (non-Javadoc)
    * @see org.objectweb.kjoram.Channel#connect()
    */
@@ -119,6 +121,11 @@ public class TcpChannel extends Channel {
     out = new OutputXStream();
     in = new InputXStream();
 
+    // Writes the Joram magic number
+    out.writeBuffer(magic);
+    
+    // Writes the user identity
+    out.writeString("");
     out.writeString(user);
     out.writeString(pass);
     out.writeInt(key);
