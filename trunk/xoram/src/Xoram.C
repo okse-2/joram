@@ -7,12 +7,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
@@ -27,7 +27,7 @@
 #include <string.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <sys/socket.h> 
+#include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <netdb.h>
@@ -69,7 +69,7 @@ class TcpMessage {
  public:
   long long id;
   AbstractRequest* msg;
-  
+
   TcpMessage(long long id, AbstractRequest* msg) {
     this->id = id;
     this->msg = msg;
@@ -166,7 +166,7 @@ class TcpChannel : public Channel {
 
     struct hostent *server = gethostbyname(host);
     if (server == NULL) throw ConnectException("Host unknown");
-    bcopy((char *)server->h_addr, 
+    bcopy((char *)server->h_addr,
           (char *)&addr.sin_addr.s_addr,
           server->h_length);
     if (::connect(sock, (sockaddr*) &addr, sizeof(addr)) == -1)
@@ -175,8 +175,17 @@ class TcpChannel : public Channel {
     out = new OutputStream();
     in = new InputStream();
 
+    // Joram magic number: should be defined in another way..
+    byte magic[] = {'J', 'O', 'R', 'A', 'M', 5, 2, 52};
+
+    // Writes the Joram magic number
+    if (out->writeByteArray(magic, 8) ==-1) throw IOException();
+
+    // Writes the identity using SimpleIdentity convention
+    if (out->writeString("") ==-1) throw IOException();
     if (out->writeString(user) == -1) throw IOException();
     if (out->writeString(pass) == -1) throw IOException();
+
     if (out->writeInt(key) == -1) throw IOException();
 
     if (key == -1) {
@@ -224,7 +233,7 @@ class TcpChannel : public Channel {
   virtual void send(AbstractRequest* request) throw (IOException) {
     if (status != CONNECT) throw IOException("Connection closed");
 
-    try {      
+    try {
       doSend(outputCounter, inputCounter, request);
       pendingMessages->addElement(new TcpMessage(outputCounter, request));
       outputCounter++;
@@ -320,7 +329,7 @@ void RequestMultiplexer::run() {
         }
         break;
       }
-      canStop = false; 
+      canStop = false;
       route(reply);
     }
   } catch (...) {
@@ -346,7 +355,7 @@ RequestMultiplexer::RequestMultiplexer(Connection* cnx,
   if(DEBUG)
     printf("<= RequestMultiplexer(): requestsTable = 0x%x\n", requestsTable);
 }
-  
+
 RequestMultiplexer::~RequestMultiplexer() {
   if(DEBUG)
     printf("~RequestMultiplexer(): requestsTable = 0x%x, exceptionListener = 0x%x\n", requestsTable, exceptionListener);
@@ -375,7 +384,7 @@ ExceptionListener* RequestMultiplexer::getExceptionListener() {
 void RequestMultiplexer::sendRequest(AbstractRequest* request) throw (XoramException) {
   sendRequest(request, (ReplyListener*) NULL);
 }
-  
+
 void RequestMultiplexer::sendRequest(AbstractRequest* request,
                                      ReplyListener* listener) throw (XoramException) {
   sync_begin();
@@ -593,11 +602,11 @@ void Requestor::abortRequest() {
 
 boolean Requestor::replyReceived(AbstractReply* reply) throw (AbortedRequestException) {
   sync_begin();
-  if (status == RUN) {      
+  if (status == RUN) {
     this->reply = reply;
     status = DONE;
     notify();
-    sync_end();    
+    sync_end();
     return true;
   }
   sync_end();
@@ -686,7 +695,7 @@ Connection::~Connection() {
     delete[] proxyId;
     proxyId = (char*) NULL;
   }
-  
+
 }
 
 boolean Connection::isStopped() {
@@ -695,7 +704,7 @@ boolean Connection::isStopped() {
 
 void Connection::start() {
   if (status == CLOSE) throw IllegalStateException();
-    
+
   // Ignoring the call if the connection is started:
   if (status == START) return;
 
@@ -728,7 +737,7 @@ void Connection::setExceptionListener(ExceptionListener* exclist) {
   this->exclist = exclist;
   mtpx->setExceptionListener(exclist);
 }
-  
+
 ExceptionListener* Connection::getExceptionListener() {
   if (status == CLOSE) throw IllegalStateException();
   return exclist;
@@ -748,7 +757,7 @@ void Connection::stop() {
     Session* session = sessions->elementAt(i);
     session->stop();
   }
-  
+
   if (status != STOP) {
     // Sending a synchronous "stop" request to the server:
     CnxStopRequest* request = new CnxStopRequest();
@@ -804,7 +813,7 @@ char* Connection::nextSessionId() {
   return ret;
   //  return strdup(buf);
 }
- 
+
 /** Returns a new message identifier. */
 char* Connection::nextMessageId() {
   char buf[40];
@@ -904,7 +913,7 @@ Destination::Destination(char* uid, char type, char* name) {
     newName[strlen(name)] = '\0';
     this->name = newName;
   }
-  
+
  // this->uid = uid;
  // this->name = name;
   this->type = type;
@@ -974,7 +983,7 @@ boolean TemporaryTopic::isTemporaryTopic() {
  *
  * @exception JMSException  In case of an invalid acknowledge mode.
  */
-Session::Session(Connection* cnx, 
+Session::Session(Connection* cnx,
                  boolean transacted,
                  int acknowledgeMode,
                  RequestMultiplexer* mtpx) throw (XoramException) {
@@ -1051,7 +1060,7 @@ RequestMultiplexer* Session::getRequestMultiplexer() {
 Topic* Session::createTopic(char* topicName) {
   // Checks if the topic to retrieve is the administration topic:
   if (strcmp(topicName, "#AdminTopic") == 0) {
-    GetAdminTopicReply* reply =  
+    GetAdminTopicReply* reply =
       (GetAdminTopicReply*) requestor->request(new GetAdminTopicRequest());
     if (reply->getId() != (char*) NULL)
       return new Topic(reply->getId(), topicName);
@@ -1071,7 +1080,7 @@ TemporaryTopic* Session::createTemporaryTopic() {
 /**
  * Creates a MessageProducer to send messages to the specified destination.
  *
- * @exception IllegalStateException  If the session is closed or if the 
+ * @exception IllegalStateException  If the session is closed or if the
  *              connection is broken.
  * @exception XoramException  If the creation fails for any other reason.
  */
@@ -1146,7 +1155,7 @@ MessageConsumer* Session::createDurableSubscriber(Topic* topic, char* subname,
   addConsumer(cons);
   return cons;
 }
-          
+
 /**
  * Unsubscribes a durable subscription that has been created by a client.
  */
@@ -1208,7 +1217,7 @@ void Session::commit() {
 /*   // Sending client messages: */
 /*   try { */
 /*     CommitRequest commitReq= new CommitRequest(); */
-      
+
 /*     Enumeration producerMessages = sendings.elements(); */
 /*     while (producerMessages.hasMoreElements()) { */
 /*       ProducerMessages pM =  */
@@ -1216,7 +1225,7 @@ void Session::commit() {
 /*       commitReq.addProducerMessages(pM); */
 /*     } */
 /*     sendings.clear(); */
-      
+
 /*     // Acknowledging the received messages: */
 /*     Enumeration targets = deliveries.keys(); */
 /*     while (targets.hasMoreElements()) { */
@@ -1229,7 +1238,7 @@ void Session::commit() {
 /*                                                  acks.getQueueMode())); */
 /*     } */
 /*     deliveries.clear(); */
-      
+
 /*     if (asyncSend) { */
 /*       // Asynchronous sending */
 /*       commitReq.setAsyncSend(true); */
@@ -1310,7 +1319,7 @@ void Session::close() {
 /*             BasicLevel.DEBUG, "", exc); */
 /*       } */
 /*     } */
-    
+
 /*     Vector producersToClose = (Vector)producers.clone(); */
 /*     producers.clear(); */
 /*     for (int i = 0; i < producersToClose.size(); i++) { */
@@ -1324,14 +1333,14 @@ void Session::close() {
 /*             BasicLevel.DEBUG, "", exc); */
 /*       } */
 /*     } */
-    
+
 /*     // This is now in removeMessageListener */
 /*     // called by MessageConsumer.close() */
 /*     // (see above) */
 /* //     try { */
 /* //       repliesIn.stop(); */
 /* //     } catch (InterruptedException iE) {} */
-      
+
   //stop();
 
 /*     // The requestor must be closed because */
@@ -1340,7 +1349,7 @@ void Session::close() {
 /*     receiveRequestor.close(); */
 
 /*     cnx.closeSession(this); */
-      
+
   status = CLOSE;
 }
 
@@ -1401,7 +1410,7 @@ void Session::distribute(AbstractReply* asyncReply) {
 
 /*     if (ids.isEmpty()) */
 /*       return; */
-  
+
 /*     try {  */
 /*       cnx.asyncRequest(new SessDenyRequest(reply.comesFrom(), ids, */
 /*                                            reply.getQueueMode(), true)); */
@@ -1437,7 +1446,7 @@ void Session::send(Message* msg, Destination* dest,
     msg->setExpiration(0);
   } else {
     msg->setExpiration(msg->getTimestamp() + timeToLive);
-  } 
+  }
   msg->setPriority(priority);
 
   if (transacted) {
@@ -1473,9 +1482,9 @@ Message* Session::receive(long timeOut1, long timeOut2,
                           char* selector, boolean queueMode) throw (XoramException) {
     if (status == CLOSE) throw IllegalStateException();
 /*   checkThreadOfControl(); */
-    
+
     // Don't call checkSessionMode because
-    // we also check that the session mode is not 
+    // we also check that the session mode is not
     // already set to RECEIVE.
 /*     switch (sessionMode) { */
 /*     case SessionMode.NONE: */
@@ -1496,7 +1505,7 @@ Message* Session::receive(long timeOut1, long timeOut2,
 
       delete request;
       request = (ConsumerReceiveRequest*) NULL;
-        
+
 /*       synchronized (this) { */
 /*         // The session may have been  */
 /*         // closed in between. */
@@ -1506,13 +1515,13 @@ Message* Session::receive(long timeOut1, long timeOut2,
 /*           } */
 /*           return null; */
 /*         } */
-        
+
         if (reply != (ConsumerMessages*) NULL) {
           Vector<Message>* msgs = reply->getMessages();
           if ((msgs != (Vector<Message>*) NULL) && (msgs->size() != 0)) {
             Message* msg = msgs->elementAt(0)->clone();
             char* msgId = msg->getMessageID();
-            
+
 /*             // Auto ack: acknowledging the message: */
 /*             if (autoAck && ! receiveAck) { */
               ConsumerAckRequest* req = new ConsumerAckRequest(targetName, queueMode);
@@ -1586,7 +1595,7 @@ void Session::addMessageListener(MessageConsumerListener* mcl) {
 /*   checkSessionMode(SessionMode.LISTENER); */
 
   listenerCount++;
-    
+
   if (status == START && listenerCount == 1) {
     // It's the first message listener, starts the session's thread.
     Daemon::start();
@@ -1603,7 +1612,7 @@ void Session::removeMessageListener(MessageConsumerListener* mcl) {
 /*     checkClosed(); */
 /*     checkThreadOfControl(); */
 /*   } */
-  
+
 /*   synchronized (this) { */
     listenerCount--;
     if (status == START && listenerCount == 0) {
@@ -1639,7 +1648,7 @@ AbstractReply* Session::syncRequest(AbstractRequest* request) throw (XoramExcept
  * @exception XoramException
  *	If the creation fails for any other reason.
  */
-MessageProducer::MessageProducer(Session* session, 
+MessageProducer::MessageProducer(Session* session,
                                  Destination* dest) throw (IllegalStateException) {
   this->deliveryMode = DeliveryMode::PERSISTENT;
   this->priority = 4;
@@ -1675,7 +1684,7 @@ void MessageProducer::setDeliveryMode(int deliveryMode) throw (IllegalStateExcep
 /**
  * Sets the producer's default priority.
  *
- * @exception IllegalStateException  
+ * @exception IllegalStateException
  *	If the producer is closed.
  * @exception IllegalArgumentException
  *	When setting an invalid priority.
@@ -1691,7 +1700,7 @@ void MessageProducer::setPriority(int priority) throw (IllegalStateException, Il
  * Sets the default duration of time in milliseconds that a produced
  * message should be retained by the provider.
  *
- * @exception IllegalStateException  
+ * @exception IllegalStateException
  *	If the producer is closed.
  */
 void MessageProducer::setTimeToLive(long timeToLive) throw (IllegalStateException) {
@@ -1715,7 +1724,7 @@ Destination* MessageProducer::getDestination() throw (IllegalStateException) {
 /**
  * Gets the producer's default delivery mode.
  *
- * @exception IllegalStateException  
+ * @exception IllegalStateException
  *	If the producer is closed.
  */
 int MessageProducer::getDeliveryMode() throw (IllegalStateException) {
@@ -1727,7 +1736,7 @@ int MessageProducer::getDeliveryMode() throw (IllegalStateException) {
 /**
  * Gets the producer's default priority.
  *
- * @exception IllegalStateException  
+ * @exception IllegalStateException
  *	If the producer is closed.
  */
 int MessageProducer::getPriority() throw (IllegalStateException) {
@@ -1740,7 +1749,7 @@ int MessageProducer::getPriority() throw (IllegalStateException) {
  * Gets the default duration in milliseconds that a produced message
  * should be retained by the provider.
  *
- * @exception IllegalStateException  
+ * @exception IllegalStateException
  *	If the producer is closed.
  */
 long MessageProducer::getTimeToLive() throw (IllegalStateException) {
@@ -1821,7 +1830,7 @@ void MessageProducer::close() {
  * @exception XoramException
  *	If the creation fails for any other reason.
  */
-MessageConsumer::MessageConsumer(Session* session, 
+MessageConsumer::MessageConsumer(Session* session,
                                  Destination* dest,
                                  char* selector) throw (XoramException) {
   MessageConsumer(session, dest, selector, (char*) NULL, FALSE);
@@ -1839,10 +1848,10 @@ MessageConsumer::MessageConsumer(Session* session,
  * @exception XoramException
  *	If the creation fails for any other reason.
  */
-MessageConsumer::MessageConsumer(Session* session, 
+MessageConsumer::MessageConsumer(Session* session,
                                  Destination* dest,
                                  char* selector,
-                                 char* subName, 
+                                 char* subName,
                                  boolean noLocal) throw (XoramException) {
   if (dest == (Destination*) NULL) throw InvalidDestinationException();
 
@@ -1856,7 +1865,7 @@ MessageConsumer::MessageConsumer(Session* session,
   /*         throw new SecurityException(); */
   /*     } else if (dest instanceof TemporaryTopic) { */
   /*       Connection tempTCnx = ((TemporaryTopic) dest).getCnx(); */
-    
+
   /*       if (tempTCnx == null || ! tempTCnx.equals(sess.getConnection())) */
   /*         throw new SecurityException(); */
   /*     } */
@@ -1930,7 +1939,7 @@ boolean MessageConsumer::getQueueMode() {
  * is started, because the session would then be accessed by the thread
  * calling this method and by the thread controlling asynchronous deliveries.
  * This situation is clearly forbidden by the single threaded nature of
- * sessions. Moreover, unsetting a message listener without stopping the 
+ * sessions. Moreover, unsetting a message listener without stopping the
  * connection may lead to the situation where asynchronous deliveries would
  * arrive on the connection, the session or the consumer without being
  * able to reach their target listener!
@@ -1984,9 +1993,9 @@ char* MessageConsumer::getMessageSelector() throw (XoramException) {
   return selector;
 }
 
-/** 
+/**
  * Receives the next message produced for this message consumer.
- * 
+ *
  * @exception IllegalStateException
  *	If the consumer is closed, or if the connection is broken.
  * @exception SecurityException
@@ -1998,7 +2007,7 @@ Message* MessageConsumer::receive() throw (XoramException) {
   return receive(0);
 }
 
-/** 
+/**
  * Receives the next message that arrives before the specified timeout.
  *
  * @exception IllegalStateException
@@ -2011,13 +2020,13 @@ Message* MessageConsumer::receive() throw (XoramException) {
 Message* MessageConsumer::receive(long timeOut) throw (XoramException) {
   if (closed) throw IllegalStateException();
 
-  return session->receive(timeOut, timeOut, this, 
+  return session->receive(timeOut, timeOut, this,
                           targetName, selector, queueMode);
 }
 
-/** 
+/**
  * Receives the next message if one is immediately available.
- * 
+ *
  * @exception IllegalStateException
  *	If the consumer is closed, or if the connection is broken.
  * @exception SecurityException
@@ -2031,7 +2040,7 @@ Message* MessageConsumer::receiveNoWait() throw (XoramException) {
   if (session->getConnection()->isStopped()) {
     return (Message*) NULL;
   } else {
-    return session->receive(-1, 0, this, 
+    return session->receive(-1, 0, this,
                             targetName, selector, queueMode);
   }
 }
@@ -2076,7 +2085,7 @@ void MessageConsumer::close() {
     // is currently receiving a message (onMessage is called)
     // so we have to be out of the synchronized block.
     mcl->close();
-    
+
     // Stop the listener.
     session->removeMessageListener(mcl);
   }
@@ -2176,7 +2185,7 @@ boolean MessageConsumerListener::replyReceived(AbstractReply* reply) throw(Abort
 /*       cm = (ConsumerMessages*) reply; */
 /*     // 2- increment messageCount (synchronized) */
 /*     messageCount += cm->getMessageCount(); */
-        
+
 /*     session->repliesIn->push(new MessageListenerContext(this, cm)); */
 /*   } catch (StoppedQueueException exc) { */
 /*     throw AbortedRequestException(); */
@@ -2189,7 +2198,7 @@ boolean MessageConsumerListener::replyReceived(AbstractReply* reply) throw(Abort
 /*     return false; */
 /*   } */
 
-  
+
 void MessageConsumerListener::replyAborted() {
   if (status == RUN) {
     reply = (AbstractReply*) NULL;
