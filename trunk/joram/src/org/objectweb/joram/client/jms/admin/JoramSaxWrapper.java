@@ -44,6 +44,7 @@ import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.security.Identity;
+import org.objectweb.joram.shared.security.SimpleIdentity;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 import org.xml.sax.Attributes;
@@ -358,7 +359,7 @@ public class JoramSaxWrapper extends DefaultHandler {
             // Get identity class name.
             identityClass = atts.getValue(ATT_IDENTITYCLASS);
             if (!isSet(identityClass))
-              identityClass = Identity.SIMPLE_IDENTITY_CLASS;
+              identityClass = SimpleIdentity.class.getName();
           } catch (NumberFormatException exc) {
             throw new Exception("bad value for port: " +
                                 atts.getValue(ATT_PORT) +
@@ -391,7 +392,7 @@ public class JoramSaxWrapper extends DefaultHandler {
             // Get identity class name.
             identityClass = atts.getValue(ATT_IDENTITYCLASS);
             if (!isSet(identityClass))
-              identityClass = Identity.SIMPLE_IDENTITY_CLASS;
+              identityClass = SimpleIdentity.class.getName();
           } catch (NumberFormatException exc) {
             throw new Exception("cnxTimer: " +
                                 atts.getValue(ATT_CNXTIMER));
@@ -410,7 +411,7 @@ public class JoramSaxWrapper extends DefaultHandler {
           // Get identity class name.
           identityClass = atts.getValue(ATT_IDENTITYCLASS);
           if (!isSet(identityClass))
-            identityClass = Identity.SIMPLE_IDENTITY_CLASS;
+            identityClass = SimpleIdentity.class.getName();
         } catch (Exception exc) {
           throw new SAXException(exc.getMessage(), exc);
         }
@@ -779,7 +780,7 @@ public class JoramSaxWrapper extends DefaultHandler {
                        "*****," +
                        serverId + ")");
           if (! isSet(login)) login = name;
-          if (! isSet(identityClass)) identityClass = Identity.SIMPLE_IDENTITY_CLASS;
+          if (! isSet(identityClass)) identityClass = SimpleIdentity.class.getName();
           User user = User.create(login, password, serverId, identityClass);
           users.put(name, user);
 

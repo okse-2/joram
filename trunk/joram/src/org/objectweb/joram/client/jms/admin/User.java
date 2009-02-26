@@ -59,6 +59,7 @@ import org.objectweb.joram.shared.admin.SetUserDMQ;
 import org.objectweb.joram.shared.admin.SetUserThreshold;
 import org.objectweb.joram.shared.admin.UpdateUser;
 import org.objectweb.joram.shared.security.Identity;
+import org.objectweb.joram.shared.security.SimpleIdentity;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.util.management.MXWrapper;
@@ -131,7 +132,7 @@ public class User extends AdministeredObject implements UserMBean {
    */ 
   public static User create(String name, String password, int serverId)
     throws ConnectException, AdminException {
-    return create(name, password, serverId, Identity.SIMPLE_IDENTITY_CLASS);
+    return create(name, password, serverId, SimpleIdentity.class.getName());
   }
   
   /**
@@ -150,7 +151,7 @@ public class User extends AdministeredObject implements UserMBean {
    */ 
   public static User create(String name, String password)
          throws ConnectException, AdminException {
-    return create(name, password, AdminModule.getLocalServerId(), Identity.SIMPLE_IDENTITY_CLASS);
+    return create(name, password, AdminModule.getLocalServerId(), SimpleIdentity.class.getName());
   }
   
   /**
@@ -224,7 +225,7 @@ public class User extends AdministeredObject implements UserMBean {
    */
   public void update(String newName, String newPassword)
     throws ConnectException, AdminException {
-    update(newName, newPassword, Identity.SIMPLE_IDENTITY_CLASS);
+    update(newName, newPassword, SimpleIdentity.class.getName());
   }
   
   /**

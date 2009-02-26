@@ -75,6 +75,7 @@ import org.objectweb.joram.shared.admin.SetDefaultDMQ;
 import org.objectweb.joram.shared.admin.SetDefaultThreshold;
 import org.objectweb.joram.shared.admin.StopServerRequest;
 import org.objectweb.joram.shared.security.Identity;
+import org.objectweb.joram.shared.security.SimpleIdentity;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -150,7 +151,7 @@ public class AdminModule {
                              String name,
                              String password)
     throws ConnectException, AdminException {
-    connect(cnxFact, name, password, Identity.SIMPLE_IDENTITY_CLASS);
+    connect(cnxFact, name, password, SimpleIdentity.class.getName());
     }
   
   /**
@@ -262,7 +263,7 @@ public class AdminModule {
                              int cnxTimer,
                              String reliableClass)
     throws UnknownHostException, ConnectException, AdminException {
-    connect(hostName, port, name, password, cnxTimer, reliableClass, Identity.SIMPLE_IDENTITY_CLASS);
+    connect(hostName, port, name, password, cnxTimer, reliableClass, SimpleIdentity.class.getName());
   }
   
   /**
@@ -361,7 +362,7 @@ public class AdminModule {
    */
   public static void collocatedConnect(String name, String password)
          throws ConnectException, AdminException {
-    collocatedConnect(name, password, Identity.SIMPLE_IDENTITY_CLASS);
+    collocatedConnect(name, password, SimpleIdentity.class.getName());
   }
 
   /**

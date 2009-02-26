@@ -40,7 +40,7 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.util.Debug;
 
 /**
- *
+ * Abstract class needed to describe all identities.
  */
 public abstract class Identity implements Externalizable, Streamable {
   
@@ -87,15 +87,20 @@ public abstract class Identity implements Externalizable, Streamable {
    * @return identity class name.
    */
   public static String getRootIdentityClass(String rootName) {
-    String identityClassName = Identity.SIMPLE_IDENTITY_CLASS;
+    String identityClassName = null;
+    
     int index = rootName.indexOf(SEPARATE_CHAR);
     if (index > 0) {
       identityClassName = rootName.substring(0, index);
-      rootName = rootName.substring(index+1, rootName.length()); 
+    } else {
+      // default identity
+      identityClassName = SimpleIdentity.class.getName();
     }
+    
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
-          "getRootIdentityClass: identityClassName = " + identityClassName);  
+                 "getRootIdentityClass: identityClassName = " + identityClassName);
+    
     return identityClassName;
   }
   
@@ -115,28 +120,11 @@ public abstract class Identity implements Externalizable, Streamable {
           "getRootName: rootName = " + root);  
     return root;
   }
-  
-  public static final String SIMPLE_IDENTITY_CLASS = "org.objectweb.joram.shared.security.SimpleIdentity";
-  public static final String JONAS_IDENTITY_ClASS = "org.objectweb.joram.shared.security.jaas.JonasIdentity";
-  protected final static int NULL_CLASS_ID = -1;
-  protected final static int SIMPLE_IDENTITY = 0;
-  protected final static int JONAS_IDENTITY = 1;
-  
-  protected int classid;
-
-  protected static final String[] classnames = {
-    SIMPLE_IDENTITY_CLASS,
-    JONAS_IDENTITY_ClASS
-  };
-  
-  protected abstract int getClassId();
 
   /**
    * Constructs an <code>Identity</code>.
    */
-  public Identity() {
-    classid = getClassId();
-  }
+  public Identity() {}
 
   /** ***** ***** ***** ***** ***** ***** ***** *****
    * Interface needed for soap serialization
@@ -189,13 +177,15 @@ public abstract class Identity implements Externalizable, Streamable {
 
   public final void writeExternal(ObjectOutput out) throws IOException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,  "Identity.writeExternal: " + out);
+      logger.log(BasicLevel.DEBUG,  "Identity.writeExternal");
+    
     writeTo((OutputStream) out);
   }
 
   public final void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,  "Identity.readExternal: " + in);
+      logger.log(BasicLevel.DEBUG,  "Identity.readExternal");
+    
     readFrom((InputStream) in);
   }
 
@@ -209,21 +199,23 @@ public abstract class Identity implements Externalizable, Streamable {
       logger.log(BasicLevel.DEBUG,  "Identity.write: " + identity);
    
     if (identity == null) {
-      StreamUtil.writeTo(NULL_CLASS_ID, os);
+      StreamUtil.writeTo((String) null, os);
+      return;
+    } else if (identity instanceof SimpleIdentity) {
+      StreamUtil.writeTo("", os);
     } else {
-      StreamUtil.writeTo(identity.getClassId(), os);
-      identity.writeTo(os);
+      StreamUtil.writeTo(identity.getClass().getName(), os);
     }
+    identity.writeTo(os);
   }
 
-  static public Identity read(InputStream is) 
-  throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
-    int classid = -1;
+  static public Identity read(InputStream is) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
     Identity identity = null;
 
-    classid = StreamUtil.readIntFrom(is);
-    if (classid != NULL_CLASS_ID) {
-      identity = (Identity) Class.forName(classnames[classid]).newInstance();
+    String classname = StreamUtil.readStringFrom(is);
+    if (classname != null) {
+      if (classname.length() == 0) classname = SimpleIdentity.class.getName();
+      identity = (Identity) Class.forName(classname).newInstance();
       identity.readFrom(is);
     }
 

@@ -75,6 +75,7 @@ import org.objectweb.joram.client.jms.local.XALocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
 import org.objectweb.joram.shared.security.Identity;
+import org.objectweb.joram.shared.security.SimpleIdentity;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import com.scalagent.jmx.JMXServer;
@@ -140,7 +141,7 @@ public class JoramAdapter
   /** Root name. */
   String rootName = "root";
   String rootPasswd = "root";
-  String identityClass = Identity.SIMPLE_IDENTITY_CLASS;
+  String identityClass = SimpleIdentity.class.getName();
 
   /** Identifier of the JORAM server to start. */
   short serverId = 0;

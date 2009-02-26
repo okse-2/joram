@@ -30,10 +30,10 @@ import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
- *
+ * Default identity class for authentication through user and password.
  */
 public class SimpleIdentity extends Identity {
-
+  /** Define serialVersionUID for interoperability. */
   private static final long serialVersionUID = 1L;
   
   private String user;
@@ -76,56 +76,34 @@ public class SimpleIdentity extends Identity {
   public boolean check(Identity identity) throws Exception  {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "SimpleIdentity.check(" + identity + ')');
-    
+
     if (! (identity instanceof SimpleIdentity)) {
       if (logger.isLoggable(BasicLevel.ERROR))
-        logger.log(BasicLevel.ERROR, "check : SimpleIdentity is not an instance of " + identity);
-      throw new Exception("check : SimpleIdentity is not an instance of " + identity);
+        logger.log(BasicLevel.ERROR, "check : SimpleIdentity is expected for " + identity);
+      throw new Exception("check : SimpleIdentity is expected for " + identity);
     }
-    
+
     if (! getUserName().equals(identity.getUserName())) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, 
-            "Invalid user [" + classnames[getClassId()] +':' + getUserName() + 
-            "] wait [" + classnames[getClassId()] +':' + identity.getUserName() + "]");
-      throw new Exception(
-          "Invalid user [" + classnames[getClassId()] +':' + getUserName() + 
-          "] wait [" + classnames[getClassId()] +':' + identity.getUserName() + "]");
+                   "Invalid user [" + getUserName() + "] wait [" + identity.getUserName() + "]");
+      throw new Exception("Invalid user [" + getUserName() + "] wait [" + identity.getUserName() + "]");
     }
     if (! getCredential().equals(identity.getCredential())) {
-      if (getCredential() instanceof String) {
-        if (logger.isLoggable(BasicLevel.ERROR))
-          logger.log(BasicLevel.ERROR, "Invalid password for user [" + identity.getUserName() + "]");
-        throw new Exception("Invalid password for user [" + identity.getUserName() + "]");
-      } else {
-        if (logger.isLoggable(BasicLevel.ERROR))
-          logger.log(BasicLevel.ERROR, 
-              "Invalid authentication class for user [" + identity.getUserName() + 
-              "] wait Identity class : " + classnames[getClassId()]);
-        throw new Exception(
-            "Invalid authentication class for user [" + identity.getUserName() + 
-            "] wait Identity class : " + classnames[getClassId()]);
-      }
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "Invalid credential for user [" + identity.getUserName() + "]");
+      throw new Exception("Invalid credential for user [" + identity.getUserName() + "]");
     }
     return true;
   }
   
   public String toString() {
     StringBuffer buff = new StringBuffer();
-    buff.append("SimpleIdentity (");
-    buff.append("user=");
-    buff.append(user);
-    buff.append(",password=****");
-    //buff.append(passwd);
+    buff.append(super.toString()).append('(');
+    buff.append("user=").append(user);
+//  buff.append(passwd);
     buff.append(')');
     return buff.toString();
-  }
-
-  /* (non-Javadoc)
-   * @see org.objectweb.joram.shared.security.Identity#getClassId()
-   */
-  protected int getClassId() {
-    return SIMPLE_IDENTITY;
   }
 
   /* (non-Javadoc)
@@ -134,14 +112,18 @@ public class SimpleIdentity extends Identity {
   public void readFrom(InputStream is) throws IOException {
     user = StreamUtil.readStringFrom(is);
     passwd = StreamUtil.readStringFrom(is);
+    
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "readFrom: user = " + user + ", passwd = ****");
+      logger.log(BasicLevel.DEBUG, "SimpleIdentity.readFrom: user=" + user);
   }
 
   /* (non-Javadoc)
    * @see org.objectweb.joram.shared.stream.Streamable#writeTo(java.io.OutputStream)
    */
   public void writeTo(OutputStream os) throws IOException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "SimpleIdentity.writeTo: user=" + user);
+
     StreamUtil.writeTo(user, os);
     StreamUtil.writeTo(passwd, os);
   }

@@ -29,6 +29,7 @@ import javax.resource.spi.InvalidPropertyException;
 import javax.resource.spi.ResourceAdapter;
 
 import org.objectweb.joram.shared.security.Identity;
+import org.objectweb.joram.shared.security.SimpleIdentity;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -67,7 +68,7 @@ public class ActivationSpecImpl
   /** User password. */
   private String password = "anonymous";
   /** identity class name. */
-  String identityClass = Identity.SIMPLE_IDENTITY_CLASS;
+  String identityClass = SimpleIdentity.class.getName();
 
   /** Message selector. */
   private String messageSelector = null;

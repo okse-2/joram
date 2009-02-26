@@ -37,6 +37,7 @@ import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.security.Identity;
+import org.objectweb.joram.shared.security.SimpleIdentity;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.util.management.MXWrapper;
@@ -97,7 +98,7 @@ public class JoramAdmin
       String name,
       String password)
   throws ConnectException, AdminException {
-    this(cnxFact, name, password, Identity.SIMPLE_IDENTITY_CLASS);
+    this(cnxFact, name, password, SimpleIdentity.class.getName());
   }
 
   public JoramAdmin(javax.jms.TopicConnectionFactory cnxFact,
@@ -354,7 +355,7 @@ public class JoramAdmin
   public void createUser(String name, String password, int serverId)
     throws AdminException {
     try {
-      User.create(name, password, serverId, Identity.SIMPLE_IDENTITY_CLASS);
+      User.create(name, password, serverId, SimpleIdentity.class.getName());
     } catch (ConnectException exc) {
       throw new AdminException("createUser() failed: admin connection "
                                + "has been lost.");

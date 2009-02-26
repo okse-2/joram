@@ -33,6 +33,7 @@ import javax.naming.StringRefAddr;
 import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.security.Identity;
+import org.objectweb.joram.shared.security.SimpleIdentity;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -48,7 +49,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
   /** Authentication identity. */
   protected Identity identity = null;
   
-  protected String identityClassName = Identity.SIMPLE_IDENTITY_CLASS;
+  protected String identityClassName = SimpleIdentity.class.getName();
 
   /**
    * Constructs a <code>ConnectionFactory</code> dedicated to a given server.
@@ -105,9 +106,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, "initIdentity("+ user + ", ****)");
     try {
       if (!isSetIdentityClassName) {
-        identityClassName = 
-          System.getProperty("org.objectweb.joram.Identity", 
-              Identity.SIMPLE_IDENTITY_CLASS);
+        identityClassName = System.getProperty("org.objectweb.joram.Identity", SimpleIdentity.class.getName());
       }
       Class clazz = Class.forName(identityClassName);
       identity = (Identity) clazz.newInstance();
