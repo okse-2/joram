@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="joram-team@ow2.org">JORAM team</author>
+    <title>JORAM road map</title>
+    <filename>roadMap.xml</filename>
+    <pathtoroot>..</pathtoroot>
+  </properties>
+
+  <body>
+
+  <s1 name="Road map">
+  
+    <s2 name="J2ME light Client">
+    <p>After the C/C++ client library, a new MIDP client allowing Joram
+    access from J2ME device will be released in September.</p>
+    </s2>
+
+    <s2 name="AMQP">
+    <p>Thank's to third party users, the Joram team should announce soon the
+    support of AMQP in Joram. It will allow the use of Joram from many client
+    interfaceS and langages.</p>
+    </s2>
+    
+    <s2 name="Security model">
+    <p>A new security implementation with authentication based on JAAS LoginModule
+    and User/Role access control rights.</p>
+    </s2>
+    
+  </s1>
+
+  <s1 name="Call for contributions">
+
+    <s2 name="Tutorials and documentation">
+    <p>If you wish to contribute a translation, feel free to contact us.</p>
+    </s2>
+
+  </s1>
+
+  </body>
+
+</document>
