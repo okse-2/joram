@@ -1,0 +1,5 @@
+# AgentServer Property File
+sid=0
+path=adir
+storageDirName=s0
+logicalServerName=server0
