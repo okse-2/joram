@@ -51,6 +51,7 @@ import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
 import org.objectweb.joram.client.jms.local.XALocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
 import org.objectweb.joram.shared.security.Identity;
+import org.objectweb.joram.shared.security.SimpleIdentity;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -87,7 +88,7 @@ public class ManagedConnectionFactoryImpl
   /** Default user password. */
   String password = "anonymous";
   /** Default identityClass*/
-  String identityClass = Identity.SIMPLE_IDENTITY_CLASS;
+  String identityClass = SimpleIdentity.class.getName();
 
   /**
    * Duration in seconds during which connecting is attempted (connecting

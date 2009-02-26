@@ -67,12 +67,11 @@ import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.BasicLevel;
 
-
 /**
- *
+ * JAAS identity class used to authenticate through JOnAS.
  */
 public class JonasIdentity extends Identity {
-
+  /** Define serialVersionUID for interoperability. */
   private static final long serialVersionUID = 1L;
 
   /**
@@ -158,13 +157,6 @@ public class JonasIdentity extends Identity {
    */
   public Object getCredential() {
     return serializeSubject(subject);
-  }
-
-  /* (non-Javadoc)
-   * @see org.objectweb.joram.shared.security.Identity#getClassId()
-   */
-  protected int getClassId() {
-    return JONAS_IDENTITY;
   }
 
   /* (non-Javadoc)

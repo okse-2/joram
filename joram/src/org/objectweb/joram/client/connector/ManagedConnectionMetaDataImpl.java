@@ -31,12 +31,10 @@ import org.objectweb.joram.client.jms.ConnectionMetaData;
  * related to a managed connection.
  */
 public class ManagedConnectionMetaDataImpl
-             implements javax.resource.spi.ManagedConnectionMetaData
-{
+             implements javax.resource.spi.ManagedConnectionMetaData {
   /** Name of the user associated with the managed connection. */
   private String userName;
 
-  
   /**
    * Constructs a <code>ManagedConnectionMetaDataImpl</code> instance.
    */
@@ -47,28 +45,23 @@ public class ManagedConnectionMetaDataImpl
     this.userName = userName;
   }
 
-   
   /** Returns JORAM's name. */
-  public String getEISProductName() throws ResourceException
-  {
+  public String getEISProductName() throws ResourceException {
     return ConnectionMetaData.jmsProviderName;
   }
 
   /** Returns the current JORAM release number. */
-  public String getEISProductVersion() throws ResourceException
-  {
+  public String getEISProductVersion() throws ResourceException {
     return ConnectionMetaData.providerVersion;
   }
 
   /** Returns 0 as JORAM as no upper limit of active connections. */
-  public int getMaxConnections() throws ResourceException
-  {
+  public int getMaxConnections() throws ResourceException {
     return 0;
   }
 
   /** Returns the name of the user associated with the managed connection. */
-  public String getUserName() throws ResourceException
-  {
+  public String getUserName() throws ResourceException {
     return userName;
   }
 }
