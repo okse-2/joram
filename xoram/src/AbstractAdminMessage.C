@@ -1,17 +1,17 @@
 /*
  * XORAM: Open Reliable Asynchronous Messaging
- * Copyright (C) 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
@@ -321,7 +321,7 @@ CreateDestinationReply::CreateDestinationReply() : AdminReply() {
   classid = CREATE_DESTINATION_REPLY;
 }
 
-CreateDestinationReply::CreateDestinationReply(char* id, 
+CreateDestinationReply::CreateDestinationReply(char* id,
                                                char* name,
                                                char* type,
                                                char* info) : AdminReply(TRUE, info) {
@@ -411,15 +411,21 @@ CreateUserRequest::~CreateUserRequest() {
 // Streamable interface
 // ====================
 void CreateUserRequest::writeTo(OutputStream *os) throw (IOException) {
-  if (os->writeInt(serverId) == -1)  throw IOException();
-  if (os->writeString(userName) == -1)  throw IOException();
-  if (os->writeString(userPass) == -1)  throw IOException();
+  if (os->writeInt(serverId) == -1) throw IOException();
+  // Always default identity class: "org.objectweb.joram.shared.security.SimpleIdentity".
+  if (os->writeString("") == -1) throw IOException();
+  if (os->writeString(userName) == -1) throw IOException();
+  if (os->writeString(userPass) == -1) throw IOException();
 }
 
 void CreateUserRequest::readFrom(InputStream *is) throw (IOException) {
-  if (is->readInt(&serverId) == -1)  throw IOException();
-  if (is->readString(&userName) == -1)  throw IOException();
-  if (is->readString(&userPass) == -1)  throw IOException();
+  char* identityClass;
+  if (is->readInt(&serverId) == -1) throw IOException();
+  if (is->readString(&identityClass) == -1) throw IOException();
+  if ((strlen(identityClass) != 0) &&
+	  (strcmp(identityClass, "org.objectweb.joram.shared.security.SimpleIdentity") != 0)) throw IOException();
+  if (is->readString(&userName) == -1) throw IOException();
+  if (is->readString(&userPass) == -1) throw IOException();
 }
 
 // ######################################################################

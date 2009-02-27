@@ -1,18 +1,18 @@
 /*
  * XORAM: Open Reliable Asynchronous Messaging
+ * Copyright (C) 2006 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2006 CNES
- * Copyright (C) 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
@@ -30,6 +30,9 @@
 
 #include "XStream.H"
 
+/**
+ * Writes len bytes from array buf to the internal buffer of the stream.
+ */
 int OutputStream::writeBuffer(byte* buf, int len) {
   int newcount = count + len;
   if (newcount > length) {
@@ -83,6 +86,11 @@ int OutputStream::size() {
   return count -4;
 }
 
+/**
+ * Writes the content of this stream to the specified file descriptor.
+ * This method first writes the size of the stream (4 bytes) then the content of the internal buffer.
+ * The stream is automatically reseted at the end of the method.
+ */
 int OutputStream::writeTo(int fd) {
   *((int*) buffer) = htonl(size());
   if (write(fd, buffer, count) != count) {
@@ -93,10 +101,29 @@ int OutputStream::writeTo(int fd) {
   return 0;
 }
 
+/**
+ * Writes the content of the internal buffer to the specified file descriptor.
+ * The stream is automatically reseted at the end of the method.
+ */
+int OutputStream::writeDataTo(int fd) {
+  if (write(fd, buffer+4, count-4) != count-4) {
+    perror("writeDataTo");
+    return -1;
+  }
+  reset();
+  return 0;
+}
+
+/**
+ * Copy the content of the internal buffer in the specified buffer.
+ */
 void OutputStream::toBuffer(byte* buf) {
   memcpy(buf, buffer+4, count-4);
 }
 
+/**
+ * Writes a long to the stream as eight bytes, high byte first.
+ */
 int OutputStream::writeLong(long long l) {
   int x1 = htonl((int) ((l >> 32) & 0xFFFFFFFFL));
   int x2 = htonl((int) (l & 0xFFFFFFFFL));
@@ -107,6 +134,9 @@ int OutputStream::writeLong(long long l) {
   return 0;
 }
 
+/**
+ * Writes an int to the stream as four bytes, high byte first.
+ */
 int OutputStream::writeInt(int i) {
   int x = htonl(i);
   if (writeBuffer((byte*) &x, 4) != 4) {
@@ -116,6 +146,9 @@ int OutputStream::writeInt(int i) {
   return 0;
 }
 
+/**
+ * Writes a short to output stream as two bytes, high byte first.
+ */
 int OutputStream::writeShort(short s) {
   short x = htons(s);
   if (writeBuffer((byte*) &x, 2) != 2) {
@@ -125,6 +158,9 @@ int OutputStream::writeShort(short s) {
   return 0;
 }
 
+/**
+ * Writes a boolean to the stream as a 1-byte value.
+ */
 int OutputStream::writeBoolean(boolean b) {
   if (b)
     return writeByte((byte) S_TRUE);
@@ -132,6 +168,9 @@ int OutputStream::writeBoolean(boolean b) {
     return writeByte((byte) S_FALSE);
 }
 
+/**
+ * Writes out a byte to the stream as a 1-byte value.
+ */
 int OutputStream::writeByte(byte b) {
   if ((count + 1) > length) {
     byte* newbuf = new byte[length*2];
@@ -147,9 +186,12 @@ int OutputStream::writeByte(byte b) {
   buffer[count] = b;
   count += 1;
 
-  return 1;	
+  return 1;
 }
 
+/**
+ * Writes a string to the stream.
+ */
 int OutputStream::writeString(char *str) {
   int len;
 
@@ -161,6 +203,9 @@ int OutputStream::writeString(char *str) {
   return writeBuffer((byte*) str, len);
 }
 
+/**
+ * Writes an array of len bytes to the stream.
+ */
 int OutputStream::writeByteArray(byte* tab, int len) {
   if (tab == NULL) {
     return writeInt(-1);
@@ -181,6 +226,9 @@ int OutputStream::writeDouble(double d) {
   return writeLong(* ((long long *) &d));
 }
 
+/**
+ * Writes a vector of string to the stream.
+ */
 void OutputStream::writeVectorOfString(Vector<char>* vector) throw(IOException) {
   if (vector == (Vector<char>*) NULL) {
     if (writeInt(-1) == -1) throw IOException();
@@ -194,6 +242,9 @@ void OutputStream::writeVectorOfString(Vector<char>* vector) throw(IOException) 
   }
 }
 
+/**
+ * Writes a Properties object to the stream.
+ */
 void OutputStream::writeProperties(Properties* properties) throw(IOException) {
   if (properties == (Properties*) NULL) {
     if (writeInt(-1) == -1) throw IOException();
@@ -203,6 +254,10 @@ void OutputStream::writeProperties(Properties* properties) throw(IOException) {
   }
 }
 
+/**
+ * Reads up to len bytes from the internal buffer to the array of bytes buf.
+ * The number of read bytes is returned.
+ */
 int InputStream::readBuffer(byte* buf, int len) {
   if (buf == NULL) return -1;
 
@@ -248,14 +303,24 @@ InputStream::~InputStream() {
   }
 }
 
+/**
+ * Resets the stream as empty.
+ */
 void InputStream::reset() {
   pos = 0;
 }
 
+/**
+ * Returns the number of bytes in the stream.
+ */
 int InputStream::size() {
   return count;
 }
 
+/**
+ * Fill the buffer from the specified file descriptor.
+ * The number of available bytes are first read then the buffer is filled.
+ */
 int InputStream::readFrom(int fd) {
   int buf, len;
   if (read(fd, &buf, 4) != 4)  {
@@ -289,9 +354,12 @@ int InputStream::readFrom(int fd) {
   return 0;
 }
 
+/**
+ * Reads eight input bytes and returns a long value.
+ */
 int InputStream::readLong(long long *l) {
   long long x1, x2;
-  
+
   if (pos +8 > count) return -1;
 
   x1 = (((long long) ntohl(*(int*)(buffer+pos))) & 0xFFFFFFFFL);
@@ -302,6 +370,9 @@ int InputStream::readLong(long long *l) {
   return 0;
 }
 
+/**
+ * Reads four input bytes and returns an int value.
+ */
 int InputStream::readInt(int *i) {
   if (pos +4 > count) return -1;
 
@@ -311,6 +382,9 @@ int InputStream::readInt(int *i) {
   return 0;
 }
 
+/**
+ * Reads two input bytes and returns a short value.
+ */
 int InputStream::readShort(short *s) {
   if (pos +2 > count) return -1;
 
@@ -320,6 +394,9 @@ int InputStream::readShort(short *s) {
   return 0;
 }
 
+/**
+ * Reads one input byte and returns true if that byte is nonzero, false if that byte is zero.
+ */
 int InputStream::readBoolean(boolean *b) {
   if (pos +1 > count) return -1;
 
@@ -329,6 +406,9 @@ int InputStream::readBoolean(boolean *b) {
   return 0;
 }
 
+/**
+ * Reads and returns one input byte.
+ */
 int InputStream::readByte(byte *b) {
   if (pos +1 > count) return -1;
 
@@ -338,6 +418,9 @@ int InputStream::readByte(byte *b) {
   return 0;
 }
 
+/**
+ * Reads in a string.
+ */
 int InputStream::readString(char **str) {
   int len;
   char* buf = (char*) NULL;
@@ -363,6 +446,9 @@ int InputStream::readString(char **str) {
   return 0;
 }
 
+/**
+ * Reads the length of the array then reads the corresponding bytes and stores them into the byte array tab.
+ */
 int InputStream::readByteArray(byte** tab) {
   int len;
 
@@ -400,7 +486,7 @@ Vector<char>* InputStream::readVectorOfString() throw(IOException) {
 /*   if (capacity <= 0) return (Vector<char>*) NULL; */
 
   if (readInt(&count) == -1) throw IOException();
-  if (count <= 0) return (Vector<char>*) NULL; 
+  if (count <= 0) return (Vector<char>*) NULL;
 
   Vector<char>* vector = new Vector<char>(count);
   for (int i=0; i<count; i++) {
