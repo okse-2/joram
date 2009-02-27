@@ -8,19 +8,18 @@ INCDIR = ../../src
 #LIBXORAM = libxoram.dll
 ###############################
 # i86-linux
- CCOPT = -g -I../../src
- LDFLAGS = -lrt
- LIBXORAM = libxoram.so
+CCOPT = -g -fPIC -I$(INCDIR)
+LDFLAGS = -lrt
+LIBXORAM = libxoram.so
 ###############################
 
 CC = g++ $(CCOPT)
 LD = g++ $(CCOPT) $(LDFLAGS)
 
 clean:
-	rm -f *.exe *.o *~ ${LIBXORAM}
+	rm -f *.exe *.o *~
 
 tests: test1 test2 test3 test4 test5 test6 test7 test8 test9 testAdmin
-	cp $(LIBDIR)/${LIBXORAM} .
 
 test1:	TestXoram1.o
 	$(LD) -o test1 TestXoram1.o -L$(LIBDIR) -lxoram
