@@ -1,7 +1,7 @@
 /*
  * XORAM: Open Reliable Asynchronous Messaging
+ * Copyright (C) 2006 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2006 CNES
- * Copyright (C) 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -179,7 +179,7 @@ class TcpChannel : public Channel {
     byte magic[] = {'J', 'O', 'R', 'A', 'M', 5, 2, 52};
 
     // Writes the Joram magic number
-    if (out->writeByteArray(magic, 8) ==-1) throw IOException();
+    if (out->writeBuffer(magic, 8) ==-1) throw IOException();
 
     // Writes the identity using SimpleIdentity convention
     if (out->writeString("") ==-1) throw IOException();
@@ -192,7 +192,7 @@ class TcpChannel : public Channel {
       // Open new connection
       if (out->writeInt(/* reconnectTimeout */ 0) == -1) throw IOException();
 
-      if (out->writeTo(sock) == -1) throw IOException();
+      if (out->writeDataTo(sock) == -1) throw IOException();
       if (in->readFrom(sock) == -1) throw IOException();
 
       int res;
@@ -207,7 +207,7 @@ class TcpChannel : public Channel {
       }
     } else {
       // Reopen the connection
-      if (out->writeTo(sock) == -1) throw IOException();
+      if (out->writeDataTo(sock) == -1) throw IOException();
       if (in->readFrom(sock) == -1) throw IOException();
 
       int res;
