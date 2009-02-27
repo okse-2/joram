@@ -8,9 +8,9 @@ INCDIR = ../../src
 #LIBXORAM = libxoram.dll
 ###############################
 # i86-linux
- CCOPT = -g -fPIC
- LDFLAGS = -fPIC -shared
- LIBXORAM = libxoram.so
+CCOPT = -g -fPIC
+LDFLAGS = -fPIC -shared
+LIBXORAM = libxoram.so
 ###############################
 
 CC = g++ $(CCOPT)
