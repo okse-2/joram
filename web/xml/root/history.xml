@@ -12,6 +12,18 @@
 
   <body>
     <s1 name="JORAM History">
+    
+      <subtitle>March 4, 2009: JORAM 5.2.1 is released</subtitle>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
+      <p>It introduces many improvements and some bug fixes, essentially:</p>
+      <ul>
+        <li>JAAS authentication,</li>
+        <li>Supplies New destination allowing data collect.</li>
+      </ul>
+      <p>It is tagged in SVN (JORAM_5_2_1), the complete list of changes can be viewed either in
+      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
+      <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/trunk/joram/history">SVN history</a>.</p>
+
       <subtitle>September 16, 2008: JORAM 5.1.0 is released</subtitle>
       <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
       <p>It introduces many improvements and some bug fixes:</p>
@@ -211,24 +223,15 @@
       <li>Complete SSL support with handling of encrypted client to server communications.</li>
       </ul>
 
-      <subtitle>May 13, 2005: JORAM 4.2.3 maintenance release and 4.3 preview</subtitle>
-      <p>The JORAM 4.2.3 maintenance release is now available for download. It basically includes
-           bug fixes, their complete list is available in the 
-           <a href="dev/versions.html">Code Update</a> page. </p>
-      <p>The next JORAM 4.3 version will include new features :</p>
-      <ul>
-      <li>JMX management improved and extended</li>
-      <li>Performance improvements</li>
-      <li>Handling of large message transmission (called swap out mode)</li>
-      <li>Complete SSL support with handling of encrypted client to server communications</li>
-      </ul>
-
      <subtitle>Joram is alive since May 2000..</subtitle>
      <p>The complete history is available <a href="oldhistory.html">here</a>, in short:</p>
       <ul>
       <li>26th May 2000 : JORAM first open source version available!</li>
-      <li>10th October 2000: JORAM is now tagged 1.1.0</li>
-      <li>5th December 2000: JORAM is included in JOnAS</li>
+      <li>December 2000: JORAM is included in JOnAS.</li>
+      <li>March 2003: JORAM 3.4 is available.</li>
+      <li>February 2004: JORAM 4.0 is available.</li>
+      <li>September 2004: JORAM 4.1 is available</li>
+      <li>March 2005: JORAM 4.2 is available</li>
      </ul>
       
     </s1>
