@@ -271,7 +271,6 @@ description=" --> launch all exceptionlistener tests">
     <ant dir="." antfile="build.xml" target="noreg.test51"/>
     <ant dir="." antfile="build.xml" target="noreg.test56"/>
     <!-- ant dir="." antfile="build.xml" target="noreg.test57"/ -->
-    <!-- ant dir="." antfile="build.xml" target="noreg.test59"/ -->
   </target>
 
   <target name="tests.xa"
@@ -1931,6 +1930,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="testid" value="perf.asynctest"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers.xml"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="jvmargs" value=""/>
       <param name="args" value=""/>
     </antcall>
@@ -2270,17 +2270,44 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 
-
   <!-- YJP specific launcher for performance tests  -->
+  <target name="test6-yjp.perf"
+          description=" --> Configurable performance test">
+    <antcall target="perf.test6-yjpx" inheritAll="true">
+      <param name="testid" value="test6-yjp.perf"/>
+      <param name="Destination"
+             value="org.objectweb.joram.client.jms.Topic"/>
+      <!-- param name="Destination"
+             value="org.objectweb.joram.client.jms.Queue"/ -->
+      <!-- param name="transaction"
+             value="fr.dyade.aaa.util.NTransaction"/ -->
+      <param name="transaction"
+             value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <!-- param name="engine" value="fr.dyade.aaa.agent.GCEngine"/ -->
+      <param name="BaseClass" value="joram.perfs.TcpBaseTest"/>
+      <!-- param name="BaseClass" value="joram.perfs.ColocatedBaseTest"/ -->
+      <!-- param name="dupsOk" value="true"/ -->
+      <!-- param name="queueMessageReadMax" value="100"/ -->
+      <!-- param name="topicAckBufferMax" value="50"/ -->
+      <!-- param name="implicitAck" value="true"/ -->
+      <param name="MsgTransient" value="true"/>
+      <param name="SubDurable" value="false"/>
+      <param name="Transacted" value="false"/>
+      <param name="NbRound" value="1000"/>
+      <param name="NbMsgPerRound" value="100"/>
+      <param name="NbProdCons" value="1"/>
+      <param name="MsgSize" value="50"/>
+    </antcall>
+  </target>
 
-  <target name="test6-yjp.perf" depends="compile">
+	<target name="perf.test6-yjpx" depends="init.test6props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test6"/>
-      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
-      <param name="jvmargs" value="-agentlib:yjpagent=onexit=memory,disablej2ee,noj2ee,tracing,alloc,dir=c:\MySnapshots -DDestination=org.objectweb.joram.client.jms.Queue -DBaseClass=joram.perfs.ColocatedBaseTest -DMsgTransient=false -DSubDurable=true -DTransacted=false -DNbSender=1 -DNbReceiver=1 -DNbDestination=1 -DNbRound=100 -DNbMsgPerRound=100 -DMsgSize=25"/>
+      <!-- param name="jvmargs" value="-agentlib:yjpagent=onexit=memory,disablej2ee,noj2ee,tracing,alloc,dir=c:\MySnapshots"/ -->
+      <param name="jvmargs" value="-agentlib:yjpagent=onexit=memory,disablej2ee,noj2ee,tracing,dir=c:\MySnapshots -DNTLogFileSize=32 -DNTLogMemorySize=4096 -DDestination=${Destination} -DBaseClass=${BaseClass} -DdupsOk=${dupsOk} -DqueueMessageReadMax=${queueMessageReadMax} -DtopicAckBufferMax=${topicAckBufferMax} -DimplicitAck=${implicitAck} -DMsgTransient=${MsgTransient} -DSubDurable=${SubDurable} -DTransacted=${Transacted} -DNbRound=${NbRound} -DNbMsgPerRound=${NbMsgPerRound} -DNbSender=${NbProdCons} -DNbReceiver=${NbProdCons} -DNbDestination=${NbProdCons} -DMsgSize=${MsgSize}"/>
     </antcall>
   </target>
 
@@ -3373,7 +3400,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="testid" value="noreg.test57-1"/>
-      <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Queue -DMsgSize=256 -DNbMsg=239"/>
+      <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Queue -DMsgSize=256 -DNbMsg=238"/>
     </antcall>
   </target>
 
@@ -3388,20 +3415,6 @@ description=" --> launch all exceptionlistener tests">
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="testid" value="noreg.test57-2"/>
       <param name="jvmargs" value="-DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef -DDestination=org.objectweb.joram.client.jms.Queue -DMsgSize=256 -DNbMsg=5000"/>
-    </antcall>
-  </target>
-
-  <target name="noreg.test59" depends="init.a3props,compile"
-          description=" --> Test about receive with timeout on DMQ (FT)">
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.noreg.Test59"/>
-      <param name="testid" value="noreg.test59"/>
-      <param name="jndiconf" value="noreg/jndi.properties"/>
-      <param name="a3conf" value="noreg/a3servers1.xml"/>
-      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="testid" value="noreg.test59"/>
-      <param name="jvmargs" value=""/>
     </antcall>
   </target>
 
