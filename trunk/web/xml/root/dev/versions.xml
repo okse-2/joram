@@ -11,6 +11,40 @@
   </properties>
 
   <body>
+    <s1 name="JORAM release 5.2.1 (March 4, 2009)">
+      <p>Joram 5.2.1 is available in the SVN repository with tag JORAM_5_2_1.
+       This release provides many features and changes:</p>
+      <s2 name="New features and improvements">
+      <ul>
+        <li>JAAS authentication,</li>
+        <li>Supplies New destination allowing data collect.</li>
+      </ul>
+      </s2>
+      <s2 name="Bug fixes">
+      <ul>
+        <li>Always call onException on closed connection (DemultiplexerDaemon)..</li>
+        <li>Correctly returns all defined rights for destinations.</li>
+        <li>Correctly handle null value for outLocalAddress in FactoryParameters.</li>
+        <li>Using SimpleNetwork could lead to message loss in some rare cases.</li>
+        <li>Fix potential NPE in JoramAdapter.endpointActivation method during the destination creation</li>
+        <li>Fix potential problems with unknown servers in case of dynamic reconfiguration (adding and removing servers).</li>
+        <li>No longer generates an error message when a contextual class loader is needed for ObjectMessage.getObject</li>
+     </ul>
+      </s2>
+    </s1>
+  
+    <subtitle>March 2, 2009: JORAM 5.2.1 is released</subtitle>
+    <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
+    <p>It introduces many improvements and some bug fixes, essentially:</p>
+    <ul>
+      <li>JAAS authentication,</li>
+      <li>Supplies New destination allowing data collect.</li>
+    </ul>
+    <p>It is tagged in SVN (JORAM_5_2_1), the complete list of changes can be viewed either in
+    <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
+    <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/trunk/joram/history">SVN history</a>.</p>
+  
+  
     <s1 name="JORAM release 5.1.0 (September 16, 2008)">
       <p>Joram 5.1.0 is available in the SVN repository with tag JORAM_5_1_0.
        This release provides many features and changes:</p>
