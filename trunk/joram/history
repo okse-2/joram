@@ -1,3 +1,16 @@
+###############################################################################
+# 2009/03/04 | Joram 5.2.1 tag.
+###############################################################################
++==============================================================================
+| 2009/02/27 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds a magic number to identify Joram version's protocol.
+ Improves the Identity serialization in order to allow dynamic handling of
+identities.
++==============================================================================
+| 2009/02/24 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix potential error fixing the acknowledge mode in JoramAdapter.
 +==============================================================================
 | 2009/01/27 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
@@ -35,19 +48,22 @@ destination creation.
 +==============================================================================
 | 2008/10/22 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
- - Re architecture the Scheduler (remove the agent dependencies).
+ New architecture for the Scheduler (remove the agent dependencies):
  - modify the scheduler queue.
  - add cron sample.
 +==============================================================================
 | 2008/10/20 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
- - add a Collector destination (first URL Collector).
- - remove the SOAP kjoram version (com.scalagent. kjoram, kjndi and ksoap).
- - The new kJoram version move in joram/kjoram project.
+ Add a Collector destination allowing to gather data and spread it through JMS
+messages.
+ Provides a new CLDC kJoram component:
+ - remove the old SOAP kjoram code (kjoram, kjndi and ksoap packages in
+   com.scalagent).
+ - move the new kJoram code in joram/kjoram project.
 +==============================================================================
 | 2008/10/13 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
- - Re architecture authentication capability.
+ New architecture for authentication capability:
  - set by default user/password authentication (SimpleIdentity).
  - add JAAS authentication based on JOnAS remoteLoginModule (JonasIdentity).
 +==============================================================================
