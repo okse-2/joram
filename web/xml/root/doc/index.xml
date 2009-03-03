@@ -24,13 +24,14 @@
 
     <subtitle>Installation and Users Guide</subtitle>
       <ul>
-        <li>Guide of the <a href="../current/doc/Joram-5.1.0-en.pdf">5.1.0 release</a>.</li>
+        <li>Guide of the <a href="../current/doc/Joram-5.2-en.pdf">5.2 release</a>.</li>
       </ul>
 
     <subtitle>API documentation</subtitle>
       <ul>
-        <li>Browsing the user <a href="../current/javadoc/">Joram 5.1.0 javadoc</a>.</li>
-        <li>For advanced user and programmer a detailed documentation generated with Doxygen is available <a href="../current/dox/html/index.html">here</a>.</li>
+        <li>Browsing the user <a href="../current/javadoc/">Joram 5.2.1 javadoc</a>.</li>
+        <li>For advanced user and programmer a detailed documentation generated with Doxygen is available <a href="../current/joramdox/html/index.html">here</a>.</li>
+				<li>Browsing the <a href="../current/xoramdox/html/index.html">Xoram 1.3.0/52 apidoc</a>.</li>
       </ul>
     </s1>
 
