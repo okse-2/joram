@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,18 +17,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): David Feliot (ScalAgent DT)
+ * Initial developer(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms.ha.local;
 
 import org.objectweb.joram.client.jms.*;
 
-public class TopicHALocalConnectionFactory 
-    extends org.objectweb.joram.client.jms.TopicConnectionFactory {
-
-  /**
-   * 
-   */
+public class TopicHALocalConnectionFactory extends org.objectweb.joram.client.jms.TopicConnectionFactory {
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   public TopicHALocalConnectionFactory() {
@@ -44,7 +40,7 @@ public class TopicHALocalConnectionFactory
   createTopicConnection(String name, String password)
   throws javax.jms.JMSException {
     initIdentity(name, password);
-    HALocalConnection lc = new HALocalConnection(identity);    
+    HALocalRequestChannel lc = new HALocalRequestChannel(identity);    
     return new TopicConnection(params, lc);
   }
 
@@ -58,7 +54,7 @@ public class TopicHALocalConnectionFactory
   createConnection(String name, String password)
   throws javax.jms.JMSException {
     initIdentity(name, password);
-    HALocalConnection lc = new HALocalConnection(identity);
+    HALocalRequestChannel lc = new HALocalRequestChannel(identity);
     return new Connection(params, lc);
   }
 

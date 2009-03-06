@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): David Feliot (ScalAgent DT)
+ * Initial developer(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms.ha.local;
 
@@ -49,7 +49,7 @@ public class XAHALocalConnectionFactory extends org.objectweb.joram.client.jms.X
   public javax.jms.XAConnection createXAConnection(String name, String password)
   throws javax.jms.JMSException {
     initIdentity(name, password);
-    HALocalConnection lc = new HALocalConnection(identity);
+    HALocalRequestChannel lc = new HALocalRequestChannel(identity);
     return new XAConnection(params, lc);
   }
 

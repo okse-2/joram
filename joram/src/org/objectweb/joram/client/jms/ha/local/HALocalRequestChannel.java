@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -39,7 +39,7 @@ import fr.dyade.aaa.agent.*;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
-public class HALocalConnection implements RequestChannel {
+public class HALocalRequestChannel implements RequestChannel {
   
   public final static int NONE = 0;
   public final static int INIT = 1;
@@ -95,9 +95,9 @@ public class HALocalConnection implements RequestChannel {
 
   private Identity identity;
   
-  private LocalConnection localConnection;
+  private LocalRequestChannel localRequestChannel;
 
-  public HALocalConnection(Identity identity) throws JMSException {
+  public HALocalRequestChannel(Identity identity) throws JMSException {
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgProxy.log(
         BasicLevel.DEBUG,
@@ -115,21 +115,21 @@ public class HALocalConnection implements RequestChannel {
   }
   
   public void connect() throws Exception {
-    localConnection = new LocalConnection(identity);
-    localConnection.connect();
+    localRequestChannel = new LocalRequestChannel(identity);
+    localRequestChannel.connect();
   }
   
   public void send(AbstractJmsRequest request) 
     throws Exception {
-    localConnection.send(request);
+    localRequestChannel.send(request);
   }
 
   public AbstractJmsReply receive() 
     throws Exception {
-    return localConnection.receive();
+    return localRequestChannel.receive();
   }
   
   public void close() {
-    localConnection.close();
+    localRequestChannel.close();
   }
 }
