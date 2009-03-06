@@ -33,8 +33,6 @@ import java.io.ObjectStreamConstants;
 import java.io.OutputStream;
 import java.net.Socket;
 
-import fr.dyade.aaa.agent.AgentServer;
-
 public class IOControl {
   /**
    *  This property allow to enable/disable SO_TIMEOUT with the specified
@@ -52,7 +50,7 @@ public class IOControl {
    * of time.
    */
   private static int socketTimeOut =
-    AgentServer.getInteger(SOCKET_SOTIMEOUT, 0).intValue();
+    Integer.getInteger(SOCKET_SOTIMEOUT, 0).intValue();
 
   private Socket socket;
 
