@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): David Feliot (ScalAgent DT)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): Frederic Maistre (Bull SA)
  */
 package org.objectweb.joram.client.jms.local;
@@ -29,43 +29,33 @@ import org.objectweb.joram.client.jms.XAConnection;
  * An <code>XALocalConnectionFactory</code> instance is a factory of
  * local connections dedicated to XA communication.
  */
-public class XALocalConnectionFactory
-    extends org.objectweb.joram.client.jms.XAConnectionFactory {
-  
-  /**
-   * 
-   */
+public class XALocalConnectionFactory extends org.objectweb.joram.client.jms.XAConnectionFactory {
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
-
 
   /**
    * Constructs an <code>XALocalConnectionFactory</code> instance.
    */
-  public XALocalConnectionFactory(){
+  public XALocalConnectionFactory() {
     super("localhost", -1);
   }
-
 
   /**
    * Method inherited from the <code>XAConnectionFactory</code> class.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.XAConnection
-  createXAConnection(String name, String password)
-  throws javax.jms.JMSException {
+  public javax.jms.XAConnection createXAConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
-    LocalConnection lc = new LocalConnection(identity);
+    LocalRequestChannel lc = new LocalRequestChannel(identity);
     return new XAConnection(params, lc);
   }
 
-  
   /**
    * Admin method creating a <code>javax.jms.XAConnectionFactory</code>
    * instance for creating local connections.
    */ 
-  public static javax.jms.XAConnectionFactory create()
-  {
+  public static javax.jms.XAConnectionFactory create() {
     return new XALocalConnectionFactory();
   }
 }
