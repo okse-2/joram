@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -32,12 +32,8 @@ import org.objectweb.joram.client.jms.XAConnection;
  * An <code>XAHATcpConnectionFactory</code> instance is a factory of
  * tcp connections dedicated to XA HA communication.
  */
-public class XAHATcpConnectionFactory
-  extends org.objectweb.joram.client.jms.XAConnectionFactory {
-
-  /**
-   * 
-   */
+public class XAHATcpConnectionFactory extends org.objectweb.joram.client.jms.XAConnectionFactory {
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   /**
@@ -48,7 +44,7 @@ public class XAHATcpConnectionFactory
   }
 
   public XAHATcpConnectionFactory() {
-	  super();
+    super();
   }
 
   /**
@@ -56,14 +52,11 @@ public class XAHATcpConnectionFactory
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.XAConnection
-      createXAConnection(String name, String password)
-    throws javax.jms.JMSException {
+  public javax.jms.XAConnection createXAConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
-      HATcpConnection lc = new HATcpConnection(
-        params.getUrl(), params, identity, reliableClass);
-      return new XAConnection(params, lc);
-    }
+    HATcpRequestChannel lc = new HATcpRequestChannel(params.getUrl(), params, identity, reliableClass);
+    return new XAConnection(params, lc);
+  }
 
   /**
    * Admin method creating a <code>javax.jms.XAConnectionFactory</code>
@@ -82,8 +75,7 @@ public class XAHATcpConnectionFactory
    * @param url URL of the HA Joram server
    * @param reliableClass  Reliable class name.
    */
-  public static javax.jms.XAConnectionFactory
-      create(String url, String reliableClass) {
+  public static javax.jms.XAConnectionFactory create(String url, String reliableClass) {
     XAHATcpConnectionFactory cf = new XAHATcpConnectionFactory(url);
     cf.setReliableClass(reliableClass);
     return cf;

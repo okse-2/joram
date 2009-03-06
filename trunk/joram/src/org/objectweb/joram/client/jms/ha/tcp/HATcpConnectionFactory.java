@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -32,12 +32,8 @@ import org.objectweb.joram.client.jms.Connection;
  * An <code>XATcpConnectionFactory</code> instance is a factory of
  * tcp connections dedicated to HA communication.
  */
-public class HATcpConnectionFactory
-  extends org.objectweb.joram.client.jms.ConnectionFactory {
-
-  /**
-   * 
-   */
+public class HATcpConnectionFactory extends org.objectweb.joram.client.jms.ConnectionFactory {
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   /**
    * Constructs an <code>HATcpConnectionFactory</code> instance.
@@ -64,7 +60,7 @@ public class HATcpConnectionFactory
       createConnection(String name, String password)
     throws javax.jms.JMSException {
     initIdentity(name, password);
-      HATcpConnection lc = new HATcpConnection(
+      HATcpRequestChannel lc = new HATcpRequestChannel(
         params.getUrl(), params, identity, reliableClass);
       return new Connection(params, lc);
     }

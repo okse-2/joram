@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): David Feliot (ScalAgent DT)
- * Contributor(s): Nicolas Tachker (ScalAgent DT)
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s):
  */
 package org.objectweb.joram.client.jms.ha.tcp;
 
@@ -36,8 +36,7 @@ import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.security.Identity;
 
-public class HATcpConnection 
-    implements RequestChannel {
+public class HATcpRequestChannel implements RequestChannel {
 
   private ReliableTcpClient tcpClient;
 
@@ -50,7 +49,7 @@ public class HATcpConnection
    * @exception JMSSecurityException  If the user identification is incorrrect.
    * @exception IllegalStateException  If the server is not reachable.
    */
-  public HATcpConnection(String url,
+  public HATcpRequestChannel(String url,
                          FactoryParameters params, 
                          Identity identity) 
     throws JMSException {
@@ -60,7 +59,7 @@ public class HATcpConnection
          "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
   }
   
-  public HATcpConnection() {
+  public HATcpRequestChannel() {
     super();
   }
   
@@ -74,7 +73,7 @@ public class HATcpConnection
    * @exception JMSSecurityException  If the user identification is incorrrect.
    * @exception IllegalStateException  If the server is not reachable.
    */
-  public HATcpConnection(String url,
+  public HATcpRequestChannel(String url,
                          FactoryParameters params, 
                          Identity identity,
                          String reliableClass) 
