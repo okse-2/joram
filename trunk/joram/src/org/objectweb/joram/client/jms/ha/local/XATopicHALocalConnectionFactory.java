@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -53,7 +53,7 @@ public class XATopicHALocalConnectionFactory extends XATopicConnectionFactory {
   public javax.jms.XATopicConnection createXATopicConnection(String name, String password)
     throws javax.jms.JMSException {
     initIdentity(name, password);
-    HALocalConnection lc = new HALocalConnection(identity);
+    HALocalRequestChannel lc = new HALocalRequestChannel(identity);
     return new XATopicConnection(params, lc);
   }
 
@@ -65,7 +65,7 @@ public class XATopicHALocalConnectionFactory extends XATopicConnectionFactory {
   public javax.jms.XAConnection createXAConnection(String name, String password)
   throws javax.jms.JMSException {
     initIdentity(name, password);
-    HALocalConnection lc = new HALocalConnection(identity);
+    HALocalRequestChannel lc = new HALocalRequestChannel(identity);
     return new XAConnection(params, lc);
   }
 
@@ -77,7 +77,7 @@ public class XATopicHALocalConnectionFactory extends XATopicConnectionFactory {
   public javax.jms.TopicConnection createTopicConnection(String name, String password)
   throws javax.jms.JMSException {
     initIdentity(name, password);
-    HALocalConnection lc = new HALocalConnection(identity);
+    HALocalRequestChannel lc = new HALocalRequestChannel(identity);
     return new TopicConnection(params, lc);
   }
 
@@ -90,7 +90,7 @@ public class XATopicHALocalConnectionFactory extends XATopicConnectionFactory {
   public javax.jms.Connection createConnection(String name, String password)
   throws javax.jms.JMSException {
     initIdentity(name, password);
-    HALocalConnection lc = new HALocalConnection(identity);
+    HALocalRequestChannel lc = new HALocalRequestChannel(identity);
     return new Connection(params, lc);
   }
 
