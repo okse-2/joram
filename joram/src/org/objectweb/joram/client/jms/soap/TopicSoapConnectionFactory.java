@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -66,10 +66,9 @@ public class TopicSoapConnectionFactory extends TopicConnectionFactory {
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.TopicConnection createTopicConnection(String name, String password)
-  throws javax.jms.JMSException {
+  public javax.jms.TopicConnection createTopicConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
-    return new TopicConnection(params, new SoapConnection(params, identity));
+    return new TopicConnection(params, new SoapRequestChannel(params, identity));
   }
 
   /**
@@ -78,10 +77,9 @@ public class TopicSoapConnectionFactory extends TopicConnectionFactory {
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.Connection createConnection(String name, String password)
-  throws javax.jms.JMSException {
+  public javax.jms.Connection createConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
-    return new Connection(params, new SoapConnection(params, identity));
+    return new Connection(params, new SoapRequestChannel(params, identity));
   }
 
   /**
@@ -107,8 +105,6 @@ public class TopicSoapConnectionFactory extends TopicConnectionFactory {
    * @exception ConnectException  If the admin connection is closed or broken.
    */ 
   public static javax.jms.TopicConnectionFactory create(int timeout) throws java.net.ConnectException {
-    return create(AdminModule.getLocalHost(), 
-                  AdminModule.getLocalPort(),
-                  timeout);
+    return create(AdminModule.getLocalHost(),AdminModule.getLocalPort(), timeout);
   }
 }

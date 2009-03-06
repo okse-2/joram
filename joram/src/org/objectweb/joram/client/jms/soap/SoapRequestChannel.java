@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -79,7 +79,7 @@ import org.objectweb.joram.shared.security.Identity;
  * <p>
  * Requests and replies travel through the connections in SOAP (XML) format.
  */
-public class SoapConnection implements RequestChannel { 
+public class SoapRequestChannel implements RequestChannel { 
   /** The user's identity */
   private Identity identity;
   
@@ -105,7 +105,7 @@ public class SoapConnection implements RequestChannel {
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not reachable.
    */
-  public SoapConnection(FactoryParameters factParams2, 
+  public SoapRequestChannel(FactoryParameters factParams2, 
                         Identity identity) throws JMSException {
     factParams = factParams2;
     this.identity = identity;
