@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -63,10 +63,7 @@ public class TopicTcpConnectionFactory extends TopicConnectionFactory {
   public javax.jms.TopicConnection createTopicConnection(String name,
                                                          String password) throws JMSException {
     initIdentity(name, password);
-    return new TopicConnection(params, 
-                               new TcpConnection(params, 
-                                                 identity,
-                                                 reliableClass));
+    return new TopicConnection(params, new TcpRequestChannel(params, identity, reliableClass));
   }
 
   /**
@@ -78,10 +75,7 @@ public class TopicTcpConnectionFactory extends TopicConnectionFactory {
   public javax.jms.Connection createConnection(String name,
                                                String password) throws JMSException {
     initIdentity(name, password);
-    return new Connection(params, 
-                          new TcpConnection(params, 
-                                            identity,
-                                            reliableClass));
+    return new Connection(params, new TcpRequestChannel(params, identity, reliableClass));
   }
 
 

@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -66,10 +66,7 @@ public class QueueTcpConnectionFactory extends QueueConnectionFactory {
   public javax.jms.QueueConnection createQueueConnection(String name,
                                                          String password) throws JMSException {
     initIdentity(name, password);
-    return new QueueConnection(params,
-                               new TcpConnection(params, 
-                                                 identity,
-                                                 reliableClass));
+    return new QueueConnection(params, new TcpRequestChannel(params, identity, reliableClass));
   }
 
   /**
@@ -81,10 +78,7 @@ public class QueueTcpConnectionFactory extends QueueConnectionFactory {
   public javax.jms.Connection createConnection(String name,
                                                String password) throws JMSException {
     initIdentity(name, password);
-    return new Connection(params,
-                          new TcpConnection(params, 
-                                            identity,
-                                            reliableClass));
+    return new Connection(params, new TcpRequestChannel(params, identity, reliableClass));
   }
 
   /**
@@ -106,8 +100,7 @@ public class QueueTcpConnectionFactory extends QueueConnectionFactory {
    * @param port  Server's listening port.
    * @param reliableClass  Reliable class name.
    */ 
-  public static javax.jms.QueueConnectionFactory create(String host, int port,
-                                                        String reliableClass) {
+  public static javax.jms.QueueConnectionFactory create(String host, int port, String reliableClass) {
     QueueTcpConnectionFactory cf = new QueueTcpConnectionFactory(host, port);
     cf.setReliableClass(reliableClass);
     return cf;

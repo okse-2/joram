@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -44,7 +44,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * <p>
  * Requests and replies travel through the socket after serialization.
  */
-public class TcpConnection implements RequestChannel { 
+public class TcpRequestChannel implements RequestChannel { 
   
   private ReliableTcpClient tcpClient = null;
 
@@ -57,7 +57,7 @@ public class TcpConnection implements RequestChannel {
    * @exception JMSSecurityException  If the user identification is incorrrect.
    * @exception IllegalStateException  If the server is not reachable.
    */
-  public TcpConnection(FactoryParameters params, 
+  public TcpRequestChannel(FactoryParameters params, 
                        Identity identity) 
     throws JMSException {
     this(params,
@@ -75,7 +75,7 @@ public class TcpConnection implements RequestChannel {
    * @exception JMSSecurityException  If the user identification is incorrrect.
    * @exception IllegalStateException  If the server is not reachable.
    */
-  public TcpConnection(FactoryParameters params, 
+  public TcpRequestChannel(FactoryParameters params, 
                        Identity identity,
                        String reliableClass) 
     throws JMSException {

@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -67,10 +67,9 @@ public class TcpConnectionFactory extends ConnectionFactory {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, 
                                  "TcpConnectionFactory.createConnection(" + name + ',' + password + ") reliableClass=" + reliableClass);
-    
+
     initIdentity(name, password);
-    return new Connection(params, 
-                          new TcpConnection(params, identity, reliableClass));
+    return new Connection(params, new TcpRequestChannel(params, identity, reliableClass));
   }
 
   /**
@@ -92,12 +91,11 @@ public class TcpConnectionFactory extends ConnectionFactory {
    * @param port           Server's listening port.
    * @param reliableClass  Reliable class name.
    */ 
-  public static javax.jms.ConnectionFactory create(String host, int port,
-                                                   String reliableClass) {
+  public static javax.jms.ConnectionFactory create(String host, int port, String reliableClass) {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, 
                                  "TcpConnectionFactory.create(" + host + ',' + port + ',' + reliableClass +')');
-    
+
     TcpConnectionFactory cf = new TcpConnectionFactory(host, port);
     cf.setReliableClass(reliableClass);
     return cf;
