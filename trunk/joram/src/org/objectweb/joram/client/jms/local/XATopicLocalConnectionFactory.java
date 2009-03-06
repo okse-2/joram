@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): David Feliot (ScalAgent DT)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): Frederic Maistre (Bull SA)
  */
 package org.objectweb.joram.client.jms.local;
@@ -34,8 +34,7 @@ import org.objectweb.joram.client.jms.XATopicConnection;
  * An <code>XATopicLocalConnectionFactory</code> instance is a factory of
  * local connections for XA Pub/Sub communication.
  */
-public class XATopicLocalConnectionFactory
-    extends org.objectweb.joram.client.jms.XATopicConnectionFactory {
+public class XATopicLocalConnectionFactory extends org.objectweb.joram.client.jms.XATopicConnectionFactory {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
@@ -51,10 +50,9 @@ public class XATopicLocalConnectionFactory
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.XATopicConnection createXATopicConnection(String name, String password)
-  throws javax.jms.JMSException {
+  public javax.jms.XATopicConnection createXATopicConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
-    LocalConnection lc = new LocalConnection(identity);
+    LocalRequestChannel lc = new LocalRequestChannel(identity);
     return new XATopicConnection(params, lc);
   }
 
@@ -63,10 +61,9 @@ public class XATopicLocalConnectionFactory
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.XAConnection createXAConnection(String name, String password)
-  throws javax.jms.JMSException {
+  public javax.jms.XAConnection createXAConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
-    LocalConnection lc = new LocalConnection(identity);
+    LocalRequestChannel lc = new LocalRequestChannel(identity);
     return new XAConnection(params, lc);
   }
 
@@ -75,10 +72,9 @@ public class XATopicLocalConnectionFactory
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.TopicConnection createTopicConnection(String name, String password)
-  throws javax.jms.JMSException {
+  public javax.jms.TopicConnection createTopicConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
-    LocalConnection lc = new LocalConnection(identity);
+    LocalRequestChannel lc = new LocalRequestChannel(identity);
     return new TopicConnection(params, lc);
   }
 
@@ -88,10 +84,9 @@ public class XATopicLocalConnectionFactory
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.Connection createConnection(String name, String password)
-  throws javax.jms.JMSException {
+  public javax.jms.Connection createConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
-    LocalConnection lc = new LocalConnection(identity);
+    LocalRequestChannel lc = new LocalRequestChannel(identity);
     return new Connection(params, lc);
   }
 

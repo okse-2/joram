@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -41,7 +41,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 
-public class LocalConnection implements RequestChannel {
+public class LocalRequestChannel implements RequestChannel {
   
   private Identity identity;
 
@@ -49,7 +49,7 @@ public class LocalConnection implements RequestChannel {
 
   private StandardConnectionContext ctx;
 
-  public LocalConnection(Identity identity) throws JMSException {
+  public LocalRequestChannel(Identity identity) throws JMSException {
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
                                 "LocalConnection.<init>(" + identity + ')');
