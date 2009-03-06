@@ -67,7 +67,7 @@
     </copy>
     <replace dir="${output.tmp.dir}"
              token="@VERSION@"
-             value="${joram.version}" />
+             value="${joram.major}.${joram.minor}.${joram.build}" />
 
     <!-- ================================================ -->
     <!--                  JORAM POMs                    -->
