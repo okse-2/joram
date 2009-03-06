@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -29,12 +29,8 @@ import javax.jms.JMSSecurityException;
 import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.TopicConnection;
 
-public class TopicHATcpConnectionFactory
-  extends org.objectweb.joram.client.jms.TopicConnectionFactory {
-
-  /**
-   * 
-   */
+public class TopicHATcpConnectionFactory extends org.objectweb.joram.client.jms.TopicConnectionFactory {
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   public TopicHATcpConnectionFactory(String url) {
@@ -52,12 +48,9 @@ public class TopicHATcpConnectionFactory
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.TopicConnection
-  createTopicConnection(String name, String password)
-  throws javax.jms.JMSException {
+  public javax.jms.TopicConnection createTopicConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
-    HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, identity, reliableClass);
+    HATcpRequestChannel lc = new HATcpRequestChannel(getParameters().getUrl(), params, identity, reliableClass);
     return new TopicConnection(params, lc);
   }
 
@@ -67,35 +60,30 @@ public class TopicHATcpConnectionFactory
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.Connection
-      createConnection(String name, String password)
-    throws javax.jms.JMSException {
+  public javax.jms.Connection createConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
-      HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, identity, reliableClass);
-      return new Connection(params, lc);
-    }
+    HATcpRequestChannel lc = new HATcpRequestChannel(getParameters().getUrl(), params, identity, reliableClass);
+    return new Connection(params, lc);
+  }
 
   /**
    * Admin method creating a <code>javax.jms.ConnectionFactory</code>
    * instance for creating HA tcp connections with a given server.
    */
   public static javax.jms.TopicConnectionFactory create(String url) {
-    return create(url,
-                  "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
+    return create(url, "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
   }
 
   /**
    * Admin method creating a <code>javax.jms.ConnectionFactory</code>
    * instance for creating HA tcp connections with a given server.
    */
-  public static javax.jms.TopicConnectionFactory
-      create(String url, String reliableClass) {
+  public static javax.jms.TopicConnectionFactory create(String url, String reliableClass) {
     TopicHATcpConnectionFactory cf = new TopicHATcpConnectionFactory(url);
     cf.setReliableClass(reliableClass);
     return cf;
   }
-  
+
   public String toString() {
     return super.toString() + ": url = " + getParameters().getUrl();
   }

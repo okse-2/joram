@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -35,38 +35,29 @@ import org.objectweb.joram.client.jms.XAQueueConnection;
  * An <code>XAQueueHATcpConnectionFactory</code> instance is a factory of
  * tcp connections for XA PTP HA communication.
  */
-public class XAQueueHATcpConnectionFactory
-    extends org.objectweb.joram.client.jms.XAQueueConnectionFactory
-{
-
-  /**
-   * 
-   */
+public class XAQueueHATcpConnectionFactory extends org.objectweb.joram.client.jms.XAQueueConnectionFactory {
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   /**
    * Constructs an <code>XAQueueHATcpConnectionFactory</code> instance.
    */
-  public XAQueueHATcpConnectionFactory(String url)
-    {
-      super(url);
-    }
+  public XAQueueHATcpConnectionFactory(String url) {
+    super(url);
+  }
 
   public XAQueueHATcpConnectionFactory() {
-	  super();
+    super();
   }
-  
+
   /**
    * Method inherited from the <code>XAQueueConnectionFactory</code> class.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.XAQueueConnection
-  createXAQueueConnection(String name, String password)
-  throws javax.jms.JMSException {
+  public javax.jms.XAQueueConnection createXAQueueConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
-    HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, identity, reliableClass);
+    HATcpRequestChannel lc = new HATcpRequestChannel(getParameters().getUrl(), params, identity, reliableClass);
     return new XAQueueConnection(params, lc);
   }
 
@@ -75,12 +66,9 @@ public class XAQueueHATcpConnectionFactory
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.XAConnection
-  createXAConnection(String name, String password)
-  throws javax.jms.JMSException {
+  public javax.jms.XAConnection createXAConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
-    HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, identity, reliableClass);
+    HATcpRequestChannel lc = new HATcpRequestChannel(getParameters().getUrl(), params, identity, reliableClass);
     return new XAConnection(params, lc);
   }
 
@@ -89,12 +77,9 @@ public class XAQueueHATcpConnectionFactory
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.QueueConnection
-  createQueueConnection(String name, String password)
-  throws javax.jms.JMSException {
+  public javax.jms.QueueConnection createQueueConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
-    HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, identity, reliableClass);
+    HATcpRequestChannel lc = new HATcpRequestChannel(getParameters().getUrl(), params, identity, reliableClass);
     return new QueueConnection(params, lc);
   }
 
@@ -103,11 +88,9 @@ public class XAQueueHATcpConnectionFactory
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.Connection createConnection(String name, String password)
-  throws javax.jms.JMSException {
+  public javax.jms.Connection createConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
-    HATcpConnection lc = new HATcpConnection(
-        getParameters().getUrl(), params, identity, reliableClass);
+    HATcpRequestChannel lc = new HATcpRequestChannel(getParameters().getUrl(), params, identity, reliableClass);
     return new Connection(params, lc);
   }
 
@@ -117,16 +100,14 @@ public class XAQueueHATcpConnectionFactory
    * instance for creating tcp connections.
    */
   public static javax.jms.XAQueueConnectionFactory create(String url) {
-    return create(url,
-                  "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
+    return create(url, "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
   }
 
   /**
    * Admin method creating a <code>javax.jms.XAQueueConnectionFactory</code>
    * instance for creating tcp connections.
    */
-  public static javax.jms.XAQueueConnectionFactory
-      create(String url, String reliableClass) {
+  public static javax.jms.XAQueueConnectionFactory create(String url, String reliableClass) {
     XAQueueHATcpConnectionFactory cf = new XAQueueHATcpConnectionFactory(url);
     cf.setReliableClass(reliableClass);
     return cf;
