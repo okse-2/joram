@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -45,13 +45,11 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * Joram specific administration and monitoring methods. This is a proxy
  * object a client uses to specify the destination of messages it is
  * sending and the source of messages it receives.
- *  
  */
 public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+  
   private final static String QUEUE_TYPE = "queue";
 
   public static boolean isQueue(String type) {
