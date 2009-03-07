@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package classic;
 
@@ -28,35 +28,29 @@ import javax.jms.*;
 /**
  * Implements the <code>javax.jms.MessageListener</code> interface.
  */
-public class MsgListener implements MessageListener
-{
+public class MsgListener implements MessageListener {
   String ident = null;
 
-  public MsgListener()
-  {}
+  public MsgListener() {}
 
-  public MsgListener(String ident)
-  {
+  public MsgListener(String ident) {
     this.ident = ident;
   }
 
-  public void onMessage(Message msg)
-  {
+  public void onMessage(Message msg) {
     try {
       if (msg instanceof TextMessage) {
         if (ident == null) 
           System.out.println(((TextMessage) msg).getText());
         else
           System.out.println(ident + ": " + ((TextMessage) msg).getText());
-      }
-      else if (msg instanceof ObjectMessage) {
+      } else if (msg instanceof ObjectMessage) {
         if (ident == null) 
           System.out.println(((ObjectMessage) msg).getObject());
         else
           System.out.println(ident + ": " + ((ObjectMessage) msg).getObject());
       }
-    }
-    catch (JMSException jE) {
+    } catch (JMSException jE) {
       System.err.println("Exception in listener: " + jE);
     }
   }

@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,13 +29,10 @@ import javax.naming.*;
 /**
  * Subscribes and sets a listener to the topic.
  */
-public class Subscriber
-{
+public class Subscriber {
   static Context ictx = null; 
 
-  public static void main(String[] args) throws Exception
-  {
-    System.out.println();
+  public static void main(String[] args) throws Exception {
     System.out.println("Subscribes and listens to the topic...");
 
     ictx = new InitialContext();
@@ -43,20 +40,17 @@ public class Subscriber
     TopicConnectionFactory tcf = (TopicConnectionFactory) ictx.lookup("tcf");
     ictx.close();
 
-    TopicConnection tc = tcf.createTopicConnection();
-    TopicSession ts =
-      tc.createTopicSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE);
-    TopicSubscriber tsub = ts.createSubscriber(topic);
+    TopicConnection cnx = tcf.createTopicConnection();
+    TopicSession session = cnx.createTopicSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE);
+    TopicSubscriber subscriber = session.createSubscriber(topic);
+    subscriber.setMessageListener(new MsgListener());
 
-    tsub.setMessageListener(new MsgListener());
-
-    tc.start();
+    cnx.start();
 
     System.in.read();
 
-    tc.close();
+    cnx.close();
 
-    System.out.println();
     System.out.println("Subscription closed.");
   }
 }
