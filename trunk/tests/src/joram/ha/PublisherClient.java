@@ -28,20 +28,18 @@ import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.Topic;
-import javax.jms.TopicConnectionFactory;
+import javax.jms.ConnectionFactory;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory;
+import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 
 public class PublisherClient {
 
   public static void main(String[] args) throws Exception {
-    TopicConnectionFactory cf = 
-      TopicHATcpConnectionFactory.create(
-      "hajoram://localhost:2560,localhost:2561,localhost:2562");
-    ((org.objectweb.joram.client.jms.ConnectionFactory)cf).getParameters().connectingTimer = 30;
+    ConnectionFactory cf = HATcpConnectionFactory.create("hajoram://localhost:2560,localhost:2561,localhost:2562");
+    ((HATcpConnectionFactory) cf).getParameters().connectingTimer = 30;
 
-    AdminModule.connect(cf, "root", "root");
+    AdminModule.connect((HATcpConnectionFactory) cf, "root", "root");
     Topic topic = 
       org.objectweb.joram.client.jms.Topic.create(0, "topic");
     ((org.objectweb.joram.client.jms.Topic)topic).setFreeReading();
