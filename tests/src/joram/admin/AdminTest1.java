@@ -43,10 +43,6 @@ import joram.framework.TestCase;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
-
-
-
 
 public class AdminTest1 extends TestCase {
 
@@ -56,9 +52,8 @@ public class AdminTest1 extends TestCase {
 
   public void run() {
     try {
-      startAgentServer(
-        (short)0, (File)null, 
-        new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
+      startAgentServer((short)0, (File)null, 
+                       new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
       
       Thread.sleep(4000);
       
@@ -69,9 +64,8 @@ public class AdminTest1 extends TestCase {
       
       Thread.sleep(4000);
       
-      startAgentServer(
-          (short)0, (File)null, 
-          new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
+      startAgentServer((short)0, (File)null, 
+                       new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
       
       Thread.sleep(4000);
       
@@ -90,44 +84,35 @@ public class AdminTest1 extends TestCase {
   private void doTest(boolean multiThreadSync) throws Exception {
     Context ctx = new InitialContext();
     
-    TopicConnectionFactory tcf = 
-      TopicTcpConnectionFactory.create("localhost", 2560);
-    ((TopicTcpConnectionFactory)tcf).getParameters().connectingTimer = 60;
-    ((TopicTcpConnectionFactory)tcf).getParameters().multiThreadSync = multiThreadSync;
+    ConnectionFactory cf = TcpConnectionFactory.create("localhost", 2560);
+    ((TcpConnectionFactory) cf).getParameters().connectingTimer = 60;
+    ((TcpConnectionFactory) cf).getParameters().multiThreadSync = multiThreadSync;
 
-    AdminModule.connect(tcf, "root", "root");
+    AdminModule.connect(((TcpConnectionFactory) cf), "root", "root");
 
     org.objectweb.joram.client.jms.admin.User user = 
-      org.objectweb.joram.client.jms.admin.User.create(
-          "anonymous", "anonymous", 0);
+      org.objectweb.joram.client.jms.admin.User.create("anonymous", "anonymous", 0);
 
     org.objectweb.joram.client.jms.Queue queue = 
       org.objectweb.joram.client.jms.Queue.create(0, "queue");
 
     // Get the reference of an existing queue
-    queue = 
-      org.objectweb.joram.client.jms.Queue.create(0, "queue");
+    queue = org.objectweb.joram.client.jms.Queue.create(0, "queue");
     queue.setFreeReading();
     queue.setFreeWriting();
 
     org.objectweb.joram.client.jms.Topic topic = 
       org.objectweb.joram.client.jms.Topic.create(0, "topic");
 
-    topic =
-      org.objectweb.joram.client.jms.Topic.create(0, "topic");
+    topic = org.objectweb.joram.client.jms.Topic.create(0, "topic");
 
     DeadMQueue deadMQueue = (DeadMQueue)DeadMQueue.create(0);
 
-    ConnectionFactory cf = 
-      org.objectweb.joram.client.jms.tcp.TcpConnectionFactory.create(
-        "localhost", 2560);
-    ((TcpConnectionFactory)cf).getParameters().multiThreadSync = 
-      multiThreadSync;
+    ((TcpConnectionFactory) cf).getParameters().multiThreadSync = multiThreadSync;
 
     Connection connection = cf.createConnection("anonymous", "anonymous");
 
-    Session session = connection.createSession(false,
-					       Session.AUTO_ACKNOWLEDGE);
+    Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
     // Create JMS objects representing the destinations
     javax.jms.Queue jmsQueue = session.createQueue(queue.getName());

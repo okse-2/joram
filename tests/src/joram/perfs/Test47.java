@@ -81,8 +81,8 @@ public class Test47 extends BaseTest {
 	    dest.setFreeReading();
 	    dest.setFreeWriting();
 
-	    cf0 = new LocalConnectionFactory();
-	    cf1 = new TcpConnectionFactory("localhost", 16011);
+	    cf0 = LocalConnectionFactory.create();
+	    cf1 = TcpConnectionFactory.create("localhost", 16011);
 	    AdminModule.disconnect();
 
 	    writeIntoFile("----------------------------------------------------");
