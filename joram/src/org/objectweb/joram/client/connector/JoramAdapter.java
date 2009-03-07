@@ -39,7 +39,7 @@ import java.util.Vector;
 
 import javax.jms.Destination;
 import javax.jms.Session;
-import javax.jms.TopicConnectionFactory;
+import javax.jms.ConnectionFactory;
 import javax.jms.XAConnection;
 import javax.jms.XAConnectionFactory;
 import javax.management.MBeanServer;
@@ -66,13 +66,13 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
 import org.objectweb.joram.client.jms.admin.JoramAdmin;
 import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.ha.local.TopicHALocalConnectionFactory;
+import org.objectweb.joram.client.jms.ha.local.HALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.local.XAHALocalConnectionFactory;
-import org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory;
+import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
-import org.objectweb.joram.client.jms.local.TopicLocalConnectionFactory;
+import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
 import org.objectweb.joram.client.jms.local.XALocalConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.shared.security.SimpleIdentity;
@@ -1103,30 +1103,29 @@ public class JoramAdapter
    */
   void adminConnect() throws AdminException {
     try {
-      TopicConnectionFactory factory;
+      ConnectionFactory factory;
 
       if (isHa) {
         if (collocated) {
           if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
             AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, "haURL = " + haURL);
           if (haURL != null) {
-            factory = TopicHATcpConnectionFactory.create(haURL);
+            factory = HATcpConnectionFactory.create(haURL);
           } else {
-            factory = TopicHALocalConnectionFactory.create();
+            factory = HALocalConnectionFactory.create();
           }
         } else {
           String urlHa = "hajoram://" + hostName + ":" + serverPort;
-          factory = TopicHATcpConnectionFactory.create(urlHa);
+          factory = HATcpConnectionFactory.create(urlHa);
         }
       } else {
         if (collocated)
-          factory = TopicLocalConnectionFactory.create();
+          factory = LocalConnectionFactory.create();
         else
-          factory = TopicTcpConnectionFactory.create(hostName, serverPort);
+          factory = TcpConnectionFactory.create(hostName, serverPort);
       }
 
-      ((org.objectweb.joram.client.jms.ConnectionFactory) factory)
-      .getParameters().connectingTimer = 60;
+      ((org.objectweb.joram.client.jms.ConnectionFactory) factory).getParameters().connectingTimer = 60;
       
       joramAdmin = new JoramAdmin(factory, rootName, rootPasswd, identityClass);
     } catch (ConnectException exc) {

@@ -30,6 +30,8 @@ import javax.jms.JMSSecurityException;
 
 import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.ConnectionFactory;
+import org.objectweb.joram.client.jms.QueueConnection;
+import org.objectweb.joram.client.jms.TopicConnection;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 
 /**
@@ -41,6 +43,12 @@ public class SoapConnectionFactory extends ConnectionFactory {
   private static final long serialVersionUID = 1L;
 
   /**
+   * Constructs an empty <code>SoapConnectionFactory</code> instance.
+   * Needed by ObjectFactory, should only be used for internal purposes.
+   */
+  public SoapConnectionFactory() {}
+
+  /**
    * Constructs a <code>SoapConnectionFactory</code> instance.
    *
    * @param host  Name or IP address of the server's host.
@@ -48,16 +56,10 @@ public class SoapConnectionFactory extends ConnectionFactory {
    * @param timeout  Duration in seconds during which a SOAP connection might
    *          be inactive before being considered as dead (0 for never).
    */
-  public SoapConnectionFactory(String host, int port, int timeout) {
+  private SoapConnectionFactory(String host, int port, int timeout) {
     super(host, port);
     params.cnxPendingTimer = timeout * 1000;
   }
-
-  /**
-   * Constructs an empty <code>SoapConnectionFactory</code> instance.
-   */
-  public SoapConnectionFactory() {}
-
 
   /**
    * Method inherited from the <code>ConnectionFactory</code> class.
@@ -68,6 +70,28 @@ public class SoapConnectionFactory extends ConnectionFactory {
   public javax.jms.Connection createConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
     return new Connection(params, new SoapRequestChannel(params, identity));
+  }
+
+  /**
+   * Method inherited from the <code>QueueConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.QueueConnection createQueueConnection(String name, String password) throws javax.jms.JMSException {
+    initIdentity(name, password);
+    return new QueueConnection(params, new SoapRequestChannel(params, identity));
+  }
+
+  /**
+   * Method inherited from the <code>TopicConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.TopicConnection createTopicConnection(String name, String password) throws javax.jms.JMSException {
+    initIdentity(name, password);
+    return new TopicConnection(params, new SoapRequestChannel(params, identity));
   }
 
   /**

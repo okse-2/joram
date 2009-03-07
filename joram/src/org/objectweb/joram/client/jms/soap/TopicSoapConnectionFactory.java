@@ -32,10 +32,13 @@ import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.TopicConnection;
 import org.objectweb.joram.client.jms.TopicConnectionFactory;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 /**
  * A <code>TopicSoapConnectionFactory</code> instance is a factory of
  * SOAP connections for Pub/Sub communication.
+ *  
+ * @deprecated Replaced next to Joram 5.2.1 by {@link SoapConnectionFactory}.
  */
 public class TopicSoapConnectionFactory extends TopicConnectionFactory {
   /** define serialVersionUID for interoperability */

@@ -27,6 +27,8 @@ import javax.jms.JMSSecurityException;
 
 import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.ConnectionFactory;
+import org.objectweb.joram.client.jms.QueueConnection;
+import org.objectweb.joram.client.jms.TopicConnection;
 
 /**
  * A <code>LocalConnectionFactory</code> instance is a factory of
@@ -38,6 +40,7 @@ public class LocalConnectionFactory extends ConnectionFactory {
 
   /**
    * Constructs a <code>QueueLocalConnectionFactory</code> instance.
+   * Needed by ObjectFactory, should only be used for internal purposes.
    */
   public LocalConnectionFactory() {
     super("localhost", -1);
@@ -53,6 +56,28 @@ public class LocalConnectionFactory extends ConnectionFactory {
     initIdentity(name, password);
     LocalRequestChannel lc = new LocalRequestChannel(identity);
     return new Connection(params, lc);
+  }
+
+  /**
+   * Method inherited from the <code>QueueConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   */
+  public javax.jms.QueueConnection createQueueConnection(String name, String password) throws javax.jms.JMSException {
+    initIdentity(name, password);
+    LocalRequestChannel lc = new LocalRequestChannel(identity);
+    return new QueueConnection(params, lc);
+  }
+
+  /**
+   * Method inherited from the <code>TopicConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   */
+  public javax.jms.TopicConnection createTopicConnection(String name, String password) throws javax.jms.JMSException {
+    initIdentity(name, password);
+    LocalRequestChannel lc = new LocalRequestChannel(identity);
+    return new TopicConnection(params, lc);
   }
 
   /**

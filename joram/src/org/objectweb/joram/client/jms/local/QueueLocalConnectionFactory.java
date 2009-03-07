@@ -26,19 +26,22 @@ package org.objectweb.joram.client.jms.local;
 import javax.jms.JMSSecurityException;
 
 import org.objectweb.joram.client.jms.Connection;
+import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.QueueConnection;
 import org.objectweb.joram.client.jms.QueueConnectionFactory;
 
 /**
  * A <code>QueueLocalConnectionFactory</code> instance is a factory of
  * local connections for PTP communication.
+ *  
+ * @deprecated Replaced next to Joram 5.2.1 by {@link LocalConnectionFactory}.
  */
 public class QueueLocalConnectionFactory extends QueueConnectionFactory {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   /**
-   * Constructs a <code>QueueLocalConnectionFactory</code> instance.
+   * Constructs an empty <code>QueueLocalConnectionFactory</code> instance.
    */
   public QueueLocalConnectionFactory() {
     super("localhost", -1);

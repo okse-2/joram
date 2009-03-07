@@ -23,6 +23,12 @@ package org.objectweb.joram.client.jms.ha.local;
 
 import org.objectweb.joram.client.jms.*;
 
+/**
+ * A <code>TopicHALocalConnectionFactory</code> instance is a factory of
+ * local connections to an HA server.
+ *  
+ * @deprecated Replaced next to Joram 5.2.1 by {@link HALocalConnectionFactory}.
+ */
 public class TopicHALocalConnectionFactory extends org.objectweb.joram.client.jms.TopicConnectionFactory {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
@@ -36,9 +42,7 @@ public class TopicHALocalConnectionFactory extends org.objectweb.joram.client.jm
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.TopicConnection
-  createTopicConnection(String name, String password)
-  throws javax.jms.JMSException {
+  public javax.jms.TopicConnection createTopicConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
     HALocalRequestChannel lc = new HALocalRequestChannel(identity);    
     return new TopicConnection(params, lc);

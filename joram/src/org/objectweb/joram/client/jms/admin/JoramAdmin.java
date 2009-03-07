@@ -45,91 +45,78 @@ import fr.dyade.aaa.util.management.MXWrapper;
 /**
  *
  */
-public class JoramAdmin
-  implements JoramAdminMBean {
+public class JoramAdmin implements JoramAdminMBean {
 
   public long timeOut = 1000;
   public PlatformAdmin platformAdmin;
   /** <code>true</code> if the underlying a JORAM HA server is defined */
   static boolean isHa = false;
 
-
   /**
    * Path to the file containing a description of the exported administered objects (destination)
    */
   private String adminFileExportXML = null;
 
-
-  public JoramAdmin()
-    throws UnknownHostException, ConnectException, AdminException {
+  public JoramAdmin() throws UnknownHostException, ConnectException, AdminException {
     platformAdmin = new PlatformAdmin();
     registerMBean();
   }
 
+  public JoramAdmin(String name,
+                    String password) throws ConnectException, AdminException {
+    platformAdmin = new PlatformAdmin(name, password);
+    registerMBean();
+  }
+
+  public JoramAdmin(String hostName,
+                    int port,
+                    String name,
+                    String password,
+                    int cnxTimer) throws UnknownHostException, ConnectException, AdminException {
+    platformAdmin = new PlatformAdmin(hostName, port, name, password, cnxTimer);
+    registerMBean();
+  }
+  
   public JoramAdmin(String hostName,
                     int port,
                     String name,
                     String password,
                     int cnxTimer,
-                    String reliableClass)
-    throws UnknownHostException, ConnectException, AdminException {
-    platformAdmin = new PlatformAdmin(hostName,port,name,password,cnxTimer,reliableClass);
+                    String reliableClass) throws UnknownHostException, ConnectException, AdminException {
+    platformAdmin = new PlatformAdmin(hostName, port, name, password, cnxTimer, reliableClass);
     registerMBean();
   }
 
-  public JoramAdmin(String hostName,
-                    int port,
+  public JoramAdmin(javax.jms.ConnectionFactory cnxFact,
                     String name,
-                    String password,
-                    int cnxTimer)
-    throws UnknownHostException, ConnectException, AdminException {
-    platformAdmin = new PlatformAdmin(hostName,port,name,password,cnxTimer);
-    registerMBean();
-  }
-
-  public JoramAdmin(String name,
-                    String password)
-    throws ConnectException, AdminException {
-    platformAdmin = new PlatformAdmin(name,password);
-    registerMBean();
-  }
-  
-  public JoramAdmin(javax.jms.TopicConnectionFactory cnxFact,
-      String name,
-      String password)
-  throws ConnectException, AdminException {
+                    String password) throws ConnectException, AdminException {
     this(cnxFact, name, password, SimpleIdentity.class.getName());
   }
 
-  public JoramAdmin(javax.jms.TopicConnectionFactory cnxFact,
+  public JoramAdmin(javax.jms.ConnectionFactory cnxFact,
                     String name,
                     String password,
                     String identityClassName)
     throws ConnectException, AdminException {
-    platformAdmin = new PlatformAdmin(cnxFact,name,password,identityClassName);
+    platformAdmin = new PlatformAdmin(cnxFact, name, password, identityClassName);
     registerMBean();
   }
 
   private void registerMBean() {
     try {
-      MXWrapper.registerMBean(this,
-                              "joramClient",
-                              "type=JoramAdmin");
+      MXWrapper.registerMBean(this, "joramClient", "type=JoramAdmin");
     } catch (Exception e) {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                   "registerMBean",e);
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "registerMBean", e);
     }
   }
 
   private void unregisterMBean() {
     try {
-      MXWrapper.unregisterMBean("joramClient",
-                                "type=JoramAdmin");
+      MXWrapper.unregisterMBean("joramClient", "type=JoramAdmin");
     } catch (Exception e) {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                   "unregisterMBean",e);
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "unregisterMBean",e);
     }
   }
 
@@ -168,8 +155,7 @@ public class JoramAdmin
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public void setDefaultDMQ(int serverId, DeadMQueue dmq)
-    throws ConnectException, AdminException {
+  public void setDefaultDMQ(int serverId, DeadMQueue dmq) throws ConnectException, AdminException {
     AdminModule.setDefaultDMQ(serverId,dmq);
   }
 
@@ -185,8 +171,7 @@ public class JoramAdmin
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public void setDefaultDMQId(int serverId, String dmqId)
-    throws ConnectException, AdminException {
+  public void setDefaultDMQId(int serverId, String dmqId) throws ConnectException, AdminException {
     AdminModule.setDefaultDMQId(serverId,dmqId);
   }
   
@@ -199,8 +184,7 @@ public class JoramAdmin
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public DeadMQueue getDefaultDMQ(int serverId)
-    throws ConnectException, AdminException {
+  public DeadMQueue getDefaultDMQ(int serverId) throws ConnectException, AdminException {
     return AdminModule.getDefaultDMQ(serverId);
   }
 
@@ -213,8 +197,7 @@ public class JoramAdmin
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public String getDefaultDMQId(int serverId)
-    throws ConnectException, AdminException {
+  public String getDefaultDMQId(int serverId) throws ConnectException, AdminException {
     return AdminModule.getDefaultDMQId(serverId);
   }
   
@@ -225,8 +208,7 @@ public class JoramAdmin
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
    */
-  public DeadMQueue getDefaultDMQ()
-    throws ConnectException, AdminException {
+  public DeadMQueue getDefaultDMQ() throws ConnectException, AdminException {
     return AdminModule.getDefaultDMQ();
   }
   
@@ -237,8 +219,7 @@ public class JoramAdmin
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
    */
-  public String getDefaultDMQId()
-    throws ConnectException, AdminException {
+  public String getDefaultDMQId() throws ConnectException, AdminException {
     return AdminModule.getDefaultDMQId();
   }
 

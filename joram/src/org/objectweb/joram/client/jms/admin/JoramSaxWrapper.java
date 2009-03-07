@@ -41,7 +41,7 @@ import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
-import org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory;
+import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.shared.security.SimpleIdentity;
@@ -683,25 +683,16 @@ public class JoramSaxWrapper extends DefaultHandler {
         if (rawName.equals(ELT_ADMINMODULE)) {
         } else if (rawName.equals(ELT_CONNECT)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "AdminModule.connect(" +
-                       host + "," +
-                       port + "," +
-                       name + "," +
-                       "***** ," +
-                       cnxTimer + "," +
-                       reliableClass + ")");
+            logger.log(BasicLevel.DEBUG,
+                       "AdminModule.connect(" + host + ',' + port + ',' + name + ',' + cnxTimer + ',' + reliableClass + ')');
           AdminModule.connect(host,port,name,password,cnxTimer,reliableClass,identityClass);
         } else if (rawName.equals(ELT_HACONNECT)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "AdminModule.haConnect(" +
-                       url + "," +
-                       name + "," +
-                       "***** ," +
-                       cnxTimer + ")");
-          javax.jms.TopicConnectionFactory tcf =
-            TopicHATcpConnectionFactory.create(url);
-          ((ConnectionFactory) tcf).getParameters().connectingTimer = cnxTimer;
-          AdminModule.connect(tcf, name, password,identityClass);
+            logger.log(BasicLevel.DEBUG,
+                       "AdminModule.haConnect(" + url + ',' + name + ',' + cnxTimer + ')');
+          ConnectionFactory cf =  (ConnectionFactory) HATcpConnectionFactory.create(url);
+          cf.getParameters().connectingTimer = cnxTimer;
+          AdminModule.connect(cf, name, password,identityClass);
         } else if (rawName.equals(ELT_COLLOCATEDCONNECT)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "AdminModule.collocatedConnect(" +
