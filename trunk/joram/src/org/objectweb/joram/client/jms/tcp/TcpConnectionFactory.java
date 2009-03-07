@@ -25,9 +25,12 @@
 package org.objectweb.joram.client.jms.tcp;
 
 import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
 
 import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.ConnectionFactory;
+import org.objectweb.joram.client.jms.QueueConnection;
+import org.objectweb.joram.client.jms.TopicConnection;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 
 import org.objectweb.joram.shared.JoramTracing;
@@ -42,19 +45,20 @@ public class TcpConnectionFactory extends ConnectionFactory {
   private static final long serialVersionUID = 1L;
 
   /**
+   * Constructs an empty <code>TcpConnectionFactory</code> instance.
+   * Should only be used for internal purposes.
+   */
+  public TcpConnectionFactory() {}
+
+  /**
    * Constructs a <code>TcpConnectionFactory</code> instance.
    *
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */
-  public TcpConnectionFactory(String host, int port) {
+  private TcpConnectionFactory(String host, int port) {
     super(host, port);
   }
-
-  /**
-   * Constructs an empty <code>TcpConnectionFactory</code> instance.
-   */
-  public TcpConnectionFactory() {}
 
   /**
    * Method inherited from the <code>ConnectionFactory</code> class.
@@ -64,12 +68,42 @@ public class TcpConnectionFactory extends ConnectionFactory {
    */
   public javax.jms.Connection createConnection(String name,
                                                String password) throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, 
-                                 "TcpConnectionFactory.createConnection(" + name + ',' + password + ") reliableClass=" + reliableClass);
-
     initIdentity(name, password);
     return new Connection(params, new TcpRequestChannel(params, identity, reliableClass));
+  }
+  
+  /**
+   * Method inherited from the <code>QueueConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.QueueConnection createQueueConnection(String name,
+                                                         String password) throws JMSException {
+    initIdentity(name, password);
+    return new QueueConnection(params, new TcpRequestChannel(params, identity, reliableClass));
+  }
+
+  /**
+   * Method inherited from the <code>TopicConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.TopicConnection createTopicConnection(String name,
+                                                         String password) throws JMSException {
+    initIdentity(name, password);
+    return new TopicConnection(params, new TcpRequestChannel(params, identity, reliableClass));
+  }
+
+  /**
+   * Admin method creating a <code>javax.jms.ConnectionFactory</code>
+   * instance for creating TCP connections with the local server.
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   */ 
+  public static javax.jms.ConnectionFactory create() throws java.net.ConnectException {
+    return create(AdminModule.getLocalHost(), AdminModule.getLocalPort());
   }
 
   /**
@@ -99,15 +133,5 @@ public class TcpConnectionFactory extends ConnectionFactory {
     TcpConnectionFactory cf = new TcpConnectionFactory(host, port);
     cf.setReliableClass(reliableClass);
     return cf;
-  }
-
-  /**
-   * Admin method creating a <code>javax.jms.ConnectionFactory</code>
-   * instance for creating TCP connections with the local server.
-   *
-   * @exception ConnectException  If the admin connection is closed or broken.
-   */ 
-  public static javax.jms.ConnectionFactory create() throws java.net.ConnectException {
-    return create(AdminModule.getLocalHost(), AdminModule.getLocalPort());
   }
 }

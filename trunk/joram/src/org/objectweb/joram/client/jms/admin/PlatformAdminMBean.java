@@ -32,82 +32,63 @@ import java.util.List;
  */
 public interface PlatformAdminMBean {
 
-  public void connect(javax.jms.TopicConnectionFactory cnxFact, 
+  public void connect(javax.jms.ConnectionFactory cnxFact, 
                       String name,
-                      String password)
-    throws ConnectException, AdminException;
+                      String password) throws ConnectException, AdminException;
   
   public void connect(String hostName,
                       int port,
                       String name,
                       String password,
                       int cnxTimer,
-                      String reliableClass)
-    throws UnknownHostException, ConnectException, AdminException;
+                      String reliableClass) throws UnknownHostException, ConnectException, AdminException;
 
-  public void connect(String name, String password, int cnxTimer)
-    throws UnknownHostException, ConnectException, AdminException;
+  public void connect(String name, String password,
+                      int cnxTimer) throws UnknownHostException, ConnectException, AdminException;
 
-  public void collocatedConnect(String name, String password)
-    throws ConnectException, AdminException;
+  public void collocatedConnect(String name, String password) throws ConnectException, AdminException;
 
   public void disconnect();
 
   public void exit();
 
-  public void stopServer(int serverId)
-    throws ConnectException, AdminException;
+  public void stopServer(int serverId) throws ConnectException, AdminException;
 
-  public void stopServer() 
-    throws ConnectException, AdminException;
+  public void stopServer() throws ConnectException, AdminException;
 
   public void addServer(int sid,
                         String hostName,
                         String domainName,
                         int port,
-                        String serverName)
-    throws ConnectException, AdminException;
+                        String serverName) throws ConnectException, AdminException;
 
-  public void removeServer(int sid)
-    throws ConnectException, AdminException;
+  public void removeServer(int sid) throws ConnectException, AdminException;
 
   public void addDomain(String domainName,
                         int sid,
-                        int port)
-    throws ConnectException, AdminException;
+                        int port) throws ConnectException, AdminException;
 
-  public void removeDomain(String domainName)
-    throws ConnectException, AdminException;
+  public void removeDomain(String domainName) throws ConnectException, AdminException;
 
-  public String getConfiguration()
-    throws ConnectException, AdminException;
+  public String getConfiguration() throws ConnectException, AdminException;
 
   public List getServersIds();
 
-  public List getServersIds(String domainName) 
-    throws ConnectException, AdminException;
+  public List getServersIds(String domainName) throws ConnectException, AdminException;
 
-  public String[] getDomainNames(int serverId) 
-    throws ConnectException, AdminException;
+  public String[] getDomainNames(int serverId) throws ConnectException, AdminException;
 
-  public void setDefaultThreshold(int serverId, int threshold)
-    throws ConnectException, AdminException;
+  public void setDefaultThreshold(int serverId, int threshold) throws ConnectException, AdminException;
 
-  public void setDefaultThreshold(int threshold)
-    throws ConnectException, AdminException;
+  public void setDefaultThreshold(int threshold) throws ConnectException, AdminException;
 
-  public int getDefaultThreshold(int serverId)
-    throws ConnectException, AdminException;
+  public int getDefaultThreshold(int serverId) throws ConnectException, AdminException;
 
-  public int getDefaultThreshold()
-    throws ConnectException, AdminException;
+  public int getDefaultThreshold() throws ConnectException, AdminException;
 
-  public int getLocalServerId() 
-    throws ConnectException;
+  public int getLocalServerId() throws ConnectException;
 
-  public String getLocalHost() 
-    throws ConnectException;
+  public String getLocalHost() throws ConnectException;
 
-  public int getLocalPort() 
-    throws ConnectException;
+  public int getLocalPort() throws ConnectException;
 }

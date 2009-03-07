@@ -32,6 +32,8 @@ import org.objectweb.joram.client.jms.TopicConnectionFactory;
 /**
  * A <code>TopicLocalConnectionFactory</code> instance is a factory of
  * local connections for Pub/Sub communication.
+ *  
+ * @deprecated Replaced next to Joram 5.2.1 by {@link LocalConnectionFactory}.
  */
 public class TopicLocalConnectionFactory extends TopicConnectionFactory {
   /** define serialVersionUID for interoperability */

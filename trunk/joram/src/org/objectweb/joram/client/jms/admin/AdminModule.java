@@ -44,13 +44,14 @@ import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TemporaryTopic;
-import javax.jms.TopicConnection;
+import javax.jms.Connection;
 
+import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.Destination;
-import org.objectweb.joram.client.jms.ha.local.TopicHALocalConnectionFactory;
-import org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory;
-import org.objectweb.joram.client.jms.local.TopicLocalConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
+import org.objectweb.joram.client.jms.ha.local.HALocalConnectionFactory;
+import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
+import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.admin.AddDomainRequest;
 import org.objectweb.joram.shared.admin.AddServerRequest;
@@ -100,7 +101,7 @@ public class AdminModule {
   protected static int localPort;
 
   /** The connection used to link the administrator and the platform. */
-  private static TopicConnection cnx = null;
+  private static Connection cnx = null;
 
   /** The requestor for sending the synchronous requests. */
   private static AdminRequestor requestor;
@@ -139,7 +140,7 @@ public class AdminModule {
    * which parameters are wrapped by a given
    * <code>TopicConnectionFactory</code>.
    *
-   * @param cnxFact  The TopicConnectionFactory to use for connecting.
+   * @param cnxFact  The ConnectionFactory to use for connecting.
    * @param name  Administrator's name.
    * @param password  Administrator's password.
    *
@@ -147,19 +148,18 @@ public class AdminModule {
    * @exception AdminException  If the administrator identification is
    *              incorrect.
    */
-  public static void connect(javax.jms.TopicConnectionFactory cnxFact,
+  public static void connect(ConnectionFactory cnxFact,
                              String name,
-                             String password)
-    throws ConnectException, AdminException {
+                             String password) throws ConnectException, AdminException {
     connect(cnxFact, name, password, SimpleIdentity.class.getName());
-    }
+  }
   
   /**
    * Opens a connection dedicated to administering with the Joram server
    * which parameters are wrapped by a given
    * <code>TopicConnectionFactory</code>.
    *
-   * @param cnxFact  The TopicConnectionFactory to use for connecting.
+   * @param cnxFact  The ConnectionFactory to use for connecting.
    * @param name  Administrator's name.
    * @param password  Administrator's password.
    * @param identityClass identity class name.
@@ -168,20 +168,18 @@ public class AdminModule {
    * @exception AdminException  If the administrator identification is
    *              incorrect.
    */
-  public static void connect(javax.jms.TopicConnectionFactory cnxFact,
+  public static void connect(ConnectionFactory cnxFact,
                              String name,
                              String password,
-                             String identityClass)
-    throws ConnectException, AdminException {
-    if (cnx != null)
-      return;
+                             String identityClass) throws ConnectException, AdminException {
+    if (cnx != null) return;
     
     //  set identity className
     ((AbstractConnectionFactory) cnxFact).setIdentityClassName(identityClass);
 
     
     try {
-      cnx = cnxFact.createTopicConnection(name, password);
+      cnx = cnxFact.createConnection(name, password);
       requestor = new AdminRequestor(cnx);
 
       cnx.start();
@@ -189,11 +187,9 @@ public class AdminModule {
       org.objectweb.joram.client.jms.FactoryParameters params = null;
 
       if (cnxFact instanceof javax.jms.XATopicConnectionFactory)
-        params = ((org.objectweb.joram.client.jms.XAConnectionFactory)
-                  cnxFact).getParameters();
+        params = cnxFact.getParameters();
       else
-        params = ((org.objectweb.joram.client.jms.ConnectionFactory)
-                  cnxFact).getParameters();
+        params = cnxFact.getParameters();
 
       localHost = params.getHost();
       localPort = params.getPort();
@@ -290,20 +286,18 @@ public class AdminModule {
                              String password,
                              int cnxTimer,
                              String reliableClass,
-                             String identityClass)
-    throws UnknownHostException, ConnectException, AdminException {
-    javax.jms.TopicConnectionFactory cnxFact =null;
+                             String identityClass) throws UnknownHostException, ConnectException, AdminException {
+    ConnectionFactory cnxFact =null;
 
     if (isHa) {
       String urlHa = "hajoram://" + hostName + ":" + port;
-      cnxFact = TopicHATcpConnectionFactory.create(urlHa);
+      cnxFact = (ConnectionFactory) HATcpConnectionFactory.create(urlHa);
 
     } else {
-      cnxFact = TopicTcpConnectionFactory.create(hostName, port, reliableClass);
+      cnxFact = (ConnectionFactory) TcpConnectionFactory.create(hostName, port, reliableClass);
     }
 
-    ((org.objectweb.joram.client.jms.ConnectionFactory)
-     cnxFact).getParameters().connectingTimer = cnxTimer;
+    cnxFact.getParameters().connectingTimer = cnxTimer;
 
     connect(cnxFact, name, password, identityClass);
   }
@@ -322,8 +316,8 @@ public class AdminModule {
    * @exception AdminException  If the administrator identification is
    *              incorrect.
    */
-  public static void connect(String name, String password, int cnxTimer)
-    throws UnknownHostException, ConnectException, AdminException {
+  public static void connect(String name, String password,
+                             int cnxTimer) throws UnknownHostException, ConnectException, AdminException {
       connect("localhost", 16010, name, password, cnxTimer);
     }
 
@@ -342,11 +336,9 @@ public class AdminModule {
    * @exception AdminException  If the administrator identification is
    *              incorrect.
    */
-  public static void connect(String name,
-                             String password,
+  public static void connect(String name, String password,
                              int cnxTimer,
-                             String reliableClass)
-    throws UnknownHostException, ConnectException, AdminException {
+                             String reliableClass) throws UnknownHostException, ConnectException, AdminException {
     connect("localhost", 16010, name, password, cnxTimer, reliableClass);
   }
   
@@ -360,8 +352,7 @@ public class AdminModule {
    * @exception AdminException  If the administrator identification is
    *              incorrect.
    */
-  public static void collocatedConnect(String name, String password)
-         throws ConnectException, AdminException {
+  public static void collocatedConnect(String name, String password) throws ConnectException, AdminException {
     collocatedConnect(name, password, SimpleIdentity.class.getName());
   }
 
@@ -376,21 +367,24 @@ public class AdminModule {
    * @exception AdminException  If the administrator identification is
    *              incorrect.
    */
-  public static void collocatedConnect(String name, String password, String identityClass)
-         throws ConnectException, AdminException {
-    JoramTracing.dbgClient.log(BasicLevel.DEBUG, "isHa=" + isHa);
+  public static void collocatedConnect(String name, String password,
+                                       String identityClass) throws ConnectException, AdminException {
     if (isHa) {
-      connect(TopicHALocalConnectionFactory.create(), name, password, identityClass);
+      connect((ConnectionFactory) HALocalConnectionFactory.create(),
+              name, password,
+              identityClass);
     } else {
-      connect(TopicLocalConnectionFactory.create(), name, password, identityClass);
+      connect((ConnectionFactory) LocalConnectionFactory.create(),
+              name, password,
+              identityClass);
     }
   }
 
   /** Closes the administration connection. */
   public static void disconnect() {
+    if (cnx == null) return;
+    
     try {
-      if (cnx == null) return;
-      
       cnx.close();
     } catch (JMSException exc) {}
 
@@ -407,8 +401,7 @@ public class AdminModule {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public static void stopServer(int serverId)
-    throws ConnectException, AdminException {
+  public static void stopServer(int serverId) throws ConnectException, AdminException {
     try {
       doRequest(new StopServerRequest(serverId));
 
@@ -448,11 +441,8 @@ public class AdminModule {
                                String hostName,
                                String domainName,
                                int port,
-                               String serverName)
-    throws ConnectException, AdminException {
-    addServer(sid,
-              hostName, domainName, port, serverName,
-              new String[]{}, new String[]{});
+                               String serverName) throws ConnectException, AdminException {
+    addServer(sid, hostName, domainName, port, serverName, new String[]{}, new String[]{});
   }
 
   /**
@@ -475,27 +465,13 @@ public class AdminModule {
                                int port,
                                String serverName,
                                String[] serviceNames,
-                               String[] serviceArgs)
-    throws ConnectException, AdminException {
-    if (serviceNames != null &&
-        serviceArgs != null) {
-      if (serviceNames.length != serviceArgs.length)
-        throw new AdminException(
-          "Same number of service names and arguments expected");
-    } else {
-      if (serviceNames == null) throw new AdminException(
-        "Expected service names");
-      if (serviceArgs == null) throw new AdminException(
-        "Expected service arguments");
-    }
-    doRequest(new AddServerRequest(
-                sid,
-                hostName,
-                domainName,
-                port,
-                serverName,
-                serviceNames,
-                serviceArgs));
+                               String[] serviceArgs) throws ConnectException, AdminException {
+    if (serviceNames == null) throw new AdminException("Expected service names");
+    if (serviceArgs == null) throw new AdminException("Expected service arguments");
+    if (serviceNames.length != serviceArgs.length)
+      throw new AdminException("Same number of service names and arguments expected");
+
+    doRequest(new AddServerRequest(sid, hostName, domainName, port, serverName, serviceNames, serviceArgs));
   }
 
   /**
@@ -506,8 +482,7 @@ public class AdminModule {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public static void removeServer(int sid)
-    throws ConnectException, AdminException {
+  public static void removeServer(int sid) throws ConnectException, AdminException {
     doRequest(new RemoveServerRequest(sid));
   }
 
@@ -523,12 +498,8 @@ public class AdminModule {
    */
   public static void addDomain(String domainName,
                                int sid,
-                               int port)
-    throws ConnectException, AdminException {
-    doRequest(new AddDomainRequest(
-                domainName,
-                sid,
-                port));
+                               int port) throws ConnectException, AdminException {
+    doRequest(new AddDomainRequest(domainName, sid, port));
   }
 
   /**
@@ -545,13 +516,8 @@ public class AdminModule {
   public static void addDomain(String domainName,
                                String network,
                                int sid,
-                               int port)
-    throws ConnectException, AdminException {
-    doRequest(new AddDomainRequest(
-                domainName,
-                network,
-                sid,
-                port));
+                               int port) throws ConnectException, AdminException {
+    doRequest(new AddDomainRequest(domainName, network, sid, port));
   }
 
   /**
@@ -562,10 +528,8 @@ public class AdminModule {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public static void removeDomain(String domainName)
-    throws ConnectException, AdminException {
-    doRequest(new RemoveDomainRequest(
-                domainName));
+  public static void removeDomain(String domainName) throws ConnectException, AdminException {
+    doRequest(new RemoveDomainRequest(domainName));
   }
 
   /**
@@ -574,8 +538,7 @@ public class AdminModule {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public static String getConfiguration()
-    throws ConnectException, AdminException {
+  public static String getConfiguration() throws ConnectException, AdminException {
     return doRequest(new GetConfigRequest()).getInfo();
   }
 
@@ -591,8 +554,7 @@ public class AdminModule {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public static void setDefaultDMQ(int serverId, DeadMQueue dmq)
-  throws ConnectException, AdminException {
+  public static void setDefaultDMQ(int serverId, DeadMQueue dmq) throws ConnectException, AdminException {
     if (dmq != null) {
       doRequest(new SetDefaultDMQ(serverId, dmq.getName()));
     }
@@ -1095,15 +1057,14 @@ public class AdminModule {
   }
 
   public static class AdminRequestor {
-    private javax.jms.TopicSession sess;
+    private javax.jms.Session sess;
     private javax.jms.Topic topic;
     private TemporaryTopic tmpTopic;
     private MessageProducer producer;
     private MessageConsumer consumer;
 
-    public AdminRequestor(javax.jms.TopicConnection cnx)
-      throws JMSException {
-      sess = cnx.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+    public AdminRequestor(javax.jms.Connection cnx) throws JMSException {
+      sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
       topic = sess.createTopic("#AdminTopic");
       producer = sess.createProducer(topic);
       tmpTopic = sess.createTemporaryTopic();

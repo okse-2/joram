@@ -29,6 +29,12 @@ import javax.jms.JMSSecurityException;
 import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.QueueConnection;
 
+/**
+ * A <code>TopicHALocalConnectionFactory</code> instance is a factory of
+ * TCP connections to an HA server.
+ *  
+ * @deprecated Replaced next to Joram 5.2.1 by {@link HATcpConnectionFactory}.
+ */
 public class QueueHATcpConnectionFactory extends org.objectweb.joram.client.jms.QueueConnectionFactory {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;

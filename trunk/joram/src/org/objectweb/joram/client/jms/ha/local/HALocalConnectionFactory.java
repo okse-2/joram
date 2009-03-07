@@ -23,12 +23,16 @@ package org.objectweb.joram.client.jms.ha.local;
 
 import org.objectweb.joram.client.jms.*;
 
-public class HALocalConnectionFactory extends org.objectweb.joram.client.jms.ConnectionFactory {
+public class HALocalConnectionFactory extends ConnectionFactory {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
+  /**
+   * Constructs a <code>QueueLocalConnectionFactory</code> instance.
+   * Needed by ObjectFactory, should only be used for internal purposes.
+   */
   public HALocalConnectionFactory() {
-    super("", -1);
+    super("localhost", -1);
   }
 
   /**
@@ -37,12 +41,32 @@ public class HALocalConnectionFactory extends org.objectweb.joram.client.jms.Con
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.Connection
-      createConnection(String name, String password)
-    throws javax.jms.JMSException {
+  public javax.jms.Connection createConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
     HALocalRequestChannel lc = new HALocalRequestChannel(identity);
     return new Connection(params, lc);
+  }
+
+  /**
+   * Method inherited from the <code>QueueConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   */
+  public javax.jms.QueueConnection createQueueConnection(String name, String password) throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HALocalRequestChannel lc = new HALocalRequestChannel(identity);    
+    return new QueueConnection(params, lc);
+  }
+
+  /**
+   * Method inherited from the <code>TopicConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   */
+  public javax.jms.TopicConnection createTopicConnection(String name, String password) throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HALocalRequestChannel lc = new HALocalRequestChannel(identity);    
+    return new TopicConnection(params, lc);
   }
 
   /**

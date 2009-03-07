@@ -30,6 +30,7 @@ import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 
 import org.objectweb.joram.client.jms.Connection;
+import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.QueueConnection;
 import org.objectweb.joram.client.jms.QueueConnectionFactory;
 import org.objectweb.joram.client.jms.admin.AdminModule;
@@ -37,6 +38,8 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
 /**
  * A <code>QueueTcpConnectionFactory</code> instance is a factory of
  * TCP connections for PTP communication.
+ *  
+ * @deprecated Replaced next to Joram 5.2.1 by {@link TcpConnectionFactory}.
  */
 public class QueueTcpConnectionFactory extends QueueConnectionFactory {
   /** define serialVersionUID for interoperability */

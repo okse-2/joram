@@ -27,18 +27,34 @@ import java.net.UnknownHostException;
 import java.util.List;
 
 import fr.dyade.aaa.util.management.MXWrapper;
+
+import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  *
  */
-public class PlatformAdmin
-  implements PlatformAdminMBean {
+public class PlatformAdmin implements PlatformAdminMBean {
 
-  public PlatformAdmin() 
-    throws ConnectException, AdminException {
+  public PlatformAdmin() throws ConnectException, AdminException {
     connect("root", "root", 60);
+    registerMBean();
+  }
+
+  public PlatformAdmin(String name,
+                       String password) throws ConnectException, AdminException {
+    collocatedConnect(name, password);
+    registerMBean();
+  }
+
+  public PlatformAdmin(String hostName,
+                       int port,
+                       String name,
+                       String password,
+                       int cnxTimer) throws UnknownHostException, ConnectException, AdminException {
+    connect(hostName, port, name, password, cnxTimer,
+            "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
     registerMBean();
   }
   
@@ -47,70 +63,43 @@ public class PlatformAdmin
                        String name,
                        String password,
                        int cnxTimer,
-                       String reliableClass) 
-    throws UnknownHostException, ConnectException, AdminException {
-    connect(hostName,port,name,password,cnxTimer,reliableClass);
+                       String reliableClass) throws UnknownHostException, ConnectException, AdminException {
+    connect(hostName, port, name, password, cnxTimer, reliableClass);
     registerMBean();
   }
 
-  public PlatformAdmin(String hostName,
-                       int port,
+  public PlatformAdmin(javax.jms.ConnectionFactory cnxFact,
                        String name,
-                       String password,
-                       int cnxTimer) 
-    throws UnknownHostException, ConnectException, AdminException {
-    connect(hostName,port,name,password,cnxTimer,
-            "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
-    registerMBean();
-  }
-
-  public PlatformAdmin(String name,
-                       String password) 
-    throws ConnectException, AdminException {
-    collocatedConnect(name,password);
-    registerMBean();
-  }
-
-  public PlatformAdmin(javax.jms.TopicConnectionFactory cnxFact,
-                       String name,
-                       String password) 
-  throws ConnectException, AdminException {
-    connect(cnxFact,name,password);
+                       String password) throws ConnectException, AdminException {
+    connect(cnxFact, name, password);
     registerMBean();
   }
   
-  public PlatformAdmin(javax.jms.TopicConnectionFactory cnxFact,
+  public PlatformAdmin(javax.jms.ConnectionFactory cnxFact,
                        String name,
                        String password,
-                       String identityClassName) 
-    throws ConnectException, AdminException {
-    connect(cnxFact,name,password,identityClassName);
+                       String identityClassName) throws ConnectException, AdminException {
+    connect(cnxFact, name, password, identityClassName);
     registerMBean();
   }
 
   private void registerMBean() {
     try {
-      MXWrapper.registerMBean(this,
-                              "joramClient",
-                              "type=PlatformAdmin");
+      MXWrapper.registerMBean(this, "joramClient", "type=PlatformAdmin");
     } catch (Exception e) {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                   "registerMBean",e);
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "registerMBean",e);
     }
   }
 
   private void unregisterMBean() {
     try {
-      MXWrapper.unregisterMBean("joramClient",
-                                "type=PlatformAdmin");
+      MXWrapper.unregisterMBean("joramClient", "type=PlatformAdmin");
     } catch (Exception e) {
       if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                   "unregisterMBean",e);
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "unregisterMBean",e);
     }
   }
-
 
   /**
    * Opens a connection dedicated to administering with the Joram server
@@ -125,11 +114,10 @@ public class PlatformAdmin
    * @exception AdminException  If the administrator identification is
    *              incorrect.
    */
-  public void connect(javax.jms.TopicConnectionFactory cnxFact, 
+  public void connect(javax.jms.ConnectionFactory cnxFact, 
                       String name,
-                      String password)
-    throws ConnectException, AdminException {
-    AdminModule.connect(cnxFact,name,password);
+                      String password) throws ConnectException, AdminException {
+    AdminModule.connect((ConnectionFactory) cnxFact, name, password);
   }
   
   /**
@@ -140,18 +128,17 @@ public class PlatformAdmin
    * @param cnxFact  The TopicConnectionFactory to use for connecting.
    * @param name  Administrator's name.
    * @param password  Administrator's password.
-   * @param indentityClass identity class name.
+   * @param identityClass identity class name.
    *
    * @exception ConnectException  If connecting fails.
    * @exception AdminException  If the administrator identification is
    *              incorrect.
    */
-  public void connect(javax.jms.TopicConnectionFactory cnxFact, 
+  public void connect(javax.jms.ConnectionFactory cnxFact, 
                       String name,
                       String password,
-                      String indentityClass)
-    throws ConnectException, AdminException {
-    AdminModule.connect(cnxFact,name,password,indentityClass);
+                      String identityClass) throws ConnectException, AdminException {
+    AdminModule.connect((ConnectionFactory) cnxFact, name, password, identityClass);
   }
    
   /**
@@ -176,8 +163,7 @@ public class PlatformAdmin
                       String name,
                       String password,
                       int cnxTimer,
-                      String reliableClass)
-    throws UnknownHostException, ConnectException, AdminException {
+                      String reliableClass) throws UnknownHostException, ConnectException, AdminException {
     AdminModule.connect(hostName,port,name,password,cnxTimer,reliableClass);
   }
   
@@ -205,8 +191,7 @@ public class PlatformAdmin
                       String password,
                       int cnxTimer,
                       String reliableClass,
-                      String indentityClass)
-    throws UnknownHostException, ConnectException, AdminException {
+                      String indentityClass) throws UnknownHostException, ConnectException, AdminException {
     AdminModule.connect(hostName,port,name,password,cnxTimer,reliableClass,indentityClass);
   }
   
@@ -224,8 +209,7 @@ public class PlatformAdmin
    * @exception AdminException  If the administrator identification is
    *              incorrect.
    */
-  public void connect(String name, String password, int cnxTimer)
-    throws ConnectException, AdminException {
+  public void connect(String name, String password, int cnxTimer) throws ConnectException, AdminException {
     try {
       connect("localhost", 
               16010, 
@@ -248,8 +232,7 @@ public class PlatformAdmin
    * @exception AdminException  If the administrator identification is
    *              incorrect.
    */
-  public void collocatedConnect(String name, String password)
-    throws ConnectException, AdminException {
+  public void collocatedConnect(String name, String password) throws ConnectException, AdminException {
     AdminModule.collocatedConnect(name,password);
   }
   
@@ -264,8 +247,7 @@ public class PlatformAdmin
    * @exception AdminException  If the administrator identification is
    *              incorrect.
    */
-  public void collocatedConnect(String name, String password, String indentityClass)
-    throws ConnectException, AdminException {
+  public void collocatedConnect(String name, String password, String indentityClass) throws ConnectException, AdminException {
     AdminModule.collocatedConnect(name,password,indentityClass);
   }
 
@@ -292,8 +274,7 @@ public class PlatformAdmin
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public void stopServer(int serverId)
-    throws ConnectException, AdminException {
+  public void stopServer(int serverId) throws ConnectException, AdminException {
     AdminModule.stopServer(serverId);
   }
 
@@ -303,8 +284,7 @@ public class PlatformAdmin
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
    */
-  public void stopServer() 
-    throws ConnectException, AdminException {
+  public void stopServer() throws ConnectException, AdminException {
     AdminModule.stopServer();
   }
 
@@ -324,8 +304,7 @@ public class PlatformAdmin
                         String hostName,
                         String domainName,
                         int port,
-                        String serverName)
-    throws ConnectException, AdminException {
+                        String serverName) throws ConnectException, AdminException {
     AdminModule.addServer(sid,hostName,domainName,port,serverName);
   }
 
@@ -337,8 +316,7 @@ public class PlatformAdmin
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public void removeServer(int sid)
-    throws ConnectException, AdminException {
+  public void removeServer(int sid) throws ConnectException, AdminException {
     AdminModule.removeServer(sid);
   }
 
@@ -356,8 +334,7 @@ public class PlatformAdmin
    */
   public void addDomain(String domainName,
                         int sid,
-                        int port)
-    throws ConnectException, AdminException {
+                        int port) throws ConnectException, AdminException {
     AdminModule.addDomain(domainName,sid,port);
   }
 
@@ -369,8 +346,7 @@ public class PlatformAdmin
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public void removeDomain(String domainName)
-    throws ConnectException, AdminException {
+  public void removeDomain(String domainName) throws ConnectException, AdminException {
     AdminModule.removeDomain(domainName);
   }
 
@@ -380,8 +356,7 @@ public class PlatformAdmin
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public String getConfiguration()
-    throws ConnectException, AdminException {
+  public String getConfiguration() throws ConnectException, AdminException {
     return AdminModule.getConfiguration();
   }
 
@@ -403,8 +378,7 @@ public class PlatformAdmin
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
    */
-  public List getServersIds(String domainName) 
-    throws ConnectException, AdminException {
+  public List getServersIds(String domainName) throws ConnectException, AdminException {
     return AdminModule.getServersIds(domainName);
   }
 
@@ -415,8 +389,7 @@ public class PlatformAdmin
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
    */
-  public String[] getDomainNames(int serverId) 
-    throws ConnectException, AdminException {
+  public String[] getDomainNames(int serverId) throws ConnectException, AdminException {
     return AdminModule.getDomainNames(serverId);
   }
 
@@ -432,8 +405,7 @@ public class PlatformAdmin
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public void setDefaultThreshold(int serverId, int threshold)
-    throws ConnectException, AdminException {
+  public void setDefaultThreshold(int serverId, int threshold) throws ConnectException, AdminException {
     AdminModule.setDefaultThreshold(serverId,threshold);
   }
 
@@ -446,8 +418,7 @@ public class PlatformAdmin
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
    */
-  public void setDefaultThreshold(int threshold)
-    throws ConnectException, AdminException {
+  public void setDefaultThreshold(int threshold) throws ConnectException, AdminException {
     AdminModule.setDefaultThreshold(threshold);
   }
 
@@ -459,8 +430,7 @@ public class PlatformAdmin
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public int getDefaultThreshold(int serverId)
-    throws ConnectException, AdminException {
+  public int getDefaultThreshold(int serverId) throws ConnectException, AdminException {
     return AdminModule.getDefaultThreshold(serverId);
   }
 
@@ -470,8 +440,7 @@ public class PlatformAdmin
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
    */
-  public int getDefaultThreshold()
-    throws ConnectException, AdminException {
+  public int getDefaultThreshold() throws ConnectException, AdminException {
     return AdminModule.getDefaultThreshold();
   }
 
@@ -480,8 +449,7 @@ public class PlatformAdmin
    *
    * @exception ConnectException  If the admin connection is not established.
    */
-  public int getLocalServerId() 
-    throws ConnectException {
+  public int getLocalServerId() throws ConnectException {
     return AdminModule.getLocalServerId();
   }
 
@@ -490,8 +458,7 @@ public class PlatformAdmin
    *
    * @exception ConnectException  If the admin connection is not established.
    */
-  public String getLocalHost() 
-    throws ConnectException {
+  public String getLocalHost() throws ConnectException {
     return AdminModule.getLocalHost();
   }
 
@@ -500,8 +467,7 @@ public class PlatformAdmin
    *
    * @exception ConnectException  If the admin connection is not established.
    */
-  public int getLocalPort() 
-    throws ConnectException {
+  public int getLocalPort() throws ConnectException {
     return AdminModule.getLocalPort();
   }
 }

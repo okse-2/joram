@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -25,13 +25,19 @@
 package org.objectweb.joram.client.jms;
 
 import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
+
+import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 
 /**
  * Implements the <code>javax.jms.TopicConnectionFactory</code> interface.
+ *  
+ * @deprecated Replaced next to Joram 5.2.1 by {@link ConnectionFactory}.
  */
-public abstract class TopicConnectionFactory
-                      extends ConnectionFactory
-  implements javax.jms.TopicConnectionFactory {
+public abstract class TopicConnectionFactory extends AbstractConnectionFactory implements javax.jms.TopicConnectionFactory {
+  /** define serialVersionUID for interoperability */
+  private static final long serialVersionUID = 1L;
+
   /**
    * Constructs a <code>TopicConnectionFactory</code> dedicated to a given
    * server.
@@ -52,7 +58,6 @@ public abstract class TopicConnectionFactory
     super(url);
   }
 
-
   /**
    * Constructs an empty <code>TopicConnectionFactory</code>.
    * Needed by ObjectFactory.
@@ -66,14 +71,23 @@ public abstract class TopicConnectionFactory
   }
 
   /**
+   * API method.
+   *
+   * @exception JMSSecurityException  If the default identification is
+   *              incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.Connection createConnection() throws JMSException {
+    return createConnection(getDefaultLogin(), getDefaultPassword());
+  }
+
+  /**
    * API method, implemented according to the communication protocol.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public abstract javax.jms.TopicConnection
-      createTopicConnection(String name, String password)
-    throws JMSException;
+  public abstract javax.jms.TopicConnection createTopicConnection(String name, String password) throws JMSException;
 
   /**
    * API method.

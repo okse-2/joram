@@ -27,6 +27,7 @@ package org.objectweb.joram.client.jms.tcp;
 import javax.jms.JMSException;
 
 import org.objectweb.joram.client.jms.Connection;
+import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.TopicConnection;
 import org.objectweb.joram.client.jms.TopicConnectionFactory;
 import org.objectweb.joram.client.jms.admin.AdminModule;
@@ -34,6 +35,8 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
 /**
  * A <code>TopicTcpConnectionFactory</code> instance is a factory of
  * TCP connections for Pub/Sub communication.
+ *  
+ * @deprecated Replaced next to Joram 5.2.1 by {@link TcpConnectionFactory}.
  */
 public class TopicTcpConnectionFactory extends TopicConnectionFactory {
   /** define serialVersionUID for interoperability */

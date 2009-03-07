@@ -27,6 +27,8 @@ package org.objectweb.joram.client.jms.ha.tcp;
 import javax.jms.JMSSecurityException;
 
 import org.objectweb.joram.client.jms.Connection;
+import org.objectweb.joram.client.jms.QueueConnection;
+import org.objectweb.joram.client.jms.TopicConnection;
 
 /**
  * An <code>XATcpConnectionFactory</code> instance is a factory of
@@ -35,35 +37,55 @@ import org.objectweb.joram.client.jms.Connection;
 public class HATcpConnectionFactory extends org.objectweb.joram.client.jms.ConnectionFactory {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
-  /**
-   * Constructs an <code>HATcpConnectionFactory</code> instance.
-   */
-  public HATcpConnectionFactory(String url) {
-    super(url);
-  }
 
   /**
    * Constructs an empty <code>HATcpConnectionFactory</code>.
-   * Needed by ObjectFactory.
+   * Needed by ObjectFactory, should only be used for internal purposes.
    */
   public HATcpConnectionFactory() {
-	super();  
+    super();  
   }
-  
+
+  /**
+   * Constructs an <code>HATcpConnectionFactory</code> instance.
+   */
+  private HATcpConnectionFactory(String url) {
+    super(url);
+  }
+
   /**
    * Method inherited from the <code>ConnectionFactory</code> class.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.Connection
-      createConnection(String name, String password)
-    throws javax.jms.JMSException {
+  public javax.jms.Connection createConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
-      HATcpRequestChannel lc = new HATcpRequestChannel(
-        params.getUrl(), params, identity, reliableClass);
-      return new Connection(params, lc);
-    }
+    HATcpRequestChannel lc = new HATcpRequestChannel(params.getUrl(), params, identity, reliableClass);
+    return new Connection(params, lc);
+  }
+
+  /**
+   * Method inherited from the <code>QueueConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   */
+  public javax.jms.QueueConnection createQueueConnection(String name, String password) throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HATcpRequestChannel lc = new HATcpRequestChannel(params.getUrl(), params, identity, reliableClass);
+    return new QueueConnection(params, lc);
+  }
+
+  /**
+   * Method inherited from the <code>TopicConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   */
+  public javax.jms.TopicConnection createTopicConnection(String name, String password) throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HATcpRequestChannel lc = new HATcpRequestChannel(params.getUrl(), params, identity, reliableClass);
+    return new TopicConnection(params, lc);
+  }
 
   /**
    * Admin method creating a <code>javax.jms.ConnectionFactory</code>
@@ -74,6 +96,7 @@ public class HATcpConnectionFactory extends org.objectweb.joram.client.jms.Conne
   public static javax.jms.ConnectionFactory create(String url) {
     return create(url, "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
   }
+
   /**
    * Admin method creating a <code>javax.jms.ConnectionFactory</code>
    * instance for creating HA TCP connections with a given list of servers.
@@ -81,8 +104,7 @@ public class HATcpConnectionFactory extends org.objectweb.joram.client.jms.Conne
    * @param url URL of the HA Joram server
    * @param reliableClass  Reliable class name.
    */
-  public static javax.jms.ConnectionFactory
-      create(String url, String reliableClass) {
+  public static javax.jms.ConnectionFactory create(String url, String reliableClass) {
     HATcpConnectionFactory cf = new HATcpConnectionFactory(url);
     cf.setReliableClass(reliableClass);
     return cf;
