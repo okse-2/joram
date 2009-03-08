@@ -125,7 +125,7 @@ public class Connection implements javax.jms.Connection {
   private AtomicCounter subsC;
 
   /** Client's agent proxy identifier. */
-  String proxyId;
+  private String proxyId;
 
   /** Connection key. */
   private int key;
@@ -195,24 +195,18 @@ public class Connection implements javax.jms.Connection {
     key = rep.getCnxKey();
 
     sessionsC = new AtomicCounter("c" + key + 's');
-    messagesC =
-      new AtomicCounter("ID:" + proxyId.substring(1) + 'c' + key + 'm');
+    messagesC = new AtomicCounter("ID:" + proxyId.substring(1) + 'c' + key + 'm');
     subsC = new AtomicCounter("c"  + key + "sub");
 
-    stringImage = "Cnx:" + proxyId + ':' + key;
-    hashCode = stringImage.hashCode();
+    stringImage = "Connection[" + proxyId + ':' + key + ']';
+    hashCode = (proxyId.hashCode() & 0xFFFF0000) + key;
 
     mtpx.setDemultiplexerDaemonName(toString());
   }
 
-  private final String newTrace(String trace) {
-    return "Connection[" + proxyId + ':' + key + ']' + trace;
-  }
-
   private void setStatus(int status) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 newTrace(".setStatus(" + Status.toString(status) + ')'));
+      logger.log(BasicLevel.DEBUG, stringImage + ".setStatus(" + Status.toString(status) + ')');
     this.status = status;
   }
 
@@ -230,12 +224,17 @@ public class Connection implements javax.jms.Connection {
   }
   
   /**
-   * Specializes this Object method; returns <code>true</code> if the
-   * parameter is a <code>Connection</code> instance sharing the same
-   * proxy identifier and connection key.
+   * Returns <code>true</code> if the parameter is a <code>Connection</code> instance
+   * sharing the same proxy identifier and connection key.
    */
   public boolean equals(Object obj) {
-    return (obj instanceof Connection) && (hashCode() == obj.hashCode()) && toString().equals(obj.toString());
+    if (obj == this) return true;
+
+    if (obj instanceof Connection) {
+      Connection cnx = (Connection) obj;
+      return (proxyId.equals(cnx.proxyId) && (key == cnx.key));
+    }
+    return false;
   }
 
   /**
@@ -405,9 +404,8 @@ public class Connection implements javax.jms.Connection {
         int maxMessages) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 newTrace(".createConnectionConsumer(" + dest +
-                          ',' +selector + ',' + sessionPool +
-                          ',' + maxMessages + ')'));
+                 stringImage + ".createConnectionConsumer(" + dest + ',' + selector + ',' +
+                 sessionPool + ',' + maxMessages + ')');
     checkClosed();
     return createConnectionConsumer(dest, null, selector, sessionPool, maxMessages);
   }
@@ -429,9 +427,8 @@ public class Connection implements javax.jms.Connection {
                                       int maxMessages) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 newTrace(".createDurableConnectionConsumer(" + 
-                          topic + ',' + subName + ',' + selector + ',' + 
-                          sessPool + ',' + maxMessages + ')'));
+                 stringImage + ".createDurableConnectionConsumer(" + topic + ',' + subName + ',' + selector + ',' +
+                 sessPool + ',' + maxMessages + ')');
     checkClosed();
     if (subName == null) 
       throw new JMSException("Invalid subscription name: " + subName);
@@ -514,7 +511,7 @@ public class Connection implements javax.jms.Connection {
     throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
-                 newTrace(".createSession(" + transacted + ',' +  acknowledgeMode + ')'));
+                 stringImage + ".createSession(" + transacted + ',' +  acknowledgeMode + ')');
     checkClosed();
     Session session = new Session(
       this,
@@ -595,9 +592,7 @@ public class Connection implements javax.jms.Connection {
    */
   public synchronized void start() throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, 
-        newTrace(".start()")); 
+      logger.log(BasicLevel.DEBUG, stringImage + ".start()"); 
     checkClosed();
     
     // Ignoring the call if the connection is started:
@@ -629,9 +624,7 @@ public class Connection implements javax.jms.Connection {
    */
   public void stop() throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, 
-        newTrace(".stop()"));
+      logger.log(BasicLevel.DEBUG, stringImage + ".stop()");
     checkClosed();
 
     synchronized (this) {
@@ -672,9 +665,7 @@ public class Connection implements javax.jms.Connection {
    */
   public void close() throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, 
-        newTrace(".close()"));
+      logger.log(BasicLevel.DEBUG, stringImage + ".close()");
 
     closer.close();
   }
@@ -754,8 +745,7 @@ public class Connection implements javax.jms.Connection {
    */
   public void cleanup() {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, newTrace(".cleanup()"));
+      logger.log(BasicLevel.DEBUG, stringImage +".cleanup()");
     
     // Closing the sessions:
     // Session session;
@@ -797,9 +787,7 @@ public class Connection implements javax.jms.Connection {
    */
   synchronized void closeSession(Session session) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, 
-        newTrace(".closeSession(" + session + ')'));
+      logger.log(BasicLevel.DEBUG, stringImage + ".closeSession(" + session + ')');
     sessions.removeElement(session);
   }
 
@@ -809,16 +797,14 @@ public class Connection implements javax.jms.Connection {
    */
   synchronized void closeConnectionConsumer(MultiSessionConsumer cc) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 newTrace(".closeConnectionConsumer(" + cc + ')'));
+      logger.log(BasicLevel.DEBUG, stringImage + ".closeConnectionConsumer(" + cc + ')');
     cconsumers.removeElement(cc);
   }
 
   synchronized AbstractJmsReply syncRequest(
     AbstractJmsRequest request) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 newTrace(".syncRequest(" + request + ')'));
+      logger.log(BasicLevel.DEBUG, stringImage + ".syncRequest(" + request + ')');
     return requestor.request(request);
   }
 
