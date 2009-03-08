@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -132,11 +132,8 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
                   String subName, 
                   boolean noLocal) throws JMSException {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG, 
-        "MessageConsumer.<init>(" + 
-        sess + ',' + dest + ',' + selector + ',' + 
-        subName + ',' + noLocal + ')');
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, 
+        "MessageConsumer.<init>(" + sess + ',' + dest + ',' + selector + ',' + subName + ',' + noLocal + ')');
     
     if (dest == null)
       throw new InvalidDestinationException("Invalid null destination.");
@@ -145,15 +142,13 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
       Connection tempQCnx = ((TemporaryQueue) dest).getCnx();
 
       if (tempQCnx == null || ! tempQCnx.equals(sess.getConnection()))
-        throw new JMSSecurityException("Forbidden consumer on this "
-                                       + "temporary destination.");
+        throw new JMSSecurityException("Forbidden consumer on this temporary destination.");
     }
     else if (dest instanceof TemporaryTopic) {
       Connection tempTCnx = ((TemporaryTopic) dest).getCnx();
     
       if (tempTCnx == null || ! tempTCnx.equals(sess.getConnection()))
-        throw new JMSSecurityException("Forbidden consumer on this "
-                                       + "temporary destination.");
+        throw new JMSSecurityException("Forbidden consumer on this temporary destination.");
     }
 
     try {
