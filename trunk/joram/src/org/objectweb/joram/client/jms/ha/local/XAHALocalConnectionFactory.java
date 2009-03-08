@@ -24,11 +24,18 @@ package org.objectweb.joram.client.jms.ha.local;
 
 import javax.jms.JMSSecurityException;
 
+import org.objectweb.joram.client.jms.Connection;
+import org.objectweb.joram.client.jms.QueueConnection;
+import org.objectweb.joram.client.jms.TopicConnection;
 import org.objectweb.joram.client.jms.XAConnection;
+import org.objectweb.joram.client.jms.XAQueueConnection;
+import org.objectweb.joram.client.jms.XATopicConnection;
 
 /**
- * An <code>XAHALocalConnectionFactory</code> instance is a factory of
- * local connections dedicated to XA HA communication.
+ * An <code>XAHALocalConnectionFactory</code> instance is a factory of XA
+ * connections to an HA colocated server.
+ *  
+ * @deprecated Replaced next to Joram 5.2.1 by {@link HALocalConnectionFactory}.
  */
 public class XAHALocalConnectionFactory extends org.objectweb.joram.client.jms.XAConnectionFactory {
   /** define serialVersionUID for interoperability */
@@ -36,21 +43,77 @@ public class XAHALocalConnectionFactory extends org.objectweb.joram.client.jms.X
 
   /**
    * Constructs an <code>XALocalConnectionFactory</code> instance.
+   * Needed by ObjectFactory, should only be used for internal purposes.
    */
   public XAHALocalConnectionFactory() {
-    super("", -1);
+    super("localhost", -1);
   }
-  
+
+  /**
+   * Method inherited from the <code>ConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.Connection createConnection(String name, String password) throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HALocalRequestChannel lc = new HALocalRequestChannel(identity);
+    return new Connection(params, lc);
+  }
+
+  /**
+   * Method inherited from the <code>QueueConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   */
+  public javax.jms.QueueConnection createQueueConnection(String name, String password) throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HALocalRequestChannel lc = new HALocalRequestChannel(identity);    
+    return new QueueConnection(params, lc);
+  }
+
+  /**
+   * Method inherited from the <code>TopicConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   */
+  public javax.jms.TopicConnection createTopicConnection(String name, String password) throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HALocalRequestChannel lc = new HALocalRequestChannel(identity);    
+    return new TopicConnection(params, lc);
+  }
+
   /**
    * Method inherited from the <code>XAConnectionFactory</code> class.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.XAConnection createXAConnection(String name, String password)
-  throws javax.jms.JMSException {
+  public javax.jms.XAConnection createXAConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
     HALocalRequestChannel lc = new HALocalRequestChannel(identity);
     return new XAConnection(params, lc);
+  }
+
+  /**
+   * Method inherited from the <code>XAQueueConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   */
+  public javax.jms.XAQueueConnection createXAQueueConnection(String name, String password) throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HALocalRequestChannel lc = new HALocalRequestChannel(identity);
+    return new XAQueueConnection(params, lc);
+  }
+
+  /**
+   * Method inherited from the <code>XATopicConnectionFactory</code> class..
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   */
+  public javax.jms.XATopicConnection createXATopicConnection(String name, String password) throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HALocalRequestChannel lc = new HALocalRequestChannel(identity);
+    return new XATopicConnection(params, lc);
   }
 
   /**

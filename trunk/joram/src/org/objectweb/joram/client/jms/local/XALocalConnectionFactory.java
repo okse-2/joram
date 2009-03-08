@@ -23,11 +23,21 @@
  */
 package org.objectweb.joram.client.jms.local;
 
+import javax.jms.JMSSecurityException;
+
+import org.objectweb.joram.client.jms.Connection;
+import org.objectweb.joram.client.jms.QueueConnection;
+import org.objectweb.joram.client.jms.TopicConnection;
 import org.objectweb.joram.client.jms.XAConnection;
+import org.objectweb.joram.client.jms.XAQueueConnection;
+import org.objectweb.joram.client.jms.XATopicConnection;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 /**
  * An <code>XALocalConnectionFactory</code> instance is a factory of
  * local connections dedicated to XA communication.
+ *  
+ * @deprecated Replaced next to Joram 5.2.1 by {@link LocalConnectionFactory}.
  */
 public class XALocalConnectionFactory extends org.objectweb.joram.client.jms.XAConnectionFactory {
   /** define serialVersionUID for interoperability */
@@ -41,6 +51,40 @@ public class XALocalConnectionFactory extends org.objectweb.joram.client.jms.XAC
   }
 
   /**
+   * Method inherited from the <code>ConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.Connection createConnection(String name, String password) throws javax.jms.JMSException {
+    initIdentity(name, password);
+    LocalRequestChannel lc = new LocalRequestChannel(identity);
+    return new Connection(params, lc);
+  }
+
+  /**
+   * Method inherited from the <code>QueueConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   */
+  public javax.jms.QueueConnection createQueueConnection(String name, String password) throws javax.jms.JMSException {
+    initIdentity(name, password);
+    LocalRequestChannel lc = new LocalRequestChannel(identity);
+    return new QueueConnection(params, lc);
+  }
+
+  /**
+   * Method inherited from the <code>TopicConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   */
+  public javax.jms.TopicConnection createTopicConnection(String name, String password) throws javax.jms.JMSException {
+    initIdentity(name, password);
+    LocalRequestChannel lc = new LocalRequestChannel(identity);
+    return new TopicConnection(params, lc);
+  }
+
+  /**
    * Method inherited from the <code>XAConnectionFactory</code> class.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
@@ -49,6 +93,28 @@ public class XALocalConnectionFactory extends org.objectweb.joram.client.jms.XAC
     initIdentity(name, password);
     LocalRequestChannel lc = new LocalRequestChannel(identity);
     return new XAConnection(params, lc);
+  }
+
+  /**
+   * Method inherited from the <code>XAQueueConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   */
+  public javax.jms.XAQueueConnection createXAQueueConnection(String name, String password) throws javax.jms.JMSException {
+    initIdentity(name, password);
+    LocalRequestChannel lc = new LocalRequestChannel(identity);
+    return new XAQueueConnection(params, lc);
+  }
+
+  /**
+   * Method inherited from the <code>XATopicConnectionFactory</code> class..
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   */
+  public javax.jms.XATopicConnection createXATopicConnection(String name, String password) throws javax.jms.JMSException {
+    initIdentity(name, password);
+    LocalRequestChannel lc = new LocalRequestChannel(identity);
+    return new XATopicConnection(params, lc);
   }
 
   /**

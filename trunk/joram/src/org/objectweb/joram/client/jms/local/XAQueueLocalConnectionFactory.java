@@ -30,10 +30,13 @@ import org.objectweb.joram.client.jms.QueueConnection;
 import org.objectweb.joram.client.jms.XAConnection;
 import org.objectweb.joram.client.jms.XAQueueConnection;
 import org.objectweb.joram.client.jms.XAQueueConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 /**
  * An <code>XAQueueLocalConnectionFactory</code> instance is a factory of
  * local connections for XA PTP communication.
+ *  
+ * @deprecated Replaced next to Joram 5.2.1 by {@link LocalConnectionFactory}.
  */
 public class XAQueueLocalConnectionFactory extends XAQueueConnectionFactory {
   /** define serialVersionUID for interoperability */
