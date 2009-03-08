@@ -47,8 +47,7 @@ public class Activator implements BundleActivator {
   public void stop(BundleContext context) {
   }
 
-  public static class JoramClientImpl 
-    implements com.scalagent.joram.osgi.client.service.JoramClient {
+  public static class JoramClientImpl implements com.scalagent.joram.osgi.client.service.JoramClient {
     /**
      *
      */
@@ -57,6 +56,7 @@ public class Activator implements BundleActivator {
                         int cnxTimer) throws Exception {
       AdminModule.connect(host, port, name, password, cnxTimer);
     }
+    
     /**
      *
      */
@@ -67,9 +67,8 @@ public class Activator implements BundleActivator {
     /**
      *
      */
-    public ConnectionFactory
-        getTcpConnectionFactory(String hostname, int port) throws Exception {
-      return new TcpConnectionFactory(hostname, port);
+    public ConnectionFactory getTcpConnectionFactory(String hostname, int port) throws Exception {
+      return (ConnectionFactory) TcpConnectionFactory.create(hostname, port);
     }
 
     /**
