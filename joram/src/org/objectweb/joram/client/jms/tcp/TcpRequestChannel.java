@@ -45,7 +45,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * Requests and replies travel through the socket after serialization.
  */
 public class TcpRequestChannel implements RequestChannel { 
-  
+
   private ReliableTcpClient tcpClient = null;
 
   /**
@@ -58,11 +58,8 @@ public class TcpRequestChannel implements RequestChannel {
    * @exception IllegalStateException  If the server is not reachable.
    */
   public TcpRequestChannel(FactoryParameters params, 
-                       Identity identity) 
-    throws JMSException {
-    this(params,
-         identity,
-         "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
+                           Identity identity) throws JMSException {
+    this(params, identity, "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
   }
 
   /**
@@ -76,71 +73,53 @@ public class TcpRequestChannel implements RequestChannel {
    * @exception IllegalStateException  If the server is not reachable.
    */
   public TcpRequestChannel(FactoryParameters params, 
-                       Identity identity,
-                       String reliableClass) 
-    throws JMSException {
+                           Identity identity,
+                           String reliableClass) throws JMSException {
 
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG, 
-        "TcpConnection.<init>(" + params + ',' +
-        identity + ',' + reliableClass +')');
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, 
+                                 "TcpConnection.<init>(" + params + ',' + identity + ',' + reliableClass +')');
 
-    if (reliableClass == null ||
-        reliableClass.equals("") ||
-        reliableClass.length() < 1) {
+    if (reliableClass == null || reliableClass.equals("") || reliableClass.length() < 1) {
       reliableClass = "org.objectweb.joram.client.jms.tcp.ReliableTcpClient";
     }
     try {
-      tcpClient = 
-        (ReliableTcpClient) Class.forName(reliableClass).newInstance(); 
+      tcpClient = (ReliableTcpClient) Class.forName(reliableClass).newInstance(); 
     } catch (ClassNotFoundException exc) {
-      JMSException jmsExc = 
-        new JMSException("TcpConnection: ClassNotFoundException : " + 
-                         reliableClass);
+      JMSException jmsExc =  new JMSException("TcpConnection: ClassNotFoundException : " + reliableClass);
       jmsExc.setLinkedException(exc);
       throw jmsExc;
     } catch (InstantiationException exc) {
-      JMSException jmsExc = 
-        new JMSException("TcpConnection: InstantiationException : " + 
-                         reliableClass);
+      JMSException jmsExc =  new JMSException("TcpConnection: InstantiationException : " + reliableClass);
       jmsExc.setLinkedException(exc);
       throw jmsExc;
     } catch (IllegalAccessException exc) {
-      JMSException jmsExc = 
-        new JMSException("TcpConnection: IllegalAccessException : " + 
-                         reliableClass);
+      JMSException jmsExc = new JMSException("TcpConnection: IllegalAccessException : " + reliableClass);
       jmsExc.setLinkedException(exc);
       throw jmsExc;
     }
-    tcpClient.init(params, 
-                   identity,
-                   params.cnxPendingTimer > 0);
-    tcpClient.addServerAddress(
-      params.getHost(),
-      params.getPort());
+    tcpClient.init(params, identity, params.cnxPendingTimer > 0);
+    tcpClient.addServerAddress(params.getHost(), params.getPort());
   }
-  
+
   public void setTimer(Timer timer) {
     tcpClient.setTimer(timer);
   }
-  
+
   public void connect() throws Exception {
     tcpClient.connect();
   }
-  
+
   /**
    * Sending a JMS request through the TCP connection.
    *
    * @exception IllegalStateException  If the connection is broken.
    */
-  public synchronized void send(AbstractJmsRequest request)
-    throws Exception {
+  public synchronized void send(AbstractJmsRequest request) throws Exception {
     tcpClient.send(request);
   }
 
-  public AbstractJmsReply receive()
-    throws Exception {
+  public AbstractJmsReply receive() throws Exception {
     return (AbstractJmsReply)tcpClient.receive();
   }
 
@@ -150,7 +129,6 @@ public class TcpRequestChannel implements RequestChannel {
   }
 
   public String toString() {
-    return '(' + super.toString() + 
-      ",tcpClient=" + tcpClient + ')';
+    return '(' + super.toString() + ",tcpClient=" + tcpClient + ')';
   }
 }

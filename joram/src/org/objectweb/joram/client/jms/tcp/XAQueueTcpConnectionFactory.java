@@ -33,6 +33,8 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
 /**
  * An <code>XAQueueTcpConnectionFactory</code> instance is a factory of
  * TCP connections for XA PTP communication.
+ *  
+ * @deprecated Replaced next to Joram 5.2.1 by {@link TcpConnectionFactory}.
  */
 public class XAQueueTcpConnectionFactory extends org.objectweb.joram.client.jms.XAQueueConnectionFactory {
   /** define serialVersionUID for interoperability */
@@ -108,8 +110,7 @@ public class XAQueueTcpConnectionFactory extends org.objectweb.joram.client.jms.
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */ 
-  public static javax.jms.XAQueueConnectionFactory
-  create(String host, int port) {
+  public static javax.jms.XAQueueConnectionFactory create(String host, int port) {
     return create(host, port, "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
   }
 

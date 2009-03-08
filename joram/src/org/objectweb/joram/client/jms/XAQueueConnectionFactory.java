@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -26,21 +26,25 @@ package org.objectweb.joram.client.jms;
 
 import javax.jms.JMSException;
 
+import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
+
 /**
  * Implements the <code>javax.jms.XAQueueConnectionFactory</code> interface.
+ *  
+ * @deprecated Replaced next to Joram 5.2.1 by {@link ConnectionFactory}.
  */
-public abstract class XAQueueConnectionFactory
-                extends XAConnectionFactory
-                implements javax.jms.XAQueueConnectionFactory {
-  
+public abstract class XAQueueConnectionFactory extends AbstractConnectionFactory implements javax.jms.XAQueueConnectionFactory {
+  /** define serialVersionUID for interoperability */
+  private static final long serialVersionUID = 1L;
+
   /**
    * Constructs an <code>XAQueueConnectionFactory</code> dedicated to a
    * given server.
    */
   public XAQueueConnectionFactory() {
-  	super();
+    super();
   }
-  
+
   /**
    * Constructs an <code>XAQueueConnectionFactory</code> dedicated to a
    * given server.
@@ -62,11 +66,20 @@ public abstract class XAQueueConnectionFactory
     super(url);
   }
 
-
-
   /** Returns a string view of the connection factory. */
   public String toString() {
     return "XAQCF:" + params.getHost() + "-" + params.getPort();
+  }
+
+  /**
+   * API method.
+   *
+   * @see javax.jms.ConnectionFactory.createXAConnection()
+   * @exception JMSSecurityException  If the default identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.XAConnection createXAConnection() throws JMSException {
+    return createXAConnection(getDefaultLogin(), getDefaultPassword());
   }
 
   /**
@@ -75,9 +88,7 @@ public abstract class XAQueueConnectionFactory
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public abstract javax.jms.XAQueueConnection
-      createXAQueueConnection(String name, String password)
-    throws JMSException;
+  public abstract javax.jms.XAQueueConnection createXAQueueConnection(String name, String password) throws JMSException;
 
   /**
    * API method.
@@ -86,10 +97,8 @@ public abstract class XAQueueConnectionFactory
    *              incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.XAQueueConnection createXAQueueConnection()
-    throws JMSException {
-    return createXAQueueConnection(ConnectionFactory.getDefaultLogin(),
-                                   ConnectionFactory.getDefaultPassword());
+  public javax.jms.XAQueueConnection createXAQueueConnection() throws JMSException {
+    return createXAQueueConnection(getDefaultLogin(), getDefaultPassword());
   }
 
   /**
@@ -99,9 +108,7 @@ public abstract class XAQueueConnectionFactory
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public abstract javax.jms.QueueConnection
-      createQueueConnection(String name, String password)
-    throws JMSException;
+  public abstract javax.jms.QueueConnection createQueueConnection(String name, String password) throws JMSException;
 
   /**
    * Method inherited from interface <code>QueueConnectionFactory</code>.
@@ -110,11 +117,9 @@ public abstract class XAQueueConnectionFactory
    *              incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public javax.jms.QueueConnection createQueueConnection() throws JMSException
-    {
-      return createQueueConnection(ConnectionFactory.getDefaultLogin(),
-                                   ConnectionFactory.getDefaultPassword());
-    }
+  public javax.jms.QueueConnection createQueueConnection() throws JMSException {
+    return createQueueConnection(getDefaultLogin(), getDefaultPassword());
+  }
 
   /**
    * Method inherited from interface <code>ConnectionFactory</code>,
@@ -123,9 +128,7 @@ public abstract class XAQueueConnectionFactory
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  public abstract javax.jms.Connection
-      createConnection(String name, String password)
-    throws JMSException;
+  public abstract javax.jms.Connection createConnection(String name, String password) throws JMSException;
 
   /**
    * Method inherited from interface <code>ConnectionFactory</code>.
@@ -135,7 +138,6 @@ public abstract class XAQueueConnectionFactory
    * @exception IllegalStateException  If the server is not listening.
    */
   public javax.jms.Connection createConnection() throws JMSException {
-    return createConnection(ConnectionFactory.getDefaultLogin(),
-                            ConnectionFactory.getDefaultPassword());
+    return createConnection(getDefaultLogin(), getDefaultPassword());
   }
 }

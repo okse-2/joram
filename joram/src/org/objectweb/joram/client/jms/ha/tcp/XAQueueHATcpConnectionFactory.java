@@ -34,6 +34,8 @@ import org.objectweb.joram.client.jms.XAQueueConnection;
 /**
  * An <code>XAQueueHATcpConnectionFactory</code> instance is a factory of
  * tcp connections for XA PTP HA communication.
+ *  
+ * @deprecated Replaced next to Joram 5.2.1 by {@link HATcpConnectionFactory}.
  */
 public class XAQueueHATcpConnectionFactory extends org.objectweb.joram.client.jms.XAQueueConnectionFactory {
   /** define serialVersionUID for interoperability */
@@ -41,13 +43,17 @@ public class XAQueueHATcpConnectionFactory extends org.objectweb.joram.client.jm
 
   /**
    * Constructs an <code>XAQueueHATcpConnectionFactory</code> instance.
+   * Needed by ObjectFactory, should only be used for internal purposes.
+   */
+  public XAQueueHATcpConnectionFactory() {
+    super();
+  }
+
+  /**
+   * Constructs an <code>XAQueueHATcpConnectionFactory</code> instance.
    */
   public XAQueueHATcpConnectionFactory(String url) {
     super(url);
-  }
-
-  public XAQueueHATcpConnectionFactory() {
-    super();
   }
 
   /**
@@ -73,17 +79,6 @@ public class XAQueueHATcpConnectionFactory extends org.objectweb.joram.client.jm
   }
 
   /**
-   * Method inherited from the <code>QueueConnectionFactory</code> class.
-   *
-   * @exception JMSSecurityException  If the user identification is incorrect.
-   */
-  public javax.jms.QueueConnection createQueueConnection(String name, String password) throws javax.jms.JMSException {
-    initIdentity(name, password);
-    HATcpRequestChannel lc = new HATcpRequestChannel(getParameters().getUrl(), params, identity, reliableClass);
-    return new QueueConnection(params, lc);
-  }
-
-  /**
    * Method inherited from the <code>ConnectionFactory</code> class.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
@@ -94,6 +89,16 @@ public class XAQueueHATcpConnectionFactory extends org.objectweb.joram.client.jm
     return new Connection(params, lc);
   }
 
+  /**
+   * Method inherited from the <code>QueueConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   */
+  public javax.jms.QueueConnection createQueueConnection(String name, String password) throws javax.jms.JMSException {
+    initIdentity(name, password);
+    HATcpRequestChannel lc = new HATcpRequestChannel(getParameters().getUrl(), params, identity, reliableClass);
+    return new QueueConnection(params, lc);
+  }
 
   /**
    * Admin method creating a <code>javax.jms.XAQueueConnectionFactory</code>

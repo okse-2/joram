@@ -34,20 +34,26 @@ import org.objectweb.joram.client.jms.XATopicConnection;
 /**
  * An <code>XATopicHATcpConnectionFactory</code> instance is a factory of
  * tcp connections for XA Pub/Sub HA communication.
+ *  
+ * @deprecated Replaced next to Joram 5.2.1 by {@link HATcpConnectionFactory}.
  */
 public class XATopicHATcpConnectionFactory extends org.objectweb.joram.client.jms.XATopicConnectionFactory {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   /**
+   * Constructs an <code>XATopicHATcpConnectionFactory</code> instance.
+   * Needed by ObjectFactory, should only be used for internal purposes.
+   */
+  public XATopicHATcpConnectionFactory() {
+    super();  
+  }
+
+  /**
    * Constructs an <code>XATopicTcpConnectionFactory</code> instance.
    */
   public XATopicHATcpConnectionFactory(String url) {
     super(url);
-  }
-
-  public XATopicHATcpConnectionFactory() {
-    super();  
   }
 
   /**

@@ -33,6 +33,8 @@ import org.objectweb.joram.client.jms.XAQueueConnectionFactory;
 /**
  * An <code>XAQueueHALocalConnectionFactory</code> instance is a factory of
  * local connections for XA PTP HA communication.
+ *  
+ * @deprecated Replaced next to Joram 5.2.1 by {@link HALocalConnectionFactory}.
  */
 public class XAQueueHALocalConnectionFactory extends XAQueueConnectionFactory {
   /** define serialVersionUID for interoperability */
@@ -42,7 +44,7 @@ public class XAQueueHALocalConnectionFactory extends XAQueueConnectionFactory {
    * Constructs an <code>XAQueueHALocalConnectionFactory</code> instance.
    */
   public XAQueueHALocalConnectionFactory() {
-    super("", -1);
+    super("localhost", -1);
   }
 
   /**
@@ -50,8 +52,7 @@ public class XAQueueHALocalConnectionFactory extends XAQueueConnectionFactory {
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.XAQueueConnection createXAQueueConnection(String name, String password)
-  throws javax.jms.JMSException {
+  public javax.jms.XAQueueConnection createXAQueueConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
     HALocalRequestChannel lc = new HALocalRequestChannel(identity);
     return new XAQueueConnection(params, lc);
@@ -62,8 +63,7 @@ public class XAQueueHALocalConnectionFactory extends XAQueueConnectionFactory {
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.XAConnection createXAConnection(String name, String password)
-  throws javax.jms.JMSException {
+  public javax.jms.XAConnection createXAConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
     HALocalRequestChannel lc = new HALocalRequestChannel(identity);
     return new XAConnection(params, lc);
@@ -74,8 +74,7 @@ public class XAQueueHALocalConnectionFactory extends XAQueueConnectionFactory {
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.QueueConnection createQueueConnection(String name, String password)
-  throws javax.jms.JMSException {
+  public javax.jms.QueueConnection createQueueConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
     HALocalRequestChannel lc = new HALocalRequestChannel(identity);
     return new QueueConnection(params, lc);
@@ -86,8 +85,7 @@ public class XAQueueHALocalConnectionFactory extends XAQueueConnectionFactory {
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  public javax.jms.Connection createConnection(String name, String password)
-  throws javax.jms.JMSException {
+  public javax.jms.Connection createConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
     HALocalRequestChannel lc = new HALocalRequestChannel(identity);
     return new Connection(params, lc);

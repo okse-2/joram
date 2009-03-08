@@ -33,6 +33,8 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
 /**
  * An <code>XATopicTcpConnectionFactory</code> instance is a factory of
  * TCP connections for XA Pub/Sub communication.
+ *  
+ * @deprecated Replaced next to Joram 5.2.1 by {@link TcpConnectionFactory}.
  */
 public class XATopicTcpConnectionFactory extends org.objectweb.joram.client.jms.XATopicConnectionFactory {
   /** define serialVersionUID for interoperability */
