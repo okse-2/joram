@@ -24,9 +24,6 @@
  */
 package org.objectweb.joram.client.jms;
 
-import javax.jms.JMSException;
-import javax.jms.JMSSecurityException;
-
 import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 
 /**
@@ -40,7 +37,7 @@ public abstract class QueueConnectionFactory extends AbstractConnectionFactory i
 
   /**
    * Constructs an empty <code>QueueConnectionFactory</code>.
-   * Needed by ObjectFactory.
+   * Needed by ObjectFactory, should only be used for internal purposes.
    */
   public QueueConnectionFactory() {}
 
@@ -51,51 +48,21 @@ public abstract class QueueConnectionFactory extends AbstractConnectionFactory i
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */
-  public QueueConnectionFactory(String host, int port) {
+  protected QueueConnectionFactory(String host, int port) {
     super(host, port);
   }
 
   /**
    * Constructs a <code>QueueConnectionFactory</code> dedicated to a given server.
    *
-   * @param url  joram ha url.
+   * @param url  joram url.
    */
-  public QueueConnectionFactory(String url) {
+  protected QueueConnectionFactory(String url) {
     super(url);
   }
 
   /** Returns a string view of the connection factory. */
   public String toString() {
     return "QCF:" + params.getHost() + "-" + params.getPort();
-  }
-
-  /**
-   * API method.
-   *
-   * @exception JMSSecurityException  If the default identification is
-   *              incorrect.
-   * @exception IllegalStateException  If the server is not listening.
-   */
-  public javax.jms.Connection createConnection() throws JMSException {
-    return createConnection(getDefaultLogin(), getDefaultPassword());
-  }
-
-  /**
-   * API method, implemented according to the communication protocol.
-   *
-   * @exception JMSSecurityException  If the user identification is incorrect.
-   * @exception IllegalStateException  If the server is not listening.
-   */
-  public abstract javax.jms.QueueConnection createQueueConnection(String name, String password) throws JMSException;
-
-  /**
-   * API method.
-   *
-   * @exception JMSSecurityException  If the default identification is
-   *              incorrect.
-   * @exception IllegalStateException  If the server is not listening.
-   */
-  public javax.jms.QueueConnection createQueueConnection() throws JMSException {
-    return createQueueConnection(getDefaultLogin(), getDefaultPassword());
   }
 }

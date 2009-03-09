@@ -26,11 +26,12 @@ package org.objectweb.joram.client.jms.tcp;
 
 import javax.jms.JMSException;
 
-import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.ConnectionFactory;
-import org.objectweb.joram.client.jms.TopicConnection;
+import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.client.jms.TopicConnectionFactory;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.connection.RequestChannel;
+import org.objectweb.joram.shared.security.Identity;
 
 /**
  * A <code>TopicTcpConnectionFactory</code> instance is a factory of
@@ -43,44 +44,38 @@ public class TopicTcpConnectionFactory extends TopicConnectionFactory {
   private static final long serialVersionUID = 1L;
 
   /**
+   * Constructs an empty <code>TopicTcpConnectionFactory</code> instance.
+   * Should only be used for internal purposes.
+   */
+  public TopicTcpConnectionFactory() {}
+
+  /**
    * Constructs a <code>TopicTcpConnectionFactory</code> instance.
    *
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */
-  public TopicTcpConnectionFactory(String host, int port) {
+  private TopicTcpConnectionFactory(String host, int port) {
     super(host, port);
   }
 
   /**
-   * Constructs an empty <code>TopicTcpConnectionFactory</code> instance.
+   * Creates the <code>TcpRequestChannel</code> object specific to the protocol used.
+   * 
+   * @param params          Connection configuration parameters.
+   * @param identity        Client's identity.
+   * @param reliableClass   The protocol specific class.
+   * @return                The <code>RequestChannel</code> object specific to the protocol used.
+   * 
+   * @exception JMSException  A problem occurs during the connection.
+   * 
+   * @see ConnectionFactory#createRequestChannel(FactoryParameters, Identity, String)
    */
-  public TopicTcpConnectionFactory() {}
-
-  /**
-   * Method inherited from the <code>TopicConnectionFactory</code> class.
-   *
-   * @exception JMSSecurityException  If the user identification is incorrect.
-   * @exception IllegalStateException  If the server is not listening.
-   */
-  public javax.jms.TopicConnection createTopicConnection(String name,
-                                                         String password) throws JMSException {
-    initIdentity(name, password);
-    return new TopicConnection(params, new TcpRequestChannel(params, identity, reliableClass));
+  protected RequestChannel createRequestChannel(FactoryParameters params,
+                                                Identity identity,
+                                                String reliableClass) throws JMSException {
+    return new TcpRequestChannel(params, identity, reliableClass);
   }
-
-  /**
-   * Method inherited from the <code>ConnectionFactory</code> class.
-   *
-   * @exception JMSSecurityException  If the user identification is incorrect.
-   * @exception IllegalStateException  If the server is not listening.
-   */
-  public javax.jms.Connection createConnection(String name,
-                                               String password) throws JMSException {
-    initIdentity(name, password);
-    return new Connection(params, new TcpRequestChannel(params, identity, reliableClass));
-  }
-
 
   /**
    * Admin method creating a <code>javax.jms.TopicConnectionFactory</code>

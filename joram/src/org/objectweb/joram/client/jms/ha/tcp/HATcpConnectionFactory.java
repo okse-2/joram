@@ -49,6 +49,8 @@ public class HATcpConnectionFactory extends org.objectweb.joram.client.jms.Conne
 
   /**
    * Constructs an <code>HATcpConnectionFactory</code> instance.
+   * 
+   * @param url The Joram HA URL.
    */
   private HATcpConnectionFactory(String url) {
     super(url);
@@ -79,7 +81,7 @@ public class HATcpConnectionFactory extends org.objectweb.joram.client.jms.Conne
    *
    * @param url URL of the HA Joram server
    */
-  public static javax.jms.ConnectionFactory create(String url) {
+  public static ConnectionFactory create(String url) {
     return create(url, "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
   }
 
@@ -90,7 +92,7 @@ public class HATcpConnectionFactory extends org.objectweb.joram.client.jms.Conne
    * @param url URL of the HA Joram server
    * @param reliableClass  Reliable class name.
    */
-  public static javax.jms.ConnectionFactory create(String url, String reliableClass) {
+  public static ConnectionFactory create(String url, String reliableClass) {
     HATcpConnectionFactory cf = new HATcpConnectionFactory(url);
     cf.setReliableClass(reliableClass);
     return cf;

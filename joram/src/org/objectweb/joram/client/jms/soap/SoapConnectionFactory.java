@@ -80,19 +80,6 @@ public class SoapConnectionFactory extends ConnectionFactory {
   }
 
   /**
-   * Admin method creating a <code>javax.jms.ConnectionFactory</code>
-   * instance for creating SOAP connections with a given server.
-   *
-   * @param host  Name or IP address of the server's host.
-   * @param port  Server's listening port.
-   * @param timeout  Duration in seconds during which a SOAP connection might
-   *          be inactive before being considered as dead (0 for never).
-   */ 
-  public static javax.jms.ConnectionFactory create(String host, int port, int timeout) {
-    return new SoapConnectionFactory(host, port, timeout);
-  }
-
-  /**
    * Admin method creating a <code>javax.jms.ConnectionFactory</code> instance
    * for creating SOAP connections with the local server.
    *
@@ -101,9 +88,20 @@ public class SoapConnectionFactory extends ConnectionFactory {
    *
    * @exception ConnectException  If the admin connection is closed or broken.
    */ 
-  public static javax.jms.ConnectionFactory create(int timeout) throws java.net.ConnectException {
-    return create(AdminModule.getLocalHost(), 
-                  AdminModule.getLocalPort(),
-                  timeout);
+  public static ConnectionFactory create(int timeout) throws java.net.ConnectException {
+    return create(AdminModule.getLocalHost(), AdminModule.getLocalPort(), timeout);
+  }
+
+  /**
+   * Admin method creating a <code>javax.jms.ConnectionFactory</code>
+   * instance for creating SOAP connections with a given server.
+   *
+   * @param host  Name or IP address of the server's host.
+   * @param port  Server's listening port.
+   * @param timeout  Duration in seconds during which a SOAP connection might
+   *          be inactive before being considered as dead (0 for never).
+   */ 
+  public static ConnectionFactory create(String host, int port, int timeout) {
+    return new SoapConnectionFactory(host, port, timeout);
   }
 }

@@ -21,7 +21,11 @@
  */
 package org.objectweb.joram.client.jms.ha.local;
 
+import javax.jms.JMSException;
+
 import org.objectweb.joram.client.jms.*;
+import org.objectweb.joram.client.jms.connection.RequestChannel;
+import org.objectweb.joram.shared.security.Identity;
 
 /**
  * A <code>QueueHALocalConnectionFactory</code> instance is a factory of
@@ -33,41 +37,38 @@ public class QueueHALocalConnectionFactory extends org.objectweb.joram.client.jm
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
+  /**
+   * Constructs a <code>QueueHALocalConnectionFactory</code> instance.
+   * Needed by ObjectFactory, should only be used for internal purposes.
+   */
   public QueueHALocalConnectionFactory() {
-    super("", -1);
+    super("localhost", -1);
   }
 
   /**
-   * Method inherited from the <code>QueueConnectionFactory</code> class.
-   *
-   * @exception JMSSecurityException  If the user identification is incorrect.
+   * Creates the <code>HALocalRequestChannel</code> object needed to connect to the
+   * colocated HA server.
+   * 
+   * @param params          Connection configuration parameters.
+   * @param identity        Client's identity.
+   * @param reliableClass   The protocol specific class.
+   * @return                The <code>RequestChannel</code> object specific to the protocol used.
+   * 
+   * @exception JMSException  A problem occurs during the connection.
+   * 
+   * @see ConnectionFactory#createRequestChannel(FactoryParameters, Identity, String)
    */
-  public javax.jms.QueueConnection createQueueConnection(String name, String password) throws javax.jms.JMSException {
-    initIdentity(name, password);
-    HALocalRequestChannel lc = new HALocalRequestChannel(identity);    
-    return new QueueConnection(params, lc);
-  }
-
-  /**
-   * Method inherited from the <code>ConnectionFactory</code> class.
-   *
-   * @exception JMSSecurityException  If the user identification is incorrect.
-   * @exception IllegalStateException  If the server is not listening.
-   */
-  public javax.jms.Connection
-  createConnection(String name, String password)
-  throws javax.jms.JMSException {
-    initIdentity(name, password);
-    HALocalRequestChannel lc = new HALocalRequestChannel(identity);
-    return new Connection(params, lc);
+  protected RequestChannel createRequestChannel(FactoryParameters params,
+                                                Identity identity,
+                                                String reliableClass) throws JMSException {
+    return new HALocalRequestChannel(identity);
   }
 
   /**
    * Admin method creating a <code>javax.jms.ConnectionFactory</code>
    * instance for creating HA local connections with a given server.
    */ 
-  public static javax.jms.QueueConnectionFactory create()
-  {
+  public static javax.jms.QueueConnectionFactory create() {
     return new QueueHALocalConnectionFactory();
   }
 }

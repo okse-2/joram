@@ -23,14 +23,13 @@
  */
 package org.objectweb.joram.client.jms.local;
 
-import javax.jms.JMSSecurityException;
+import javax.jms.JMSException;
 
-import org.objectweb.joram.client.jms.Connection;
-import org.objectweb.joram.client.jms.QueueConnection;
-import org.objectweb.joram.client.jms.XAConnection;
-import org.objectweb.joram.client.jms.XAQueueConnection;
+import org.objectweb.joram.client.jms.ConnectionFactory;
+import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.client.jms.XAQueueConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.client.jms.connection.RequestChannel;
+import org.objectweb.joram.shared.security.Identity;
 
 /**
  * An <code>XAQueueLocalConnectionFactory</code> instance is a factory of
@@ -44,55 +43,30 @@ public class XAQueueLocalConnectionFactory extends XAQueueConnectionFactory {
 
   /**
    * Constructs an <code>XAQueueLocalConnectionFactory</code> instance.
+   * Should only be used for internal purposes.
    */
   public XAQueueLocalConnectionFactory() {
     super("localhost", -1);
   }
 
   /**
-   * Method inherited from the <code>XAQueueConnectionFactory</code> class.
-   *
-   * @exception JMSSecurityException  If the user identification is incorrect.
+   * Creates the <code>LocalRequestChannel</code> object needed to connect to the
+   * colocated server.
+   * 
+   * @param params          Connection configuration parameters.
+   * @param identity        Client's identity.
+   * @param reliableClass   The protocol specific class.
+   * @return                The <code>RequestChannel</code> object specific to the protocol used.
+   * 
+   * @exception JMSException  A problem occurs during the connection.
+   * 
+   * @see ConnectionFactory#createRequestChannel(FactoryParameters, Identity, String)
    */
-  public javax.jms.XAQueueConnection createXAQueueConnection(String name, String password) throws javax.jms.JMSException {
-    initIdentity(name, password);
-    LocalRequestChannel lc = new LocalRequestChannel(identity);
-    return new XAQueueConnection(params, lc);
+  protected RequestChannel createRequestChannel(FactoryParameters params,
+                                                Identity identity,
+                                                String reliableClass) throws JMSException {
+    return new LocalRequestChannel(identity);
   }
-
-  /**
-   * Method inherited from the <code>XAConnectionFactory</code> class.
-   *
-   * @exception JMSSecurityException  If the user identification is incorrect.
-   */
-  public javax.jms.XAConnection createXAConnection(String name, String password) throws javax.jms.JMSException {
-    initIdentity(name, password);
-    LocalRequestChannel lc = new LocalRequestChannel(identity);
-    return new XAConnection(params, lc);
-  }
-
-  /**
-   * Method inherited from the <code>QueueConnectionFactory</code> class.
-   *
-   * @exception JMSSecurityException  If the user identification is incorrect.
-   */
-  public javax.jms.QueueConnection createQueueConnection(String name, String password) throws javax.jms.JMSException {
-    initIdentity(name, password);
-    LocalRequestChannel lc = new LocalRequestChannel(identity);
-    return new QueueConnection(params, lc);
-  }
-
-  /**
-   * Method inherited from the <code>ConnectionFactory</code> class.
-   *
-   * @exception JMSSecurityException  If the user identification is incorrect.
-   */
-  public javax.jms.Connection createConnection(String name, String password) throws javax.jms.JMSException {
-    initIdentity(name, password);
-    LocalRequestChannel lc = new LocalRequestChannel(identity);
-    return new Connection(params, lc);
-  }
-
 
   /**
    * Admin method creating a <code>javax.jms.XAQueueConnectionFactory</code>

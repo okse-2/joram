@@ -24,11 +24,13 @@
  */
 package org.objectweb.joram.client.jms.tcp;
 
-import org.objectweb.joram.client.jms.XAConnection;
-import org.objectweb.joram.client.jms.XATopicConnection;
-import org.objectweb.joram.client.jms.Connection;
-import org.objectweb.joram.client.jms.TopicConnection;
+import javax.jms.JMSException;
+
+import org.objectweb.joram.client.jms.ConnectionFactory;
+import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.connection.RequestChannel;
+import org.objectweb.joram.shared.security.Identity;
 
 /**
  * An <code>XATopicTcpConnectionFactory</code> instance is a factory of
@@ -43,6 +45,7 @@ public class XATopicTcpConnectionFactory extends org.objectweb.joram.client.jms.
   /**
    * Constructs an <code>XATopicTcpConnectionFactory</code> instance.
    * This empty constructor is needed for JNDI.
+   * Should only be used for internal purposes.
    */
   public XATopicTcpConnectionFactory() {
     super();
@@ -54,52 +57,26 @@ public class XATopicTcpConnectionFactory extends org.objectweb.joram.client.jms.
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */
-  public XATopicTcpConnectionFactory(String host, int port) {
+  private XATopicTcpConnectionFactory(String host, int port) {
     super(host, port);
   }
 
   /**
-   * Method inherited from the <code>XATopicConnectionFactory</code> class..
-   *
-   * @exception JMSSecurityException  If the user identification is incorrect.
-   * @exception IllegalStateException  If the server is not listening.
+   * Creates the <code>TcpRequestChannel</code> object specific to the protocol used.
+   * 
+   * @param params          Connection configuration parameters.
+   * @param identity        Client's identity.
+   * @param reliableClass   The protocol specific class.
+   * @return                The <code>RequestChannel</code> object specific to the protocol used.
+   * 
+   * @exception JMSException  A problem occurs during the connection.
+   * 
+   * @see ConnectionFactory#createRequestChannel(FactoryParameters, Identity, String)
    */
-  public javax.jms.XATopicConnection createXATopicConnection(String name, String password) throws javax.jms.JMSException {
-    initIdentity(name, password);
-    return new XATopicConnection(params, new TcpRequestChannel(params, identity, reliableClass));
-  }
-
-  /**
-   * Method inherited from the <code>XAConnectionFactory</code> class.
-   *
-   * @exception JMSSecurityException  If the user identification is incorrect.
-   * @exception IllegalStateException  If the server is not listening.
-   */
-  public javax.jms.XAConnection createXAConnection(String name, String password) throws javax.jms.JMSException {
-    initIdentity(name, password);
-    return new XAConnection(params, new TcpRequestChannel(params, identity, reliableClass));
-  }
-
-  /**
-   * Method inherited from the <code>TopicConnectionFactory</code> class.
-   *
-   * @exception JMSSecurityException  If the user identification is incorrect.
-   * @exception IllegalStateException  If the server is not listening.
-   */
-  public javax.jms.TopicConnection createTopicConnection(String name, String password) throws javax.jms.JMSException {
-    initIdentity(name, password);
-    return new TopicConnection(params, new TcpRequestChannel(params, identity, reliableClass));
-  }
-
-  /**
-   * Method inherited from the <code>ConnectionFactory</code> class.
-   *
-   * @exception JMSSecurityException  If the user identification is incorrect.
-   * @exception IllegalStateException  If the server is not listening.
-   */
-  public javax.jms.Connection createConnection(String name, String password) throws javax.jms.JMSException {
-    initIdentity(name, password);
-    return new Connection(params, new TcpRequestChannel(params, identity, reliableClass));
+  protected RequestChannel createRequestChannel(FactoryParameters params,
+                                                Identity identity,
+                                                String reliableClass) throws JMSException {
+    return new TcpRequestChannel(params, identity, reliableClass);
   }
 
   /**

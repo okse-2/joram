@@ -82,7 +82,7 @@ public class TcpConnectionFactory extends ConnectionFactory {
    *
    * @exception ConnectException  If the admin connection is closed or broken.
    */ 
-  public static javax.jms.ConnectionFactory create() throws java.net.ConnectException {
+  public static ConnectionFactory create() throws java.net.ConnectException {
     return create(AdminModule.getLocalHost(), AdminModule.getLocalPort());
   }
 
@@ -93,7 +93,7 @@ public class TcpConnectionFactory extends ConnectionFactory {
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */ 
-  public static javax.jms.ConnectionFactory create(String host, int port) {
+  public static ConnectionFactory create(String host, int port) {
     return create(host, port, "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
   }
 
@@ -105,7 +105,7 @@ public class TcpConnectionFactory extends ConnectionFactory {
    * @param port           Server's listening port.
    * @param reliableClass  Reliable class name.
    */ 
-  public static javax.jms.ConnectionFactory create(String host, int port, String reliableClass) {
+  public static ConnectionFactory create(String host, int port, String reliableClass) {
     if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgClient.log(BasicLevel.DEBUG, 
                                  "TcpConnectionFactory.create(" + host + ',' + port + ',' + reliableClass +')');
