@@ -33,7 +33,7 @@ public class HALocalConnectionFactory extends ConnectionFactory {
   private static final long serialVersionUID = 1L;
 
   /**
-   * Constructs a <code>QueueLocalConnectionFactory</code> instance.
+   * Constructs a <code>HALocalConnectionFactory</code> instance.
    * Needed by ObjectFactory, should only be used for internal purposes.
    */
   public HALocalConnectionFactory() {
@@ -63,7 +63,7 @@ public class HALocalConnectionFactory extends ConnectionFactory {
    * Admin method creating a <code>javax.jms.ConnectionFactory</code>
    * instance for creating HA local connections with a given server.
    */ 
-  public static javax.jms.ConnectionFactory create() {
+  public static ConnectionFactory create() {
     return new HALocalConnectionFactory();
   }
 }

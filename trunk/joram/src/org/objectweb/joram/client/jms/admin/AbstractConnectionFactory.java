@@ -26,11 +26,20 @@ package org.objectweb.joram.client.jms.admin;
 import java.util.Hashtable;
 
 import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
 import javax.naming.NamingException;
 import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 
+import org.objectweb.joram.client.jms.Connection;
 import org.objectweb.joram.client.jms.FactoryParameters;
+import org.objectweb.joram.client.jms.QueueConnection;
+import org.objectweb.joram.client.jms.TopicConnection;
+import org.objectweb.joram.client.jms.XAConnection;
+import org.objectweb.joram.client.jms.XAQueueConnection;
+import org.objectweb.joram.client.jms.XATopicConnection;
+import org.objectweb.joram.client.jms.connection.RequestChannel;
+import org.objectweb.joram.client.jms.tcp.TcpRequestChannel;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.shared.security.SimpleIdentity;
@@ -203,6 +212,221 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
     return params;
   }
 
+  /*
+   * ConnectionFactory interfaces implementation.
+   */
+  
+  /**
+   * Creates the <code>RequestChannel</code> object specific to the protocol used.
+   * 
+   * @param params          Connection configuration parameters.
+   * @param identity        Client's identity.
+   * @param reliableClass   The protocol specific class.
+   * @return                The <code>RequestChannel</code> object specific to the protocol used.
+   * 
+   * @exception JMSException  A problem occurs during the connection.
+   */
+  protected abstract RequestChannel createRequestChannel(FactoryParameters params,
+                                                         Identity identity,
+                                                         String reliableClass) throws JMSException;
+
+  /**
+   * API method, creates a connection with the default user identity.
+   * The connection is created in stopped mode.
+   *
+   * @return  a newly created connection.
+   * 
+   * @see javax.jms.ConnectionFactory.createConnection()
+   * @exception JMSSecurityException  If the default identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.Connection createConnection() throws JMSException {
+    return createConnection(getDefaultLogin(), getDefaultPassword());
+  }
+  
+  /**
+   * API method, creates a connection with the specified user identity.
+   * The connection is created in stopped mode.
+   *
+   * @param name      the caller's user name.
+   * @param password  the caller's password.
+   * @return          a newly created connection.
+   * 
+   * @see javax.jms.ConnectionFactory.createConnection(String, String)
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.Connection createConnection(String name,
+                                               String password) throws JMSException {
+    initIdentity(name, password);
+    return new Connection(params, createRequestChannel(params, identity, reliableClass));
+  }
+
+  /**
+   * API method, creates a queue connection with the default user identity.
+   * The connection is created in stopped mode.
+   *
+   * @return  a newly created queue connection.
+   * 
+   * @see javax.jms.ConnectionFactory.createQueueConnection()
+   * @exception JMSSecurityException  If the default identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.QueueConnection createQueueConnection() throws JMSException {
+    return createQueueConnection(getDefaultLogin(), getDefaultPassword());
+  }
+
+  /**
+   * API method, creates a queue connection with the specified user identity.
+   * The connection is created in stopped mode.
+   *
+   * @param name      the caller's user name.
+   * @param password  the caller's password.
+   * @return          a newly created queue connection.
+   * 
+   * @see javax.jms.ConnectionFactory.createQueueConnection(String, String)
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.QueueConnection createQueueConnection(String name,
+                                                         String password) throws JMSException {
+    initIdentity(name, password);
+    return new QueueConnection(params, new TcpRequestChannel(params, identity, reliableClass));
+  }
+
+  /**
+   * API method, creates a topic connection with the default user identity.
+   * The connection is created in stopped mode.
+   *
+   * @return  a newly created topic connection.
+   * 
+   * @see javax.jms.ConnectionFactory.createTopicConnection()
+   * @exception JMSSecurityException  If the default identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.TopicConnection createTopicConnection() throws JMSException {
+    return createTopicConnection(getDefaultLogin(), getDefaultPassword());
+  }
+
+  /**
+   * API method, creates a topic connection with the specified user identity.
+   * The connection is created in stopped mode.
+   *
+   * @param name      the caller's user name.
+   * @param password  the caller's password.
+   * @return          a newly created topic connection.
+   * 
+   * @see javax.jms.ConnectionFactory.createTopicConnection(String, String)
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.TopicConnection createTopicConnection(String name,
+                                                         String password) throws JMSException {
+    initIdentity(name, password);
+    return new TopicConnection(params, createRequestChannel(params, identity, reliableClass));
+  }
+
+  /**
+   * API method, creates an XA connection with the default user identity.
+   * The connection is created in stopped mode.
+   *
+   * @return  a newly created XA connection..
+   *
+   * @see javax.jms.ConnectionFactory.createXAConnection()
+   * @exception JMSSecurityException  If the default identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.XAConnection createXAConnection() throws JMSException {
+    return createXAConnection(getDefaultLogin(), getDefaultPassword());
+  }
+
+  /**
+   * API method, creates an XA connection with the specified user identity.
+   * The connection is created in stopped mode.
+   *
+   * @param name      the caller's user name.
+   * @param password  the caller's password.
+   * @return          a newly created XA connection.
+   *
+   * @see javax.jms.ConnectionFactory.createXAConnection(String, String)
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.XAConnection createXAConnection(String name, String password) throws javax.jms.JMSException {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, 
+                                 "TcpConnectionFactory.createXAConnection(" + name + ',' + password + ") reliableClass=" + reliableClass);
+
+    initIdentity(name, password);
+    return new XAConnection(params, new TcpRequestChannel(params, identity, reliableClass));
+  }
+
+  /**
+   * API method, creates an XA queue connection with the default user identity.
+   * The connection is created in stopped mode.
+   *
+   * @return  a newly created XA queue connection..
+   *
+   * @see javax.jms.ConnectionFactory.createXAQueueConnection()
+   * @exception JMSSecurityException  If the default identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.XAQueueConnection createXAQueueConnection() throws JMSException {
+    return createXAQueueConnection(getDefaultLogin(), getDefaultPassword());
+  }
+
+  /**
+   * API method, creates an XA queue connection with the specified user identity.
+   * The connection is created in stopped mode.
+   *
+   * @param name      the caller's user name.
+   * @param password  the caller's password.
+   * @return          a newly created XA queue connection.
+   *
+   * @see javax.jms.ConnectionFactory.createXAQueueConnection(String, String)
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  
+  public javax.jms.XAQueueConnection createXAQueueConnection(String name, String password) throws javax.jms.JMSException {
+    initIdentity(name, password);
+    return new XAQueueConnection(params, new TcpRequestChannel(params, identity, reliableClass));
+  }
+
+  /**
+   * API method, creates an XA topic connection with the default user identity.
+   * The connection is created in stopped mode.
+   *
+   * @return  a newly created XA topic connection..
+   *
+   * @exception JMSSecurityException  If the default identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.XATopicConnection createXATopicConnection() throws JMSException {
+    return createXATopicConnection(getDefaultLogin(), getDefaultPassword());
+  }
+
+  /**
+   * API method, creates an XA topic connection with the specified user identity.
+   * The connection is created in stopped mode.
+   *
+   * @param name      the caller's user name.
+   * @param password  the caller's password.
+   * @return          a newly created XA topic connection.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+
+  public javax.jms.XATopicConnection createXATopicConnection(String name, String password) throws javax.jms.JMSException {
+    initIdentity(name, password);
+    return new XATopicConnection(params, new TcpRequestChannel(params, identity, reliableClass));
+  }
+
+  /*
+   * Referenceable interface implementation.
+   */
+  
   /** Sets the naming reference of an administered object. */
   public final void toReference(Reference ref) throws NamingException {
     toReference(ref, "cf");
@@ -230,6 +454,10 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
     setIdentityClassName((String) ref.get(prefix + ".identityClassName").getContent());
     params.fromReference(ref, prefix);
   }
+
+  /*
+   * SoapItf interface implementation.
+   */
 
   /**
    * Codes a <code>ConnectionFactory</code> as a Hashtable for traveling

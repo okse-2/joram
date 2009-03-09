@@ -39,7 +39,7 @@ public class LocalConnectionFactory extends ConnectionFactory {
 
   /**
    * Constructs a <code>QueueLocalConnectionFactory</code> instance.
-   * Needed by ObjectFactory, should only be used for internal purposes.
+   * Should only be used for internal purposes.
    */
   public LocalConnectionFactory() {
     super("localhost", -1);
@@ -68,7 +68,7 @@ public class LocalConnectionFactory extends ConnectionFactory {
    * Admin method creating a <code>javax.jms.ConnectionFactory</code>
    * instance for creating local connections.
    */ 
-  public static javax.jms.ConnectionFactory create() {
+  public static ConnectionFactory create() {
     return new LocalConnectionFactory();
   }
 }

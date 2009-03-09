@@ -24,9 +24,6 @@
  */
 package org.objectweb.joram.client.jms;
 
-import javax.jms.JMSException;
-import javax.jms.JMSSecurityException;
-
 import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 
 /**
@@ -39,13 +36,19 @@ public abstract class TopicConnectionFactory extends AbstractConnectionFactory i
   private static final long serialVersionUID = 1L;
 
   /**
+   * Constructs an empty <code>TopicConnectionFactory</code>.
+   * Needed by ObjectFactory, should only be used for internal purposes.
+   */
+  public TopicConnectionFactory() {}
+
+  /**
    * Constructs a <code>TopicConnectionFactory</code> dedicated to a given
    * server.
    *
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */
-  public TopicConnectionFactory(String host, int port) {
+  protected TopicConnectionFactory(String host, int port) {
     super(host, port);
   }
 
@@ -54,49 +57,13 @@ public abstract class TopicConnectionFactory extends AbstractConnectionFactory i
    *
    * @param url  joram ha url.
    */
-  public TopicConnectionFactory(String url) {
+  protected TopicConnectionFactory(String url) {
     super(url);
   }
-
-  /**
-   * Constructs an empty <code>TopicConnectionFactory</code>.
-   * Needed by ObjectFactory.
-   */
-  public TopicConnectionFactory() {}
 
 
   /** Returns a string view of the connection factory. */
   public String toString() {
     return "TCF:" + params.getHost() + "-" + params.getPort();
-  }
-
-  /**
-   * API method.
-   *
-   * @exception JMSSecurityException  If the default identification is
-   *              incorrect.
-   * @exception IllegalStateException  If the server is not listening.
-   */
-  public javax.jms.Connection createConnection() throws JMSException {
-    return createConnection(getDefaultLogin(), getDefaultPassword());
-  }
-
-  /**
-   * API method, implemented according to the communication protocol.
-   *
-   * @exception JMSSecurityException  If the user identification is incorrect.
-   * @exception IllegalStateException  If the server is not listening.
-   */
-  public abstract javax.jms.TopicConnection createTopicConnection(String name, String password) throws JMSException;
-
-  /**
-   * API method.
-   *
-   * @exception JMSSecurityException  If the default identification is
-   *              incorrect.
-   * @exception IllegalStateException  If the server is not listening.
-   */
-  public javax.jms.TopicConnection createTopicConnection() throws JMSException {
-    return createTopicConnection(getDefaultLogin(), getDefaultPassword());
   }
 }

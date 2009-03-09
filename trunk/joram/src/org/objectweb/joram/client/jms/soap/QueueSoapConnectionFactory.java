@@ -26,13 +26,14 @@ package org.objectweb.joram.client.jms.soap;
 
 import java.net.ConnectException;
 
-import javax.jms.JMSSecurityException;
+import javax.jms.JMSException;
 
-import org.objectweb.joram.client.jms.Connection;
-import org.objectweb.joram.client.jms.QueueConnection;
+import org.objectweb.joram.client.jms.ConnectionFactory;
+import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.client.jms.QueueConnectionFactory;
 import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.client.jms.connection.RequestChannel;
+import org.objectweb.joram.shared.security.Identity;
 
 /**
  * A <code>QueueSoapConnectionFactory</code> instance is a factory of
@@ -45,6 +46,12 @@ public class QueueSoapConnectionFactory extends QueueConnectionFactory {
   private static final long serialVersionUID = 1L;
 
   /**
+   * Constructs an empty <code>QueueSoapConnectionFactory</code> instance.
+   * Needed by ObjectFactory, should only be used for internal purposes.
+   */
+  public QueueSoapConnectionFactory() {}
+
+  /**
    * Constructs a <code>QueueSoapConnectionFactory</code> instance.
    *
    * @param host  Name or IP address of the server's host.
@@ -52,37 +59,40 @@ public class QueueSoapConnectionFactory extends QueueConnectionFactory {
    * @param timeout  Duration in seconds during which a SOAP connection might
    *          be inactive before being considered as dead (0 for never).
    */
-  public QueueSoapConnectionFactory(String host, int port, int timeout) {
+  private QueueSoapConnectionFactory(String host, int port, int timeout) {
     super(host, port);
     params.cnxPendingTimer = timeout * 1000;
   }
 
   /**
-   * Constructs an empty <code>QueueSoapConnectionFactory</code> instance.
+   * Creates the <code>SoapRequestChannel</code> object specific to the protocol used.
+   * 
+   * @param params          Connection configuration parameters.
+   * @param identity        Client's identity.
+   * @param reliableClass   The protocol specific class.
+   * @return                The <code>RequestChannel</code> object specific to the protocol used.
+   * 
+   * @exception JMSException  A problem occurs during the connection.
+   * 
+   * @see ConnectionFactory#createRequestChannel(FactoryParameters, Identity, String)
    */
-  public QueueSoapConnectionFactory() {
+  protected RequestChannel createRequestChannel(FactoryParameters params,
+                                                Identity identity,
+                                                String reliableClass) throws JMSException {
+    return new SoapRequestChannel(params, identity);
   }
 
   /**
-   * Method inherited from the <code>QueueConnectionFactory</code> class.
+   * Admin method creating a <code>javax.jms.QueueConnectionFactory</code>
+   * instance for creating SOAP connections with the local server.
    *
-   * @exception JMSSecurityException  If the user identification is incorrect.
-   * @exception IllegalStateException  If the server is not listening.
-   */
-  public javax.jms.QueueConnection createQueueConnection(String name, String password) throws javax.jms.JMSException {
-    initIdentity(name, password);
-    return new QueueConnection(params, new SoapRequestChannel(params, identity));
-  }
-
-  /**
-   * Method inherited from the <code>ConnectionFactory</code> class.
+   * @param timeout  Duration in seconds during which a SOAP connection might
+   *          be inactive before being considered as dead (0 for never).
    *
-   * @exception JMSSecurityException  If the user identification is incorrect.
-   * @exception IllegalStateException  If the server is not listening.
-   */
-  public javax.jms.Connection createConnection(String name, String password) throws javax.jms.JMSException {
-    initIdentity(name, password);
-    return new Connection(params, new SoapRequestChannel(params, identity));
+   * @exception ConnectException  If the admin connection is closed or broken.
+   */ 
+  public static javax.jms.QueueConnectionFactory create(int timeout) throws java.net.ConnectException {
+    return create(AdminModule.getLocalHost(),  AdminModule.getLocalPort(), timeout);
   }
 
   /**
@@ -96,20 +106,5 @@ public class QueueSoapConnectionFactory extends QueueConnectionFactory {
    */ 
   public static javax.jms.QueueConnectionFactory create(String host, int port, int timeout) {
     return new QueueSoapConnectionFactory(host, port, timeout);
-  }
-
-  /**
-   * Admin method creating a <code>javax.jms.QueueConnectionFactory</code>
-   * instance for creating SOAP connections with the local server.
-   *
-   * @param timeout  Duration in seconds during which a SOAP connection might
-   *          be inactive before being considered as dead (0 for never).
-   *
-   * @exception ConnectException  If the admin connection is closed or broken.
-   */ 
-  public static javax.jms.QueueConnectionFactory create(int timeout) throws java.net.ConnectException {
-    return create(AdminModule.getLocalHost(), 
-                  AdminModule.getLocalPort(),
-                  timeout);
   }
 }

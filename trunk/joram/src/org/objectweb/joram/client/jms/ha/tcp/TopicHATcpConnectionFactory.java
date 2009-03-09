@@ -24,10 +24,12 @@
  */
 package org.objectweb.joram.client.jms.ha.tcp;
 
-import javax.jms.JMSSecurityException;
+import javax.jms.JMSException;
 
-import org.objectweb.joram.client.jms.Connection;
-import org.objectweb.joram.client.jms.TopicConnection;
+import org.objectweb.joram.client.jms.ConnectionFactory;
+import org.objectweb.joram.client.jms.FactoryParameters;
+import org.objectweb.joram.client.jms.connection.RequestChannel;
+import org.objectweb.joram.shared.security.Identity;
 
 /**
  * A <code>TopicHALocalConnectionFactory</code> instance is a factory of
@@ -39,37 +41,38 @@ public class TopicHATcpConnectionFactory extends org.objectweb.joram.client.jms.
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
-  public TopicHATcpConnectionFactory(String url) {
-    super(url);
-  }
-
   /**
    * Constructs an empty <code>TopicHATcpConnectionFactory</code>.
-   * Needed by ObjectFactory.
+   * Needed by ObjectFactory, should only be used for internal purposes.
    */
   public TopicHATcpConnectionFactory() {}
 
   /**
-   * Method inherited from the <code>TopicConnectionFactory</code> class.
-   *
-   * @exception JMSSecurityException  If the user identification is incorrect.
+   * Constructs an <code>TopicHATcpConnectionFactory</code> instance.
+   * 
+   * @param url The Joram HA URL.
    */
-  public javax.jms.TopicConnection createTopicConnection(String name, String password) throws javax.jms.JMSException {
-    initIdentity(name, password);
-    HATcpRequestChannel lc = new HATcpRequestChannel(getParameters().getUrl(), params, identity, reliableClass);
-    return new TopicConnection(params, lc);
+  private TopicHATcpConnectionFactory(String url) {
+    super(url);
   }
 
   /**
-   * Method inherited from the <code>ConnectionFactory</code> class.
-   *
-   * @exception JMSSecurityException  If the user identification is incorrect.
-   * @exception IllegalStateException  If the server is not listening.
+   * Creates the <code>HATcpRequestChannel</code> object needed to connect to the
+   * remote HA server.
+   * 
+   * @param params          Connection configuration parameters.
+   * @param identity        Client's identity.
+   * @param reliableClass   The protocol specific class.
+   * @return                The <code>RequestChannel</code> object specific to the protocol used.
+   * 
+   * @exception JMSException  A problem occurs during the connection.
+   * 
+   * @see ConnectionFactory#createRequestChannel(FactoryParameters, Identity, String)
    */
-  public javax.jms.Connection createConnection(String name, String password) throws javax.jms.JMSException {
-    initIdentity(name, password);
-    HATcpRequestChannel lc = new HATcpRequestChannel(getParameters().getUrl(), params, identity, reliableClass);
-    return new Connection(params, lc);
+  protected RequestChannel createRequestChannel(FactoryParameters params,
+                                                Identity identity,
+                                                String reliableClass) throws JMSException {
+    return new HATcpRequestChannel(params.getUrl(), params, identity, reliableClass);
   }
 
   /**
