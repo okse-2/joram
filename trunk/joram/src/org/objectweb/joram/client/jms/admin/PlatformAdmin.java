@@ -117,7 +117,7 @@ public class PlatformAdmin implements PlatformAdminMBean {
   public void connect(javax.jms.ConnectionFactory cnxFact, 
                       String name,
                       String password) throws ConnectException, AdminException {
-    AdminModule.connect((ConnectionFactory) cnxFact, name, password);
+    AdminModule.connect(cnxFact, name, password);
   }
   
   /**
