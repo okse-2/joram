@@ -22,12 +22,6 @@
  */
 package org.objectweb.joram.client.jms.admin;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectStreamClass;
-
 import javax.jms.MessageFormatException;
 import javax.jms.MessageNotWriteableException;
 
@@ -35,8 +29,12 @@ import org.objectweb.joram.client.jms.Message;
 import org.objectweb.joram.client.jms.Session;
 import org.objectweb.joram.shared.admin.AbstractAdminMessage;
 
+/**
+ * The class AdminMessage allows to send and receive administration messages.
+ * It defines a proprietary JMS message type, the body is serialized through a
+ * proprietary encoding.
+ */
 public class AdminMessage extends Message {
-
   /**
    * Instantiates a bright new <code>AdminMessage</code>.
    */
@@ -64,11 +62,9 @@ public class AdminMessage extends Message {
    * @throws MessageNotWriteableException
    * @throws MessageFormatException
    */
-  public void setAdminMessage(AbstractAdminMessage adminMsg) 
-    throws MessageNotWriteableException, MessageFormatException {
+  public void setAdminMessage(AbstractAdminMessage adminMsg) throws MessageNotWriteableException, MessageFormatException {
     if (RObody)
-      throw new MessageNotWriteableException("Can't set an AbstractAdminMessage as the"
-                                             + " message body is read-only.");
+      throw new MessageNotWriteableException("Can't set an AbstractAdminMessage as the message body is read-only.");
 
     try {
       clearBody();
@@ -85,46 +81,6 @@ public class AdminMessage extends Message {
    * @throws MessageFormatException
    */
   public AbstractAdminMessage getAdminMessage() throws MessageFormatException {
-    try {
-      return momMsg.getAdminMessage();
-    } catch (ClassNotFoundException cnfexc) {
-      ByteArrayInputStream bais = null;
-      InputStream is = null;
-      try {
-        // Could not build AbstractAdminMessage: reason could be linked to 
-        // class loaders hierarchy in an application server.
-        class Specialized_OIS extends ObjectInputStream {
-          Specialized_OIS(InputStream is) throws IOException {
-            super(is);
-          }
-
-          protected Class resolveClass(ObjectStreamClass osc)
-            throws IOException, ClassNotFoundException {
-            String n = osc.getName();
-            return Class.forName(n, false,
-                                 Thread.currentThread().getContextClassLoader());
-          }
-        }
-        
-        bais = new ByteArrayInputStream(momMsg.body);
-        is = new Specialized_OIS(bais);
-        return AbstractAdminMessage.read(is);
-      } catch (Exception exc) {
-        MessageFormatException jE =
-          new MessageFormatException("Error while deserializing the wrapped object: " + exc);
-        throw jE;
-      } finally {
-        try {
-          is.close();
-        } catch (Exception e) {}
-        try {
-          bais.close();
-        } catch (Exception e) {}
-      }
-    } catch (Exception exc) {
-      MessageFormatException jE =
-        new MessageFormatException("Error while deserializing the wrapped object: " + exc);
-      throw jE;
-    }
+    return momMsg.getAdminMessage();
   }
 }
