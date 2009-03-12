@@ -18,6 +18,7 @@
   <target name="tests.all"
            description=" --> launch all joram tests">
      <ant dir="." antfile="build.xml" target="tests.noperf.all"/>
+     <ant dir="." antfile="build.xml" target="tests.ha"/>
      <ant dir="." antfile="build.xml" target="tests.perf"/>
    </target>
     
@@ -34,7 +35,6 @@
     <ant dir="." antfile="build.xml" target="base.test_Multi_Q"/>
     <ant dir="." antfile="build.xml" target="tests.transacted"/>
     <ant dir="." antfile="build.xml" target="tests.exceptionlistener"/>
-    <ant dir="." antfile="build.xml" target="tests.ha"/>
     <ant dir="." antfile="build.xml" target="tests.recovery"/>
     <ant dir="." antfile="build.xml" target="tests.dist"/>
     <ant dir="." antfile="build.xml" target="tests.admin"/>
