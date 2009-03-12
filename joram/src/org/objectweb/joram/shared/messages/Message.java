@@ -268,7 +268,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
    * @exception Exception  In case of an error while getting the object.
    */
   public Serializable getObject() throws Exception {
-    // AF: May be, we should verify that it is an Object message!!
+    // TODO (AF): May be, we should verify that it is an Object message!!
     if (body == null) return null;
 
     ByteArrayInputStream bais = null;
@@ -340,7 +340,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
    * @exception IOException  In case of an error while getting the object.
    * @exception ClassNotFoundException  If the object class is unknown.
    */
-  public AbstractAdminMessage getAdminMessage() throws ClassNotFoundException, IOException {
+  public AbstractAdminMessage getAdminMessage() {
     if (body == null) return null;
 
     ByteArrayInputStream bais = null;
@@ -352,10 +352,6 @@ public final class Message implements Cloneable, Serializable, Streamable {
     } catch (Exception e) {
       if (JoramTracing.dbgProxy.isLoggable(BasicLevel.ERROR))
         JoramTracing.dbgProxy.log(BasicLevel.ERROR, "ERROR: getAdminMessage()", e);
-    } finally {
-      try {
-        bais.close();
-      } catch (Exception e) {}
     }
     return adminMsg;
   }
