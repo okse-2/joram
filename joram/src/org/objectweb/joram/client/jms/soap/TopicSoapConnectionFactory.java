@@ -24,14 +24,11 @@
  */
 package org.objectweb.joram.client.jms.soap;
 
-import java.net.ConnectException;
-
 import javax.jms.JMSException;
 
 import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.client.jms.TopicConnectionFactory;
-import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.connection.RequestChannel;
 import org.objectweb.joram.shared.security.Identity;
 
@@ -80,19 +77,6 @@ public class TopicSoapConnectionFactory extends TopicConnectionFactory {
                                                 Identity identity,
                                                 String reliableClass) throws JMSException {
     return new SoapRequestChannel(params, identity);
-  }
-
-  /**
-   * Admin method creating a <code>javax.jms.TopicConnectionFactory</code>
-   * instance for creating SOAP connections with the local server.
-   *
-   * @param timeout  Duration in seconds during which a SOAP connection might
-   *          be inactive before being considered as dead (0 for never).
-   *
-   * @exception ConnectException  If the admin connection is closed or broken.
-   */ 
-  public static javax.jms.TopicConnectionFactory create(int timeout) throws java.net.ConnectException {
-    return create(AdminModule.getLocalHost(),AdminModule.getLocalPort(), timeout);
   }
 
   /**
