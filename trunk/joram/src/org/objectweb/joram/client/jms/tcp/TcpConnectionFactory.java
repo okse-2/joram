@@ -28,7 +28,6 @@ import javax.jms.JMSException;
 
 import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.FactoryParameters;
-import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.connection.RequestChannel;
 
 import org.objectweb.joram.shared.JoramTracing;
@@ -78,12 +77,14 @@ public class TcpConnectionFactory extends ConnectionFactory {
 
   /**
    * Admin method creating a <code>javax.jms.ConnectionFactory</code>
-   * instance for creating TCP connections with the local server.
+   * instance for creating TCP connections with the default server.
    *
    * @exception ConnectException  If the admin connection is closed or broken.
+   * @see #getDefaultServerHost()
+   * @see #getDefaultServerPort()
    */ 
   public static ConnectionFactory create() throws java.net.ConnectException {
-    return create(AdminModule.getLocalHost(), AdminModule.getLocalPort());
+    return create(getDefaultServerHost(), getDefaultServerPort());
   }
 
   /**
