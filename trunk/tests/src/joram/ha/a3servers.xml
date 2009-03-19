@@ -13,7 +13,6 @@
         <service class="fr.dyade.aaa.agent.AdminProxy" args="7890"/>
         <service class="org.objectweb.joram.mom.proxies.ConnectionManager" args="root root"/>
         <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" args="2560"/>
-        <service class="org.objectweb.joram.client.jms.ha.local.HALocalConnection"/>
       </server>
 
       <server id="1" hostname="localhost">
@@ -21,7 +20,6 @@
         <service class="fr.dyade.aaa.agent.AdminProxy" args="7891"/>
         <service class="org.objectweb.joram.mom.proxies.ConnectionManager" args="root root"/>
         <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" args="2561"/>
-        <service class="org.objectweb.joram.client.jms.ha.local.HALocalConnection"/>
       </server>
 
       <server id="2" hostname="localhost">
@@ -29,7 +27,6 @@
         <service class="fr.dyade.aaa.agent.AdminProxy" args="7892"/>
         <service class="org.objectweb.joram.mom.proxies.ConnectionManager" args="root root"/>
         <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" args="2562"/>
-        <service class="org.objectweb.joram.client.jms.ha.local.HALocalConnection"/>
       </server>
     </cluster>
 
