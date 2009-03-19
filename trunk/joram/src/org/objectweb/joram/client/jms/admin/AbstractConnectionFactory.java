@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2007 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -39,7 +39,6 @@ import org.objectweb.joram.client.jms.XAConnection;
 import org.objectweb.joram.client.jms.XAQueueConnection;
 import org.objectweb.joram.client.jms.XATopicConnection;
 import org.objectweb.joram.client.jms.connection.RequestChannel;
-import org.objectweb.joram.client.jms.tcp.TcpRequestChannel;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.shared.security.SimpleIdentity;
@@ -95,6 +94,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
 
   
   private boolean isSetIdentityClassName = false;
+  
   /**
    * set indentity class name
    * @param identityClassName default Identity.SIMPLE_IDENTITY_CLASS (user/passwd).
@@ -146,30 +146,44 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
   }
 
   /**
+   * Default server's hostname for connection, default value is "localhost".
+   * This value can be adjusted through the <tt>JoramDfltServerHost</tt>
+   * property.
+   */
+  final static String dfltServerHost = "localhost";
+
+  /**
+   * Returns default server's hostname for connection.
+   * Default value "localhost" can be adjusted by setting the
+   * <tt>JoramDfltServerHost</tt> property.
+   */
+  public static String getDefaultServerHost() {
+    return System.getProperty("JoramDfltServerHost", dfltServerHost);
+  }
+
+  /**
+   * Default server's port for connection, default value is 16010.
+   * This value can be adjusted through the <tt>JoramDfltServerPort</tt>
+   * property.
+   */
+  final static int dfltServerPort = 16010;
+
+  /**
+   * Returns default server's port for connection.
+   * Default value 16010 can be adjusted by setting the
+   * <tt>JoramDfltServerPort</tt> property.
+   */
+  public static int getDefaultServerPort() {
+    return Integer.getInteger("JoramDfltServerPort", dfltServerPort).intValue();
+  }
+  
+  /**
    * Default administrator login name for connection, default value is
    * "root".
    * This value can be adjusted through the <tt>JoramDfltRootLogin</tt>
    * property.
    */
   final static String dfltRootLogin = "root";
-  /**
-   * Default administrator login password for connection, default value is
-   * "root".
-   * This value can be adjusted through the <tt>JoramDfltRootPassword</tt>
-   * property.
-   */
-  final static String dfltRootPassword = "root";
-  /**
-   * Default login name for connection, default value is "anonymous".
-   * This value can be adjusted through the <tt>JoramDfltLogin</tt> property.
-   */
-  final static String dfltLogin = "anonymous";
-  /**
-   * Default login password for connection, default value is "anonymous".
-   * This value can be adjusted through the <tt>JoramDfltPassword</tt>
-   * property.
-   */
-  final static String dfltPassword = "anonymous";
 
   /**
    * Returns default administrator login name for connection.
@@ -179,6 +193,14 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
   public static String getDefaultRootLogin() {
     return System.getProperty("JoramDfltRootLogin", dfltRootLogin);
   }
+  
+  /**
+   * Default administrator login password for connection, default value is
+   * "root".
+   * This value can be adjusted through the <tt>JoramDfltRootPassword</tt>
+   * property.
+   */
+  final static String dfltRootPassword = "root";
 
   /**
    * Returns the default administrator login password for connection.
@@ -190,6 +212,12 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
   }
 
   /**
+   * Default login name for connection, default value is "anonymous".
+   * This value can be adjusted through the <tt>JoramDfltLogin</tt> property.
+   */
+  final static String dfltLogin = "anonymous";
+
+  /**
    * Returns default login name for connection.
    * Default value "anonymous" can be adjusted by setting the
    * <tt>JoramDfltLogin</tt> property.
@@ -197,6 +225,13 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
   public static String getDefaultLogin() {
     return System.getProperty("JoramDfltLogin", dfltLogin);
   }
+
+  /**
+   * Default login password for connection, default value is "anonymous".
+   * This value can be adjusted through the <tt>JoramDfltPassword</tt>
+   * property.
+   */
+  final static String dfltPassword = "anonymous";
 
   /**
    * Returns the default login password for connection.
@@ -291,7 +326,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
   public javax.jms.QueueConnection createQueueConnection(String name,
                                                          String password) throws JMSException {
     initIdentity(name, password);
-    return new QueueConnection(params, new TcpRequestChannel(params, identity, reliableClass));
+    return new QueueConnection(params, createRequestChannel(params, identity, reliableClass));
   }
 
   /**
@@ -358,7 +393,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
                                  "TcpConnectionFactory.createXAConnection(" + name + ',' + password + ") reliableClass=" + reliableClass);
 
     initIdentity(name, password);
-    return new XAConnection(params, new TcpRequestChannel(params, identity, reliableClass));
+    return new XAConnection(params, createRequestChannel(params, identity, reliableClass));
   }
 
   /**
@@ -390,7 +425,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
   
   public javax.jms.XAQueueConnection createXAQueueConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
-    return new XAQueueConnection(params, new TcpRequestChannel(params, identity, reliableClass));
+    return new XAQueueConnection(params, createRequestChannel(params, identity, reliableClass));
   }
 
   /**
@@ -420,7 +455,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
 
   public javax.jms.XATopicConnection createXATopicConnection(String name, String password) throws javax.jms.JMSException {
     initIdentity(name, password);
-    return new XATopicConnection(params, new TcpRequestChannel(params, identity, reliableClass));
+    return new XATopicConnection(params, createRequestChannel(params, identity, reliableClass));
   }
 
   /*
