@@ -35,78 +35,76 @@ import org.objectweb.joram.client.jms.admin.User;
  *    
  */
 public class TestDmq6 extends TestCase {
+  public static void main(String[] args) {
+    new TestDmq6().run();
+  }
 
-   
-    public static void main(String[] args) {
-	new TestDmq6().run();
-    }
-         
-    public void run() {
-	try {
-	    boolean defaultCreate = false, dmq = false, dmq1 = false;
-	    System.out.println("server start");
-	    startAgentServer((short)0);
-	    
-	    Thread.sleep(5000);
-	    AdminModule.connect("localhost", 2560,"root", "root", 60);
-	    System.out.println("admin ok");
-	   
-	    // check 
-	    List liste = AdminModule.getDestinations();
-	    for(int i = 0;i < liste.size(); i++){
-		Destination dest = (Destination)liste.get(i);
-		
-		if(dest.getType().equals("queue")){
-		    assertTrue( dest.isFreelyWriteable() );
-		    assertTrue( dest.isFreelyReadable() );
-		    assertEquals(2,((Queue)dest).getThreshold());
-		}else if(dest.getType().equals("topic")){
-		    assertTrue( dest.isFreelyWriteable() );
-		    assertTrue( dest.isFreelyReadable() );
-		}
+  public void run() {
+    try {
+      boolean defaultCreate = false, dmq = false, dmq1 = false;
+      System.out.println("server start");
+      startAgentServer((short)0);
 
-		if(dest.getAdminName().equals("defaultdmq")){
-		    List listeI = dest.getReaders();
-		    assertEquals("dmq",((User)listeI.get(0)).getName());
-		    assertEquals(dest,AdminModule.getDefaultDMQ());
-		    assertEquals(10,AdminModule.getDefaultThreshold());
-		    defaultCreate = true;
-		} else if (dest.getAdminName().equals("dmq")){
-		    List listeI = dest.getReaders();
-		    assertEquals("dmq",((User)listeI.get(0)).getName());
-		    dmq = true;
-		} else if (dest.getAdminName().equals("dmq1")){
-		    List listeI = dest.getReaders();
-		    assertEquals("dmq",((User)listeI.get(0)).getName());
-		    dmq1 = true;
-		}
-	    }
-	    
-	    assertTrue(defaultCreate);
-	    assertTrue(dmq);
-	    assertTrue(dmq1);
-	    
-	    
-	    liste = AdminModule.getUsers();
-	    for(int i = 0;i < liste.size();i++){
-		User user = (User)liste.get(i);
-		if(user.getName().equals("anonymous")){
-		    assertEquals(2,user.getThreshold());
-		}
-	    }
-	    
-	    
-	    AdminModule.disconnect();
-	    
-	} catch (Throwable exc) {
-	    exc.printStackTrace();
-	    error(exc);
-	} finally {
-	    System.out.println("Server stop ");
-	    stopAgentServer((short)0);
-	    endTest(); 
-	}
+      Thread.sleep(5000);
+      AdminModule.connect("localhost", 2560,"root", "root", 60);
+      System.out.println("admin ok");
+
+      // check 
+      List liste = AdminModule.getDestinations();
+      for(int i = 0;i < liste.size(); i++){
+        Destination dest = (Destination)liste.get(i);
+
+        if(dest.getType().equals("queue")){
+          assertTrue( dest.isFreelyWriteable() );
+          assertTrue( dest.isFreelyReadable() );
+          assertEquals(2,((Queue)dest).getThreshold());
+        }else if(dest.getType().equals("topic")){
+          assertTrue( dest.isFreelyWriteable() );
+          assertTrue( dest.isFreelyReadable() );
+        }
+
+        if(dest.getAdminName().equals("defaultdmq")){
+          List listeI = dest.getReaders();
+          assertEquals("dmq",((User)listeI.get(0)).getName());
+          assertEquals(dest,AdminModule.getDefaultDMQ());
+          assertEquals(10,AdminModule.getDefaultThreshold());
+          defaultCreate = true;
+        } else if (dest.getAdminName().equals("dmq")){
+          List listeI = dest.getReaders();
+          assertEquals("dmq",((User)listeI.get(0)).getName());
+          dmq = true;
+        } else if (dest.getAdminName().equals("dmq1")){
+          List listeI = dest.getReaders();
+          assertEquals("dmq",((User)listeI.get(0)).getName());
+          dmq1 = true;
+        }
+      }
+
+      assertTrue(defaultCreate);
+      assertTrue(dmq);
+      assertTrue(dmq1);
+
+
+      liste = AdminModule.getUsers();
+      for(int i = 0;i < liste.size();i++){
+        User user = (User)liste.get(i);
+        if(user.getName().equals("anonymous")){
+          assertEquals(2,user.getThreshold());
+        }
+      }
+
+
+      AdminModule.disconnect();
+
+    } catch (Throwable exc) {
+      exc.printStackTrace();
+      error(exc);
+    } finally {
+      System.out.println("Server stop ");
+      stopAgentServer((short)0);
+      endTest(); 
     }
-    
-   
+  }
+
+
 }
