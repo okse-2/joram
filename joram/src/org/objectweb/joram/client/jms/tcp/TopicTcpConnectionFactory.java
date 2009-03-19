@@ -29,7 +29,6 @@ import javax.jms.JMSException;
 import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.client.jms.TopicConnectionFactory;
-import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.connection.RequestChannel;
 import org.objectweb.joram.shared.security.Identity;
 
@@ -78,6 +77,18 @@ public class TopicTcpConnectionFactory extends TopicConnectionFactory {
   }
 
   /**
+   * Admin method creating a <code>javax.jms.TopicConnectionFactory</code> 
+   * instance for creating TCP connections with the default server.
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @see #getDefaultServerHost()
+   * @see #getDefaultServerPort()
+   */ 
+  public static javax.jms.TopicConnectionFactory create() throws java.net.ConnectException {
+    return create(getDefaultServerHost(), getDefaultServerPort());
+  }
+
+  /**
    * Admin method creating a <code>javax.jms.TopicConnectionFactory</code>
    * instance for creating TCP connections with a given server.
    *
@@ -102,15 +113,5 @@ public class TopicTcpConnectionFactory extends TopicConnectionFactory {
     TopicTcpConnectionFactory cf = new TopicTcpConnectionFactory(host, port);
     cf.setReliableClass(reliableClass);
     return cf;
-  }
-
-  /**
-   * Admin method creating a <code>javax.jms.TopicConnectionFactory</code> 
-   * instance for creating TCP connections with the local server.
-   *
-   * @exception ConnectException  If the admin connection is closed or broken.
-   */ 
-  public static javax.jms.TopicConnectionFactory create() throws java.net.ConnectException {
-    return create(AdminModule.getLocalHost(), AdminModule.getLocalPort());
   }
 }
