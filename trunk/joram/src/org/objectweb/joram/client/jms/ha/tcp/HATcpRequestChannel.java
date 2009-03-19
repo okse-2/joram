@@ -76,42 +76,31 @@ public class HATcpRequestChannel implements RequestChannel {
   public HATcpRequestChannel(String url,
                          FactoryParameters params, 
                          Identity identity,
-                         String reliableClass) 
-    throws JMSException {
+                         String reliableClass) throws JMSException {
     try {
-      tcpClient = 
-        (ReliableTcpClient) Class.forName(reliableClass).newInstance(); 
+      tcpClient = (ReliableTcpClient) Class.forName(reliableClass).newInstance(); 
     } catch (ClassNotFoundException exc) {
-      JMSException jmsExc = 
-        new JMSException("HATcpConnection: ClassNotFoundException : " + 
-                         reliableClass);
+      JMSException jmsExc = new JMSException("HATcpConnection: ClassNotFoundException : " + reliableClass);
       jmsExc.setLinkedException(exc);
       throw jmsExc;
     } catch (InstantiationException exc) {
-      JMSException jmsExc = 
-        new JMSException("HATcpConnection: InstantiationException : " + 
-                         reliableClass);
+      JMSException jmsExc = new JMSException("HATcpConnection: InstantiationException : " + reliableClass);
       jmsExc.setLinkedException(exc);
       throw jmsExc;
     } catch (IllegalAccessException exc) {
-      JMSException jmsExc = 
-        new JMSException("HATcpConnection: IllegalAccessException : " + 
-                         reliableClass);
+      JMSException jmsExc = new JMSException("HATcpConnection: IllegalAccessException : " + reliableClass);
       jmsExc.setLinkedException(exc);
       throw jmsExc;
     }
-    tcpClient.init(params, 
-                   identity,
-                   true);
+    tcpClient.init(params, identity, true);
+    
     StringTokenizer tokenizer = new StringTokenizer(url, "/:,");
     if (! tokenizer.hasMoreElements()) 
       throw new javax.jms.JMSException("URL not valid:" + url);
     String protocol = tokenizer.nextToken();        
     if (protocol.equals("hajoram")) {
       while (tokenizer.hasMoreElements()) {
-        tcpClient.addServerAddress(
-          tokenizer.nextToken(),
-          Integer.parseInt(tokenizer.nextToken()));
+        tcpClient.addServerAddress(tokenizer.nextToken(), Integer.parseInt(tokenizer.nextToken()));
       }
     } else {
       throw new javax.jms.JMSException("Unknown protocol:" + protocol);
@@ -129,13 +118,11 @@ public class HATcpRequestChannel implements RequestChannel {
   /**
    * Sending a JMS request through the TCP connection.
    */
-  public void send(AbstractJmsRequest request)
-    throws Exception {
+  public void send(AbstractJmsRequest request) throws Exception {
     tcpClient.send(request);
   }
 
-  public AbstractJmsReply receive()
-    throws Exception {
+  public AbstractJmsReply receive() throws Exception {
     return (AbstractJmsReply)tcpClient.receive();
   }
 
@@ -143,5 +130,4 @@ public class HATcpRequestChannel implements RequestChannel {
   public void close() {
     tcpClient.close();
   }
-
 }
