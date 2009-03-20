@@ -32,11 +32,11 @@ import javax.transaction.xa.XAResource;
 
 public class MessagePointFactory implements MessageEndpointFactory {
 
-    public MessageEndpoint createEndpoint(XAResource xaResource) throws UnavailableException {
-	return new MessagePoint() ;
-    }
+  public MessageEndpoint createEndpoint(XAResource xaResource) throws UnavailableException {
+    return new MessagePoint() ;
+  }
 
-    public boolean isDeliveryTransacted(Method method) throws NoSuchMethodException {
-	return false;
-    }
+  public boolean isDeliveryTransacted(Method method) throws NoSuchMethodException {
+    return false;
+  }
 }
