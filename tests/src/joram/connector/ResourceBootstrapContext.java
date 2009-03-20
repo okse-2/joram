@@ -29,25 +29,22 @@ import javax.resource.spi.UnavailableException;
 import javax.resource.spi.XATerminator;
 import javax.resource.spi.work.WorkManager;
 
-
 public class ResourceBootstrapContext implements BootstrapContext {
-    
-    private WorkManager wrkMgr = null;
-    
-    public ResourceBootstrapContext(WorkManager wm) {
-        wrkMgr = wm;
-	
-    }
-    
-    public Timer createTimer() throws UnavailableException {
-        return new Timer(true);
-    }
-    
-    public WorkManager getWorkManager() {
-        return wrkMgr;
-    }
-    
-    public XATerminator getXATerminator() {
-	return null;
-    }
+  private WorkManager wrkMgr = null;
+
+  public ResourceBootstrapContext(WorkManager wm) {
+    wrkMgr = wm;
+  }
+
+  public Timer createTimer() throws UnavailableException {
+    return new Timer(true);
+  }
+
+  public WorkManager getWorkManager() {
+    return wrkMgr;
+  }
+
+  public XATerminator getXATerminator() {
+    return null;
+  }
 }
