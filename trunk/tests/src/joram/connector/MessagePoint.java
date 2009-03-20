@@ -29,24 +29,22 @@ import javax.jms.TextMessage;
 import javax.resource.spi.endpoint.MessageEndpoint;
 
 public class MessagePoint implements MessageEndpoint,javax.jms.MessageListener {
- 
+
   public  void afterDelivery(){}
-    
+
   public  void beforeDelivery(Method method){}
-        
+
   public  void release() {}
-
-   
-    public void onMessage(Message m){
-     try{
-	 Connector.assertTrue(((TextMessage)m).getText().startsWith("with"));
-	 //System.out.println(((TextMessage)m).getText());
-     }catch(Exception exc){
-	 System.out.println("error");
-	 Connector.error(exc);
-     }
+  
+  public void onMessage(Message m){
+    try{
+      String text = ((TextMessage)m).getText();
+      Connector.assertTrue(text.startsWith("with"));
+      Connector.countMessages(text);
+      //System.out.println(((TextMessage)m).getText());
+    }catch(Exception exc){
+      System.out.println("error");
+      Connector.error(exc);
     }
-
-
-
+  }
 }
