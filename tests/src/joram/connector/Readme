@@ -16,11 +16,11 @@ Then run JoramAdapter using start() method.
 
 You can use a Context to lookup destination ( Queue, Topic).
 
-Instantiate a ManagedConnectionFactoryImpl and specifie JoramAdapter use setResourceAdapter() method.
+Instantiate a ManagedConnectionFactoryImpl and specify JoramAdapter use setResourceAdapter() method.
 ManagedConnectionFactoryImpl's instance permit to create a ManagedConnectionImpl.
 With a ManagedConnectionImpl can get a connection : OutboundConnection.
 Then with an OutboundConnection can create an OutboundSession.
-With an OutboundSession can cerate :
+With an OutboundSession can create :
 				OutboundProducer
 				OutboundConsumer
 
@@ -38,6 +38,6 @@ Instantiate ActivationSpecImpl and fix parameter :
 	spec.setDestinationType("javax.jms.Queue"); or spec.setDestinationType("javax.jms.Topic");
 	spec.setDestination("sampleQueue"); or spec.setDestination("sampleTopic");
 then use the endpointActivation method.
-Finnally send message with OutboundProducer, and messages are automatically receive on method onMessage.
+Finally send message with OutboundProducer, and messages are automatically receive on method onMessage.
 
 
