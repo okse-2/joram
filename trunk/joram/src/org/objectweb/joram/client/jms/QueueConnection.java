@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,9 +31,7 @@ import org.objectweb.joram.client.jms.connection.RequestChannel;
 /**
  * Implements the <code>javax.jms.QueueConnection</code> interface.
  */
-public class QueueConnection extends Connection
-    implements javax.jms.QueueConnection {
-
+public class QueueConnection extends Connection implements javax.jms.QueueConnection {
   /**
    * Creates a <code>QueueConnection</code> instance.
    *
@@ -44,8 +42,7 @@ public class QueueConnection extends Connection
    * @exception IllegalStateException  If the server is not listening.
    */
   public QueueConnection(FactoryParameters factoryParameters,
-                         RequestChannel requestChannel) 
-    throws JMSException {
+                         RequestChannel requestChannel) throws JMSException {
     super(factoryParameters, requestChannel);
   }
 
@@ -58,17 +55,11 @@ public class QueueConnection extends Connection
    *              not exist.
    * @exception JMSException  If the method fails for any other reason.
    */
-  public javax.jms.ConnectionConsumer
-      createConnectionConsumer(javax.jms.Queue queue, 
-                               String selector,
-                               javax.jms.ServerSessionPool sessionPool,
-                               int maxMessages) 
-    throws JMSException {
-    return super.createConnectionConsumer(
-      queue, 
-      selector,
-      sessionPool, 
-      maxMessages);
+  public javax.jms.ConnectionConsumer createConnectionConsumer(javax.jms.Queue queue, 
+                                                               String selector,
+                                                               javax.jms.ServerSessionPool sessionPool,
+                                                               int maxMessages) throws JMSException {
+    return super.createConnectionConsumer(queue, selector, sessionPool, maxMessages);
   }
 
   /**
@@ -77,16 +68,12 @@ public class QueueConnection extends Connection
    * @exception IllegalStateException  If the connection is closed.
    * @exception JMSException  In case of an invalid acknowledge mode.
    */
-  public synchronized javax.jms.QueueSession
-         createQueueSession(boolean transacted, int acknowledgeMode)
-         throws JMSException
-  {
+  public synchronized javax.jms.QueueSession createQueueSession(boolean transacted,
+                                                                int acknowledgeMode) throws JMSException {
     checkClosed();
-    QueueSession qs = new QueueSession(
-      this, 
-      transacted, 
-      acknowledgeMode,
-      getRequestMultiplexer());
+    QueueSession qs = new QueueSession(this, 
+                                       transacted, acknowledgeMode,
+                                       getRequestMultiplexer());
     addSession(qs);
     return qs;
   }
@@ -96,12 +83,11 @@ public class QueueConnection extends Connection
    *
    * @exception IllegalStateException  Systematically.
    */
-  public javax.jms.ConnectionConsumer
-         createDurableConnectionConsumer(javax.jms.Topic topic, String name,
-                                         String selector,
-                                         javax.jms.ServerSessionPool sessPool,
-                                         int maxMessages) throws JMSException
-  {
+  public javax.jms.ConnectionConsumer createDurableConnectionConsumer(javax.jms.Topic topic,
+                                                                      String subname,
+                                                                      String selector,
+                                                                      javax.jms.ServerSessionPool sessPool,
+                                                                      int maxMessages) throws JMSException {
     throw new IllegalStateException("Forbidden call on a QueueConnection.");
   }
 }
