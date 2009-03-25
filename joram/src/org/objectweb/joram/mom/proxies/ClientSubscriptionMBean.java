@@ -1,15 +1,38 @@
+/*
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
+ *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
+ */
 package org.objectweb.joram.mom.proxies;
 
+import java.util.Vector;
+
+import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
 
 public interface ClientSubscriptionMBean {
-
   /**
    * Deletes a particular pending message in the subscription. The message is
    * pointed out through its unique identifier.
    * 
-   * @param msgId
-   *            The unique message's identifier.
+   * @param msgId The unique message's identifier.
    */
   void deleteMessage(String msgId);
 
@@ -102,14 +125,23 @@ public interface ClientSubscriptionMBean {
   public long getNbMsgsDeliveredSinceCreation();
 
   /**
-   * Returns the description of a particular pending message. The message is
-   * pointed out through its unique identifier. The description includes the
-   * type and priority of the message.
+   * Returns the description of a particular pending message.
+   * The message is pointed out through its unique identifier.
    * 
-   * @param msgId
-   *          The unique message's identifier.
+   * @param msgId The unique message's identifier.
    * @return the description of the message.
+   * 
+   * @see org.objectweb.joram.mom.messages.MessageJMXWrapper
    */
-  public TabularData getMessagesTabularData() throws Exception;
+  public CompositeData getMessage(String msgId) throws Exception;
 
+  /**
+   * Returns the description of all pending messages.
+   * 
+   * @return the description of the message.
+   * 
+   * @see org.objectweb.joram.mom.messages.MessageJMXWrapper
+   */
+  public TabularData getMessages() throws Exception;
+//  public CompositeData[] getMessages() throws Exception;
 }

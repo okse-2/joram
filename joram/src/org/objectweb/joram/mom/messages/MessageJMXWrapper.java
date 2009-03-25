@@ -1,9 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
- * Copyright (C) 2004 - France Telecom R&D
- * Copyright (C) 1996 - 2004 Bull SA
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,10 +17,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
-package org.objectweb.joram.mom.proxies;
+package org.objectweb.joram.mom.messages;
 
 import java.util.Enumeration;
 
@@ -36,8 +33,6 @@ import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
 
-import org.objectweb.joram.mom.messages.Message;
-
 public class MessageJMXWrapper {
 
   public final static String[] itemNames = { "id", "priority" };
@@ -47,23 +42,39 @@ public class MessageJMXWrapper {
   public final static OpenType[] itemTypes = { SimpleType.STRING, SimpleType.INTEGER };
 
   private static CompositeType rowType;
-
+ 
+  /**
+   * Returns the description of a message.
+   * The description includes the type and priority of the message.
+   * 
+   * @param msg The message to describe.
+   * @return    The message description.
+   * 
+   * @throws Exception
+   */
   public static CompositeData createCompositeDataSupport(Message msg) throws Exception {
-    if (rowType == null) {
+    if (rowType == null)
       rowType = new CompositeType("Message", "xxx", itemNames, itemDescs, itemTypes);
-    }
-    return new CompositeDataSupport(rowType, itemNames, new Object[] { msg.getIdentifier(),
-        new Integer(msg.getPriority()) });
+
+    return new CompositeDataSupport(rowType, itemNames, new Object[] { msg.getIdentifier(), new Integer(msg.getPriority()) });
   }
 
+  /**
+   * Returns the description of an enumeration of messages.
+   * The description includes the type and priority of the message.
+   * 
+   * @param msg The enumeration of messages to describe.
+   * @return    The messages description.
+   * 
+   * @throws Exception
+   */
   public static TabularData createTabularDataSupport(Enumeration messages) throws Exception {
     if (rowType == null) {
       rowType = new CompositeType("Message", "xxx", itemNames, itemDescs, itemTypes);
     }
     CompositeType rowType = new CompositeType("Message", "xxx", itemNames, itemDescs, itemTypes);
     String[] id = { "id" };
-    TabularDataSupport tds = new TabularDataSupport(new TabularType("Messages",
-        "Id and priority of the messages", rowType, id));
+    TabularDataSupport tds = new TabularDataSupport(new TabularType("Messages", "Id and priority of the messages", rowType, id));
 
     while (messages.hasMoreElements()) {
       Message message = (Message) messages.nextElement();
@@ -71,4 +82,18 @@ public class MessageJMXWrapper {
     }
     return tds;
   }
+  
+//  public static CompositeData[] createTabularDataSupport(Enumeration messages) throws Exception {
+//    if (rowType == null)
+//      rowType = new CompositeType("Message", "xxx", itemNames, itemDescs, itemTypes);
+//
+//    Vector v = new Vector();
+//    while (messages.hasMoreElements()) {
+//      Message message = (Message) messages.nextElement();
+//      v.add(MessageJMXWrapper.createCompositeDataSupport(message));
+//    }
+//    CompositeData[] cda = new CompositeData[v.size()];
+//    return (CompositeData[]) v.toArray(cda);
+//  }
+
 }

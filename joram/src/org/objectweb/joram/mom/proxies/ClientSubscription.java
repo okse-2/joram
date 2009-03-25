@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,10 +30,12 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
 
 import org.objectweb.joram.mom.dest.QueueImpl;
 import org.objectweb.joram.mom.messages.Message;
+import org.objectweb.joram.mom.messages.MessageJMXWrapper;
 import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.MessageErrorConstants;
@@ -875,23 +877,51 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     return nbMsgsDeliveredSinceCreation;
   }
 
-  public TabularData getMessagesTabularData() throws Exception {
-    return MessageJMXWrapper.createTabularDataSupport(messagesTable.elements());
-  }
-
-  Message getMessage(String msgId) {
+  Message getSubscriptionMessage(String msgId) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "ClientSubscription.getMessage(" + msgId + ')');
+      logger.log(BasicLevel.DEBUG, "ClientSubscription.getSubscriptionMessage(" + msgId + ')');
+    
     int index = messageIds.indexOf(msgId);
     if (index < 0) {
       // The message has been delivered
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> message not found");
+      
       return null;
     } else {
       return (Message) messagesTable.get(msgId);
     }
   }
+  
+  /**
+   * Returns the description of a particular pending message. The message is
+   * pointed out through its unique identifier.
+   * 
+   * @param msgId The unique message's identifier.
+   * @return the description of the message.
+   * 
+   * @see org.objectweb.joram.mom.messages.MessageJMXWrapper
+   */
+  public CompositeData getMessage(String msgId) throws Exception {
+    Message msg = getSubscriptionMessage(msgId);
+    if (msg == null) return null;
+    
+    return MessageJMXWrapper.createCompositeDataSupport(msg);
+  }
+
+  /**
+   * Returns the description of all pending messages.
+   * 
+   * @return the description of the message.
+   * 
+   * @see org.objectweb.joram.mom.messages.MessageJMXWrapper
+   */
+  public TabularData getMessages() throws Exception {
+    return MessageJMXWrapper.createTabularDataSupport(messagesTable.elements());
+  }
+//  public CompositeData[] getMessages() throws Exception {
+//    return MessageJMXWrapper.createTabularDataSupport(messagesTable.elements());
+//  }
 
   public void deleteMessage(String msgId) {
     messageIds.remove(msgId);

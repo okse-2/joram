@@ -354,7 +354,7 @@ public class ClusterQueueImpl extends QueueImpl {
       for (Enumeration e = clusters.keys(); e.hasMoreElements(); ) {
         AgentId id = (AgentId) e.nextElement();
         if (! visit.contains(id)) {
-          Message message = getMessage(msgId, true);
+          Message message = getQueueMessage(msgId, true);
           if (message != null) {
             LBCycleLife cycle = (LBCycleLife) table.get(id);
             if (cycle == null) {
@@ -603,8 +603,8 @@ public class ClusterQueueImpl extends QueueImpl {
    * @param remove  if true delete message
    * @return mom message
    */
-  protected Message getMessage(String msgId, boolean remove) {  
-    Message msg = super.getMessage(msgId, remove);
+  protected Message getQueueMessage(String msgId, boolean remove) {  
+    Message msg = super.getQueueMessage(msgId, remove);
     if (msg != null) {
       monitoringMsgSendToCluster(msg.getIdentifier());
     }
