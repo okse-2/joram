@@ -35,11 +35,6 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
 
 import org.objectweb.joram.shared.admin.*;
 
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.joram.shared.JoramTracing;
-
-import fr.dyade.aaa.util.management.MXWrapper;
-
 /**
  *  Implements the <code>javax.jms.Queue</code> interface and provides
  * Joram specific administration and monitoring methods. This is a proxy
@@ -49,8 +44,6 @@ import fr.dyade.aaa.util.management.MXWrapper;
 public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
-  
-  private final static String QUEUE_TYPE = "queue";
 
   public static boolean isQueue(String type) {
     return Destination.isAssignableTo(type, QUEUE_TYPE);
@@ -80,6 +73,134 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
     return getName();
   }
 
+  public static Queue createQueue(String agentId,
+                                  String name,
+                                  String type) {
+    Queue dest = new Queue();
+    
+    dest.agentId = agentId;
+    dest.adminName = name;
+    dest.type = type;
+
+    return dest;
+  }
+
+  /**
+   * Admin method creating and deploying a queue on the local server. 
+   * <p>
+   * The request fails if the destination deployment fails server side.
+   * <p>
+   * Be careful this method use the static AdminModule connection.
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public static Queue create() throws ConnectException, AdminException {
+    return create(AdminModule.getLocalServerId());
+  }
+
+  /**
+   * Admin method creating and deploying a queue on a given server.
+   * <p>
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployment fails server side.
+   * <p>
+   * Be careful this method use the static AdminModule connection.
+   *
+   * @param serverId   The identifier of the server where deploying the queue.
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public static Queue create(int serverId) throws ConnectException, AdminException {
+    return create(serverId, null, "org.objectweb.joram.mom.dest.Queue", null);
+  }
+
+  /**
+   * Admin method creating and deploying (or retrieving) a queue on the
+   * local server. First a destination with the specified name is searched
+   * on the given server, if it does not exist it is created. In any case,
+   * its provider-specific address is returned.
+   * <p>
+   * The request fails if the destination deployment fails server side.
+   * <p>
+   * Be careful this method use the static AdminModule connection.
+   *
+   * @param name      The queue name. 
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public static Queue create(String name) throws ConnectException, AdminException {
+    return create(AdminModule.getLocalServerId(),
+                  name,
+                  "org.objectweb.joram.mom.dest.Queue",
+                  null);
+  }
+
+  /**
+   * Admin method creating and deploying (or retrieving) a queue on a given
+   * server with a given name. First a destination with the specified name is
+   * searched on the given server, if it does not exist it is created. In any
+   * case, its provider-specific address is returned.
+   * <p>
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployment fails server side.
+   * <p>
+   * Be careful this method use the static AdminModule connection.
+   *
+   * @param serverId  The identifier of the server where deploying the queue.
+   * @param name      The queue name. 
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public static Queue create(int serverId,
+                             String name) throws ConnectException, AdminException {
+    return create(serverId, name, "org.objectweb.joram.mom.dest.Queue", null);
+  }
+
+  /**
+   * Admin method creating and deploying a queue on a given server.
+   * It creates a Joram's standard queue.
+   * <p>
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployment fails server side.
+   * <p>
+   * Be careful this method use the static AdminModule connection.
+   *
+   * @param serverId   The identifier of the server where deploying the queue.
+   * @param prop       The queue properties.
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public static Queue create(int serverId,
+                             Properties prop) throws ConnectException, AdminException {
+    return create(serverId, "org.objectweb.joram.mom.dest.Queue", prop);
+  }
+
+  /**
+   * Admin method creating and deploying a queue on a given server.
+   * <p>
+   * The request fails if the target server does not belong to the platform,
+   * or if the destination deployment fails server side.
+   * <p>
+   * Be careful this method use the static AdminModule connection.
+   *
+   * @param serverId   The identifier of the server where deploying the queue.
+   * @param className  The queue class name.
+   * @param prop       The queue properties.
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public static Queue create(int serverId,
+                             String className,
+                             Properties prop) throws ConnectException, AdminException {
+    return create(serverId, null, className, prop);
+  }
+  
   /**
    *  Admin method creating and deploying (or retrieving) a queue on a
    * given server. First a destination with the specified name is searched
@@ -88,6 +209,8 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * <p>
    *  The request fails if the target server does not belong to the platform,
    * or if the destination deployment fails server side.
+   * <p>
+   * Be careful this method use the static AdminModule connection.
    *
    * @param serverId   The identifier of the server where deploying the queue.
    * @param name       The name of the queue.
@@ -100,127 +223,10 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
   public static Queue create(int serverId,
                              String name,
                              String className,
-                             Properties prop)
-    throws ConnectException, AdminException {
+                             Properties prop) throws ConnectException, AdminException {
     Queue queue = new Queue();
     doCreate(serverId, name, className, prop, queue, QUEUE_TYPE);
-
-    StringBuffer buff = new StringBuffer();
-    buff.append("type=").append(QUEUE_TYPE);
-    buff.append(",name=").append(name);
-    try {
-      MXWrapper.registerMBean(queue, "joramClient", buff.toString());
-    } catch (Exception e) {
-      JoramTracing.dbgClient.log(BasicLevel.WARN, "registerMBean", e);
-    }
     return queue;
-  }
-
-  /**
-   * Admin method creating and deploying a queue on a given server.
-   * <p>
-   * The request fails if the target server does not belong to the platform,
-   * or if the destination deployment fails server side.
-   *
-   * @param serverId   The identifier of the server where deploying the queue.
-   * @param className  The queue class name.
-   * @param prop       The queue properties.
-   *
-   * @exception ConnectException  If the admin connection is closed or broken.
-   * @exception AdminException  If the request fails.
-   */
-  public static Queue create(int serverId,
-                             String className,
-                             Properties prop)
-                throws ConnectException, AdminException {
-    return create(serverId, null, className, prop);
-  }
-
-  /**
-   * Admin method creating and deploying a queue on a given server.
-   * It creates a Joram's standard queue.
-   * <p>
-   * The request fails if the target server does not belong to the platform,
-   * or if the destination deployment fails server side.
-   *
-   * @param serverId   The identifier of the server where deploying the queue.
-   * @param prop       The queue properties.
-   *
-   * @exception ConnectException  If the admin connection is closed or broken.
-   * @exception AdminException  If the request fails.
-   */
-  public static Queue create(int serverId, Properties prop)
-                throws ConnectException, AdminException {
-    return create(serverId, "org.objectweb.joram.mom.dest.Queue", prop);
-  }
-
-  /**
-   * Admin method creating and deploying (or retrieving) a queue on a given
-   * server with a given name. First a destination with the specified name is
-   * searched on the given server, if it does not exist it is created. In any
-   * case, its provider-specific address is returned.
-   * <p>
-   * The request fails if the target server does not belong to the platform,
-   * or if the destination deployment fails server side.
-   *
-   * @param serverId  The identifier of the server where deploying the queue.
-   * @param name      The queue name. 
-   *
-   * @exception ConnectException  If the admin connection is closed or broken.
-   * @exception AdminException  If the request fails.
-   */
-  public static Queue create(int serverId, String name)
-                throws ConnectException, AdminException {
-    return create(serverId, name, "org.objectweb.joram.mom.dest.Queue", null);
-  }
-
-  /**
-   * Admin method creating and deploying (or retrieving) a queue on the
-   * local server. First a destination with the specified name is searched
-   * on the given server, if it does not exist it is created. In any case,
-   * its provider-specific address is returned.
-   * <p>
-   * The request fails if the destination deployment fails server side.
-   *
-   * @param name      The queue name. 
-   *
-   * @exception ConnectException  If the admin connection is closed or broken.
-   * @exception AdminException  If the request fails.
-   */
-  public static Queue create(String name)
-                throws ConnectException, AdminException {
-    return create(AdminModule.getLocalServerId(),
-                  name,
-                  "org.objectweb.joram.mom.dest.Queue",
-                  null);
-  }
- 
-  /**
-   * Admin method creating and deploying a queue on a given server.
-   * <p>
-   * The request fails if the target server does not belong to the platform,
-   * or if the destination deployment fails server side.
-   *
-   * @param serverId   The identifier of the server where deploying the queue.
-   *
-   * @exception ConnectException  If the admin connection is closed or broken.
-   * @exception AdminException  If the request fails.
-   */
-  public static Queue create(int serverId)
-                throws ConnectException, AdminException {
-    return create(serverId, null, "org.objectweb.joram.mom.dest.Queue", null);
-  }
-
-  /**
-   * Admin method creating and deploying a queue on the local server. 
-   * <p>
-   * The request fails if the destination deployment fails server side.
-   *
-   * @exception ConnectException  If the admin connection is closed or broken.
-   * @exception AdminException  If the request fails.
-   */
-  public static Queue create() throws ConnectException, AdminException {
-    return create(AdminModule.getLocalServerId());
   }
 
   /**
@@ -234,13 +240,11 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public void setThreshold(int threshold)
-              throws ConnectException, AdminException
-  {
+  public void setThreshold(int threshold) throws ConnectException, AdminException {
     if (threshold == -1)
-      AdminModule.doRequest(new UnsetQueueThreshold(agentId));
+      doRequest(new UnsetQueueThreshold(agentId));
     else
-      AdminModule.doRequest(new SetQueueThreshold(agentId, threshold));
+      doRequest(new SetQueueThreshold(agentId, threshold));
   } 
 
   /** 
@@ -251,11 +255,10 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public int getThreshold() throws ConnectException, AdminException
-  {
+  public int getThreshold() throws ConnectException, AdminException {
     Monitor_GetDMQSettings request = new Monitor_GetDMQSettings(agentId);
     Monitor_GetDMQSettingsRep reply;
-    reply = (Monitor_GetDMQSettingsRep) AdminModule.doRequest(request);
+    reply = (Monitor_GetDMQSettingsRep) doRequest(request);
     
     if (reply.getThreshold() == null)
       return -1;
@@ -273,9 +276,8 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public void setNbMaxMsg(int nbMaxMsg)
-    throws ConnectException, AdminException {
-    AdminModule.doRequest(new SetNbMaxMsg(agentId, nbMaxMsg));
+  public void setNbMaxMsg(int nbMaxMsg) throws ConnectException, AdminException {
+    doRequest(new SetNbMaxMsg(agentId, nbMaxMsg));
   } 
 
   /** 
@@ -286,11 +288,10 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public int getNbMaxMsg() 
-    throws ConnectException, AdminException {
+  public int getNbMaxMsg()  throws ConnectException, AdminException {
     Monitor_GetNbMaxMsg request = new Monitor_GetNbMaxMsg(agentId);
     Monitor_GetNbMaxMsgRep reply;
-    reply = (Monitor_GetNbMaxMsgRep) AdminModule.doRequest(request);
+    reply = (Monitor_GetNbMaxMsgRep) doRequest(request);
     return reply.getNbMaxMsg();
   }
    
@@ -302,12 +303,11 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public int getPendingMessages() throws ConnectException, AdminException
-  {
+  public int getPendingMessages() throws ConnectException, AdminException {
     Monitor_GetPendingMessages request =
       new Monitor_GetPendingMessages(agentId);
     Monitor_GetNumberRep reply;
-    reply = (Monitor_GetNumberRep) AdminModule.doRequest(request);
+    reply = (Monitor_GetNumberRep) doRequest(request);
 
     return reply.getNumber();
   }
@@ -324,7 +324,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
     Monitor_GetPendingRequests request =
       new Monitor_GetPendingRequests(agentId);
     Monitor_GetNumberRep reply =
-      (Monitor_GetNumberRep) AdminModule.doRequest(request);
+      (Monitor_GetNumberRep) doRequest(request);
 
     return reply.getNumber();
   }
@@ -338,7 +338,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    */
   public String[] getMessageIds() throws AdminException, ConnectException {
     GetQueueMessageIdsRep reply = 
-      (GetQueueMessageIdsRep)AdminModule.doRequest(
+      (GetQueueMessageIdsRep)doRequest(
         new GetQueueMessageIds(agentId));
     return reply.getMessageIds();
   }
@@ -346,7 +346,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
   /**
    * Returns a copy of the message.
    * 
-   * @param msgId         THe identifier of the message.
+   * @param msgId         The identifier of the message.
    * @return The message
    * 
    * @throws AdminException
@@ -355,28 +355,31 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    */
   public javax.jms.Message getMessage(String msgId) throws AdminException, ConnectException, JMSException {
     GetQueueMessageRep reply = 
-      (GetQueueMessageRep)AdminModule.doRequest(new GetQueueMessage(agentId, msgId, true));
+      (GetQueueMessageRep)doRequest(new GetQueueMessage(agentId, msgId, true));
     return Message.wrapMomMessage(null, reply.getMessage());
   }
   
   /**
-   * @deprecated
-   *
-   * @param msgId
-   * @return
+   * Returns a copy of the message.
+   * 
+   * @param msgId         The identifier of the message.
+   * @return The message
+   * 
    * @throws AdminException
    * @throws ConnectException
    * @throws JMSException
+   * 
+   * @deprecated Since Joram 5.2 use getMessage.
    */
   public javax.jms.Message readMessage(String msgId) throws AdminException, ConnectException, JMSException {
     return getMessage(msgId);
   }
   
-  public String getMessageDigest(String msgId)
-    throws AdminException, ConnectException, JMSException {
+  public String getMessageDigest(String msgId) throws AdminException, ConnectException, JMSException {
     GetQueueMessageRep reply = 
-      (GetQueueMessageRep)AdminModule.doRequest(new GetQueueMessage(agentId, msgId, false));
+      (GetQueueMessageRep)doRequest(new GetQueueMessage(agentId, msgId, false));
     Message msg =  Message.wrapMomMessage(null, reply.getMessage());
+    
     StringBuffer strbuf = new StringBuffer();
     strbuf.append("Message: ").append(msg.getJMSMessageID());
     strbuf.append("\n\tTo: ").append(msg.getJMSDestination());
@@ -394,7 +397,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
   public Properties getMessageHeader(String msgId)
     throws AdminException, ConnectException, JMSException {
     GetQueueMessageRep reply = 
-      (GetQueueMessageRep)AdminModule.doRequest(new GetQueueMessage(agentId, msgId, false));
+      (GetQueueMessageRep)doRequest(new GetQueueMessage(agentId, msgId, false));
     Message msg =  Message.wrapMomMessage(null, reply.getMessage());
 
     Properties prop = new Properties();
@@ -423,10 +426,9 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
     return prop;
   }
 
-  public Properties getMessageProperties(String msgId)
-    throws AdminException, ConnectException, JMSException {
+  public Properties getMessageProperties(String msgId) throws AdminException, ConnectException, JMSException {
     GetQueueMessageRep reply = 
-      (GetQueueMessageRep)AdminModule.doRequest(new GetQueueMessage(agentId, msgId, false));
+      (GetQueueMessageRep)doRequest(new GetQueueMessage(agentId, msgId, false));
     Message msg =  Message.wrapMomMessage(null, reply.getMessage());
 
     Properties prop = new Properties();
@@ -435,15 +437,12 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
     return prop;
   }
 
-  public void deleteMessage(
-    String msgId)
-    throws AdminException, ConnectException {
-    AdminModule.doRequest(new DeleteQueueMessage(agentId, msgId));
+  public void deleteMessage(String msgId) throws AdminException, ConnectException {
+    doRequest(new DeleteQueueMessage(agentId, msgId));
   }
 
-  public void clear() 
-    throws AdminException, ConnectException {
-    AdminModule.doRequest(new ClearQueue(agentId));
+  public void clear() throws AdminException, ConnectException {
+    doRequest(new ClearQueue(agentId));
   }
 
   /**
@@ -459,10 +458,8 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public void addClusteredQueue(Queue addedQueue)
-    throws ConnectException, AdminException {
-    AdminModule.doRequest(
-      new AddQueueCluster(agentId, addedQueue.getName()));
+  public void addClusteredQueue(Queue addedQueue)  throws ConnectException, AdminException {
+    doRequest(new AddQueueCluster(agentId, addedQueue.getName()));
   }
 
   /**
@@ -476,10 +473,8 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public void removeClusteredQueue(Queue removedQueue)
-    throws ConnectException, AdminException {
-    AdminModule.doRequest(
-      new RemoveQueueCluster(agentId, removedQueue.getName()));
+  public void removeClusteredQueue(Queue removedQueue) throws ConnectException, AdminException {
+    doRequest(new RemoveQueueCluster(agentId, removedQueue.getName()));
   }
 
   /**
@@ -488,10 +483,8 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public String[] getQueueClusterElements()
-    throws ConnectException, AdminException {
-    AdminReply reply = AdminModule.doRequest(
-      new ListClusterQueue(agentId));
+  public String[] getQueueClusterElements() throws ConnectException, AdminException {
+    AdminReply reply = doRequest(new ListClusterQueue(agentId));
     Vector list = (Vector)reply.getReplyObject();
     String[] res = new String[list.size()];
     list.copyInto(res);

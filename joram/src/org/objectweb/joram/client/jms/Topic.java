@@ -36,11 +36,6 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
 
 import org.objectweb.joram.shared.admin.*;
 
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.joram.shared.JoramTracing;
-
-import fr.dyade.aaa.util.management.MXWrapper;
-
 /**
  *  Implements the <code>javax.jms.Topic</code> interface and provides
  * Joram specific administration and monitoring methods. This is a proxy
@@ -51,8 +46,6 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
-  private final static String TOPIC_TYPE = "topic";
-
   public static boolean isTopic(String type) {
     return Destination.isAssignableTo(type, TOPIC_TYPE);
   }
@@ -62,12 +55,12 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
     super(TOPIC_TYPE);
   }
 
-  public Topic(String name) {
-    super(name, TOPIC_TYPE);
+  public Topic(String id) {
+    super(id, TOPIC_TYPE);
   }
 
-  protected Topic(String name, String type) {
-    super(name, type);
+  protected Topic(String id, String type) {
+    super(id, type);
   }
 
   /**
@@ -80,6 +73,18 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
     return getName();
   }
 
+  public static Topic createTopic(String agentId,
+                                  String name,
+                                  String type) {
+    Topic dest = new Topic();
+    
+    dest.agentId = agentId;
+    dest.adminName = name;
+    dest.type = type;
+
+    return dest;
+  }
+
   /**
    *  Admin method creating and deploying (or retrieving) a topic on a
    * given server. First a destination with the specified name is searched
@@ -88,6 +93,8 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * <p>
    *  The request fails if the target server does not belong to the platform,
    * or if the destination deployment fails server side.
+   * <p>
+   * Be careful this method use the static AdminModule connection.
    *
    * @param serverId   The identifier of the server where deploying the topic.
    * @param name       The name of the topic.
@@ -103,15 +110,6 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
                              Properties prop) throws ConnectException, AdminException {
     Topic topic = new Topic();
     doCreate(serverId, name, className, prop, topic, TOPIC_TYPE);
-
-    StringBuffer buff = new StringBuffer();
-    buff.append("type=").append(TOPIC_TYPE);
-    buff.append(",name=").append(name);
-    try {
-      MXWrapper.registerMBean(topic, "joramClient", buff.toString());
-    } catch (Exception e) {
-      JoramTracing.dbgClient.log(BasicLevel.WARN, "registerMBean", e);
-    }
     return topic;
   }
 
@@ -120,6 +118,8 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * <p>
    * The request fails if the target server does not belong to the platform,
    * or if the destination deployment fails server side.
+   * <p>
+   * Be careful this method use the static AdminModule connection.
    *
    * @param serverId   The identifier of the server where deploying the topic.
    * @param className  The topic class name.
@@ -140,6 +140,8 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * <p>
    * The request fails if the target server does not belong to the platform,
    * or if the destination deployment fails server side.
+   * <p>
+   * Be careful this method use the static AdminModule connection.
    *
    * @param serverId   The identifier of the server where deploying the topic.
    * @param prop       The topic properties.
@@ -159,6 +161,8 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * <p>
    * The request fails if the target server does not belong to the platform,
    * or if the destination deployment fails server side.
+   * <p>
+   * Be careful this method use the static AdminModule connection.
    *
    * @param serverId  The identifier of the server where deploying the topic.
    * @param name      The topic name. 
@@ -177,6 +181,8 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * its provider-specific address is returned.
    * <p>
    * The request fails if the destination deployment fails server side.
+   * <p>
+   * Be careful this method use the static AdminModule connection.
    *
    * @param name      The topic name. 
    *
@@ -195,6 +201,8 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * <p>
    * The request fails if the target server does not belong to the platform,
    * or if the destination deployment fails server side.
+   * <p>
+   * Be careful this method use the static AdminModule connection.
    *
    * @param serverId   The identifier of the server where deploying the topic.
    *
@@ -209,6 +217,8 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * Admin method creating and deploying a topic on the local server. 
    * <p>
    * The request fails if the destination deployment fails server side.
+   * <p>
+   * Be careful this method use the static AdminModule connection.
    *
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
@@ -228,8 +238,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    */
   public Topic getHierarchicalFather() throws ConnectException, AdminException {
     Monitor_GetFather request = new Monitor_GetFather(agentId);
-    Monitor_GetFatherRep reply =
-      (Monitor_GetFatherRep) AdminModule.doRequest(request);
+    Monitor_GetFatherRep reply = (Monitor_GetFatherRep) doRequest(request);
 
     if (reply.getFatherId() == null)
       return null;
@@ -248,8 +257,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    */
   public List getClusterFellows() throws ConnectException, AdminException {
     Monitor_GetCluster request = new Monitor_GetCluster(agentId);
-    Monitor_GetClusterRep reply =
-      (Monitor_GetClusterRep) AdminModule.doRequest(request);
+    Monitor_GetClusterRep reply = (Monitor_GetClusterRep) doRequest(request);
 
     Vector topics = reply.getTopics();
     Vector list = new Vector();
@@ -270,14 +278,13 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    */
   public int getSubscriptions() throws ConnectException, AdminException {
     Monitor_GetSubscriptions request = new Monitor_GetSubscriptions(agentId);
-    Monitor_GetNumberRep reply =
-      (Monitor_GetNumberRep) AdminModule.doRequest(request);
+    Monitor_GetNumberRep reply = (Monitor_GetNumberRep) doRequest(request);
     return reply.getNumber();
   }
 
   public String[] getSubscriberIds() throws AdminException, ConnectException {
     GetSubscriberIdsRep reply = 
-      (GetSubscriberIdsRep)AdminModule.doRequest(new GetSubscriberIds(agentId));
+      (GetSubscriberIdsRep)doRequest(new GetSubscriberIds(agentId));
     return reply.getSubscriberIds();
   }
 
@@ -295,7 +302,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * @exception AdminException  If the request fails.
    */
   public void addClusteredTopic(Topic addedTopic) throws ConnectException, AdminException {
-    AdminModule.doRequest(new SetCluster(agentId, addedTopic.getName()));
+    doRequest(new SetCluster(agentId, addedTopic.getName()));
   }
 
   /**
@@ -308,7 +315,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * @exception AdminException  If the request fails.
    */
   public void removeFromCluster() throws ConnectException, AdminException {
-    AdminModule.doRequest(new UnsetCluster(agentId));
+    doRequest(new UnsetCluster(agentId));
   }
 
   /**
@@ -327,7 +334,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
     if (parent == null)
       unsetParent();
     else
-      AdminModule.doRequest(new SetFather(parent.getName(), agentId));
+      doRequest(new SetFather(parent.getName(), agentId));
   }
 
   /**
@@ -340,6 +347,6 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * @exception AdminException  If the request fails.
    */
   public void unsetParent() throws ConnectException, AdminException {
-    AdminModule.doRequest(new UnsetFather(agentId));
+    doRequest(new UnsetFather(agentId));
   }
 }
