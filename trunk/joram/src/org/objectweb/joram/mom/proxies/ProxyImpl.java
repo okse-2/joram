@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 2003 - 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
@@ -2323,7 +2323,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       
       Message message = null;
       if (msgId != null)
-        message = cs.getMessage(msgId);
+        message = cs.getSubscriptionMessage(msgId);
 
       if (message != null) {
         GetSubscriptionMessageRep reply = null;

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,6 +21,11 @@
  * Contributor(s): 
  */
 package org.objectweb.joram.mom.dest;
+
+import java.util.Vector;
+
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.TabularData;
 
 public interface QueueImplMBean extends DestinationImplMBean {
   /**
@@ -60,10 +65,10 @@ public interface QueueImplMBean extends DestinationImplMBean {
    */
   int getWaitingRequestCount();
 
-//   /**
-//    * Removes all request that the expiration time is expired.
-//    */
-//   void cleanWaitingRequest();
+   /**
+    * Removes all request that the expiration time is expired.
+    */
+   void cleanWaitingRequest();
 
   /**
    * Returns the number of pending messages in the queue.
@@ -72,10 +77,10 @@ public interface QueueImplMBean extends DestinationImplMBean {
    */
   int getPendingMessageCount();
 
-//   /**
-//    * Removes all messages that the time-to-live is expired.
-//    */
-//   void cleanPendingMessage();
+   /**
+    * Removes all messages that the time-to-live is expired.
+    */
+   void cleanPendingMessage();
 
   /**
    * Returns the number of messages delivered and waiting for acknowledge.
@@ -99,4 +104,25 @@ public interface QueueImplMBean extends DestinationImplMBean {
    * @param nbMaxMsg the maximum number of message (-1 set no limit).
    */
   void setNbMaxMsg(int nbMaxMsg);
+
+  /**
+   * Returns the description of a particular pending message. 
+   * The message is pointed out through its unique identifier.
+   * 
+   * @param msgId The unique message's identifier.
+   * @return the description of the message.
+   * 
+   * @see org.objectweb.joram.mom.messages.MessageJMXWrapper
+   */
+  public CompositeData getMessage(String msgId) throws Exception;
+
+  /**
+   * Returns the description of all pending messages.
+   * 
+   * @return the description of the message.
+   * 
+   * @see org.objectweb.joram.mom.messages.MessageJMXWrapper
+   */
+  public TabularData getMessages() throws Exception;
+//  public CompositeData[] getMessages() throws Exception;
 }

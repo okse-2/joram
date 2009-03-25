@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -34,7 +34,11 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.TabularData;
+
 import org.objectweb.joram.mom.messages.Message;
+import org.objectweb.joram.mom.messages.MessageJMXWrapper;
 import org.objectweb.joram.mom.notifications.AbortReceiveRequest;
 import org.objectweb.joram.mom.notifications.AcknowledgeRequest;
 import org.objectweb.joram.mom.notifications.AdminReply;
@@ -179,6 +183,13 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
   protected Vector requests;
 
   /**
+   * Removes all request that the expiration time is expired.
+   */
+  public void cleanWaitingRequest() {
+    cleanWaitingRequest(System.currentTimeMillis());
+  }
+
+  /**
    * Cleans the waiting request list.
    * Removes all request that the expiration time is less than the time
    * given in parameter.
@@ -217,6 +228,13 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
 
   /** Vector holding the messages before delivery. */
   protected transient Vector messages;
+
+  /**
+   * Removes all messages that the time-to-live is expired.
+   */
+  public void cleanPendingMessage() {
+    cleanPendingMessage(System.currentTimeMillis());
+  }
 
   /**
    * Cleans the pending messages list. Removes all messages which expire before
@@ -1181,7 +1199,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
   }
 
   /**
-   *  get a client message contain nb messages.
+   * Get a client message contain <code>nb</code> messages.
    *  
    * @param nb        number of messages returned in ClientMessage.
    * @param selector  jms selector
@@ -1206,28 +1224,28 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     return cm;
   }
 
-  /**
-   * List of message to be removed.
-   * 
-   * @param msgIds  List of message id.
-   */
-  protected void removeMessages(List msgIds) {
-    String id = null;
-    Iterator itMessages = msgIds.iterator();
-    while (itMessages.hasNext()) {
-      id = (String) itMessages.next();
-      int i = 0;
-      Message message = null;
-      while (i < messages.size()) {
-        message = (Message) messages.get(i);
-        if (id.equals(message.getIdentifier())) {
-          messages.remove(i);
-          message.delete();
-          break;
-        }
-      }
-    }
-  }
+//  /**
+//   * List of message to be removed.
+//   * 
+//   * @param msgIds  List of message id.
+//   */
+//  protected void removeMessages(List msgIds) {
+//    String id = null;
+//    Iterator itMessages = msgIds.iterator();
+//    while (itMessages.hasNext()) {
+//      id = (String) itMessages.next();
+//      int i = 0;
+//      Message message = null;
+//      while (i < messages.size()) {
+//        message = (Message) messages.get(i);
+//        if (id.equals(message.getIdentifier())) {
+//          messages.remove(i);
+//          message.delete();
+//          break;
+//        }
+//      }
+//    }
+//  }
 
   /**
    * get messages, if it's possible.
@@ -1296,7 +1314,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    * @param remove  if true delete message
    * @return mom message
    */
-  protected Message getMessage(String msgId, boolean remove) {   
+  protected Message getQueueMessage(String msgId, boolean remove) {   
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "QueueImpl.getMessage(" + msgId + ',' + remove + ')');
 
@@ -1317,6 +1335,34 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       } 
     }
     return message;
+  }
+  
+  /**
+   * Returns the description of a particular pending message. The message is
+   * pointed out through its unique identifier.
+   * 
+   * @param msgId The unique message's identifier.
+   * @return the description of the message.
+   * 
+   * @see org.objectweb.joram.mom.messages.MessageJMXWrapper
+   */
+  public CompositeData getMessage(String msgId) throws Exception {
+    Message msg = getQueueMessage(msgId, false);
+    if (msg == null) return null;
+    
+    return MessageJMXWrapper.createCompositeDataSupport(msg);
+  }
+
+  /**
+   * Returns the description of all pending messages.
+   * 
+   * @return the description of the message.
+   * 
+   * @see org.objectweb.joram.mom.messages.MessageJMXWrapper
+   */
+  public TabularData getMessages() throws Exception {
+//  public CompositeData[] getMessages() throws Exception {
+    return MessageJMXWrapper.createTabularDataSupport(messages.elements());
   }
 
   /**
