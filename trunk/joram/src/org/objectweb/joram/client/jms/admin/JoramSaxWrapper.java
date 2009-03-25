@@ -24,6 +24,7 @@ package org.objectweb.joram.client.jms.admin;
 
 import java.io.Reader;
 import java.lang.reflect.Method;
+import java.net.ConnectException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
@@ -31,6 +32,8 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import javax.jms.Connection;
+import javax.jms.JMSException;
 import javax.naming.InitialContext;
 import javax.naming.NameAlreadyBoundException;
 import javax.naming.NamingException;
@@ -42,8 +45,9 @@ import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
+import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.shared.JoramTracing;
-import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.shared.security.SimpleIdentity;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -53,15 +57,30 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import fr.dyade.aaa.util.Debug;
+
 /**
- * XML SAX Wrapper for Joram Admin configuration file.
+ * XML SAX Wrapper for Joram Administration configuration file.
  */
 public class JoramSaxWrapper extends DefaultHandler {
 
   public static final String SCN = "scn:comp/";
   public static final String HASCN = "hascn:comp/";
   
+  /**
+   * Builds a new JoramSaxWrapper using by default AdminModule static connection.
+   */
   public JoramSaxWrapper() {}
+  
+  /**
+   * Builds a new JoramSaxWrapper using by default the given administration
+   * connection.
+   * 
+   * @param defaultWrapper  The administration connection to use by default.
+   */
+  public JoramSaxWrapper(AdminWrapper defaultWrapper) {
+    this.defaultWrapper = defaultWrapper;
+  }
 
   /** Syntaxic name for JoramAdmin element */
   static final String ELT_JORAMADMIN = "JoramAdmin";
@@ -120,7 +139,6 @@ public class JoramSaxWrapper extends DefaultHandler {
   /** Syntaxic name for Cluster element */
   static final String ELT_CLUSTER_ELEMENT = "ClusterElement";
 
-
   /** Syntaxic name for name attribute */
   static final String ATT_NAME = "name";
   /** Syntaxic name for login attribute */
@@ -164,17 +182,14 @@ public class JoramSaxWrapper extends DefaultHandler {
 
   static final String DFLT_LISTEN_HOST = "localhost";
   static final int DFLT_LISTEN_PORT = 16010;
-  static final String DFLT_HA_URL = "hajoram://localhost:2560,localhost:2561,localhost:2562";
 
-  static final String DFLT_CF =
-    "org.objectweb.joram.client.jms.tcp.TcpConnectionFactory";
+  static final String DFLT_CF = "org.objectweb.joram.client.jms.tcp.TcpConnectionFactory";
 
   boolean result = true;
   Object obj = null;
   String name = null;
   String login = null;
   String password = null;
-  String value = null;
   String host = null;
   int port = -1;
   int cnxTimer = -1;
@@ -197,7 +212,45 @@ public class JoramSaxWrapper extends DefaultHandler {
   boolean freeWriting = false;
 
   InitialContext jndiCtx = null;
+  
+  /**
+   * External wrapper used to perform administration stuff.
+   * <p>
+   * It is defined at creation and it is used by default if no administration
+   * connection is defined in the script. if it is not defined the static AdminModule
+   * connection is used.
+   */
+  AdminWrapper defaultWrapper = null;
 
+  /**
+   * Wrapper used to perform administration stuff.
+   * <p>
+   * It is defined through AdminModule element, it is closed at the end of
+   * the script. if it is not defined the wrapper set at creation is used, if
+   * none the static AdminModule connection is used.
+   */
+  AdminWrapper wrapper = null;
+
+  
+  /**
+   * Returns the wrapper to use.
+   * 
+   * @return The wrapper to use.
+   * @throws ConnectException if no wrapper is defined.
+   */
+  AdminWrapper getWrapper() throws ConnectException {
+    if (wrapper != null) return wrapper;
+    if (defaultWrapper != null) return defaultWrapper;
+    return AdminModule.getWrapper();
+  }
+  
+  Connection cnx = null;
+  
+  void close() throws JMSException {
+    if (wrapper != null) wrapper.close();
+    if (cnx != null) cnx.close();
+  }
+  
   /** Contains ConnectionFactory defined in the current script */
   Hashtable cfs = new Hashtable();
   /** Contains all users defined in the current script */
@@ -225,7 +278,7 @@ public class JoramSaxWrapper extends DefaultHandler {
   /** Working attribute used during configuration's */
   String conf = null;
 
-  Logger logger = null;
+  public static Logger logger = Debug.getLogger(JoramSaxWrapper.class.getName());
 
   /**
    * Launches the XML parser.
@@ -252,8 +305,7 @@ public class JoramSaxWrapper extends DefaultHandler {
    */
   public void fatalError(SAXParseException e) throws SAXException {
     logger.log(BasicLevel.FATAL,
-               "fatal error parsing " + e.getPublicId() +
-               " at " + e.getLineNumber() + "." + e.getColumnNumber());
+               "fatal error parsing " + e.getPublicId() + " at " + e.getLineNumber() + "." + e.getColumnNumber());
     throw e;
   }
 
@@ -267,8 +319,7 @@ public class JoramSaxWrapper extends DefaultHandler {
    */
   public void error(SAXParseException e) throws SAXException {
     logger.log(BasicLevel.ERROR,
-               "error parsing " + e.getPublicId() +
-               " at " + e.getLineNumber() + "." + e.getColumnNumber());
+               "error parsing " + e.getPublicId() + " at " + e.getLineNumber() + "." + e.getColumnNumber());
     throw e;
   }
 
@@ -284,8 +335,7 @@ public class JoramSaxWrapper extends DefaultHandler {
   public void warning(SAXParseException e) throws SAXException {
     if (logger.isLoggable(BasicLevel.WARN))
       logger.log(BasicLevel.WARN,
-                 "warning parsing " + e.getPublicId() +
-                 " at " + e.getLineNumber() + "." + e.getColumnNumber());
+                 "warning parsing " + e.getPublicId() + " at " + e.getLineNumber() + "." + e.getColumnNumber());
     throw e;
   }
 
@@ -321,7 +371,7 @@ public class JoramSaxWrapper extends DefaultHandler {
 			   Attributes atts) throws SAXException {
 
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "startElement: " + rawName);
+      logger.log(BasicLevel.DEBUG, "JoramSaxWrapper startElement: " + rawName);
 
     if (rawName.equals(ELT_JORAMADMIN)) {
       conf = atts.getValue(ATT_NAME);
@@ -329,323 +379,285 @@ public class JoramSaxWrapper extends DefaultHandler {
     } else if (joramAdmName.equals(conf)) {
       if (rawName.equals(ELT_ADMINMODULE)) {
       } else if (rawName.equals(ELT_CONNECT)) {
+        // Get the hostname of server for administrator connection.
+        host = atts.getValue(ATT_HOST);
+        if (!isSet(host)) host = DFLT_LISTEN_HOST;
         try {
-          try {
-            // Get the hostname of server for administrator connection.
-            host = atts.getValue(ATT_HOST);
-            if (!isSet(host)) host = DFLT_LISTEN_HOST;
-            // Get the listen port of server for administrator connection.
-            String value = atts.getValue(ATT_PORT);
-            if (value == null)
-              port = DFLT_LISTEN_PORT;
-            else
-              port = Integer.parseInt(value);
-            // Get the username for administrator connection.
-            name = atts.getValue(ATT_NAME);
-            if (!isSet(name))
-              name = AbstractConnectionFactory.getDefaultRootLogin();
-            // Get the password for administrator connection.
-            password = atts.getValue(ATT_PASSWORD);
-            if (!isSet(password))
-              password = AbstractConnectionFactory.getDefaultRootPassword();
-            // Get the CnxTimer attribute for administrator connection.
-            value = atts.getValue(ATT_CNXTIMER);
-            if (value == null)
-              cnxTimer = 60;
-            else
-              cnxTimer = Integer.parseInt(value);
-            // Get the protocol implementation.
-            reliableClass = atts.getValue(ATT_RELIABLECLASS);
-            // Get identity class name.
-            identityClass = atts.getValue(ATT_IDENTITYCLASS);
-            if (!isSet(identityClass))
-              identityClass = SimpleIdentity.class.getName();
-          } catch (NumberFormatException exc) {
-            throw new Exception("bad value for port: " +
-                                atts.getValue(ATT_PORT) +
-                                " or cnxTimer: " +
-                                atts.getValue(ATT_CNXTIMER));
-          }
-        } catch (Exception exc) {
-          throw new SAXException(exc.getMessage(), exc);
+          // Get the listen port of server for administrator connection.
+          String value = atts.getValue(ATT_PORT);
+          if (value == null)
+            port = DFLT_LISTEN_PORT;
+          else
+            port = Integer.parseInt(value);
+        } catch (NumberFormatException exc) {
+          throw new SAXException("bad value for port: " + atts.getValue(ATT_PORT));
         }
+        // Get the username for administrator connection.
+        name = atts.getValue(ATT_NAME);
+        if (!isSet(name))
+          name = AbstractConnectionFactory.getDefaultRootLogin();
+        // Get the password for administrator connection.
+        password = atts.getValue(ATT_PASSWORD);
+        if (!isSet(password))
+          password = AbstractConnectionFactory.getDefaultRootPassword();
+        try {
+          // Get the CnxTimer attribute for administrator connection.
+          String value = atts.getValue(ATT_CNXTIMER);
+          if (value == null)
+            cnxTimer = 60;
+          else
+            cnxTimer = Integer.parseInt(value);
+        } catch (NumberFormatException exc) {
+          throw new SAXException("bad value for cnxTimer: " + atts.getValue(ATT_CNXTIMER));
+        }
+        // Get the protocol implementation.
+        reliableClass = atts.getValue(ATT_RELIABLECLASS);
+        // Get identity class name.
+        identityClass = atts.getValue(ATT_IDENTITYCLASS);
+        if (!isSet(identityClass))
+          identityClass = SimpleIdentity.class.getName();
       } else if (rawName.equals(ELT_HACONNECT)) {
+        // Get the ha url for administrator connection.
+        url = atts.getValue(ATT_URL);
+        if (!isSet(url))
+          throw new SAXException("URL for HA connection is not defined.");
+        // Get the username for administrator connection.
+        name = atts.getValue(ATT_NAME);
+        if (!isSet(name))
+          name = AbstractConnectionFactory.getDefaultRootLogin();
+        // Get the password for administrator connection.
+        password = atts.getValue(ATT_PASSWORD);
+        if (!isSet(password))
+          password = AbstractConnectionFactory.getDefaultRootPassword();
         try {
-          try {
-            // Get the ha url for administrator connection.
-            url = atts.getValue(ATT_URL);
-            if (!isSet(url)) url = DFLT_HA_URL;
-            // Get the username for administrator connection.
-            name = atts.getValue(ATT_NAME);
-            if (!isSet(name))
-              name = AbstractConnectionFactory.getDefaultRootLogin();
-            // Get the password for administrator connection.
-            password = atts.getValue(ATT_PASSWORD);
-            if (!isSet(password))
-              password = AbstractConnectionFactory.getDefaultRootPassword();
-            // Get the CnxTimer attribute for administrator connection.
-            value = atts.getValue(ATT_CNXTIMER);
-            if (value == null)
-              cnxTimer = 60;
-            else
-              cnxTimer = Integer.parseInt(value);
-            // Get identity class name.
-            identityClass = atts.getValue(ATT_IDENTITYCLASS);
-            if (!isSet(identityClass))
-              identityClass = SimpleIdentity.class.getName();
-          } catch (NumberFormatException exc) {
-            throw new Exception("cnxTimer: " +
-                                atts.getValue(ATT_CNXTIMER));
-          }
-        } catch (Exception exc) {
-          throw new SAXException(exc.getMessage(), exc);
+          // Get the CnxTimer attribute for administrator connection.
+          String value = atts.getValue(ATT_CNXTIMER);
+          if (value == null)
+            cnxTimer = 60;
+          else
+            cnxTimer = Integer.parseInt(value);
+        } catch (NumberFormatException exc) {
+          throw new SAXException("bad value for cnxTimer: " + atts.getValue(ATT_CNXTIMER));
         }
+        // Get identity class name.
+        identityClass = atts.getValue(ATT_IDENTITYCLASS);
+        if (!isSet(identityClass))
+          identityClass = SimpleIdentity.class.getName();
+
       } else if (rawName.equals(ELT_COLLOCATEDCONNECT)) {
-        try {
-          name = atts.getValue(ATT_NAME);
-          if (!isSet(name))
-            name = AbstractConnectionFactory.getDefaultRootLogin();
-          password = atts.getValue(ATT_PASSWORD);
-          if (!isSet(password))
-            password = AbstractConnectionFactory.getDefaultRootPassword();
-          // Get identity class name.
-          identityClass = atts.getValue(ATT_IDENTITYCLASS);
-          if (!isSet(identityClass))
-            identityClass = SimpleIdentity.class.getName();
-        } catch (Exception exc) {
-          throw new SAXException(exc.getMessage(), exc);
-        }
+        name = atts.getValue(ATT_NAME);
+        if (!isSet(name))
+          name = AbstractConnectionFactory.getDefaultRootLogin();
+        password = atts.getValue(ATT_PASSWORD);
+        if (!isSet(password))
+          password = AbstractConnectionFactory.getDefaultRootPassword();
+        // Get identity class name.
+        identityClass = atts.getValue(ATT_IDENTITYCLASS);
+        if (!isSet(identityClass))
+          identityClass = SimpleIdentity.class.getName();
       } else if (rawName.equals(ELT_CONNECTIONFACTORY)) {
-        try {
-          name = atts.getValue(ATT_NAME);
-          className = atts.getValue(ATT_CLASSNAME);
-          if (!isSet(className)) className = DFLT_CF;
-          identityClass = atts.getValue(ATT_IDENTITYCLASS);
-        } catch (Exception exc) {
-          throw new SAXException(exc.getMessage(), exc);
-        }
+        name = atts.getValue(ATT_NAME);
+        className = atts.getValue(ATT_CLASSNAME);
+        if (!isSet(className)) className = DFLT_CF;
+        identityClass = atts.getValue(ATT_IDENTITYCLASS);
       } else if (rawName.equals(ELT_TCP)) {
+        host = atts.getValue(ATT_HOST);
+        if (!isSet(host)) host = DFLT_LISTEN_HOST;
         try {
-          try {
-            host = atts.getValue(ATT_HOST);
-            if (!isSet(host)) host = DFLT_LISTEN_HOST;
-            String value = atts.getValue(ATT_PORT);
-            if (value == null)
-              port = DFLT_LISTEN_PORT;
-            else
-              port = Integer.parseInt(value);
-            reliableClass = atts.getValue(ATT_RELIABLECLASS);
-          } catch (NumberFormatException exc) {
-            throw new Exception("bad value for port: " +
-                                atts.getValue(ATT_PORT));
-          }
-        } catch (Exception exc) {
-          throw new SAXException(exc.getMessage(), exc);
+          // Get the listen port of server for this connection factory.
+          String value = atts.getValue(ATT_PORT);
+          if (value == null)
+            port = DFLT_LISTEN_PORT;
+          else
+            port = Integer.parseInt(value);
+        } catch (NumberFormatException exc) {
+          throw new SAXException("bad value for port: " + atts.getValue(ATT_PORT));
         }
+        reliableClass = atts.getValue(ATT_RELIABLECLASS);
       } else if (rawName.equals(ELT_LOCAL)) {
       } else if (rawName.equals(ELT_HATCP)) {
-        try {
-          url = atts.getValue(ATT_URL);
-          reliableClass = atts.getValue(ATT_RELIABLECLASS);
-        } catch (Exception exc) {
-          throw new SAXException(exc.getMessage(), exc);
-        }
+        url = atts.getValue(ATT_URL);
+        reliableClass = atts.getValue(ATT_RELIABLECLASS);
       } else if (rawName.equals(ELT_HALOCAL)) {
       } else if (rawName.equals(ELT_SOAP)) {
+        host = atts.getValue(ATT_HOST);
+        if (!isSet(host))
+          host = "localhost";
         try {
-          try {
-            host = atts.getValue(ATT_HOST);
-            if (!isSet(host))
-              host = "localhost";
-            String value = atts.getValue(ATT_PORT);
-            if (value == null)
-              port = 16010;
-            else
-              port = Integer.parseInt(value);
-            value = atts.getValue(ATT_TIMEOUT);
-            if (value == null)
-              timeout = 60;
-            else
-              timeout = Integer.parseInt(value);
-          } catch (NumberFormatException exc) {
-            throw new Exception("bad value for port: " +
-                                atts.getValue(ATT_PORT));
-          }
-        } catch (Exception exc) {
-          throw new SAXException(exc.getMessage(), exc);
+          // Get the listen port of server for administrator connection.
+          String value = atts.getValue(ATT_PORT);
+          if (value == null)
+            port = DFLT_LISTEN_PORT;
+          else
+            port = Integer.parseInt(value);
+        } catch (NumberFormatException exc) {
+          throw new SAXException("bad value for port: " + atts.getValue(ATT_PORT));
+        }
+        try {
+          // Get the timeout attribute for this connection factory.
+          String value = atts.getValue(ATT_TIMEOUT);
+          if (value == null)
+            timeout = 60;
+          else
+            timeout = Integer.parseInt(value);
+        } catch (NumberFormatException exc) {
+          throw new SAXException("bad value for cnxTimer: " + atts.getValue(ATT_CNXTIMER));
         }
       } else if (rawName.equals(ELT_JNDI)) {
-        try {
-          jndiName = atts.getValue(ATT_NAME);
-        } catch (Exception exc) {
-          throw new SAXException(exc.getMessage(), exc);
-        }
+        jndiName = atts.getValue(ATT_NAME);
       } else if (rawName.equals(ELT_SERVER)) {
         try {
-          try {
-            String value = atts.getValue(ATT_SERVERID);
-            if (value == null)
-              serverId =  AdminModule.getLocalServerId();
-            else
-              serverId = Integer.parseInt(value);
-          } catch (NumberFormatException exc) {
-            throw new Exception("bad value for serverId: " +
-                                atts.getValue(ATT_SERVERID));
-          }
-          dmq = atts.getValue(ATT_DMQ);
-          value = atts.getValue(ATT_THRESHOLD);
-          try {
-            if (value == null)
-              threshold = -1;
-            else
-              threshold = Integer.parseInt(value);
-          } catch (NumberFormatException exc) {
-            throw new Exception("bad value for threshold: " +
-                                atts.getValue(ATT_THRESHOLD));
-          }
-        } catch (Exception exc) {
-          throw new SAXException(exc.getMessage(), exc);
+          String value = atts.getValue(ATT_SERVERID);
+          if (value == null)
+            serverId =  getWrapper().getLocalServerId();
+          else
+            serverId = Integer.parseInt(value);
+        } catch (NumberFormatException exc) {
+          throw new SAXException("bad value for serverId: " + atts.getValue(ATT_SERVERID));
+        } catch (ConnectException exc) {
+          throw new SAXException("error getting serverId: " + exc.getMessage());
+        } catch (AdminException exc) {
+          throw new SAXException("error getting serverId: " + exc.getMessage());
+        }
+        dmq = atts.getValue(ATT_DMQ);
+        try {
+          String value = atts.getValue(ATT_THRESHOLD);
+          if (value == null)
+            threshold = -1;
+          else
+            threshold = Integer.parseInt(value);
+        } catch (NumberFormatException exc) {
+          throw new SAXException("bad value for threshold: " + atts.getValue(ATT_THRESHOLD));
         }
       } else if (rawName.equals(ELT_USER)) {
+        name = atts.getValue(ATT_NAME);
+        login = atts.getValue(ATT_LOGIN);
+        password = atts.getValue(ATT_PASSWORD);
         try {
-          try {
-            name = atts.getValue(ATT_NAME);
-            login = atts.getValue(ATT_LOGIN);
-            password = atts.getValue(ATT_PASSWORD);
-            String value = atts.getValue(ATT_SERVERID);
-            if (value == null)
-              serverId =  AdminModule.getLocalServerId();
-            else
-              serverId = Integer.parseInt(value);
-            dmq = atts.getValue(ATT_DMQ);
-            value = atts.getValue(ATT_THRESHOLD);
-            if (value == null)
-              threshold = -1;
-            else
-              threshold = Integer.parseInt(value);
-            identityClass = atts.getValue(ATT_IDENTITYCLASS);
-          } catch (NumberFormatException exc) {
-            throw new Exception("bad value for serverId: " +
-                                atts.getValue(ATT_SERVERID));
-          }
-        } catch (Exception exc) {
-          throw new SAXException(exc.getMessage(), exc);
+          String value = atts.getValue(ATT_SERVERID);
+          if (value == null)
+            serverId =  getWrapper().getLocalServerId();
+          else
+            serverId = Integer.parseInt(value);
+        } catch (NumberFormatException exc) {
+          throw new SAXException("bad value for serverId: " + atts.getValue(ATT_SERVERID));
+        } catch (ConnectException exc) {
+          throw new SAXException("error getting serverId: " + exc.getMessage());
+        } catch (AdminException exc) {
+          throw new SAXException("error getting serverId: " + exc.getMessage());
         }
+        dmq = atts.getValue(ATT_DMQ);
+        try {
+          String value = atts.getValue(ATT_THRESHOLD);
+          if (value == null)
+            threshold = -1;
+          else
+            threshold = Integer.parseInt(value);
+        } catch (NumberFormatException exc) {
+          throw new SAXException("bad value for threshold: " + atts.getValue(ATT_THRESHOLD));
+        }
+        identityClass = atts.getValue(ATT_IDENTITYCLASS);
       } else if (rawName.equals(ELT_DESTINATION)) {
+        type = atts.getValue(ATT_TYPE);
+        name = atts.getValue(ATT_NAME);
         try {
-          try {
-            type = atts.getValue(ATT_TYPE);
-            name = atts.getValue(ATT_NAME);
-            String value = atts.getValue(ATT_SERVERID);
-            if (value == null)
-              serverId = AdminModule.getLocalServerId();
-            else
-              serverId = Integer.parseInt(value);
-            className = atts.getValue(ATT_CLASSNAME);
-            dmq = atts.getValue(ATT_DMQ);
-          } catch (NumberFormatException exc) {
-            throw new Exception("bad value for serverId: " +
-                                atts.getValue(ATT_SERVERID));
-          }
-        } catch (Exception exc) {
-          throw new SAXException(exc.getMessage(), exc);
+          String value = atts.getValue(ATT_SERVERID);
+          if (value == null)
+            serverId =  getWrapper().getLocalServerId();
+          else
+            serverId = Integer.parseInt(value);
+        } catch (NumberFormatException exc) {
+          throw new SAXException("bad value for serverId: " + atts.getValue(ATT_SERVERID));
+        } catch (ConnectException exc) {
+          throw new SAXException("error getting serverId: " + exc.getMessage());
+        } catch (AdminException exc) {
+          throw new SAXException("error getting serverId: " + exc.getMessage());
         }
+        className = atts.getValue(ATT_CLASSNAME);
+        dmq = atts.getValue(ATT_DMQ);
       } else if (rawName.equals(ELT_QUEUE)) {
+        name = atts.getValue(ATT_NAME);
         try {
-          try {
-            name = atts.getValue(ATT_NAME);
-            String value = atts.getValue(ATT_SERVERID);
-            if (value == null)
-              serverId = AdminModule.getLocalServerId();
-            else
-              serverId = Integer.parseInt(value);
-            className = atts.getValue(ATT_CLASSNAME);
-            dmq = atts.getValue(ATT_DMQ);
-            value = atts.getValue(ATT_THRESHOLD);
-            if (value == null)
-              threshold = -1;
-            else
-              threshold = Integer.parseInt(value);
-            value = atts.getValue(ATT_NBMAXMSG);
-            if (value == null)
-              nbMaxMsg = -1;
-            else
-              nbMaxMsg = Integer.parseInt(value);
-          } catch (NumberFormatException exc) {
-            throw new Exception("bad value for serverId: " +
-                                atts.getValue(ATT_SERVERID));
-          }
-        } catch (Exception exc) {
-          throw new SAXException(exc.getMessage(), exc);
+          String value = atts.getValue(ATT_SERVERID);
+          if (value == null)
+            serverId =  getWrapper().getLocalServerId();
+          else
+            serverId = Integer.parseInt(value);
+        } catch (NumberFormatException exc) {
+          throw new SAXException("bad value for serverId: " + atts.getValue(ATT_SERVERID));
+        } catch (ConnectException exc) {
+          throw new SAXException("error getting serverId: " + exc.getMessage());
+        } catch (AdminException exc) {
+          throw new SAXException("error getting serverId: " + exc.getMessage());
+        }
+        className = atts.getValue(ATT_CLASSNAME);
+        dmq = atts.getValue(ATT_DMQ);
+        try {
+          String value = atts.getValue(ATT_THRESHOLD);
+          if (value == null)
+            threshold = -1;
+          else
+            threshold = Integer.parseInt(value);
+        } catch (NumberFormatException exc) {
+          throw new SAXException("bad value for threshold: " + atts.getValue(ATT_THRESHOLD));
+        }
+        try {
+          String value = atts.getValue(ATT_NBMAXMSG);
+          if (value == null)
+            nbMaxMsg = -1;
+          else
+            nbMaxMsg = Integer.parseInt(value);
+        } catch (NumberFormatException exc) {
+          throw new SAXException("bad value for nbMaxMsg: " + atts.getValue(ATT_NBMAXMSG));
         }
       } else if (rawName.equals(ELT_TOPIC)) {
+        name = atts.getValue(ATT_NAME);
         try {
-          try {
-            name = atts.getValue(ATT_NAME);
-            String value = atts.getValue(ATT_SERVERID);
-            if (value == null)
-              serverId = AdminModule.getLocalServerId();
-            else
-              serverId = Integer.parseInt(value);
-            className = atts.getValue(ATT_CLASSNAME);
-            dmq = atts.getValue(ATT_DMQ);
-            parent = atts.getValue(ATT_PARENT);
-          } catch (NumberFormatException exc) {
-            throw new Exception("bad value for serverId: " +
-                                atts.getValue(ATT_SERVERID));
-          }
-        } catch (Exception exc) {
-          throw new SAXException(exc.getMessage(), exc);
+          String value = atts.getValue(ATT_SERVERID);
+          if (value == null)
+            serverId =  getWrapper().getLocalServerId();
+          else
+            serverId = Integer.parseInt(value);
+        } catch (NumberFormatException exc) {
+          throw new SAXException("bad value for serverId: " + atts.getValue(ATT_SERVERID));
+        } catch (ConnectException exc) {
+          throw new SAXException("error getting serverId: " + exc.getMessage());
+        } catch (AdminException exc) {
+          throw new SAXException("error getting serverId: " + exc.getMessage());
         }
+        className = atts.getValue(ATT_CLASSNAME);
+        dmq = atts.getValue(ATT_DMQ);
+        parent = atts.getValue(ATT_PARENT);
       } else if (rawName.equals(ELT_DMQUEUE)) {
+        name = atts.getValue(ATT_NAME);
         try {
-          try {
-            name = atts.getValue(ATT_NAME);
-            String value = atts.getValue(ATT_SERVERID);
-            if (value == null)
-              serverId = AdminModule.getLocalServerId();
-            else
-              serverId = Integer.parseInt(value);
-          } catch (NumberFormatException exc) {
-            throw new Exception("bad value for serverId: " +
-                                atts.getValue(ATT_SERVERID));
-          }
-        } catch (Exception exc) {
-          throw new SAXException(exc.getMessage(), exc);
+          String value = atts.getValue(ATT_SERVERID);
+          if (value == null)
+            serverId =  getWrapper().getLocalServerId();
+          else
+            serverId = Integer.parseInt(value);
+        } catch (NumberFormatException exc) {
+          throw new SAXException("bad value for serverId: " + atts.getValue(ATT_SERVERID));
+        } catch (ConnectException exc) {
+          throw new SAXException("error getting serverId: " + exc.getMessage());
+        } catch (AdminException exc) {
+          throw new SAXException("error getting serverId: " + exc.getMessage());
         }
       } else if (rawName.equals(ELT_PROPERTY)) {
-        try {
-          if (properties == null)
-            properties = new Properties();
-          properties.put(atts.getValue(ATT_NAME),
-                         atts.getValue(ATT_VALUE));
-        } catch (Exception exc) {
-          throw new SAXException(exc.getMessage(), exc);
-        }
+        if (properties == null)
+          properties = new Properties();
+        properties.put(atts.getValue(ATT_NAME), atts.getValue(ATT_VALUE));
       } else if (rawName.equals(ELT_READER)) {
-        try {
-          user = atts.getValue(ATT_USER);
-        } catch (Exception exc) {
-          throw new SAXException(exc.getMessage(), exc);
-        }
+        user = atts.getValue(ATT_USER);
       } else if (rawName.equals(ELT_WRITER)) {
-        try {
-          user = atts.getValue(ATT_USER);
-        } catch (Exception exc) {
-          throw new SAXException(exc.getMessage(), exc);
-        }
+        user = atts.getValue(ATT_USER);
       } else if (rawName.equals(ELT_FREEREADER)) {
         freeReading = true;
       } else if (rawName.equals(ELT_FREEWRITER)) {
         freeWriting = true;
       } else if (rawName.equals(ELT_INITIALCONTEXT)) {
       } else if (rawName.equals(ELT_CLUSTER_ELEMENT)) {
-        try {
-          cluster.put(atts.getValue(ATT_NAME),
-                      atts.getValue(ATT_LOCATION));
-        } catch (Exception exc) {
-          throw new SAXException(exc.getMessage(), exc);
-        }
+        cluster.put(atts.getValue(ATT_NAME), atts.getValue(ATT_LOCATION));
       } else if (rawName.equals(ELT_CLUSTER_QUEUE)) {
         cluster.clear();
       } else if (rawName.equals(ELT_CLUSTER_TOPIC)) {
@@ -653,7 +665,7 @@ public class JoramSaxWrapper extends DefaultHandler {
       } else if (rawName.equals(ELT_CLUSTER_CF)) {
         cluster.clear();
       } else {
-	throw new SAXException("unknown element \"" + rawName + "\"");
+        throw new SAXException("unknown element \"" + rawName + "\"");
       }
     }
   }
@@ -674,7 +686,7 @@ public class JoramSaxWrapper extends DefaultHandler {
 			 String rawName) throws SAXException {
 
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "endElement: " + rawName);
+      logger.log(BasicLevel.DEBUG, "JoramSaxWrapper endElement: " + rawName);
 
     if (rawName.equals(ELT_JORAMADMIN)) {
       conf = null;
@@ -684,28 +696,43 @@ public class JoramSaxWrapper extends DefaultHandler {
         } else if (rawName.equals(ELT_CONNECT)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG,
-                       "AdminModule.connect(" + host + ',' + port + ',' + name + ',' + cnxTimer + ',' + reliableClass + ')');
-          AdminModule.connect(host,port,name,password,cnxTimer,reliableClass,identityClass);
+                       "JoramSaxWrapper creates wrapper (TCP): " + host + ',' + port + ',' + name);
+          ConnectionFactory cf =  (ConnectionFactory)TcpConnectionFactory.create(host, port, reliableClass);
+          cf.getParameters().connectingTimer = cnxTimer;
+          cf.setIdentityClassName(identityClass);
+
+          cnx = cf.createConnection(name, password);
+          wrapper = new AdminWrapper(cnx);
+          cnx.start();
         } else if (rawName.equals(ELT_HACONNECT)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG,
-                       "AdminModule.haConnect(" + url + ',' + name + ',' + cnxTimer + ')');
+                       "JoramSaxWrapper creates wrapper (HA): " + url + ',' + name);
+          
           ConnectionFactory cf =  (ConnectionFactory) HATcpConnectionFactory.create(url);
           cf.getParameters().connectingTimer = cnxTimer;
-          AdminModule.connect(cf, name, password,identityClass);
+          cf.setIdentityClassName(identityClass);
+
+          cnx = cf.createConnection(name, password);
+          wrapper = new AdminWrapper(cnx);
+          cnx.start();
         } else if (rawName.equals(ELT_COLLOCATEDCONNECT)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "AdminModule.collocatedConnect(" +
-                       name + "," +
-                       "*****)");
-          AdminModule.collocatedConnect(name,password,identityClass);
+            logger.log(BasicLevel.DEBUG,
+                       "JoramSaxWrapper creates wrapper (Local): " + name);
+          
+          ConnectionFactory cf =  (ConnectionFactory) LocalConnectionFactory.create();
+          cf.setIdentityClassName(identityClass);
+
+          cnx = cf.createConnection(name, password);
+          wrapper = new AdminWrapper(cnx);
+          cnx.start();
         } else if (rawName.equals(ELT_CONNECTIONFACTORY)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "cf \""+ name + "\"= " + obj);
           // set identity className
           if (isSet(identityClass)) 
-            ((org.objectweb.joram.client.jms.admin.AbstractConnectionFactory) obj)
-            .setIdentityClassName(identityClass);
+            ((org.objectweb.joram.client.jms.admin.AbstractConnectionFactory) obj).setIdentityClassName(identityClass);
           // Bind the ConnectionFactory in JNDI.
           // Be Careful, currently only one binding is handled.
           if (isSet(jndiName))
@@ -752,27 +779,26 @@ public class JoramSaxWrapper extends DefaultHandler {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG,
                        "Server.configure(" + serverId + ")");
+          
           if (threshold > 0)
-            AdminModule.setDefaultThreshold(serverId, threshold);
+            getWrapper().setDefaultThreshold(serverId, threshold);
 
           if (isSet(dmq)) {
             if (dmqs.containsKey(dmq)) {
-              AdminModule.setDefaultDMQ(serverId, (DeadMQueue) dmqs.get(dmq));
+              getWrapper().setDefaultDMQ(serverId, (DeadMQueue) dmqs.get(dmq));
             } else {
               logger.log(BasicLevel.ERROR,
-                         "User.create(): Unknown DMQ: " + dmq);
+                         "Cannot set default DMQ, unknown DMQ: " + dmq);
             }
           }
         } else if (rawName.equals(ELT_USER)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "User.create(" +
-                       name + "," +
-                       login + "," +
-                       "*****," +
-                       serverId + ")");
+            logger.log(BasicLevel.DEBUG,
+                       "User.create(" + name + "," + login + "," + "-," + serverId + ")");
+          
           if (! isSet(login)) login = name;
           if (! isSet(identityClass)) identityClass = SimpleIdentity.class.getName();
-          User user = User.create(login, password, serverId, identityClass);
+          User user = getWrapper().createUser(login, password, serverId, identityClass);
           users.put(name, user);
 
           if (threshold > 0)
@@ -783,7 +809,7 @@ public class JoramSaxWrapper extends DefaultHandler {
               user.setDMQ((DeadMQueue) dmqs.get(dmq));
             } else {
               logger.log(BasicLevel.ERROR,
-                         "User.create(): Unknown DMQ: " + dmq);
+                         "User.create(), unknown DMQ: " + dmq);
             }
           }
         } else if (rawName.equals(ELT_DESTINATION)) {
@@ -794,29 +820,21 @@ public class JoramSaxWrapper extends DefaultHandler {
           if (type.equals("queue")) {
             if (className == null)
               className = "org.objectweb.joram.mom.dest.Queue";
+            
             if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, "Queue.create(" +
-                         serverId + "," +
-                         name + "," +
-                         className + "," +
-                         properties + ")");
-            dest = Queue.create(serverId,
-                                name,
-                                className,
-                                properties);
+              logger.log(BasicLevel.DEBUG,
+                         "Queue.create(" + serverId + "," + name + "," + className + "," + properties + ")");
+            
+            dest = getWrapper().createQueue(serverId, name, className, properties);
           } else if (type.equals("topic")) {
             if (className == null)
               className = "org.objectweb.joram.mom.dest.Topic";
+            
             if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, "Topic.create(" +
-                         serverId + "," +
-                         name + "," +
-                         className + "," +
-                         properties + ")");
-            dest = Topic.create(serverId,
-                                name,
-                                className,
-                                properties);
+              logger.log(BasicLevel.DEBUG,
+                         "Topic.create(" + serverId + "," + name + "," + className + "," + properties + ")");
+            
+            dest = getWrapper().createTopic(serverId, name, className, properties);
           } else
             throw new Exception("type " + type + " bad value. (queue or topic)");
 
@@ -848,15 +866,9 @@ public class JoramSaxWrapper extends DefaultHandler {
           if (className == null)
             className = "org.objectweb.joram.mom.dest.Queue";
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "Queue.create(" +
-                       serverId + "," +
-                       name + "," +
-                       className + "," +
-                       properties + ")");
-          Queue queue = Queue.create(serverId,
-                                     name,
-                                     className,
-                                     properties);
+            logger.log(BasicLevel.DEBUG,
+                       "Queue.create(" + serverId + "," + name + "," + className + "," + properties + ")");
+          Queue queue = (Queue) getWrapper().createQueue(serverId, name, className, properties);
           properties = null;
 
           configureDestination(queue);
@@ -882,20 +894,15 @@ public class JoramSaxWrapper extends DefaultHandler {
           if (className == null)
             className = "org.objectweb.joram.mom.dest.Topic";
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "Topic.create(" +
-                       serverId + "," +
-                       name + "," +
-                       className + "," +
-                       properties + ")");
-          Topic topic = Topic.create(serverId,
-                                     name,
-                                     className,
-                                     properties);
+            logger.log(BasicLevel.DEBUG,
+                       "Topic.create(" + serverId + "," + name + "," + className + "," + properties + ")");
+          Topic topic = (Topic) getWrapper().createTopic(serverId, name, className, properties);
           properties = null;
 
           configureDestination(topic);
 
           if (isSet(parent)) {
+            // TODO (AF): may be we should search the parent topic: JNDI? Joram?
             if (topics.containsKey(parent)) {
               topic.setParent((Topic) topics.get(parent));
             } else {
@@ -917,11 +924,10 @@ public class JoramSaxWrapper extends DefaultHandler {
         } else if (rawName.equals(ELT_DMQUEUE)) {
           className = "org.objectweb.joram.mom.dest.DeadMQueue";
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "DeadMQueue.create(" +
-                       serverId + "," +
-                       name + ")");
+            logger.log(BasicLevel.DEBUG,
+                       "DeadMQueue.create(" + serverId + "," + name + ")");
 
-          DeadMQueue dmq = (DeadMQueue) DeadMQueue.create(serverId, name);
+          DeadMQueue dmq = (DeadMQueue) getWrapper().createDeadMQueue(serverId, name);
 
           configureDestination(dmq);
 
@@ -1063,7 +1069,12 @@ public class JoramSaxWrapper extends DefaultHandler {
   public void endDocument() throws SAXException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "endDocument");
-    AdminModule.disconnect();
+    
+    try {
+      close();
+    } catch (JMSException exc) {
+      logger.log(BasicLevel.ERROR,"",exc);
+    }
 
     try {
       if (jndiCtx == null)

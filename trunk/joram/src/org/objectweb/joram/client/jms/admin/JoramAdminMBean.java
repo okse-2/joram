@@ -23,86 +23,86 @@
 package org.objectweb.joram.client.jms.admin;
 
 import java.net.ConnectException;
-import java.util.List;
 import java.util.Properties;
 
-import javax.jms.Destination;
+import org.objectweb.joram.client.jms.Destination;
 
 /**
  *
  */
 public interface JoramAdminMBean {
 
-  public void exit();
+  //  // TODO (AF): What is the need ?
+  //  public void exit();
 
-  public void setTimeOutToAbortRequest(long timeOut);
+  public void setTimeOutToAbortRequest(long timeOut) throws ConnectException;
 
-  public long getTimeOutToAbortRequest();
-  
-  public String getDefaultDMQId(int serverId)
-  throws ConnectException, AdminException;
-  
-  public void setDefaultDMQId(int serverId, String dmqId)
-  throws ConnectException, AdminException;
+  public long getTimeOutToAbortRequest() throws ConnectException;
 
-  public String getDefaultDMQId()
-    throws ConnectException, AdminException;
+  public String getDefaultDMQId(int serverId) throws ConnectException, AdminException;
 
-  public List getDestinations(int serverId);
+  public void setDefaultDMQId(int serverId, String dmqId) throws ConnectException, AdminException;
 
-  public List getDestinations();
+  public String getDefaultDMQId() throws ConnectException, AdminException;
 
-  public List getUsers(int serverId);
+  public void setDefaultThreshold(int serverId, int threshold) throws ConnectException, AdminException;
 
-  public List getUsers();
+  public void setDefaultThreshold(int threshold) throws ConnectException, AdminException;
 
-  public void createUser(String name, String password)
-    throws AdminException;
+  public int getDefaultThreshold(int serverId) throws ConnectException, AdminException;
 
-  public void createUser(String name, String password, int serverId)
-  throws AdminException;
-  
-  public void createUser(String name, String password, int serverId, String identityClass)
-    throws AdminException;
-  
-  public void createUser(String name, String password, String identityClass)
-  throws AdminException;
+  public int getDefaultThreshold() throws ConnectException, AdminException;
 
-  public Destination createQueue(String name)
-    throws AdminException;
+  public Destination[] getDestinations(int serverId) throws ConnectException, AdminException;
 
-  public Destination createQueue(int serverId, String name)
-    throws AdminException;
+  public Destination[] getDestinations() throws ConnectException, AdminException;
+
+  public Destination createQueue(String name) throws ConnectException, AdminException;
+
+  public Destination createQueue(int serverId, String name) throws ConnectException, AdminException;
 
   public Destination createQueue(int serverId,
                                  String name,
                                  String className,
-                                 Properties prop)
-    throws AdminException;
+                                 Properties prop) throws ConnectException, AdminException;
 
-  public Destination createTopic(String name)
-    throws AdminException;
+  public Destination createTopic(String name) throws ConnectException, AdminException;
 
-  public Destination createTopic(int serverId, String name)
-    throws AdminException;
+  public Destination createTopic(int serverId, String name) throws ConnectException, AdminException;
 
   public Destination createTopic(int serverId,
                                  String name,
                                  String className,
-                                 Properties prop)
-    throws AdminException;
+                                 Properties prop) throws ConnectException, AdminException;
 
+
+  public User[] getUsers(int serverId) throws ConnectException, AdminException;
+
+  public User[] getUsers() throws ConnectException, AdminException;
+
+  public User createUser(String name, String password) throws ConnectException, AdminException;
+
+  public User createUser(String name, String password,
+                         int serverId) throws ConnectException, AdminException;
+
+  public User createUser(String name, String password,
+                         int serverId,
+                         String identityClass) throws ConnectException, AdminException;
+
+  public User createUser(String name, String password,
+                         String identityClass) throws ConnectException, AdminException;
 
   /**
    * Export the repository content to an XML file
    * - only the destinations objects are retrieved in this version
    * - xml script format of the admin objects (joramAdmin.xml)
-   * @param exportDir target directory where the export file will be put
+   * 
+   * @param exportDir       target directory where the export file will be put
+   * @param exportFilename  filename of the export file
    * @throws AdminException if an error occurs
    */
-  public void exportRepositoryToFile(String exportDir)
-    throws AdminException;
+  public void exportRepositoryToFile(String exportDir,
+                                     String exportFilename) throws AdminException;
 
-  public boolean executeXMLAdminJMX(String path)
-    throws Exception;
+  public boolean executeXMLAdmin(String path) throws Exception;
 }

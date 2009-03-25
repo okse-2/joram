@@ -26,6 +26,7 @@ package org.objectweb.joram.client.connector;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -37,11 +38,8 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import javax.jms.Destination;
 import javax.jms.Session;
-import javax.jms.ConnectionFactory;
 import javax.jms.XAConnection;
-import javax.jms.XAConnectionFactory;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.naming.Context;
@@ -57,42 +55,37 @@ import javax.resource.spi.endpoint.MessageEndpointFactory;
 import javax.resource.spi.work.WorkManager;
 import javax.transaction.xa.XAResource;
 
+import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.ConnectionMetaData;
-import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.client.jms.Topic;
-import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
+import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
-import org.objectweb.joram.client.jms.admin.JoramAdmin;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.ha.local.HALocalConnectionFactory;
-import org.objectweb.joram.client.jms.ha.local.XAHALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
-import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
 import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
-import org.objectweb.joram.client.jms.local.XALocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
-import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.shared.security.SimpleIdentity;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import com.scalagent.jmx.JMXServer;
 
 import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.util.Debug;
 
 /**
- * A <code>JoramAdapter</code> instance manages connectivities to an
- * underlying JORAM server: outbound connectivity (JCA connection
- * management contract) and inbound connectivity (asynchronous message
- * delivery as specified by the JCA message inflow contract).
+ * A <code>JoramAdapter</code> instance manages connectivities to an underlying 
+ * JORAM server: outbound connectivity (JCA connection management contract) and
+ * inbound connectivity (asynchronous message delivery as specified by the JCA
+ * message inflow contract).
  */
-public class JoramAdapter
-  implements javax.resource.spi.ResourceAdapter,
-  java.io.Serializable, JoramAdapterMBean {
+public class JoramAdapter implements javax.resource.spi.ResourceAdapter, java.io.Serializable, JoramAdapterMBean {
   /** Define serialVersionUID for interoperability. */
   private static final long serialVersionUID = 1L;
+
+  public static Logger logger = Debug.getLogger(JoramAdapter.class.getName());
 
   /** <code>WorkManager</code> instance provided by the application server. */
   private transient WorkManager workManager;
@@ -183,6 +176,8 @@ public class JoramAdapter
   /** Local MBean server. */
   private static MBeanServer mbs = null;
 
+  /** Name of the root in the MBean tree */
+  private static String jmxRootName = "joramClient";
   /**
    * Duration in seconds during which connecting is attempted (connecting
    * might take time if the server is temporarily not reachable); the 0 value
@@ -270,15 +265,12 @@ public class JoramAdapter
 
   public JMXServer jmxServer;
 
-  private transient JoramAdmin joramAdmin;
-
   /**
    * Constructs a <code>JoramAdapter</code> instance.
    */
   public JoramAdapter() {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
-      AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
-      "JORAM adapter instantiated.");
+    if (logger.isLoggable(BasicLevel.INFO))
+      logger.log(BasicLevel.INFO, "JORAM adapter instantiated.");
 
     consumers = new Hashtable();
     producers = new Vector();
@@ -296,28 +288,27 @@ public class JoramAdapter
    * @exception ResourceAdapterInternalException  If the adapter could not be
    *                                              initialized.
    */
-  public synchronized void start(BootstrapContext ctx)
-  throws ResourceAdapterInternalException {
-    // set HA mode if needed
-    JoramAdmin.setHa(isHa);
-
+  public synchronized void start(BootstrapContext ctx) throws ResourceAdapterInternalException {
     if (started)
       throw new ResourceAdapterInternalException("Adapter already started.");
     if (stopped)
       throw new ResourceAdapterInternalException("Adapter has been stopped.");
 
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
-      AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
-      "JORAM adapter starting deployment...");
+    // set HA mode if needed
+    AdminModule.setHa(isHa);
+
+    if (logger.isLoggable(BasicLevel.INFO))
+      logger.log(BasicLevel.INFO, "JORAM adapter starting deployment...");
 
     workManager = ctx.getWorkManager();
 
     // Collocated mode: starting the JORAM server.
     if (collocated) {
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
-        AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
-        "  - Collocated JORAM server is starting...");
+      if (logger.isLoggable(BasicLevel.INFO))
+        logger.log(BasicLevel.INFO, " - Collocated JORAM server is starting...");
 
+      // TODO (AF): Setting system properties forbids the launching of multiples
+      // servers in an OSGi platform.
       if (persistentPlatform) {
         System.setProperty("Transaction", "fr.dyade.aaa.util.NTransaction");
         System.setProperty("NTNoLockFile", "true");
@@ -334,58 +325,57 @@ public class JoramAdapter
       try {
         AgentServer.init(serverId, serverName, null, clusterId);
         AgentServer.start();
-        if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
-          AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
+        if (logger.isLoggable(BasicLevel.INFO))
+          logger.log(BasicLevel.INFO,
           "  - Collocated JORAM server has successfully started.");
       } catch (Exception exc) {
         AgentServer.stop();
         AgentServer.reset(true);
 
-        throw new ResourceAdapterInternalException("Could not start "
-                                                   + "collocated JORAM "
-                                                   + " instance: " + exc);
+        throw new ResourceAdapterInternalException("Could not start collocated JORAM instance: " + exc);
       }
-    }
-
-    // Starting admin.
-    try {
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
-        AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
-                                      "  - Reading the provided admin file: " + adminFileXML);
-      JoramAdmin.executeXMLAdmin(platformConfigDir, adminFileXML);
-    } catch (Exception exc) {
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
-        AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
-        "JORAM ADMIN XML not found.");
     }
 
     // Starting an admin session...
     try {
       adminConnect();
-      serverId = (short) joramAdmin.getPlatformAdmin().getLocalServerId();
+      serverId = (short) AdminModule.getLocalServerId();
     } catch (Exception exc) {
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.WARN))
-        AdapterTracing.dbgAdapter.log(BasicLevel.WARN,
-                                      "  - JORAM server not administerable: " + exc);
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN,
+                   " - JORAM server not administerable: " + exc);
     }
 
-    // Recreates the objects (backup) if the export file is present
-    if (joramAdmin != null) {
-      joramAdmin.setAdminFileExportXML(adminFileExportXML);
+    // Execute the XML script of configuration.
+    try {
+      if (logger.isLoggable(BasicLevel.INFO))
+        logger.log(BasicLevel.INFO,
+                   "  - Reading the provided admin file: " + adminFileXML);
+      AdminModule.executeXMLAdmin(platformConfigDir, adminFileXML);
+    } catch (FileNotFoundException exc) {
+      if (logger.isLoggable(BasicLevel.INFO))
+        logger.log(BasicLevel.INFO,
+                   "JoramAdapter - problem during XML configuration: " + adminFileExportXML, exc);
+    } catch (Exception exc) {
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR,
+                   "JoramAdapter - problem during XML configuration: " + adminFileExportXML, exc);
+    }
 
-      try {
-        if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
-          AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
-                                        "  - Reading the provided admin file: " + adminFileExportXML);
-        JoramAdmin.executeXMLAdmin(platformConfigDir, adminFileExportXML);
-
-        // redo the admin connection as the executeXMLAdmin has closed the session
-        adminConnect();
-      } catch (Exception exc) {
-        if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
-          AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
-                                        adminFileExportXML + " not found.");
-      }
+    // Execute the XML script corresponding to the export of the configuration.
+    try {
+      if (logger.isLoggable(BasicLevel.INFO))
+        logger.log(BasicLevel.INFO,
+                   "  - Reading the provided admin file: " + adminFileExportXML);
+      AdminModule.executeXMLAdmin(platformConfigDir, adminFileExportXML);
+    } catch (FileNotFoundException exc) {
+      if (logger.isLoggable(BasicLevel.INFO))
+        logger.log(BasicLevel.INFO,
+                   "JoramAdapter - problem during XML configuration: " + adminFileExportXML, exc);
+    } catch (Exception exc) {
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR,
+                   "JoramAdapter - problem during XML configuration: " + adminFileExportXML, exc);
     }
 
     // Administering as specified in the properties file.
@@ -406,9 +396,9 @@ public class JoramAdapter
       FileReader fileReader = new FileReader(file);
       BufferedReader reader = new BufferedReader(fileReader);
 
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
-        AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
-                                      "  - Reading the provided admin file: " + file);
+      if (logger.isLoggable(BasicLevel.INFO))
+        logger.log(BasicLevel.INFO,
+                   "  - Reading the provided admin file: " + file);
 
       boolean end = false;
       String line;
@@ -430,48 +420,40 @@ public class JoramAdapter
               if (firstToken.equalsIgnoreCase("Host")) {
                 if (tokenizer.hasMoreTokens())
                   hostName = tokenizer.nextToken();
-              }
-              else if (firstToken.equalsIgnoreCase("Port")) {
+              } else if (firstToken.equalsIgnoreCase("Port")) {
                 if (tokenizer.hasMoreTokens())
                   serverPort = Integer.parseInt(tokenizer.nextToken());
-              }
-              else if (firstToken.equalsIgnoreCase("Queue")) {
+              } else if (firstToken.equalsIgnoreCase("Queue")) {
                 if (tokenizer.hasMoreTokens()) {
                   name = tokenizer.nextToken();
                   createQueue(name);
                 }
-              }
-              else if (firstToken.equalsIgnoreCase("Topic")) {
+              } else if (firstToken.equalsIgnoreCase("Topic")) {
                 if (tokenizer.hasMoreTokens()) {
                   name = tokenizer.nextToken();
                   createTopic(name);
                 }
-              }
-              else if (firstToken.equalsIgnoreCase("User")) {
+              } else if (firstToken.equalsIgnoreCase("User")) {
                 if (tokenizer.hasMoreTokens())
                   name = tokenizer.nextToken();
                 if (tokenizer.hasMoreTokens()) {
                   String password = tokenizer.nextToken();
                   createUser(name, password);
-                }
-                else
-                  if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-                    AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                                  "  - Missing password for user [" + name + "]");
-              }
-              else if (firstToken.equalsIgnoreCase("CF")) {
+                } else
+                  if (logger.isLoggable(BasicLevel.DEBUG))
+                    logger.log(BasicLevel.DEBUG,
+                               "  - Missing password for user [" + name + "]");
+              } else if (firstToken.equalsIgnoreCase("CF")) {
                 if (tokenizer.hasMoreTokens()) {
                   name = tokenizer.nextToken();
                   createCF(name);
                 }
-              }
-              else if (firstToken.equalsIgnoreCase("QCF")) {
+              } else if (firstToken.equalsIgnoreCase("QCF")) {
                 if (tokenizer.hasMoreTokens()) {
                   name = tokenizer.nextToken();
                   createQCF(name);
                 }
-              }
-              else if (firstToken.equalsIgnoreCase("TCF")) {
+              } else if (firstToken.equalsIgnoreCase("TCF")) {
                 if (tokenizer.hasMoreTokens()) {
                   name = tokenizer.nextToken();
                   createTCF(name);
@@ -479,57 +461,50 @@ public class JoramAdapter
               }
             }
           }
-        }
-        // Error while reading one line.
-        catch (IOException exc) {
-          // Error while creating the destination.
+        } catch (IOException exc) {
+          // Error while reading one line.
         } catch (AdminException exc) {
-          AdapterTracing.dbgAdapter.log(BasicLevel.ERROR,
-                                        "Creation failed",exc);
+          // Error while creating the destination.
+          logger.log(BasicLevel.ERROR, "Creation failed",exc);
         }
       }
-    }
-    // No destination to deploy.
-    catch (java.io.FileNotFoundException fnfe) {
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+    } catch (java.io.FileNotFoundException fnfe) {
+      // No destination to deploy.
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG,
         "  - No administration task requested.");
     }
 
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
-      AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
-                                    "Server port is " + serverPort);
+    if (logger.isLoggable(BasicLevel.INFO))
+      logger.log(BasicLevel.INFO,
+                 "Server port is " + serverPort);
 
     started = true;
 
     // Registering MBeans...
     try {
       jmxServer.registerMBean(this,
-                              "joramClient",
-                              "type=JoramAdapter,version=" +
-                              ConnectionMetaData.providerVersion);
+                              jmxRootName,
+                              "type=JoramAdapter,version=" + ConnectionMetaData.providerVersion);
     } catch (Exception e) {
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.WARN))
-        AdapterTracing.dbgAdapter.log(BasicLevel.WARN,
-                                      "  - Could not register JoramAdapterMBean",
-                                      e);
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN,
+                   "  - Could not register JoramAdapterMBean",
+                   e);
     }
 
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
-      AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
-                                    "JORAM adapter " +
-                                    ConnectionMetaData.providerVersion +
-      " successfully deployed.");
+    if (logger.isLoggable(BasicLevel.INFO))
+      logger.log(BasicLevel.INFO,
+                 "JORAM adapter " + ConnectionMetaData.providerVersion + " successfully deployed.");
   }
 
   /**
    * Notifies the adapter to terminate the connections it manages, and if
-   * needed, to shut down the collocated JORAM server.
+   * needed, to shutdown the collocated JORAM server.
    */
   public synchronized void stop() {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
-      AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
-      "JORAM adapter stopping...");
+    if (logger.isLoggable(BasicLevel.INFO))
+      logger.log(BasicLevel.INFO, "JORAM adapter stopping...");
 
     if (! started || stopped)
       return;
@@ -539,7 +514,16 @@ public class JoramAdapter
       unbind((String) boundNames.remove(0));
 
     // Finishing the admin session.
-    joramAdmin.getPlatformAdmin().disconnect();
+    AdminModule.disconnect();
+
+    try {
+      jmxServer.unregisterMBean(jmxRootName,
+                                "type=JoramAdapter,version=" + ConnectionMetaData.providerVersion);
+    } catch (Exception e) {
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN,
+                   "unregisterMBean", e);
+    }
 
     // Closing the outbound connections, if any.
     while (! producers.isEmpty()) {
@@ -565,25 +549,25 @@ public class JoramAdapter
     if (collocated) {
       try {
         AgentServer.stop();
-      } catch (Exception exc) {}
+      } catch (Exception exc) {
+        if (logger.isLoggable(BasicLevel.WARN))
+          logger.log(BasicLevel.WARN, "Error during AgentServer stopping", exc);
+
+      }
     }
 
     stopped = true;
 
     try {
-      jmxServer.unregisterMBean("joramClient",
-                                "type=JoramAdapter,version=" +
-                                ConnectionMetaData.providerVersion);
-    } catch (Exception e) {
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.WARN))
-        AdapterTracing.dbgAdapter.log(BasicLevel.WARN,
-                                      "unregisterMBean",
-                                      e);
+      jmxServer.unregisterMBean(jmxRootName,
+                                "type=JoramAdapter,version=" + ConnectionMetaData.providerVersion);
+    } catch (Exception exc) {
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN, "unregisterMBean", exc);
     }
 
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
-      AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
-      "JORAM adapter successfully stopped.");
+    if (logger.isLoggable(BasicLevel.INFO))
+      logger.log(BasicLevel.INFO, "JORAM adapter successfully stopped.");
   }
 
   /**
@@ -600,9 +584,9 @@ public class JoramAdapter
    */
   public void endpointActivation(MessageEndpointFactory endpointFactory,
                                  ActivationSpec spec) throws ResourceException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                    this + " endpointActivation(" + endpointFactory + ", " + spec + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 this + " endpointActivation(" + endpointFactory + ", " + spec + ")");
 
     if (! started)
       throw new IllegalStateException("Non started resource adapter.");
@@ -616,8 +600,8 @@ public class JoramAdapter
     if (! specImpl.getResourceAdapter().equals(this))
       throw new ResourceException("Supplied ActivationSpec instance associated to an other ResourceAdapter.");
 
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, "Activating Endpoint on JORAM adapter.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Activating Endpoint on JORAM adapter.");
 
     boolean durable =
       specImpl.getSubscriptionDurability() != null
@@ -679,56 +663,53 @@ public class JoramAdapter
 
       createUser(userName, password, identityClass);
 
-      XAConnectionFactory cf = null;
-      org.objectweb.joram.client.jms.XAConnectionFactory connectionFactory = null;
+      ConnectionFactory cf = null;
 
       if (isHa) {
         if (collocated) {
           if (haURL != null) {
-            cf = XAHATcpConnectionFactory.create(haURL);
+            cf = HATcpConnectionFactory.create(haURL);
           } else {
-            cf = XAHALocalConnectionFactory.create();
+            cf = HALocalConnectionFactory.create();
           }
         } else {
-          cf = XAHATcpConnectionFactory.create("hajoram://" + hostName + ':' + serverPort);
+          cf = HATcpConnectionFactory.create("hajoram://" + hostName + ':' + serverPort);
         }
       }  else {
         if (collocated)
-          cf = XALocalConnectionFactory.create();
+          cf = LocalConnectionFactory.create();
         else
-          cf = XATcpConnectionFactory.create(hostName, serverPort);
+          cf = TcpConnectionFactory.create(hostName, serverPort);
       }
 
-      connectionFactory = (org.objectweb.joram.client.jms.XAConnectionFactory) cf;
-      
-      connectionFactory.getParameters().connectingTimer = connectingTimer;
-      connectionFactory.getParameters().cnxPendingTimer = cnxPendingTimer;
-      connectionFactory.getParameters().txPendingTimer = txPendingTimer;
+      cf.getParameters().connectingTimer = connectingTimer;
+      cf.getParameters().cnxPendingTimer = cnxPendingTimer;
+      cf.getParameters().txPendingTimer = txPendingTimer;
 
       if (queueMessageReadMax > 0) {
-        connectionFactory.getParameters().queueMessageReadMax = queueMessageReadMax;
+        cf.getParameters().queueMessageReadMax = queueMessageReadMax;
       }
 
       if (topicAckBufferMax > 0) {
-        connectionFactory.getParameters().topicAckBufferMax = topicAckBufferMax;
+        cf.getParameters().topicAckBufferMax = topicAckBufferMax;
       }
 
       if (topicPassivationThreshold > 0) {
-        connectionFactory.getParameters().topicPassivationThreshold = topicPassivationThreshold;
+        cf.getParameters().topicPassivationThreshold = topicPassivationThreshold;
       }
 
       if (topicActivationThreshold > 0) {
-        connectionFactory.getParameters().topicActivationThreshold = topicActivationThreshold;
+        cf.getParameters().topicActivationThreshold = topicActivationThreshold;
       }
 
       // set identity class for this connectionFactory.
-      ((AbstractConnectionFactory) connectionFactory).setIdentityClassName(identityClass);
-      
-      XAConnection cnx = connectionFactory.createXAConnection(userName, password);
+      cf.setIdentityClassName(identityClass);
 
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                      this + " endpointActivation cnx = " + cnx);
+      XAConnection cnx = cf.createXAConnection(userName, password);
+
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG,
+                   this + " endpointActivation cnx = " + cnx);
 
       // Creating and registering a consumer instance for this endpoint.
       InboundConsumer consumer =
@@ -749,11 +730,11 @@ public class JoramAdapter
     } catch (javax.jms.JMSSecurityException exc) {
       throw new SecurityException("Invalid user identification: " + exc);
     } catch (javax.jms.JMSException exc) {
-      throw new CommException("Could not connect to the JORAM server: "
-                              + exc);
+      throw new CommException("Could not connect to the JORAM server: " + exc);
+    } catch (ConnectException exc) {
+      throw new ResourceException("Problem when handling the JORAM destinations: " + exc);
     } catch (AdminException exc) {
-      throw new ResourceException("Problem when handling the JORAM "
-                                  + "destinations: " + exc);
+      throw new ResourceException("Problem when handling the JORAM destinations: " + exc);
     }
   }
 
@@ -762,14 +743,14 @@ public class JoramAdapter
    */
   public void endpointDeactivation(MessageEndpointFactory endpointFactory,
                                    ActivationSpec spec) {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                    this + " endpointDeactivation(" + endpointFactory + ", " + spec + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 this + " endpointDeactivation(" + endpointFactory + ", " + spec + ")");
     if (! started || stopped)
       return;
 
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
       "Deactivating Endpoint on JORAM adapter.");
 
     ((InboundConsumer) consumers.remove(spec)).close();
@@ -787,9 +768,9 @@ public class JoramAdapter
    * @exception ResourceException      Generic exception.
    */
   public XAResource[] getXAResources(ActivationSpec[] specs) throws ResourceException {
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                    this + " getXAResources(" + specs + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 this + " getXAResources(" + specs + ")");
 
     if (! started)
       throw new IllegalStateException("Non started resource adapter.");
@@ -798,7 +779,7 @@ public class JoramAdapter
 
     ActivationSpecImpl specImpl;
     String userName;
-    XAConnectionFactory connectionFactory = null;
+    ConnectionFactory cf = null;
     XAConnection connection;
     Vector resources = new Vector();
 
@@ -827,47 +808,45 @@ public class JoramAdapter
 
           if (isHa) {
             if (collocated) {
-              if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-                AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, "haURL = " + haURL);
+              if (logger.isLoggable(BasicLevel.DEBUG))
+                logger.log(BasicLevel.DEBUG, "haURL = " + haURL);
               if (haURL != null) {
-                connectionFactory = XAHATcpConnectionFactory.create(haURL);
+                cf = HATcpConnectionFactory.create(haURL);
               } else {
-                connectionFactory = XAHALocalConnectionFactory.create();
+                cf = HALocalConnectionFactory.create();
               }
             } else {
               String urlHa = "hajoram://" + hostName + ":" + serverPort;
-              connectionFactory = XAHATcpConnectionFactory.create(urlHa);
+              cf = HATcpConnectionFactory.create(urlHa);
             }
           }  else {
             if (collocated)
-              connectionFactory = XALocalConnectionFactory.create();
+              cf = LocalConnectionFactory.create();
             else
-              connectionFactory = XATcpConnectionFactory.create(hostName, serverPort);
+              cf = TcpConnectionFactory.create(hostName, serverPort);
           }
 
-          ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().connectingTimer = connectingTimer;
-          ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().cnxPendingTimer = cnxPendingTimer;
-          ((org.objectweb.joram.client.jms.XAConnectionFactory) connectionFactory).getParameters().txPendingTimer = txPendingTimer;
+          cf.getParameters().connectingTimer = connectingTimer;
+          cf.getParameters().cnxPendingTimer = cnxPendingTimer;
+          cf.getParameters().txPendingTimer = txPendingTimer;
 
           // set identity class for this connectionFactory.
-          ((AbstractConnectionFactory) connectionFactory).setIdentityClassName(identityClass);
-          
-          connection =
-            connectionFactory.createXAConnection(userName, password);
+          cf.setIdentityClassName(identityClass);
+
+          connection = cf.createXAConnection(userName, password);
 
           connections.put(userName, connection);
 
           resources.add(connection.createXASession().getXAResource());
         }
-        if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-          AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                        this + " getXAResources resources = " + resources);
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG,
+                     this + " getXAResources resources = " + resources);
       }
     } catch (javax.jms.JMSSecurityException exc) {
       throw new SecurityException("Invalid user identification: " + exc);
     } catch (javax.jms.JMSException exc) {
-      throw new CommException("Could not connect to the JORAM server: "
-                              + exc);
+      throw new CommException("Could not connect to the JORAM server: " + exc);
     }
 
     return (XAResource[]) resources.toArray(new XAResource[resources.size()]);
@@ -891,154 +870,210 @@ public class JoramAdapter
       && hostName.equals(other.hostName)
       && serverPort == other.serverPort;
 
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                    this + " equals = " + res);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 this + " equals = " + res);
     return res;
   }
 
-  public List getDestinations() {
-    return joramAdmin.getDestinations();
+  // Implementation of MBean's interfaces
+
+  /**
+   * Returns the list of the platform's servers' identifiers.
+   * 
+   * @throws AdminException If the request fails.
+   * @throws ConnectException If the connection fails.
+   * 
+   * @deprecated No longer supported next to Joram 5.2
+   */
+  public List getServersIds() throws ConnectException, AdminException {
+    return AdminModule.getServersIds();
   }
 
-  public List getDestinations(int serverId) {
-    return joramAdmin.getDestinations(serverId);
+  /**
+   * Returns the list of all destinations that exist on the local server,
+   * or null if none exist.
+   * <p>
+   * The request fails if the target server does not belong to the platform.
+   * 
+   * @return An array containing the list of all destinations of the local server
+   *         or null if none exists.
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public Destination[] getDestinations() throws ConnectException, AdminException {
+    return getDestinations(AdminModule.getLocalServerId());
   }
 
-  public List getUsers() {
-    return joramAdmin.getUsers();
+  /**
+   * Returns the list of all destinations that exist on a given server,
+   * or null if none exist.
+   * <p>
+   * The request fails if the target server does not belong to the platform.
+   * 
+   * @param serverId The unique identifier of the selected server.
+   * @return An array containing the list of all destinations of the local server
+   *         or null if none exists.
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public Destination[] getDestinations(int serverId) throws ConnectException, AdminException {
+    return AdminModule.getDestinations(serverId);
   }
 
-  public List getUsers(int serverId) {
-    return joramAdmin.getUsers(serverId);
+  /**
+   * Returns the list of all users that exist on a given server, or null if none exist.
+   * <p>
+   * The request fails if the target server does not belong to the platform.
+   * 
+   * @param serverId  Unique identifier of the given server.
+   * @return  An array containing all users defined on the local server, or null if none exist.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public User[] getUsers() throws ConnectException, AdminException {
+    return getUsers(AdminModule.getLocalServerId());
   }
 
-  public List getPlatformServersIds() {
-    return joramAdmin.getPlatformAdmin().getServersIds();
-  }
-
-  public List getLocalUsers() {
-    return joramAdmin.getUsers(serverId);
+  /**
+   * Returns the list of all users that exist on a given server, or null if none exist.
+   * <p>
+   * The request fails if the target server does not belong to the platform.
+   * 
+   * @param serverId  Unique identifier of the given server.
+   * @return  An array containing all users defined on the local server, or null if none exist.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public User[] getUsers(int serverId) throws ConnectException, AdminException {
+    return AdminModule.getUsers(serverId);
   }
 
   public void setDefaultDMQ(int serverId,
                             DeadMQueue dmq) throws ConnectException, AdminException {
-    joramAdmin.setDefaultDMQ(serverId,dmq);
+    AdminModule.setDefaultDMQ(serverId,dmq);
   }
 
   public void setDefaultDMQId(int serverId,
                               String dmqId) throws ConnectException, AdminException {
-    joramAdmin.setDefaultDMQId(serverId,dmqId);
+    AdminModule.setDefaultDMQId(serverId,dmqId);
   }
 
   public DeadMQueue getDefaultDMQ(int serverId) throws ConnectException, AdminException {
-    return joramAdmin.getDefaultDMQ(serverId);
+    return AdminModule.getDefaultDMQ(serverId);
   }
 
   public String getDefaultDMQId() throws ConnectException, AdminException {
-    return joramAdmin.getDefaultDMQId();
+    return AdminModule.getDefaultDMQId();
   }
 
   public String getDefaultDMQId(int serverId) throws ConnectException, AdminException {
-    return joramAdmin.getDefaultDMQId(serverId);
+    return AdminModule.getDefaultDMQId(serverId);
   }
 
   public DeadMQueue getDefaultDMQ() throws ConnectException, AdminException {
-    return joramAdmin.getDefaultDMQ();
+    return AdminModule.getDefaultDMQ();
+  }
+
+  /**
+   * @see org.objectweb.joram.client.jms.admin.JoramAdminMBean#getDefaultThreshold()
+   */
+  public int getDefaultThreshold() throws ConnectException, AdminException {
+    return AdminModule.getDefaultThreshold();
+  }
+
+  /**
+   * @see org.objectweb.joram.client.jms.admin.JoramAdminMBean#getDefaultThreshold(int)
+   */
+  public int getDefaultThreshold(int serverId) throws ConnectException, AdminException {
+    return AdminModule.getDefaultThreshold(serverId);
+  }
+
+  /**
+   * @see org.objectweb.joram.client.jms.admin.JoramAdminMBean#setDefaultThreshold(int)
+   */
+  public void setDefaultThreshold(int threshold) throws ConnectException, AdminException {
+    AdminModule.setDefaultThreshold(threshold);
+  }
+
+  /**
+   * @see org.objectweb.joram.client.jms.admin.JoramAdminMBean#setDefaultThreshold(int, int)
+   */
+  public void setDefaultThreshold(int serverId, int threshold) throws ConnectException, AdminException {
+    AdminModule.setDefaultThreshold(serverId, threshold);
   }
 
   public void exit() {
-    joramAdmin.exit();
+    AdminModule.disconnect();
   }
 
   /**
    * wait before abort a request.
+   * @throws ConnectException 
    */
-  public void setTimeOutToAbortRequest(long timeOut) {
-    joramAdmin.setTimeOutToAbortRequest(timeOut);
+  public void setTimeOutToAbortRequest(long timeOut) throws ConnectException {
+    AdminModule.setTimeOutToAbortRequest(timeOut);
   }
 
   /**
    * wait before abort a request.
+   * @throws ConnectException 
    */
-  public long getTimeOutToAbortRequest() {
-    return joramAdmin.getTimeOutToAbortRequest();
+  public long getTimeOutToAbortRequest() throws ConnectException {
+    return AdminModule.getTimeOutToAbortRequest();
   }
 
   /**
    * Creates or retrieves a user on the underlying JORAM server.
    *
    * @exception AdminException   If the creation fails.
+   * @throws ConnectException 
    */
-  public void createUser(String name,
-                         String password) throws AdminException {
-    try {
-      User.create(name, password);
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
-        AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
-                                      "  - User [" + name + "] has been created.");
-    } catch (ConnectException exc) {
-      throw new AdminException("createUser() failed: admin connection "
-                               + "has been lost.");
-    }
+  public User createUser(String name,
+                         String password) throws AdminException, ConnectException {
+    return createUser(name, password, AdminModule.getLocalServerId(), SimpleIdentity.class.getName());
   }
 
   /**
    * Creates or retrieves a user on the underlying JORAM server.
    *
    * @exception AdminException   If the creation fails.
+   * @throws ConnectException 
    */
-  public void createUser(String name, String password, String identityClass)
-    throws AdminException {
-    try {
-      User.create(name, password, AdminModule.getLocalServerId(), identityClass);
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
-        AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
-                                      "  - User [" + name + "] has been created.");
-    }
-    catch (ConnectException exc) {
-      throw new AdminException("createUser() failed: admin connection "
-                               + "has been lost.");
-    }
-  }
-  
-  /**
-   * Creates or retrieves a user on the underlying JORAM server.
-   *
-   * @exception AdminException   If the creation fails.
-   */
-  public void createUser(String name, String password, int serverId, String identityClass)
-    throws AdminException {
-    try {
-      User.create(name, password, serverId, identityClass);
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
-        AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
-                                      "  - User [" + name + "] has been created.");
-    }
-    catch (ConnectException exc) {
-      throw new AdminException("createUser() failed: admin connection "
-                               + "has been lost.");
-    }
+  public User createUser(String name, String password,
+                         String identityClass) throws AdminException, ConnectException {
+    return createUser(name, password, AdminModule.getLocalServerId(), identityClass);
   }
 
   /**
    * Creates or retrieves a user on the underlying JORAM server.
    *
    * @exception AdminException   If the creation fails.
+   * @throws ConnectException 
    */
-  public void createUser(String name, String password, int serverId)
-    throws AdminException {
-    try {
-      User.create(name, password, serverId);
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
-        AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
-                                      "  - User [" + name + "] has been created.");
-    } catch (ConnectException exc) {
-      throw new AdminException("createUser() failed: admin connection "
-                               + "has been lost.");
-    }
+  public User createUser(String name, String password,
+                         int serverId) throws AdminException, ConnectException {
+    return createUser(name, password, serverId, SimpleIdentity.class.getName());
   }
-  
+
+  /**
+   * Creates or retrieves a user on the underlying JORAM server.
+   *
+   * @exception AdminException   If the creation fails.
+   * @throws ConnectException 
+   */
+  public User createUser(String name, String password,
+                         int serverId,
+                         String identityClass) throws AdminException, ConnectException {
+    User user = AdminModule.createUser(name, password, serverId, identityClass);
+    user.registerMBean(jmxRootName);
+    return user;
+  }
+
   /**
    * Creates a non managed connection factory and binds it to JNDI.
    */
@@ -1051,10 +1086,9 @@ public class JoramAdapter
 
       Object factory = mcf.createConnectionFactory();
       bind(name, factory);
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
-        AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
-                                      "  - ConnectionFactory [" + name
-                                      + "] has been created and bound.");
+      if (logger.isLoggable(BasicLevel.INFO))
+        logger.log(BasicLevel.INFO,
+                   "  - ConnectionFactory [" + name + "] has been created and bound.");
     } catch (Exception exc) {}
   }
 
@@ -1070,10 +1104,10 @@ public class JoramAdapter
 
       Object factory = mcf.createConnectionFactory();
       bind(name, factory);
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
-        AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
-                                      "  - QueueConnectionFactory [" + name
-                                      + "] has been created and bound.");
+      if (logger.isLoggable(BasicLevel.INFO))
+        logger.log(BasicLevel.INFO,
+                   "  - QueueConnectionFactory [" + name
+                   + "] has been created and bound.");
     } catch (Exception exc) {}
   }
 
@@ -1089,10 +1123,10 @@ public class JoramAdapter
 
       Object factory = mcf.createConnectionFactory();
       bind(name, factory);
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
-        AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
-                                      "  - TopicConnectionFactory [" + name
-                                      + "] has been created and bound.");
+      if (logger.isLoggable(BasicLevel.INFO))
+        logger.log(BasicLevel.INFO,
+                   "  - TopicConnectionFactory [" + name
+                   + "] has been created and bound.");
     } catch (Exception exc) {}
   }
 
@@ -1103,34 +1137,44 @@ public class JoramAdapter
    */
   void adminConnect() throws AdminException {
     try {
-      ConnectionFactory factory;
+      org.objectweb.joram.client.jms.ConnectionFactory cf;
 
       if (isHa) {
         if (collocated) {
-          if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-            AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, "haURL = " + haURL);
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "haURL = " + haURL);
           if (haURL != null) {
-            factory = HATcpConnectionFactory.create(haURL);
+            cf = HATcpConnectionFactory.create(haURL);
           } else {
-            factory = HALocalConnectionFactory.create();
+            cf = HALocalConnectionFactory.create();
           }
         } else {
           String urlHa = "hajoram://" + hostName + ":" + serverPort;
-          factory = HATcpConnectionFactory.create(urlHa);
+          cf = HATcpConnectionFactory.create(urlHa);
         }
       } else {
         if (collocated)
-          factory = LocalConnectionFactory.create();
+          cf = LocalConnectionFactory.create();
         else
-          factory = TcpConnectionFactory.create(hostName, serverPort);
+          cf = TcpConnectionFactory.create(hostName, serverPort);
       }
 
-      ((org.objectweb.joram.client.jms.ConnectionFactory) factory).getParameters().connectingTimer = 60;
-      
-      joramAdmin = new JoramAdmin(factory, rootName, rootPasswd, identityClass);
+      cf.getParameters().connectingTimer = 60;
+
+      AdminModule.connect(cf, rootName, rootPasswd, identityClass);
+
+      // Registering MBeans...
+      try {
+        jmxServer.registerMBean(this,
+                                jmxRootName,
+                                "type=JoramAdapter,version=" + ConnectionMetaData.providerVersion);
+      } catch (Exception e) {
+        if (logger.isLoggable(BasicLevel.WARN))
+          logger.log(BasicLevel.WARN,
+                     "  - Could not register JoramAdapterMBean", e);
+      }
     } catch (ConnectException exc) {
-      throw new AdminException("Admin connection can't be established: "
-                               + exc.getMessage());
+      throw new AdminException("Admin connection can't be established: " + exc.getMessage());
     }
   }
 
@@ -1163,37 +1207,25 @@ public class JoramAdapter
    *
    * @param serverId   The identifier of the server where deploying the queue.
    * @param name       The name of the queue.
-   * @param className  The queue class name.
-   * @param prop       The queue properties.
    *
    * @exception AdminException   If the creation fails.
+   * @throws ConnectException 
    */
-  public Destination createQueue(int serverId,
-                                 String name,
-                                 String className,
-                                 Properties prop) throws AdminException {
-    try {
-      Context ctx = new InitialContext();
-      return (Destination) ctx.lookup(name);
-    } catch (javax.naming.NamingException exc) {
-      try {
-        String shortName = removePrefix(name);
-        Queue queue = Queue.create(serverId,
-                                   shortName,
-                                   className,
-                                   prop);
-        queue.setFreeReading();
-        queue.setFreeWriting();
-        if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
-          AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
-                                        "  - Queue [" + shortName + "] has been created.");
-        bind(name, queue);
-        return queue;
-      } catch (ConnectException exc2) {
-        throw new AdminException("createQueue() failed: admin connection "
-                                 + "has been lost.");
-      }
-    }
+  public Destination createQueue(int serverId, String name) throws AdminException, ConnectException {
+    return createQueue(serverId, name, "org.objectweb.joram.mom.dest.Queue", null);
+  }
+
+  /**
+   * Creates or retrieves a queue destination on the underlying JORAM server,
+   * (re)binds the corresponding <code>Queue</code> instance.
+   *
+   * @param name       The name of the queue.
+   *
+   * @exception AdminException   If the creation fails.
+   * @throws ConnectException 
+   */
+  public Destination createQueue(String name) throws AdminException, ConnectException {
+    return createQueue(AdminModule.getLocalServerId(), name, "org.objectweb.joram.mom.dest.Queue", null);
   }
 
   /**
@@ -1202,34 +1234,63 @@ public class JoramAdapter
    *
    * @param serverId   The identifier of the server where deploying the queue.
    * @param name       The name of the queue.
+   * @param className  The queue class name.
+   * @param prop       The queue properties.
    *
    * @exception AdminException   If the creation fails.
+   * @throws ConnectException 
    */
-  public Destination createQueue(int serverId, String name) throws AdminException {
-    return createQueue(serverId,
-                       name,
-                       "org.objectweb.joram.mom.dest.Queue",
-                       null);
+  public Destination createQueue(int serverId,
+                                 String name,
+                                 String className,
+                                 Properties prop) throws AdminException, ConnectException {
+    Destination queue = null;
+
+    try {
+      Context ctx = new InitialContext();
+      queue = (Destination) ctx.lookup(name);
+    } catch (javax.naming.NamingException exc) {
+      String shortName = removePrefix(name);
+      queue = AdminModule.createQueue(serverId, shortName, className, prop);
+      queue.setFreeReading();
+      queue.setFreeWriting();
+
+      if (logger.isLoggable(BasicLevel.INFO))
+        logger.log(BasicLevel.INFO,
+                   "  - Queue [" + shortName + "] has been created.");
+
+      bind(name, queue);
+    }
+
+    queue.registerMBean(jmxRootName);
+    return queue;
   }
 
   /**
-   * Creates or retrieves a queue destination on the underlying JORAM server,
-   * (re)binds the corresponding <code>Queue</code> instance.
+   * Creates or retrieves a topic destination on the underlying JORAM server,
+   * (re)binds the corresponding <code>Topic</code> instance.
    *
-   * @param name       The name of the queue.
+   * @param serverId   The identifier of the server where deploying the topic.
+   * @param name       The name of the topic.
    *
    * @exception AdminException   If the creation fails.
+   * @throws ConnectException 
    */
-  public Destination createQueue(String name) throws AdminException {
-    try {
-      return createQueue(joramAdmin.getPlatformAdmin().getLocalServerId(),
-                         name,
-                         "org.objectweb.joram.mom.dest.Queue",
-                         null);
-    } catch (ConnectException exc2) {
-      throw new AdminException("createQueue() failed: admin connection "
-                               + "has been lost.");
-    }
+  public Destination createTopic(int serverId, String name) throws AdminException, ConnectException {
+    return createTopic(serverId, name, "org.objectweb.joram.mom.dest.Topic", null);
+  }
+
+  /**
+   * Creates or retrieves a topic destination on the underlying JORAM server,
+   * (re)binds the corresponding <code>Topic</code> instance.
+   *
+   * @param name       The name of the topic.
+   *
+   * @exception AdminException   If the creation fails.
+   * @throws ConnectException 
+   */
+  public Destination createTopic(String name) throws AdminException, ConnectException {
+    return createTopic(AdminModule.getLocalServerId(), name, "org.objectweb.joram.mom.dest.Topic", null);
   }
 
   /**
@@ -1242,69 +1303,32 @@ public class JoramAdapter
    * @param prop       The topic properties.
    *
    * @exception AdminException   If the creation fails.
+   * @throws ConnectException 
    */
   public Destination createTopic(int serverId,
                                  String name,
                                  String className,
-                                 Properties prop) throws AdminException {
+                                 Properties prop) throws AdminException, ConnectException {
+    Destination topic = null;
+
     try {
       Context ctx = new InitialContext();
-      return (Destination) ctx.lookup(name);
+      topic = (Destination) ctx.lookup(name);
     } catch (javax.naming.NamingException exc) {
-      try {
-        String shortName = removePrefix(name);
-        Topic topic = Topic.create(serverId,
-                                   shortName,
-                                   className,
-                                   prop);
-        topic.setFreeReading();
-        topic.setFreeWriting();
-        if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.INFO))
-          AdapterTracing.dbgAdapter.log(BasicLevel.INFO,
-                                        "  - Topic [" + shortName + "] has been created.");
-        bind(name, topic);
-        return topic;
-      } catch (ConnectException exc2) {
-        throw new AdminException("createTopic() failed: admin connection "
-                                 + "has been lost.");
-      }
-    }
-  }
+      String shortName = removePrefix(name);
+      topic = AdminModule.createTopic(serverId, shortName, className, prop);
+      topic.setFreeReading();
+      topic.setFreeWriting();
 
-  /**
-   * Creates or retrieves a topic destination on the underlying JORAM server,
-   * (re)binds the corresponding <code>Topic</code> instance.
-   *
-   * @param serverId   The identifier of the server where deploying the topic.
-   * @param name       The name of the topic.
-   *
-   * @exception AdminException   If the creation fails.
-   */
-  public Destination createTopic(int serverId, String name) throws AdminException {
-    return createTopic(serverId,
-                       name,
-                       "org.objectweb.joram.mom.dest.Topic",
-                       null);
-  }
+      if (logger.isLoggable(BasicLevel.INFO))
+        logger.log(BasicLevel.INFO,
+                   "  - Topic [" + shortName + "] has been created.");
 
-  /**
-   * Creates or retrieves a topic destination on the underlying JORAM server,
-   * (re)binds the corresponding <code>Topic</code> instance.
-   *
-   * @param name       The name of the topic.
-   *
-   * @exception AdminException   If the creation fails.
-   */
-  public Destination createTopic(String name) throws AdminException {
-    try {
-      return createTopic(joramAdmin.getPlatformAdmin().getLocalServerId(),
-                         name,
-                         "org.objectweb.joram.mom.dest.Topic",
-                         null);
-    } catch (ConnectException exc2) {
-      throw new AdminException("createTopic() failed: admin connection "
-                               + "has been lost.");
+      bind(name, topic);
     }
+
+    topic.registerMBean(jmxRootName);
+    return topic;
   }
 
   /**
@@ -1318,12 +1342,12 @@ public class JoramAdapter
       Destination dest = (Destination) ctx.lookup(name);
       ctx.close();
 
-      if (dest instanceof org.objectweb.joram.client.jms.Destination)
-        ((org.objectweb.joram.client.jms.Destination) dest).delete();
+      dest.delete();
       unbind(name);
     } catch (Exception exc) {
-      throw new AdminException("removeDestination(" + name +
-      ") failed: use Destination.delete()");
+      logger.log(BasicLevel.WARN,
+                 "removeDestination failed: " + name, exc);
+      throw new AdminException("removeDestination(" + name + ") failed.");
     }
   }
 
@@ -1335,9 +1359,9 @@ public class JoramAdapter
       if (! boundNames.contains(name))
         boundNames.add(name);
     } catch (Exception e) {
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.WARN))
-        AdapterTracing.dbgAdapter.log(BasicLevel.WARN,
-                                      "Binding failed:  bind(" + name +"," + obj +")", e);
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN,
+                   "Binding failed:  bind(" + name +"," + obj +")", e);
     }
   }
 
@@ -1349,14 +1373,6 @@ public class JoramAdapter
       boundNames.remove(name);
     } catch (Exception exc) {}
   }
-
-  /** Deserializing method. */
-  private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
-    in.defaultReadObject();
-    consumers = new Hashtable();
-    producers = new Vector();
-  }
-
 
   // ------------------------------------------
   // --- JavaBean setter and getter methods ---
@@ -1376,7 +1392,7 @@ public class JoramAdapter
   public void setRootName(String rn) {
     rootName = rn;
   }
-  
+
   public void setRootPasswd(String rp) { 
     rootPasswd = rp;
   }
@@ -1482,7 +1498,7 @@ public class JoramAdapter
   public String getIdentityClass() {
     return identityClass;
   }
-  
+
   public String getServerName() {
     return serverName;
   }
@@ -1555,7 +1571,6 @@ public class JoramAdapter
     return new Integer(multiThreadSyncDelay);
   }
 
-
   /**
    * @return the DeleteDurableSubscription
    */
@@ -1573,25 +1588,38 @@ public class JoramAdapter
   }
 
   /**
-   * Export the repository content to an XML file
-   * - only the destinations objects are retrieved in this version
-   * - xml script format of the admin objects (joramAdmin.xml)
-   * @param exportDir target directory where the export file will be put
-   * @throws AdminException if an error occurs
-   */
-  public void exportRepositoryToFile(String exportDir) throws AdminException {
-    joramAdmin.exportRepositoryToFile(exportDir);
-  }
-
-  /**
-   * Reload the joramAdmin.xml file
+   * Executes the XML configuration file.
+   * 
    * @param the path for the joramAdmin file
    * @throws AdminException if an error occurs
    */
-  public boolean executeXMLAdminJMX(String path)
-  throws Exception {
-    boolean executeAdmin = JoramAdmin.executeXMLAdmin(path);
-    adminConnect();
-    return executeAdmin;
+  public boolean executeXMLAdmin(String path) throws Exception {
+    return AdminModule.executeXMLAdmin(path);
+  }
+
+  /**
+   * Export the repository content to an XML file with default filename.
+   * - only the destinations objects are retrieved in this version
+   * - xml script format of the admin objects (joramAdmin.xml)
+   * 
+   * @param exportDir       target directory where the export file will be put
+   * @throws AdminException if an error occurs
+   */
+  public void exportRepositoryToFile(String exportDir) throws AdminException {
+    AdminModule.exportRepositoryToFile(exportDir, adminFileExportXML);
+  }
+
+  /**
+   * Export the repository content to an XML file
+   * - only the destinations objects are retrieved in this version
+   * - xml script format of the admin objects (joramAdmin.xml)
+   * 
+   * @param exportDir       target directory where the export file will be put
+   * @param exportFilename  filename of the export file
+   * @throws AdminException if an error occurs
+   */
+  public void exportRepositoryToFile(String exportDir,
+                                     String exportFilename) throws AdminException {
+    AdminModule.exportRepositoryToFile(exportDir, exportFilename);
   }
 }

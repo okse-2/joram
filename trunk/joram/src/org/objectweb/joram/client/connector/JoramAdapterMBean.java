@@ -25,17 +25,7 @@ package org.objectweb.joram.client.connector;
 import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.JoramAdminMBean;
 
-import java.net.ConnectException;
-import java.util.List;
-
-public interface JoramAdapterMBean
-  extends JoramAdminMBean {
-
-  /** Platform servers identifiers. */
-  public List getPlatformServersIds();
-
-  public List getLocalUsers();
-
+public interface JoramAdapterMBean extends JoramAdminMBean {
   /**
    * Path to the directory containing JORAM's configuration files
    * (<code>a3servers.xml</code>, <code>a3debug.cfg</code>
@@ -62,11 +52,21 @@ public interface JoramAdapterMBean
 
   public java.lang.String getAdminFileExportXML();
 
+  /**
+   * Export the repository content to an XML file with default filename.
+   * - only the destinations objects are retrieved in this version
+   * - xml script format of the admin objects (joramAdmin.xml)
+   * 
+   * @param exportDir       target directory where the export file will be put
+   * @throws AdminException if an error occurs
+   */
+  public void exportRepositoryToFile(String exportDir) throws AdminException;
+
   public java.lang.Boolean getCollocatedServer();
 
   public java.lang.String getHostName();
 
-  public java.lang.Integer getServerPort();
+  public Integer getServerPort();
 
   /**
    * Duration in seconds during which connecting is attempted (connecting
@@ -97,10 +97,4 @@ public interface JoramAdapterMBean
   public java.lang.Boolean  getDeleteDurableSubscription();
 
   public void removeDestination(String name) throws AdminException;
-
-  public void setDefaultDMQId(int serverId, String dmqId) throws ConnectException, AdminException;
-  
-  public String getDefaultDMQId(int serverId) throws ConnectException, AdminException;
-  
-  public String getDefaultDMQId() throws ConnectException, AdminException;
 }

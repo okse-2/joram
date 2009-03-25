@@ -28,6 +28,7 @@ import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
+import javax.jms.MessageFormatException;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TemporaryTopic;
@@ -45,9 +46,9 @@ import fr.dyade.aaa.util.Debug;
  * TemporaryTopic for the responses. It provides a request method that sends the request
  * message to the administration topic of the connected server and waits for its reply.
  * 
- * @see AdminModule
+ * @see AdminWrapper
  */
-public class AdminRequestor {
+public final class AdminRequestor {
   // Session used to send requests and receive replies.
   private javax.jms.Session session;
   // The administration topic of the connected server.
@@ -56,11 +57,33 @@ public class AdminRequestor {
   private TemporaryTopic tmpTopic;
   // The message producer to send requests.
   private MessageProducer producer;
-  // The message consuler to receive replies.
+  // The message consumer to receive replies.
   private MessageConsumer consumer;
-  // The identifier of the connected server.
-  private int localServerId;
   
+  public static final String REQUEST_TIMEOUT_PROP = "org.objectweb.joram.client.jms.admin.requestTimeout";
+
+  public final static long DEFAULT_REQUEST_TIMEOUT = 60000;
+
+  private long requestTimeout = DEFAULT_REQUEST_TIMEOUT;
+  
+  /**
+   * Set the maximum time in ms before aborting request.
+   * 
+   * @param requestTimeout the maximum time in ms before aborting request.
+   */
+  public void setRequestTimeout(long requestTimeout) {
+    this.requestTimeout = requestTimeout;
+  }
+
+  /**
+   * Returns the maximum time in ms before aborting request.
+   * 
+   * @return the maximum time in ms before aborting request.
+   */
+  public long getRequestTimeout() {
+    return requestTimeout;
+  }
+
   public static Logger logger = Debug.getLogger(AdminRequestor.class.getName());
   
   /**
@@ -89,16 +112,6 @@ public class AdminRequestor {
       if (session != null) session.close();
       throw exc;
     }
-    
-    try {
-      String topicName = topic.getTopicName();
-      int idx0 = topicName.indexOf(".");
-      int idx1 = topicName.indexOf(".", idx0 +1);
-      localServerId =  Integer.parseInt(topicName.substring(idx0 +1, idx1));
-    } catch (JMSException exc) {
-      // Should never happen.
-      localServerId = -1;
-    }
   }
 
   /**
@@ -113,11 +126,9 @@ public class AdminRequestor {
    * 
    * @throws JMSException if Joram fails to complete the request due to some internal error.
    */
-  public AdminReply request(AdminRequest request,
-                            long timeout) throws AdminException, ConnectException {
+  public synchronized AdminReply request(AdminRequest request) throws AdminException, ConnectException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "AdminRequestor.request(" + request + ',' + timeout + ')');
+      logger.log(BasicLevel.DEBUG, "AdminRequestor.request(" + request + ')');
 
     AdminMessage requestMsg = new AdminMessage();
     javax.jms.Message replyMsg = null;
@@ -127,12 +138,12 @@ public class AdminRequestor {
       // Sends the an AdminMessage containing the request to the administration topic.
       requestMsg.setAdminMessage(request);
       requestMsg.setJMSReplyTo(tmpTopic);
-      producer.send(requestMsg, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, timeout);
+      producer.send(requestMsg, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, requestTimeout);
 
       // Selects the message containing the reply.
       String correlationId = requestMsg.getJMSMessageID();
       while (true) {
-        replyMsg = consumer.receive(timeout);
+        replyMsg = consumer.receive(requestTimeout);
         if (replyMsg == null) {
           throw new JMSException("Interrupted request");
         } else {
@@ -141,14 +152,22 @@ public class AdminRequestor {
           if (logger.isLoggable(BasicLevel.WARN))
             logger.log(BasicLevel.WARN, "AdminRequestor.request() bad correlation identifier.");
         }
-        reply = (AdminReply) ((AdminMessage) replyMsg).getAdminMessage();
       }
     } catch (JMSException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG,
                    "AdminRequestor.request() connection failed.", exc);
       throw new ConnectException("Connection failed: " + exc.getMessage());
+    }
+    
+    try {
+      reply = (AdminReply) ((AdminMessage) replyMsg).getAdminMessage();
     } catch (ClassCastException exc) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG,
+                   "AdminRequestor.request() invalid server reply.", exc);
+      throw new AdminException("Invalid server reply: " + exc.getMessage());
+    } catch (MessageFormatException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG,
                    "AdminRequestor.request() invalid server reply.", exc);
@@ -160,19 +179,23 @@ public class AdminRequestor {
   }
 
   /**
+   * Aborts the running request.
    * 
-   * @throws JMSException
+   * @throws ConnectConnection A problem occurs with the connection.
    */
-  public void abort() throws JMSException {
+  public void abort() throws ConnectException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "AdminRequestor.abort()");
-    
-    consumer.close();
-    consumer = session.createConsumer(tmpTopic);
-  }
 
-  public int getLocalServerId() {
-    return localServerId;
+    try {
+      consumer.close();
+      consumer = session.createConsumer(tmpTopic);
+    } catch (JMSException exc) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG,
+                   "AdminRequestor.abort() connection failed.", exc);
+      throw new ConnectException("Connection failed: " + exc.getMessage());
+    }
   }
 
   /**
