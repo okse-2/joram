@@ -28,11 +28,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.objectweb.joram.client.jms.admin.AdminException;
-import org.objectweb.joram.client.jms.admin.NameAlreadyUsedException;
-import org.objectweb.joram.client.jms.admin.ServerIdAlreadyUsedException;
-import org.objectweb.joram.client.jms.admin.StartFailureException;
-import org.objectweb.joram.client.jms.admin.UnknownServerException;
 import org.objectweb.joram.shared.stream.StreamUtil;
 
 /**
@@ -131,24 +126,6 @@ public class AdminReply extends AbstractAdminMessage {
   /** Returns the error code. */
   public final int getErrorCode() {
     return errorCode;
-  }
-
-  /** Throws an exception corresponding to the error code. */
-  public final void throwException() throws AdminException {
-    if (! succeeded()) {
-      switch (getErrorCode()) {
-      case AdminReply.NAME_ALREADY_USED:
-        throw new NameAlreadyUsedException(getInfo());
-      case AdminReply.START_FAILURE:
-        throw new StartFailureException(getInfo());
-      case AdminReply.SERVER_ID_ALREADY_USED:
-        throw new ServerIdAlreadyUsedException(getInfo());
-      case AdminReply.UNKNOWN_SERVER:
-        throw new UnknownServerException(getInfo());
-      default:
-        throw new AdminException(getInfo());
-      }
-    }
   }
 
   public String toString() {
