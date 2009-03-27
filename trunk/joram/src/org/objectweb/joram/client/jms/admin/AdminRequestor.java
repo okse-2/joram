@@ -174,8 +174,27 @@ public final class AdminRequestor {
       throw new AdminException("Invalid server reply: " + exc.getMessage());
     }
 
-    reply.throwException();
+    throwException(reply);
     return reply;
+  }
+  
+  /** Throws an exception corresponding to the error code of the reply if needed. 
+   * @param reply */
+  private final void throwException(AdminReply reply) throws AdminException {
+    if (! reply.succeeded()) {
+      switch (reply.getErrorCode()) {
+      case AdminReply.NAME_ALREADY_USED:
+        throw new NameAlreadyUsedException(reply.getInfo());
+      case AdminReply.START_FAILURE:
+        throw new StartFailureException(reply.getInfo());
+      case AdminReply.SERVER_ID_ALREADY_USED:
+        throw new ServerIdAlreadyUsedException(reply.getInfo());
+      case AdminReply.UNKNOWN_SERVER:
+        throw new UnknownServerException(reply.getInfo());
+      default:
+        throw new AdminException(reply.getInfo());
+      }
+    }
   }
 
   /**
