@@ -1,6 +1,5 @@
 /*
- * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,13 +20,17 @@
  */
 package org.objectweb.joram.mom.proxies.tcp;
 
-import org.objectweb.joram.mom.proxies.*;
+import java.io.IOException;
+import java.util.Date;
 
+import org.objectweb.joram.mom.proxies.ReliableConnectionContext;
 import org.objectweb.joram.shared.JoramTracing;
-
+import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  * Handles the TCP connection. Starts the
@@ -39,16 +42,13 @@ import fr.dyade.aaa.agent.AgentId;
  * @see TcpProxyService
  * @see TcpConnectionListener
  */
-public class TcpConnection {
+public class TcpConnection implements TcpConnectionMBean {
 
   private IOControl ioctrl;
 
   private AgentId proxyId;
 
-  private int key;
-
-  private AckedQueue replyQueue;
-
+  private ReliableConnectionContext ctx;
   /**
    * The reader thread responsible for
    * reading the requests (input).
@@ -68,26 +68,36 @@ public class TcpConnection {
   private TcpProxyService proxyService;
 
   private boolean closeConnection;
+  
+  private Identity identity;
+  
+  private Date creationDate;
 
   /**
    * Creates a new TCP connection.
    *
    * @param sock the TCP connection socket
    * @param proxyService the TCP proxy service
+   * @param identity 
    */
-  public TcpConnection(
-    IOControl ioctrl,
-    AgentId proxyId,
-    AckedQueue replyQueue,
-    int key,
-    TcpProxyService proxyService,
-    boolean closeConnection) {    
+  public TcpConnection(IOControl ioctrl, ReliableConnectionContext ctx, AgentId proxyId,
+      TcpProxyService proxyService, Identity identity) throws IOException {
+    this.creationDate = new Date();
     this.ioctrl = ioctrl;
     this.proxyId = proxyId;
-    this.replyQueue = replyQueue;
-    this.key = key;
+    this.ctx = ctx;
     this.proxyService = proxyService;
-    this.closeConnection = closeConnection;
+    this.closeConnection = ctx.getHeartBeat() == 0;
+    this.identity = identity;
+    try {
+      MXWrapper.registerMBean(this, "Joram#" + AgentServer.getServerId(), getMBeanName());
+    } catch (Exception e) {
+      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "registerMBean", e);
+    }
+  }
+
+  private String getMBeanName() {
+    return proxyService.getMBeanName() + ",id=" + identity.getUserName() + "[" + ctx.getKey() + "]";
   }
 
   public final AgentId getProxyId() {
@@ -95,7 +105,7 @@ public class TcpConnection {
   }
 
   public final int getKey() {
-    return key;
+    return ctx.getKey();
   }
 
   /**
@@ -103,19 +113,10 @@ public class TcpConnection {
    */
   void start() throws Exception {
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
-        BasicLevel.DEBUG, 
-        "TcpConnection.start()");
+      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpConnection.start()");
     try {
-      tcpWriter = new TcpWriter(
-	ioctrl,
-        replyQueue,
-        this);
-      tcpReader = new TcpReader(
-        ioctrl,
-	proxyId,
-        this,
-        closeConnection);
+      tcpWriter = new TcpWriter(ioctrl, ctx.getQueue(), this);
+      tcpReader = new TcpReader(ioctrl, proxyId, this, closeConnection);
       proxyService.registerConnection(this);
       tcpWriter.start();
       tcpReader.start();
@@ -130,16 +131,40 @@ public class TcpConnection {
    * writer threads.
    * Closes the socket.
    */
-  void close() {
+  public void close() {
     if (tcpWriter != null)
       tcpWriter.stop();
     if (tcpReader != null)
       tcpReader.stop();
     if (ioctrl != null)
       ioctrl.close();
+    try {
+      MXWrapper.unregisterMBean("Joram#" + AgentServer.getServerId(), getMBeanName());
+    } catch (Exception e) {
+      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "unregisterMBean", e);
+    }
     ioctrl = null;
-    proxyService.unregisterConnection(
-      TcpConnection.this);
+    proxyService.unregisterConnection(this);
+  }
+
+  public String getUserName() {
+    return identity.getUserName();
+  }
+
+  public String getAddress() {
+    return ioctrl.getSocket().toString();
+  }
+
+  public Date getCreationDate() {
+    return creationDate;
+  }
+
+  public long getReceivedCount() {
+    return ioctrl.getReceivedCount();
+  }
+
+  public long getSentCount() {
+    return ioctrl.getSentCount();
   }
 
 }
