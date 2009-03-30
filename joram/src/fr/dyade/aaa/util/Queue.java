@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -45,6 +45,11 @@ public class Queue extends Vector {
   private boolean stopping;
 
   /**
+   * <code>true</code> if the queue has been closed.
+   */
+  private boolean closed;
+
+  /**
    * Constructs a <code>Queue</code> instance.
    */
   public Queue() {
@@ -73,8 +78,10 @@ public class Queue extends Vector {
    * @return  The object at the top of this queue. 
    */
   public synchronized Object get() throws InterruptedException {
-    while (size() == 0)
+    while (size() == 0 && !closed)
       wait();
+    if (closed)
+      throw new InterruptedException();
 
     return elementAt(0);
   }
@@ -105,8 +112,10 @@ public class Queue extends Vector {
    * @return  The object at the top of this queue. 
    */
   public synchronized Object getAndPop() throws InterruptedException {
-    while (size() == 0)
+    while (size() == 0 && !closed)
       wait();
+    if (closed)
+      throw new InterruptedException();
 
     Object obj = elementAt(0);
     removeElementAt(0);
@@ -120,6 +129,7 @@ public class Queue extends Vector {
   /** Authorizes the use of the queue by producers. */
   public void start() {
     stopping = false;
+    closed = false;
   }
 
   /**
@@ -129,5 +139,15 @@ public class Queue extends Vector {
   public synchronized void stop() throws InterruptedException {
     stopping = true;
     if (size() != 0) wait();
+  }
+
+  /**
+   * Closes the queue. Interrupts all threads blocked on {@link #get()} with an
+   * {@link InterruptedException}.
+   */
+  public synchronized void close() {
+    stopping = true;
+    closed = true;
+    notifyAll();
   }
 }
