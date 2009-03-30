@@ -1,3 +1,31 @@
++==============================================================================
+| 2009/03/30 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adapts Joram's bundles to OSGi 4.1 specification.
+ Use of Felix 1.4.1.
+ Fit to the new administration API of Joram.
++==============================================================================
+| 2009/03/25 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Change administration software architecture:
+ - AdminRequestor objects to manage administration requests over a Joram
+ connection,
+ - AdminWrapper objects to perform administration actions to a Joram server,
+ - AdminModule for compatibility reasons (static administration interface),
+ - JoramAdmin for JMX administration.
+ Allows pending message observation in queue mbean (Shared MessageJMXWrapper
+with subscriptions.
++==============================================================================
+| 2009/03/19 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds default hostname (localhost) and port (16010) properties in connection
+factories. Use these properties for ConnectionFactory.create method with no
+parameter.
++==============================================================================
+| 2009/03/09 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Merges unified, queue and topic connection factories.
+ Queue and topic connection factories are now deprecated.
 ###############################################################################
 # 2009/03/04 | Joram 5.2.1 tag.
 ###############################################################################
@@ -74,6 +102,11 @@ messages.
 | 2008/10/02 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Bug fix: always call onException on closed connection (DemultiplexerDaemon).
+ +==============================================================================
+| 2008/09/30 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix logging level for errors during JMX registering in Queue and Topic client
+objects.
 +==============================================================================
 | 2008/09/29 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
