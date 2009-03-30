@@ -99,6 +99,7 @@
     	<include name="org/objectweb/joram/shared/security/SimpleIdentity.java"/>
 
       <include name="org/objectweb/joram/client/**/*.java"/>
+      <exclude name="org/objectweb/joram/client/tools/**/*.java"/>
       <include name="org/objectweb/joram/mom/**/*.java"/>
       <exclude name="org/objectweb/joram/mom/amqp/**/*.java"/>
       <!-- End - Needed for JORAM -->
@@ -278,12 +279,6 @@
       <metainf dir="${licenses.dir}">
         <include name="NOTICE.TXT"/>
       </metainf>
-      <fileset dir="${obj.dir}">
-        <include name="org/objectweb/joram/client/tools/admin/*.class"/>
-      </fileset>
-      <fileset dir="${src.dir}">
-        <include name="org/objectweb/joram/client/tools/admin/icons/*.png"/>
-      </fileset>
     </jar>
   </target>
 
@@ -496,6 +491,27 @@
         <include name="com/scalagent/joram/osgi/test2/*.class"/>
       </fileset>
     </jar>
+
+    <jar jarfile="${ship.dir}/lib/joram-test3-bundle.jar"
+         manifest="${src.dir}/com/scalagent/joram/osgi/test3/manifest.mf">
+      <fileset dir="${obj.dir}">
+        <include name="com/scalagent/joram/osgi/test3/*.class"/>
+      </fileset>
+    </jar>
+
+    <jar jarfile="${ship.dir}/lib/joram-test4-bundle.jar"
+         manifest="${src.dir}/com/scalagent/joram/osgi/test4/manifest.mf">
+      <fileset dir="${obj.dir}">
+        <include name="com/scalagent/joram/osgi/test4/*.class"/>
+      </fileset>
+    </jar>
+
+    <jar jarfile="${ship.dir}/lib/joram-test5-bundle.jar"
+         manifest="${src.dir}/com/scalagent/joram/osgi/test5/manifest.mf">
+      <fileset dir="${obj.dir}">
+        <include name="com/scalagent/joram/osgi/test5/*.class"/>
+      </fileset>
+    </jar>
   </target>
 
   <!-- JAVADOC --> 
@@ -512,7 +528,7 @@
              windowtitle="Joram ${version} Platform Documentation"
              doctitle="Joram ${version} Platform Documentation"
              header="Joram ${version}"
-             bottom="Copyright &#xA9; 2005 Scalagent - All rights reserved">
+             bottom="Copyright &#xA9; 2000 - 2009 Scalagent D.T. - All rights reserved">
       <doctitle><![CDATA[<h1>Joram(TM) Documentation</h1>]]></doctitle>
       <package name="org.objectweb.joram.*"/>
     </javadoc>
@@ -531,7 +547,7 @@
              use="false"
              windowtitle="Joram(TM) Platform Documentation"
              doctitle="Joram(TM) Platform Documentation"
-             bottom="Copyright &#xA9; 2005 Scalagent - All rights reserved">
+             bottom="Copyright &#xA9; 2000 - 2009 Scalagent D.T. - All rights reserved">
       <doctitle><![CDATA[<h1>Joram(TM) Documentation</h1>]]></doctitle>
       <package name="*"/>
     </javadoc>
