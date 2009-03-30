@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -52,6 +52,10 @@ public class IOControl {
   private int windowSize;
 
   private int unackCounter;
+  
+  private long receivedCount;
+
+  private long sentCount;
 
   public IOControl(Socket sock) throws IOException {
     this(sock, -1);
@@ -76,6 +80,7 @@ public class IOControl {
 
     try {
       nos.send(msg.getId(), msg.getAckId(), msg.getObject());
+      sentCount++;
       unackCounter = 0;
     } catch (IOException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
@@ -126,10 +131,11 @@ public class IOControl {
         int len = StreamUtil.readIntFrom(bis);
         long messageId = StreamUtil.readLongFrom(bis);
         long ackId = StreamUtil.readLongFrom(bis);
-        AbstractJmsRequest obj =  (AbstractJmsRequest) AbstractJmsMessage.read(bis);
+        AbstractJmsRequest obj = (AbstractJmsRequest) AbstractJmsMessage.read(bis);
+        receivedCount++;
 
-	if (messageId > inputCounter) {
-	  inputCounter = messageId;
+        if (messageId > inputCounter) {
+          inputCounter = messageId;
           synchronized (this) {
             if (unackCounter < windowSize) {
               unackCounter++;
@@ -137,11 +143,10 @@ public class IOControl {
               send(new ProxyMessage(-1, messageId, null));
             }
           }
-	  return new ProxyMessage(messageId, ackId, obj);      
-	} else {
-	  logger.log(BasicLevel.DEBUG,
-                     "IOControl.receive: already received message: " + messageId + " -> " + obj);
-	}
+          return new ProxyMessage(messageId, ackId, obj);
+        } else {
+          logger.log(BasicLevel.DEBUG, "IOControl.receive: already received message: " + messageId + " -> " + obj);
+        }
       }
     } catch (IOException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
@@ -167,4 +172,17 @@ public class IOControl {
       sock = null;
     } catch (IOException exc) {}
   }
+  
+  Socket getSocket() {
+    return sock;
+  }
+  
+  public long getSentCount() {
+    return sentCount;
+  }
+
+  public long getReceivedCount() {
+    return receivedCount;
+  }
+  
 }
