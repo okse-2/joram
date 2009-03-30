@@ -22,6 +22,7 @@
  */
 package org.objectweb.joram.client.jms.local;
 
+import java.util.Date;
 import java.util.Timer;
 
 import javax.jms.JMSException;
@@ -32,6 +33,7 @@ import org.objectweb.joram.mom.notifications.GetProxyIdNot;
 import org.objectweb.joram.mom.proxies.ConnectionManager;
 import org.objectweb.joram.mom.proxies.OpenConnectionNot;
 import org.objectweb.joram.mom.proxies.StandardConnectionContext;
+import org.objectweb.joram.mom.proxies.local.LocalConnections;
 import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
@@ -40,15 +42,22 @@ import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.util.management.MXWrapper;
 
-public class LocalRequestChannel implements RequestChannel {
+public class LocalRequestChannel implements RequestChannel, LocalRequestChannelMBean {
   
   private Identity identity;
 
   private AgentId proxyId;
 
   private StandardConnectionContext ctx;
+  
+  private Date creationDate;
+  
+  private long sentCount;
 
+  private long receivedCount;
+  
   public LocalRequestChannel(Identity identity) throws JMSException {
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
@@ -63,6 +72,10 @@ public class LocalRequestChannel implements RequestChannel {
   public void connect() throws Exception {
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "LocalConnection.connect()");
+
+    if (!LocalConnections.getCurrentInstance().isActivated()) {
+      throw new IllegalStateException("Local connections have been deactivated.");
+    }
 
     if (AgentServer.getStatus() != AgentServer.Status.STARTED) {
       if ((AgentServer.getStatus() != AgentServer.Status.INITIALIZED) &&
@@ -92,7 +105,8 @@ public class LocalRequestChannel implements RequestChannel {
     OpenConnectionNot ocn = new OpenConnectionNot(false, 0);
     try {
       ocn.invoke(proxyId);
-      ctx = (StandardConnectionContext)ocn.getConnectionContext();
+      ctx = (StandardConnectionContext) ocn.getConnectionContext();
+      creationDate = new Date();
     } catch (Exception exc) {
       if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
@@ -100,25 +114,56 @@ public class LocalRequestChannel implements RequestChannel {
       jmse.setLinkedException(exc);
       throw jmse;
     }
+
+    LocalConnections.getCurrentInstance().addLocalConnection(this);
+    try {
+      MXWrapper.registerMBean(this, "Joram#" + AgentServer.getServerId(), getMBeanName());
+    } catch (Exception e) {
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "registerMBean", e);
+    }
   }
 
-  public void send(AbstractJmsRequest request) 
-    throws Exception {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log( BasicLevel.DEBUG, 
-                                  "LocalConnection.send(" + request + ')');
+  private String getMBeanName() {
+    return "type=Connection,mode=local,id=" + identity.getUserName() + "[" + ctx.getKey() + "]";
+  }
 
+  public void send(AbstractJmsRequest request) throws Exception {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "LocalConnection.send(" + request + ')');
     ConnectionManager.sendToProxy(proxyId, ctx.getKey(), request, request);
+    sentCount++;
   }
 
   public AbstractJmsReply receive() throws Exception {
-    AbstractJmsReply reply = (AbstractJmsReply)ctx.getQueue().get();
+    AbstractJmsReply reply = (AbstractJmsReply) ctx.getQueue().get();
     ctx.getQueue().pop();
-
+    receivedCount++;
     return reply;
   }
 
   public void close() {
-    // Nothing to do
+    ctx.getQueue().close();
+    LocalConnections.getCurrentInstance().removeLocalConnection(this);
+    try {
+      MXWrapper.unregisterMBean("Joram#" + AgentServer.getServerId(), getMBeanName());
+    } catch (Exception e) {
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "unregisterMBean", e);
+    }
+  }
+
+  public Date getCreationDate() {
+    return creationDate;
+  }
+
+  public long getReceivedCount() {
+    return receivedCount;
+  }
+
+  public long getSentCount() {
+    return sentCount;
+  }
+
+  public String getUserName() {
+    return identity.getUserName();
   }
 }
