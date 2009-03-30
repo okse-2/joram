@@ -1695,6 +1695,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="className" value="joram.local.LocalTest"/>
       <param name="jndiconf" value="local/jndi.properties"/>
       <param name="a3conf" value="local/a3servers.xml"/>
+      <param name="testid" value="local.test"/>
       <param name="jvmargs" value=""/>
       <param name="args" value=""/>
     </antcall>
@@ -1707,6 +1708,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="className" value="joram.local.CommitTest"/>
       <param name="jndiconf" value="local/jndi.properties"/>
       <param name="a3conf" value="local/a3servers.xml"/>
+      <param name="testid" value="local.test1"/>
       <param name="jvmargs" value=""/>
       <param name="args" value=""/>
     </antcall>
@@ -1718,7 +1720,9 @@ description=" --> launch all exceptionlistener tests">
       <param name="className" value="joram.local.Test2"/>
       <param name="jndiconf" value="local/jndi.properties"/>
       <param name="a3conf" value="local/a3servers1.xml"/>
+      <param name="testid" value="local.test2"/>
       <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
     </antcall>
   </target>
 
@@ -4016,8 +4020,9 @@ description=" --> launch all exceptionlistener tests">
 
   <target name="jca.test" depends="init.a3props,compile"
           description=" --> test joram connector">
-    <antcall target="test.run" inheritAll="true">
+    <antcall target="jca.test.run" inheritAll="true">
       <param name="className" value="joram.connector.Connector"/>
+      <param name="testid" value="jca.test"/>
       <param name="jvmargs" value=""/>
       <param name="args" value=""/>
       <param name="a3conf" value="connector/a3servers.xml"/>
@@ -4026,12 +4031,19 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 
+  <target name="jca.test.run">
+    <antcall target="init.test" inheritAll="true"/>
+    <copy file="connector/joramAdminExport.xml" todir="${test.dir}"/>
+    <antcall target="test.start" inheritAll="true"/>
+  </target>
+
   <!--  start dmq tests -->
   <target name="dmq.TestDmq1" depends="init.a3props,compile"
           description=" --> check threshold of specific queue and user">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="joram.dmq.TestDmq1"/>
+      <param name="testid" value="dmq.TestDmq1"/>
       <param name="jndiconf" value="dmq/jndi.properties"/>
       <param name="a3conf" value="dmq/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -4043,6 +4055,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="joram.dmq.TestDmq2"/>
+      <param name="testid" value="dmq.TestDmq2"/>
       <param name="jndiconf" value="dmq/jndi.properties"/>
       <param name="a3conf" value="dmq/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -4054,6 +4067,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="joram.dmq.TestDmq3"/>
+      <param name="testid" value="dmq.TestDmq3"/>
       <param name="jndiconf" value="dmq/jndi.properties"/>
       <param name="a3conf" value="dmq/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -4065,6 +4079,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="joram.dmq.TestDmq4"/>
+      <param name="testid" value="dmq.TestDmq4"/>
       <param name="jndiconf" value="dmq/jndi.properties"/>
       <param name="a3conf" value="dmq/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -4077,6 +4092,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="joram.dmq.TestDmq5"/>
+      <param name="testid" value="dmq.TestDmq5"/>
       <param name="jndiconf" value="dmq/jndi.properties"/>
       <param name="a3conf" value="dmq/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -4090,6 +4106,7 @@ description=" --> launch all exceptionlistener tests">
       <antcall target="test.run" inheritAll="true">
         <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
         <param name="className" value="joram.dmq.TestDmq6"/>
+        <param name="testid" value="dmq.TestDmq6"/>
         <param name="jndiconf" value="dmq/jndi.properties"/>
         <param name="a3conf" value="dmq/a3servers.xml"/>
         <param name="joramAdmin" value="dmq/joramAdmin.xml"/>
@@ -4113,6 +4130,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="joram.dmq.ChainedDMQ"/>
+      <param name="testid" value="dmq.ChainedDMQ"/>
       <param name="jndiconf" value="dmq/jndi.properties"/>
       <param name="a3conf" value="dmq/a3servers.xml"/>
       <param name="jvmargs" value=""/>
