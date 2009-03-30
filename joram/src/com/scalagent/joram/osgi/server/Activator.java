@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.objectweb.joram.client.jms.ConnectionFactory;
+import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
@@ -191,8 +192,8 @@ public class Activator implements BundleActivator {
     /**
      * Returns the list of all destinations that exist on the server.
      */
-    public List getDestinations() throws Exception {
-      List destinations = null;
+    public Destination[] getDestinations() throws Exception {
+      Destination[] destinations = null;
       try {
         AdminModule.collocatedConnect(rootUserName, rootPassword);
         destinations = AdminModule.getDestinations();
@@ -205,8 +206,8 @@ public class Activator implements BundleActivator {
     /**
      * Returns the list of all users that exist on a given server.
      */
-    public List getUsers() throws Exception {
-      List users = null;
+    public User[] getUsers() throws Exception {
+      User[] users = null;
       try {
         AdminModule.collocatedConnect(rootUserName, rootPassword);
         users = AdminModule.getUsers();

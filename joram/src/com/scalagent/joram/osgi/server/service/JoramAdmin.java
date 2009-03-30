@@ -1,11 +1,12 @@
 package com.scalagent.joram.osgi.server.service;
 
 import java.io.Reader;
-import java.util.List;
 
 import org.objectweb.joram.client.jms.ConnectionFactory;
+import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
+import org.objectweb.joram.client.jms.admin.User;
 
 /**
  * Interface of the OSGI service that enables to ..
@@ -59,10 +60,10 @@ public interface JoramAdmin {
   /**
    * Returns the list of all destinations that exist on the server.
    */
-  public List getDestinations() throws Exception;
+  public Destination[] getDestinations() throws Exception;
 
   /**
    * Returns the list of all users that exist on the server.
    */
-  public List getUsers() throws Exception;
+  public User[] getUsers() throws Exception;
 }

@@ -1,28 +1,31 @@
 package com.scalagent.joram.osgi.client.service;
 
 import java.io.Reader;
-import java.util.List;
 import java.util.Hashtable;
 
 import javax.naming.Context;
+import javax.naming.NamingException;
 
 import org.objectweb.joram.client.jms.ConnectionFactory;
+import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
+import org.objectweb.joram.client.jms.admin.User;
 
 /**
- * Interface of the OSGI service that enables to ..
+ *  Interface of the OSGI service that enables the handling and the administration
+ * of Joram through a TCP connection.
  */
 public interface JoramClient {
   /**
-   *
+   * Performs a static connection for administration.
    */
   public void connect(String host, int port,
                       String name, String password,
                       int cnxTimer) throws Exception;
 
   /**
-   *
+   * Closes the administration static connection.
    */
   public void disconnect();
 
@@ -32,7 +35,7 @@ public interface JoramClient {
   public ConnectionFactory getTcpConnectionFactory(String hostname, int port) throws Exception;
 
   /**
-   *
+   * Get a default initial context for JNDI requests.
    */
   public Context getInitialContext() throws Exception;
 
@@ -40,6 +43,18 @@ public interface JoramClient {
    *
    */
   public Context getInitialContext(Hashtable prop) throws Exception;
+
+  /**
+   * Retrieves the named object.
+   * 
+   * @param name  the name of the object to look up
+   * @return  the object bound to name
+   * 
+   * @throws NamingException  if a naming exception is encountered
+   * 
+   * @see Context#lookup(String)
+   */
+  public Object lookup(String name) throws NamingException;
 
   /**
    *
@@ -51,7 +66,7 @@ public interface JoramClient {
    *
    * @exception Exception   If the creation fails.
    */
-  public void createUser(String name, String password) throws Exception;
+  public User createUser(String name, String password) throws Exception;
 
   /**
    * Creates or retrieves a queue destination on the underlying JORAM server,
@@ -74,10 +89,10 @@ public interface JoramClient {
   /**
    * Returns the list of all destinations that exist on the server.
    */
-  public List getDestinations() throws Exception;
+  public Destination[] getDestinations() throws Exception;
 
   /**
    * Returns the list of all users that exist on the server.
    */
-  public List getUsers() throws Exception;
+  public User[] getUsers() throws Exception;
 }
