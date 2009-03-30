@@ -21,22 +21,41 @@
  */
 package org.objectweb.joram.client.tools.admin;
 
+import java.net.ConnectException;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Enumeration;
-import java.net.ConnectException;
-import javax.naming.*;
-import javax.swing.tree.*;
-import javax.jms.*;
 
-import org.objectweb.joram.client.jms.admin.*;
-import org.objectweb.joram.client.jms.tcp.*;
+import javax.jms.TemporaryQueue;
+import javax.jms.TemporaryTopic;
+import javax.naming.Binding;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NameClassPair;
+import javax.naming.NameNotFoundException;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreeNode;
+
+import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
-import org.objectweb.joram.client.jms.Destination;
-
-import org.objectweb.util.monolog.api.*;
+import org.objectweb.joram.client.jms.admin.AdminException;
+import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.DeadMQueue;
+import org.objectweb.joram.client.jms.admin.Server;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.XAQueueTcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.XATopicTcpConnectionFactory;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 public class AdminController {
 
@@ -193,7 +212,7 @@ public class AdminController {
 
   void updateDestinations(int serverId, MutableTreeNode destinationRoot) throws ConnectException,
       AdminException {
-    List destList = AdminModule.getDestinations(serverId);
+    List destList = AdminModule.getDestinationsList(serverId);
     for (Iterator i = destList.iterator(); i.hasNext();) {
       Destination dest = (Destination) i.next();
       DestinationTreeNode destNode;
@@ -213,7 +232,7 @@ public class AdminController {
   }
 
   void updateUsers(int serverId, MutableTreeNode userRoot) throws ConnectException, AdminException {
-    List userList = AdminModule.getUsers(serverId);
+    List userList = AdminModule.getUsersList(serverId);
     for (Iterator i = userList.iterator(); i.hasNext();) {
       User user = (User) i.next();
       UserTreeNode userNode = new UserTreeNode(this, user);
