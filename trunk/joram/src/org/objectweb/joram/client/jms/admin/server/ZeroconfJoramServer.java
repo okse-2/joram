@@ -18,7 +18,6 @@ import org.objectweb.joram.client.jms.admin.Server;
 import org.objectweb.joram.client.jms.admin.StartFailureException;
 import org.objectweb.joram.client.jms.admin.UnknownServerException;
 import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.mom.proxies.tcp.TcpProxyService;
 
 import fr.dyade.aaa.agent.AgentServer;
 
@@ -200,10 +199,6 @@ public class ZeroconfJoramServer {
     int res = ois.readInt();
     fis.close();
     return res;
-  }
-
-  public final static int getTcpEntryPointPort() {
-    return TcpProxyService.getListenPort();
   }
 
   public static void stop() {
