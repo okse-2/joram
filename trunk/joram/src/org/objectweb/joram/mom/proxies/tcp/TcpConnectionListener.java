@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -31,7 +31,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import org.objectweb.joram.mom.notifications.GetProxyIdNot;
-import org.objectweb.joram.mom.proxies.AckedQueue;
 import org.objectweb.joram.mom.proxies.GetConnectionNot;
 import org.objectweb.joram.mom.proxies.OpenConnectionNot;
 import org.objectweb.joram.mom.proxies.ReliableConnectionContext;
@@ -53,10 +52,6 @@ import fr.dyade.aaa.util.Daemon;
  * right user's proxy.
  */
 public class TcpConnectionListener extends Daemon {
-  /**
-   * The server socket listening to connections from the JMS clients.
-   */
-  private ServerSocket serverSocket;
   
   /**
    * The TCP proxy service 
@@ -72,11 +67,8 @@ public class TcpConnectionListener extends Daemon {
    * @param proxyService the TCP proxy service of this
    * connection listener
    */
-  public TcpConnectionListener(ServerSocket serverSocket,
-                               TcpProxyService proxyService,
-                               int timeout) {
+  public TcpConnectionListener(TcpProxyService proxyService, int timeout) {
     super("TcpConnectionListener");
-    this.serverSocket = serverSocket;
     this.proxyService = proxyService;
     this.timeout = timeout;
   }
@@ -97,7 +89,7 @@ public class TcpConnectionListener extends Daemon {
     loop:
     while (running) {
       canStop = true;
-      if (serverSocket != null) {
+      if (proxyService.getServerSocket() != null) {
         try {
           acceptConnection();
         } catch (Exception exc) {
@@ -147,7 +139,7 @@ public class TcpConnectionListener extends Daemon {
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpConnectionListener.acceptConnection()");
 
-    Socket sock = serverSocket.accept();
+    Socket sock = proxyService.getServerSocket().accept();
     String inaddr = sock.getInetAddress().getHostAddress();
 
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
@@ -204,17 +196,15 @@ public class TcpConnectionListener extends Daemon {
       }
 
       IOControl ioctrl;
-      AckedQueue replyQueue;
+      ReliableConnectionContext ctx;
       if (key == -1) {
         OpenConnectionNot ocn = new OpenConnectionNot(true, heartBeat);
         ocn.invoke(proxyId);
         StreamUtil.writeTo(0, nos);
-        ReliableConnectionContext ctx =
-          (ReliableConnectionContext)ocn.getConnectionContext();
+        ctx = (ReliableConnectionContext) ocn.getConnectionContext();
         key = ctx.getKey();
-        StreamUtil.writeTo(ctx.getKey(), nos);
+        StreamUtil.writeTo(key, nos);
         nos.send();
-        replyQueue = ctx.getQueue();
         ioctrl = new IOControl(sock);
       } else {
         GetConnectionNot gcn = new GetConnectionNot(key);
@@ -228,10 +218,7 @@ public class TcpConnectionListener extends Daemon {
           nos.send();
           return;
         }
-        ReliableConnectionContext ctx =
-          (ReliableConnectionContext)gcn.getConnectionContext();
-        replyQueue = ctx.getQueue();
-        heartBeat = ctx.getHeartBeat();
+        ctx = (ReliableConnectionContext) gcn.getConnectionContext();
         StreamUtil.writeTo(0, nos);
         nos.send();
         ioctrl = new IOControl(sock, ctx.getInputCounter());
@@ -246,8 +233,7 @@ public class TcpConnectionListener extends Daemon {
       // wait for requests.
       sock.setSoTimeout(0);
 
-      TcpConnection tcpConnection = new TcpConnection(ioctrl, proxyId,
-                                                      replyQueue, key, proxyService, heartBeat == 0);
+      TcpConnection tcpConnection = new TcpConnection(ioctrl, ctx, proxyId, proxyService, identity);
       tcpConnection.start();
     } catch (IllegalAccessException exc) {
       if (JoramTracing.dbgProxy.isLoggable(BasicLevel.ERROR))
@@ -267,10 +253,10 @@ public class TcpConnectionListener extends Daemon {
   }
     
   protected void close() {
+    ServerSocket srvSocket = proxyService.getServerSocket();
     try {
-      if (serverSocket != null)
-        serverSocket.close();
+      if (!srvSocket.isClosed())
+        srvSocket.close();
     } catch (IOException exc) {}
-    serverSocket = null;
   }
 }
