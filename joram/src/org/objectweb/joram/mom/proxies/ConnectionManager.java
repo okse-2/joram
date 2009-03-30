@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France-Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -22,7 +22,10 @@
  */
 package org.objectweb.joram.mom.proxies;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import org.objectweb.joram.mom.dest.AdminTopic;
@@ -36,12 +39,13 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  * A <code>ConnectionManager</code> is started as a service in each
  * MOM agent server for allowing connections with external clients.
  */
-public class ConnectionManager {
+public class ConnectionManager implements ConnectionManagerMBean {
   
   public static final String MULTI_CNX_SYNC = 
     "org.objectweb.joram.mom.proxies.ConnectionManager.multiCnxSync";
@@ -53,6 +57,17 @@ public class ConnectionManager {
   
   private static long multiThreadSyncDelay = 
     AgentServer.getLong(MULTI_CNX_SYNC_DELAY, 1).longValue();
+
+  private static final String MBEAN_NAME = "type=Connection";
+  
+  /** <code>true</code> if new connections are accepted. */
+  private boolean activated = true;
+  
+  /** List of registered managers (tcp, ssl, local, ...) */
+  private List managers = new ArrayList();
+
+  /** Unique ConnectionManager instance. */
+  private static ConnectionManager currentInstance;
   
   public static final void sendToProxy(AgentId proxyId, int cnxKey,
       AbstractJmsRequest req, Object msg) {
@@ -152,6 +167,12 @@ public class ConnectionManager {
 
         Channel.sendTo(adminTopic.getId(), adminNot);
       }
+      
+      try {
+        MXWrapper.registerMBean(getCurrentInstance(), "Joram#" + AgentServer.getServerId(), MBEAN_NAME);
+      } catch (Exception e) {
+        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "registerMBean", e);
+      }
     }
   }
 
@@ -190,5 +211,92 @@ public class ConnectionManager {
   public static void stopService() {
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "ConnectionManager.stop()");
+    try {
+      MXWrapper.unregisterMBean("Joram#" + AgentServer.getServerId(), MBEAN_NAME);
+    } catch (Exception e) {
+      JoramTracing.dbgProxy.log(BasicLevel.ERROR, "unregisterMBean", e);
+    }
+    getCurrentInstance().removeAllManagers();
+  }
+
+  public void activate() {
+    for (Iterator iterator = managers.iterator(); iterator.hasNext();) {
+      ConnectionManagerMBean cnxManager = (ConnectionManagerMBean) iterator.next();
+      cnxManager.activate();
+    }
+    activated = true;
+  }
+
+  public void closeAllConnections() {
+    for (Iterator iterator = managers.iterator(); iterator.hasNext();) {
+      ConnectionManagerMBean cnxManager = (ConnectionManagerMBean) iterator.next();
+      cnxManager.closeAllConnections();
+    }
+  }
+
+  public void deactivate() {
+    for (Iterator iterator = managers.iterator(); iterator.hasNext();) {
+      ConnectionManagerMBean cnxManager = (ConnectionManagerMBean) iterator.next();
+      cnxManager.deactivate();
+    }
+    activated = false;
+  }
+
+  public int getRunningConnectionsCount() {
+    int count = 0;
+    for (Iterator iterator = managers.iterator(); iterator.hasNext();) {
+      ConnectionManagerMBean cnxManager = (ConnectionManagerMBean) iterator.next();
+      count += cnxManager.getRunningConnectionsCount();
+    }
+    return count;
+  }
+
+  public boolean isActivated() {
+    return activated;
+  }
+
+  public static ConnectionManager getCurrentInstance() {
+    if (currentInstance == null) {
+      currentInstance = new ConnectionManager();
+    }
+    return currentInstance;
+  }
+
+  /**
+   * Registers a new manager.
+   */
+  public void addManager(ConnectionManagerMBean manager) {
+    managers.add(manager);
+    try {
+      MXWrapper.registerMBean(manager, "Joram#" + AgentServer.getServerId(), manager.getMBeanName());
+    } catch (Exception e) {
+      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "registerMBean", e);
+    }
+  }
+
+  /**
+   * Removes a registered manager.
+   */
+  public void removeManager(ConnectionManagerMBean manager) {
+    boolean isRemoved = managers.remove(manager);
+    if (isRemoved) {
+      try {
+        MXWrapper.unregisterMBean("Joram#" + AgentServer.getServerId(), manager.getMBeanName());
+      } catch (Exception e) {
+        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "unregisterMBean", e);
+      }
+    }
+  }
+  
+  private void removeAllManagers() {
+    ConnectionManagerMBean[] array = (ConnectionManagerMBean[]) managers
+        .toArray(new ConnectionManagerMBean[managers.size()]);
+    for (int i = 0; i < array.length; i++) {
+      removeManager(array[i]);
+    }
+  }
+
+  public String getMBeanName() {
+    return MBEAN_NAME;
   }
 }

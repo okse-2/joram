@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -51,6 +51,13 @@ public class SSLTcpProxyService extends TcpProxyService {
   private final static String KS_PASS = "org.objectweb.joram.keystorepass";
   private final static String KS_TYPE = "org.objectweb.joram.keystoretype";
   private final static String SSLCONTEXT = "org.objectweb.joram.sslCtx";
+  
+  private static final String MBEAN_NAME = "type=Connection,mode=tcp-ssl";
+  
+  /**
+   * The proxy service reference (used to stop it).
+   */
+  private static SSLTcpProxyService proxyService;
 
   /**
    * Initializes the SSLTCP entry point by creating a
@@ -81,25 +88,21 @@ public class SSLTcpProxyService extends TcpProxyService {
 
     // Create the socket here in order to throw an exception
     // if the socket can't be created (even if firstTime is false).
-    ServerSocket serverSocket;
-
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgProxy.log(
         BasicLevel.DEBUG, "SSLTcpProxyService.init() - binding to address " + address + ", port " + port);
 
-    serverSocket = createServerSocket(port, backlog, address);
-    int poolSize = AgentServer.getInteger(POOL_SIZE_PROP, DEFAULT_POOL_SIZE).intValue();
-
-    int timeout = AgentServer.getInteger(SO_TIMEOUT_PROP, DEFAULT_SO_TIMEOUT).intValue();
-    
-    proxyService = new SSLTcpProxyService(serverSocket, poolSize, timeout);
+    proxyService = new SSLTcpProxyService(port, backlog, address);
     proxyService.start();
+    
   }
   
-  public SSLTcpProxyService(ServerSocket serverSocket,
-                            int poolSize,
-                            int timeout) {
-    super(serverSocket,poolSize,timeout);
+  public String getMBeanName() {
+    return MBEAN_NAME;
+  }
+
+  public SSLTcpProxyService(int port, int backlog, String address) throws Exception {
+    super(port, backlog, address);
   }
 
   private static ServerSocketFactory createServerSocketFactory() throws Exception {
@@ -131,7 +134,7 @@ public class SSLTcpProxyService extends TcpProxyService {
     return ctx.getServerSocketFactory();
   }
 
-  private static ServerSocket createServerSocket(int port, int backlog, String address) throws Exception {
+  protected ServerSocket createServerSocket(int port, int backlog, String address) throws Exception {
     ServerSocketFactory serverSocketFactory = createServerSocketFactory();
 
     SSLServerSocket serverSocket = null;
