@@ -1,4 +1,9 @@
 +==============================================================================
+| 2009/03/31 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds JMX monitoring for connections. Additionally, a server can now be
+deactivated to avoid creation of new connections.
++==============================================================================
 | 2009/03/30 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Adapts Joram's bundles to OSGi 4.1 specification.
