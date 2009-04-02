@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,8 +17,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Freyssinet Andre (ScalAgent D.T.)
- * Contributor(s): Badolle Fabien (ScalAgent D.T.)
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package joram.local;
 
@@ -33,40 +33,41 @@ import fr.dyade.aaa.agent.AgentServer;
  *
  */
 public class Test2  extends joram.framework.TestCase{
-    public static void main (String args[]) throws Exception {
-	new Test2().run();
+  public static void main (String args[]) throws Exception {
+    new Test2().run();
+  }
+  
+  public void run(){
+    try {
+      try {
+        System.out.println("Should throw an Exception.");
+        ConnectionFactory cf =  LocalConnectionFactory.create();
+        Connection cnx = cf.createConnection();
+      } catch (Exception exc) {
+        exc.printStackTrace();
+      }
+
+      AgentServer.init((short) 0, "s0", null);
+
+      try {
+        System.out.println("Should print a WARN.");
+        ConnectionFactory cf =  LocalConnectionFactory.create();
+        //	Connection cnx = cf.createConnection();
+        //	cnx.close();
+      } catch (Exception exc) {
+        exc.printStackTrace();
+      }
+
+      AgentServer.start();
+
+
+      Thread.sleep(1000L);
+    }catch(Throwable exc){
+      exc.printStackTrace();
+      error(exc);
+    }finally {
+      AgentServer.stop();
+      endTest();
     }
-    public void run(){
-	try {
-	    try {
-		System.out.println("Should throw an Exception.");
-		ConnectionFactory cf =  LocalConnectionFactory.create();
-		Connection cnx = cf.createConnection();
-	    } catch (Exception exc) {
-		exc.printStackTrace();
-	    }
-	  
-	    AgentServer.init((short) 0, "s0", null);
-	 
-	    try {
-		System.out.println("Should print a WARN.");
-		ConnectionFactory cf =  LocalConnectionFactory.create();
-		//	Connection cnx = cf.createConnection();
-		//	cnx.close();
-	    } catch (Exception exc) {
-		exc.printStackTrace();
-	    }
-	  
-	    AgentServer.start();
-	  
-	  
-	    Thread.sleep(1000L);
-	}catch(Throwable exc){
-	    exc.printStackTrace();
-	    error(exc);
-	}finally {
-	    AgentServer.stop();
-	    endTest();
-	}
-    }
+  }
 }

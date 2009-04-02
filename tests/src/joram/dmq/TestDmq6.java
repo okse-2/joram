@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2007 ScalAgent Distributed Technologies
+ * Copyright (C)  2007 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s):Badolle Fabien (ScalAgent D.T.)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
 package joram.dmq;
@@ -50,9 +50,9 @@ public class TestDmq6 extends TestCase {
       System.out.println("admin ok");
 
       // check 
-      List liste = AdminModule.getDestinations();
-      for(int i = 0;i < liste.size(); i++){
-        Destination dest = (Destination)liste.get(i);
+      Destination[] list1 = AdminModule.getDestinations();
+      for(int i = 0;i < list1.length; i++){
+        Destination dest = list1[i];
 
         if(dest.getType().equals("queue")){
           assertTrue( dest.isFreelyWriteable() );
@@ -85,9 +85,9 @@ public class TestDmq6 extends TestCase {
       assertTrue(dmq1);
 
 
-      liste = AdminModule.getUsers();
-      for(int i = 0;i < liste.size();i++){
-        User user = (User)liste.get(i);
+      User[] list2 = AdminModule.getUsers();
+      for(int i = 0;i < list2.length;i++){
+        User user = list2[i];
         if(user.getName().equals("anonymous")){
           assertEquals(2,user.getThreshold());
         }
