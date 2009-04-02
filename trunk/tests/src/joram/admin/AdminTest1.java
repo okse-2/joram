@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2006 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C)  2006 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -40,6 +40,7 @@ import javax.naming.InitialContext;
 
 import joram.framework.TestCase;
 
+import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
@@ -128,21 +129,19 @@ public class AdminTest1 extends TestCase {
 
     connection.start();
 
-    List destinations = AdminModule.getDestinations(0);
+    Destination[] destinations = AdminModule.getDestinations(0);
 
     System.out.println("destinations=" + destinations);
 
-    assertTrue("Wrong destinations count (" + destinations.size() + ')', 
-               destinations.size() == 5);
+    assertTrue("Wrong destinations count (" + destinations.length + ')', destinations.length == 5);
 
     boolean topicFound = false;
     boolean queueFound = false;
     boolean tmpTopicFound = false;
     boolean tmpQueueFound = false;
     boolean deadMQueueFound = false;
-    for (int i = 0; i < destinations.size(); i++) {
-      org.objectweb.joram.client.jms.Destination dest = 
-        (org.objectweb.joram.client.jms.Destination)destinations.get(i);
+    for (int i = 0; i < destinations.length; i++) {
+      Destination dest = destinations[i];
       if (dest.getAdminName().equals("queue")) {
         assertTrue(
           "Wrong queue type: " + dest, 

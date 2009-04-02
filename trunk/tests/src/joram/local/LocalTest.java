@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): (ScalAgent D.T.)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): Badolle Fabien (ScalAgent D.T.)
  */
 
@@ -26,13 +26,18 @@ package joram.local;
 
 import java.util.Enumeration;
 
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
 import javax.jms.QueueBrowser;
 import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
 import javax.jms.QueueReceiver;
 import javax.jms.QueueSender;
 import javax.jms.QueueSession;
+import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
@@ -42,116 +47,127 @@ import javax.jms.TopicSubscriber;
 
 import joram.framework.TestCase;
 
+import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
+import org.objectweb.joram.client.jms.local.QueueLocalConnectionFactory;
+import org.objectweb.joram.client.jms.local.TopicLocalConnectionFactory;
 
 /**
  * Test local : try to send a message and receive it with a queue and with a topic
- *
  */
 public class LocalTest extends TestCase {
-
-  public static final String TRANSACTION = "Transaction";
-  public static final String NULL_TRANSACTION = 
-      "fr.dyade.aaa.util.NullTransaction";
-  public static final int MESSAGE_NUMBER = 10;
-
   public LocalTest() {
     super();
   }
 
   public void run() {
     try {
-      System.getProperties().put(TRANSACTION, NULL_TRANSACTION);
+      System.getProperties().put("Transaction", "fr.dyade.aaa.util.NullTransaction");
       fr.dyade.aaa.agent.AgentServer.init(new String[]{"0", "s0"});
       fr.dyade.aaa.agent.AgentServer.start();
 
-      AdminModule.connect("localhost", 2560,
-                          "root", "root", 60);
+      AdminModule.connect("localhost", 2560, "root", "root", 60);
 
-      org.objectweb.joram.client.jms.admin.User user = 
-        org.objectweb.joram.client.jms.admin.User.create("anonymous", "anonymous", 0);
+      User user = User.create("anonymous", "anonymous", 0);
 
-      TopicConnectionFactory tcf = 
-        org.objectweb.joram.client.jms.local.TopicLocalConnectionFactory.create();
-      
-      QueueConnectionFactory qcf =
-        org.objectweb.joram.client.jms.local.QueueLocalConnectionFactory.create();
+      ConnectionFactory cf = LocalConnectionFactory.create();
+      QueueConnectionFactory qcf = QueueLocalConnectionFactory.create();
+      TopicConnectionFactory tcf = TopicLocalConnectionFactory.create();
 
-      org.objectweb.joram.client.jms.Topic topic = 
-        org.objectweb.joram.client.jms.Topic.create(0);
+      Topic topic = Topic.create(0);
       topic.setFreeReading();
       topic.setFreeWriting();
 
-      org.objectweb.joram.client.jms.Queue queue = 
-        org.objectweb.joram.client.jms.Queue.create(0);
+      Queue queue = Queue.create(0);
       queue.setFreeReading();
       queue.setFreeWriting();
 
-      // Test1 - Queue sender-receiver
-      QueueConnection qc = qcf.createQueueConnection();
-      final QueueSession sendQs = qc.createQueueSession(true, 0);
-      final QueueSender qsend = sendQs.createSender(queue);
-
-      QueueSession recQs = qc.createQueueSession(true, 0);
-      QueueReceiver qrec = recQs.createReceiver(queue);      
-      QueueBrowser qb = recQs.createBrowser(queue);
-      qc.start();
-
-      new Thread(new Runnable() {
-          public void run() {
-	      //System.out.println("Producer");
-            try {
-              for (int i = 0; i < MESSAGE_NUMBER; i++) {
-                TextMessage msg = sendQs.createTextMessage();
-                msg.setText("Test number " + i);
-                //System.out.println("Test number " + i);
-                qsend.send(msg);
-              }
-              //System.out.println("Commit");
-              sendQs.commit();
-            } catch (Exception exc) {
-              exc.printStackTrace();
-            }
-          }
-        }).start();
-
-      
-      //if (checkQueue(qb, MESSAGE_NUMBER) == MESSAGE_NUMBER) {
-      
-      //System.out.println("Consumer");
-      for (int i = 0; i < MESSAGE_NUMBER; i++) {
-        TextMessage msg = (TextMessage)qrec.receive();
-	// System.out.println("Msg received: " + msg.getText());
-	assertTrue( msg.getText().startsWith("Test number "));
-      }
-      recQs.commit();
-    
-      checkQueue(qb, 0);
-
-      // Test2 - Topic pub/sub
-      TopicConnection tc = tcf.createTopicConnection();
-      TopicSession ts = tc.createTopicSession(true, 0);
-      TopicPublisher tpub = ts.createPublisher(topic);
-      TopicSubscriber tsub = ts.createSubscriber(topic);
-      tc.start();
-      
-      for (int i = 0; i < MESSAGE_NUMBER; i++) {
-        TextMessage msg = ts.createTextMessage();
-        msg.setText("Test number " + i);
-        tpub.publish(msg);
-      }
-      ts.commit();
-
-      for (int i = 0; i < MESSAGE_NUMBER; i++) {
-        TextMessage msg = (TextMessage)tsub.receive();
-	//        System.out.println("Msg received: " + msg.getText());
-	assertTrue( msg.getText().startsWith("Test number "));
-      }
-      ts.commit();
-      
-      qc.close();
-      tc.close();
       AdminModule.disconnect();
+      
+      try {
+        // Test1 - Queue and Topic unified
+        Connection cnx = cf.createConnection();
+        Session sess1 = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        MessageProducer producer = sess1.createProducer(null);
+        
+        Session sess2 = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+        MessageConsumer qconsumer = sess2.createConsumer(queue);
+        MessageConsumer tconsumer = sess2.createConsumer(topic);
+       
+        cnx.start();
+
+        TextMessage msg1 = sess1.createTextMessage();
+        msg1.setText("Test Queue with LocalConnectionFactory");
+        producer.send(queue, msg1);
+
+        TextMessage msg2 = (TextMessage) qconsumer.receive();
+ 
+        assertTrue(msg1.getText().equals(msg2.getText()));
+        
+        msg1 = sess1.createTextMessage();
+        msg1.setText("Test Topic LocalConnectionFactory");
+        producer.send(topic, msg1);
+
+        msg2 = (TextMessage) tconsumer.receive();
+ 
+        assertTrue(msg1.getText().equals(msg2.getText()));
+
+        cnx.close();
+      } catch (Exception exc) {
+        throw exc;
+      }
+
+      try {
+        // Test2 - Queue sender-receiver
+        QueueConnection cnx = qcf.createQueueConnection();
+        QueueSession sess1 = cnx.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+        QueueSender sender = sess1.createSender(queue);
+
+        QueueSession sess2 = cnx.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+        QueueReceiver receiver = sess2.createReceiver(queue);    
+        
+        cnx.start();
+
+        // Send a message
+        TextMessage msg1 = sess1.createTextMessage();
+        msg1.setText("Test QueueLocalConnectionFactory");
+        sender.send(msg1);
+        
+        TextMessage msg2 = (TextMessage) receiver.receive();
+ 
+        assertTrue(msg1.getText().equals(msg2.getText()));
+        
+        cnx.close();
+      } catch (Exception exc) {
+        throw exc;
+      }
+      
+      try {
+        // Test3 - Topic pub/sub
+        TopicConnection cnx = tcf.createTopicConnection();
+        TopicSession sess1 = cnx.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+        TopicPublisher publisher = sess1.createPublisher(topic);
+        
+        TopicSession sess2 = cnx.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+        TopicSubscriber subscriber = sess2.createSubscriber(topic);
+        
+        cnx.start();
+
+        TextMessage msg1 = sess1.createTextMessage();
+        msg1.setText("Test QueueLocalConnectionFactory");
+        publisher.send(msg1);
+
+        TextMessage msg2 = (TextMessage) subscriber.receive();
+ 
+        assertTrue(msg1.getText().equals(msg2.getText()));
+        
+        cnx.close();
+      } catch (Exception exc) {
+        throw exc;
+      }
     } catch (Exception exc) {
       error(exc);
     } finally {
@@ -159,22 +175,6 @@ public class LocalTest extends TestCase {
       fr.dyade.aaa.agent.AgentServer.stop();
       endTest();     
     }
-  }
-
-  public int checkQueue(QueueBrowser qb,
-                        int expectedMessageNumber) 
-    throws JMSException {
-    Enumeration messages = qb.getEnumeration();
-    int counter = 0;
-    while (messages.hasMoreElements()) {
-      counter++;
-      messages.nextElement();
-    }
-    assertTrue(
-      "Queue: " + counter + 
-      " messages in queue instead of " + expectedMessageNumber,
-      counter == expectedMessageNumber);
-    return counter;
   }
 
   public static void main(String args[]) {

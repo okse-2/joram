@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,6 @@
 package joram.ha;
 
 import java.io.File;
-import java.util.Vector;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -33,7 +32,6 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 import org.objectweb.joram.client.jms.Queue;
 
@@ -69,13 +67,14 @@ public class HATest extends TestCase {
 
       Thread.sleep(1000);
 
-      AdminModule.connect("localhost", 2560, "root", "root", 60);
-
-      User user = User.create("anonymous", "anonymous", 0);
-
       ConnectionFactory cf = HATcpConnectionFactory.create("hajoram://localhost:2560,localhost:2561,localhost:2562");
       ((HATcpConnectionFactory) cf).getParameters().cnxPendingTimer = 500;
       ((HATcpConnectionFactory) cf).getParameters().connectingTimer = 30;
+
+      AdminModule.connect(cf, "root", "root");
+//      AdminModule.connect("localhost", 2560, "root", "root", 60);
+
+      User user = User.create("anonymous", "anonymous", 0);
 
       Queue queue = Queue.create(0, "queue");
       queue.setFreeReading();
