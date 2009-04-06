@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2007 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C)  2007 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,17 +24,20 @@ package joram.base;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
-import javax.jms.TextMessage;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
 import javax.jms.Session;
+import javax.jms.TextMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
 import joram.framework.TestCase;
 
+import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.shared.MessageErrorConstants;
 
 /**
@@ -69,7 +72,7 @@ public class Test_Exp_Q extends TestCase {
       MessageConsumer consumer = sessionc.createConsumer(queue);
       cnx.start();
 
-      // create a message send to the queue by the pruducer 
+      // create a message send to the queue by the producer 
       TextMessage msg = sessionp.createTextMessage("Message de Test");
       producer.setTimeToLive(1000L);
       producer.send(msg);
@@ -78,7 +81,7 @@ public class Test_Exp_Q extends TestCase {
       Thread.sleep(1500L);
 
       // the consumer no receive the message from the queue
-      TextMessage msg1= (TextMessage) consumer.receive(500);
+      TextMessage msg1 = (TextMessage) consumer.receive(500);
       assertEquals(null, msg1);
 
       cnx.close();
@@ -92,7 +95,7 @@ public class Test_Exp_Q extends TestCase {
       cnx_dead.start();
 
       // but the message is in the deadqueue
-      msg1= (TextMessage) consumer_dead.receive(500);
+      msg1 = (TextMessage) consumer_dead.receive(5000);
 
       assertEquals(1, msg1.getIntProperty("JMS_JORAM_ERRORCOUNT"));
       assertEquals(MessageErrorConstants.EXPIRED, msg1.getIntProperty("JMS_JORAM_ERRORCODE_1"));
@@ -118,28 +121,25 @@ public class Test_Exp_Q extends TestCase {
      *   use jndi
      */
   public void admin() throws Exception {
-    // conexion 
-    org.objectweb.joram.client.jms.admin.AdminModule.connect("localhost", 2560,
-                                                             "root", "root", 60);
+    // connection 
+    ConnectionFactory cf = TcpConnectionFactory.create("localhost", 2560);
+
+    AdminModule.connect(cf);
     // create a Queue   
     org.objectweb.joram.client.jms.Queue queue =
-      (org.objectweb.joram.client.jms.Queue) org.objectweb.joram.client.jms.Queue.create(0); 
+      org.objectweb.joram.client.jms.Queue.create(0); 
 
     // create a deadqueue for receive expired messages
     DeadMQueue dq = (DeadMQueue) DeadMQueue.create(0);
     dq.setFreeReading();
     dq.setFreeWriting();
-    org.objectweb.joram.client.jms.admin.AdminModule.setDefaultDMQ(0,dq);
+    AdminModule.setDefaultDMQ(0, dq);
 
     // create a user
-    org.objectweb.joram.client.jms.admin.User user =
-      org.objectweb.joram.client.jms.admin.User.create("anonymous", "anonymous");
+    User.create("anonymous", "anonymous");
     // set permissions
     queue.setFreeReading();
     queue.setFreeWriting();
-
-    javax.jms.ConnectionFactory cf =
-      org.objectweb.joram.client.jms.tcp.TcpConnectionFactory.create("localhost", 2560);
 
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     jndiCtx.bind("cf", cf);
@@ -147,7 +147,7 @@ public class Test_Exp_Q extends TestCase {
     jndiCtx.bind("dq", dq);
     jndiCtx.close();
 
-    org.objectweb.joram.client.jms.admin.AdminModule.disconnect();
+    AdminModule.disconnect();
   }
 }
 
