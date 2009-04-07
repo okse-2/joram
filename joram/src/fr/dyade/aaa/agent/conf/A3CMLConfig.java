@@ -18,6 +18,8 @@
  */
 package fr.dyade.aaa.agent.conf;
 
+import java.io.ByteArrayInputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -802,12 +804,24 @@ public class A3CMLConfig implements Serializable {
    * @param cfgFileName   serialized file name
    * @exception           Exception
    */
-  public static A3CMLConfig load() throws Exception {
+  public static A3CMLConfig load(File dir) throws Exception {
     // Get the logging monitor from current server MonoLog.loggeritorFactory
     if (Log.logger.isLoggable(BasicLevel.DEBUG))
       Log.logger.log(BasicLevel.DEBUG, "Config.load()");
     
-    A3CMLConfig a3config = (A3CMLConfig) AgentServer.getTransaction().load(AgentServer.DEFAULT_SER_CFG_FILE);
+    File file;
+    file = new File(dir, AgentServer.DEFAULT_SER_CFG_FILE);
+    FileInputStream fis = new FileInputStream(file);
+    byte[] buf = new byte[(int) file.length()];
+    for (int nb = 0; nb < buf.length;) {
+      int ret = fis.read(buf, nb, buf.length - nb);
+      if (ret == -1)
+        throw new EOFException();
+      nb += ret;
+    }
+    fis.close();
+    ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(buf));
+    A3CMLConfig a3config = (A3CMLConfig) ois.readObject();
 
     if (a3config == null) {
       Log.logger.log(BasicLevel.WARN,
@@ -821,7 +835,7 @@ public class A3CMLConfig implements Serializable {
   }
 
   /**
-   * Gets a <code>A3CMLConfig</code> serialialized object from file.
+   * Gets a <code>A3CMLConfig</code> serialized object from file.
    *
    * @param path   path of serialized configuration file
    * @return	   the <code>A3CMLConfig</code> object if file exists and is
