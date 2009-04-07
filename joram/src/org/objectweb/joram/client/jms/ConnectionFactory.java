@@ -25,15 +25,7 @@
  */
 package org.objectweb.joram.client.jms;
 
-import javax.jms.JMSException;
-import javax.jms.JMSSecurityException;
-
 import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
-import org.objectweb.joram.client.jms.connection.RequestChannel;
-import org.objectweb.joram.client.jms.tcp.TcpRequestChannel;
-import org.objectweb.joram.shared.JoramTracing;
-import org.objectweb.joram.shared.security.Identity;
-import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * Implements all the <code>javax.jms.ConnectionFactory</code> interfaces.
