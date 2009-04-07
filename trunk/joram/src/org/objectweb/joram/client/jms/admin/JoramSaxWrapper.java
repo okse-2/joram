@@ -47,7 +47,6 @@ import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.security.SimpleIdentity;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -285,8 +284,6 @@ public class JoramSaxWrapper extends DefaultHandler {
    */
   public boolean parse(Reader cfgReader, String cfgName) throws Exception {
     this.joramAdmName = cfgName;
-
-    logger = JoramTracing.dbgAdmin;
 
     SAXParserFactory factory = SAXParserFactory.newInstance();
     SAXParser parser = factory.newSAXParser();
