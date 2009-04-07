@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,6 +37,7 @@ import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.admin.User;
 
 import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.util.Configuration;
 
 /**
  *
@@ -87,8 +88,8 @@ public abstract class Test1 {
     port = Integer.getInteger("port", port).intValue();
 
     System.out.println("====================================================");
-    System.out.println("Transaction: " + System.getProperty("Transaction"));
-    System.out.println("Engine: " + System.getProperty("Engine"));
+    System.out.println("Transaction: " + Configuration.getProperty("Transaction"));
+    System.out.println("Engine: " + Configuration.getProperty("Engine"));
     System.out.println("Destination: " + destc);
     System.out.println("NbRound: " + NbRound);
     System.out.println("NbMsgPerRound: " + NbMsgPerRound);

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -39,6 +39,8 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+
+import fr.dyade.aaa.util.Configuration;
 
 /**
  *
@@ -86,9 +88,9 @@ public class Test47 extends BaseTest {
 	    AdminModule.disconnect();
 
 	    writeIntoFile("----------------------------------------------------");
-	    writeIntoFile("Transaction: " + System.getProperty("Transaction"));
-	    writeIntoFile("Engine: " + System.getProperty("Engine"));
-	    writeIntoFile("Transacted=" + Boolean.getBoolean("Transacted"));
+	    writeIntoFile("Transaction: " + Configuration.getProperty("Transaction"));
+	    writeIntoFile("Engine: " + Configuration.getProperty("Engine"));
+	    writeIntoFile("Transacted=" + Configuration.getBoolean("Transacted"));
 	    writeIntoFile("Message: transient=" + MsgTransient);
 	    writeIntoFile("Subscriber: durable=" + SubDurable);
 	    writeIntoFile("NbRound=" + NbRound + 
