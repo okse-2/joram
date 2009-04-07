@@ -136,6 +136,7 @@ description=" --> launch all exceptionlistener tests">
     <ant dir="." antfile="build.xml" target="recovery.test3"/>
     <ant dir="." antfile="build.xml" target="recovery.test4"/>
     <ant dir="." antfile="build.xml" target="recovery.test5"/>
+    <ant dir="." antfile="build.xml" target="recovery.reliable-test"/>
     <ant dir="." antfile="build.xml" target="recovery.test6"/>
     <ant dir="." antfile="build.xml" target="recovery.test7"/>
     <ant dir="." antfile="build.xml" target="recovery.test8"/>
@@ -1076,8 +1077,19 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
-
+  
   <target name="recovery.test5" depends="compile"
+          description=" --> Check transaction properties after a restart of the agent server.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.recovery.Recover_5"/>
+      <param name="jndiconf" value="recovery/jndi.properties"/>
+      <param name="a3conf" value="recovery/a3servers2.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="recovery.reliable-test" depends="compile"
           description=" --> Test recovery : kill server during receive">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.recovery.ReliableTest"/>
@@ -2969,7 +2981,7 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 
-  <target name="noreg.test15" depends="test15-1.noreg,test15-2.noreg,test15-3.noreg,test15-4.noreg"
+  <target name="noreg.test15"
           description=" --> test close  and start consumer cnx during producer send. option : queue or topic and  Tcp or local ">
     <ant dir="." antfile="build.xml" target="test15-1.noreg"/>
     <ant dir="." antfile="build.xml" target="test15-2.noreg"/>
