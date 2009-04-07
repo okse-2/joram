@@ -32,11 +32,11 @@ import javax.jms.JMSSecurityException;
 import org.objectweb.joram.shared.client.ConsumerCloseSubRequest;
 import org.objectweb.joram.shared.client.ConsumerSubRequest;
 import org.objectweb.joram.shared.client.ConsumerUnsubRequest;
-
 import org.objectweb.joram.shared.selectors.ClientSelector;
-
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.Debug;
 
 /**
  * Implements the <code>javax.jms.MessageConsumer</code> interface.
@@ -65,6 +65,8 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
       return names[status];
     }
   }
+
+  private static Logger logger = Debug.getLogger(MessageConsumer.class.getName());
 
   /** The selector for filtering messages. */
   String selector;
@@ -103,10 +105,9 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
    * OPEN, CLOSE
    */
   private int status;
-  
+
   /**
-   * Used to synchonize the 
-   * method close()
+   * Used to synchronize the method close()
    */
   private Closer closer;
 
@@ -131,9 +132,9 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
                   String selector,
                   String subName, 
                   boolean noLocal) throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, 
-        "MessageConsumer.<init>(" + sess + ',' + dest + ',' + selector + ',' + subName + ',' + noLocal + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "MessageConsumer.<init>(" + sess + ',' + dest + ',' + selector + ','
+          + subName + ',' + noLocal + ')');
     
     if (dest == null)
       throw new InvalidDestinationException("Invalid null destination.");
@@ -202,17 +203,13 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
    *                                   activated.
    * @exception JMSException           Generic exception.
    */
-  MessageConsumer(Session sess, 
-                  Destination dest,
-                  String selector) throws JMSException {
+  MessageConsumer(Session sess, Destination dest, String selector) throws JMSException {
     this(sess, dest, selector, null, false);
   }
 
   private synchronized void setStatus(int status) {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG, 
-        "MessageConsumer.setStatus(" + Status.toString(status) + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "MessageConsumer.setStatus(" + Status.toString(status) + ')');
     this.status = status;
   }
 
@@ -224,8 +221,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
     return queueMode;
   }
 
-  protected synchronized void checkClosed() 
-    throws IllegalStateException {
+  protected synchronized void checkClosed() throws IllegalStateException {
     if (status == Status.CLOSE)
       throw new IllegalStateException("Forbidden call on a closed consumer.");
   }
@@ -252,14 +248,9 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
    *              connection is broken.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public synchronized void setMessageListener(
-    javax.jms.MessageListener messageListener)
-    throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG, 
-        "MessageConsumer.setMessageListener(" + 
-        messageListener + ')');
+  public synchronized void setMessageListener(javax.jms.MessageListener messageListener) throws JMSException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "MessageConsumer.setMessageListener(" + messageListener + ')');
     checkClosed();
     if (mcl != null) {
       if (messageListener == null) {
@@ -293,10 +284,10 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
    *
    * @exception IllegalStateException  If the consumer is closed.
    */
-  public synchronized javax.jms.MessageListener getMessageListener() 
-    throws JMSException {
+  public synchronized javax.jms.MessageListener getMessageListener() throws JMSException {
     checkClosed();
-    if (mcl == null) return null;
+    if (mcl == null)
+      return null;
     return mcl.getMessageListener();
   }
 
@@ -306,8 +297,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
    *
    * @exception IllegalStateException  If the consumer is closed.
    */
-  public final String getMessageSelector() 
-    throws JMSException {
+  public final String getMessageSelector() throws JMSException {
     checkClosed();
     return selector;
   }
@@ -322,15 +312,11 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
    *              destination.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public javax.jms.Message receive(long timeOut) 
-    throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG, 
-        "MessageConsumer.receive(" + timeOut + ')');
+  public javax.jms.Message receive(long timeOut) throws JMSException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "MessageConsumer.receive(" + timeOut + ')');
     checkClosed();
-    return sess.receive(timeOut, timeOut, this, 
-                        targetName, selector, queueMode);
+    return sess.receive(timeOut, timeOut, this, targetName, selector, queueMode);
   }
 
   /** 
@@ -343,8 +329,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
    *              destination.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public javax.jms.Message receive() 
-    throws JMSException {
+  public javax.jms.Message receive() throws JMSException {
     return receive(0);
   }
 
@@ -358,14 +343,12 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
    *              destination.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public javax.jms.Message receiveNoWait() 
-    throws JMSException {
+  public javax.jms.Message receiveNoWait() throws JMSException {
     checkClosed();
     if (sess.getConnection().isStopped()) {
       return null;
     } else {
-      return sess.receive(-1, 0, this, 
-                          targetName, selector, queueMode);
+      return sess.receive(-1, 0, this, targetName, selector, queueMode);
     }
   }
 
@@ -375,10 +358,8 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
    * @exception JMSException
    */
   public void close() throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(
-        BasicLevel.DEBUG, 
-        "MessageConsumer.close()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "MessageConsumer.close()");
     closer.close();
   }
 
@@ -412,15 +393,15 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
         try {
           sess.syncRequest(new ConsumerCloseSubRequest(targetName));
         } catch (JMSException exc) {
-          if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", exc);
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "", exc);
         }
       } else {
         try {
           sess.syncRequest(new ConsumerUnsubRequest(targetName));
         } catch (JMSException exc) {
-          if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", exc);
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "", exc);
         }
       }
     }
