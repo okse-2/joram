@@ -24,17 +24,13 @@
 package org.objectweb.joram.shared;
 
 import org.objectweb.util.monolog.api.Logger;
+
 import fr.dyade.aaa.util.Debug;
 
 /**
  * The <code>JoramTracing</code> class centralizes the log tracing for joram.
  */
 public class JoramTracing {
-  /**
-   * Logger used to trace joram admin activity, to be set using topic
-   * org.objectweb.joram.client.jms.Admin
-   */
-  public static Logger dbgAdmin = null;
   /**
    * Logger used to trace joram activity, to be set using topic
    * org.objectweb.joram.client.jms.Client
@@ -62,7 +58,6 @@ public class JoramTracing {
    * Initializes the package by setting the various loggers.
    */
   static {
-    dbgAdmin = Debug.getLogger("org.objectweb.joram.client.jms.Admin");
     dbgClient = Debug.getLogger("org.objectweb.joram.client.jms.Client");
     dbgDestination = Debug.getLogger("org.objectweb.joram.mom.Destination");
     dbgProxy = Debug.getLogger("org.objectweb.joram.mom.Proxy");
