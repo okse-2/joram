@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Properties;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -46,6 +45,7 @@ import fr.dyade.aaa.agent.conf.A3CMLNetwork;
 import fr.dyade.aaa.agent.conf.A3CMLProperty;
 import fr.dyade.aaa.agent.conf.A3CMLServer;
 import fr.dyade.aaa.agent.conf.A3CMLService;
+import fr.dyade.aaa.util.Configuration;
 import fr.dyade.aaa.util.Timer;
 import fr.dyade.aaa.util.Transaction;
 import fr.dyade.aaa.util.management.MXWrapper;
@@ -165,8 +165,6 @@ public final class AgentServer {
   public final static String A3CMLWRP_PROPERTY = "fr.dyade.aaa.agent.A3CMLWrapper";
   public final static String DEFAULT_A3CMLWRP = "fr.dyade.aaa.agent.conf.A3CMLSaxWrapper";
   
-  private final static Properties serverProperties = new Properties(System.getProperties());
-
   static ThreadGroup tgroup = null;
 
   public static ThreadGroup getThreadGroup() {
@@ -234,17 +232,14 @@ public final class AgentServer {
    */
   private static Hashtable consumers = null;
 
-  static void addConsumer(String domain,
-                          MessageConsumer cons) throws Exception {
+  static void addConsumer(String domain, MessageConsumer cons) throws Exception {
     if (consumers.containsKey(domain))
       throw new Exception("Consumer for domain " + domain + " already exist");
 
     consumers.put(domain, cons);
 
     try {
-      MXWrapper.registerMBean(cons,
-                              "AgentServer",
-                              "server=" + getName() + ",cons=" + cons.getName());
+      MXWrapper.registerMBean(cons, "AgentServer", "server=" + getName() + ",cons=" + cons.getName());
     } catch (Exception exc) {
       logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
     }
@@ -370,7 +365,7 @@ public final class AgentServer {
    * @return	   the value with the specified key value.
    */
   public static String getProperty(String key) {
-    return serverProperties.getProperty(key);
+    return Configuration.getProperty(key);
   }
 
   /**
@@ -382,7 +377,7 @@ public final class AgentServer {
    * @return	   the value with the specified key value.
    */
   public static String getProperty(String key, String value) {
-    return serverProperties.getProperty(key, value);
+    return Configuration.getProperty(key, value);
   }
 
   /**
@@ -393,11 +388,7 @@ public final class AgentServer {
    * @return 	the Integer value of the property.
    */
   public static Integer getInteger(String key) {
-    try {
-      return Integer.valueOf(serverProperties.getProperty(key));
-    } catch (Exception exc) {
-      return null;
-    }
+    return Configuration.getInteger(key);
   }
 
   /**
@@ -409,8 +400,7 @@ public final class AgentServer {
    * @return 	the Integer value of the property.
    */
   public static Integer getInteger(String key, int value) {
-    Integer result = getInteger(key);
-    return (result == null) ? new Integer(value) : result;
+    return Configuration.getInteger(key, value);
   }
 
   /**
@@ -422,11 +412,7 @@ public final class AgentServer {
    * @return the Integer value of the property.
    */
   public static Long getLong(String key) {
-    try {
-      return Long.valueOf(serverProperties.getProperty(key));
-    } catch (Exception exc) {
-      return null;
-    }
+    return Configuration.getLong(key);
   }
 
   /**
@@ -439,8 +425,7 @@ public final class AgentServer {
    * @return the Integer value of the property.
    */
   public static Long getLong(String key, long value) {
-    Long result = getLong(key);
-    return (result == null) ? new Long(value) : result;
+    return Configuration.getLong(key, value);
   }
 
   /**
@@ -451,10 +436,10 @@ public final class AgentServer {
    *          property name.
    * @param value
    *          a default value.
-   * @return the Integer value of the property.
+   * @return the boolean value of the property.
    */
   public static boolean getBoolean(String key) {
-    return Boolean.valueOf(serverProperties.getProperty(key)).booleanValue();
+    return Configuration.getBoolean(key);
   }
 
   /** Static description of all known agent servers in ascending order. */
@@ -745,7 +730,7 @@ public final class AgentServer {
     if (a3config.properties != null) {
       for (Enumeration e = a3config.properties.elements(); e.hasMoreElements();) {
         A3CMLProperty p = (A3CMLProperty) e.nextElement();
-        serverProperties.put(p.name, p.value);
+        Configuration.putProperty(p.name, p.value);
 
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,
@@ -765,7 +750,7 @@ public final class AgentServer {
         Enumeration e = cluster.properties.elements();
         do {
           A3CMLProperty p = (A3CMLProperty) e.nextElement();
-          serverProperties.put(p.name, p.value);
+          Configuration.putProperty(p.name, p.value);
 
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG,
@@ -784,7 +769,7 @@ public final class AgentServer {
       Enumeration e = server.properties.elements();
       do {
         A3CMLProperty p = (A3CMLProperty) e.nextElement();
-        serverProperties.put(p.name, p.value);
+        Configuration.putProperty(p.name, p.value);
 
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,
@@ -792,8 +777,6 @@ public final class AgentServer {
                      p.name + " = " + p.value);
       } while (e.hasMoreElements());
     }
-    
-    System.setProperties(serverProperties);
   }
   
   public static class Status {
@@ -1024,6 +1007,19 @@ public final class AgentServer {
       // transaction manager and get the configuration.
       File dir = new File(path);
       if (dir.exists() && dir.isDirectory()) {
+        
+        // Gets static configuration of agent servers from a file. This method
+        // fills the object graph configuration in the <code>A3CMLConfig</code>
+        // object, then the configure method really initializes the server.
+        // Try to read the serialized configuration
+        try {
+          a3config = A3CMLConfig.load(dir);
+          // set properties
+          setProperties(serverId, clusterId);
+        } catch (Exception exc) {
+          logmon.log(BasicLevel.WARN, getName() + ", config not found");
+        }
+        
         File tfc = new File(dir, "TFC");
         if (tfc.exists()) {
           DataInputStream dis = null;
@@ -1033,9 +1029,7 @@ public final class AgentServer {
             Class tclass = Class.forName(tname);
             transaction = (Transaction) tclass.newInstance();
           } catch (Exception exc) {
-            logmon.log(BasicLevel.FATAL,
-                       getName() + ", can't instantiate transaction manager",
-                       exc);
+            logmon.log(BasicLevel.FATAL, getName() + ", can't instantiate transaction manager", exc);
             throw new Exception("Can't instantiate transaction manager");
           } finally {
             if (dis != null) dis.close();
@@ -1043,24 +1037,9 @@ public final class AgentServer {
           try {
             transaction.init(path);
           } catch (IOException exc) {
-            logmon.log(BasicLevel.FATAL,
-                       getName() + ", can't start transaction manager", exc);
+            logmon.log(BasicLevel.FATAL, getName() + ", can't start transaction manager", exc);
             throw new Exception("Can't start transaction manager");
           }
-        }
-      }
-
-      // Gets static configuration of agent servers from a file. This method
-      // fills the object graph configuration in the <code>A3CMLConfig</code>
-      // object, then the configure method really initializes the server.
-      // There are two steps because the configuration step needs the
-      // transaction components to be initialized.
-      if (transaction != null) {
-        // Try to read the serialized configuration (through transaction)
-        try {
-          a3config = A3CMLConfig.load();
-        } catch (Exception exc) {
-          logmon.log(BasicLevel.WARN, getName() + ", config not found");
         }
       }
 
@@ -1070,8 +1049,7 @@ public final class AgentServer {
         try {
           a3config = A3CMLConfig.getConfig(DEFAULT_SER_CFG_FILE);
         } catch (Exception exc) {
-          logmon.log(BasicLevel.WARN,
-                     getName() + ", serialized a3cmlconfig not found");
+          logmon.log(BasicLevel.WARN, getName() + ", serialized a3cmlconfig not found");
         }
 
         if (a3config == null) {
@@ -1079,32 +1057,28 @@ public final class AgentServer {
           try {
             a3config = A3CML.getXMLConfig();
           } catch (Exception exc) {
-            logmon.log(BasicLevel.WARN,
-                       getName() + ", XML configuration file not found");
+            logmon.log(BasicLevel.WARN, getName() + ", XML configuration file not found");
           }
         }
 
         if (a3config == null) {
           // 3rd, Generate A3CMLConfig base.
-          logmon.log(BasicLevel.WARN,
-                     "Generate default configuration");
-          A3CMLDomain d = new A3CMLDomain(ADMIN_DOMAIN,
-                                          "fr.dyade.aaa.agent.SimpleNetwork");
+          logmon.log(BasicLevel.WARN, "Generate default configuration");
+          A3CMLDomain d = new A3CMLDomain(ADMIN_DOMAIN, "fr.dyade.aaa.agent.SimpleNetwork");
           A3CMLServer s = new A3CMLServer((short) 0, ADMIN_SERVER, "localhost");
           s.networks.addElement(new A3CMLNetwork(ADMIN_DOMAIN, 27300));
-          s.services.addElement(new A3CMLService("fr.dyade.aaa.agent.AgentAdmin",null));
+          s.services.addElement(new A3CMLService("fr.dyade.aaa.agent.AgentAdmin", null));
           d.addServer(s);
           a3config = new A3CMLConfig();
           a3config.addDomain(d);
           a3config.addServer(s);
         }
+        // set properties
+        setProperties(serverId, clusterId);
       }
 
       // if JGroups
       if (cid > NULL_ID) clusterId = cid;
-
-      // set properties
-      setProperties(serverId, clusterId);
 
       // Initializes the JMX Wrapper
       try {
@@ -1115,20 +1089,17 @@ public final class AgentServer {
 
       if (transaction == null) {
         try {
-          String tname = getProperty("Transaction",
-                                     "fr.dyade.aaa.util.NTransaction");
+          String tname = getProperty("Transaction", "fr.dyade.aaa.util.NTransaction");
           transaction = (Transaction) Class.forName(tname).newInstance();
         } catch (Exception exc) {
-          logmon.log(BasicLevel.FATAL,
-                     getName() + ", can't instantiate transaction manager", exc);
+          logmon.log(BasicLevel.FATAL, getName() + ", can't instantiate transaction manager", exc);
           throw new Exception("Can't instantiate transaction manager");
         }
 
         try {
           transaction.init(path);
         } catch (IOException exc) {
-          logmon.log(BasicLevel.FATAL,
-                     getName() + ", can't start transaction manager", exc);
+          logmon.log(BasicLevel.FATAL, getName() + ", can't start transaction manager", exc);
           throw new Exception("Can't start transaction manager");
         }
       }
