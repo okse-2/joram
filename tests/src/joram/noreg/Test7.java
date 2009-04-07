@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,6 +32,7 @@ import javax.jms.Session;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.admin.User;
 
+import fr.dyade.aaa.util.Configuration;
 
 /**
  * check system property and create multiple queue
@@ -61,8 +62,8 @@ public class Test7 extends BaseTest {
 	    String destclass = System.getProperty("Destination",
 						  "org.objectweb.joram.client.jms.Queue");
 	    writeIntoFile("----------------------------------------------------");
-	    writeIntoFile("| Transaction: " + System.getProperty("Transaction"));
-	    writeIntoFile("| Engine: " + System.getProperty("Engine"));
+	    writeIntoFile("| Transaction: " + Configuration.getProperty("Transaction"));
+	    writeIntoFile("| Engine: " + Configuration.getProperty("Engine"));
 	    writeIntoFile("| baseclass: " + baseclass);
 	    writeIntoFile("| Destination: " + destclass + "NbDest=" + NbDest);
 	    writeIntoFile("| NbMsg=" + NbMsg + ", MsgSize=" + MsgSize);
