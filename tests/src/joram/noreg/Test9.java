@@ -33,6 +33,8 @@ import javax.jms.Session;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.admin.User;
 
+import fr.dyade.aaa.util.Configuration;
+
 /**
  * check message ID and system property
  * 
@@ -73,11 +75,11 @@ public class Test9 extends BaseTest {
       assertEquals("Joram", cnxmd.getJMSProviderName());
 
       // System.out.println("Transaction: " +
-      // System.getProperty("Transaction"));
-      // assertEquals("fr.dyade.aaa.util.NTransaction",System.getProperty("Transaction"));
+      // Configuration.getProperty("Transaction"));
+      // assertEquals("fr.dyade.aaa.util.NTransaction",Configuration.getProperty("Transaction"));
 
       // System.out.println("Engine: " + System.getProperty("Engine"));
-      assertEquals("fr.dyade.aaa.agent.GCEngine", System.getProperty("Engine"));
+      assertEquals("fr.dyade.aaa.agent.GCEngine", Configuration.getProperty("Engine"));
 
       // System.out.println("baseclass: " + baseclass);
       assertEquals("joram.noreg.ColocatedBaseTest", baseclass);
