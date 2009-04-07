@@ -39,15 +39,20 @@ import org.objectweb.joram.client.jms.XAConnection;
 import org.objectweb.joram.client.jms.XAQueueConnection;
 import org.objectweb.joram.client.jms.XATopicConnection;
 import org.objectweb.joram.client.jms.connection.RequestChannel;
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.shared.security.SimpleIdentity;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.Debug;
 
 /**
  * Implements the <code>javax.jms.ConnectionFactory</code> interface.
  */
 public abstract class AbstractConnectionFactory extends AdministeredObject {
+  
+  private static Logger logger = Debug.getLogger(AbstractConnectionFactory.class.getName());
+  
   /** Object containing the factory's parameters. */
   protected FactoryParameters params;
 
@@ -68,8 +73,8 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
   public AbstractConnectionFactory(String host, int port) {
     params = new FactoryParameters(host, port);
     
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ": created.");
   }
 
   /**
@@ -80,8 +85,8 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
   public AbstractConnectionFactory(String url) {
     params = new FactoryParameters(url);
     
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ": created.");
   }
 
   /**
@@ -111,8 +116,8 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
    * @throws JMSException
    */
   protected void initIdentity(String user, String passwd) throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "initIdentity("+ user + ", ****)");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "initIdentity(" + user + ", ****)");
     try {
       if (!isSetIdentityClassName) {
         identityClassName = System.getProperty("org.objectweb.joram.Identity", SimpleIdentity.class.getName());
@@ -120,23 +125,23 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
       Class clazz = Class.forName(identityClassName);
       identity = (Identity) clazz.newInstance();
       identity.setIdentity(user, passwd);
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "initIdentity : identity = " + identity);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "initIdentity : identity = " + identity);
     } catch (ClassNotFoundException e) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgClient.log(BasicLevel.ERROR, "EXCEPTION:: initIdentity", e);
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "EXCEPTION:: initIdentity", e);
       throw new JMSException(e.getClass() + ":: " + e.getMessage());
     } catch (InstantiationException e) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgClient.log(BasicLevel.ERROR, "EXCEPTION:: initIdentity", e);
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "EXCEPTION:: initIdentity", e);
       throw new JMSException(e.getClass() + ":: " + e.getMessage());
     } catch (IllegalAccessException e) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgClient.log(BasicLevel.ERROR, "EXCEPTION:: initIdentity", e);
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "EXCEPTION:: initIdentity", e);
       throw new JMSException(e.getClass() + ":: " + e.getMessage());
     } catch (Exception e) {
-      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgClient.log(BasicLevel.ERROR, "EXCEPTION:: initIdentity", e);
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "EXCEPTION:: initIdentity", e);
       throw new JMSException(e.getClass() + ":: " + e.getMessage());
     }
   }
@@ -388,9 +393,9 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
    * @exception IllegalStateException  If the server is not listening.
    */
   public javax.jms.XAConnection createXAConnection(String name, String password) throws javax.jms.JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, 
-                                 "TcpConnectionFactory.createXAConnection(" + name + ',' + password + ") reliableClass=" + reliableClass);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "TcpConnectionFactory.createXAConnection(" + name + ',' + password
+          + ") reliableClass=" + reliableClass);
 
     initIdentity(name, password);
     return new XAConnection(params, createRequestChannel(params, identity, reliableClass));
