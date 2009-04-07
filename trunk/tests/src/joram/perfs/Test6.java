@@ -30,6 +30,8 @@ import javax.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.admin.User;
 
+import fr.dyade.aaa.util.Configuration;
+
 /**
  * See build for more detail : Class use with more option
  *
@@ -111,10 +113,10 @@ public class Test6 extends BaseTest {
       org.objectweb.joram.client.jms.admin.AdminModule.disconnect();
 
       writeIntoFile("----------------------------------------------------");
-      writeIntoFile("Transaction: " + System.getProperty("Transaction"));
-      writeIntoFile("Engine: " + System.getProperty("Engine"));
+      writeIntoFile("Transaction: " + Configuration.getProperty("Transaction"));
+      writeIntoFile("Engine: " + Configuration.getProperty("Engine"));
       writeIntoFile("baseclass: " + baseclass +
-                    ", Transacted=" + Boolean.getBoolean("Transacted"));
+                    ", Transacted=" + Configuration.getBoolean("Transacted"));
       writeIntoFile("Destination: " + destclass);
       writeIntoFile("Message: transient=" + MsgTransient);
       writeIntoFile("Subscriber: durable=" + SubDurable + 

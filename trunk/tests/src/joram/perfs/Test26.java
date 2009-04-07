@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -36,6 +36,7 @@ import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.admin.User;
 
 import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.util.Configuration;
 
 /**
  * Simple test for measure travel time. Several different parameter
@@ -92,10 +93,10 @@ public class Test26 extends BaseTest {
 	    org.objectweb.joram.client.jms.admin.AdminModule.disconnect();
 
 	    writeIntoFile("----------------------------------------------------");
-	    writeIntoFile("Transaction: " + System.getProperty("Transaction"));
-	    writeIntoFile("Engine: " + System.getProperty("Engine"));
+	    writeIntoFile("Transaction: " + Configuration.getProperty("Transaction"));
+        writeIntoFile("Engine: " + Configuration.getProperty("Engine"));
 	    writeIntoFile("baseclass: " + baseclass +
-			       ", Transacted=" + Boolean.getBoolean("Transacted"));
+			       ", Transacted=" + Configuration.getBoolean("Transacted"));
 	    writeIntoFile("Message: transient=" + MsgTransient);
 	    writeIntoFile("Subscriber: durable=" + SubDurable);
 	    writeIntoFile("NbReceiver=" + NbReceiver);
