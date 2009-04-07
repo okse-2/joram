@@ -35,6 +35,7 @@ import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.admin.User;
 
 import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.util.Configuration;
 
 /**
  *
@@ -62,7 +63,7 @@ public class Test10 extends BaseTest {
 	    dest.setFreeReading();
 	    dest.setFreeWriting();
 
-	    User user = User.create("anonymous", "anonymous", 0);
+	    User.create("anonymous", "anonymous", 0);
 
 	    org.objectweb.joram.client.jms.admin.AdminModule.disconnect();
 
@@ -87,8 +88,8 @@ public class Test10 extends BaseTest {
 
 	    writeIntoFile("----------------------------------------------------");
 	    writeIntoFile("Provider: " + cnxmd.getJMSProviderName() + cnxmd.getProviderVersion());
-	    writeIntoFile("Transaction: " + System.getProperty("Transaction"));
-	    writeIntoFile("Engine: " + System.getProperty("Engine"));
+	    writeIntoFile("Transaction: " + Configuration.getProperty("Transaction"));
+	    writeIntoFile("Engine: " + Configuration.getProperty("Engine"));
 	    writeIntoFile("baseclass: " + baseclass);
 	    writeIntoFile("NbRound=" + NbRound);
 	    writeIntoFile("----------------------------------------------------");
