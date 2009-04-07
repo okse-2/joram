@@ -90,7 +90,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
    * @return The maximum size of memory log in Kb.
    */
   public final int getMaxLogMemorySize() {
-    return MaxLogMemorySize/Mb;
+    return MaxLogMemorySize / Kb;
   }
 
   /**
@@ -99,7 +99,8 @@ public final class NTransaction implements Transaction, NTransactionMBean {
    * @param size The maximum size of memory log in Kb.
    */
   public final void setMaxLogMemorySize(int size) {
-    if (size > 0) MaxLogMemorySize = size *Mb;
+    if (size > 0)
+      MaxLogMemorySize = size * Kb;
   }
 
   /**
@@ -393,12 +394,9 @@ public final class NTransaction implements Transaction, NTransactionMBean {
   public final void init(String path) throws IOException {
     phase = INIT;
 
-    LogMemoryCapacity = Integer.getInteger("NTLogMemoryCapacity",
-                                           LogMemoryCapacity).intValue();
-    MaxLogFileSize = Integer.getInteger("NTLogFileSize",
-                                        MaxLogFileSize /Mb).intValue() *Mb;
-    MaxLogMemorySize = Integer.getInteger("NTLogMemorySize",
-                                          MaxLogMemorySize /Kb).intValue() *Kb;
+    LogMemoryCapacity = Configuration.getInteger("NTLogMemoryCapacity", LogMemoryCapacity).intValue();
+    MaxLogFileSize = Configuration.getInteger("NTLogFileSize", MaxLogFileSize / Mb).intValue() * Mb;
+    MaxLogMemorySize = Configuration.getInteger("NTLogMemorySize", MaxLogMemorySize / Kb).intValue() * Kb;
 
     logmon = Debug.getLogger("fr.dyade.aaa.util.Transaction");
     if (logmon.isLoggable(BasicLevel.INFO))
@@ -450,9 +448,8 @@ public final class NTransaction implements Transaction, NTransactionMBean {
       };
     
     // Be careful, setGarbageDelay and garbageAsync use logFile !!
-    setGarbageDelay(Integer.getInteger("NTGarbageDelay",
-                                       getGarbageDelay()).intValue());
-    garbageAsync(Boolean.getBoolean("NTAsyncGarbage"));
+    setGarbageDelay(Configuration.getInteger("NTGarbageDelay", getGarbageDelay()).intValue());
+    garbageAsync(Configuration.getBoolean("NTAsyncGarbage"));
 
     startTime = System.currentTimeMillis();
 
@@ -614,7 +611,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
   }
 
   /**
-   *  Save an object state already serialized. The byte array keeped in log is
+   *  Save an object state already serialized. The byte array kept in log is
    * a copy, so the original one may be modified.
    */
   public final void saveByteArray(byte[] buf, String name) throws IOException {
@@ -1330,9 +1327,9 @@ final class Operation implements Serializable {
   private static Pool pool = null;
 
   static {
-    pool = new Pool("NTransaction$Operation",
-                    Integer.getInteger("NTLogThresholdOperation",
-                                       NTransaction.LogThresholdOperation).intValue());
+    NTransaction.LogThresholdOperation = Configuration.getInteger("NTLogThresholdOperation",
+        NTransaction.LogThresholdOperation).intValue();
+    pool = new Pool("NTransaction$Operation", NTransaction.LogThresholdOperation);
   }
 
   static Operation alloc(int type, String dirName, String name) {
