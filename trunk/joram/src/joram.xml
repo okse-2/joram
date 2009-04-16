@@ -88,6 +88,7 @@
       <!-- End - Needed for task OSGI -->
 
       <include name="fr/dyade/aaa/util/SocketFactory*.java"/>
+      <include name="fr/dyade/aaa/util/ServerSocketFactory*.java"/>
 
       <!-- Begin - Needed for JORAM -->
       <include name="org/objectweb/joram/shared/selectors/*.java"/>
