@@ -24,6 +24,7 @@
  */
 package org.objectweb.joram.mom.proxies.tcp;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.StringTokenizer;
@@ -89,11 +90,57 @@ public class TcpProxyService implements TcpProxyServiceMBean {
    * The proxy service reference (used to stop it).
    */
   private static TcpProxyService proxyService;
-
+  
+  int port;
+  int backlog;
+  String address;
+  
   /**
    * The server socket listening to connections from the JMS clients.
    */
-  private ServerSocket serverSocket;
+  private ServerSocket serverSocket = null;
+  
+  /**
+   * Gets the listening socket.
+   * 
+   * @return the listening socket.
+   */
+  ServerSocket getServerSocket() {
+    return serverSocket;
+  }
+
+  /**
+   * Closes the listening socket and sets the variable to null.
+   */
+  protected void resetServerSocket() {
+    if (serverSocket == null) return;
+    
+    try {
+      serverSocket.close();
+    } catch (IOException exc) {}
+    serverSocket = null;
+  }
+  
+  /**
+   * Initialize the listening socket.
+   *  
+   * @param port
+   * @param backlog
+   * @param address
+   * @return The initialized socket.
+   * 
+   * @throws Exception
+   */
+  protected ServerSocket createServerSocket(int port, int backlog, String address) throws Exception {
+    ServerSocket serverSocket;
+    // TODO (AF): Use the ServerSocketFactory
+    if (address.equals("0.0.0.0")) {
+      serverSocket = new ServerSocket(port, backlog);
+    } else {
+      serverSocket = new ServerSocket(port, backlog, InetAddress.getByName(address));
+    }
+    return serverSocket;
+  }
 
   /**
    * Initializes the TCP entry point by creating a server socket listening
@@ -123,8 +170,7 @@ public class TcpProxyService implements TcpProxyServiceMBean {
     // if the socket can't be created (even if firstTime is false).
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
       JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                "TcpProxyService.init() - binding to " +
-                                address + ", port " + port);
+                                "TcpProxyService.init() - binding to " + address + ", port " + port);
     proxyService = new TcpProxyService(port, backlog, address);
     proxyService.start();
     
@@ -153,7 +199,13 @@ public class TcpProxyService implements TcpProxyServiceMBean {
   private boolean activated = false;
 
   public TcpProxyService(int port, int backlog, String address) throws Exception {
+    // Memorizes values for future socket creation (see activate).
+    this.port = port;
+    this.backlog = backlog;
+    this.address = address;
+    
     this.serverSocket = createServerSocket(port, backlog, address);
+    
     int poolSize = AgentServer.getInteger(POOL_SIZE_PROP, DEFAULT_POOL_SIZE).intValue();
     int timeout = AgentServer.getInteger(SO_TIMEOUT_PROP, DEFAULT_SO_TIMEOUT).intValue();
     
@@ -162,16 +214,6 @@ public class TcpProxyService implements TcpProxyServiceMBean {
     for (int i = 0; i < poolSize; i++) {
       connectionListeners[i] = new TcpConnectionListener(this, timeout);
     }
-  }
-
-  protected ServerSocket createServerSocket(int port, int backlog, String address) throws Exception {
-    ServerSocket serverSocket;
-    if (address.equals("0.0.0.0")) {
-      serverSocket = new ServerSocket(port, backlog);
-    } else {
-      serverSocket = new ServerSocket(port, backlog, InetAddress.getByName(address));
-    }
-    return serverSocket;
   }
 
   protected void start() {
@@ -217,17 +259,12 @@ public class TcpProxyService implements TcpProxyServiceMBean {
     closeAllConnections();
     ConnectionManager.getCurrentInstance().removeManager(this);
   }
-  
-  ServerSocket getServerSocket() {
-    return serverSocket;
-  }
 
   public void activate() {
     try {
-      if (serverSocket.isClosed()) {
-        int backlog = AgentServer.getInteger(BACKLOG_PROP, DEFAULT_BACKLOG).intValue();
-        serverSocket = createServerSocket(serverSocket.getLocalPort(), backlog, serverSocket.getInetAddress().getHostName());
-      }
+      if (serverSocket == null)
+        serverSocket = createServerSocket(port, backlog, address);
+      
       for (int i = 0; i < connectionListeners.length; i++) {
         if (!connectionListeners[i].isRunning())
           connectionListeners[i].start();
@@ -267,7 +304,6 @@ public class TcpProxyService implements TcpProxyServiceMBean {
   }
 
   public String getServerAddress() {
-    return serverSocket.toString();
+    return address.toString();
   }
-  
 }

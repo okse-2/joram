@@ -75,31 +75,21 @@ public class TcpConnectionListener extends Daemon {
 
   public void run() {
     if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
-        BasicLevel.DEBUG, "TcpConnectionListener.run()");
+      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpConnectionListener.run()");
 
-    // Wait for the admin topic deployment.
-    // AF: a synchronization would be much better.
+    // Wait for the administration topic deployment.
+    // TODO (AF): a synchronization would be much better.
     try {
       Thread.sleep(2000);
     } catch (InterruptedException exc) {
       // continue
     }
 
-    loop:
     while (running) {
       canStop = true;
-      if (proxyService.getServerSocket() != null) {
-        try {
-          acceptConnection();
-        } catch (Exception exc) {
-          if (running) {
-            continue loop;
-          } else {
-            break loop;
-          }
-        }
-      }
+      try {
+        acceptConnection();
+      } catch (Exception exc) {}
     }
   }
 
@@ -166,25 +156,23 @@ public class TcpConnectionListener extends Daemon {
       
       Identity identity = Identity.read(is);
       if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-            " -> read identity = " + identity);
+        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, " -> read identity = " + identity);
+      
       int key = StreamUtil.readIntFrom(is);
       if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
         JoramTracing.dbgProxy.log(BasicLevel.DEBUG, " -> read key = " + key);
+      
       int heartBeat = 0;
       if (key == -1) {
         heartBeat = StreamUtil.readIntFrom(is);
         if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgProxy.log(BasicLevel.DEBUG, 
-              " -> read heartBeat = " + heartBeat);
+          JoramTracing.dbgProxy.log(BasicLevel.DEBUG, " -> read heartBeat = " + heartBeat);
       }
 
       GetProxyIdNot gpin = new GetProxyIdNot(identity, inaddr);
       AgentId proxyId;
       try {
-        gpin.invoke(new AgentId(AgentServer.getServerId(),
-            AgentServer.getServerId(),
-            AgentId.JoramAdminStamp));
+        gpin.invoke(new AgentId(AgentServer.getServerId(), AgentServer.getServerId(),  AgentId.JoramAdminStamp));
         proxyId = gpin.getProxyId();
       } catch (Exception exc) {
         if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
@@ -253,10 +241,6 @@ public class TcpConnectionListener extends Daemon {
   }
     
   protected void close() {
-    ServerSocket srvSocket = proxyService.getServerSocket();
-    try {
-      if (!srvSocket.isClosed())
-        srvSocket.close();
-    } catch (IOException exc) {}
+    proxyService.resetServerSocket();
   }
 }
