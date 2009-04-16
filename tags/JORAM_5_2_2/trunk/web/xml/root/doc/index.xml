@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="joram-team@ow2.org">JORAM team</author>
+    <title>Documentation</title>
+    <filename>index.xml</filename>
+    <pathtoroot>..</pathtoroot>
+  </properties>
+
+  <body>
+
+    <s1 name="JORAM manuals">
+      <p>The JORAM documentation is packaged as a single PDF document.</p>
+      <p>It is well known by the JORAM team that this documentation is not
+      sufficient and sometimes vague or unclear. Do not hesitate to provide
+      any comment or feedback that could help us improving this doc. Of course, 
+      any contribution is welcome ;-).</p>
+      <p>The Old documentation (before 4.1 version) is still accessible
+      <a href="old-documentation.html">here</a>. Since 4.1 the documentation
+      can be downloaded <a href="../download/index.html">in the download area</a>.</p>
+
+    <subtitle>Installation and Users Guide</subtitle>
+      <ul>
+        <li>Guide of the <a href="../current/doc/Joram-5.2-en.pdf">5.2 release</a>.</li>
+      </ul>
+
+    <subtitle>API documentation</subtitle>
+      <ul>
+        <li>Browsing the user <a href="../current/javadoc/">Joram 5.2.1 javadoc</a>.</li>
+        <li>For advanced user and programmer a detailed documentation generated with Doxygen is available <a href="../current/joramdox/html/index.html">here</a>.</li>
+				<li>Browsing the <a href="../current/xoramdox/html/index.html">Xoram 1.3.0/52 apidoc</a>.</li>
+      </ul>
+    </s1>
+
+    <s1 name="Other documentation">
+      <subtitle>JORAM show</subtitle>
+      <p>The latest JORAM slides show, presented at the Objectweb conference
+      in Paris (20-21 November 2003), is available <a href="http://www.objectweb.org/phorum/download.php/36,68/031120-Joram-OWConf.pdf">here</a>.</p>
+
+      <subtitle>ScalAgent Distributed Technologies</subtitle>
+      <p><a href="http://www.scalagent.com">ScalAgent</a> is the provider
+         of the open-source platform on top of which JORAM's MOM is built,
+         and proposes complementary information and showcases involving
+         JORAM.</p>
+      <p>White papers about JORAM are available, in
+         <a href="http://www.scalagent.com/pages/fr/datasheet/040322-joram-whitepaper-fr.pdf">French</a> and in
+         <a href="http://www.scalagent.com/pages/en/datasheet/040322-joram-whitepaper-en.pdf">English</a>.</p>
+
+      <subtitle>JMS related pages and documentation</subtitle>
+      <ul>
+        <li>JMS home: <a href="http://java.sun.com/products/jms/">
+            http://java.sun.com/products/jms/</a></li>
+        <li>JMS tutorial: 
+            <a href="http://java.sun.com/products/jms/tutorial/index.html">
+            http://java.sun.com/products/jms/tutorial/index.html</a></li>
+      </ul>
+      <ul>
+        <li>IBM developerWork article introducing JMS: <a href="http://www-106.ibm.com/developerworks/java/library/j-pj2ee5/">"Enterprise messaging with JMS"</a></li>
+        <li>IBM developerWork article about administration and naming: <a href="http://www-106.ibm.com/developerworks/java/library/j-jmsvendor/">"Implementing vendor-independent JMS solutions"</a></li>
+        <li>IBM developerWork article about JMS 1.1: <a href="http://www-106.ibm.com/developerworks/java/library/j-jms11/">"JMS 1.1 simplifies messaging with unified domains"</a></li>
+      </ul>
+
+    </s1>
+  </body>
+
+</document> 
