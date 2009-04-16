@@ -490,4 +490,28 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
     list.copyInto(res);
     return res;
   }
+  
+  /**
+   * Sets the current queue as the default DMQ for the local server.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  Never thrown.
+   */
+  public void setDefaultDMQ() throws ConnectException, AdminException {
+    AdminModule.setDefaultDMQId(getName());
+  }
+  
+  /**
+   * Sets the current queue as the default DMQ for the given server.
+   * <p>
+   * The request fails if the target server does not belong to the platform.
+   *
+   * @param serverId  The identifier of the server.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void setDefaultDMQ(int serverId) throws ConnectException, AdminException {
+    AdminModule.setDefaultDMQId(serverId, getName());
+  }
 }
