@@ -47,7 +47,7 @@ public class ManagedConnectionMetaDataImpl
 
   /** Returns JORAM's name. */
   public String getEISProductName() throws ResourceException {
-    return ConnectionMetaData.jmsProviderName;
+    return ConnectionMetaData.providerName;
   }
 
   /** Returns the current JORAM release number. */
