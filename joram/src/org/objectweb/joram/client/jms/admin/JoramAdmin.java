@@ -102,9 +102,6 @@ public class JoramAdmin extends AdminWrapper implements JoramAdminMBean {
     }
   }
 
-//  /** <code>true</code> if the underlying a JORAM HA server is defined */
-//  static boolean isHa = false;
-
   ///**
   // * Opens a connection dedicated to administering with the Joram server
   // * which parameters are wrapped by a given <code>ConnectionFactory</code>.

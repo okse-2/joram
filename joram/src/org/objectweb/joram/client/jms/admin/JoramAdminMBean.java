@@ -31,10 +31,6 @@ import org.objectweb.joram.client.jms.Destination;
  *
  */
 public interface JoramAdminMBean {
-
-  //  // TODO (AF): What is the need ?
-  //  public void exit();
-
   public void setTimeOutToAbortRequest(long timeOut) throws ConnectException;
 
   public long getTimeOutToAbortRequest() throws ConnectException;
