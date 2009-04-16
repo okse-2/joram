@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -40,22 +40,25 @@ public final class MXWrapper {
     if ((mxname != null) && (mxname.length() > 0))
       Class.forName(mxname).newInstance();
   }
+  
+  public static String objectName(String domain, String name) {
+    StringBuffer strbuf = new StringBuffer();
+    strbuf.append(domain).append(':').append(name);
+    return strbuf.toString();
+  }
 
-  public static void registerMBean(Object bean, String domain, String name) throws Exception {
+  public static String  registerMBean(Object bean, String domain, String name) throws Exception {
+    return registerMBean(bean, objectName(domain, name));
+  }
+  
+  public static String registerMBean(Object bean, String fullName) throws Exception {
     if (mxserver == null)
-      return;
-    mxserver.registerMBean(bean, domain, name);
+      return null;
+    return mxserver.registerMBean(bean, fullName);
   }
 
   public static void unregisterMBean(String domain, String name) throws Exception {
-    if (mxserver == null) return;
-    mxserver.unregisterMBean(domain, name);
-  }
-  
-  public static void registerMBean(Object bean, String fullName) throws Exception {
-    if (mxserver == null)
-      return;
-    mxserver.registerMBean(bean, fullName);
+    unregisterMBean(objectName(domain, name));
   }
 
   public static void unregisterMBean(String fullName) throws Exception {

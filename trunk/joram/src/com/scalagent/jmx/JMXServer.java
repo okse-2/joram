@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,7 +21,6 @@
  */
 package com.scalagent.jmx;
 
-import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Set;
 
@@ -41,7 +40,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
 /**
  * 
  */
-public class JMXServer implements MXServer, Serializable {
+public class JMXServer implements MXServer {
   
   public MBeanServer mxserver = null;
 
@@ -55,33 +54,17 @@ public class JMXServer implements MXServer, Serializable {
       // Try to get the default platform MBeanServer (since JDK 1.5)
       Class clazz = Class.forName("java.lang.management.ManagementFactory");
       Method method = clazz.getMethod("getPlatformMBeanServer", null);
-      this.mxserver = (MBeanServer) method.invoke(null, null);
+      mxserver = (MBeanServer) method.invoke(null, null);
     } catch (Exception exc) {
       // Prior JDK1.5 (with JMXRI implementation).
-      this.mxserver = MBeanServerFactory.createMBeanServer("AgentServer");
+      mxserver = MBeanServerFactory.createMBeanServer("AgentServer");
     }
     MXWrapper.setMXServer(this);
   }
 
-  public void registerMBean(Object bean,
-                            String domain,
-                            String name) throws Exception {
-    StringBuffer strbuf = new StringBuffer();
-    strbuf.append(domain).append(':').append(name);
-    registerMBean(bean, strbuf.toString());
-  }
-
-  public void unregisterMBean(String domain,
-                              String name) throws Exception {
-    StringBuffer strbuf = new StringBuffer();
-    strbuf.append(domain);
-    strbuf.append(':').append(name);
-    unregisterMBean(strbuf.toString());
-  }
-
-  public void registerMBean(Object bean, String fullName) throws Exception {
-    if (mxserver == null)
-      return;
+  public String registerMBean(Object bean, String fullName) throws Exception {
+    if (mxserver == null) return null;
+    
     try {
       mxserver.registerMBean(bean, new ObjectName(fullName));
     } catch (InstanceAlreadyExistsException exc) {
@@ -98,6 +81,8 @@ public class JMXServer implements MXServer, Serializable {
       // Wraps a java.lang.IllegalArgumentException
       throw exc;
     }
+    
+    return fullName;
   }
 
   public void unregisterMBean(String fullName) throws Exception {

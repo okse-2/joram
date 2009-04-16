@@ -332,8 +332,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
     dest.adminName = name;
     dest.type = reply.getType();
 
-    // TODO (AF): MBean (un)registration is done explicitly
-    //    dest.registerMBean("joramClient");
+    // Be careful, MBean registration is now done explicitly
   }
 
   /**
@@ -345,40 +344,39 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    */
   public void delete() throws ConnectException, AdminException, javax.jms.JMSException {
     doRequest(new DeleteDestination(getName()));
-    // TODO (AF): MBean (un)registration is done explicitly
-    //    unregisterMBean();
+    unregisterMBean();
   }
 
-  transient protected String JMXBaseName = null;
+  // Object name of the MBean if it is registered.
   transient protected String JMXBeanName = null;
 
-  public void registerMBean(String base) {
-    if (MXWrapper.mxserver == null) return;
+  public String registerMBean(String base) {
+    if (MXWrapper.mxserver == null) return null;
 
     StringBuffer buf = new StringBuffer();
+    buf.append(base).append(':');
     buf.append("type=").append(getType());
     buf.append(",name=").append(getAdminName()).append('[').append(getName()).append(']');
     JMXBeanName = buf.toString();
-    JMXBaseName = base;
-
+    
     try {
-      MXWrapper.registerMBean(this, JMXBaseName, JMXBeanName);
+       MXWrapper.registerMBean(this, JMXBeanName);
     } catch (Exception e) {
       if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN,
-                   "Destination.registerMBean: " + JMXBaseName + ", " + JMXBeanName, e);
+        logger.log(BasicLevel.WARN, "Destination.registerMBean: " + JMXBeanName, e);
     }
+    
+    return JMXBeanName;
   }
 
   public void unregisterMBean() {
-    if ((MXWrapper.mxserver == null) || (JMXBaseName == null) || (JMXBeanName == null)) return;
+    if ((MXWrapper.mxserver == null) || (JMXBeanName == null)) return;
 
     try {
-      MXWrapper.unregisterMBean(JMXBaseName, JMXBeanName);
+      MXWrapper.unregisterMBean(JMXBeanName);
     } catch (Exception e) {
       if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN,
-                   "Destination.unregisterMBean: " + JMXBaseName + ", " + JMXBeanName, e);
+        logger.log(BasicLevel.WARN, "Destination.unregisterMBean: " + JMXBeanName, e);
     }
   }
 
@@ -798,8 +796,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
       return null;
   }
 
-  public static Destination newInstance(
-                                        String id,
+  public static Destination newInstance(String id,
                                         String name,
                                         String type) throws AdminException {
     if (logger.isLoggable(BasicLevel.DEBUG))
