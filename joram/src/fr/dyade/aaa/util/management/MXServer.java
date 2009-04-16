@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,13 +24,9 @@ import javax.management.MBeanAttributeInfo;
 import javax.management.ObjectName;
 
 public interface MXServer {
-  public void registerMBean(Object bean, String domain, String name) throws Exception;
+  public String registerMBean(Object bean, String name) throws Exception;
 
-  public void unregisterMBean(String domain, String name) throws Exception;
-
-  public void registerMBean(Object bean, String fullName) throws Exception;
-
-  public void unregisterMBean(String fullName) throws Exception;
+  public void unregisterMBean(String name) throws Exception;
   
   public Object getAttribute(ObjectName objectName, String attribute) throws Exception;
   

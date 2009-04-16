@@ -232,41 +232,40 @@ public class User extends AdministeredObject implements UserMBean {
     AdminReply reply = AdminModule.doRequest(new CreateUserRequest(identity, serverId));
     User user = new User(name, ((CreateUserReply) reply).getProxId());
 
-// TODO (AF): MBean (un)registration is done explicitly
-//    user.registerMBean("joramClient");
+    // Be careful, MBean registration is now done explicitly
 
     return user;
   }
 
-  transient protected String JMXBaseName = null;
+  // Object name of the MBean if it is registered.
   transient protected String JMXBeanName = null;
 
-  public void registerMBean(String base) {
-    if (MXWrapper.mxserver == null) return;
+  public String registerMBean(String base) {
+    if (MXWrapper.mxserver == null) return null;
 
     StringBuffer buf = new StringBuffer();
+    buf.append(base).append(':');
     buf.append("type=User,name=").append(getName()).append('[').append(getProxyId()).append(']');
     JMXBeanName = buf.toString();
-    JMXBaseName = base;
-
+    
     try {
-      MXWrapper.registerMBean(this, JMXBaseName, JMXBeanName);
+      MXWrapper.registerMBean(this, JMXBeanName);
     } catch (Exception e) {
       if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN,
-                                   "User.registerMBean: " + JMXBaseName + ", " + JMXBeanName, e);
+        logger.log(BasicLevel.WARN, "User.registerMBean: " + JMXBeanName, e);
     }
+    
+    return JMXBeanName;
   }
 
   public void unregisterMBean() {
-    if ((MXWrapper.mxserver == null) || (JMXBaseName == null) || (JMXBeanName == null)) return;
+    if ((MXWrapper.mxserver == null) || (JMXBeanName == null)) return;
 
     try {
-      MXWrapper.unregisterMBean(JMXBaseName, JMXBeanName);
+      MXWrapper.unregisterMBean(JMXBeanName);
     } catch (Exception e) {
       if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN,
-                                   "User.unregisterMBean: " + JMXBaseName + ", " + JMXBeanName, e);
+        logger.log(BasicLevel.WARN, "User.unregisterMBean: " + JMXBeanName, e);
     }
   }
 
@@ -339,8 +338,7 @@ public class User extends AdministeredObject implements UserMBean {
    */
   public void delete() throws ConnectException, AdminException {
     doRequest(new DeleteUser(name, proxyId));
-// TODO (AF): MBean (un)registration is done explicitly
-//    unregisterMBean();
+    unregisterMBean();
   } 
 
   /**
