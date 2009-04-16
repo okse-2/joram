@@ -43,7 +43,7 @@ import fr.dyade.aaa.agent.AgentServer;
  * kill server 1. send message. restart server 1. and receivewith the same user 
  * use some message
  */
-public class Test9 extends joram.framework.TestCase {
+public class Test9 extends framework.TestCase {
   static int MsgSize = 100;
   static int NbMsg = 1000; // Must be a multiple of 10
 

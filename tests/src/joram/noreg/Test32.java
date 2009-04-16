@@ -35,7 +35,7 @@ import fr.dyade.aaa.agent.AgentServer;
 /**
  * test create queue
  */
-public class Test32 extends joram.framework.TestCase{
+public class Test32 extends framework.TestCase{
     public static void main (String args[]) throws Exception {
 	new Test32().run();
     }

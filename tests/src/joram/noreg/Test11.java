@@ -34,7 +34,6 @@ import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 
-import joram.framework.BaseTestCase;
 
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
@@ -42,6 +41,7 @@ import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 import fr.dyade.aaa.agent.AgentServer;
+import framework.BaseTestCase;
 
 class ExcList11 implements ExceptionListener {
   String name = null;
@@ -90,7 +90,7 @@ public class Test11 extends BaseTest {
       boolean asynchronous = Boolean.getBoolean("async");
 
       if (sid != 0) {
-        joram.framework.TestCase.startAgentServer(sid);
+        framework.TestCase.startAgentServer(sid);
       }
       System.out.println((sid == 0) ? "local" : "remote");
       System.out.println("async: " + asynchronous);
@@ -190,7 +190,7 @@ public class Test11 extends BaseTest {
       AdminModule.disconnect();
 
       if (sid != 0)
-        joram.framework.TestCase.stopAgentServer(sid);
+        framework.TestCase.stopAgentServer(sid);
 
     } catch (Throwable exc) {
       exc.printStackTrace();

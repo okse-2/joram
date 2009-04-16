@@ -34,7 +34,7 @@ import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 import fr.dyade.aaa.agent.AgentServer;
 
-public class BaseTest extends joram.framework.BaseTestCase{
+public class BaseTest extends framework.BaseTestCase{
 
   static void startServer() throws Exception {
     AgentServer.init((short) 0, "./s0", null);

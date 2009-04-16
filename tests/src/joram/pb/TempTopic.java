@@ -40,7 +40,7 @@ import javax.naming.NamingException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
-public class TempTopic extends joram.framework.TestCase {
+public class TempTopic extends framework.TestCase {
   public static void main(String[] args) throws Exception {
     new TempTopic().run();
   }

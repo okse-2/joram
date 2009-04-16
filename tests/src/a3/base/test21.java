@@ -22,8 +22,8 @@
  */
 package a3.base;
 
-import joram.framework.TestCase;
 import fr.dyade.aaa.agent.*;
+import framework.TestCase;
 
 /**
  * This test verify the sending the network behavior with a great number of

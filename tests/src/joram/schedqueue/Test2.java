@@ -39,7 +39,7 @@ import fr.dyade.aaa.agent.AgentServer;
  * 
  *
  */
-public class Test2 extends joram.framework.TestCase{
+public class Test2 extends framework.TestCase{
     static Connection cnx_a;
    
     static Session sess_a;

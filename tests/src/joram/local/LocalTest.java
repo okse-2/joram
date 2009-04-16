@@ -45,7 +45,6 @@ import javax.jms.TopicPublisher;
 import javax.jms.TopicSession;
 import javax.jms.TopicSubscriber;
 
-import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
@@ -54,6 +53,8 @@ import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
 import org.objectweb.joram.client.jms.local.QueueLocalConnectionFactory;
 import org.objectweb.joram.client.jms.local.TopicLocalConnectionFactory;
+
+import framework.TestCase;
 
 /**
  * Test local : try to send a message and receive it with a queue and with a topic

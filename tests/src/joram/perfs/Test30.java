@@ -65,7 +65,7 @@ class MsgList30 implements MessageListener {
  * check creation of multiple connection and queue.Counts of msg/s for the receiver and sender
  *
  */
-public class Test30 extends joram.framework.TestCase {
+public class Test30 extends framework.TestCase {
     public static void main (String args[]) throws Exception {
 	new Test30().run();
     }

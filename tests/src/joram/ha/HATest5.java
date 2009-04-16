@@ -39,9 +39,10 @@ import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 
-import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
+
+import framework.TestCase;
 
 public class HATest5 extends TestCase {
   public static int nbRound = 1000;

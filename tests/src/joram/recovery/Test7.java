@@ -41,7 +41,7 @@ import fr.dyade.aaa.agent.AgentServer;
  * stop server. restart server and check receive two message
  *
  */
-public class Test7 extends joram.framework.TestCase {
+public class Test7 extends framework.TestCase {
     public static void main (String args[]) {
 	new Test7().run();
     }

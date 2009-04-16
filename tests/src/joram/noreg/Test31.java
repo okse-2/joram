@@ -46,7 +46,7 @@ import fr.dyade.aaa.agent.AgentServer;
  * test use TTL
  *
  */
-public class Test31 extends joram.framework.TestCase implements MessageListener{
+public class Test31 extends framework.TestCase implements MessageListener{
   public static void main (String args[]) throws Exception {
       new Test31().run();
   }

@@ -42,7 +42,7 @@ import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
  * stop server and restart and receive the message from dmq.
  *
  */
-public class Test8 extends joram.framework.TestCase {
+public class Test8 extends framework.TestCase {
     static Connection cnx;
     static Session session;
 

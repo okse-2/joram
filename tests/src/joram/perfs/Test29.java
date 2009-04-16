@@ -64,7 +64,7 @@ class MsgList29 implements MessageListener {
 /**
  *Several messages on some destination. Counts of msg/s for the receiver
  */
-public class Test29 extends joram.framework.TestCase {
+public class Test29 extends framework.TestCase {
     public static void main (String args[]) throws Exception {
 	new Test29().run();
     }

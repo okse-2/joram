@@ -22,8 +22,8 @@
  */
 package a3.base;
 
-import joram.framework.TestCase;
 import fr.dyade.aaa.agent.*;
+import framework.TestCase;
 
 public class test16 extends TestCase {
   short ServerReceiver1 = 1;

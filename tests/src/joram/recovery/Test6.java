@@ -42,7 +42,7 @@ import fr.dyade.aaa.agent.AgentServer;
  * stop first server. send 2 message. restart 2 server and check receive four message
  *
  */
-public class Test6 extends joram.framework.TestCase {
+public class Test6 extends framework.TestCase {
   public static void main (String args[]) {
       new Test6().run();
   }

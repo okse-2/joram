@@ -28,7 +28,8 @@ import java.io.File;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 
-import joram.framework.TestCase;
+import framework.TestCase;
+
 
 
 /**

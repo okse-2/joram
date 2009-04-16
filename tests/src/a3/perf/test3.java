@@ -24,8 +24,8 @@
 
 package a3.perf;
 
-import joram.framework.TestCase;
 import fr.dyade.aaa.agent.*;
+import framework.TestCase;
 
 public class test3 extends TestCase {
   short ServerPing;

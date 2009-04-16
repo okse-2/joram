@@ -32,10 +32,11 @@ import javax.jms.TextMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
-import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
+
+import framework.TestCase;
 
 /**
  * Test : set a default dmq and set a threshold for queue

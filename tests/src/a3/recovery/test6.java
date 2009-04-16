@@ -27,10 +27,10 @@ package a3.recovery;
 
 import java.util.*;
 
-import joram.framework.TestCase;
 
 
 import fr.dyade.aaa.agent.*;
+import framework.TestCase;
 
 public class test6 extends TestCase {
   public test6() {

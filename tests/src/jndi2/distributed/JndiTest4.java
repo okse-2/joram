@@ -29,7 +29,8 @@ import java.io.*;
 import java.util.*;
 import javax.naming.*;
 
-import joram.framework.TestCase;
+import framework.TestCase;
+
 
 /**
  *

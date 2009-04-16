@@ -30,7 +30,8 @@ import javax.jms.Destination;
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 
-import joram.framework.TestCase;
+import framework.TestCase;
+
 
 
 /**

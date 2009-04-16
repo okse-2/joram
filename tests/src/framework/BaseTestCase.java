@@ -21,7 +21,7 @@
  * Contributor(s): Badolle Fabien (ScalAgent D.T.)
  */
 
-package joram.framework;
+package framework;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;

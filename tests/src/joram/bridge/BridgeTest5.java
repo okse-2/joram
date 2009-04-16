@@ -30,7 +30,8 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import joram.framework.TestCase;
+import framework.TestCase;
+
 
 /**
  * Test :

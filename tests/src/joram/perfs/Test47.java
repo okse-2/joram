@@ -72,7 +72,7 @@ public class Test47 extends BaseTest {
 	    MsgTransient = Boolean.getBoolean("MsgTransient");
 	    SubDurable = Boolean.getBoolean("SubDurable");
 	    writeIntoFile("======================== start test 47 =====================");
-	    joram.framework.TestCase.startAgentServer((short) 1);
+	    framework.TestCase.startAgentServer((short) 1);
 	    startServer();
 	    Thread.sleep(500L);
 
@@ -140,7 +140,7 @@ public class Test47 extends BaseTest {
 	    exc.printStackTrace();
 	    error(exc);
 	}finally{
-	    joram.framework.TestCase.stopAgentServer((short) 1);
+	    framework.TestCase.stopAgentServer((short) 1);
 	    endTest();
 	}
     }

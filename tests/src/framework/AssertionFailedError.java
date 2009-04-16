@@ -20,7 +20,7 @@
  * Initial developer(s): (ScalAgent D.T.)
  * Contributor(s): 
  */
-package joram.framework;
+package framework;
 
 /**
  * Thrown when an assertion failed.

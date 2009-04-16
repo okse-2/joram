@@ -24,13 +24,14 @@ package joram.reconf;
 
 import java.io.File;
 
-import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.NameAlreadyUsedException;
 import org.objectweb.joram.client.jms.admin.StartFailureException;
 import org.objectweb.joram.client.jms.admin.User;
+
+import framework.TestCase;
 
 /**
  * Testing: server reconfiguration

@@ -73,7 +73,7 @@ class MsgList28 implements MessageListener {
 /**
  *Test the impact of a durable subscription on the performances of a normal subscription
  */
-public class Test28 extends joram.framework.TestCase{
+public class Test28 extends framework.TestCase{
     public static void main (String args[]) throws Exception {
 	new Test28().run();
     }

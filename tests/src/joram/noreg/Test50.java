@@ -40,7 +40,7 @@ import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
  *  test user.clearSubscription(), restart of server, and check there is no message
  *
  */
-public class Test50 extends joram.framework.TestCase {
+public class Test50 extends framework.TestCase {
   public static void main (String args[])  {
       new Test50().run();
   }

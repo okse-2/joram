@@ -31,7 +31,6 @@ import javax.jms.Topic;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
-import joram.framework.TestCase;
 
 import org.objectweb.joram.client.connector.ActivationSpecImpl;
 import org.objectweb.joram.client.connector.JoramAdapter;
@@ -41,6 +40,8 @@ import org.objectweb.joram.client.connector.OutboundConnection;
 import org.objectweb.joram.client.connector.OutboundConsumer;
 import org.objectweb.joram.client.connector.OutboundProducer;
 import org.objectweb.joram.client.connector.OutboundSession;
+
+import framework.TestCase;
 
 public class Connector extends TestCase {
   public static void main(String[] args) throws Exception {

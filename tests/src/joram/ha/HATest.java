@@ -35,9 +35,10 @@ import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 import org.objectweb.joram.client.jms.Queue;
 
-import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
+
+import framework.TestCase;
 
 public class HATest extends TestCase {
   public static final int MESSAGE_NUMBER = 50;

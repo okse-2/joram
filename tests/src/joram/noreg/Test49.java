@@ -44,7 +44,7 @@ public class Test49 extends BaseTest {
     }
     public void run(){
 	try {
-	    joram.framework.TestCase.startAgentServer((short) 0);
+	    framework.TestCase.startAgentServer((short) 0);
 	    Thread.sleep(1000L);
 	  
 	    AdminModule.connect("root", "root", 60);
@@ -83,10 +83,10 @@ public class Test49 extends BaseTest {
 
 	    Thread.sleep(1000L);
 	    System.out.println("Stop Server#0");
-	    joram.framework.TestCase.stopAgentServer((short) 0);
+	    framework.TestCase.stopAgentServer((short) 0);
 	    Thread.sleep(1000L);
 	    System.out.println("Start Server#0");
-	    joram.framework.TestCase.startAgentServer((short) 0);
+	    framework.TestCase.startAgentServer((short) 0);
 	    Thread.sleep(1000L);
 
 	    AdminModule.connect("root", "root", 60);
@@ -102,7 +102,7 @@ public class Test49 extends BaseTest {
 	    error(exc);
 	}finally{
 	    System.out.println("Stop Server#0");
-	    joram.framework.TestCase.stopAgentServer((short) 0);  
+	    framework.TestCase.stopAgentServer((short) 0);  
 	    endTest();
 	}
     }

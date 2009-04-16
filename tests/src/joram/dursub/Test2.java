@@ -38,7 +38,7 @@ import fr.dyade.aaa.agent.AgentServer;
  * check  unsubscribe null throw an exception
  *
  */
-public class Test2 extends joram.framework.TestCase {
+public class Test2 extends framework.TestCase {
     public static void main (String args[]) {
 	new Test2().run();
     }

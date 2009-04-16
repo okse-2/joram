@@ -24,11 +24,11 @@
 
 package a3.base;
 
-import joram.framework.TestCase;
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.Notification;
+import framework.TestCase;
 
 public class test15 extends TestCase {
   public test15() {

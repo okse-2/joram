@@ -23,8 +23,8 @@
 
 package a3.perf;
 
-import joram.framework.TestCase;
 import fr.dyade.aaa.agent.*;
+import framework.TestCase;
 
 public class test5 extends TestCase {
   public test5() {

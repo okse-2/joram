@@ -32,7 +32,7 @@ import fr.dyade.aaa.agent.AgentServer;
 /**
  *
  */
-public class Test2  extends joram.framework.TestCase{
+public class Test2  extends framework.TestCase{
   public static void main (String args[]) throws Exception {
     new Test2().run();
   }

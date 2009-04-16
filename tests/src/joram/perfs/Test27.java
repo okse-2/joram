@@ -45,7 +45,7 @@ import fr.dyade.aaa.util.Configuration;
 /**
  *CarrierIQ Scenario. Measure travel time
  */
-public class Test27 extends joram.framework.TestCase{
+public class Test27 extends framework.TestCase{
     static int NbMsg = 10000;
     static int MsgSize = 100;
     static int NbCollector = 4;
