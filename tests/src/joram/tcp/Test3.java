@@ -102,7 +102,7 @@ public class Test3 extends TestCase {
 
     // Avoids a bug: synchro between connection
     // error and further receive.
-    Thread.sleep(5000);
+    Thread.sleep(10000);
 
     IllegalStateException ise = null;
     try {
@@ -111,8 +111,7 @@ public class Test3 extends TestCase {
       ise = exc;
     }
     
-    assertTrue("Expected IllegalStateException not thrown", 
-        ise != null);
+    assertTrue("Expected IllegalStateException not thrown", ise != null);
   }
 
   public static void main(String args[]) {
