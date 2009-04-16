@@ -112,7 +112,7 @@
              author="false"
              windowtitle="ScalAgent(TM) Agent Framework"
              doctitle="Scalagent(TM) Agent Framework"
-             bottom="Copyright &#xA9; 2004 Scalagent - All rights reserved">
+             bottom="Copyright &#xA9; 2009 Scalagent - All rights reserved">
       <doctitle><![CDATA[<h1>Joram Documentation</h1>]]></doctitle>
       <package name="fr.dyade.aaa.*"/>
     </javadoc>
