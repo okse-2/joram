@@ -674,13 +674,12 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     int consCtx;
     DMQManager dmqManager = null;
 
-    // If the deny request is empty, the denying is a contextual one: it
-    // requests the denying of all the messages consumed by the denier in
-    // the denying context:
     if (! ids.hasMoreElements()) {
-      // Browsing the delivered messages:
-      for (Enumeration delIds = deliveredMsgs.keys();
-      delIds.hasMoreElements();) {
+      // If the deny request is empty, the denying is a contextual one: it
+      // requests the denying of all the messages consumed by the denier in
+      // the denying context:
+      for (Enumeration delIds = deliveredMsgs.keys(); delIds.hasMoreElements();) {
+        // Browsing the delivered messages:
         msgId = (String) delIds.nextElement();
 
         message = (Message) deliveredMsgs.get(msgId);
@@ -1390,7 +1389,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     DMQManager dmqManager = cleanPendingMessage(current);
 
     // Processing each request as long as there are deliverable messages:
-    while (! messages.isEmpty() && index < requests.size()) { 
+    while (! messages.isEmpty() && index < requests.size()) {
       notRec = (ReceiveRequest) requests.get(index);
       notMsg = new QueueMsgReply(notRec);
 
