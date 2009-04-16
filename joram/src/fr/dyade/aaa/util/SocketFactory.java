@@ -50,11 +50,12 @@ public abstract class SocketFactory {
    * @return The SocketFactory singleton for the default class.
    */
   public static SocketFactory getDefaultFactory() {
-    return SocketFactory14.getFactory();
+    return getFactory(DefaultFactory);
   }
 
   /**
    * Returns the SocketFactory singleton for the specified class.
+   * If the specified class can not be instantiated the default one is used.
    *
    * @param  The classname for SocketFactory class.
    * @return The SocketFactory singleton for the specified class.
