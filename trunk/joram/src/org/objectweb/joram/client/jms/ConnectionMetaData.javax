@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -30,44 +30,25 @@ import javax.jms.JMSException;
 /**
  * Implements the <code>javax.jms.ConnectionMetaData</code> interface.
  */
-public class ConnectionMetaData implements javax.jms.ConnectionMetaData {
+public final class ConnectionMetaData implements javax.jms.ConnectionMetaData {
   /** JMS major version number */
-  private final static int jmsMajorVersion = 1;
+  public final static int jmsMajorVersion = 1;
   /** JMS minor version number */
-  private final static int jmsMinorVersion = 1;
-  /** JMS provider name: Joram */
-  public final static String jmsProviderName = "Joram";
+  public final static int jmsMinorVersion = 1;
   /** JMS API version, currently 1.1 */
-  private final static String jmsVersion = "1.1";
+  public final static String jmsVersion = "1.1";
+  /** JMS provider name: Joram */
+  public final static String providerName = "Joram";
   /** Joram's major version number, currently @major@ */
-  private static int providerMajorVersion = @major@;
+  public final static int providerMajorVersion = @major@;
   /** Joram's minor version number, currently @minor@ */
-  private static int providerMinorVersion = @minor@;
+  public final static int providerMinorVersion = @minor@;
   /** Joram's implementation version, currently @major@.@minor@.@build@. */
   public final static String providerVersion = "@major@.@minor@.@build@";
   /** Enumeration of the Joram's JMSX property names */
   private final static Vector jmsxProperties = new Vector();
   
   static {
-//    int idx1 = 0;
-//    int idx2 = 0;
-//    try {
-//      idx1 = providerVersion.indexOf('.');
-//      if (idx1 != -1) {
-//        providerMajorVersion =
-//          Integer.parseInt(providerVersion.substring(0, idx1));
-//      }
-//    } catch (Exception exc) {
-//    }
-//    try {
-//      idx2 = providerVersion.indexOf('.', idx1 +1);
-//      if (idx2 != -1) {
-//        providerMinorVersion =
-//          Integer.parseInt(providerVersion.substring(idx1 +1, idx2));
-//      }
-//    } catch (Exception exc) {
-//    }
-
     jmsxProperties.add("JMSXDeliveryCount");
     jmsxProperties.add("JMSXGroupID");
     jmsxProperties.add("JMSXGroupSeq");
@@ -92,21 +73,21 @@ public class ConnectionMetaData implements javax.jms.ConnectionMetaData {
   }
 
   /**
-   * API method: Gets the JMS provider name: Joram.
-   *
-   * @exception JMSException  Actually never thrown.
-   */
-  public String getJMSProviderName() throws JMSException {
-    return jmsProviderName;
-  }
-
-  /**
    * API method: Gets the JMS API version, currently 1.1.
    *
    * @exception JMSException  Actually never thrown.
    */
   public String getJMSVersion() throws JMSException {
     return jmsVersion;
+  }
+
+  /**
+   * API method: Gets the JMS provider name: Joram.
+   *
+   * @exception JMSException  Actually never thrown.
+   */
+  public String getJMSProviderName() throws JMSException {
+    return providerName;
   }
 
   /**
