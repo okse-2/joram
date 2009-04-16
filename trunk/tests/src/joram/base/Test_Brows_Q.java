@@ -35,7 +35,8 @@ import javax.jms.TextMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
-import joram.framework.TestCase;
+import framework.TestCase;
+
 
 
 /**

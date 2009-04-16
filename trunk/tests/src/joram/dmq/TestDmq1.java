@@ -33,9 +33,10 @@ import javax.jms.Topic;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
-import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
+
+import framework.TestCase;
 
 /**
  * Test : set specifik dmq for queue and an other dmq for user. 

@@ -32,7 +32,6 @@ import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 
-import joram.framework.BaseTestCase;
 
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
@@ -42,6 +41,7 @@ import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.shared.MessageErrorConstants;
 
 import fr.dyade.aaa.agent.AgentServer;
+import framework.BaseTestCase;
 
 class ExcList21 implements ExceptionListener {
   String name = null;

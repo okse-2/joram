@@ -27,11 +27,11 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import joram.framework.TestCase;
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.Notification;
+import framework.TestCase;
 
 public class test2 extends TestCase {
   public test2() {

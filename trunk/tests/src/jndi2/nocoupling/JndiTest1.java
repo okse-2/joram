@@ -30,7 +30,8 @@ import java.util.Hashtable;
 import javax.naming.InitialContext;
 import javax.naming.NameNotFoundException;
 
-import joram.framework.TestCase;
+import framework.TestCase;
+
 
 /**
  * Tests: Simple test with 2 servers

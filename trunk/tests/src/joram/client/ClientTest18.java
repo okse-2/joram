@@ -39,7 +39,7 @@ import fr.dyade.aaa.agent.AgentServer;
 /**
  * Checks that a message listener can send messages.
  */
-public class ClientTest18 extends joram.framework.TestCase{
+public class ClientTest18 extends framework.TestCase{
     static int NbRound = 100;
     static int NbMsgPerRound = 5;
 

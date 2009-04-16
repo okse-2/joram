@@ -28,7 +28,7 @@ import fr.dyade.aaa.agent.AgentServer;
  *check server start and stop run with no problems
  *
  */
-public class Test8 extends joram.framework.TestCase{
+public class Test8 extends framework.TestCase{
 
   public static void main (String args[]) throws Exception {
       new Test8().run();

@@ -31,9 +31,10 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.Session;
 
-import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
+
+import framework.TestCase;
 
 /**
  * TCK test: receiveNoWait must return null if

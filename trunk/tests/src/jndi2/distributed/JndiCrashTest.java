@@ -28,7 +28,8 @@ import java.util.Hashtable;
 
 import javax.naming.InitialContext;
 
-import joram.framework.TestCase;
+import framework.TestCase;
+
 
 
 

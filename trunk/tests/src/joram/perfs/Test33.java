@@ -43,7 +43,7 @@ import fr.dyade.aaa.agent.AgentServer;
  *Memory test with TTL
  *
  */
-public class Test33 extends joram.framework.TestCase{
+public class Test33 extends framework.TestCase{
     public static void main (String args[]) throws Exception {
 	new Test33().run();
     }

@@ -34,8 +34,8 @@ import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.admin.User;
 
 import fr.dyade.aaa.agent.AgentServer;
+import framework.TestCase;
 
-import joram.framework.TestCase;
 
 /**
  * Test a server restart with lot of big messages.

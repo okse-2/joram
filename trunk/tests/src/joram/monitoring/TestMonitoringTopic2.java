@@ -37,11 +37,12 @@ import javax.jms.Topic;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
-import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+
+import framework.TestCase;
 
 /**
  * Tests modifying parameters monitored by the MonitoringTopic.

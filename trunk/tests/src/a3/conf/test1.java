@@ -23,12 +23,12 @@
 
 package a3.conf;
 
-import joram.framework.TestCase;
 
 import fr.dyade.aaa.agent.*;
 import fr.dyade.aaa.agent.conf.*;
 import fr.dyade.aaa.admin.script.*;
 import fr.dyade.aaa.admin.cmd.*;
+import framework.TestCase;
 
 public class test1 extends TestCase {
   public test1() {

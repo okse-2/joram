@@ -28,7 +28,8 @@ import java.util.Hashtable;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
-import joram.framework.TestCase;
+import framework.TestCase;
+
 
 /**
  *  Exception when bind an element (/A/elt) without create subcontext (/A)

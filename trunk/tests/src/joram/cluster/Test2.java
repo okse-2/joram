@@ -22,11 +22,12 @@
  */
 package joram.cluster;
 
-import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+
+import framework.TestCase;
 
 /**
  * Test : can't cluster an already clustered topic

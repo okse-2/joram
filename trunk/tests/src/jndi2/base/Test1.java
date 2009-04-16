@@ -34,7 +34,8 @@ import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.NotContextException;
 
-import joram.framework.TestCase;
+import framework.TestCase;
+
 
 /**
  *

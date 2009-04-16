@@ -32,7 +32,8 @@ import javax.jms.TextMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
-import joram.framework.TestCase;
+import framework.TestCase;
+
 
 /**
  * Test distributed architecture. Use 3 servers. The producer is attached to server 0. 

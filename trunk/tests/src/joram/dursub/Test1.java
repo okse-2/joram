@@ -39,7 +39,7 @@ import fr.dyade.aaa.agent.AgentServer;
  * TEST : creation of durable subscriber. If already active during cretion there is an exception 
  *
  */
-public class Test1 extends joram.framework.TestCase {
+public class Test1 extends framework.TestCase {
   static Topic topic = null;
   static ConnectionFactory cf = null;
 

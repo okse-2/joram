@@ -27,12 +27,12 @@ package a3.conf;
 import java.io.*;
 import java.util.*;
 
-import joram.framework.TestCase;
 
 import fr.dyade.aaa.agent.*;
 import fr.dyade.aaa.agent.conf.*;
 import fr.dyade.aaa.admin.script.*;
 import fr.dyade.aaa.admin.cmd.*;
+import framework.TestCase;
 
 
 public class Script2 extends TestScript {

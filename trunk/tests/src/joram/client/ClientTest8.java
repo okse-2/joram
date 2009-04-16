@@ -34,10 +34,11 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TemporaryQueue;
 
-import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
+
+import framework.TestCase;
 
 /**
  * Testing:

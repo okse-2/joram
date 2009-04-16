@@ -29,7 +29,8 @@ import java.lang.reflect.Method;
 
 import javax.jms.JMSException;
 
-import joram.framework.TestCase;
+import framework.TestCase;
+
 
 /**
  * Class extending <code>framework.TestCase</code> to provide a new

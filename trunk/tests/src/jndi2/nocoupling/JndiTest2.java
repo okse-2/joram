@@ -29,7 +29,8 @@ import java.util.Hashtable;
 
 import javax.naming.InitialContext;
 
-import joram.framework.TestCase;
+import framework.TestCase;
+
 
 /**
  * Tests: test with 2 servers

@@ -24,12 +24,13 @@ package joram.dmq;
 
 import java.util.List;
 
-import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
+
+import framework.TestCase;
 /**
  * Test : set a default dmq and set a default threshold for user
  *    

@@ -28,7 +28,8 @@ import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 
-import joram.framework.TestCase;
+import framework.TestCase;
+
 
 
 /**

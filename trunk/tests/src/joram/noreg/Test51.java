@@ -43,7 +43,7 @@ import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
  */
 
 
-public class Test51 extends joram.framework.TestCase {
+public class Test51 extends framework.TestCase {
   public static void main (String args[])  {
       new Test51().run();
   }

@@ -32,7 +32,7 @@ import fr.dyade.aaa.util.NTransaction;
 /**
  * Check transaction properties after a restart of the agent server.
  */
-public class Recover_5 extends joram.framework.TestCase {
+public class Recover_5 extends framework.TestCase {
   
   static Connection cnx;
   static Session session;

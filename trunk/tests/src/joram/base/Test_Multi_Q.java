@@ -37,7 +37,7 @@ import org.objectweb.joram.client.jms.admin.User;
  * check send and receive message with 500 queue
  *
  */
-public class Test_Multi_Q extends joram.framework.TestCase {
+public class Test_Multi_Q extends framework.TestCase {
     static int NbDest = 500;
     static int NbMsg = 5;
     static Destination dest[] = null;

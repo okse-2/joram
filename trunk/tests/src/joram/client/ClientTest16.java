@@ -28,9 +28,10 @@ import javax.jms.ConnectionFactory;
 import javax.jms.Session;
 import javax.jms.TopicSubscriber;
 
-import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
+
+import framework.TestCase;
 
 /**
  * Tests that when the connectingTimer of a

@@ -32,12 +32,12 @@ import javax.jms.QueueBrowser;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.admin.User;
 
 import fr.dyade.aaa.agent.AgentServer;
+import framework.TestCase;
 
 /**
  * Test that the ack is in session level. If close consumer without ack, message not redelivred .

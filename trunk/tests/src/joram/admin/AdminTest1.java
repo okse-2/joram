@@ -38,12 +38,13 @@ import javax.jms.TopicConnectionFactory;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
-import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+
+import framework.TestCase;
 
 public class AdminTest1 extends TestCase {
 

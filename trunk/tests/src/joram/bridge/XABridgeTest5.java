@@ -35,9 +35,10 @@ import javax.jms.XASession;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
-import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.XidImpl;
+
+import framework.TestCase;
 /**
  * Test :
  *    

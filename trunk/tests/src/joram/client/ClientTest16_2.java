@@ -29,9 +29,10 @@ import javax.jms.JMSException;
 import javax.jms.Session;
 import javax.jms.TopicSubscriber;
 
-import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
+
+import framework.TestCase;
 public class ClientTest16_2 extends TestCase {
 
   public static void main(String[] args) {

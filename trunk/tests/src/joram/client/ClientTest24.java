@@ -34,9 +34,10 @@ import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
 
-import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
+
+import framework.TestCase;
 
 /**
  * Check that sending an empty ObjectMessage

@@ -35,7 +35,8 @@ import javax.naming.InitialContext;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
 
-import joram.framework.TestCase;
+import framework.TestCase;
+
 
 
 

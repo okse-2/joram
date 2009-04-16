@@ -31,12 +31,12 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import joram.framework.TestCase;
 
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.admin.User;
 
 import fr.dyade.aaa.agent.AgentServer;
+import framework.TestCase;
 
 /**
  * Checks that a message listener can be closed

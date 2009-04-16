@@ -3,8 +3,8 @@
  */
 package a3.recovery;
 
-import joram.framework.TestCase;
 import fr.dyade.aaa.agent.*;
+import framework.TestCase;
 
 public class test3 extends TestCase {
   public test3() {
