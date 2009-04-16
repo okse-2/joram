@@ -738,9 +738,9 @@ public class BaseTestCase {
     
     // write Joram version
     if (current.summary)
-      System.err.println(ConnectionMetaData.jmsProviderName + " " + ConnectionMetaData.providerVersion);
+      System.err.println(ConnectionMetaData.providerName + " " + ConnectionMetaData.providerVersion);
     if (current.writer != null)
-      current.writer.println("| " + ConnectionMetaData.jmsProviderName + " " + ConnectionMetaData.providerVersion);
+      current.writer.println("| " + ConnectionMetaData.providerName + " " + ConnectionMetaData.providerVersion);
 
     // TODO:
     if ((current.failures != null) || (current.errors != null)) {
