@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -50,7 +50,16 @@ public abstract class SocketFactory {
    * @return The SocketFactory singleton for the default class.
    */
   public static SocketFactory getDefaultFactory() {
-    return getFactory(DefaultFactory);
+    SocketFactory socketFactory = null;
+    try {
+      Class factoryClass = Class.forName(DefaultFactory);
+      Method method = factoryClass.getMethod("getFactory", null);
+      socketFactory = (SocketFactory) method.invoke(null, null);
+    } catch (Exception exc) {
+      logger.log(BasicLevel.ERROR,
+                 "Unable to instantiate default SocketFactory: " + DefaultFactory, exc);
+    }
+    return socketFactory;
   }
 
   /**
@@ -68,7 +77,7 @@ public abstract class SocketFactory {
       socketFactory = (SocketFactory) method.invoke(null, null);
     } catch (Exception exc) {
       logger.log(BasicLevel.ERROR,
-                 "Unable to instantiate SocketFactory: " + sfcn, exc);
+                 "Use default SocketFactory, unable to instantiate : " + sfcn, exc);
       socketFactory = getDefaultFactory();
     }
     return socketFactory;
