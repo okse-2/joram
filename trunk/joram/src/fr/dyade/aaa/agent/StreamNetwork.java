@@ -36,6 +36,7 @@ import java.util.Enumeration;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
+import fr.dyade.aaa.util.ServerSocketFactory;
 import fr.dyade.aaa.util.SocketAddress;
 import fr.dyade.aaa.util.SocketFactory;
 
@@ -151,7 +152,23 @@ public abstract class StreamNetwork extends Network {
   InetAddress outLocalAddr = null;
 
   /**
-   * Allows to define a specific factory for socket in order to by-pass
+   * Allows to define a specific factory for ServerSocket in order to by-pass
+   * compatibility problem between JDK version.
+   * Currently there is two factories, The default factory one for JDK
+   * since 1.4, and "fr.dyade.aaa.util.ServerSocketFactory13" for JDK prior
+   * to 1.4.
+   *  This value can be adjusted for all network components by setting
+   * <code>ServerSocketFactory</code> global property or for a particular
+   * network by setting <code>\<DomainName\>.ServerSocketFactory</code>
+   * specific property.
+   * <p>
+   *  Theses properties can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
+   */
+  ServerSocketFactory serverSocketFactory = null;
+
+  /**
+   * Allows to define a specific factory for Socket in order to by-pass
    * compatibility problem between JDK version.
    * Currently there is two factories, The default factory one for JDK
    * since 1.4, and "fr.dyade.aaa.util.SocketFactory13" for JDK prior to 1.4.
@@ -229,6 +246,10 @@ public abstract class StreamNetwork extends Network {
     String sfcn = AgentServer.getProperty("SocketFactory", SocketFactory.DefaultFactory);
     sfcn = AgentServer.getProperty(domain + ".SocketFactory", sfcn);
     socketFactory = SocketFactory.getFactory(sfcn);
+
+    String ssfcn = AgentServer.getProperty("ServerSocketFactory", ServerSocketFactory.DefaultFactory);
+    ssfcn = AgentServer.getProperty(domain + ".ServerSocketFactory", ssfcn);
+    serverSocketFactory = ServerSocketFactory.getFactory(ssfcn);
     
     if (logmon.isLoggable(BasicLevel.DEBUG)) {
       StringBuffer strbuf = new StringBuffer();
@@ -242,6 +263,7 @@ public abstract class StreamNetwork extends Network {
       strbuf.append(", inLocalAddressStr=").append(inLocalAddressStr);
       strbuf.append(", outLocalAddressStr=").append(outLocalAddressStr);
       strbuf.append(", outLocalPort=").append(outLocalPort);
+      strbuf.append(", ssfcn=").append(ssfcn);
       strbuf.append(", sfcn=").append(sfcn);
       strbuf.append(')');
       
