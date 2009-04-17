@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+
+<project default="ship.joram" basedir=".">
+
+  <!-- JORAM shipment target -->
+  <target name="ship.joram" depends="clean"
+          description="builds and ships Joram">
+    <ant dir="." antfile="joram.xml" target="ship"/>
+  </target>
+
+  <!-- Javadoc target -->
+  <target name="javadoc"
+          description="generates the Joram javadoc">
+    <ant dir="." antfile="joram.xml" target="javadoc"/>
+  </target>
+
+  <!-- Global cleaning target -->
+  <target name="clean"
+          description="cleans the generated shipments">
+    <ant dir="." antfile="joram.xml" target="clean"/>
+  </target>
+</project>
