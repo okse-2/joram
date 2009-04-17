@@ -729,7 +729,7 @@ public class JoramSaxWrapper extends DefaultHandler {
             logger.log(BasicLevel.DEBUG, "cf \""+ name + "\"= " + obj);
           // set identity className
           if (isSet(identityClass)) 
-            ((org.objectweb.joram.client.jms.admin.AbstractConnectionFactory) obj).setIdentityClassName(identityClass);
+            ((AbstractConnectionFactory) obj).setIdentityClassName(identityClass);
           // Bind the ConnectionFactory in JNDI.
           // Be Careful, currently only one binding is handled.
           if (isSet(jndiName))
@@ -741,36 +741,66 @@ public class JoramSaxWrapper extends DefaultHandler {
           obj = null;
           identityClass = null;
         } else if (rawName.equals(ELT_TCP)) {
-          Class clazz = Class.forName(className);
-          Class [] classParams = {new String().getClass(),
-                                  Integer.TYPE,
-                                  new String().getClass()};
-          Method methode = clazz.getMethod("create", classParams);
-          Object[] objParams = {host, new Integer(port), reliableClass};
-          obj = methode.invoke(null, objParams);
+          try {
+            Class clazz = Class.forName(className);
+            Class [] classParams = {new String().getClass(),
+                                    Integer.TYPE,
+                                    new String().getClass()};
+            Method methode = clazz.getMethod("create", classParams);
+            Object[] objParams = {host, new Integer(port), reliableClass};
+            obj = methode.invoke(null, objParams);
+          } catch (Throwable exc) {
+            logger.log(BasicLevel.ERROR,
+                       "JoramSaxWrapper: Cannot instantiate " + className, exc);
+            throw new SAXException(exc.getMessage());
+          }
         } else if (rawName.equals(ELT_LOCAL)) {
-          Class clazz = Class.forName(className);
-          Method methode = clazz.getMethod("create", new Class[0]);
-          obj = methode.invoke(null, new Object[0]);
+          try {
+            Class clazz = Class.forName(className);
+            Method methode = clazz.getMethod("create", new Class[0]);
+            obj = methode.invoke(null, new Object[0]);
+          } catch (Throwable exc) {
+            logger.log(BasicLevel.ERROR,
+                       "JoramSaxWrapper: Cannot instantiate " + className, exc);
+            throw new SAXException(exc.getMessage());
+          }
         } else if (rawName.equals(ELT_HATCP)) {
-          Class clazz = Class.forName(className);
-          Class [] classParams = {new String().getClass(),
-                                  new String().getClass()};
-          Method methode = clazz.getMethod("create",classParams);
-          Object[] objParams = {url,reliableClass};
-          obj = methode.invoke(null,objParams);
+          try {
+            Class clazz = Class.forName(className);
+            Class [] classParams = {new String().getClass(),
+                                    new String().getClass()};
+            Method methode = clazz.getMethod("create",classParams);
+            Object[] objParams = {url,reliableClass};
+            obj = methode.invoke(null,objParams);
+          } catch (Throwable exc) {
+            logger.log(BasicLevel.ERROR,
+                       "JoramSaxWrapper: Cannot instantiate " + className, exc);
+            throw new SAXException(exc.getMessage());
+          }
         } else if (rawName.equals(ELT_HALOCAL)) {
-          Class clazz = Class.forName(className);
-          Method methode = clazz.getMethod("create", new Class[0]);
-          obj = methode.invoke(null, new Object[0]);
+          try {
+            Class clazz = Class.forName(className);
+            Method methode = clazz.getMethod("create", new Class[0]);
+            obj = methode.invoke(null, new Object[0]);
+          } catch (Throwable exc) {
+            logger.log(BasicLevel.ERROR,
+                       "JoramSaxWrapper: Cannot instantiate " + className, exc);
+            throw new SAXException(exc.getMessage());
+          }
         } else if (rawName.equals(ELT_SOAP)) {
-          Class clazz = Class.forName(className);
-          Class [] classParams = {new String().getClass(),
-                                  Integer.TYPE,
-                                  Integer.TYPE};
-          Method methode = clazz.getMethod("create", classParams);
-          Object[] objParams = {host, new Integer(port), new Integer(timeout)};
-          obj = methode.invoke(null, objParams);
+          try {
+            Class clazz = Class.forName(className);
+            Class [] classParams = {new String().getClass(),
+                                    Integer.TYPE,
+                                    Integer.TYPE};
+            Method methode = clazz.getMethod("create", classParams);
+            Object[] objParams = {host, new Integer(port), new Integer(timeout)};
+            obj = methode.invoke(null, objParams);
+          } catch (Throwable exc) {
+            logger.log(BasicLevel.ERROR,
+                       "JoramSaxWrapper: Cannot instantiate " + className, exc);
+            throw new SAXException(exc.getMessage());
+          }
         } else if (rawName.equals(ELT_JNDI)) {
         } else if (rawName.equals(ELT_SERVER)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
