@@ -31,22 +31,24 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.XACnxPrepare;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.util.Debug;
 
 /**
  * The <code>ClientContext</code> class holds the data related to a client
  * context.
  */
 class ClientContext implements java.io.Serializable {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+  
+  /** logger */
+  public static Logger logger = Debug.getLogger(ClientContext.class.getName());
 
   /** The proxy's agent identifier. */
   private AgentId proxyId;
@@ -82,8 +84,7 @@ class ClientContext implements java.io.Serializable {
    * @param proxyId  The proxy's agent identifier. 
    * @param id  Identifier of the context.
    */
-  ClientContext(AgentId proxyId, int id)
-  {
+  ClientContext(AgentId proxyId, int id) {
     this.proxyId = proxyId;
     this.id = id;
 
@@ -101,18 +102,15 @@ class ClientContext implements java.io.Serializable {
   }
  
   /** Returns the identifier of the context. */
-  int getId()
-  {
+  int getId() {
     return id;
   }
 
   /** Sets the activation status of the context. */
   void setActivated(boolean started) {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
-        BasicLevel.DEBUG,
-        "ClientContext[" + proxyId + ',' + id + 
-        "].setActivated(" + started + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "ClientContext[" + proxyId + ',' + id + "].setActivated(" + started + ')');
     this.started = started;
   }
 
@@ -123,14 +121,12 @@ class ClientContext implements java.io.Serializable {
   }
 
   /** Adds a temporary destination identifier. */
-  void addTemporaryDestination(AgentId destId)
-  {
+  void addTemporaryDestination(AgentId destId) {
     tempDestinations.add(destId);
     proxy.setSave();
   }
    
-  Enumeration getTempDestinations()
-  {
+  Enumeration getTempDestinations() {
     //Creates an enumeration not backed by tempDestinations
     Vector tempDests = new Vector();
     for(Enumeration dests = tempDestinations.elements(); dests.hasMoreElements(); ){  
@@ -140,8 +136,7 @@ class ClientContext implements java.io.Serializable {
   }
 
   /** Removes a temporary destination identifier. */
-  void removeTemporaryDestination(AgentId destId)
-  {
+  void removeTemporaryDestination(AgentId destId) {
     deliveringQueues.remove(destId);
     tempDestinations.remove(destId);
     proxy.setSave();
@@ -149,71 +144,58 @@ class ClientContext implements java.io.Serializable {
 
   /** Adds a pending delivery. */
   void addPendingDelivery(AbstractJmsReply reply) {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
-        BasicLevel.DEBUG,
-        "ClientContext[" + proxyId + ',' + id + 
-        "].addPendingDelivery(" + reply + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "ClientContext[" + proxyId + ',' + id + "].addPendingDelivery(" + reply + ')');
     repliesBuffer.add(reply);
   }
 
   /** Returns the pending deliveries. */
-  Enumeration getPendingDeliveries()
-  {
+  Enumeration getPendingDeliveries() {
     return repliesBuffer.elements();
   }
 
   /** Clears the pending deliveries buffer. */
-  void clearPendingDeliveries()
-  {
+  void clearPendingDeliveries() {
     repliesBuffer.clear();
   }
 
   /** Adds an active subscription name. */
-  void addSubName(String subName)
-  {
+  void addSubName(String subName) {
     activeSubs.add(subName);
   }
 
   /** Returns the active subscriptions' names. */
-  Enumeration getActiveSubs()
-  {
+  Enumeration getActiveSubs() {
     return activeSubs.elements();
   }
 
   /** Removes an active subscription name. */
-  void removeSubName(String subName)
-  {
+  void removeSubName(String subName) {
     activeSubs.remove(subName);
   }
   
   /** Cancels a "receive" request. */
-  void cancelReceive(int cancelledRequestId)
-  {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
-        BasicLevel.DEBUG, 
-        "ClientContext[" + proxyId + ':' + id + 
-        "].cancelReceive(" + cancelledRequestId + ')');
+  void cancelReceive(int cancelledRequestId) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+                 "ClientContext[" + proxyId + ':' + id + "].cancelReceive(" + cancelledRequestId + ')');
     this.cancelledRequestId = cancelledRequestId;
   }
 
   /** Returns the cancelled "receive" request identifier. */
-  int getCancelledReceive()
-  {
+  int getCancelledReceive() {
     return cancelledRequestId;
   }
 
   /** Adds the identifier of a delivering queue. */ 
-  void addDeliveringQueue(AgentId queueId)
-  {
+  void addDeliveringQueue(AgentId queueId) {
     deliveringQueues.put(queueId, queueId);
     proxy.setSave();
   }
 
   /** Returns the identifiers of the delivering queues. */
-  Enumeration getDeliveringQueues()
-  {
+  Enumeration getDeliveringQueues() {
     return deliveringQueues.keys();
   }
   
@@ -225,15 +207,11 @@ class ClientContext implements java.io.Serializable {
    * @param asyncReplyCount
    */
   void addMultiReplyContext(int requestId, int asyncReplyCount) {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, 
-                                "ClientContext[" + proxyId + ':' + id + 
-                                "].addMultiReplyContext(" + requestId + ',' +
-                                asyncReplyCount + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+                 "ClientContext[" + proxyId + ':' + id + "].addMultiReplyContext(" + requestId + ',' + asyncReplyCount + ')');
     if (commitTable == null) commitTable = new Hashtable();
-    commitTable.put(
-        new Integer(requestId), 
-        new MultiReplyContext(asyncReplyCount));
+    commitTable.put(new Integer(requestId), new MultiReplyContext(asyncReplyCount));
     proxy.setSave();
   }
   
@@ -248,16 +226,15 @@ class ClientContext implements java.io.Serializable {
    * or if the context doesn't exist
    */
   int setReply(int requestId) {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, 
-                                "ClientContext[" + proxyId + ':' + id + 
-                                "].setReply(" + requestId + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+                 "ClientContext[" + proxyId + ':' + id + "].setReply(" + requestId + ')');
     if (commitTable == null) return 0;
     Integer ctxKey = new Integer(requestId);
-    MultiReplyContext ctx = 
-      (MultiReplyContext)commitTable.get(ctxKey);
-    if (ctx == null) return 0;
-    else {
+    MultiReplyContext ctx = (MultiReplyContext)commitTable.get(ctxKey);
+    if (ctx == null) {
+      return 0;
+    } else {
       ctx.counter--;
       if (ctx.counter == 0) {
         commitTable.remove(ctxKey);

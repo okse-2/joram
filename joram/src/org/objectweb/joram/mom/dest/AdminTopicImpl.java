@@ -72,7 +72,6 @@ import org.objectweb.joram.mom.notifications.UserAdminRequestNot;
 import org.objectweb.joram.mom.proxies.AdminNotification;
 import org.objectweb.joram.mom.proxies.SendReplyNot;
 import org.objectweb.joram.mom.proxies.UserAgent;
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.admin.AddDomainRequest;
 import org.objectweb.joram.shared.admin.AddServerRequest;
 import org.objectweb.joram.shared.admin.AdminReply;
@@ -173,7 +172,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
   /** Reference of the server's local AdminTopicImpl instance. */
   private static AdminTopicImpl ref;
-  
+
   /** Identifier of the server this topic is deployed on. */
   private int serverId;
 
@@ -265,7 +264,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
           throw new Exception("No proxy deployed for user [" + identity.getUserName() + "]");
         }
 
-      return userProxId;
+        return userProxId;
       }
     } else {
       if (logger.isLoggable(BasicLevel.ERROR))
@@ -300,7 +299,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   public boolean isTaken(String name) {
     return usersTable.containsKey(name);
   }
-  
+
   /**
    * Method implementing the reaction to a
    * <code>org.objectweb.joram.mom.proxies.AdminNotification</code>
@@ -317,9 +316,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
       clients.put(adminNot.getProxyId(), new Integer(READWRITE));
 
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, identity.getUserName() + " successfully"
-            + " set as admin client.");
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, identity.getUserName() + " successfully"
+                   + " set as admin client.");
     } catch (Exception e) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "Exception:: ", e);
@@ -372,7 +371,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       reply = new AdminReply(not.getSuccess(), 
                              not.getInfo(),
                              not.getReplyObject());
-    
+
     distributeReply(replyTo, requestId, reply);
   }
 
@@ -412,10 +411,10 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       }
       DestinationDesc destDesc = 
         new DestinationDesc(
-          not.getTmpDestId(),
-          destName,
-          className,
-          type);
+                            not.getTmpDestId(),
+                            destName,
+                            className,
+                            type);
       destinationsTable.put(destName, destDesc);
     } else {
       destinationsTable.remove(destName);
@@ -426,16 +425,16 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     String name = not.getName();
     if (name == null || destinationsTable.contains(name))
       return;
-    
+
     DestinationDesc destDesc = 
       new DestinationDesc(
-        not.getId(),
-        not.getName(),
-        not.getClassName(),
-        not.getType());
+                          not.getId(),
+                          not.getName(),
+                          not.getClassName(),
+                          not.getType());
     destinationsTable.put(name, destDesc);
   }
-  
+
   public void RegisteredDestNot(AgentId from, RegisteredDestNot not) {
     DestinationDesc destDesc = 
       (DestinationDesc) destinationsTable.get(not.getName());
@@ -443,7 +442,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       not.setDestination(destDesc.getId());
     forward(not.getReply(), not);
   }
-  
+
   /**
    * Processes a <code>Monit_GetUsersRep</code> notification holding a
    * destination's readers' or writers' identifiers.
@@ -529,9 +528,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * @exception  AccessException  Not thrown.
    */ 
   public void setRightRequest(AgentId from, SetRightRequest request) throws AccessException {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      JoramTracing.dbgDestination.log(BasicLevel.WARN,
-                                    "Unexpected request: " + request);
+    if (logger.isLoggable(BasicLevel.WARN))
+      logger.log(BasicLevel.WARN,
+                 "Unexpected request: " + request);
   }
 
   /**
@@ -541,15 +540,15 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * @exception  AccessException  Not thrown.
    */ 
   public void setDMQRequest(AgentId from, SetDMQRequest request) throws AccessException {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      JoramTracing.dbgDestination.log(BasicLevel.WARN,
-                                    "Unexpected request: " + request);
+    if (logger.isLoggable(BasicLevel.WARN))
+      logger.log(BasicLevel.WARN,
+                 "Unexpected request: " + request);
   }
 
   public void requestGroupNot(AgentId from, RequestGroupNot not) {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                      "AdminTopicImpl.requestGroupNot(" + not + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "AdminTopicImpl.requestGroupNot(" + not + ')');
     Enumeration en = not.getClientMessages();
     while (en.hasMoreElements()) {
       ClientMessages cm = (ClientMessages) en.nextElement();
@@ -559,7 +558,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       }
     }
   }
- 
+
   public SetRightRequest preProcess(SetRightRequest req) {
     // nothing to do
     return req;
@@ -567,39 +566,39 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   public void postProcess(SetRightRequest req) {
     // nothing to do
   }
-  
+
   /**
    * Overrides this <code>DestinationImpl</code> method;
    * <code>ClientMessages</code> notifications hold requests sent by an
    * administrator.
    */
   public ClientMessages preProcess(AgentId from, ClientMessages msgs) {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                      "AdminTopicImpl.clientMessages(" + msgs + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "AdminTopicImpl.clientMessages(" + msgs + ')');
     if (! msgs.getPersistent() && !msgs.getAsyncSend()) {
       // Means that this notification has been sent by a local
       // proxy (optimization). Must acknowledge it.
       forward(from, 
               new SendReplyNot(
-                  msgs.getClientContext(), 
-                  msgs.getRequestId()));
+                               msgs.getClientContext(), 
+                               msgs.getRequestId()));
     }
-    
+
     // ... and processing the wrapped requests locally:
     processAdminRequests(msgs);
-    
+
     return null;
   }
-  
+
   /**
    * Overrides this <code>DestinationImpl</code> method; deletion requests are
    * not accepted by AdminTopics.
    */
   public void deleteNot(AgentId from, DeleteNot not) {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      JoramTracing.dbgDestination.log(BasicLevel.WARN,
-                                    "Unexpected request: " + not);
+    if (logger.isLoggable(BasicLevel.WARN))
+      logger.log(BasicLevel.WARN,
+                 "Unexpected request: " + not);
   }
 
   /**
@@ -609,9 +608,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * @exception  AccessException  Not thrown.
    */ 
   public void clusterRequest(AgentId from, ClusterRequest request) throws AccessException {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      JoramTracing.dbgDestination.log(BasicLevel.WARN,
-                                    "Unexpected request: " + request);
+    if (logger.isLoggable(BasicLevel.WARN))
+      logger.log(BasicLevel.WARN,
+                 "Unexpected request: " + request);
   }
 
   /**
@@ -628,9 +627,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * is not expected by an AdminTopic.
    */ 
   public void clusterAck(AgentId from, ClusterAck ack) {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      JoramTracing.dbgDestination.log(BasicLevel.WARN,
-                                    "Unexpected notification: " + ack);
+    if (logger.isLoggable(BasicLevel.WARN))
+      logger.log(BasicLevel.WARN,
+                 "Unexpected notification: " + ack);
   }
 
   /**
@@ -639,9 +638,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * fellows are notified to it.
    */
   public void clusterNot(AgentId from, ClusterNot not) {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      JoramTracing.dbgDestination.log(BasicLevel.WARN,
-                                    "Unexpected notification: " + not);
+    if (logger.isLoggable(BasicLevel.WARN))
+      logger.log(BasicLevel.WARN,
+                 "Unexpected notification: " + not);
   }
 
   /**
@@ -651,9 +650,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * @exception AccessException  Not thrown.
    */ 
   public void unclusterRequest(AgentId from, UnclusterRequest request) throws MomException {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      JoramTracing.dbgDestination.log(BasicLevel.WARN,
-                                    "Unexpected request: " + request);
+    if (logger.isLoggable(BasicLevel.WARN))
+      logger.log(BasicLevel.WARN,
+                 "Unexpected request: " + request);
   }
 
   /**
@@ -663,10 +662,10 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * @exception  AccessException  Not thrown.
    */ 
   public void setFatherRequest(AgentId from, SetFatherRequest request)
-                 throws MomException {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      JoramTracing.dbgDestination.log(BasicLevel.WARN,
-                                    "Unexpected request: " + request);
+  throws MomException {
+    if (logger.isLoggable(BasicLevel.WARN))
+      logger.log(BasicLevel.WARN,
+                 "Unexpected request: " + request);
   }
 
   /**
@@ -685,9 +684,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * acknowledges the process of creating a hierarchy of topics.
    */ 
   public void fatherAck(AgentId from, FatherAck ack) {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      JoramTracing.dbgDestination.log(BasicLevel.WARN,
-                                    "Unexpected notification: " + ack);
+    if (logger.isLoggable(BasicLevel.WARN))
+      logger.log(BasicLevel.WARN,
+                 "Unexpected notification: " + ack);
   }
 
   /**
@@ -697,12 +696,12 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * @exception  AccessException  Not thrown.
    */ 
   public void unsetFatherRequest(AgentId from, UnsetFatherRequest request) throws MomException {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-      JoramTracing.dbgDestination.log(BasicLevel.WARN,
-                                    "Unexpected request: " + request);
+    if (logger.isLoggable(BasicLevel.WARN))
+      logger.log(BasicLevel.WARN,
+                 "Unexpected request: " + request);
   }
 
-  
+
   /**
    * Overrides this <code>TopicImpl</code> method; the forwarded messages
    * contain admin requests and will be processed.
@@ -727,11 +726,11 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
         AgentId replyTo = (AgentId) requestsTable.remove(reqId);
 
         String info = strbuf.append("Request [")
-          .append(not.getClass().getName())
-          .append("], sent to AdminTopic on server [")
-          .append(serverId)
-          .append("], successful [false]: unknown agent [")
-          .append(agId).append("]").toString();
+        .append(not.getClass().getName())
+        .append("], sent to AdminTopic on server [")
+        .append(serverId)
+        .append("], successful [false]: unknown agent [")
+        .append(agId).append("]").toString();
         strbuf.setLength(0);
 
         distributeReply(replyTo, reqId, new AdminReply(false, info));
@@ -753,7 +752,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     AdminRequest request = null;
 
     if (not == null) return;
-    
+
     Enumeration messages = not.getMessages().elements();
 
     while (messages.hasMoreElements()) {
@@ -766,22 +765,22 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       try {
         request = (AdminRequest) msg.getAdminMessage();
 
-        if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                        "--- " + this + ": got " 
-                                        + msg.getAdminMessage());
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG,
+                     "--- " + this + ": got " 
+                     + msg.getAdminMessage());
       } catch (ClassCastException exc) {
-        JoramTracing.dbgDestination.log(BasicLevel.ERROR,
-                                      "--- " + this + ": got bad AdminRequest");
+        logger.log(BasicLevel.ERROR,
+                   "--- " + this + ": got bad AdminRequest");
         if (request == null) {
           info = strbuf.append("Unexpected request to AdminTopic on server [")
-            .append(serverId).append("]: ").append(exc.getMessage()).toString();
+          .append(serverId).append("]: ").append(exc.getMessage()).toString();
           strbuf.setLength(0);
         } else {
           info = strbuf.append("Request [").append(request.getClass().getName())
-            .append("], sent to AdminTopic on server [").append(serverId)
-            .append("], successful [false]: ")
-            .append(exc.getMessage()).toString();
+          .append("], sent to AdminTopic on server [").append(serverId)
+          .append("], successful [false]: ")
+          .append(exc.getMessage()).toString();
           strbuf.setLength(0);
         }
 
@@ -907,24 +906,24 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } catch (UnknownServerException exc) {
       // Caught when a target server is invalid.
       info = strbuf.append("Request [").append(request.getClass().getName())
-        .append("], successful [false]: ")
-        .append(exc.getMessage()).toString();
+      .append("], successful [false]: ")
+      .append(exc.getMessage()).toString();
       strbuf.setLength(0);
 
       distributeReply(replyTo, msgId, new AdminReply(false, info));
     } catch (MomException exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.WARN))
-        JoramTracing.dbgDestination.log(BasicLevel.WARN, exc);
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN, exc);
 
       if (request == null) {
         info = strbuf.append("Unexpected request to AdminTopic on server [")
-          .append(serverId).append("]: ").append(exc.getMessage()).toString();
+        .append(serverId).append("]: ").append(exc.getMessage()).toString();
         strbuf.setLength(0);
       } else {
         info = strbuf.append("Request [").append(request.getClass().getName())
-          .append("], sent to AdminTopic on server [").append(serverId)
-          .append("], successful [false]: ")
-          .append(exc.getMessage()).toString();
+        .append("], sent to AdminTopic on server [").append(serverId)
+        .append("], successful [false]: ")
+        .append(exc.getMessage()).toString();
         strbuf.setLength(0);
       }
 
@@ -939,7 +938,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(StopServerRequest request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException {
-     if (checkServerId(request.getServerId())) {
+    if (checkServerId(request.getServerId())) {
       // It's the local server, process the request.
       distributeReply(replyTo, msgId,
                       new AdminReply(true, "Server stopped"));
@@ -947,7 +946,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault((short) request.getServerId()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
   }
 
@@ -961,38 +960,38 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(CreateDestinationRequest request,
                          AgentId replyTo,
                          String msgId)
-    throws UnknownServerException, RequestException {
+  throws UnknownServerException, RequestException {
 
     if (checkServerId(request.getServerId())) {
       // The destination is local, process the request.
-      
+
       DestinationDesc destDesc = createDestination(
-          request.getDestinationName(),
-          null,
-          request.getProperties(),
-          request.getExpectedType(),
-          request.getClassName(),
-          request.getClass().getName(),
-          strbuf);
-      
+                                                   request.getDestinationName(),
+                                                   null,
+                                                   request.getProperties(),
+                                                   request.getExpectedType(),
+                                                   request.getClassName(),
+                                                   request.getClass().getName(),
+                                                   strbuf);
+
       distributeReply(
-          replyTo,
-          msgId,
-          new CreateDestinationReply(
-              destDesc.getId().toString(), 
-              destDesc.getName(),
-              destDesc.getType(),
-              strbuf.toString()));
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, strbuf.toString());
+                      replyTo,
+                      msgId,
+                      new CreateDestinationReply(
+                                                 destDesc.getId().toString(), 
+                                                 destDesc.getName(),
+                                                 destDesc.getType(),
+                                                 strbuf.toString()));
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, strbuf.toString());
       strbuf.setLength(0);
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault((short) request.getServerId()),
-          new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
   }
-   
+
   /**
    * Instantiating the destination class or retrieving the destination.
    * 
@@ -1008,13 +1007,13 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * @throws RequestException
    */
   public DestinationDesc createDestination(
-      String destName,
-      AgentId adminId,
-      Properties properties,
-      String type,
-      String className,
-      String requestClassName,
-      StringBuffer strbuf)
+                                           String destName,
+                                           AgentId adminId,
+                                           Properties properties,
+                                           String type,
+                                           String className,
+                                           String requestClassName,
+                                           StringBuffer strbuf)
   throws UnknownServerException, RequestException {
 
     boolean destNameActivated = (destName != null && ! destName.equals(""));
@@ -1049,8 +1048,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
         Method getTypeM = clazz.getMethod("getDestinationType", new Class[0]);
         destType = (String)getTypeM.invoke(null, new Object[0]);
       } catch (Exception exc) {
-        JoramTracing.dbgDestination.log(BasicLevel.ERROR,
-                                        "Could not instantiate Destination class [" + className + "]: ", exc);
+        logger.log(BasicLevel.ERROR,
+                   "Could not instantiate Destination class [" + className + "]: ", exc);
         if (exc instanceof ClassCastException) {
           throw new RequestException("Class [" + className + "] is not a Destination class.");
         } else {
@@ -1064,7 +1063,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
         destName = createdDestId.toString();
 
       destDesc = new DestinationDesc(createdDestId, destName, 
-          className, destType);
+                                     className, destType);
       if (! destDesc.isAssignableTo(type)) {
         throw new RequestException("Destination type not compliant");
       }
@@ -1079,10 +1078,10 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
         .append(createdDestId.toString()).append("] has been created and deployed");
 
       } catch (Exception exc) {
-        if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-          JoramTracing.dbgDestination.log(BasicLevel.ERROR, "xxx", exc);
+        if (logger.isLoggable(BasicLevel.ERROR))
+          logger.log(BasicLevel.ERROR, "xxx", exc);
         throw new RequestException("Error while deploying Destination [" + 
-            clazz + "]: " + exc);
+                                   clazz + "]: " + exc);
       }
     }
     return destDesc;
@@ -1105,28 +1104,28 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * @throws IOException  transaction exception.
    */
   public static DestinationDesc createDestinationAndSave(
-      String destName,
-      AgentId adminId,
-      Properties properties,
-      String type,
-      String className,
-      String requestClassName,
-      StringBuffer strbuf)
+                                                         String destName,
+                                                         AgentId adminId,
+                                                         Properties properties,
+                                                         String type,
+                                                         String className,
+                                                         String requestClassName,
+                                                         StringBuffer strbuf)
   throws UnknownServerException, RequestException, IOException {
     // create destination.
     DestinationDesc destDesc = ref.createDestination(
-        destName,
-        adminId,
-        properties,
-        type,
-        className,
-        requestClassName,
-        strbuf);
+                                                     destName,
+                                                     adminId,
+                                                     properties,
+                                                     type,
+                                                     className,
+                                                     requestClassName,
+                                                     strbuf);
     // save Agent AdminTopic
     AgentServer.getTransaction().save(ref.agent, ref.getId().toString()); 
     return destDesc;
   }
-  
+
   /**
    * is destinationTable contain destName ?
    * (used by ScalAgent mediation)
@@ -1137,7 +1136,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   public static boolean isDestinationTableContain(String destName) {
     return ref.destinationsTable.containsKey(destName);
   }
-  
+
   /**
    * Processes a <code>DeleteDestination</code> instance requesting the
    * deletion of a destination.
@@ -1145,7 +1144,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(DeleteDestination request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     AgentId destId = AgentId.fromString(request.getId());
 
     // If the destination is not local, doing nothing:
@@ -1166,21 +1165,21 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       forward(destId, new DeleteNot());
 
       info = strbuf.append("Request [").append(request.getClass().getName())
-        .append("], sent to AdminTopic on server [").append(serverId)
-        .append("], successful [true]: destination [").append(destId)
-        .append("], successfuly notified for deletion").toString();
+      .append("], sent to AdminTopic on server [").append(serverId)
+      .append("], successful [true]: destination [").append(destId)
+      .append("], successfuly notified for deletion").toString();
       strbuf.setLength(0);
 
       distributeReply(replyTo, msgId, new AdminReply(true, info));
 
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, info);
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(destId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes a <code>SetCluster<code> instance requesting to link two topics
@@ -1189,7 +1188,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(SetCluster request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     AgentId initId = AgentId.fromString(request.getInitId());
     AgentId topId = AgentId.fromString(request.getTopId());
 
@@ -1200,9 +1199,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(initId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes an <code>UnsetCluster<code> instance requesting a topic to
@@ -1211,7 +1210,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(UnsetCluster request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     AgentId topId = AgentId.fromString(request.getTopId());
 
     if (checkServerId(topId.getTo())) {
@@ -1221,9 +1220,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(topId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes a <code>SetFather<code> instance requesting to link two topics
@@ -1232,20 +1231,20 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(SetFather request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
-     AgentId fatherId = AgentId.fromString(request.getFather());
-     AgentId sonId = AgentId.fromString(request.getSon());
+                         {
+    AgentId fatherId = AgentId.fromString(request.getFather());
+    AgentId sonId = AgentId.fromString(request.getSon());
 
-     if (checkServerId(sonId.getTo())) {
-       // If the son is local, process the request.
-       forward(sonId, new SetFatherRequest(msgId, fatherId));
-       if (replyTo != null) requestsTable.put(msgId, replyTo);
+    if (checkServerId(sonId.getTo())) {
+      // If the son is local, process the request.
+      forward(sonId, new SetFatherRequest(msgId, fatherId));
+      if (replyTo != null) requestsTable.put(msgId, replyTo);
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(sonId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes an <code>UnsetFather<code> instance requesting a topic to
@@ -1254,7 +1253,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(UnsetFather request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     AgentId topId = AgentId.fromString(request.getTopId());
 
     if (checkServerId(topId.getTo())) {
@@ -1264,9 +1263,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(topId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes a <code>CreateUserRequest</code> instance requesting the
@@ -1277,9 +1276,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    *              different password, or if the proxy deployment failed.
    */
   public void doProcess(CreateUserRequest request,
-                         AgentId replyTo,
-                         String msgId)
-               throws UnknownServerException, RequestException {
+                        AgentId replyTo,
+                        String msgId)
+  throws UnknownServerException, RequestException {
     if (checkServerId(request.getServerId())) {
       // If this server is the target server, process the request.
       Identity identity = request.getIdentity();
@@ -1290,31 +1289,31 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
       // The user has already been set. 
       if (proxId != null) {
-       Identity userIdentity = (Identity) usersTable.get(name);
-       if (logger.isLoggable(BasicLevel.INFO))
-         logger.log(BasicLevel.INFO, "User [" + name + "] already exists : " + userIdentity);
-       try {
-         if (! identity.check(userIdentity)) {
-           throw new RequestException("User [" + name + "] already exists"
-               + " but with a different password.");
-         } 
-       } catch (Exception e) {
-         throw new RequestException("User [" + name + "] already exists :: Exception :" + e.getMessage());
-       }
-       info = strbuf.append("Request [").append(request.getClass().getName())
+        Identity userIdentity = (Identity) usersTable.get(name);
+        if (logger.isLoggable(BasicLevel.INFO))
+          logger.log(BasicLevel.INFO, "User [" + name + "] already exists : " + userIdentity);
+        try {
+          if (! identity.check(userIdentity)) {
+            throw new RequestException("User [" + name + "] already exists"
+                                       + " but with a different password.");
+          } 
+        } catch (Exception e) {
+          throw new RequestException("User [" + name + "] already exists :: Exception :" + e.getMessage());
+        }
+        info = strbuf.append("Request [").append(request.getClass().getName())
         .append("], processed by AdminTopic on server [").append(serverId)
         .append("], successful [true]: proxy [").append(proxId.toString())
         .append("] of user [").append(name)
         .append("] has been retrieved").toString();
         strbuf.setLength(0);
       } else {
-//        try {
-//          if (! identity.validate()) {
-//            throw new RequestException("User [" + name + "] security validate failed.");
-//          }
-//        } catch (Exception e) {
-//          throw new RequestException(e.getMessage());
-//        }
+        //        try {
+        //          if (! identity.validate()) {
+        //            throw new RequestException("User [" + name + "] security validate failed.");
+        //          }
+        //        } catch (Exception e) {
+        //          throw new RequestException(e.getMessage());
+        //        }
 
         UserAgent proxy = new UserAgent();
         if (name != null) {
@@ -1326,12 +1325,12 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
           proxy.deploy();
           usersTable.put(name, identity);
           proxiesTable.put(name, proxy.getId());
-  
+
           info = strbuf.append("Request [").append(request.getClass().getName())
-            .append("], processed by AdminTopic on server [").append(serverId)
-            .append("], successful [true]: proxy [")
-            .append(proxId.toString()).append("] for user [").append(name)
-            .append("] has been created and deployed").toString();
+          .append("], processed by AdminTopic on server [").append(serverId)
+          .append("], successful [true]: proxy [")
+          .append(proxId.toString()).append("] for user [").append(name)
+          .append("] has been created and deployed").toString();
           strbuf.setLength(0);
         }
         catch (Exception exc) {
@@ -1339,8 +1338,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
         }
       }
 
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, info);
 
       distributeReply(replyTo,
                       msgId,
@@ -1348,7 +1347,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault((short) request.getServerId()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
   }
 
@@ -1364,9 +1363,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * @throws IOException transaction exception
    */
   public static void CreateUserAndSave(
-      CreateUserRequest request,
-      AgentId replyTo,
-      String msgId)
+                                       CreateUserRequest request,
+                                       AgentId replyTo,
+                                       String msgId)
   throws UnknownServerException, RequestException, IOException {
     ref.doProcess(request, replyTo, msgId);
     //  save Agent AdminTopic
@@ -1383,7 +1382,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(UpdateUser request,
                          AgentId replyTo,
                          String msgId)
-               throws RequestException, UnknownServerException {
+  throws RequestException, UnknownServerException {
     String name = request.getUserName();
     AgentId proxId = AgentId.fromString(request.getProxId());
 
@@ -1410,20 +1409,20 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       }
 
       info = strbuf.append("Request [").append(request.getClass().getName())
-        .append("], processed by AdminTopic on server [").append(serverId)
-        .append("], successful [true]: user [").append(name)
-        .append("] has been updated to [").append(newIdentity.getUserName()).
-        append("]").toString();
+      .append("], processed by AdminTopic on server [").append(serverId)
+      .append("], successful [true]: user [").append(name)
+      .append("] has been updated to [").append(newIdentity.getUserName()).
+      append("]").toString();
       strbuf.setLength(0);
 
       distributeReply(replyTo, msgId, new AdminReply(true, info));
 
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, info);
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(proxId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
   }
 
@@ -1434,7 +1433,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(DeleteUser request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     String name = request.getUserName();
     AgentId proxId = AgentId.fromString(request.getProxId());
 
@@ -1446,30 +1445,30 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
         forward(proxId, new DeleteNot());
         usersTable.remove(name);
         proxiesTable.remove(name);
-    
+
         info = strbuf.append("Request [").append(request.getClass().getName())
-          .append("], sent to AdminTopic on server [").append(serverId)
-          .append("], successful [true]: proxy [").append(proxId)
-          .append("], of user [").append(name)
-          .append("] has been notified of deletion").toString();
+        .append("], sent to AdminTopic on server [").append(serverId)
+        .append("], successful [true]: proxy [").append(proxId)
+        .append("], of user [").append(name)
+        .append("] has been notified of deletion").toString();
         strbuf.setLength(0);
       } else {
         info = strbuf.append("Request [").append(request.getClass().getName())
-          .append("], sent to AdminTopic on server [").append(serverId)
-          .append("], successful [false]: user [").append(name)
-          .append(" does not exist").toString();
+        .append("], sent to AdminTopic on server [").append(serverId)
+        .append("], successful [false]: user [").append(name)
+        .append(" does not exist").toString();
         strbuf.setLength(0);
       }
       distributeReply(replyTo, msgId, new AdminReply(true, info));
-    
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, info);
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(proxId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes a <code>SetRight</code> instance requesting to grant a user
@@ -1482,7 +1481,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
     if (checkServerId(destId.getTo())) {
       // If the destination belong to this server, process request
-      
+
       AgentId userId = null;
       if (request.getUserProxId() != null)
         userId = AgentId.fromString(request.getUserProxId());
@@ -1502,10 +1501,10 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(destId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
   }
-  
+
   /**
    * Processes a <code>SetRight</code> instance requesting to grant a user
    * a given right on a given destination. And save Agent TopicAdmin.
@@ -1518,14 +1517,14 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * @throws IOException
    */
   public static void setRightAndSave(
-      SetRight request,
-      AgentId replyTo,
-      String msgId) throws UnknownServerException, IOException {
+                                     SetRight request,
+                                     AgentId replyTo,
+                                     String msgId) throws UnknownServerException, IOException {
     ref.doProcess(request, replyTo, msgId);
     // save Agent AdminTopic
     AgentServer.getTransaction().save(ref.agent, ref.getId().toString()); 
   }
-  
+
   /**
    * Processes a <code>SetDefaultDMQ</code> request requesting a given
    * dead message queue to be set as the default one.
@@ -1535,7 +1534,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(SetDefaultDMQ request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     if (checkServerId(request.getServerId())) {
       // If this server is the target server, process the request.
       String info;
@@ -1547,21 +1546,21 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       QueueImpl.defaultDMQId = dmqId;
 
       info = strbuf.append("Request [").append(request.getClass().getName())
-        .append("], sent to AdminTopic on server [").append(serverId)
-        .append("], successful [true]: dmq [").append(dmqId.toString())
-        .append("], has been successfuly set as the default one").toString();
+      .append("], sent to AdminTopic on server [").append(serverId)
+      .append("], successful [true]: dmq [").append(dmqId.toString())
+      .append("], has been successfuly set as the default one").toString();
       strbuf.setLength(0);
 
       distributeReply(replyTo, msgId, new AdminReply(true, info));
 
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, info);
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault((short) request.getServerId()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes a <code>SetDestinationDMQ</code> request requesting a given
@@ -1570,7 +1569,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(SetDestinationDMQ request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     AgentId destId = AgentId.fromString(request.getDestId());
 
     if (checkServerId(destId.getTo())) {
@@ -1581,9 +1580,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(destId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes a <code>SetUserDMQ</code> request requesting a given
@@ -1592,7 +1591,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(SetUserDMQ request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     AgentId userId = AgentId.fromString(request.getUserProxId());
 
     if (checkServerId(userId.getTo())) {
@@ -1603,9 +1602,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(userId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  } 
+                         } 
 
   /**
    * Processes a <code>SetDefaultThreshold</code> request requesting a given
@@ -1616,7 +1615,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(SetDefaultThreshold request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     if (checkServerId(request.getServerId())) {
       // If this server is the target server, process the request.
       String info;
@@ -1624,21 +1623,21 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       QueueImpl.defaultThreshold = new Integer(request.getThreshold());
 
       info = strbuf.append("Request [").append(request.getClass().getName())
-        .append("], sent to AdminTopic on server [").append(serverId)
-        .append("], successful [true]: default threshold [")
-        .append(request.getThreshold()).append("] has been set").toString();
+      .append("], sent to AdminTopic on server [").append(serverId)
+      .append("], successful [true]: default threshold [")
+      .append(request.getThreshold()).append("] has been set").toString();
       strbuf.setLength(0);
 
       distributeReply(replyTo, msgId, new AdminReply(true, info)); 
 
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, info);
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault((short) request.getServerId()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes a <code>SetNbMaxMsg</code> request requesting
@@ -1647,7 +1646,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(SetNbMaxMsg request,
                          AgentId replyTo,
                          String msgId) 
-    throws UnknownServerException {
+  throws UnknownServerException {
     AgentId destId = AgentId.fromString(request.getId());
 
     if (checkServerId(destId.getTo())) {
@@ -1659,7 +1658,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(destId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
   }
 
@@ -1671,7 +1670,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(SetQueueThreshold request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     AgentId destId = AgentId.fromString(request.getQueueId());
 
     if (checkServerId(destId.getTo())) {
@@ -1682,9 +1681,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(destId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes a <code>SetUserThreshold</code> request requesting
@@ -1694,7 +1693,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(SetUserThreshold request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     AgentId userId = AgentId.fromString(request.getUserProxId());
 
     if (checkServerId(userId.getTo())) {
@@ -1705,9 +1704,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(userId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes an <code>UnsetDefaultDMQ</code> request requesting to unset
@@ -1718,7 +1717,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(UnsetDefaultDMQ request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     if (checkServerId(request.getServerId())) {
       // If this server is the target server, process the request.
       String info;
@@ -1726,20 +1725,20 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       QueueImpl.defaultDMQId = null;
 
       info = strbuf.append("Request [").append(request.getClass().getName())
-        .append("], sent to AdminTopic on server [").append(serverId)
-        .append("], successful [true]: default dmq has been unset").toString();
+      .append("], sent to AdminTopic on server [").append(serverId)
+      .append("], successful [true]: default dmq has been unset").toString();
       strbuf.setLength(0);
-      
+
       distributeReply(replyTo, msgId, new AdminReply(true, info)); 
-      
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, info);
+
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, info);
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault((short) request.getServerId()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes an <code>UnsetDestinationDMQ</code> request requesting to unset
@@ -1748,7 +1747,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(UnsetDestinationDMQ request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     AgentId destId = AgentId.fromString(request.getDestId());
 
     if (checkServerId(destId.getTo())) {
@@ -1758,9 +1757,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(destId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes an <code>UnsetUserDMQ</code> request requesting to unset
@@ -1769,7 +1768,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(UnsetUserDMQ request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     AgentId userId = AgentId.fromString(request.getUserProxId());
 
     if (checkServerId(userId.getTo())) {
@@ -1779,9 +1778,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(userId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes an <code>UnsetDefaultThreshold</code> request requesting
@@ -1792,7 +1791,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(UnsetDefaultThreshold request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     if (checkServerId(request.getServerId())) {
       // If this server is the target server, process the request.
       String info;
@@ -1800,22 +1799,22 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       QueueImpl.defaultThreshold = null;
 
       info = strbuf.append("Request [").append(request.getClass().getName())
-        .append("], sent to AdminTopic on server [").append(serverId)
-        .append("], successful [true]: default threshold has been unset")
-        .toString();
+      .append("], sent to AdminTopic on server [").append(serverId)
+      .append("], successful [true]: default threshold has been unset")
+      .toString();
       strbuf.setLength(0);
 
       distributeReply(replyTo, msgId, new AdminReply(true, info)); 
 
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                      "Default threshold unset.");
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG,
+        "Default threshold unset.");
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault((short) request.getServerId()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes an <code>UnsetQueueThreshold</code> request requesting
@@ -1824,19 +1823,19 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(UnsetQueueThreshold request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
-     AgentId destId = AgentId.fromString(request.getQueueId());
+                         {
+    AgentId destId = AgentId.fromString(request.getQueueId());
 
-     if (checkServerId(destId.getTo())) {
-       // The destination is local, process the request.
-       forward(destId, new SetThreshRequest(msgId, null));
-       if (replyTo != null) requestsTable.put(msgId, replyTo);
-     } else {
-       // Forward the request to the right AdminTopic agent.
-       forward(AdminTopic.getDefault(destId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+    if (checkServerId(destId.getTo())) {
+      // The destination is local, process the request.
+      forward(destId, new SetThreshRequest(msgId, null));
+      if (replyTo != null) requestsTable.put(msgId, replyTo);
+    } else {
+      // Forward the request to the right AdminTopic agent.
+      forward(AdminTopic.getDefault(destId.getTo()),
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes an <code>UnsetUserThreshold</code> request requesting to unset
@@ -1845,7 +1844,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(UnsetUserThreshold request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     AgentId userId = AgentId.fromString(request.getUserProxId());
 
     if (checkServerId(userId.getTo())) {
@@ -1855,9 +1854,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(userId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes a <code>Monitor_GetServersIds</code> request by sending 
@@ -1897,18 +1896,18 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
           i++;
         }
         Monitor_GetServersIdsRep reply = new Monitor_GetServersIdsRep(
-          ids, names, hostNames);
+                                                                      ids, names, hostNames);
         distributeReply(replyTo, msgId, reply);
       } catch (Exception exc) {
-        if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "", exc);
         distributeReply(replyTo, msgId,
                         new AdminReply(false, exc.toString()));
       }
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault((short) request.getServerId()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
   }
 
@@ -1923,8 +1922,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
                                             a3cmlServer.name,
                                             a3cmlServer.hostname));
     } catch (Exception exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -1944,8 +1943,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       GetDomainNamesRep reply = new GetDomainNamesRep(domainNames);
       distributeReply(replyTo, msgId, reply);
     } catch (Exception exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -1960,7 +1959,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(Monitor_GetDestinations request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     if (checkServerId(request.getServerId())) {
       Enumeration destinations = destinationsTable.elements();
       String[] ids = new String[destinationsTable.size()];
@@ -1981,9 +1980,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault((short) request.getServerId()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes a <code>Monitor_GetUsers</code> request by sending the
@@ -1994,23 +1993,23 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(Monitor_GetUsers request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     if (checkServerId(request.getServerId())) {
       Monitor_GetUsersRep reply = new Monitor_GetUsersRep();
-  
+
       String name; 
       for (Enumeration names = proxiesTable.keys(); names.hasMoreElements();) {
         name = (String) names.nextElement();
         reply.addUser(name, ((AgentId) proxiesTable.get(name)).toString());
       }
-      
+
       distributeReply(replyTo, msgId, reply);
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault((short) request.getServerId()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes a <code>Monitor_GetReaders</code> request by forwarding it
@@ -2019,7 +2018,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(Monitor_GetReaders request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     AgentId destId = AgentId.fromString(request.getDest());
 
     if (checkServerId(destId.getTo())) {
@@ -2029,9 +2028,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(destId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes a <code>Monitor_GetWriters</code> request by forwarding it
@@ -2040,7 +2039,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(Monitor_GetWriters request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     AgentId destId = AgentId.fromString(request.getDest());
 
     if (checkServerId(destId.getTo())) {
@@ -2050,9 +2049,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(destId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes a <code>Monitor_GetFreeAccess</code> request by forwarding it
@@ -2061,19 +2060,19 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(Monitor_GetFreeAccess request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     AgentId destId = AgentId.fromString(request.getDest());
 
     if (checkServerId(destId.getTo())) {
       // The destination is local, process the request.
-    forward(destId, new Monit_FreeAccess(msgId));
-    if (replyTo != null) requestsTable.put(msgId, replyTo);
+      forward(destId, new Monit_FreeAccess(msgId));
+      if (replyTo != null) requestsTable.put(msgId, replyTo);
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(destId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes a <code>Monitor_GetDMQSettings</code> request either by
@@ -2085,7 +2084,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(Monitor_GetDMQSettings request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     if (request.getServerId() != -1) {
       if (checkServerId(request.getServerId())) {
         Monitor_GetDMQSettingsRep reply;
@@ -2097,12 +2096,12 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       } else {
         // Forward the request to the right AdminTopic agent.
         forward(AdminTopic.getDefault((short) request.getServerId()),
-               new AdminRequestNot(replyTo, msgId, request));
+                new AdminRequestNot(replyTo, msgId, request));
       }
     } else {
       if (request.getTarget() != null) {
         AgentId targetId = AgentId.fromString(request.getTarget());
-        
+
         if (checkServerId(targetId.getTo())) {
           forward(targetId, new Monit_GetDMQSettings(msgId));
 
@@ -2111,13 +2110,13 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
         } else {
           // Forward the request to the right AdminTopic agent.
           forward(AdminTopic.getDefault(targetId.getTo()),
-                 new AdminRequestNot(replyTo, msgId, request));
+                  new AdminRequestNot(replyTo, msgId, request));
         }
       } else {
         // AF: Return an error/empty message to unlock client ?
       }
     }
-  }
+                         }
 
   /**
    * Processes a <code>Monitor_GetFather</code> request by forwarding it to
@@ -2126,7 +2125,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(Monitor_GetFather request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     AgentId topicId = AgentId.fromString(request.getTopic());
 
     if (checkServerId(topicId.getTo())) {
@@ -2136,9 +2135,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(topicId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes a <code>Monitor_GetCluster</code> request by forwarding it to
@@ -2147,7 +2146,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(Monitor_GetCluster request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     AgentId topicId = AgentId.fromString(request.getTopic());
 
     if (checkServerId(topicId.getTo())) {
@@ -2157,9 +2156,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(topicId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes a <code>Monitor_GetPendingMessages</code> request by
@@ -2168,7 +2167,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(Monitor_GetPendingMessages request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     AgentId destId = AgentId.fromString(request.getDest());
 
     if (checkServerId(destId.getTo())) {
@@ -2178,9 +2177,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(destId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes a <code>Monitor_GetPendingRequests</code> request by
@@ -2189,7 +2188,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(Monitor_GetPendingRequests request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     AgentId destId = AgentId.fromString(request.getDest());
 
     if (checkServerId(destId.getTo())) {
@@ -2199,9 +2198,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(destId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
+                         }
 
   /**
    * Processes a <code>Monitor_GetStat</code> request by
@@ -2210,9 +2209,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(Monitor_GetStat request,
                          AgentId replyTo,
                          String msgId) 
-    throws UnknownServerException {
+  throws UnknownServerException {
     AgentId destId = AgentId.fromString(request.getDest());
-    
+
     if (checkServerId(destId.getTo())) {
       // The destination is local, process the request.
       forward(destId, new Monit_GetStat(msgId));
@@ -2220,7 +2219,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(destId.getTo()),
-                     new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
   }
 
@@ -2231,18 +2230,18 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(Monitor_GetNbMaxMsg request,
                          AgentId replyTo,
                          String msgId)
-    throws UnknownServerException {
-     AgentId destId = AgentId.fromString(request.getId());
+  throws UnknownServerException {
+    AgentId destId = AgentId.fromString(request.getId());
 
-     if (checkServerId(destId.getTo())) {
-       // The destination is local, process the request.
-       String subName = request.getSubName();
-       forward(destId, new Monit_GetNbMaxMsg(msgId, subName));
-       if (replyTo != null) requestsTable.put(msgId, replyTo);
-     } else {
-       // Forward the request to the right AdminTopic agent.
-       forward(AdminTopic.getDefault(destId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+    if (checkServerId(destId.getTo())) {
+      // The destination is local, process the request.
+      String subName = request.getSubName();
+      forward(destId, new Monit_GetNbMaxMsg(msgId, subName));
+      if (replyTo != null) requestsTable.put(msgId, replyTo);
+    } else {
+      // Forward the request to the right AdminTopic agent.
+      forward(AdminTopic.getDefault(destId.getTo()),
+              new AdminRequestNot(replyTo, msgId, request));
     }
   }
 
@@ -2253,7 +2252,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(Monitor_GetSubscriptions request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException
-  {
+                         {
     AgentId destId = AgentId.fromString(request.getDest());
 
     if (checkServerId(destId.getTo())) {
@@ -2263,21 +2262,21 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(destId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
-  }
-  
+                         }
+
   private void doProcess(SpecialAdmin request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException {
     AgentId destId = AgentId.fromString(request.getDestId());
-    
+
     if (checkServerId(destId.getTo())) {
       // The destination is local, process the request.
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
-                                      "AdminTopicImpl.doProcess " +
-                                      "SpecialAdminRequest destId=" + destId);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, 
+                   "AdminTopicImpl.doProcess " +
+                   "SpecialAdminRequest destId=" + destId);
 
       if (getId().equals(destId)) {
         // If this destination is the target destination, doing nothing:
@@ -2291,7 +2290,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(destId.getTo()),
-             new AdminRequestNot(replyTo, msgId, request));
+              new AdminRequestNot(replyTo, msgId, request));
     }
   }
 
@@ -2314,24 +2313,24 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
                          replyTo, msgId);
       }
     } catch (ServerConfigHelper.NameAlreadyUsedException exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
                       new AdminReply(
-                        false, 
-                        AdminReply.NAME_ALREADY_USED, 
-                        exc.getMessage(), null));
+                                     false, 
+                                     AdminReply.NAME_ALREADY_USED, 
+                                     exc.getMessage(), null));
     } catch (ServerConfigHelper.StartFailureException exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
                       new AdminReply(
-                        false,
-                        AdminReply.START_FAILURE, 
-                        exc.getMessage(), null));
+                                     false,
+                                     AdminReply.START_FAILURE, 
+                                     exc.getMessage(), null));
     } catch (Exception exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -2353,13 +2352,13 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
                          replyTo, msgId);
       }
     } catch (Exception exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
                       new AdminReply(false, exc.toString()));
     }
   }
-  
+
   private void doProcess(AddServerRequest request,
                          AgentId replyTo,
                          String msgId,
@@ -2367,15 +2366,15 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     try {
       ServerConfigHelper helper = new ServerConfigHelper(false);
       helper.addServer(
-        request.getServerId(),
-        request.getHostName(),
-        request.getDomainName(),
-        request.getPort(),
-        request.getServerName());
+                       request.getServerId(),
+                       request.getHostName(),
+                       request.getDomainName(),
+                       request.getPort(),
+                       request.getServerName());
       helper.addService(
-        request.getServerId(),
-        "org.objectweb.joram.mom.proxies.ConnectionManager",
-        "root root");
+                        request.getServerId(),
+                        "org.objectweb.joram.mom.proxies.ConnectionManager",
+      "root root");
       String[] serviceNames = request.getServiceNames();
       String[] serviceArgs = request.getServiceArgs();
       for (int i = 0; i < serviceNames.length; i++) {
@@ -2392,16 +2391,16 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
                          replyTo, msgId);
       }
     } catch (ServerConfigHelper.ServerIdAlreadyUsedException exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
                       new AdminReply(
-                        false, 
-                        AdminReply.SERVER_ID_ALREADY_USED, 
-                        exc.getMessage(), null));
+                                     false, 
+                                     AdminReply.SERVER_ID_ALREADY_USED, 
+                                     exc.getMessage(), null));
     } catch (Exception exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -2422,16 +2421,16 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
                          replyTo, msgId);
       }
     } catch (UnknownServerException exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
                       new AdminReply(
-                        false, 
-                        AdminReply.UNKNOWN_SERVER, 
-                        exc.getMessage(), null));
+                                     false, 
+                                     AdminReply.UNKNOWN_SERVER, 
+                                     exc.getMessage(), null));
     } catch (Exception exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -2468,8 +2467,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       distributeReply(replyTo, msgId,
                       new AdminReply(true, config));
     } catch (Exception exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -2478,31 +2477,31 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(UserAdminRequest request,
                          AgentId replyTo,
                          String requestMsgId) 
-    throws UnknownServerException {
+  throws UnknownServerException {
     AgentId userId = AgentId.fromString(request.getUserId());
     if (checkServerId(userId.getTo())) {
       // Delegate to the proxy
       forward(userId, new UserAdminRequestNot(
-        request, replyTo, requestMsgId, createMessageId()));
+                                              request, replyTo, requestMsgId, createMessageId()));
     } else {
       // Forward the request to the right AdminTopic agent.
       forward(AdminTopic.getDefault(userId.getTo()),
-                     new AdminRequestNot(
-                       replyTo, requestMsgId, request));
+              new AdminRequestNot(
+                                  replyTo, requestMsgId, request));
     }
   }
 
   private void doProcess(GetSubscriberIds request,
                          AgentId replyTo,
                          String requestMsgId) 
-    throws UnknownServerException {
+  throws UnknownServerException {
     try {
       AgentId topicId = AgentId.fromString(request.getTopicId());
       forward(topicId, new DestinationAdminRequestNot(
-        request, replyTo, requestMsgId, createMessageId()));
+                                                      request, replyTo, requestMsgId, createMessageId()));
     } catch (Exception exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, requestMsgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -2511,14 +2510,14 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(QueueAdminRequest request,
                          AgentId replyTo,
                          String requestMsgId) 
-    throws UnknownServerException {
+  throws UnknownServerException {
     try {
       AgentId queueId = AgentId.fromString(request.getQueueId());
       forward(queueId, new DestinationAdminRequestNot(
-        request, replyTo, requestMsgId, createMessageId()));
+                                                      request, replyTo, requestMsgId, createMessageId()));
     } catch (Exception exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "", exc);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, requestMsgId,
                       new AdminReply(false, exc.toString()));
     }
@@ -2545,7 +2544,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
     throw new UnknownServerException("server#" + serverId + " is unknow.");
   }
- 
+
   private String createMessageId() {
     msgCounter++;
     return "ID:" + getId().toString() + '_' + msgCounter;
@@ -2560,15 +2559,15 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * @param reply  The <code>AdminReply</code> instance to send.
    */
   private void distributeReply(AgentId to, String msgId, AdminReply reply) {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(
-        BasicLevel.DEBUG,
-        "AdminTopicImpl.distributeReply(" + 
-        to + ',' + msgId + ',' + reply + ')');
-                            
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
+                 BasicLevel.DEBUG,
+                 "AdminTopicImpl.distributeReply(" + 
+                 to + ',' + msgId + ',' + reply + ')');
+
     if (to == null)
       return;
-    
+
     Message message = new Message();
     message.id = createMessageId();
     message.correlationId = msgId;
@@ -2580,23 +2579,23 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       forward(to, clientMessages);
       nbMsgsDeliverSinceCreation = nbMsgsDeliverSinceCreation + 1;
     } catch (Exception exc) {
-      JoramTracing.dbgDestination.log(
-        BasicLevel.ERROR, "", exc);
+      logger.log(
+                 BasicLevel.ERROR, "", exc);
     }
   }
 
   /** Serializes an <code>AdminTopicImpl</code> instance. */
   private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
-  	// Saves DMQ defaults.
-  	out.writeObject(QueueImpl.defaultDMQId);
-  	out.writeObject(QueueImpl.defaultThreshold);
+    // Saves DMQ defaults.
+    out.writeObject(QueueImpl.defaultDMQId);
+    out.writeObject(QueueImpl.defaultThreshold);
 
     out.defaultWriteObject();
   }
 
   /** Deserializes an <code>AdminTopicImpl</code> instance. */
   private void readObject(java.io.ObjectInputStream in)
-               throws java.io.IOException, ClassNotFoundException {
+  throws java.io.IOException, ClassNotFoundException {
     QueueImpl.defaultDMQId = (AgentId) in.readObject();
     QueueImpl.defaultThreshold = (Integer) in.readObject();
     in.defaultReadObject();
@@ -2622,7 +2621,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   }
 
   public static class DestinationDesc implements java.io.Serializable {
-  	/** define serialVersionUID for interoperability */
+    /** define serialVersionUID for interoperability */
     private static final long serialVersionUID = 1L;
     private AgentId id;
     private String name;
@@ -2642,7 +2641,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     public final AgentId getId() {
       return id;
     }
-    
+
     public final String getName() {
       return name;
     }
@@ -2661,10 +2660,10 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
     public String toString() {
       return '(' + super.toString() +
-        ",id=" + id +
-        ",name=" + name + 
-        ",className=" + className + 
-        ",type=" + type + ')';
+      ",id=" + id +
+      ",name=" + name + 
+      ",className=" + className + 
+      ",type=" + type + ')';
     }
   }
 }

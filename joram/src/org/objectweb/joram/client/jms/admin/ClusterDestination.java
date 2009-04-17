@@ -38,10 +38,12 @@ import javax.naming.StringRefAddr;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.admin.SetReader;
 import org.objectweb.joram.shared.admin.SetWriter;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.Debug;
 
 /**
  * A base class for clustered destinations.
@@ -49,6 +51,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
 public class ClusterDestination extends Destination {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+
+  private static Logger logger = Debug.getLogger(ClusterDestination.class.getName());
   
   protected Hashtable cluster = null;
 
@@ -64,9 +68,8 @@ public class ClusterDestination extends Destination {
    */ 
   public ClusterDestination(Hashtable cluster) {
     this.cluster = cluster;
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, 
-                                 this + ": cluster = " + cluster);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ": cluster = " + cluster);
   }
 
   public void setCluster(Hashtable cluster) {

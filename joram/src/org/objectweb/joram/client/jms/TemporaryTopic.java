@@ -30,7 +30,6 @@ import javax.jms.JMSSecurityException;
 import org.objectweb.joram.shared.client.TempDestDeleteRequest;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.joram.shared.JoramTracing;
 
 /**
  * Implements the <code>javax.jms.TemporaryTopic</code> interface.
@@ -64,8 +63,7 @@ public class TemporaryTopic extends Topic implements javax.jms.TemporaryTopic {
   }
 
   /** Returns a String image of the topic. */
-  public String toString()
-  {
+  public String toString() {
     return "TempTopic:" + agentId;
   }
 
@@ -81,9 +79,8 @@ public class TemporaryTopic extends Topic implements javax.jms.TemporaryTopic {
       throw new JMSSecurityException("Forbidden call as this TemporaryQueue"
                                      + " does not belong to this connection.");
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
-                                 + ": deleting...");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "--- " + this + ": deleting...");
 
     // Checking the connection's subscribers:
     cnx.checkConsumers(agentId);
@@ -91,8 +88,8 @@ public class TemporaryTopic extends Topic implements javax.jms.TemporaryTopic {
     // Sending the request to the server:
     cnx.syncRequest(new TempDestDeleteRequest(agentId));
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": deleted.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ": deleted.");
   }
 
   /**

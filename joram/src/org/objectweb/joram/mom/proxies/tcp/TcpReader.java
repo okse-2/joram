@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -30,10 +30,11 @@ import org.objectweb.joram.mom.proxies.ConnectionManager;
 import org.objectweb.joram.mom.proxies.ProxyMessage;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.Daemon;
+import fr.dyade.aaa.util.Debug;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Channel;
 
@@ -42,6 +43,9 @@ import fr.dyade.aaa.agent.Channel;
  * the user's proxy.
  */
 public class TcpReader extends Daemon {
+  /** logger */
+  public static Logger logger = Debug.getLogger(TcpReader.class.getName());
+
   /**
    * The TCP connection that started this reader.
    */
@@ -64,7 +68,7 @@ public class TcpReader extends Daemon {
    *          the TCP connection
    */
   public TcpReader(IOControl ioctrl, AgentId proxyId,
-      TcpConnection tcpConnection, boolean closeConnection) throws IOException {
+                   TcpConnection tcpConnection, boolean closeConnection) throws IOException {
     super("tcpReader");
     this.ioctrl = ioctrl;
     this.proxyId = proxyId;
@@ -73,26 +77,24 @@ public class TcpReader extends Daemon {
   }
 
   public void run() {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpReader.run()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "TcpReader.run()");
     try {
       while (running) {
         ProxyMessage msg = ioctrl.receive();
         canStop = false;
-        if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpReader reads msg: "
-              + msg);
-        ConnectionManager.sendToProxy(
-            proxyId,
-            tcpConnection.getKey(),
-            (AbstractJmsRequest)msg.getObject(), 
-            msg);
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "TcpReader reads msg: " + msg);
+        ConnectionManager.sendToProxy(proxyId,
+                                      tcpConnection.getKey(),
+                                      (AbstractJmsRequest)msg.getObject(), 
+                                      msg);
         canStop = true;
       }
     } catch (Throwable error) {
       canStop = false;
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "", error);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "", error);
     } finally {
       canStop = false;
       if (closeConnection) {
@@ -112,8 +114,8 @@ public class TcpReader extends Daemon {
   }
 
   protected void close() {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpReader.close()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "TcpReader.close()");
     if (ioctrl != null)
       ioctrl.close();
     ioctrl = null;

@@ -27,22 +27,22 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.ServerSocket;
 import java.net.Socket;
 
 import org.objectweb.joram.mom.notifications.GetProxyIdNot;
 import org.objectweb.joram.mom.proxies.GetConnectionNot;
 import org.objectweb.joram.mom.proxies.OpenConnectionNot;
 import org.objectweb.joram.mom.proxies.ReliableConnectionContext;
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.shared.stream.MetaData;
 import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.util.Daemon;
+import fr.dyade.aaa.util.Debug;
 
 /**
  * Listens to the TCP connections from the JMS clients.
@@ -52,7 +52,9 @@ import fr.dyade.aaa.util.Daemon;
  * right user's proxy.
  */
 public class TcpConnectionListener extends Daemon {
-  
+  /** logger */
+  public static Logger logger = Debug.getLogger(TcpConnectionListener.class.getName());
+
   /**
    * The TCP proxy service 
    */
@@ -74,8 +76,8 @@ public class TcpConnectionListener extends Daemon {
   }
 
   public void run() {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpConnectionListener.run()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "TcpConnectionListener.run()");
 
     // Wait for the administration topic deployment.
     // TODO (AF): a synchronization would be much better.
@@ -126,14 +128,14 @@ public class TcpConnectionListener extends Daemon {
    * right user's proxy, creates and starts the <code>TcpConnection</code>.
    */
   private void acceptConnection() throws Exception {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpConnectionListener.acceptConnection()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "TcpConnectionListener.acceptConnection()");
 
     Socket sock = proxyService.getServerSocket().accept();
     String inaddr = sock.getInetAddress().getHostAddress();
 
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, " -> accept connection");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, " -> accept connection");
 
     try {
       sock.setTcpNoDelay(true);
@@ -153,20 +155,20 @@ public class TcpConnectionListener extends Daemon {
       }
       if (magic[7] != MetaData.joramMagic[7])
         throw new IllegalAccessException("Bad protocol version number");
-      
+
       Identity identity = Identity.read(is);
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, " -> read identity = " + identity);
-      
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, " -> read identity = " + identity);
+
       int key = StreamUtil.readIntFrom(is);
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, " -> read key = " + key);
-      
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, " -> read key = " + key);
+
       int heartBeat = 0;
       if (key == -1) {
         heartBeat = StreamUtil.readIntFrom(is);
-        if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgProxy.log(BasicLevel.DEBUG, " -> read heartBeat = " + heartBeat);
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, " -> read heartBeat = " + heartBeat);
       }
 
       GetProxyIdNot gpin = new GetProxyIdNot(identity, inaddr);
@@ -175,8 +177,8 @@ public class TcpConnectionListener extends Daemon {
         gpin.invoke(new AgentId(AgentServer.getServerId(), AgentServer.getServerId(),  AgentId.JoramAdminStamp));
         proxyId = gpin.getProxyId();
       } catch (Exception exc) {
-        if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "", exc);
         StreamUtil.writeTo(1, nos);
         StreamUtil.writeTo(exc.getMessage(), nos);
         nos.send();
@@ -199,8 +201,8 @@ public class TcpConnectionListener extends Daemon {
         try {
           gcn.invoke(proxyId);
         } catch (Exception exc) {
-          if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-            JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "", exc);
           StreamUtil.writeTo(1, nos);
           StreamUtil.writeTo(exc.getMessage(), nos);
           nos.send();
@@ -224,22 +226,22 @@ public class TcpConnectionListener extends Daemon {
       TcpConnection tcpConnection = new TcpConnection(ioctrl, ctx, proxyId, proxyService, identity);
       tcpConnection.start();
     } catch (IllegalAccessException exc) {
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgProxy.log(BasicLevel.ERROR, "", exc);
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "", exc);
       sock.close();
       throw exc;
     } catch (IOException exc) {
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "", exc);
       sock.close();
       throw exc;
     }
   }
-  
+
   protected void shutdown() {
     close();
   }
-    
+
   protected void close() {
     proxyService.resetServerSocket();
   }

@@ -34,15 +34,12 @@ import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.QueueMsgReply;
 import org.objectweb.joram.mom.notifications.ReceiveRequest;
 import org.objectweb.joram.mom.util.DMQManager;
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.joram.shared.selectors.Selector;
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.Debug;
 import fr.dyade.aaa.agent.DeleteNot;
 
 /**
@@ -57,12 +54,9 @@ public class JMSBridgeQueueImpl extends QueueImpl {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
-  /** logger */
-  public static Logger logger = Debug.getLogger(JMSBridgeQueueImpl.class.getName());
-  
   /** The JMS module for accessing the foreign JMS destination. */
   private JMSBridgeModule jmsModule;
-  
+
   /**
    * Table persisting the outgoing messages until acknowledgement by the
    * bridge module.
@@ -85,7 +79,7 @@ public class JMSBridgeQueueImpl extends QueueImpl {
     // creates the JMS module for communication with external provider
     jmsModule = new JMSBridgeModule(prop);
   }
-  
+
   /**
    * Initializes the destination.
    * 
@@ -94,7 +88,7 @@ public class JMSBridgeQueueImpl extends QueueImpl {
   public void initialize(boolean firstTime) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "initialize(" + firstTime + ')');
-    
+
     // initialize the destination
     super.initialize(firstTime);
 
@@ -115,14 +109,14 @@ public class JMSBridgeQueueImpl extends QueueImpl {
       Message currentMsg;
       for (Enumeration keys = outTable.keys(); keys.hasMoreElements();) {
         momMsg = (Message) outTable.get(keys.nextElement());
-  
+
         int i = 0;
         while (i < outMessages.size()) {
           currentMsg = (Message) outMessages.get(i);
-  
+
           if (momMsg.order < currentMsg.order)
             break;
-  
+
           i++;
         }
         outMessages.insertElementAt(momMsg, i);
@@ -133,11 +127,11 @@ public class JMSBridgeQueueImpl extends QueueImpl {
         jmsModule.send(momMsg.getFullMessage());
       }
     } catch (Exception exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgDestination.log(BasicLevel.ERROR, "", exc);
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "", exc);
     }
   }
-  
+
   public String toString() {
     return "BridgeQueueImpl:" + getId().toString();
   }
@@ -166,7 +160,7 @@ public class JMSBridgeQueueImpl extends QueueImpl {
   public void bridgeAck(JMSBridgeAckNot not) {
     outTable.remove(not.getIdentifier());
   }
-  
+
   /**
    * Method specializing the reaction to a <code>ReceiveRequest</code>
    * instance, requesting a message.
@@ -177,7 +171,7 @@ public class JMSBridgeQueueImpl extends QueueImpl {
    * @exception AccessException  If the sender is not a reader.
    */
   public void receiveRequest(AgentId from, ReceiveRequest not)
-                 throws AccessException {
+  throws AccessException {
     // If client is not a reader, sending an exception.
     if (! isReader(from))
       throw new AccessException("READ right not granted");
@@ -204,9 +198,9 @@ public class JMSBridgeQueueImpl extends QueueImpl {
           message = jmsModule.receiveNoWait();
         } catch (Exception exc) {
           // JMS module not properly initialized.
-          if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-            JoramTracing.dbgDestination.log(BasicLevel.ERROR,
-                                            "Failing receive request on remote destination: ", exc);
+          if (logger.isLoggable(BasicLevel.ERROR))
+            logger.log(BasicLevel.ERROR,
+                       "Failing receive request on remote destination: ", exc);
         }
 
         // If message not null but not selected, setting it to null.
@@ -218,18 +212,18 @@ public class JMSBridgeQueueImpl extends QueueImpl {
         reply.addMessage(message);
         forward(from, reply);
 
-        if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgDestination.log(BasicLevel.DEBUG,
-                                        "Receive answered.");
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG,
+          "Receive answered.");
       } else {
         // Else, requesting the foreign JMS destination for a delivery: 
         try {
           jmsModule.receive();
         } catch (Exception exc) {
           // JMS module not properly initialized.
-          if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-            JoramTracing.dbgDestination.log(BasicLevel.ERROR,
-                                            "Failing receive request on remote destination: ", exc);
+          if (logger.isLoggable(BasicLevel.ERROR))
+            logger.log(BasicLevel.ERROR,
+                       "Failing receive request on remote destination: ", exc);
         }
       }
     }
@@ -244,11 +238,11 @@ public class JMSBridgeQueueImpl extends QueueImpl {
   public ClientMessages preProcess(AgentId from, ClientMessages not) {
     if (getId().equals(from))
       return not;
-    
+
     // Sending each message:
     Message message;
     for (Enumeration msgs = not.getMessages().elements();
-         msgs.hasMoreElements();) {
+    msgs.hasMoreElements();) {
       message = new Message((org.objectweb.joram.shared.messages.Message) msgs.nextElement());
       message.order = arrivalsCounter++;
 
@@ -257,9 +251,9 @@ public class JMSBridgeQueueImpl extends QueueImpl {
       try {
         jmsModule.send(message.getFullMessage());
       } catch (Exception exc) {
-        if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-          JoramTracing.dbgDestination.log(BasicLevel.ERROR,
-                                          "Failing sending to remote  destination: ", exc);
+        if (logger.isLoggable(BasicLevel.ERROR))
+          logger.log(BasicLevel.ERROR,
+                     "Failing sending to remote  destination: ", exc);
 
         outTable.remove(message.getIdentifier());
         DMQManager dmqManager = new DMQManager(not.getDMQId(), dmqId, getId());

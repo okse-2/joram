@@ -36,24 +36,27 @@ import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.util.Debug;
 
 /**
  * Starts a SSLTCP entry point for MOM clients.
  */
 public class SSLTcpProxyService extends TcpProxyService {
+  /** logger */
+  public static Logger logger = Debug.getLogger(SSLTcpProxyService.class.getName());
 
   private final static String CIPHER = "org.objectweb.joram.cipherList";
   private final static String KS = "org.objectweb.joram.keystore";
   private final static String KS_PASS = "org.objectweb.joram.keystorepass";
   private final static String KS_TYPE = "org.objectweb.joram.keystoretype";
   private final static String SSLCONTEXT = "org.objectweb.joram.sslCtx";
-  
+
   private static final String MBEAN_NAME = "type=Connection,mode=tcp-ssl";
-  
+
   /**
    * The proxy service reference (used to stop it).
    */
@@ -68,11 +71,10 @@ public class SSLTcpProxyService extends TcpProxyService {
    * when the agent server starts.   
    */
   public static void init(String args, boolean firstTime) 
-    throws Exception {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
-        BasicLevel.DEBUG, "SSLTcpProxyService.init(" + 
-        args + ',' + firstTime + ')');
+  throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "SSLTcpProxyService.init(" + args + ',' + firstTime + ')');
 
     int port = DEFAULT_PORT;
     String address = DEFAULT_BINDADDRESS;
@@ -83,20 +85,20 @@ public class SSLTcpProxyService extends TcpProxyService {
         address = st.nextToken();
       }
     }
-    
+
     int backlog = AgentServer.getInteger(BACKLOG_PROP, DEFAULT_BACKLOG).intValue();
 
     // Create the socket here in order to throw an exception
     // if the socket can't be created (even if firstTime is false).
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
-        BasicLevel.DEBUG, "SSLTcpProxyService.init() - binding to address " + address + ", port " + port);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "SSLTcpProxyService.init() - binding to address " + address + ", port " + port);
 
     proxyService = new SSLTcpProxyService(port, backlog, address);
     proxyService.start();
-    
+
   }
-  
+
   public String getMBeanName() {
     return MBEAN_NAME;
   }
@@ -111,26 +113,25 @@ public class SSLTcpProxyService extends TcpProxyService {
     String sslContext = System.getProperty(SSLCONTEXT, "SSL");
     String ksType = System.getProperty(KS_TYPE, "JKS");
 
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                "SSLTcpProxyService.createServerSocketFactory:" +
-                                keystoreFile + ':' + new String(keyStorePass));
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "SSLTcpProxyService.createServerSocketFactory:" + keystoreFile + ':' + new String(keyStorePass));
 
     KeyStore keystore = KeyStore.getInstance(ksType);
     keystore.load(new FileInputStream(keystoreFile), keyStorePass);
-    
+
     KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
     kmf.init(keystore,keyStorePass);
-    
+
     TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
     tmf.init(keystore);       
     TrustManager[] trustManagers = tmf.getTrustManagers();
-    
+
     SSLContext ctx = SSLContext.getInstance(sslContext);
     SecureRandom securerandom = SecureRandom.getInstance("SHA1PRNG");
-//    SecureRandom securerandom = null;
+    //    SecureRandom securerandom = null;
     ctx.init(kmf.getKeyManagers(),trustManagers,securerandom);
-    
+
     return ctx.getServerSocketFactory();
   }
 

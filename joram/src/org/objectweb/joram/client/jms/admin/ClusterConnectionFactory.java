@@ -37,8 +37,10 @@ import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 
 import org.objectweb.joram.client.jms.ConnectionFactory;
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.Debug;
 
 /**
  * A base class for clustered connection factories.
@@ -46,6 +48,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
 public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.admin.AdministeredObject implements javax.jms.ConnectionFactory {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+
+  private static Logger logger = Debug.getLogger(ClusterConnectionFactory.class.getName());
   
   protected Hashtable cluster = null;
 
@@ -207,8 +211,8 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
         if (cluster == null) cluster = new Hashtable();
         cluster.put(key, cf);
       } catch (Exception exc) {
-        if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
-          JoramTracing.dbgClient.log(BasicLevel.ERROR, "", exc);
+        if (logger.isLoggable(BasicLevel.ERROR))
+          logger.log(BasicLevel.ERROR, "", exc);
       }
       i++;
     }
@@ -280,8 +284,8 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
 
         cluster.put(key, cf);
       } catch (Exception exc) {
-        if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
-          JoramTracing.dbgClient.log(BasicLevel.ERROR, "", exc);
+        if (logger.isLoggable(BasicLevel.ERROR))
+          logger.log(BasicLevel.ERROR, "", exc);
       }
       i++;
     }

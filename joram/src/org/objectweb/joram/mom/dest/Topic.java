@@ -36,7 +36,6 @@ import org.objectweb.joram.mom.notifications.SubscribeRequest;
 import org.objectweb.joram.mom.notifications.UnclusterRequest;
 import org.objectweb.joram.mom.notifications.UnsetFatherRequest;
 import org.objectweb.joram.mom.notifications.UnsubscribeRequest;
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -94,11 +93,9 @@ public class Topic extends Destination {
     if (not instanceof AbstractRequest)
       reqId = ((AbstractRequest) not).getRequestId();
 
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "--- " + this
-                                    + ": got " + not.getClass().getName()
-                                    + " with id: " + reqId
-                                    + " from: " + from.toString());
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "--- " + this + ": got " + not.getClass().getName()+ " with id: " + reqId + " from: " + from.toString());
     try {
       if (not instanceof ClusterRequest)
         ((TopicImpl)destImpl).clusterRequest(from, (ClusterRequest) not);

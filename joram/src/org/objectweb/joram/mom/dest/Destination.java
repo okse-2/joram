@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,7 +37,6 @@ import org.objectweb.joram.mom.notifications.RequestGroupNot;
 import org.objectweb.joram.mom.notifications.SetDMQRequest;
 import org.objectweb.joram.mom.notifications.SetRightRequest;
 import org.objectweb.joram.mom.notifications.SpecialAdminRequest;
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -124,8 +123,7 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
     try {
       MXWrapper.registerMBean(destImpl, "Joram#"+AgentServer.getServerId(), getMBeanName());
     } catch (Exception exc) {
-      JoramTracing.dbgDestination.log(BasicLevel.ERROR,
-                                      this + " jmx failed", exc);
+      logger.log(BasicLevel.ERROR, this + " jmx failed", exc);
     }
   }
 
@@ -134,8 +132,8 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
     try {
       MXWrapper.unregisterMBean("Joram#"+AgentServer.getServerId(), getMBeanName());
     } catch (Exception exc) {
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "Destination.agentFinalize", exc);
     }
     super.agentFinalize(lastTime);
   }
@@ -208,16 +206,14 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
   
   
   protected void setNoSave() {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
-                                      this + ": setNoSave().");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ": setNoSave().");
     super.setNoSave();
   }
 
   protected void setSave() {
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, 
-                                    this + ": setSave().");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ": setSave().");
     super.setSave();
   }
 }

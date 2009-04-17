@@ -31,10 +31,12 @@ import javax.jms.MessageFormatException;
 import javax.jms.MessageNotWriteableException;
 
 import org.objectweb.joram.client.jms.admin.AdminMessage;
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.excepts.MessageValueException;
 import org.objectweb.joram.shared.messages.ConversionHelper;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.Debug;
 
 /**
  * Implements the <code>javax.jms.Message</code> interface.
@@ -43,6 +45,9 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * for effective MOM transport facility.
  */
 public class Message implements javax.jms.Message {
+  /** logger */
+  public static Logger logger = Debug.getLogger(Message.class.getName());
+
   protected org.objectweb.joram.shared.messages.Message momMsg;
 
   /**
@@ -907,7 +912,7 @@ public class Message implements javax.jms.Message {
       try {
         strbuf.append(",JMSDestination=").append(getJMSDestination());
       } catch (JMSException exc) {
-        JoramTracing.dbgClient.log(BasicLevel.ERROR, "Message.toString()", exc);
+        logger.log(BasicLevel.ERROR, "Message.toString()", exc);
       }
       strbuf.append(",JMSCorrelationID=").append(getJMSCorrelationID());
       strbuf.append(",JMSDeliveryMode=").append(getJMSDeliveryMode());
@@ -917,7 +922,7 @@ public class Message implements javax.jms.Message {
       try {
         strbuf.append(",JMSReplyTo=").append(getJMSReplyTo());
       } catch (JMSException exc) {
-        JoramTracing.dbgClient.log(BasicLevel.ERROR, "Message.toString()", exc);
+        logger.log(BasicLevel.ERROR, "Message.toString()", exc);
       }
       strbuf.append(",JMSTimestamp=").append(getJMSTimestamp());
       strbuf.append(",JMSType=").append(getJMSType());

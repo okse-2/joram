@@ -24,25 +24,27 @@ import java.io.IOException;
 import java.util.Date;
 
 import org.objectweb.joram.mom.proxies.ReliableConnectionContext;
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.util.Debug;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
- * Handles the TCP connection. Starts the
- * reader and writer threads responsible for
+ * Handles the TCP connection. Starts the reader and writer threads responsible for
  * reading the requests and writing the replies.
- * Calls the <code>UserConnection</code> in order
- * to invoke the user's proxy and get its replies.
+ * Calls the <code>UserConnection</code> in order to invoke the user's proxy and get
+ * its replies.
  *
  * @see TcpProxyService
  * @see TcpConnectionListener
  */
 public class TcpConnection implements TcpConnectionMBean {
+  /** logger */
+  public static Logger logger = Debug.getLogger(TcpConnection.class.getName());
 
   private IOControl ioctrl;
 
@@ -92,7 +94,7 @@ public class TcpConnection implements TcpConnectionMBean {
     try {
       MXWrapper.registerMBean(this, "Joram#" + AgentServer.getServerId(), getMBeanName());
     } catch (Exception e) {
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "registerMBean", e);
+      logger.log(BasicLevel.DEBUG, "registerMBean", e);
     }
   }
 
@@ -112,8 +114,8 @@ public class TcpConnection implements TcpConnectionMBean {
    * Starts the connection reader and writer threads.
    */
   void start() throws Exception {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpConnection.start()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "TcpConnection.start()");
     try {
       tcpWriter = new TcpWriter(ioctrl, ctx.getQueue(), this);
       tcpReader = new TcpReader(ioctrl, proxyId, this, closeConnection);
@@ -141,7 +143,7 @@ public class TcpConnection implements TcpConnectionMBean {
     try {
       MXWrapper.unregisterMBean("Joram#" + AgentServer.getServerId(), getMBeanName());
     } catch (Exception e) {
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "unregisterMBean", e);
+      logger.log(BasicLevel.DEBUG, "unregisterMBean", e);
     }
     ioctrl = null;
     proxyService.unregisterConnection(this);

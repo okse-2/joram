@@ -28,7 +28,9 @@ import javax.jms.MessageFormatException;
 import javax.jms.JMSException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.Debug;
 
 /**
  * Implements the <code>javax.jms.MessageProducer</code> interface.
@@ -65,6 +67,8 @@ public class MessageProducer implements javax.jms.MessageProducer {
   /** The destination the producer sends messages to. */
   protected Destination dest = null;
 
+  private static Logger logger = Debug.getLogger(MessageProducer.class.getName());
+
   /**
    * Constructs a producer.
    *
@@ -76,14 +80,14 @@ public class MessageProducer implements javax.jms.MessageProducer {
    */
   MessageProducer(Session sess, 
                   Destination dest) 
-    throws JMSException {
+                  throws JMSException {
     this.sess = sess;
     this.dest = dest;
     if (dest == null)
       identified = false;
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ": created.");
   }
 
   /**
@@ -276,14 +280,14 @@ public class MessageProducer implements javax.jms.MessageProducer {
                                 int deliveryMode,
                                 int priority, 
                                 long timeToLive) throws JMSException
-  {
+                                {
     if (! identified)
       throw new UnsupportedOperationException("Can't send message to"
                                               + " an unidentified"
                                               + " destination.");
     // Actually producing it:
     doSend(dest, message, deliveryMode, priority, timeToLive);
-  }
+                                }
 
   /**
    * Sends a message with default delivery parameters for an unidentified 
@@ -299,7 +303,7 @@ public class MessageProducer implements javax.jms.MessageProducer {
    */
   public synchronized void send(javax.jms.Destination dest,
                                 javax.jms.Message message) throws JMSException
-  {
+                                {
     if (identified)
       throw new UnsupportedOperationException("An unidentified message"
                                               + " producer can't use this"
@@ -311,7 +315,7 @@ public class MessageProducer implements javax.jms.MessageProducer {
                                               + " destination.");
 
     doSend((Destination) dest, message, deliveryMode, priority, timeToLive);
-  }
+                                }
 
   /**
    * Sends a message with given delivery parameters for an unidentified
@@ -330,7 +334,7 @@ public class MessageProducer implements javax.jms.MessageProducer {
                                 int deliveryMode, 
                                 int priority,
                                 long timeToLive) throws JMSException
-  {
+                                {
     if (identified)
       throw new UnsupportedOperationException("An unidentified message"
                                               + " producer can't use this"
@@ -342,7 +346,7 @@ public class MessageProducer implements javax.jms.MessageProducer {
                                               + " destination.");
 
     doSend((Destination) dest, message, deliveryMode, priority, timeToLive);
-  }
+                                }
 
   /**
    * Closes the message producer.
@@ -356,15 +360,15 @@ public class MessageProducer implements javax.jms.MessageProducer {
     if (closed)
       return;
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
-                                 + ": closing...");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "--- " + this + ": closing...");
 
     sess.closeProducer(this);
     closed = true;
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": closed.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ": closed.");
 
   }
 
@@ -382,10 +386,10 @@ public class MessageProducer implements javax.jms.MessageProducer {
                       int deliveryMode, 
                       int priority,
                       long timeToLive) 
-    throws JMSException {
+  throws JMSException {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
-    
+
     sess.send(dest, message, deliveryMode, priority, 
               timeToLive, timestampDisabled);
   }
