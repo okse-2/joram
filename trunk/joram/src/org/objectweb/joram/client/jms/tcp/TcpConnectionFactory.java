@@ -30,9 +30,11 @@ import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.client.jms.connection.RequestChannel;
 
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.Debug;
 
 /**
  * A <code>TcpConnectionFactory</code> instance is a factory of TCP connections.
@@ -40,6 +42,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
 public class TcpConnectionFactory extends ConnectionFactory {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+
+  private static Logger logger = Debug.getLogger(TcpConnectionFactory.class.getName());
 
   /**
    * Constructs an empty <code>TcpConnectionFactory</code> instance.
@@ -107,9 +111,9 @@ public class TcpConnectionFactory extends ConnectionFactory {
    * @param reliableClass  Reliable class name.
    */ 
   public static ConnectionFactory create(String host, int port, String reliableClass) {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, 
-                                 "TcpConnectionFactory.create(" + host + ',' + port + ',' + reliableClass +')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+                 "TcpConnectionFactory.create(" + host + ',' + port + ',' + reliableClass +')');
 
     TcpConnectionFactory cf = new TcpConnectionFactory(host, port);
     cf.setReliableClass(reliableClass);

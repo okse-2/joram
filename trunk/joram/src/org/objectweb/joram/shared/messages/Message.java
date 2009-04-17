@@ -34,12 +34,14 @@ import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.admin.AbstractAdminMessage;
 import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.joram.shared.stream.Streamable;
 import org.objectweb.joram.shared.util.Properties;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.Debug;
 
 /**
  * Implements the <code>Message</code> data structure.
@@ -47,6 +49,9 @@ import org.objectweb.util.monolog.api.BasicLevel;
 public final class Message implements Cloneable, Serializable, Streamable {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 2L;
+
+  /** logger */
+  public static Logger logger = Debug.getLogger(Message.class.getName());
 
   /**
    * Constructs a bright new <code>Message</code>.
@@ -299,8 +304,8 @@ public final class Message implements Cloneable, Serializable, Streamable {
         obj = ois.readObject(); 
       }
     } catch (Exception exc) {
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgProxy.log(BasicLevel.ERROR, "ERROR: getObject()", exc);
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "ERROR: getObject()", exc);
       // Don't forget to rethrow the Exception
       throw exc;
     } finally {
@@ -350,8 +355,8 @@ public final class Message implements Cloneable, Serializable, Streamable {
      bais = new ByteArrayInputStream(body);
      adminMsg = AbstractAdminMessage.read(bais);
     } catch (Exception e) {
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgProxy.log(BasicLevel.ERROR, "ERROR: getAdminMessage()", e);
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "ERROR: getAdminMessage()", e);
     }
     return adminMsg;
   }
@@ -496,16 +501,16 @@ public final class Message implements Cloneable, Serializable, Streamable {
                                    OutputStream os) throws IOException {
     if (messages == null) {
       StreamUtil.writeTo(-1, os);
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "writeVectorTo: -1");
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "writeVectorTo: -1");
     } else {
       int size = messages.size();
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "writeVectorTo: " + size);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "writeVectorTo: " + size);
       StreamUtil.writeTo(size, os);
       for (int i=0; i<size; i++) {
-        if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "writeVectorTo: msg#" + i);
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "writeVectorTo: msg#" + i);
         ((Message) messages.elementAt(i)).writeTo(os);
       }
     }
@@ -519,15 +524,15 @@ public final class Message implements Cloneable, Serializable, Streamable {
    */
   public static Vector readVectorFrom(InputStream is) throws IOException {
     int size = StreamUtil.readIntFrom(is);
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "readVectorFrom: " + size);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "readVectorFrom: " + size);
     if (size == -1) {
       return null;
     } else {
       Vector messages = new Vector(size);
       for (int i=0; i<size; i++) {
-        if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "readVectorFrom: msg#" + i);
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "readVectorFrom: msg#" + i);
         Message msg = new Message();
         msg.readFrom(is);
         messages.addElement(msg);

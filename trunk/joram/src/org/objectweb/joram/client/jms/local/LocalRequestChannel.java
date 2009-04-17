@@ -34,44 +34,47 @@ import org.objectweb.joram.mom.proxies.ConnectionManager;
 import org.objectweb.joram.mom.proxies.OpenConnectionNot;
 import org.objectweb.joram.mom.proxies.StandardConnectionContext;
 import org.objectweb.joram.mom.proxies.local.LocalConnections;
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.util.Debug;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 public class LocalRequestChannel implements RequestChannel, LocalRequestChannelMBean {
-  
+  /** logger */
+  public static Logger logger = Debug.getLogger(LocalRequestChannel.class.getName());
+
   private Identity identity;
 
   private AgentId proxyId;
 
   private StandardConnectionContext ctx;
-  
+
   private Date creationDate;
-  
+
   private long sentCount;
 
   private long receivedCount;
-  
+
   public LocalRequestChannel(Identity identity) throws JMSException {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                "LocalConnection.<init>(" + identity + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "LocalConnection.<init>(" + identity + ')');
     this.identity = identity;
   }
-  
+
   public void setTimer(Timer timer) {
     // Use of timer is useless
   }
-  
+
   public void connect() throws Exception {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "LocalConnection.connect()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "LocalConnection.connect()");
 
     if (!LocalConnections.getCurrentInstance().isActivated()) {
       throw new IllegalStateException("Local connections have been deactivated.");
@@ -80,16 +83,16 @@ public class LocalRequestChannel implements RequestChannel, LocalRequestChannelM
     if (AgentServer.getStatus() != AgentServer.Status.STARTED) {
       if ((AgentServer.getStatus() != AgentServer.Status.INITIALIZED) &&
           (AgentServer.getStatus() != AgentServer.Status.STOPPED)) {
-        if (JoramTracing.dbgProxy.isLoggable(BasicLevel.ERROR))
-          JoramTracing.dbgProxy.log(BasicLevel.ERROR,
-                                    "LocalConnection.connect(), server is not initialized: " + AgentServer.getStatusInfo() + '.');
+        if (logger.isLoggable(BasicLevel.ERROR))
+          logger.log(BasicLevel.ERROR,
+                     "LocalConnection.connect(), server is not initialized: " + AgentServer.getStatusInfo() + '.');
 
         throw new Exception();
       }
-      
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.WARN))
-        JoramTracing.dbgProxy.log(BasicLevel.WARN,
-                                  "LocalConnection.connect(), server is not started: " + AgentServer.getStatusInfo() + '.');
+
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN,
+                   "LocalConnection.connect(), server is not started: " + AgentServer.getStatusInfo() + '.');
     }
 
     GetProxyIdNot gpin = new GetProxyIdNot(identity, null);
@@ -97,8 +100,8 @@ public class LocalRequestChannel implements RequestChannel, LocalRequestChannelM
       gpin.invoke(AdminTopic.getDefault());
       proxyId = gpin.getProxyId();
     } catch (Exception exc) {
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "", exc);
       throw new JMSException(exc.getMessage());
     }
 
@@ -108,8 +111,8 @@ public class LocalRequestChannel implements RequestChannel, LocalRequestChannelM
       ctx = (StandardConnectionContext) ocn.getConnectionContext();
       creationDate = new Date();
     } catch (Exception exc) {
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "", exc);
       JMSException jmse = new JMSException(exc.getMessage());
       jmse.setLinkedException(exc);
       throw jmse;
@@ -119,7 +122,7 @@ public class LocalRequestChannel implements RequestChannel, LocalRequestChannelM
     try {
       MXWrapper.registerMBean(this, "Joram#" + AgentServer.getServerId(), getMBeanName());
     } catch (Exception e) {
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "registerMBean", e);
+      logger.log(BasicLevel.DEBUG, "registerMBean", e);
     }
   }
 
@@ -128,8 +131,8 @@ public class LocalRequestChannel implements RequestChannel, LocalRequestChannelM
   }
 
   public void send(AbstractJmsRequest request) throws Exception {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "LocalConnection.send(" + request + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "LocalConnection.send(" + request + ')');
     ConnectionManager.sendToProxy(proxyId, ctx.getKey(), request, request);
     sentCount++;
   }
@@ -147,7 +150,7 @@ public class LocalRequestChannel implements RequestChannel, LocalRequestChannelM
     try {
       MXWrapper.unregisterMBean("Joram#" + AgentServer.getServerId(), getMBeanName());
     } catch (Exception e) {
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "unregisterMBean", e);
+      logger.log(BasicLevel.DEBUG, "unregisterMBean", e);
     }
   }
 

@@ -38,7 +38,6 @@ import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 
 import org.objectweb.joram.client.jms.FactoryParameters;
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.client.AbstractJmsMessage;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.shared.stream.MetaData;
@@ -58,8 +57,7 @@ public class ReliableTcpClient {
   public static final int CONNECT = 1;
   public static final int CLOSE = 2;
 
-  public static final String[] statusNames =
-  {"INIT", "CONNECT", "CLOSE"};
+  public static final String[] statusNames = {"INIT", "CONNECT", "CLOSE"};
 
   protected FactoryParameters params;
 
@@ -234,10 +232,10 @@ public class ReliableTcpClient {
 
     int outLocalPort = params.outLocalPort;
     
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                 "ReliableTcpClient[" + identity + ',' + key + "].createSocket(" + hostname + "," + port
-          + ") on interface " + outLocalAddrStr + ":" + outLocalPort);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "ReliableTcpClient[" + identity + ',' + key + "].createSocket(" +
+                 hostname + "," + port + ") on interface " + outLocalAddrStr + ":" + outLocalPort);
 
     SocketFactory factory = SocketFactory.getFactory(params.socketFactory);
     Socket socket = factory.createSocket(addr, port,
@@ -248,9 +246,9 @@ public class ReliableTcpClient {
   }
 
   private void doConnect(String hostname, int port) throws Exception, JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                 "ReliableTcpClient[" + identity + ',' + key + "].doConnect(" + hostname + "," + port + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "ReliableTcpClient[" + identity + ',' + key + "].doConnect(" + hostname + "," + port + ")");
     Socket socket = createSocket(hostname, port);
 
     socket.setTcpNoDelay(params.TcpNoDelay);

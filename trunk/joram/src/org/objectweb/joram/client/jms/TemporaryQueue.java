@@ -29,7 +29,6 @@ import javax.jms.JMSSecurityException;
 import org.objectweb.joram.shared.client.TempDestDeleteRequest;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.joram.shared.JoramTracing;
 
 /**
  * Implements the <code>javax.jms.TemporaryQueue</code> interface.
@@ -37,7 +36,7 @@ import org.objectweb.joram.shared.JoramTracing;
 public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
-  
+
   private final static String TMP_QUEUE_TYPE = "queue.tmp";
 
   public static boolean isTemporaryQueue(String type) {
@@ -78,9 +77,8 @@ public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue {
       throw new JMSSecurityException("Forbidden call as this TemporaryQueue"
                                      + " does not belong to this connection.");
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "--- " + this
-                                 + ": deleting...");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "--- " + this + ": deleting...");
 
     // Checking the connection's receivers:
     cnx.checkConsumers(agentId);
@@ -88,8 +86,8 @@ public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue {
     // Sending the request to the server:
     cnx.syncRequest(new TempDestDeleteRequest(agentId));
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": deleted.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ": deleted.");
   }
 
   /**

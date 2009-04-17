@@ -35,12 +35,15 @@ import org.objectweb.joram.mom.dest.AdminTopic;
 import org.objectweb.joram.client.jms.connection.RequestChannel;
 
 import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.util.Debug;
 
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 public class HALocalRequestChannel implements RequestChannel {
-  
+  /** logger */
+  public static Logger logger = Debug.getLogger(HALocalRequestChannel.class.getName());
+
   public final static int NONE = 0;
   public final static int INIT = 1;
   public final static int RUN = 2;
@@ -48,11 +51,11 @@ public class HALocalRequestChannel implements RequestChannel {
   private static Object lock = new Object();
 
   private static int status;
-  
+
   public static void init(String args, boolean firstTime) throws Exception {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                "HALocalConnection.init(" + args + ',' + firstTime + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "HALocalConnection.init(" + args + ',' + firstTime + ')');
 
     synchronized (lock) {
       status = INIT;
@@ -61,17 +64,16 @@ public class HALocalRequestChannel implements RequestChannel {
   }
 
   public static void waitForStart() {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                "HALocalConnection.waitForStart()");
-    
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "HALocalConnection.waitForStart()");
+
     synchronized (lock) {
       while (status == NONE) {
         try {
           lock.wait();
         } catch (InterruptedException exc) {}
       }
-     
+
       if (status == INIT) {
         // Clean the proxies
         GetProxyIdListNot gpin = new GetProxyIdListNot();
@@ -80,13 +82,13 @@ public class HALocalRequestChannel implements RequestChannel {
           gpin.invoke(AdminTopic.getDefault());
           proxyIds = gpin.getIds();
           ResetCollocatedConnectionsNot rccn = 
-          new ResetCollocatedConnectionsNot();
+            new ResetCollocatedConnectionsNot();
           for (int i = 0; i < proxyIds.length; i++) {
             Channel.sendTo(proxyIds[i], rccn);
           }
           status = RUN;
         } catch (Exception exc) {
-          JoramTracing.dbgClient.log(BasicLevel.ERROR, "", exc);
+          logger.log(BasicLevel.ERROR, "", exc);
           throw new Error(exc.toString());
         }
       }
@@ -94,41 +96,38 @@ public class HALocalRequestChannel implements RequestChannel {
   }
 
   private Identity identity;
-  
+
   private LocalRequestChannel localRequestChannel;
 
   public HALocalRequestChannel(Identity identity) throws JMSException {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
-        BasicLevel.DEBUG,
-        "HALocalConnection.<init>(" + identity + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "HALocalConnection.<init>(" + identity + ')');
     waitForStart();
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
-        BasicLevel.DEBUG,
-        " -> create the local connection");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, " -> create the local connection");
     this.identity = identity;
   }
-  
+
   public void setTimer(Timer timer) {
     // No timer is useful
   }
-  
+
   public void connect() throws Exception {
     localRequestChannel = new LocalRequestChannel(identity);
     localRequestChannel.connect();
   }
-  
+
   public void send(AbstractJmsRequest request) 
-    throws Exception {
+  throws Exception {
     localRequestChannel.send(request);
   }
 
   public AbstractJmsReply receive() 
-    throws Exception {
+  throws Exception {
     return localRequestChannel.receive();
   }
-  
+
   public void close() {
     localRequestChannel.close();
   }

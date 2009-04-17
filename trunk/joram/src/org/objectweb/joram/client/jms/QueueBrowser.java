@@ -33,11 +33,13 @@ import javax.jms.InvalidSelectorException;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.client.QBrowseReply;
 import org.objectweb.joram.shared.client.QBrowseRequest;
 import org.objectweb.joram.shared.selectors.ClientSelector;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.Debug;
 
 /**
  * Implements the <code>javax.jms.QueueBrowser</code> interface.
@@ -54,6 +56,8 @@ public class QueueBrowser implements javax.jms.QueueBrowser {
 
   /** <code>true</code> if the browser is closed. */
   private boolean closed = false;
+
+  private static Logger logger = Debug.getLogger(QueueBrowser.class.getName());
 
   /**
    * Constructs a browser.
@@ -80,8 +84,8 @@ public class QueueBrowser implements javax.jms.QueueBrowser {
     this.queue = queue;
     this.selector = selector;
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + ": created.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ": created.");
   }
 
   /** Returns a string view of this browser. */
@@ -123,9 +127,9 @@ public class QueueBrowser implements javax.jms.QueueBrowser {
    * @exception JMSException  If the request fails for any other reason.
    */
   public synchronized Enumeration getEnumeration() throws JMSException {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                 this + ": requests an enumeration.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 this + ": requests an enumeration.");
 
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed browser.");
@@ -135,9 +139,9 @@ public class QueueBrowser implements javax.jms.QueueBrowser {
     // Expecting an answer:
     QBrowseReply reply = (QBrowseReply) sess.syncRequest(browReq);
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                 this + ": received an enumeration.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 this + ": received an enumeration.");
 
     // Return an enumeration:
     return new QueueEnumeration(reply.getMessages());
@@ -156,8 +160,8 @@ public class QueueBrowser implements javax.jms.QueueBrowser {
     sess.closeBrowser(this);
     closed = true;
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, this + " closed.");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + " closed.");
   }
 
   /**
@@ -195,8 +199,8 @@ public class QueueBrowser implements javax.jms.QueueBrowser {
         msg = (org.objectweb.joram.shared.messages.Message) messages.remove(0);
         jmsMsg = Message.wrapMomMessage(null, msg);
       } catch (JMSException exc) {
-        JoramTracing.dbgClient.log(BasicLevel.ERROR,
-                                   this + ", bad message: " + msg, exc);
+        logger.log(BasicLevel.ERROR,
+                   this + ", bad message: " + msg, exc);
       }
       return jmsMsg;
     }

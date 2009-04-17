@@ -35,8 +35,10 @@ import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.security.Identity;
 
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.Debug;
 
 /**
  * A <code>TcpConnection</code> links a Joram client and a Joram platform
@@ -45,6 +47,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * Requests and replies travel through the socket after serialization.
  */
 public class TcpRequestChannel implements RequestChannel { 
+
+  private static Logger logger = Debug.getLogger(TcpRequestChannel.class.getName());
 
   private ReliableTcpClient tcpClient = null;
 
@@ -76,9 +80,9 @@ public class TcpRequestChannel implements RequestChannel {
                            Identity identity,
                            String reliableClass) throws JMSException {
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG, 
-                                 "TcpConnection.<init>(" + params + ',' + identity + ',' + reliableClass +')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+                 "TcpConnection.<init>(" + params + ',' + identity + ',' + reliableClass +')');
 
     if (reliableClass == null || reliableClass.equals("") || reliableClass.length() < 1) {
       reliableClass = "org.objectweb.joram.client.jms.tcp.ReliableTcpClient";

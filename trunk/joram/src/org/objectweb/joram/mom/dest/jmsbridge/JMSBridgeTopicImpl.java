@@ -35,14 +35,11 @@ import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.SubscribeRequest;
 import org.objectweb.joram.mom.notifications.UnsubscribeRequest;
 import org.objectweb.joram.mom.util.DMQManager;
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.Debug;
 import fr.dyade.aaa.agent.DeleteNot;
 
 /**
@@ -57,9 +54,6 @@ import fr.dyade.aaa.agent.DeleteNot;
 public class JMSBridgeTopicImpl extends TopicImpl {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
-
-  /** logger */
-  public static Logger logger = Debug.getLogger(JMSBridgeTopicImpl.class.getName());
 
   /** The JMS module for accessing the foreign JMS destination. */
   private JMSBridgeModule jmsModule;
@@ -89,7 +83,7 @@ public class JMSBridgeTopicImpl extends TopicImpl {
     // creates the table for outgoing messages.
     jmsModule = new JMSBridgeModule(prop);
   }
-  
+
   /**
    * Initializes the destination.
    * 
@@ -98,7 +92,7 @@ public class JMSBridgeTopicImpl extends TopicImpl {
   public void initialize(boolean firstTime) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "initialize(" + firstTime + ')');
-    
+
     // initialize the destination
     super.initialize(firstTime);
 
@@ -118,14 +112,14 @@ public class JMSBridgeTopicImpl extends TopicImpl {
       Message currentMsg;
       for (Enumeration keys = outTable.keys(); keys.hasMoreElements();) {
         momMsg = (Message) outTable.get(keys.nextElement());
-  
+
         int i = 0;
         while (i < outMessages.size()) {
           currentMsg = (Message) outMessages.get(i);
-  
+
           if (momMsg.order < currentMsg.order)
             break;
-  
+
           i++;
         }
         outMessages.insertElementAt(momMsg, i);
@@ -136,8 +130,8 @@ public class JMSBridgeTopicImpl extends TopicImpl {
         jmsModule.send(momMsg.getFullMessage());
       }
     } catch (Exception exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgDestination.log(BasicLevel.ERROR, "", exc);
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "", exc);
     }
   }
 
@@ -162,7 +156,7 @@ public class JMSBridgeTopicImpl extends TopicImpl {
   public void bridgeAckNot(JMSBridgeAckNot not) {
     outTable.remove(not.getIdentifier());
   }
-  
+
   /**
    * Method specializing the reaction to a <code>SubscribeRequest</code>
    * instance.
@@ -178,9 +172,9 @@ public class JMSBridgeTopicImpl extends TopicImpl {
       if (subscribers.size() == 1) 
         jmsModule.setMessageListener();
     } catch (Exception exc) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgDestination.log(BasicLevel.ERROR,
-                                        "Failing subscribe request on remote destination: ", exc);
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR,
+                   "Failing subscribe request on remote destination: ", exc);
     }
   }
 
@@ -210,7 +204,7 @@ public class JMSBridgeTopicImpl extends TopicImpl {
     // If the forward comes from a son, forwarding it to the father, if any.
     if (not.toFather && fatherId != null)
       forward(fatherId, not);
-    
+
     // Sending the received messages to the foreign JMS destination:
     Message message;
     DMQManager dmqManager = null;
@@ -247,7 +241,7 @@ public class JMSBridgeTopicImpl extends TopicImpl {
   public ClientMessages preProcess(AgentId from, ClientMessages not) {
     if (getId().equals(from))
       return not;
-    
+
     // Forwarding the messages to the father or the cluster fellows, if any:
     forwardMessages(not);
 

@@ -34,12 +34,15 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.Debug;
 
 public class ReliableSSLTcpClient extends ReliableTcpClient {
 
-  private final static String CIPHER = "org.objectweb.joram.cipherList";
+  private static Logger logger = Debug.getLogger(ReliableSSLTcpClient.class.getName());
+
   private final static String KS = "org.objectweb.joram.keystore";
   private final static String KS_PASS = "org.objectweb.joram.keystorepass";
   private final static String KS_TYPE = "org.objectweb.joram.keystoretype";
@@ -57,23 +60,21 @@ public class ReliableSSLTcpClient extends ReliableTcpClient {
 
     int outLocalPort = params.outLocalPort;
     
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                 "ReliableSSLTcpClient[" + identity + ',' + key + "].createSocket(" + hostname + "," + port
-          + ") on interface " + outLocalAddrStr + ":" + outLocalPort);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "ReliableSSLTcpClient[" + identity + ',' + key + "].createSocket(" +
+                 hostname + "," + port + ") on interface " + outLocalAddrStr + ":" + outLocalPort);
 
     SocketFactory socketFactory = createSocketFactory();
     // AF: Be careful SSLSocketFactory don't allow to use ConnectTimeout
-    Socket socket =  socketFactory.createSocket(hostname, port,
-                                                outLocalAddr, outLocalPort);
+    Socket socket =  socketFactory.createSocket(hostname, port, outLocalAddr, outLocalPort);
 
     return socket;
   }
 
   private static SocketFactory createSocketFactory() throws Exception {
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                 "ReliableSSLTcpClient.createSocketFactory()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "ReliableSSLTcpClient.createSocketFactory()");
 
     // AF: TODO these parameters should be in FactoryParameters
     char[] keyStorePass =  System.getProperty(KS_PASS,"jorampass").toCharArray();
@@ -81,9 +82,9 @@ public class ReliableSSLTcpClient extends ReliableTcpClient {
     String sslContext = System.getProperty(SSLCONTEXT,"SSL");
     String ksType = System.getProperty(KS_TYPE,"JKS");
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                 "SSLTcpProxyService.createSocketFactory : keystoreFile=" + keystoreFile);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "SSLTcpProxyService.createSocketFactory : keystoreFile=" + keystoreFile);
     
     KeyStore keystore = KeyStore.getInstance(ksType);
     keystore.load(new FileInputStream(keystoreFile),keyStorePass);

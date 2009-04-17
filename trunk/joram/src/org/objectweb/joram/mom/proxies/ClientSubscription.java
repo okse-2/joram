@@ -37,7 +37,6 @@ import org.objectweb.joram.mom.dest.QueueImpl;
 import org.objectweb.joram.mom.messages.Message;
 import org.objectweb.joram.mom.messages.MessageJMXWrapper;
 import org.objectweb.joram.mom.util.DMQManager;
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.client.ConsumerMessages;
 import org.objectweb.joram.shared.selectors.Selector;
@@ -53,9 +52,7 @@ import fr.dyade.aaa.util.Debug;
  * of the messages.
  */
 class ClientSubscription implements ClientSubscriptionMBean, Serializable {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   
   public static Logger logger = Debug.getLogger(ClientSubscription.class.getName());
@@ -539,8 +536,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
 
      // Returning null if a "receive" request has expired:
     if (!toListener && requestExpTime > 0 && System.currentTimeMillis() >= requestExpTime) {
-      if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgDestination.log(BasicLevel.DEBUG, this + ": receive request " + requestId
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, this + ": receive request " + requestId
             + " expired.");
       requestId = -1;
       requestExpTime = 0;

@@ -31,7 +31,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 
 import org.objectweb.joram.mom.notifications.WakeUpNot;
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.CnxCloseRequest;
@@ -41,6 +40,7 @@ import org.objectweb.joram.shared.client.ProducerMessages;
 import org.objectweb.joram.shared.client.ServerReply;
 import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
@@ -49,6 +49,7 @@ import fr.dyade.aaa.agent.BagSerializer;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownNotificationException;
 import fr.dyade.aaa.agent.WakeUpTask;
+import fr.dyade.aaa.util.Debug;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /** 
@@ -57,6 +58,9 @@ import fr.dyade.aaa.util.management.MXWrapper;
 public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+
+  /** logger */
+  public static Logger logger = Debug.getLogger(UserAgent.class.getName());
 
   /**
    * All the user requests are delegated to the proxy
@@ -106,18 +110,18 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
 
   /** (Re)initializes the agent when (re)loading. */
   public void agentInitialize(boolean firstTime) throws Exception {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                "UserAgent.agentInitialize(" +  firstTime + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "UserAgent.agentInitialize(" +  firstTime + ')');
 
     super.agentInitialize(firstTime);
     proxyImpl.initialize(firstTime);
     cleaningTask = new WakeUpTask(getId(), WakeUpNot.class);
     cleaningTask.schedule(proxyImpl.getPeriod());
     try {
-    MXWrapper.registerMBean(proxyImpl, "Joram#"+AgentServer.getServerId(), getMBeanName());
+      MXWrapper.registerMBean(proxyImpl, "Joram#"+AgentServer.getServerId(), getMBeanName());
     } catch (Exception exc) {
-      JoramTracing.dbgProxy.log(BasicLevel.ERROR, this + " jmx failed", exc);
+      logger.log(BasicLevel.ERROR, this + " jmx failed", exc);
     }
   }
 
@@ -126,15 +130,15 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
     try {
       MXWrapper.unregisterMBean("Joram#"+AgentServer.getServerId(), getMBeanName());
     } catch (Exception exc) {
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "", exc);
     }
     super.agentFinalize(lastTime);
   }
 
   private String getMBeanName() {
     return new StringBuffer().append("type=User").append(",name=").append(
-        (name == nullName) ? getId().toString() : name).toString();
+                                                                          (name == nullName) ? getId().toString() : name).toString();
   }
 
   /**
@@ -147,9 +151,9 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
    * </ul>
    */
   public void react(AgentId from, Notification not) throws Exception {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                "UserAgent.react(" + from + ',' + not + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "UserAgent.react(" + from + ',' + not + ')');
 
     // set agent no save:
     // the default behavior is transient
@@ -177,9 +181,8 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
       try {
         proxyImpl.cleanPendingMessages(System.currentTimeMillis());
       } catch (Exception exc) {
-        if (JoramTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
-          JoramTracing.dbgDestination.log(BasicLevel.ERROR,
-                                          "--- " + this + " Proxy(...)", exc);
+        if (logger.isLoggable(BasicLevel.ERROR))
+          logger.log(BasicLevel.ERROR, "--- " + this + " Proxy(...)", exc);
       }
 
       if (cleaningTask == null)
@@ -212,18 +215,18 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
     ConnectionContext ctx;
     if (not.getReliable()) {
       ctx = new ReliableConnectionContext(
-          proxyImpl, keyCounter,
-          not.getHeartBeat());
+                                          proxyImpl, keyCounter,
+                                          not.getHeartBeat());
       connections.put(objKey, ctx);
     } else {
       ctx = new StandardConnectionContext(
-          proxyImpl, keyCounter);
+                                          proxyImpl, keyCounter);
       connections.put(objKey, ctx);
     }
 
     if (not.getHeartBeat() > 0) {
       HeartBeatTask heartBeatTask = new HeartBeatTask(2 * not.getHeartBeat(),
-          objKey);
+                                                      objKey);
       heartBeatTasks.put(objKey, heartBeatTask);
       heartBeatTask.start();
     }
@@ -249,7 +252,7 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
     } else {
       Integer objKey = new Integer(key);
       ReliableConnectionContext ctx = (ReliableConnectionContext) connections
-          .get(objKey);
+      .get(objKey);
       if (ctx == null) {
         not.Throw(new Exception("Connection " + key + " not found"));
       } else {
@@ -267,10 +270,10 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
         if (heartBeatTask != null) {
           heartBeatTask.touch();
         }
-        
+
         AbstractJmsRequest request = ctx.getRequest(not.getMessage());  
         proxyImpl.reactToClientRequest(key.intValue(), request);
-        
+
         if (ctx.isClosed()) {
           //CnxCloseRequest request = (CnxCloseRequest) not.getMessage();
           connections.remove(key);
@@ -286,7 +289,7 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
     // - RequestNot always follows an OpenConnection or
     // a GetConnection
   }
-  
+
   private void doReact(ProxyRequestGroupNot not) {
     RequestNot[] requests = not.getRequests();
     RequestBuffer rm = new RequestBuffer(this);
@@ -349,7 +352,7 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
         if (obj instanceof StandardConnectionContext) {
           ConnectionContext cc = (ConnectionContext) obj;
           proxyImpl.reactToClientRequest(
-              cc.getKey(), new CnxCloseRequest());
+                                         cc.getKey(), new CnxCloseRequest());
           iterator.remove();
         }
       }
@@ -370,18 +373,18 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
    * @param not
    */
   private void doReact(SendReplyNot not) {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "UserAgent.doReact(" + not + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "UserAgent.doReact(" + not + ')');
     ClientContext cc = proxyImpl.getClientContext(not.getKey());
     if (cc != null) {
       if (cc.setReply(not.getRequestId()) == 0) {
         sendToClient(not.getKey(), new ServerReply(not.getRequestId()));
       }
-    } else if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG)) {
+    } else if (logger.isLoggable(BasicLevel.DEBUG)) {
       // Can happen if the connection is closed before the SendReplyNot
       // arrives.
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                "UserAgent: unknown client context for " + not);
+      logger.log(BasicLevel.DEBUG,
+                 "UserAgent: unknown client context for " + not);
     }
   }
 
@@ -392,9 +395,9 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
    * @param not the notification to send
    */
   public void sendNot(AgentId to, Notification not) {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                "UserAgent.sendNot(" + to + ',' + not + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "UserAgent.sendNot(" + to + ',' + not + ')');
     sendTo(to, not);
   }
 
@@ -407,9 +410,9 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
    * @param reply the reply to send to the client.
    */
   public void sendToClient(int key, AbstractJmsReply reply) {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, 
-                                "UserAgent.sendToClient(" + key + ',' + reply + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+                 "UserAgent.sendToClient(" + key + ',' + reply + ')');
     Integer objKey = new Integer(key);
     if (connections != null) {
       ConnectionContext ctx = (ConnectionContext)connections.get(objKey);
@@ -425,7 +428,7 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
    * it has not sent any requests for the duration 'timeout'.
    */
   class HeartBeatTask extends fr.dyade.aaa.util.TimerTask implements
-      java.io.Serializable {
+  java.io.Serializable {
     /**
      * 
      */
@@ -445,9 +448,8 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
     public void run() {
       long date = System.currentTimeMillis();
       if ((date - lastRequestDate) > timeout) {
-        if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-          JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                    "HeartBeatTask: close connection");
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "HeartBeatTask: close connection");
         ConnectionContext ctx = (ConnectionContext) connections.remove(key);
         heartBeatTasks.remove(key);
         proxyImpl.reactToClientRequest(key.intValue(), new CnxCloseRequest());
@@ -473,21 +475,21 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
   }
 
   public void setNoSave() {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "setNoSave()");
-    
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "setNoSave()");
+
     super.setNoSave();
   }
 
   public void setSave() {
-   if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "UserAgent.setSave()");
-    
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "UserAgent.setSave()");
+
     super.setSave();
   }
 
   public void readBag(ObjectInputStream in) throws IOException,
-      ClassNotFoundException {
+  ClassNotFoundException {
     connections = (Hashtable) in.readObject();
     heartBeatTasks = (Hashtable) in.readObject();
 

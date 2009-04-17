@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -27,11 +27,12 @@ import java.io.IOException;
 
 import org.objectweb.joram.mom.proxies.AckedQueue;
 import org.objectweb.joram.mom.proxies.ProxyMessage;
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.client.MomExceptionReply;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.Daemon;
+import fr.dyade.aaa.util.Debug;
 
 /**
  * The activity responsible for getting the replies
@@ -39,6 +40,9 @@ import fr.dyade.aaa.util.Daemon;
  * socket. 
  */
 public class TcpWriter extends Daemon {
+  /** logger */
+  public static Logger logger = Debug.getLogger(TcpWriter.class.getName());
+
   /**
    * The TCP connection that started this writer.
    */
@@ -57,9 +61,9 @@ public class TcpWriter extends Daemon {
    * @param tcpConnection the TCP connection
    */
   public TcpWriter(IOControl ioctrl,
-		   AckedQueue replyQueue,
+                   AckedQueue replyQueue,
                    TcpConnection tcpConnection) 
-    throws IOException {
+  throws IOException {
     super("tcpWriter");
     this.ioctrl = ioctrl;
     this.replyQueue = replyQueue;
@@ -68,8 +72,8 @@ public class TcpWriter extends Daemon {
   }
 
   public void run() {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,  "TcpWriter.run()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,  "TcpWriter.run()");
     try {
       while (running) {
         ProxyMessage msg = replyQueue.get();
@@ -79,10 +83,10 @@ public class TcpWriter extends Daemon {
           // has been closed by the heart beat task.
           // (see UserAgent)
           new Thread(new Runnable() {
-              public void run() {            
-                tcpConnection.close();
-              }
-            }).start();
+            public void run() {            
+              tcpConnection.close();
+            }
+          }).start();
         } else {
           ioctrl.send(msg);
           // No queue.pop() !
@@ -90,21 +94,19 @@ public class TcpWriter extends Daemon {
         }
       }
     } catch (Exception exc) {
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-        JoramTracing.dbgProxy.log(
-          BasicLevel.DEBUG, "", exc);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "", exc);
     }
   }
 
   protected void shutdown() {
     close();
   }
-    
+
   protected void close() {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
-        BasicLevel.DEBUG, 
-        "TcpWriter.close()", new Exception());
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, 
+                 "TcpWriter.close()", new Exception());
     if (ioctrl != null)
       ioctrl.close();
     ioctrl = null;

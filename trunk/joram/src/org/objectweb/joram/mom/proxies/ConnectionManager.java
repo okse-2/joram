@@ -29,16 +29,17 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.objectweb.joram.mom.dest.AdminTopic;
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.JmsRequestGroup;
 import org.objectweb.joram.shared.client.ProducerMessages;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.util.Debug;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
@@ -46,7 +47,9 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * MOM agent server for allowing connections with external clients.
  */
 public class ConnectionManager implements ConnectionManagerMBean {
-  
+  /** logger */
+  public static Logger logger = Debug.getLogger(ConnectionManager.class.getName());
+
   public static final String MULTI_CNX_SYNC = 
     "org.objectweb.joram.mom.proxies.ConnectionManager.multiCnxSync";
   
@@ -123,9 +126,9 @@ public class ConnectionManager implements ConnectionManagerMBean {
    */
   public static void init(String args, boolean firstTime) 
     throws Exception {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                "ConnectionManager.init(" + args + ',' + firstTime + ')');    
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "ConnectionManager.init(" + args + ',' + firstTime + ')');
     if (! firstTime) return;
 
     AdminTopic adminTopic = new AdminTopic();
@@ -171,7 +174,7 @@ public class ConnectionManager implements ConnectionManagerMBean {
       try {
         MXWrapper.registerMBean(getCurrentInstance(), "Joram#" + AgentServer.getServerId(), MBEAN_NAME);
       } catch (Exception e) {
-        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "registerMBean", e);
+        logger.log(BasicLevel.DEBUG, "registerMBean", e);
       }
     }
   }
@@ -198,8 +201,8 @@ public class ConnectionManager implements ConnectionManagerMBean {
       else
         identity.setUserName(adminName);
     } catch (Exception e) {
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgProxy.log(BasicLevel.ERROR, "EXCEPTION:: ConnectionManager.createIdentity: ", e);
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "EXCEPTION:: ConnectionManager.createIdentity: ", e);
       throw new Exception(e.getMessage());
     }
     return identity;
@@ -209,12 +212,12 @@ public class ConnectionManager implements ConnectionManagerMBean {
    * Stops the <code>ConnectionManager</code> service.
    */ 
   public static void stopService() {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "ConnectionManager.stop()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "ConnectionManager.stop()");
     try {
       MXWrapper.unregisterMBean("Joram#" + AgentServer.getServerId(), MBEAN_NAME);
     } catch (Exception e) {
-      JoramTracing.dbgProxy.log(BasicLevel.ERROR, "unregisterMBean", e);
+      logger.log(BasicLevel.ERROR, "unregisterMBean", e);
     }
     getCurrentInstance().removeAllManagers();
   }
@@ -270,7 +273,7 @@ public class ConnectionManager implements ConnectionManagerMBean {
     try {
       MXWrapper.registerMBean(manager, "Joram#" + AgentServer.getServerId(), manager.getMBeanName());
     } catch (Exception e) {
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "registerMBean", e);
+      logger.log(BasicLevel.DEBUG, "registerMBean", e);
     }
   }
 
@@ -283,14 +286,13 @@ public class ConnectionManager implements ConnectionManagerMBean {
       try {
         MXWrapper.unregisterMBean("Joram#" + AgentServer.getServerId(), manager.getMBeanName());
       } catch (Exception e) {
-        JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "unregisterMBean", e);
+        logger.log(BasicLevel.DEBUG, "unregisterMBean", e);
       }
     }
   }
   
   private void removeAllManagers() {
-    ConnectionManagerMBean[] array = (ConnectionManagerMBean[]) managers
-        .toArray(new ConnectionManagerMBean[managers.size()]);
+    ConnectionManagerMBean[] array = (ConnectionManagerMBean[]) managers.toArray(new ConnectionManagerMBean[managers.size()]);
     for (int i = 0; i < array.length; i++) {
       removeManager(array[i]);
     }

@@ -28,7 +28,9 @@ import javax.transaction.xa.XAException;
 import javax.transaction.xa.Xid;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.Debug;
 
 /**
  * A <code>XAResource</code> instance is used by a <code>XASession</code> 
@@ -45,7 +47,9 @@ public class XAResource implements javax.transaction.xa.XAResource {
 
   /** The session producing and consuming messages. */
   Session sess;
- 
+
+  private static Logger logger = Debug.getLogger(XAResource.class.getName());
+
   /**
    * Constructs an XA resource representing a given session.
    */
@@ -53,9 +57,9 @@ public class XAResource implements javax.transaction.xa.XAResource {
     this.rm = rm;
     this.sess = sess;
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                 " XAResource rm = " + rm + ", sess = " + sess);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 " XAResource rm = " + rm + ", sess = " + sess);
   }
 
   /**
@@ -66,14 +70,14 @@ public class XAResource implements javax.transaction.xa.XAResource {
    *                         resource.
    */
   public void start(Xid xid, int flag) 
-    throws XAException {
+  throws XAException {
     if (enlisted)
       throw new XAException("Resource already enlisted.");
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                 this + ": start(" + xid + 
-                                 ", " + flag + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 this + ": start(" + xid + 
+                 ", " + flag + ")");
 
     rm.start(xid, flag, sess);
 
@@ -89,15 +93,15 @@ public class XAResource implements javax.transaction.xa.XAResource {
    *                         resource.
    */
   public void end(Xid xid, int flag)
-    throws XAException {
+  throws XAException {
     if (! enlisted || ! xid.equals(currentXid))
       throw new XAException("Resource is not enlisted in specified"
                             + " transaction.");
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                 this + ": end(" + xid + 
-                                 ", " + flag + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 this + ": end(" + xid + 
+                 ", " + flag + ")");
 
     rm.end(xid, flag, sess);
 
@@ -111,11 +115,11 @@ public class XAResource implements javax.transaction.xa.XAResource {
    * @exception XAException  If the RM fails to prepare the resource.
    */
   public int prepare(Xid xid) 
-    throws XAException {
+  throws XAException {
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                 this + ": prepare(" + xid + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 this + ": prepare(" + xid + ")");
     rm.prepare(xid);
     return XA_OK;
   }
@@ -126,12 +130,12 @@ public class XAResource implements javax.transaction.xa.XAResource {
    * @exception XAException  If the RM fails to commit the resource.
    */
   public void commit(Xid xid, boolean onePhase) 
-    throws XAException {
+  throws XAException {
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                 this + ": commit(" + xid + 
-                                 ", " + onePhase + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 this + ": commit(" + xid + 
+                 ", " + onePhase + ")");
 
     if (onePhase)
       rm.prepare(xid);
@@ -145,11 +149,11 @@ public class XAResource implements javax.transaction.xa.XAResource {
    * @exception XAException  If the RM fails to roll the resource back.
    */
   public void rollback(Xid xid) 
-    throws XAException {
+  throws XAException {
 
-    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                 this + ": rollback(" + xid + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 this + ": rollback(" + xid + ")");
 
     if (enlisted && currentXid.equals(xid)) {
       rm.end(xid, javax.transaction.xa.XAResource.TMFAIL, sess);
@@ -206,18 +210,18 @@ public class XAResource implements javax.transaction.xa.XAResource {
    * @exception XAException  Never thrown.
    */
   public boolean isSameRM(javax.transaction.xa.XAResource o)
-    throws XAException {
+  throws XAException {
 
     if (! (o instanceof org.objectweb.joram.client.jms.XAResource))
       return false;
 
     XAResource other = (org.objectweb.joram.client.jms.XAResource) o;
 
-   if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
-                                 this + ": isSameRM  other.rm = " + other.rm + 
-                                 ", this.rm = " + this.rm +
-                                 ", equals = " + this.rm.equals(other.rm));
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 this + ": isSameRM  other.rm = " + other.rm + 
+                 ", this.rm = " + this.rm +
+                 ", equals = " + this.rm.equals(other.rm));
 
     return this.rm.equals(other.rm);
   }

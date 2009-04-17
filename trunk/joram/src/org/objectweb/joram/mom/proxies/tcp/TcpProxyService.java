@@ -31,16 +31,20 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.objectweb.joram.mom.proxies.ConnectionManager;
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.util.Debug;
 
 /**
  * Starts a TCP entry point for MOM clients.
  */
 public class TcpProxyService implements TcpProxyServiceMBean {
+  /** logger */
+  public static Logger logger = Debug.getLogger(TcpProxyService.class.getName());
+
   /**
    * Name the property that allow to fix the TCP SO_TIMEOUT property for the
    * client's connections.
@@ -90,16 +94,16 @@ public class TcpProxyService implements TcpProxyServiceMBean {
    * The proxy service reference (used to stop it).
    */
   private static TcpProxyService proxyService;
-  
+
   int port;
   int backlog;
   String address;
-  
+
   /**
    * The server socket listening to connections from the JMS clients.
    */
   private ServerSocket serverSocket = null;
-  
+
   /**
    * Gets the listening socket.
    * 
@@ -114,13 +118,13 @@ public class TcpProxyService implements TcpProxyServiceMBean {
    */
   protected void resetServerSocket() {
     if (serverSocket == null) return;
-    
+
     try {
       serverSocket.close();
     } catch (IOException exc) {}
     serverSocket = null;
   }
-  
+
   /**
    * Initialize the listening socket.
    *  
@@ -150,9 +154,9 @@ public class TcpProxyService implements TcpProxyServiceMBean {
    * @param firstTime <code>true</code>  when the agent server starts.   
    */
   public static void init(String args, boolean firstTime) throws Exception {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                "TcpProxyService.init(" + args + ',' + firstTime + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "TcpProxyService.init(" + args + ',' + firstTime + ')');
 
     int port = DEFAULT_PORT;
     String address = DEFAULT_BINDADDRESS;
@@ -163,25 +167,25 @@ public class TcpProxyService implements TcpProxyServiceMBean {
         address = st.nextToken();
       }
     }
-    
+
     int backlog = AgentServer.getInteger(BACKLOG_PROP, DEFAULT_BACKLOG).intValue();
 
     // Create the socket here in order to throw an exception
     // if the socket can't be created (even if firstTime is false).
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG,
-                                "TcpProxyService.init() - binding to " + address + ", port " + port);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "TcpProxyService.init() - binding to " + address + ", port " + port);
     proxyService = new TcpProxyService(port, backlog, address);
     proxyService.start();
-    
+
   }
 
   /**
    * Stops the service.
    */ 
   public static void stopService() {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpProxyService.stop()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "TcpProxyService.stop()");
     proxyService.stop();
   }
 
@@ -195,7 +199,7 @@ public class TcpProxyService implements TcpProxyServiceMBean {
    * TCP connections.
    */
   private TcpConnectionListener[] connectionListeners;
-  
+
   private boolean activated = false;
 
   public TcpProxyService(int port, int backlog, String address) throws Exception {
@@ -203,12 +207,12 @@ public class TcpProxyService implements TcpProxyServiceMBean {
     this.port = port;
     this.backlog = backlog;
     this.address = address;
-    
+
     this.serverSocket = createServerSocket(port, backlog, address);
-    
+
     int poolSize = AgentServer.getInteger(POOL_SIZE_PROP, DEFAULT_POOL_SIZE).intValue();
     int timeout = AgentServer.getInteger(SO_TIMEOUT_PROP, DEFAULT_SO_TIMEOUT).intValue();
-    
+
     this.connections = new Vector();
     connectionListeners = new TcpConnectionListener[poolSize];
     for (int i = 0; i < poolSize; i++) {
@@ -217,8 +221,8 @@ public class TcpProxyService implements TcpProxyServiceMBean {
   }
 
   protected void start() {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpProxyService.start()");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "TcpProxyService.start()");
     ConnectionManager.getCurrentInstance().addManager(this);
     activate();
   }
@@ -228,18 +232,16 @@ public class TcpProxyService implements TcpProxyServiceMBean {
   }
 
   void registerConnection(TcpConnection tcpConnection) {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
-        BasicLevel.DEBUG, "TcpProxyService.registerConnection(" +
-        tcpConnection + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "TcpProxyService.registerConnection(" + tcpConnection + ')');
     connections.addElement(tcpConnection);
   }
 
   void unregisterConnection(TcpConnection tcpConnection) {
-    if (JoramTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgProxy.log(
-        BasicLevel.DEBUG, "TcpProxyService.unregisterConnection(" +
-        tcpConnection + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "TcpProxyService.unregisterConnection(" + tcpConnection + ')');
     connections.removeElement(tcpConnection);
   }
 
@@ -264,18 +266,18 @@ public class TcpProxyService implements TcpProxyServiceMBean {
     try {
       if (serverSocket == null)
         serverSocket = createServerSocket(port, backlog, address);
-      
+
       for (int i = 0; i < connectionListeners.length; i++) {
         if (!connectionListeners[i].isRunning())
           connectionListeners[i].start();
       }
       activated = true;
     } catch (Exception exc) {
-      if (JoramTracing.dbgProxy.isLoggable(BasicLevel.ERROR))
-        JoramTracing.dbgProxy.log(BasicLevel.ERROR, "TcpProxyService.activate()", exc);
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "TcpProxyService.activate()", exc);
     }
   }
-  
+
   public void closeAllConnections() {
     Vector stopList = (Vector) connections.clone();
     for (int i = 0; i < stopList.size(); i++) {
@@ -294,11 +296,11 @@ public class TcpProxyService implements TcpProxyServiceMBean {
   public boolean isActivated() {
     return activated;
   }
-  
+
   public int getRunningConnectionsCount() {
     return connections.size();
   }
-  
+
   public int getTcpListenersPoolSize() {
     return connectionListeners.length;
   }

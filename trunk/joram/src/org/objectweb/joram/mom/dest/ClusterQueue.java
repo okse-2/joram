@@ -31,7 +31,6 @@ import org.objectweb.joram.mom.notifications.LBCycleLife;
 import org.objectweb.joram.mom.notifications.LBMessageGive;
 import org.objectweb.joram.mom.notifications.LBMessageHope;
 import org.objectweb.joram.mom.notifications.LeaveQueueCluster;
-import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.AgentId;
@@ -44,9 +43,7 @@ import fr.dyade.aaa.agent.Notification;
  * @see ClusterQueueImpl
  */
 public class ClusterQueue extends Queue {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   /**
@@ -72,9 +69,9 @@ public class ClusterQueue extends Queue {
   public void react(AgentId from, Notification not)
     throws Exception {
 
-    if (JoramTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
-      JoramTracing.dbgDestination.log(BasicLevel.DEBUG, "--- " + this +
-                                    " react(" + from + "," + not + ")");
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "--- " + this + " react(" + from + "," + not + ")");
 
     if (not instanceof AckJoinQueueCluster)
       ((ClusterQueueImpl) destImpl).ackJoinQueueCluster((AckJoinQueueCluster) not);
