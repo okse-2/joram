@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2001 ScalAgent Distributed Technologies
+ * Copyright (C)  2001 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,11 +25,11 @@
 
 package a3.recovery;
 
-import java.util.*;
+import java.util.Random;
 
-
-
-import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.agent.Agent;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Notification;
 import framework.TestCase;
 
 public class test6 extends TestCase {
@@ -42,7 +42,7 @@ public class test6 extends TestCase {
   static int  nbStopTask =0;
 
   protected void setUp() throws Exception {
-    ServerPing = Integer.getInteger("Pong", ServerPong).shortValue();
+    ServerPing = Integer.getInteger("Ping", ServerPing).shortValue();
     ServerPong = Integer.getInteger("Pong", ServerPong).shortValue();
 
     startAgentServer(ServerPing);
@@ -108,7 +108,7 @@ public class test6 extends TestCase {
             TestCase.crashAgentServer(test6.ServerPing);
 	  }
 	  // Wait in order to prevent WAIT status on TCP connection
-	  Thread.currentThread().sleep(2000L);
+	  Thread.sleep(2000L);
 	  // Start server#1
 	  TestCase.startAgentServer(test6.ServerPing);
 	  nbStopTask++;
