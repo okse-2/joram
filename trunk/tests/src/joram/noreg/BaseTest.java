@@ -92,13 +92,6 @@ class ColocatedBaseTest {
 }
 
 class TcpBaseTest {
-  public static void AdminConnect() throws Exception {
-    String host = System.getProperty("hostname", "localhost");
-    int port = Integer.getInteger("port", 16010).intValue();
-      
-    AdminModule.connect(host, port, "root", "root", 60);
-  }
-
   public static ConnectionFactory createConnectionFactory() throws Exception {
     String host = System.getProperty("hostname", "localhost");
     int port = Integer.getInteger("port", 16010).intValue();

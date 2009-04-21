@@ -28,12 +28,11 @@ import javax.jms.ConnectionFactory;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
-import javax.jms.DeliveryMode;
 
 import org.objectweb.joram.client.jms.Destination;
+import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 
-import fr.dyade.aaa.agent.AgentServer;
 import framework.TestCase;
 
 
@@ -71,8 +70,8 @@ public class Test57 extends BaseTest {
       writeIntoFile("NbMsg: " + NbMsg);
       writeIntoFile("----------------------------------------------------");
 
-      TcpBaseTest.AdminConnect();
       cf = TcpBaseTest.createConnectionFactory();
+      AdminModule.connect(cf);
       dest = createDestination(destc);
       User user = User.create("anonymous", "anonymous", 0);
       dest.setFreeReading();
