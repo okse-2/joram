@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,10 +31,9 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.naming.InitialContext;
 
-
+import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 import framework.TestCase;
@@ -67,9 +66,11 @@ public class AsyncTest extends TestCase {
       startAgentServer((short) 1, (File) null,
                        new String[] { "-DTransaction=fr.dyade.aaa.util.NullTransaction" });
 
-      AdminModule.connect("localhost", 2560, "root", "root", 60);
+      cf = TcpConnectionFactory.create("localhost", 2560);
 
-      User user = User.create("anonymous", "anonymous", 0);
+      AdminModule.connect(cf);
+
+      User.create("anonymous", "anonymous", 0);
 
       Topic localTopic = Topic.create(0);
       localTopic.setFreeReading();
@@ -78,8 +79,6 @@ public class AsyncTest extends TestCase {
       Topic remoteTopic = Topic.create(1);
       remoteTopic.setFreeReading();
       remoteTopic.setFreeWriting();
-
-      cf = TcpConnectionFactory.create("localhost", 2560);
 
       asyncSendCf = TcpConnectionFactory.create("localhost", 2560);
       ((TcpConnectionFactory) asyncSendCf).getParameters().asyncSend = true;
