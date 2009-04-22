@@ -43,12 +43,6 @@ public class BaseTest extends framework.BaseTestCase{
     Thread.sleep(1000L);
   }
 
-  static void AdminConnect(String classname) throws Exception {
-    Class c = Class.forName(classname);
-    Method m = c.getMethod("AdminConnect", new Class[0]);
-    m.invoke(null, new Object[0]);
-  }
-
   static ConnectionFactory createConnectionFactory(String classname) throws Exception {
     Class c = Class.forName(classname);
     Method m = c.getMethod("createConnectionFactory", new Class[0]);
@@ -95,19 +89,13 @@ class TcpBaseTest {
   public static ConnectionFactory createConnectionFactory() throws Exception {
     String host = System.getProperty("hostname", "localhost");
     int port = Integer.getInteger("port", 16010).intValue();
-
     return TcpConnectionFactory.create(host, port);
   }
 }
 
 class SoapBaseTest {
-  public static void AdminConnect() throws Exception {
-    AdminModule.connect("root", "root", 60);
-  }
-
   public static ConnectionFactory createConnectionFactory() throws Exception {
     String host = System.getProperty("hostname", "localhost");
-
-    return SoapConnectionFactory.create("localhost", 8080, 30);
+    return SoapConnectionFactory.create(host, 8080, 30);
   }
 }
