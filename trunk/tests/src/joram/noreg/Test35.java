@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,6 +26,7 @@ import javax.naming.InitialContext;
 
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
+import org.objectweb.joram.client.jms.admin.AdminModule;
 
 import fr.dyade.aaa.agent.AgentServer;
 
@@ -46,7 +47,7 @@ public class Test35 extends BaseTest {
 	    String baseclass = "joram.noreg.ColocatedBaseTest";
 	    baseclass = System.getProperty("BaseClass", baseclass);
 
-	    AdminConnect(baseclass);
+        AdminModule.connect(createConnectionFactory(baseclass));
 
 	    Queue queue = Queue.create(queueName);
 	    Topic topic = Topic.create(topicName);
@@ -68,7 +69,7 @@ public class Test35 extends BaseTest {
 	    assertEquals("myQueue",queue1.getAdminName());
 	    assertEquals("myTopic",topic1.getAdminName());
 
-	    org.objectweb.joram.client.jms.admin.AdminModule.disconnect();
+	    AdminModule.disconnect();
 
 	}catch(Throwable exc){
 	    exc.printStackTrace();
