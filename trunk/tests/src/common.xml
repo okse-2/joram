@@ -74,8 +74,17 @@
          verbose="${verbose}">
     <classpath refid="project.class.path"/>
     <include name="framework/*.java"/>
+    <include name="utils/*.java"/>
     <patternset refid="specific"/>
     <compilerarg value="-g"/>
     <!--<compilerarg value="-Xlint:unchecked"/>-->
   </javac>
+</target>
+
+  
+<target name="check.report.file" depends="compile">
+  <java classname="framework.CheckReportFile" failonerror="true" fork="true" maxmemory="256m" dir="${test.dir}">
+    <classpath path="${project.class.path}"/>
+    <jvmarg line="-Dframework.TestCase.OutFile=${report.file} ${jvmargs}"/>
+  </java>
 </target>
