@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,12 +26,7 @@ import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
 
-import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 
@@ -94,9 +89,9 @@ public class Test18 extends BaseTest implements ExceptionListener {
 
       Thread.sleep(500L);
 
-      AdminConnect(baseclass);
-      User user = User.create("anonymous", "anonymous", 0);
-      cf =  createConnectionFactory(baseclass);
+      cf = createConnectionFactory(baseclass);
+      AdminModule.connect(cf);
+      User.create("anonymous", "anonymous", 0);
       AdminModule.disconnect();
 
       connect();

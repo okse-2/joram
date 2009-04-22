@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,6 +32,7 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 
 import org.objectweb.joram.client.jms.Destination;
+import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 
 import fr.dyade.aaa.agent.AgentServer;
@@ -57,7 +58,8 @@ public class Test10 extends BaseTest {
 
 	    NbRound = Integer.getInteger("NbRound", NbRound).intValue();
 
-	    AdminConnect(baseclass);
+        ConnectionFactory cf = createConnectionFactory(baseclass);
+        AdminModule.connect(cf);
 
 	    Destination dest = createDestination("org.objectweb.joram.client.jms.Topic");
 	    dest.setFreeReading();
@@ -65,9 +67,7 @@ public class Test10 extends BaseTest {
 
 	    User.create("anonymous", "anonymous", 0);
 
-	    org.objectweb.joram.client.jms.admin.AdminModule.disconnect();
-
-	    ConnectionFactory cf =  createConnectionFactory(baseclass);
+	    AdminModule.disconnect();
 
 	    Connection cnx = cf.createConnection();
 	    ConnectionMetaData cnxmd = cnx.getMetaData();

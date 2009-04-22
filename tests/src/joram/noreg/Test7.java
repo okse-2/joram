@@ -30,6 +30,7 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 
 import org.objectweb.joram.client.jms.Destination;
+import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 
 import fr.dyade.aaa.util.Configuration;
@@ -68,8 +69,9 @@ public class Test7 extends BaseTest {
 	    writeIntoFile("| Destination: " + destclass + "NbDest=" + NbDest);
 	    writeIntoFile("| NbMsg=" + NbMsg + ", MsgSize=" + MsgSize);
 	    writeIntoFile("----------------------------------------------------");
-	    
-	    AdminConnect(baseclass);
+
+        cf = createConnectionFactory(baseclass);
+        AdminModule.connect(cf);
 	    
 	    dest = new Destination[NbDest];
 	    for (int i=0; i<NbDest; i++) {
@@ -78,8 +80,7 @@ public class Test7 extends BaseTest {
 		dest[i].setFreeWriting();
 	    }
 	    
-	    User user = User.create("anonymous", "anonymous", 0);
-	    cf = createConnectionFactory(baseclass);
+	    User.create("anonymous", "anonymous", 0);
 	    org.objectweb.joram.client.jms.admin.AdminModule.disconnect();
 	    
 	    Connection cnx = cf.createConnection();
