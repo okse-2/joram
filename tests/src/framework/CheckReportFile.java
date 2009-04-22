@@ -25,9 +25,9 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 
 /**
- * This class checks the report file to find at least one occurrence of
- * 'FAILED'. This is useful to show errors when running tests on <a
- * href="http://forge.ow2.org/bamboo/browse/JORAM">bamboo</a>.
+ * This class checks the report file to find 'FAILED' occurrences and exits in
+ * an error status if found. This is useful to show errors when running tests on
+ * <a href="http://forge.ow2.org/bamboo/browse/JORAM">bamboo</a>.
  */
 public class CheckReportFile {
 
@@ -35,13 +35,23 @@ public class CheckReportFile {
     FileReader fr = new FileReader(System.getProperty("framework.TestCase.OutFile"));
     BufferedReader br = new BufferedReader(fr);
     String line = br.readLine();
+    int failedCount = 0;
+
     while (line != null) {
       if (line.indexOf("FAILED") != -1) {
-        System.exit(-1);
+        failedCount++;
+        System.out.println(line);
       }
       line = br.readLine();
     }
-    System.exit(0);
+
+    System.out.println();
+    System.out.println("Failed tests: " + failedCount);
+    if (failedCount > 0) {
+      System.exit(-1);
+    } else {
+      System.exit(0);
+    }
   }
-  
+
 }
