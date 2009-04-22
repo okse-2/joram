@@ -17,7 +17,6 @@
   <target name="tests.jndi.all" description=" --> launch all JNDI tests">
     <ant dir="jndi2" antfile="build.xml" target="clean" />
     <ant dir="jndi2" antfile="build.xml" target="tests.all" />
-    <ant dir="jndi2" antfile="build.xml" target="check.report.file" />
   </target>
 
   <target name="tests.joram.all" description=" --> launch all Joram tests">
@@ -29,7 +28,6 @@
           description=" --> launch all JMS compliance tests">
     <ant dir="jms" antfile="build.xml" target="clean" />
     <ant dir="jms" antfile="build.xml" target="jms.test" />
-    <ant dir="jms" antfile="build.xml" target="check.report.file" />
   </target>
 
   <target name="tests.task.all" description=" --> launch all task tests">
@@ -42,12 +40,20 @@
     <antcall target="tests.jndi.all" />
     <antcall target="tests.joram.noperf.all" />
     <antcall target="tests.jms.all" />
+    <antcall target="check.reports" />
+  </target>
+  
+  <target name="check.reports" description=" --> check reports (for bamboo)">
+    <parallel>
+      <ant dir="jndi2" antfile="build.xml" target="check.report.file" />
+      <ant dir="joram" antfile="build.xml" target="check.report.file" />
+      <ant dir="jms" antfile="build.xml" target="check.report.file" />
+  	</parallel>
   </target>
 
   <target name="tests.joram.noperf.all" description=" --> launch all no perf Joram tests">
     <ant dir="joram" antfile="build.xml" target="clean" />
     <ant dir="joram" antfile="build.xml" target="tests.noperf.all" />
-    <ant dir="joram" antfile="build.xml" target="check.report.file" />
   </target>
 
 </project>
