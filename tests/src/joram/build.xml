@@ -17,351 +17,354 @@
 
   <target name="tests.all"
            description=" --> launch all joram tests">
-     <ant dir="." antfile="build.xml" target="tests.noperf.all"/>
-     <ant dir="." antfile="build.xml" target="tests.ha"/>
-     <ant dir="." antfile="build.xml" target="tests.perf"/>
+     <antcall target="tests.noperf.all"/>
+     <antcall target="tests.ha"/>
+     <antcall target="tests.perf"/>
    </target>
     
   <target name="tests.noperf.all"
           description=" --> launch all no perf joram tests">
-    <ant dir="." antfile="build.xml" target="tests.messages"/>
-    <ant dir="." antfile="build.xml" target="tests.property"/>
-    <ant dir="." antfile="build.xml" target="tests.selector"/>
-    <ant dir="." antfile="build.xml" target="tests.temporary"/>
-    <ant dir="." antfile="build.xml" target="tests.ack"/>
-    <ant dir="." antfile="build.xml" target="base.test_Brows_Q"/>
-    <ant dir="." antfile="build.xml" target="base.test_MsgList_T"/>
-    <ant dir="." antfile="build.xml" target="base.test_Exp_Q"/>
-    <ant dir="." antfile="build.xml" target="base.test_Multi_Q"/>
-    <ant dir="." antfile="build.xml" target="tests.transacted"/>
-    <ant dir="." antfile="build.xml" target="tests.exceptionlistener"/>
-    <ant dir="." antfile="build.xml" target="tests.recovery"/>
-    <ant dir="." antfile="build.xml" target="tests.dist"/>
-    <ant dir="." antfile="build.xml" target="tests.admin"/>
-    <ant dir="." antfile="build.xml" target="tests.client"/>
-    <ant dir="." antfile="build.xml" target="tests.local"/>
-    <ant dir="." antfile="build.xml" target="tests.dursub"/>
-    <ant dir="." antfile="build.xml" target="tests.tcp"/>
-    <ant dir="." antfile="build.xml" target="tests.reconf"/>
-    <ant dir="." antfile="build.xml" target="tests.noreg"/>
-    <ant dir="." antfile="build.xml" target="tests.xa"/>
-    <ant dir="." antfile="build.xml" target="tests.bridge"/>
-    <ant dir="." antfile="build.xml" target="tests.schedqueue"/>
-    <ant dir="." antfile="build.xml" target="tests.cluster"/>
-    <ant dir="." antfile="build.xml" target="tests.hierarchical"/>
-    <ant dir="." antfile="build.xml" target="tests.ssl"/>
-    <ant dir="." antfile="build.xml" target="jca.test"/>
-    <ant dir="." antfile="build.xml" target="tests.dmq"/>
-    <ant dir="." antfile="build.xml" target="tests.ttl"/>
-    <ant dir="." antfile="build.xml" target="tests.sub"/>
-    <ant dir="." antfile="build.xml" target="tests.monitoring"/>
+    <antcall target="tests.messages"/>
+    <antcall target="tests.property"/>
+    <antcall target="tests.selector"/>
+    <antcall target="tests.temporary"/>
+    <antcall target="tests.ack"/>
+    <antcall target="base.test_Brows_Q"/>
+    <antcall target="base.test_MsgList_T"/>
+    <antcall target="base.test_Exp_Q"/>
+    <antcall target="base.test_Multi_Q"/>
+    <antcall target="tests.transacted"/>
+    <antcall target="tests.exceptionlistener"/>
+    <antcall target="tests.recovery"/>
+    <antcall target="tests.dist"/>
+    <antcall target="tests.admin"/>
+    <antcall target="tests.client"/>
+    <antcall target="tests.local"/>
+    <antcall target="tests.dursub"/>
+    <antcall target="tests.tcp"/>
+    <antcall target="tests.reconf"/>
+    <antcall target="tests.noreg"/>
+    <antcall target="tests.xa"/>
+    <antcall target="tests.bridge"/>
+    <antcall target="tests.schedqueue"/>
+    <antcall target="tests.cluster"/>
+    <antcall target="tests.hierarchical"/>
+    <antcall target="tests.ssl"/>
+    <antcall target="jca.test"/>
+    <antcall target="tests.dmq"/>
+    <antcall target="tests.ttl"/>
+    <antcall target="tests.sub"/>
+    <antcall target="tests.monitoring"/>
   </target>
 
   <target name="tests.messages"
           description=" --> launch all messages tests">
-    <ant dir="." antfile="build.xml" target="base.test_Q_M"/>
-    <ant dir="." antfile="build.xml" target="base.test_T_M"/>
-    <ant dir="." antfile="build.xml" target="base.test_Q_MText"/>
-    <ant dir="." antfile="build.xml" target="base.test_T_MText"/>
-    <ant dir="." antfile="build.xml" target="base.test_Q_MObj"/>
-    <ant dir="." antfile="build.xml" target="base.test_Q_MObjNull"/>
-    <ant dir="." antfile="build.xml" target="base.test_Q_MObjBA"/>
-    <ant dir="." antfile="build.xml" target="base.test_T_MObj"/>
-    <ant dir="." antfile="build.xml" target="base.test_T_MObjNull"/>
-    <ant dir="." antfile="build.xml" target="base.test_T_MObjBA"/>
-    <ant dir="." antfile="build.xml" target="base.test_Q_MByte"/>
-    <ant dir="." antfile="build.xml" target="base.test_T_MByte"/>
-    <ant dir="." antfile="build.xml" target="base.test_Q_MMap"/>
-    <ant dir="." antfile="build.xml" target="base.test_T_MMap"/>
-    <ant dir="." antfile="build.xml" target="base.test_Q_MStream"/>
-    <ant dir="." antfile="build.xml" target="base.test_T_MStream"/>
-    <ant dir="." antfile="build.xml" target="base.test_DMQ_Body"/>
+    <antcall target="base.test_Q_M"/>
+    <antcall target="base.test_T_M"/>
+    <antcall target="base.test_Q_MText"/>
+    <antcall target="base.test_T_MText"/>
+    <antcall target="base.test_Q_MObj"/>
+    <antcall target="base.test_Q_MObjNull"/>
+    <antcall target="base.test_Q_MObjBA"/>
+    <antcall target="base.test_T_MObj"/>
+    <antcall target="base.test_T_MObjNull"/>
+    <antcall target="base.test_T_MObjBA"/>
+    <antcall target="base.test_Q_MByte"/>
+    <antcall target="base.test_T_MByte"/>
+    <antcall target="base.test_Q_MMap"/>
+    <antcall target="base.test_T_MMap"/>
+    <antcall target="base.test_Q_MStream"/>
+    <antcall target="base.test_T_MStream"/>
+    <antcall target="base.test_DMQ_Body"/>
   </target>
 
   <target name="tests.property"
           description=" --> launch all properties tests">
-    <ant dir="." antfile="build.xml" target="base.test_property_Q"/>
-    <ant dir="." antfile="build.xml" target="base.test_property_T"/>
+    <antcall target="base.test_property_Q"/>
+    <antcall target="base.test_property_T"/>
   </target>
 
   <target name="tests.selector"
           description=" --> launch all selectors tests">
-    <ant dir="." antfile="build.xml" target="base.test_Selector_Q"/>
-    <ant dir="." antfile="build.xml" target="base.test_Selector_T"/>
+    <antcall target="base.test_Selector_Q"/>
+    <antcall target="base.test_Selector_T"/>
   </target>
 
   <target name="tests.temporary"
           description=" --> launch all temporary tests">
-    <ant dir="." antfile="build.xml" target="base.test_Temp_Q"/>
-    <ant dir="." antfile="build.xml" target="base.test_Temp_T"/>
-    <ant dir="." antfile="build.xml" target="base.test_Temp_T2"/>
+    <antcall target="base.test_Temp_Q"/>
+    <antcall target="base.test_Temp_T"/>
+    <antcall target="base.test_Temp_T2"/>
   </target>
 
   <target name="tests.ack"
           description=" --> launch all acknowledge tests">
-    <ant dir="." antfile="build.xml" target="base.test_CAck1_Q"/>
-    <ant dir="." antfile="build.xml" target="base.test_CAck1_T"/>
-    <ant dir="." antfile="build.xml" target="base.test_CAck2_Q"/>
-    <ant dir="." antfile="build.xml" target="base.test_CAck2_T"/>
-    <ant dir="." antfile="build.xml" target="base.test_CAck3_Q"/>
+    <antcall target="base.test_CAck1_Q"/>
+    <antcall target="base.test_CAck1_T"/>
+    <antcall target="base.test_CAck2_Q"/>
+    <antcall target="base.test_CAck2_T"/>
+    <antcall target="base.test_CAck3_Q"/>
   </target>
 
   <target name="tests.transacted"
           description=" --> launch all transacted tests">
-    <ant dir="." antfile="build.xml" target="base.test_Trans_Q"/>
-    <ant dir="." antfile="build.xml" target="base.test_Trans_T"/>
+    <antcall target="base.test_Trans_Q"/>
+    <antcall target="base.test_Trans_T"/>
   </target>
 
   <target name="tests.exceptionlistener" 
 description=" --> launch all exceptionlistener tests">
-    <ant dir="." antfile="build.xml" target="base.test_ExcpList_Q"/>
-    <ant dir="." antfile="build.xml" target="base.test_ExcpList_T"/>
+    <antcall target="base.test_ExcpList_Q"/>
+    <antcall target="base.test_ExcpList_T"/>
   </target>
 
   <target name="tests.ha"
           description=" --> launch all ha tests">
-    <ant dir="." antfile="build.xml" target="ha.test1"/>
-    <ant dir="." antfile="build.xml" target="ha.test2"/>
+    <antcall target="ha.test1"/>
+    <antcall target="ha.test2"/>
     <!-- ant dir="." antfile="build.xml" target="ha.test3"/ -->
-    <ant dir="." antfile="build.xml" target="ha.test4-1"/>
-    <ant dir="." antfile="build.xml" target="ha.test4-2"/>
-    <ant dir="." antfile="build.xml" target="ha.test5-1"/>
-    <ant dir="." antfile="build.xml" target="ha.test5-2"/>
+    <antcall target="ha.test4-1"/>
+    <antcall target="ha.test4-2"/>
+    <antcall target="ha.test5-1"/>
+    <antcall target="ha.test5-2"/>
     </target>
 
   <target name="tests.recovery"
           description=" --> launch all recovery tests">
-    <ant dir="." antfile="build.xml" target="recovery.test1"/>
-    <ant dir="." antfile="build.xml" target="recovery.test2"/>
-    <ant dir="." antfile="build.xml" target="recovery.test3"/>
-    <ant dir="." antfile="build.xml" target="recovery.test4"/>
-    <ant dir="." antfile="build.xml" target="recovery.test5"/>
-    <ant dir="." antfile="build.xml" target="recovery.reliable-test"/>
-    <ant dir="." antfile="build.xml" target="recovery.test6"/>
-    <ant dir="." antfile="build.xml" target="recovery.test7"/>
-    <ant dir="." antfile="build.xml" target="recovery.test8"/>
-    <ant dir="." antfile="build.xml" target="recovery.test9"/>
+    <antcall target="recovery.test1"/>
+    <antcall target="recovery.test2"/>
+    <antcall target="recovery.test3"/>
+    <antcall target="recovery.test4"/>
+    <antcall target="recovery.test5"/>
+    <antcall target="recovery.reliable-test"/>
+    <antcall target="recovery.test6"/>
+    <antcall target="recovery.test7"/>
+    <antcall target="recovery.test8"/>
+    <antcall target="recovery.test9"/>
   </target>
 
   <target name="tests.dist"
           description=" --> launch all distributed tests">
-    <ant dir="." antfile="build.xml" target="dist.test1"/>
-    <ant dir="." antfile="build.xml" target="dist.test2"/>
-    <ant dir="." antfile="build.xml" target="dist.test3"/>
-    <ant dir="." antfile="build.xml" target="dist.test4"/>
+    <antcall target="dist.test1"/>
+    <antcall target="dist.test2"/>
+    <antcall target="dist.test3"/>
+    <antcall target="dist.test4"/>
+    <antcall target="dist.test5"/>
+    <antcall target="dist.test6"/>
+    <antcall target="dist.test.http"/>
   </target>
 
   <target name="tests.client"
           description=" --> launch all client tests">
-    <ant dir="." antfile="build.xml" target="client.test8"/>
-    <ant dir="." antfile="build.xml" target="client.test13"/>
-    <ant dir="." antfile="build.xml" target="client.test18"/>
-    <ant dir="." antfile="build.xml" target="client.topic"/>
-    <ant dir="." antfile="build.xml" target="client.topic2"/>
-    <ant dir="." antfile="build.xml" target="client.qrmax"/>
-    <ant dir="." antfile="build.xml" target="client.mcun"/>
-    <ant dir="." antfile="build.xml" target="client.close1"/>
-    <ant dir="." antfile="build.xml" target="client.close2"/>
-    <ant dir="." antfile="build.xml" target="client.close3"/>
-    <ant dir="." antfile="build.xml" target="client.close4"/>
-    <ant dir="." antfile="build.xml" target="client.rqueue"/>
-    <ant dir="." antfile="build.xml" target="client.tmpq"/>
-    <ant dir="." antfile="build.xml" target="client.recover"/>
-    <ant dir="." antfile="build.xml" target="client.servexc"/>
-    <ant dir="." antfile="build.xml" target="client.cnxclose"/>
-    <ant dir="." antfile="build.xml" target="client.cnxclose1"/>
-    <ant dir="." antfile="build.xml" target="client.cnxclose2"/>
-    <ant dir="." antfile="build.xml" target="client.cnxclose3"/>
-    <ant dir="." antfile="build.xml" target="client.empty"/>
-    <ant dir="." antfile="build.xml" target="client.redelivery"/>
-    <ant dir="." antfile="build.xml" target="client.rollback"/>
-    <ant dir="." antfile="build.xml" target="client.nowait"/>
-    <ant dir="." antfile="build.xml" target="client.cnxtime_1"/>
-    <ant dir="." antfile="build.xml" target="client.cnxtime_2"/>
-    <ant dir="." antfile="build.xml" target="client.noloss_1"/>
-    <ant dir="." antfile="build.xml" target="client.noloss_2"/>
+    <antcall target="client.test8"/>
+    <antcall target="client.test13"/>
+    <antcall target="client.test18"/>
+    <antcall target="client.topic"/>
+    <antcall target="client.topic2"/>
+    <antcall target="client.qrmax"/>
+    <antcall target="client.mcun"/>
+    <antcall target="client.close1"/>
+    <antcall target="client.close2"/>
+    <antcall target="client.close3"/>
+    <antcall target="client.close4"/>
+    <antcall target="client.rqueue"/>
+    <antcall target="client.tmpq"/>
+    <antcall target="client.recover"/>
+    <antcall target="client.servexc"/>
+    <antcall target="client.cnxclose"/>
+    <antcall target="client.cnxclose1"/>
+    <antcall target="client.cnxclose2"/>
+    <antcall target="client.cnxclose3"/>
+    <antcall target="client.empty"/>
+    <antcall target="client.redelivery"/>
+    <antcall target="client.rollback"/>
+    <antcall target="client.nowait"/>
+    <antcall target="client.cnxtime_1"/>
+    <antcall target="client.cnxtime_2"/>
+    <antcall target="client.noloss_1"/>
+    <antcall target="client.noloss_2"/>
   </target>
 
   <target name="tests.connection"
           description=" --> launch all connection tests">
-    <ant dir="." antfile="build.xml" target="connection.test1"/>
+    <antcall target="connection.test1"/>
   </target>
 
   <target name="tests.local"
           description=" --> launch all local tests">
-    <ant dir="." antfile="build.xml" target="local.test"/>
-    <ant dir="." antfile="build.xml" target="local.test1"/>
-    <ant dir="." antfile="build.xml" target="local.test2"/>
+    <antcall target="local.test"/>
+    <antcall target="local.test1"/>
+    <antcall target="local.test2"/>
   </target>
 
   <target name="tests.dursub"
           description=" --> launch all dursub tests">
-    <ant dir="." antfile="build.xml" target="dursub.test1"/>
-    <ant dir="." antfile="build.xml" target="dursub.test2"/>
-    <ant dir="." antfile="build.xml" target="dursub.test3"/>
-    <ant dir="." antfile="build.xml" target="dursub.test4"/>
-    <ant dir="." antfile="build.xml" target="dursub.unsub"/>
+    <antcall target="dursub.test1"/>
+    <antcall target="dursub.test2"/>
+    <antcall target="dursub.test3"/>
+    <antcall target="dursub.test4"/>
+    <antcall target="dursub.unsub"/>
   </target>
 
   <target name="tests.tcp"
           description=" --> launch all tcp tests">
-    <ant dir="." antfile="build.xml" target="tcp.test1"/>
-    <ant dir="." antfile="build.xml" target="tcp.test2"/>
-    <ant dir="." antfile="build.xml" target="tcp.test3"/>
-    <ant dir="." antfile="build.xml" target="tcp.test4"/>
-    <ant dir="." antfile="build.xml" target="tcp.test5"/>
+    <antcall target="tcp.test1"/>
+    <antcall target="tcp.test2"/>
+    <antcall target="tcp.test3"/>
+    <antcall target="tcp.test4"/>
+    <antcall target="tcp.test5"/>
   </target>
 
   <target name="tests.reconf"
           description=" --> launch all reconf tests">
-    <ant dir="." antfile="build.xml" target="reconf.test-base"/>
-    <ant dir="." antfile="build.xml" target="reconf.test"/>
-    <ant dir="." antfile="build.xml" target="reconf.test2"/>
-    <ant dir="." antfile="build.xml" target="reconf.test3"/>
+    <antcall target="reconf.test-base"/>
+    <antcall target="reconf.test"/>
+    <antcall target="reconf.test2"/>
+    <antcall target="reconf.test3"/>
   </target>
 
   <target name="tests.perf"
           description=" --> launch all perf tests">
-    <ant dir="." antfile="build.xml" target="perf.test5"/>
-    <ant dir="." antfile="build.xml" target="perf.test6"/>
-    <ant dir="." antfile="build.xml" target="perf.test6M"/>
-    <ant dir="." antfile="build.xml" target="perf.test26"/>
-    <ant dir="." antfile="build.xml" target="perf.test27"/>
-    <ant dir="." antfile="build.xml" target="perf.test28"/>
-    <ant dir="." antfile="build.xml" target="perf.test29"/>
-    <ant dir="." antfile="build.xml" target="perf.test30"/>
-    <ant dir="." antfile="build.xml" target="perf.test33"/>
-    <ant dir="." antfile="build.xml" target="perf.test34"/>
-    <ant dir="." antfile="build.xml" target="perf.test47"/>
-    <ant dir="." antfile="build.xml" target="perf.test54"/>
-    <ant dir="." antfile="build.xml" target="perf.asynctest"/>
+    <antcall target="perf.test5"/>
+    <antcall target="perf.test6"/>
+    <antcall target="perf.test6M"/>
+    <antcall target="perf.test26"/>
+    <antcall target="perf.test27"/>
+    <antcall target="perf.test28"/>
+    <antcall target="perf.test29"/>
+    <antcall target="perf.test30"/>
+    <antcall target="perf.test33"/>
+    <antcall target="perf.test34"/>
+    <antcall target="perf.test47"/>
+    <antcall target="perf.test54"/>
+    <antcall target="perf.asynctest"/>
   </target>
 
   <target name="tests.noreg"
           description=" --> launch all noreg tests">
-    <ant dir="." antfile="build.xml" target="noreg.test3"/>
-    <ant dir="." antfile="build.xml" target="noreg.test4"/>
-    <ant dir="." antfile="build.xml" target="noreg.test7.1"/>
-    <ant dir="." antfile="build.xml" target="noreg.test7.2"/>
-    <ant dir="." antfile="build.xml" target="noreg.test8"/>
-    <ant dir="." antfile="build.xml" target="noreg.test9"/>
-    <ant dir="." antfile="build.xml" target="noreg.test10"/>
-    <ant dir="." antfile="build.xml" target="noreg.test11"/>
-    <ant dir="." antfile="build.xml" target="noreg.test12"/>
-    <ant dir="." antfile="build.xml" target="noreg.test13"/>
-    <ant dir="." antfile="build.xml" target="noreg.test14"/>
-    <ant dir="." antfile="build.xml" target="noreg.test15"/>
-    <ant dir="." antfile="build.xml" target="noreg.test16"/>
-    <ant dir="." antfile="build.xml" target="noreg.test17"/>
-    <ant dir="." antfile="build.xml" target="noreg.test18"/>
-    <ant dir="." antfile="build.xml" target="noreg.test19"/>
-    <ant dir="." antfile="build.xml" target="noreg.test20"/>
-    <ant dir="." antfile="build.xml" target="noreg.test21"/>
-    <ant dir="." antfile="build.xml" target="noreg.test25"/>
-    <ant dir="." antfile="build.xml" target="noreg.test31"/>
-    <ant dir="." antfile="build.xml" target="noreg.test32"/>
-    <ant dir="." antfile="build.xml" target="noreg.test35"/>
-    <ant dir="." antfile="build.xml" target="noreg.test39"/>
-    <ant dir="." antfile="build.xml" target="noreg.test40"/>
-    <ant dir="." antfile="build.xml" target="noreg.test41"/>
-    <ant dir="." antfile="build.xml" target="noreg.test45"/>
-    <ant dir="." antfile="build.xml" target="noreg.test46"/>
-    <ant dir="." antfile="build.xml" target="noreg.test48"/>
-    <ant dir="." antfile="build.xml" target="noreg.test49"/>
-    <ant dir="." antfile="build.xml" target="noreg.test50"/>
-    <ant dir="." antfile="build.xml" target="noreg.test51"/>
-    <ant dir="." antfile="build.xml" target="noreg.test56"/>
+    <antcall target="noreg.test3"/>
+    <antcall target="noreg.test4"/>
+    <antcall target="noreg.test7.1"/>
+    <antcall target="noreg.test7.2"/>
+    <antcall target="noreg.test8"/>
+    <antcall target="noreg.test9"/>
+    <antcall target="noreg.test10"/>
+    <antcall target="noreg.test11"/>
+    <antcall target="noreg.test12"/>
+    <antcall target="noreg.test13"/>
+    <antcall target="noreg.test14"/>
+    <antcall target="noreg.test15"/>
+    <antcall target="noreg.test16"/>
+    <antcall target="noreg.test17"/>
+    <antcall target="noreg.test18"/>
+    <antcall target="noreg.test19"/>
+    <antcall target="noreg.test20"/>
+    <antcall target="noreg.test21"/>
+    <antcall target="noreg.test25"/>
+    <antcall target="noreg.test31"/>
+    <antcall target="noreg.test32"/>
+    <antcall target="noreg.test35"/>
+    <antcall target="noreg.test39"/>
+    <antcall target="noreg.test40"/>
+    <antcall target="noreg.test41"/>
+    <antcall target="noreg.test45"/>
+    <antcall target="noreg.test46"/>
+    <antcall target="noreg.test48"/>
+    <antcall target="noreg.test49"/>
+    <antcall target="noreg.test50"/>
+    <antcall target="noreg.test51"/>
+    <antcall target="noreg.test56"/>
     <!-- ant dir="." antfile="build.xml" target="noreg.test57"/ -->
   </target>
 
   <target name="tests.xa"
           description=" --> launch all xa tests">
-    <ant dir="." antfile="build.xml" target="xa.test1"/>
-    <ant dir="." antfile="build.xml" target="xa.test2"/>
-    <ant dir="." antfile="build.xml" target="xa.test3"/>
-    <ant dir="." antfile="build.xml" target="xa.test4"/>
+    <antcall target="xa.test1"/>
+    <antcall target="xa.test2"/>
+    <antcall target="xa.test3"/>
+    <antcall target="xa.test4"/>
   </target>
 
   
   <target name="tests.bridge" description=" --> launch all bridge tests">
-    <ant dir="." antfile="build.xml" target="bridge.test1"/>
-    <ant dir="." antfile="build.xml" target="bridge.test1.1"/>
-    <ant dir="." antfile="build.xml" target="bridge.test2"/>
-    <ant dir="." antfile="build.xml" target="bridge.test2.1"/>
-    <ant dir="." antfile="build.xml" target="bridge.test3"/>
-    <ant dir="." antfile="build.xml" target="bridge.test3.1"/>
-    <ant dir="." antfile="build.xml" target="bridge.test4"/>
-    <ant dir="." antfile="build.xml" target="bridge.test5"/>
-    <ant dir="." antfile="build.xml" target="bridge.test5.1"/>
-    <ant dir="." antfile="build.xml" target="bridge.test6"/>
-    <ant dir="." antfile="build.xml" target="bridge.test6.1"/>
-    <ant dir="." antfile="build.xml" target="bridge.xatest1"/>
-    <ant dir="." antfile="build.xml" target="bridge.xatest1.1"/>
-    <ant dir="." antfile="build.xml" target="bridge.xatest2"/>
-    <ant dir="." antfile="build.xml" target="bridge.xatest2.1"/>
-    <ant dir="." antfile="build.xml" target="bridge.xatest3"/>
-    <ant dir="." antfile="build.xml" target="bridge.xatest4"/>
-    <ant dir="." antfile="build.xml" target="bridge.xatest4.1"/>
-    <ant dir="." antfile="build.xml" target="bridge.xatest5"/>
-    <ant dir="." antfile="build.xml" target="bridge.xatest5.1"/>
-    <ant dir="." antfile="build.xml" target="bridge.xatest6"/>
-    <ant dir="." antfile="build.xml" target="bridge.xatest6.1"/>
+    <antcall target="bridge.test1"/>
+    <antcall target="bridge.test1.1"/>
+    <antcall target="bridge.test2"/>
+    <antcall target="bridge.test2.1"/>
+    <antcall target="bridge.test3"/>
+    <antcall target="bridge.test3.1"/>
+    <antcall target="bridge.test4"/>
+    <antcall target="bridge.test5"/>
+    <antcall target="bridge.test5.1"/>
+    <antcall target="bridge.test6"/>
+    <antcall target="bridge.test6.1"/>
+    <antcall target="bridge.xatest1"/>
+    <antcall target="bridge.xatest1.1"/>
+    <antcall target="bridge.xatest2"/>
+    <antcall target="bridge.xatest2.1"/>
+    <antcall target="bridge.xatest3"/>
+    <antcall target="bridge.xatest4"/>
+    <antcall target="bridge.xatest4.1"/>
+    <antcall target="bridge.xatest5"/>
+    <antcall target="bridge.xatest5.1"/>
+    <antcall target="bridge.xatest6"/>
+    <antcall target="bridge.xatest6.1"/>
   </target>
 
   <target name="tests.schedqueue"
           description=" --> launch all schedqueue tests">
-    <ant dir="." antfile="build.xml" target="schedqueue.test1"/>
-    <ant dir="." antfile="build.xml" target="schedqueue.test2"/>
+    <antcall target="schedqueue.test1"/>
+    <antcall target="schedqueue.test2"/>
   </target>
 
   <target name="tests.cluster"
           description=" --> launch all cluster tests">
-    <ant dir="." antfile="build.xml" target="cluster.test1"/>
-    <ant dir="." antfile="build.xml" target="cluster.test2"/>
-    <ant dir="." antfile="build.xml" target="cluster.testQ1"/>
-    <ant dir="." antfile="build.xml" target="cluster.testQ2"/>
-    <ant dir="." antfile="build.xml" target="cluster.testQ3"/>
-    <ant dir="." antfile="build.xml" target="cluster.testQ4"/>
-    <ant dir="." antfile="build.xml" target="cluster.testQ5"/>
+    <antcall target="cluster.test1"/>
+    <antcall target="cluster.test2"/>
+    <antcall target="cluster.testQ1"/>
+    <antcall target="cluster.testQ2"/>
+    <antcall target="cluster.testQ3"/>
+    <antcall target="cluster.testQ4"/>
+    <antcall target="cluster.testQ5"/>
   </target>
 
   <target name="tests.hierarchical"
           description=" --> launch all hierarchical tests">
-    <ant dir="." antfile="build.xml" target="hierarchical.test1"/>
+    <antcall target="hierarchical.test1"/>
   </target>
 
   <target name="tests.ssl"
           description=" --> launch all ssl tests">
-    <ant dir="." antfile="build.xml" target="ssl.test"/>
+    <antcall target="ssl.test"/>
   </target>
 
   <target name="tests.dmq"
           description=" --> launch all dmq tests">
-    <ant dir="." antfile="build.xml" target="dmq.TestDmq1"/>
-    <ant dir="." antfile="build.xml" target="dmq.TestDmq2"/>
-    <ant dir="." antfile="build.xml" target="dmq.TestDmq3"/>
-    <ant dir="." antfile="build.xml" target="dmq.TestDmq4"/>
-    <ant dir="." antfile="build.xml" target="dmq.TestDmq5"/>
-    <ant dir="." antfile="build.xml" target="dmq.TestDmq6"/>
-    <ant dir="." antfile="build.xml" target="dmq.ChainedDMQ"/>
+    <antcall target="dmq.TestDmq1"/>
+    <antcall target="dmq.TestDmq2"/>
+    <antcall target="dmq.TestDmq3"/>
+    <antcall target="dmq.TestDmq4"/>
+    <antcall target="dmq.TestDmq5"/>
+    <antcall target="dmq.TestDmq6"/>
+    <antcall target="dmq.ChainedDMQ"/>
   </target>
 
   <target name="tests.ttl"
           description=" --> launch all ttl tests">
-    <ant dir="." antfile="build.xml" target="ttl.Test1_Topic"/>
-    <ant dir="." antfile="build.xml" target="ttl.Test2_Queue"/>
+    <antcall target="ttl.Test1_Topic"/>
+    <antcall target="ttl.Test2_Queue"/>
   </target>
 
   <target name="tests.sub"
           description=" --> launch all sub tests">
-    <ant dir="." antfile="build.xml" target="sub.Sub"/>
+    <antcall target="sub.Sub"/>
   </target>
   
   <target name="tests.monitoring"
           description=" --> launch all monitoring tests">
-    <ant dir="." antfile="build.xml" target="monit.Test"/>
-    <ant dir="." antfile="build.xml" target="monit.Test2"/>
-  	<ant dir="." antfile="build.xml" target="monit.Test3"/>
+    <antcall target="monit.Test"/>
+    <antcall target="monit.Test2"/>
+  	<antcall target="monit.Test3"/>
   </target>
 
   <!--
@@ -1122,9 +1125,9 @@ description=" --> launch all exceptionlistener tests">
 
   <target name="recovery.test8"
           description=" --> test the DMQ recovery">
-    <ant dir="." antfile="build.xml" target="recovery.test8-1"/>
-    <ant dir="." antfile="build.xml" target="recovery.test8-2"/>
-    <ant dir="." antfile="build.xml" target="recovery.test8-3"/>
+    <antcall target="recovery.test8-1"/>
+    <antcall target="recovery.test8-2"/>
+    <antcall target="recovery.test8-3"/>
   </target>
 
   <target name="recovery.test8-1" depends="init.a3props,compile"
@@ -1161,8 +1164,8 @@ description=" --> launch all exceptionlistener tests">
   </target>
 
   <target name="recovery.test9">
-    <ant dir="." antfile="build.xml" target="recovery.test9-1"/>
-    <ant dir="." antfile="build.xml" target="recovery.test9-2"/>
+    <antcall target="recovery.test9-1"/>
+    <antcall target="recovery.test9-2"/>
   </target>
 
   <target name="recovery.test9-1" depends="init.a3props,compile">
@@ -1231,6 +1234,56 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="distrib/a3servers.xml"/>
       <param name="jvmargs" value=""/>
       <param name="args" value=""/>
+    </antcall>
+  </target>
+  
+  <target name="dist.test5" depends="init.a3props,compile"
+          description=" --> test distributed with 2 serveurs, a queue and a bad network">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.distrib.Distrib_2serv_BadNetwork"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
+      <param name="jndiconf" value="distrib/jndi.properties"/>
+      <param name="a3conf" value="distrib/a3servers2.xml"/>
+      <param name="jvmargs" value="-DNbRound=200 -DNbMsgPerRound=100"/>
+    </antcall>
+  </target>
+  
+  <target name="dist.test6" depends="init.a3props,compile"
+          description=" --> test distributed with 2 serveurs, a topic and a bad network">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.distrib.Distrib_2serv_T_BadNetwork"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
+      <param name="jndiconf" value="distrib/jndi.properties"/>
+      <param name="a3conf" value="distrib/a3servers2.xml"/>
+      <param name="jvmargs" value="-DNbRound=200 -DNbMsgPerRound=100"/>
+    </antcall>
+  </target>
+  
+  <target name="dist.test.http" depends="init.a3props,compile"
+          description=" --> test distributed with 2 serveurs, a topic and an http network">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.distrib.Distrib_2serv_T_Http"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="distrib/jndi.properties"/>
+      <param name="a3conf" value="distrib/a3servers.http.xml"/>
+      <param name="jvmargs" value="-DNbRound=10 -DNbMsgPerRound=1"/>
+    </antcall>
+  </target>
+  
+  <target name="dist.test.http.long" depends="init.a3props,compile"
+          description=" --> test distributed with 2 serveurs, a topic and an http network">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.distrib.Distrib_2serv_T_Http"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="distrib/jndi.properties"/>
+      <param name="a3conf" value="distrib/a3servers.http.xml"/>
+      <param name="jvmargs" value="-DNbRound=100 -DNbMsgPerRound=1"/>
     </antcall>
   </target>
 
@@ -2020,14 +2073,14 @@ description=" --> launch all exceptionlistener tests">
   <!-- Queue statistics -->
 
   <target name="perf.test6-1" description=" --> queue statistics">
-    <ant dir="." antfile="build.xml" target="perf.test6-1.1"/>
-    <ant dir="." antfile="build.xml" target="perf.test6-1.2"/>
-    <ant dir="." antfile="build.xml" target="perf.test6-1.3"/>
-    <ant dir="." antfile="build.xml" target="perf.test6-1.4"/>
-    <ant dir="." antfile="build.xml" target="perf.test6-1.5"/>
-    <ant dir="." antfile="build.xml" target="perf.test6-1.6"/>
-    <ant dir="." antfile="build.xml" target="perf.test6-1.7"/>
-    <ant dir="." antfile="build.xml" target="perf.test6-1.8"/>
+    <antcall target="perf.test6-1.1"/>
+    <antcall target="perf.test6-1.2"/>
+    <antcall target="perf.test6-1.3"/>
+    <antcall target="perf.test6-1.4"/>
+    <antcall target="perf.test6-1.5"/>
+    <antcall target="perf.test6-1.6"/>
+    <antcall target="perf.test6-1.7"/>
+    <antcall target="perf.test6-1.8"/>
    </target>
 
   <target name="perf.test6-1.1"
@@ -2344,16 +2397,16 @@ description=" --> launch all exceptionlistener tests">
 
   <target name="perf.test6M"
           description="Queue and topic statistics in multi-sender mode">
-    <ant dir="." antfile="build.xml" target="perf.test6M-1"/>
-    <ant dir="." antfile="build.xml" target="perf.test6M-2"/>
+    <antcall target="perf.test6M-1"/>
+    <antcall target="perf.test6M-2"/>
   </target>
 
   <!-- Queue statistics in multi-sender mode -->
 
   <target name="perf.test6M-1"
           description="Queue statistics in multi-sender mode">
-    <ant dir="." antfile="build.xml" target="perf.test6M-1.1"/>
-    <ant dir="." antfile="build.xml" target="perf.test6M-1.2"/>
+    <antcall target="perf.test6M-1.1"/>
+    <antcall target="perf.test6M-1.2"/>
   </target>
 
   <target name="perf.test6M-1.1">
@@ -2378,8 +2431,8 @@ description=" --> launch all exceptionlistener tests">
 
   <target name="perf.test6M-2"
           description="Topic statistics in multi-sender mode">
-    <ant dir="." antfile="build.xml" target="perf.test6M-2.1"/>
-    <ant dir="." antfile="build.xml" target="perf.test6M-2.2"/>
+    <antcall target="perf.test6M-2.1"/>
+    <antcall target="perf.test6M-2.2"/>
   </target>
 
   <target name="perf.test6M-2.1">
@@ -2847,8 +2900,8 @@ description=" --> launch all exceptionlistener tests">
 
   <target name="noreg.test10"
           description=" --> test selector with option : tcp or local">
-    <ant dir="." antfile="build.xml" target="test10a.noreg"/>
-    <ant dir="." antfile="build.xml" target="test10b.noreg"/>
+    <antcall target="test10a.noreg"/>
+    <antcall target="test10b.noreg"/>
   </target>
 
   <target name="test10a.noreg" depends="init.a3props,compile">
@@ -2874,9 +2927,9 @@ description=" --> launch all exceptionlistener tests">
 
   <target name="noreg.test11"
           description=" --> check send message on delete topic thrown an exception if there are one server launch">
-    <ant dir="." antfile="build.xml" target="test11a.noreg"/>
-    <ant dir="." antfile="build.xml" target="test11b.noreg"/>
-    <ant dir="." antfile="build.xml" target="test11c.noreg"/>
+    <antcall target="test11a.noreg"/>
+    <antcall target="test11b.noreg"/>
+    <antcall target="test11c.noreg"/>
   </target>
 
 
@@ -2916,9 +2969,9 @@ description=" --> launch all exceptionlistener tests">
 
   <target name="noreg.test12"
           description=" --> check send message on delete queue thrown an exception if there are one server launch">
-    <ant dir="." antfile="build.xml" target="test12a.noreg"/>
-    <ant dir="." antfile="build.xml" target="test12b.noreg"/>
-    <ant dir="." antfile="build.xml" target="test12c.noreg"/>
+    <antcall target="test12a.noreg"/>
+    <antcall target="test12b.noreg"/>
+    <antcall target="test12c.noreg"/>
   </target>
 
 
@@ -2983,10 +3036,10 @@ description=" --> launch all exceptionlistener tests">
 
   <target name="noreg.test15"
           description=" --> test close  and start consumer cnx during producer send. option : queue or topic and  Tcp or local ">
-    <ant dir="." antfile="build.xml" target="test15-1.noreg"/>
-    <ant dir="." antfile="build.xml" target="test15-2.noreg"/>
-    <ant dir="." antfile="build.xml" target="test15-3.noreg"/>
-    <ant dir="." antfile="build.xml" target="test15-4.noreg"/>
+    <antcall target="test15-1.noreg"/>
+    <antcall target="test15-2.noreg"/>
+    <antcall target="test15-3.noreg"/>
+    <antcall target="test15-4.noreg"/>
   </target>
 
 
@@ -3037,8 +3090,8 @@ description=" --> launch all exceptionlistener tests">
 
   <target name="noreg.test16"
           description=" --> test close during receive and start consumer cnx during producer send. option : queue or topic and  Tcp or local ">
-    <ant dir="." antfile="build.xml" target="test16-1.noreg"/>
-    <ant dir="." antfile="build.xml" target="test16-2.noreg"/>
+    <antcall target="test16-1.noreg"/>
+    <antcall target="test16-2.noreg"/>
     <!-- ant dir="." antfile="build.xml" target="test16-3.noreg"/ -->
     <!-- ant dir="." antfile="build.xml" target="test16-4.noreg"/ -->
   </target>
@@ -3094,8 +3147,8 @@ description=" --> launch all exceptionlistener tests">
 
   <target name="noreg.test17"
           description=" --> test close and start consumer cnx during producer send. option : queue or topic and  Tcp or local ">
-    <ant dir="." antfile="build.xml" target="test17-1.noreg"/>
-    <ant dir="." antfile="build.xml" target="test17-2.noreg"/>
+    <antcall target="test17-1.noreg"/>
+    <antcall target="test17-2.noreg"/>
     <!-- ant dir="." antfile="build.xml" target="test17-3.noreg"/ -->
     <!-- ant dir="." antfile="build.xml" target="test17-4.noreg"/ -->
   </target>
@@ -3150,7 +3203,7 @@ description=" --> launch all exceptionlistener tests">
 
   <target name="noreg.test18"
           description=" --> test exception listener activation during close. option:  Tcp or local ">
-    <ant dir="." antfile="build.xml" target="test18-1.noreg"/>
+    <antcall target="test18-1.noreg"/>
     <!-- ant dir="." antfile="build.xml" target="test18-2.noreg"/ -->
   </target>
 
@@ -3227,6 +3280,19 @@ description=" --> launch all exceptionlistener tests">
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="testid" value="noreg.test25"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
+  
+  <target name="noreg.test26" depends="init.a3props,compile"
+          description=" --> Test closure of connection on stop server with cnxPendingTimer and connectingTimer ">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.noreg.Test26"/>
+      <param name="jndiconf" value="noreg/jndi.properties"/>
+      <param name="a3conf" value="noreg/a3servers1.xml"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="testid" value="noreg.test26"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
