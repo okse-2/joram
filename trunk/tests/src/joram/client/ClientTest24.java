@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,8 +34,10 @@ import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
 
-
+import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 import framework.TestCase;
 
@@ -58,28 +60,21 @@ public class ClientTest24 extends TestCase {
       startAgentServer((short) 0, (File) null,
           new String[] { "-DTransaction=fr.dyade.aaa.util.NullTransaction" });
 
-      AdminModule.connect("localhost", 2560, "root", "root", 60);
+      ConnectionFactory cf = TcpConnectionFactory.create("localhost", 2560);
+      AdminModule.connect(cf);
 
-      org.objectweb.joram.client.jms.admin.User user = 
-        org.objectweb.joram.client.jms.admin.User
-          .create("anonymous", "anonymous", 0);
+      User.create("anonymous", "anonymous", 0);
 
-      org.objectweb.joram.client.jms.Queue queue = org.objectweb.joram.client.jms.Queue
-          .create(0);
+      Queue queue = Queue.create(0);
       queue.setFreeReading();
       queue.setFreeWriting();
 
       dest = queue;
 
-      ConnectionFactory cf = org.objectweb.joram.client.jms.tcp.TcpConnectionFactory
-          .create("localhost", 2560);
-
       connection = cf.createConnection("anonymous", "anonymous");
-
       connection.start();
 
-      Session session = connection.createSession(false,
-          Session.AUTO_ACKNOWLEDGE);
+      Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
       //System.out.println("Create a producer");
       MessageProducer producer = session.createProducer(dest);
@@ -91,7 +86,7 @@ public class ClientTest24 extends TestCase {
       producer.send(objMsg);
       //System.out.println("objMsg = " + objMsg);
       
-      Message msg = (Message)consumer.receive();
+      Message msg = consumer.receive();
       
       assertTrue("Not ObjectMessage: msg=" + msg, msg instanceof ObjectMessage);
 
