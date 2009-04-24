@@ -24,18 +24,13 @@
  */
 package org.objectweb.joram.client.connector;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.ConnectException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
-import java.util.StringTokenizer;
 import java.util.Vector;
 
 import javax.jms.Session;
@@ -239,35 +234,6 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
 
   public void setPersistentPlatform(Boolean persistentPlatform) {
     this.persistentPlatform = persistentPlatform.booleanValue();
-  }
-
-  /**
-   * Path to the file containing a description of the administered objects to
-   * create and bind.
-   * 
-   * @deprecated Should not be used next to Joram 5.1
-   * @see #adminFileXML
-   */
-  private String adminFile = "joram-admin.cfg";
-
-  /**
-   * Returns the path of the file containing a description of the administered
-   * objects to create and bind at starting.
-   * 
-   * @deprecated Should not be used next to Joram 5.1
-   */
-  public String getAdminFile() {
-    return adminFile;
-  }
-
-  /**
-   * Sets the path of the file containing a description of the administered
-   * objects to create and bind at starting.
-   * 
-   * @deprecated Should not be used next to Joram 5.1
-   */
-  public void setAdminFile(String adminFile) {
-    this.adminFile = adminFile;
   }
 
   /**
@@ -653,106 +619,8 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
                    "JoramAdapter - problem during XML configuration: " + adminFileExportXML, exc);
     }
 
-    // Administering as specified in the properties file.
-    try {
-      File file = null;
-
-      try {
-        if (platformConfigDir == null) {
-          java.net.URL url = ClassLoader.getSystemResource(adminFile);
-          file = new File(url.getFile());
-        }
-        else
-          file = new File(platformConfigDir, adminFile);
-      } catch (NullPointerException e) {
-        throw new java.io.FileNotFoundException();
-      }
-
-      FileReader fileReader = new FileReader(file);
-      BufferedReader reader = new BufferedReader(fileReader);
-
-      if (logger.isLoggable(BasicLevel.INFO))
-        logger.log(BasicLevel.INFO,
-                   "  - Reading the provided admin file: " + file);
-
-      boolean end = false;
-      String line;
-      StringTokenizer tokenizer;
-      String firstToken;
-      String name = null;
-
-      while (! end) {
-        try {
-          line = reader.readLine();
-
-          if (line == null)
-            end = true;
-          else {
-            tokenizer = new StringTokenizer(line);
-
-            if (tokenizer.hasMoreTokens()) {
-              firstToken = tokenizer.nextToken();
-              if (firstToken.equalsIgnoreCase("Host")) {
-                if (tokenizer.hasMoreTokens())
-                  hostName = tokenizer.nextToken();
-              } else if (firstToken.equalsIgnoreCase("Port")) {
-                if (tokenizer.hasMoreTokens())
-                  serverPort = Integer.parseInt(tokenizer.nextToken());
-              } else if (firstToken.equalsIgnoreCase("Queue")) {
-                if (tokenizer.hasMoreTokens()) {
-                  name = tokenizer.nextToken();
-                  createQueue(name);
-                }
-              } else if (firstToken.equalsIgnoreCase("Topic")) {
-                if (tokenizer.hasMoreTokens()) {
-                  name = tokenizer.nextToken();
-                  createTopic(name);
-                }
-              } else if (firstToken.equalsIgnoreCase("User")) {
-                if (tokenizer.hasMoreTokens())
-                  name = tokenizer.nextToken();
-                if (tokenizer.hasMoreTokens()) {
-                  String password = tokenizer.nextToken();
-                  createUser(name, password);
-                } else
-                  if (logger.isLoggable(BasicLevel.DEBUG))
-                    logger.log(BasicLevel.DEBUG,
-                               "  - Missing password for user [" + name + "]");
-              } else if (firstToken.equalsIgnoreCase("CF")) {
-                if (tokenizer.hasMoreTokens()) {
-                  name = tokenizer.nextToken();
-                  createCF(name);
-                }
-              } else if (firstToken.equalsIgnoreCase("QCF")) {
-                if (tokenizer.hasMoreTokens()) {
-                  name = tokenizer.nextToken();
-                  createQueueCF(name);
-                }
-              } else if (firstToken.equalsIgnoreCase("TCF")) {
-                if (tokenizer.hasMoreTokens()) {
-                  name = tokenizer.nextToken();
-                  createTopicCF(name);
-                }
-              }
-            }
-          }
-        } catch (IOException exc) {
-          // Error while reading one line.
-        } catch (AdminException exc) {
-          // Error while creating the destination.
-          logger.log(BasicLevel.ERROR, "Creation failed",exc);
-        }
-      }
-    } catch (java.io.FileNotFoundException fnfe) {
-      // No destination to deploy.
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,
-        "  - No administration task requested.");
-    }
-
     if (logger.isLoggable(BasicLevel.INFO))
-      logger.log(BasicLevel.INFO,
-                 "Server port is " + serverPort);
+      logger.log(BasicLevel.INFO, "Server port is " + serverPort);
 
     started = true;
 
@@ -1118,15 +986,12 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
     try {
       for (int i = 0; i < specs.length; i++) {
         if (! (specs[i] instanceof ActivationSpecImpl))
-          throw new ResourceException("Provided ActivationSpec instance is "
-                                      + "not a JORAM activation spec.");
+          throw new ResourceException("Provided ActivationSpec instance is not a JORAM activation spec.");
 
         specImpl = (ActivationSpecImpl) specs[i];
 
         if (! specImpl.getResourceAdapter().equals(this))
-          throw new ResourceException("Supplied ActivationSpec instance "
-                                      + "associated to an other "
-                                      + "ResourceAdapter.");
+          throw new ResourceException("Supplied ActivationSpec instance associated to an other ResourceAdapter.");
 
         userName = specImpl.getUserName();
 

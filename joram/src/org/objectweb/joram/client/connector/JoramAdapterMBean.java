@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,12 +25,8 @@ package org.objectweb.joram.client.connector;
 import java.net.ConnectException;
 import java.util.Properties;
 
-import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.shared.security.SimpleIdentity;
-import org.objectweb.util.monolog.api.BasicLevel;
 
 public interface JoramAdapterMBean {
   /**
@@ -474,11 +470,9 @@ public interface JoramAdapterMBean {
   public String getPlatformConfigDir();
 
   /**
-   * Path to the file containing a description of the administered objects to
-   * create and bind.
+   * Path to the XML file containing a description of the administered objects
+   * to create and bind.
    */
-  public String getAdminFile();
-
   public String getAdminFileXML();
 
   public String getAdminFileExportXML();
