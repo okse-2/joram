@@ -251,8 +251,8 @@ public class User extends AdministeredObject implements UserMBean {
     try {
       MXWrapper.registerMBean(this, JMXBeanName);
     } catch (Exception e) {
-      if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN, "User.registerMBean: " + JMXBeanName, e);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "User.registerMBean: " + JMXBeanName, e);
     }
     
     return JMXBeanName;
@@ -264,8 +264,8 @@ public class User extends AdministeredObject implements UserMBean {
     try {
       MXWrapper.unregisterMBean(JMXBeanName);
     } catch (Exception e) {
-      if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN, "User.unregisterMBean: " + JMXBeanName, e);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "User.unregisterMBean: " + JMXBeanName, e);
     }
   }
 

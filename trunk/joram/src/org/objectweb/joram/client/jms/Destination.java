@@ -362,8 +362,8 @@ public abstract class Destination extends AdministeredObject implements javax.jm
     try {
        MXWrapper.registerMBean(this, JMXBeanName);
     } catch (Exception e) {
-      if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN, "Destination.registerMBean: " + JMXBeanName, e);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "Destination.registerMBean: " + JMXBeanName, e);
     }
     
     return JMXBeanName;
@@ -375,8 +375,8 @@ public abstract class Destination extends AdministeredObject implements javax.jm
     try {
       MXWrapper.unregisterMBean(JMXBeanName);
     } catch (Exception e) {
-      if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN, "Destination.unregisterMBean: " + JMXBeanName, e);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "Destination.unregisterMBean: " + JMXBeanName, e);
     }
   }
 
