@@ -29,6 +29,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.Arrays;
+import fr.dyade.aaa.util.Strings;
 
 /**
  * The <code>Network</code> abstract class provides ..
@@ -376,12 +377,13 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
       }
       // Joins with the new domain configuration:
       if ((servers != null) && !Arrays.equals(servers, s)) {
-        for (int i=0; i<servers.length; i++)
-          logmon.log(BasicLevel.DEBUG,
-                     "servers[" + i + "]=" + servers[i]);
-        for (int i=0; i<s.length; i++)
-          logmon.log(BasicLevel.DEBUG,
-                     "servers[" + i + "]=" + s[i]);
+        StringBuffer strbuf = new StringBuffer();
+        strbuf.append("Incoherent network configuration: ");
+        Strings.toString(strbuf, servers, -1, 0);
+        strbuf.append(" != ");
+        Strings.toString(strbuf, s, -1, 0);
+
+        logmon.log(BasicLevel.ERROR, strbuf.toString());
 
         throw new IOException("Network configuration changed");
       }
