@@ -398,7 +398,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     MaxLogFileSize = Configuration.getInteger("NTLogFileSize", MaxLogFileSize / Mb).intValue() * Mb;
     MaxLogMemorySize = Configuration.getInteger("NTLogMemorySize", MaxLogMemorySize / Kb).intValue() * Kb;
 
-    logmon = Debug.getLogger("fr.dyade.aaa.util.Transaction");
+    logmon = Debug.getLogger(Transaction.class.getName());
     if (logmon.isLoggable(BasicLevel.INFO))
       logmon.log(BasicLevel.INFO, "NTransaction, init():" +
                  (MaxLogFileSize /Mb) + '/' + (MaxLogMemorySize /Kb));
@@ -442,10 +442,10 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     logFile = new LogFile(dir, repository);
 
     perThreadContext = new ThreadLocal() {
-        protected synchronized Object initialValue() {
-          return new Context();
-        }
-      };
+      protected synchronized Object initialValue() {
+        return new Context();
+      }
+    };
     
     // Be careful, setGarbageDelay and garbageAsync use logFile !!
     setGarbageDelay(Configuration.getInteger("NTGarbageDelay", getGarbageDelay()).intValue());

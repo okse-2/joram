@@ -122,7 +122,7 @@ public abstract class DBTransaction implements Transaction, DBTransactionMBean {
   public void init(String path) throws IOException {
     phase = INIT;
 
-    logmon = Debug.getLogger(Debug.A3Debug + ".Transaction");
+    logmon = Debug.getLogger(Transaction.class.getName());
     if (logmon.isLoggable(BasicLevel.INFO))
       logmon.log(BasicLevel.INFO, "DBTransaction, init()");
 

@@ -23,7 +23,9 @@
  */
 package fr.dyade.aaa.util;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
 
 public class NullTransaction implements Transaction, NullTransactionMBean {
   // State of the transaction monitor.

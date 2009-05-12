@@ -20,8 +20,23 @@
  */
 package fr.dyade.aaa.util;
 
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.NotActiveException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.RandomAccessFile;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 /**
  *  The JTransaction class implements a transactionnal storage.
@@ -40,7 +55,7 @@ public final class JTransaction implements Transaction, JTransactionMBean {
   private Hashtable log = null;
 
   // SAVE and DELETE should be static attribute of Operation inner class.
-  // Unfortunatly it's unsupported in Java 1.1.x.
+  // Unfortunately it's unsupported in Java 1.1.x.
   static final int SAVE = 1;
   static final int DELETE = 2;
 
