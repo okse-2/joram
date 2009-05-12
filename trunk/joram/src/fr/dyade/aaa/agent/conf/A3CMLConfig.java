@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -510,7 +510,7 @@ public class A3CMLConfig implements Serializable {
 
     // Temporary fix, reset visited and gateway fields
     reset();
-    
+
     // Search alls directly accessible domains.
     for (Enumeration n = root.networks.elements(); n.hasMoreElements();) {
       A3CMLNetwork network = (A3CMLNetwork)  n.nextElement();
@@ -523,7 +523,7 @@ public class A3CMLConfig implements Serializable {
       Log.logger.log(BasicLevel.DEBUG,
                      "configure - toExplore.add(" + domain + ")");
     }
-    
+
     root.visited = true;
     root.gateway = -1;
     root.hops = 0;
@@ -539,8 +539,8 @@ public class A3CMLConfig implements Serializable {
 
       // Parse all nodes of this domain
       for (Enumeration s = domain.servers.elements();
-	   s.hasMoreElements();) {
-	A3CMLServer server = (A3CMLServer) s.nextElement();
+      s.hasMoreElements();) {
+        A3CMLServer server = (A3CMLServer) s.nextElement();
 
         if (server.visited) continue;
 
@@ -561,7 +561,7 @@ public class A3CMLConfig implements Serializable {
         // If the server is a router then add the accessible domains
         // to the list.
         for (Enumeration n = server.networks.elements();
-             n.hasMoreElements();) {
+        n.hasMoreElements();) {
           A3CMLNetwork network = (A3CMLNetwork)  n.nextElement();
           A3CMLDomain d2 = (A3CMLDomain) domains.get(network.domain);
 
@@ -574,7 +574,7 @@ public class A3CMLConfig implements Serializable {
             // The server is directly accessible from root server by
             // this network interface; fixes the communication port
             // for this server.
-            
+
             // AF 03/11/2004 - It seems in fact the domain is the one we are
             // exploring, so if the server is directly accessible its listen
             // port is the one of this network...
@@ -584,12 +584,12 @@ public class A3CMLConfig implements Serializable {
 
           // If the domain is already explored then there is more
           // than one route to this domain.
-          
+
           //if (d2.gateway != -1)
           // throw new Exception("more than one route to: " + domain);
-            
+
           // if (d2.hops != -1)
-//             throw new Exception("more than one route to: " + domain);
+          //             throw new Exception("more than one route to: " + domain);
           d2.hops = domain.hops +1;
 
           // The domain is not already explored.
@@ -610,8 +610,8 @@ public class A3CMLConfig implements Serializable {
       A3CMLServer server = (A3CMLServer) s.nextElement();
       if (Log.logger.isLoggable(BasicLevel.DEBUG))
         Log.logger.log(BasicLevel.DEBUG, "configure - verify " + server);
-        if (! server.visited)
-          throw new Exception(server + " inaccessible");
+      if (! server.visited)
+        throw new Exception(server + " inaccessible");
     }
 
     // Search alls directly accessible domains, then set special routes
@@ -642,7 +642,6 @@ public class A3CMLConfig implements Serializable {
         }
       }
     }
-
   }
 
   /**
@@ -796,32 +795,30 @@ public class A3CMLConfig implements Serializable {
   }
     
   /**
-   * read object from a serialized file,
-   * in cfgDir if null, search object in 
-   * path used to load classes
+   * read object from a serialized file.
    *
-   * @param cfgDir        read obj in this directory
-   * @param cfgFileName   serialized file name
    * @exception           Exception
    */
-  public static A3CMLConfig load(File dir) throws Exception {
-    // Get the logging monitor from current server MonoLog.loggeritorFactory
+//  public static A3CMLConfig load(File dir) throws Exception {
+  public static A3CMLConfig load() throws Exception {
     if (Log.logger.isLoggable(BasicLevel.DEBUG))
       Log.logger.log(BasicLevel.DEBUG, "Config.load()");
     
-    File file;
-    file = new File(dir, AgentServer.DEFAULT_SER_CFG_FILE);
-    FileInputStream fis = new FileInputStream(file);
-    byte[] buf = new byte[(int) file.length()];
-    for (int nb = 0; nb < buf.length;) {
-      int ret = fis.read(buf, nb, buf.length - nb);
-      if (ret == -1)
-        throw new EOFException();
-      nb += ret;
-    }
-    fis.close();
-    ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(buf));
-    A3CMLConfig a3config = (A3CMLConfig) ois.readObject();
+    A3CMLConfig a3config = (A3CMLConfig) AgentServer.getTransaction().load(AgentServer.DEFAULT_SER_CFG_FILE);
+        
+//    File file;
+//    file = new File(dir, AgentServer.DEFAULT_SER_CFG_FILE);
+//    FileInputStream fis = new FileInputStream(file);
+//    byte[] buf = new byte[(int) file.length()];
+//    for (int nb = 0; nb < buf.length;) {
+//      int ret = fis.read(buf, nb, buf.length - nb);
+//      if (ret == -1)
+//        throw new EOFException();
+//      nb += ret;
+//    }
+//    fis.close();
+//    ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(buf));
+//    A3CMLConfig a3config = (A3CMLConfig) ois.readObject();
 
     if (a3config == null) {
       Log.logger.log(BasicLevel.WARN,
@@ -845,7 +842,6 @@ public class A3CMLConfig implements Serializable {
    *	unspecialized exception when reading and parsing the configuration file
    */
   public static A3CMLConfig getConfig(String path) throws Exception {
-    // Get the logging monitor from current server MonoLog.loggeritorFactory
     if (Log.logger.isLoggable(BasicLevel.DEBUG))
       Log.logger.log(BasicLevel.DEBUG, "Config.load(" + path + ")");
     
