@@ -3,7 +3,7 @@
   <property name="Engine" value="@engine@"/>
   <property name="Transaction" value="@transaction@"/>
   
-  <domain name="D0" network="fr.dyade.aaa.agent.SimpleNetwork"/>
+  <domain name="D0" network="@network@"/>
 
   <server id="0" name="s0" hostname="localhost">
     <network domain="D0" port="27300"/>
