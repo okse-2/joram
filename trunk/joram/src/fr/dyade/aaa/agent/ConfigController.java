@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
@@ -50,7 +50,7 @@ public class ConfigController {
 
   public final static String SERVER_COUNTER = "serverCounter";
 
-  private static Logger logger = Debug.getLogger("fr.dyade.aaa.agent.ConfigController");
+  private static Logger logger = Debug.getLogger(ConfigController.class.getName());
 
   public static class Status {
     public static final int FREE = 0;
@@ -81,14 +81,11 @@ public class ConfigController {
 
   ConfigController() throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 "ConfigController.<init>()");
-    // DF: must be improved. The admin server id can be
-    // higher than zero.
+      logger.log(BasicLevel.DEBUG, "ConfigController.<init>()");
+    // DF: must be improved. The admin server id can be higher than zero.
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 " -> AgentServer.getServerId() = " + 
-                 AgentServer.getServerId());
+                 " -> AgentServer.getServerId() = " + AgentServer.getServerId());
     if (AgentServer.getServerId() == 0) {
       Transaction transaction = AgentServer.getTransaction();
       Short counter = (Short)transaction.load(SERVER_COUNTER);
@@ -812,7 +809,11 @@ public class ConfigController {
     A3CMLServer server = a3cmlConfig.getServer(sid);
     ServerDesc desc = AgentServer.getServerDesc(sid);
     AgentServer.initServerDesc(desc, server);
-    if (desc.gateway == desc.sid) {
+    
+    // TODO (AF): There is a problem with HttpNetwork.
+    
+//    if (desc.gateway == desc.sid) {
+    if (server.hops == 1) {
       if (desc.domain instanceof Network) {
         ((Network) desc.domain).addServer(server.sid);
       } else {
@@ -820,7 +821,7 @@ public class ConfigController {
       }
     } else {
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, " -> desc = " + desc);
+        logger.log(BasicLevel.DEBUG, "ConfigController.startServer -> desc = " + desc);
     }
   }
 

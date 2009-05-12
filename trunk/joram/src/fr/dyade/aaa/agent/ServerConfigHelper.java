@@ -49,40 +49,35 @@ public class ServerConfigHelper {
   public boolean addDomain(String domainName,
                            String network,
                            int routerId,
-                           int port) 
-    throws Exception {
+                           int port) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 "ServerConfigHelper.addDomain(" + domainName + ',' +
-                 network + ','
-                 + routerId + ',' + 
-                 port + ')');
+                 "ServerConfigHelper.addDomain(" + domainName + ',' + network + ',' + routerId + ',' + port + ')');
 
     // Check configuration consistency (may fail)
     A3CMLConfig a3cmlConfig = AgentServer.getConfig();
+    
     if (a3cmlConfig.domains.get(domainName) != null) 
-      throw new NameAlreadyUsedException(
-        "Domain name already used: " + domainName);
+      throw new NameAlreadyUsedException("Domain name already used: " + domainName);
+    
     if (a3cmlConfig.servers.get(new Short((short)routerId)) == null)
       throw new Exception("Server not found: " + routerId);
     
     // Update the configuration (can't fail)
     A3CMLDomain domain = new A3CMLDomain(domainName, network);
     a3cmlConfig.addDomain(domain);
-    A3CMLServer a3cmlServer = a3cmlConfig.getServer((short)routerId);
+    A3CMLServer a3cmlServer = a3cmlConfig.getServer((short) routerId);
     domain.addServer(a3cmlServer);
     A3CMLNetwork a3cmlNetwork = new A3CMLNetwork(domainName, port);
     a3cmlServer.addNetwork(a3cmlNetwork);
 
-    A3CMLServer root = a3cmlConfig.getServer(
-      AgentServer.getServerId());
+    A3CMLServer root = a3cmlConfig.getServer(AgentServer.getServerId());
     a3cmlConfig.configure(root);
 
     boolean res = false;
     if (routerId == AgentServer.getServerId()) {
       // Create and start the run-time entities (may fail)
-      Network net = 
-        (Network) Class.forName(network).newInstance();
+      Network net = (Network) Class.forName(network).newInstance();
       
       // GS: Network name is set earlier than normal to have a well formed name
       // for the MBean in addConsumer method.
@@ -91,10 +86,8 @@ public class ServerConfigHelper {
       
       try {
         short[] sids = new short[1];
-        sids[0] = (short)routerId;
-        net.init(domainName, 
-                     port, 
-                     sids);
+        sids[0] = (short) routerId;
+        net.init(domainName, port, sids);
         net.start();
       } catch (Exception exc) {
         if (logger.isLoggable(BasicLevel.ERROR))
@@ -173,20 +166,16 @@ public class ServerConfigHelper {
                         String hostName, 
                         String domainName,
                         int port,
-                        String name)
-    throws Exception {
+                        String name) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 "ServerConfigHelper.addServer(" + 
-                 sid + ',' + 
-                 hostName + ',' + 
-                 domainName + ',' + 
-                 port + ',' + 
-                 name + ')');
+                 "ServerConfigHelper.addServer(" + sid + ',' + hostName + ',' + domainName + ',' + port + ',' + name + ')');
+    
+    // Adds the server in the ACML configuration graph
+    
     A3CMLConfig a3cmlConfig = AgentServer.getConfig();
     if (a3cmlConfig.servers.get(new Integer(sid)) != null)
-      throw new ServerIdAlreadyUsedException(
-        "Server id already used: " + sid);
+      throw new ServerIdAlreadyUsedException("Server id already used: " + sid);
     
     A3CMLDomain domain = a3cmlConfig.getDomain(domainName);
     
@@ -201,24 +190,30 @@ public class ServerConfigHelper {
     A3CMLServer root = a3cmlConfig.getServer(AgentServer.getServerId());
     a3cmlConfig.configure(root);
     
-    ServerDesc serverDesc = new ServerDesc(
-      (short)sid,
-      name,
-      hostName,
-      -1);
-    AgentServer.addServerDesc(serverDesc);
-    AgentServer.initServerDesc(serverDesc, server);
-    if (serverDesc.gateway == serverDesc.sid) {
-      if (serverDesc.domain instanceof Network) {
-        Network net = (Network) serverDesc.domain;
+    // Adds the server in the configuration structure
+    
+    ServerDesc desc = new ServerDesc((short)sid, name, hostName, -1);
+    AgentServer.addServerDesc(desc);
+    AgentServer.initServerDesc(desc, server);
+    
+    // TODO (AF): There is a problem with HttpNetwork.
+
+//    if (desc.gateway == desc.sid) {
+    if (server.hops == 1) {
+      // The server is directly accessible, adds it to the corresponding Network component
+      if (desc.domain instanceof Network) {
+        Network net = (Network) desc.domain;
         net.stop();
         net.addServer((short)sid);
         net.start();
       } else {
-        throw new Error("Unknown gateway type: " + 
-                        serverDesc.domain);
+        throw new Error("Unknown gateway type: " + desc.domain);
       }
+    } else {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "ServerConfigHelper.addServer -> desc = " + desc);
     }
+
 
     if (autoCommit) commit();
   }
@@ -323,14 +318,11 @@ public class ServerConfigHelper {
 
   public void commit() throws Exception {
     A3CMLConfig a3cmlConfig = AgentServer.getConfig();
-    if (AgentServer.getTransaction() instanceof 
-        fr.dyade.aaa.util.NullTransaction) {
-      String cfgDir = System.getProperty(AgentServer.CFG_DIR_PROPERTY, 
-                                         AgentServer.DEFAULT_CFG_DIR);
-      String cfgFile = System.getProperty(AgentServer.CFG_FILE_PROPERTY,
-                                          AgentServer.DEFAULT_CFG_FILE);
-      FileOutputStream fos = new FileOutputStream(
-        new File(cfgDir, cfgFile));
+    if (AgentServer.getTransaction() instanceof fr.dyade.aaa.util.NullTransaction) {
+      // TODO (AF): NullTransaction is not significant. 
+      String cfgDir = System.getProperty(AgentServer.CFG_DIR_PROPERTY, AgentServer.DEFAULT_CFG_DIR);
+      String cfgFile = System.getProperty(AgentServer.CFG_FILE_PROPERTY, AgentServer.DEFAULT_CFG_FILE);
+      FileOutputStream fos = new FileOutputStream(new File(cfgDir, cfgFile));
       PrintWriter out = new PrintWriter(fos);
       A3CML.toXML(a3cmlConfig, out);
       out.flush();
