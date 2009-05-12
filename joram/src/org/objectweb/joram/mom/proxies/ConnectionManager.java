@@ -217,7 +217,7 @@ public class ConnectionManager implements ConnectionManagerMBean {
     try {
       MXWrapper.unregisterMBean("Joram#" + AgentServer.getServerId(), MBEAN_NAME);
     } catch (Exception e) {
-      logger.log(BasicLevel.ERROR, "unregisterMBean", e);
+      logger.log(BasicLevel.DEBUG, "unregisterMBean", e);
     }
     getCurrentInstance().removeAllManagers();
   }
