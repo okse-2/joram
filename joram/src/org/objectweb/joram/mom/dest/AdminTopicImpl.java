@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -579,10 +579,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     if (! msgs.getPersistent() && !msgs.getAsyncSend()) {
       // Means that this notification has been sent by a local
       // proxy (optimization). Must acknowledge it.
-      forward(from, 
-              new SendReplyNot(
-                               msgs.getClientContext(), 
-                               msgs.getRequestId()));
+      forward(from, new SendReplyNot(msgs.getClientContext(), msgs.getRequestId()));
     }
 
     // ... and processing the wrapped requests locally:
@@ -767,8 +764,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG,
-                     "--- " + this + ": got " 
-                     + msg.getAdminMessage());
+                     "--- " + this + ": got " + msg.getAdminMessage());
       } catch (ClassCastException exc) {
         logger.log(BasicLevel.ERROR,
                    "--- " + this + ": got bad AdminRequest");
@@ -2300,39 +2296,25 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
                          AgentId from) {
     try {
       ServerConfigHelper helper = new ServerConfigHelper(true);
-      if (helper.addDomain(request.getDomainName(),
-                           request.getNetwork(),
-                           request.getServerId(),
-                           request.getPort())) {
-        distributeReply(replyTo, msgId,
-                        new AdminReply(true, "Domain added"));
+      if (helper.addDomain(request.getDomainName(), request.getNetwork(), request.getServerId(), request.getPort())) {
+        distributeReply(replyTo, msgId, new AdminReply(true, "Domain added"));
       }
-      if (from == null) {
-        broadcastRequest(request, 
-                         -1, 
-                         replyTo, msgId);
-      }
+      if (from == null)
+        broadcastRequest(request, -1, replyTo, msgId);
     } catch (ServerConfigHelper.NameAlreadyUsedException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
-                      new AdminReply(
-                                     false, 
-                                     AdminReply.NAME_ALREADY_USED, 
-                                     exc.getMessage(), null));
+                      new AdminReply(false, AdminReply.NAME_ALREADY_USED, exc.getMessage(), null));
     } catch (ServerConfigHelper.StartFailureException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
-                      new AdminReply(
-                                     false,
-                                     AdminReply.START_FAILURE, 
-                                     exc.getMessage(), null));
+                      new AdminReply(false, AdminReply.START_FAILURE, exc.getMessage(), null));
     } catch (Exception exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "", exc);
-      distributeReply(replyTo, msgId,
-                      new AdminReply(false, exc.toString()));
+      distributeReply(replyTo, msgId, new AdminReply(false, exc.toString()));
     }
   }
 
@@ -2579,8 +2561,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       forward(to, clientMessages);
       nbMsgsDeliverSinceCreation = nbMsgsDeliverSinceCreation + 1;
     } catch (Exception exc) {
-      logger.log(
-                 BasicLevel.ERROR, "", exc);
+      logger.log(BasicLevel.ERROR, "", exc);
     }
   }
 
