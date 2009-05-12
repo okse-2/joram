@@ -647,8 +647,7 @@ public final class AgentServer {
     }
 
     // Search all directly accessible domains.
-    for (Enumeration n = root.networks.elements();
-	 n.hasMoreElements();) {
+    for (Enumeration n = root.networks.elements(); n.hasMoreElements();) {
       A3CMLNetwork network = (A3CMLNetwork) n.nextElement();
 
       A3CMLDomain domain = getConfig().getDomain(network.domain);
@@ -658,8 +657,8 @@ public final class AgentServer {
         // Initializes it with domain description. Be careful, this array
         // is kept in consumer, don't reuse it!!
         consumer.init(domain.name, network.port, domain.getServersId());
-        if (consumer instanceof SimpleNetwork &&
-            jgroups != null) {//NTA modify to SimpleHANetwork
+        if (consumer instanceof SimpleNetwork && jgroups != null) {
+          //NTA modify to SimpleHANetwork
           ((SimpleNetwork) consumer).setJGroups(jgroups);
           jgroups.setNetWork((SimpleNetwork) consumer);
         }
@@ -963,7 +962,7 @@ public final class AgentServer {
       name = new StringBuffer("AgentServer#").append(sid).append('.').append(cid).toString();
 
     if (loggerFactory != null) Debug.setLoggerFactory(loggerFactory);
-    logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer.#" + sid);
+    logmon = Debug.getLogger(AgentServer.class.getName() + ".#" + sid);
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + ", init()", new Exception());
@@ -1007,19 +1006,6 @@ public final class AgentServer {
       // transaction manager and get the configuration.
       File dir = new File(path);
       if (dir.exists() && dir.isDirectory()) {
-        
-        // Gets static configuration of agent servers from a file. This method
-        // fills the object graph configuration in the <code>A3CMLConfig</code>
-        // object, then the configure method really initializes the server.
-        // Try to read the serialized configuration
-        try {
-          a3config = A3CMLConfig.load(dir);
-          // set properties
-          setProperties(serverId, clusterId);
-        } catch (Exception exc) {
-          logmon.log(BasicLevel.WARN, getName() + ", config not found");
-        }
-        
         File tfc = new File(dir, "TFC");
         if (tfc.exists()) {
           DataInputStream dis = null;
@@ -1040,6 +1026,20 @@ public final class AgentServer {
             logmon.log(BasicLevel.FATAL, getName() + ", can't start transaction manager", exc);
             throw new Exception("Can't start transaction manager");
           }
+        }
+      }
+
+      // Gets static configuration of agent servers from a file. This method
+      // fills the object graph configuration in the <code>A3CMLConfig</code>
+      // object, then the configure method really initializes the server.
+      // There are two steps because the configuration step needs the
+      // transaction components to be initialized.
+      if (transaction != null) {
+        // Try to read the serialized configuration (through transaction)
+        try {
+          a3config = A3CMLConfig.load();
+        } catch (Exception exc) {
+          logmon.log(BasicLevel.WARN, getName() + ", config not found");
         }
       }
 
@@ -1110,7 +1110,7 @@ public final class AgentServer {
                                 "server=" + getName() + ",cons=Transaction");
       } catch (Exception exc) {
         if (logmon == null)
-          logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer");
+          logmon = Debug.getLogger(AgentServer.class.getName());
         logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
       }
 
@@ -1233,7 +1233,7 @@ public final class AgentServer {
         MXWrapper.registerMBean(bean, "AgentServer", "server=" + getName());
       } catch (Exception exc) {
         if (logmon == null)
-          logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer");
+          logmon = Debug.getLogger(AgentServer.class.getName());
         logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
       }
     } catch (Exception exc) {
@@ -1552,7 +1552,7 @@ public final class AgentServer {
       System.out.println(exc.toString());
       System.out.println(ENDSTRING);
       if (logmon == null)
-        logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer");
+        logmon = Debug.getLogger(AgentServer.class.getName());
       logmon.log(BasicLevel.ERROR,
                  getName() + " initialization failed", exc);
       System.exit(1);
@@ -1574,7 +1574,7 @@ public final class AgentServer {
       System.out.print(exc.toString());
       System.out.println(ENDSTRING);
       if (logmon == null)
-        logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer");
+        logmon = Debug.getLogger(AgentServer.class.getName());
       logmon.log(BasicLevel.ERROR, getName() + " failed", exc);
       System.exit(1);
     }
