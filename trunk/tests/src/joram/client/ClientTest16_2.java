@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,10 +29,12 @@ import javax.jms.JMSException;
 import javax.jms.Session;
 import javax.jms.TopicSubscriber;
 
-
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.client.jms.Topic;
 
 import framework.TestCase;
+
 public class ClientTest16_2 extends TestCase {
 
   public static void main(String[] args) {
@@ -41,47 +43,38 @@ public class ClientTest16_2 extends TestCase {
 
   public void run() {
     try {
-	AdminModule.connect("localhost", 2560,
-                          "root", "root", 20);
+      AdminModule.connect("localhost", 2560, "root", "root", 20);
 
-      org.objectweb.joram.client.jms.Topic topic = 
-        org.objectweb.joram.client.jms.Topic.create(0, "test_topic");
+      Topic topic = Topic.create(0, "test_topic");
 
-      ConnectionFactory cf = 
-        org.objectweb.joram.client.jms.tcp.TcpConnectionFactory.create(
-          "localhost", 2560);
-      ((org.objectweb.joram.client.jms.tcp.TcpConnectionFactory)cf)
-        .getParameters().cnxPendingTimer = 500;
+      ConnectionFactory cf = TcpConnectionFactory.create("localhost", 2560);
+      ((TcpConnectionFactory) cf).getParameters().cnxPendingTimer = 500;
 
-      Connection connection = cf.createConnection(
-        "anonymous", "anonymous");
-      
-      Session recSession = connection.createSession(
-        false,
-        Session.AUTO_ACKNOWLEDGE);
+      Connection connection = cf.createConnection("anonymous", "anonymous");
+
+      Session recSession = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
       try{
-      TopicSubscriber consumer = 
-        recSession.createDurableSubscriber(topic, "test_sub");
-      assertTrue(consumer!=null);
+        TopicSubscriber consumer = recSession.createDurableSubscriber(topic, "test_sub");
+        assertTrue(consumer!=null);
       }catch(JMSException exc){
-	  System.out.println("OK -> create fail");
-	  //if time in build permit reconnection before connectingTimer
-	  assertTrue(exc instanceof javax.jms.JMSException);
+        System.out.println("OK -> create fail");
+        //if time in build permit reconnection before connectingTimer
+        assertTrue(exc instanceof javax.jms.JMSException);
       }
 
       connection.start();
 
       Thread.sleep(5000);
-      
+
       connection.close();
 
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);
     } finally {
-	stopAgentServerExt((short)0);
-	endTest();
+      stopAgentServerExt((short)0);
+      endTest();
     }
   }
 }
