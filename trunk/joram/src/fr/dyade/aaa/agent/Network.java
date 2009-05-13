@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -334,13 +334,19 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
   /**
    * Saves information to persistent storage.
    */
-  public void save() throws IOException {}
+  public void save() throws IOException {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, getName() + ".save()");
+  }
 
   /**
    * Restores component's information from persistent storage.
    * If it is the first load, initializes it.
    */
   public void restore() throws Exception {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, getName() + ".restore()");
+
     sid = AgentServer.getServerId();
     idxLS = index(sid);
     // Loads the logical clock.
@@ -406,16 +412,26 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
   public void init(String name, int port, short[] servers) throws Exception {
     this.name = AgentServer.getName() + '.' + name;
 
-    qout = new MessageVector(this.name,
-                            AgentServer.getTransaction().isPersistent());
+    // Get the logging monitor from current server MonologLoggerFactory
+    // Be careful, logmon is initialized from name and not this.name !!
+    logmon = Debug.getLogger(Network.class.getName() + '.' + name);
+    logmon.log(BasicLevel.INFO, name + ", initialized");
+    
+    if (logmon.isLoggable(BasicLevel.DEBUG)) {
+      StringBuffer strbuf = new StringBuffer(); 
+      strbuf.append(getName()).append(".init(");
+      strbuf.append(name).append(',');
+      strbuf.append(port).append(',');
+      Strings.toString(strbuf, servers, -1, 0);
+      strbuf.append(')');
+
+      logmon.log(BasicLevel.DEBUG, strbuf.toString());
+    }
+    
+    qout = new MessageVector(this.name, AgentServer.getTransaction().isPersistent());
 
     this.domain = name;
     this.port = port;
-
-    // Get the logging monitor from current server MonologLoggerFactory
-    // Be careful, logmon is initialized from name and not this.name !!
-    logmon = Debug.getLogger(Debug.A3Network + '.' + name);
-    logmon.log(BasicLevel.INFO, name + ", initialized");
 
     // Sorts the array of server ids into ascending numerical order.
     Arrays.sort(servers);
@@ -489,6 +505,10 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * @param id	the unique server id.
    */
   synchronized void addServer(short id) throws Exception {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
+                 getName() + ".addServer(" + id + ')');
+
     // First we have to verify that id is not already in servers
     int idx = index(id);
     if (idx >= 0) return;
@@ -541,6 +561,10 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * @param id	the unique server id.
    */
   synchronized void delServer(short id) throws Exception {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
+                 getName() + ".delServer(" + id + ')');
+
     // First we have to verify that id is already in servers
     int idx = index(id);
     if (idx < 0) return;
@@ -564,8 +588,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     if (idx > 0)
       System.arraycopy(stampbuf, 0, newStampBuf, 0, idx*4);
     if (idx < (servers.length-1))
-      System.arraycopy(stampbuf, (idx+1)*4,
-                       newStampBuf, idx*4, (servers.length-idx-1)*4);
+      System.arraycopy(stampbuf, (idx+1)*4, newStampBuf, idx*4, (servers.length-idx-1)*4);
 
     stamp = newStamp;
     stampbuf = newStampBuf;
