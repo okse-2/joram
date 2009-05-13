@@ -596,7 +596,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
     } catch (FileNotFoundException exc) {
       if (logger.isLoggable(BasicLevel.INFO))
         logger.log(BasicLevel.INFO,
-                   "JoramAdapter - problem during XML configuration: " + adminFileExportXML, exc);
+                   "JoramAdapter - problem during XML configuration: " + adminFileExportXML);
     } catch (Exception exc) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR,
@@ -612,7 +612,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
     } catch (FileNotFoundException exc) {
       if (logger.isLoggable(BasicLevel.INFO))
         logger.log(BasicLevel.INFO,
-                   "JoramAdapter - problem during XML configuration: " + adminFileExportXML, exc);
+                   "JoramAdapter - problem during XML configuration: " + adminFileExportXML);
     } catch (Exception exc) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR,
