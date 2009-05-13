@@ -1073,12 +1073,13 @@ public final class AgentServer {
           a3config.addDomain(d);
           a3config.addServer(s);
         }
-        // set properties
-        setProperties(serverId, clusterId);
       }
 
       // if JGroups
       if (cid > NULL_ID) clusterId = cid;
+      
+      // set properties
+      setProperties(serverId, clusterId);
 
       // Initializes the JMX Wrapper
       try {
