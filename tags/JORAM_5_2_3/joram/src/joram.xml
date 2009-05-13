@@ -1,0 +1,645 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE project [
+    <!ENTITY common SYSTEM "./common.xml">
+]>
+
+<project default="ship" basedir=".">
+  <!-- Includes generic stuff -->
+  &common;
+
+  <!-- Initializes properties -->
+  <target name="init.joram" depends="init,setver">
+    <property name="releases.dir" location="../releases"/>
+    <property name="samples.dir" location="../samples"/>
+
+  	<copy file="${src.dir}/org/objectweb/joram/shared/stream/MetaData.javax"
+  	      tofile="${src.dir}/org/objectweb/joram/shared/stream/MetaData.java"
+  	      overwrite="true"/>
+  	
+    <replace file="${src.dir}/org/objectweb/joram/shared/stream/MetaData.java"
+             token="@major@" value="${joram.major}"/>
+    <replace file="${src.dir}/org/objectweb/joram/shared/stream/MetaData.java"
+             token="@minor@" value="${joram.minor}"/>
+    <replace file="${src.dir}/org/objectweb/joram/shared/stream/MetaData.java"
+             token="@build@" value="${joram.build}"/>
+    <replace file="${src.dir}/org/objectweb/joram/shared/stream/MetaData.java"
+             token="@protocol@" value="${joram.protocol}"/>
+
+  	<copy file="${src.dir}/org/objectweb/joram/client/jms/ConnectionMetaData.javax"
+  	      tofile="${src.dir}/org/objectweb/joram/client/jms/ConnectionMetaData.java"
+          overwrite="true"/>
+  	
+    <replace file="${src.dir}/org/objectweb/joram/client/jms/ConnectionMetaData.java"
+             token="@major@" value="${joram.major}"/>
+    <replace file="${src.dir}/org/objectweb/joram/client/jms/ConnectionMetaData.java"
+             token="@minor@" value="${joram.minor}"/>
+    <replace file="${src.dir}/org/objectweb/joram/client/jms/ConnectionMetaData.java"
+             token="@build@" value="${joram.build}"/>
+    <replace file="${src.dir}/org/objectweb/joram/client/jms/ConnectionMetaData.java"
+             token="@protocol@" value="${joram.protocol}"/>
+
+    <echo message="Joram ${joram.major}.${joram.minor}.${joram.build}/${joram.protocol}"/>
+
+    <!-- Defines specific fileset to compile -->
+    <patternset id="specific.compile.sources" >
+      <include name="fr/dyade/aaa/agent/AgentServer.java"/>
+      <include name="fr/dyade/aaa/agent/Engine.java"/>
+      <include name="fr/dyade/aaa/agent/GCEngine.java"/>
+      <include name="fr/dyade/aaa/agent/HAEngine.java"/>
+      <include name="fr/dyade/aaa/agent/SimpleNetwork.java"/>
+      <include name="fr/dyade/aaa/agent/PoolNetwork.java"/>
+      <include name="fr/dyade/aaa/agent/SSLNetwork.java"/>
+      <include name="fr/dyade/aaa/agent/NGNetwork.java"/>
+      <include name="fr/dyade/aaa/agent/UDPNetwork.java"/>
+      <include name="fr/dyade/aaa/agent/HttpNetwork.java"/>
+      <include name="fr/dyade/aaa/agent/HttpsNetwork.java"/>
+      <include name="fr/dyade/aaa/agent/SCServer.java"/>
+      <include name="fr/dyade/aaa/agent/SCAdminBase.java"/>
+      <include name="fr/dyade/aaa/agent/AgentAdmin.java"/>
+      <include name="fr/dyade/aaa/agent/UnknownDomainException.java"/>
+      <include name="fr/dyade/aaa/agent/conf/A3CMLSaxWrapper.java"/>
+      <include name="fr/dyade/aaa/agent/conf/A3CMLKXmlWrapper.java"/>
+
+      <include name="fr/dyade/aaa/util/NullTransaction.java"/>
+      <include name="fr/dyade/aaa/util/JTransaction.java"/>
+      <include name="fr/dyade/aaa/util/NTransaction.java"/>
+      <include name="fr/dyade/aaa/util/FileRepository.java"/>
+      <include name="fr/dyade/aaa/util/DBRepository.java"/>
+      <include name="fr/dyade/aaa/util/MySQLDBTransaction.java"/>
+      <include name="fr/dyade/aaa/util/DerbyDBTransaction.java"/>
+
+      <!-- Begin - Needed for JMX monitoring -->
+      <include name="fr/dyade/aaa/util/management/*.java"/>
+      <include name="com/scalagent/jmx/*.java"/>
+      <!-- End - Needed for JMX monitoring -->
+
+      <include name="fr/dyade/aaa/admin/**/*.java"/>
+
+      <!-- Begin - Needed for JNDI -->
+      <include name="fr/dyade/aaa/jndi2/**/*.java"/>
+      <!-- End - Needed for task JNDI -->
+
+      <!-- Begin - Needed for OSGI -->
+      <include name="com/scalagent/joram/osgi/server/Activator.java"/>
+      <include name="com/scalagent/joram/osgi/client/Activator.java"/>
+      <!-- include name="com/scalagent/joram/osgi/test/Activator.java"/ -->
+      <!-- include name="com/scalagent/joram/osgi/test2/Activator.java"/ -->
+      <!-- End - Needed for task OSGI -->
+
+      <include name="fr/dyade/aaa/util/SocketFactory*.java"/>
+      <include name="fr/dyade/aaa/util/ServerSocketFactory*.java"/>
+
+      <!-- Begin - Needed for JORAM -->
+      <include name="org/objectweb/joram/shared/selectors/*.java"/>
+      <include name="org/objectweb/joram/shared/admin/**/*.java"/>
+      <include name="org/objectweb/joram/shared/client/**/*.java"/>
+      <include name="org/objectweb/joram/shared/excepts/**/*.java"/>
+      <include name="org/objectweb/joram/shared/messages/**/*.java"/>
+      <!-- include name="org/objectweb/joram/shared/security/**/*.java"/ -->
+    	<include name="org/objectweb/joram/shared/security/SimpleIdentity.java"/>
+
+      <include name="org/objectweb/joram/client/**/*.java"/>
+      <exclude name="org/objectweb/joram/client/tools/**/*.java"/>
+      <include name="org/objectweb/joram/mom/**/*.java"/>
+      <exclude name="org/objectweb/joram/mom/amqp/**/*.java"/>
+      <!-- End - Needed for JORAM -->
+
+      <!-- Begin - Needed for JORAM FTP destinations -->
+      <include name="com/scalagent/joram/mom/dest/ftp/*.java"/>
+      <!-- End - Needed for JORAM FTP destinations -->
+
+      <!-- Begin - Needed for JORAM Mail destinations -->
+      <include name="com/scalagent/joram/mom/dest/mail/*.java"/>
+      <!-- End - Needed for JORAM Mail destinations -->
+
+      <!-- Begin - Needed for JORAM Scheduler destinations -->
+      <include name="com/scalagent/scheduler/*.java"/>
+      <include name="com/scalagent/joram/mom/dest/scheduler/*.java"/>
+      <!-- End - Needed for JORAM Scheduler destinations -->
+      
+      <!-- Begin - Needed for JORAM Collector destinations -->
+      <include name="com/scalagent/joram/mom/dest/collector/*.java"/>
+      <!-- End - Needed for JORAM Collector destinations -->
+    </patternset>
+
+    <!-- Specific classpath needed for compilation -->
+    <path id="specific.class.path">
+      <path refid="project.class.path"/>
+    </path>
+  </target>
+
+  <target name="setver" depends="init" unless="version">
+    <!-- If version is not set, fix it -->
+    <property name="version" value="${joram.major}.${joram.minor}.${joram.build}"/>
+  </target>
+
+  <!-- Builds all needed jars -->
+  <target name="build.joram" depends="init.joram,compile"
+      description="--> Builds Joram server and client jars.">
+    <mkdir dir="${build.dir}/META-INF"/>
+    <jar jarfile="${build.dir}/joram-shared.jar">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="${licenses.dir}/NOTICE.TXT"/>
+      </metainf>
+      <fileset dir="${obj.dir}">
+        <include name="fr/dyade/aaa/jndi2/msg/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/soap/SoapObjectHelper.class"/>
+        <include name="fr/dyade/aaa/jndi2/soap/SoapObjectItf.class"/>
+        <include name="fr/dyade/aaa/util/*.class"/>
+        <include name="fr/dyade/aaa/util/management/*.class"/>
+        <include name="org/objectweb/joram/shared/**/*.class"/>
+        <include name="com/scalagent/jmx/*.class"/>
+      </fileset>
+    </jar>
+    <jar jarfile="${build.dir}/joram-mom.jar">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
+      <fileset dir="${obj.dir}">
+        <include name="fr/dyade/aaa/admin/*.class"/>
+        <include name="fr/dyade/aaa/admin/cmd/*.class"/>
+        <include name="fr/dyade/aaa/admin/script/*.class"/>
+        <include name="fr/dyade/aaa/agent/*.class"/>
+        <include name="fr/dyade/aaa/agent/conf/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/distributed/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/ha/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/impl/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/server/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/soap/JndiSoapService.class"/>
+        <include name="org/objectweb/joram/mom/**/*.class"/>
+        <include name="com/scalagent/joram/mom/**/*.class"/>
+        <include name="com/scalagent/scheduler/*.class"/>
+      </fileset>
+    </jar>
+    <jar jarfile="${build.dir}/joram-client.jar">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
+      <fileset dir="${obj.dir}">
+        <include name="fr/dyade/aaa/jndi2/client/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/haclient/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/hascn/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/scn/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/soap/SoapExt_*.class"/>
+        <include name="org/objectweb/joram/client/jms/*.class"/>
+        <include name="org/objectweb/joram/client/jms/admin/*.class"/>
+        <include name="org/objectweb/joram/client/jms/connection/*.class"/>
+        <include name="org/objectweb/joram/client/jms/local/*.class"/>
+        <include name="org/objectweb/joram/client/jms/soap/*.class"/>
+        <include name="org/objectweb/joram/client/jms/tcp/*.class"/>
+        <include name="org/objectweb/joram/client/jms/ha/tcp/*.class"/>
+        <include name="org/objectweb/joram/client/jms/ha/local/*.class"/>
+      </fileset>
+    </jar>
+    <jar jarfile="${build.dir}/joram-connector.jar">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
+      <fileset dir="${obj.dir}">
+        <include name="org/objectweb/joram/client/connector/**/*.class"/>
+      </fileset>
+    </jar>
+    <jar jarfile="${build.dir}/joram-raconfig.jar">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
+      <fileset dir="${obj.dir}">
+        <include name="fr/dyade/aaa/agent/conf/*.class"/>
+        <include name="fr/dyade/aaa/agent/Debug.class"/>
+        <include name="fr/dyade/aaa/util/Debug.class"/>
+        <include name="org/objectweb/joram/client/connector/utils/*.class"/>
+      </fileset>
+    </jar>
+    <jar jarfile="${build.dir}/joram-config.jar">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
+      <fileset dir="${src.dir}/org/objectweb/joram/client/connector/">
+        <include name="a3debug.cfg"/>
+        <include name="a3servers.xml"/>
+      </fileset>
+    </jar>
+    <jar jarfile="${build.dir}/joram-gui.jar">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
+    </jar>
+  </target>
+
+  <!-- Ships a JORAM distribution -->
+  <target name="ship.joram" depends="ship"/>
+
+  <target name="ship" depends="build.joram"
+    description="--> Creates a Joram shipment.">
+    <mkdir dir="${ship.dir}"/>
+    <mkdir dir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/activation.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/jakarta-regexp-1.2.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/JCup.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/jms.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/jndi.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/jta.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/jmxri.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/jmxtools.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/mail.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/ow_monolog.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/soap.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/soap.war" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/connector-1_5.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/jgroups-all.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/commons-logging-api.jar" todir="${ship.dir}/lib"/>
+    <!-- copy file="${lib.dir}/kxml.jar" todir="${ship.dir}/lib"/ -->
+    <copy file="${lib.dir}/midpapi.jar" todir="${ship.dir}/lib"/>
+    <!-- copy file="${lib.dir}/hsqldb.jar" todir="${ship.dir}/lib"/ -->
+    <!-- copy file="${lib.dir}/derby.jar" todir="${ship.dir}/lib"/ -->
+    <copy file="${build.dir}/joram-shared.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-mom.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-client.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-gui.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-connector.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-config.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-raconfig.jar" todir="${ship.dir}/lib"/>
+    <!-- copy file="${build.dir}/joram-kclient.jar" todir="${ship.dir}/lib"/ -->
+    <mkdir dir="${ship.dir}/licenses"/>
+    <copy todir="${ship.dir}/licenses" flatten="yes">
+      <fileset dir="${licenses.dir}">
+        <include name="APACHE_LICENSE.TXT"/>
+        <include name="CUP_LICENSE.TXT"/>
+        <include name="LGPL_HEADER.TXT"/>
+        <include name="LGPL_LICENSE.TXT"/>
+        <include name="NOTICE.TXT"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <!-- Ships a JORAM JCA 1.5 adapter bin -->
+  <target name="ship.adapter.bin">
+    <mkdir dir="${ship.dir}/bin"/>
+    <copy file="${src.dir}/org/objectweb/joram/client/connector/utils/raconfig.sh"
+          todir="${ship.dir}/bin"/>
+    <copy file="${src.dir}/org/objectweb/joram/client/connector/utils/raconfig.bat"
+          todir="${ship.dir}/bin"/>
+  </target>
+
+  <!-- Ships a JORAM JCA 1.5 adapter -->
+  <target name="ship.adapter" depends="ship.joram"
+          description="--> Ships a JORAM JCA adapter">
+    <copy file="${src.dir}/org/objectweb/joram/client/connector/ra.xml"
+          tofile="${build.dir}/META-INF/ra.xml"/>
+    <jar jarfile="${ship.dir}/lib/joram.rar">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
+      <fileset dir="${build.dir}">
+        <include name="joram-client.jar"/>
+        <include name="joram-connector.jar"/>
+        <include name="joram-config.jar"/>
+        <include name="joram-mom.jar"/>
+        <include name="joram-shared.jar"/>
+        <include name="META-INF/ra.xml"/>
+      </fileset>
+      <fileset dir="${lib.dir}">
+        <include name="jakarta-regexp-1.2.jar"/>
+        <include name="JCup.jar"/>
+        <include name="ow_monolog.jar"/>
+      </fileset>
+    </jar>
+    <delete file="${build.dir}/META-INF/ra.xml"/>
+  </target>
+
+  <!-- Ships a JORAM JCA 1.5 adapter for non collocated use -->
+  <target name="ship.remoteadapter" depends="ship.joram"
+          description="--> Ships a JORAM JCA adapter for non collocated use">
+    <copy file="${src.dir}/org/objectweb/joram/client/connector/ra-remote.xml"
+          tofile="${build.dir}/META-INF/ra.xml"/>
+    <jar jarfile="${ship.dir}/lib/joram.rar">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
+      <fileset dir="${build.dir}">
+        <include name="joram-shared.jar"/>
+        <include name="joram-client.jar"/>
+        <include name="joram-connector.jar"/>
+        <include name="joram-config.jar"/>
+        <include name="META-INF/ra.xml"/>
+      </fileset>
+      <fileset dir="${lib.dir}">
+        <include name="JCup.jar"/>
+        <include name="ow_monolog.jar"/>
+      </fileset>
+    </jar>
+    <delete file="${build.dir}/META-INF/ra.xml"/>
+  </target>
+
+  <!-- Ships a JORAM JCA 1.5 adapter for JOnAS joram_for_jonas_ra.rar -->
+  <target name="ship.jonasadapter" depends="ship.joram"
+          description="--> Ships a JORAM JCA adapter for JOnAS">
+    <copy file="${src.dir}/org/objectweb/joram/client/connector/ra.xml"
+          tofile="${build.dir}/META-INF/ra.xml"/>
+    <copy file="${src.dir}/org/objectweb/joram/client/connector/jonas-ra.xml"
+          tofile="${build.dir}/META-INF/jonas-ra.xml"/>
+    <jar jarfile="${ship.dir}/lib/joram_for_jonas_ra.rar">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
+      <fileset dir="${build.dir}">
+        <include name="joram-config.jar"/>
+        <include name="META-INF/*.xml"/>
+      </fileset>
+    </jar>
+    <delete file="${build.dir}/META-INF/ra.xml"/>
+    <delete file="${build.dir}/META-INF/jonas-ra.xml"/>
+  </target>
+
+  <target name="ship.osgi" depends="ship.joram"
+          description="--> Builds a Joram OSGI bundle.">
+    <jar jarfile="${ship.dir}/lib/joram-mom-bundle.jar"
+         manifest="${src.dir}/com/scalagent/joram/osgi/server/manifest.mf">
+      <fileset dir="${src.dir}/com/scalagent/joram/osgi/server">
+        <include name="a3servers.xml"/>
+        <include name="a3server.prop"/>
+        <include name="a3debug.cfg"/>
+      </fileset>
+      <fileset dir="${obj.dir}">
+        <include name="com/scalagent/joram/osgi/server/**/*.class"/>
+      </fileset>
+      <fileset dir="${build.dir}">
+        <include name="joram-mom.jar"/>
+        <include name="joram-shared.jar"/>
+      </fileset>
+     <fileset dir="${lib.dir}">
+        <include name="JCup.jar"/>
+        <include name="ow_monolog.jar"/>
+        <include name="jakarta-regexp-1.2.jar"/>
+      </fileset>
+    </jar>
+
+    <jar jarfile="${ship.dir}/lib/joram-client-bundle.jar"
+         manifest="${src.dir}/com/scalagent/joram/osgi/client/manifest.mf">
+      <fileset dir="${src.dir}/com/scalagent/joram/osgi/client">
+        <include name="a3debug.cfg"/>
+      </fileset>
+      <fileset dir="${obj.dir}">
+        <include name="com/scalagent/joram/osgi/client/**/*.class"/>
+      </fileset>
+      <fileset dir="${build.dir}">
+        <include name="joram-client.jar"/>
+        <include name="joram-shared.jar"/>
+      </fileset>
+     <fileset dir="${lib.dir}">
+        <include name="jms.jar"/>
+        <include name="JCup.jar"/>
+        <include name="jakarta-regexp-1.2.jar"/>
+        <include name="ow_monolog.jar"/>
+      </fileset>
+    </jar>
+
+    <jar jarfile="${ship.dir}/lib/joram-test-bundle.jar"
+         manifest="${src.dir}/com/scalagent/joram/osgi/test/manifest.mf">
+      <fileset dir="${obj.dir}">
+        <include name="com/scalagent/joram/osgi/test/*.class"/>
+      </fileset>
+      <fileset dir="${src.dir}/com/scalagent/joram/osgi/test">
+        <include name="joramAdmin.xml"/>
+      </fileset>
+    </jar>
+
+    <jar jarfile="${ship.dir}/lib/joram-test2-bundle.jar"
+         manifest="${src.dir}/com/scalagent/joram/osgi/test2/manifest.mf">
+      <fileset dir="${obj.dir}">
+        <include name="com/scalagent/joram/osgi/test2/*.class"/>
+      </fileset>
+    </jar>
+
+    <jar jarfile="${ship.dir}/lib/joram-test3-bundle.jar"
+         manifest="${src.dir}/com/scalagent/joram/osgi/test3/manifest.mf">
+      <fileset dir="${obj.dir}">
+        <include name="com/scalagent/joram/osgi/test3/*.class"/>
+      </fileset>
+    </jar>
+
+    <jar jarfile="${ship.dir}/lib/joram-test4-bundle.jar"
+         manifest="${src.dir}/com/scalagent/joram/osgi/test4/manifest.mf">
+      <fileset dir="${obj.dir}">
+        <include name="com/scalagent/joram/osgi/test4/*.class"/>
+      </fileset>
+    </jar>
+
+    <jar jarfile="${ship.dir}/lib/joram-test5-bundle.jar"
+         manifest="${src.dir}/com/scalagent/joram/osgi/test5/manifest.mf">
+      <fileset dir="${obj.dir}">
+        <include name="com/scalagent/joram/osgi/test5/*.class"/>
+      </fileset>
+    </jar>
+  </target>
+
+  <!-- JAVADOC --> 
+  <target name="javadoc" depends="init.joram"
+      description="--> Generates the Joram's client and server JavaDoc.">
+    <javadoc sourcepath="${src.dir}"
+             destdir="${doc.dir}"
+             classpathref="project.class.path"
+             overview="overview.html"
+             access="protected"
+             version="false"
+             author="false"
+             use="false"
+             windowtitle="Joram ${version} Platform Documentation"
+             doctitle="Joram ${version} Platform Documentation"
+             header="Joram ${version}"
+             bottom="Copyright &#xA9; 2000 - 2009 Scalagent D.T. - All rights reserved">
+      <doctitle><![CDATA[<h1>Joram(TM) Documentation</h1>]]></doctitle>
+      <package name="org.objectweb.joram.*"/>
+    </javadoc>
+  </target>
+
+  <!-- JAVADOC --> 
+  <target name="javadoc.all" depends="init.joram"
+      description="--> Generates the complete JavaDoc.">
+    <javadoc sourcepath="${src.dir}"
+             destdir="${doc.dir}"
+             classpathref="project.class.path"
+             overview="overview.html"
+             access="protected"
+             version="false"
+             author="false"
+             use="false"
+             windowtitle="Joram(TM) Platform Documentation"
+             doctitle="Joram(TM) Platform Documentation"
+             bottom="Copyright &#xA9; 2000 - 2009 Scalagent D.T. - All rights reserved">
+      <doctitle><![CDATA[<h1>Joram(TM) Documentation</h1>]]></doctitle>
+      <package name="*"/>
+    </javadoc>
+  </target>
+
+  <!-- RELEASES -->
+  <target name="releases"
+          depends="clean,release.src,release.jar"
+          description="--> Builds a Joram complete distribution.">
+    <antcall target="ship.adapter" inheritAll="true"/>
+    <copy file="${ship.dir}/lib/joram.rar"
+          tofile="${releases.dir}/joram-${version}-RA.rar"/>
+    <delete file="${ship.dir}/lib/joram.rar"/>
+    <antcall target="ship.remoteadapter" inheritAll="true"/>
+    <copy file="${ship.dir}/lib/joram.rar"
+          tofile="${releases.dir}/joram-${version}-remoteRA.rar"/>
+    <delete file="${ship.dir}/lib/joram.rar"/>
+    <antcall target="ship.jonasadapter" inheritAll="true"/>
+    <copy file="${ship.dir}/lib/joram_for_jonas_ra.rar"
+          tofile="${releases.dir}/joram-jonasadapter-${version}.rar"/>
+    <delete file="${ship.dir}/lib/joram_for_jonas_ra.rar"/>
+    <antcall target="ship.adapter.bin" inheritAll="true"/>
+
+    <tar tarfile="${releases.dir}/joram-raconfig-${version}.tar"
+         longfile="gnu">
+      <tarfileset dir="${ship.dir}" prefix="joram-${version}/ship"
+                  username="joram" group="joram">
+        <include name="bin/raconfig.bat"/>
+        <include name="bin/raconfig.sh"/>
+        <include name="lib/joram-raconfig.jar"/>
+        <include name="lib/ow_monolog.jar"/>
+        <include name="licences/LGPL_HEADER.TXT"/>
+      </tarfileset>
+    </tar>
+    <delete file="${releases.dir}/joram-raconfig-${version}.tgz"/>
+    <gzip src="${releases.dir}/joram-raconfig-${version}.tar"
+          zipfile="${releases.dir}/joram-raconfig-${version}.tgz"/>
+    <delete file="${releases.dir}/joram-raconfig-${version}.tar"/>
+
+  </target>
+
+  <target name="release.jar" depends="ship.joram,javadoc"
+          description="--> Builds a Joram binary distribution.">
+    <mkdir dir="${releases.dir}"/>
+    <tar tarfile="${releases.dir}/joram-${version}.tar"
+         longfile="gnu">
+      <tarfileset dir="${doc.dir}" prefix="joram-${version}/doc"
+                  username="joram" group="joram">
+        <include name="**"/>
+      </tarfileset>
+      <tarfileset dir="${samples.dir}" prefix="joram-${version}/samples"
+                  username="joram" group="joram">
+        <include name="src/**"/>
+        <include name="config/**"/>
+        <include name="bin/**"/>
+      </tarfileset>
+      <tarfileset dir="${ship.dir}" prefix="joram-${version}/ship"
+                  username="joram" group="joram">
+        <include name="**"/>
+      </tarfileset>
+    </tar>
+    <delete file="${releases.dir}/joram-${version}.tar.tgz"/>
+    <gzip src="${releases.dir}/joram-${version}.tar"
+          zipfile="${releases.dir}/joram-${version}.tgz"/>
+    <delete file="${releases.dir}/joram-${version}.tar"/>
+  </target>
+
+  <target name="release.src" depends="init.joram"
+          description="--> Builds a Joram source distribution.">
+   <mkdir dir="${releases.dir}"/>
+     <tar tarfile="${releases.dir}/joram-${version}-src.tar"
+          longfile="gnu">
+      <tarfileset dir=".." prefix="joram-${version}"
+                  username="joram" group="joram">
+        <include name="lib/**"/>
+        <include name="src/**"/>
+        <include name="samples/src/**"/>
+        <include name="samples/config/**"/>
+        <include name="samples/bin/**"/>
+        <include name="licenses/**"/>
+      </tarfileset>
+    </tar>
+    <delete file="${releases.dir}/joram-${version}-src.tar.tgz"/>
+    <gzip src="${releases.dir}/joram-${version}-src.tar"
+          zipfile="${releases.dir}/joram-${version}-src.tgz"/>
+    <delete file="${releases.dir}/joram-${version}-src.tar"/> 
+  </target>
+
+  <target name="crlfbin" depends="init.joram">
+    <fixcrlf srcdir="${samples.dir}/bin" eol="crlf"
+             includes="*.bat"/>
+    <fixcrlf srcdir="${samples.dir}/bin" eol="lf"
+             includes="*.sh"/>
+  </target>
+</project>

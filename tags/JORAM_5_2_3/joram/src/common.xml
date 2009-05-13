@@ -1,0 +1,95 @@
+  <!-- Initializes properties -->
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Initialize the environment properties, use ${env.name} -->
+    <property environment="env"/>
+  
+    <!-- Detect cygwin unix emulation on windows-->
+    <condition property="cygwin32">
+      <equals arg1="${env.OSTYPE}" arg2="cygwin32"/>
+    </condition >
+
+    <!-- Detect NT familly OS -->
+    <condition property="nt">
+      <os family="windows"/>
+    </condition >
+
+    <!-- Get the user defined properties from file -->
+    <property file="build.properties"/>
+
+    <!-- Initialize the directory structure properties -->
+    <property name="src.dir" location="."/>
+    <property name="obj.dir" location="../classes"/>
+    <property name="lib.dir" location="../lib"/>
+    <property name="build.dir" location="../build"/>
+    <property name="ship.dir" location="../ship"/>
+    <property name="doc.dir" location="../doc"/>
+    <property name="test.dir" location="../test/src"/>
+    <property name="licenses.dir" location="../licenses"/>
+
+    <!-- Base classpath needed for execution -->
+    <path id="base.class.path">
+      <pathelement path="${java.class.path}/"/>
+      <fileset dir="${lib.dir}">
+        <include name="**.jar"/>
+        <exclude name="service.jar" unless="nt"/>
+      </fileset>
+    </path>
+
+    <!-- Project classpath needed for compilation -->
+    <path id="project.class.path">
+      <path refid="base.class.path"/>
+      <pathelement path="${obj.dir}"/>
+      <pathelement path="${additional.path}"/>
+    </path>
+  </target>
+
+  <!-- Clean all generated files -->
+  <target name="clean" depends="init">
+    <delete dir="${obj.dir}"/>
+    <delete dir="${build.dir}"/>
+    <delete dir="${ship.dir}"/>
+    <delete dir="${doc.dir}"/>
+  </target>
+
+  <!-- Prepare compilation phase -->
+  <target name="prepare" depends="init">
+    <!-- Create the directory structure -->
+    <mkdir dir="${obj.dir}"/>
+    <mkdir dir="${build.dir}"/>
+    <mkdir dir="${doc.dir}"/>
+  </target>
+
+  <!-- Compilation phase -->
+  <target name="compile" depends="prepare"
+      description="--> Compiles sources.">
+    <javac srcdir="${src.dir}:${obj.dir}"
+           destdir="${obj.dir}"
+           source="1.4"
+           debug="${debug}"
+           deprecation="${deprecation}"
+           optimize="${optimize}"
+           nowarn="${nowarn}"
+           verbose="${verbose}">
+
+      <classpath refid="specific.class.path"/>
+
+      <patternset refid="specific.compile.sources"/>
+    </javac>
+  </target>
+
+  <target name="dosunix" depends="init">
+    <fixcrlf srcdir=".." eol="lf"
+             includes="**/*.java,**/*.cup,**/*.flex,**/*.html,**/*.xml,**/*.dtd,**/*.sh"/>
+    <fixcrlf srcdir=".." eol="lf" defaultexcludes="no" includes="**/CVS/*"/>
+    <fixcrlf srcdir=".." eol="crlf" includes="**/*.bat"/>
+  </target>
+
+  <target name="chroot" depends="init">
+    <replace dir=".." defaultexcludes="no"
+             token=":tachker@aurore.scalagent.fr:"
+             value=":freyssin@aurore.scalagent.fr:">
+      <include name="**/CVS/Root"/>
+    </replace>
+  </target>
