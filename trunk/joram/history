@@ -1,4 +1,47 @@
 ###############################################################################
+# 2009/05/13 | Joram 5.2.3 tag.
+###############################################################################
++==============================================================================
+| 2009/05/13 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix in DefaultConnectionManager class: Avoid class cast exception in
+allocateConnection method (objects returned by create methods are in fact
+AbstractConnectionFactory).
+ JoramAdapter: Removes stack trace printing when XML configuration file is not
+found.
+ Bug fix: If the internal AdminWrapper object is closed the AdminModule static
+one is used.
++==============================================================================
+| 2009/05/13 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix initialization of collector destination.
++==============================================================================
+| 2009/05/12 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fixes in AgentServer initialization: Initializes the transaction component
+before the configuration reading and reads the configuration through the
+transaction (otherwise modifications in the transaction log could not be read).
+ Bug fixes in HttpNetwork reconfiguration: In ServerConfigHelper.addServer
+replaces test to add the server to the MessageConsumer (use hops rather than
+gateway attribute, gateway is defined for 'client' servers of HttpNetwork
+domains).
++==============================================================================
+| 2009/04/24 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Improves Strings utility class.
+ JoramAdmin.cfg file is no longer supported.
+ Fix logging level to DEBUG for unregisterMBean.
++==============================================================================
+| 2009/04/23 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Use ServerSocketFactory class.
++==============================================================================
+| 2009/04/17 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Changes logger naming pattern, no longer use JoramTracing class.
+ Handles reflection errors in JoramSaxWrapper during connection factories
+creation.
+###############################################################################
 # 2009/04/16 | Joram 5.2.2 tag.
 ###############################################################################
 +==============================================================================
@@ -7,6 +50,11 @@
  Removes undesirable static reference to SocketFactory14 in SocketFactory.
  Avoid infinite loop in SocketFactory creation if default class is unavailable.
  Adds ServerSocketFactory facility.
++==============================================================================
+| 2009/04/07 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Use a global configuration object to get all joram specific properties.
+ No longer modify the system properties.
 +==============================================================================
 | 2009/03/31 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
