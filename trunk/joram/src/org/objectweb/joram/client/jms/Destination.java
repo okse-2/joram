@@ -159,7 +159,8 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * @throws ConnectException if no wrapper is defined.
    */
   protected final AdminWrapper getWrapper() throws ConnectException {
-    if (wrapper != null) return wrapper;
+    if ((wrapper != null) && (! wrapper.isClosed()))
+      return wrapper;
     return AdminModule.getWrapper();
   }
 
