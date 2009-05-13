@@ -419,7 +419,6 @@
         <attribute name="Implementation-Title" value="Joram"/>
         <attribute name="Implementation-Version" value="${version}"/> 
         <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
-        <attribute name="Require-JOnAS-Services" value="joram"/>
       </manifest>
       <metainf dir="${licenses.dir}">
         <include name="NOTICE.TXT"/>
