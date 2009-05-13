@@ -104,24 +104,18 @@ public class DefaultConnectionManager
     
     try {
       if (cxRequest instanceof QueueConnectionRequest) {
-        QueueConnectionFactory factory =
-          QueueTcpConnectionFactory.create(hostName, serverPort);
-        setFactoryParameters((org.objectweb.joram.client.jms.ConnectionFactory) factory,
-                             (ManagedConnectionFactoryImpl) mcf);
+        QueueConnectionFactory factory = QueueTcpConnectionFactory.create(hostName, serverPort);
+        setFactoryParameters((AbstractConnectionFactory) factory, (ManagedConnectionFactoryImpl) mcf);
         ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
         return factory.createQueueConnection(userName, password);
       } else if (cxRequest instanceof TopicConnectionRequest) {
-        TopicConnectionFactory factory =
-          TopicTcpConnectionFactory.create(hostName, serverPort);
-        setFactoryParameters((org.objectweb.joram.client.jms.ConnectionFactory) factory,
-                             (ManagedConnectionFactoryImpl) mcf);
+        TopicConnectionFactory factory = TopicTcpConnectionFactory.create(hostName, serverPort);
+        setFactoryParameters((AbstractConnectionFactory) factory, (ManagedConnectionFactoryImpl) mcf);
         ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
         return factory.createTopicConnection(userName, password);
       } else {
-        ConnectionFactory factory =
-          TcpConnectionFactory.create(hostName, serverPort);
-        setFactoryParameters((org.objectweb.joram.client.jms.ConnectionFactory) factory,
-                             (ManagedConnectionFactoryImpl) mcf);
+        ConnectionFactory factory = TcpConnectionFactory.create(hostName, serverPort);
+        setFactoryParameters((AbstractConnectionFactory) factory, (ManagedConnectionFactoryImpl) mcf);
         ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
         return factory.createConnection(userName, password);
       }
@@ -134,7 +128,7 @@ public class DefaultConnectionManager
     }
   }
 
-  private void setFactoryParameters(org.objectweb.joram.client.jms.ConnectionFactory factory , ManagedConnectionFactoryImpl mcf) {
+  private void setFactoryParameters(AbstractConnectionFactory factory , ManagedConnectionFactoryImpl mcf) {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
                                     this + " setFactoryParameters(" + factory + "," + mcf + ")");   
