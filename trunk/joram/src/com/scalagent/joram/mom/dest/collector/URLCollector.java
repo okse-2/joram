@@ -95,7 +95,7 @@ public class URLCollector implements Collector, Serializable {
     String typeStr = collectorDest.getProperties().getProperty("collector.type");
     int type = Message.BYTES;
     if (typeStr != null)
-      type = Integer.valueOf(type).intValue();
+      type = Integer.valueOf(typeStr).intValue();
     
     if (prop == null)
       prop = new Properties();
