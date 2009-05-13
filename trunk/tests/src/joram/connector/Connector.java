@@ -22,8 +22,6 @@
  */
 package joram.connector;
 
-import java.util.Hashtable;
-
 import javax.jms.Destination;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
