@@ -80,7 +80,7 @@ public class Test9 extends BaseTest {
       // assertEquals("fr.dyade.aaa.util.NTransaction",Configuration.getProperty("Transaction"));
 
       // System.out.println("Engine: " + System.getProperty("Engine"));
-      assertEquals("fr.dyade.aaa.agent.GCEngine", Configuration.getProperty("Engine"));
+      // assertEquals("fr.dyade.aaa.agent.GCEngine", Configuration.getProperty("Engine"));
 
       // System.out.println("baseclass: " + baseclass);
       assertEquals("joram.noreg.ColocatedBaseTest", baseclass);
