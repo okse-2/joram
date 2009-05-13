@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,12 +32,19 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.Daemon;
+import fr.dyade.aaa.util.Strings;
 
 /**
  * <tt>HttpNetwork</tt> is a simple implementation of <tt>StreamNetwork</tt>
  * based on HTTP 1.1 protocol.
  */
 public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
+  /**
+   * Network address of proxy server.
+   * 
+   * @see #proxyhost
+   * @see #proxyport
+   */
   private InetAddress proxy = null;
   /**
    *  Hostname (or IP dotted address) of proxy host, if not defined there
@@ -190,17 +197,6 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     try {
       if (isRunning()) return;
 
-      // AF: May be, we have to verify that there is only one 'listen' network.
-      for (int i=0; i<servers.length; i++) {
-        server = AgentServer.getServerDesc(servers[i]);
-        if ((server.getServerId() != AgentServer.getServerId()) &&
-            (server.getPort() > 0)) {
-          logmon.log(BasicLevel.DEBUG, getName() + ", server=" + server);
-          break;
-        }
-        server = null;
-      }
-
       if (port != 0) {
         dmon = new Daemon[NbDaemon];
         ServerSocket listen = createServerSocket();
@@ -209,6 +205,15 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
           dmon[i] = new NetServerIn(getName() + '.' + i, listen, logmon);
         }
       } else {
+        // AF: May be, we have to verify that there is only one 'listen' network.
+        for (int i=0; i<servers.length; i++) {
+          server = AgentServer.getServerDesc(servers[i]);
+          if ((server.getServerId() != AgentServer.getServerId()) && (server.getPort() > 0)) {
+            logmon.log(BasicLevel.DEBUG, getName() + ", server=" + server);
+            break;
+          }
+          server = null;
+        }
         dmon = new Daemon[1];
         dmon[0] = new NetServerOut(getName(), logmon);
       }
