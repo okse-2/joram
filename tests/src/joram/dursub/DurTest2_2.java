@@ -31,7 +31,9 @@ import javax.jms.TextMessage;
 import javax.jms.TopicSubscriber;
 
 
+import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 import framework.TestCase;
 
@@ -48,34 +50,25 @@ public class DurTest2_2 extends TestCase {
 
   public void run() {
     try {
-	//System.out.println("AdminModule connect");
-      AdminModule.connect("localhost", 2560,
-                          "root", "root", 60);
+      //System.out.println("AdminModule connect");
+      AdminModule.connect("localhost", 2560, "root", "root", 60);
 
       //System.out.println("Create topic");
-      org.objectweb.joram.client.jms.Topic topic = 
-        org.objectweb.joram.client.jms.Topic.create(0, "topic");
+      Topic topic = Topic.create(0, "topic");
       topic.setFreeReading();
       topic.setFreeWriting();
 
-      ConnectionFactory cf = 
-        org.objectweb.joram.client.jms.tcp.TcpConnectionFactory.create(
-          "localhost", 2560);
-      
-      Connection connection = cf.createConnection(
-        "anonymous", "anonymous");
+      ConnectionFactory cf = TcpConnectionFactory.create("localhost", 2560);
 
-      Session sendSession = connection.createSession(
-        false,
-        Session.AUTO_ACKNOWLEDGE);
+      Connection connection = cf.createConnection("anonymous", "anonymous");
+
+      Session sendSession = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
       MessageProducer producer = sendSession.createProducer(topic);
 
-      Session recSession = connection.createSession(
-        false,
-        Session.AUTO_ACKNOWLEDGE);
+      Session recSession = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
       TopicSubscriber consumer = recSession.createDurableSubscriber(topic, "test_sub");
-      
+
       connection.start();
 
       //System.out.println("Consumer: receive msg2");
