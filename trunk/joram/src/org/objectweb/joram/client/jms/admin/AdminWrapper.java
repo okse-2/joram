@@ -127,11 +127,23 @@ public class AdminWrapper {
     requestor = new AdminRequestor(cnx);
   }
 
+  /**
+   * Closes the underlying requestor.
+   */
   public void close() {
     if (requestor != null) requestor.close();
     requestor = null;
   }
 
+  /**
+   * Returns true if the underlying requestor is closed.
+   * 
+   * @return true if the underlying requestor is closed.
+   */
+  public boolean isClosed() {
+    return (requestor == null);
+  }
+  
   /**
    * Stops the platform local server.
    *
