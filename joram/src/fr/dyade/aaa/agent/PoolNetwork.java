@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2008 CSSI
  *
  * This library is free software; you can redistribute it and/or
@@ -300,11 +300,11 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
   synchronized void addServer(short id) throws Exception {
     if (logmon.isLoggable(BasicLevel.DEBUG)) {
       StringBuffer strbuf = new StringBuffer();
+      strbuf.append(getName()).append(" before addServer(").append(id).append("):");
       for (int i=0; i<servers.length; i++) {
-        strbuf.append("\n\t").append("server#" + servers[i] + " -> " + sessions[i]);
+        strbuf.append("\n\tserver#" + servers[i] + " -> " + sessions[i]);
       }
-      logmon.log(BasicLevel.DEBUG,
-                 getName() + " before addServer:" + strbuf.toString());
+      logmon.log(BasicLevel.DEBUG, strbuf.toString());
     }
 
     // First we have to verify that the server is not already defined.
@@ -335,16 +335,17 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 
       if (logmon.isLoggable(BasicLevel.DEBUG)) {
         StringBuffer strbuf = new StringBuffer();
+        strbuf.append(getName()).append(" after addServer:");
         for (int i=0; i<servers.length; i++) {
-          strbuf.append("\t").append(sessions[i]).append("\n");
+          strbuf.append("\n\tserver#" + servers[i] + " -> " + sessions[i]);
         }
-        logmon.log(BasicLevel.DEBUG,
-                   getName() + " after addServer:" + strbuf.toString());
+        logmon.log(BasicLevel.DEBUG, strbuf.toString());
       }
 
     } catch (Exception exc) {
       logmon.log(BasicLevel.FATAL, getName() + " addServer failed", exc);
     }
+    
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + " addServer ok");
   }
@@ -357,10 +358,11 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
   synchronized void delServer(short id) throws Exception {
     if (logmon.isLoggable(BasicLevel.DEBUG)) {
       StringBuffer strbuf = new StringBuffer();
+      strbuf.append(getName()).append(" before delServer(").append(id).append("):");
       for (int i=0; i<servers.length; i++) {
-        strbuf.append("\t").append(sessions[i]).append("\n");
+        strbuf.append("\n\tserver#" + servers[i] + " -> " + sessions[i]);
       }
-      logmon.log(BasicLevel.DEBUG, getName() + strbuf.toString());
+      logmon.log(BasicLevel.DEBUG, strbuf.toString());
     }
 
     // First we have to verify that the server is defined.
@@ -372,7 +374,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 
       NetSession[] newSessions = new NetSession[servers.length];
       int j = 0;
-      for (int i=0; i<servers.length; i++) {
+      for (int i=0; i<sessions.length; i++) {
         if (sessions[i] == null) {
           j += 1;
         } else if (sessions[i].sid != id) {
@@ -384,16 +386,19 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 
       if (logmon.isLoggable(BasicLevel.DEBUG)) {
         StringBuffer strbuf = new StringBuffer();
+        strbuf.append(getName()).append(" after delServer:");
         for (int i=0; i<servers.length; i++) {
-          strbuf.append("\t").append(sessions[i]).append("\n");
+          strbuf.append("\n\tserver#" + servers[i] + " -> " + sessions[i]);
         }
-        logmon.log(BasicLevel.DEBUG, getName() + strbuf.toString());
+        logmon.log(BasicLevel.DEBUG, strbuf.toString());
       }
 
     } catch (Exception exc) {
       logmon.log(BasicLevel.FATAL, getName() + " delServer failed", exc);
     }
-    logmon.log(BasicLevel.FATAL, getName() + " delServer ok", new Exception());
+    
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, getName() + " delServer ok");
   }
 
   private String getMBeanName(short sid) {
@@ -718,8 +723,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
             Boot boot = readBoot(sock.getInputStream());
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
               this.logmon.log(BasicLevel.DEBUG,
-                              this.getName() + ", connection setup from #" +
-                              boot.sid);
+                              this.getName() + ", connection setup from #" + boot.sid);
             getSession(boot.sid).start(sock, boot.boot);
           } catch (Exception exc) {
             this.logmon.log(BasicLevel.ERROR,
@@ -2127,7 +2131,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 
         running = false;
         close();
-        // Avoid a session starting befor the end of this thread.
+        // Avoid a session starting before the end of this thread.
         sock = null;
       }
     }
