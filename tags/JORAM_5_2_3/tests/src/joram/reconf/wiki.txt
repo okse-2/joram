@@ -1,0 +1,150 @@
+The dynamic configuration feature is available from the Joram version 4.2. It allows to modify a Joram platform at run-time by adding and removing servers. As the servers can be gathered into several domains you can also add and remove domains.
+
+!!!Adding a new server
+
+You can dynamically configure your Joram platform by adding new Joram servers. This is a two steps operation:
+# define the new server in the platform configuration using the Joram administration API
+# start the new server
+
+Let's take an example in order to illustrate how it works. This simple scenario starts from a very simple Joram platform configuration that contains only one server called {{S0}}. This configuration is defined in Joram user guide (3.3.1).
+
+{{{
+<?xml version="1.0"?> 
+<config> 
+  <property name="Transaction" value="fr.dyade.aaa.util.NullTransaction"/> 
+  <server id="0" name="S0" hostname="localhost"> 
+    <service class="org.objectweb.joram.mom.proxies.ConnectionManager" args="root root"/> 
+    <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" args="16010"/> 
+    <service class="fr.dyade.aaa.jndi2.server.JndiServer" args="16400"/> 
+  </server> 
+</config>
+}}}
+
+!! Server definition
+
+The definition of a new server is programmatically done using the class {{AdminModule}} from Joram's administration API (package {{org.objectweb.joram.jms.admin}}).
+
+{{{
+import org.objectweb.joram.client.jms.admin.AdminModule;
+}}}
+
+First you need to connect the {{AdminModule}} to the Joram server {{S0}}:
+
+{{{
+AdminModule.connect("localhost", 16010, "root", "root", 60);
+}}}
+
+In order to define a new server you must specify in which domain the server is added. As the initial configuration doesn't define any domain, you have to add a first domain to the platform configuration.
+
+A domain is defined by three parameters:
+# its name (unique inside a platform)
+# the name of an existing server that will be the first server belonging to this domain. When this server already belongs to a domain, it becomes the router between this domain and the new domain.
+# the port used by the first server to communicate with the other servers from this domain (none at the beginning)
+
+The following code adds the domain {{D0}} that contains the server {{S0}}. The port used by {{S0}} to communicate inside {{D0}} is {{17770}}.
+
+{{{
+AdminModule.addDomain("D0", "S0", 17770);
+}}}
+
+Once the domain {{D0}} is added you can add a new server {{S1}} into this domain. A server is defined by five parameters:
+# its name (unique inside a platform)
+# the address or name of the host where the server is running
+# the identifier of the server (unique inside a platform)
+# the name of the domain where the server is added
+# the port used by the server to communicate with other servers inside the domain
+
+{{{
+AdminModule.addServer("S1", "localhost", (short)1, "D0", 17771);
+}}}
+
+Now the server {{S1}} has been added you need to get the overall configuration of the platform in order to start {{S1}}.
+
+{{{
+String platformConfig = AdminModule.getConfiguration();
+}}}
+
+The configuration is returned as a {{String}} which content is:
+
+{{{
+<?xml version="1.0"?>
+<!DOCTYPE config SYSTEM "a3config.dtd">
+
+<config>
+
+  <domain name="D0" network="fr.dyade.aaa.agent.SimpleNetwork"/>
+
+  <server hostname="localhost" id="1" name="S1">
+    <network domain="D0" port="17771"/>
+    <service class="org.objectweb.joram.mom.proxies.ConnectionManager" args="root root"/>
+  </server>
+
+  <server hostname="localhost" id="0" name="S0">
+    <network domain="D0" port="17770"/>
+    <service class="org.objectweb.joram.mom.proxies.ConnectionManager" args="root root"/>
+    <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" args="16010"/>
+    <service class="fr.dyade.aaa.jndi2.server.JndiServer" args="16400"/> 
+  </server>
+
+</config>
+}}}
+
+As you can see, the initial platform configuration has been extended with the definition of a new domain {{D0}} and a new server {{S1}}.
+
+Store this configuration into a file {{a3servers_updated.xml}}. This file is necessary to start the new server {{S1}}.
+
+{{{
+File platformConfigFile = new File("a3servers_updated.xml");
+FileOutputStream fos = new FileOutputStream(platformConfigFile);
+PrintWriter pw = new PrintWriter(fos);
+pw.println(platformConfig);
+pw.flush();
+pw.close();
+fos.close();
+}}}
+
+!! Server start
+
+The server {{S1}} is started in the same way as described in Joram user guide (see 3.3.2, running a platform):
+# copy the file a3servers_updated.xml in the directory where you want to start {{S1}} and rename it to {{a3servers.xml}}. You also need to put the DTD file {{a3config.dtd}} in the same directory.
+# customize the configuration of {{S1}} by modifying the file {{a3servers.xml}}. For example, you can add services (e.g. distributed {{JndiServer}}).
+# start the server with the following commands:
+
+{{{
+  cd <S1 running dir>
+  java fr.dyade.aaa.AgentServer 1 ./s1
+}}}
+
+!!!Removing a server
+
+This is a two steps operation:
+# stop the server
+# remove the server from the platform configuration using the Joram administration API
+
+Notice that you can also remove it first from the configuration and then stop it.
+
+!! Server stop
+
+To stop a server you need to specify the identifier of the server. Notice that this operation is not synchronous, i.e. the server is asynchronously stopped. The server may still be running a while after the method {{stopServer}} returned.
+
+{{{
+AdminModule.stopServer(1);
+}}}
+
+!! Server removal
+
+To remove a server from the platform configuration, you need to give the name of the server. This operation destroys all the pending messages sent to the removed server through the whole platform.
+
+{{{
+AdminModule.removeServer("S1");
+}}}
+
+You can also remove a domain even if it is not empty. In this last case, the servers inside this domain are also removed. So you have to stop them.
+
+{{{
+AdminModule.removeDomain("D0");
+}}}
+
+This last operation removes the domain {{D0}} but not the server {{S0}} because it is used to make the dynamic configuration.
+
+When you manipulate configurations with multiple domains by removing servers and/or domains, be careful not to split your platform into several parts.
