@@ -56,11 +56,6 @@
          <config-property-value>s0</config-property-value>
       </config-property>
       <config-property>
-         <config-property-name>AdminFile</config-property-name>
-         <config-property-type>java.lang.String</config-property-type>
-         <config-property-value>joram-admin.cfg</config-property-value>
-      </config-property>
-      <config-property>
          <config-property-name>AdminFileXML</config-property-name>
          <config-property-type>java.lang.String</config-property-type>
          <config-property-value>joramAdmin.xml</config-property-value>
