@@ -17,9 +17,9 @@
 
   <target name="tests.all"
            description=" --> launch all joram tests">
-     <antcall target="tests.noperf.all"/>
-     <antcall target="tests.ha"/>
-     <antcall target="tests.perf"/>
+     <ant dir="." antfile="build.xml" target="tests.noperf.all"/>
+     <ant dir="." antfile="build.xml" target="tests.ha"/>
+     <ant dir="." antfile="build.xml" target="tests.perf"/>
    </target>
     
   <target name="tests.noperf.all"
@@ -122,7 +122,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> launch all ha tests">
     <antcall target="ha.test1"/>
     <antcall target="ha.test2"/>
-    <!-- ant dir="." antfile="build.xml" target="ha.test3"/ -->
+    <!-- antcall target="ha.test3"/ -->
     <antcall target="ha.test4-1"/>
     <antcall target="ha.test4-2"/>
     <antcall target="ha.test5-1"/>
@@ -217,10 +217,13 @@ description=" --> launch all exceptionlistener tests">
 
   <target name="tests.reconf"
           description=" --> launch all reconf tests">
-    <antcall target="reconf.test-base"/>
-    <antcall target="reconf.test"/>
+    <antcall target="reconf.test0"/>
+    <antcall target="reconf.test1"/>
     <antcall target="reconf.test2"/>
     <antcall target="reconf.test3"/>
+    <antcall target="reconf.test4"/>
+    <antcall target="reconf.test5"/>
+    <antcall target="reconf.test6"/>
   </target>
 
   <target name="tests.perf"
@@ -274,7 +277,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="noreg.test50"/>
     <antcall target="noreg.test51"/>
     <antcall target="noreg.test56"/>
-    <!-- ant dir="." antfile="build.xml" target="noreg.test57"/ -->
+    <!-- antcall target="noreg.test57"/ -->
   </target>
 
   <target name="tests.xa"
@@ -1944,22 +1947,130 @@ description=" --> launch all exceptionlistener tests">
 
   <!--  test reconf -->
 
-  <target name="reconf.test-base" depends="init.a3props,compile"
-          description=" --> test reconfiguration server">
+  <target name="reconf.test0" depends="reconf.test0.1,reconf.test0.2"/>
+
+  <target name="reconf.test0.1" depends="init.a3props,compile"
+          description=" --> test reconfiguration server - SimpleNetwork">
     <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.reconf.ReconfTestBase"/>
+      <param name="testid" value="reconf.test0.1"/>
+      <param name="className" value="joram.reconf.ReconfTest0"/>
       <param name="jndiconf" value="reconf/jndi.properties"/>
       <param name="a3conf" value="reconf/a3servers.xml"/>
       <param name="args" value=""/>
-      <param name="jvmargs" value=""/>
+      <param name="jvmargs" value="-DNetwork=fr.dyade.aaa.agent.SimpleNetwork"/>
+    </antcall>
+  </target>
+	
+  <target name="reconf.test0.2" depends="init.a3props,compile"
+          description=" --> test reconfiguration server - PoolNetwork">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="reconf.test0.2"/>
+      <param name="className" value="joram.reconf.ReconfTest0"/>
+      <param name="jndiconf" value="reconf/jndi.properties"/>
+      <param name="a3conf" value="reconf/a3servers.xml"/>
+      <param name="args" value=""/>
+      <param name="jvmargs" value="-DNetwork=fr.dyade.aaa.agent.PoolNetwork"/>
+    </antcall>
+  </target>
+
+  <target name="reconf.test1" depends="reconf.test1.1,reconf.test1.2"/>
+
+	
+  <target name="reconf.test1.1" depends="init.a3props,compile"
+          description=" --> test reconfiguration server - SimpleNetwork">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="reconf.test1.1"/>
+      <param name="className" value="joram.reconf.ReconfTest1"/>
+      <param name="jndiconf" value="reconf/jndi.properties"/>
+      <param name="a3conf" value="reconf/a3servers.xml"/>
+      <param name="jvmargs" value="-DNetwork=fr.dyade.aaa.agent.SimpleNetwork"/>
+      <param name="args" value=""/>
     </antcall>
   </target>
   
-  <target name="reconf.test" depends="init.a3props,compile"
-          description=" --> test reconfiguration server">
+  <target name="reconf.test1.2" depends="init.a3props,compile"
+          description=" --> test reconfiguration server - PoolNetwork">
     <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.reconf.ReconfTest"/>
-      <param name="testid" value="reconf.test"/>
+      <param name="testid" value="reconf.test1.2"/>
+      <param name="className" value="joram.reconf.ReconfTest1"/>
+      <param name="jndiconf" value="reconf/jndi.properties"/>
+      <param name="a3conf" value="reconf/a3servers.xml"/>
+      <param name="jvmargs" value="-DNetwork=fr.dyade.aaa.agent.PoolNetwork"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="reconf.test2" depends="init.a3props,compile"
+          description=" --> test reconfiguration server with exceptions">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="reconf.test2"/>
+      <param name="className" value="joram.reconf.ReconfTest2"/>
+      <param name="jndiconf" value="reconf/jndi.properties"/>
+      <param name="a3conf" value="reconf/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+ 
+  <target name="reconf.test3" depends="reconf.test3.1,reconf.test3.2"/>
+
+  <target name="reconf.test3.1" depends="init.a3props,compile"
+          description=" --> test reconfiguration server - SimpleNetwork">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="reconf.test3.1"/>
+      <param name="className" value="joram.reconf.ReconfTest3"/>
+      <param name="jndiconf" value="reconf/jndi.properties"/>
+      <param name="a3conf" value="reconf/a3servers3.xml"/>
+    	<param name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="reconf.test3.2" depends="init.a3props,compile"
+          description=" --> test reconfiguration server - PoolNetwork">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="reconf.test3.2"/>
+      <param name="className" value="joram.reconf.ReconfTest3"/>
+      <param name="jndiconf" value="reconf/jndi.properties"/>
+      <param name="a3conf" value="reconf/a3servers3.xml"/>
+    	<param name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+	 
+	<target name="reconf.test4" depends="reconf.test4.1,reconf.test4.2"/>
+
+  <target name="reconf.test4.1" depends="init.a3props,compile"
+          description=" --> test reconfiguration server - SimpleNetwork">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="reconf.test4.1"/>
+      <param name="className" value="joram.reconf.ReconfTest4"/>
+      <param name="jndiconf" value="reconf/jndi.properties"/>
+      <param name="a3conf" value="reconf/a3servers.xml"/>
+      <param name="jvmargs" value="-DNetwork=fr.dyade.aaa.agent.SimpleNetwork"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="reconf.test4.2" depends="init.a3props,compile"
+          description=" --> test reconfiguration server - PoolNetwork">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="reconf.test4.2"/>
+      <param name="className" value="joram.reconf.ReconfTest4"/>
+      <param name="jndiconf" value="reconf/jndi.properties"/>
+      <param name="a3conf" value="reconf/a3servers.xml"/>
+      <param name="jvmargs" value="-DNetwork=fr.dyade.aaa.agent.PoolNetwork"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="reconf.test5" depends="init.a3props,compile"
+          description=" --> test reconfiguration server - HttpNetwork">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="reconf.test5"/>
+      <param name="className" value="joram.reconf.ReconfTest5"/>
       <param name="jndiconf" value="reconf/jndi.properties"/>
       <param name="a3conf" value="reconf/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -1967,29 +2078,19 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 
-  <target name="reconf.test2" depends="init.a3props,compile"
-          description=" --> test reconfiguration server with exception">
+  <target name="reconf.test6" depends="init.a3props,compile"
+          description=" --> test reconfiguration server - HttpNetwork">
     <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.reconf.ReconfTest2"/>
-      <param name="testid" value="reconf.test1"/>
+      <param name="testid" value="reconf.test6"/>
+      <param name="className" value="joram.reconf.ReconfTest6"/>
       <param name="jndiconf" value="reconf/jndi.properties"/>
       <param name="a3conf" value="reconf/a3servers.xml"/>
       <param name="jvmargs" value=""/>
       <param name="args" value=""/>
     </antcall>
   </target>
-  
-  <target name="reconf.test3" depends="init.a3props,compile"
-          description=" --> test reconfiguration server">
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.reconf.ReconfTest3"/>
-      <param name="jndiconf" value="reconf/jndi.properties"/>
-      <param name="a3conf" value="reconf/a3servers3.xml"/>
-      <param name="jvmargs" value=""/>
-      <param name="args" value=""/>
-    </antcall>
-  </target>
-  <!-- end test reconf -->
+
+	<!-- end test reconf -->
 
   <!-- perf test -->
 
@@ -2875,7 +2976,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="noreg.test8" depends="init.a3props,compile"
           description=" --> check server start and stop">
     <antcall target="test.run" inheritAll="true">
-      <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="className" value="joram.noreg.Test8"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
@@ -2889,7 +2990,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="noreg.test9" depends="init.a3props,compile"
           description=" --> check message ID and system property">
     <antcall target="test.run" inheritAll="true">
-      <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="className" value="joram.noreg.Test9"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
@@ -3092,8 +3193,8 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test close during receive and start consumer cnx during producer send. option : queue or topic and  Tcp or local ">
     <antcall target="test16-1.noreg"/>
     <antcall target="test16-2.noreg"/>
-    <!-- ant dir="." antfile="build.xml" target="test16-3.noreg"/ -->
-    <!-- ant dir="." antfile="build.xml" target="test16-4.noreg"/ -->
+    <!-- antcall target="test16-3.noreg"/ -->
+    <!-- antcall target="test16-4.noreg"/ -->
   </target>
 
 
@@ -3149,8 +3250,8 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test close and start consumer cnx during producer send. option : queue or topic and  Tcp or local ">
     <antcall target="test17-1.noreg"/>
     <antcall target="test17-2.noreg"/>
-    <!-- ant dir="." antfile="build.xml" target="test17-3.noreg"/ -->
-    <!-- ant dir="." antfile="build.xml" target="test17-4.noreg"/ -->
+    <!-- antcall target="test17-3.noreg"/ -->
+    <!-- antcall target="test17-4.noreg"/ -->
   </target>
 
   <target name="test17-1.noreg" depends="init.a3props,compile">
@@ -3204,7 +3305,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="noreg.test18"
           description=" --> test exception listener activation during close. option:  Tcp or local ">
     <antcall target="test18-1.noreg"/>
-    <!-- ant dir="." antfile="build.xml" target="test18-2.noreg"/ -->
+    <!-- antcall target="test18-2.noreg"/ -->
   </target>
 
 
