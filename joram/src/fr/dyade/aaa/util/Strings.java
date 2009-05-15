@@ -36,6 +36,30 @@ import java.util.Map;
  */
 public class Strings {
   /**
+   * Controls the default formatting of lists of objects.
+   * By default lists with a number of elements up to <code>listMax</code> are
+   * entirely printed. A value of <code>-1</code> leads to complete printing of
+   * the list, whatever its size.
+   * <p>
+   * This variable, when used in an agent server, may be set by the debug
+   * variable <code>Debug.var.fr.dyade.aaa.util.listMax</code>. Its default value
+   * is <code>10</code>.
+   */
+  public static int listMax = 10;
+
+  /**
+   * Controls the default formatting of lists of objects.
+   * By default lists with a number of elements greater than <code>listMax</code>
+   * are partially printed, with the <code>listBorder</code> leading and trailing
+   * elements.
+   * <p>
+   * This variable, when used in an agent server, may be set by the debug
+   * variable <code>Debug.var.fr.dyade.aaa.util.listBorder</code>. Its default value is
+   * is <code>3</code>.
+   */
+  public static int listBorder = 3;
+  
+  /**
    * Provides a string representation of an object. Checks if there exists
    * in this class a specialized <code>toString</code> function for the object
    * class, or calls the <code>toString</code> function of the object.
@@ -240,16 +264,19 @@ public class Strings {
   /**
    * Provides a string representation of an array.
    * <p>
-   * Lists with a number of elements greater than <code>10</code> are partially
-   * printed, with the <code>3</code> leading and trailing elements.
+   * Lists with a number of elements greater than <code>listMax</code> are partially
+   * printed, with the <code>listBorder</code> leading and trailing elements.
    *
    * @param output      a buffer to print the object into
    * @param obj         the array to print
    * @param type        the type of the array components
+   * 
+   * @see #listMax
+   * @see #listBorder
    */
   public static final void toString(StringBuffer output,
                                     Object obj, Class type) {
-    toString(output, obj, type, 10, 3);
+    toString(output, obj, type, listMax, listBorder);
   }
 
   /**
@@ -369,15 +396,18 @@ public class Strings {
   /**
    * Provides a string representation of an array of booleans.
    * <p>
-   * Lists with a number of elements greater than <code>10</code> are partially
-   * printed, with the <code>3</code> leading and trailing elements.
+   * Lists with a number of elements greater than <code>listMax</code> are partially
+   * printed, with the <code>listBorder</code> leading and trailing elements.
    *
    * @param output      a buffer to print the object into
    * @param obj         the array to print
    * @param type        the type of the array components
+   * 
+   * @see #listMax
+   * @see #listBorder
    */
   public static final void toString(StringBuffer output, boolean[] tab) {
-    toString(output, tab, 10, 3);
+    toString(output, tab, listMax, listBorder);
   }
   
   /**
@@ -432,15 +462,18 @@ public class Strings {
   /**
    * Provides a string representation of an array of bytes.
    * <p>
-   * Lists with a number of elements greater than <code>10</code> are partially
-   * printed, with the <code>3</code> leading and trailing elements.
+   * Lists with a number of elements greater than <code>listMax</code> are partially
+   * printed, with the <code>listBorder</code> leading and trailing elements.
    *
    * @param output      a buffer to print the object into
    * @param obj         the array to print
    * @param type        the type of the array components
+   * 
+   * @see #listMax
+   * @see #listBorder
    */
   public static final void toString(StringBuffer output, byte[] tab) {
-    toString(output, tab, 10, 3);
+    toString(output, tab, listMax, listBorder);
   }
   
   /**
@@ -495,15 +528,18 @@ public class Strings {
   /**
    * Provides a string representation of an array of chars.
    * <p>
-   * Lists with a number of elements greater than <code>10</code> are partially
-   * printed, with the <code>3</code> leading and trailing elements.
+   * Lists with a number of elements greater than <code>listMax</code> are partially
+   * printed, with the <code>listBorder</code> leading and trailing elements.
    *
    * @param output      a buffer to print the object into
    * @param obj         the array to print
    * @param type        the type of the array components
+   * 
+   * @see #listMax
+   * @see #listBorder
    */
   public static final void toString(StringBuffer output, char[] tab) {
-    toString(output, tab, 10, 3);
+    toString(output, tab, listMax, listBorder);
   }
   
   /**
@@ -558,15 +594,18 @@ public class Strings {
   /**
    * Provides a string representation of an array of shorts.
    * <p>
-   * Lists with a number of elements greater than <code>10</code> are partially
-   * printed, with the <code>3</code> leading and trailing elements.
+   * Lists with a number of elements greater than <code>listMax</code> are partially
+   * printed, with the <code>listBorder</code> leading and trailing elements.
    *
    * @param output      a buffer to print the object into
    * @param obj         the array to print
    * @param type        the type of the array components
+   * 
+   * @see #listMax
+   * @see #listBorder
    */
   public static final void toString(StringBuffer output, short[] tab) {
-    toString(output, tab, 10, 3);
+    toString(output, tab, listMax, listBorder);
   }
   
   /**
@@ -621,15 +660,18 @@ public class Strings {
   /**
    * Provides a string representation of an array of ints.
    * <p>
-   * Lists with a number of elements greater than <code>10</code> are partially
-   * printed, with the <code>3</code> leading and trailing elements.
+   * Lists with a number of elements greater than <code>listMax</code> are partially
+   * printed, with the <code>listBorder</code> leading and trailing elements.
    *
    * @param output      a buffer to print the object into
    * @param obj         the array to print
    * @param type        the type of the array components
+   * 
+   * @see #listMax
+   * @see #listBorder
    */
   public static final void toString(StringBuffer output, int[] tab) {
-    toString(output, tab, 10, 3);
+    toString(output, tab, listMax, listBorder);
   }
   
   /**
@@ -684,15 +726,18 @@ public class Strings {
   /**
    * Provides a string representation of an array of longs.
    * <p>
-   * Lists with a number of elements greater than <code>10</code> are partially
-   * printed, with the <code>3</code> leading and trailing elements.
+   * Lists with a number of elements greater than <code>listMax</code> are partially
+   * printed, with the <code>listBorder</code> leading and trailing elements.
    *
    * @param output      a buffer to print the object into
    * @param obj         the array to print
    * @param type        the type of the array components
+   * 
+   * @see #listMax
+   * @see #listBorder
    */
   public static final void toString(StringBuffer output, long[] tab) {
-    toString(output, tab, 10, 3);
+    toString(output, tab, listMax, listBorder);
   }
 
   /**
@@ -747,15 +792,18 @@ public class Strings {
   /**
    * Provides a string representation of an array of floats.
    * <p>
-   * Lists with a number of elements greater than <code>10</code> are partially
-   * printed, with the <code>3</code> leading and trailing elements.
+   * Lists with a number of elements greater than <code>listMax</code> are partially
+   * printed, with the <code>listBorder</code> leading and trailing elements.
    *
    * @param output      a buffer to print the object into
    * @param obj         the array to print
    * @param type        the type of the array components
+   * 
+   * @see #listMax
+   * @see #listBorder
    */
   public static final void toString(StringBuffer output, float[] tab) {
-    toString(output, tab, 10, 3);
+    toString(output, tab, listMax, listBorder);
   }
   
   /**
@@ -810,16 +858,19 @@ public class Strings {
   /**
    * Provides a string representation of an array of doubles.
    * <p>
-   * Lists with a number of elements greater than <code>10</code> are partially
-   * printed, with the <code>3</code> leading and trailing elements.
+   * Lists with a number of elements greater than <code>listMax</code> are partially
+   * printed, with the <code>listBorder</code> leading and trailing elements.
    * <p>
    *
    * @param output      a buffer to print the object into
    * @param obj         the array to print
    * @param type        the type of the array components
+   * 
+   * @see #listMax
+   * @see #listBorder
    */
   public static final void toString(StringBuffer output, double[] tab) {
-    toString(output, tab, 10, 3);
+    toString(output, tab, listMax, listBorder);
   }
 
 
@@ -875,16 +926,19 @@ public class Strings {
   /**
    * Provides a string representation of an array of objects.
    * <p>
-   * Lists with a number of elements greater than <code>10</code> are partially
-   * printed, with the <code>3</code> leading and trailing elements.
+   * Lists with a number of elements greater than <code>listMax</code> are partially
+   * printed, with the <code>listBorder</code> leading and trailing elements.
    * <p>
    *
    * @param output      a buffer to print the object into
    * @param obj         the array to print
    * @param type        the type of the array components
+   * 
+   * @see #listMax
+   * @see #listBorder
    */
   public static final void toString(StringBuffer output, Object[] tab) {
-    toString(output, tab, 10, 3);
+    toString(output, tab, listMax, listBorder);
   }
 
 
@@ -941,15 +995,18 @@ public class Strings {
    * Provides a string representation of a list of objects.
    * This includes Vectors.
    * <p>
-   * Lists with a number of elements greater than <code>10</code> are partially
-   * printed, with the <code>3</code> leading and trailing elements.
+   * Lists with a number of elements greater than <code>listMax</code> are partially
+   * printed, with the <code>listBorder</code> leading and trailing elements.
    *
    * @param output      a buffer to print the object into
    * @param list        the list of <code>Object</code> objects to print
    * @param type        the type of the array components
+   * 
+   * @see #listMax
+   * @see #listBorder
    */
   public static final void toString(StringBuffer output, List list) {
-    toString(output, list, 10, 3);
+    toString(output, list, listMax, listBorder);
   }
 
   /**
@@ -1022,15 +1079,18 @@ public class Strings {
    * Provides a string representation of an unordered Collection of objects.
    * This includes HashSets.
    * <p>
-   * Lists with a number of elements greater than <code>10</code> are partially
-   * printed, with the <code>3</code> leading and trailing elements.
+   * Lists with a number of elements greater than <code>listMax</code> are partially
+   * printed, with the <code>listBorder</code> leading and trailing elements.
    *
    * @param output      a buffer to print the object into
    * @param set   the collection to print
    * @param type        the type of the array components
+   * 
+   * @see #listMax
+   * @see #listBorder
    */
   public static final void toString(StringBuffer output, Collection set) {
-    toString(output, set, 10, 3);
+    toString(output, set, listMax, listBorder);
   }
   
   /**
