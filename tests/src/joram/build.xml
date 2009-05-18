@@ -224,6 +224,8 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="reconf.test4"/>
     <antcall target="reconf.test5"/>
     <antcall target="reconf.test6"/>
+  	<antcall target="reconf.test7"/>
+  	<antcall target="reconf.test8"/>
   </target>
 
   <target name="tests.perf"
@@ -2090,6 +2092,30 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 
+  <target name="reconf.test7" depends="init.a3props,compile"
+          description=" --> test reconfiguration server - HttpNetwork">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="reconf.test7"/>
+      <param name="className" value="joram.reconf.ReconfTest7"/>
+      <param name="jndiconf" value="reconf/jndi.properties"/>
+      <param name="a3conf" value="reconf/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="reconf.test8" depends="init.a3props,compile"
+          description=" --> test reconfiguration server - HttpNetwork">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="reconf.test8"/>
+      <param name="className" value="joram.reconf.ReconfTest8"/>
+      <param name="jndiconf" value="reconf/jndi.properties"/>
+      <param name="a3conf" value="reconf/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
 	<!-- end test reconf -->
 
   <!-- perf test -->
@@ -3196,7 +3222,6 @@ description=" --> launch all exceptionlistener tests">
     <!-- antcall target="test16-3.noreg"/ -->
     <!-- antcall target="test16-4.noreg"/ -->
   </target>
-
 
   <target name="test16-1.noreg" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
