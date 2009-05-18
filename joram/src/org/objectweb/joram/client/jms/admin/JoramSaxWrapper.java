@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -699,8 +699,8 @@ public class JoramSaxWrapper extends DefaultHandler {
           cf.setIdentityClassName(identityClass);
 
           cnx = cf.createConnection(name, password);
-          wrapper = new AdminWrapper(cnx);
           cnx.start();
+          wrapper = new AdminWrapper(cnx);
         } else if (rawName.equals(ELT_HACONNECT)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG,

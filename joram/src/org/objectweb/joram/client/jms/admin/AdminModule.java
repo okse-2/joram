@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -567,8 +567,8 @@ public final class AdminModule {
     
     try {
       cnx = cf.createConnection(name, password);
-      wrapper = new AdminWrapper(cnx);
       cnx.start();
+      wrapper = new AdminWrapper(cnx);
 
       FactoryParameters params = cf.getParameters();
       localHost = params.getHost();
