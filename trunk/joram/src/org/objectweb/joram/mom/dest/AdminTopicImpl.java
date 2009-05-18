@@ -795,6 +795,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
                                     String msgId,
                                     AdminRequest request,
                                     AgentId from) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ".processAdminRequests(" + msgId + ',' + request + ')');
+    
     String info = null;
 
     // state change, so save.
@@ -1907,9 +1910,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     }
   }
 
-  private void doProcess(GetLocalServer request,
-                         AgentId replyTo,
-                         String msgId) throws UnknownServerException {
+  private void doProcess(GetLocalServer request, AgentId replyTo, String msgId) {
     try {
       A3CMLConfig config = AgentServer.getConfig();
       A3CMLServer a3cmlServer = config.getServer(AgentServer.getServerId());
@@ -1918,10 +1919,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
                                             a3cmlServer.name,
                                             a3cmlServer.hostname));
     } catch (Exception exc) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "", exc);
-      distributeReply(replyTo, msgId,
-                      new AdminReply(false, exc.toString()));
+      logger.log(BasicLevel.ERROR, this + ".doProcess()", exc);
+      distributeReply(replyTo, msgId, new AdminReply(false, exc.toString()));
     }
   }
 
