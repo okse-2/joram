@@ -118,13 +118,17 @@ public class AdminWrapper {
 
   /**
    * Creates an administration wrapper for a Joram server.
+   * Be careful, if the connection is not started this method will failed with
+   * a ConnectException.
    * 
    * @param cnx A valid connection to the Joram server.
    * @throws JMSException A problem occurs during initialization.
    */
-  public AdminWrapper(Connection cnx) throws JMSException {
+  public AdminWrapper(Connection cnx) throws JMSException, ConnectException, AdminException {
     requestTimeout = Long.getLong(REQUEST_TIMEOUT_PROP, requestTimeout).longValue();
     requestor = new AdminRequestor(cnx);
+    // Get basic informations about local server. 
+    getLocalServer();
   }
 
   /**
@@ -169,11 +173,11 @@ public class AdminWrapper {
   public final void stopServer(int serverId) throws ConnectException, AdminException {
     try {
       doRequest(new StopServerRequest(serverId));
-      if (serverId == getLocalServerId()) close();
     } catch (ConnectException exc) {
-      close();
-      // ConnectException is intercepted if stopped server is local server.
-      if (serverId != getLocalServerId()) throw exc;
+      // In many case the reply to a StopServerRequest is not transmitted.
+      // Ignore the underlying error.
+    } finally {
+      if (serverId == getLocalServerId()) close();
     }
   }
 
@@ -946,7 +950,7 @@ public class AdminWrapper {
    */
   public final Server getLocalServer() throws ConnectException, AdminException {
     if (server == null) {
-      GetLocalServerRep reply =  (GetLocalServerRep)doRequest(new GetLocalServer());
+      GetLocalServerRep reply = (GetLocalServerRep) doRequest(new GetLocalServer());
       server = new Server(reply.getId(), reply.getName(), reply.getHostName());
     }
     return server;
