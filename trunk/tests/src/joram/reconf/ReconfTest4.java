@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s):  ScalAgent D.T.
+ * Initial developer(s):  ScalAgent Distributed Technologies
  * Contributor(s): 
  */
 package joram.reconf;
@@ -144,20 +144,28 @@ public class ReconfTest4 extends ReconfTestBase {
       // Then clean the configuration: the server is not reachable anymore.
       AdminModule.removeServer(2);
 
+      checkQueue((short) 3);
+
       // First stop the server because it must be reachable in order to be stopped.
       AdminModule.stopServer(3);
       // Then clean the configuration: the server is not reachable anymore.
       AdminModule.removeServer(3);
+      
+      checkQueue((short) 4);
 
       // First stop the server because it must be reachable in order to be stopped.
       AdminModule.stopServer(4);
       // Then clean the configuration: the server is not reachable anymore.
       AdminModule.removeServer(4);
+      
+      checkQueue((short) 5);
 
       // First stop the server because it must be reachable in order to be stopped.
       AdminModule.stopServer(5);
       // Then clean the configuration: the server is not reachable anymore.
       AdminModule.removeServer(5);
+      
+      checkQueue((short) 6);
 
       // First stop the server because it must be reachable in order to be stopped.
       AdminModule.stopServer(6);
