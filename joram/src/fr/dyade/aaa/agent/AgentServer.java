@@ -1407,6 +1407,9 @@ public final class AgentServer {
     if (sync == true) {
       stopper.run();
     } else {
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, getName() + ", stop()", new Exception());
+
       // Creates a thread to execute AgentServer.stop in order to
       // avoid deadlock.
       Thread t = new Thread(stopper);
