@@ -214,8 +214,8 @@ public final class AgentId implements Serializable {
   public static final int NullIdStamp = 0;
   /** Reserved stamp for factory <code>AgentId</code>. */
   public static final int FactoryIdStamp = 1;
-  /** Reserved stamp for admin <code>AgentId</code>. */
-  public static final int AdminIdStamp = 2;
+  /** Reserved stamp for admin <code>AgentId</code>, now unused. */
+//  public static final int AdminIdStamp = 2;
   /** Maximum reserved stamp for system services. */
   public static final int MaxSystemIdStamp = 2;
 
@@ -274,11 +274,6 @@ public final class AgentId implements Serializable {
    * @see AgentFactory
    */
   static AgentId factoryId;
-  /**
-   * <code>AgentId</code> for local admin agent.
-   * @see AgentAdmin
-   */
-  public static AgentId adminId;
 
   /**
    * Returns the <code>AgentId</code> for a remote factory agent.
@@ -306,9 +301,6 @@ public final class AgentId implements Serializable {
     factoryId = new AgentId(AgentServer.getServerId(),
 			    AgentServer.getServerId(),
 			    FactoryIdStamp);
-    adminId = new AgentId(AgentServer.getServerId(),
-			    AgentServer.getServerId(),
-			    AdminIdStamp);
     // Initialize stamp values
     AgentIdStamp.init();
   }
