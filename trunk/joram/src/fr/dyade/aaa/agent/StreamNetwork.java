@@ -283,6 +283,9 @@ public abstract class StreamNetwork extends Network {
    * @exception IOException	if the connection can't be established
    */
   final Socket createSocket(ServerDesc server) throws IOException {
+    if (server == null)
+      throw new ConnectException("Cannot connect to null server");
+    
     for (Enumeration e = server.getSockAddrs(); e.hasMoreElements();) {
       SocketAddress sa = (SocketAddress) e.nextElement();
 
