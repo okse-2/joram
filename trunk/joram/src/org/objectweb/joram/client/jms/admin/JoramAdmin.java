@@ -47,6 +47,8 @@ public class JoramAdmin extends AdminWrapper implements JoramAdminMBean {
 
   /**
    * Creates a MBean to administer Joram using the default basename.
+   * Be careful, if the connection is not started this method will failed with
+   * a ConnectException.
    * 
    * @param cnx A valid connection to the Joram server.
    * @throws JMSException A problem occurs during initialization.
@@ -54,12 +56,14 @@ public class JoramAdmin extends AdminWrapper implements JoramAdminMBean {
    * @see {@link #JoramAdmin(Connection, String)}
    * @see AdminWrapper#AdminWrapper(Connection)
    */
-  public JoramAdmin(Connection cnx) throws JMSException {
+  public JoramAdmin(Connection cnx) throws ConnectException, AdminException, JMSException {
     this(cnx, "joramClient");
   }
 
   /**
    * Creates a MBean to administer Joram using the given basename.
+   * Be careful, if the connection is not started this method will failed with
+   * a ConnectException.
    * 
    * @param cnx   A valid connection to the Joram server.
    * @param base  the basename for registering the MBean.
@@ -68,7 +72,7 @@ public class JoramAdmin extends AdminWrapper implements JoramAdminMBean {
    * 
    * @see AdminWrapper#AdminWrapper(Connection)
    */
-  public JoramAdmin(Connection cnx, String base) throws JMSException {
+  public JoramAdmin(Connection cnx, String base) throws ConnectException, AdminException, JMSException {
     super(cnx);
     registerMBean(base);
   }
