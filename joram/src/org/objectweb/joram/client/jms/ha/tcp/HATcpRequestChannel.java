@@ -46,7 +46,7 @@ public class HATcpRequestChannel implements RequestChannel {
    * @param params  Factory parameters.
    * @param identity
    *
-   * @exception JMSSecurityException  If the user identification is incorrrect.
+   * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not reachable.
    */
   public HATcpRequestChannel(String url,
@@ -70,7 +70,7 @@ public class HATcpRequestChannel implements RequestChannel {
    * @param identity
    * @param reliableClass  reliable class name.
    *
-   * @exception JMSSecurityException  If the user identification is incorrrect.
+   * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not reachable.
    */
   public HATcpRequestChannel(String url,
@@ -129,5 +129,9 @@ public class HATcpRequestChannel implements RequestChannel {
   /** Closes the TCP connection. */
   public void close() {
     tcpClient.close();
+  }
+
+  public void closing() {
+    tcpClient.stopReconnections();
   }
 }

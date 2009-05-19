@@ -34,7 +34,6 @@ import org.objectweb.joram.client.jms.connection.RequestChannel;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.security.Identity;
-
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -58,7 +57,7 @@ public class TcpRequestChannel implements RequestChannel {
    * @param params  Factory parameters.
    * @param identity
    *
-   * @exception JMSSecurityException  If the user identification is incorrrect.
+   * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not reachable.
    */
   public TcpRequestChannel(FactoryParameters params, 
@@ -73,7 +72,7 @@ public class TcpRequestChannel implements RequestChannel {
    * @param identity 
    * @param reliableClass  reliable class name.
    *
-   * @exception JMSSecurityException  If the user identification is incorrrect.
+   * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not reachable.
    */
   public TcpRequestChannel(FactoryParameters params, 
@@ -134,5 +133,9 @@ public class TcpRequestChannel implements RequestChannel {
 
   public String toString() {
     return '(' + super.toString() + ",tcpClient=" + tcpClient + ')';
+  }
+
+  public void closing() {
+    tcpClient.stopReconnections();
   }
 }

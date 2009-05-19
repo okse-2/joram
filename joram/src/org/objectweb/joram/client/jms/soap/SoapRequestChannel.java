@@ -95,6 +95,8 @@ public class SoapRequestChannel implements RequestChannel {
 
   /** Identifier of the connection. */
   private int cnxId;
+  
+  private boolean closing = false;
 
   /**
    * Creates a <code>SoapConnection</code> instance.
@@ -275,6 +277,9 @@ public class SoapRequestChannel implements RequestChannel {
     // Setting the timer values:
     long startTime = System.currentTimeMillis();
     long endTime = startTime + factParams.connectingTimer * 1000;
+    if (closing) {
+      endTime = startTime;
+    }
     long currentTime;
     long nextSleep = 2000;
     boolean tryAgain;
@@ -413,5 +418,9 @@ public class SoapRequestChannel implements RequestChannel {
     }
 
     return reply;
+  }
+
+  public void closing() {
+    closing = true;
   }
 }

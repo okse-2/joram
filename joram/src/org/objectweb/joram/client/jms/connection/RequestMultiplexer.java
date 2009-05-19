@@ -131,6 +131,10 @@ public class RequestMultiplexer {
   public boolean isClosed() {
     return status == Status.CLOSE;
   }
+  
+  public void closing() {
+    channel.closing();
+  }
 
   public void setExceptionListener(
     javax.jms.ExceptionListener exceptionListener) {

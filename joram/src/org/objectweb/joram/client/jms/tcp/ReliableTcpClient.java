@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -42,13 +42,12 @@ import org.objectweb.joram.shared.client.AbstractJmsMessage;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.shared.stream.MetaData;
 import org.objectweb.joram.shared.stream.StreamUtil;
-
-import fr.dyade.aaa.util.SocketFactory;
-import fr.dyade.aaa.util.ReliableTcpConnection;
-
-import fr.dyade.aaa.util.Debug;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.Debug;
+import fr.dyade.aaa.util.ReliableTcpConnection;
+import fr.dyade.aaa.util.SocketFactory;
 
 public class ReliableTcpClient {
   public static Logger logger = Debug.getLogger(ReliableTcpClient.class.getName());
@@ -351,8 +350,7 @@ public class ReliableTcpClient {
     }
   }
 
-  public Object receive() 
-    throws Exception {
+  public Object receive() throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
                  "ReliableTcpClient[" + identity + ',' + key + "].receive()");
@@ -449,5 +447,9 @@ public class ReliableTcpClient {
     public String toString() {
       return "(hostName=" + hostName + ",port=" + port + ')';
     }
+  }
+
+  public void stopReconnections() {
+    reconnect = false;
   }
 }
