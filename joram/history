@@ -1,3 +1,9 @@
++==============================================================================
+| 2009/05/19 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: a deadlock could occur in PoolNetwork on a failing network.
+ Avoid lengthy connection close operation if connection is broken and factory
+parameter 'connectingTimer' was set.
 ###############################################################################
 # 2009/05/13 | Joram 5.2.3 tag.
 ###############################################################################
