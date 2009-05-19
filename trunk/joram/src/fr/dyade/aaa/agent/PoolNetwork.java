@@ -207,6 +207,14 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
   }
 
   /**
+   * Specifies the number of tries in {@link PoolSender#reset(short)} before
+   * returning. Each try lasts 10ms. This is used to release {@link NetSession}
+   * 's lock to avoid deadlock with {@link NetSession#close()} if an exception
+   * occurred in {@link NetSession#send()}.
+   */
+  int nbMaxResetTries = 100;
+
+  /**
    * Creates a new network component.
    */
   public PoolNetwork() throws Exception {
@@ -217,7 +225,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
    * Initializes a new network component. This method is used in order to
    * easily creates and configure a Network component from a class name.
    * So we can use the <code>Class.newInstance()</code> method for create
-   * (whithout any parameter) the component, then we can initialize it with
+   * (without any parameter) the component, then we can initialize it with
    * this method.<br>
    * This method initializes the logical clock for the domain.
    *
@@ -260,7 +268,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         nbMaxCnx = -1;
       }
     }
-
+    nbMaxResetTries = AgentServer.getInteger("PoolNetwork.nbMaxResetTries", 100).intValue();
     nbMaxFreeSender = AgentServer.getInteger("PoolNetwork.nbMaxFreeSender", 2).intValue();
     nbMaxFreeSender = AgentServer.getInteger(domain + ".nbMaxFreeSender", nbMaxFreeSender).intValue();
     if (nbMaxFreeSender < 1)
@@ -1178,20 +1186,27 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       return session.sender;
     }
     
-    synchronized void reset(short sid) throws UnknownServerException {
+    synchronized boolean reset(short sid) throws UnknownServerException {
       if (logmon.isLoggable(BasicLevel.INFO))
       logmon.log(BasicLevel.INFO, getName() + ", reset(" + sid + ')');
       
       Sender sender = getSender(sid);
-      // 
       sender.restart = true;
       
-      if (! sender.isCurrentThread()) {
+      if (!sender.isCurrentThread()) {
         synchronized (sender) {
+          int tryCount = 0;
           while (!sender.waiting) {
             try {
+              tryCount++;
+              if (tryCount > nbMaxResetTries) {
+                if (logmon.isLoggable(BasicLevel.WARN))
+                  logmon.log(BasicLevel.WARN, getName() + " : after " + nbMaxResetTries
+                      + " attempts, sender is still busy : exit reset().");
+                return false;
+              }
               if (logmon.isLoggable(BasicLevel.DEBUG))
-                logmon.log(BasicLevel.DEBUG, getName() + ", waits sender.");
+                logmon.log(BasicLevel.DEBUG, getName() + ", waits sender : " + tryCount + " / " + nbMaxResetTries);
               sender.wait(10);
             } catch (InterruptedException e) {
               continue;
@@ -1214,6 +1229,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       }
       if (logmon.isLoggable(BasicLevel.WARN))
         logmon.log(BasicLevel.WARN, getName() + ", reset end (" + sid + ')');
+      return true;
     }
     
     synchronized void restart(short sid) throws UnknownServerException {
@@ -1616,7 +1632,9 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         }
 
         try {
-          poolSender.reset(sid);
+          if (!poolSender.reset(sid)) {
+            return false;
+          }
         } catch (UnknownServerException exc) {
           // Should never happen!
         }
@@ -1710,7 +1728,9 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 
         writeAck(sock.getOutputStream());
 
-        poolSender.reset(sid);
+        if (!poolSender.reset(sid)) {
+          return false;
+        }
 
         AgentServer.getTransaction().begin();
         testBootTS(sid, boot);
