@@ -70,7 +70,7 @@ public final class ServerDesc implements Serializable {
   /**
    * Domain description of this server.
    */
-  transient MessageConsumer domain = null;
+  private transient MessageConsumer domain = null;
 
   /** True if there is no waiting messages for this server. */
   transient volatile boolean active = true;
@@ -156,7 +156,7 @@ public final class ServerDesc implements Serializable {
     sockAddrs.addElement(new SocketAddress(hostname, port));
   }
 
-  void updateSockAddr(String hostname, int port) {
+  public void updateSockAddr(String hostname, int port) {
     sockAddrs.remove(0);
     sockAddrs.insertElementAt(new SocketAddress(hostname,port), 0);
   }
@@ -192,6 +192,10 @@ public final class ServerDesc implements Serializable {
   public short getGateway() {
     return gateway;
   }
+  
+  public void setGateway(short id) {
+    gateway = id;
+  }
 
   public String getDomainName() {
     return domain.getDomainName();
@@ -221,5 +225,13 @@ public final class ServerDesc implements Serializable {
     strBuf.append(",domain=").append(domain);
     strBuf.append(")");
     return strBuf.toString();
+  }
+
+  public void setDomain(MessageConsumer domain) {
+    this.domain = domain;
+  }
+
+  public MessageConsumer getDomain() {
+    return domain;
   }
 }

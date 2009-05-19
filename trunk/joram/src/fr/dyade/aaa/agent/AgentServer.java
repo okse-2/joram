@@ -220,19 +220,13 @@ public final class AgentServer {
     return false;
   }
   
-  private static ConfigController configController;
-
-  public static ConfigController getConfigController() {
-    return configController;
-  }
-
   /**
    * Static references to all messages consumers initialized in this
    * agent server (including <code>Engine</code>).
    */
   private static Hashtable consumers = null;
 
-  static void addConsumer(String domain, MessageConsumer cons) throws Exception {
+  public static void addConsumer(String domain, MessageConsumer cons) throws Exception {
     if (consumers.containsKey(domain))
       throw new Exception("Consumer for domain " + domain + " already exist");
 
@@ -252,13 +246,13 @@ public final class AgentServer {
       return consumers.elements();
   }
 
-  static MessageConsumer getConsumer(String domain) throws Exception {
+  public static MessageConsumer getConsumer(String domain) throws Exception {
     if (! consumers.containsKey(domain))
       throw new Exception("Unknown consumer for domain " + domain);
     return (MessageConsumer) consumers.get(domain);
   }
 
-  static void removeConsumer(String domain) {
+  public static void removeConsumer(String domain) {
     MessageConsumer cons = (MessageConsumer) consumers.remove(domain);
     if (cons != null) {
       cons.stop();
@@ -299,7 +293,7 @@ public final class AgentServer {
     setConfig(a3config, false);
   }
 
-  final static void setConfig(A3CMLConfig a3config,
+  public final static void setConfig(A3CMLConfig a3config,
                               boolean force) throws Exception {
     if (! force) {
       synchronized(status) {
@@ -445,12 +439,12 @@ public final class AgentServer {
   /** Static description of all known agent servers in ascending order. */
   private static ServersHT servers = null;
 
-  static void addServerDesc(ServerDesc desc) throws Exception {
+  public static void addServerDesc(ServerDesc desc) throws Exception {
     if (desc == null) return;
     servers.put(desc);
   }
 
-  static ServerDesc removeServerDesc(short sid) throws Exception {
+  public static ServerDesc removeServerDesc(short sid) throws Exception {
     return servers.remove(sid);
   }
 
@@ -477,7 +471,7 @@ public final class AgentServer {
    * @param sid	agent server id.
    * @return	the server's descriptor.
    */
-  final static ServerDesc getServerDesc(short sid) throws UnknownServerException {
+  public final static ServerDesc getServerDesc(short sid) throws UnknownServerException {
     ServerDesc serverDesc = servers.get(sid);
     if (serverDesc == null)
       throw new UnknownServerException("Unknow server id. #" + sid);
@@ -491,7 +485,7 @@ public final class AgentServer {
    * @return	the corresponding message consumer.
    */
   final static MessageConsumer getConsumer(short sid) throws UnknownServerException {
-    return getServerDesc(sid).domain;
+    return getServerDesc(sid).getDomain();
   }
 
   /**
@@ -612,7 +606,7 @@ public final class AgentServer {
     }
 
     initServices(root, local);
-    local.domain = engine;
+    local.setDomain(engine);
 
 //     if (logmon.isLoggable(BasicLevel.DEBUG)) {
 //       for (int i=0; i<servers.length; i++) {
@@ -674,7 +668,7 @@ public final class AgentServer {
     }
   }
 
-  static void initServerDesc(ServerDesc desc,
+  public static void initServerDesc(ServerDesc desc,
                              A3CMLServer server) throws Exception {
     desc.gateway = server.gateway;
     // For each server set the gateway to the real next destination of
@@ -690,7 +684,7 @@ public final class AgentServer {
           logmon.log(BasicLevel.DEBUG, getName() + " : NAT sDesc = " + desc);
       }
     }
-    desc.domain = getConsumer(server.domain);
+    desc.setDomain(getConsumer(server.domain));
   }   
 
   private static ServerDesc
@@ -838,8 +832,6 @@ public final class AgentServer {
     } catch (NumberFormatException exc) {}
 
     init(sid, path, null, cid);
-
-    configController = new ConfigController();
 
     return 2;
   }
@@ -1150,7 +1142,7 @@ public final class AgentServer {
             // deliver to its consumer (Engine or Network component). So we have
             // to insert it in the queue of this consumer.
             try {
-              getServerDesc(msg.getDest()).domain.insert(msg);
+              getServerDesc(msg.getDest()).getDomain().insert(msg);
             } catch (UnknownServerException exc) {
               logmon.log(BasicLevel.ERROR,
                          getName() + ", discard message to unknown server id#" +
