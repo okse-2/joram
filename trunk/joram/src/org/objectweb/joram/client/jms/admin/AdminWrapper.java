@@ -314,7 +314,7 @@ public class AdminWrapper {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
    * 
-   * @see #getDefaultDMQId()
+   * @see #getDefaultDMQId(int)
    */
   public final String getDefaultDMQId() throws ConnectException, AdminException {
     return getDefaultDMQId(getLocalServerId());
