@@ -266,6 +266,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="noreg.test20"/>
     <antcall target="noreg.test21"/>
     <antcall target="noreg.test25"/>
+    <antcall target="noreg.test26"/>
     <antcall target="noreg.test31"/>
     <antcall target="noreg.test32"/>
     <antcall target="noreg.test35"/>
