@@ -169,4 +169,8 @@ public class LocalRequestChannel implements RequestChannel, LocalRequestChannelM
   public String getUserName() {
     return identity.getUserName();
   }
+
+  public void closing() {
+    // Nothing to do.
+  }
 }

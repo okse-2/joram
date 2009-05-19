@@ -21,24 +21,24 @@
  */
 package org.objectweb.joram.client.jms.ha.local;
 
-import java.util.*;
+import java.util.Timer;
 
-import javax.jms.*;
-
-import org.objectweb.joram.client.jms.local.*;
-import org.objectweb.joram.shared.client.*;
-import org.objectweb.joram.shared.security.Identity;
-import org.objectweb.joram.mom.proxies.*;
-import org.objectweb.joram.mom.notifications.*;
-import org.objectweb.joram.mom.dest.AdminTopic;
+import javax.jms.JMSException;
 
 import org.objectweb.joram.client.jms.connection.RequestChannel;
-
-import fr.dyade.aaa.agent.*;
-import fr.dyade.aaa.util.Debug;
-
+import org.objectweb.joram.client.jms.local.LocalRequestChannel;
+import org.objectweb.joram.mom.dest.AdminTopic;
+import org.objectweb.joram.mom.notifications.GetProxyIdListNot;
+import org.objectweb.joram.mom.proxies.ResetCollocatedConnectionsNot;
+import org.objectweb.joram.shared.client.AbstractJmsReply;
+import org.objectweb.joram.shared.client.AbstractJmsRequest;
+import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.util.Debug;
 
 public class HALocalRequestChannel implements RequestChannel {
   /** logger */
@@ -130,5 +130,9 @@ public class HALocalRequestChannel implements RequestChannel {
 
   public void close() {
     localRequestChannel.close();
+  }
+
+  public void closing() {
+    // Nothing to do.
   }
 }

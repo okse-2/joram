@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -69,7 +69,7 @@ public class Connection implements javax.jms.Connection {
     public static final int START = 1;
 
     /**
-     * Status of the conenction when it is closed.
+     * Status of the connection when it is closed.
      */
     public static final int CLOSE = 2;
 
@@ -692,6 +692,7 @@ public class Connection implements javax.jms.Connection {
       
     Vector sessionsToClose = (Vector)sessions.clone();
     sessions.clear();
+    mtpx.closing();
     
     for (int i = 0; i < sessionsToClose.size(); i++) {
       Session session = 
