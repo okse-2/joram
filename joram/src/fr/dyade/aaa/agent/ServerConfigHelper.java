@@ -201,13 +201,13 @@ public class ServerConfigHelper {
 //    if (desc.gateway == desc.sid) {
     if (server.hops == 1) {
       // The server is directly accessible, adds it to the corresponding Network component
-      if (desc.domain instanceof Network) {
-        Network net = (Network) desc.domain;
+      if (desc.getDomain() instanceof Network) {
+        Network net = (Network) desc.getDomain();
         net.stop();
         net.addServer((short)sid);
         net.start();
       } else {
-        throw new Error("Unknown gateway type: " + desc.domain);
+        throw new Error("Unknown gateway type: " + desc.getDomain());
       }
     } else {
       if (logger.isLoggable(BasicLevel.DEBUG))
@@ -246,8 +246,8 @@ public class ServerConfigHelper {
       ServerDesc servDesc = 
         AgentServer.removeServerDesc((short)sid);
       
-      if (servDesc.domain instanceof Network) {
-        Network net = (Network) servDesc.domain;
+      if (servDesc.getDomain() instanceof Network) {
+        Network net = (Network) servDesc.getDomain();
         net.stop();
         net.delServer(servDesc.sid);
         net.start();
@@ -258,7 +258,7 @@ public class ServerConfigHelper {
         ServerDesc sd = (ServerDesc)e.nextElement();
         if (sd.gateway == sid) {
           sd.gateway = -1;
-          sd.domain = null;
+          sd.setDomain(null);
         }
       }
 

@@ -297,7 +297,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
    *
    * @param id	the unique server id.
    */
-  synchronized void addServer(short id) throws Exception {
+  public synchronized void addServer(short id) throws Exception {
     if (logmon.isLoggable(BasicLevel.DEBUG)) {
       StringBuffer strbuf = new StringBuffer();
       strbuf.append(getName()).append(" before addServer(").append(id).append("):");
@@ -355,7 +355,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
    *
    * @param id	the unique server id.
    */
-  synchronized void delServer(short id) throws Exception {
+  public synchronized void delServer(short id) throws Exception {
     if (logmon.isLoggable(BasicLevel.DEBUG)) {
       StringBuffer strbuf = new StringBuffer();
       strbuf.append(getName()).append(" before delServer(").append(id).append("):");

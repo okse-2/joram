@@ -110,7 +110,7 @@ public class ServiceManager implements Serializable {
    *
    * @param desc	service descriptor.
    */
-  static void start(ServiceDesc desc) throws Exception {
+  public static void start(ServiceDesc desc) throws Exception {
     xlogmon.log(BasicLevel.DEBUG,
                 getName() +" start service: " + desc);
 
@@ -183,7 +183,7 @@ public class ServiceManager implements Serializable {
    *
    * @param scname	service class name.
    */
-  static void stop(String scname) throws Exception {
+  public static void stop(String scname) throws Exception {
     ServiceDesc desc = (ServiceDesc) manager.registry.get(scname);
     if (desc == null)
       throw new NoSuchElementException("Unknown service: " + scname);
@@ -223,7 +223,7 @@ public class ServiceManager implements Serializable {
    * @param scname	service class name.
    * @param args	launching arguments.
    */
-  static void register(String scname, String args) {
+  public static void register(String scname, String args) {
     synchronized (manager) {
       ServiceDesc desc = (ServiceDesc) manager.registry.get(scname);
       xlogmon.log(BasicLevel.DEBUG,
@@ -246,6 +246,10 @@ public class ServiceManager implements Serializable {
     synchronized (manager) {
       manager.registry.remove(scname);
     }
+  }
+  
+  public static ServiceDesc getService(String serviceClassName) {
+    return (ServiceDesc) manager.registry.get(serviceClassName);
   }
 
   static ServiceDesc[] getServices() {

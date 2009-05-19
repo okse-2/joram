@@ -504,7 +504,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    *
    * @param id	the unique server id.
    */
-  synchronized void addServer(short id) throws Exception {
+  public synchronized void addServer(short id) throws Exception {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
                  getName() + ".addServer(" + id + ')');
@@ -560,7 +560,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    *
    * @param id	the unique server id.
    */
-  synchronized void delServer(short id) throws Exception {
+  public synchronized void delServer(short id) throws Exception {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
                  getName() + ".delServer(" + id + ')');
