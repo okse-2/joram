@@ -4,8 +4,15 @@
  Bug fix: a deadlock could occur in PoolNetwork on a failing network.
  Avoid lengthy connection close operation if connection is broken and factory
 parameter 'connectingTimer' was set.
++==============================================================================
+| 2009/05/18 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Removes unused classes: Platform administration scripts and AgentAdmin.
+ Fix potential NPE with HttpNetwork defined without any server.
+ Improve Joram administration connection and server stop, trying to avoid
+ConnectException.
 ###############################################################################
-# 2009/05/13 | Joram 5.2.3 tag.
+# 2009/05/14 | Joram 5.2.3 tag.
 ###############################################################################
 +==============================================================================
 | 2009/05/13 | Andre Freyssinet - ScalAgent Distributed Technologies 
