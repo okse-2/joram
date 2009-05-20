@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,6 +15,9 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
+ *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package fr.dyade.aaa.agent;
 
@@ -44,6 +47,26 @@ public interface PoolNetworkMBean extends NetworkMBean {
    * @return  the number of free senders in the pool.
    */
   public int getNbMaxFreeSender();
+  
+  /**
+   * Returns the number of tries in {@link PoolSender#reset(short)} before
+   * returning.
+   * 
+   * @return the nbMaxResetTries
+   * 
+   * @see #nbMaxResetTries
+   */
+  public int getNbMaxResetTries();
+
+  /**
+   * Sets the number of tries in {@link PoolSender#reset(short)} before
+   * returning.
+   * 
+   * @param nbMaxResetTries the nbMaxResetTries to set
+   * 
+   * @see #nbMaxResetTries
+   */
+  public void setNbMaxResetTries(int nbMaxResetTries);
 
   /**
    * Gets the number of waiting messages to send for this session.

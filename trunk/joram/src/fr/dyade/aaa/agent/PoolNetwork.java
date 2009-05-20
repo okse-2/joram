@@ -207,12 +207,45 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
   }
 
   /**
-   * Specifies the number of tries in {@link PoolSender#reset(short)} before
-   * returning. Each try lasts 10ms. This is used to release {@link NetSession}
-   * 's lock to avoid deadlock with {@link NetSession#close()} if an exception
-   * occurred in {@link NetSession#send()}.
+   *  Specifies the number of tries in {@link PoolSender#reset(short)} before
+   * returning. This is used to release {@link NetSession}'s lock to avoid
+   * deadlock with {@link NetSession#close()} if an exception occurred in
+   * {@link NetSession#send()}.
+   * <p>
+   *  By default this value is set to <code>100</code>, each try lasts 10ms.
+   * <p>
+   *  This value can be adjusted for all network components by setting the
+   * <code>PoolNetwork.nbMaxResetTries</code> global property or for a particular
+   * network by setting \<DomainName\>.nbMaxResetTries</code> specific property.
+   * <p>
+   *  Theses properties can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
    */
   int nbMaxResetTries = 100;
+
+  /**
+   * Returns the number of tries in {@link PoolSender#reset(short)} before
+   * returning.
+   * 
+   * @return the nbMaxResetTries
+   * 
+   * @see #nbMaxResetTries
+   */
+  public int getNbMaxResetTries() {
+    return nbMaxResetTries;
+  }
+
+  /**
+   * Sets the number of tries in {@link PoolSender#reset(short)} before
+   * returning.
+   * 
+   * @param nbMaxResetTries the nbMaxResetTries to set
+   * 
+   * @see #nbMaxResetTries
+   */
+  public void setNbMaxResetTries(int nbMaxResetTries) {
+    this.nbMaxResetTries = nbMaxResetTries;
+  }
 
   /**
    * Creates a new network component.
@@ -268,7 +301,11 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         nbMaxCnx = -1;
       }
     }
-    nbMaxResetTries = AgentServer.getInteger("PoolNetwork.nbMaxResetTries", 100).intValue();
+    nbMaxResetTries = AgentServer.getInteger("PoolNetwork.nbMaxResetTries", nbMaxResetTries).intValue();
+    nbMaxResetTries = AgentServer.getInteger(domain + ".nbMaxResetTries", nbMaxResetTries).intValue();
+    if (nbMaxResetTries < 1)
+      nbMaxResetTries = 100;
+    
     nbMaxFreeSender = AgentServer.getInteger("PoolNetwork.nbMaxFreeSender", 2).intValue();
     nbMaxFreeSender = AgentServer.getInteger(domain + ".nbMaxFreeSender", nbMaxFreeSender).intValue();
     if (nbMaxFreeSender < 1)
@@ -325,7 +362,6 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       if (sessions.length == servers.length) return;
 
       NetSession[] newSessions = new NetSession[servers.length];
-
 
       // Copy the old array in the new one
       for (int i=0; i<sessions.length; i++) {
