@@ -41,7 +41,10 @@ public class CreateDestinationReply extends AdminReply {
 
   private String name;
 
-  private String type;
+  // TODO (AF): No longer needed, the destination type is specified in the request,
+  // it must be the same in the reply otherwise an error must be returned !!
+  
+//  private byte type;
 
   /**
    * Constructs a <code>CreateDestinationReply</code> instance.
@@ -49,15 +52,10 @@ public class CreateDestinationReply extends AdminReply {
    * @param id  The id of the created destination.
    * @param info  Related information.
    */
-  public CreateDestinationReply(
-    String id, 
-    String name,
-    String type,
-    String info) {
+  public CreateDestinationReply(String id, String name, String info) {
     super(true, info);
     this.id = id;
     this.name = name;
-    this.type = type;
   }
 
   public CreateDestinationReply() { }
@@ -71,15 +69,12 @@ public class CreateDestinationReply extends AdminReply {
     return name;
   }
 
-  public final String getType() {
-    return type;
-  }
+//  public final byte getType() {
+//    return type;
+//  }
 
   public String toString() {
-    return '(' + super.toString() +
-      ",id=" + id + 
-      ",name=" + name + 
-      ",type=" + type + ')';
+    return '(' + super.toString() + ",id=" + id + ",name=" + name + ')';
   }
   
   protected int getClassId() {
@@ -90,13 +85,13 @@ public class CreateDestinationReply extends AdminReply {
     super.readFrom(is);
     id = StreamUtil.readStringFrom(is);
     name = StreamUtil.readStringFrom(is);
-    type = StreamUtil.readStringFrom(is);
+//    type = StreamUtil.readByteFrom(is);
   }
 
   public void writeTo(OutputStream os) throws IOException {
     super.writeTo(os);
     StreamUtil.writeTo(id, os);
     StreamUtil.writeTo(name, os);
-    StreamUtil.writeTo(type, os);
+//    StreamUtil.writeTo(type, os);
   }
 }
