@@ -31,6 +31,7 @@ import org.objectweb.joram.mom.dest.QueueImpl;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.SpecialAdminRequest;
 import org.objectweb.joram.mom.util.DMQManager;
+import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.admin.SpecialAdmin;
 import org.objectweb.joram.shared.excepts.RequestException;
@@ -490,12 +491,10 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
         try {
           count++;
           Properties prop = javaMailUtil.getMOMProperties(msgs[i]);
-          MailMessage m = 
-            javaMailUtil.createMessage(prop,
-                                       getId().toString()+"mail_"+count,
-                                       Queue.getDestinationType(),
-                                       getId().toString(),
-                                       Queue.getDestinationType());
+          MailMessage m = javaMailUtil.createMOMMessage(prop,
+                                                        getId().toString()+"mail_"+count,
+                                                        DestinationConstants.QUEUE_TYPE,
+                                                        getId().toString());
           storeMessage(new org.objectweb.joram.mom.messages.Message(m.getSharedMessage()));
 
           if (logger.isLoggable(BasicLevel.DEBUG))

@@ -226,63 +226,55 @@ public class JavaMailUtil {
     } 
   }
 
-  protected MailMessage createMessage(Properties prop, 
-                                      String mailId,
-                                      String destType,
-                                      String toId,
-                                      String replyDestType) 
-    throws Exception {
+  protected MailMessage createMOMMessage(Properties prop, 
+                                         String mailId,
+                                         byte destType,
+                                         String toId) throws Exception {
     MailMessage msg = new MailMessage();
-    
+
     msg.setIdentifier(mailId);
-    msg.setPersistent(ConversionHelper.toBoolean(prop.getProperty("persistent","true")));
-    msg.setPriority(ConversionHelper.toInt(prop.getProperty("priority","4")));
-    msg.setExpiration(ConversionHelper.toLong(prop.getProperty("expiration","0")));
+    msg.setPersistent(ConversionHelper.toBoolean(prop.getProperty("persistent", "true")));
+    msg.setPriority(ConversionHelper.toInt(prop.getProperty("priority", "4")));
+    msg.setExpiration(ConversionHelper.toLong(prop.getProperty("expiration", "0")));
     if (prop.containsKey("timestamp"))
       msg.setTimestamp(ConversionHelper.toLong(prop.getProperty("timestamp")));
-    msg.setDestination(prop.getProperty("toId",toId),
-                       prop.getProperty("destType",destType));
+    msg.setDestination(toId, destType);
     if (prop.containsKey("correlationId"))
       msg.setCorrelationId(prop.getProperty("correlationId"));
-    if (prop.containsKey("replyToId"))
-      msg.setReplyTo(prop.getProperty("replyToId"),
-                     prop.getProperty("replyDestType",replyDestType));
-    msg.setDeliveryCount(ConversionHelper.toInt(prop.getProperty("deliveryCount","0")));
-    msg.setDenied(ConversionHelper.toBoolean(prop.getProperty("denied","false")));
-    
-    if (prop.containsKey("errorCount")) {
-      int errorCount = ConversionHelper.toInt(prop.getProperty("errorCount"));
-      msg.setProperty("JMS_JORAM_ERRORCOUNT", new Integer(errorCount));
-      for (int i = 1; i <= errorCount; i++) {
-        msg.setProperty("JMS_JORAM_ERRORCODE_" + i, new Short(prop.getProperty("errorCode" + i)));
-        msg.setProperty("JMS_JORAM_ERRORCAUSE_" + i, new Short(prop.getProperty("errorCause" + i)));
-      }
-    }
-    
+
+    // TODO (AF): This code below should be removed, the error's properties must not be handled
+    // from the mail message.
+
+    //    if (prop.containsKey("errorCount")) {
+    //      int errorCount = ConversionHelper.toInt(prop.getProperty("errorCount"));
+    //      msg.setProperty("JMS_JORAM_ERRORCOUNT", new Integer(errorCount));
+    //      for (int i = 1; i <= errorCount; i++) {
+    //        msg.setProperty("JMS_JORAM_ERRORCODE_" + i, new Short(prop.getProperty("errorCode" + i)));
+    //        msg.setProperty("JMS_JORAM_ERRORCAUSE_" + i, new Short(prop.getProperty("errorCause" + i)));
+    //      }
+    //    }
+
     msg.setText(prop.getProperty("mailMessage"));
-    
+
     return msg;
   }
 
-  public Properties getMOMProperties(javax.mail.Message message)
-    throws Exception, MessagingException {
+  public Properties getMOMProperties(javax.mail.Message message) throws Exception, MessagingException {
     Properties prop = new Properties();
     
     String subject = message.getSubject();
-    prop.setProperty("subject",subject);
+    prop.setProperty("subject", subject);
 
     Part messagePart = message;
     Object content = messagePart.getContent();
     if (content instanceof Multipart)
-      messagePart=((Multipart)content).getBodyPart(0);
+      messagePart = ((Multipart) content).getBodyPart(0);
     
     String contentType = messagePart.getContentType();
 
-    if (contentType.startsWith("text/plain")
-        || contentType.startsWith("text/html")) {
+    if (contentType.startsWith("text/plain") || contentType.startsWith("text/html")) {
       InputStream is = messagePart.getInputStream();
-      BufferedReader reader = new BufferedReader(
-        new InputStreamReader(is));
+      BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 
       String currentLine = reader.readLine();
       while (currentLine != null) {
@@ -292,7 +284,7 @@ public class JavaMailUtil {
           String[] buf = currentLine.split("=");
           prop.setProperty(buf[0],buf[1]);
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG,buf[0] + "=" + buf[1]);
+            logger.log(BasicLevel.DEBUG, buf[0] + "=" + buf[1]);
         }
         currentLine = reader.readLine();
       }
@@ -311,8 +303,7 @@ public class JavaMailUtil {
       
       contentType = messagePart.getContentType();
       
-      if (contentType.startsWith("text/plain")
-          || contentType.startsWith("text/html")) {
+      if (contentType.startsWith("text/plain") || contentType.startsWith("text/html")) {
         InputStream is = messagePart.getInputStream();
         BufferedReader reader = new BufferedReader(
           new InputStreamReader(is));

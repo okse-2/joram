@@ -120,7 +120,7 @@ public class MailMessage {
    * The message destination type.
    * @return destination type
    */
-  public String getToType() {
+  public byte getToType() {
     return sharedMsg.toType;
   }
 
@@ -144,7 +144,7 @@ public class MailMessage {
    * <code>true</code> if the "reply to" destination is a queue.
    * @return reply type
    */
-  public String replyToType() {
+  public byte replyToType() {
     return sharedMsg.replyToType;
   }
 
@@ -229,7 +229,7 @@ public class MailMessage {
    * @param id  The destination identifier.
    * @param type The type of the destination.
    */
-  public void setDestination(String id, String type) {
+  public void setDestination(String id, byte type) {
     sharedMsg.setDestination(id, type);
   }
 
@@ -247,7 +247,7 @@ public class MailMessage {
    * @param id  The destination identifier.
    * @param type The destination type.
    */
-  public void setReplyTo(String id, String type) {
+  public void setReplyTo(String id, byte type) {
     sharedMsg.setReplyTo(id, type);
   }
 
