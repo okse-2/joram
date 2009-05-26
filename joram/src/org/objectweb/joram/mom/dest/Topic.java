@@ -36,6 +36,7 @@ import org.objectweb.joram.mom.notifications.SubscribeRequest;
 import org.objectweb.joram.mom.notifications.UnclusterRequest;
 import org.objectweb.joram.mom.notifications.UnsetFatherRequest;
 import org.objectweb.joram.mom.notifications.UnsubscribeRequest;
+import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -53,10 +54,8 @@ public class Topic extends Destination {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   
-  public static final String TOPIC_TYPE = "topic";
-  
-  public static String getDestinationType() {
-    return TOPIC_TYPE;
+  public final byte getType() {
+    return DestinationConstants.TOPIC_TYPE;
   }
 
   /**
