@@ -49,7 +49,7 @@ public class CreateDestinationRequest extends AdminRequest {
   /** Properties needed to create destination object. */
   private Properties props;
 
-  private String expectedType;
+  private byte expectedType;
 
   /**
    * Constructs a <code>CreateDestinationRequest</code> instance.
@@ -62,7 +62,7 @@ public class CreateDestinationRequest extends AdminRequest {
                                   String name,
                                   String className,
                                   Properties props,
-                                  String expectedType) {
+                                  byte expectedType) {
     this.serverId = serverId;
     this.name = name;
     this.className = className;
@@ -92,7 +92,7 @@ public class CreateDestinationRequest extends AdminRequest {
     return props;
   }
 
-  public final String getExpectedType() {
+  public final byte getExpectedType() {
     return expectedType;
   }
   
@@ -105,7 +105,7 @@ public class CreateDestinationRequest extends AdminRequest {
     name = StreamUtil.readStringFrom(is);
     className = StreamUtil.readStringFrom(is);
     props = StreamUtil.readJPropertiesFrom(is);
-    expectedType = StreamUtil.readStringFrom(is);
+    expectedType = StreamUtil.readByteFrom(is);
   }
 
   public void writeTo(OutputStream os) throws IOException {

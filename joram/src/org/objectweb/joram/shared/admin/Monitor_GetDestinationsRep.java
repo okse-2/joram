@@ -39,12 +39,12 @@ public class Monitor_GetDestinationsRep extends Monitor_Reply {
 
   private String[] ids;
   private String[] names;
-  private String[] types;
+  private byte[] types;
 
   public Monitor_GetDestinationsRep(
     String[] ids,
     String[] names,
-    String[] types) {
+    byte[] types) {
     this.ids = ids;
     this.names = names;
     this.types = types;
@@ -60,7 +60,7 @@ public class Monitor_GetDestinationsRep extends Monitor_Reply {
     return names;
   }
 
-  public String[] getTypes() {
+  public byte[] getTypes() {
     return types;
   }
   
@@ -72,13 +72,13 @@ public class Monitor_GetDestinationsRep extends Monitor_Reply {
     super.readFrom(is);
     ids = StreamUtil.readArrayOfStringFrom(is);
     names = StreamUtil.readArrayOfStringFrom(is);
-    types = StreamUtil.readArrayOfStringFrom(is);
+    types = StreamUtil.readByteArrayFrom(is);
   }
 
   public void writeTo(OutputStream os) throws IOException {
     super.writeTo(os);
     StreamUtil.writeArrayOfStringTo(ids, os);
     StreamUtil.writeArrayOfStringTo(names, os);
-    StreamUtil.writeArrayOfStringTo(types, os);
+    StreamUtil.writeTo(types, os);
   }
 }
