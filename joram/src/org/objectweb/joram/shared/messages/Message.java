@@ -34,6 +34,7 @@ import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.admin.AbstractAdminMessage;
 import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.joram.shared.stream.Streamable;
@@ -166,10 +167,13 @@ public final class Message implements Cloneable, Serializable, Streamable {
    */
   public transient boolean redelivered = false;
 
+  public final static byte TOPIC_TYPE = DestinationConstants.TOPIC_TYPE;
+  public final static byte QUEUE_TYPE = DestinationConstants.QUEUE_TYPE;
+
   /** The message destination identifier. */
   public transient String toId = null;
   /** The message destination type. */
-  public transient String toType;
+  public transient byte toType;
 
   /**
    * Sets the message destination.
@@ -177,35 +181,35 @@ public final class Message implements Cloneable, Serializable, Streamable {
    * @param id  The destination identifier.
    * @param type The type of the destination.
    */
-  public final void setDestination(String id, String type) {
+  public final void setDestination(String id, byte type) {
     toId = id;
     toType = type;
   }
 
-  /** Returns the message destination identifier. */
-  public final String getDestinationId() {
-    return toId;
-  }
-
-  /** Returns <code>true</code> if the destination is a queue. */
-  public final String getDestinationType() {
-    return toType;
-  }
+//  /** Returns the message destination identifier. */
+//  public final String getDestinationId() {
+//    return toId;
+//  }
+//
+//  /** Returns <code>true</code> if the destination is a queue. */
+//  public final String getDestinationType() {
+//    return toType;
+//  }
 
   /** The reply to destination identifier. */
   public transient String replyToId = null;
   /** <code>true</code> if the "reply to" destination is a queue. */
-  public transient String replyToType;
+  public transient byte replyToType;
 
-  /** Returns the destination id the reply should be sent to. */
-  public final String getReplyToId() {
-    return replyToId;
-  }
-
-  /** Returns <code>true</code> if the reply to destination is a queue. */
-  public final String replyToType() {
-    return replyToType;
-  }
+//  /** Returns the destination id the reply should be sent to. */
+//  public final String getReplyToId() {
+//    return replyToId;
+//  }
+//
+//  /** Returns <code>true</code> if the reply to destination is a queue. */
+//  public final String replyToType() {
+//    return replyToType;
+//  }
 
   /**
    * Sets the destination to which a reply should be sent.
@@ -213,7 +217,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
    * @param id  The destination identifier.
    * @param type The destination type.
    */
-  public final void setReplyTo(String id, String type) {
+  public final void setReplyTo(String id, byte type) {
     replyToId = id;
     replyToType = type;
   }
@@ -476,10 +480,10 @@ public final class Message implements Cloneable, Serializable, Streamable {
     id = StreamUtil.readStringFrom(is);
     priority = StreamUtil.readIntFrom(is);
     toId = StreamUtil.readStringFrom(is);
-    toType = StreamUtil.readStringFrom(is);
+    toType = StreamUtil.readByteFrom(is);
     expiration = StreamUtil.readLongFrom(is);
     replyToId = StreamUtil.readStringFrom(is);
-    replyToType = StreamUtil.readStringFrom(is);
+    replyToType = StreamUtil.readByteFrom(is);
     timestamp = StreamUtil.readLongFrom(is);
     correlationId = StreamUtil.readStringFrom(is);
     deliveryCount = StreamUtil.readIntFrom(is);
