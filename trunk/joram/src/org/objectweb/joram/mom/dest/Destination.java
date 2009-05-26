@@ -104,6 +104,16 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
   public abstract DestinationImpl createsImpl(AgentId adminId, Properties prop);
 
   /**
+   * Returns the type of this destination: Queue or Topic.
+   * 
+   * @return the type of this destination.
+   * 
+   * @see DestinationConstants#TOPIC_TYPE
+   * @see DestinationConstants#QUEUE_TYPE
+   */
+  public abstract byte getType();
+  
+  /**
    * Gives this agent an opportunity to initialize after having been deployed,
    * and each time it is loaded into memory.
    *

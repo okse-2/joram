@@ -816,15 +816,14 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     return nbMsgsSentToDMQSinceCreation;
   }
 
-  protected void replyToTopic(
-    org.objectweb.joram.shared.admin.AdminReply reply,
-    AgentId replyTo,
-    String requestMsgId,
-    String replyMsgId) {
+  protected void replyToTopic(org.objectweb.joram.shared.admin.AdminReply reply,
+                              AgentId replyTo,
+                              String requestMsgId,
+                              String replyMsgId) {
     Message message = new Message();
     message.correlationId = requestMsgId;
     message.timestamp = System.currentTimeMillis();
-    message.setDestination(replyTo.toString(), Topic.TOPIC_TYPE);
+    message.setDestination(replyTo.toString(), message.TOPIC_TYPE);
     message.id = replyMsgId;
     try {
       message.setAdminMessage(reply);
