@@ -31,6 +31,7 @@ import org.objectweb.joram.mom.dest.TopicImpl;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.SpecialAdminRequest;
 import org.objectweb.joram.mom.util.DMQManager;
+import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.admin.SpecialAdmin;
 import org.objectweb.joram.shared.excepts.RequestException;
@@ -477,10 +478,7 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
   public void doPop() {
     long count = 0;
     Vector toExpunge = new Vector();
-    javax.mail.Message[] msgs = javaMailUtil.popMail(popServer,
-                                                     popUser,
-                                                     popPassword,
-                                                     expunge);      
+    javax.mail.Message[] msgs = javaMailUtil.popMail(popServer, popUser, popPassword, expunge);      
     if (msgs != null) {
       for (int i = 0; i < msgs.length; i++) {
         if (logger.isLoggable(BasicLevel.DEBUG))
@@ -489,12 +487,10 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
         try {
           count++;
           Properties prop = javaMailUtil.getMOMProperties(msgs[i]);
-          MailMessage m = 
-            javaMailUtil.createMessage(prop,
-                                       getId().toString()+"mail_"+count,
-                                       Topic.getDestinationType(),
-                                       getId().toString(),
-                                       Topic.getDestinationType());
+          MailMessage m = javaMailUtil.createMOMMessage(prop,
+                                                        getId().toString() + "mail_" + count,
+                                                        DestinationConstants.TOPIC_TYPE,
+                                                        getId().toString());
           publish(m.getSharedMessage());
 
           if (logger.isLoggable(BasicLevel.DEBUG))
@@ -510,7 +506,7 @@ public class JavaMailTopicImpl extends TopicImpl implements JavaMailTopicImplMBe
         }
       }
     }
-    
+
     javaMailUtil.closeFolder(toExpunge,expunge);
     toExpunge.clear();
   }
