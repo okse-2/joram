@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -25,28 +25,25 @@ package org.objectweb.joram.client.jms.admin;
 
 import java.net.ConnectException;
 
-import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 
 
 /**
  * The <code>DeadMQueue</code> class allows administrators to manipulate
  * dead message queues.
+ * 
+ * @deprecated Since Joram 5.2.2 the DeadMQueue is a simply a Queue.
  */
 public class DeadMQueue extends Queue {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
-
-  public static boolean isDeadMQueue(String type) {
-    return Destination.isAssignableTo(type, DMQ_TYPE);
-  }
 
   public static DeadMQueue createDeadMQueue(String agentId, String name) {
     DeadMQueue dest = new DeadMQueue();
     
     dest.agentId = agentId;
     dest.adminName = name;
-    dest.type = DMQ_TYPE;
+    dest.type = QUEUE_TYPE;
 
     return dest;
   }
@@ -101,7 +98,7 @@ public class DeadMQueue extends Queue {
    */
   public static Queue create(int serverId, String name) throws ConnectException, AdminException {
     DeadMQueue dmq = new DeadMQueue();
-    doCreate(serverId, name, DEAD_MQUEUE, null, dmq, DMQ_TYPE);
+    doCreate(serverId, name, DEAD_MQUEUE, null, dmq, QUEUE_TYPE);
     return dmq;
   }
 
@@ -109,7 +106,7 @@ public class DeadMQueue extends Queue {
   public DeadMQueue() {}
   
   public DeadMQueue(String name) {
-    super(name, DMQ_TYPE);
+    super(name, QUEUE_TYPE);
   }
 
   public String toString() {
