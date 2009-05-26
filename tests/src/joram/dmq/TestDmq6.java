@@ -55,13 +55,15 @@ public class TestDmq6 extends TestCase {
       for(int i = 0;i < list1.length; i++){
         Destination dest = list1[i];
 
-        if(dest.getType().equals("queue")){
-          assertTrue( dest.isFreelyWriteable() );
-          assertTrue( dest.isFreelyReadable() );
+        if (dest.getAdminName().equals("queue")) {
+          assertTrue(dest.isQueue());
+          assertTrue(dest.isFreelyWriteable());
+          assertTrue(dest.isFreelyReadable());
           assertEquals(2,((Queue)dest).getThreshold());
-        }else if(dest.getType().equals("topic")){
-          assertTrue( dest.isFreelyWriteable() );
-          assertTrue( dest.isFreelyReadable() );
+        } else if (dest.getAdminName().equals("queue")) {
+          assertTrue(dest.isTopic());
+          assertTrue(dest.isFreelyWriteable());
+          assertTrue(dest.isFreelyReadable());
         }
 
         if(dest.getAdminName().equals("defaultdmq")){
