@@ -72,6 +72,7 @@ import org.objectweb.joram.mom.notifications.UserAdminRequestNot;
 import org.objectweb.joram.mom.proxies.AdminNotification;
 import org.objectweb.joram.mom.proxies.SendReplyNot;
 import org.objectweb.joram.mom.proxies.UserAgent;
+import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.admin.AddDomainRequest;
 import org.objectweb.joram.shared.admin.AddServerRequest;
 import org.objectweb.joram.shared.admin.AdminReply;
@@ -400,21 +401,16 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   public void RegisterTmpDestNot(RegisterTmpDestNot not) {
     String destName = not.getTmpDestId().toString();
     if (not.toAdd()) {
-      String type;
+      byte type;
       String className;
       if (not.isTopic()) {
-        type = "topic.tmp";
+        type = DestinationConstants.TOPIC_TYPE | DestinationConstants.TEMPORARY;
         className = Topic.class.getName();
       } else {
-        type = "queue.tmp";
+        type = DestinationConstants.QUEUE_TYPE | DestinationConstants.TEMPORARY;
         className = Queue.class.getName();
       }
-      DestinationDesc destDesc = 
-        new DestinationDesc(
-                            not.getTmpDestId(),
-                            destName,
-                            className,
-                            type);
+      DestinationDesc destDesc = new DestinationDesc(not.getTmpDestId(), destName, className, type);
       destinationsTable.put(destName, destDesc);
     } else {
       destinationsTable.remove(destName);
@@ -426,18 +422,12 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     if (name == null || destinationsTable.contains(name))
       return;
 
-    DestinationDesc destDesc = 
-      new DestinationDesc(
-                          not.getId(),
-                          not.getName(),
-                          not.getClassName(),
-                          not.getType());
+    DestinationDesc destDesc = new DestinationDesc(not.getId(), not.getName(), not.getClassName(), not.getType());
     destinationsTable.put(name, destDesc);
   }
 
   public void RegisteredDestNot(AgentId from, RegisteredDestNot not) {
-    DestinationDesc destDesc = 
-      (DestinationDesc) destinationsTable.get(not.getName());
+    DestinationDesc destDesc = (DestinationDesc) destinationsTable.get(not.getName());
     if (destDesc != null)
       not.setDestination(destDesc.getId());
     forward(not.getReply(), not);
@@ -756,7 +746,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       nbMsgsReceiveSinceCreation = nbMsgsReceiveSinceCreation + 1;
       msg = (Message) messages.nextElement();
       msgId = msg.id;
-      replyTo = AgentId.fromString(msg.getReplyToId());
+      replyTo = AgentId.fromString(msg.replyToId);
       request = null;
 
       try {
@@ -964,8 +954,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     if (checkServerId(request.getServerId())) {
       // The destination is local, process the request.
 
-      DestinationDesc destDesc = createDestination(
-                                                   request.getDestinationName(),
+      DestinationDesc destDesc = createDestination(request.getDestinationName(),
                                                    null,
                                                    request.getProperties(),
                                                    request.getExpectedType(),
@@ -973,13 +962,10 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
                                                    request.getClass().getName(),
                                                    strbuf);
 
-      distributeReply(
-                      replyTo,
+      distributeReply(replyTo,
                       msgId,
-                      new CreateDestinationReply(
-                                                 destDesc.getId().toString(), 
+                      new CreateDestinationReply(destDesc.getId().toString(), 
                                                  destDesc.getName(),
-                                                 destDesc.getType(),
                                                  strbuf.toString()));
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, strbuf.toString());
@@ -1005,24 +991,21 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * @throws UnknownServerException
    * @throws RequestException
    */
-  public DestinationDesc createDestination(
-                                           String destName,
+  public DestinationDesc createDestination(String destName,
                                            AgentId adminId,
                                            Properties properties,
-                                           String type,
+                                           byte type,
                                            String className,
                                            String requestClassName,
-                                           StringBuffer strbuf)
-  throws UnknownServerException, RequestException {
+                                           StringBuffer strbuf) throws UnknownServerException, RequestException {
 
     boolean destNameActivated = (destName != null && ! destName.equals(""));
     DestinationDesc destDesc;
-    Agent dest = null;
 
     // Retrieving an existing destination:
     if (destNameActivated && destinationsTable.containsKey(destName)) {
       destDesc = (DestinationDesc) destinationsTable.get(destName);
-      if (! destDesc.isAssignableTo(type)) {
+      if (! DestinationConstants.compatible(destDesc.getType(), type)) {
         throw new RequestException("Destination type not compliant");
       }
       strbuf.append("Request [").append(requestClassName)
@@ -1032,20 +1015,13 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     } else {
       // Instantiating the destination class.
       Class clazz;
-      String destType;
+      Destination dest = null;
       try {
-        clazz = Class.forName(className);
-        dest = (Agent) clazz.newInstance();
-        if (destName != null) {
-          dest.name = destName;
-        }
+        dest = (Destination) Class.forName(className).newInstance();
+        if (destName != null) dest.name = destName;
 
-        if (adminId == null)
-          adminId = getId();
+        if (adminId == null) adminId = getId();
         ((AdminDestinationItf) dest).init(adminId, properties);
-
-        Method getTypeM = clazz.getMethod("getDestinationType", new Class[0]);
-        destType = (String)getTypeM.invoke(null, new Object[0]);
       } catch (Exception exc) {
         logger.log(BasicLevel.ERROR,
                    "Could not instantiate Destination class [" + className + "]: ", exc);
@@ -1055,18 +1031,18 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
           throw new RequestException("Could not instantiate Destination class [" + className + "]: " + exc);
         }
       }
+      
+      byte destType = dest.getType();
+      if (! DestinationConstants.compatible(destType, type)) {
+        throw new RequestException("Requested destination type is not compliant with destination classname");
+      }
 
       AgentId createdDestId = dest.getId();
 
       if (! destNameActivated)
         destName = createdDestId.toString();
 
-      destDesc = new DestinationDesc(createdDestId, destName, 
-                                     className, destType);
-      if (! destDesc.isAssignableTo(type)) {
-        throw new RequestException("Destination type not compliant");
-      }
-
+      destDesc = new DestinationDesc(createdDestId, destName, className, destType);
       try {
         dest.deploy();
         destinationsTable.put(destName, destDesc);
@@ -1079,61 +1055,10 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       } catch (Exception exc) {
         if (logger.isLoggable(BasicLevel.ERROR))
           logger.log(BasicLevel.ERROR, "xxx", exc);
-        throw new RequestException("Error while deploying Destination [" + 
-                                   clazz + "]: " + exc);
+        throw new RequestException("Error while deploying Destination [" + className + "]: " + exc);
       }
     }
     return destDesc;
-  }
-
-  /**
-   * Instantiating the destination class or retrieving the destination
-   * and save Agent AdminTopic. (used by ScalAgent mediation)
-   * 
-   * @param destName           destination Name
-   * @param adminId            other admin (null for TopicAdmin)
-   * @param properties         destination properties
-   * @param type               destination type ("queue" or "topic")
-   * @param className          creates an instance of the class
-   * @param requestClassName  
-   * @param strbuf             information
-   * @return DestinationDesc   contain destination description
-   * @throws UnknownServerException
-   * @throws RequestException
-   * @throws IOException  transaction exception.
-   */
-  public static DestinationDesc createDestinationAndSave(
-                                                         String destName,
-                                                         AgentId adminId,
-                                                         Properties properties,
-                                                         String type,
-                                                         String className,
-                                                         String requestClassName,
-                                                         StringBuffer strbuf)
-  throws UnknownServerException, RequestException, IOException {
-    // create destination.
-    DestinationDesc destDesc = ref.createDestination(
-                                                     destName,
-                                                     adminId,
-                                                     properties,
-                                                     type,
-                                                     className,
-                                                     requestClassName,
-                                                     strbuf);
-    // save Agent AdminTopic
-    AgentServer.getTransaction().save(ref.agent, ref.getId().toString()); 
-    return destDesc;
-  }
-
-  /**
-   * is destinationTable contain destName ?
-   * (used by ScalAgent mediation)
-   * 
-   * @param destName destination name.
-   * @return true if contain.
-   */
-  public static boolean isDestinationTableContain(String destName) {
-    return ref.destinationsTable.containsKey(destName);
   }
 
   /**
@@ -1959,7 +1884,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       Enumeration destinations = destinationsTable.elements();
       String[] ids = new String[destinationsTable.size()];
       String[] names = new String[destinationsTable.size()];
-      String[] types = new String[destinationsTable.size()];
+      byte[] types = new byte[destinationsTable.size()];
       int i = 0;
       while (destinations.hasMoreElements()) {
         DestinationDesc destDesc = 
@@ -1969,8 +1894,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
         types[i] = destDesc.getType();
         i++;
       }
-      Monitor_GetDestinationsRep reply = 
-        new Monitor_GetDestinationsRep(ids, names, types);
+      Monitor_GetDestinationsRep reply = new Monitor_GetDestinationsRep(ids, names, types);
       distributeReply(replyTo, msgId, reply);
     } else {
       // Forward the request to the right AdminTopic agent.
@@ -2553,7 +2477,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     message.id = createMessageId();
     message.correlationId = msgId;
     message.timestamp = System.currentTimeMillis();
-    message.setDestination(getId().toString(), Topic.TOPIC_TYPE);
+    message.setDestination(getId().toString(), message.TOPIC_TYPE);
     try {
       message.setAdminMessage(reply);
       ClientMessages clientMessages = new ClientMessages(-1, -1, message);
@@ -2606,16 +2530,16 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     private AgentId id;
     private String name;
     private String className;
-    private String type;
+    private byte type;
 
     public DestinationDesc(AgentId id,
                            String name,
                            String className,
-                           String type) {
+                           byte type) {
       this.id = id;
       this.name = name;
       this.className = className.intern();
-      this.type = type.intern();
+      this.type = type;
     }
 
     public final AgentId getId() {
@@ -2630,12 +2554,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       return className;
     }
 
-    public final String getType() {
+    public final byte getType() {
       return type;
-    }
-
-    public boolean isAssignableTo(String assignedType) {
-      return type.startsWith(assignedType);
     }
 
     public String toString() {
@@ -2645,5 +2565,61 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       ",className=" + className + 
       ",type=" + type + ')';
     }
+  }
+  
+  // ================================================================================
+  // This code below is needed by external applications. The interface between these
+  // applications and Joram needs to be defined.
+  // ================================================================================
+
+  /**
+   * Instantiating the destination class or retrieving the destination
+   * and save Agent AdminTopic. (used by ScalAgent mediation)
+   * 
+   * @param destName           destination Name
+   * @param adminId            other admin (null for TopicAdmin)
+   * @param properties         destination properties
+   * @param type               destination type ("queue" or "topic")
+   * @param className          creates an instance of the class
+   * @param requestClassName  
+   * @param strbuf             information
+   * @return DestinationDesc   contain destination description
+   * @throws UnknownServerException
+   * @throws RequestException
+   * @throws IOException  transaction exception.
+   * 
+   * @deprecated
+   */
+  public static DestinationDesc createDestinationAndSave(
+                                                         String destName,
+                                                         AgentId adminId,
+                                                         Properties properties,
+                                                         byte type,
+                                                         String className,
+                                                         String requestClassName,
+                                                         StringBuffer strbuf)
+  throws UnknownServerException, RequestException, IOException {
+    // create destination.
+    DestinationDesc destDesc = ref.createDestination(destName,
+                                                     adminId, properties,
+                                                     type, className,
+                                                     requestClassName,
+                                                     strbuf);
+    // save Agent AdminTopic
+    AgentServer.getTransaction().save(ref.agent, ref.getId().toString()); 
+    return destDesc;
+  }
+
+  /**
+   * is destinationTable contain destName ?
+   * (used by ScalAgent mediation)
+   * 
+   * @param destName destination name.
+   * @return true if contain.
+   * 
+   * @deprecated
+   */
+  public static boolean isDestinationTableContain(String destName) {
+    return ref.destinationsTable.containsKey(destName);
   }
 }
