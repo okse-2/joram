@@ -214,7 +214,7 @@ public class Message implements javax.jms.Message {
   public final void setJMSDestination(javax.jms.Destination dest) throws JMSException {
     jmsDest = dest;
     if (dest == null) {
-      momMsg.setDestination(null, null);
+      momMsg.setDestination(null, (byte) 0);
     } else if (dest instanceof org.objectweb.joram.client.jms.Destination) {
       Destination d = (org.objectweb.joram.client.jms.Destination) dest;
       momMsg.toId = d.getName();
@@ -288,11 +288,9 @@ public class Message implements javax.jms.Message {
   public final void setJMSReplyTo(javax.jms.Destination replyTo) throws JMSException {
     try {
       Destination d = (org.objectweb.joram.client.jms.Destination) replyTo;
-      momMsg.replyToId = d.getName();
-      momMsg.replyToType = d.getType();
+      momMsg.setReplyTo(d.getName(), d.getType());
     } catch (NullPointerException npe) {
-      momMsg.replyToId = null;
-      momMsg.replyToType = null;
+      momMsg.setReplyTo(null, (byte) 0);
     } catch (ClassCastException cce) {
       throw new JMSException("Destination is not Joram compatible.");
     }
@@ -631,8 +629,7 @@ public class Message implements javax.jms.Message {
         momMsg.setOptionalHeader(name, ConversionHelper.toString(value));
       } else if (name.equals("JMSXGroupSeq")) {
         try {
-          momMsg.setOptionalHeader(name,
-                                   new Integer(ConversionHelper.toInt(value)));
+          momMsg.setOptionalHeader(name, new Integer(ConversionHelper.toInt(value)));
         } catch (MessageValueException mE) {
           throw new MessageFormatException(mE.getMessage());
         }

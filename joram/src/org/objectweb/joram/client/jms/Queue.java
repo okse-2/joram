@@ -45,10 +45,6 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
-  public static boolean isQueue(String type) {
-    return Destination.isAssignableTo(type, QUEUE_TYPE);
-  }
-
   // Used by jndi2 SoapObjectHelper
   public Queue() {
     super(QUEUE_TYPE);
@@ -58,7 +54,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
     super(name, QUEUE_TYPE);
   }
 
-  protected Queue(String name, String type) {
+  protected Queue(String name, byte type) {
     super(name, type);
   }
 
@@ -73,14 +69,12 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
     return getName();
   }
 
-  public static Queue createQueue(String agentId,
-                                  String name,
-                                  String type) {
+  public static Queue createQueue(String agentId, String name) {
     Queue dest = new Queue();
     
     dest.agentId = agentId;
     dest.adminName = name;
-    dest.type = type;
+    dest.type = QUEUE_TYPE;
 
     return dest;
   }

@@ -44,6 +44,7 @@ import org.objectweb.joram.client.jms.admin.AdministeredObject;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.admin.XmlSerializer;
+import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.admin.AdminReply;
 import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.admin.CreateDestinationReply;
@@ -83,39 +84,53 @@ public abstract class Destination extends AdministeredObject implements javax.jm
   /** Identifier of the agent destination. */
   protected String agentId;
 
-  public final static String TOPIC_TYPE = "topic";
-  public final static String QUEUE_TYPE = "queue";
-  
-  public final static String DMQ_TYPE = "queue.dmq";
-
   /** Name given by the administrator. */
   protected String adminName;
 
-  protected String type;
+  public final static byte TOPIC_TYPE = DestinationConstants.TOPIC_TYPE;
+  public final static byte QUEUE_TYPE = DestinationConstants.QUEUE_TYPE;
+  
+  public final static byte TEMPORARY = DestinationConstants.TEMPORARY;
+  
+  /** Type of the destination: Queue or Topic, Temporary or not. */
+  protected byte type;
 
   // Used by jndi2 SoapObjectHelper
   public Destination() {}
 
-  public Destination(String type) {
+  protected Destination(byte type) {
     this.type = type;
   }
 
-  protected Destination(String id, String type) {
+  protected Destination(String id, byte type) {
     agentId = id;
     this.type = type;
   }
 
-  /** Returns the name of the destination. */
+  /**
+   * Returns the internal name of the destination.
+   * This unique name is chosen internally by the MOM.
+   * 
+   * @return the internal name of the destination.
+   */
   public String getName() {
     return agentId;
   }
 
-  /** Returns the administration name of the destination. */
+  /**
+   * Returns the symbolic administration name of the destination.
+   * This symbolic name is given by the user at creation.
+   * 
+   * @return the symbolic name of the destination if any.
+   */
   public final String getAdminName() {
     return adminName;
   }
 
-  public final String getType() {
+  /**
+   * Returns the type of the destination: queue or topic, temporary or not.
+   */
+  protected final byte getType() {
     return type;
   }
 
@@ -202,9 +217,9 @@ public abstract class Destination extends AdministeredObject implements javax.jm
 
     strbuf.append(XmlSerializer.indent(indent));
 
-    if (getType().equals("queue")) {
+    if (getType() == QUEUE_TYPE) {
       strbuf.append("<Queue ");
-    } else if (getType().equals("topic")) {
+    } else if (getType() == TOPIC_TYPE) {
       strbuf.append("<Topic ");
     } else {
       return "";
@@ -259,9 +274,9 @@ public abstract class Destination extends AdministeredObject implements javax.jm
 
     strbuf.append(XmlSerializer.indent(indent));
 
-    if (getType().equals("queue")) {
+    if (getType() == QUEUE_TYPE) {
       strbuf.append("</Queue>\n");
-    } else if (getType().equals("topic")) {
+    } else if (getType() == TOPIC_TYPE) {
       strbuf.append("</Topic>\n");
     }
 
@@ -275,28 +290,24 @@ public abstract class Destination extends AdministeredObject implements javax.jm
     return (this instanceof javax.jms.Queue);
   }
 
-  public static final String QUEUE =
-    "org.objectweb.joram.mom.dest.Queue";
-  public static final String TOPIC =
-    "org.objectweb.joram.mom.dest.Topic";
-  public static final String DEAD_MQUEUE =
-    "org.objectweb.joram.mom.dest.DeadMQueue";
-  public static final String CLUSTER_QUEUE =
-    "org.objectweb.joram.mom.dest.ClusterQueue";
-  public static final String BRIDGE_QUEUE =
-    "org.objectweb.joram.mom.dest.BridgeQueue";
-  public static final String BRIDGE_TOPIC =
-    "org.objectweb.joram.mom.dest.BridgeTopic";
-  public static final String MAIL_QUEUE =
-    "com.scalagent.joram.mom.dest.mail.JavaMailQueue";
-  public static final String MAIL_TOPIC =
-    "com.scalagent.joram.mom.dest.mail.JavaMailTopic";
-  public static final String SCHEDULER_QUEUE =
-    "com.scalagent.joram.mom.dest.scheduler.SchedulerQueue";
-  public static final String COLLECTOR_QUEUE =
-    "com.scalagent.joram.mom.dest.collector.CollectorQueue";
-  public static final String COLLECTOR_TOPIC =
-    "com.scalagent.joram.mom.dest.collector.CollectorTopic";
+  /**
+   * Returns <code>true</code> if the destination is a topic.
+   */
+  public boolean isTopic() {
+    return (this instanceof javax.jms.Topic);
+  }
+
+  public static final String QUEUE = "org.objectweb.joram.mom.dest.Queue";
+  public static final String TOPIC = "org.objectweb.joram.mom.dest.Topic";
+  public static final String DEAD_MQUEUE = "org.objectweb.joram.mom.dest.DeadMQueue";
+  public static final String CLUSTER_QUEUE = "org.objectweb.joram.mom.dest.ClusterQueue";
+  public static final String BRIDGE_QUEUE = "org.objectweb.joram.mom.dest.BridgeQueue";
+  public static final String BRIDGE_TOPIC = "org.objectweb.joram.mom.dest.BridgeTopic";
+  public static final String MAIL_QUEUE = "com.scalagent.joram.mom.dest.mail.JavaMailQueue";
+  public static final String MAIL_TOPIC = "com.scalagent.joram.mom.dest.mail.JavaMailTopic";
+  public static final String SCHEDULER_QUEUE = "com.scalagent.joram.mom.dest.scheduler.SchedulerQueue";
+  public static final String COLLECTOR_QUEUE = "com.scalagent.joram.mom.dest.collector.CollectorQueue";
+  public static final String COLLECTOR_TOPIC = "com.scalagent.joram.mom.dest.collector.CollectorTopic";
 
   /**
    * Administration method creating or retrieving a destination with a given name on a
@@ -321,7 +332,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
                                  String className,
                                  Properties props,
                                  Destination dest,
-                                 String expectedType) throws ConnectException, AdminException {
+                                 byte expectedType) throws ConnectException, AdminException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
                  "Destination.doCreate(" + serverId + ',' + name + ',' + className + ',' + props + ',' + dest + ',' + expectedType + ')');
@@ -331,7 +342,6 @@ public abstract class Destination extends AdministeredObject implements javax.jm
 
     dest.agentId = reply.getId();
     dest.adminName = name;
-    dest.type = reply.getType();
 
     // Be careful, MBean registration is now done explicitly
   }
@@ -799,33 +809,30 @@ public abstract class Destination extends AdministeredObject implements javax.jm
 
   public static Destination newInstance(String id,
                                         String name,
-                                        String type) throws AdminException {
+                                        byte type) throws AdminException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
                  "Destination.newInstance(" + id + ',' + name + ',' + type + ')');
+    
     Destination dest;
-    if (Queue.isQueue(type)) {
-      if (TemporaryQueue.isTemporaryQueue(type)) {
+    if ((type & QUEUE_TYPE) != 0) {
+      if ((type & TEMPORARY) != 0) {
         dest = new TemporaryQueue(id, null);
-      } else if (DeadMQueue.isDeadMQueue(type)) {
-        dest = new DeadMQueue(id);
       } else {
         dest = new Queue(id);
       }
-    } else if (Topic.isTopic(type)) {
-      if (TemporaryTopic.isTemporaryTopic(type)) {
+    } else if ((type & TOPIC_TYPE) != 0) {
+      if ((type & TEMPORARY) != 0) {
         dest = new TemporaryTopic(id, null);
       } else {
         dest = new Topic(id);
       }
-    } else throw new AdminException("Unknown destination type");
+    } else {
+      throw new AdminException("Unknown destination type (" + type + ')');
+    }
+    
     dest.adminName = name;
     return dest;
-  }
-
-  public static boolean isAssignableTo(String realType,
-                                       String resultingType) {
-    return realType.startsWith(resultingType);
   }
 
   /**
@@ -868,12 +875,12 @@ public abstract class Destination extends AdministeredObject implements javax.jm
   public Hashtable code() {
     Hashtable h = new Hashtable();
     h.put("agentId", getName());
-    h.put("type", type);
+    h.put("type", new Byte(type));
     return h;
   }
 
   public void decode(Hashtable h) {
     agentId = (String) h.get("agentId");
-    type = (String) h.get("type");
+    type = ((Byte) h.get("type")).byteValue();
   }
 }

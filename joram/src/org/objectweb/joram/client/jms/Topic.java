@@ -46,9 +46,6 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
-  public static boolean isTopic(String type) {
-    return Destination.isAssignableTo(type, TOPIC_TYPE);
-  }
 
   // Used by jndi2 SoapObjectHelper
   public Topic() {
@@ -59,7 +56,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
     super(id, TOPIC_TYPE);
   }
 
-  protected Topic(String id, String type) {
+  protected Topic(String id, byte type) {
     super(id, type);
   }
 
@@ -73,14 +70,12 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
     return getName();
   }
 
-  public static Topic createTopic(String agentId,
-                                  String name,
-                                  String type) {
+  public static Topic createTopic(String agentId, String name) {
     Topic dest = new Topic();
     
     dest.agentId = agentId;
     dest.adminName = name;
-    dest.type = type;
+    dest.type = TOPIC_TYPE;
 
     return dest;
   }

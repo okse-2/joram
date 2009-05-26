@@ -40,10 +40,6 @@ public class TemporaryTopic extends Topic implements javax.jms.TemporaryTopic {
   
   private final static String TMP_TOPIC_TYPE = "topic.tmp";
 
-  public static boolean isTemporaryTopic(String type) {
-    return Destination.isAssignableTo(type, TMP_TOPIC_TYPE);
-  }
-
   /** The connection the topic belongs to, <code>null</code> if not known. */
   private Connection cnx;
 
@@ -58,7 +54,7 @@ public class TemporaryTopic extends Topic implements javax.jms.TemporaryTopic {
    *          not known. 
    */
   public TemporaryTopic(String agentId, Connection cnx) {
-    super(agentId, TMP_TOPIC_TYPE);
+    super(agentId, (byte) (TOPIC_TYPE | TEMPORARY));
     this.cnx = cnx;
   }
 
