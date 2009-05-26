@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -32,15 +32,11 @@ import fr.dyade.aaa.agent.AgentId;
  * queue, and which behavior is provided by a <code>DeadMQueueImpl</code>
  * instance.
  *
- * @see DeadMQueueImpl
+ * @deprecated Since Joram 5.2 every Queue can be a DeadMQueue
  */
 public class DeadMQueue extends Queue {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
-
-  public static String getDestinationType() {
-    return "queue.dmq";
-  }
 
   /**
    * Empty constructor for newInstance(). 
