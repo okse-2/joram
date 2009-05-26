@@ -24,7 +24,6 @@ package joram.admin;
 
 
 import java.io.File;
-import java.util.List;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -34,14 +33,16 @@ import javax.jms.Session;
 import javax.jms.TemporaryQueue;
 import javax.jms.TemporaryTopic;
 import javax.jms.TextMessage;
-import javax.jms.TopicConnectionFactory;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
 
 import org.objectweb.joram.client.jms.Destination;
+import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
+import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 import framework.TestCase;
@@ -90,25 +91,29 @@ public class AdminTest1 extends TestCase {
     ((TcpConnectionFactory) cf).getParameters().connectingTimer = 60;
     ((TcpConnectionFactory) cf).getParameters().multiThreadSync = multiThreadSync;
 
-    AdminModule.connect(((TcpConnectionFactory) cf), "root", "root");
+    AdminModule.connect(cf, "root", "root");
 
-    org.objectweb.joram.client.jms.admin.User user = 
-      org.objectweb.joram.client.jms.admin.User.create("anonymous", "anonymous", 0);
+    User user = User.create("anonymous", "anonymous", 0);
 
-    org.objectweb.joram.client.jms.Queue queue = 
-      org.objectweb.joram.client.jms.Queue.create(0, "queue");
-
-    // Get the reference of an existing queue
-    queue = org.objectweb.joram.client.jms.Queue.create(0, "queue");
+    // Create a queue
+    Queue queue = Queue.create(0, "queue");
     queue.setFreeReading();
     queue.setFreeWriting();
 
-    org.objectweb.joram.client.jms.Topic topic = 
-      org.objectweb.joram.client.jms.Topic.create(0, "topic");
+    // Get the reference of an existing queue
+    Queue queue2 = Queue.create(0, "queue");
+    assertTrue("Bad queue", queue.equals(queue2));
+    assertTrue("Bad read rights", queue2.isFreelyReadable());
+    assertTrue("Bad write rights", queue2.isFreelyWriteable());
 
-    topic = org.objectweb.joram.client.jms.Topic.create(0, "topic");
+    // Create a topic
+    Topic topic = Topic.create(0, "topic");
 
-    DeadMQueue deadMQueue = (DeadMQueue)DeadMQueue.create(0);
+    // Get the reference of an existing topic
+    Topic topic2 = Topic.create(0, "topic");
+    assertTrue("Bad topic", topic.equals(topic2));
+
+    DeadMQueue deadMQueue = (DeadMQueue) DeadMQueue.create(0,"dmq");
 
     ((TcpConnectionFactory) cf).getParameters().multiThreadSync = multiThreadSync;
 
@@ -144,22 +149,18 @@ public class AdminTest1 extends TestCase {
     for (int i = 0; i < destinations.length; i++) {
       Destination dest = destinations[i];
       if (dest.getAdminName().equals("queue")) {
-        assertTrue(
-          "Wrong queue type: " + dest, 
-          dest.getClass() == org.objectweb.joram.client.jms.Queue.class);
+        assertTrue("Wrong queue type: " + dest, dest.getClass() == Queue.class);
         queueFound = true;
       } else if (dest.getAdminName().equals("topic")) {
-        assertTrue(
-          "Wrong topic type: " + dest, 
-          dest.getClass() == org.objectweb.joram.client.jms.Topic.class);
+        assertTrue("Wrong topic type: " + dest, dest.getClass() == Topic.class);
         topicFound = true;
-      } else if (dest instanceof TemporaryTopic) {
+      } else if (dest.getAdminName().equals("dmq")) {
+        deadMQueueFound = true;
+      }else if (dest instanceof TemporaryTopic) {
         tmpTopic = (TemporaryTopic)dest;
         tmpTopicFound = true;
       } else if (dest instanceof TemporaryQueue) {
         tmpQueueFound = true;
-      } else if (dest instanceof DeadMQueue) {
-        deadMQueueFound = true;
       }
     }
 
