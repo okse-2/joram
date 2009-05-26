@@ -26,6 +26,7 @@ import java.util.Properties;
 
 import org.objectweb.joram.mom.notifications.RegisterDestNot;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
+import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.AgentId;
@@ -52,15 +53,18 @@ public class MonitoringTopic extends Topic {
   public static void init(String args, boolean firstTime) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "MonitoringTopic.init(" + args + ',' + firstTime + ')');
-    if (!firstTime)
-      return;
+    
+    if (!firstTime) return;
+    
     MonitoringTopic monitTopic = new MonitoringTopic();
     monitTopic.setName("JoramMonitoringTopic");
     monitTopic.init(null, null);
     monitTopic.deploy();
     
-    RegisterDestNot regDestNot = new RegisterDestNot(monitTopic.getId(), monitTopic.getName(),
-        MonitoringTopic.class.getName(), TOPIC_TYPE);
+    RegisterDestNot regDestNot = new RegisterDestNot(monitTopic.getId(),
+                                                     monitTopic.getName(),
+                                                     MonitoringTopic.class.getName(),
+                                                     DestinationConstants.TOPIC_TYPE);
     Channel.sendTo(AdminTopic.getDefault(), regDestNot);
   }
   

@@ -189,7 +189,7 @@ public class MonitoringTopicImpl extends TopicImpl implements MonitoringTopicImp
     message.id = createMessageId();
     message.timestamp = currentTime;
     message.persistent = isPersistent;
-    message.setDestination(getId().toString(), Topic.TOPIC_TYPE);
+    message.setDestination(getId().toString(), message.TOPIC_TYPE);
     message.priority = priority;
     if (expiration > -1) {
       message.expiration = currentTime + expiration;
