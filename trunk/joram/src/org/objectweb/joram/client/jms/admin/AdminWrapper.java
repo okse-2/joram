@@ -620,7 +620,7 @@ public class AdminWrapper {
     String[] ids = reply.getIds();
     if ((ids != null) && (ids.length > 0)) {
       String[] names = reply.getNames();
-      String[] types = reply.getTypes();
+      byte[] types = reply.getTypes();
 
       dest = new Destination[ids.length];
       for (int i=0; i<ids.length; i++) {
@@ -685,7 +685,7 @@ public class AdminWrapper {
     CreateDestinationRequest cdr = new CreateDestinationRequest(serverId, name, className, prop, Queue.QUEUE_TYPE);
     CreateDestinationReply reply = (CreateDestinationReply) doRequest(cdr);
     
-    Queue queue = Queue.createQueue(reply.getId(), name, reply.getType());
+    Queue queue = Queue.createQueue(reply.getId(), name);
     
     if (AdminModule.wrapper != this)
       queue.setWrapper(this);
@@ -748,7 +748,7 @@ public class AdminWrapper {
     CreateDestinationRequest cdr = new CreateDestinationRequest(serverId, name, className, prop, Topic.TOPIC_TYPE);
     CreateDestinationReply reply = (CreateDestinationReply) doRequest(cdr);
     
-    Topic topic = Topic.createTopic(reply.getId(), name, reply.getType());
+    Topic topic = Topic.createTopic(reply.getId(), name);
 
     if (AdminModule.wrapper != this)
       topic.setWrapper(this);
