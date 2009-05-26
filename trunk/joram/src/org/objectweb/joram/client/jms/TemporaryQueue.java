@@ -39,10 +39,6 @@ public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue {
 
   private final static String TMP_QUEUE_TYPE = "queue.tmp";
 
-  public static boolean isTemporaryQueue(String type) {
-    return Destination.isAssignableTo(type, TMP_QUEUE_TYPE);
-  }
-
   /** The connection the queue belongs to, <code>null</code> if not known. */
   private Connection cnx;
 
@@ -57,7 +53,7 @@ public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue {
    *          not known.
    */
   public TemporaryQueue(String agentId, Connection cnx) {
-    super(agentId, TMP_QUEUE_TYPE);
+    super(agentId, (byte) (QUEUE_TYPE | TEMPORARY));
     this.cnx = cnx;
   }
 

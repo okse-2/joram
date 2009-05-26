@@ -32,12 +32,16 @@ import javax.jms.JMSException;
 public interface DestinationMBean {
   public String getName();
   public String getAdminName();
-  public String getType();
 
   /**
    * Returns <code>true</code> if the destination is a queue.
    */
   public boolean isQueue();
+  
+  /**
+   * Returns <code>true</code> if the destination is a topic.
+   */
+  public boolean isTopic();
 
   /**
    * Administration method removing this destination from the platform.
