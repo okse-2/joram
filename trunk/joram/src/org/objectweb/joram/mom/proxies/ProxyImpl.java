@@ -2413,15 +2413,14 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     }
   }
 
-  private void replyToTopic(
-    org.objectweb.joram.shared.admin.AdminReply reply,
-    AgentId replyTo,
-    String requestMsgId,
-    String replyMsgId) {
+  private void replyToTopic(org.objectweb.joram.shared.admin.AdminReply reply,
+                            AgentId replyTo,
+                            String requestMsgId,
+                            String replyMsgId) {
     org.objectweb.joram.shared.messages.Message message = new org.objectweb.joram.shared.messages.Message();
     message.correlationId = requestMsgId;
     message.timestamp = System.currentTimeMillis();
-    message.setDestination(replyTo.toString(), Topic.TOPIC_TYPE);
+    message.setDestination(replyTo.toString(), message.TOPIC_TYPE);
     message.id = replyMsgId;
     try {
       message.setAdminMessage(reply);
