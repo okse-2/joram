@@ -664,15 +664,15 @@ public class BaseTestCase {
       // Creates a thread to execute the test in order to
       // control the test duration.
       t = new Thread() {
-          public void run() {
-            try {
-              startTest();
-            } catch (Exception exc) {
-              addError(exc);
-              endTest();
-            }
+        public void run() {
+          try {
+            startTest();
+          } catch (Exception exc) {
+            addError(exc);
+            endTest();
           }
-        };
+        }
+      };
       t.setDaemon(true);
       t.start();
       if (timeout != 0L) {

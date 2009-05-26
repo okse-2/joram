@@ -32,7 +32,7 @@ import fr.dyade.aaa.agent.SCAdminBase;
  * Framework for tests using A3 agent servers.
  */
 public class TestCase extends BaseTestCase {
-  
+
   static SCAdminBase admin = null;
 
   protected boolean running = false;
@@ -46,8 +46,8 @@ public class TestCase extends BaseTestCase {
    * Starts the agent server.
    */
   protected void setUpEnv(String args[]) throws Exception {
-      AgentServer.init(args);
-      running = true;
+    AgentServer.init(args);
+    running = true;
   }
 
   /**
@@ -72,10 +72,10 @@ public class TestCase extends BaseTestCase {
       // Creates a thread to execute AgentServer.stop in order to
       // avoid deadlock if called from an agent reaction.
       Thread t = new Thread() {
-          public void run() {
-            AgentServer.stop();
-          }
-        };
+        public void run() {
+          AgentServer.stop();
+        }
+      };
       t.setDaemon(true);
       t.start();
       running = false;
@@ -87,7 +87,7 @@ public class TestCase extends BaseTestCase {
   }
 
   public static void startAgentServer(short sid,
-				      File dir) throws Exception {
+                                      File dir) throws Exception {
     try {
       getAdmin().startAgentServer(sid, dir);
     } catch (IllegalStateException exc) {
@@ -100,7 +100,7 @@ public class TestCase extends BaseTestCase {
   }
 
   public static void startAgentServer(short sid,
-				      File dir,
+                                      File dir,
                                       String[] jvmargs) throws Exception {
     try {
       getAdmin().startAgentServer(sid, dir, jvmargs);
@@ -121,23 +121,23 @@ public class TestCase extends BaseTestCase {
       exception(exc);
     }
   }
- public static void stopAgentServerExt(short sid) {
+  public static void stopAgentServerExt(short sid) {
     try {
       getAdmin().stopAgentServer(sid);
     } catch (Exception exc) {
-	exception(exc);
+      exception(exc);
     }
- }
- public static void killAgentServerExt(short sid) {
+  }
+  public static void killAgentServerExt(short sid) {
     try {
       getAdmin().killAgentServer(sid);
     } catch (Exception exc) {
-	exception(exc);
+      exception(exc);
     }
- }
+  }
 
 
-    
+
   public static void crashAgentServer(short sid) {
     try {
       getAdmin().crashAgentServer(sid);
@@ -170,9 +170,8 @@ public class TestCase extends BaseTestCase {
 
   public static SCAdminBase getAdmin() throws Exception {
     if (admin == null) {
-      String cfgFile = System.getProperty(
-        AgentServer.CFG_FILE_PROPERTY,
-        AgentServer.DEFAULT_CFG_FILE);
+      String cfgFile = System.getProperty(AgentServer.CFG_FILE_PROPERTY,
+                                          AgentServer.DEFAULT_CFG_FILE);
       // Initializes the admin proxy.
       admin = new SCAdminBase(cfgFile);
     }
@@ -184,7 +183,7 @@ public class TestCase extends BaseTestCase {
     assertFileIdentical(args[0], args[1]);
     endTest();
   }
-  
+
   public static void deleteDirectory(File dir) {
     String[] files = dir.list();
     for (int i = 0; i < files.length; i++) {
