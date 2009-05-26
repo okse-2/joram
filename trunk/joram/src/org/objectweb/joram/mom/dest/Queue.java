@@ -41,6 +41,7 @@ import org.objectweb.joram.mom.notifications.ReceiveRequest;
 import org.objectweb.joram.mom.notifications.SetNbMaxMsgRequest;
 import org.objectweb.joram.mom.notifications.SetThreshRequest;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
+import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -53,18 +54,16 @@ import fr.dyade.aaa.agent.WakeUpTask;
 
 /**
  * A <code>Queue</code> agent is an agent hosting a MOM queue, and which
- * behaviour is provided by a <code>QueueImpl</code> instance.
+ * behavior is provided by a <code>QueueImpl</code> instance.
  *
  * @see QueueImpl
  */
 public class Queue extends Destination implements BagSerializer {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
-  
-  public static final String QUEUE_TYPE = "queue";
 
-  public static String getDestinationType() {
-    return QUEUE_TYPE;
+  public final byte getType() {
+    return DestinationConstants.QUEUE_TYPE;
   }
 
   /**
