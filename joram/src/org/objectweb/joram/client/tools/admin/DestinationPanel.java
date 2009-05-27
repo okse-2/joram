@@ -22,15 +22,27 @@
  */
 package org.objectweb.joram.client.tools.admin;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Iterator;
 
-import org.objectweb.joram.client.jms.admin.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.admin.DeadMQueue;
+import org.objectweb.joram.client.jms.admin.User;
 
 /**
  * @author afedoro
@@ -233,7 +245,7 @@ public class DestinationPanel extends JPanel {
   public void setDestination(Destination dest) {
     this.dest = dest;
     idLabel.setText(dest.getName());
-    typeLabel.setText(dest.getType());
+    typeLabel.setText(dest.getAdminName());
     String name = c.findDestinationJndiName(dest);
     nameLabel.setText((name == null ? "Unknown" : name));
   }
