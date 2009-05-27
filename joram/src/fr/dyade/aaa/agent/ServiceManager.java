@@ -119,9 +119,14 @@ public class ServiceManager implements Serializable {
     Class ptypes[] = new Class[2];
     Object args[] = new Object[2];
 
-    ptypes[0] = Class.forName("java.lang.String");
+    ptypes[0] = String.class;
     ptypes[1] = Boolean.TYPE;
-    Class service = Class.forName(desc.getClassName());
+    Class service = null;
+    try {
+      service = Class.forName(desc.getClassName());
+    } catch (ClassNotFoundException cnfe) {
+      service = AgentServer.getResolverRepository().resolveClass(desc.getClassName());
+    }
     Method init = service.getMethod("init", ptypes);
     args[0] = desc.getArguments();
     args[1] = new Boolean(! desc.isInitialized());
@@ -172,7 +177,12 @@ public class ServiceManager implements Serializable {
     // DF: idempotency (could be done in AgentAdmin)
     if (! desc.running) return;
 //       throw new Exception("Service already stopped");
-    Class service = Class.forName(desc.getClassName());
+    Class service;
+    try {
+      service = Class.forName(desc.getClassName());
+    } catch (ClassNotFoundException cnfe) {
+      service = AgentServer.getResolverRepository().resolveClass(desc.getClassName());
+    }
     Method stop = service.getMethod("stopService", new Class[0]);
     stop.invoke(null, new Object[0]);
     desc.running = false;

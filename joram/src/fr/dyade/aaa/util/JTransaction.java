@@ -256,7 +256,7 @@ public final class JTransaction implements Transaction, JTransactionMBean {
       if (op != null) {
         if (op.type == SAVE) {
           ByteArrayInputStream bis = new ByteArrayInputStream(op.value);
-          ObjectInputStream ois = new ObjectInputStream(bis);
+          ObjectInputStream ois = new ResolverObjectInputStream(bis);
 
           return ois.readObject();
         } else if (op.type == DELETE) {
@@ -278,7 +278,7 @@ public final class JTransaction implements Transaction, JTransactionMBean {
 
       // I'm not sure we can directly read the object without use
       // a ByteArrayInputStream.
-      ObjectInputStream ois = new ObjectInputStream(fis);
+      ObjectInputStream ois = new ResolverObjectInputStream(fis);
       obj = ois.readObject();
 
       fis.close();
