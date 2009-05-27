@@ -46,6 +46,7 @@ import fr.dyade.aaa.agent.conf.A3CMLProperty;
 import fr.dyade.aaa.agent.conf.A3CMLServer;
 import fr.dyade.aaa.agent.conf.A3CMLService;
 import fr.dyade.aaa.util.Configuration;
+import fr.dyade.aaa.util.ResolverRepository;
 import fr.dyade.aaa.util.Timer;
 import fr.dyade.aaa.util.Transaction;
 import fr.dyade.aaa.util.management.MXWrapper;
@@ -338,6 +339,15 @@ public final class AgentServer {
 
   public final static String getName() {
     return name;
+  }
+  
+  static ResolverRepository resolverRepo = null;
+
+  public static ResolverRepository getResolverRepository() {
+    if (resolverRepo == null) {
+      resolverRepo = new ResolverRepository();
+    }
+    return resolverRepo;
   }
 
   /**
@@ -1056,10 +1066,9 @@ public final class AgentServer {
         if (a3config == null) {
           // 3rd, Generate A3CMLConfig base.
           logmon.log(BasicLevel.WARN, "Generate default configuration");
-          A3CMLDomain d = new A3CMLDomain(ADMIN_DOMAIN, "fr.dyade.aaa.agent.SimpleNetwork");
+          A3CMLDomain d = new A3CMLDomain(ADMIN_DOMAIN, SimpleNetwork.class.getName());
           A3CMLServer s = new A3CMLServer((short) 0, ADMIN_SERVER, "localhost");
           s.networks.addElement(new A3CMLNetwork(ADMIN_DOMAIN, 27300));
-          s.services.addElement(new A3CMLService("fr.dyade.aaa.agent.AgentAdmin", null));
           d.addServer(s);
           a3config = new A3CMLConfig();
           a3config.addDomain(d);

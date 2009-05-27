@@ -702,7 +702,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
       }
 
       ByteArrayInputStream bis = new ByteArrayInputStream(buf);
-      ObjectInputStream ois = new ObjectInputStream(bis);	  
+      ObjectInputStream ois = new ResolverObjectInputStream(bis);	  
       try {
         return ois.readObject();
       } finally {

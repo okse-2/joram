@@ -355,7 +355,7 @@ public abstract class DBTransaction implements Transaction, DBTransactionMBean {
     byte[] buf = loadByteArray(name);
     if (buf != null) {
       ByteArrayInputStream bis = new ByteArrayInputStream(buf);
-      ObjectInputStream ois = new ObjectInputStream(bis);	  
+      ObjectInputStream ois = new ResolverObjectInputStream(bis);	  
       return ois.readObject();
     }
     return null;

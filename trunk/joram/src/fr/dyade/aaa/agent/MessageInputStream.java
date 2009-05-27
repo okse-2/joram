@@ -29,6 +29,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.BinaryDump;
+import fr.dyade.aaa.util.ResolverObjectInputStream;
 
 /**
  * Class used to receive messages through a stream.
@@ -242,9 +243,9 @@ public abstract class MessageInputStream extends InputStream {
           if (count < 0) throw new EOFException();
           n += count;
         } while (n < length);
-        ois = new ObjectInputStream(new GZIPInputStream(new ByteArrayInputStream(buf)));
+        ois = new ResolverObjectInputStream(new GZIPInputStream(new ByteArrayInputStream(buf)));
       } else {
-        ois = new ObjectInputStream(this);
+        ois = new ResolverObjectInputStream(this);
       }
       
       if (getLogger().isLoggable(BasicLevel.DEBUG))

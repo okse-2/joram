@@ -26,6 +26,8 @@ import java.io.ObjectInputStream;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
+import fr.dyade.aaa.util.ResolverObjectInputStream;
+
 /**
  * <code>Agent</code> used to allow remote agent creation. Every agent
  * server hosts a factory agent, they all use a predefined stamp identifier
@@ -96,7 +98,7 @@ final class AgentFactory extends Agent {
       try {
 	// Restore the new agent state.
 	ObjectInputStream ois =
-	  new ObjectInputStream(
+	  new ResolverObjectInputStream(
 	    new ByteArrayInputStream(
 	      cnot.agentState, 0, cnot.agentState.length));
 	Agent ag = (Agent) ois.readObject();
