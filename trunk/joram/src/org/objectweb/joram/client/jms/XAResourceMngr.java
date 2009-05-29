@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2000 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -479,7 +479,7 @@ class XAContext {
     String newDest;
     ProducerMessages newPM;
     ProducerMessages storedPM;
-    Vector<org.objectweb.joram.shared.messages.Message> msgs;
+    Vector msgs;
 
     // Browsing the destinations for which messages have been produced:
     Enumeration newDests = newSendings.keys();
@@ -496,7 +496,7 @@ class XAContext {
       else {
         msgs = newPM.getMessages();
         for (int i = 0; i < msgs.size(); i++)
-          storedPM.addMessage(msgs.get(i));
+          storedPM.addMessage((org.objectweb.joram.shared.messages.Message) msgs.get(i));
       }
     }
   }
