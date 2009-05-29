@@ -1,4 +1,10 @@
 +==============================================================================
+| 2009/05/29 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: A ClassCastException occurs in XAContext.addSendings during
+XAResourceMngr.end call. The real type of vector element is not a JMS message
+but the shared structure used in the protocol.
++==============================================================================
 | 2009/05/19 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Bug fix: a deadlock could occur in PoolNetwork on a failing network.
