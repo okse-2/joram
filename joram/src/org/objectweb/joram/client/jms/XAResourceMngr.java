@@ -479,7 +479,7 @@ class XAContext {
     String newDest;
     ProducerMessages newPM;
     ProducerMessages storedPM;
-    Vector msgs;
+    Vector<org.objectweb.joram.shared.messages.Message> msgs;
 
     // Browsing the destinations for which messages have been produced:
     Enumeration newDests = newSendings.keys();
@@ -496,7 +496,7 @@ class XAContext {
       else {
         msgs = newPM.getMessages();
         for (int i = 0; i < msgs.size(); i++)
-          storedPM.addMessage(((Message) msgs.get(i)).momMsg);
+          storedPM.addMessage(msgs.get(i));
       }
     }
   }
