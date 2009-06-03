@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<JoramAdmin>
+  <Queue name="anotherQueue">
+    <freeReader/>
+    <freeWriter/>
+    <jndi name="anotherQueue"/>
+  </Queue>
+</JoramAdmin>
