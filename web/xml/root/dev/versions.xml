@@ -11,6 +11,60 @@
   </properties>
 
   <body>
+  
+    <s1 name="JORAM release 5.2.4 (June 4, 2009)">
+      <p>Joram 5.2.4 is available in the SVN repository with tag JORAM_5_2_4.
+       This release provides many features and changes:</p>
+      <s2 name="New features and improvements">
+      <ul>
+        <li>Change administration software architecture:
+        <ul>
+          <li>AdminRequestor objects to manage administration requests over a Joram connection,</li>
+          <li>AdminWrapper objects to perform administration actions to a Joram server,</li>
+          <li>AdminModule for compatibility reasons (static administration interface and connection),</li>
+          <li>and JoramAdmin for JMX administration.</li>
+        </ul>
+        </li>
+        <li>Improve Joram administration connection and server stop, trying to avoid ConnectException.</li>
+        <li>Allows pending message observation in queue mbean (Shared MessageJMXWrapper with subscriptions.</li>
+        <li>Adds JMX monitoring for connections. Additionally, a server can now be deactivated to avoid
+        creation of new connections.</li>
+        <li>JoramAdapter: Removes stack trace printing when XML configuration file is not found (Be careful
+        JoramAdmin.cfg file is no longer supported).</li>
+        <li>Merges unified, queue and topic connection factories. Queue and topic connection factories are now deprecated.
+        Adds default hostname (localhost) and port (16010) properties in connection factories. Use these properties for
+        ConnectionFactory.create method with no parameter.</li>
+        <li>Adapts Joram's bundles to OSGi 4.1 specification and use of Felix 1.4.1.</li>
+        <li>Adds ResolverRepository and Resolver classes in order to allow packaging of Joram in multiples bundles.</li>
+        <li>Widely use SocketFactory class and adds ServerSocketFactory facility. Removes undesirable static
+        reference to SocketFactory14 in SocketFactory and avoid infinite loop in SocketFactory creation if default
+        class is unavailable.</li>
+        <li>Use a global configuration object to get all joram specific properties. No longer modify the system properties.</li>
+        <li>Changes logger naming pattern, no longer use JoramTracing class.</li>
+      </ul>
+      </s2>
+      <s2 name="Bug fixes">
+      <ul>
+        <li>A ClassCastException occurs in XAContext.addSendings during XAResourceMngr.end call. The real type
+        of vector element is not a JMS message but the shared structure used in the protocol.</li>
+        <li>A deadlock could occur in PoolNetwork on a failing network. Avoid lengthy connection close operation
+        if connection is broken and factory parameter 'connectingTimer' was set.</li>
+        <li>Fix potential NPE with HttpNetwork defined without any server.</li>
+        <li>Bug fix in DefaultConnectionManager class: Avoid class cast exception in allocateConnection method
+        (objects returned by create methods are in fact AbstractConnectionFactory).</li>
+        <li>In administered objects use the AdminModule static connection when the internal AdminWrapper object
+        is closed.</li>
+        <li>Bug fixes in AgentServer initialization: Initializes the transaction component before the configuration
+        reading and reads the configuration through the transaction (otherwise modifications in the transaction log
+        could not be read).</li>
+        <li>Bug fixes in HttpNetwork reconfiguration: In ServerConfigHelper.addServer replaces test to add the server
+        to the MessageConsumer (use hops rather than gateway attribute, gateway is defined for 'client' servers of
+        HttpNetwork domains).</li>
+        <li>Fix initialization of collector destination.</li>
+      </ul>
+      </s2>
+    </s1>
+  
     <s1 name="JORAM release 5.2.1 (March 4, 2009)">
       <p>Joram 5.2.1 is available in the SVN repository with tag JORAM_5_2_1.
        This release provides many features and changes:</p>

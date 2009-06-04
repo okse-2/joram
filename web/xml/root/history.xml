@@ -13,6 +13,22 @@
   <body>
     <s1 name="JORAM History">
     
+      <subtitle>June 4, 2009: JORAM 5.2.4 is released</subtitle>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
+      <p>It introduces many improvements and some bug fixes, essentially:</p>
+      <ul>
+        <li>Administration: Many changes in the administration software architecture.</li>
+        <li>JMX: Adds pending message observation in queue and monitoring for active connections.</li>
+        <li>JoramAdapter: Removes stack trace printing when XML configuration file is not found (Be careful
+        JoramAdmin.cfg file is no longer supported).</li>
+        <li>Merges unified, queue and topic connection factories.</li>
+        <li>OSGi: Fixes and improvements.</li>
+      </ul>
+      <p>This version is bundled in <a href="http://jonas.ow2.org/">Jonas 4.10.4</a>.</p>
+      <p>It is tagged in SVN (JORAM_5_2_4), the complete list of changes can be viewed either in
+      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
+      <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/trunk/joram/history">SVN history</a>.</p>
+    
       <subtitle>March 4, 2009: JORAM 5.2.1 is released</subtitle>
       <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
       <p>It introduces many improvements and some bug fixes, essentially:</p>
