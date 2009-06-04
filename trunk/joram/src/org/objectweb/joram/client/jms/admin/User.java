@@ -245,8 +245,8 @@ public class User extends AdministeredObject implements UserMBean {
     if (MXWrapper.mxserver == null) return null;
 
     StringBuffer buf = new StringBuffer();
-    buf.append(base).append(':');
-    buf.append("type=User,name=").append(getName()).append('[').append(getProxyId()).append(']');
+    buf.append(base);
+    buf.append(":type=User,name=").append(getName()).append('[').append(getProxyId()).append(']');
     JMXBeanName = buf.toString();
     
     try {
