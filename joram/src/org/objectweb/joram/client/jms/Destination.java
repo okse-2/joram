@@ -365,9 +365,12 @@ public abstract class Destination extends AdministeredObject implements javax.jm
     if (MXWrapper.mxserver == null) return null;
 
     StringBuffer buf = new StringBuffer();
-    buf.append(base).append(':');
-    buf.append("type=").append(getType());
-    buf.append(",name=").append(getAdminName()).append('[').append(getName()).append(']');
+    buf.append(base);
+    if (isQueue())
+      buf.append(":type=Queue,name=");
+    else
+      buf.append(":type=Topic,name=");
+    buf.append(getAdminName()).append('[').append(getName()).append(']');
     JMXBeanName = buf.toString();
     
     try {
