@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -102,16 +102,17 @@ public class JndiTest2 extends TestCase {
 	System.out.println("End test2");
 	
     } catch (Exception exc) {   
-	exc.printStackTrace();
-	error(exc);      
+      exc.printStackTrace();
+      error(exc);
+      // In case the exception occurred before stopping the server 0
+      stopAgentServer((short) 0);
     } finally {
-	//stopAgentServer((short)0);
-	stopAgentServer((short)1);
-	endTest();
+      stopAgentServer((short) 1);
+      endTest();
     }
   }
     
-    public static void main(String args[]) {
+  public static void main(String args[]) {
 	new JndiTest2().run();
-    }
+  }
 }
