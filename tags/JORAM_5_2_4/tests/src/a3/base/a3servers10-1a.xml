@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+
+<config>
+  <domain name="D1" network="fr.dyade.aaa.agent.SimpleNetwork"/>
+
+  <server id="0" name="S0" hostname="localhost">
+    <network domain="D1" port="16300"/>
+    <service class="fr.dyade.aaa.agent.AdminProxy" args="8090"/>
+  </server>
+  <server id="1" name="S1" hostname="localhost">
+    <network domain="D1" port="16301"/>
+    <service class="fr.dyade.aaa.agent.AdminProxy" args="8091"/>
+  </server>
+  <server id="2" name="S2" hostname="localhost">
+    <network domain="D1" port="16302"/>
+    <service class="fr.dyade.aaa.agent.AdminProxy" args="8092"/>
+  </server>
+</config>
