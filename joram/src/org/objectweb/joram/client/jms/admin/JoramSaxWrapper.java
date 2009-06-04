@@ -711,8 +711,8 @@ public class JoramSaxWrapper extends DefaultHandler {
           cf.setIdentityClassName(identityClass);
 
           cnx = cf.createConnection(name, password);
-          wrapper = new AdminWrapper(cnx);
           cnx.start();
+          wrapper = new AdminWrapper(cnx);
         } else if (rawName.equals(ELT_COLLOCATEDCONNECT)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG,
@@ -722,8 +722,8 @@ public class JoramSaxWrapper extends DefaultHandler {
           cf.setIdentityClassName(identityClass);
 
           cnx = cf.createConnection(name, password);
-          wrapper = new AdminWrapper(cnx);
           cnx.start();
+          wrapper = new AdminWrapper(cnx);
         } else if (rawName.equals(ELT_CONNECTIONFACTORY)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "cf \""+ name + "\"= " + obj);
