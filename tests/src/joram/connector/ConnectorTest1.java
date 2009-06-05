@@ -41,22 +41,30 @@ import org.objectweb.joram.client.connector.OutboundSession;
 
 import framework.TestCase;
 
-public class Connector extends TestCase {
+/**
+ * JCA Connector test with a colocated Joram server.
+ */
+public class ConnectorTest1 extends TestCase {
+  static boolean colocated = false;
+  
   public static void main(String[] args) throws Exception {
-    new Connector().run();
+    new ConnectorTest1().run();
   }
 
   public void run(){  
     try{
-      System.out.println("start");
-      startAgentServer((short) 0);
-      JWorkManager jw = new JWorkManager(1, 5, 5000);
-      ResourceBootstrapContext bt=new ResourceBootstrapContext(jw);
-
+      colocated = Boolean.getBoolean("colocated");
+      System.out.println("colocated=" + colocated);
+      
+      if (! colocated)
+        startAgentServer((short) 0);
+      
       JoramAdapter ja= new JoramAdapter() ;
-      ja.start(bt);
-
-      Thread.sleep(10000);
+      ja.setCollocatedServer(colocated);
+      ja.start(new ResourceBootstrapContext(new JWorkManager(1, 5, 5000)));
+      
+      Thread.sleep(5000);
+      
       Context ictx = new InitialContext();
       Queue queue = (Queue) ictx.lookup("sampleQueue");
       assertTrue("queue not found", queue != null);
@@ -137,9 +145,9 @@ public class Connector extends TestCase {
       prod3.send(msg);
 
       Thread.sleep(5000);  // wait onMessage
-      assertTrue("counter1=" + counter1, counter1 == 1);
-      assertTrue("counter2=" + counter2, counter2 == 1);
-      assertTrue("counter3=" + counter3, counter3 == 1);
+      assertTrue("counter1=" + counter1 + " should be 1", counter1 == 1);
+      assertTrue("counter2=" + counter2 + " should be 1", counter2 == 1);
+      assertTrue("counter3=" + counter3 + " should be 1", counter3 == 1);
       
       new Thread() {
         public void run() {
@@ -179,16 +187,17 @@ public class Connector extends TestCase {
       }.start();
 
       Thread.sleep(10000);  // wait onMessage
-      assertTrue("counter1=" + counter1, counter1 == 101);
-      assertTrue("counter2=" + counter2, counter2 == 101);
-      assertTrue("counter3=" + counter3, counter3 == 101 );
+      assertTrue("counter1=" + counter1 + " should be 101", counter1 == 101);
+      assertTrue("counter2=" + counter2 + " should be 101", counter2 == 101);
+      assertTrue("counter3=" + counter3 + " should be 101", counter3 == 101 );
       
       ja.stop();
-    }catch(Throwable exc){
+    } catch(Throwable exc) {
       exc.printStackTrace();
       error(exc);
-    }finally{
-      stopAgentServerExt((short)0);
+    } finally {
+      if (! colocated)
+        stopAgentServerExt((short)0);
       endTest();
     }
   }
