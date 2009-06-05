@@ -46,6 +46,8 @@ public class AdminReply extends AbstractAdminMessage {
   public final static int SERVER_ID_ALREADY_USED = 2;
 
   public final static int UNKNOWN_SERVER = 3;
+
+  public final static int PERMISSION_DENIED = 4;
   
   /** <code>true</code> if this reply replies to a successful request. */
   private boolean success = false;
