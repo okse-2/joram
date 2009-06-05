@@ -12,6 +12,7 @@
     <!-- Tests specific sources set -->
     <patternset id="specific">
       <include name="joram/**/*.java"/>
+    	<exclude name="joram/studycase/**/*.java"/>
     </patternset>
   </target>
 
@@ -50,7 +51,7 @@
     <antcall target="tests.cluster"/>
     <antcall target="tests.hierarchical"/>
     <antcall target="tests.ssl"/>
-    <antcall target="jca.test"/>
+    <antcall target="tests.jca"/>
     <antcall target="tests.dmq"/>
     <antcall target="tests.ttl"/>
     <antcall target="tests.sub"/>
@@ -344,6 +345,11 @@ description=" --> launch all exceptionlistener tests">
   <target name="tests.ssl"
           description=" --> launch all ssl tests">
     <antcall target="ssl.test"/>
+  </target>
+	
+  <target name="tests.jca" description=" --> test joram connector">
+    <antcall target="jca.test1"/>
+    <antcall target="jca.test2"/>
   </target>
 
   <target name="tests.dmq"
@@ -4253,16 +4259,81 @@ description=" --> launch all exceptionlistener tests">
 
   <!-- end test ssl -->
 
-  <target name="jca.test" depends="init.a3props,compile"
-          description=" --> test joram connector">
+  <!--  start JCA tests -->
+
+  <target name="jca.test1" description=" --> test joram connector (colocated server)">
+    <antcall target="jca.test1.1"/>
+    <antcall target="jca.test1.2"/>
+    <antcall target="jca.test1.3"/>
+  </target>
+
+  <target name="jca.test1.1" depends="init.a3props,compile"
+	        description=" --> test joram connector (colocated server)">
     <antcall target="jca.test.run" inheritAll="true">
-      <param name="className" value="joram.connector.Connector"/>
-      <param name="testid" value="jca.test"/>
-      <param name="jvmargs" value=""/>
+      <param name="className" value="joram.connector.ConnectorTest1"/>
+      <param name="testid" value="jca.test1.1"/>
+      <param name="jvmargs" value="-Dcolocated=true"/>
       <param name="args" value=""/>
       <param name="a3conf" value="connector/a3servers.xml"/>
       <param name="jndiconf" value="connector/jndi.properties"/>
-      <param name="joramAdmin" value="connector/joramAdmin.xml"/>
+      <param name="joramAdmin" value="connector/joramAdmin1.xml"/>
+    </antcall>
+  </target>
+
+  <target name="jca.test1.2" depends="init.a3props,compile"
+	        description=" --> test joram connector (colocated server)">
+    <antcall target="jca.test.run" inheritAll="true">
+      <param name="className" value="joram.connector.ConnectorTest1"/>
+      <param name="testid" value="jca.test1.2"/>
+      <param name="jvmargs" value="-Dcolocated=true"/>
+      <param name="args" value=""/>
+      <param name="a3conf" value="connector/a3servers.xml"/>
+      <param name="jndiconf" value="connector/jndi.properties"/>
+      <param name="joramAdmin" value="connector/joramAdmin2.xml"/>
+    </antcall>
+  </target>
+
+  <target name="jca.test1.3" depends="init.a3props,compile"
+	        description=" --> test joram connector (colocated server)">
+    <antcall target="jca.test.run" inheritAll="true">
+      <param name="className" value="joram.connector.ConnectorTest1"/>
+      <param name="testid" value="jca.test1.3"/>
+      <param name="jvmargs" value="-Dcolocated=true"/>
+      <param name="args" value=""/>
+      <param name="a3conf" value="connector/a3servers.xml"/>
+      <param name="jndiconf" value="connector/jndi.properties"/>
+      <param name="joramAdmin" value="connector/joramAdmin3.xml"/>
+    </antcall>
+  </target>
+
+  <target name="jca.test2" description=" --> test joram connector remote server)">
+    <antcall target="jca.test2.1"/>
+    <antcall target="jca.test2.2"/>
+  </target>
+	
+  <target name="jca.test2.1" depends="init.a3props,compile"
+          description=" --> test joram connector (remote server)">
+    <antcall target="jca.test.run" inheritAll="true">
+      <param name="className" value="joram.connector.ConnectorTest1"/>
+      <param name="testid" value="jca.test2.1"/>
+      <param name="jvmargs" value="-Dcolocated=false"/>
+      <param name="args" value=""/>
+      <param name="a3conf" value="connector/a3servers.xml"/>
+      <param name="jndiconf" value="connector/jndi.properties"/>
+      <param name="joramAdmin" value="connector/joramAdmin1.xml"/>
+    </antcall>
+  </target>
+	
+  <target name="jca.test2.2" depends="init.a3props,compile"
+          description=" --> test joram connector (remote server)">
+    <antcall target="jca.test.run" inheritAll="true">
+      <param name="className" value="joram.connector.ConnectorTest1"/>
+      <param name="testid" value="jca.test2.2"/>
+      <param name="jvmargs" value="-Dcolocated=false"/>
+      <param name="args" value=""/>
+      <param name="a3conf" value="connector/a3servers.xml"/>
+      <param name="jndiconf" value="connector/jndi.properties"/>
+      <param name="joramAdmin" value="connector/joramAdmin3.xml"/>
     </antcall>
   </target>
 
@@ -4272,7 +4343,10 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.start" inheritAll="true"/>
   </target>
 
+  <!-- end JCA tests -->
+
   <!--  start dmq tests -->
+	
   <target name="dmq.TestDmq1" depends="init.a3props,compile"
           description=" --> check threshold of specific queue and user">
     <antcall target="test.run" inheritAll="true">
