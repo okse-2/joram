@@ -79,6 +79,16 @@ Message::~Message() {
   return;
 }
 
+void Message::setBody(int length, byte* body) {
+	this->length = length;
+	this->body = body;
+}
+
+void Message::getBody(int* length, byte** body) {
+	*length = this->length;
+	*body = this->body;
+}
+
 void Message::acknowledge() {
   if (session == NULL) throw IllegalStateException();
 }

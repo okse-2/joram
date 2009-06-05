@@ -7,12 +7,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
@@ -93,7 +93,7 @@ class Message : Streamable {
   int type;
 
   byte* body;
- 
+
   /** A simple message carries an empty body. */
   const static int SIMPLE = 0;
   /** A text message carries a String body. */
@@ -123,7 +123,7 @@ class Message : Streamable {
    * By default, the priority is 4?
    */
   int priority;
- 
+
   /** The message expiration time, by default 0 for infinite time-to-live. */
   long long expiration;
 
@@ -169,8 +169,11 @@ class Message : Streamable {
    * Constructs a bright new <code>Message</code>.
    */
   Message();
-  
+
   ~Message();
+
+  void setBody(int length, byte* body);
+  void getBody(int* length, byte** body);
 
   /**
    * Acknowledges all consumed messages of the session of this message.
@@ -196,7 +199,7 @@ class Message : Streamable {
    * Sets the correlation ID for the message.
    */
   void setCorrelationID(char* correlationID);
-         
+
   /**
    * Returns <code>true</code> if the message is persistent.
    */
