@@ -471,6 +471,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
         msg = (Message) msgs.nextElement();
         nbMsgsSentToDMQSinceCreation++;
         dmqManager.addDeadMessage(msg, MessageErrorConstants.NOT_WRITEABLE);
+        handleDeniedMessage(msg.id, AgentId.fromString(msg.replyToId));
       }
       dmqManager.sendToDMQ();
       throw new AccessException("WRITE right not granted");
@@ -485,7 +486,15 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     if (! not.getPersistent() && !not.getAsyncSend()) {
       forward(from, new SendReplyNot(not.getClientContext(), not.getRequestId()));
     }
-  } 
+  }
+
+  /**
+   * Method used to do specific actions when a message is denied because of a
+   * lack of rights.
+   */
+  protected void handleDeniedMessage(String msgId, AgentId replyTo) {
+    // Nothing to do, useful in admin topic
+  }
 
   /**
    * Method implementing the reaction to an <code>UnknownAgent</code>
