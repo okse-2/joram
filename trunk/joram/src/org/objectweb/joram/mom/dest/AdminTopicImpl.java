@@ -26,7 +26,6 @@ package org.objectweb.joram.mom.dest;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -149,7 +148,6 @@ import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.util.monolog.api.BasicLevel;
 
-import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.DeleteNot;
@@ -252,25 +250,19 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       throw new Exception("User [" + identity.getUserName() + "] does not exist");
     }
 
-    if (identity instanceof Identity) {
-      if (! identity.check(userIdentity)) {
-        if (logger.isLoggable(BasicLevel.ERROR))
-          logger.log(BasicLevel.ERROR, "identity check failed.");
-        throw new Exception("identity check failed.");
-      } else {        
-        userProxId = (AgentId) proxiesTable.get(identity.getUserName());
-        if (userProxId == null) {
-          if (logger.isLoggable(BasicLevel.ERROR))
-            logger.log(BasicLevel.ERROR, "No proxy deployed for user [" + identity.getUserName() + "]");
-          throw new Exception("No proxy deployed for user [" + identity.getUserName() + "]");
-        }
-
-        return userProxId;
-      }
-    } else {
+    if (!identity.check(userIdentity)) {
       if (logger.isLoggable(BasicLevel.ERROR))
-        logger.log(BasicLevel.ERROR, "Bad Auth must be instanceof Identity :: identity = " + identity);
-      throw new Exception("Bad Auth must be instanceof Identity :: identity = " + identity);
+        logger.log(BasicLevel.ERROR, "identity check failed.");
+      throw new Exception("identity check failed.");
+    } else {
+      userProxId = (AgentId) proxiesTable.get(identity.getUserName());
+      if (userProxId == null) {
+        if (logger.isLoggable(BasicLevel.ERROR))
+          logger.log(BasicLevel.ERROR, "No proxy deployed for user [" + identity.getUserName() + "]");
+        throw new Exception("No proxy deployed for user [" + identity.getUserName() + "]");
+      }
+
+      return userProxId;
     }
   }
 
@@ -299,6 +291,15 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   /** Method used by proxies for checking if a given name is already used. */
   public boolean isTaken(String name) {
     return usersTable.containsKey(name);
+  }
+
+  /**
+   * Method used to send a response when a message is denied because of a lack
+   * of rights.
+   */
+  protected void handleDeniedMessage(String msgId, AgentId replyTo) {
+    distributeReply(replyTo, msgId, new AdminReply(false, AdminReply.PERMISSION_DENIED, "Permission denied.",
+        null));
   }
 
   /**
