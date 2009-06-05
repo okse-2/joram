@@ -219,7 +219,8 @@ class TcpChannel : public Channel {
       }
     }
 
-    printf("connected -> %d\n", key);
+    if(DEBUG)
+      printf("connected -> %d\n", key);
 
     TcpMessage* pendingMsg = (TcpMessage*) NULL;
     for (int i = 0; i < pendingMessages->size(); i++) {
