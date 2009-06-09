@@ -30,7 +30,7 @@ public interface JoramAdmin {
   /**
    *
    */
-  public boolean executeAdminXML(Reader reader) throws Exception;
+  public void executeAdminXML(Reader reader) throws Exception;
 
   /**
    * Creates or retrieves a user on the underlying JORAM server.
