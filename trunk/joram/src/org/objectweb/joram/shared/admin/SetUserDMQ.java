@@ -44,8 +44,8 @@ public class SetUserDMQ extends AdminRequest {
   /**
    * Constructs a <code>SetUserDMQ</code> instance.
    *
-   * @param userId  Identifier of the user's proxy the DMQ is set for.
-   * @param dmqId  Identifier of the DMQ.
+   * @param userProxId  Identifier of the user's proxy the DMQ is set for.
+   * @param dmqId       Identifier of the DMQ.
    */
   public SetUserDMQ(String userProxId, String dmqId) {
     this.userProxId = userProxId;

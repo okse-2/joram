@@ -59,16 +59,11 @@ public class TcpReader extends Daemon {
 
   /**
    * Creates a new reader.
-   * 
-   * @param sock
-   *          the socket to read
-   * @param userConnection
-   *          the connection with the user's proxy
-   * @param tcpConnection
-   *          the TCP connection
    */
-  public TcpReader(IOControl ioctrl, AgentId proxyId,
-                   TcpConnection tcpConnection, boolean closeConnection) throws IOException {
+  public TcpReader(IOControl ioctrl,
+                   AgentId proxyId,
+                   TcpConnection tcpConnection,
+                   boolean closeConnection) throws IOException {
     super("tcpReader");
     this.ioctrl = ioctrl;
     this.proxyId = proxyId;

@@ -47,10 +47,9 @@ public class SetCluster extends AdminRequest {
   /**
    * Constructs a <code>SetCluster</code> instance.
    *
-   * @param initName  Identifier of the topic already part of a cluster, or
-   *          chosen as the initiator.
-   * @param topName  Identifier of the topic joining the cluster, or the
-   *          initiator.
+   * @param initId  Identifier of the topic already part of a cluster, or
+   *                chosen as the initiator.
+   * @param topId  Identifier of the topic joining the cluster, or the initiator.
    */
   public SetCluster(String initId, String topId) {
     this.initId = initId;
