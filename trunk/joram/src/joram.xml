@@ -529,8 +529,11 @@
              doctitle="Joram ${version} Platform Documentation"
              header="Joram ${version}"
              bottom="Copyright &#xA9; 2000 - 2009 Scalagent D.T. - All rights reserved">
-      <doctitle><![CDATA[<h1>Joram(TM) Documentation</h1>]]></doctitle>
+      <doctitle><![CDATA[<h1>Joram(TM) ${version} User Documentation</h1>]]></doctitle>
       <package name="org.objectweb.joram.*"/>
+      <package name="org.objectweb.joram.*"/>
+    	<excludepackage name="org.objectweb.joram.client.tools.*"/>
+      <excludepackage name="org.objectweb.joram.mom.amqp.*"/>
     </javadoc>
   </target>
 
@@ -548,29 +551,33 @@
              windowtitle="Joram(TM) Platform Documentation"
              doctitle="Joram(TM) Platform Documentation"
              bottom="Copyright &#xA9; 2000 - 2009 Scalagent D.T. - All rights reserved">
-      <doctitle><![CDATA[<h1>Joram(TM) Documentation</h1>]]></doctitle>
+      <doctitle><![CDATA[<h1>Joram(TM) ${version} Developer Documentation</h1>]]></doctitle>
       <package name="*"/>
     </javadoc>
   </target>
 
   <!-- RELEASES -->
   <target name="releases"
-          depends="clean,release.src,release.jar"
+          depends="clean,release.src,release.jar,release.doc"
           description="--> Builds a Joram complete distribution.">
     <antcall target="ship.adapter" inheritAll="true"/>
     <copy file="${ship.dir}/lib/joram.rar"
           tofile="${releases.dir}/joram-${version}-RA.rar"/>
     <delete file="${ship.dir}/lib/joram.rar"/>
+  	
     <antcall target="ship.remoteadapter" inheritAll="true"/>
     <copy file="${ship.dir}/lib/joram.rar"
           tofile="${releases.dir}/joram-${version}-remoteRA.rar"/>
     <delete file="${ship.dir}/lib/joram.rar"/>
+  	
     <antcall target="ship.jonasadapter" inheritAll="true"/>
     <copy file="${ship.dir}/lib/joram_for_jonas_ra.rar"
           tofile="${releases.dir}/joram-jonasadapter-${version}.rar"/>
     <delete file="${ship.dir}/lib/joram_for_jonas_ra.rar"/>
+  	
     <antcall target="ship.adapter.bin" inheritAll="true"/>
 
+    <delete file="${releases.dir}/joram-raconfig-${version}.tar"/>
     <tar tarfile="${releases.dir}/joram-raconfig-${version}.tar"
          longfile="gnu">
       <tarfileset dir="${ship.dir}" prefix="joram-${version}/ship"
@@ -592,8 +599,8 @@
   <target name="release.jar" depends="ship.joram,javadoc"
           description="--> Builds a Joram binary distribution.">
     <mkdir dir="${releases.dir}"/>
-    <tar tarfile="${releases.dir}/joram-${version}.tar"
-         longfile="gnu">
+  	<delete file="${releases.dir}/joram-${version}.tar"/>
+    <tar tarfile="${releases.dir}/joram-${version}.tar" longfile="gnu">
       <tarfileset dir="${doc.dir}" prefix="joram-${version}/doc"
                   username="joram" group="joram">
         <include name="**"/>
@@ -609,7 +616,7 @@
         <include name="**"/>
       </tarfileset>
     </tar>
-    <delete file="${releases.dir}/joram-${version}.tar.tgz"/>
+    <delete file="${releases.dir}/joram-${version}.tgz"/>
     <gzip src="${releases.dir}/joram-${version}.tar"
           zipfile="${releases.dir}/joram-${version}.tgz"/>
     <delete file="${releases.dir}/joram-${version}.tar"/>
@@ -618,10 +625,11 @@
   <target name="release.src" depends="init.joram"
           description="--> Builds a Joram source distribution.">
    <mkdir dir="${releases.dir}"/>
+     <delete file="${releases.dir}/joram-${version}-src.tar"/>
      <tar tarfile="${releases.dir}/joram-${version}-src.tar"
           longfile="gnu">
-      <tarfileset dir=".." prefix="joram-${version}"
-                  username="joram" group="joram">
+     <tarfileset dir=".." prefix="joram-${version}"
+                 username="joram" group="joram">
         <include name="lib/**"/>
         <include name="src/**"/>
         <include name="samples/src/**"/>
@@ -630,12 +638,29 @@
         <include name="licenses/**"/>
       </tarfileset>
     </tar>
-    <delete file="${releases.dir}/joram-${version}-src.tar.tgz"/>
+    <delete file="${releases.dir}/joram-${version}-src.tgz"/>
     <gzip src="${releases.dir}/joram-${version}-src.tar"
           zipfile="${releases.dir}/joram-${version}-src.tgz"/>
     <delete file="${releases.dir}/joram-${version}-src.tar"/> 
   </target>
 
+
+  <target name="release.doc" depends="init.joram,javadoc"
+          description="--> Builds the Joram documentation.">
+    <mkdir dir="${releases.dir}"/>
+    <delete file="${releases.dir}/joram-${version}-doc.tar"/>
+    <tar tarfile="${releases.dir}/joram-${version}-doc.tar" longfile="gnu">
+      <tarfileset dir="${doc.dir}" prefix="joram-${version}/doc"
+                  username="joram" group="joram">
+        <include name="**"/>
+      </tarfileset>
+    </tar>
+    <delete file="${releases.dir}/joram-${version}-doc.tgz"/>
+    <gzip src="${releases.dir}/joram-${version}-doc.tar"
+          zipfile="${releases.dir}/joram-${version}-doc.tgz"/>
+    <delete file="${releases.dir}/joram-${version}-doc.tar"/> 
+  </target>
+	
   <target name="crlfbin" depends="init.joram">
     <fixcrlf srcdir="${samples.dir}/bin" eol="crlf"
              includes="*.bat"/>
