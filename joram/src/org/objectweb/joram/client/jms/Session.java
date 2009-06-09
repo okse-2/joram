@@ -59,6 +59,22 @@ import fr.dyade.aaa.util.Debug;
 
 /**
  * Implements the <code>javax.jms.Session</code> interface.
+ * <p>
+ * A Session object is a single-threaded context for producing and consuming
+ * messages. A session serves several purposes:
+ * <ul>
+ * <li>It is a factory for message producers and consumers.</li>
+ * <li>It is a factory for Joram specific message.</li>
+ * <li>It defines a serial order for the messages it consumes and the messages
+ * it produces.</li>
+ * <li>It retains messages it consumes until they have been acknowledged.</li>
+ * <li>It serializes execution of message listeners registered with its message
+ * consumers.</li>
+ * <li>It is a factory for TemporaryTopics and TemporaryQueues.</li>
+ * <li>It supports a single series of transactions that combine work spanning
+ * its producers and consumers into atomic units.</li>
+ * </ul>
+ *  A session can create and service multiple message producers and consumers.
  */
 public class Session implements javax.jms.Session {
 
@@ -264,6 +280,10 @@ public class Session implements javax.jms.Session {
    *  Indicates whether the messages consumed are implicitly acknowledged
    * or not. When true messages are immediately removed from queue when
    * delivered.
+   *  Contrary to Session's AUTO_ACKNOWLEDGE mode there is none acknowledge
+   * message from client to server.
+   * 
+   * @see FactoryParameters#implicitAck
    */
   private boolean implicitAck;
   
@@ -276,8 +296,7 @@ public class Session implements javax.jms.Session {
    * by default false. 
    *
    * @return true if messages produced are implicitly acknowledged.
-   *
-   * @see FactoryParameters.implicitAck
+   * @see #implicitAck
    */
   public boolean isImplicitAck() {
     return implicitAck;
@@ -294,6 +313,7 @@ public class Session implements javax.jms.Session {
    * by default false. 
    * 
    * @param implicitAck if true sets implicit acknowledge for this session.
+   * @see #implicitAck
    */
   public void setImplicitAck(boolean implicitAck) {
     this.implicitAck = implicitAck;
@@ -302,6 +322,8 @@ public class Session implements javax.jms.Session {
   /**
    *  Indicates whether the messages produced are asynchronously sent
    * or not (without or with acknowledgment).
+   * 
+   * @see FactoryParameters#asyncSend
    */
   private boolean asyncSend;
 
@@ -313,8 +335,7 @@ public class Session implements javax.jms.Session {
    * by default false. 
    *
    * @return true if messages produced are asynchronously sent.
-   *
-   * @see FactoryParameters.asyncSend
+   * @see #asyncSend
    */
   public boolean isAsyncSend() {
     return asyncSend;
@@ -330,6 +351,7 @@ public class Session implements javax.jms.Session {
    * by default false. 
    * 
    * @param asyncSend	if true sets asynchronous sending for this session.
+   * @see #asyncSend
    */
   public void setAsyncSend(boolean asyncSend) {
     this.asyncSend = asyncSend;
@@ -341,7 +363,7 @@ public class Session implements javax.jms.Session {
    *  This attribute is inherited from Connection at initialization,
    * default value is 1.
    *
-   * @see FactoryParameters.queueMessageReadMax
+   * @see FactoryParameters#queueMessageReadMax
    */
   private int queueMessageReadMax;
   
@@ -355,9 +377,7 @@ public class Session implements javax.jms.Session {
    * @return    The maximum number of messages that can be read at once from
    *            a queue.
    *
-   * @see queueMessageReadMax
-   * @see FactoryParameters.queueMessageReadMax
-   * @see setQueueMessageReadMax
+   * @see #queueMessageReadMax
    */
   public final int getQueueMessageReadMax() {
     return queueMessageReadMax;
@@ -373,9 +393,7 @@ public class Session implements javax.jms.Session {
    * @param queueMessageReadMax	The maximum number of messages that can be
    *				read at once from a queue.
    *
-   * @see queueMessageReadMax
-   * @see FactoryParameters.queueMessageReadMax
-   * @see getQueueMessageReadMax
+   * @see #queueMessageReadMax
    */
   public void setQueueMessageReadMax(int queueMessageReadMax) {
     this.queueMessageReadMax = queueMessageReadMax;
@@ -388,7 +406,7 @@ public class Session implements javax.jms.Session {
    *  This attribute is inherited from Connection at initialization,
    *  default value is 0.
    * 
-   * @see FactoryParameters.topicAckBufferMax
+   * @see FactoryParameters#topicAckBufferMax
    */
   private int topicAckBufferMax;
 
@@ -402,9 +420,7 @@ public class Session implements javax.jms.Session {
    * @return The Maximum number of acknowledgements that can be buffered when
    *         using Session.DUPS_OK_ACKNOWLEDGE mode.
    *
-   * @see topicAckBufferMax
-   * @see FactoryParameters.topicAckBufferMax
-   * @see setTopicAckBufferMax
+   * @see #topicAckBufferMax
    */
   public final int getTopicAckBufferMax() {
     return topicAckBufferMax;
@@ -421,9 +437,7 @@ public class Session implements javax.jms.Session {
    *			      can be buffered in Session.DUPS_OK_ACKNOWLEDGE
    *			      mode.
    *
-   * @see topicAckBufferMax
-   * @see FactoryParameters.topicAckBufferMax
-   * @see getTopicAckBufferMax
+   * @see #topicAckBufferMax
    */
   public void setTopicAckBufferMax(int topicAckBufferMax) {
     this.topicAckBufferMax = topicAckBufferMax;
@@ -436,7 +450,7 @@ public class Session implements javax.jms.Session {
    *  This attribute is inherited from Connection at initialization,
    * default value is Integer.MAX_VALUE.
    *
-   * @see FactoryParameters.topicPassivationThreshold
+   * @see FactoryParameters#topicPassivationThreshold
    */
   private int topicPassivationThreshold;
 
@@ -452,9 +466,7 @@ public class Session implements javax.jms.Session {
    * @return The maximum messages number over which the subscription
    *         is passivated.
    *
-   * @see topicPassivationThreshold
-   * @see FactoryParameters.topicPassivationThreshold
-   * @see setTopicPassivationThreshold
+   * @see #topicPassivationThreshold
    */
   public final int getTopicPassivationThreshold() {
     return topicPassivationThreshold;
@@ -471,12 +483,8 @@ public class Session implements javax.jms.Session {
    *
    * @param topicPassivationThreshold The maximum messages number over which
    *				      the subscription is passivated.
-   * @return The maximum messages number over which the subscription
-   *         is passivated.
    *
-   * @see topicPassivationThreshold
-   * @see FactoryParameters.topicPassivationThreshold
-   * @see setTopicPassivationThreshold
+   * @see #topicPassivationThreshold
    */
   public void setTopicPassivationThreshold(int topicPassivationThreshold) {
     this.topicPassivationThreshold = topicPassivationThreshold;
@@ -489,7 +497,7 @@ public class Session implements javax.jms.Session {
    *  This attribute is inherited from Connection at initialization,
    * default value is 0.
    *
-   * @see FactoryParameters.topicActivationThreshold
+   * @see FactoryParameters#topicActivationThreshold
    */
   private int topicActivationThreshold;
 
@@ -502,9 +510,7 @@ public class Session implements javax.jms.Session {
    *  This attribute is inherited from Connection at initialization,
    * default value is 0.
    *
-   * @see topicActivationThreshold
-   * @see FactoryParameters.topicActivationThreshold
-   * @see setTopicActivationThreshold
+   * @see #topicActivationThreshold
    *
    * @return The minimum messages number below which the subscription
    *         is activated.
@@ -525,9 +531,7 @@ public class Session implements javax.jms.Session {
    * @param topicActivationThreshold The minimum messages number below which
    *			   	     the subscription is activated.
    *
-   * @see topicActivationThreshold
-   * @see FactoryParameters.topicActivationThreshold
-   * @see getTopicActivationThreshold
+   * @see #topicActivationThreshold
    */
   public void setTopicActivationThreshold(int topicActivationThreshold) {
     this.topicActivationThreshold = topicActivationThreshold;

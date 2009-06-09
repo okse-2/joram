@@ -87,12 +87,31 @@ public abstract class Destination extends AdministeredObject implements javax.jm
   /** Name given by the administrator. */
   protected String adminName;
 
+  /**
+   * Constant defining the type of a topic destination.
+   * @see #getType()
+   * @see DestinationConstants#TOPIC_TYPE
+   */
   public final static byte TOPIC_TYPE = DestinationConstants.TOPIC_TYPE;
+  /**
+   * Constant defining the type of a queue destination.
+   * @see #getType()
+   * @see DestinationConstants#QUEUE_TYPE
+   */
   public final static byte QUEUE_TYPE = DestinationConstants.QUEUE_TYPE;
   
+  /**
+   * Constant defining the type of a temporary destination (OR'ed with queue or topic type
+   * depending of the real type of the destination).
+   * @see #getType()
+   * @see DestinationConstants#TEMPORARY
+   */
   public final static byte TEMPORARY = DestinationConstants.TEMPORARY;
   
-  /** Type of the destination: Queue or Topic, Temporary or not. */
+  /**
+   * Type of the destination: Queue or Topic, Temporary or not.
+   * @see #getType()
+   */
   protected byte type;
 
   // Used by jndi2 SoapObjectHelper
@@ -322,7 +341,9 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    *                  destination.
    * @param name      The destination name.
    * @param className Name of the MOM destination class.
-   * @param prop      Properties.
+   * @param props     The configuration properties of the destination.
+   * @param dest      The proxy object of the destination.
+   * @param type      The type of the destination: queue, topic, temporary or not.
    *
    * @exception ConnectException  If the administration connection is closed or broken.
    * @exception AdminException  If the request fails.
@@ -332,12 +353,12 @@ public abstract class Destination extends AdministeredObject implements javax.jm
                                  String className,
                                  Properties props,
                                  Destination dest,
-                                 byte expectedType) throws ConnectException, AdminException {
+                                 byte type) throws ConnectException, AdminException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
-                 "Destination.doCreate(" + serverId + ',' + name + ',' + className + ',' + props + ',' + dest + ',' + expectedType + ')');
+                 "Destination.doCreate(" + serverId + ',' + name + ',' + className + ',' + props + ',' + dest + ',' + type + ')');
 
-    CreateDestinationRequest cdr = new CreateDestinationRequest(serverId, name, className, props, expectedType);
+    CreateDestinationRequest cdr = new CreateDestinationRequest(serverId, name, className, props, type);
     CreateDestinationReply reply = (CreateDestinationReply) AdminModule.doRequest(cdr);
 
     dest.agentId = reply.getId();

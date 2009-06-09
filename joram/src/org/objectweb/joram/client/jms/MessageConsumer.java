@@ -40,6 +40,28 @@ import fr.dyade.aaa.util.Debug;
 
 /**
  * Implements the <code>javax.jms.MessageConsumer</code> interface.
+ * <p>
+ * A client uses a MessageConsumer object to receive messages from a
+ * destination. A MessageConsumer object is created by calling the
+ * createConsumer method on a session object. A message consumer is
+ * normally dedicated to a unique destination.
+ * <br>
+ * A message consumer can be created with a message selector. A message
+ * selector allows the client to restrict the messages delivered to the
+ * message consumer to those that match the selector.
+ * <br>
+ * A client may either synchronously receive a message consumer's messages or
+ * have the consumer asynchronously deliver them as they arrive:<ul>
+ * <li>For synchronous receipt, a client can request the next message from
+ * the message consumer using one of its receive methods. There are several
+ * variations of receive that allow a client to poll or wait for the next
+ * message.</li>
+ * <li>For asynchronous delivery, a client must register a MessageListener
+ * object with a message consumer. As messages arrive at the message consumer,
+ * it delivers them by calling the MessageListener's onMessage method. It is a
+ * client programming error for a MessageListener to throw an exception.</li>
+ * </ul>
+ *
  */
 public class MessageConsumer implements javax.jms.MessageConsumer {
   /**

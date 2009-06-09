@@ -36,7 +36,7 @@ public class QueueConnection extends Connection implements javax.jms.QueueConnec
    * Creates a <code>QueueConnection</code> instance.
    *
    * @param factoryParameters  The factory parameters.
-   * @param connectionImpl  The actual connection to wrap.
+   * @param requestChannel     The actual connection to wrap.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.

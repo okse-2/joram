@@ -34,6 +34,19 @@ import fr.dyade.aaa.util.Debug;
 
 /**
  * Implements the <code>javax.jms.MessageProducer</code> interface.
+ * <p>
+ * A client uses a MessageProducer object to send messages to a destination.
+ * A MessageProducer object is created by calling the createProducer method on
+ * the session object. A message producer is normally dedicated to a unique
+ * destination.
+ * <br>
+ * A client also has the option of creating a message producer without
+ * supplying a unique destination. In this case, a destination must be
+ * provided with every send operation. 
+ * <br>
+ * A client can specify a default delivery mode, priority, and time to live
+ * for messages sent by a message producer. It can also specify the delivery
+ * mode, priority, and time to live for each individual message.
  */
 public class MessageProducer implements javax.jms.MessageProducer {
   /** Default delivery mode. */
