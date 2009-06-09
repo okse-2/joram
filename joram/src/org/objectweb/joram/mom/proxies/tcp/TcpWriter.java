@@ -54,11 +54,6 @@ public class TcpWriter extends Daemon {
 
   /**
    * Creates a new writer.
-   *
-   * @param sock the socket where to write
-   * @param userConnection the connection 
-   * with the user's proxy
-   * @param tcpConnection the TCP connection
    */
   public TcpWriter(IOControl ioctrl,
                    AckedQueue replyQueue,

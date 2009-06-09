@@ -65,9 +65,8 @@ public class TcpConnectionListener extends Daemon {
   /**
    * Creates a new connection listener
    *
-   * @param serverSocket the server socket to listen to
-   * @param proxyService the TCP proxy service of this
-   * connection listener
+   * @param proxyService  the TCP proxy service associated with this connection listener
+   * @param timeout       the timeout
    */
   public TcpConnectionListener(TcpProxyService proxyService, int timeout) {
     super("TcpConnectionListener");

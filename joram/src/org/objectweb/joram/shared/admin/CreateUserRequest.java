@@ -37,7 +37,7 @@ import org.objectweb.joram.shared.stream.StreamUtil;
 public class CreateUserRequest extends AdminRequest {
   private static final long serialVersionUID = 1L;
 
-  /** Identity contain Name of the user and password or Subjet */
+  /** Identity contain Name of the user and password or subject */
   private Identity identity;
   /** Id of the server where deploying the proxy. */
   private int serverId;
@@ -45,8 +45,7 @@ public class CreateUserRequest extends AdminRequest {
   /**
    * Constructs a <code>CreateUserRequest</code> instance.
    *
-   * @param userName  The name of the user.
-   * @param userPass  The password of the user.
+   * @param identity  The authentication of the user.
    * @param serverId  The id of the server where deploying its proxy.
    */
   public CreateUserRequest(Identity identity, int serverId) {

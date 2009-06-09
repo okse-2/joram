@@ -34,7 +34,6 @@ import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
 
 public class MessageJMXWrapper {
-
   public final static String[] itemNames = { "id", "priority" };
 
   public final static String[] itemDescs = { "xxx", "xxx" };
@@ -63,8 +62,8 @@ public class MessageJMXWrapper {
    * Returns the description of an enumeration of messages.
    * The description includes the type and priority of the message.
    * 
-   * @param msg The enumeration of messages to describe.
-   * @return    The messages description.
+   * @param messages The enumeration of messages to describe.
+   * @return The messages description.
    * 
    * @throws Exception
    */

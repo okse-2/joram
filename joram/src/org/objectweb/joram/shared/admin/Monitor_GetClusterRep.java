@@ -43,7 +43,7 @@ public class Monitor_GetClusterRep extends Monitor_Reply {
   /**
    * Constructs a <code>Monitor_GetClusterRep</code> instance.
    *
-   * @param fatherId  Identifiers of the cluster's topics.
+   * @param topics  Identifiers of the cluster's topics.
    */
   public Monitor_GetClusterRep(Vector topics) {
     this.topics = topics;

@@ -52,20 +52,17 @@ public class TcpConnection implements TcpConnectionMBean {
 
   private ReliableConnectionContext ctx;
   /**
-   * The reader thread responsible for
-   * reading the requests (input).
+   * The reader thread responsible for reading the requests (input).
    */
   private TcpReader tcpReader;
 
   /**
-   * The writer thread responsible for
-   * writing the replies (output).
+   * The writer thread responsible for writing the replies (output).
    */
   private TcpWriter tcpWriter;
 
   /**
-   * The TCP proxy service used to 
-   * register and unregister this connection.
+   * The TCP proxy service used to register and unregister this connection.
    */
   private TcpProxyService proxyService;
 
@@ -78,12 +75,17 @@ public class TcpConnection implements TcpConnectionMBean {
   /**
    * Creates a new TCP connection.
    *
-   * @param sock the TCP connection socket
+   * @param ioctrl
+   * @param ctx
+   * @param proxyId
    * @param proxyService the TCP proxy service
    * @param identity 
    */
-  public TcpConnection(IOControl ioctrl, ReliableConnectionContext ctx, AgentId proxyId,
-      TcpProxyService proxyService, Identity identity) throws IOException {
+  public TcpConnection(IOControl ioctrl,
+                       ReliableConnectionContext ctx,
+                       AgentId proxyId,
+                       TcpProxyService proxyService,
+                       Identity identity) throws IOException {
     this.creationDate = new Date();
     this.ioctrl = ioctrl;
     this.proxyId = proxyId;
