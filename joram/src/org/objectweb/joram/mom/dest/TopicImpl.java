@@ -97,7 +97,6 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
   /**
    * Constructs a <code>TopicImpl</code> instance.
    *
-   * @param destId  Identifier of the agent hosting the topic.
    * @param adminId  Identifier of the administrator of the topic.
    * @param prop     The initial set of properties.
    */

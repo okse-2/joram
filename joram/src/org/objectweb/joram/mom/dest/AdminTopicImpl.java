@@ -232,9 +232,10 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * Method used by <code>ConnectionManager</code> proxies to check their
    * clients identification.
    *
-   * @param name
-   * @param pass
+   * @param identity
    * @param inaddr
+   * @return The agent unique identifier of the authentified user.
+   * 
    * @exception Exception  If the user does not exist, is wrongly identified,
    *              or does not have any proxy deployed.
    * @see org.objectweb.joram.mom.proxies.ConnectionManager

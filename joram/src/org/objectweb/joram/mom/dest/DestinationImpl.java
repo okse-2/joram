@@ -127,7 +127,6 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
   /**
    * Constructs a <code>DestinationImpl</code>.
    *
-   * @param destId  Identifier of the agent hosting the destination.
    * @param adminId  Identifier of the administrator of the destination.
    * @param prop     The initial set of properties.
    */ 
