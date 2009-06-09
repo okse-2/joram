@@ -133,7 +133,7 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
 
   /**
    *  Determines whether the produced messages are asynchronously
-   * sent or not (without or with acknowledgement)
+   * sent or not (without or with acknowledgement).
    * <p>
    *  Default is false (with ack).
    */

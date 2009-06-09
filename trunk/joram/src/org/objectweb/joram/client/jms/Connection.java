@@ -49,6 +49,24 @@ import fr.dyade.aaa.util.Debug;
 
 /**
  * Implements the <code>javax.jms.Connection</code> interface.
+ * <p>
+ * A Connection object allows the client's active connection to the Joram
+ * server. Connections support concurrent use, it serves several purposes:
+ * <ul>
+ * <li>It encapsulates the real connection with the Joram server (for example
+ * an open TCP/IP socket between the client and the server).
+ * <li>It needs the client authentication.
+ * <li>It specifies a unique client identifier.
+ * <li>It supports the ExceptionListener object. 
+ * </ul>
+ * A Joram client typically creates a connection, one or more sessions, and a
+ * number of message producers and consumers. 
+ * <br>
+ * When a connection is created, it is in stopped mode that means that no
+ * messages are being delivered. In order to minimize any client confusion
+ * that may result from asynchronous message delivery during setup, it is
+ * typical to leave the connection in stopped mode until setup is complete.
+ * A message producer can send messages while a connection is stopped.
  */
 public class Connection implements javax.jms.Connection {
   public static Logger logger = Debug.getLogger(Connection.class.getName());
@@ -157,18 +175,18 @@ public class Connection implements javax.jms.Connection {
    * Creates a <code>Connection</code> instance.
    *
    * @param factoryParameters  The factory parameters.
-   * @param connectionImpl  The actual connection to wrap.
+   * @param requestChannel  The actual connection to wrap.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
   public Connection(FactoryParameters factoryParameters,
-                    RequestChannel requestChannel) 
-    throws JMSException {
+                    RequestChannel requestChannel) throws JMSException {
+    // AF: This method shouldn't be public but it is actually used by AbstractFactory
+    // in admin package (merge in future in ConnectionFactory class).
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 "Connection.<init>(" + factoryParameters +
-                 ',' + requestChannel + ')');
+                 "Connection.<init>(" + factoryParameters + ',' + requestChannel + ')');
     // We need to clone the FactoryParameter Object to avoid side-effect with
     // external modifications.
     this.factoryParameters = (FactoryParameters) factoryParameters.clone();
@@ -245,8 +263,7 @@ public class Connection implements javax.jms.Connection {
    * @return the duration in seconds during which a JMS transacted (non XA)
    * session might be pending.
    *
-   * @see FactoryParameters.txPendingTimer
-   * @see Session.txPendingTimer
+   * @see FactoryParameters#txPendingTimer
    */
   public final long getTxPendingTimer() {
     return factoryParameters.txPendingTimer;
@@ -255,14 +272,14 @@ public class Connection implements javax.jms.Connection {
   /** 
    *  Indicates whether the messages consumed are implicitly acknowledged
    * or not. If true messages are immediately removed from queue when
-   * delivered.
+   * delivered and there is none acknowledge message from client to server.
    * <p>
    *  This attribute is inherited from FactoryParameters, by default false.
    *
    * @return true if messages produced are implicitly acknowledged.
    *
-   * @see FactoryParameters.implicitAck
-   * @see Session.implicitAck
+   * @see FactoryParameters#implicitAck
+   * @see Session#isImplicitAck()
    */
   public final boolean getImplicitAck() {
     return factoryParameters.implicitAck;
@@ -276,8 +293,8 @@ public class Connection implements javax.jms.Connection {
    *
    * @return true if messages produced are asynchronously sent.
    *
-   * @see FactoryParameters.asyncSend
-   * @see Session.asyncSend
+   * @see FactoryParameters#asyncSend
+   * @see Session#isAsyncSend()
    */
   public final boolean getAsyncSend() {
     return factoryParameters.asyncSend;
@@ -292,8 +309,8 @@ public class Connection implements javax.jms.Connection {
    * @return    The maximum number of messages that can be read at once from
    *            a queue.
    *
-   * @see FactoryParameters.queueMessageReadMax
-   * @see Session.queueMessageReadMax
+   * @see FactoryParameters#queueMessageReadMax
+   * @see Session#getQueueMessageReadMax()
    */
   public final int getQueueMessageReadMax() {
     return factoryParameters.queueMessageReadMax;
@@ -308,8 +325,8 @@ public class Connection implements javax.jms.Connection {
    * @return The Maximum number of acknowledgements that can be buffered when
    *         using Session.DUPS_OK_ACKNOWLEDGE mode.
    *
-   * @see FactoryParameters.topicAckBufferMax
-   * @see Session.setTopicAckBufferMax
+   * @see FactoryParameters#topicAckBufferMax
+   * @see Session#getTopicAckBufferMax()
    */
   public final int getTopicAckBufferMax() {
     return factoryParameters.topicAckBufferMax;
@@ -327,8 +344,8 @@ public class Connection implements javax.jms.Connection {
    * @return The maximum messages number over which the subscription
    *         is passivated.
    *
-   * @see FactoryParameters.topicPassivationThreshold
-   * @see Session.setTopicPassivationThreshold
+   * @see FactoryParameters#topicPassivationThreshold
+   * @see Session#getTopicPassivationThreshold()
    */
   public final int getTopicPassivationThreshold() {
     return factoryParameters.topicPassivationThreshold;
@@ -345,8 +362,8 @@ public class Connection implements javax.jms.Connection {
    * @return The minimum messages number below which the subscription
    *         is activated.
    *
-   * @see FactoryParameters.topicActivationThreshold
-   * @see Session.setTopicActivationThreshold
+   * @see FactoryParameters#topicActivationThreshold
+   * @see Session#getTopicActivationThreshold()
    */
   public final int getTopicActivationThreshold() {
     return factoryParameters.topicActivationThreshold;
@@ -359,7 +376,7 @@ public class Connection implements javax.jms.Connection {
    *  
    * @return the local IP address on which the TCP connection is activated.
    *
-   * @see FactoryParameters.outLocalAddress
+   * @see FactoryParameters#outLocalAddress
    */
   public final String getOutLocalAddress() {
     return factoryParameters.outLocalAddress;
@@ -372,7 +389,7 @@ public class Connection implements javax.jms.Connection {
    *  
    * @return the local IP address port on which the TCP connection is activated.
    *
-   * @see FactoryParameters.outLocalPort
+   * @see FactoryParameters#outLocalPort
    */
   public final int getOutLocalPort() {
     return factoryParameters.outLocalPort;
@@ -396,12 +413,10 @@ public class Connection implements javax.jms.Connection {
    *              not exist.
    * @exception JMSException  If the method fails for any other reason.
    */
-  public synchronized javax.jms.ConnectionConsumer
-      createConnectionConsumer(
-        javax.jms.Destination dest, 
-        String selector,
-        javax.jms.ServerSessionPool sessionPool,
-        int maxMessages) throws JMSException {
+  public synchronized javax.jms.ConnectionConsumer createConnectionConsumer(javax.jms.Destination dest, 
+                                                                            String selector,
+                                                                            javax.jms.ServerSessionPool sessionPool,
+                                                                            int maxMessages) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
                  stringImage + ".createConnectionConsumer(" + dest + ',' + selector + ',' +
