@@ -479,14 +479,9 @@ public class User extends AdministeredObject implements UserMBean {
   /**
    * Returns the subscriptions owned by a user.
    *
-   * @param serverId the identifier of the server where the user has been
-   *        created.
+   * @return The subscriptions owned by the user.
    *
-   * @param userName name of the user.
-   *
-   * @exception AdminException If an error is raised by the 
-   *                           administration operation.
-   *
+   * @exception AdminException If an error is raised by the administration operation.
    * @exception ConnectException  If the admin connection is not established.
    */
   public Subscription[] getSubscriptions() throws AdminException, ConnectException {
@@ -517,16 +512,10 @@ public class User extends AdministeredObject implements UserMBean {
   /**
    * Returns a subscription.
    *
-   * @param serverId the identifier of the server where the user 
-   * owner of the subscription has been created.
-   *
-   * @param userName name of the user that owns the subscription.
-   *
    * @param subName the name of the subscription.
+   * @return The subscription.
    *
-   * @exception AdminException If an error is raised by the 
-   *                           administration operation.
-   *
+   * @exception AdminException If an error is raised by the administration operation.
    * @exception ConnectException  If the admin connection is not established.
    */
   public Subscription getSubscription(String subName) throws AdminException, ConnectException {
@@ -619,7 +608,6 @@ public class User extends AdministeredObject implements UserMBean {
 
   /**
    * @deprecated
-   * @see org.objectweb.joram.client.jms.admin.UserMBean#readMessage(java.lang.String, java.lang.String)
    */
   public Message readMessage(String subName,
                              String msgId) throws AdminException, ConnectException, JMSException {

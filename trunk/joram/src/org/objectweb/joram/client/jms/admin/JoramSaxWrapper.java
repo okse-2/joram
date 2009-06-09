@@ -184,7 +184,6 @@ public class JoramSaxWrapper extends DefaultHandler {
 
   static final String DFLT_CF = "org.objectweb.joram.client.jms.tcp.TcpConnectionFactory";
 
-  boolean result = true;
   Object obj = null;
   String name = null;
   String login = null;
@@ -282,14 +281,12 @@ public class JoramSaxWrapper extends DefaultHandler {
   /**
    * Launches the XML parser.
    */
-  public boolean parse(Reader cfgReader, String cfgName) throws Exception {
+  public void parse(Reader cfgReader, String cfgName) throws Exception {
     this.joramAdmName = cfgName;
 
     SAXParserFactory factory = SAXParserFactory.newInstance();
     SAXParser parser = factory.newSAXParser();
     parser.parse(new InputSource(cfgReader), this);
-
-    return result;
   }
 
   /**
@@ -670,17 +667,16 @@ public class JoramSaxWrapper extends DefaultHandler {
   /**
    * Receive notification of the end of an element.
    *
-   * @param uri		The Namespace URI
-   * @param localName	The local name
-   * @param rawName	The qualified name
-   * @param atts	The attributes attached to the element.
+   * @param uri		      The Namespace URI
+   * @param localName	  The local name
+   * @param rawName	    The qualified name
    *
    * @exception SAXException
    *	unspecialized error
    */
   public void endElement(String uri,
-			 String localName,
-			 String rawName) throws SAXException {
+                         String localName,
+                         String rawName) throws SAXException {
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "JoramSaxWrapper endElement: " + rawName);

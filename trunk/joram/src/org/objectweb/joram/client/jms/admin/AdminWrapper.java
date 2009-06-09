@@ -186,11 +186,11 @@ public class AdminWrapper {
    * <p>
    * The server is configured without any service.
    *
-   * @param serverId Id of the added server
-   * @param host Address of the host where the added server is started
-   * @param domain Name of the domain where the server is added
-   * @param port Listening port of the server in the specified domain
-   * @param server Name of the added server
+   * @param sid     Id of the added server
+   * @param host    Address of the host where the added server is started
+   * @param domain  Name of the domain where the server is added
+   * @param port    Listening port of the server in the specified domain
+   * @param server  Name of the added server
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
@@ -198,34 +198,34 @@ public class AdminWrapper {
    * @see #addServer(int, String, String, int, String, String[], String[])
    */
   public final void addServer(int sid,
-                        String host,
-                        String domain,
-                        int port,
-                        String server) throws ConnectException, AdminException {
+                              String host,
+                              String domain,
+                              int port,
+                              String server) throws ConnectException, AdminException {
     addServer(sid, host, domain, port, server, new String[]{}, new String[]{});
   }
 
   /**
    * Adds a server to the platform.
    *
-   * @param serverId Id of the added server
-   * @param host Address of the host where the added server is started
-   * @param domain Name of the domain where the server is added
-   * @param port Listening port of the server in the specified domain
-   * @param server Name of the added server
-   * @param services Names of the service to start within the server
-   * @param args Services' arguments
+   * @param sid       Id of the added server
+   * @param host      Address of the host where the added server is started
+   * @param domain    Name of the domain where the server is added
+   * @param port      Listening port of the server in the specified domain
+   * @param server    Name of the added server
+   * @param services  Names of the service to start within the server
+   * @param args      Services' arguments
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
   public final void addServer(int sid,
-                        String host,
-                        String domain,
-                        int port,
-                        String server,
-                        String[] services,
-                        String[] args) throws ConnectException, AdminException {
+                              String host,
+                              String domain,
+                              int port,
+                              String server,
+                              String[] services,
+                              String[] args) throws ConnectException, AdminException {
     if (services == null) throw new AdminException("Expected service names");
     if (args == null) throw new AdminException("Expected service arguments");
     if (services.length != args.length)
@@ -769,8 +769,6 @@ public class AdminWrapper {
    *
    * @param serverId   The identifier of the server where deploying the topic.
    * @param name       The name of the queue.
-   * @param className  The topic class name.
-   * @param prop       The topic properties.
    *
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException    If the request fails.
@@ -872,9 +870,9 @@ public class AdminWrapper {
   /**
    * Creates or retrieves a user on the underlying JORAM server.
    *
-   * @param name                Name of the user.
-   * @param password            Password of the user.
-   * @param identityClassName   By default user/password for SimpleIdentity.
+   * @param name            Name of the user.
+   * @param password        Password of the user.
+   * @param identityClass   Classname for authentication, by default SimpleIdentity for user/password.
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.

@@ -276,7 +276,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
    *
    * @return  a newly created connection.
    * 
-   * @see javax.jms.ConnectionFactory.createConnection()
+   * @see javax.jms.ConnectionFactory#createConnection()
    * @exception JMSSecurityException  If the default identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
@@ -292,7 +292,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
    * @param password  the caller's password.
    * @return          a newly created connection.
    * 
-   * @see javax.jms.ConnectionFactory.createConnection(String, String)
+   * @see javax.jms.ConnectionFactory#createConnection(String, String)
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
@@ -308,7 +308,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
    *
    * @return  a newly created queue connection.
    * 
-   * @see javax.jms.ConnectionFactory.createQueueConnection()
+   * @see javax.jms.QueueConnectionFactory#createQueueConnection()
    * @exception JMSSecurityException  If the default identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
@@ -324,7 +324,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
    * @param password  the caller's password.
    * @return          a newly created queue connection.
    * 
-   * @see javax.jms.ConnectionFactory.createQueueConnection(String, String)
+   * @see javax.jms.QueueConnectionFactory#createQueueConnection(String, String)
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
@@ -340,7 +340,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
    *
    * @return  a newly created topic connection.
    * 
-   * @see javax.jms.ConnectionFactory.createTopicConnection()
+   * @see javax.jms.TopicConnectionFactory#createTopicConnection()
    * @exception JMSSecurityException  If the default identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
@@ -356,7 +356,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
    * @param password  the caller's password.
    * @return          a newly created topic connection.
    * 
-   * @see javax.jms.ConnectionFactory.createTopicConnection(String, String)
+   * @see javax.jms.TopicConnectionFactory#createTopicConnection(String, String)
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
@@ -372,7 +372,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
    *
    * @return  a newly created XA connection..
    *
-   * @see javax.jms.ConnectionFactory.createXAConnection()
+   * @see javax.jms.XAConnectionFactory#createXAConnection()
    * @exception JMSSecurityException  If the default identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
@@ -388,7 +388,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
    * @param password  the caller's password.
    * @return          a newly created XA connection.
    *
-   * @see javax.jms.ConnectionFactory.createXAConnection(String, String)
+   * @see javax.jms.XAConnectionFactory#createXAConnection(String, String)
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
@@ -407,7 +407,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
    *
    * @return  a newly created XA queue connection..
    *
-   * @see javax.jms.ConnectionFactory.createXAQueueConnection()
+   * @see javax.jms.XAQueueConnectionFactory#createXAQueueConnection()
    * @exception JMSSecurityException  If the default identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
@@ -423,7 +423,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
    * @param password  the caller's password.
    * @return          a newly created XA queue connection.
    *
-   * @see javax.jms.ConnectionFactory.createXAQueueConnection(String, String)
+   * @see javax.jms.XAQueueConnectionFactory#createXAQueueConnection(String, String)
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
@@ -439,6 +439,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
    *
    * @return  a newly created XA topic connection..
    *
+   * @see javax.jms.XATopicConnectionFactory#createXATopicConnection()
    * @exception JMSSecurityException  If the default identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
@@ -454,6 +455,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
    * @param password  the caller's password.
    * @return          a newly created XA topic connection.
    *
+   * @see javax.jms.XATopicConnectionFactory#createXATopicConnection(String, String)
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */

@@ -46,14 +46,14 @@ public class JoramAdmin extends AdminWrapper implements JoramAdminMBean {
   public static Logger logger = Debug.getLogger(JoramAdmin.class.getName());
 
   /**
-   * Creates a MBean to administer Joram using the default basename.
+   * Creates a MBean to administer Joram using the default basename for JMX
+   * registering ({@link #JoramAdmin(Connection, String)}).
    * Be careful, if the connection is not started this method will failed with
    * a ConnectException.
    * 
    * @param cnx A valid connection to the Joram server.
    * @throws JMSException A problem occurs during initialization.
    * 
-   * @see {@link #JoramAdmin(Connection, String)}
    * @see AdminWrapper#AdminWrapper(Connection)
    */
   public JoramAdmin(Connection cnx) throws ConnectException, AdminException, JMSException {
@@ -61,9 +61,9 @@ public class JoramAdmin extends AdminWrapper implements JoramAdminMBean {
   }
 
   /**
-   * Creates a MBean to administer Joram using the given basename.
-   * Be careful, if the connection is not started this method will failed with
-   * a ConnectException.
+   * Creates a MBean to administer Joram using the given basename for JMX registering.
+   * Be careful, if the connection is not started this method will failed with a
+   * ConnectException.
    * 
    * @param cnx   A valid connection to the Joram server.
    * @param base  the basename for registering the MBean.
@@ -151,11 +151,10 @@ public class JoramAdmin extends AdminWrapper implements JoramAdminMBean {
    *
    * @param cfgDir        The directory containing the file.
    * @param cfgFileName   The script filename.
-   * @return
    */
-  public boolean executeXMLAdmin(String cfgDir,
+  public void executeXMLAdmin(String cfgDir,
                                  String cfgFileName) throws Exception {
-    return AdminModule.executeXMLAdmin(cfgDir, cfgFileName);
+    AdminModule.executeXMLAdmin(cfgDir, cfgFileName);
   }
 
   /**
@@ -167,8 +166,8 @@ public class JoramAdmin extends AdminWrapper implements JoramAdminMBean {
    *
    * @param path    The script pathname.
    */
-  public boolean executeXMLAdmin(String path) throws Exception {
-    return AdminModule.executeXMLAdmin(path);
+  public void executeXMLAdmin(String path) throws Exception {
+    AdminModule.executeXMLAdmin(path);
   }
 
   /**
