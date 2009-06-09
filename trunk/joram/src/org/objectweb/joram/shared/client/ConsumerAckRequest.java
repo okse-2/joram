@@ -59,7 +59,7 @@ public final class ConsumerAckRequest extends AbstractJmsRequest {
     this.queueMode = queueMode;
   }
 
-  /** Returns <code>true</code> if the request is destinated to a queue. */
+  /** Returns <code>true</code> if the request is for a queue. */
   public boolean getQueueMode() {
     return queueMode;
   }
@@ -72,9 +72,7 @@ public final class ConsumerAckRequest extends AbstractJmsRequest {
    * Constructs a <code>ConsumerAckRequest</code> instance.
    *
    * @param targetName  Name of the target queue or subscription.
-   * @param id  The message identifier.
-   * @param queueMode  <code>true</code> if this request is destinated to
-   *          a queue.
+   * @param queueMode  <code>true</code> if this request is for a queue.
    */
   public ConsumerAckRequest(String targetName, boolean queueMode) {
     super(targetName);
