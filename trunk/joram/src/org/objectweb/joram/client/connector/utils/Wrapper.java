@@ -48,8 +48,9 @@ public class Wrapper {
   }
 
   /**
-   *
-   * @param reader   Reader
+   * Parses the RA's configuration file from an input stream.
+   * 
+   * @param in  The input stream.
    * @exception Exception  unspecialized error
    */
   public String parse(InputStream in) throws Exception {
@@ -115,9 +116,10 @@ public class Wrapper {
 
 
  /**
-   *
-   * @param reader   Reader
-   * @param map      update by this properties
+   * Update the configuration from the properties in parameter.
+   * 
+   * @param in   The input stream
+   * @param map  The map containing the updates.
    * @exception Exception  unspecialized error
    */
   public String update(InputStream in, Map map) throws Exception {

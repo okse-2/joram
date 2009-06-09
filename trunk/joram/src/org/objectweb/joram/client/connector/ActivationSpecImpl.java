@@ -28,7 +28,6 @@ import javax.resource.spi.IllegalStateException;
 import javax.resource.spi.InvalidPropertyException;
 import javax.resource.spi.ResourceAdapter;
 
-import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.shared.security.SimpleIdentity;
 import org.objectweb.util.monolog.api.BasicLevel;
 
