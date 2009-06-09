@@ -26,15 +26,9 @@ import java.net.ConnectException;
 import java.util.Properties;
 
 import org.objectweb.joram.client.jms.Destination;
-import org.objectweb.joram.shared.admin.AddDomainRequest;
-import org.objectweb.joram.shared.admin.AddServerRequest;
-import org.objectweb.joram.shared.admin.GetConfigRequest;
-import org.objectweb.joram.shared.admin.RemoveDomainRequest;
-import org.objectweb.joram.shared.admin.RemoveServerRequest;
-import org.objectweb.joram.shared.admin.StopServerRequest;
 
 /**
- *
+ * MBean interface for JoramAdmin.
  */
 public interface JoramAdminMBean {
   public void setTimeOutToAbortRequest(long timeOut) throws ConnectException;
