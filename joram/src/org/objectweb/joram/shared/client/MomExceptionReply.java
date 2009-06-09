@@ -72,8 +72,8 @@ public final class MomExceptionReply extends AbstractJmsReply {
   /**
    * Constructs a <code>MomExceptionReply</code> instance.
    *
-   * @param correlationId  Identifier of the failed request.
-   * @param momExcept  The resulting exception.
+   * @param correlationId   Identifier of the failed request.
+   * @param exc             The resulting exception.
    */
   public MomExceptionReply(int correlationId, MomException exc) {
     super(correlationId);
@@ -84,7 +84,7 @@ public final class MomExceptionReply extends AbstractJmsReply {
   /**
    * Constructs a <code>MomExceptionReply</code> instance.
    *
-   * @param momExcept  The exception to wrap.
+   * @param exc The exception to wrap.
    */
   public MomExceptionReply(MomException exc) {
     this.type = exc.getType();
