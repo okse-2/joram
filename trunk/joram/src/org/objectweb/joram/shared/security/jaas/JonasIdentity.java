@@ -146,7 +146,9 @@ public class JonasIdentity extends Identity {
   }
 
   /**
-   * @return
+   * Gets the subject of identity.
+   * 
+   * @return the subject of identity.
    */
   public Subject getSubject() {
     return subject; 
