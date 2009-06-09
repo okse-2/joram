@@ -58,6 +58,7 @@ import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
+import org.objectweb.joram.client.jms.admin.Server;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.ha.local.HALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
@@ -1130,7 +1131,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
   /**
    * Sets timeout before abort a request.
    * 
-   * @param timeout timeout before abort a request.
+   * @param timeOut timeout before abort a request.
    * @throws ConnectException 
    * 
    * @see AdminModule#setTimeOutToAbortRequest(long)
@@ -1655,7 +1656,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
   /**
    * Executes the XML configuration file.
    * 
-   * @param the path for the joramAdmin file
+   * @param path the path for the joramAdmin file
    * @throws AdminException if an error occurs
    */
   public boolean executeXMLAdmin(String path) throws Exception {
@@ -1691,12 +1692,19 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
   /**
    * Returns the list of the platform's servers' identifiers.
    * 
+   * @return an array containing the list of the platform's servers' identifiers.
    * @throws AdminException If the request fails.
    * @throws ConnectException If the connection fails.
-   * 
-   * @deprecated No longer supported next to Joram 5.2
    */
-  public List getServersIds() throws ConnectException, AdminException {
-    return AdminModule.getServersIds();
+  public int[] getServersIds() throws ConnectException, AdminException {
+    Server[] servers = AdminModule.getServers();
+    int[] sid = new int[servers.length];
+    
+    for (int i=0; i<servers.length; i++) {
+      sid[i] = servers[i].getId();
+    }
+    return sid;
   }
+  
+  
 }

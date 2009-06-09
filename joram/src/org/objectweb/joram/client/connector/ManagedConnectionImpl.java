@@ -539,7 +539,6 @@ public class ManagedConnectionImpl
    *                                       is lost.
    * @exception LocalTransactionException  If a local transaction has already
    *                                       begun.
-   * @exception
    */
   public synchronized void begin() throws ResourceException {
 

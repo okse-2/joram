@@ -118,7 +118,7 @@ public interface JoramAdapterMBean {
   /**
    * Sets timeout before abort a request.
    * 
-   * @param timeout timeout before abort a request.
+   * @param timeOut timeout before abort a request.
    * @throws ConnectException 
    * 
    * @see AdminModule#setTimeOutToAbortRequest(long)
@@ -149,7 +149,6 @@ public interface JoramAdapterMBean {
   /**
    * Unset the default dead message queue for the local server.
    * 
-   * @param serverId Unique identifier of the server.
    * @throws ConnectException
    * @throws AdminException
    */
@@ -502,8 +501,12 @@ public interface JoramAdapterMBean {
                                      String exportFilename) throws AdminException;
 
   /**
-  * @return the DeleteDurableSubscription that indicates whether the durablesubscription
-  * must be deleted at InboundConsumer close time.
-  */
-  public Boolean  getDeleteDurableSubscription();
+   * Returns the list of the platform's servers' identifiers.
+   * 
+   * @return an array containing the list of the platform's servers' identifiers.
+   * @throws AdminException If the request fails.
+   * @throws ConnectException If the connection fails.
+   */
+  public int[] getServersIds() throws ConnectException, AdminException;
+
 }
