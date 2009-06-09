@@ -467,7 +467,7 @@ public final class StreamUtil {
    * This  method allows to write a vector of String objects to the
    * output stream.
    *
-   * @param p 	the Properties object to write
+   * @param v 	the Vector object to write
    * @param os 	the stream to write the object to
    */
   public static void writeVectorOfStringTo(Vector v, OutputStream os) throws IOException {
