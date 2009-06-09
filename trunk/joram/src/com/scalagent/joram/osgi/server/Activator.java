@@ -131,8 +131,8 @@ public class Activator implements BundleActivator {
     /**
      *
      */
-    public boolean executeAdminXML(Reader reader) throws Exception {
-      return AdminModule.executeAdmin(reader);
+    public void executeAdminXML(Reader reader) throws Exception {
+      AdminModule.executeAdmin(reader);
     }
 
     /**
