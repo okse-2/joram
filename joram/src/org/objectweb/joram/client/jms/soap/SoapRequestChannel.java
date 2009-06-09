@@ -80,9 +80,9 @@ import org.objectweb.joram.shared.security.Identity;
  * Requests and replies travel through the connections in SOAP (XML) format.
  */
 public class SoapRequestChannel implements RequestChannel { 
-  /** The user's identity */
+  /** The user's identity for authentication */
   private Identity identity;
-  
+  /** The factory parameters to configure the connection */
   private FactoryParameters factParams;
 
   /** URL of the SOAP service this object communicates with. */
@@ -101,15 +101,15 @@ public class SoapRequestChannel implements RequestChannel {
   /**
    * Creates a <code>SoapConnection</code> instance.
    *
-   * @param params  Factory parameters.
-   * @param identity
+   * @param params    The factory parameters to configure the connection.
+   * @param identity  The user's  identity for authentication.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not reachable.
    */
-  public SoapRequestChannel(FactoryParameters factParams2, 
-                        Identity identity) throws JMSException {
-    factParams = factParams2;
+  public SoapRequestChannel(FactoryParameters params, 
+                            Identity identity) throws JMSException {
+    factParams = params;
     this.identity = identity;
   }
   
