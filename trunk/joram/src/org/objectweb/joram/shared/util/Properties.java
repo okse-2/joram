@@ -127,8 +127,6 @@ public class Properties implements Cloneable {
    * @return  an enumeration of the keys in this hashtable.
    * @see     Enumeration
    * @see     #elements()
-   * @see	#keySet()
-   * @see	Map
    */
   public synchronized Enumeration keys() {
     return getEnumeration(KEYS);
@@ -141,8 +139,6 @@ public class Properties implements Cloneable {
    *
    * @return  an enumeration of the values in this hashtable.
    * @see     java.util.Enumeration
-   * @see     #keys()
-   * @see	#values()
    * @see	Map
    */
   public synchronized Enumeration elements() {
@@ -157,7 +153,6 @@ public class Properties implements Cloneable {
    *          is a key in this hashtable, as determined by the 
    *          <tt>equals</tt> method; <code>false</code> otherwise.
    * @throws  NullPointerException  if the key is <code>null</code>.
-   * @see     #contains(Object)
    */
   public synchronized boolean containsKey(String key) {
     Entry tab[] = table;
@@ -179,7 +174,6 @@ public class Properties implements Cloneable {
    *          <code>null</code> if the key is not mapped to any value in
    *          this hashtable.
    * @throws  NullPointerException  if the key is <code>null</code>.
-   * @see     #put(Object, Object)
    */
   public synchronized Object get(String key) {
     Entry tab[] = table;
@@ -238,7 +232,6 @@ public class Properties implements Cloneable {
    * @exception  NullPointerException  if the key or value is
    *               <code>null</code>.
    * @see     Object#equals(Object)
-   * @see     #get(Object)
    */
   public synchronized Object put(String key, Object value) {
     // Make sure the value is not null
