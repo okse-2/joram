@@ -121,7 +121,6 @@ public final class AdminRequestor {
    * reply; any other replies are discarded.
    * 
    * @param request the administration request to send
-   * @param timeout the timeout in milliseconds 
    * @return  the reply message
    * 
    * @throws JMSException if Joram fails to complete the request due to some internal error.

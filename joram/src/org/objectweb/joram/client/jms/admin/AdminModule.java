@@ -61,6 +61,12 @@ import fr.dyade.aaa.util.Debug;
  * The <code>AdminModule</code> class allows to set an administrator
  * connection to a given JORAM server, and provides administration and
  * monitoring methods at a server/platform level.
+ * <p>
+ * The <code>AdminModule</code> class uses a unique static connection to
+ * the Joram server, the connection is opened through connect method and
+ * closed by calling disconnect.
+ * 
+ * @see AdminWrapper
  */
 public final class AdminModule {
   public static final String ADM_NAME_PROPERTY = "JoramAdminXML";
@@ -655,11 +661,11 @@ public final class AdminModule {
   /**
    * Adds a server to the platform.
    *
-   * @param serverId Id of the added server
-   * @param host Address of the host where the added server is started
-   * @param domain Name of the domain where the server is added
-   * @param port Listening port of the server in the specified domain
-   * @param server Name of the added server
+   * @param sid     Id of the added server
+   * @param host    Address of the host where the added server is started
+   * @param domain  Name of the domain where the server is added
+   * @param port    Listening port of the server in the specified domain
+   * @param server  Name of the added server
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
@@ -675,13 +681,13 @@ public final class AdminModule {
   /**
    * Adds a server to the platform.
    *
-   * @param serverId Id of the added server
-   * @param host Address of the host where the added server is started
-   * @param domain Name of the domain where the server is added
-   * @param port Listening port of the server in the specified domain
-   * @param server Name of the added server
-   * @param services Names of the service to start within the server
-   * @param args Services' arguments
+   * @param sid       Id of the added server
+   * @param host      Address of the host where the added server is started
+   * @param domain    Name of the domain where the server is added
+   * @param port      Listening port of the server in the specified domain
+   * @param server    Name of the added server
+   * @param services  Names of the service to start within the server
+   * @param args      Services' arguments
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
@@ -1326,7 +1332,7 @@ public final class AdminModule {
                    "Unable to find Joram Admin configuration file \"" + cfgFile.getPath() + "\".");
       reader = null;
     }
-    if (reader != null) return executeAdmin(reader);
+    if (reader != null) executeAdmin(reader);
 
     // 2nd, search XML configuration file in path used to load classes.
     InputStream is = null;
@@ -1353,19 +1359,19 @@ public final class AdminModule {
                    "Trying to find [" + path + "] using ClassLoader.getSystemResource().");
       is = ClassLoader.getSystemResourceAsStream(path);
     }
-    if (is != null) return executeAdmin(new InputStreamReader(is));
+    if (is != null) executeAdmin(new InputStreamReader(is));
 
     throw new FileNotFoundException("XML Joram configuration file \"" + path + "\" not found.");
   }
 
-  public static boolean executeAdmin(Reader reader) throws Exception {
+  public static void executeAdmin(Reader reader) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "executeAdmin(Reader)");
 
     String cfgName = System.getProperty(ADM_NAME_PROPERTY, DEFAULT_ADM_NAME);
 
     JoramSaxWrapper wrapper = new JoramSaxWrapper();
-    return wrapper.parse(reader,cfgName);
+    wrapper.parse(reader,cfgName);
   }
   
   /**
@@ -1451,7 +1457,9 @@ public final class AdminModule {
   }
 
   /**
-   * @param timeOut
+   * Sets the timeout before abortion of administration requests.
+   * 
+   * @param timeOut The timeout
    * @throws ConnectException 
    */
   public static void setTimeOutToAbortRequest(long timeOut) throws ConnectException {
@@ -1462,7 +1470,9 @@ public final class AdminModule {
   }
 
   /**
-   * @return
+   * Gets the timeout before abortion of administration requests.
+   * 
+   * @return the timeout
    * @throws ConnectException 
    */
   public static long getTimeOutToAbortRequest() throws ConnectException {

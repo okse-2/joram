@@ -68,11 +68,11 @@ public interface JoramAdminMBean {
    * <p>
    * The server is configured without any service.
    *
-   * @param serverId Id of the added server
-   * @param host Address of the host where the added server is started
-   * @param domain Name of the domain where the server is added
-   * @param port Listening port of the server in the specified domain
-   * @param server Name of the added server
+   * @param sid     Id of the added server
+   * @param host    Address of the host where the added server is started
+   * @param domain  Name of the domain where the server is added
+   * @param port    Listening port of the server in the specified domain
+   * @param server  Name of the added server
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
@@ -88,13 +88,13 @@ public interface JoramAdminMBean {
   /**
    * Adds a server to the platform.
    *
-   * @param serverId Id of the added server
-   * @param host Address of the host where the added server is started
-   * @param domain Name of the domain where the server is added
-   * @param port Listening port of the server in the specified domain
-   * @param server Name of the added server
-   * @param services Names of the service to start within the server
-   * @param args Services' arguments
+   * @param sid       Id of the added server
+   * @param host      Address of the host where the added server is started
+   * @param domain    Name of the domain where the server is added
+   * @param port      Listening port of the server in the specified domain
+   * @param server    Name of the added server
+   * @param services  Names of the service to start within the server
+   * @param args      Services' arguments
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
@@ -174,7 +174,7 @@ public interface JoramAdminMBean {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
    * 
-   * @see #getServers(String)
+   * @see #getServersIds(String)
    */
   public int[] getServersIds() throws ConnectException, AdminException;
 
@@ -366,9 +366,8 @@ public interface JoramAdminMBean {
    *
    * @param cfgDir        The directory containing the file.
    * @param cfgFileName   The script filename.
-   * @return
    */
-  public boolean executeXMLAdmin(String cfgDir,
+  public void executeXMLAdmin(String cfgDir,
                                  String cfgFileName) throws Exception;
 
   /**
@@ -380,5 +379,5 @@ public interface JoramAdminMBean {
    *
    * @param path    The script pathname.
    */
-  public boolean executeXMLAdmin(String path) throws Exception;
+  public void executeXMLAdmin(String path) throws Exception;
 }
