@@ -57,7 +57,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * for example a <tt>Queue</tt> or a <tt>Topic</tt>.
  * Its behaviour is provided by a <code>DestinationImpl</code> instance.
  *
- * @see DestinationItf
+ * @see AdminDestinationItf
  */
 public abstract class Destination extends Agent implements AdminDestinationItf {
   /** logger */
@@ -88,10 +88,10 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
    * object.
    *
    * @param adminId  Identifier of the destination administrator.
-   * @param prop     The initial set of properties.
+   * @param props    The initial set of properties.
    */
-  public final void init(AgentId adminId, Properties properties) {
-    destImpl = createsImpl(adminId, properties);
+  public final void init(AgentId adminId, Properties props) {
+    destImpl = createsImpl(adminId, props);
     destImpl.setAgent(this);
   }
 
@@ -108,8 +108,8 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
    * 
    * @return the type of this destination.
    * 
-   * @see DestinationConstants#TOPIC_TYPE
-   * @see DestinationConstants#QUEUE_TYPE
+   * @see org.objectweb.joram.shared.DestinationConstants#TOPIC_TYPE
+   * @see org.objectweb.joram.shared.DestinationConstants#QUEUE_TYPE
    */
   public abstract byte getType();
   

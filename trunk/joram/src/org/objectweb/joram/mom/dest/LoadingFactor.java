@@ -149,14 +149,14 @@ public class LoadingFactor implements Serializable {
   }
 
   /** 
-   * update the threshol if autoEvalThreshold is true.
+   * update the threshold if autoEvalThreshold is true.
    */
-  private void updateThreshol() {
+  private void updateThreshold() {
     if (autoEvalThreshold) {
 
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, 
-                   "LoadingFactor.updateThreshol before" +
+                   "LoadingFactor.updateThreshold before" +
                    " rateOfFlow=" + rateOfFlow +
                    ", producThreshold=" + producThreshold +
                    ", consumThreshold=" + consumThreshold );
@@ -196,16 +196,15 @@ public class LoadingFactor implements Serializable {
   }
 
   /**
-   * eval the rate of flow (means).
-   * if rateOfFlow > 1 the queue are more pending requests 
-   * than pending messages.
-   * else if rateOfFlow < 1 the queue are more pending messages 
-   * than pending requests.
+   * Evaluates the average rate of flow.
+   * If rateOfFlow is greater than 1 the queue are more pending requests 
+   * than pending messages else if rateOfFlow is lower than 1 the queue are
+   * more pending messages than pending requests.
    * This value is set in all QueueClusterNot notification.
    * 
-   * @param pendingMessages
-   * @param pendingRequests
-   * @return
+   * @param pendingMessages   the number of pending messages.
+   * @param pendingRequests   the number of pending requests.
+   * @return the rate of flow
    */
   public float evalRateOfFlow(int pendingMessages,
                               int pendingRequests) {
@@ -213,6 +212,9 @@ public class LoadingFactor implements Serializable {
     nbOfPendingMessages = pendingMessages;
     nbOfPendingRequests = pendingRequests;
 
+    // TODO (AF): Be careful this evaluation is not really useful as either pendingMessages
+    // or pendingRequests is equal to zero!
+    
     if (pendingMessages == 0 && pendingRequests == 0) 
       currentROF = 1;
     else if (pendingMessages == 0 && pendingRequests != 0)
@@ -227,18 +229,15 @@ public class LoadingFactor implements Serializable {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
                  "LoadingFactor.evalRateOfFlow" +
-                 " pendingMessages = " + pendingMessages +
-                 ", pendingRequests = " + pendingRequests +
-                 ", rateOfFlow = " + rateOfFlow + 
-                 ", currentROF = " + currentROF);
+                 " pendingMessages = " + pendingMessages + ", pendingRequests = " + pendingRequests +
+                 ", rateOfFlow = " + rateOfFlow + ", currentROF = " + currentROF);
 
     return rateOfFlow;
   }
 
   /**
-   * this method eval the rate of flow and activity.
-   * if necessary send "give or hope" messages, and
-   * update threshol.
+   * This method evaluates the rate of flow and activity.
+   * If necessary send "give" or "hope" messages, and update threshold.
    * 
    * @param clusters
    * @param pendingMessages
@@ -261,8 +260,7 @@ public class LoadingFactor implements Serializable {
                  ">> LoadingFactor.factorCheck " +
                  this + "\nclusters = " + clusters);
 
-    evalRateOfFlow(pendingMessages,
-                   pendingRequests);
+    evalRateOfFlow(pendingMessages, pendingRequests);
 
     evalActivity();
 
@@ -276,7 +274,7 @@ public class LoadingFactor implements Serializable {
       }
     }
 
-    updateThreshol();
+    updateThreshold();
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 

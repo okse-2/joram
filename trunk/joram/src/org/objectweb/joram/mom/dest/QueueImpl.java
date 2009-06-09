@@ -157,7 +157,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
   /**
    * Sets or unsets the threshold for this queue.
    *
-   * @param The threshold value to be set (-1 for unsetting previous value).
+   * @param threshold The threshold value to be set (-1 for unsetting previous value).
    */
   public void setThreshold(int threshold) {
     if (threshold < 0)
