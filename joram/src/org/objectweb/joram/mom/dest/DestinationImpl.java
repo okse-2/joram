@@ -76,7 +76,11 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    */
   private boolean deletable = false;
 
-  /** Identifier of the destination's administrator. */
+  /**
+   * Identifier of the destination's administrator.
+   * In any case the local administration topic is authorized to handle the
+   * destination, this mechanism allows an other agent to get the same rights.
+   */
   private AgentId adminId;
 
   /**
@@ -655,8 +659,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    * @param client  AgentId of the client requesting an admin permission.
    */
   protected boolean isAdministrator(AgentId client) {
-    return client.equals(adminId) ||
-      client.equals(AdminTopic.getDefault());
+    return client.equals(adminId) || client.equals(AdminTopic.getDefault());
   }
 
   abstract protected void doRightRequest(SetRightRequest not);
