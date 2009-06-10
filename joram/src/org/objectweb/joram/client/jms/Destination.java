@@ -804,8 +804,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    */
   public DeadMQueue getDMQ() throws ConnectException, AdminException {
     Monitor_GetDMQSettings request = new Monitor_GetDMQSettings(getName());
-    Monitor_GetDMQSettingsRep reply;
-    reply = (Monitor_GetDMQSettingsRep) doRequest(request);
+    Monitor_GetDMQSettingsRep reply = (Monitor_GetDMQSettingsRep) doRequest(request);
 
     if (reply.getDMQName() == null) {
       return null;
