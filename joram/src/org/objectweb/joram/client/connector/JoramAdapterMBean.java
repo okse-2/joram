@@ -508,5 +508,23 @@ public interface JoramAdapterMBean {
    * @throws ConnectException If the connection fails.
    */
   public int[] getServersIds() throws ConnectException, AdminException;
-
+  /**
+   * Returns the list of the platform's servers' names.
+   *
+   * @return An array containing the list of server's names.
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  Never thrown.
+   * 
+   * @see #getServers(String)
+   */
+  public String[] getServersNames() throws ConnectException, AdminException;
+  
+  /**
+   * Returns the current servers configuration (a3servers.xml).
+   *
+   * @return The current servers configuration.
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public String getConfiguration() throws ConnectException, AdminException;
 }
