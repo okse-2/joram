@@ -540,11 +540,15 @@ public abstract class Agent implements AgentMBean, Serializable {
   }
 
   private String getMBeanName() {
-    return new StringBuffer()
-      .append("server=").append(AgentServer.getName())
-      .append(",cons=Engine#").append(getId().getTo())
-      .append(",agent=").append((name == nullName)?getId().toString():name)
-      .toString();
+    StringBuffer strbuf = new StringBuffer();
+    strbuf.append("server=").append(AgentServer.getName());
+    strbuf.append(",cons=Engine#").append(getId().getTo());
+    if (name == nullName)
+      strbuf.append(",agent=").append(getAgentId());
+    else
+      strbuf.append(",agent=").append(name).append('[').append(getAgentId()).append(']');
+    
+    return strbuf.toString();
   }
 
   /**
