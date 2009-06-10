@@ -532,6 +532,35 @@ public class AdminWrapper {
 
     return reply.getIds();
   }
+
+  /**
+   * Returns the list of the platform's servers' names.
+   *
+   * @return An array containing the list of server's names.
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  Never thrown.
+   * 
+   * @see #getServers(String)
+   */
+  public final String[] getServersNames() throws ConnectException, AdminException {
+    return getServersNames(null);
+  }
+
+  /**
+   * Returns the list of the servers' names that belong to the specified domain
+   *
+   * @param domain  Name of the domain.
+   * @return An array containing the list of server's names of the specified domain.
+   * 
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  Never thrown.
+   */
+  public final String[] getServersNames(String domain) throws ConnectException, AdminException {
+    Monitor_GetServersIds request = new Monitor_GetServersIds(getLocalServerId(), domain);
+    Monitor_GetServersIdsRep reply = (Monitor_GetServersIdsRep) doRequest(request);
+
+    return reply.getNames();
+  }
   
   /**
    * Returns the list of the platform's servers' identifiers.

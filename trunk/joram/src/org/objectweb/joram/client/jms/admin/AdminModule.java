@@ -964,6 +964,9 @@ public final class AdminModule {
     wrapper.setDefaultThreshold(serverId, threshold);
   }
 
+  // TODO (AF): Removes the deprecated getServersIds methods, adds getServersIds and
+  // getServersNames as defined in AdminWrapper.
+  
   /**
    * Returns the list of the platform's servers' identifiers.
    *
