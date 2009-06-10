@@ -1139,8 +1139,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
   public void setTimeOutToAbortRequest(long timeOut) throws ConnectException {
     AdminModule.setTimeOutToAbortRequest(timeOut);
   }
-
-  
+ 
   /**
    * Returns the default dead message queue for the local server, null if not
    * set.
@@ -1700,6 +1699,29 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
     // TODO (AF): next to 5.2, directly use  AdminModule.getServersIds()
     return AdminModule.getWrapper().getServersIds();
   }
+
+  /**
+   * Returns the list of the platform's servers' names.
+   *
+   * @return An array containing the list of server's names.
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  Never thrown.
+   * 
+   * @see #getServers(String)
+   */
+  public final String[] getServersNames() throws ConnectException, AdminException {
+    // TODO (AF): next to 5.2, directly use  AdminModule.getServersIds()
+    return AdminModule.getWrapper().getServersNames(null);
+  }
   
-  
+  /**
+   * Returns the current servers configuration (a3servers.xml).
+   *
+   * @return The current servers configuration.
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public final String getConfiguration() throws ConnectException, AdminException {
+    return AdminModule.getConfiguration();
+  }
 }
