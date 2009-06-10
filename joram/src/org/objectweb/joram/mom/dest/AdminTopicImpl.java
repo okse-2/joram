@@ -217,7 +217,10 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   public AdminTopicImpl(AgentId topicId) {
     super(topicId, null);
     serverId = AgentServer.getServerId();
+    
     destinationsTable = new Hashtable();
+    // Be careful to not register the AdminTopicImpl itself. If it is registered
+    // then it appears in JMX destination list and it produces deadlock.
     usersTable = new Hashtable();
     proxiesTable = new Hashtable();
     requestsTable = new Hashtable();
@@ -640,8 +643,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    */ 
   public void unclusterRequest(AgentId from, UnclusterRequest request) throws MomException {
     if (logger.isLoggable(BasicLevel.WARN))
-      logger.log(BasicLevel.WARN,
-                 "Unexpected request: " + request);
+      logger.log(BasicLevel.WARN, "Unexpected request: " + request);
   }
 
   /**
@@ -650,11 +652,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    *
    * @exception  AccessException  Not thrown.
    */ 
-  public void setFatherRequest(AgentId from, SetFatherRequest request)
-  throws MomException {
+  public void setFatherRequest(AgentId from, SetFatherRequest request) throws MomException {
     if (logger.isLoggable(BasicLevel.WARN))
-      logger.log(BasicLevel.WARN,
-                 "Unexpected request: " + request);
+      logger.log(BasicLevel.WARN, "Unexpected request: " + request);
   }
 
   /**
@@ -674,8 +674,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    */ 
   public void fatherAck(AgentId from, FatherAck ack) {
     if (logger.isLoggable(BasicLevel.WARN))
-      logger.log(BasicLevel.WARN,
-                 "Unexpected notification: " + ack);
+      logger.log(BasicLevel.WARN, "Unexpected notification: " + ack);
   }
 
   /**
@@ -686,8 +685,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    */ 
   public void unsetFatherRequest(AgentId from, UnsetFatherRequest request) throws MomException {
     if (logger.isLoggable(BasicLevel.WARN))
-      logger.log(BasicLevel.WARN,
-                 "Unexpected request: " + request);
+      logger.log(BasicLevel.WARN, "Unexpected request: " + request);
   }
 
 
@@ -708,8 +706,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
     // For admin requests, notifying the administrator.
     if (not instanceof org.objectweb.joram.mom.notifications.AdminRequest) {
-      String reqId =
-        ((org.objectweb.joram.mom.notifications.AdminRequest) not).getId();
+      String reqId = ((org.objectweb.joram.mom.notifications.AdminRequest) not).getId();
 
       if (reqId != null) {
         AgentId replyTo = (AgentId) requestsTable.remove(reqId);
@@ -957,7 +954,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       // The destination is local, process the request.
 
       DestinationDesc destDesc = createDestination(request.getDestinationName(),
-                                                   null,
+                                                   getId(),
                                                    request.getProperties(),
                                                    request.getExpectedType(),
                                                    request.getClassName(),
@@ -1000,12 +997,10 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
                                            String className,
                                            String requestClassName,
                                            StringBuffer strbuf) throws UnknownServerException, RequestException {
-
-    boolean destNameActivated = (destName != null && ! destName.equals(""));
     DestinationDesc destDesc;
 
     // Retrieving an existing destination:
-    if (destNameActivated && destinationsTable.containsKey(destName)) {
+    if (destName != null && ! destName.equals("") && destinationsTable.containsKey(destName)) {
       destDesc = (DestinationDesc) destinationsTable.get(destName);
       if (! DestinationConstants.compatible(destDesc.getType(), type)) {
         throw new RequestException("Destination type not compliant");
@@ -1022,7 +1017,6 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
         dest = (Destination) Class.forName(className).newInstance();
         if (destName != null) dest.name = destName;
 
-        if (adminId == null) adminId = getId();
         ((AdminDestinationItf) dest).init(adminId, properties);
       } catch (Exception exc) {
         logger.log(BasicLevel.ERROR,
@@ -1039,12 +1033,10 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
         throw new RequestException("Requested destination type is not compliant with destination classname");
       }
 
-      AgentId createdDestId = dest.getId();
+      if (destName == null || destName.equals(""))
+        destName = dest.getAgentId();
 
-      if (! destNameActivated)
-        destName = createdDestId.toString();
-
-      destDesc = new DestinationDesc(createdDestId, destName, className, destType);
+      destDesc = new DestinationDesc(dest.getId(), destName, className, destType);
       try {
         dest.deploy();
         destinationsTable.put(destName, destDesc);
@@ -1052,7 +1044,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
         strbuf.append("Request [").append(requestClassName)
         .append("], processed by AdminTopic on server [").append(serverId)
         .append("], successful [true]: ").append(className).append(" [")
-        .append(createdDestId.toString()).append("] has been created and deployed");
+        .append(dest.getAgentId()).append("] has been created and deployed");
 
       } catch (Exception exc) {
         if (logger.isLoggable(BasicLevel.ERROR))
@@ -1880,8 +1872,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    */
   private void doProcess(Monitor_GetDestinations request,
                          AgentId replyTo,
-                         String msgId) throws UnknownServerException
-                         {
+                         String msgId) throws UnknownServerException {
     if (checkServerId(request.getServerId())) {
       Enumeration destinations = destinationsTable.elements();
       String[] ids = new String[destinationsTable.size()];
@@ -1903,7 +1894,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       forward(AdminTopic.getDefault((short) request.getServerId()),
               new AdminRequestNot(replyTo, msgId, request));
     }
-                         }
+  }
 
   /**
    * Processes a <code>Monitor_GetUsers</code> request by sending the
@@ -2004,8 +1995,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    */
   private void doProcess(Monitor_GetDMQSettings request,
                          AgentId replyTo,
-                         String msgId) throws UnknownServerException
-                         {
+                         String msgId) throws UnknownServerException {
     if (request.getServerId() != -1) {
       if (checkServerId(request.getServerId())) {
         Monitor_GetDMQSettingsRep reply;
@@ -2037,7 +2027,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
         // AF: Return an error/empty message to unlock client ?
       }
     }
-                         }
+  }
 
   /**
    * Processes a <code>Monitor_GetFather</code> request by forwarding it to
@@ -2045,8 +2035,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    */
   private void doProcess(Monitor_GetFather request,
                          AgentId replyTo,
-                         String msgId) throws UnknownServerException
-                         {
+                         String msgId) throws UnknownServerException {
     AgentId topicId = AgentId.fromString(request.getTopic());
 
     if (checkServerId(topicId.getTo())) {
@@ -2058,7 +2047,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       forward(AdminTopic.getDefault(topicId.getTo()),
               new AdminRequestNot(replyTo, msgId, request));
     }
-                         }
+  }
 
   /**
    * Processes a <code>Monitor_GetCluster</code> request by forwarding it to
@@ -2066,8 +2055,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    */
   private void doProcess(Monitor_GetCluster request,
                          AgentId replyTo,
-                         String msgId) throws UnknownServerException
-                         {
+                         String msgId) throws UnknownServerException {
     AgentId topicId = AgentId.fromString(request.getTopic());
 
     if (checkServerId(topicId.getTo())) {
@@ -2079,7 +2067,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       forward(AdminTopic.getDefault(topicId.getTo()),
               new AdminRequestNot(replyTo, msgId, request));
     }
-                         }
+  }
 
   /**
    * Processes a <code>Monitor_GetPendingMessages</code> request by
@@ -2087,8 +2075,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    */
   private void doProcess(Monitor_GetPendingMessages request,
                          AgentId replyTo,
-                         String msgId) throws UnknownServerException
-                         {
+                         String msgId) throws UnknownServerException {
     AgentId destId = AgentId.fromString(request.getDest());
 
     if (checkServerId(destId.getTo())) {
@@ -2100,7 +2087,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       forward(AdminTopic.getDefault(destId.getTo()),
               new AdminRequestNot(replyTo, msgId, request));
     }
-                         }
+  }
 
   /**
    * Processes a <code>Monitor_GetPendingRequests</code> request by
@@ -2108,8 +2095,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    */
   private void doProcess(Monitor_GetPendingRequests request,
                          AgentId replyTo,
-                         String msgId) throws UnknownServerException
-                         {
+                         String msgId) throws UnknownServerException {
     AgentId destId = AgentId.fromString(request.getDest());
 
     if (checkServerId(destId.getTo())) {
@@ -2121,7 +2107,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       forward(AdminTopic.getDefault(destId.getTo()),
               new AdminRequestNot(replyTo, msgId, request));
     }
-                         }
+  }
 
   /**
    * Processes a <code>Monitor_GetStat</code> request by
@@ -2129,8 +2115,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    */
   private void doProcess(Monitor_GetStat request,
                          AgentId replyTo,
-                         String msgId) 
-  throws UnknownServerException {
+                         String msgId) throws UnknownServerException {
     AgentId destId = AgentId.fromString(request.getDest());
 
     if (checkServerId(destId.getTo())) {
@@ -2150,8 +2135,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    */
   private void doProcess(Monitor_GetNbMaxMsg request,
                          AgentId replyTo,
-                         String msgId)
-  throws UnknownServerException {
+                         String msgId) throws UnknownServerException {
     AgentId destId = AgentId.fromString(request.getId());
 
     if (checkServerId(destId.getTo())) {
@@ -2172,8 +2156,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    */
   private void doProcess(Monitor_GetSubscriptions request,
                          AgentId replyTo,
-                         String msgId) throws UnknownServerException
-                         {
+                         String msgId) throws UnknownServerException {
     AgentId destId = AgentId.fromString(request.getDest());
 
     if (checkServerId(destId.getTo())) {
@@ -2185,7 +2168,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       forward(AdminTopic.getDefault(destId.getTo()),
               new AdminRequestNot(replyTo, msgId, request));
     }
-                         }
+  }
 
   private void doProcess(SpecialAdmin request,
                          AgentId replyTo,
@@ -2272,16 +2255,14 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
                          AgentId from) {
     try {
       ServerConfigHelper helper = new ServerConfigHelper(false);
-      helper.addServer(
-                       request.getServerId(),
+      helper.addServer(request.getServerId(),
                        request.getHostName(),
                        request.getDomainName(),
                        request.getPort(),
                        request.getServerName());
-      helper.addService(
-                        request.getServerId(),
+      helper.addService(request.getServerId(),
                         "org.objectweb.joram.mom.proxies.ConnectionManager",
-      "root root");
+                        "root root");
       String[] serviceNames = request.getServiceNames();
       String[] serviceArgs = request.getServiceArgs();
       for (int i = 0; i < serviceNames.length; i++) {
@@ -2290,8 +2271,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
                           serviceArgs[i]);
       }
       helper.commit();
-      distributeReply(replyTo, msgId,
-                      new AdminReply(true, "Server added"));
+      distributeReply(replyTo, msgId, new AdminReply(true, "Server added"));
       if (from == null) {
         broadcastRequest(request, 
                          request.getServerId(), 
@@ -2301,8 +2281,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
-                      new AdminReply(
-                                     false, 
+                      new AdminReply(false, 
                                      AdminReply.SERVER_ID_ALREADY_USED, 
                                      exc.getMessage(), null));
     } catch (Exception exc) {
@@ -2331,8 +2310,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "", exc);
       distributeReply(replyTo, msgId,
-                      new AdminReply(
-                                     false, 
+                      new AdminReply(false, 
                                      AdminReply.UNKNOWN_SERVER, 
                                      exc.getMessage(), null));
     } catch (Exception exc) {
@@ -2592,8 +2570,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * 
    * @deprecated
    */
-  public static DestinationDesc createDestinationAndSave(
-                                                         String destName,
+  public static DestinationDesc createDestinationAndSave(String destName,
                                                          AgentId adminId,
                                                          Properties properties,
                                                          byte type,
