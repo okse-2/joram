@@ -1360,8 +1360,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    * @see org.objectweb.joram.mom.messages.MessageJMXWrapper
    */
   public TabularData getMessages() throws Exception {
-//  public CompositeData[] getMessages() throws Exception {
-    return MessageJMXWrapper.createTabularDataSupport(messages.elements());
+    return MessageJMXWrapper.createTabularDataSupport(messages);
   }
 
   /**
