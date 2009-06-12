@@ -137,15 +137,31 @@ public interface JoramAdapterMBean {
 
 
   /**
-   * Returns the default dead message queue for the local server, null if not
-   * set.
+   * Returns the unique identifier of the default dead message queue for the local
+   * server, null if not set.
    *
-   * @return An array containing the object name of the dead message queue of the
-   *         local server or null if none exists.
+   * @return The unique identifier of the dead message queue of the local
+   *         server or null if none exists.
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
    */
-  public String getDefaultDMQ() throws ConnectException, AdminException;
+  public String getDefaultDMQId() throws ConnectException, AdminException;
+
+  /**
+   * Returns the unique identifier of the default dead message queue for a given
+   * server, null if not set.
+   * <p>
+   * The request fails if the target server does not belong to the platform.
+   * 
+   * @param serverId Unique identifier of the given server.
+   * @return The unique identifier of the dead message queue of the given
+   *         server or null if none exists.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public String getDefaultDMQId(int serverId) throws ConnectException, AdminException;
+
   /**
    * Unset the default dead message queue for the local server.
    * 
@@ -153,20 +169,6 @@ public interface JoramAdapterMBean {
    * @throws AdminException
    */
   public void resetDefaultDMQ() throws ConnectException, AdminException;
-
-  /**
-   * Returns the default dead message queue for a given server, null if not set.
-   * <p>
-   * The request fails if the target server does not belong to the platform.
-   * 
-   * @param serverId Unique identifier of the given server.
-   * @return An array containing the object name of the dead message queue of the
-   *         given server or null if none exists.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  If the request fails.
-   */
-  public String getDefaultDMQ(int serverId) throws ConnectException, AdminException;
   
   /**
    * Unset the default dead message queue for the given server.
