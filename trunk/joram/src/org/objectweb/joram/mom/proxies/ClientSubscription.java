@@ -914,11 +914,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    * @see org.objectweb.joram.mom.messages.MessageJMXWrapper
    */
   public TabularData getMessages() throws Exception {
-    return MessageJMXWrapper.createTabularDataSupport(messagesTable.elements());
+    return MessageJMXWrapper.createTabularDataSupport(messagesTable, messageIds);
   }
-//  public CompositeData[] getMessages() throws Exception {
-//    return MessageJMXWrapper.createTabularDataSupport(messagesTable.elements());
-//  }
 
   public void deleteMessage(String msgId) {
     messageIds.remove(msgId);
