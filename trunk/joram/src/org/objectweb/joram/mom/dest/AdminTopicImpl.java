@@ -1465,7 +1465,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
       info = strbuf.append("Request [").append(request.getClass().getName())
       .append("], sent to AdminTopic on server [").append(serverId)
-      .append("], successful [true]: dmq [").append(dmqId.toString())
+      .append("], successful [true]: dmq [").append(dmqId)
       .append("], has been successfuly set as the default one").toString();
       strbuf.setLength(0);
 
