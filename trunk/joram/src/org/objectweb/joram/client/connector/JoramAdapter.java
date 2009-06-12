@@ -1141,18 +1141,37 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
   }
  
   /**
-   * Returns the default dead message queue for the local server, null if not
-   * set.
+   * Returns the unique identifier of the default dead message queue for the local
+   * server, null if not set.
    *
-   * @return The object name of the dead message queue of the local server or null
+   * @return The unique identifier of the dead message queue of the local server or null
    *         if none exists.
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
    * 
-   * @see #getDefaultDMQ(int)
+   * @see AdminModule#getDefaultDMQId()
    */
-  public String getDefaultDMQ() throws ConnectException, AdminException {
-    return getDefaultDMQ(serverId);
+  public String getDefaultDMQId() throws ConnectException, AdminException {
+    return AdminModule.getDefaultDMQId();
+  }
+  
+  /**
+   * Returns the unique identifier of the default dead message queue for a given
+   * server, null if not set.
+   * <p>
+   * The request fails if the target server does not belong to the platform.
+   * 
+   * @param serverId Unique identifier of the server.
+   * @return The unique identifier of the dead message queue of the given server or null
+   *         if none exists.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   * 
+   * @see AdminModule#getDefaultDMQId()
+   */
+  public String getDefaultDMQId(int serverId) throws ConnectException, AdminException {
+    return AdminModule.getDefaultDMQId(serverId);
   }
 
   /**
@@ -1163,25 +1182,6 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    */
   public void resetDefaultDMQ() throws ConnectException, AdminException {
     AdminModule.setDefaultDMQ(null);
-  }
-  
-  /**
-   * Returns the default dead message queue for a given server, null if not set.
-   * <p>
-   * The request fails if the target server does not belong to the platform.
-   * 
-   * @param serverId Unique identifier of the server.
-   * @return The object name of the dead message queue of the given server or null
-   *         if none exists.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  If the request fails.
-   */
-  public String getDefaultDMQ(int serverId) throws ConnectException, AdminException {
-    DeadMQueue dmq = AdminModule.getDefaultDMQ(serverId);
-    if (dmq == null)
-      return null;
-    return dmq.registerMBean(jmxRootName);
   }
 
   /**
