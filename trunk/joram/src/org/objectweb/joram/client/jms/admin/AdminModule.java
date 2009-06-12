@@ -566,6 +566,7 @@ public final class AdminModule {
                                 String name,
                                 String password,
                                 String identityClass) throws ConnectException, AdminException {
+    // TODO (AF): May be we should throw an exception AlreadyConnected.
     if (wrapper != null) return;
 
     //  set identity className
