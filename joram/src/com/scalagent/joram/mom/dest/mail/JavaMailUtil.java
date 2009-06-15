@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -61,13 +61,13 @@ public class JavaMailUtil {
   private Store store = null;
   private Folder folder = null;
 
-  public void sendJavaMail(SenderInfo si, MailMessage message)
+  public void sendJavaMail(MailSender sender, MailMessage message)
     throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 "--- " + this + " sendJavaMail(" + si + "," + message + ")");
+                 "--- " + this + " sendJavaMail(" + sender + "," + message + ")");
     
-    if (si.smtpServer == null || si.smtpServer.length() < 0) {
+    if (sender.getSMTPServer() == null || sender.getSMTPServer().length() <= 0) {
       logger.log(BasicLevel.ERROR, 
                  "--- " + this + " sendJavaMail : smtpServer is empty.");
       throw new Exception("sendJavaMail : smtpServer is empty.");
@@ -75,43 +75,39 @@ public class JavaMailUtil {
     
     
     Properties props = System.getProperties();
-    props.put("mail.smtp.host", si.smtpServer);
+    props.put("mail.smtp.host", sender.getSMTPServer());
     Session session = Session.getDefaultInstance(props);
     MimeMessage msg = new MimeMessage(session);
     MimeMultipart mimeMultiPart = new MimeMultipart();
     MimeBodyPart mimeBodyPart = new MimeBodyPart();
     
-    msg.setFrom(new InternetAddress(si.from));
+    msg.setFrom(new InternetAddress(sender.getFrom()));
     
-    if (si.to != null) {
-      StringTokenizer st = new StringTokenizer(si.to,",");
+    if (sender.getTo() != null && sender.getTo() != "") {
+      StringTokenizer st = new StringTokenizer(sender.getTo(), ",");
       while (st.hasMoreTokens()) {
         msg.setRecipients(javax.mail.Message.RecipientType.TO,
                           InternetAddress.parse(st.nextToken(),false));
       }
-    } else {
-      logger.log(BasicLevel.ERROR, 
-                 "--- " + this + " sendJavaMail : to is null.");
-      throw new Exception("sendJavaMail : to is null.");
     }
     
-    if (si.cc != null) {
-      StringTokenizer st = new StringTokenizer(si.cc,",");
+    if (sender.getCC() != null && sender.getCC() != "") {
+      StringTokenizer st = new StringTokenizer(sender.getCC(), ",");
       while (st.hasMoreTokens()) {
         msg.setRecipients(javax.mail.Message.RecipientType.CC
                           ,InternetAddress.parse(st.nextToken(),false));
       }
     }
     
-    if (si.bcc != null) {
-      StringTokenizer st = new StringTokenizer(si.bcc,",");
+    if (sender.getBcc() != null && sender.getBcc() != "") {
+      StringTokenizer st = new StringTokenizer(sender.getBcc(), ",");
       while (st.hasMoreTokens()) {
         msg.setRecipients(javax.mail.Message.RecipientType.BCC
                           ,InternetAddress.parse(st.nextToken(),false));
       }
     }
     
-    msg.setSubject(si.subject);
+    msg.setSubject(sender.getSubject());
     
     if (ConversionHelper.toBoolean(message.getProperty("showProperties"))) {
       try {
