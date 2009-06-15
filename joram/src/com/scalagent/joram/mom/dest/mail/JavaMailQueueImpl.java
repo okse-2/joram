@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,15 +26,11 @@ import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
 
-import org.objectweb.joram.mom.dest.Queue;
 import org.objectweb.joram.mom.dest.QueueImpl;
 import org.objectweb.joram.mom.notifications.ClientMessages;
-import org.objectweb.joram.mom.notifications.SpecialAdminRequest;
 import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.MessageErrorConstants;
-import org.objectweb.joram.shared.admin.SpecialAdmin;
-import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.joram.shared.selectors.Selector;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -100,13 +96,7 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
     from = prop.getProperty("from", from);
     subject = prop.getProperty("subject", subject);
     selector = prop.getProperty("selector", selector);
-
-    // to send mail
-    senderInfos = new Vector();
-    senderInfos.add(new SenderInfo(smtpServer,
-                                   to, cc, bcc, from, subject,
-                                   selector));
-
+    
     try {
       popPeriod = Long.valueOf(prop.getProperty("popPeriod")).longValue();
     } catch (NumberFormatException exc) {
@@ -168,7 +158,7 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
    *
    * @return the default <code>to</code> field.
    */
-  public String getDefaultTo() {
+  public String getTo() {
     return to;
   }
 
@@ -178,7 +168,7 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
    * @param to 	The default <code>to</code> field or null for unsetting
    *            previous value.
    */
-  public void setDefaultTo(String to) {
+  public void setTo(String to) {
     this.to = to;
   }
 
@@ -187,7 +177,7 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
    *
    * @return the default <code>cc</code> field.
    */
-  public String getDefaultCC() {
+  public String getCC() {
     return cc;
   }
 
@@ -197,7 +187,7 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
    * @param cc 	The default <code>cc</code> field or null for unsetting
    *            previous value.
    */
-  public void setDefaultCC(String cc) {
+  public void setCC(String cc) {
     this.cc = cc;
   }
 
@@ -206,7 +196,7 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
    *
    * @return the default <code>bcc</code> field.
    */
-  public String getDefaultBcc() {
+  public String getBcc() {
     return bcc;
   }
 
@@ -216,7 +206,7 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
    * @param bcc The default <code>bcc</code> field or null for unsetting
    *            previous value.
    */
-  public void setDefaultBcc(String bcc) {
+  public void setBcc(String bcc) {
     this.bcc = bcc;
   }
 
@@ -225,7 +215,7 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
    *
    * @return the default <code>from</code> field.
    */
-  public String getDefaultFrom() {
+  public String getFrom() {
     return from;
   }
 
@@ -235,7 +225,7 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
    * @param from The default <code>from</code> field or null for unsetting
    *             previous value.
    */
-  public void setDefaultFrom(String from) {
+  public void setFrom(String from) {
     this.from = from;
   }
 
@@ -244,7 +234,7 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
    *
    * @return the default <code>subject</code> field.
    */
-  public String getDefaultSubject() {
+  public String getSubject() {
     return subject;
   }
 
@@ -254,7 +244,7 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
    * @param subject 	The default <code>subject</code> field or null for
    *             	unsetting previous value.
    */
-  public void setDefaultSubject(String subject) {
+  public void setSubject(String subject) {
     this.subject = subject;
   }
 
@@ -263,7 +253,7 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
    *
    * @return the default <code>selector</code>.
    */
-  public String getDefaultSelector() {
+  public String getSelector() {
     return selector;
   }
 
@@ -273,7 +263,7 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
    * @param selector 	The default <code>selector</code> or null for
    *             	unsetting previous value.
    */
-  public void setDefaultSelector(String selector) {
+  public void setSelector(String selector) {
     this.selector = selector;
   }
 
@@ -377,75 +367,16 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
     return "JavaMailQueueImpl:" + getId().toString();
   }
 
-  protected Object specialAdminProcess(SpecialAdminRequest not) 
-    throws RequestException {
-
-    try {
-      SpecialAdmin req = not.getRequest();
-      
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, 
-                   "--- " + this + " specialAdminProcess : " + req);
-      if (req instanceof AddSenderInfo)
-        addSenderInfo(((AddSenderInfo) req).si,
-                      ((AddSenderInfo) req).index);
-      else if (req instanceof RemoveSenderInfo) {
-        if (((RemoveSenderInfo) req).index > -1)
-          removeSenderInfo(((RemoveSenderInfo) req).index);
-        else 
-          removeSenderInfo(((RemoveSenderInfo) req).si);
-      }  else if (req instanceof UpdateSenderInfo)
-        updateSenderInfo(((UpdateSenderInfo) req).oldSi,
-                         ((UpdateSenderInfo) req).newSi);
-      
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, 
-                   "--- " + this + " specialAdminProcess senderInfos=" + senderInfos);
-    } catch (Exception exc) {
-      if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN, 
-                   "--- " + this + " specialAdminProcess", exc);
-      throw new RequestException(exc.getMessage());
-    }
-    return "done";
-  }
-    
-  protected void addSenderInfo(SenderInfo si, int index) 
-    throws ArrayIndexOutOfBoundsException {
-    if (index > -1)
-      senderInfos.add(index,si);
-    else
-      senderInfos.add(si);
-  }
-
-  protected SenderInfo removeSenderInfo(int index)
-    throws ArrayIndexOutOfBoundsException {
-    return (SenderInfo) senderInfos.remove(index);
-  }
-
-  protected boolean removeSenderInfo(SenderInfo si) {
-    return senderInfos.remove(si);
-  }
-
-  protected boolean updateSenderInfo(SenderInfo oldSi, SenderInfo newSi)
-    throws ArrayIndexOutOfBoundsException {
-    int index = senderInfos.indexOf(oldSi);
-    if (index > -1) return false;
-    senderInfos.set(index,newSi);
-    return true;
-  }
-
   public ClientMessages preProcess(AgentId from, ClientMessages not) {
     DMQManager dmqManager = null;
     for (Enumeration msgs = not.getMessages().elements(); msgs.hasMoreElements();) {
       Message msg = (Message) msgs.nextElement();
-      SenderInfo si = match(msg);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "--- " + this + " match=" + (si != null));
-      if (si != null) {
+        logger.log(BasicLevel.DEBUG, "--- " + this + " match=" + (selector != null));
+      if (selector == null || Selector.matches(msg, selector)) {
         try {
-          javaMailUtil.sendJavaMail(si, new MailMessage(msg));
+          javaMailUtil.sendJavaMail(this, new MailMessage(msg));
         } catch (Exception exc) {
           if (dmqManager == null) {
             dmqManager = new DMQManager(not.getDMQId(), dmqId, getId());
@@ -466,16 +397,6 @@ public class JavaMailQueueImpl extends QueueImpl implements JavaMailQueueImplMBe
     return null;
   }
   
-  protected SenderInfo match(Message msg) {
-    for (Enumeration e = senderInfos.elements(); e.hasMoreElements(); ) {
-      SenderInfo si = (SenderInfo) e.nextElement();
-      if (si.selector == null) return si;
-      if (Selector.matches(msg,si.selector))
-        return si;
-    }
-    return null;
-  }
-
   public void doPop() {
     long count = 0;
     Vector toExpunge = new Vector();
