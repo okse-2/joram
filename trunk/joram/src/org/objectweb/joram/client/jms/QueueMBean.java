@@ -86,4 +86,12 @@ public interface QueueMBean extends DestinationMBean {
    * @exception AdminException  If the request fails.
    */
   public void setDefaultDMQ(int serverId) throws ConnectException, AdminException;
+  
+  /**
+   * Unset the default dead message queue for the local server.
+   * 
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public void resetDefaultDMQ() throws ConnectException, AdminException;
 }
