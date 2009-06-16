@@ -59,7 +59,7 @@ public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue {
 
   /** Returns a String image of the queue. */
   public String toString() {
-    return "TempQueue:" + agentId;
+    return "TemporaryQueue" + agentId;
   }
 
   /**
