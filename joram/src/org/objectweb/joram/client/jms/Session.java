@@ -1065,10 +1065,10 @@ public class Session implements javax.jms.Session {
    *
    * @exception IllegalStateException  If the session is closed.
    */
-  public synchronized javax.jms.Queue createQueue(
-    String queueName) 
-    throws JMSException {
+  public synchronized javax.jms.Queue createQueue(String queueName) throws JMSException {
     checkClosed();
+    checkThreadOfControl();
+    
     return new Queue(queueName);
   }
 
@@ -1078,9 +1078,7 @@ public class Session implements javax.jms.Session {
    * @exception IllegalStateException  If the session is closed.
    * @exception JMSException  If the topic creation failed.
    */
-  public synchronized javax.jms.Topic createTopic(
-    String topicName) 
-    throws JMSException {
+  public synchronized javax.jms.Topic createTopic(String topicName) throws JMSException {
     checkClosed();
     checkThreadOfControl();
 
@@ -1111,8 +1109,7 @@ public class Session implements javax.jms.Session {
    *              connection is broken.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public synchronized javax.jms.TemporaryQueue createTemporaryQueue() 
-    throws JMSException {
+  public synchronized javax.jms.TemporaryQueue createTemporaryQueue() throws JMSException {
     checkClosed();
     checkThreadOfControl();
 
@@ -1129,8 +1126,7 @@ public class Session implements javax.jms.Session {
    *              connection is broken.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public synchronized javax.jms.TemporaryTopic createTemporaryTopic() 
-    throws JMSException {
+  public synchronized javax.jms.TemporaryTopic createTemporaryTopic() throws JMSException {
     checkClosed();
     checkThreadOfControl();
 
