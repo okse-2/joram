@@ -59,6 +59,19 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
   }
 
   /**
+   * Returns a String image of the queue.
+   *
+   * @return A provider-specific identity values for this queue.
+   */
+  public String toString() {
+    StringBuffer strbuf = new StringBuffer();
+    strbuf.append("Queue").append(agentId);
+    if (adminName != null)
+      strbuf.append('(').append(adminName).append(')');
+    return strbuf.toString();
+  }
+
+  /**
    * Gets the The Joram's internal unique identifier of this queue.
    * API method.
    *
@@ -298,8 +311,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * @exception AdminException  If the request fails.
    */
   public int getPendingMessages() throws ConnectException, AdminException {
-    Monitor_GetPendingMessages request =
-      new Monitor_GetPendingMessages(agentId);
+    Monitor_GetPendingMessages request = new Monitor_GetPendingMessages(agentId);
     Monitor_GetNumberRep reply;
     reply = (Monitor_GetNumberRep) doRequest(request);
 
@@ -315,10 +327,8 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * @exception AdminException  If the request fails.
    */
   public int getPendingRequests() throws ConnectException, AdminException {
-    Monitor_GetPendingRequests request =
-      new Monitor_GetPendingRequests(agentId);
-    Monitor_GetNumberRep reply =
-      (Monitor_GetNumberRep) doRequest(request);
+    Monitor_GetPendingRequests request = new Monitor_GetPendingRequests(agentId);
+    Monitor_GetNumberRep reply = (Monitor_GetNumberRep) doRequest(request);
 
     return reply.getNumber();
   }
@@ -331,9 +341,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * @see org.objectweb.joram.client.jms.QueueMBean#getMessageIds()
    */
   public String[] getMessageIds() throws AdminException, ConnectException {
-    GetQueueMessageIdsRep reply = 
-      (GetQueueMessageIdsRep)doRequest(
-        new GetQueueMessageIds(agentId));
+    GetQueueMessageIdsRep reply = (GetQueueMessageIdsRep)doRequest(new GetQueueMessageIds(agentId));
     return reply.getMessageIds();
   }
   
@@ -492,7 +500,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * @exception AdminException  Never thrown.
    */
   public void setDefaultDMQ() throws ConnectException, AdminException {
-    AdminModule.setDefaultDMQId(getName());
+    getWrapper().setDefaultDMQId(getName());
   }
   
   /**
@@ -506,6 +514,47 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * @exception AdminException  If the request fails.
    */
   public void setDefaultDMQ(int serverId) throws ConnectException, AdminException {
-    AdminModule.setDefaultDMQId(serverId, getName());
+    getWrapper().setDefaultDMQId(serverId, getName());
+  }
+  
+  /**
+   * Returns the default dead message queue for the local server, null if not
+   * set.
+   *
+   * @return The object name of the dead message queue of the local server or null
+   *         if none exists.
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  Never thrown.
+   * 
+   * @see #getDefaultDMQ(int)
+   */
+  public Queue getDefaultDMQ() throws ConnectException, AdminException {
+    return getWrapper().getDefaultDMQ();
+  }
+  
+  /**
+   * Returns the default dead message queue for a given server, null if not set.
+   * <p>
+   * The request fails if the target server does not belong to the platform.
+   * 
+   * @param serverId Unique identifier of the server.
+   * @return The object name of the dead message queue of the given server or null
+   *         if none exists.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public Queue getDefaultDMQ(int serverId) throws ConnectException, AdminException {
+    return getWrapper().getDefaultDMQ(serverId);
+  }
+  
+  /**
+   * Unset the default dead message queue for the local server.
+   * 
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public void resetDefaultDMQ() throws ConnectException, AdminException {
+    getWrapper().setDefaultDMQ(null);
   }
 }
