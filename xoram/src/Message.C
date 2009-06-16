@@ -82,6 +82,7 @@ Message::~Message() {
 void Message::setBody(int length, byte* body) {
 	this->length = length;
 	this->body = body;
+	type = BYTES;
 }
 
 void Message::getBody(int* length, byte** body) {
