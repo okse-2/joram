@@ -60,7 +60,7 @@ public class TemporaryTopic extends Topic implements javax.jms.TemporaryTopic {
 
   /** Returns a String image of the topic. */
   public String toString() {
-    return "TempTopic:" + agentId;
+    return "TemporaryTopic" + agentId;
   }
 
   /**
