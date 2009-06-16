@@ -35,21 +35,21 @@ public interface JoramAdapterMBean {
    * @return The JMS API version.
    */
   public String getJMSVersion();
-  
+
   /**
    * Get the provider name: Joram.
    * 
    * @return The provider name: Joram.
    */
   public String getJMSProviderName();
-  
+
   /**
    * Gets the Joram's implementation version.
    * 
    * @return The Joram's implementation version.
    */
   public String getProviderVersion();
-  
+
   /**
    * Returns the unique identifier of the Joram server.
    * 
@@ -91,8 +91,8 @@ public interface JoramAdapterMBean {
    * @return <code>true</code> if the Joram server is collocated.
    */
   public Boolean getCollocatedServer();
-  
-  
+
+
   /**
    * Duration in seconds during which connecting is attempted (connecting
    * might take time if the server is temporarily not reachable); the 0 value
@@ -114,7 +114,7 @@ public interface JoramAdapterMBean {
    * considered as dead and processed as required.
    */
   public Integer getCnxPendingTimer();
-  
+
   /**
    * Sets timeout before abort a request.
    * 
@@ -169,7 +169,7 @@ public interface JoramAdapterMBean {
    * @throws AdminException
    */
   public void resetDefaultDMQ() throws ConnectException, AdminException;
-  
+
   /**
    * Unset the default dead message queue for the given server.
    * 
@@ -178,8 +178,8 @@ public interface JoramAdapterMBean {
    * @throws AdminException
    */
   public void resetDefaultDMQ(int serverId) throws ConnectException, AdminException;
-  
-  
+
+
   /**
    * Returns the default threshold of the Joram server.
    * 
@@ -213,7 +213,7 @@ public interface JoramAdapterMBean {
    * @see AdminModule#setDefaultThreshold(int, int)
    */
   public void setDefaultThreshold(int serverId, int threshold) throws ConnectException, AdminException;
-  
+
   /**
    * Returns the list of all destinations that exist on the local server.
    * This method creates and registers MBeans for all the destinations of
@@ -273,25 +273,6 @@ public interface JoramAdapterMBean {
    */
   public String createQueue(int serverId, String name) throws AdminException, ConnectException;
 
-  /**
-   * First tries to retrieve a queue destination on the underlying JORAM server first
-   * using JNDI then the Joram's internal name service. Finally, if the destination does
-   * not exist it is created. Anyway at the end of this method the destination is bound
-   * in the JNDI repository.
-   *
-   * @param serverId   The identifier of the server where deploying the queue.
-   * @param name       The name of the queue.
-   * @param className  The queue class name.
-   * @param prop       The queue properties.
-   *
-   * @exception AdminException   If the creation fails.
-   * @exception ConnectException if the connection is closed or broken
-   */
-  public String createQueue(int serverId,
-                                 String name,
-                                 String className,
-                                 Properties prop) throws ConnectException, AdminException;
-  
 
   /**
    * Creates or retrieves a topic destination on the underlying JORAM server,
@@ -320,23 +301,6 @@ public interface JoramAdapterMBean {
    */
   public String createTopic(int serverId, String name) throws AdminException, ConnectException;
 
-  /**
-   * Creates or retrieves a topic destination on the underlying JORAM server,
-   * (re)binds the corresponding <code>Topic</code> instance.
-   *
-   * @param serverId   The identifier of the server where deploying the topic.
-   * @param name       The name of the topic.
-   * @param className  The topic class name.
-   * @param prop       The topic properties.
-   *
-   * @exception AdminException   If the creation fails.
-   * @exception ConnectException if the connection is closed or broken
-   */
-  public String createTopic(int serverId,
-                                 String name,
-                                 String className,
-                                 Properties prop) throws ConnectException, AdminException;
-
 
   /**
    * Remove a destination specified by its JNDI name on the underlying
@@ -346,7 +310,6 @@ public interface JoramAdapterMBean {
    */
   public void removeDestination(String name) throws AdminException;
 
-  
   /**
    * Returns the list of all users that exist on the local server.
    * This method creates and registers MBeans for all the users of
@@ -377,7 +340,6 @@ public interface JoramAdapterMBean {
    * @exception AdminException    If the request fails.
    */
   public String[] getUsers(int serverId) throws ConnectException, AdminException;
-  
 
   /**
    * Creates or retrieves a user on the underlying JORAM server.
@@ -438,10 +400,9 @@ public interface JoramAdapterMBean {
    * @exception ConnectException  If the connection fails.
    */
   public String createUser(String name, String password,
-                         int serverId,
-                         String identityClass) throws ConnectException, AdminException;
-  
-  
+                           int serverId,
+                           String identityClass) throws ConnectException, AdminException;
+
   /**
    * Creates a non managed connection factory and binds it to JNDI.
    * 
@@ -520,7 +481,7 @@ public interface JoramAdapterMBean {
    * @see #getServers(String)
    */
   public String[] getServersNames() throws ConnectException, AdminException;
-  
+
   /**
    * Returns the current servers configuration (a3servers.xml).
    *
