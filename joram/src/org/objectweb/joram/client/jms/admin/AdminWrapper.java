@@ -719,8 +719,6 @@ public class AdminWrapper {
     if (AdminModule.wrapper != this)
       queue.setWrapper(this);
 
-    queue.registerMBean("joramClient");
-
     return queue;
   }
 
@@ -782,8 +780,6 @@ public class AdminWrapper {
     if (AdminModule.wrapper != this)
       topic.setWrapper(this);
 
-    topic.registerMBean("joramClient");
-
     return topic;
   }
 
@@ -801,6 +797,8 @@ public class AdminWrapper {
    *
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException    If the request fails.
+   * 
+   * @deprecated No longer needed, any queue can be used as DMQ.
    */
   public DeadMQueue createDeadMQueue(int serverId, String name) throws ConnectException, AdminException {
     CreateDestinationRequest cdr = new CreateDestinationRequest(serverId,
@@ -814,8 +812,6 @@ public class AdminWrapper {
     
     if (AdminModule.wrapper != this)
       dmq.setWrapper(this);
-
-    dmq.registerMBean("joramClient");
 
     return dmq;
   }
@@ -939,8 +935,6 @@ public class AdminWrapper {
     
     if (AdminModule.wrapper != this)
       user.setWrapper(this);
-
-    user.registerMBean("joramClient");
 
     return user;
   }
