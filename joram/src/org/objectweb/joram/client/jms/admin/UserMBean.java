@@ -23,7 +23,6 @@
 package org.objectweb.joram.client.jms.admin;
 
 import java.net.ConnectException;
-import java.util.List;
 import java.util.Properties;
 
 import javax.jms.JMSException;
@@ -75,9 +74,6 @@ public interface UserMBean {
   /**
    * Returns the subscriptions owned by a user.
    */
-  public List getSubscriptionList() 
-    throws ConnectException, AdminException;
-
   public Subscription[] getSubscriptions()
     throws AdminException, ConnectException;
 
