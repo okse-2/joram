@@ -165,19 +165,6 @@ public abstract class Destination extends AdministeredObject implements javax.jm
   }
 
   /**
-   * Returns a String image of the queue.
-   *
-   * @return A provider-specific identity values for this queue.
-   */
-  public String toString() {
-    StringBuffer strbuf = new StringBuffer();
-    strbuf.append(type).append(agentId);
-    if (adminName != null)
-      strbuf.append('(').append(adminName).append(')');
-    return strbuf.toString();
-  }
-
-  /**
    * Administration wrapper used to perform administration stuff.
    * <p>
    * It is defined through AdminModule element, it is closed at the end of
@@ -385,12 +372,16 @@ public abstract class Destination extends AdministeredObject implements javax.jm
   public String registerMBean(String base) {
     if (MXWrapper.mxserver == null) return null;
 
+    String str = agentId.substring(agentId.indexOf('.') +1, agentId.lastIndexOf('.'));
+    System.out.println(str);
+    int sid = Integer.parseInt(str);
+    
     StringBuffer buf = new StringBuffer();
     buf.append(base);
     if (isQueue())
-      buf.append(":type=Queue,name=");
+      buf.append(":type=Queue,location=server#").append(sid).append(",name=");
     else
-      buf.append(":type=Topic,name=");
+      buf.append(":type=Topic,location=server#").append(sid).append(",name=");
     buf.append(getAdminName()).append('[').append(getName()).append(']');
     JMXBeanName = buf.toString();
     
