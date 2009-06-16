@@ -38,9 +38,7 @@ import java.io.Serializable;
  * class.
  */
 final class AgentIdStamp implements Serializable {
-  /**
-   * 
-   */
+  /** Define serialVersionUID for interoperability. */
   private static final long serialVersionUID = 1L;
 
   /** Static reference to local <code>AgentIdStamp</code> object. */
@@ -158,9 +156,7 @@ final class AgentIdStamp implements Serializable {
  * @see AgentIdStamp
  */
 public final class AgentId implements Serializable {
-  /*
-   * 
-   */
+  /** Define serialVersionUID for interoperability. */
   static final long serialVersionUID = 1L;
 
   //  Declares all fields transient in order to avoid useless
@@ -399,7 +395,7 @@ public final class AgentId implements Serializable {
    * @return	The <code>AgentId</code> object represented by the argument.
    */
   public static final AgentId fromString(String str) {
-    if (str == null) return null;
+    if ((str == null) || (str.length() == 0)) return null;
     if (str.charAt(0) != '#')
       throw new IllegalArgumentException(str + ": bad id");
 
