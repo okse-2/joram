@@ -372,17 +372,14 @@ public abstract class Destination extends AdministeredObject implements javax.jm
   public String registerMBean(String base) {
     if (MXWrapper.mxserver == null) return null;
 
-    String str = agentId.substring(agentId.indexOf('.') +1, agentId.lastIndexOf('.'));
-    System.out.println(str);
-    int sid = Integer.parseInt(str);
-    
+    int sid = Integer.parseInt(agentId.substring(agentId.indexOf('.') +1, agentId.lastIndexOf('.')));
     StringBuffer buf = new StringBuffer();
     buf.append(base);
     if (isQueue())
-      buf.append(":type=Queue,location=server#").append(sid).append(",name=");
+      buf.append(":type=Queue,location=server#");
     else
-      buf.append(":type=Topic,location=server#").append(sid).append(",name=");
-    buf.append(getAdminName()).append('[').append(getName()).append(']');
+      buf.append(":type=Topic,location=server#");
+    buf.append(sid).append(",name=").append(getAdminName()).append('[').append(getName()).append(']');
     JMXBeanName = buf.toString();
     
     try {
