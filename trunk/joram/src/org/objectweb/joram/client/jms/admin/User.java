@@ -244,9 +244,10 @@ public class User extends AdministeredObject implements UserMBean {
   public String registerMBean(String base) {
     if (MXWrapper.mxserver == null) return null;
 
+    int sid = Integer.parseInt(proxyId.substring(proxyId.indexOf('.') +1, proxyId.lastIndexOf('.')));
     StringBuffer buf = new StringBuffer();
     buf.append(base);
-    buf.append(":type=User,name=").append(getName()).append('[').append(getProxyId()).append(']');
+    buf.append(":type=User,location=server#").append(sid).append(",name=").append(getName()).append('[').append(getProxyId()).append(']');
     JMXBeanName = buf.toString();
     
     try {
