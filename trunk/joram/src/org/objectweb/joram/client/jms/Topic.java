@@ -61,6 +61,19 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
   }
 
   /**
+   * Returns a String image of the queue.
+   *
+   * @return A provider-specific identity values for this queue.
+   */
+  public String toString() {
+    StringBuffer strbuf = new StringBuffer();
+    strbuf.append("Topic").append(agentId);
+    if (adminName != null)
+      strbuf.append('(').append(adminName).append(')');
+    return strbuf.toString();
+  }
+
+  /**
    * Gets the The Joram's internal unique identifier of this topic.
    * API method.
    *
