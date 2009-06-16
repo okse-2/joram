@@ -1,4 +1,8 @@
 +==============================================================================
+| 2009/06/15 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Improved JMX monitoring for mail destinations.
++==============================================================================
 | 2009/06/05 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Admin actions with a wrong user don't hang anymore and an understandable
