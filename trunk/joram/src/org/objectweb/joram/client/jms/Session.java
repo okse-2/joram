@@ -895,14 +895,17 @@ public class Session implements javax.jms.Session {
   }
 
   /**
+   * Creates a QueueBrowser object to peek at the messages on the specified queue using a message selector.
    * API method
-   *
-   * @exception IllegalStateException  If the session is closed.
+   * 
+   * @param queue     the queue to browse
+   * @param selector  the expression allowing to filter messages 
+   * 
+   * @exception IllegalStateException       if the session is closed.
+   * @exception InvalidDestinationException if an invalid destination is specified.
+   * @exception InvalidSelectorException    if the message selector is invalid.
    */
-  public synchronized javax.jms.QueueBrowser
-      createBrowser(javax.jms.Queue queue, 
-                    String selector)
-    throws JMSException {
+   public synchronized javax.jms.QueueBrowser createBrowser(javax.jms.Queue queue, String selector) throws JMSException {
     checkClosed();
     checkThreadOfControl();
     QueueBrowser qb = new QueueBrowser(this, (Queue) queue, selector);
@@ -911,13 +914,15 @@ public class Session implements javax.jms.Session {
   }
 
   /**
+   * Creates a QueueBrowser object to peek at the messages on the specified queue.
    * API method
    *
-   * @exception IllegalStateException  If the session is closed.
+   * @param queue     the queue to browse
+   * 
+   * @exception IllegalStateException       if the session is closed.
+   * @exception InvalidDestinationException if an invalid destination is specified.
    */
-  public synchronized javax.jms.QueueBrowser 
-      createBrowser(javax.jms.Queue queue)
-    throws JMSException {
+  public synchronized javax.jms.QueueBrowser createBrowser(javax.jms.Queue queue) throws JMSException {
     checkClosed();
     checkThreadOfControl();
     QueueBrowser qb =  new QueueBrowser(this, (Queue) queue, null);
@@ -929,42 +934,39 @@ public class Session implements javax.jms.Session {
    * Creates a MessageProducer to send messages to the specified destination.
    * API method.
    *
-   * @exception IllegalStateException  If the session is closed or if the 
-   *              connection is broken.
+   * @param dest  the Destination to send to, or null if this is a producer which does not have
+   *              a specified destination.
+   *              
+   * @exception InvalidDestinationException if an invalid destination is specified.
+   * @exception IllegalStateException  If the session is closed or if the connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
    */
-  public synchronized javax.jms.MessageProducer createProducer(
-    javax.jms.Destination dest)
-    throws JMSException {
+  public synchronized javax.jms.MessageProducer createProducer(javax.jms.Destination dest) throws JMSException {
     checkClosed();
     checkThreadOfControl();
-    MessageProducer mp = new MessageProducer(
-      this, 
-      (Destination) dest);
+    MessageProducer mp = new MessageProducer(this, (Destination) dest);
     addProducer(mp);
     return mp;
   }
   
   /**
-   * Creates a MessageConsumer for the specified destination using a
-   * message selector.
+   * Creates a MessageConsumer for the specified destination using a message selector.
    * API method.
+   * 
+   * @param dest  the Destination to send to, or null if this is a producer which does not have
+   *              a specified destination.
    *
+   * @exception InvalidDestinationException if an invalid destination is specified.
    * @exception IllegalStateException  If the session is closed or if the
    *              connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
    */
-  public synchronized javax.jms.MessageConsumer
-      createConsumer(javax.jms.Destination dest, 
-                     String selector,
-                     boolean noLocal) 
-    throws JMSException {
+  public synchronized javax.jms.MessageConsumer createConsumer(javax.jms.Destination dest,
+                                                               String selector,
+                                                               boolean noLocal) throws JMSException {
     checkClosed();
     checkThreadOfControl();
-    MessageConsumer mc = new MessageConsumer(
-      this, (Destination) dest, 
-      selector, null,
-      noLocal);
+    MessageConsumer mc = new MessageConsumer(this, (Destination) dest, selector, null, noLocal);
     addConsumer(mc);
     return mc;
   }
@@ -974,18 +976,20 @@ public class Session implements javax.jms.Session {
    * message selector.
    * API method.
    *
+   * @param dest      the Destination to send to, or null if this is a producer which does not have
+   *                  a specified destination.
+   * @param selector  The selector allowing to filter messages.
+   *
+   * @exception InvalidDestinationException if an invalid destination is specified.
    * @exception IllegalStateException  If the session is closed or if the
    *              connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
    */
-  public synchronized javax.jms.MessageConsumer
-      createConsumer(javax.jms.Destination dest, 
-                     String selector)
-    throws JMSException {
+  public synchronized javax.jms.MessageConsumer createConsumer(javax.jms.Destination dest, 
+                                                               String selector) throws JMSException {
     checkClosed();
     checkThreadOfControl();
-    MessageConsumer mc = new MessageConsumer(
-      this, (Destination) dest, selector);
+    MessageConsumer mc = new MessageConsumer(this, (Destination) dest, selector);
     addConsumer(mc);
     return mc;
   }
@@ -994,68 +998,59 @@ public class Session implements javax.jms.Session {
    * Creates a MessageConsumer for the specified destination.
    * API method.
    *
+   * @exception InvalidDestinationException if an invalid destination is specified.
    * @exception IllegalStateException  If the session is closed or if the
    *              connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
    */
-  public synchronized javax.jms.MessageConsumer 
-      createConsumer(javax.jms.Destination dest)
-    throws JMSException {
+  public synchronized javax.jms.MessageConsumer createConsumer(javax.jms.Destination dest) throws JMSException {
     checkClosed();
     checkThreadOfControl();
-    MessageConsumer mc = new MessageConsumer(
-      this, (Destination) dest, null);
+    MessageConsumer mc = new MessageConsumer(this, (Destination) dest, null);
     addConsumer(mc);
     return mc;
   }
 
   /**
+   * Creates or retrieves a durable subscription with the specified name.
    * API method.
    *
+   * @exception InvalidDestinationException if an invalid destination is specified.
    * @exception IllegalStateException  If the session is closed or if the 
    *              connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
    */
-  public synchronized javax.jms.TopicSubscriber
-      createDurableSubscriber(javax.jms.Topic topic, 
-                              String name,
-                              String selector,
-                              boolean noLocal) 
-    throws JMSException {
+  public synchronized javax.jms.TopicSubscriber createDurableSubscriber(javax.jms.Topic topic,
+                                                                        String name,
+                                                                        String selector,
+                                                                        boolean noLocal) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, 
-        "Session.createDurableSubscriber(" + 
-        topic + ',' + name + ',' + 
-        selector + ',' + noLocal + ')');
+      logger.log(BasicLevel.DEBUG, 
+                 "Session.createDurableSubscriber(" + topic + ',' + name + ',' + selector + ',' + noLocal + ')');
     checkClosed();
     checkThreadOfControl();
-    TopicSubscriber ts = new TopicSubscriber(
-      this, (Topic) topic, name, selector, noLocal);
+    TopicSubscriber ts = new TopicSubscriber(this, (Topic) topic, name, selector, noLocal);
     addConsumer(ts);
     return ts;
   }
 
   /**
+   * Creates or retrieves a durable subscription with the specified name.
    * API method.
    *
+   * @exception InvalidDestinationException if an invalid destination is specified.
    * @exception IllegalStateException  If the session is closed or if the 
    *              connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
    */
-  public synchronized javax.jms.TopicSubscriber
-      createDurableSubscriber(javax.jms.Topic topic, 
-                              String name)
-    throws JMSException {
+  public synchronized javax.jms.TopicSubscriber createDurableSubscriber(javax.jms.Topic topic, 
+                                                                        String name) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, 
-        "Session.createDurableSubscriber(" + 
-        topic + ',' + name + ')');
+      logger.log(BasicLevel.DEBUG, 
+                 "Session.createDurableSubscriber(" + topic + ',' + name + ')');
     checkClosed();
     checkThreadOfControl();
-    TopicSubscriber ts = new TopicSubscriber(
-      this, (Topic) topic, name, null, false);
+    TopicSubscriber ts = new TopicSubscriber(this, (Topic) topic, name, null, false);
     addConsumer(ts);
     return ts;
   }
