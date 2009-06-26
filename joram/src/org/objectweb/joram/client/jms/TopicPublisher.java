@@ -29,9 +29,7 @@ import javax.jms.JMSException;
 /**
  * Implements the <code>javax.jms.TopicPublisher</code> interface.
  */
-public class TopicPublisher extends MessageProducer
-                            implements javax.jms.TopicPublisher
-{
+public class TopicPublisher extends MessageProducer implements javax.jms.TopicPublisher {
   /**
    * Constructs a publisher.
    *
@@ -46,8 +44,7 @@ public class TopicPublisher extends MessageProducer
   }
 
   /** Returns a string view of this receiver. */
-  public String toString()
-  {
+  public String toString() {
     return "TopicPub:" + sess.getId();
   }
 
@@ -56,8 +53,7 @@ public class TopicPublisher extends MessageProducer
    *
    * @exception IllegalStateException  If the publisher is closed.
    */
-  public javax.jms.Topic getTopic() throws JMSException
-  {
+  public javax.jms.Topic getTopic() throws JMSException {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed publisher.");
 
@@ -71,9 +67,10 @@ public class TopicPublisher extends MessageProducer
    *              connection is broken.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public void publish(javax.jms.Message message, int deliveryMode,
-                      int priority, long timeToLive) throws JMSException
-  {
+  public void publish(javax.jms.Message message,
+                      int deliveryMode,
+                      int priority,
+                      long timeToLive) throws JMSException {
     super.send(message, deliveryMode, priority, timeToLive);
   }
     
@@ -84,8 +81,7 @@ public class TopicPublisher extends MessageProducer
    *              connection is broken.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public void publish(javax.jms.Message message) throws JMSException
-  {
+  public void publish(javax.jms.Message message) throws JMSException {
     super.send(message);
   }
 
@@ -96,9 +92,7 @@ public class TopicPublisher extends MessageProducer
    *              connection is broken.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public void publish(javax.jms.Topic topic, javax.jms.Message message)
-            throws JMSException
-  {
+  public void publish(javax.jms.Topic topic, javax.jms.Message message) throws JMSException {
     super.send(topic, message);
   }
 
@@ -111,8 +105,7 @@ public class TopicPublisher extends MessageProducer
    */
   public void publish(javax.jms.Topic topic, javax.jms.Message message,
                       int deliveryMode, int priority,
-                      long timeToLive) throws JMSException
-  {
+                      long timeToLive) throws JMSException {
     super.send(topic, message, deliveryMode, priority, timeToLive);
   }
 }

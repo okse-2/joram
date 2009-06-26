@@ -30,9 +30,7 @@ import javax.jms.JMSException;
 /**
  * Implements the <code>javax.jms.QueueReceiver</code> interface.
  */
-public class QueueReceiver extends MessageConsumer
-                           implements javax.jms.QueueReceiver
-{
+public class QueueReceiver extends MessageConsumer implements javax.jms.QueueReceiver {
   /**
    * Constructs a receiver.
    *
@@ -49,8 +47,7 @@ public class QueueReceiver extends MessageConsumer
   }
 
   /** Returns a string view of this receiver. */
-  public String toString()
-  {
+  public String toString() {
     return "QueueRec:" + sess.getId();
   }
 
@@ -59,8 +56,7 @@ public class QueueReceiver extends MessageConsumer
    *
    * @exception IllegalStateException  If the receiver is closed.
    */
-  public javax.jms.Queue getQueue() throws JMSException
-  {
+  public javax.jms.Queue getQueue() throws JMSException {
     checkClosed();
     return (javax.jms.Queue) dest;
   }
