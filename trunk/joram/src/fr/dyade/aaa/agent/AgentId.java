@@ -397,7 +397,7 @@ public final class AgentId implements Serializable {
   public static final AgentId fromString(String str) {
     if ((str == null) || (str.length() == 0)) return null;
     if (str.charAt(0) != '#')
-      throw new IllegalArgumentException(str + ": bad id");
+      throw new IllegalArgumentException(str + ": bad agent identifier");
 
     try {
       int start = 1;
