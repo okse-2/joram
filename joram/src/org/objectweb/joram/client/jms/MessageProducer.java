@@ -24,6 +24,7 @@
 package org.objectweb.joram.client.jms;
 
 import javax.jms.IllegalStateException;
+import javax.jms.InvalidDestinationException;
 import javax.jms.MessageFormatException;
 import javax.jms.JMSException;
 
@@ -88,16 +89,17 @@ public class MessageProducer implements javax.jms.MessageProducer {
    * @param sess  The session the producer belongs to.
    * @param dest  The destination the producer sends messages to.
    *
+   * @exception InvalidDestinationException if an invalid destination is specified.
    * @exception IllegalStateException  If the connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
    */
-  MessageProducer(Session sess, 
-                  Destination dest) 
-                  throws JMSException {
+  MessageProducer(Session sess, Destination dest) throws JMSException {
     this.sess = sess;
     this.dest = dest;
     if (dest == null)
       identified = false;
+    else
+      dest.check();
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, this + ": created.");
@@ -108,8 +110,7 @@ public class MessageProducer implements javax.jms.MessageProducer {
    *
    * @exception IllegalStateException  If the producer is closed.
    */
-  public synchronized void setDisableMessageID(boolean value) throws JMSException
-  {
+  public synchronized void setDisableMessageID(boolean value) throws JMSException {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
   }
@@ -121,8 +122,7 @@ public class MessageProducer implements javax.jms.MessageProducer {
    * @exception IllegalStateException  If the producer is closed.
    * @exception JMSException  When setting an invalid delivery mode.
    */
-  public synchronized void setDeliveryMode(int deliveryMode) throws JMSException
-  {
+  public synchronized void setDeliveryMode(int deliveryMode) throws JMSException {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
 

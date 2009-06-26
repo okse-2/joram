@@ -143,6 +143,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
    * @param noLocal  <code>true</code> for a subscriber not wishing to consume
    *          messages produced by its connection.
    *
+   * @exception InvalidDestinationException if an invalid destination is specified.
    * @exception InvalidSelectorException  If the selector syntax is invalid.
    * @exception IllegalStateException  If the connection is broken, or if the
    *                                   subscription is durable and already
@@ -160,7 +161,8 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
     
     if (dest == null)
       throw new InvalidDestinationException("Invalid null destination.");
-
+    dest.check();
+    
     if (dest instanceof TemporaryQueue) {
       Connection tempQCnx = ((TemporaryQueue) dest).getCnx();
 
@@ -219,6 +221,7 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
    * @param dest  The destination the consumer gets messages from.
    * @param selector  Selector for filtering messages.
    *
+   * @exception InvalidDestinationException if an invalid destination is specified.
    * @exception InvalidSelectorException  If the selector syntax is invalid.
    * @exception IllegalStateException  If the connection is broken, or if the
    *                                   subscription is durable and already
