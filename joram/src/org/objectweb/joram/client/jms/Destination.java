@@ -32,6 +32,7 @@ import java.util.ListIterator;
 import java.util.Properties;
 import java.util.Vector;
 
+import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
 import javax.naming.NamingException;
 import javax.naming.Reference;
@@ -153,6 +154,20 @@ public abstract class Destination extends AdministeredObject implements javax.jm
     return type;
   }
 
+  /**
+   * Check the destination destination.
+   * 
+   * @exception InvalidDestinationException if an invalid destination is specified.
+   */
+  public void check() throws InvalidDestinationException {
+    if (agentId == null)
+      throw new InvalidDestinationException("Undefined (null) destination identifier.");
+    
+    if (agentId.matches("#\\d+\\.\\d+\\.\\d+")) return;
+    
+    throw new InvalidDestinationException("Bad destination identifier:" + agentId);
+  }
+  
   /**
    * Returns <code>true</code> if the parameter object is a Joram destination
    * wrapping the same agent identifier.
