@@ -30,9 +30,7 @@ import javax.jms.IllegalStateException;
 /**
  * Implements the <code>javax.jms.QueueSender</code> interface.
  */
-public class QueueSender extends MessageProducer
-                         implements javax.jms.QueueSender
-{
+public class QueueSender extends MessageProducer implements javax.jms.QueueSender {
   /**
    * Constructs a sender.
    *
@@ -47,8 +45,7 @@ public class QueueSender extends MessageProducer
   }
 
   /** Returns a string view of this receiver. */
-  public String toString()
-  {
+  public String toString() {
     return "QueueSend:" + sess.getId();
   }
 
@@ -57,8 +54,7 @@ public class QueueSender extends MessageProducer
    *
    * @exception IllegalStateException  If the sender is closed.
    */
-  public javax.jms.Queue getQueue() throws JMSException
-  {
+  public javax.jms.Queue getQueue() throws JMSException {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed sender.");
 
@@ -76,9 +72,7 @@ public class QueueSender extends MessageProducer
    *              connection is broken.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public void send(javax.jms.Queue queue, javax.jms.Message message)
-            throws JMSException
-  {
+  public void send(javax.jms.Queue queue, javax.jms.Message message) throws JMSException {
     super.send(queue, message);
   }
 
@@ -93,10 +87,10 @@ public class QueueSender extends MessageProducer
    *              connection is broken.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public void send(javax.jms.Queue queue, javax.jms.Message message,
+  public void send(javax.jms.Queue queue,
+                   javax.jms.Message message,
                    int deliveryMode, int priority,
-                   long timeToLive) throws JMSException
-  {
+                   long timeToLive) throws JMSException {
     super.send(queue, message, deliveryMode, priority, timeToLive);
   }
 }
