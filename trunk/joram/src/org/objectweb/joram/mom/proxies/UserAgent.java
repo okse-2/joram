@@ -55,7 +55,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
 /** 
  * Class of a user proxy agent.
  */
-public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
+public final class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
@@ -121,7 +121,7 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
     try {
       MXWrapper.registerMBean(proxyImpl, "Joram#"+AgentServer.getServerId(), getMBeanName());
     } catch (Exception exc) {
-      logger.log(BasicLevel.ERROR, this + " jmx failed", exc);
+      logger.log(BasicLevel.WARN, this + " jmx failed", exc);
     }
   }
 
@@ -131,14 +131,13 @@ public class UserAgent extends Agent implements BagSerializer, ProxyAgentItf {
       MXWrapper.unregisterMBean("Joram#"+AgentServer.getServerId(), getMBeanName());
     } catch (Exception exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "", exc);
+        logger.log(BasicLevel.DEBUG, this + " jmx failed", exc);
     }
     super.agentFinalize(lastTime);
   }
 
   private String getMBeanName() {
-    return new StringBuffer().append("type=User").append(",name=").append(
-                                                                          (name == nullName) ? getId().toString() : name).toString();
+    return new StringBuffer().append("type=User").append(",name=").append((name == nullName) ? getId().toString() : name).toString();
   }
 
   /**
