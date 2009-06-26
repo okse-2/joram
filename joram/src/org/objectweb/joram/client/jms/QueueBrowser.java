@@ -66,6 +66,7 @@ public class QueueBrowser implements javax.jms.QueueBrowser {
    * @param queue  The queue the browser browses.
    * @param selector  The selector for filtering messages.
    *
+   * @exception InvalidDestinationException if an invalid destination is specified.
    * @exception InvalidSelectorException  If the selector syntax is invalid.
    * @exception IllegalStateException  If the connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
@@ -73,6 +74,7 @@ public class QueueBrowser implements javax.jms.QueueBrowser {
   QueueBrowser(Session sess, Queue queue, String selector) throws JMSException {
     if (queue == null)
       throw new InvalidDestinationException("Invalid queue: " + queue);
+    queue.check();
 
     try {
       ClientSelector.checks(selector);
