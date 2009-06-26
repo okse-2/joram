@@ -398,14 +398,12 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * A <code>MomExceptionReply</code> wrapping a <tt>DestinationException</tt>
    * might be sent back if a target destination can't be identified.
    */
-  public void reactToClientRequest(int key, AbstractJmsRequest request)
-  {
+  public void reactToClientRequest(int key, AbstractJmsRequest request) {
     try {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG,
                    "--- " + this + " got " + request.getClass().getName() +
-                   " with id: " + request.getRequestId() +
-                   " through activeCtx: " + key);
+                   " with id: " + request.getRequestId() + " through activeCtx: " + key);      
 
       if (request instanceof ProducerMessages)
         reactToClientRequest(key, (ProducerMessages) request);
@@ -420,16 +418,13 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       else {
         doReact(key, request);   
       }
-    }
-    // Catching an exception due to an invalid agent identifier to
-    // forward the request to:
-    catch (IllegalArgumentException iE) {
-      DestinationException dE =
-        new DestinationException("Proxy could not forward the request to"
-                                 + " incorrectly identified destination: "
-                                 + iE);
-
+    } catch (IllegalArgumentException iE) {
+      // Catching an exception due to an invalid agent identifier to
+      // forward the request to:
+      DestinationException dE = new DestinationException("Incorrect destination identifier: " + iE);
       doReply(key, new MomExceptionReply(request.getRequestId(), dE));
+    } catch (RequestException exc) {
+      doReply(key, new MomExceptionReply(request.getRequestId(), exc));
     }
   }
 
@@ -438,20 +433,20 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * <code>ProducerMessages</code> request as a <code>ClientMessages</code>
    * MOM request directly to a destination, and acknowledges them by sending
    * a <code>ServerReply</code> back.
+   * 
+   * @throws RequestException The destination id is undefined
    */
-  private void reactToClientRequest(int key, ProducerMessages req) {
+  private void reactToClientRequest(int key, ProducerMessages req) throws RequestException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
                  "ProxyImpl.reactToClientRequest(" +  key + ',' + req + ')');
 
     AgentId destId = AgentId.fromString(req.getTarget());
-    ClientMessages not = new ClientMessages(
-      key,
-      req.getRequestId(),
-      req.getMessages());
+    if (destId == null)
+      throw new RequestException("Request to an undefined destination (null).");
 
+    ClientMessages not = new ClientMessages(key, req.getRequestId(), req.getMessages());
     setDmq(not);
-    
     
     if (destId.getTo() == proxyAgent.getId().getTo()) {
       if (logger.isLoggable(BasicLevel.DEBUG))
@@ -485,26 +480,25 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * Either forwards the <code>ConsumerReceiveRequest</code> request as a
    * <code>ReceiveRequest</code> directly to the target queue, or wraps it
    * and sends it to the proxy if destinated to a subscription.
+   * 
+   * @throws RequestException Undefined (null) destination
    */
-  private void reactToClientRequest(int key, ConsumerReceiveRequest req)
-  {
+  private void reactToClientRequest(int key, ConsumerReceiveRequest req) throws RequestException {    
     if (req.getQueueMode()) {
-      ReceiveRequest not = new ReceiveRequest(
-        key,
-        req.getRequestId(),
-        req.getSelector(),
-        req.getTimeToLive(),
-        req.getReceiveAck(),
-        null,
-        1);
-      AgentId to = AgentId.fromString(req.getTarget());
-      if (to.getTo() == proxyAgent.getId().getTo()) {
+      ReceiveRequest not = new ReceiveRequest(key, req.getRequestId(),
+                                              req.getSelector(), req.getTimeToLive(), req.getReceiveAck(),
+                                              null, 1);
+      AgentId destId = AgentId.fromString(req.getTarget());
+      if (destId == null)
+        throw new RequestException("Request to an undefined destination (null).");
+
+      if (destId.getTo() == proxyAgent.getId().getTo()) {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> local receiving");
         not.setPersistent(false);
-        proxyAgent.sendNot(to, not);
+        proxyAgent.sendNot(destId, not);
       } else {
-        proxyAgent.sendNot(to, not);
+        proxyAgent.sendNot(destId, not);
       }
     } else {
       doReact(key, req);   
@@ -515,11 +509,12 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * Either forwards the <code>ConsumerSetListRequest</code> request as a
    * <code>ReceiveRequest</code> directly to the target queue, or wraps it
    * and sends it to the proxy if destinated to a subscription.
+   * 
+   * @throws RequestException Undefined (null) destination
    */
-  private void reactToClientRequest(int key, ConsumerSetListRequest req) {
+  private void reactToClientRequest(int key, ConsumerSetListRequest req) throws RequestException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-          "ProxyImp.reactToClientRequest(" + key + ',' + req + ')');
+      logger.log(BasicLevel.DEBUG, "ProxyImp.reactToClientRequest(" + key + ',' + req + ')');
     if (req.getQueueMode()) {
       ReceiveRequest not = new ReceiveRequest(key,
                                               req.getRequestId(),
@@ -528,14 +523,17 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
                                               false,
                                               req.getMessageIdsToAck(),
                                               req.getMessageCount());    
-      AgentId to = AgentId.fromString(req.getTarget());
-      if (to.getTo() == proxyAgent.getId().getTo()) {
+      AgentId destId = AgentId.fromString(req.getTarget());
+      if (destId == null)
+        throw new RequestException("Request to an undefined destination (null).");
+
+      if (destId.getTo() == proxyAgent.getId().getTo()) {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> local sending");
         not.setPersistent(false);
-        proxyAgent.sendNot(to, not);
+        proxyAgent.sendNot(destId, not);
       } else {
-        proxyAgent.sendNot(to, not);
+        proxyAgent.sendNot(destId, not);
       }
     }
     else {
@@ -546,13 +544,15 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
   /**
    * Forwards the client's <code>QBrowseRequest</code> request as
    * a <code>BrowseRequest</code> MOM request directly to a destination.
+   * 
+   * @throws RequestException Undefined (null) destination
    */
-  private void reactToClientRequest(int key, QBrowseRequest req)
-  {
-    proxyAgent.sendNot(AgentId.fromString(req.getTarget()),
-                       new BrowseRequest(key,
-                                         req.getRequestId(),
-                                         req.getSelector()));
+  private void reactToClientRequest(int key, QBrowseRequest req) throws RequestException {
+    AgentId destId = AgentId.fromString(req.getTarget());
+    if (destId == null)
+      throw new RequestException("Request to an undefined destination (null).");
+    
+    proxyAgent.sendNot(destId, new BrowseRequest(key, req.getRequestId(), req.getSelector()));
   }
   
   private void reactToClientRequest(int key, JmsRequestGroup request) {
@@ -653,8 +653,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * A <code>JmsExceptReply</code> is sent back to the client when an
    * exception is thrown by the reaction.
    */ 
-  private void doReact(int key, AbstractJmsRequest request)
-  {
+  private void doReact(int key, AbstractJmsRequest request) {
     try {
       // Updating the active context if the request is not a new context
       // request!
@@ -709,13 +708,18 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         doReact(key, (ActivateConsumerRequest) request);
       else if (request instanceof CommitRequest)
         doReact(key, (CommitRequest)request);
-    }
-    catch (MomException mE) {
-      if (logger.isLoggable(BasicLevel.ERROR))
-        logger.log(BasicLevel.ERROR, mE);
+    } catch (MomException mE) {
+      logger.log(BasicLevel.ERROR,
+                 this + " - error during request: " + request, mE);
 
       // Sending the exception to the client:
       doReply(new MomExceptionReply(request.getRequestId(), mE));
+    } catch (Exception exc) {
+      logger.log(BasicLevel.FATAL,
+                 this + " - unexpected error during request: " + request, exc);
+
+      // Sending the exception to the client:
+      doReply(new MomExceptionReply(request.getRequestId(), new MomException(exc.getMessage())));
     }
   }
 
@@ -878,15 +882,21 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
   }
 
   /**
-   * Method implementing the JMS proxy reaction to a
-   * <code>ConsumerSubRequest</code> requesting to subscribe to a topic.
+   * Method implementing the JMS proxy reaction to a <code>ConsumerSubRequest</code>
+   * requesting to subscribe to a topic.
    *
-   * @exception StateException  If activating an already active durable
-   *              subscription.
+   * @exception StateException    If activating an already active durable subscription.
+   * @exception RequestException  If the subscription parameters are not correct.
    */
-  private void doReact(ConsumerSubRequest req) throws StateException {
+  private void doReact(ConsumerSubRequest req) throws StateException, RequestException {
     AgentId topicId = AgentId.fromString(req.getTarget());
     String subName = req.getSubName();
+    
+    if (topicId == null)
+      throw new RequestException("Cannot subscribe to an undefined topic (null).");
+    
+    if (subName == null)
+      throw new RequestException("Unauthorized null subscription name.");
     
     boolean newTopic = ! topicsTable.containsKey(topicId);
     boolean newSub = ! subsTable.containsKey(subName);
