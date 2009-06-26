@@ -25,14 +25,31 @@ package org.objectweb.joram.client.jms.admin;
 import java.net.ConnectException;
 import java.util.Properties;
 
-import org.objectweb.joram.client.jms.Destination;
-
 /**
  * MBean interface for JoramAdmin.
  */
 public interface JoramAdminMBean {
+  /**
+   * Closes the administration connection and unregister the MBean.
+   */
+  public void exit();
+  
+  /**
+   * Specifies how much time a command has to complete before If the command
+   * does not complete within the specified time, it is canceled and an exception
+   * is generated.
+   * 
+   * @param timeOut the maximum time before a command is canceled.
+   * @throws ConnectException A problem occurs during connection.
+   */
   public void setTimeOutToAbortRequest(long timeOut) throws ConnectException;
 
+  /**
+   * Gets the maximum time a command has to complete before it is canceled.
+   * 
+   * @return the maximum time before a command is canceled
+   * @throws ConnectException A problem occurs during connection.
+   */
   public long getTimeOutToAbortRequest() throws ConnectException;
 
   /**
@@ -80,28 +97,6 @@ public interface JoramAdminMBean {
                         String server) throws ConnectException, AdminException;
 
   /**
-   * Adds a server to the platform.
-   *
-   * @param sid       Id of the added server
-   * @param host      Address of the host where the added server is started
-   * @param domain    Name of the domain where the server is added
-   * @param port      Listening port of the server in the specified domain
-   * @param server    Name of the added server
-   * @param services  Names of the service to start within the server
-   * @param args      Services' arguments
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  If the request fails.
-   */
-  public void addServer(int sid,
-                        String host,
-                        String domain,
-                        int port,
-                        String server,
-                        String[] services,
-                        String[] args) throws ConnectException, AdminException;
-
-  /**
    * Removes a server from the platform.
    *
    * @param sid Id of the removed server
@@ -124,8 +119,8 @@ public interface JoramAdminMBean {
    * @exception AdminException  If the request fails.
    */
   public void addDomain(String domain,
-                              int sid,
-                              int port) throws ConnectException, AdminException;
+                        int sid,
+                        int port) throws ConnectException, AdminException;
 
   /**
    * Adds a domain to the platform using a specific network component.
@@ -139,9 +134,9 @@ public interface JoramAdminMBean {
    * @exception AdminException  If the request fails.
    */
   public void addDomain(String domain,
-                              String network,
-                              int sid,
-                              int port) throws ConnectException, AdminException;
+                        String network,
+                        int sid,
+                        int port) throws ConnectException, AdminException;
 
   /**
    * Removes a domain from the platform.
@@ -299,44 +294,185 @@ public interface JoramAdminMBean {
    * @see #getDefaultThreshold(int)
    */
   public int getDefaultThreshold() throws ConnectException, AdminException;
+  
+  /**
+   * Returns the list of all destinations that exist on the local server.
+   * This method creates and registers MBeans for all the destinations of
+   * the selected servers.
+   *
+   * @return  An array containing the object name of all destinations defined
+   *          on the given server or null if none exists.
+   * 
+   * @exception ConnectException  If the connection is closed or broken.
+   * @exception AdminException    Never thrown.
+   * 
+   * @see #getDestinations(int)
+   */
+  public void getDestinations() throws ConnectException, AdminException;
 
-  public Destination[] getDestinations(int serverId) throws ConnectException, AdminException;
+  /**
+   * Returns the list of all destinations that exist on the given server.
+   * This method creates and registers MBeans for all the destinations of
+   * the selected servers.
+   * <p>
+   * The request fails if the target server does not belong to the platform.
+   *
+   * @return  An array containing the object name of all destinations defined
+   *          on the given server or null if none exists.
+   * 
+   * @exception ConnectException  If the connection is closed or broken.
+   * @exception AdminException    Never thrown.
+   * 
+   * @see #getDestinations(int)
+   */
+  public void getDestinations(int serverId) throws ConnectException, AdminException;
 
-  public Destination[] getDestinations() throws ConnectException, AdminException;
+  /**
+   * Creates or retrieves a queue destination on the underlying JORAM server,
+   * (re)binds the corresponding <code>Queue</code> instance.
+   *
+   * @param name       The name of the queue.
+   *
+   * @exception AdminException   If the creation fails.
+   * @exception ConnectException if the connection is closed or broken
+   * 
+   * @see #createQueue(int, String, String, Properties)
+   */
+  public void createQueue(String name) throws AdminException, ConnectException;
 
-  public Destination createQueue(String name) throws ConnectException, AdminException;
+  /**
+   * Creates or retrieves a queue destination on the underlying JORAM server,
+   * (re)binds the corresponding <code>Queue</code> instance.
+   *
+   * @param serverId   The identifier of the server where deploying the queue.
+   * @param name       The name of the queue.
+   *
+   * @exception AdminException   If the creation fails.
+   * @exception ConnectException if the connection is closed or broken
+   * 
+   * @see #createQueue(int, String, String, Properties)
+   */
+  public void createQueue(int serverId, String name) throws AdminException, ConnectException;
 
-  public Destination createQueue(int serverId, String name) throws ConnectException, AdminException;
+  /**
+   * Creates or retrieves a topic destination on the underlying JORAM server,
+   * (re)binds the corresponding <code>Topic</code> instance.
+   *
+   * @param name       The name of the topic.
+   *
+   * @exception AdminException   If the creation fails.
+   * @exception ConnectException if the connection is closed or broken
+   * 
+   * @see #createTopic(int, String, String, Properties)
+   */
+  public void createTopic(String name) throws AdminException, ConnectException;
 
-  public Destination createQueue(int serverId,
-                                 String name,
-                                 String className,
-                                 Properties prop) throws ConnectException, AdminException;
+  /**
+   * Creates or retrieves a topic destination on the underlying JORAM server,
+   * (re)binds the corresponding <code>Topic</code> instance.
+   *
+   * @param serverId   The identifier of the server where deploying the topic.
+   * @param name       The name of the topic.
+   *
+   * @exception AdminException   If the creation fails.
+   * @exception ConnectException if the connection is closed or broken
+   * 
+   * @see #createTopic(int, String, String, Properties)
+   */
+  public void createTopic(int serverId, String name) throws AdminException, ConnectException;
 
-  public Destination createTopic(String name) throws ConnectException, AdminException;
 
-  public Destination createTopic(int serverId, String name) throws ConnectException, AdminException;
+  /**
+   * Returns the list of all users that exist on the local server.
+   * This method creates and registers MBeans for all the users of
+   * the selected servers.
+   *
+   * @return  An array containing the object name of all users defined
+   *          on the given server or null if none exists.
+   * 
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException    Never thrown.
+   * 
+   * @see #getUsers(int)
+   */
+  public void getUsers() throws ConnectException, AdminException;
 
-  public Destination createTopic(int serverId,
-                                 String name,
-                                 String className,
-                                 Properties prop) throws ConnectException, AdminException;
+  /**
+   * Returns the list of all users that exist on a given server.
+   * This method creates and registers MBeans for all the users of
+   * the selected servers.
+   * <p>
+   * The request fails if the target server does not belong to the platform.
+   * 
+   * @param serverId  Unique identifier of the given server.
+   * @return  An array containing the object name of all users defined
+   *          on the given server or null if none exists.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException    If the request fails.
+   */
+  public void getUsers(int serverId) throws ConnectException, AdminException;
+  
+  /**
+   * Creates or retrieves a user on the underlying JORAM server.
+   *
+   * @param name      The login name of the user.
+   * @param password  The password of the user.
+   * @return The object name of created user.
+   * 
+   * @exception AdminException    If the creation fails.
+   * @exception ConnectException  If the connection fails.
+   * 
+   * @see #createUser(String, String, int, String)
+   */
+  public void createUser(String name, String password) throws AdminException, ConnectException;
 
+  /**
+   * Creates or retrieves a user on the underlying JORAM server.
+   *
+   * @param name          The login name of the user.
+   * @param password      The password of the user.
+   * @param identityClass The identity class used for authentication.
+   * @return The object name of created user.
+   * 
+   * @exception AdminException    If the creation fails.
+   * @exception ConnectException  If the connection fails.
+   * 
+   * @see #createUser(String, String, int, String)
+   */
+  public void createUser(String name, String password,
+                         String identityClass) throws AdminException, ConnectException;
 
-  public User[] getUsers(int serverId) throws ConnectException, AdminException;
+  /**
+   * Creates or retrieves a user on the given JORAM server.
+   *
+   * @param name      The login name of the user.
+   * @param password  The password of the user.
+   * @param serverId  The unique identifier of the Joram server.
+   * @return The object name of created user.
+   * 
+   * @exception AdminException    If the creation fails.
+   * @exception ConnectException  If the connection fails.
+   * 
+   * @see #createUser(String, String, int, String)
+   */
+  public void createUser(String name, String password,
+                         int serverId) throws AdminException, ConnectException;
 
-  public User[] getUsers() throws ConnectException, AdminException;
-
-  public User createUser(String name, String password) throws ConnectException, AdminException;
-
-  public User createUser(String name, String password,
-                         int serverId) throws ConnectException, AdminException;
-
-  public User createUser(String name, String password,
+  /**
+   * Creates or retrieves a user on the underlying JORAM server.
+   *
+   * @param name          The login name of the user.
+   * @param password      The password of the user.
+   * @param serverId      The unique identifier of the Joram server.
+   * @param identityClass The identity class used for authentication.
+   * @return The object name of created user.
+   * 
+   * @exception AdminException    If the creation fails.
+   * @exception ConnectException  If the connection fails.
+   */
+  public void createUser(String name, String password,
                          int serverId,
-                         String identityClass) throws ConnectException, AdminException;
-
-  public User createUser(String name, String password,
                          String identityClass) throws ConnectException, AdminException;
 
   /**
