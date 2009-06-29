@@ -155,17 +155,26 @@ public abstract class Destination extends AdministeredObject implements javax.jm
   }
 
   /**
-   * Check the destination destination.
+   * Check the destination identifier.
    * 
-   * @exception InvalidDestinationException if an invalid destination is specified.
+   * @exception InvalidDestinationException if the destination identifier is invalid.
    */
   public void check() throws InvalidDestinationException {
-    if (agentId == null)
+    checkId(agentId);
+  }
+  
+  /**
+   * Check the specified destination identifier.
+   * 
+   * @exception InvalidDestinationException if an invalid destination identifier is specified.
+   */
+  public static void checkId(String id)  throws InvalidDestinationException {
+    if (id == null)
       throw new InvalidDestinationException("Undefined (null) destination identifier.");
     
-    if (agentId.matches("#\\d+\\.\\d+\\.\\d+")) return;
+    if (id.matches("#\\d+\\.\\d+\\.\\d+")) return;
     
-    throw new InvalidDestinationException("Bad destination identifier:" + agentId);
+    throw new InvalidDestinationException("Bad destination identifier:" + id);
   }
   
   /**
@@ -585,49 +594,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
   public void removeWriter(String proxyId) throws ConnectException, AdminException {
     doRequest(new UnsetWriter(proxyId, getName()));
   }
-
-  /**
-   * Administration method setting or unsetting a dead message queue for this
-   * destination.
-   * <p>
-   * The request fails if this destination is deleted server side.
-   *
-   * @param dmq  The dead message queue to be set (<code>null</code> for
-   *             unsetting current DMQ).
-   *
-   * @exception IllegalArgumentException  If the DMQ is not a valid
-   *              JORAM destination.
-   * @exception ConnectException  If the administration connection is closed or broken.
-   * @exception AdminException  If the request fails.
-   */
-  public void setDMQ(DeadMQueue dmq) throws ConnectException, AdminException {
-    if (dmq != null)
-      setDMQId(dmq.getName());
-    else
-      setDMQId(null);
-  }
-
-  /**
-   * Administration method setting or unsetting a dead message queue for this
-   * destination.
-   * <p>
-   * The request fails if this destination is deleted server side.
-   *
-   * @param dmqId  The dead message queue Id to be set (<code>null</code> for
-   *               unsetting current DMQ).
-   *
-   * @exception IllegalArgumentException  If the DMQ is not a valid
-   *              JORAM destination.
-   * @exception ConnectException  If the administration connection is closed or broken.
-   * @exception AdminException  If the request fails.
-   */
-  public void setDMQId(String dmqId) throws ConnectException, AdminException {
-    if (dmqId == null)
-      doRequest(new UnsetDestinationDMQ(getName()));
-    else
-      doRequest(new SetDestinationDMQ(getName(), dmqId));
-  }
-
+  
   /**
    * Monitoring method returning the list of all users that have a reading
    * permission on this destination, or an empty list if no specific readers
@@ -805,15 +772,38 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * @exception ConnectException  If the administration connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public DeadMQueue getDMQ() throws ConnectException, AdminException {
+  public Queue getDMQ() throws ConnectException, AdminException {
     Monitor_GetDMQSettings request = new Monitor_GetDMQSettings(getName());
     Monitor_GetDMQSettingsRep reply = (Monitor_GetDMQSettingsRep) doRequest(request);
 
     if (reply.getDMQName() == null) {
       return null;
     } else {
-      return new DeadMQueue(reply.getDMQName());
+      return new Queue(reply.getDMQName());
     }
+  }
+
+  /**
+   * Administration method setting or unsetting a dead message queue for this
+   * destination.
+   * <p>
+   * The request fails if this destination is deleted server side.
+   *
+   * @param dmq  The dead message queue to be set (<code>null</code> for
+   *             unsetting current DMQ).
+   *
+   * @exception IllegalArgumentException  If the DMQ is not a valid
+   *              JORAM destination.
+   * @exception ConnectException  If the administration connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   * @throws InvalidDestinationException If the specified destination is invalid.
+   */
+  public void setDMQ(Queue dmq) throws ConnectException, AdminException, InvalidDestinationException {
+    dmq.check();
+    if (dmq != null)
+      setDMQId(dmq.getName());
+    else
+      setDMQId(null);
   }
 
   /**
@@ -826,11 +816,34 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * @exception AdminException  If the request fails.
    */
   public String getDMQId() throws ConnectException, AdminException {
-    DeadMQueue dmq = getDMQ();
+    Queue dmq = getDMQ();
     if (dmq != null)
       return dmq.getName();
     else
       return null;
+  }
+
+  /**
+   * Administration method setting or unsetting a dead message queue for this
+   * destination.
+   * <p>
+   * The request fails if this destination is deleted server side.
+   *
+   * @param dmqId  The dead message queue Id to be set (<code>null</code> for
+   *               unsetting current DMQ).
+   *
+   * @exception IllegalArgumentException  If the DMQ is not a valid
+   *              JORAM destination.
+   * @exception ConnectException  If the administration connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   * @throws InvalidDestinationException If the specified destination is invalid.
+   */
+  public void setDMQId(String dmqId) throws ConnectException, AdminException, InvalidDestinationException {
+    checkId(dmqId);
+    if (dmqId == null)
+      doRequest(new UnsetDestinationDMQ(getName()));
+    else
+      doRequest(new SetDestinationDMQ(getName(), dmqId));
   }
 
   public static Destination newInstance(String id,
