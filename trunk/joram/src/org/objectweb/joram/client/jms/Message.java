@@ -885,6 +885,7 @@ public class Message implements javax.jms.Message {
    */
   protected void prepare() throws JMSException {
     momMsg.redelivered = false;
+    momMsg.deliveryCount = 0;
   }
 
   
