@@ -1467,9 +1467,9 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    */
   protected boolean isUndeliverable(Message message) {
     if (threshold != null)
-      return (message.getDeliveryCount() == threshold.intValue());
+      return (message.getDeliveryCount() >= threshold.intValue());
     else if (QueueImpl.defaultThreshold != null)
-      return (message.getDeliveryCount() == QueueImpl.defaultThreshold.intValue());
+      return (message.getDeliveryCount() >= QueueImpl.defaultThreshold.intValue());
     return false;
   }
 
