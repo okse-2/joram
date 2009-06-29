@@ -1,12 +1,48 @@
 +==============================================================================
+| 2009/06/29 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ In order to avoid MOM malfunctioning verify that the destination identifier
+is valid when setting a DMQ.
+ Resets the deliveryCount attribute when sending a message.
+ In the isUndeliverable method of QueueImpl and ProxyImpl now verify that
+the number of delivery attempts is not greater or equals to the threshold
+(previously strict equality).
++==============================================================================
+| 2009/06/16 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Potential bug fix in AgentId.fromString if the incoming string is empty.
+ 1st version of a component (JoramAdminConnect) allowing the administration
+of Joram through a JMX console. It uses JoramAdmin MBean component to handle
+remote servers.
+ Adds toString method in Queue and Topic administered objects (previously
+defined in Destination superclass).
+ Adds location (server unique identifier) in administered objects MBean name.
+ No longer register MBean of administered objects in AdminWrapper (done by
+JoramAdapter or JoramAdmin JMX component).
++==============================================================================
 | 2009/06/15 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Improved JMX monitoring for mail destinations.
 +==============================================================================
+| 2009/06/10 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Enhances messages view from queue and subscription in JMX console.
+ Bug fix: Avoid to see all messages related to any user's subscription.
+ Bug fix: Avoid NPE if default DMQ is reseted (set to null).
++==============================================================================
+| 2009/06/10 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds agent identifier in MBean name (different agents can have the same name).
+ Extends JoramAdapter MBean: getServersIds, getServersNames, etc.
++==============================================================================
+| 2009/06/09 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Javadoc enhancements adn fixes.
++==============================================================================
 | 2009/06/05 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
- Admin actions with a wrong user don't hang anymore and an understandable
-response is returned.
+ Administration interactions with a wrong user don't hang anymore and an
+understandable response is returned.
 ###############################################################################
 # 2009/06/04 | Joram 5.2.4 tag.
 ###############################################################################
