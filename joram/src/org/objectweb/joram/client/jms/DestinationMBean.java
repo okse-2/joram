@@ -27,6 +27,8 @@ import org.objectweb.joram.client.jms.admin.AdminException;
 import java.net.ConnectException;
 import java.util.List;
 import java.util.Hashtable;
+
+import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
 
 public interface DestinationMBean {
@@ -134,7 +136,7 @@ public interface DestinationMBean {
    * Admininistration method setting or unsetting a dead message queue for this
    * destination.
    */
-  public void setDMQId(String dmqId) throws ConnectException, AdminException;
+  public void setDMQId(String dmqId) throws ConnectException, AdminException, InvalidDestinationException;
 
   /**
    * Return a set of statistic values from the destination.
