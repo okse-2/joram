@@ -2075,8 +2075,8 @@ public class Session implements javax.jms.Session {
                          boolean timestampDisabled) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
-                 "Session.send(" + dest + ',' + msg + ',' + deliveryMode + ',' +
-                 priority + ',' + timeToLive + ',' + timestampDisabled + ')');
+                 "Session.send(" + dest + ',' + msg + ',' +
+                 deliveryMode + ',' + priority + ',' + timeToLive + ',' + timestampDisabled + ')');
     
     checkClosed();
     checkThreadOfControl();

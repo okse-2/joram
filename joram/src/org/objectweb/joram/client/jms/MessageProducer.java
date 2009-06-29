@@ -140,8 +140,7 @@ public class MessageProducer implements javax.jms.MessageProducer {
    * @exception IllegalStateException  If the producer is closed.
    * @exception JMSException  When setting an invalid priority.
    */
-  public synchronized void setPriority(int priority) throws JMSException
-  {
+  public synchronized void setPriority(int priority) throws JMSException {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
 
@@ -158,8 +157,7 @@ public class MessageProducer implements javax.jms.MessageProducer {
    *
    * @exception IllegalStateException  If the producer is closed.
    */
-  public synchronized void setTimeToLive(long timeToLive) throws JMSException
-  {
+  public synchronized void setTimeToLive(long timeToLive) throws JMSException {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
 
@@ -171,8 +169,7 @@ public class MessageProducer implements javax.jms.MessageProducer {
    *
    * @exception IllegalStateException  If the producer is closed.
    */
-  public synchronized void setDisableMessageTimestamp(boolean value) throws JMSException
-  {
+  public synchronized void setDisableMessageTimestamp(boolean value) throws JMSException {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
 
@@ -185,8 +182,7 @@ public class MessageProducer implements javax.jms.MessageProducer {
    *
    * @exception IllegalStateException  If the producer is closed.
    */
-  public synchronized javax.jms.Destination getDestination() throws JMSException
-  {
+  public synchronized javax.jms.Destination getDestination() throws JMSException {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
 
@@ -198,8 +194,7 @@ public class MessageProducer implements javax.jms.MessageProducer {
    *
    * @exception IllegalStateException  If the producer is closed.
    */
-  public synchronized boolean getDisableMessageID() throws JMSException
-  {
+  public synchronized boolean getDisableMessageID() throws JMSException {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
 
@@ -212,8 +207,7 @@ public class MessageProducer implements javax.jms.MessageProducer {
    *
    * @exception IllegalStateException  If the producer is closed.
    */
-  public synchronized int getDeliveryMode() throws JMSException
-  {
+  public synchronized int getDeliveryMode() throws JMSException {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
 
@@ -226,8 +220,7 @@ public class MessageProducer implements javax.jms.MessageProducer {
    *
    * @exception IllegalStateException  If the producer is closed.
    */
-  public synchronized int getPriority() throws JMSException
-  {
+  public synchronized int getPriority() throws JMSException {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
 
@@ -241,8 +234,7 @@ public class MessageProducer implements javax.jms.MessageProducer {
    *
    * @exception IllegalStateException  If the producer is closed.
    */
-  public synchronized long getTimeToLive() throws JMSException
-  {
+  public synchronized long getTimeToLive() throws JMSException {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
 
@@ -254,8 +246,7 @@ public class MessageProducer implements javax.jms.MessageProducer {
    *
    * @exception IllegalStateException  If the producer is closed.
    */
-  public synchronized boolean getDisableMessageTimestamp() throws JMSException
-  {
+  public synchronized boolean getDisableMessageTimestamp() throws JMSException {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
 
@@ -271,12 +262,9 @@ public class MessageProducer implements javax.jms.MessageProducer {
    *              connection is broken.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public synchronized void send(javax.jms.Message message) throws JMSException
-  {
+  public synchronized void send(javax.jms.Message message) throws JMSException {
     if (! identified)
-      throw new UnsupportedOperationException("Can't send message to"
-                                              + " an unidentified"
-                                              + " destination.");
+      throw new UnsupportedOperationException("Can't send message to an unidentified destination.");
     // Actually producing it:
     doSend(dest, message, deliveryMode, priority, timeToLive);
   }
@@ -292,12 +280,9 @@ public class MessageProducer implements javax.jms.MessageProducer {
   public synchronized void send(javax.jms.Message message, 
                                 int deliveryMode,
                                 int priority, 
-                                long timeToLive) throws JMSException
-                                {
+                                long timeToLive) throws JMSException {
     if (! identified)
-      throw new UnsupportedOperationException("Can't send message to"
-                                              + " an unidentified"
-                                              + " destination.");
+      throw new UnsupportedOperationException("Can't send message to an unidentified destination.");
     // Actually producing it:
     doSend(dest, message, deliveryMode, priority, timeToLive);
                                 }
@@ -315,17 +300,11 @@ public class MessageProducer implements javax.jms.MessageProducer {
    * @exception JMSException  If the request fails for any other reason.
    */
   public synchronized void send(javax.jms.Destination dest,
-                                javax.jms.Message message) throws JMSException
-                                {
+                                javax.jms.Message message) throws JMSException {
     if (identified)
-      throw new UnsupportedOperationException("An unidentified message"
-                                              + " producer can't use this"
-                                              + " identified message"
-                                              + " producer.");
+      throw new UnsupportedOperationException("An unidentified message producer can't use this identified message producer.");
     if (dest == null)
-      throw new UnsupportedOperationException("Can't send message to"
-                                              + " an unidentified"
-                                              + " destination.");
+      throw new UnsupportedOperationException("Can't send message to an unidentified destination.");
 
     doSend((Destination) dest, message, deliveryMode, priority, timeToLive);
                                 }
@@ -349,14 +328,9 @@ public class MessageProducer implements javax.jms.MessageProducer {
                                 long timeToLive) throws JMSException
                                 {
     if (identified)
-      throw new UnsupportedOperationException("An unidentified message"
-                                              + " producer can't use this"
-                                              + " identified message"
-                                              + " producer.");
+      throw new UnsupportedOperationException("An unidentified message producer can't use this identified message producer.");
     if (dest == null)
-      throw new UnsupportedOperationException("Can't send message to"
-                                              + " an unidentified"
-                                              + " destination.");
+      throw new UnsupportedOperationException("Can't send message to an unidentified destination.");
 
     doSend((Destination) dest, message, deliveryMode, priority, timeToLive);
                                 }
@@ -367,15 +341,13 @@ public class MessageProducer implements javax.jms.MessageProducer {
    *
    * @exception JMSException  Actually never thrown.
    */
-  public synchronized void close() throws JMSException
-  {
+  public synchronized void close() throws JMSException {
     // Ignoring call if producer is already closed:
     if (closed)
       return;
 
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "--- " + this + ": closing...");
+      logger.log(BasicLevel.DEBUG, "--- " + this + ": closing...");
 
     sess.closeProducer(this);
     closed = true;
@@ -398,12 +370,10 @@ public class MessageProducer implements javax.jms.MessageProducer {
                       javax.jms.Message message,
                       int deliveryMode, 
                       int priority,
-                      long timeToLive) 
-  throws JMSException {
+                      long timeToLive) throws JMSException {
     if (closed)
       throw new IllegalStateException("Forbidden call on a closed producer.");
 
-    sess.send(dest, message, deliveryMode, priority, 
-              timeToLive, timestampDisabled);
+    sess.send(dest, message, deliveryMode, priority, timeToLive, timestampDisabled);
   }
 }
