@@ -229,6 +229,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="reconf.test6"/>
   	<antcall target="reconf.test7"/>
   	<antcall target="reconf.test8"/>
+  	<antcall target="reconf.test9"/>
   </target>
 
   <target name="tests.perf"
@@ -283,7 +284,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="noreg.test50"/>
     <antcall target="noreg.test51"/>
     <antcall target="noreg.test56"/>
-    <!-- antcall target="noreg.test57"/ -->
+    <antcall target="noreg.test58"/>
   </target>
 
   <target name="tests.xa"
@@ -361,6 +362,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="dmq.TestDmq5"/>
     <antcall target="dmq.TestDmq6"/>
     <antcall target="dmq.ChainedDMQ"/>
+    <antcall target="dmq.TestDmq7"/>
   </target>
 
   <target name="tests.ttl"
@@ -2152,6 +2154,34 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
+	
+  <target name="reconf.test9" depends="reconf.test9.1,reconf.test9.2"/>
+
+  <target name="reconf.test9.1" depends="init.a3props,compile"
+          description=" --> test reconfiguration server - SimpleNetwork">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="reconf.test9.1"/>
+      <param name="className" value="joram.reconf.ReconfTest9"/>
+      <param name="jndiconf" value="reconf/jndi.properties"/>
+      <param name="a3conf" value="reconf/a3servers3.xml"/>
+    	<param name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="reconf.test9.2" depends="init.a3props,compile"
+          description=" --> test reconfiguration server - PoolNetwork">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="reconf.test9.2"/>
+      <param name="className" value="joram.reconf.ReconfTest9"/>
+      <param name="jndiconf" value="reconf/jndi.properties"/>
+      <param name="a3conf" value="reconf/a3servers3.xml"/>
+    	<param name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
 
 	<!-- end test reconf -->
 
@@ -3628,7 +3658,6 @@ description=" --> launch all exceptionlistener tests">
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
-      <param name="testid" value="noreg.test56"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
@@ -3660,6 +3689,19 @@ description=" --> launch all exceptionlistener tests">
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="testid" value="noreg.test57-2"/>
       <param name="jvmargs" value="-DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef -DDestination=org.objectweb.joram.client.jms.Queue -DMsgSize=256 -DNbMsg=5000"/>
+    </antcall>
+  </target>
+
+  <target name="noreg.test58" depends="init.a3props,compile"
+          description=" --> test creation of a consumer with a null topic id">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.noreg.Test58"/>
+      <param name="testid" value="noreg.test58"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jndiconf" value="noreg/jndi.properties"/>
+      <param name="a3conf" value="noreg/a3servers1.xml"/>
+      <param name="jvmargs" value=""/>
     </antcall>
   </target>
 
@@ -4432,6 +4474,18 @@ description=" --> launch all exceptionlistener tests">
         </java>
       </sequential>
     </parallel>
+  </target>
+  
+  <target name="dmq.TestDmq7" depends="init.a3props,compile"
+          description=" --> test chaining dmqs">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="className" value="joram.dmq.TestDmq7"/>
+      <param name="testid" value="dmq.TestDmq7"/>
+      <param name="a3conf" value="dmq/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
   </target>
   
   <target name="dmq.ChainedDMQ" depends="init.a3props,compile"
