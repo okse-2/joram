@@ -860,9 +860,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    */
   private boolean isUndeliverable(int deliveryAttempts) {
     if (threshold != null)
-      return deliveryAttempts == threshold.intValue();
+      return (deliveryAttempts >= threshold.intValue());
     else if (QueueImpl.getDefaultThreshold() != null)
-      return deliveryAttempts == QueueImpl.getDefaultThreshold().intValue();
+      return (deliveryAttempts >= QueueImpl.getDefaultThreshold().intValue());
     return false;
   }
   
