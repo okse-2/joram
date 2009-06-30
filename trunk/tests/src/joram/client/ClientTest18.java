@@ -198,7 +198,7 @@ class Receiver7 implements MessageListener {
         javax.jms.Destination sender = msg.getJMSReplyTo();
         Message fx = sess.createMessage();
         //System.out.println("reply " + sender);
-	ClientTest18.assertTrue(sender.toString().startsWith("TempTopic:"));
+        ClientTest18.assertTrue(sender.toString().startsWith("TemporaryTopic#"));
         prod.send(sender, fx);
       }
       //System.out.println("receive " + index);
