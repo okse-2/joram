@@ -470,7 +470,7 @@ public interface JoramAdapterMBean {
    * @throws AdminException If the request fails.
    * @throws ConnectException If the connection fails.
    */
-  public int[] getServersIds() throws ConnectException, AdminException;
+  public Short[] getServersIds() throws ConnectException, AdminException;
   /**
    * Returns the list of the platform's servers' names.
    *

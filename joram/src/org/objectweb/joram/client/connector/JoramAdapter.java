@@ -1692,9 +1692,13 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * @throws AdminException If the request fails.
    * @throws ConnectException If the connection fails.
    */
-  public int[] getServersIds() throws ConnectException, AdminException {
+  public Short[] getServersIds() throws ConnectException, AdminException {
     // TODO (AF): next to 5.2, directly use  AdminModule.getServersIds()
-    return AdminModule.getWrapper().getServersIds();
+    int[] sids = AdminModule.getWrapper().getServersIds();
+    Short serversIds[] = new Short[sids.length];
+    for (int i=0; i<sids.length; i++)
+      serversIds[i] = new Short((short) sids[i]);
+    return serversIds;
   }
 
   /**
