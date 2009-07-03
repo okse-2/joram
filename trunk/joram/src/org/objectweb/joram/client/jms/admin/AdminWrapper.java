@@ -28,8 +28,8 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
 
-import javax.jms.JMSException;
 import javax.jms.Connection;
+import javax.jms.JMSException;
 
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
@@ -385,7 +385,7 @@ public class AdminWrapper {
    * 
    * @see #getDefaultDMQ(int)
    */
-  public final DeadMQueue getDefaultDMQ() throws ConnectException, AdminException {
+  public final Queue getDefaultDMQ() throws ConnectException, AdminException {
     return getDefaultDMQ(getLocalServerId());
   }
 
@@ -400,7 +400,7 @@ public class AdminWrapper {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public final DeadMQueue getDefaultDMQ(int serverId) throws ConnectException, AdminException {
+  public final Queue getDefaultDMQ(int serverId) throws ConnectException, AdminException {
     String reply = getDefaultDMQId(serverId);
     if (reply == null) return null;
 
@@ -416,9 +416,9 @@ public class AdminWrapper {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
    * 
-   * @see #setDefaultDMQ(int, DeadMQueue)
+   * @see #setDefaultDMQ(int, Queue)
    */
-  public final void setDefaultDMQ(DeadMQueue dmq) throws ConnectException, AdminException {
+  public final void setDefaultDMQ(Queue dmq) throws ConnectException, AdminException {
     setDefaultDMQ(getLocalServerId(), dmq);
   }
 
@@ -434,7 +434,7 @@ public class AdminWrapper {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public final void setDefaultDMQ(int serverId, DeadMQueue dmq) throws ConnectException, AdminException {
+  public final void setDefaultDMQ(int serverId, Queue dmq) throws ConnectException, AdminException {
     doRequest(new SetDefaultDMQ(serverId, (dmq==null)?null:dmq.getName()));
   }
 
@@ -800,15 +800,15 @@ public class AdminWrapper {
    * 
    * @deprecated No longer needed, any queue can be used as DMQ.
    */
-  public DeadMQueue createDeadMQueue(int serverId, String name) throws ConnectException, AdminException {
+  public Queue createDeadMQueue(int serverId, String name) throws ConnectException, AdminException {
     CreateDestinationRequest cdr = new CreateDestinationRequest(serverId,
                                                                 name, 
                                                                 "org.objectweb.joram.mom.dest.DeadMQueue",
                                                                 null,
-                                                                DeadMQueue.QUEUE_TYPE);
+                                                                Queue.QUEUE_TYPE);
     CreateDestinationReply reply = (CreateDestinationReply) doRequest(cdr);
     
-    DeadMQueue dmq = DeadMQueue.createDeadMQueue(reply.getId(), name);
+    Queue dmq = DeadMQueue.createDeadMQueue(reply.getId(), name);
     
     if (AdminModule.wrapper != this)
       dmq.setWrapper(this);

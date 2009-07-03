@@ -35,6 +35,7 @@ import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 
 import org.objectweb.joram.client.jms.Message;
+import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.shared.admin.AdminReply;
 import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.admin.ClearSubscription;
@@ -353,7 +354,7 @@ public class User extends AdministeredObject implements UserMBean {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public void setDMQ(DeadMQueue dmq) throws ConnectException, AdminException {
+  public void setDMQ(Queue dmq) throws ConnectException, AdminException {
     setDMQId(dmq.getName());
   }
 
