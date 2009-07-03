@@ -25,16 +25,26 @@
 package org.objectweb.joram.client.jms;
 
 import java.net.ConnectException;
-import java.util.Vector;
 import java.util.List;
 import java.util.Properties;
- 
+import java.util.Vector;
+
 import javax.jms.JMSException;
 
 import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
-
-import org.objectweb.joram.shared.admin.*;
+import org.objectweb.joram.shared.admin.GetSubscriberIds;
+import org.objectweb.joram.shared.admin.GetSubscriberIdsRep;
+import org.objectweb.joram.shared.admin.Monitor_GetCluster;
+import org.objectweb.joram.shared.admin.Monitor_GetClusterRep;
+import org.objectweb.joram.shared.admin.Monitor_GetFather;
+import org.objectweb.joram.shared.admin.Monitor_GetFatherRep;
+import org.objectweb.joram.shared.admin.Monitor_GetNumberRep;
+import org.objectweb.joram.shared.admin.Monitor_GetSubscriptions;
+import org.objectweb.joram.shared.admin.SetCluster;
+import org.objectweb.joram.shared.admin.SetFather;
+import org.objectweb.joram.shared.admin.UnsetCluster;
+import org.objectweb.joram.shared.admin.UnsetFather;
 
 /**
  *  Implements the <code>javax.jms.Topic</code> interface and provides
@@ -61,15 +71,16 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
   }
 
   /**
-   * Returns a String image of the queue.
-   *
-   * @return A provider-specific identity values for this queue.
+   * Returns a String image of the topic.
+   * 
+   * @return A provider-specific identity values for this topic.
    */
   public String toString() {
     StringBuffer strbuf = new StringBuffer();
-    strbuf.append("Topic").append(agentId);
+    strbuf.append("Topic");
     if (adminName != null)
-      strbuf.append('(').append(adminName).append(')');
+      strbuf.append('[').append(adminName).append(']');
+    strbuf.append(':').append(agentId);
     return strbuf.toString();
   }
 
