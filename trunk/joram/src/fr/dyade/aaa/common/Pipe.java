@@ -17,7 +17,7 @@
  * USA.
  *
  */
-package fr.dyade.aaa.util;
+package fr.dyade.aaa.common;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +25,7 @@ import java.io.RandomAccessFile;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
+
 
 public class Pipe {
   protected String name = null;

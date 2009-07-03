@@ -41,7 +41,7 @@ import fr.dyade.aaa.agent.Notification;
 public class QueueAgent extends Agent {
   
   public final static Logger logger = 
-    fr.dyade.aaa.util.Debug.getLogger(QueueAgent.class.getName());
+    fr.dyade.aaa.common.Debug.getLogger(QueueAgent.class.getName());
   
   private String name;
   

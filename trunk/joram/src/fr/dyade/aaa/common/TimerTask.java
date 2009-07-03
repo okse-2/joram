@@ -18,7 +18,8 @@
  *
  * The present code contributor is ScalAgent Distributed Technologies.
  */
-package fr.dyade.aaa.util;
+package fr.dyade.aaa.common;
+
 
 /**
  * The <code>TimerTask</code> class is the base class for implementing tasks run

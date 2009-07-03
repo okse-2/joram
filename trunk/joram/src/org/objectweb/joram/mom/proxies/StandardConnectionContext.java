@@ -30,7 +30,7 @@ import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.MomExceptionReply;
 import org.objectweb.joram.shared.client.CnxCloseRequest;
 
-import fr.dyade.aaa.util.Queue;
+import fr.dyade.aaa.common.Queue;
 
 /**
  *

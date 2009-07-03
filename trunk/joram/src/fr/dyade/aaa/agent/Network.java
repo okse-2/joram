@@ -28,8 +28,8 @@ import java.io.IOException;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.Arrays;
-import fr.dyade.aaa.util.Strings;
+import fr.dyade.aaa.common.Arrays;
+import fr.dyade.aaa.common.Strings;
 
 /**
  * The <code>Network</code> abstract class provides ..

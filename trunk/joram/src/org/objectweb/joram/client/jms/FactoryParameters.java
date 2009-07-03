@@ -30,7 +30,8 @@ import javax.naming.RefAddr;
 import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 
-import fr.dyade.aaa.util.SocketFactory;
+import fr.dyade.aaa.common.SocketFactory;
+import fr.dyade.aaa.common.SocketFactory13;
 
 /**
  * A <code>FactoryParameters</code> instance holds a
@@ -120,7 +121,7 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
    * Allows to define a specific factory for socket in order to by-pass
    * compatibility problem between JDK version.
    * Currently there is two factories, The default factory one for JDK
-   * since 1.4, and "fr.dyade.aaa.util.SocketFactory13" for JDK prior to 1.4.
+   * since 1.4, and {@link SocketFactory13} for JDK prior to 1.4.
    */
   public String socketFactory = SocketFactory.DefaultFactory;
   

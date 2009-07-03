@@ -68,7 +68,7 @@ import org.objectweb.util.monolog.api.Logger;
 import com.scalagent.jmx.JMXServer;
 
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.util.Debug;
+import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**

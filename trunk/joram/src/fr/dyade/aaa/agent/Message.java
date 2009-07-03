@@ -25,7 +25,7 @@ import java.io.Serializable;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
-import fr.dyade.aaa.util.Pool;
+import fr.dyade.aaa.common.Pool;
 
 /**
  * The internal message structure.

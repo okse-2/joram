@@ -31,17 +31,18 @@ import javax.naming.NamingException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
+import fr.dyade.aaa.common.SocketFactory;
+import fr.dyade.aaa.common.SocketFactory13;
 import fr.dyade.aaa.jndi2.msg.IOControl;
 import fr.dyade.aaa.jndi2.msg.JndiReply;
 import fr.dyade.aaa.jndi2.msg.JndiRequest;
-import fr.dyade.aaa.util.SocketFactory;
 
 public class SimpleNamingConnection implements NamingConnection {
   /**
    *  Allows to define a specific factory for socket in order to by-pass
    * compatibility problem between JDK version.
    *  Currently there is two factories, The default factory one for JDK
-   * since 1.4, and "fr.dyade.aaa.util.SocketFactory13" for JDK prior to 1.4.
+   * since 1.4, and {@link SocketFactory13} for JDK prior to 1.4.
    *  This value can be adjusted by setting
    * <code>fr.dyade.aaa.jndi2.client.SocketFactory</code> property.
    */

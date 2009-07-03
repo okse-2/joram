@@ -29,7 +29,7 @@ import java.io.IOException;
 
 import org.objectweb.joram.shared.stream.StreamUtil;
 
-import fr.dyade.aaa.util.Strings;
+import fr.dyade.aaa.common.Strings;
 
 /**
  * A <code>ConsumerSetListRequest</code> is sent by a

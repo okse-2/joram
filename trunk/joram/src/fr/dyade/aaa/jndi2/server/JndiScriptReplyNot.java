@@ -25,7 +25,7 @@ package fr.dyade.aaa.jndi2.server;
 
 import fr.dyade.aaa.jndi2.msg.*;
 import fr.dyade.aaa.agent.Notification;
-import fr.dyade.aaa.util.Strings;
+import fr.dyade.aaa.common.Strings;
 
 public class JndiScriptReplyNot extends Notification {
 

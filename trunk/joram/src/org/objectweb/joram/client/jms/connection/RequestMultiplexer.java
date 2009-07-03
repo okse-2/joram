@@ -43,7 +43,7 @@ import org.objectweb.joram.shared.client.SessDenyRequest;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.Debug;
+import fr.dyade.aaa.common.Debug;
 
 public class RequestMultiplexer {
 
@@ -395,7 +395,7 @@ public class RequestMultiplexer {
     return demtpx.getName();
   }
 
-  private class DemultiplexerDaemon extends fr.dyade.aaa.util.Daemon {
+  private class DemultiplexerDaemon extends fr.dyade.aaa.common.Daemon {
     DemultiplexerDaemon() {
       // The real name is set later when
       // the proxy id and connection id are known

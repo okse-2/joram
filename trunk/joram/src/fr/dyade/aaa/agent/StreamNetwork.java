@@ -36,9 +36,11 @@ import java.util.Enumeration;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
-import fr.dyade.aaa.util.ServerSocketFactory;
-import fr.dyade.aaa.util.SocketAddress;
-import fr.dyade.aaa.util.SocketFactory;
+import fr.dyade.aaa.common.ServerSocketFactory;
+import fr.dyade.aaa.common.ServerSocketFactory13;
+import fr.dyade.aaa.common.SocketAddress;
+import fr.dyade.aaa.common.SocketFactory;
+import fr.dyade.aaa.common.SocketFactory13;
 
 /**
  *  <code>StreamNetwork</code> is a base implementation of <code>Network</code>
@@ -155,7 +157,7 @@ public abstract class StreamNetwork extends Network {
    * Allows to define a specific factory for ServerSocket in order to by-pass
    * compatibility problem between JDK version.
    * Currently there is two factories, The default factory one for JDK
-   * since 1.4, and "fr.dyade.aaa.util.ServerSocketFactory13" for JDK prior
+   * since 1.4, and {@link ServerSocketFactory13} for JDK prior
    * to 1.4.
    *  This value can be adjusted for all network components by setting
    * <code>ServerSocketFactory</code> global property or for a particular
@@ -171,7 +173,7 @@ public abstract class StreamNetwork extends Network {
    * Allows to define a specific factory for Socket in order to by-pass
    * compatibility problem between JDK version.
    * Currently there is two factories, The default factory one for JDK
-   * since 1.4, and "fr.dyade.aaa.util.SocketFactory13" for JDK prior to 1.4.
+   * since 1.4, and {@link SocketFactory13} for JDK prior to 1.4.
    *  This value can be adjusted for all network components by setting
    * <code>SocketFactory</code> global property or for a particular network
    * by setting <code>\<DomainName\>.SocketFactory</code> specific property.

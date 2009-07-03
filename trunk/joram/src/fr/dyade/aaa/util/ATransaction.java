@@ -45,6 +45,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.Debug;
+import fr.dyade.aaa.common.Pool;
 
 public class ATransaction implements Transaction, Runnable {
   // State of the transaction monitor.

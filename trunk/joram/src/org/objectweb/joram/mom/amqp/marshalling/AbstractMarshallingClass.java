@@ -28,7 +28,7 @@ import java.io.IOException;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.Debug;
+import fr.dyade.aaa.common.Debug;
 
 public abstract class AbstractMarshallingClass {
   

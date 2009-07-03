@@ -34,7 +34,7 @@ import java.util.Map;
 import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.Debug;
+import fr.dyade.aaa.common.Debug;
 
 public class AMQPInputStream {
 

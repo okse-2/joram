@@ -19,7 +19,7 @@
  * Original developer: ScalAgent Distributed Technologies
  * Contributor(s): Douglas S. Jackson
  */
-package fr.dyade.aaa.util;
+package fr.dyade.aaa.common;
 
 import java.io.File;
 import java.io.FileNotFoundException;

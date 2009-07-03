@@ -37,7 +37,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.util.Debug;
+import fr.dyade.aaa.common.Debug;
 
 /**
  * The <code>JavaMailQueueImpl</code> class implements the MOM queue behaviour,

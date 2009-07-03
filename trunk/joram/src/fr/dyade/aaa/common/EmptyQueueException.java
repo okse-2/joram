@@ -23,13 +23,13 @@
  */
 
 
-package fr.dyade.aaa.util;
+package fr.dyade.aaa.common;
 
 /**
  * Thrown by methods in the <code>Queue</code> class to indicate 
  * that the queue is empty. 
  *
- * @see     fr.dyade.aaa.util.Queue
+ * @see     fr.dyade.aaa.common.Queue
  */
 public class EmptyQueueException extends RuntimeException {
 

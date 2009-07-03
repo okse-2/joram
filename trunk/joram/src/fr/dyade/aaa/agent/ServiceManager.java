@@ -30,7 +30,7 @@ import java.util.NoSuchElementException;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.Strings;
+import fr.dyade.aaa.common.Strings;
 
 /**
  * Object which manages services.

@@ -49,7 +49,7 @@ public class scnURLContext implements Context {
   public final static Logger logger;
   
   static {
-    logger = fr.dyade.aaa.util.Debug.getLogger("fr.dyade.aaa.jndi2.scn");    
+    logger = fr.dyade.aaa.common.Debug.getLogger("fr.dyade.aaa.jndi2.scn");    
   }
 
   static private final String URL_PREFIX = "scn:comp/";

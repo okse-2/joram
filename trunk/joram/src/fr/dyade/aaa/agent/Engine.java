@@ -28,7 +28,7 @@ import java.util.Vector;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.Queue;
+import fr.dyade.aaa.common.Queue;
 
 class EngineThread extends Thread {
   Engine engine = null;

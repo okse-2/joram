@@ -42,8 +42,8 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.util.Debug;
-import fr.dyade.aaa.util.Queue;
+import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.Queue;
 
 /**
  * The <code>SoapProxyService</code> class implements the SOAP service

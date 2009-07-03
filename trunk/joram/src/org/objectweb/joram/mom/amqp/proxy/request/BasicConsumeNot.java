@@ -28,7 +28,7 @@ import org.objectweb.joram.mom.amqp.DeliveryListener;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.Notification;
-import fr.dyade.aaa.util.Queue;
+import fr.dyade.aaa.common.Queue;
 
 public class BasicConsumeNot extends Notification {
   

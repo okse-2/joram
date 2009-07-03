@@ -24,8 +24,8 @@ package fr.dyade.aaa.jndi2.distributed;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.common.Strings;
 import fr.dyade.aaa.jndi2.impl.NamingContextInfo;
-import fr.dyade.aaa.util.Strings;
 
 public class InitJndiServerNot extends Notification {
   

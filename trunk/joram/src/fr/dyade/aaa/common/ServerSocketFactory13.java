@@ -21,7 +21,7 @@
  * Contributor(s): 
  */
 
-package fr.dyade.aaa.util;
+package fr.dyade.aaa.common;
 
 import java.io.IOException;
 import java.net.InetAddress;

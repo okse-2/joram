@@ -32,7 +32,7 @@ import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.Debug;
+import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
@@ -42,7 +42,8 @@ public class JoramAdminConnect implements JoramAdminConnectMBean {
 
   public static Logger logger = Debug.getLogger(JoramAdminConnect.class.getName());
   
-  private JoramAdminConnect() { }
+  public JoramAdminConnect() {
+  }
   
   public static void main(String args[]) {
     try {

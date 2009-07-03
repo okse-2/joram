@@ -39,13 +39,13 @@ import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.common.Strings;
 import fr.dyade.aaa.jndi2.msg.ChangeOwnerRequest;
 import fr.dyade.aaa.jndi2.msg.CreateSubcontextRequest;
 import fr.dyade.aaa.jndi2.msg.DestroySubcontextRequest;
 import fr.dyade.aaa.jndi2.msg.JndiRequest;
 import fr.dyade.aaa.jndi2.msg.UnbindRequest;
 import fr.dyade.aaa.jndi2.server.JndiScriptRequestNot;
-import fr.dyade.aaa.util.Strings;
 
 public class NamingContext implements NamingContextMBean, Serializable, Cloneable {
 

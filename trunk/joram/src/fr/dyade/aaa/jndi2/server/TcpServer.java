@@ -31,7 +31,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.Channel;
-import fr.dyade.aaa.util.Daemon;
+import fr.dyade.aaa.common.Daemon;
 
 public class TcpServer {
 

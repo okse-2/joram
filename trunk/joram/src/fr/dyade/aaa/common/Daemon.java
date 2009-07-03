@@ -19,10 +19,11 @@
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
-package fr.dyade.aaa.util;
+package fr.dyade.aaa.common;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
+
 
 /**
  * The Daemon class represents a basic active component in a server. It

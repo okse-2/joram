@@ -35,7 +35,7 @@ public class LookupReply extends JndiReply {
    */
   private static final long serialVersionUID = 1L;
 
-  public static final Logger logger = fr.dyade.aaa.util.Debug.getLogger(
+  public static final Logger logger = fr.dyade.aaa.common.Debug.getLogger(
       LookupReply.class.getName());
   
   private Object obj;

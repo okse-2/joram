@@ -61,12 +61,12 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.DeleteAck;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.SyncNotification;
-import fr.dyade.aaa.util.Queue;
+import fr.dyade.aaa.common.Queue;
 
 public class ProxyAgent extends Agent {
   
   public final static Logger logger = 
-    fr.dyade.aaa.util.Debug.getLogger(ProxyAgent.class.getName());
+    fr.dyade.aaa.common.Debug.getLogger(ProxyAgent.class.getName());
   
   public static final String USER_NAME = "userName";
   

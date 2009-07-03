@@ -42,7 +42,7 @@ package fr.dyade.aaa.agent;
  * <p>
  * Currently only boolean variables may be dynamically set this way.
  */
-public final class Debug extends fr.dyade.aaa.util.Debug {
+public final class Debug extends fr.dyade.aaa.common.Debug {
   public static final String A3Debug = "fr.dyade.aaa.agent";
   public static final String A3Agent = A3Debug + ".Agent";
   public static final String A3Engine = A3Debug + ".Engine";

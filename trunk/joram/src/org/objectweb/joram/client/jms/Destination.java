@@ -69,7 +69,7 @@ import org.objectweb.joram.shared.admin.UnsetWriter;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.Debug;
+import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
@@ -236,7 +236,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
 
   /**
    * Format the destination properties in a XML format
-   * @param indent use this indent for prexifing XML representation.
+   * @param indent use this indent for prefixing XML representation.
    * @param serverId server id hosting the destination object
    * @return returns a XML view of the queue (administration format)
    * @throws ConnectException if the server is unreachable
@@ -638,7 +638,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
     Vector list = new Vector();
     Hashtable users = reply.getUsers();
     for (Enumeration names = users.keys(); names.hasMoreElements();) {
-      list.add((String) names.nextElement());
+      list.add(names.nextElement());
     }
     return list;
   }
@@ -686,7 +686,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
     Vector list = new Vector();
     Hashtable users = reply.getUsers();
     for (Enumeration names = users.keys(); names.hasMoreElements();) {
-      list.add((String) names.nextElement());
+      list.add(names.nextElement());
     }
     return list;
   }

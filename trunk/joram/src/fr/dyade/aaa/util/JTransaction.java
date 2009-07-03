@@ -38,6 +38,7 @@ import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+
 /**
  *  The JTransaction class implements a transactionnal storage.
  *  This implementation is simple but inefficient, its main advantage is

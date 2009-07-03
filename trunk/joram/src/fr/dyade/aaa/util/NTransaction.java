@@ -39,6 +39,12 @@ import java.util.Hashtable;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
+import fr.dyade.aaa.common.Configuration;
+import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.Pool;
+import fr.dyade.aaa.common.Timer;
+import fr.dyade.aaa.common.TimerTask;
+
 /**
  *  The NTransaction class implements a transactional storage.
  *  For efficiency it uses a file for its transaction journal, the final

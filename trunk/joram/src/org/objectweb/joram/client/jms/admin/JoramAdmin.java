@@ -35,7 +35,7 @@ import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.Debug;
+import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
@@ -690,7 +690,7 @@ public class JoramAdmin implements JoramAdminMBean {
    * @exception ConnectException  If connecting fails.
    * @exception AdminException  If the administrator identification is incorrect.
    */
-  static JoramAdmin doCreate(AbstractConnectionFactory cf,
+  public static JoramAdmin doCreate(AbstractConnectionFactory cf,
                              String name,
                              String password,
                              String identityClass) throws ConnectException, AdminException {

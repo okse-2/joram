@@ -41,8 +41,8 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.util.Daemon;
-import fr.dyade.aaa.util.Debug;
+import fr.dyade.aaa.common.Daemon;
+import fr.dyade.aaa.common.Debug;
 
 /**
  * Listens to the TCP connections from the JMS clients.
