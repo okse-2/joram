@@ -32,7 +32,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
-import org.objectweb.joram.client.jms.admin.DeadMQueue;
+import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.Server;
 import org.objectweb.joram.client.jms.admin.User;
 
@@ -148,7 +148,7 @@ class ServerTreeNode extends DefaultMutableTreeNode
     for (int i = 0; i < destRoot.getChildCount(); i++){
       DestinationTreeNode dtn = (DestinationTreeNode) destRoot.getChildAt(i);
       try {
-        DeadMQueue dmq = (DeadMQueue) dtn.getDestination();
+        Queue dmq = (Queue) dtn.getDestination();
         rs.add(dmq);
       }
       catch (ClassCastException cce) {}
