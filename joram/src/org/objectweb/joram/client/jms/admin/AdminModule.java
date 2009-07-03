@@ -38,13 +38,14 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
+import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
-import javax.jms.Connection;
 
 import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.FactoryParameters;
+import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.ha.local.HALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
@@ -469,10 +470,10 @@ public final class AdminModule {
 
     if (isHa) {
       String urlHa = "hajoram://" + host + ":" + port;
-      cf = (ConnectionFactory) HATcpConnectionFactory.create(urlHa);
+      cf = HATcpConnectionFactory.create(urlHa);
 
     } else {
-      cf = (ConnectionFactory) TcpConnectionFactory.create(host, port, reliableClass);
+      cf = TcpConnectionFactory.create(host, port, reliableClass);
     }
     cf.getParameters().connectingTimer = cnxTimer;
 
@@ -540,11 +541,11 @@ public final class AdminModule {
   public static void doCollocatedConnect(String name, String password,
                                          String identityClass) throws ConnectException, AdminException {
     if (isHa) {
-      doConnect((ConnectionFactory) HALocalConnectionFactory.create(),
+      doConnect(HALocalConnectionFactory.create(),
                 name, password,
                 identityClass);
     } else {
-      doConnect((ConnectionFactory) LocalConnectionFactory.create(),
+      doConnect(LocalConnectionFactory.create(),
                 name, password,
                 identityClass);
     }
@@ -796,7 +797,7 @@ public final class AdminModule {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
    */
-  public static DeadMQueue getDefaultDMQ() throws ConnectException, AdminException {
+  public static Queue getDefaultDMQ() throws ConnectException, AdminException {
     return getDefaultDMQ(getLocalServerId());
   }
 
@@ -810,7 +811,7 @@ public final class AdminModule {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public static DeadMQueue getDefaultDMQ(int serverId) throws ConnectException, AdminException {
+  public static Queue getDefaultDMQ(int serverId) throws ConnectException, AdminException {
     if (wrapper == null)
       throw new ConnectException("Administrator not connected.");
 
@@ -826,7 +827,7 @@ public final class AdminModule {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
    */
-  public static void setDefaultDMQ(DeadMQueue dmq) throws ConnectException, AdminException {
+  public static void setDefaultDMQ(Queue dmq) throws ConnectException, AdminException {
     setDefaultDMQ(getLocalServerId(), dmq);
   }
 
@@ -842,7 +843,7 @@ public final class AdminModule {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public static void setDefaultDMQ(int serverId, DeadMQueue dmq) throws ConnectException, AdminException {
+  public static void setDefaultDMQ(int serverId, Queue dmq) throws ConnectException, AdminException {
     if (wrapper == null)
       throw new ConnectException("Administrator not connected.");
 

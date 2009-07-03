@@ -38,7 +38,7 @@ public class DeadMQueue extends Queue {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
-  public static DeadMQueue createDeadMQueue(String agentId, String name) {
+  public static Queue createDeadMQueue(String agentId, String name) {
     DeadMQueue dest = new DeadMQueue();
     
     dest.agentId = agentId;
