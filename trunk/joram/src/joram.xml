@@ -56,7 +56,6 @@
       <include name="fr/dyade/aaa/agent/HttpsNetwork.java"/>
       <include name="fr/dyade/aaa/agent/SCServer.java"/>
       <include name="fr/dyade/aaa/agent/SCAdminBase.java"/>
-      <include name="fr/dyade/aaa/agent/AgentAdmin.java"/>
       <include name="fr/dyade/aaa/agent/UnknownDomainException.java"/>
       <include name="fr/dyade/aaa/agent/conf/A3CMLSaxWrapper.java"/>
       <include name="fr/dyade/aaa/agent/conf/A3CMLKXmlWrapper.java"/>
@@ -73,8 +72,6 @@
       <include name="fr/dyade/aaa/util/management/*.java"/>
       <include name="com/scalagent/jmx/*.java"/>
       <!-- End - Needed for JMX monitoring -->
-
-      <include name="fr/dyade/aaa/admin/**/*.java"/>
 
       <!-- Begin - Needed for JNDI -->
       <include name="fr/dyade/aaa/jndi2/**/*.java"/>
@@ -106,11 +103,11 @@
       <!-- End - Needed for JORAM -->
 
       <!-- Begin - Needed for JORAM FTP destinations -->
-      <include name="com/scalagent/joram/mom/dest/ftp/*.java"/>
+      <include name="com/scalagent/joram/mom/dest/ftp/**/*.java"/>
       <!-- End - Needed for JORAM FTP destinations -->
 
       <!-- Begin - Needed for JORAM Mail destinations -->
-      <include name="com/scalagent/joram/mom/dest/mail/*.java"/>
+      <include name="com/scalagent/joram/mom/dest/mail/**/*.java"/>
       <!-- End - Needed for JORAM Mail destinations -->
 
       <!-- Begin - Needed for JORAM Scheduler destinations -->
@@ -156,6 +153,7 @@
         <include name="fr/dyade/aaa/jndi2/soap/SoapObjectItf.class"/>
         <include name="fr/dyade/aaa/util/*.class"/>
         <include name="fr/dyade/aaa/util/management/*.class"/>
+        <include name="fr/dyade/aaa/common/*.class"/>
         <include name="org/objectweb/joram/shared/**/*.class"/>
         <include name="com/scalagent/jmx/*.class"/>
       </fileset>
@@ -173,9 +171,6 @@
         <include name="NOTICE.TXT"/>
       </metainf>
       <fileset dir="${obj.dir}">
-        <include name="fr/dyade/aaa/admin/*.class"/>
-        <include name="fr/dyade/aaa/admin/cmd/*.class"/>
-        <include name="fr/dyade/aaa/admin/script/*.class"/>
         <include name="fr/dyade/aaa/agent/*.class"/>
         <include name="fr/dyade/aaa/agent/conf/*.class"/>
         <include name="fr/dyade/aaa/jndi2/distributed/*.class"/>
@@ -268,6 +263,7 @@
         <include name="a3servers.xml"/>
       </fileset>
     </jar>
+    
     <jar jarfile="${build.dir}/joram-gui.jar">
       <manifest>
         <attribute name="Specification-Title" value="JMS"/>
@@ -432,88 +428,204 @@
     <delete file="${build.dir}/META-INF/jonas-ra.xml"/>
   </target>
 
-  <target name="ship.osgi" depends="ship.joram"
-          description="--> Builds a Joram OSGI bundle.">
-    <jar jarfile="${ship.dir}/lib/joram-mom-bundle.jar"
-         manifest="${src.dir}/com/scalagent/joram/osgi/server/manifest.mf">
-      <fileset dir="${src.dir}/com/scalagent/joram/osgi/server">
+  <target name="build.osgi" depends="build.joram"
+          description="--> Builds Joram OSGI bundles.">
+    <mkdir dir="${build.dir}"/>
+    
+    <jar jarfile="${build.dir}/joram-common-util-bundle.jar" manifest="${src.dir}/fr/dyade/aaa/common/osgi/manifest.mf">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+        <attribute name="Bundle-Version" value="${version}"/> 
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
+      <fileset dir="${obj.dir}">
+        <include name="fr/dyade/aaa/common/*.class"/>
+        <include name="fr/dyade/aaa/util/management/*.class"/>
+        <include name="com/scalagent/jmx/*.class"/>
+      </fileset>
+    </jar>
+    
+    <jar jarfile="${build.dir}/joram-rt-bundle.jar" manifest="${src.dir}/fr/dyade/aaa/agent/osgi/manifest.mf">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+        <attribute name="Bundle-Version" value="${version}"/> 
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
+      <fileset dir="${obj.dir}">
+        <include name="fr/dyade/aaa/agent/*.class"/>
+        <include name="fr/dyade/aaa/agent/conf/*.class"/>
+        <include name="fr/dyade/aaa/util/*.class"/>
+        <include name="a3debug.cfg"/>
         <include name="a3servers.xml"/>
-        <include name="a3server.prop"/>
-        <include name="a3debug.cfg"/>
       </fileset>
+    </jar>
+    
+    <jar jarfile="${build.dir}/joram-jndi-bundle.jar" manifest="${src.dir}/fr/dyade/aaa/jndi2/server/osgi/manifest.mf">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+        <attribute name="Bundle-Version" value="${version}"/> 
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
       <fileset dir="${obj.dir}">
-        <include name="com/scalagent/joram/osgi/server/**/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/distributed/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/ha/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/impl/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/server/**/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/msg/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/soap/JndiSoapService.class"/>
       </fileset>
-      <fileset dir="${build.dir}">
-        <include name="joram-mom.jar"/>
-        <include name="joram-shared.jar"/>
+    </jar>
+    
+    <jar jarfile="${build.dir}/joram-mom-bundle.jar" manifest="${src.dir}/org/objectweb/joram/mom/osgi/manifest.mf">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+        <attribute name="Bundle-Version" value="${version}"/> 
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
+      <fileset dir="${obj.dir}">
+        <include name="org/objectweb/joram/mom/**/*.class"/>
+        <include name="com/scalagent/joram/mom/dest/collector/*.class"/>
+        <include name="com/scalagent/joram/mom/dest/scheduler/*.class"/>
+        <include name="com/scalagent/scheduler/*.class"/>
       </fileset>
-     <fileset dir="${lib.dir}">
+    </jar>
+    
+    <jar jarfile="${build.dir}/joram-mail-bundle.jar" manifest="${src.dir}/com/scalagent/joram/mom/dest/mail/osgi/manifest.mf">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+        <attribute name="Bundle-Version" value="${version}"/> 
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
+      <fileset dir="${obj.dir}">
+        <include name="com/scalagent/joram/mom/dest/mail/**/*.class"/>
+      </fileset>
+      <fileset dir="${lib.dir}">
+        <include name="activation.jar"/>
+        <include name="mail.jar"/>
+      </fileset>
+    </jar>
+    
+    <jar jarfile="${build.dir}/joram-ftp-bundle.jar" manifest="${src.dir}/com/scalagent/joram/mom/dest/ftp/osgi/manifest.mf">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+        <attribute name="Bundle-Version" value="${version}"/> 
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
+      <fileset dir="${obj.dir}">
+        <include name="com/scalagent/joram/mom/dest/ftp/**/*.class"/>
+      </fileset>
+      <fileset dir="${lib.dir}">
+        <include name="jftp.jar"/>
+      </fileset>
+    </jar>
+    
+    <jar jarfile="${build.dir}/joram-client-bundle.jar" manifest="${src.dir}/org/objectweb/joram/client/osgi/manifest.mf">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+        <attribute name="Bundle-Version" value="${version}"/> 
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
+      <fileset dir="${obj.dir}">
+        <include name="fr/dyade/aaa/jndi2/client/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/haclient/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/hascn/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/scn/*.class"/>
+        <include name="org/objectweb/joram/client/osgi/Activator.class"/>
+        <include name="org/objectweb/joram/client/jms/**/*.class"/>
+      </fileset>
+      <fileset dir="${lib.dir}">
+        <include name="jndi.jar"/>
+      </fileset>
+    </jar>
+    
+    <jar jarfile="${build.dir}/joram-shared-bundle.jar" manifest="${src.dir}/org/objectweb/joram/shared/osgi/manifest.mf">
+      <manifest>
+        <attribute name="Specification-Title" value="JMS"/>
+        <attribute name="Specification-Version" value="1.1"/>
+        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
+        <attribute name="Implementation-Title" value="Joram"/>
+        <attribute name="Implementation-Version" value="${version}"/> 
+        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+        <attribute name="Bundle-Version" value="${version}"/> 
+      </manifest>
+      <metainf dir="${licenses.dir}">
+        <include name="NOTICE.TXT"/>
+      </metainf>
+      <fileset dir="${obj.dir}">
+        <include name="org/objectweb/joram/shared/**/*.class"/>
+        <include name="fr/dyade/aaa/jndi2/soap/SoapObjectHelper.class"/>
+        <include name="fr/dyade/aaa/jndi2/soap/SoapObjectItf.class"/>
+        <include name="fr/dyade/aaa/common/Debug.class"/>
+      </fileset>
+      <fileset dir="${lib.dir}">
         <include name="JCup.jar"/>
-        <include name="ow_monolog.jar"/>
-        <include name="jakarta-regexp-1.2.jar"/>
-      </fileset>
-    </jar>
-
-    <jar jarfile="${ship.dir}/lib/joram-client-bundle.jar"
-         manifest="${src.dir}/com/scalagent/joram/osgi/client/manifest.mf">
-      <fileset dir="${src.dir}/com/scalagent/joram/osgi/client">
-        <include name="a3debug.cfg"/>
-      </fileset>
-      <fileset dir="${obj.dir}">
-        <include name="com/scalagent/joram/osgi/client/**/*.class"/>
-      </fileset>
-      <fileset dir="${build.dir}">
-        <include name="joram-client.jar"/>
-        <include name="joram-shared.jar"/>
-      </fileset>
-     <fileset dir="${lib.dir}">
-        <include name="jms.jar"/>
-        <include name="JCup.jar"/>
-        <include name="jakarta-regexp-1.2.jar"/>
-        <include name="ow_monolog.jar"/>
-      </fileset>
-    </jar>
-
-    <jar jarfile="${ship.dir}/lib/joram-test-bundle.jar"
-         manifest="${src.dir}/com/scalagent/joram/osgi/test/manifest.mf">
-      <fileset dir="${obj.dir}">
-        <include name="com/scalagent/joram/osgi/test/*.class"/>
-      </fileset>
-      <fileset dir="${src.dir}/com/scalagent/joram/osgi/test">
-        <include name="joramAdmin.xml"/>
-      </fileset>
-    </jar>
-
-    <jar jarfile="${ship.dir}/lib/joram-test2-bundle.jar"
-         manifest="${src.dir}/com/scalagent/joram/osgi/test2/manifest.mf">
-      <fileset dir="${obj.dir}">
-        <include name="com/scalagent/joram/osgi/test2/*.class"/>
-      </fileset>
-    </jar>
-
-    <jar jarfile="${ship.dir}/lib/joram-test3-bundle.jar"
-         manifest="${src.dir}/com/scalagent/joram/osgi/test3/manifest.mf">
-      <fileset dir="${obj.dir}">
-        <include name="com/scalagent/joram/osgi/test3/*.class"/>
-      </fileset>
-    </jar>
-
-    <jar jarfile="${ship.dir}/lib/joram-test4-bundle.jar"
-         manifest="${src.dir}/com/scalagent/joram/osgi/test4/manifest.mf">
-      <fileset dir="${obj.dir}">
-        <include name="com/scalagent/joram/osgi/test4/*.class"/>
-      </fileset>
-    </jar>
-
-    <jar jarfile="${ship.dir}/lib/joram-test5-bundle.jar"
-         manifest="${src.dir}/com/scalagent/joram/osgi/test5/manifest.mf">
-      <fileset dir="${obj.dir}">
-        <include name="com/scalagent/joram/osgi/test5/*.class"/>
       </fileset>
     </jar>
   </target>
 
+  <target name="ship.osgi" depends="build.osgi" description="--> Creates a Joram OSGi shipment.">
+    <mkdir dir="${ship.dir}" />
+    <mkdir dir="${ship.dir}/lib" />
+    <copy file="${build.dir}/joram-common-util-bundle.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-rt-bundle.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-jndi-bundle.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-mom-bundle.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-mail-bundle.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-ftp-bundle.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-client-bundle.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-shared-bundle.jar" todir="${ship.dir}/lib"/>
+  </target>
+
+  
   <!-- JAVADOC --> 
   <target name="javadoc" depends="init.joram"
       description="--> Generates the Joram's client and server JavaDoc.">
