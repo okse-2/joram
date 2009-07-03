@@ -281,12 +281,12 @@ public class DestinationPanel extends JPanel {
     freeWrite.setSelected(val);
   }
 
-  public void setDMQList(java.util.List dmqs, DeadMQueue ddmq) {
+  public void setDMQList(java.util.List dmqs, Queue ddmq) {
     dmqCombo.removeAllItems();
     dmqCombo.addItem("No Dead Message Queue");
 
     for (Iterator i = dmqs.iterator(); i.hasNext();) {
-      DeadMQueue dmq = (DeadMQueue) i.next();
+      Queue dmq = (Queue) i.next();
       dmqCombo.addItem(dmq);
 
       // TODO: This comparison is not very clean and should be improved

@@ -466,11 +466,11 @@ public class AdminController {
     AdminModule.setDefaultThreshold(serverId, threshold);
   }
 
-  public DeadMQueue getDefaultDMQ(int serverId) throws Exception {
+  public Queue getDefaultDMQ(int serverId) throws Exception {
     return AdminModule.getDefaultDMQ(serverId);
   }
 
-  public void setDefaultDMQ(int serverId, DeadMQueue dmq) throws Exception {
+  public void setDefaultDMQ(int serverId, Queue dmq) throws Exception {
     AdminModule.setDefaultDMQ(serverId, dmq);
   }
 
@@ -490,11 +490,11 @@ public class AdminController {
     user.setThreshold(threshold);
   }
 
-  public DeadMQueue getUserDMQ(User user) throws Exception {
+  public Queue getUserDMQ(User user) throws Exception {
     return user.getDMQ();
   }
 
-  public void setUserDMQ(User user, DeadMQueue dmq) throws Exception {
+  public void setUserDMQ(User user, Queue dmq) throws Exception {
     user.setDMQ(dmq);
   }
 
@@ -514,7 +514,7 @@ public class AdminController {
     queue.setThreshold(threshold);
   }
 
-  public DeadMQueue getDestinationDMQ(Destination dest) throws Exception {
+  public Queue getDestinationDMQ(Destination dest) throws Exception {
     return dest.getDMQ();
   }
 
