@@ -63,9 +63,7 @@ public class IOControl {
     
   public IOControl(Socket sock,
 		   long inputCounter)  throws IOException {    
-    windowSize = AgentServer.getInteger(
-      fr.dyade.aaa.util.ReliableTcpConnection.WINDOW_SIZE_PROP_NAME,
-      fr.dyade.aaa.util.ReliableTcpConnection.DEFAULT_WINDOW_SIZE).intValue();
+    windowSize = AgentServer.getInteger("fr.dyade.aaa.util.ReliableTcpConnection.windowSize", 100).intValue();
     unackCounter = 0;
     this.inputCounter = inputCounter;
     this.sock = sock;
