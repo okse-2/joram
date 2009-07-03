@@ -24,16 +24,34 @@
  */
 package org.objectweb.joram.client.jms;
 
-import java.util.Vector;
-import java.util.Properties;
 import java.net.ConnectException;
+import java.util.Properties;
+import java.util.Vector;
 
 import javax.jms.JMSException;
 
 import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
-
-import org.objectweb.joram.shared.admin.*;
+import org.objectweb.joram.shared.admin.AddQueueCluster;
+import org.objectweb.joram.shared.admin.AdminReply;
+import org.objectweb.joram.shared.admin.ClearQueue;
+import org.objectweb.joram.shared.admin.DeleteQueueMessage;
+import org.objectweb.joram.shared.admin.GetQueueMessage;
+import org.objectweb.joram.shared.admin.GetQueueMessageIds;
+import org.objectweb.joram.shared.admin.GetQueueMessageIdsRep;
+import org.objectweb.joram.shared.admin.GetQueueMessageRep;
+import org.objectweb.joram.shared.admin.ListClusterQueue;
+import org.objectweb.joram.shared.admin.Monitor_GetDMQSettings;
+import org.objectweb.joram.shared.admin.Monitor_GetDMQSettingsRep;
+import org.objectweb.joram.shared.admin.Monitor_GetNbMaxMsg;
+import org.objectweb.joram.shared.admin.Monitor_GetNbMaxMsgRep;
+import org.objectweb.joram.shared.admin.Monitor_GetNumberRep;
+import org.objectweb.joram.shared.admin.Monitor_GetPendingMessages;
+import org.objectweb.joram.shared.admin.Monitor_GetPendingRequests;
+import org.objectweb.joram.shared.admin.RemoveQueueCluster;
+import org.objectweb.joram.shared.admin.SetNbMaxMsg;
+import org.objectweb.joram.shared.admin.SetQueueThreshold;
+import org.objectweb.joram.shared.admin.UnsetQueueThreshold;
 
 /**
  *  Implements the <code>javax.jms.Queue</code> interface and provides
@@ -65,9 +83,10 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    */
   public String toString() {
     StringBuffer strbuf = new StringBuffer();
-    strbuf.append("Queue").append(agentId);
+    strbuf.append("Queue");
     if (adminName != null)
-      strbuf.append('(').append(adminName).append(')');
+      strbuf.append('[').append(adminName).append(']');
+    strbuf.append(':').append(agentId);
     return strbuf.toString();
   }
 
