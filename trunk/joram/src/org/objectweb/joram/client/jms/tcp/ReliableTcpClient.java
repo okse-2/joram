@@ -46,7 +46,6 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.util.Debug;
-import fr.dyade.aaa.util.ReliableTcpConnection;
 import fr.dyade.aaa.util.SocketFactory;
 
 public class ReliableTcpClient {
