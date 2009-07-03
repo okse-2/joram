@@ -28,7 +28,6 @@ import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 
 import org.objectweb.joram.shared.client.TempDestDeleteRequest;
-
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -38,8 +37,6 @@ public class TemporaryTopic extends Topic implements javax.jms.TemporaryTopic {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   
-  private final static String TMP_TOPIC_TYPE = "topic.tmp";
-
   /** The connection the topic belongs to, <code>null</code> if not known. */
   private Connection cnx;
 
