@@ -1011,12 +1011,14 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       .append(destName).append("] has been retrieved");
     } else {
       // Instantiating the destination class.
-      Class clazz;
       Destination dest = null;
       try {
-        dest = (Destination) Class.forName(className).newInstance();
+        try {
+          dest = (Destination) Class.forName(className).newInstance();
+        } catch (ClassNotFoundException cnfe) {
+          dest = (Destination) AgentServer.getResolverRepository().resolveClass(className).newInstance();
+        }
         if (destName != null) dest.name = destName;
-
         ((AdminDestinationItf) dest).init(adminId, properties);
       } catch (Exception exc) {
         logger.log(BasicLevel.ERROR,
