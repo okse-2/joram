@@ -19,15 +19,16 @@
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
-package fr.dyade.aaa.util;
+package fr.dyade.aaa.common;
 
-import java.net.ServerSocket;
-import java.net.InetAddress;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.net.ServerSocket;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
+
 
 /**
  * This class wraps multiples implementations of the java.net.Socket class.
@@ -42,7 +43,7 @@ public abstract class ServerSocketFactory {
    * The default implementation of the ServerSocketFactory interface is for 
    * JDK since 1.4.
    */
-  public static final String DefaultFactory = "fr.dyade.aaa.util.ServerSocketFactory13";
+  public static final String DefaultFactory = ServerSocketFactory13.class.getName();
 
   /**
    * Returns the ServerSocketFactory singleton for the specified default class.

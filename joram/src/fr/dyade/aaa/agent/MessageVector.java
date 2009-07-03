@@ -24,7 +24,7 @@ package fr.dyade.aaa.agent;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.EmptyQueueException;
+import fr.dyade.aaa.common.EmptyQueueException;
 
 /**
  * Class <code>MessageVector</code> represents a persistent vector of

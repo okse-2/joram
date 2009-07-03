@@ -41,7 +41,7 @@ public class hascnURLContextFactory implements ObjectFactory {
   public final static Logger logger;
   
   static {
-    logger = fr.dyade.aaa.util.Debug.getLogger("fr.dyade.aaa.jndi2.hascn");    
+    logger = fr.dyade.aaa.common.Debug.getLogger("fr.dyade.aaa.jndi2.hascn");    
   }
 
   /**

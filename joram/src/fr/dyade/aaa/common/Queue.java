@@ -18,9 +18,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  */
-package fr.dyade.aaa.util;
+package fr.dyade.aaa.common;
 
 import java.util.Vector;
+
 
 /**
  * The <code>Queue</code> class implements a First-In-First-Out 

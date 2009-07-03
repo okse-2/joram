@@ -39,7 +39,7 @@ import java.util.LinkedList;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.Daemon;
+import fr.dyade.aaa.common.Daemon;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 public class UDPNetwork extends Network implements UDPNetworkMBean {

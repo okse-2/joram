@@ -27,7 +27,7 @@ import java.util.Date;
 import com.scalagent.scheduler.CronEvent;
 import com.scalagent.scheduler.Scheduler;
 
-import fr.dyade.aaa.util.Timer;
+import fr.dyade.aaa.common.Timer;
 
 public class CronTest {
 

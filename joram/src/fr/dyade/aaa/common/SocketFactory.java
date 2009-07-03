@@ -19,15 +19,16 @@
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
-package fr.dyade.aaa.util;
+package fr.dyade.aaa.common;
 
-import java.net.Socket;
-import java.net.InetAddress;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.net.Socket;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
+
 
 /**
  * This class wraps multiples implementations of the java.net.Socket class.
@@ -42,7 +43,7 @@ public abstract class SocketFactory {
    * The default implementation of the SocketFactory interface is for 
    * JDK since 1.4.
    */
-  public static final String DefaultFactory = "fr.dyade.aaa.util.SocketFactory14";
+  public static final String DefaultFactory = SocketFactory14.class.getName();
   
   /**
    * Returns the SocketFactory singleton for the specified default class.
@@ -120,7 +121,7 @@ public abstract class SocketFactory {
   
   private static String[] factoryClasses = {
     DefaultFactory,
-    "fr.dyade.aaa.util.SocketFactory13"
+    SocketFactory13.class.getName()
   };
 
   private static SocketFactory factory;

@@ -28,7 +28,7 @@ import java.util.zip.GZIPInputStream;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.BinaryDump;
+import fr.dyade.aaa.common.BinaryDump;
 import fr.dyade.aaa.util.ResolverObjectInputStream;
 
 /**

@@ -27,7 +27,7 @@ import java.util.Map;
 
 import org.objectweb.joram.mom.amqp.marshalling.AMQP;
 
-import fr.dyade.aaa.util.Queue;
+import fr.dyade.aaa.common.Queue;
 
 public interface MOMHandler {
 

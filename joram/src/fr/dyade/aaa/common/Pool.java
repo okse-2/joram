@@ -16,10 +16,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  */
-package fr.dyade.aaa.util;
+package fr.dyade.aaa.common;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
+
 
 public final class Pool {
   int elementCount = 0;

@@ -28,9 +28,9 @@ import java.lang.reflect.*;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.Daemon;
 import fr.dyade.aaa.agent.conf.A3CML;
 import fr.dyade.aaa.agent.conf.A3CMLConfig;
+import fr.dyade.aaa.common.Daemon;
 
 /**
  * A <code>AdminProxy</code> service provides a TCP service allowing remote

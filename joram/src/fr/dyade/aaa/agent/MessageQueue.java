@@ -23,7 +23,7 @@
  */
 package fr.dyade.aaa.agent;
 
-import fr.dyade.aaa.util.EmptyQueueException;
+import fr.dyade.aaa.common.EmptyQueueException;
 
 /**
  * Interface <code>MessageQueue</code> represents a First-In-First-Out (FIFO)

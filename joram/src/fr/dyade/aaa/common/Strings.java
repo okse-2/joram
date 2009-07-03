@@ -21,7 +21,7 @@
  * Initial developer(s): Dyade
  * Contributor(s): ScalAgent Distributed Technologies
  */
-package fr.dyade.aaa.util;
+package fr.dyade.aaa.common;
 
 import java.lang.reflect.Method;
 import java.io.ByteArrayOutputStream;

@@ -37,11 +37,11 @@ import org.objectweb.joram.client.jms.connection.ReplyListener;
 import org.objectweb.joram.client.jms.connection.AbortedRequestException;
 import org.objectweb.joram.client.jms.connection.RequestMultiplexer;
 
-import fr.dyade.aaa.util.StoppedQueueException;
+import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.StoppedQueueException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
-import fr.dyade.aaa.util.Debug;
 
 /**
  * This class listens to replies asynchronously returned by the user proxy 

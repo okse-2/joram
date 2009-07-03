@@ -23,7 +23,7 @@ import java.io.OutputStream;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
-import fr.dyade.aaa.util.BinaryDump;
+import fr.dyade.aaa.common.BinaryDump;
 
 /**
  * Class used to send messages through a stream using buffering.

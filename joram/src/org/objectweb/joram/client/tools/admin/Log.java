@@ -24,7 +24,8 @@
 package org.objectweb.joram.client.tools.admin;
 
 import org.objectweb.util.monolog.api.Logger;
-import fr.dyade.aaa.util.Debug;
+
+import fr.dyade.aaa.common.Debug;
 
 public class Log {
   public static Logger logger = Debug.getLogger(

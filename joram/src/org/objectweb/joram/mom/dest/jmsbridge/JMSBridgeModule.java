@@ -53,7 +53,7 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.Debug;
-import fr.dyade.aaa.util.Daemon;
+import fr.dyade.aaa.common.Daemon;
 
 /**
  * The <code>BridgeUnifiedModule</code> class is a bridge module based on the
@@ -990,7 +990,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
     }
 
     /**
-     * @see fr.dyade.aaa.util.Daemon#start()
+     * @see fr.dyade.aaa.common.Daemon#start()
      */
     public void start() {
       if (logger.isLoggable(BasicLevel.DEBUG))

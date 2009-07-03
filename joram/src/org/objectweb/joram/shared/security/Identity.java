@@ -37,7 +37,7 @@ import org.objectweb.joram.shared.stream.Streamable;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.Debug;
+import fr.dyade.aaa.common.Debug;
 
 /**
  * Abstract class needed to describe all identities.

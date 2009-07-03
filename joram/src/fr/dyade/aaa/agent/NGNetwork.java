@@ -28,7 +28,7 @@ import java.nio.channels.*;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.Daemon;
+import fr.dyade.aaa.common.Daemon;
 
 /**
  * <code>NGNetwork</code> is a new implementation of <code>Network</code>

@@ -43,9 +43,9 @@ import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.Daemon;
-import fr.dyade.aaa.util.Debug;
-import fr.dyade.aaa.util.Queue;
+import fr.dyade.aaa.common.Daemon;
+import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.Queue;
 
 /**
  * Listens to the TCP connections.

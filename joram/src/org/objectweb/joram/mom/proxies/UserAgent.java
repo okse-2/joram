@@ -49,7 +49,7 @@ import fr.dyade.aaa.agent.BagSerializer;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownNotificationException;
 import fr.dyade.aaa.agent.WakeUpTask;
-import fr.dyade.aaa.util.Debug;
+import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /** 
@@ -426,7 +426,7 @@ public final class UserAgent extends Agent implements BagSerializer, ProxyAgentI
    * Timer task responsible for closing the connection if 
    * it has not sent any requests for the duration 'timeout'.
    */
-  class HeartBeatTask extends fr.dyade.aaa.util.TimerTask implements
+  class HeartBeatTask extends fr.dyade.aaa.common.TimerTask implements
   java.io.Serializable {
     /**
      * 

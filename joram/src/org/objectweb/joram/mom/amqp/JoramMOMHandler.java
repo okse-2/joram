@@ -46,7 +46,7 @@ import org.objectweb.joram.mom.amqp.proxy.request.QueuePurgeNot;
 import org.objectweb.joram.mom.amqp.proxy.request.QueueUnbindNot;
 
 import fr.dyade.aaa.agent.Channel;
-import fr.dyade.aaa.util.Queue;
+import fr.dyade.aaa.common.Queue;
 
 public class JoramMOMHandler implements MOMHandler {
   

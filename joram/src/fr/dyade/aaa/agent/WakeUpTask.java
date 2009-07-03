@@ -3,7 +3,7 @@ package fr.dyade.aaa.agent;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.TimerTask;
+import fr.dyade.aaa.common.TimerTask;
 
 /**
  * Class used to schedule a wake up on a specific agent. A notification is sent

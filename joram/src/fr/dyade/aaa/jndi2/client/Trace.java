@@ -29,6 +29,6 @@ public class Trace {
   public final static Logger logger;
   
   static {
-    logger = fr.dyade.aaa.util.Debug.getLogger("fr.dyade.aaa.jndi2.client");    
+    logger = fr.dyade.aaa.common.Debug.getLogger("fr.dyade.aaa.jndi2.client");    
   }
 }

@@ -36,7 +36,8 @@ import java.util.Hashtable;
 import org.objectweb.joram.shared.stream.Streamable;
 import org.objectweb.joram.shared.stream.StreamUtil;
 
-import fr.dyade.aaa.util.Debug;
+import fr.dyade.aaa.common.Debug;
+
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 

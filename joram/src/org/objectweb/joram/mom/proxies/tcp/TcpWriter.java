@@ -31,8 +31,8 @@ import org.objectweb.joram.shared.client.MomExceptionReply;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.Daemon;
-import fr.dyade.aaa.util.Debug;
+import fr.dyade.aaa.common.Daemon;
+import fr.dyade.aaa.common.Debug;
 
 /**
  * The activity responsible for getting the replies

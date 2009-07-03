@@ -36,7 +36,7 @@ import org.objectweb.joram.shared.selectors.ClientSelector;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.Debug;
+import fr.dyade.aaa.common.Debug;
 
 /**
  * Implements the <code>javax.jms.MessageConsumer</code> interface.

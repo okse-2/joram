@@ -56,7 +56,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import fr.dyade.aaa.util.Debug;
+import fr.dyade.aaa.common.Debug;
 
 /**
  * XML SAX Wrapper for Joram Administration configuration file.

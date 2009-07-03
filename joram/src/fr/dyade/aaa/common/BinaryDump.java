@@ -20,7 +20,7 @@
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
-package fr.dyade.aaa.util;
+package fr.dyade.aaa.common;
 
 import java.text.DecimalFormat;
 

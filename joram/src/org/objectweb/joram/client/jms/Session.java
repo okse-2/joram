@@ -55,7 +55,7 @@ import org.objectweb.joram.shared.client.SessDenyRequest;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.Debug;
+import fr.dyade.aaa.common.Debug;
 
 /**
  * Implements the <code>javax.jms.Session</code> interface.
@@ -196,7 +196,7 @@ public class Session implements javax.jms.Session {
   private Vector browsers;
 
   /** FIFO queue holding the asynchronous server deliveries. */
-  private fr.dyade.aaa.util.Queue repliesIn;
+  private fr.dyade.aaa.common.Queue repliesIn;
 
   /** Daemon distributing asynchronous server deliveries. */
   private SessionDaemon daemon;
@@ -614,7 +614,7 @@ public class Session implements javax.jms.Session {
     consumers = new Vector();
     producers = new Vector();
     browsers = new Vector();
-    repliesIn = new fr.dyade.aaa.util.Queue();
+    repliesIn = new fr.dyade.aaa.common.Queue();
     sendings = new Hashtable();
     deliveries = new Hashtable();
     
@@ -2196,7 +2196,7 @@ public class Session implements javax.jms.Session {
   /**
    * This thread controls the session in mode LISTENER.
    */
-  private class SessionDaemon extends fr.dyade.aaa.util.Daemon {
+  private class SessionDaemon extends fr.dyade.aaa.common.Daemon {
     SessionDaemon() {
       super("Connection#" + cnx + " - Session#" + ident);
     }

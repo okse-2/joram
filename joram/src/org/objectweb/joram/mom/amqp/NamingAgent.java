@@ -36,7 +36,7 @@ import fr.dyade.aaa.agent.Notification;
 public class NamingAgent extends Agent {
   
   public final static Logger logger = 
-    fr.dyade.aaa.util.Debug.getLogger(NamingAgent.class.getName());
+    fr.dyade.aaa.common.Debug.getLogger(NamingAgent.class.getName());
   
   private static NamingAgent singleton;
   

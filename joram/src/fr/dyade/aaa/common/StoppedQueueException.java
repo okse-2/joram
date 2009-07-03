@@ -17,13 +17,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  */
-package fr.dyade.aaa.util;
+package fr.dyade.aaa.common;
 
 /**
  * Thrown by the <code>push</code> method of the <code>Queue</code> class
  * when the queue is actually stopping or stopped.
  *
- * @see fr.dyade.aaa.util.Queue
+ * @see fr.dyade.aaa.common.Queue
  */
 public class StoppedQueueException extends RuntimeException
 {

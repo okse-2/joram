@@ -31,8 +31,8 @@ import java.net.Socket;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.util.Daemon;
-import fr.dyade.aaa.util.Strings;
+import fr.dyade.aaa.common.Daemon;
+import fr.dyade.aaa.common.Strings;
 
 /**
  * <tt>HttpNetwork</tt> is a simple implementation of <tt>StreamNetwork</tt>

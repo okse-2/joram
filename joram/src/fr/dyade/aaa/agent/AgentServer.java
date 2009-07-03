@@ -45,9 +45,9 @@ import fr.dyade.aaa.agent.conf.A3CMLNetwork;
 import fr.dyade.aaa.agent.conf.A3CMLProperty;
 import fr.dyade.aaa.agent.conf.A3CMLServer;
 import fr.dyade.aaa.agent.conf.A3CMLService;
-import fr.dyade.aaa.util.Configuration;
+import fr.dyade.aaa.common.Configuration;
+import fr.dyade.aaa.common.Timer;
 import fr.dyade.aaa.util.ResolverRepository;
-import fr.dyade.aaa.util.Timer;
 import fr.dyade.aaa.util.Transaction;
 import fr.dyade.aaa.util.management.MXWrapper;
 
