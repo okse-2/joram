@@ -27,7 +27,6 @@ import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 
 import org.objectweb.joram.shared.client.TempDestDeleteRequest;
-
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -36,8 +35,6 @@ import org.objectweb.util.monolog.api.BasicLevel;
 public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
-
-  private final static String TMP_QUEUE_TYPE = "queue.tmp";
 
   /** The connection the queue belongs to, <code>null</code> if not known. */
   private Connection cnx;
