@@ -43,23 +43,26 @@ public class TcpRequestContext extends RequestContext {
 
   public JndiRequest getRequest() {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, 
-                       "TcpRequestContext.getRequest()"); 
+      Trace.logger.log(BasicLevel.DEBUG, "TcpRequestContext.getRequest()"); 
     return request;
   }
 
   public void reply(JndiReply reply) {
+    if (ioCtrl == null) {
+      Trace.logger.log(BasicLevel.WARN, "TcpRequestContext.reply(" + reply + ") ioCtrl is null");
+      return;
+    }
+      
     try {
       ioCtrl.writeObject(reply);
     } catch (Exception exc) {
-      Trace.logger.log(BasicLevel.ERROR, "", exc);
+      Trace.logger.log(BasicLevel.ERROR, "TcpRequestContext.reply(" + reply + ")", exc);
     } finally {
       ioCtrl.close();
     }
   }
   
   public String toString() {
-    return '(' + super.toString() +
-      ",request=" + request + ')';
+    return '(' + super.toString() + ",request=" + request + ')';
   }
 }
