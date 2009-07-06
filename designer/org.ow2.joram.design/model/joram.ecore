@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="joram"
+    nsURI="http:///joram.ow2.org/ecore/joram" nsPrefix="joram">
+  <eClassifiers xsi:type="ecore:EClass" name="Domain" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="managedElements" upperBound="-1"
+        eType="#//ManagedElement" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ManagedElement" abstract="true" interface="true"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ScalAgentServer" eSuperTypes="#//ManagedElement">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        defaultValueLiteral="JORAM"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="version" lowerBound="1"
+        eType="#//JoramVersion"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="hostname" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        defaultValueLiteral="localhost"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="services" upperBound="-1"
+        eType="#//JoramService" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="sid" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EShort"
+        defaultValueLiteral="0" iD="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="StorageDirectory" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        unsettable="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="JORAM" eSuperTypes="#//ScalAgentServer">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="jmsObjects" upperBound="-1"
+        eType="#//JMSObject" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="JoramVersion">
+    <eLiterals name="JORAM_5_2_4" value="1" literal="5.2.4"/>
+    <eLiterals name="JORAM_5_2_3" literal="5.2.3"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="JoramDomain" eSuperTypes="#//Domain">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        defaultValueLiteral="joram"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="JoramService" abstract="true"/>
+  <eClassifiers xsi:type="ecore:EClass" name="AdminProxy" eSuperTypes="#//JoramService">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        defaultValueLiteral="AdminProxy"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="port" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        defaultValueLiteral="7890"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ConnectionManager" eSuperTypes="#//JoramService">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="user" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        defaultValueLiteral="root"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="password" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        defaultValueLiteral="root"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        defaultValueLiteral="ConnectionManager"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="JNDIServer" eSuperTypes="#//JoramService">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        defaultValueLiteral="JNDIServer"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="port" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        defaultValueLiteral="16400"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TCPProxyService" eSuperTypes="#//JoramService">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        defaultValueLiteral="TCPProxyService"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="port" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        defaultValueLiteral="2560"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="NetworkDomain" eSuperTypes="#//ManagedElement">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        defaultValueLiteral="D0" iD="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="networkClass" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        defaultValueLiteral="fr.dyade.aaa.agent.PoolNetwork"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="NetworkPort" eSuperTypes="#//ManagedElement">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="port" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        defaultValueLiteral="16100"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="server" eType="#//ScalAgentServer">
+      <eAnnotations source="http:///org/eclipse/emf/ecore/util/ExtendedMetaData">
+        <details key="kind" value="qsdfsdq"/>
+        <details key="namespace" value="##targetNamespace"/>
+      </eAnnotations>
+    </eStructuralFeatures>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="domain" eType="#//NetworkDomain"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="JMSObject" abstract="true"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Queue" eSuperTypes="#//JMSObject">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        defaultValueLiteral="queue"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Topic" eSuperTypes="#//JMSObject">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        defaultValueLiteral="topic"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="User" eSuperTypes="#//JMSObject">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        defaultValueLiteral="anonymous"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="password" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        defaultValueLiteral="anonymous"/>
+  </eClassifiers>
+</ecore:EPackage>
