@@ -83,13 +83,13 @@ public class ExportAction implements IObjectActionDelegate {
 
           final IFile joramModelFile = (IFile) o;
 
-          /* create the correct URI for topology.xml based on *.joram */
+          /* create the correct URI for a3servers.xml based on *.joram */
           URI outputFileURi = URI.createFileURI(joramModelFile.getLocation().toOSString());
           outputFileURi = outputFileURi.trimSegments(1);
           outputFileURi = outputFileURi.appendSegment("a3servers.xml");
 
           TransformerFactory tFactory = TransformerFactory.newInstance();
-          URL url = Platform.getBundle("org.ow2.joram.design.diagram").getResource(
+          URL url = Platform.getBundle("org.ow2.joram.design").getResource(
               "org/ow2/joram/design/model/export/xslt/joram.xsl");
           Transformer transformer = tFactory.newTransformer(new StreamSource(url.toURI().toString()));
           transformer.transform(new StreamSource(joramModelFile.getContents()), new StreamResult(
