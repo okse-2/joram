@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" ?>
 <!-- 
  * Copyright (C) 2009 ScalAgent Distributed Technologies
  *
@@ -19,7 +20,6 @@
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  * -->
-<?xml version="1.0" encoding="UTF-8" ?>
 <xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:joram="http:///joram.ow2.org/ecore/joram">
   <xsl:output indent="yes" method="xml" />
   
@@ -29,7 +29,7 @@
     </xsl:element>
   </xsl:template>
   
-  <xsl:template match="//managedElements[@xsi:type='joram:JORAM']">
+  <xsl:template match="//managedElements[@xsi:type='joram:JORAM' or @xsi:type='joram:ScalAgentServer']">
     <xsl:element name="server">
     
       <xsl:attribute name="id">
