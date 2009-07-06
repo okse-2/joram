@@ -1249,7 +1249,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * @see #getDestinations(int)
    */
   public String[] getDestinations() throws ConnectException, AdminException {
-    return getDestinations(AdminModule.getLocalServerId());
+    return getDestinations((short) AdminModule.getLocalServerId());
   }
 
   /**
@@ -1265,7 +1265,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * @exception ConnectException  If the connection is closed or broken.
    * @exception AdminException    Never thrown.
    */
-  public String[] getDestinations(int serverId) throws ConnectException, AdminException {
+  public String[] getDestinations(short serverId) throws ConnectException, AdminException {
     Destination[] destinations = AdminModule.getDestinations(serverId);
     String[] names = new String[destinations.length];
     
@@ -1448,7 +1448,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * @see #getUsers(int)
    */
   public String[] getUsers() throws ConnectException, AdminException {
-    return getUsers(AdminModule.getLocalServerId());
+    return getUsers((short) AdminModule.getLocalServerId());
   }
 
   /**
@@ -1465,7 +1465,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * @exception ConnectException  If the connection fails.
    * @exception AdminException    If the request fails.
    */
-  public String[] getUsers(int serverId) throws ConnectException, AdminException {
+  public String[] getUsers(short serverId) throws ConnectException, AdminException {
     User[] users = AdminModule.getUsers(serverId);
     String[] names = new String[users.length];
     
