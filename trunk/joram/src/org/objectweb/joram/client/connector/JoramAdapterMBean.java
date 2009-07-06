@@ -242,9 +242,9 @@ public interface JoramAdapterMBean {
    * @exception ConnectException  If the connection is closed or broken.
    * @exception AdminException    Never thrown.
    * 
-   * @see #getDestinations(int)
+   * @see #getDestinations(short)
    */
-  public String[] getDestinations(int serverId) throws ConnectException, AdminException;
+  public String[] getDestinations(short serverId) throws ConnectException, AdminException;
 
   /**
    * Creates or retrieves a queue destination on the underlying JORAM server,
@@ -321,7 +321,7 @@ public interface JoramAdapterMBean {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException    Never thrown.
    * 
-   * @see #getUsers(int)
+   * @see #getUsers(short)
    */
   public String[] getUsers() throws ConnectException, AdminException;
 
@@ -339,7 +339,7 @@ public interface JoramAdapterMBean {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException    If the request fails.
    */
-  public String[] getUsers(int serverId) throws ConnectException, AdminException;
+  public String[] getUsers(short serverId) throws ConnectException, AdminException;
 
   /**
    * Creates or retrieves a user on the underlying JORAM server.
