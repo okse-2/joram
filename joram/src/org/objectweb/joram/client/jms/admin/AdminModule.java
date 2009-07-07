@@ -1303,9 +1303,9 @@ public final class AdminModule {
    * 
    * @since 4.3.10
    */
-  public static boolean executeXMLAdmin(String cfgDir,
+  public static void executeXMLAdmin(String cfgDir,
                                         String cfgFileName) throws Exception {
-    return executeXMLAdmin(new File(cfgDir, cfgFileName).getPath());
+    executeXMLAdmin(new File(cfgDir, cfgFileName).getPath());
   }
 
   /**
@@ -1316,7 +1316,7 @@ public final class AdminModule {
    *
    * @since 4.3.10
    */
-  public static boolean executeXMLAdmin(String path) throws Exception {
+  public static void executeXMLAdmin(String path) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "AdminModule.executeXMLAdmin(" + path + ")");
     
@@ -1364,9 +1364,11 @@ public final class AdminModule {
                    "Trying to find [" + path + "] using ClassLoader.getSystemResource().");
       is = ClassLoader.getSystemResourceAsStream(path);
     }
-    if (is != null) executeAdmin(new InputStreamReader(is));
+    
+    if (is == null)
+      throw new FileNotFoundException("XML Joram configuration file \"" + path + "\" not found.");
 
-    throw new FileNotFoundException("XML Joram configuration file \"" + path + "\" not found.");
+    executeAdmin(new InputStreamReader(is));
   }
 
   public static void executeAdmin(Reader reader) throws Exception {
