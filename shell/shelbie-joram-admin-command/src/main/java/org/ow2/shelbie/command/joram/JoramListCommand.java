@@ -29,7 +29,7 @@ import org.ow2.shelbie.ICommandRenderer;
 public class JoramListCommand extends DefaultCommandSupport {
 
   /**
-   * Return the class that has to be called to execute the command.
+   * Returns the class that has to be called to execute the command.
    * 
    * @return A class which implements ICommandHandler interface.
    */
@@ -56,7 +56,7 @@ public class JoramListCommand extends DefaultCommandSupport {
   }
 
   /**
-   * Specify the class that contains the options.
+   * Specifies the class that contains the options.
    * 
    * @see org.ow2.shelbie.ICommand#getOption()
    * @return The class of {@link JoramListOption}
@@ -66,8 +66,8 @@ public class JoramListCommand extends DefaultCommandSupport {
   }
   
   /**
-   * An inner class which store the command line option in order to be available
-   * both for the handler and the renderer.
+   * An inner class which stores the command line option in order to be
+   * available both for the handler and the renderer.
    */
   public static class JoramCreateOption {
 
