@@ -147,7 +147,7 @@ public class HATest2 extends TestCase {
     String[] jvmargs = new String[] {
       "-DnbClusterExpected=1",
       "-DTransaction=fr.dyade.aaa.util.NullTransaction",
-      "-D" + fr.dyade.aaa.util.Debug.DEBUG_DIR_PROPERTY + "=.."};
+      "-D" + fr.dyade.aaa.common.Debug.DEBUG_DIR_PROPERTY + "=.."};
 
     String[] args = new String[] { rid };
 
