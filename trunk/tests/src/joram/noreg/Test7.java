@@ -32,7 +32,7 @@ import javax.jms.Session;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.admin.User;
 
-import fr.dyade.aaa.util.Configuration;
+import fr.dyade.aaa.common.Configuration;
 
 /**
  * check system property and create multiple queue

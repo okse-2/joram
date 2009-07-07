@@ -31,10 +31,10 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.util.Debug;
-import fr.dyade.aaa.util.SocketFactory;
-import fr.dyade.aaa.util.Timer;
-import fr.dyade.aaa.util.TimerTask;
+import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.SocketFactory;
+import fr.dyade.aaa.common.Timer;
+import fr.dyade.aaa.common.TimerTask;
 
 /**
  * This class implements a SocketFactory. Sockets created by this factory are

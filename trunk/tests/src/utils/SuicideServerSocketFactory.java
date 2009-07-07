@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 
-import fr.dyade.aaa.util.ServerSocketFactory;
+import fr.dyade.aaa.common.ServerSocketFactory;
 
 /**
  * This class implements the ServerSocketFactory interface for JDK prior to 1.4.

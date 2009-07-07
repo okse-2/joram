@@ -141,7 +141,7 @@ public class HATest4 extends TestCase {
 //       "-Xmx64m",
       "-DnbClusterExpected=2",
       "-DTransaction=fr.dyade.aaa.util.NullTransaction",
-      "-D" + fr.dyade.aaa.util.Debug.DEBUG_DIR_PROPERTY + "=..",
+      "-D" + fr.dyade.aaa.common.Debug.DEBUG_DIR_PROPERTY + "=..",
       "-Dname=" + name};
 
     String[] args = new String[] { rid };
