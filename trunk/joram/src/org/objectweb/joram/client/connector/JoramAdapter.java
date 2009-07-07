@@ -1655,8 +1655,8 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * @param path the path for the joramAdmin file
    * @throws AdminException if an error occurs
    */
-  public boolean executeXMLAdmin(String path) throws Exception {
-    return AdminModule.executeXMLAdmin(path);
+  public void executeXMLAdmin(String path) throws Exception {
+    AdminModule.executeXMLAdmin(path);
   }
 
   /**

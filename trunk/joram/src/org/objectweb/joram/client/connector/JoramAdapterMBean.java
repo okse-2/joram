@@ -439,7 +439,7 @@ public interface JoramAdapterMBean {
 
   public String getAdminFileExportXML();
 
-  public boolean executeXMLAdmin(String path) throws Exception;
+  public void executeXMLAdmin(String path) throws Exception;
 
   /**
    * Export the repository content to an XML file with default filename.
