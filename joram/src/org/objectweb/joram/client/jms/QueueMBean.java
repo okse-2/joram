@@ -73,7 +73,7 @@ public interface QueueMBean extends DestinationMBean {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
    */
-  public void setDefaultDMQ() throws ConnectException, AdminException;
+  public void registerAsDefaultDMQ() throws ConnectException, AdminException;
   
   /**
    * Sets the current queue as the default DMQ for the given server.
@@ -85,13 +85,13 @@ public interface QueueMBean extends DestinationMBean {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public void setDefaultDMQ(int serverId) throws ConnectException, AdminException;
+  public void registerAsDefaultDMQ(int serverId) throws ConnectException, AdminException;
   
-  /**
-   * Unset the default dead message queue for the local server.
-   * 
-   * @throws ConnectException
-   * @throws AdminException
-   */
-  public void resetDefaultDMQ() throws ConnectException, AdminException;
+//  /**
+//   * Unset the default dead message queue for the local server.
+//   * 
+//   * @throws ConnectException
+//   * @throws AdminException
+//   */
+//  public void resetDefaultDMQ() throws ConnectException, AdminException;
 }

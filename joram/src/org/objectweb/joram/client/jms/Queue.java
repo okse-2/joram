@@ -518,7 +518,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
    */
-  public void setDefaultDMQ() throws ConnectException, AdminException {
+  public void registerAsDefaultDMQ() throws ConnectException, AdminException {
     getWrapper().setDefaultDMQId(getName());
   }
   
@@ -532,48 +532,48 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public void setDefaultDMQ(int serverId) throws ConnectException, AdminException {
+  public void registerAsDefaultDMQ(int serverId) throws ConnectException, AdminException {
     getWrapper().setDefaultDMQId(serverId, getName());
   }
   
-  /**
-   * Returns the default dead message queue for the local server, null if not
-   * set.
-   *
-   * @return The object name of the dead message queue of the local server or null
-   *         if none exists.
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
-   * 
-   * @see #getDefaultDMQ(int)
-   */
-  public Queue getDefaultDMQ() throws ConnectException, AdminException {
-    return getWrapper().getDefaultDMQ();
-  }
-  
-  /**
-   * Returns the default dead message queue for a given server, null if not set.
-   * <p>
-   * The request fails if the target server does not belong to the platform.
-   * 
-   * @param serverId Unique identifier of the server.
-   * @return The object name of the dead message queue of the given server or null
-   *         if none exists.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  If the request fails.
-   */
-  public Queue getDefaultDMQ(int serverId) throws ConnectException, AdminException {
-    return getWrapper().getDefaultDMQ(serverId);
-  }
-  
-  /**
-   * Unset the default dead message queue for the local server.
-   * 
-   * @throws ConnectException
-   * @throws AdminException
-   */
-  public void resetDefaultDMQ() throws ConnectException, AdminException {
-    getWrapper().setDefaultDMQ(null);
-  }
+//  /**
+//   * Returns the default dead message queue for the local server, null if not
+//   * set.
+//   *
+//   * @return The object name of the dead message queue of the local server or null
+//   *         if none exists.
+//   * @exception ConnectException  If the connection fails.
+//   * @exception AdminException  Never thrown.
+//   * 
+//   * @see #getDefaultDMQ(int)
+//   */
+//  public Queue getDefaultDMQ() throws ConnectException, AdminException {
+//    return getWrapper().getDefaultDMQ();
+//  }
+//  
+//  /**
+//   * Returns the default dead message queue for a given server, null if not set.
+//   * <p>
+//   * The request fails if the target server does not belong to the platform.
+//   * 
+//   * @param serverId Unique identifier of the server.
+//   * @return The object name of the dead message queue of the given server or null
+//   *         if none exists.
+//   *
+//   * @exception ConnectException  If the connection fails.
+//   * @exception AdminException  If the request fails.
+//   */
+//  public Queue getDefaultDMQ(int serverId) throws ConnectException, AdminException {
+//    return getWrapper().getDefaultDMQ(serverId);
+//  }
+//  
+//  /**
+//   * Unset the default dead message queue for the local server.
+//   * 
+//   * @throws ConnectException
+//   * @throws AdminException
+//   */
+//  public void resetDefaultDMQ() throws ConnectException, AdminException {
+//    getWrapper().setDefaultDMQ(null);
+//  }
 }
