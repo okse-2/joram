@@ -1337,7 +1337,10 @@ public final class AdminModule {
                    "Unable to find Joram Admin configuration file \"" + cfgFile.getPath() + "\".");
       reader = null;
     }
-    if (reader != null) executeAdmin(reader);
+    if (reader != null) {
+      executeAdmin(reader);
+      return;
+    }
 
     // 2nd, search XML configuration file in path used to load classes.
     InputStream is = null;
