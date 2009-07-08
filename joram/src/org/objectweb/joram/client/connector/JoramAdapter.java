@@ -1489,7 +1489,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    */
   public String createUser(String name,
                            String password) throws AdminException, ConnectException {
-    return createUser(name, password, AdminModule.getLocalServerId(), SimpleIdentity.class.getName());
+    return createUser(name, password, (short) AdminModule.getLocalServerId(), SimpleIdentity.class.getName());
   }
 
   /**
@@ -1508,7 +1508,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
   public String createUser(String name,
                            String password,
                            String identityClass) throws AdminException, ConnectException {
-    return createUser(name, password, AdminModule.getLocalServerId(), identityClass);
+    return createUser(name, password, (short) AdminModule.getLocalServerId(), identityClass);
   }
 
   /**
