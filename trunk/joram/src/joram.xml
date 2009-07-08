@@ -287,7 +287,6 @@
     <mkdir dir="${ship.dir}"/>
     <mkdir dir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/activation.jar" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/jakarta-regexp-1.2.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/JCup.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/jms.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/jndi.jar" todir="${ship.dir}/lib"/>
@@ -360,7 +359,6 @@
         <include name="META-INF/ra.xml"/>
       </fileset>
       <fileset dir="${lib.dir}">
-        <include name="jakarta-regexp-1.2.jar"/>
         <include name="JCup.jar"/>
         <include name="ow_monolog.jar"/>
       </fileset>

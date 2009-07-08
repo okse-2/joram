@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -32,8 +32,11 @@
 package org.objectweb.joram.shared.selectors;
 
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
-import java_cup.runtime.*;
+import java_cup.runtime.Scanner;
+import java_cup.runtime.Symbol;
+
 import org.objectweb.joram.shared.messages.Message;
 
 /** CUP v0.10j generated parser.
@@ -804,7 +807,6 @@ class CUP$Filter$actions {
                            instanceof String) {
                     StringBuffer stBuff = new StringBuffer(st1.substring(1, st1.length() - 1));
                     StringBuffer stBuffRes = new StringBuffer();
-                    stBuffRes.append('^');
                     char esc = st2.charAt(1);
                     for (int i = 0; i < stBuff.length(); i++) {
                       if (stBuff.charAt(i) == esc) {
@@ -820,15 +822,8 @@ class CUP$Filter$actions {
                         stBuffRes.append(stBuff.charAt(i));
                       }
                     }
-                    stBuffRes.append('$');
                     st1 = stBuffRes.toString(); 
-                    org.apache.regexp.RE regExp =
-                      new org.apache.regexp.RE(st1);
-
-                    RESULT =
-                      new Boolean(! regExp.match((String)
-                                                 Interpreter.interpret
-                                                 (id, message, syntaxType)));
+                    RESULT = new Boolean(!Pattern.matches(st1, (String) Interpreter.interpret(id, message, syntaxType)));
                   }
 
                   // Comparison of non like values returns FALSE.
@@ -861,7 +856,6 @@ class CUP$Filter$actions {
                            instanceof String) {
                     StringBuffer stBuff = new StringBuffer(st1.substring(1, st1.length() - 1));
                     StringBuffer stBuffRes = new StringBuffer();
-                    stBuffRes.append('^');
                     char esc = st2.charAt(1);
                     for (int i = 0; i < stBuff.length(); i++) {
                       if (stBuff.charAt(i) == esc) {
@@ -877,15 +871,8 @@ class CUP$Filter$actions {
                         stBuffRes.append(stBuff.charAt(i));
                       }
                     }
-                    stBuffRes.append('$');
                     st1 = stBuffRes.toString(); 
-                    org.apache.regexp.RE regExp =
-                      new org.apache.regexp.RE(st1);
-
-                    RESULT =
-                      new Boolean(regExp.match((String)
-                                               Interpreter.interpret
-                                               (id, message, syntaxType)));
+                    RESULT = new Boolean(Pattern.matches(st1, (String) Interpreter.interpret(id, message, syntaxType)));
                   }
 
                   // Comparison of non like values returns FALSE.
@@ -914,8 +901,6 @@ class CUP$Filter$actions {
                            instanceof String) {
                     StringBuffer stBuff =
                       new StringBuffer(st.substring(1, st.length() - 1));
-                    stBuff.insert(0, '^');
-
                     for (int i = 0; i < stBuff.length(); i++) {
                       if (stBuff.charAt(i) == '_')
                         stBuff.setCharAt(i, '.');
@@ -925,14 +910,9 @@ class CUP$Filter$actions {
                         i++ ;
                       }
                     }
-                    stBuff.append('$');
 
-                    st = stBuff.toString(); 
-                    org.apache.regexp.RE regExp = new org.apache.regexp.RE(st);
-                    RESULT =
-                      new Boolean(! regExp.match((String)
-                                                 Interpreter.interpret
-                                                 (id, message, syntaxType)));
+                    st = stBuff.toString();
+                    RESULT = new Boolean(!Pattern.matches(st, (String) Interpreter.interpret(id, message, syntaxType)));
                   }
                   // Comparison of non like values returns FALSE.
                   else
@@ -960,7 +940,6 @@ class CUP$Filter$actions {
                       instanceof String) {
                     StringBuffer stBuff =
                       new StringBuffer(st.substring(1, st.length() - 1));
-                    stBuff.insert(0, '^');
 
                     for (int i = 0; i < stBuff.length(); i++) {
                       if (stBuff.charAt(i) == '_')
@@ -971,15 +950,9 @@ class CUP$Filter$actions {
                         i++ ;
                       }
                     }
-                    stBuff.append('$');
 
-                    st = stBuff.toString(); 
-                    org.apache.regexp.RE regExp = new org.apache.regexp.RE(st);
-
-                    RESULT =
-                      new Boolean(regExp.match((String)
-                                               Interpreter.interpret
-                                               (id, message, syntaxType)));
+                    st = stBuff.toString();
+                    RESULT = new Boolean(Pattern.matches(st, (String) Interpreter.interpret(id, message, syntaxType)));
                   }
                   // Comparison of non like values returns FALSE.
                   else
