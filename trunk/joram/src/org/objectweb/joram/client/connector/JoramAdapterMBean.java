@@ -160,7 +160,7 @@ public interface JoramAdapterMBean {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public String getDefaultDMQId(int serverId) throws ConnectException, AdminException;
+  public String getDefaultDMQId(short serverId) throws ConnectException, AdminException;
 
   /**
    * Unset the default dead message queue for the local server.
@@ -177,7 +177,7 @@ public interface JoramAdapterMBean {
    * @throws ConnectException
    * @throws AdminException
    */
-  public void resetDefaultDMQ(int serverId) throws ConnectException, AdminException;
+  public void resetDefaultDMQ(short serverId) throws ConnectException, AdminException;
 
 
   /**
@@ -195,7 +195,7 @@ public interface JoramAdapterMBean {
    * @return the default threshold of the given Joram server.
    * @see AdminModule#getDefaultThreshold(int)
    */
-  public int getDefaultThreshold(int serverId) throws ConnectException, AdminException;
+  public int getDefaultThreshold(short serverId) throws ConnectException, AdminException;
 
   /**
    * Sets the default threshold of the Joram server.
@@ -212,7 +212,7 @@ public interface JoramAdapterMBean {
    * @param threshold the default threshold of the given Joram server.
    * @see AdminModule#setDefaultThreshold(int, int)
    */
-  public void setDefaultThreshold(int serverId, int threshold) throws ConnectException, AdminException;
+  public void setDefaultThreshold(short serverId, int threshold) throws ConnectException, AdminException;
 
   /**
    * Returns the list of all destinations that exist on the local server.
@@ -271,7 +271,7 @@ public interface JoramAdapterMBean {
    * 
    * @see #createQueue(int, String, String, Properties)
    */
-  public String createQueue(int serverId, String name) throws AdminException, ConnectException;
+  public String createQueue(short serverId, String name) throws AdminException, ConnectException;
 
 
   /**
@@ -299,7 +299,7 @@ public interface JoramAdapterMBean {
    * 
    * @see #createTopic(int, String, String, Properties)
    */
-  public String createTopic(int serverId, String name) throws AdminException, ConnectException;
+  public String createTopic(short serverId, String name) throws AdminException, ConnectException;
 
 
   /**
@@ -385,7 +385,7 @@ public interface JoramAdapterMBean {
    * @see #createUser(String, String, int, String)
    */
   public String createUser(String name, String password,
-                           int serverId) throws AdminException, ConnectException;
+                           short serverId) throws AdminException, ConnectException;
 
   /**
    * Creates or retrieves a user on the underlying JORAM server.
@@ -400,7 +400,7 @@ public interface JoramAdapterMBean {
    * @exception ConnectException  If the connection fails.
    */
   public String createUser(String name, String password,
-                           int serverId,
+                           short serverId,
                            String identityClass) throws ConnectException, AdminException;
 
   /**

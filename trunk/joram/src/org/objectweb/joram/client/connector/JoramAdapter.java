@@ -1167,7 +1167,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * 
    * @see AdminModule#getDefaultDMQId()
    */
-  public String getDefaultDMQId(int serverId) throws ConnectException, AdminException {
+  public String getDefaultDMQId(short serverId) throws ConnectException, AdminException {
     return AdminModule.getDefaultDMQId(serverId);
   }
 
@@ -1188,7 +1188,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * @throws ConnectException
    * @throws AdminException
    */
-  public void resetDefaultDMQ(int serverId) throws ConnectException, AdminException {
+  public void resetDefaultDMQ(short serverId) throws ConnectException, AdminException {
     AdminModule.setDefaultDMQ(serverId, null);
   }
 
@@ -1210,7 +1210,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * @return the default threshold of the given Joram server.
    * @see AdminModule#getDefaultThreshold(int)
    */
-  public int getDefaultThreshold(int serverId) throws ConnectException, AdminException {
+  public int getDefaultThreshold(short serverId) throws ConnectException, AdminException {
     return AdminModule.getDefaultThreshold(serverId);
   }
 
@@ -1231,7 +1231,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * @param threshold the default threshold of the given Joram server.
    * @see AdminModule#setDefaultThreshold(int, int)
    */
-  public void setDefaultThreshold(int serverId, int threshold) throws ConnectException, AdminException {
+  public void setDefaultThreshold(short serverId, int threshold) throws ConnectException, AdminException {
     AdminModule.setDefaultThreshold(serverId, threshold);
   }
 
@@ -1302,7 +1302,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * 
    * @see #createQueue(int, String, String, Properties)
    */
-  public String createQueue(int serverId, String name) throws AdminException, ConnectException {
+  public String createQueue(short serverId, String name) throws AdminException, ConnectException {
     return createQueue(serverId, name, Destination.QUEUE, null);
   }
 
@@ -1320,7 +1320,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * @exception AdminException   If the creation fails.
    * @exception ConnectException if the connection is closed or broken
    */
-  public String createQueue(int serverId,
+  public String createQueue(short serverId,
                             String name,
                             String className,
                             Properties prop) throws AdminException, ConnectException {
@@ -1372,7 +1372,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * 
    * @see #createTopic(int, String, String, Properties)
    */
-  public String createTopic(int serverId, String name) throws AdminException, ConnectException {
+  public String createTopic(short serverId, String name) throws AdminException, ConnectException {
     return createTopic(serverId, name, Destination.TOPIC, null);
   }
 
@@ -1388,7 +1388,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * @exception AdminException   If the creation fails.
    * @exception ConnectException if the connection is closed or broken
    */
-  public String createTopic(int serverId,
+  public String createTopic(short serverId,
                             String name,
                             String className,
                             Properties prop) throws AdminException, ConnectException {
@@ -1526,7 +1526,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    */
   public String createUser(String name,
                            String password,
-                           int serverId) throws AdminException, ConnectException {
+                           short serverId) throws AdminException, ConnectException {
     return createUser(name, password, serverId, SimpleIdentity.class.getName());
   }
 
@@ -1544,7 +1544,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    */
   public String createUser(String name,
                          String password,
-                         int serverId,
+                         short serverId,
                          String identityClass) throws AdminException, ConnectException {
     User user = AdminModule.createUser(name, password, serverId, identityClass);
     return user.registerMBean(jmxRootName);
