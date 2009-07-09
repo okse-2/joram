@@ -247,7 +247,10 @@ public class ProxyAgent extends Agent {
       logger.log(BasicLevel.DEBUG, "ProxyAgent.queueDeclare(" + 
           channelId + ',' + ticket + ',' + queue + ')');
     // Check if the queue already exists
-    Object ref = NamingAgent.getSingleton().lookup(queue);
+    Object ref = null;
+    if (queue != null && !queue.equals("")) {
+      ref = NamingAgent.getSingleton().lookup(queue);
+    }
     String queueName = queue;
     if (ref == null && !passive) {
       QueueAgent queueAgent = new QueueAgent(queue, durable, autoDelete);
@@ -256,6 +259,10 @@ public class ProxyAgent extends Agent {
         queueName = queueAgent.getAgentId();
       }
       NamingAgent.getSingleton().bind(queueName, queueAgent.getId());
+      
+      // All message queues MUST BE automatically bound to the nameless exchange using the
+      // message queue's name as routing key.
+      queueBind(channelId, ticket, queueName, "", queueName, null);
     }
     // TODO msgCount / consumerCount
     return new AMQP.Queue.DeclareOk(queueName, 0, 0);
