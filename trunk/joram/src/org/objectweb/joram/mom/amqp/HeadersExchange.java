@@ -24,12 +24,15 @@
 package org.objectweb.joram.mom.amqp;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.objectweb.joram.mom.amqp.marshalling.LongString;
+import org.objectweb.joram.mom.amqp.marshalling.LongStringHelper;
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 
 import fr.dyade.aaa.agent.AgentId;
@@ -66,7 +69,7 @@ import fr.dyade.aaa.agent.UnknownAgent;
  */
 public class HeadersExchange extends ExchangeAgent {
   
-  private Map bindings;
+  private Map bindings = new HashMap();
   
   public HeadersExchange(String name, boolean durable) {
     super(name, durable);
@@ -99,17 +102,24 @@ public class HeadersExchange extends ExchangeAgent {
     Set destQueues = new HashSet();
     Iterator iteratorMaps = bindings.keySet().iterator();
     
+    if (properties.headers == null) {
+      return;
+    }
+    
     while (iteratorMaps.hasNext()) {
       Map bindArguments = (Map) iteratorMaps.next();
       Iterator iteratorArguments = bindArguments.keySet().iterator();
 
       // Match any : find the first argument matching to publish to the bound queues
-      if (((String) bindArguments.get("x-match")).equalsIgnoreCase("any")) {
+      if (((LongString) bindArguments.get("x-match")).toString().equalsIgnoreCase("any")) {
         while (iteratorArguments.hasNext()) {
           String argument = (String) iteratorArguments.next();
+          if (argument.equals("x-match")) {
+            continue;
+          }
           if (bindArguments.get(argument) == null && properties.headers.containsKey(argument)
-              || ((String) bindArguments.get(argument)).equals("") && properties.headers.containsKey(argument)
-              || ((String) bindArguments.get(argument)).equals(properties.headers.get(argument))) {
+              || ((LongString) bindArguments.get(argument)).equals(LongStringHelper.asLongString("")) && properties.headers.containsKey(argument)
+              || ((LongString) bindArguments.get(argument)).equals(properties.headers.get(argument))) {
             destQueues.addAll((List) bindings.get(bindArguments));
             break;
           }
@@ -120,9 +130,12 @@ public class HeadersExchange extends ExchangeAgent {
         boolean matched = true;
         while (iteratorArguments.hasNext()) {
           String argument = (String) iteratorArguments.next();
+          if (argument.equals("x-match")) {
+            continue;
+          }
           if (bindArguments.get(argument) == null && !properties.headers.containsKey(argument)
-              || ((String) bindArguments.get(argument)).equals("") && !properties.headers.containsKey(argument)
-              || !((String) bindArguments.get(argument)).equals(properties.headers.get(argument))) {
+              || ((LongString) bindArguments.get(argument)).equals(LongStringHelper.asLongString("")) && !properties.headers.containsKey(argument)
+              || !((LongString) bindArguments.get(argument)).equals(properties.headers.get(argument))) {
             matched = false;
             break;
           }
