@@ -24,6 +24,8 @@
 package org.objectweb.joram.mom.amqp;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -78,6 +80,9 @@ public class NamingAgent extends Agent {
     if (namingTable == null) {
       namingTable = new HashMap();
     }
+    if (firstTime) {
+      createDefaults();
+    }
   }
   
   public void react(Notification not) throws Exception {
@@ -88,8 +93,7 @@ public class NamingAgent extends Agent {
   
   public Object lookup(String name) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "NamingAgent.lookup(" + 
-          name + ')');
+      logger.log(BasicLevel.DEBUG, "NamingAgent.lookup(" + name + ')');
     return namingTable.get(name);
   }
   
@@ -109,6 +113,34 @@ public class NamingAgent extends Agent {
     if (found != null) {
       saveNaming();
     }
+  }
+  
+  private static void createDefaults() throws Exception {
+    ExchangeAgent exchangeAgent;
+    String exchangeName = "";
+    exchangeAgent = new DirectExchange(exchangeName, true);
+    NamingAgent.getSingleton().bind(exchangeName, exchangeAgent.getId());
+    exchangeAgent.deploy();
+
+    exchangeName = "amq.direct";
+    exchangeAgent = new DirectExchange(exchangeName, true);
+    NamingAgent.getSingleton().bind(exchangeName, exchangeAgent.getId());
+    exchangeAgent.deploy();
+
+    exchangeName = "amq.fanout";
+    exchangeAgent = new FanoutExchange(exchangeName, true);
+    NamingAgent.getSingleton().bind(exchangeName, exchangeAgent.getId());
+    exchangeAgent.deploy();
+
+    exchangeName = "amq.topic";
+    exchangeAgent = new TopicExchange(exchangeName, true);
+    NamingAgent.getSingleton().bind(exchangeName, exchangeAgent.getId());
+    exchangeAgent.deploy();
+
+    exchangeName = "amq.match";
+    exchangeAgent = new HeadersExchange(exchangeName, true);
+    NamingAgent.getSingleton().bind(exchangeName, exchangeAgent.getId());
+    exchangeAgent.deploy();
   }
 
 }
