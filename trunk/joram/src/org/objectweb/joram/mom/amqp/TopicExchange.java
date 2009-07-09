@@ -39,34 +39,30 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.UnknownAgent;
 
 /**
- * The topic exchange type provides routing to bound queues based on a pattern
- * match between the binding key and the routing key of the message. This
- * exchange type may be used to support the classic publish/subscribe paradigm
- * using a topic namespace as the addressing model to select and deliver
- * messages across multiple consumers based on a partial or full match on a
- * topic pattern.<br>
  * The topic exchange type works as follows:
  * <ul>
- * <li>1. A message queue is bound to the exchange using a binding key, K.
+ * <li>1. A message queue binds to the exchange using a routing pattern, P.
  * <li>2. A publisher sends the exchange a message with the routing key R.
- * <li>3. The message is passed to the all message queues where K matches R.
+ * <li>3. The message is passed to the message queue if R matches P.
  * </ul>
- * The binding key is formed using zero or more tokens, with each token
- * delimited by the '.' char. The binding key MUST be specified in this form and
- * additionally supports special wild-card characters: '*' matches a single word
- * and '#' matches zero or more words.<br>
- * Thus the binding key "*.stock.#" matches the routing keys "usd.stock" and
- * "eur.stock.db" but not "stock.nasdaq".
+ * The routing key used for a topic exchange MUST consist of zero or more words
+ * delimited by dots. Each word may contain the letters A-Z and a-z and digits
+ * 0-9.<br>
+ * The routing pattern follows the same rules as the routing key with the
+ * addition that * matches a single word, and # matches zero or more words. Thus
+ * the routing pattern *.stock.# matches the routing keys usd.stock and
+ * eur.stock.db but not stock.nasdaq.
  */
 public class TopicExchange extends ExchangeAgent {
   
   private static Pattern createPattern(String routingPattern) {
     String newPattern = routingPattern;
-    newPattern = newPattern.replaceAll("\\*", "[a-zA-Z]+");
+    newPattern = newPattern.replaceAll("\\*", "[a-zA-Z0-9]+");
 
-    newPattern = newPattern.replaceAll("\\.#\\.", ".([a-zA-Z]+.)*");
-    newPattern = newPattern.replaceAll("\\.#", "(.[a-zA-Z]+)*");
-    newPattern = newPattern.replaceAll("#\\.", "([a-zA-Z]+.)*");
+    newPattern = newPattern.replaceAll("\\.#\\.", ".([a-zA-Z0-9]+.)*");
+    newPattern = newPattern.replaceAll("\\.#", "(.[a-zA-Z0-9]+)*");
+    newPattern = newPattern.replaceAll("#\\.", "([a-zA-Z0-9]+.)*");
+    newPattern = newPattern.replaceAll("#", "[a-zA-Z0-9\\.]*");
 
     newPattern = newPattern.replaceAll("\\.", "\\\\.");
     return Pattern.compile(newPattern);
