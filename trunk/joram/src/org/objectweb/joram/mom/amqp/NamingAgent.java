@@ -98,6 +98,8 @@ public class NamingAgent extends Agent {
   }
   
   public void bind(String name, Object ref) throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "NamingAgent.bind(" + name + ", " + ref + ')');
     Object found = namingTable.get(name);
     if (found != null) throw new Exception("Already bound: " + name);
     namingTable.put(name, ref);
@@ -109,6 +111,8 @@ public class NamingAgent extends Agent {
   }
 
   public void unbind(String name) throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "NamingAgent.unbind(" + name + ')');
     Object found = namingTable.remove(name);
     if (found != null) {
       saveNaming();
@@ -117,29 +121,24 @@ public class NamingAgent extends Agent {
   
   private static void createDefaults() throws Exception {
     ExchangeAgent exchangeAgent;
-    String exchangeName = "";
-    exchangeAgent = new DirectExchange(exchangeName, true);
-    NamingAgent.getSingleton().bind(exchangeName, exchangeAgent.getId());
+    exchangeAgent = new DirectExchange(ExchangeAgent.DEFAULT_EXCHANGE_NAME, true);
+    NamingAgent.getSingleton().bind(ExchangeAgent.DEFAULT_EXCHANGE_NAME, exchangeAgent.getId());
     exchangeAgent.deploy();
 
-    exchangeName = "amq.direct";
-    exchangeAgent = new DirectExchange(exchangeName, true);
-    NamingAgent.getSingleton().bind(exchangeName, exchangeAgent.getId());
+    exchangeAgent = new DirectExchange(DirectExchange.DEFAULT_NAME, true);
+    NamingAgent.getSingleton().bind(exchangeAgent.getName(), exchangeAgent.getId());
     exchangeAgent.deploy();
 
-    exchangeName = "amq.fanout";
-    exchangeAgent = new FanoutExchange(exchangeName, true);
-    NamingAgent.getSingleton().bind(exchangeName, exchangeAgent.getId());
+    exchangeAgent = new FanoutExchange(FanoutExchange.DEFAULT_NAME, true);
+    NamingAgent.getSingleton().bind(exchangeAgent.getName(), exchangeAgent.getId());
     exchangeAgent.deploy();
 
-    exchangeName = "amq.topic";
-    exchangeAgent = new TopicExchange(exchangeName, true);
-    NamingAgent.getSingleton().bind(exchangeName, exchangeAgent.getId());
+    exchangeAgent = new TopicExchange(TopicExchange.DEFAULT_NAME, true);
+    NamingAgent.getSingleton().bind(exchangeAgent.getName(), exchangeAgent.getId());
     exchangeAgent.deploy();
 
-    exchangeName = "amq.match";
-    exchangeAgent = new HeadersExchange(exchangeName, true);
-    NamingAgent.getSingleton().bind(exchangeName, exchangeAgent.getId());
+    exchangeAgent = new HeadersExchange(HeadersExchange.DEFAULT_NAME, true);
+    NamingAgent.getSingleton().bind(exchangeAgent.getName(), exchangeAgent.getId());
     exchangeAgent.deploy();
   }
 

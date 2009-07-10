@@ -69,6 +69,8 @@ import fr.dyade.aaa.agent.UnknownAgent;
  */
 public class HeadersExchange extends ExchangeAgent {
   
+  public static final String DEFAULT_NAME = "amq.match";
+  
   private Map bindings = new HashMap();
   
   public HeadersExchange(String name, boolean durable) {

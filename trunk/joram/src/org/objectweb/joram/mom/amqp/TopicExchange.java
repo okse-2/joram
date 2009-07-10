@@ -55,6 +55,8 @@ import fr.dyade.aaa.agent.UnknownAgent;
  */
 public class TopicExchange extends ExchangeAgent {
   
+  public static final String DEFAULT_NAME = "amq.topic";
+
   private static Pattern createPattern(String routingPattern) {
     String newPattern = routingPattern;
     newPattern = newPattern.replaceAll("\\*", "[a-zA-Z0-9]+");
