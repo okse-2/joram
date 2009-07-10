@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.UnknownAgent;
@@ -50,6 +52,10 @@ import fr.dyade.aaa.agent.UnknownAgent;
  * </ul>
  */
 public class DirectExchange extends ExchangeAgent {
+  
+  public final static Logger logger = fr.dyade.aaa.common.Debug.getLogger(DirectExchange.class.getName());
+  
+  public static final String DEFAULT_NAME = "amq.direct";
   
   private Map bindings;
   
@@ -82,12 +88,19 @@ public class DirectExchange extends ExchangeAgent {
   }
 
   public void publish(String exchange, String routingKey, BasicProperties properties, byte[] body) {
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "DirectExchange.Publish(" + exchange + "," + routingKey + ")");
+    }
+    
     List boundQueues = (List) bindings.get(routingKey);
     if (boundQueues != null) {
       Iterator it = boundQueues.iterator();
       while (it.hasNext()) {
         AgentId queueAgent = (AgentId) it.next();
         sendTo(queueAgent, new PublishNot(exchange, routingKey, properties, body));
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
+          logger.log(BasicLevel.DEBUG, "Publishing to queue " + queueAgent);
+        }
       }
     }
   }

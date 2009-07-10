@@ -43,6 +43,8 @@ import fr.dyade.aaa.agent.UnknownAgent;
  */
 public class FanoutExchange extends ExchangeAgent {
   
+  public static final String DEFAULT_NAME = "amq.fanout";
+  
   private List boundQueues;
   
   public FanoutExchange(String name, boolean durable) {
