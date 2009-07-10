@@ -61,7 +61,7 @@ public class AMQPService {
   /**
    * Default value for the pool size.
    */
-  public static final int DEFAULT_POOL_SIZE = 2;
+  public static final int DEFAULT_POOL_SIZE = 1;
   /**
    * Default value for the TCP BACKLOG property.
    */
@@ -130,11 +130,15 @@ public class AMQPService {
 
     int poolSize = AgentServer.getInteger(POOL_SIZE_PROP, DEFAULT_POOL_SIZE).intValue();
     int timeout = AgentServer.getInteger(SO_TIMEOUT_PROP, DEFAULT_SO_TIMEOUT).intValue();
+    
+    if (firstTime) {
+      NamingAgent naming = new NamingAgent();
+      naming.deploy();
+    }
 
     amqpService = new AMQPService(serverSocket, poolSize, timeout);
     amqpService.start();
   }
-  
 
   /**
    * Stops the service.
