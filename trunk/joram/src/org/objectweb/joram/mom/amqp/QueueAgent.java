@@ -43,8 +43,6 @@ public class QueueAgent extends Agent {
   public final static Logger logger = 
     fr.dyade.aaa.common.Debug.getLogger(QueueAgent.class.getName());
   
-  private String name;
-  
   private boolean durable;
   
   private boolean autodelete;
@@ -58,7 +56,7 @@ public class QueueAgent extends Agent {
   private LinkedList consumers;
   
   public QueueAgent(String name, boolean durable, boolean autodelete) {
-    this.name = name;
+    super(name);
     this.durable = durable;
     this.autodelete = autodelete;
     this.toDeliver = new LinkedList();
@@ -206,7 +204,7 @@ public class QueueAgent extends Agent {
       hasToBeDeleted = false;
     }
     if (hasToBeDeleted) {
-      NamingAgent.getSingleton().unbind(name);
+      NamingAgent.getSingleton().unbind(getName());
       delete(from);
     } else {
       sendTo(from, new DeleteAck(getId()));
