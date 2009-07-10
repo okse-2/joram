@@ -50,14 +50,11 @@ import fr.dyade.aaa.common.Queue;
 
 public class JoramMOMHandler implements MOMHandler {
   
-  private NamingAgent naming;
   private ProxyAgent proxy;
   private Consumer consumer;
 
   public JoramMOMHandler() {
     try {
-      naming = new NamingAgent();
-      naming.deploy();
       proxy = new ProxyAgent();
       proxy.deploy();
     } catch (IOException exc) {
