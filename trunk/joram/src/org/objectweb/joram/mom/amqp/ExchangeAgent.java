@@ -35,11 +35,12 @@ import fr.dyade.aaa.agent.UnknownAgent;
 
 public abstract class ExchangeAgent extends Agent {
   
-  private String name;
+  public static final String DEFAULT_EXCHANGE_NAME = "";
+  
   private boolean durable;
 
   public ExchangeAgent(String name, boolean durable) {
-    this.name = name;
+    super(name);
     this.durable = durable;
   }
   
