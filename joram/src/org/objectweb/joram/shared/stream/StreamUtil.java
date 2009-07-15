@@ -299,6 +299,28 @@ public final class StreamUtil {
       throw new IOException("bad string length");
     }
   }
+  
+  /**
+   * This method allows to restore a short String from the input stream. The
+   * maximum length for a short String is 255 characters.
+   * 
+   * @param is
+   *          the stream to read data from in order to restore the object
+   * @return the String object or null
+   */
+  public static String readShortStringFrom(InputStream is) throws IOException {
+    int length = readUnsignedByteFrom(is);
+    if (length == -1) {
+      return null;
+    } else if (length == 0) {
+      return EMPTY_STRING;
+    } else if (length > 0) {
+      byte[] tab = readFully(length, is);
+      return new String(tab, 0, length);
+    } else {
+      throw new IOException("bad short string length");
+    }
+  }
 
   static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
