@@ -152,8 +152,29 @@ public class AMQPInputStream {
       case 'A':
         value = readArray();
         break;
+      case 'f':
+        value = new Float(StreamUtil.readFloatFrom(in));
+        break;
+      case 'd':
+        value = new Double(StreamUtil.readDoubleFrom(in));
+        break;
+      case 'b':
+        value = new Byte(StreamUtil.readByteFrom(in));
+        break;
+      case 'l':
+        value = new Long(StreamUtil.readLongFrom(in));
+        break;
+      case 't':
+        value = new Boolean(StreamUtil.readBooleanFrom(in));
+        break;
+      case 'V':
+        value = null;
+        break;
+      case 's':
+        value = new Boolean(StreamUtil.readShortStringFrom(in));
+        break;
       default:
-        throw new MalformedFrameException("Unrecognised type in table: " + type);
+        throw new MalformedFrameException("Unrecognised type in table: " + (char) type);
       }
 
       if (!table.containsKey(name))
@@ -235,8 +256,47 @@ public class AMQPInputStream {
         value[i] = readArray();
       }
       break;
+    case 'f':
+      value = new Float[count];
+      for (int i = 0; i < count; i++) {
+        value[i] = new Float(StreamUtil.readFloatFrom(in));
+      }
+      break;
+    case 'd':
+      value = new Double[count];
+      for (int i = 0; i < count; i++) {
+        value[i] = new Double(StreamUtil.readDoubleFrom(in));
+      }
+      break;
+    case 'b':
+      value = new Byte[count];
+      for (int i = 0; i < count; i++) {
+        value[i] = new Byte(StreamUtil.readByteFrom(in));
+      }
+      break;
+    case 'l':
+      value = new Long[count];
+      for (int i = 0; i < count; i++) {
+        value[i] = new Long(StreamUtil.readLongFrom(in));
+      }
+      break;
+    case 't':
+      value = new Boolean[count];
+      for (int i = 0; i < count; i++) {
+        value[i] = new Boolean(StreamUtil.readBooleanFrom(in));
+      }
+      break;
+    case 'V':
+      value = new Object[count];
+      break;
+    case 's':
+      value = new String[count];
+      for (int i = 0; i < count; i++) {
+        value[i] = StreamUtil.readShortStringFrom(in);
+      }
+      break;
     default:
-      throw new MalformedFrameException("Unrecognised type in table: " + typeCode);
+      throw new MalformedFrameException("Unrecognised type in table: " + (char) typeCode);
     }
 
     if (in.available() > 0) {

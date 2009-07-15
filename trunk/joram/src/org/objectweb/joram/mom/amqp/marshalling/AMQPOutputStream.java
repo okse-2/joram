@@ -77,13 +77,6 @@ public class AMQPOutputStream {
     }
   }
 
-  public final void writeLongstr(String str) throws IOException {
-    bitflush();
-    byte[] bytes = str.getBytes("utf-8");
-    writeLong(bytes.length);
-    out.write(bytes);
-  }
-
   public final void writeShort(short s) throws IOException {
     bitflush();
     StreamUtil.writeTo(s, out);
@@ -129,6 +122,11 @@ public class AMQPOutputStream {
     needBitFlush = true;
   }
 
+  public final void writeBoolean(boolean b) throws IOException {
+    bitflush();
+    StreamUtil.writeTo(b, out);
+  }
+
   public final void writeTable(Map table) throws IOException {
     bitflush();
     if (table == null) {
@@ -139,9 +137,11 @@ public class AMQPOutputStream {
         Map.Entry entry = (Map.Entry) entries.next();
         writeShortstr((String) entry.getKey());
         Object value = entry.getValue();
-        if (value instanceof String) {
-          writeOctet('S');
-          writeLongstr((String) value);
+        if (value == null) {
+          writeOctet('V');
+        } else if (value instanceof String) {
+          writeOctet('s');
+          writeShortstr((String) value);
         } else if (value instanceof LongString) {
           writeOctet('S');
           writeLongstr((LongString) value);
@@ -152,7 +152,7 @@ public class AMQPOutputStream {
           writeOctet('U');
           writeShort(((Short) value).shortValue());
         } else if (value instanceof Byte) {
-          writeOctet('B');
+          writeOctet('b');
           writeByte(((Byte) value).byteValue());
         } else if (value instanceof BigDecimal) {
           writeOctet('D');
@@ -165,12 +165,21 @@ public class AMQPOutputStream {
         } else if (value instanceof Date) {
           writeOctet('T');
           writeTimestamp((Date) value);
+        } else if (value instanceof Boolean) {
+          writeOctet('t');
+          writeBoolean(((Boolean) value).booleanValue());
         } else if (value instanceof Map) {
           writeOctet('F');
           writeTable((Map) value);
         } else if (value instanceof Long) {
-          writeOctet('L');
+          writeOctet('l');
           writeLonglong(((Long) value).longValue());
+        } else if (value instanceof Double) {
+          writeOctet('d');
+          writeDouble(((Double) value).doubleValue());
+        } else if (value instanceof Float) {
+          writeOctet('f');
+          writeFloat(((Float) value).floatValue());
         } else if (value instanceof Object[]) {
           writeOctet('A');
           writeArray((Object[]) value);
@@ -188,10 +197,10 @@ public class AMQPOutputStream {
     StreamUtil.writeTo(arraySize(value), out);
 
     if (value instanceof String[]) {
-      writeOctet('S');
+      writeOctet('s');
       StreamUtil.writeTo(len, out);
       for (int i = 0; i < len; i++) {
-        writeLongstr((String) value[i]);
+        writeShortstr((String) value[i]);
       }
     } else if (value instanceof LongString[]) {
       writeOctet('S');
@@ -212,7 +221,7 @@ public class AMQPOutputStream {
         writeShort(((Short) value[i]).shortValue());
       }
     } else if (value instanceof Byte[]) {
-      writeOctet('B');
+      writeOctet('b');
       StreamUtil.writeTo(len, out);
       for (int i = 0; i < len; i++) {
         writeByte(((Byte) value[i]).byteValue());
@@ -234,11 +243,29 @@ public class AMQPOutputStream {
       for (int i = 0; i < len; i++) {
         writeTimestamp((Date) value[i]);
       }
+    } else if (value instanceof Boolean[]) {
+      writeOctet('t');
+      StreamUtil.writeTo(len, out);
+      for (int i = 0; i < len; i++) {
+        writeBoolean(((Boolean) value[i]).booleanValue());
+      }
     } else if (value instanceof Long[]) {
-      writeOctet('L');
+      writeOctet('l');
       StreamUtil.writeTo(len, out);
       for (int i = 0; i < len; i++) {
         writeLonglong(((Long) value[i]).longValue());
+      }
+    } else if (value instanceof Double[]) {
+      writeOctet('d');
+      StreamUtil.writeTo(len, out);
+      for (int i = 0; i < len; i++) {
+        writeDouble(((Double) value[i]).doubleValue());
+      }
+    } else if (value instanceof Float[]) {
+      writeOctet('f');
+      StreamUtil.writeTo(len, out);
+      for (int i = 0; i < len; i++) {
+        writeFloat(((Float) value[i]).floatValue());
       }
     } else if (value instanceof Map[]) {
       writeOctet('F');
@@ -257,6 +284,16 @@ public class AMQPOutputStream {
     }
   }
 
+  public final void writeFloat(float floatValue) throws IOException {
+    bitflush();
+    StreamUtil.writeTo(floatValue, out);
+  }
+
+  public final void writeDouble(double doubleValue) throws IOException {
+    bitflush();
+    StreamUtil.writeTo(doubleValue, out);
+  }
+
   public final void writeOctet(int octet) throws IOException {
     bitflush();
     StreamUtil.writeTo((byte) octet, out);
@@ -269,16 +306,12 @@ public class AMQPOutputStream {
 
   public final void writeTimestamp(Date timestamp) throws IOException {
     bitflush();
-    // AMQP uses POSIX time_t which is in seconds since the epoc
+    // AMQP uses POSIX time_t which is in seconds since the epoch
     writeLonglong(timestamp.getTime() / 1000);
   }
 
   private int shortStrSize(String str) throws UnsupportedEncodingException {
     return str.getBytes("utf-8").length + 1;
-  }
-
-  private int longStrSize(String str) throws UnsupportedEncodingException {
-    return str.getBytes("utf-8").length + 4;
   }
 
   private long tableSize(Map table) throws UnsupportedEncodingException {
@@ -288,18 +321,23 @@ public class AMQPOutputStream {
       acc += shortStrSize((String) entry.getKey());
       acc += 1;
       Object value = entry.getValue();
-      if (value instanceof String) {
-        acc += longStrSize((String) entry.getValue());
+      if (value == null) {
+        continue;
+      } else if (value instanceof Byte || value instanceof Boolean) {
+        acc++;
+      } else if (value instanceof String) {
+        acc += shortStrSize((String) entry.getValue());
       } else if (value instanceof LongString) {
         acc += 4;
         acc += ((LongString) value).length();
-      } else if (value instanceof Integer) {
+      } else if (value instanceof Integer || value instanceof Float) {
         acc += 4;
       } else if (value instanceof Short) {
         acc += 2;
       } else if (value instanceof BigDecimal) {
         acc += 5;
-      } else if (value instanceof Long || value instanceof Date || value instanceof Timestamp) {
+      } else if (value instanceof Long || value instanceof Date || value instanceof Timestamp
+          || value instanceof Double) {
         acc += 8;
       } else if (value instanceof Map) {
         acc += 4;
@@ -308,7 +346,7 @@ public class AMQPOutputStream {
         acc += 4;
         acc += arraySize((Object[]) value);
       } else {
-        throw new IllegalArgumentException("invalid value in table");
+        throw new IllegalArgumentException("Invalid value in table: " + value.getClass().getName());
       }
     }
 
@@ -322,22 +360,23 @@ public class AMQPOutputStream {
     int len = value.length;
     if (value instanceof String[]) {
       for (int i = 0; i < len; i++) {
-        acc += longStrSize((String) value[i]);
+        acc += shortStrSize((String) value[i]);
       }
     } else if (value instanceof LongString[]) {
       for (int i = 0; i < len; i++) {
         acc += 4;
         acc += ((LongString) value[i]).length();
       }
-    } else if (value instanceof Integer[]) {
+    } else if (value instanceof Integer[] || value instanceof Float[]) {
       acc += 4 * len;
     } else if (value instanceof Short[]) {
       acc += 2 * len;
-    } else if (value instanceof Byte[]) {
+    } else if (value instanceof Byte[] || value instanceof Boolean[]) {
       acc += len;
     } else if (value instanceof BigDecimal[]) {
       acc += 5 * len;
-    } else if (value instanceof Long[] || value instanceof Date[] || value instanceof Timestamp[]) {
+    } else if (value instanceof Long[] || value instanceof Date[] || value instanceof Timestamp[]
+        || value instanceof Double[]) {
       acc += 8 * len;
     } else if (value instanceof Map[]) {
       for (int i = 0; i < len; i++) {
