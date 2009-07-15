@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.joram.mom.amqp.marshalling.AMQP;
+import org.objectweb.joram.mom.amqp.marshalling.LongStringHelper;
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 import org.objectweb.joram.mom.amqp.proxy.request.AccessRequestNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicAckNot;
@@ -137,10 +138,10 @@ public class JoramMOMHandler implements MOMHandler {
 
   public Map getMOMProperties() {
     Map tab = new HashMap();
-    tab.put("product", "JORAM_AMQP");
-    tab.put("platform", "java");
-    tab.put("copyright", "ScalAgent");
-    tab.put("version", "0.1");
+    tab.put("product", LongStringHelper.asLongString("JORAM_AMQP"));
+    tab.put("platform", LongStringHelper.asLongString("java"));
+    tab.put("copyright", LongStringHelper.asLongString("ScalAgent"));
+    tab.put("version", LongStringHelper.asLongString("0.1"));
     return tab;
   }
 
