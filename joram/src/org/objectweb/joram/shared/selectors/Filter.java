@@ -807,6 +807,7 @@ class CUP$Filter$actions {
                            instanceof String) {
                     StringBuffer stBuff = new StringBuffer(st1.substring(1, st1.length() - 1));
                     StringBuffer stBuffRes = new StringBuffer();
+                    stBuffRes.append('^');
                     char esc = st2.charAt(1);
                     for (int i = 0; i < stBuff.length(); i++) {
                       if (stBuff.charAt(i) == esc) {
@@ -822,6 +823,7 @@ class CUP$Filter$actions {
                         stBuffRes.append(stBuff.charAt(i));
                       }
                     }
+                    stBuffRes.append('$');
                     st1 = stBuffRes.toString(); 
                     RESULT = new Boolean(!Pattern.matches(st1, (String) Interpreter.interpret(id, message, syntaxType)));
                   }
@@ -856,6 +858,7 @@ class CUP$Filter$actions {
                            instanceof String) {
                     StringBuffer stBuff = new StringBuffer(st1.substring(1, st1.length() - 1));
                     StringBuffer stBuffRes = new StringBuffer();
+                    stBuffRes.append('^');
                     char esc = st2.charAt(1);
                     for (int i = 0; i < stBuff.length(); i++) {
                       if (stBuff.charAt(i) == esc) {
@@ -871,6 +874,7 @@ class CUP$Filter$actions {
                         stBuffRes.append(stBuff.charAt(i));
                       }
                     }
+                    stBuffRes.append('$');
                     st1 = stBuffRes.toString(); 
                     RESULT = new Boolean(Pattern.matches(st1, (String) Interpreter.interpret(id, message, syntaxType)));
                   }
@@ -901,6 +905,8 @@ class CUP$Filter$actions {
                            instanceof String) {
                     StringBuffer stBuff =
                       new StringBuffer(st.substring(1, st.length() - 1));
+                    stBuff.insert(0, '^');
+
                     for (int i = 0; i < stBuff.length(); i++) {
                       if (stBuff.charAt(i) == '_')
                         stBuff.setCharAt(i, '.');
@@ -910,6 +916,7 @@ class CUP$Filter$actions {
                         i++ ;
                       }
                     }
+                    stBuff.append('$');
 
                     st = stBuff.toString();
                     RESULT = new Boolean(!Pattern.matches(st, (String) Interpreter.interpret(id, message, syntaxType)));
@@ -940,6 +947,7 @@ class CUP$Filter$actions {
                       instanceof String) {
                     StringBuffer stBuff =
                       new StringBuffer(st.substring(1, st.length() - 1));
+                    stBuff.insert(0, '^');
 
                     for (int i = 0; i < stBuff.length(); i++) {
                       if (stBuff.charAt(i) == '_')
@@ -950,6 +958,7 @@ class CUP$Filter$actions {
                         i++ ;
                       }
                     }
+                    stBuff.append('$');
 
                     st = stBuff.toString();
                     RESULT = new Boolean(Pattern.matches(st, (String) Interpreter.interpret(id, message, syntaxType)));
