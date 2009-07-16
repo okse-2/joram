@@ -72,7 +72,7 @@ public abstract class ExchangeAgent extends Agent {
 
   private void doReact(DeleteNot not, AgentId from) throws Exception {
     if (not.isIfUnused() && !isUnused()) {
-      sendTo(from, new DeleteAck(getId()));
+      sendTo(from, new DeleteAck(getId(), new NotUnusedException("Exchange not unused.")));
     } else {
       NamingAgent.getSingleton().unbind(name);
       delete(from);
