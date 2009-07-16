@@ -196,18 +196,13 @@ public class QueueAgent extends Agent {
   }
 
   private void doReact(DeleteNot not, AgentId from) throws Exception {
-    boolean hasToBeDeleted = true;
     if (not.isIfEmpty() && toDeliver.size() > 0) {
-      hasToBeDeleted = false;
-    }
-    if (not.isIfUnused() && consumers.size() > 0) {
-      hasToBeDeleted = false;
-    }
-    if (hasToBeDeleted) {
+      sendTo(from, new DeleteAck(getId()));
+    } else if (not.isIfUnused() && consumers.size() > 0) {
+      sendTo(from, new DeleteAck(getId(), new NotUnusedException("Queue not unused.")));
+    } else {
       NamingAgent.getSingleton().unbind(getName());
       delete(from);
-    } else {
-      sendTo(from, new DeleteAck(getId()));
     }
   }
   
@@ -220,6 +215,9 @@ public class QueueAgent extends Agent {
   }
 
   public void ackMessages(List idsToAck) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "QueueAgent.ackMessages(" + idsToAck + ')');
+
     // Both lists must be sorted
     Iterator iterIds = idsToAck.iterator();
     Iterator iterMsgs = toAck.iterator();
@@ -240,6 +238,9 @@ public class QueueAgent extends Agent {
   }
 
   public void recoverMessages(List idsToRecover) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "QueueAgent.recoverMessages(" + idsToRecover + ')');
+
     // Both lists must be sorted
     Iterator iterIds = idsToRecover.iterator();
     Iterator iterMsgs = toAck.iterator();
