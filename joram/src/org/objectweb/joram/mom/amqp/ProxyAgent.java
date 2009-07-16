@@ -31,6 +31,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.naming.NameNotFoundException;
+
 import org.objectweb.joram.mom.amqp.marshalling.AMQP;
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.CancelOk;
@@ -209,6 +211,8 @@ public class ProxyAgent extends Agent {
   }
   
   private void doReact(ExchangeDeleteNot not) throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "ProxyAgent.exchangeDelete(" + not + ')');
     exchangeDelete(
         not.getChannelId(),
         not.getTicket(),
@@ -228,6 +232,8 @@ public class ProxyAgent extends Agent {
   }
 
   private void doReact(QueueDeclareNot not) throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "ProxyAgent.queueDeclare(" + not + ')');
     AMQP.Queue.DeclareOk res = queueDeclare(
         not.getChannelId(),
         not.getTicket(),
@@ -243,9 +249,6 @@ public class ProxyAgent extends Agent {
   public AMQP.Queue.DeclareOk queueDeclare(int channelId, int ticket, String queue,
       boolean passive, boolean durable, boolean exclusive, boolean autoDelete,
       Map arguments) throws Exception {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "ProxyAgent.queueDeclare(" + 
-          channelId + ',' + ticket + ',' + queue + ')');
     // Check if the queue already exists
     Object ref = null;
     if (queue != null && !queue.equals("")) {
@@ -253,16 +256,17 @@ public class ProxyAgent extends Agent {
     }
     String queueName = queue;
     if (ref == null && !passive) {
-      QueueAgent queueAgent = new QueueAgent(queue, durable, autoDelete);
-      queueAgent.deploy();
-      if (queueName == null || queueName.equals("")) {
-        queueName = queueAgent.getAgentId();
+      if (queue != null && queue.equals("")) {
+        queueName = null;
       }
+      QueueAgent queueAgent = new QueueAgent(queueName, durable, autoDelete);
+      queueAgent.deploy();
+      queueName = queueAgent.getName();
       NamingAgent.getSingleton().bind(queueName, queueAgent.getId());
       
       // All message queues MUST BE automatically bound to the nameless exchange using the
       // message queue's name as routing key.
-      queueBind(channelId, ticket, queueName, "", queueName, null);
+      queueBind(channelId, ticket, queueName, ExchangeAgent.DEFAULT_EXCHANGE_NAME, queueName, null);
     }
     // TODO msgCount / consumerCount
     return new AMQP.Queue.DeclareOk(queueName, 0, 0);
@@ -356,6 +360,8 @@ public class ProxyAgent extends Agent {
   }
 
   private void doReact(BasicPublishNot not) throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "ProxyAgent.basicPublish(" + not + ")");
     basicPublish(
         not.getChannelId(),
         not.getTicket(),
@@ -435,22 +441,35 @@ public class ProxyAgent extends Agent {
   }
 
   private void doReact(QueueUnbindNot not) {
-    AMQP.Queue.UnbindOk res = queueUnbind(
-        not.getChannelId(),
-        not.getTicket(),
-        not.getQueue(),
-        not.getExchange(),
-        not.getRoutingKey(),
-        not.getArguments());
-    not.Return(res);
+    try {
+      AMQP.Queue.UnbindOk res = queueUnbind(
+          not.getChannelId(),
+          not.getTicket(),
+          not.getQueue(),
+          not.getExchange(),
+          not.getRoutingKey(),
+          not.getArguments());
+      not.Return(res);
+    } catch (NameNotFoundException exc) {
+      not.Throw(exc);
+    }
   }
 
   public UnbindOk queueUnbind(int channelId, int ticket, String queue, String exchange, String routingKey,
-      Map arguments) {
+      Map arguments) throws NameNotFoundException {
     AgentId exchangeId = (AgentId) NamingAgent.getSingleton().lookup(exchange);
-    UnbindNot unbindNot = new UnbindNot(queue, routingKey, arguments);
-    sendTo(exchangeId, unbindNot);
-    return new AMQP.Queue.UnbindOk();
+    if (exchangeId != null) {
+      AgentId queueId = (AgentId) NamingAgent.getSingleton().lookup(queue);
+      if (queueId != null) {
+        UnbindNot unbindNot = new UnbindNot(queue, routingKey, arguments);
+        sendTo(exchangeId, unbindNot);
+        return new AMQP.Queue.UnbindOk();
+      } else {
+        throw new NameNotFoundException("Queue not found.");
+      }
+    } else {
+      throw new NameNotFoundException("Exchange not found.");
+    }
   }
 
   private void doReact(DeleteAck not) {
@@ -459,10 +478,18 @@ public class ProxyAgent extends Agent {
       // TODO msgCount
       int msgCount = 0;
       QueueDeleteNot deleteNot = (QueueDeleteNot) syncNot;
-      deleteNot.Return(new AMQP.Queue.DeleteOk(msgCount));
+      if (not.exc == null) {
+        deleteNot.Return(new AMQP.Queue.DeleteOk(msgCount));
+      } else {
+        deleteNot.Throw((Exception) not.exc);
+      }
     } else if (syncNot instanceof ExchangeDeleteNot) {
       ExchangeDeleteNot deleteNot = (ExchangeDeleteNot) syncNot;
-      deleteNot.Return(new AMQP.Exchange.DeleteOk());
+      if (not.exc == null) {
+        deleteNot.Return(new AMQP.Exchange.DeleteOk());
+      } else {
+        deleteNot.Throw((Exception) not.exc);
+      }
     }
   }
   
