@@ -36,6 +36,7 @@ import org.objectweb.joram.mom.amqp.proxy.request.BasicCancelNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicConsumeNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicGetNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicPublishNot;
+import org.objectweb.joram.mom.amqp.proxy.request.BasicRecoverNot;
 import org.objectweb.joram.mom.amqp.proxy.request.ChannelCloseNot;
 import org.objectweb.joram.mom.amqp.proxy.request.ChannelOpenNot;
 import org.objectweb.joram.mom.amqp.proxy.request.ConnectionCloseNot;
@@ -116,6 +117,11 @@ public class JoramMOMHandler implements MOMHandler {
       Thread.sleep(50);
     } catch (Exception exc) {
     }
+  }
+
+  public void basicRecover(boolean requeue, int channelNumber) {
+    BasicRecoverNot basicRecover = new BasicRecoverNot(channelNumber, requeue);
+    Channel.sendTo(proxy.getId(), basicRecover);
   }
 
   public void close() {
