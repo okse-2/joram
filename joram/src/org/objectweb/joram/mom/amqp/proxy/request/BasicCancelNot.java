@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2008 CNES
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,6 +30,9 @@ import fr.dyade.aaa.agent.SyncNotification;
 
 public class BasicCancelNot extends SyncNotification {
 
+  /** define serialVersionUID for interoperability */
+  private static final long serialVersionUID = 1L;
+
   private int channelId;
   private String consumerTag;
   
@@ -44,12 +47,17 @@ public class BasicCancelNot extends SyncNotification {
   public BasicCancelNot(int channelId, String consumerTag) {
     super();
     this.consumerTag = consumerTag;
+    this.channelId = channelId;
   }
   
   public String getConsumerTag() {
     return consumerTag;
   }
   
+  public int getChannelId() {
+    return channelId;
+  }
+
   public AMQP.Basic.CancelOk basicCancel(AgentId proxyId) throws Exception {
     Object[] res = invoke(proxyId);
     return (AMQP.Basic.CancelOk) res[0];
