@@ -24,6 +24,7 @@
 package org.objectweb.joram.mom.amqp;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -109,7 +110,7 @@ public class QueueAgent extends Agent {
         toAck.addLast(msg);
       }
       // TODO should be a notification sent to proxy
-      long deliveryTag = proxy.getDeliveryTag(getId(), channelId, msgCounter, noAck);
+      long deliveryTag = proxy.getDeliveryTag(getId(), channelId, msg.queueMsgId, noAck);
       consumer.handleGet(deliveryTag, msg.redelivered, msg.exchange, msg.routingKey, toDeliver.size(),
           msg.properties, msg.body);
     } else {
@@ -136,7 +137,7 @@ public class QueueAgent extends Agent {
         toAck.addLast(msg);
       }
       // TODO should be a notification sent to proxy
-      long deliveryTag = proxy.getDeliveryTag(getId(), channelId, msgCounter, noAck);
+      long deliveryTag = proxy.getDeliveryTag(getId(), channelId, msg.queueMsgId, noAck);
       consumer.handleDelivery(consumerTag, deliveryTag, msg.redelivered, msg.exchange, msg.routingKey,
           msg.properties, msg.body);
     }
@@ -229,7 +230,7 @@ public class QueueAgent extends Agent {
       long id = ((Long) iterIds.next()).longValue();
       while (iterMsgs.hasNext()) {
         Message msg = (Message) iterMsgs.next();
-        if (msg.deliveryTag == id) {
+        if (msg.queueMsgId == id) {
           iterMsgs.remove();
           break;
         }
@@ -248,15 +249,23 @@ public class QueueAgent extends Agent {
     // Both lists must be sorted
     Iterator iterIds = idsToRecover.iterator();
     Iterator iterMsgs = toAck.iterator();
-    while (iterIds.hasNext()) {     
-      long id = ((Long) iterIds.next()).longValue();
-      while (iterMsgs.hasNext()) {
-        Message msg = (Message) iterMsgs.next();
-        if (msg.deliveryTag == id) {
-          publish(msg.exchange, msg.routingKey, msg.properties, msg.body, true);
+    List recoveredMsgs = new ArrayList();
+    while (iterMsgs.hasNext()) {
+      Message msg = (Message) iterMsgs.next();
+      while (iterIds.hasNext()) {
+        long id = ((Long) iterIds.next()).longValue();
+        if (msg.queueMsgId == id) {
+          iterMsgs.remove();
+          recoveredMsgs.add(msg);
           break;
         }
       }
+    }
+
+    iterMsgs = recoveredMsgs.iterator();
+    while (iterMsgs.hasNext()) {
+      Message msg = (Message) iterMsgs.next();
+      publish(msg.exchange, msg.routingKey, msg.properties, msg.body, true);
     }
   }
 
@@ -266,7 +275,7 @@ public class QueueAgent extends Agent {
     private String routingKey;
     private BasicProperties properties;
     private byte[] body;
-    private long deliveryTag;
+    private long queueMsgId;
     private boolean redelivered;
 
     /**
@@ -279,7 +288,7 @@ public class QueueAgent extends Agent {
       this.routingKey = routingKey;
       this.properties = properties;
       this.body = body;
-      this.deliveryTag = deliveryTag;
+      this.queueMsgId = deliveryTag;
       this.redelivered = redelivered;
     }
   }
