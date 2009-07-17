@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2008 CNES
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,6 +37,7 @@ import org.objectweb.joram.mom.amqp.proxy.request.BasicConsumeNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicGetNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicPublishNot;
 import org.objectweb.joram.mom.amqp.proxy.request.ChannelCloseNot;
+import org.objectweb.joram.mom.amqp.proxy.request.ChannelOpenNot;
 import org.objectweb.joram.mom.amqp.proxy.request.ConnectionCloseNot;
 import org.objectweb.joram.mom.amqp.proxy.request.ExchangeDeclareNot;
 import org.objectweb.joram.mom.amqp.proxy.request.ExchangeDeleteNot;
@@ -89,7 +90,7 @@ public class JoramMOMHandler implements MOMHandler {
   public void basicConsume(String queue, boolean noAck, String consumerTag, boolean noLocal,
       boolean exclusive, int ticket, boolean noWait, int channelNumber, Queue queueOut) throws Exception {
     BasicConsumeNot basicConsume = new BasicConsumeNot(channelNumber, ticket, queue, noAck, consumerTag,
-        noWait, new DeliverMessageConsumer(channelNumber, consumerTag), queueOut);
+        noWait, new DeliverMessageConsumer(channelNumber), queueOut);
     basicConsume.basicConsume(proxy.getId());
   }
 
@@ -180,33 +181,37 @@ public class JoramMOMHandler implements MOMHandler {
     queuePurge.queuePurge(proxy.getId());
   }
 
+  public void channelOpen(int channelNumber) throws Exception {
+    ChannelOpenNot channelClose = new ChannelOpenNot(channelNumber);
+    channelClose.openChannel(proxy.getId());
+  }
+
   public void channelClose(int channelNumber) throws Exception {
     ChannelCloseNot channelClose = new ChannelCloseNot(channelNumber);
     channelClose.closeChannel(proxy.getId());
   }
 
   public void connectionClose() throws Exception {
-    ConnectionCloseNot channelClose = new ConnectionCloseNot();
-    channelClose.closeConnection(proxy.getId());
+    ConnectionCloseNot connectionClose = new ConnectionCloseNot();
+    connectionClose.closeConnection(proxy.getId());
   }
   
   
   class DeliverMessageConsumer implements DeliveryListener {
     
     private int channelNumber;
-    private String consumerTag;
 
-    public DeliverMessageConsumer(int channelNumber, String consumerTag) {
+    public DeliverMessageConsumer(int channelNumber) {
       this.channelNumber = channelNumber;
-      this.consumerTag = consumerTag;
     }
 
-    public void handleDelivery(long deliveryTag, boolean redelivered, String exchange,
+    public void handleDelivery(String consumerTag, long deliveryTag, boolean redelivered, String exchange,
         String routingKey, BasicProperties properties, byte[] body) {
       AMQP.Basic.Deliver deliver = new AMQP.Basic.Deliver(consumerTag, deliveryTag, redelivered, exchange,
           routingKey);
       consumer.handleDelivery(channelNumber, deliver, properties, body);
     }
+
   }
   
   class GetMessageConsumer implements GetListener {
