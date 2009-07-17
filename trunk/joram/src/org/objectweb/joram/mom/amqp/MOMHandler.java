@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - ScalAgent Distributed Technologies
- * Copyright (C) 2008 CNES
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -187,5 +187,7 @@ public interface MOMHandler {
   public void channelClose(int channelNumber) throws Exception;
 
   public void connectionClose() throws Exception;
+
+  public void channelOpen(int channelNumber) throws Exception;
 
 }
