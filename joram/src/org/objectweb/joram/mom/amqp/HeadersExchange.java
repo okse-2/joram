@@ -120,8 +120,8 @@ public class HeadersExchange extends ExchangeAgent {
             continue;
           }
           if (bindArguments.get(argument) == null && properties.headers.containsKey(argument)
-              || ((LongString) bindArguments.get(argument)).equals(LongStringHelper.asLongString("")) && properties.headers.containsKey(argument)
-              || ((LongString) bindArguments.get(argument)).equals(properties.headers.get(argument))) {
+              || bindArguments.get(argument).equals(LongStringHelper.asLongString("")) && properties.headers.containsKey(argument)
+              || bindArguments.get(argument).equals(properties.headers.get(argument))) {
             destQueues.addAll((List) bindings.get(bindArguments));
             break;
           }
@@ -136,8 +136,8 @@ public class HeadersExchange extends ExchangeAgent {
             continue;
           }
           if (bindArguments.get(argument) == null && !properties.headers.containsKey(argument)
-              || ((LongString) bindArguments.get(argument)).equals(LongStringHelper.asLongString("")) && !properties.headers.containsKey(argument)
-              || !((LongString) bindArguments.get(argument)).equals(properties.headers.get(argument))) {
+              || bindArguments.get(argument).equals(LongStringHelper.asLongString("")) && !properties.headers.containsKey(argument)
+              || !bindArguments.get(argument).equals(properties.headers.get(argument))) {
             matched = false;
             break;
           }
