@@ -190,4 +190,6 @@ public interface MOMHandler {
 
   public void channelOpen(int channelNumber) throws Exception;
 
+  public void basicRecover(boolean requeue, int channelNumber);
+
 }
