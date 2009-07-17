@@ -46,6 +46,7 @@ import org.objectweb.joram.mom.amqp.proxy.request.BasicCancelNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicConsumeNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicGetNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicPublishNot;
+import org.objectweb.joram.mom.amqp.proxy.request.BasicRecoverNot;
 import org.objectweb.joram.mom.amqp.proxy.request.ChannelCloseNot;
 import org.objectweb.joram.mom.amqp.proxy.request.ChannelOpenNot;
 import org.objectweb.joram.mom.amqp.proxy.request.ConnectionCloseNot;
@@ -148,6 +149,8 @@ public class ProxyAgent extends Agent {
       doReact((BasicCancelNot) not);
     } else if (not instanceof BasicAckNot) {
       doReact((BasicAckNot) not);
+    } else if (not instanceof BasicRecoverNot) {
+      doReact((BasicRecoverNot) not);
     } else if (not instanceof QueueBindNot) {
       doReact((QueueBindNot) not);
     } else if (not instanceof QueueUnbindNot) {
@@ -201,16 +204,20 @@ public class ProxyAgent extends Agent {
   }
   
   private void doReact(ExchangeDeclareNot not) throws Exception {
-    AMQP.Exchange.DeclareOk res = exchangeDeclare(
-        not.getChannelId(),
-        not.getTicket(),
-        not.getExchange(),
-        not.getType(),
-        not.isPassive(),
-        not.isDurable(),
-        not.isAutoDelete(),
-        not.getArguments());
-    not.Return(res);
+    try {
+      AMQP.Exchange.DeclareOk res = exchangeDeclare(
+          not.getChannelId(),
+          not.getTicket(),
+          not.getExchange(),
+          not.getType(),
+          not.isPassive(),
+          not.isDurable(),
+          not.isAutoDelete(),
+          not.getArguments());
+      not.Return(res);
+    } catch (ClassNotFoundException cnfe) {
+      not.Throw(cnfe);
+    }
   }
 
   public AMQP.Exchange.DeclareOk exchangeDeclare(int channelId, int ticket,
@@ -394,7 +401,11 @@ public class ProxyAgent extends Agent {
     not.Return();
   }
   
-  public void basicGet(int channelId, int ticket, String queueName, boolean noAck, GetListener callback) {
+  public void basicGet(int channelId, int ticket, String queue, boolean noAck, GetListener callback) {
+    String queueName = queue;
+    if (queueName.equals("")) {
+      queueName = ((ChannelContext) channelContexts.get(new Integer(channelId))).lastQueueCreated;
+    }
     AgentId queueId = (AgentId) NamingAgent.getSingleton().lookup(queueName);
     ReceiveNot receiveNot = new ReceiveNot(channelId, callback, this, noAck);
     sendTo(queueId, receiveNot);
@@ -462,6 +473,34 @@ public class ProxyAgent extends Agent {
         AgentId queueId = (AgentId) iterQueues.next();
         sendTo(queueId, new AckNot((List) deliveryMap.get(queueId)));
       }
+    }
+  }
+
+  private void doReact(BasicRecoverNot not) {
+    basicRecover(not.getChannelId(), not.isRequeue());
+    not.Return();
+  }
+
+  public void basicRecover(int channelId, boolean requeue) {
+    // Recover non-acked messages on the channel
+    Iterator iter = deliveriesToAck.iterator();
+    Map recoverMap = new HashMap();
+    while (iter.hasNext()) {
+      DeliverContext delivery = (DeliverContext) iter.next();
+      if (delivery.channelId == channelId) {
+        List ackList = (List) recoverMap.get(delivery.queueId);
+        if (ackList == null) {
+          ackList = new ArrayList();
+          recoverMap.put(delivery.queueId, ackList);
+        }
+        ackList.add(new Long(delivery.queueMsgId));
+        iter.remove();
+      }
+    }
+    Iterator iterQueues = recoverMap.keySet().iterator();
+    while (iterQueues.hasNext()) {
+      AgentId queueId = (AgentId) iterQueues.next();
+      sendTo(queueId, new RecoverNot((List) recoverMap.get(queueId)));
     }
   }
 
@@ -582,27 +621,7 @@ public class ProxyAgent extends Agent {
         sendTo((AgentId) consumer.getValue(), cancelNot);
       }
     }
-
-    // Recover non-acked messages on the channel
-    Iterator iter = deliveriesToAck.iterator();
-    Map recoverMap = new HashMap();
-    while (iter.hasNext()) {
-      DeliverContext delivery = (DeliverContext) iter.next();
-      if (delivery.channelId == channelId) {
-        List ackList = (List) recoverMap.get(delivery.queueId);
-        if (ackList == null) {
-          ackList = new ArrayList();
-          recoverMap.put(delivery.queueId, ackList);
-        }
-        ackList.add(new Long(delivery.queueMsgId));
-        iter.remove();
-      }
-    }
-    Iterator iterQueues = recoverMap.keySet().iterator();
-    while (iterQueues.hasNext()) {
-      AgentId queueId = (AgentId) iterQueues.next();
-      sendTo(queueId, new RecoverNot((List) recoverMap.get(queueId)));
-    }
+    basicRecover(channelId, true);
   }
 
   private void doReact(ConnectionCloseNot not) {
