@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2008 CNES
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,8 +29,19 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.SyncNotification;
 
 public class ChannelOpenNot extends SyncNotification {
-  
-  public ChannelOpenNot() {}
+
+  /** define serialVersionUID for interoperability */
+  private static final long serialVersionUID = 1L;
+
+  private int channelId;
+
+  public ChannelOpenNot(int channelId) {
+    this.channelId = channelId;
+  }
+
+  public int getChannelId() {
+    return channelId;
+  }
   
   public AMQP.Channel.OpenOk openChannel(AgentId proxyId) throws Exception {
     Object[] res = invoke(proxyId);
