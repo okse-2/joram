@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2008 CNES
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,11 +25,13 @@ package org.objectweb.joram.mom.amqp;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.naming.NameNotFoundException;
 
@@ -67,6 +69,33 @@ import fr.dyade.aaa.common.Queue;
 
 public class ProxyAgent extends Agent {
   
+  class ChannelContext {
+  
+    // Links between consumer tags and queue ids
+    private Map consumers = new HashMap();
+    
+    private int consumerTag = 0;
+    
+    private String lastQueueCreated;
+    
+  }
+
+  static class DeliverContext implements Serializable {
+
+    private AgentId queueId;
+    private int channelId;
+    private long queueMsgId;
+    private long deliveryTag;
+
+    public DeliverContext(AgentId queueId, int channelId, long queueMsgId, long deliveryTag) {
+      super();
+      this.queueId = queueId;
+      this.channelId = channelId;
+      this.queueMsgId = queueMsgId;
+      this.deliveryTag = deliveryTag;
+    }
+  }
+
   public final static Logger logger = 
     fr.dyade.aaa.common.Debug.getLogger(ProxyAgent.class.getName());
   
@@ -80,9 +109,6 @@ public class ProxyAgent extends Agent {
   
   private int ticketCounter;
   
-  // Links between consumer tags and queue ids
-  private Map consumers = new HashMap();
-  
   private Map pendingRequests = new HashMap();
   
   // Used to find queue from deliveryTag
@@ -90,6 +116,8 @@ public class ProxyAgent extends Agent {
   
   private long tagCounter;
   
+  // Maps channel id to its context
+  private Map channelContexts = new HashMap();
   
   public void react(AgentId from, Notification not) throws Exception {
     // This agent is not persistent.
@@ -145,11 +173,12 @@ public class ProxyAgent extends Agent {
   }
   
   private void doReact(ChannelOpenNot not) {
-    AMQP.Channel.OpenOk res = channelOpen();
+    AMQP.Channel.OpenOk res = channelOpen(not.getChannelId());
     not.Return(res);
   }
   
-  public AMQP.Channel.OpenOk channelOpen() {
+  public AMQP.Channel.OpenOk channelOpen(int channelId) {
+    channelContexts.put(new Integer(channelId), new ChannelContext());
     return new AMQP.Channel.OpenOk();
   }
   
@@ -268,6 +297,10 @@ public class ProxyAgent extends Agent {
       // message queue's name as routing key.
       queueBind(channelId, ticket, queueName, ExchangeAgent.DEFAULT_EXCHANGE_NAME, queueName, null);
     }
+
+    ChannelContext context = (ChannelContext) channelContexts.get(new Integer(channelId));
+    context.lastQueueCreated = queueName;
+
     // TODO msgCount / consumerCount
     return new AMQP.Queue.DeclareOk(queueName, 0, 0);
   }
@@ -289,7 +322,6 @@ public class ProxyAgent extends Agent {
     if (queueId != null) {
       pendingRequests.put(queueId, not);
       sendTo(queueId, new DeleteNot(ifUnused, ifEmpty));
-      //      NamingAgent.getSingleton().unbind(name);
     }
   }
 
@@ -324,23 +356,32 @@ public class ProxyAgent extends Agent {
   public void basicConsume(int channelId, int ticket, String queue,
       boolean noAck, String consumerTag, boolean noWait, DeliveryListener callback, Queue queueOut)
       throws Exception {
+    ChannelContext channelContext = (ChannelContext) channelContexts.get(new Integer(channelId));
+    // The consumer tag is local to a channel, so two clients can use the
+    // same consumer tags. If this field is empty the server will generate a unique tag.
+    String tag = consumerTag;
+    if (consumerTag.equals("")) {
+      channelContext.consumerTag++;
+      tag = "genTag-" + channelId + "-" + channelContext.consumerTag;
+    }
     AgentId queueId = (AgentId) NamingAgent.getSingleton().lookup(queue);
-    ConsumeNot consumeNot = new ConsumeNot(channelId, callback, this, consumerTag, noAck);
+    ConsumeNot consumeNot = new ConsumeNot(channelId, callback, this, tag, noAck);
     sendTo(queueId, consumeNot);
-    consumers.put(consumerTag, queueId);
+    channelContext.consumers.put(tag, queueId);
     if (!noWait) {
       // TODO The marshalling code should not be there
-      queueOut.push(new AMQP.Basic.ConsumeOk(consumerTag).toFrame(channelId));
+      queueOut.push(new AMQP.Basic.ConsumeOk(tag).toFrame(channelId));
     }
   }
   
   private void doReact(BasicCancelNot not) {
-    AMQP.Basic.CancelOk res = basicCancel(not.getConsumerTag());
+    AMQP.Basic.CancelOk res = basicCancel(not.getChannelId(), not.getConsumerTag());
     not.Return(res);
   }
 
-  public CancelOk basicCancel(String consumerTag) {
-    AgentId queueId = (AgentId) consumers.remove(consumerTag);
+  public CancelOk basicCancel(int channelId, String consumerTag) {
+    ChannelContext channelContext = (ChannelContext) channelContexts.get(new Integer(channelId));
+    AgentId queueId = (AgentId) channelContext.consumers.remove(consumerTag);
     if (queueId != null) {
       CancelNot cancelNot = new CancelNot(consumerTag);
       sendTo(queueId, cancelNot);
@@ -377,6 +418,9 @@ public class ProxyAgent extends Agent {
       String routingKey, boolean mandatory, boolean immediate,
       BasicProperties props, byte[] body) throws Exception {
     AgentId exchangeId = (AgentId) NamingAgent.getSingleton().lookup(exchange);
+    //    if (exchangeId == null) {
+    //      throw new NameNotFoundException("Exchange " + exchange + " not found");
+    //    }
     PublishNot publishNot = new PublishNot(exchange, routingKey, props, body);
     sendTo(exchangeId, publishNot);
   }
@@ -422,20 +466,46 @@ public class ProxyAgent extends Agent {
   }
 
   private void doReact(QueueBindNot not) throws Exception {
-    AMQP.Queue.BindOk res = queueBind(
-        not.getChannelId(),
-        not.getTicket(),
-        not.getQueue(),
-        not.getExchange(),
-        not.getRoutingKey(),
-        not.getArguments());
-    not.Return(res);
+    try {
+      AMQP.Queue.BindOk res = queueBind(
+          not.getChannelId(),
+          not.getTicket(),
+          not.getQueue(),
+          not.getExchange(),
+          not.getRoutingKey(),
+          not.getArguments());
+      not.Return(res);
+    } catch (SyntaxErrorException exc) {
+      not.Throw(exc);
+    }
   }
   
   public AMQP.Queue.BindOk queueBind(int channelId, int ticket, String queue, String exchange,
       String routingKey, Map arguments) throws Exception {
+    /*
+     * If the queue name is empty, the server uses the last queue declared on
+     * the channel. If the routing key is also empty, the server uses this queue
+     * name for the routing key as well. If the queue name is provided but the
+     * routing key is empty, the server does the binding with that empty routing
+     * key.
+     */
+    String queueName = queue;
+    String rkey = routingKey;
+    if (queueName.equals("")) {
+      queueName = ((ChannelContext) channelContexts.get(new Integer(channelId))).lastQueueCreated;
+      /*
+       * If the client did not declare a queue, and the method needs a queue
+       * name, this will result in a 502 (syntax error) channel exception.
+       */
+      if (queueName == null) {
+        throw new SyntaxErrorException("No queue declared.");
+      }
+      if (routingKey.equals("")) {
+        rkey = queueName;
+      }
+    }
     AgentId exchangeId = (AgentId) NamingAgent.getSingleton().lookup(exchange);
-    BindNot bindNot = new BindNot(queue, routingKey, arguments);
+    BindNot bindNot = new BindNot(queueName, rkey, arguments);
     sendTo(exchangeId, bindNot);
     return new AMQP.Queue.BindOk();
   }
@@ -499,6 +569,20 @@ public class ProxyAgent extends Agent {
   }
   
   public void channelClose(int channelId) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "ProxyAgent.channelClose(" + channelId + ")");
+
+    // Close consumers on the channel
+    ChannelContext channelContext = (ChannelContext) channelContexts.remove(new Integer(channelId));
+    if (channelContext != null) {
+      Set entrySet = channelContext.consumers.entrySet();
+      for (Iterator iterator = entrySet.iterator(); iterator.hasNext();) {
+        Map.Entry consumer = (Map.Entry) iterator.next();
+        CancelNot cancelNot = new CancelNot((String) consumer.getKey());
+        sendTo((AgentId) consumer.getValue(), cancelNot);
+      }
+    }
+
     // Recover non-acked messages on the channel
     Iterator iter = deliveriesToAck.iterator();
     Map recoverMap = new HashMap();
@@ -527,6 +611,22 @@ public class ProxyAgent extends Agent {
   }
 
   private void connectionClose() {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "ProxyAgent.connectionClose()");
+
+    // Close consumers on remaining channels
+    Collection contexts = channelContexts.values();
+    for (Iterator iterator = contexts.iterator(); iterator.hasNext();) {
+      ChannelContext channelContext = (ChannelContext) iterator.next();
+      Set entrySet = channelContext.consumers.entrySet();
+      for (Iterator subIterator = entrySet.iterator(); subIterator.hasNext();) {
+        Map.Entry consumer = (Map.Entry) subIterator.next();
+        CancelNot cancelNot = new CancelNot((String) consumer.getKey());
+        sendTo((AgentId) consumer.getValue(), cancelNot);
+      }
+    }
+    channelContexts.clear();
+
     // Recover all non-acked messages
     Iterator iter = deliveriesToAck.iterator();
     Map recoverMap = new HashMap();
@@ -553,23 +653,6 @@ public class ProxyAgent extends Agent {
       deliveriesToAck.add(new DeliverContext(queueId, channelId, queueMsgId, deliveryTag));
     }
     return deliveryTag;
-  }
-  
-  
-  static class DeliverContext implements Serializable {
-
-    private AgentId queueId;
-    private int channelId;
-    private long queueMsgId;
-    private long deliveryTag;
-
-    public DeliverContext(AgentId queueId, int channelId, long queueMsgId, long deliveryTag) {
-      super();
-      this.queueId = queueId;
-      this.channelId = channelId;
-      this.queueMsgId = queueMsgId;
-      this.deliveryTag = deliveryTag;
-    }
   }
 
 }
