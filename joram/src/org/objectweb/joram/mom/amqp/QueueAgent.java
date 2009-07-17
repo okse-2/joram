@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2008 CNES
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -137,8 +137,8 @@ public class QueueAgent extends Agent {
       }
       // TODO should be a notification sent to proxy
       long deliveryTag = proxy.getDeliveryTag(getId(), channelId, msgCounter, noAck);
-      consumer.handleDelivery(deliveryTag, msg.redelivered, msg.exchange, msg.routingKey, msg.properties,
-          msg.body);
+      consumer.handleDelivery(consumerTag, deliveryTag, msg.redelivered, msg.exchange, msg.routingKey,
+          msg.properties, msg.body);
     }
     consumers.addLast(new DeliverContext(channelId, proxy, consumer, consumerTag, noAck));
   }
@@ -163,7 +163,8 @@ public class QueueAgent extends Agent {
           deliverContext.noAck);
       if (callback instanceof DeliveryListener) {
         DeliveryListener consumer = (DeliveryListener) callback;
-        consumer.handleDelivery(deliveryTag, redelivered, exchange, routingKey, properties, body);
+        consumer.handleDelivery(deliverContext.consumerTag, deliveryTag, redelivered, exchange, routingKey,
+            properties, body);
       } else if (callback instanceof GetListener) {
         GetListener consumer = (GetListener) callback;
         consumer.handleGet(deliveryTag, redelivered, exchange, routingKey, toDeliver.size(), properties, body);
@@ -176,11 +177,11 @@ public class QueueAgent extends Agent {
     }
   }
 
-  private void doReact(CancelNot not) {
+  private void doReact(CancelNot not) throws Exception {
     cancel(not.getConsumerTag());
   }
 
-  public void cancel(String consumerTag) {
+  public void cancel(String consumerTag) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "QueueAgent.cancel()");
     ListIterator iterator = consumers.listIterator();
@@ -191,6 +192,9 @@ public class QueueAgent extends Agent {
       }
     }
     if (consumers.size() == 0 && autodelete) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "QueueAgent: no more consumers -> autodelete");
+      NamingAgent.getSingleton().unbind(getName());
       delete();
     }
   }
