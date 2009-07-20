@@ -32,21 +32,6 @@ import fr.dyade.aaa.common.Queue;
 public interface MOMHandler {
 
   /**
-   * Request an access ticket for the named realm and the given role and exclusivity flags
-   * @param realm the name of the realm
-   * @param exclusive true if we are requesting exclusive access
-   * @param passive true if we are requesting passive access
-   * @param active true if we are requesting active access
-   * @param write true if we are requesting write access
-   * @param read true if we are requesting read access
-   * @param channelNumber the channel the request came from
-   * @return a valid access ticket
-   * @throws java.io.IOException if an error is encountered e.g. we don't have permission
-   */
-  public AMQP.Access.RequestOk accessRequest(String realm, boolean exclusive, boolean passive,
-      boolean active, boolean write, boolean read, int channelNumber) throws Exception;
-  
-  /**
    * Declare a queue
    * @param queueName the name of the queue
    * @param passive true if we are passively declaring a queue (asserting the queue already exists)

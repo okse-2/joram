@@ -363,33 +363,6 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
         break;
 
       /******************************************************
-       * Class Access
-       ******************************************************/
-      case AMQP.Access.INDEX:
-        switch (method.getMethodId()) {
-        case AMQP.Access.Request.INDEX:
-          if (classState == AMQP.Channel.INDEX && methodState == AMQP.Channel.OpenOk.INDEX) {
-            AMQP.Access.Request request = (AMQP.Access.Request) method;
-            AMQP.Access.RequestOk requestOk = momHandler.accessRequest(
-                request.realm,
-                request.exclusive,
-                request.passive,
-                request.active,
-                request.write,
-                request.read,
-                channelNumber);
-            sendMethodToPeer(requestOk, channelNumber);
-          } else
-            invalidState(method);
-          break;
-
-        default:
-          invalidState(method);
-          break;
-        }
-        break;
-
-      /******************************************************
        * Class Queue
        ******************************************************/
       case AMQP.Queue.INDEX:
