@@ -2834,8 +2834,8 @@ public class AMQP {
       public java.lang.String contentType;
       public java.lang.String contentEncoding;
       public Map headers;
-      public int deliveryMode;
-      public int priority;
+      public int deliveryMode = -1;
+      public int priority = -1;
       public java.lang.String correlationId;
       public java.lang.String replyTo;
       public java.lang.String expiration;
