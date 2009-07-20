@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2008 CNES
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,6 @@ import java.util.Date;
 import java.util.Map;
 
 public class AMQP {
-
   public static class PROTOCOL {
     public static final int MAJOR = 0;
     public static final int MINOR = 9;
@@ -36,6 +35,7 @@ public class AMQP {
   }
 
     
+
 
   /**
    * The connection class provides methods for a client to establish a network connection to a server, and for both peers to operate the connection thereafter.
@@ -48,12 +48,8 @@ public class AMQP {
   public static final int CLASS_CHANNEL = 20;
 
   /**
-   * The protocol control access to server resources using access tickets. A client must explicitly request access tickets before doing work. An access ticket grants a client the right to use a specific set of resources - called a "realm" - in specific ways.
-   */
-  public static final int CLASS_ACCESS = 30;
-
-  /**
-   * Exchanges match and distribute messages across queues. Exchanges can be configured in the server or created at runtime.
+   * Exchanges match and distribute messages across queues. Exchanges can be
+   * configured in the server or declared at runtime.
    */
   public static final int CLASS_EXCHANGE = 40;
 
@@ -81,12 +77,11 @@ public class AMQP {
   public static final int CLASS_TX = 90;
 
 
-  public static final int[] ids = { 10, 20, 30, 40, 50, 60, 90 };
+  public static final int[] ids = { 10, 20, 40, 50, 60, 90 };
   
   public static final java.lang.String[] classnames = {
     "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection",
     "org.objectweb.joram.mom.amqp.marshalling.AMQP$Channel",
-    "org.objectweb.joram.mom.amqp.marshalling.AMQP$Access",
     "org.objectweb.joram.mom.amqp.marshalling.AMQP$Exchange",
     "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue",
     "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic",
@@ -122,8 +117,6 @@ public class AMQP {
   
     private static final long serialVersionUID = 1L;
 
-  
-      
     public final static int INDEX = 10;
       
     public int getClassId() { 
@@ -208,7 +201,7 @@ public class AMQP {
    * A list of the message locales that the server supports, delimited by spaces. The locale defines the language in which the server will send reply texts.
    */
     public LongString locales;
-      
+
     public final static int INDEX = 10;
       
       
@@ -308,7 +301,7 @@ public class AMQP {
    * A single message locale selected by the client, which must be one of those specified by the server.
    */
     public java.lang.String locale;
-      
+
     public final static int INDEX = 11;
       
       
@@ -390,7 +383,7 @@ public class AMQP {
    * Challenge information, a block of opaque binary data passed to the security mechanism.
    */
     public LongString challenge;
-      
+
     public final static int INDEX = 20;
       
       
@@ -454,7 +447,7 @@ public class AMQP {
    * A block of opaque data passed to the security mechanism. The contents of this data are defined by the SASL security mechanism.
    */
     public LongString response;
-      
+
     public final static int INDEX = 21;
       
       
@@ -532,7 +525,7 @@ public class AMQP {
    * The delay, in seconds, of the connection heartbeat that the server wants. Zero means the server does not want a heartbeat.
    */
     public int heartbeat;
-      
+
     public final static int INDEX = 30;
       
       
@@ -616,7 +609,7 @@ public class AMQP {
    * The delay, in seconds, of the connection heartbeat that the client wants. Zero means the client does not want a heartbeat.
    */
     public int heartbeat;
-      
+
     public final static int INDEX = 31;
       
       
@@ -707,7 +700,7 @@ public class AMQP {
   /**
    * This method opens a connection to a virtual host, which is a collection of resources, and acts to separate multiple application domains within a server. The server may apply arbitrary limits per virtual host, such as the number of each type of entity that may be used, per connection and/or in total.
    */
-    public Open(java.lang.String virtualHost, java.lang.String reserved1, boolean reserved2) {
+      public Open(java.lang.String virtualHost, java.lang.String reserved1, boolean reserved2) {
       this.virtualHost = virtualHost;
       this.reserved1 = reserved1;
         this.reserved2 = reserved2;
@@ -868,7 +861,7 @@ public class AMQP {
        * is due to an exception, the sender provides the class and method id of
        * the method which caused the exception.
        */
-    public Close(int replyCode, java.lang.String replyText, int classId, int methodId) {
+      public Close(int replyCode, java.lang.String replyText, int classId, int methodId) {
         this.replyCode = replyCode;
         this.replyText = replyText;
         this.classId = classId;
@@ -941,10 +934,10 @@ public class AMQP {
   
     private static final long serialVersionUID = 1L;
   
+      public final static int INDEX = 51;
       
-    public final static int INDEX = 51;
-
-      /**
+      
+  /**
        * This method confirms a Connection.Close method and tells the recipient
        * that it is safe to release resources for the connection and close the
        * socket.
@@ -983,15 +976,13 @@ public class AMQP {
       
       buff.append(')');
         return buff.toString();
-      }
+    }
     }
 
   
   public String toString() {
     StringBuffer buff = new StringBuffer();
-    buff.append("Connection(");
-    
-    buff.append(')');
+      buff.append("Connection()");
     return buff.toString();
   }
  }
@@ -1000,8 +991,6 @@ public class AMQP {
   
     private static final long serialVersionUID = 1L;
 
-  
-      
     public final static int INDEX = 20;
       
     public int getClassId() { 
@@ -1193,10 +1182,10 @@ public class AMQP {
    * If 1, the peer starts sending content frames. If 0, the peer stops sending content frames.
    */
     public boolean active;
-      
-    public final static int INDEX = 20;
 
-      /**
+      public final static int INDEX = 20;
+      
+  /**
        * This method asks the peer to pause or restart the flow of content data
        * sent by a consumer. This is a simple flow-control mechanism that a peer
        * can use to avoid overflowing its queues or otherwise finding itself
@@ -1204,7 +1193,7 @@ public class AMQP {
        * not intended for window control. It does not affect contents returned
        * by Basic.Get-Ok methods.
        */
-    public Flow(boolean active) {
+      public Flow(boolean active) {
       this.active = active;
     }
     
@@ -1261,7 +1250,7 @@ public class AMQP {
    * Confirms the setting of the processed flow method: 1 means the peer will start sending or continue to send content frames; 0 means it will not.
    */
     public boolean active;
-      
+
     public final static int INDEX = 21;
       
       
@@ -1337,7 +1326,7 @@ public class AMQP {
    * When the close is provoked by a method exception, this is the ID of the method.
    */
     public int methodId;
-      
+
     public final static int INDEX = 40;
       
       
@@ -1415,7 +1404,7 @@ public class AMQP {
   
     private static final long serialVersionUID = 1L;
   
-      
+
     public final static int INDEX = 41;
       
       
@@ -1462,19 +1451,15 @@ public class AMQP {
   
   public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Channel(");
-    
-    buff.append(')');
+      buff.append("Channel()");
       return buff.toString();
-    }
+  }
   }
 
   public static class Exchange extends AbstractMarshallingClass {
 
     private static final long serialVersionUID = 1L;
 
-  
-      
     public final static int INDEX = 40;
       
     public int getClassId() { 
@@ -1514,10 +1499,8 @@ public class AMQP {
         return AMQP.Exchange.methodnames[pos];
       return "";
     }
-  
 
-
-  /**
+    /**
      * This method creates an exchange if it does not already exist, and if the
      * exchange exists, verifies that it is of the correct and expected class.
      */
@@ -1528,11 +1511,11 @@ public class AMQP {
       /**
    * 
    */
-      public int reserved1;
+    public int reserved1;
       /**
    * 
    */
-      public java.lang.String exchange;
+    public java.lang.String exchange;
       /**
        * Each exchange belongs to one of a set of exchange types implemented by
        * the server. The exchange types define the functionality of the exchange
@@ -1559,15 +1542,15 @@ public class AMQP {
       /**
    * 
    */
-      public boolean reserved2;
+    public boolean reserved2;
       /**
    * 
    */
-      public boolean reserved3;
+    public boolean reserved3;
       /**
    * 
    */
-      public boolean noWait;
+    public boolean noWait;
       /**
        * A set of arguments for the declaration. The syntax and semantics of
        * these arguments depends on the server implementation.
@@ -1581,7 +1564,7 @@ public class AMQP {
        * the exchange exists, verifies that it is of the correct and expected
        * class.
        */
-    public Declare(int reserved1, java.lang.String exchange, java.lang.String type, boolean passive,
+      public Declare(int reserved1, java.lang.String exchange, java.lang.String type, boolean passive,
           boolean durable, boolean reserved2, boolean reserved3, boolean noWait, Map arguments) {
         this.reserved1 = reserved1;
         this.exchange = exchange;
@@ -1643,7 +1626,7 @@ public class AMQP {
     public String toString() {
       StringBuffer buff = new StringBuffer();
       buff.append("Declare(");
-
+      
         buff.append("reserved1=");
         buff.append(reserved1);
         buff.append(',');
@@ -1670,7 +1653,7 @@ public class AMQP {
         buff.append(',');
         buff.append("arguments=");
         buff.append(arguments);
-      
+
       buff.append(')');
       return buff.toString();
     }
@@ -1684,10 +1667,10 @@ public class AMQP {
   
     private static final long serialVersionUID = 1L;
   
+      public final static int INDEX = 11;
       
-    public final static int INDEX = 11;
-
-      /**
+      
+  /**
        * This method confirms a Declare method and confirms the name of the
        * exchange, essential for automatically-named exchanges.
        */
@@ -1728,7 +1711,7 @@ public class AMQP {
     }
   }
 
-  /**
+    /**
      * This method deletes an exchange. When an exchange is deleted all queue
      * bindings on the exchange are cancelled.
      */
@@ -1761,7 +1744,7 @@ public class AMQP {
        * This method deletes an exchange. When an exchange is deleted all queue
        * bindings on the exchange are cancelled.
        */
-    public Delete(int reserved1, java.lang.String exchange, boolean ifUnused, boolean noWait) {
+      public Delete(int reserved1, java.lang.String exchange, boolean ifUnused, boolean noWait) {
         this.reserved1 = reserved1;
         this.exchange = exchange;
         this.ifUnused = ifUnused;
@@ -1832,10 +1815,9 @@ public class AMQP {
   
     private static final long serialVersionUID = 1L;
   
+      public final static int INDEX = 21;
       
-    public final static int INDEX = 21;
-
-      /**
+  /**
        * This method confirms the deletion of an exchange.
        */
     public DeleteOk() {
@@ -1878,9 +1860,7 @@ public class AMQP {
   
   public String toString() {
     StringBuffer buff = new StringBuffer();
-    buff.append("Exchange(");
-    
-    buff.append(')');
+      buff.append("Exchange()");
     return buff.toString();
   }
  }
@@ -1889,8 +1869,6 @@ public class AMQP {
   
     private static final long serialVersionUID = 1L;
 
-  
-      
     public final static int INDEX = 50;
       
     public int getClassId() { 
@@ -1944,7 +1922,9 @@ public class AMQP {
       return "";
     }
 
-    /**
+
+
+  /**
      * This method creates or checks a queue. When creating a new queue the
      * client can specify various properties that control the durability of the
      * queue and its contents, and the level of sharing for the queue.
@@ -2001,15 +1981,16 @@ public class AMQP {
        * these arguments depends on the server implementation.
        */
     public Map arguments;
-      
-    public final static int INDEX = 10;
 
-      /**
+      public final static int INDEX = 10;
+      
+      
+  /**
        * This method creates or checks a queue. When creating a new queue the
        * client can specify various properties that control the durability of
        * the queue and its contents, and the level of sharing for the queue.
        */
-    public Declare(int reserved1, java.lang.String queue, boolean passive, boolean durable,
+      public Declare(int reserved1, java.lang.String queue, boolean passive, boolean durable,
           boolean exclusive, boolean autoDelete, boolean noWait, Map arguments) {
         this.reserved1 = reserved1;
         this.queue = queue;
@@ -2114,17 +2095,18 @@ public class AMQP {
       /**
    * 
    */
-      public int messageCount;
+    public int messageCount;
       /**
        * Reports the number of active consumers for the queue. Note that
        * consumers can suspend activity (Channel.Flow) in which case they do not
        * appear in this count.
        */
     public int consumerCount;
-      
-    public final static int INDEX = 11;
 
-      /**
+      public final static int INDEX = 11;
+      
+      
+  /**
        * This method confirms a Declare method and confirms the name of the
        * queue, essential for automatically-named queues.
        */
@@ -2141,7 +2123,7 @@ public class AMQP {
         return INDEX;
       }
 
-      public java.lang.String getMethodName() {
+    public java.lang.String getMethodName() {
         return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue$DeclareOk";
       
     }
@@ -2204,7 +2186,7 @@ public class AMQP {
        * Specifies the name of the queue to bind.
        */
       public java.lang.String queue;
-  /**
+      /**
    * 
    */
     public java.lang.String exchange;
@@ -2238,7 +2220,7 @@ public class AMQP {
        * store-and-forward queues are bound to a direct exchange and
        * subscription queues are bound to a topic exchange.
        */
-    public Bind(int reserved1, java.lang.String queue, java.lang.String exchange,
+      public Bind(int reserved1, java.lang.String queue, java.lang.String exchange,
           java.lang.String routingKey, boolean noWait, Map arguments) {
         this.reserved1 = reserved1;
         this.queue = queue;
@@ -2294,10 +2276,10 @@ public class AMQP {
       
       buff.append("reserved1=");
         buff.append(reserved1);
-        buff.append(',');
+      buff.append(',');
         buff.append("queue=");
         buff.append(queue);
-      buff.append(',');
+        buff.append(',');
       buff.append("exchange=");
       buff.append(exchange);
       buff.append(',');
@@ -2322,10 +2304,10 @@ public class AMQP {
   
     private static final long serialVersionUID = 1L;
   
+      public final static int INDEX = 21;
       
-    public final static int INDEX = 21;
-
-      /**
+      
+  /**
        * This method confirms that the bind was successful.
        */
     public BindOk() {
@@ -2365,7 +2347,7 @@ public class AMQP {
     }
   }
 
-  /**
+    /**
      * This method unbinds a queue from an exchange.
      */
     public static class Unbind extends AbstractMarshallingMethod {
@@ -2375,7 +2357,7 @@ public class AMQP {
       /**
    * 
    */
-      public int reserved1;
+    public int reserved1;
       /**
        * Specifies the name of the queue to unbind.
        */
@@ -2427,7 +2409,7 @@ public class AMQP {
       return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue";
     }
 
-    public void readFrom(AMQPInputStream in) throws IOException {
+      public void readFrom(AMQPInputStream in) throws IOException {
         this.reserved1 = in.readShort();
         this.queue = in.readShortstr();
         this.exchange = in.readShortstr();
@@ -2435,7 +2417,7 @@ public class AMQP {
         this.arguments = in.readTable();
       }
 
-      public void writeTo(AMQPOutputStream out) throws IOException {
+    public void writeTo(AMQPOutputStream out) throws IOException {
         out.writeShort(this.reserved1);
         out.writeShortstr(this.queue);
         out.writeShortstr(this.exchange);
@@ -2474,10 +2456,9 @@ public class AMQP {
   
     private static final long serialVersionUID = 1L;
   
+      public final static int INDEX = 51;
       
-    public final static int INDEX = 51;
-
-      /**
+  /**
        * This method confirms that the unbind was successful.
        */
     public UnbindOk() {
@@ -2544,7 +2525,7 @@ public class AMQP {
        * This method removes all messages from a queue which are not awaiting
        * acknowledgment.
        */
-    public Purge(int reserved1, java.lang.String queue, boolean noWait) {
+      public Purge(int reserved1, java.lang.String queue, boolean noWait) {
         this.reserved1 = reserved1;
       this.queue = queue;
       this.noWait = noWait;
@@ -2677,7 +2658,7 @@ public class AMQP {
       /**
    * 
    */
-      public int reserved1;
+    public int reserved1;
       /**
        * Specifies the name of the queue to delete.
        */
@@ -2695,7 +2676,7 @@ public class AMQP {
       /**
    * 
    */
-      public boolean noWait;
+    public boolean noWait;
 
       public final static int INDEX = 40;
 
@@ -2704,7 +2685,7 @@ public class AMQP {
        * messages are sent to a dead-letter queue if this is defined in the
        * server configuration, and all consumers on the queue are cancelled.
        */
-    public Delete(int reserved1, java.lang.String queue, boolean ifUnused, boolean ifEmpty, boolean noWait) {
+      public Delete(int reserved1, java.lang.String queue, boolean ifUnused, boolean ifEmpty, boolean noWait) {
         this.reserved1 = reserved1;
         this.queue = queue;
         this.ifUnused = ifUnused;
@@ -2840,255 +2821,15 @@ public class AMQP {
   
   public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Queue(");
-
-      buff.append(')');
+      buff.append("Queue()");
       return buff.toString();
-    }
   }
-
-  public static class Access extends AbstractMarshallingClass {
-    
-    private static final long serialVersionUID = 1L;
-
-    public final static int INDEX = 30;
-
-    public int getClassId() {
-      return INDEX;
-    }
-
-    public java.lang.String getClassName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Access";
-    }
-
-    public static final int METHOD_ACCESS_REQUEST = 10;
-    public static final int METHOD_ACCESS_REQUEST_OK = 11;
-
-    public static final int[] mids = { 10, 11 };
-
-    public static final java.lang.String[] methodnames = {
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Access$Request",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Access$RequestOk" };
-
-    private static int getPosition(int id) {
-      for (int i = 0; i < AMQP.Access.mids.length; i++) {
-        if (AMQP.Access.mids[i] == id)
-          return i;
-      }
-      return -1;
-    }
-
-    public java.lang.String getMethodName(int id) {
-      int pos = getPosition(id);
-      if (pos > -1)
-        return AMQP.Access.methodnames[pos];
-      return "";
-    }
-
-    /**
-     * This method requests an access ticket for an access realm. The server
-     * responds by granting the access ticket. If the client does not have
-     * access rights to the requested realm this causes a connection exception.
-     * Access tickets are a per-channel resource.
-     */
-    public static class Request extends AbstractMarshallingMethod {
-      private static final long serialVersionUID = 1L;
-
-      /**
-       * Specifies the name of the realm to which the client is requesting
-       * access. The realm is a configured server-side object that collects a
-       * set of resources (exchanges, queues, etc.). If the channel has already
-       * requested an access ticket onto this realm, the previous ticket is
-       * destroyed and a new ticket is created with the requested access rights,
-       * if allowed.
-       */
-      public java.lang.String realm;
-      /**
-       * Request exclusive access to the realm, meaning that this will be the
-       * only channel that uses the realm's resources.
-       */
-      public boolean exclusive;
-      /**
-       * Request message passive access to the specified access realm. Passive
-       * access lets a client get information about resources in the realm but
-       * not to make any changes to them.
-       */
-      public boolean passive;
-      /**
-       * Request message active access to the specified access realm. Active
-       * access lets a client get create and delete resources in the realm.
-       */
-      public boolean active;
-      /**
-       * Request write access to the specified access realm. Write access lets a
-       * client publish messages to all exchanges in the realm.
-       */
-      public boolean write;
-      /**
-       * Request read access to the specified access realm. Read access lets a
-       * client consume messages from queues in the realm.
-       */
-      public boolean read;
-
-      public final static int INDEX = 10;
-
-      /**
-       * This method requests an access ticket for an access realm. The server
-       * responds by granting the access ticket. If the client does not have
-       * access rights to the requested realm this causes a connection
-       * exception. Access tickets are a per-channel resource.
-       */
-      public Request(java.lang.String realm, boolean exclusive, boolean passive, boolean active,
-          boolean write, boolean read) {
-        this.realm = realm;
-        this.exclusive = exclusive;
-        this.passive = passive;
-        this.active = active;
-        this.write = write;
-        this.read = read;
-      }
-
-      public Request() {
-      }
-
-      public int getMethodId() {
-        return INDEX;
-      }
-
-      public java.lang.String getMethodName() {
-        return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Access$Request";
-
-      }
-
-      public int getClassId() {
-        return 30;
-      }
-
-      public java.lang.String getClassName() {
-        return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Access";
-      }
-
-      public void readFrom(AMQPInputStream in) throws IOException {
-        this.realm = in.readShortstr();
-        this.exclusive = in.readBit();
-        this.passive = in.readBit();
-        this.active = in.readBit();
-        this.write = in.readBit();
-        this.read = in.readBit();
-      }
-
-      public void writeTo(AMQPOutputStream out) throws IOException {
-        out.writeShortstr(this.realm);
-        out.writeBit(this.exclusive);
-        out.writeBit(this.passive);
-        out.writeBit(this.active);
-        out.writeBit(this.write);
-        out.writeBit(this.read);
-      }
-
-      public String toString() {
-        StringBuffer buff = new StringBuffer();
-        buff.append("Request(");
-
-        buff.append("realm=");
-        buff.append(realm);
-        buff.append(',');
-        buff.append("exclusive=");
-        buff.append(exclusive);
-        buff.append(',');
-        buff.append("passive=");
-        buff.append(passive);
-        buff.append(',');
-        buff.append("active=");
-        buff.append(active);
-        buff.append(',');
-        buff.append("write=");
-        buff.append(write);
-        buff.append(',');
-        buff.append("read=");
-        buff.append(read);
-
-        buff.append(')');
-        return buff.toString();
-      }
-    }
-
-    /**
-     * This method provides the client with an access ticket. The access ticket
-     * is valid within the current channel and for the lifespan of the channel.
-     */
-    public static class RequestOk extends AbstractMarshallingMethod {
-      private static final long serialVersionUID = 1L;
-
-      /**
- * 
- */
-      public int ticket;
-
-      public final static int INDEX = 11;
-
-      /**
-       * This method provides the client with an access ticket. The access
-       * ticket is valid within the current channel and for the lifespan of the
-       * channel.
-       */
-      public RequestOk(int ticket) {
-        this.ticket = ticket;
-      }
-
-      public RequestOk() {
-      }
-
-      public int getMethodId() {
-        return INDEX;
-      }
-
-      public java.lang.String getMethodName() {
-        return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Access$RequestOk";
-
-      }
-
-      public int getClassId() {
-        return 30;
-      }
-
-      public java.lang.String getClassName() {
-        return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Access";
-      }
-
-      public void readFrom(AMQPInputStream in) throws IOException {
-        this.ticket = in.readShort();
-      }
-
-      public void writeTo(AMQPOutputStream out) throws IOException {
-        out.writeShort(this.ticket);
-      }
-
-      public String toString() {
-        StringBuffer buff = new StringBuffer();
-        buff.append("RequestOk(");
-
-        buff.append("ticket=");
-        buff.append(ticket);
-
-        buff.append(')');
-        return buff.toString();
-      }
-    }
-
-    public String toString() {
-      StringBuffer buff = new StringBuffer();
-      buff.append("Access(");
-
-      buff.append(')');
-      return buff.toString();
-    }
   }
 
   public static class Basic extends AbstractMarshallingClass {
-  
-    private static final long serialVersionUID = 1L;
 
+    private static final long serialVersionUID = 1L;
+    
     public static class BasicProperties {
       public java.lang.String contentType;
       public java.lang.String contentEncoding;
@@ -3289,63 +3030,6 @@ public class AMQP {
         return buff.toString();
       }
     }
-  
-  /**
-   * 
-   */
-    public java.lang.String contentType;
-    /**
-   * 
-   */
-    public java.lang.String contentEncoding;
-    /**
-   * 
-   */
-    public Map headers;
-    /**
-   * 
-   */
-    public int deliveryMode;
-    /**
-   * 
-   */
-    public int priority;
-    /**
-   * 
-   */
-    public java.lang.String correlationId;
-    /**
-   * 
-   */
-    public java.lang.String replyTo;
-    /**
-   * 
-   */
-    public java.lang.String expiration;
-    /**
-   * 
-   */
-    public java.lang.String messageId;
-    /**
-   * 
-   */
-    public Date timestamp;
-    /**
-   * 
-   */
-    public java.lang.String type;
-    /**
-   * 
-   */
-    public java.lang.String userId;
-    /**
-   * 
-   */
-    public java.lang.String appId;
-    /**
-   * 
-   */
-    public java.lang.String reserved;
 
     public final static int INDEX = 60;
       
@@ -3413,7 +3097,8 @@ public class AMQP {
       return "";
     }
 
-    /**
+
+  /**
      * This method requests a specific quality of service. The QoS can be
      * specified for the current channel or for all channels on the connection.
      * The particular properties and semantics of a qos method always depend on
@@ -3461,7 +3146,7 @@ public class AMQP {
        * could in principle apply to both peers, it is currently meaningful only
        * for the server.
        */
-    public Qos(int prefetchSize, int prefetchCount, boolean global) {
+      public Qos(int prefetchSize, int prefetchCount, boolean global) {
         this.prefetchSize = prefetchSize;
         this.prefetchCount = prefetchCount;
         this.global = global;
@@ -3504,7 +3189,7 @@ public class AMQP {
     public String toString() {
       StringBuffer buff = new StringBuffer();
       buff.append("Qos(");
-
+      
         buff.append("prefetchSize=");
         buff.append(prefetchSize);
         buff.append(',');
@@ -3513,7 +3198,7 @@ public class AMQP {
         buff.append(',');
         buff.append("global=");
         buff.append(global);
-      
+
       buff.append(')');
       return buff.toString();
     }
@@ -3528,10 +3213,10 @@ public class AMQP {
   
     private static final long serialVersionUID = 1L;
   
+      public final static int INDEX = 11;
       
-    public final static int INDEX = 11;
-
-      /**
+      
+  /**
        * This method tells the client that the requested QoS levels could be
        * handled by the server. The requested QoS applies to all active
        * consumers until a new QoS is defined.
@@ -3599,16 +3284,16 @@ public class AMQP {
       /**
    * 
    */
-      public boolean noLocal;
+    public boolean noLocal;
       /**
    * 
    */
-      public boolean noAck;
+    public boolean noAck;
       /**
        * Request exclusive consumer access, meaning only this consumer can
        * access the queue.
        */
-      public boolean exclusive;
+    public boolean exclusive;
       /**
    * 
    */
@@ -3626,7 +3311,7 @@ public class AMQP {
        * request for messages from a specific queue. Consumers last as long as
        * the channel they were declared on, or until the client cancels them.
        */
-    public Consume(int reserved1, java.lang.String queue, java.lang.String consumerTag, boolean noLocal,
+      public Consume(int reserved1, java.lang.String queue, java.lang.String consumerTag, boolean noLocal,
           boolean noAck, boolean exclusive, boolean noWait, Map arguments) {
         this.reserved1 = reserved1;
         this.queue = queue;
@@ -3658,7 +3343,7 @@ public class AMQP {
       return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic";
     }
 
-    public void readFrom(AMQPInputStream in) throws IOException {
+      public void readFrom(AMQPInputStream in) throws IOException {
         this.reserved1 = in.readShort();
         this.queue = in.readShortstr();
         this.consumerTag = in.readShortstr();
@@ -3669,7 +3354,7 @@ public class AMQP {
         this.arguments = in.readTable();
     }
 
-    public void writeTo(AMQPOutputStream out) throws IOException {
+      public void writeTo(AMQPOutputStream out) throws IOException {
         out.writeShort(this.reserved1);
         out.writeShortstr(this.queue);
         out.writeShortstr(this.consumerTag);
@@ -3770,10 +3455,10 @@ public class AMQP {
     public String toString() {
       StringBuffer buff = new StringBuffer();
       buff.append("ConsumeOk(");
-
+      
         buff.append("consumerTag=");
         buff.append(consumerTag);
-      
+
       buff.append(')');
       return buff.toString();
     }
@@ -3792,11 +3477,11 @@ public class AMQP {
       /**
    * 
    */
-      public java.lang.String consumerTag;
+    public java.lang.String consumerTag;
       /**
    * 
    */
-      public boolean noWait;
+    public boolean noWait;
 
       public final static int INDEX = 30;
 
@@ -3807,7 +3492,7 @@ public class AMQP {
        * messages in between sending the cancel method and receiving the
        * cancel-ok reply.
        */
-    public Cancel(java.lang.String consumerTag, boolean noWait) {
+      public Cancel(java.lang.String consumerTag, boolean noWait) {
         this.consumerTag = consumerTag;
         this.noWait = noWait;
     }
@@ -3847,13 +3532,13 @@ public class AMQP {
     public String toString() {
       StringBuffer buff = new StringBuffer();
       buff.append("Cancel(");
-
+      
         buff.append("consumerTag=");
         buff.append(consumerTag);
         buff.append(',');
         buff.append("noWait=");
         buff.append(noWait);
-      
+
       buff.append(')');
       return buff.toString();
     }
@@ -3912,17 +3597,17 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("CancelOk(");
-      
-      buff.append("consumerTag=");
-        buff.append(consumerTag);
-      
-      buff.append(')');
-      return buff.toString();
-    }
-  }
+        buff.append("CancelOk(");
 
-  /**
+        buff.append("consumerTag=");
+        buff.append(consumerTag);
+
+        buff.append(')');
+        return buff.toString();
+      }
+    }
+
+    /**
      * This method publishes a message to a specific exchange. The message will
      * be routed to queues as defined by the exchange configuration and
      * distributed to any active consumers when the transaction, if any, is
@@ -3962,11 +3647,12 @@ public class AMQP {
        * zero, the server will queue the message, but with no guarantee that it
        * will ever be consumed.
        */
-    public boolean immediate;
+      public boolean immediate;
 
       public final static int INDEX = 40;
-
-      /**
+      
+      
+  /**
        * This method publishes a message to a specific exchange. The message
        * will be routed to queues as defined by the exchange configuration and
        * distributed to any active consumers when the transaction, if any, is
@@ -4022,7 +3708,7 @@ public class AMQP {
     public String toString() {
       StringBuffer buff = new StringBuffer();
       buff.append("Publish(");
-
+      
         buff.append("reserved1=");
         buff.append(reserved1);
         buff.append(',');
@@ -4037,13 +3723,13 @@ public class AMQP {
         buff.append(',');
         buff.append("immediate=");
         buff.append(immediate);
-      
+
       buff.append(')');
       return buff.toString();
       }
   }
 
-  /**
+    /**
      * This method returns an undeliverable message that was published with the
      * "immediate" flag set, or an unroutable message published with the
      * "mandatory" flag set. The reply code and text provide information about
@@ -4080,7 +3766,7 @@ public class AMQP {
        * "mandatory" flag set. The reply code and text provide information about
        * the reason that the message was undeliverable.
        */
-    public Return(int replyCode, java.lang.String replyText, java.lang.String exchange,
+      public Return(int replyCode, java.lang.String replyText, java.lang.String exchange,
           java.lang.String routingKey) {
         this.replyCode = replyCode;
         this.replyText = replyText;
@@ -4145,7 +3831,7 @@ public class AMQP {
       }
   }
 
-  /**
+    /**
      * This method delivers a message to the client, via a consumer. In the
      * asynchronous message delivery model, the client starts a consumer using
      * the Consume method, then the server responds with Deliver methods as and
@@ -4162,11 +3848,11 @@ public class AMQP {
       /**
    * 
    */
-      public long deliveryTag;
+    public long deliveryTag;
       /**
    * 
    */
-      public boolean redelivered;
+    public boolean redelivered;
       /**
        * Specifies the name of the exchange that the message was originally
        * published to. May be empty, indicating the default exchange.
@@ -4198,7 +3884,7 @@ public class AMQP {
       public Deliver() {
       }
 
-      public int getMethodId() { 
+      public int getMethodId() {
       return INDEX;
     }
 
@@ -4211,11 +3897,11 @@ public class AMQP {
         return 60;
       }
 
-      public java.lang.String getClassName() {
+    public java.lang.String getClassName() {
         return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic";
       }
 
-      public void readFrom(AMQPInputStream in) throws IOException {
+    public void readFrom(AMQPInputStream in) throws IOException {
         this.consumerTag = in.readShortstr();
         this.deliveryTag = in.readLonglong();
         this.redelivered = in.readBit();
@@ -4223,7 +3909,7 @@ public class AMQP {
         this.routingKey = in.readShortstr();
     }
 
-    public void writeTo(AMQPOutputStream out) throws IOException {
+      public void writeTo(AMQPOutputStream out) throws IOException {
         out.writeShortstr(this.consumerTag);
         out.writeLonglong(this.deliveryTag);
         out.writeBit(this.redelivered);
@@ -4297,7 +3983,7 @@ public class AMQP {
         return INDEX;
       }
 
-      public java.lang.String getMethodName() {
+    public java.lang.String getMethodName() {
         return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$Get";
 
       }
@@ -4306,17 +3992,17 @@ public class AMQP {
         return 60;
       }
 
-      public java.lang.String getClassName() {
+    public java.lang.String getClassName() {
         return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic";
       }
 
-      public void readFrom(AMQPInputStream in) throws IOException {
+    public void readFrom(AMQPInputStream in) throws IOException {
         this.reserved1 = in.readShort();
         this.queue = in.readShortstr();
         this.noAck = in.readBit();
       }
 
-      public void writeTo(AMQPOutputStream out) throws IOException {
+    public void writeTo(AMQPOutputStream out) throws IOException {
         out.writeShort(this.reserved1);
         out.writeShortstr(this.queue);
         out.writeBit(this.noAck);
@@ -4337,18 +4023,18 @@ public class AMQP {
 
         buff.append(')');
         return buff.toString();
-      }
+    }
     }
 
-    /**
+  /**
      * This method delivers a message to the client following a get method. A
      * message delivered by 'get-ok' must be acknowledged unless the no-ack
      * option was set in the get method.
      */
   public static class GetOk extends AbstractMarshallingMethod {
-
-      private static final long serialVersionUID = 1L;
   
+      private static final long serialVersionUID = 1L;
+
   /**
    * 
    */
@@ -4380,7 +4066,7 @@ public class AMQP {
        * message delivered by 'get-ok' must be acknowledged unless the no-ack
        * option was set in the get method.
        */
-    public GetOk(long deliveryTag, boolean redelivered, java.lang.String exchange,
+      public GetOk(long deliveryTag, boolean redelivered, java.lang.String exchange,
           java.lang.String routingKey, int messageCount) {
         this.deliveryTag = deliveryTag;
       this.redelivered = redelivered;
@@ -4545,7 +4231,7 @@ public class AMQP {
        * or Get-Ok methods. The client can ask to confirm a single message or a
        * set of messages up to and including a specific message.
        */
-    public Ack(long deliveryTag, boolean multiple) {
+      public Ack(long deliveryTag, boolean multiple) {
         this.deliveryTag = deliveryTag;
         this.multiple = multiple;
     }
@@ -4624,7 +4310,7 @@ public class AMQP {
        * interrupt and cancel large incoming messages, or return untreatable
        * messages to their original queue.
        */
-    public Reject(long deliveryTag, boolean requeue) {
+      public Reject(long deliveryTag, boolean requeue) {
         this.deliveryTag = deliveryTag;
         this.requeue = requeue;
     }
@@ -4689,10 +4375,11 @@ public class AMQP {
    * If this field is zero, the message will be redelivered to the original recipient. If this bit is 1, the server will attempt to requeue the message, potentially then delivering it to an alternative subscriber.
    */
     public boolean requeue;
-      
-    public final static int INDEX = 100;
 
-      /**
+      public final static int INDEX = 100;
+      
+      
+  /**
        * This method asks the server to redeliver all unacknowledged messages on
        * a specified channel. Zero or more messages may be redelivered. This
        * method is deprecated in favour of the synchronous Recover/Recover-Ok.
@@ -4819,10 +4506,9 @@ public class AMQP {
   
     private static final long serialVersionUID = 1L;
   
+      public final static int INDEX = 111;
       
-    public final static int INDEX = 111;
-
-      /**
+  /**
        * This method acknowledges a Basic.Recover method.
        */
     public RecoverOk() {
@@ -4865,61 +4551,15 @@ public class AMQP {
   
   public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Basic(");
-
-      buff.append("contentType=");
-      buff.append(contentType);
-      buff.append(',');
-      buff.append("contentEncoding=");
-      buff.append(contentEncoding);
-      buff.append(',');
-      buff.append("headers=");
-      buff.append(headers);
-      buff.append(',');
-      buff.append("deliveryMode=");
-      buff.append(deliveryMode);
-      buff.append(',');
-      buff.append("priority=");
-      buff.append(priority);
-      buff.append(',');
-      buff.append("correlationId=");
-      buff.append(correlationId);
-      buff.append(',');
-      buff.append("replyTo=");
-      buff.append(replyTo);
-      buff.append(',');
-      buff.append("expiration=");
-      buff.append(expiration);
-      buff.append(',');
-      buff.append("messageId=");
-      buff.append(messageId);
-      buff.append(',');
-      buff.append("timestamp=");
-      buff.append(timestamp);
-      buff.append(',');
-      buff.append("type=");
-      buff.append(type);
-      buff.append(',');
-      buff.append("userId=");
-      buff.append(userId);
-      buff.append(',');
-      buff.append("appId=");
-      buff.append(appId);
-      buff.append(',');
-      buff.append("reserved=");
-      buff.append(reserved);
-    
-    buff.append(')');
+      buff.append("Basic()");
       return buff.toString();
-    }
+  }
   }
 
   public static class Tx extends AbstractMarshallingClass {
 
     private static final long serialVersionUID = 1L;
 
-  
-      
     public final static int INDEX = 90;
       
     public int getClassId() { 
@@ -4964,7 +4604,9 @@ public class AMQP {
       return "";
     }
 
-    /**
+
+
+  /**
      * This method sets the channel to use standard transactions. The client
      * must use this method at least once on a channel before using the Commit
      * or Rollback methods.
@@ -4973,10 +4615,10 @@ public class AMQP {
   
     private static final long serialVersionUID = 1L;
   
+      public final static int INDEX = 10;
       
-    public final static int INDEX = 10;
-
-      /**
+      
+  /**
        * This method sets the channel to use standard transactions. The client
        * must use this method at least once on a channel before using the Commit
        * or Rollback methods.
@@ -5026,10 +4668,9 @@ public class AMQP {
   
     private static final long serialVersionUID = 1L;
   
+      public final static int INDEX = 11;
       
-    public final static int INDEX = 11;
-
-      /**
+  /**
        * This method confirms to the client that the channel was successfully
        * set to use standard transactions.
        */
@@ -5079,10 +4720,10 @@ public class AMQP {
   
     private static final long serialVersionUID = 1L;
   
+      public final static int INDEX = 20;
       
-    public final static int INDEX = 20;
-
-      /**
+      
+  /**
        * This method commits all message publications and acknowledgments
        * performed in the current transaction. A new transaction starts
        * immediately after a commit.
@@ -5132,10 +4773,10 @@ public class AMQP {
   
     private static final long serialVersionUID = 1L;
   
+      public final static int INDEX = 21;
       
-    public final static int INDEX = 21;
-
-      /**
+      
+  /**
        * This method confirms to the client that the commit succeeded. Note that
        * if a commit fails, the server raises a channel exception.
        */
@@ -5187,10 +4828,9 @@ public class AMQP {
   
     private static final long serialVersionUID = 1L;
   
+      public final static int INDEX = 30;
       
-    public final static int INDEX = 30;
-
-      /**
+  /**
        * This method abandons all message publications and acknowledgments
        * performed in the current transaction. A new transaction starts
        * immediately after a rollback. Note that unacked messages will not be
@@ -5242,10 +4882,10 @@ public class AMQP {
   
     private static final long serialVersionUID = 1L;
   
+      public final static int INDEX = 31;
       
-    public final static int INDEX = 31;
-
-      /**
+      
+  /**
        * This method confirms to the client that the rollback succeeded. Note
        * that if an rollback fails, the server raises a channel exception.
        */
@@ -5289,9 +4929,7 @@ public class AMQP {
   
   public String toString() {
     StringBuffer buff = new StringBuffer();
-    buff.append("Tx(");
-    
-    buff.append(')');
+      buff.append("Tx()");
     return buff.toString();
   }
  }
