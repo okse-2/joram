@@ -40,7 +40,6 @@ import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.CancelOk;
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Queue.PurgeOk;
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Queue.UnbindOk;
-import org.objectweb.joram.mom.amqp.proxy.request.AccessRequestNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicAckNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicCancelNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicConsumeNot;
@@ -108,8 +107,6 @@ public class ProxyAgent extends Agent {
   
   private String password;
   
-  private int ticketCounter;
-  
   private Map pendingRequests = new HashMap();
   
   // Used to find queue from deliveryTag
@@ -127,8 +124,6 @@ public class ProxyAgent extends Agent {
       doReact((ConnectionStartOkNot) not);
     } else if (not instanceof ChannelOpenNot) {
       doReact((ChannelOpenNot) not);
-    } else if (not instanceof AccessRequestNot) {
-      doReact((AccessRequestNot) not);
     } else if (not instanceof ExchangeDeclareNot) {
       doReact((ExchangeDeclareNot) not);
     } else if (not instanceof ExchangeDeleteNot) {
@@ -183,24 +178,6 @@ public class ProxyAgent extends Agent {
   public AMQP.Channel.OpenOk channelOpen(int channelId) {
     channelContexts.put(new Integer(channelId), new ChannelContext());
     return new AMQP.Channel.OpenOk();
-  }
-  
-  private void doReact(AccessRequestNot not) throws Exception {
-    AMQP.Access.RequestOk res = accessRequest(
-        not.getChannelId(),
-        not.getRealm(),
-        not.isExclusive(),
-        not.isPassive(),
-        not.isActive(),
-        not.isWrite(),
-        not.isRead());
-    not.Return(res);
-  }
-  
-  public AMQP.Access.RequestOk accessRequest(int channelId, String realm,
-      boolean exclusive, boolean passive, boolean active, boolean write,
-      boolean read) throws Exception {
-    return new AMQP.Access.RequestOk(ticketCounter++);
   }
   
   private void doReact(ExchangeDeclareNot not) throws Exception {

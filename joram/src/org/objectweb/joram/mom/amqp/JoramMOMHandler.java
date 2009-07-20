@@ -30,7 +30,6 @@ import java.util.Map;
 import org.objectweb.joram.mom.amqp.marshalling.AMQP;
 import org.objectweb.joram.mom.amqp.marshalling.LongStringHelper;
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
-import org.objectweb.joram.mom.amqp.proxy.request.AccessRequestNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicAckNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicCancelNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicConsumeNot;
@@ -68,14 +67,6 @@ public class JoramMOMHandler implements MOMHandler {
   
   public void setConsumer(Consumer consumer) {
     this.consumer = consumer;
-  }
-
-  public AMQP.Access.RequestOk accessRequest(String realm, boolean exclusive, boolean passive,
-      boolean active, boolean write, boolean read, int channelNumber) throws Exception {
-    AccessRequestNot accessRequest = new AccessRequestNot(channelNumber, realm, exclusive, passive, active,
-        write, read);
-    AMQP.Access.RequestOk accessRes = accessRequest.accessRequest(proxy.getId());
-    return accessRes;
   }
   
   public void basicAck(long deliveryTag, boolean multiple, int channelNumber) throws Exception {
