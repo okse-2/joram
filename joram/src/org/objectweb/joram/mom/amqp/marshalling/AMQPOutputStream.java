@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2008 CNES
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -49,7 +49,7 @@ public class AMQPOutputStream {
 
   private byte bitAccumulator;
 
-  private int bitMask;
+  private int bitMask = 1;
 
   private OutputStream out;
 
@@ -124,7 +124,8 @@ public class AMQPOutputStream {
 
   public final void writeBoolean(boolean b) throws IOException {
     bitflush();
-    StreamUtil.writeTo(b, out);
+    int bool = b ? 1 : 0;
+    StreamUtil.writeTo((byte) bool, out);
   }
 
   public final void writeTable(Map table) throws IOException {
