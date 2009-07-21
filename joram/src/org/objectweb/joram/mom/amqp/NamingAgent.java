@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2008 CNES
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,8 +24,6 @@
 package org.objectweb.joram.mom.amqp;
 
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -37,6 +35,9 @@ import fr.dyade.aaa.agent.Notification;
 
 public class NamingAgent extends Agent {
   
+  /** define serialVersionUID for interoperability */
+  private static final long serialVersionUID = 1L;
+
   public final static Logger logger = 
     fr.dyade.aaa.common.Debug.getLogger(NamingAgent.class.getName());
   
@@ -82,6 +83,7 @@ public class NamingAgent extends Agent {
     }
     if (firstTime) {
       createDefaults();
+      saveNaming();
     }
   }
   
@@ -123,22 +125,27 @@ public class NamingAgent extends Agent {
     ExchangeAgent exchangeAgent;
     exchangeAgent = new DirectExchange(ExchangeAgent.DEFAULT_EXCHANGE_NAME, true);
     NamingAgent.getSingleton().bind(ExchangeAgent.DEFAULT_EXCHANGE_NAME, exchangeAgent.getId());
+    NamingAgent.getSingleton().bind(ExchangeAgent.DEFAULT_EXCHANGE_NAME + "$_type", "direct");
     exchangeAgent.deploy();
 
     exchangeAgent = new DirectExchange(DirectExchange.DEFAULT_NAME, true);
     NamingAgent.getSingleton().bind(exchangeAgent.getName(), exchangeAgent.getId());
+    NamingAgent.getSingleton().bind(exchangeAgent.getName() + "$_type", "direct");
     exchangeAgent.deploy();
 
     exchangeAgent = new FanoutExchange(FanoutExchange.DEFAULT_NAME, true);
     NamingAgent.getSingleton().bind(exchangeAgent.getName(), exchangeAgent.getId());
+    NamingAgent.getSingleton().bind(exchangeAgent.getName() + "$_type", "fanout");
     exchangeAgent.deploy();
 
     exchangeAgent = new TopicExchange(TopicExchange.DEFAULT_NAME, true);
     NamingAgent.getSingleton().bind(exchangeAgent.getName(), exchangeAgent.getId());
+    NamingAgent.getSingleton().bind(exchangeAgent.getName() + "$_type", "topic");
     exchangeAgent.deploy();
 
     exchangeAgent = new HeadersExchange(HeadersExchange.DEFAULT_NAME, true);
     NamingAgent.getSingleton().bind(exchangeAgent.getName(), exchangeAgent.getId());
+    NamingAgent.getSingleton().bind(exchangeAgent.getName() + "$_type", "headers");
     exchangeAgent.deploy();
   }
 
