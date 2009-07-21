@@ -195,8 +195,7 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
         logger.log(BasicLevel.DEBUG, "client FRAME_HEARTBEAT.");
       }
       if (channelNumber != NO_CHANNEL) {
-        sendMethodToPeer(new AMQP.Connection.Close(AMQP.COMMAND_INVALID,
-            "Non-zero channel number for heartbeat frame.", 0, 0), channelNumber);
+        connectionException(AMQP.COMMAND_INVALID, "Non-zero channel number for heartbeat frame.", 0, 0);
         return;
       }
       queueOut.push(new Frame(AMQP.FRAME_HEARTBEAT, NO_CHANNEL));
@@ -206,8 +205,7 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
       if (logger.isLoggable(BasicLevel.WARN)) {
         logger.log(BasicLevel.WARN, "AMQPConnectionListener.process:: bad type " + frame);
       }
-      sendMethodToPeer(new AMQP.Connection.Close(AMQP.COMMAND_INVALID, "Bad frame type received: "
-          + frame.getType(), 0, 0), channelNumber);
+      connectionException(AMQP.COMMAND_INVALID, "Bad frame type received: " + frame.getType(), 0, 0);
       break;
     }
   }
@@ -236,9 +234,8 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
        ******************************************************/
       case AMQP.Connection.INDEX:
         if (channelNumber != NO_CHANNEL) {
-          sendMethodToPeer(new AMQP.Connection.Close(AMQP.COMMAND_INVALID,
-              "Non-zero channel number used for connection class.", AMQP.Connection.INDEX, method
-                  .getMethodId()), channelNumber);
+          connectionException(AMQP.COMMAND_INVALID, "Non-zero channel number used for connection class.",
+              AMQP.Connection.INDEX, method.getMethodId());
           return;
         }
         switch (method.getMethodId()) {
@@ -301,22 +298,22 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
        ******************************************************/
       case AMQP.Channel.INDEX:
         if (channelNumber == NO_CHANNEL) {
-          sendMethodToPeer(new AMQP.Connection.Close(AMQP.COMMAND_INVALID, "No channel defined.",
-              AMQP.Channel.INDEX, method.getMethodId()), channelNumber);
+          connectionException(AMQP.COMMAND_INVALID, "No channel defined.", AMQP.Connection.INDEX, method
+              .getMethodId());
           return;
         }
         if (method.getMethodId() != AMQP.Channel.Open.INDEX
             && channelPublish.get(new Integer(channelNumber)) == null) {
-          sendMethodToPeer(new AMQP.Connection.Close(AMQP.CHANNEL_ERROR, "Channel not opened.",
-              AMQP.Channel.INDEX, method.getMethodId()), channelNumber);
+          connectionException(AMQP.CHANNEL_ERROR, "Channel not opened.", AMQP.Channel.INDEX, method
+              .getMethodId());
           return;
         }
 
         switch (method.getMethodId()) {
         case AMQP.Channel.Open.INDEX:
           if (channelPublish.get(new Integer(channelNumber)) != null) {
-            sendMethodToPeer(new AMQP.Connection.Close(AMQP.CHANNEL_ERROR, "Channel already opened.",
-                AMQP.Channel.INDEX, AMQP.Channel.Open.INDEX), channelNumber);
+            connectionException(AMQP.CHANNEL_ERROR, "Channel already opened.", AMQP.Channel.INDEX,
+                AMQP.Channel.Open.INDEX);
           }
           channelPublish.put(new Integer(channelNumber), new PublishRequest());
           momHandler.channelOpen(channelNumber);
@@ -367,25 +364,30 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
        ******************************************************/
       case AMQP.Queue.INDEX:
         if (channelPublish.get(new Integer(channelNumber)) == null) {
-          sendMethodToPeer(new AMQP.Connection.Close(AMQP.CHANNEL_ERROR, "Channel not opened.",
-              AMQP.Channel.INDEX, method.getMethodId()), channelNumber);
+          connectionException(AMQP.CHANNEL_ERROR, "Channel not opened.", AMQP.Channel.INDEX,
+              method.getMethodId());
           return;
         }
 
         switch (method.getMethodId()) {
         case AMQP.Queue.Declare.INDEX:
           AMQP.Queue.Declare declare = (AMQP.Queue.Declare) method;
-          AMQP.Queue.DeclareOk declareOk = momHandler.queueDeclare(
-              declare.queue,
-              declare.passive,
-              declare.durable,
-              declare.exclusive,
-              declare.autoDelete,
-              declare.arguments,
-              declare.reserved1,
-              channelNumber);
-          if (declare.noWait == false) {
-            sendMethodToPeer(declareOk, channelNumber);
+          try {
+            AMQP.Queue.DeclareOk declareOk = momHandler.queueDeclare(
+                declare.queue,
+                declare.passive,
+                declare.durable,
+                declare.exclusive,
+                declare.autoDelete,
+                declare.arguments,
+                declare.reserved1,
+                channelNumber);
+            if (declare.noWait == false) {
+              sendMethodToPeer(declareOk, channelNumber);
+            }
+          } catch (NameNotFoundException nnfe) {
+            channelException(channelNumber, AMQP.NOT_FOUND, nnfe.getMessage(), AMQP.Queue.INDEX,
+                AMQP.Queue.Declare.INDEX);
           }
           break;
 
@@ -403,8 +405,8 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
               sendMethodToPeer(deleteOk, channelNumber);
             }
           } catch (NotUnusedException exc) {
-            sendMethodToPeer(new AMQP.Channel.Close(AMQP.PRECONDITION_FAILED, exc.getMessage(),
-                AMQP.Queue.INDEX, AMQP.Queue.Delete.INDEX), channelNumber);
+            channelException(channelNumber, AMQP.PRECONDITION_FAILED, exc.getMessage(), AMQP.Queue.INDEX,
+                AMQP.Queue.Delete.INDEX);
           }
           break;
 
@@ -422,8 +424,11 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
             if (bind.noWait == false)
               sendMethodToPeer(new AMQP.Queue.BindOk(), channelNumber);
           } catch (SyntaxErrorException exc) {
-            sendMethodToPeer(new AMQP.Channel.Close(AMQP.SYNTAX_ERROR, exc.getMessage(), AMQP.Queue.INDEX,
-                AMQP.Queue.Bind.INDEX), channelNumber);
+            channelException(channelNumber, AMQP.SYNTAX_ERROR, exc.getMessage(), AMQP.Queue.INDEX,
+                AMQP.Queue.Bind.INDEX);
+          } catch (NameNotFoundException exc) {
+            channelException(channelNumber, AMQP.NOT_FOUND, exc.getMessage(), AMQP.Queue.INDEX,
+                AMQP.Queue.Bind.INDEX);
           }
           break;
           
@@ -439,8 +444,8 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
                 channelNumber);
             sendMethodToPeer(new AMQP.Queue.UnbindOk(), channelNumber);
           } catch (NameNotFoundException exc) {
-            sendMethodToPeer(new AMQP.Channel.Close(AMQP.NOT_FOUND, exc.getMessage(), AMQP.Queue.INDEX,
-                AMQP.Queue.Unbind.INDEX), channelNumber);
+            channelException(channelNumber, AMQP.NOT_FOUND, exc.getMessage(), AMQP.Queue.INDEX,
+                AMQP.Queue.Unbind.INDEX);
           }
           break;
           
@@ -466,8 +471,8 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
        ******************************************************/
       case AMQP.Basic.INDEX:
         if (channelPublish.get(new Integer(channelNumber)) == null) {
-          sendMethodToPeer(new AMQP.Connection.Close(AMQP.CHANNEL_ERROR, "Channel not opened.",
-              AMQP.Channel.INDEX, method.getMethodId()), channelNumber);
+          connectionException(AMQP.CHANNEL_ERROR, "Channel not opened.", AMQP.Basic.INDEX, method
+              .getMethodId());
           return;
         }
 
@@ -505,19 +510,25 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
           AMQP.Basic.Consume consume = (AMQP.Basic.Consume) method;
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "consume = " + consume);
-          momHandler.basicConsume(
-              consume.queue,
-              consume.noAck,
-              consume.consumerTag,
-              consume.noLocal,
-              consume.exclusive,
-              consume.reserved1,
-              consume.noWait,
-              channelNumber,
-              queueOut);
-          //          if (consume.nowait == false) {
-          //            sendMethodToPeer(consumerOk, channelNumber);
-          //          }
+          try {
+            AMQP.Basic.ConsumeOk consumeOk = momHandler.basicConsume(
+                consume.queue,
+                consume.noAck,
+                consume.consumerTag,
+                consume.noLocal,
+                consume.exclusive,
+                consume.noWait,
+                channelNumber);
+            if (consume.noWait == false) {
+              sendMethodToPeer(consumeOk, channelNumber);
+            }
+          } catch (NameNotFoundException nnfe) {
+            channelException(channelNumber, AMQP.NOT_FOUND, nnfe.getMessage(), AMQP.Basic.INDEX,
+                AMQP.Basic.Consume.INDEX);
+          } catch (IllegalArgumentException iae) {
+            connectionException(AMQP.NOT_ALLOWED, iae.getMessage(), AMQP.Basic.INDEX,
+                AMQP.Basic.Consume.INDEX);
+          }
           break;
 
         case AMQP.Basic.Cancel.INDEX:
@@ -566,8 +577,8 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
        ******************************************************/
       case AMQP.Exchange.INDEX:
         if (channelPublish.get(new Integer(channelNumber)) == null) {
-          sendMethodToPeer(new AMQP.Connection.Close(AMQP.CHANNEL_ERROR, "Channel not opened.",
-              AMQP.Channel.INDEX, method.getMethodId()), channelNumber);
+          connectionException(AMQP.CHANNEL_ERROR, "Channel not opened.", AMQP.Exchange.INDEX, method
+              .getMethodId());
           return;
         }
 
@@ -588,8 +599,14 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
               sendMethodToPeer(new AMQP.Exchange.DeclareOk(), channelNumber);
             }
           } catch (ClassNotFoundException cnfe) {
-            sendMethodToPeer(new AMQP.Connection.Close(AMQP.COMMAND_INVALID, cnfe.getMessage(),
-                AMQP.Exchange.INDEX, AMQP.Exchange.Declare.INDEX), channelNumber);
+            connectionException(AMQP.COMMAND_INVALID, cnfe.getMessage(), AMQP.Exchange.INDEX,
+                AMQP.Exchange.Declare.INDEX);
+          } catch (IllegalArgumentException iae) {
+            connectionException(AMQP.NOT_ALLOWED, iae.getMessage(), AMQP.Exchange.INDEX,
+                AMQP.Exchange.Declare.INDEX);
+          } catch (NameNotFoundException nnfe) {
+            channelException(channelNumber, AMQP.NOT_FOUND, nnfe.getMessage(), AMQP.Exchange.INDEX,
+                AMQP.Exchange.Declare.INDEX);
           }
           break;
           
@@ -606,8 +623,8 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
               sendMethodToPeer(new AMQP.Exchange.DeleteOk(), channelNumber);
             }
           } catch (NotUnusedException exc) {
-            sendMethodToPeer(new AMQP.Channel.Close(AMQP.PRECONDITION_FAILED, exc.getMessage(),
-                AMQP.Exchange.INDEX, AMQP.Exchange.Delete.INDEX), channelNumber);
+            channelException(channelNumber, AMQP.PRECONDITION_FAILED, exc.getMessage(), AMQP.Exchange.INDEX,
+                AMQP.Exchange.Delete.INDEX);
           }
           break;
 
@@ -622,8 +639,7 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
        ******************************************************/
       case AMQP.Tx.INDEX:
         if (channelPublish.get(new Integer(channelNumber)) == null) {
-          sendMethodToPeer(new AMQP.Connection.Close(AMQP.CHANNEL_ERROR, "Channel not opened.",
-              AMQP.Channel.INDEX, method.getMethodId()), channelNumber);
+          connectionException(AMQP.CHANNEL_ERROR, "Channel not opened.", AMQP.Tx.INDEX, method.getMethodId());
           return;
         }
 
@@ -657,6 +673,28 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
         break;
       }
     }
+  }
+
+  /**
+   * Release channel resources and close it by sending a notification to the
+   * client.
+   */
+  private void channelException(int channelNumber, int errorNumber, String message, int classId, int methodId)
+      throws Exception {
+    channelPublish.remove(new Integer(channelNumber));
+    momHandler.channelClose(channelNumber);
+    sendMethodToPeer(new AMQP.Channel.Close(errorNumber, message, classId, methodId), channelNumber);
+  }
+
+  /**
+   * Release channel resources and close it by sending a notification to the
+   * client.
+   */
+  private void connectionException(int errorNumber, String message, int classId, int methodId)
+      throws Exception {
+    channelPublish.clear();
+    momHandler.connectionClose();
+    sendMethodToPeer(new AMQP.Connection.Close(errorNumber, message, classId, methodId), NO_CHANNEL);
   }
 
   /**
@@ -754,8 +792,8 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
       }
 
     } catch (Exception exc) {
-      if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN, "", exc);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "", exc);
       netServerOut.stop();
       sock.close();
       channelPublish.clear();
