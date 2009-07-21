@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2008 CNES
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -43,6 +43,9 @@ import fr.dyade.aaa.agent.UnknownAgent;
  */
 public class FanoutExchange extends ExchangeAgent {
   
+  /** define serialVersionUID for interoperability */
+  private static final long serialVersionUID = 1L;
+
   public static final String DEFAULT_NAME = "amq.fanout";
   
   private List boundQueues;
@@ -52,16 +55,14 @@ public class FanoutExchange extends ExchangeAgent {
     boundQueues = new ArrayList();
   }
 
-  public void bind(String queue, String routingKey, Map arguments) {
-    AgentId queueAgent = (AgentId) NamingAgent.getSingleton().lookup(queue);
-    if (queueAgent != null && !boundQueues.contains(queueAgent)) {
-      boundQueues.add(queueAgent);
+  public void bind(AgentId queueId, String routingKey, Map arguments) {
+    if (!boundQueues.contains(queueId)) {
+      boundQueues.add(queueId);
     }
   }
 
-  public void unbind(String queue, String routingKey, Map arguments) {
-    AgentId queueAgent = (AgentId) NamingAgent.getSingleton().lookup(queue);
-    boundQueues.remove(queueAgent);
+  public void unbind(AgentId queueId, String routingKey, Map arguments) {
+    boundQueues.remove(queueId);
   }
 
   public void publish(String exchange, String routingKey, BasicProperties properties, byte[] body) {

@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2008 CNES
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -35,6 +35,9 @@ import fr.dyade.aaa.agent.UnknownAgent;
 
 public abstract class ExchangeAgent extends Agent {
   
+  /** define serialVersionUID for interoperability */
+  private static final long serialVersionUID = 1L;
+
   public static final String DEFAULT_EXCHANGE_NAME = "";
   
   private boolean durable;
@@ -75,6 +78,7 @@ public abstract class ExchangeAgent extends Agent {
       sendTo(from, new DeleteAck(getId(), new NotUnusedException("Exchange not unused.")));
     } else {
       NamingAgent.getSingleton().unbind(name);
+      NamingAgent.getSingleton().unbind(name + "$_type");
       delete(from);
     }
   }
@@ -84,7 +88,7 @@ public abstract class ExchangeAgent extends Agent {
   }
   
   private void doReact(BindNot not) {
-    bind(not.getQueue(), not.getRoutingKey(), not.getArguments());
+    bind(not.getQueueId(), not.getRoutingKey(), not.getArguments());
   }
   
   private void doReact(UnbindNot not) {
@@ -97,9 +101,9 @@ public abstract class ExchangeAgent extends Agent {
   
   public abstract void publish(String exchange, String routingKey, BasicProperties properties, byte[] body);
 
-  public abstract void bind(String queue, String routingKey, Map arguments);
+  public abstract void bind(AgentId queueId, String routingKey, Map arguments);
 
-  public abstract void unbind(String queue, String routingKey, Map arguments);
+  public abstract void unbind(AgentId queueId, String routingKey, Map arguments);
   
   public abstract boolean isUnused();
 
