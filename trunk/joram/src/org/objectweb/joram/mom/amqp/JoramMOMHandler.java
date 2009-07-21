@@ -48,7 +48,6 @@ import org.objectweb.joram.mom.amqp.proxy.request.QueuePurgeNot;
 import org.objectweb.joram.mom.amqp.proxy.request.QueueUnbindNot;
 
 import fr.dyade.aaa.agent.Channel;
-import fr.dyade.aaa.common.Queue;
 
 public class JoramMOMHandler implements MOMHandler {
   
@@ -79,11 +78,12 @@ public class JoramMOMHandler implements MOMHandler {
     basicCancel.basicCancel(proxy.getId());
   }
 
-  public void basicConsume(String queue, boolean noAck, String consumerTag, boolean noLocal,
-      boolean exclusive, int ticket, boolean noWait, int channelNumber, Queue queueOut) throws Exception {
-    BasicConsumeNot basicConsume = new BasicConsumeNot(channelNumber, ticket, queue, noAck, consumerTag,
-        noWait, new DeliverMessageConsumer(channelNumber), queueOut);
-    basicConsume.basicConsume(proxy.getId());
+  public AMQP.Basic.ConsumeOk basicConsume(String queue, boolean noAck, String consumerTag, boolean noLocal,
+      boolean exclusive, boolean noWait, int channelNumber) throws Exception {
+    BasicConsumeNot basicConsume = new BasicConsumeNot(channelNumber, queue, noAck, consumerTag, noWait,
+        new DeliverMessageConsumer(channelNumber));
+    AMQP.Basic.ConsumeOk consumeOk = basicConsume.basicConsume(proxy.getId());
+    return consumeOk;
   }
 
   public void basicGet(String queue, boolean noAck, int ticket, int channelNumber) throws Exception {

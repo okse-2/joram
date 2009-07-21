@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2008 CNES
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,22 +24,22 @@
 package org.objectweb.joram.mom.amqp.proxy.request;
 
 import org.objectweb.joram.mom.amqp.DeliveryListener;
+import org.objectweb.joram.mom.amqp.marshalling.AMQP;
 
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.Channel;
-import fr.dyade.aaa.agent.Notification;
-import fr.dyade.aaa.common.Queue;
+import fr.dyade.aaa.agent.SyncNotification;
 
-public class BasicConsumeNot extends Notification {
+public class BasicConsumeNot extends SyncNotification {
   
+  /** define serialVersionUID for interoperability */
+  private static final long serialVersionUID = 1L;
+
   private int channelId;
-  private int ticket;
   private String queue;
   private boolean noAck;
   private String consumerTag;
   private boolean noWait;
   private DeliveryListener callback;
-  private Queue queueOut;
 
   /**
    * @param channelId
@@ -51,48 +51,48 @@ public class BasicConsumeNot extends Notification {
    * @param callback
    * @param queueOut
    */
-  public BasicConsumeNot(int channelId, int ticket, String queue, boolean noAck, String consumerTag,
-      boolean noWait, DeliveryListener callback, Queue queueOut) {
+  public BasicConsumeNot(int channelId, String queue, boolean noAck, String consumerTag, boolean noWait,
+      DeliveryListener callback) {
     super();
     this.channelId = channelId;
-    this.ticket = ticket;
     this.queue = queue;
     this.noAck = noAck;
     this.consumerTag = consumerTag;
     this.noWait = noWait;
     this.callback = callback;
-    this.queueOut = queueOut;
   }
   
   public DeliveryListener getCallback() {
     return callback;
   }
+
   public int getChannelId() {
     return channelId;
   }
+
   public String getConsumerTag() {
     return consumerTag;
   }
+
   public boolean isNoAck() {
     return noAck;
   }
+
   public String getQueue() {
     return queue;
-  }
-  public int getTicket() {
-    return ticket;
-  }
-  
-  public void basicConsume(AgentId proxyId) throws Exception {
-    Channel.sendTo(proxyId, this);
   }
 
   public boolean isNoWait() {
     return noWait;
   }
 
-  public Queue getQueueOut() {
-    return queueOut;
+  public AMQP.Basic.ConsumeOk basicConsume(AgentId proxyId) throws Exception {
+    Object[] res = invoke(proxyId);
+    return (AMQP.Basic.ConsumeOk) res[0];
+  }
+
+  public void Return(AMQP.Basic.ConsumeOk res) {
+    Return(new Object[] { res });
   }
 
 }
