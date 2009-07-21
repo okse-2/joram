@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2008 CNES
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,11 +25,15 @@ package org.objectweb.joram.mom.amqp;
 
 import java.util.Map;
 
+import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Notification;
 
 public class BindNot extends Notification {
   
-  private String queue;
+  /** define serialVersionUID for interoperability */
+  private static final long serialVersionUID = 1L;
+
+  private AgentId queueId;
   
   private String routingKey;
   
@@ -40,9 +44,9 @@ public class BindNot extends Notification {
    * @param routingKey
    * @param arguments
    */
-  public BindNot(String queue, String routingKey, Map arguments) {
+  public BindNot(AgentId queueId, String routingKey, Map arguments) {
     super();
-    this.queue = queue;
+    this.queueId = queueId;
     this.routingKey = routingKey;
     this.arguments = arguments;
   }
@@ -50,9 +54,11 @@ public class BindNot extends Notification {
   public Map getArguments() {
     return arguments;
   }
-  public String getQueue() {
-    return queue;
+
+  public AgentId getQueueId() {
+    return queueId;
   }
+
   public String getRoutingKey() {
     return routingKey;
   }

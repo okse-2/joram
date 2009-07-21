@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2008 CNES
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -55,6 +55,9 @@ import fr.dyade.aaa.agent.UnknownAgent;
  */
 public class TopicExchange extends ExchangeAgent {
   
+  /** define serialVersionUID for interoperability */
+  private static final long serialVersionUID = 1L;
+
   public static final String DEFAULT_NAME = "amq.topic";
 
   private static Pattern createPattern(String routingPattern) {
@@ -77,25 +80,23 @@ public class TopicExchange extends ExchangeAgent {
     bindings = new HashMap();
   }
 
-  public void bind(String queue, String routingKey, Map arguments) {
+  public void bind(AgentId queueId, String routingKey, Map arguments) {
     Pattern routingPattern = createPattern(routingKey);
     List boundQueues = (List) bindings.get(routingPattern);
     if (boundQueues == null) {
       boundQueues = new ArrayList();
       bindings.put(routingPattern, boundQueues);
     }
-    AgentId queueAgent = (AgentId) NamingAgent.getSingleton().lookup(queue);
-    if (queueAgent != null && !boundQueues.contains(queueAgent)) {
-      boundQueues.add(queueAgent);
+    if (!boundQueues.contains(queueId)) {
+      boundQueues.add(queueId);
     }
   }
 
-  public void unbind(String queue, String routingKey, Map arguments) {
+  public void unbind(AgentId queueId, String routingKey, Map arguments) {
     Pattern routingPattern = createPattern(routingKey);
     List boundQueues = (List) bindings.get(routingPattern);
     if (boundQueues != null) {
-      AgentId queueAgent = (AgentId) NamingAgent.getSingleton().lookup(queue);
-      boundQueues.remove(queueAgent);
+      boundQueues.remove(queueId);
       if (boundQueues.size() == 0) {
         bindings.remove(routingPattern);
       }
