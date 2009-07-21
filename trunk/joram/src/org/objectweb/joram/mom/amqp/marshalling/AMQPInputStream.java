@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2008 CNES
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -94,6 +94,12 @@ public class AMQPInputStream {
     return StreamUtil.readLongFrom(in);
   }
 
+  public final boolean readBoolean() throws IOException {
+    clearBits();
+    int bool = StreamUtil.readUnsignedByteFrom(in);
+    return bool != 0;
+  }
+
   public final boolean readBit() throws IOException {
     if (bit > 0x80) {
       bits = StreamUtil.readUnsignedByteFrom(in);
@@ -165,7 +171,7 @@ public class AMQPInputStream {
         value = new Long(StreamUtil.readLongFrom(in));
         break;
       case 't':
-        value = new Boolean(StreamUtil.readBooleanFrom(in));
+        value = new Boolean(readBoolean());
         break;
       case 'V':
         value = null;
@@ -185,7 +191,7 @@ public class AMQPInputStream {
     return table;
   }
 
-  public final Object[] readArray() throws IOException {
+  private final Object[] readArray() throws IOException {
 
     long arrayLength = StreamUtil.readUnsignedIntFrom(in);
     if (arrayLength < 1)
@@ -283,7 +289,7 @@ public class AMQPInputStream {
     case 't':
       value = new Boolean[count];
       for (int i = 0; i < count; i++) {
-        value[i] = new Boolean(StreamUtil.readBooleanFrom(in));
+        value[i] = new Boolean(readBoolean());
       }
       break;
     case 'V':
