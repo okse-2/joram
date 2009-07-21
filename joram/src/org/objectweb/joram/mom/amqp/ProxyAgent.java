@@ -65,7 +65,6 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.DeleteAck;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.SyncNotification;
-import fr.dyade.aaa.common.Queue;
 
 public class ProxyAgent extends Agent {
   
@@ -117,6 +116,8 @@ public class ProxyAgent extends Agent {
   // Maps channel id to its context
   private Map channelContexts = new HashMap();
   
+  private List exclusiveQueues = new ArrayList();
+
   public void react(AgentId from, Notification not) throws Exception {
     // This agent is not persistent.
     setNoSave();
@@ -194,6 +195,10 @@ public class ProxyAgent extends Agent {
       not.Return(res);
     } catch (ClassNotFoundException cnfe) {
       not.Throw(cnfe);
+    } catch (NameNotFoundException nnfe) {
+      not.Throw(nnfe);
+    } catch (IllegalArgumentException iae) {
+      not.Throw(iae);
     }
   }
 
@@ -202,7 +207,10 @@ public class ProxyAgent extends Agent {
       Map arguments) throws Exception {
     // Check if the exchange already exists
     Object ref = NamingAgent.getSingleton().lookup(exchange);
-    if (ref == null && !passive) {
+    if (ref == null) {
+      if (passive) {
+        throw new NameNotFoundException("Passive declaration of an unknown exchange.");
+      }
       ExchangeAgent exchangeAgent;
       if (type.equalsIgnoreCase("direct")) {
         exchangeAgent = new DirectExchange(exchange, durable);
@@ -218,7 +226,14 @@ public class ProxyAgent extends Agent {
       }
       exchangeAgent.setArguments(arguments);
       NamingAgent.getSingleton().bind(exchange, exchangeAgent.getId());
+      NamingAgent.getSingleton().bind(exchange + "$_type", type);
       exchangeAgent.deploy();
+    } else {
+      // Check if exchange type corresponds with existing exchange
+      String previousType = (String) NamingAgent.getSingleton().lookup(exchange + "$_type");
+      if (!previousType.equals(type)) {
+        throw new IllegalArgumentException("Exchange type do not match existing exchange.");
+      }
     }
     return new AMQP.Exchange.DeclareOk();
   }
@@ -247,28 +262,34 @@ public class ProxyAgent extends Agent {
   private void doReact(QueueDeclareNot not) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "ProxyAgent.queueDeclare(" + not + ')');
-    AMQP.Queue.DeclareOk res = queueDeclare(
-        not.getChannelId(),
-        not.getTicket(),
-        not.getQueue(),
-        not.isPassive(),
-        not.isDurable(),
-        not.isExclusive(),
-        not.isAutoDelete(),
-        not.getArguments());
-    not.Return(res);
+    try {
+      AMQP.Queue.DeclareOk res = queueDeclare(
+          not.getChannelId(),
+          not.getTicket(),
+          not.getQueue(),
+          not.isPassive(),
+          not.isDurable(),
+          not.isExclusive(),
+          not.isAutoDelete(),
+          not.getArguments());
+      not.Return(res);
+    } catch (NameNotFoundException nnfe) {
+      not.Throw(nnfe);
+    }
   }
 
-  public AMQP.Queue.DeclareOk queueDeclare(int channelId, int ticket, String queue,
-      boolean passive, boolean durable, boolean exclusive, boolean autoDelete,
-      Map arguments) throws Exception {
+  public AMQP.Queue.DeclareOk queueDeclare(int channelId, int ticket, String queue, boolean passive,
+      boolean durable, boolean exclusive, boolean autoDelete, Map arguments) throws Exception {
     // Check if the queue already exists
     Object ref = null;
     if (queue != null && !queue.equals("")) {
       ref = NamingAgent.getSingleton().lookup(queue);
     }
     String queueName = queue;
-    if (ref == null && !passive) {
+    if (ref == null) {
+      if (passive) {
+        throw new NameNotFoundException("Passive declaration of an unknown queue.");
+      }
       if (queue != null && queue.equals("")) {
         queueName = null;
       }
@@ -280,6 +301,10 @@ public class ProxyAgent extends Agent {
       // All message queues MUST BE automatically bound to the nameless exchange using the
       // message queue's name as routing key.
       queueBind(channelId, ticket, queueName, ExchangeAgent.DEFAULT_EXCHANGE_NAME, queueName, null);
+
+      if (exclusive) {
+        exclusiveQueues.add(queueAgent.getId());
+      }
     }
 
     ChannelContext context = (ChannelContext) channelContexts.get(new Integer(channelId));
@@ -290,6 +315,8 @@ public class ProxyAgent extends Agent {
   }
   
   private void doReact(QueueDeleteNot not) throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "ProxyAgent.queueDelete(" + not + ')');
     queueDelete(
         not.getChannelId(),
         not.getTicket(),
@@ -303,7 +330,30 @@ public class ProxyAgent extends Agent {
   public void queueDelete(int channelId, int ticket, String queue, boolean ifUnused, boolean ifEmpty,
       boolean nowait, QueueDeleteNot not) throws Exception {
     AgentId queueId = (AgentId) NamingAgent.getSingleton().lookup(queue);
+
     if (queueId != null) {
+      // Clean non-acked deliveries.
+      Iterator iter = deliveriesToAck.iterator();
+      while (iter.hasNext()) {
+        DeliverContext delivery = (DeliverContext) iter.next();
+        if (delivery.queueId.equals(queueId)) {
+          iter.remove();
+        }
+      }
+
+      // Remove queue from exclusive list
+      exclusiveQueues.remove(queueId);
+
+      // Remove consumers using this queue
+      ChannelContext channelContext = (ChannelContext) channelContexts.get(new Integer(channelId));
+      Iterator consumerQueueIterator = channelContext.consumers.values().iterator();
+      while (consumerQueueIterator.hasNext()) {
+        AgentId consumerQueueId = (AgentId) consumerQueueIterator.next();
+        if (consumerQueueId.equals(queueId)) {
+          consumerQueueIterator.remove();
+        }
+      }
+
       pendingRequests.put(queueId, not);
       sendTo(queueId, new DeleteNot(ifUnused, ifEmpty));
     }
@@ -326,20 +376,28 @@ public class ProxyAgent extends Agent {
   }
 
   private void doReact(BasicConsumeNot not) throws Exception {
-    basicConsume(
-        not.getChannelId(),
-        not.getTicket(),
-        not.getQueue(),
-        not.isNoAck(),
-        not.getConsumerTag(),
-        not.isNoWait(),
-        not.getCallback(),
-        not.getQueueOut());
+    try {
+      AMQP.Basic.ConsumeOk consumeOk = basicConsume(
+          not.getChannelId(),
+          not.getQueue(),
+          not.isNoAck(),
+          not.getConsumerTag(),
+          not.isNoWait(),
+          not.getCallback());
+      not.Return(consumeOk);
+    } catch (NameNotFoundException nnfe) {
+      not.Throw(nnfe);
+    } catch (IllegalArgumentException iae) {
+      not.Throw(iae);
+    }
   }
   
-  public void basicConsume(int channelId, int ticket, String queue,
-      boolean noAck, String consumerTag, boolean noWait, DeliveryListener callback, Queue queueOut)
-      throws Exception {
+  public AMQP.Basic.ConsumeOk basicConsume(int channelId, String queue, boolean noAck, String consumerTag,
+      boolean noWait, DeliveryListener callback) throws Exception {
+    if (queue == null || queue.equals("")) {
+      throw new IllegalArgumentException("Consuming from unspecified queue.");
+    }
+
     ChannelContext channelContext = (ChannelContext) channelContexts.get(new Integer(channelId));
     // The consumer tag is local to a channel, so two clients can use the
     // same consumer tags. If this field is empty the server will generate a unique tag.
@@ -348,14 +406,20 @@ public class ProxyAgent extends Agent {
       channelContext.consumerTag++;
       tag = "genTag-" + channelId + "-" + channelContext.consumerTag;
     }
+
+    if (channelContext.consumers.get(tag) != null) {
+      throw new IllegalArgumentException("Consume request failed due to non-unique tag.");
+    }
+
     AgentId queueId = (AgentId) NamingAgent.getSingleton().lookup(queue);
+    if (queueId == null) {
+      throw new NameNotFoundException("Consuming from non-existent queue.");
+    }
+
     ConsumeNot consumeNot = new ConsumeNot(channelId, callback, this, tag, noAck);
     sendTo(queueId, consumeNot);
     channelContext.consumers.put(tag, queueId);
-    if (!noWait) {
-      // TODO The marshalling code should not be there
-      queueOut.push(new AMQP.Basic.ConsumeOk(tag).toFrame(channelId));
-    }
+    return new AMQP.Basic.ConsumeOk(tag);
   }
   
   private void doReact(BasicCancelNot not) {
@@ -493,6 +557,8 @@ public class ProxyAgent extends Agent {
       not.Return(res);
     } catch (SyntaxErrorException exc) {
       not.Throw(exc);
+    } catch (NameNotFoundException nnfe) {
+      not.Throw(nnfe);
     }
   }
   
@@ -521,7 +587,15 @@ public class ProxyAgent extends Agent {
       }
     }
     AgentId exchangeId = (AgentId) NamingAgent.getSingleton().lookup(exchange);
-    BindNot bindNot = new BindNot(queueName, rkey, arguments);
+    if (exchangeId == null) {
+      throw new NameNotFoundException("Binding to a non-existent exchange.");
+    }
+    AgentId queueId = (AgentId) NamingAgent.getSingleton().lookup(queueName);
+    if (queueId == null) {
+      throw new NameNotFoundException("Binding to a non-existent queue.");
+    }
+
+    BindNot bindNot = new BindNot(queueId, rkey, arguments);
     sendTo(exchangeId, bindNot);
     return new AMQP.Queue.BindOk();
   }
@@ -547,7 +621,7 @@ public class ProxyAgent extends Agent {
     if (exchangeId != null) {
       AgentId queueId = (AgentId) NamingAgent.getSingleton().lookup(queue);
       if (queueId != null) {
-        UnbindNot unbindNot = new UnbindNot(queue, routingKey, arguments);
+        UnbindNot unbindNot = new UnbindNot(queueId, routingKey, arguments);
         sendTo(exchangeId, unbindNot);
         return new AMQP.Queue.UnbindOk();
       } else {
@@ -641,6 +715,14 @@ public class ProxyAgent extends Agent {
       AgentId queueId = (AgentId) iterQueues.next();
       sendTo(queueId, new RecoverNot((List) recoverMap.get(queueId)));
     }
+
+    // Delete exclusive queues
+    iterQueues = exclusiveQueues.iterator();
+    while (iterQueues.hasNext()) {
+      AgentId queueId = (AgentId) iterQueues.next();
+      sendTo(queueId, new DeleteNot(false, false));
+    }
+    exclusiveQueues.clear();
   }
 
   public synchronized long getDeliveryTag(AgentId queueId, int channelId, long queueMsgId, boolean noAck) {
