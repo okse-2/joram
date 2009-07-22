@@ -38,7 +38,6 @@ import javax.naming.NameNotFoundException;
 import org.objectweb.joram.mom.amqp.marshalling.AMQP;
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.CancelOk;
-import org.objectweb.joram.mom.amqp.marshalling.AMQP.Queue.PurgeOk;
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Queue.UnbindOk;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicAckNot;
 import org.objectweb.joram.mom.amqp.proxy.request.BasicCancelNot;
@@ -157,6 +156,10 @@ public class ProxyAgent extends Agent {
       doReact((ChannelCloseNot) not);
     } else if (not instanceof ConnectionCloseNot) {
       doReact((ConnectionCloseNot) not);
+    } else if (not instanceof GetQueueInfoNot) {
+      doReact((GetQueueInfoNot) not, from);
+    } else if (not instanceof ClearQueueNot) {
+      doReact((ClearQueueNot) not, from);
     } else {
       super.react(from, not);
     }
@@ -274,19 +277,22 @@ public class ProxyAgent extends Agent {
           not.isDurable(),
           not.isExclusive(),
           not.isAutoDelete(),
-          not.getArguments());
-      not.Return(res);
+          not.getArguments(),
+          not);
+      if (res != null) {
+        not.Return(res);
+      }
     } catch (NameNotFoundException nnfe) {
       not.Throw(nnfe);
     }
   }
 
-  public AMQP.Queue.DeclareOk queueDeclare(int channelId, String queue, boolean passive,
-      boolean durable, boolean exclusive, boolean autoDelete, Map arguments) throws Exception {
+  public AMQP.Queue.DeclareOk queueDeclare(int channelId, String queue, boolean passive, boolean durable,
+      boolean exclusive, boolean autoDelete, Map arguments, QueueDeclareNot not) throws Exception {
     // Check if the queue already exists
-    Object ref = null;
+    AgentId ref = null;
     if (queue != null && !queue.equals("")) {
-      ref = NamingAgent.getSingleton().lookup(queue);
+      ref = (AgentId) NamingAgent.getSingleton().lookup(queue);
     }
     String queueName = queue;
     if (ref == null) {
@@ -308,13 +314,20 @@ public class ProxyAgent extends Agent {
       if (exclusive) {
         exclusiveQueues.add(queueAgent.getId());
       }
+
+      ChannelContext context = (ChannelContext) channelContexts.get(new Integer(channelId));
+      context.lastQueueCreated = queueName;
+      return new AMQP.Queue.DeclareOk(queueName, 0, 0);
+
+    } else {
+
+      ChannelContext context = (ChannelContext) channelContexts.get(new Integer(channelId));
+      context.lastQueueCreated = queueName;
+
+      sendTo(ref, new GetQueueInfoNot());
+      pendingRequests.put(ref, not);
+      return null;
     }
-
-    ChannelContext context = (ChannelContext) channelContexts.get(new Integer(channelId));
-    context.lastQueueCreated = queueName;
-
-    // TODO msgCount / consumerCount
-    return new AMQP.Queue.DeclareOk(queueName, 0, 0);
   }
   
   private void doReact(QueueDeleteNot not) throws Exception {
@@ -367,19 +380,31 @@ public class ProxyAgent extends Agent {
     sendTo(queueId, new DeleteNot(ifUnused, ifEmpty));
   }
 
-  private void doReact(QueuePurgeNot not) {
-    AMQP.Queue.PurgeOk res = queuePurge(
-        not.getChannelId(),
-        not.getQueue(),
-        not.isNowait());
-    not.Return(res);
+  private void doReact(QueuePurgeNot not) throws Exception {
+    try {
+      queuePurge(
+          not.getChannelId(),
+          not.getQueue(),
+          not.isNowait(),
+          not);
+    } catch (NameNotFoundException nnfe) {
+      not.Throw(nnfe);
+    } catch (IllegalArgumentException iae) {
+      not.Throw(iae);
+    }
   }
 
-  public PurgeOk queuePurge(int channelId, String queue, boolean nowait) {
+  public void queuePurge(int channelId, String queue, boolean nowait, QueuePurgeNot not) throws Exception {
+    if (queue == null || queue.equals("")) {
+      throw new IllegalArgumentException("Purging unspecified queue.");
+    }
     AgentId queueId = (AgentId) NamingAgent.getSingleton().lookup(queue);
+    if (queueId == null) {
+      throw new NameNotFoundException("Purging non-existent queue");
+    }
     ClearQueueNot purgeNot = new ClearQueueNot();
     sendTo(queueId, purgeNot);
-    return new AMQP.Queue.PurgeOk(0);
+    pendingRequests.put(queueId, not);
   }
 
   private void doReact(BasicConsumeNot not) throws Exception {
@@ -638,11 +663,9 @@ public class ProxyAgent extends Agent {
   private void doReact(DeleteAck not) {
     SyncNotification syncNot = (SyncNotification) pendingRequests.get(not.agent);
     if (syncNot instanceof QueueDeleteNot) {
-      // TODO msgCount
-      int msgCount = 0;
       QueueDeleteNot deleteNot = (QueueDeleteNot) syncNot;
       if (not.exc == null) {
-        deleteNot.Return(new AMQP.Queue.DeleteOk(msgCount));
+        deleteNot.Return(new AMQP.Queue.DeleteOk(((Integer) not.extraInformation).intValue()));
       } else {
         deleteNot.Throw((Exception) not.exc);
       }
@@ -656,6 +679,16 @@ public class ProxyAgent extends Agent {
     }
   }
   
+  private void doReact(GetQueueInfoNot not, AgentId from) {
+    QueueDeclareNot syncNot = (QueueDeclareNot) pendingRequests.get(from);
+    syncNot.Return(new AMQP.Queue.DeclareOk(not.getQueueName(), not.getMessageCount(), not.getConsumerCount()));
+  }
+
+  private void doReact(ClearQueueNot not, AgentId from) {
+    QueuePurgeNot syncNot = (QueuePurgeNot) pendingRequests.get(from);
+    syncNot.Return(new AMQP.Queue.PurgeOk(not.getMessageCount()));
+  }
+
   private void doReact(ChannelCloseNot not) {
     channelClose(not.getChannelId());
     not.Return();
