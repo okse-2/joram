@@ -408,6 +408,9 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
           } catch (NameNotFoundException nnfe) {
             channelException(channelNumber, AMQP.NOT_FOUND, nnfe.getMessage(), AMQP.Queue.INDEX,
                 AMQP.Queue.Delete.INDEX);
+          } catch (NotEmptyException nee) {
+            channelException(channelNumber, AMQP.PRECONDITION_FAILED, nee.getMessage(), AMQP.Queue.INDEX,
+                AMQP.Queue.Delete.INDEX);
           }
           break;
 
@@ -449,13 +452,20 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
           break;
           
         case AMQP.Queue.Purge.INDEX:
-          AMQP.Queue.Purge purge = (AMQP.Queue.Purge) method;
-          momHandler.queuePurge(
-              purge.queue,
-              purge.noWait,
-              channelNumber);
-          if (purge.noWait == false)
-            sendMethodToPeer(new AMQP.Queue.PurgeOk(), channelNumber);
+          try {
+            AMQP.Queue.Purge purge = (AMQP.Queue.Purge) method;
+            AMQP.Queue.PurgeOk purgeOk = momHandler.queuePurge(
+                purge.queue,
+                purge.noWait,
+                channelNumber);
+            if (purge.noWait == false)
+              sendMethodToPeer(purgeOk, channelNumber);
+          } catch (NameNotFoundException exc) {
+            channelException(channelNumber, AMQP.NOT_FOUND, exc.getMessage(), AMQP.Queue.INDEX,
+                AMQP.Queue.Purge.INDEX);
+          } catch (IllegalArgumentException iae) {
+            connectionException(AMQP.NOT_ALLOWED, iae.getMessage(), AMQP.Queue.INDEX, AMQP.Queue.Purge.INDEX);
+          }
           break;
 
         default:
