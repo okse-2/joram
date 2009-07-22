@@ -185,12 +185,10 @@ public class ProxyAgent extends Agent {
     try {
       AMQP.Exchange.DeclareOk res = exchangeDeclare(
           not.getChannelId(),
-          not.getTicket(),
           not.getExchange(),
           not.getType(),
           not.isPassive(),
           not.isDurable(),
-          not.isAutoDelete(),
           not.getArguments());
       not.Return(res);
     } catch (ClassNotFoundException cnfe) {
@@ -202,9 +200,8 @@ public class ProxyAgent extends Agent {
     }
   }
 
-  public AMQP.Exchange.DeclareOk exchangeDeclare(int channelId, int ticket,
-      String exchange, String type, boolean passive, boolean durable, boolean autoDelete, 
-      Map arguments) throws Exception {
+  public AMQP.Exchange.DeclareOk exchangeDeclare(int channelId, String exchange, String type,
+      boolean passive, boolean durable, Map arguments) throws Exception {
     // Check if the exchange already exists
     Object ref = NamingAgent.getSingleton().lookup(exchange);
     if (ref == null) {
@@ -241,22 +238,29 @@ public class ProxyAgent extends Agent {
   private void doReact(ExchangeDeleteNot not) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "ProxyAgent.exchangeDelete(" + not + ')');
-    exchangeDelete(
-        not.getChannelId(),
-        not.getTicket(),
-        not.getExchange(),
-        not.isIfUnused(),
-        not.isNowait(),
-        not);
+    try {
+      exchangeDelete(
+          not.getChannelId(),
+          not.getExchange(),
+          not.isIfUnused(),
+          not.isNowait(),
+          not);
+    } catch (NameNotFoundException nnfe) {
+      not.Throw(nnfe);
+    }
   }
 
-  public void exchangeDelete(int channelId, int ticket, String exchange, boolean ifUnused, boolean nowait,
+  public void exchangeDelete(int channelId, String exchange, boolean ifUnused, boolean nowait,
       ExchangeDeleteNot not) throws Exception {
+    
     AgentId exchangeId = (AgentId) NamingAgent.getSingleton().lookup(exchange);
-    if (exchangeId != null) {
-      pendingRequests.put(exchangeId, not);
-      sendTo(exchangeId, new DeleteNot(ifUnused));
+    if (exchangeId == null) {
+      throw new NameNotFoundException("Exchange not found for deletion.");
     }
+    
+    pendingRequests.put(exchangeId, not);
+    sendTo(exchangeId, new DeleteNot(ifUnused));
+    
   }
 
   private void doReact(QueueDeclareNot not) throws Exception {
@@ -265,7 +269,6 @@ public class ProxyAgent extends Agent {
     try {
       AMQP.Queue.DeclareOk res = queueDeclare(
           not.getChannelId(),
-          not.getTicket(),
           not.getQueue(),
           not.isPassive(),
           not.isDurable(),
@@ -278,7 +281,7 @@ public class ProxyAgent extends Agent {
     }
   }
 
-  public AMQP.Queue.DeclareOk queueDeclare(int channelId, int ticket, String queue, boolean passive,
+  public AMQP.Queue.DeclareOk queueDeclare(int channelId, String queue, boolean passive,
       boolean durable, boolean exclusive, boolean autoDelete, Map arguments) throws Exception {
     // Check if the queue already exists
     Object ref = null;
@@ -300,7 +303,7 @@ public class ProxyAgent extends Agent {
       
       // All message queues MUST BE automatically bound to the nameless exchange using the
       // message queue's name as routing key.
-      queueBind(channelId, ticket, queueName, ExchangeAgent.DEFAULT_EXCHANGE_NAME, queueName, null);
+      queueBind(channelId, queueName, ExchangeAgent.DEFAULT_EXCHANGE_NAME, queueName, null);
 
       if (exclusive) {
         exclusiveQueues.add(queueAgent.getId());
@@ -317,58 +320,62 @@ public class ProxyAgent extends Agent {
   private void doReact(QueueDeleteNot not) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "ProxyAgent.queueDelete(" + not + ')');
-    queueDelete(
-        not.getChannelId(),
-        not.getTicket(),
-        not.getQueue(),
-        not.isIfUnused(),
-        not.isIfEmpty(),
-        not.isNowait(),
-        not);
+    try {
+      queueDelete(
+          not.getChannelId(),
+          not.getQueue(),
+          not.isIfUnused(),
+          not.isIfEmpty(),
+          not.isNowait(),
+          not);
+    } catch (NameNotFoundException nnfe) {
+      not.Throw(nnfe);
+    }
   }
   
-  public void queueDelete(int channelId, int ticket, String queue, boolean ifUnused, boolean ifEmpty,
+  public void queueDelete(int channelId, String queue, boolean ifUnused, boolean ifEmpty,
       boolean nowait, QueueDeleteNot not) throws Exception {
+
     AgentId queueId = (AgentId) NamingAgent.getSingleton().lookup(queue);
-
-    if (queueId != null) {
-      // Clean non-acked deliveries.
-      Iterator iter = deliveriesToAck.iterator();
-      while (iter.hasNext()) {
-        DeliverContext delivery = (DeliverContext) iter.next();
-        if (delivery.queueId.equals(queueId)) {
-          iter.remove();
-        }
-      }
-
-      // Remove queue from exclusive list
-      exclusiveQueues.remove(queueId);
-
-      // Remove consumers using this queue
-      ChannelContext channelContext = (ChannelContext) channelContexts.get(new Integer(channelId));
-      Iterator consumerQueueIterator = channelContext.consumers.values().iterator();
-      while (consumerQueueIterator.hasNext()) {
-        AgentId consumerQueueId = (AgentId) consumerQueueIterator.next();
-        if (consumerQueueId.equals(queueId)) {
-          consumerQueueIterator.remove();
-        }
-      }
-
-      pendingRequests.put(queueId, not);
-      sendTo(queueId, new DeleteNot(ifUnused, ifEmpty));
+    if (queueId == null) {
+      throw new NameNotFoundException("Unknown queue for deletion.");
     }
+
+    // Clean non-acked deliveries.
+    Iterator iter = deliveriesToAck.iterator();
+    while (iter.hasNext()) {
+      DeliverContext delivery = (DeliverContext) iter.next();
+      if (delivery.queueId.equals(queueId)) {
+        iter.remove();
+      }
+    }
+
+    // Remove queue from exclusive list
+    exclusiveQueues.remove(queueId);
+
+    // Remove consumers using this queue
+    ChannelContext channelContext = (ChannelContext) channelContexts.get(new Integer(channelId));
+    Iterator consumerQueueIterator = channelContext.consumers.values().iterator();
+    while (consumerQueueIterator.hasNext()) {
+      AgentId consumerQueueId = (AgentId) consumerQueueIterator.next();
+      if (consumerQueueId.equals(queueId)) {
+        consumerQueueIterator.remove();
+      }
+    }
+
+    pendingRequests.put(queueId, not);
+    sendTo(queueId, new DeleteNot(ifUnused, ifEmpty));
   }
 
   private void doReact(QueuePurgeNot not) {
     AMQP.Queue.PurgeOk res = queuePurge(
         not.getChannelId(),
-        not.getTicket(),
         not.getQueue(),
         not.isNowait());
     not.Return(res);
   }
 
-  public PurgeOk queuePurge(int channelId, int ticket, String queue, boolean nowait) {
+  public PurgeOk queuePurge(int channelId, String queue, boolean nowait) {
     AgentId queueId = (AgentId) NamingAgent.getSingleton().lookup(queue);
     ClearQueueNot purgeNot = new ClearQueueNot();
     sendTo(queueId, purgeNot);
@@ -438,11 +445,11 @@ public class ProxyAgent extends Agent {
   }
 
   private void doReact(BasicGetNot not) {
-    basicGet(not.getChannelId(), not.getTicket(), not.getQueueName(), not.isNoAck(), not.getCallback());
+    basicGet(not.getChannelId(), not.getQueueName(), not.isNoAck(), not.getCallback());
     not.Return();
   }
   
-  public void basicGet(int channelId, int ticket, String queue, boolean noAck, GetListener callback) {
+  public void basicGet(int channelId, String queue, boolean noAck, GetListener callback) {
     String queueName = queue;
     if (queueName.equals("")) {
       queueName = ((ChannelContext) channelContexts.get(new Integer(channelId))).lastQueueCreated;
@@ -457,7 +464,6 @@ public class ProxyAgent extends Agent {
       logger.log(BasicLevel.DEBUG, "ProxyAgent.basicPublish(" + not + ")");
     basicPublish(
         not.getChannelId(),
-        not.getTicket(),
         not.getExchange(),
         not.getRoutingKey(),
         not.isMandatory(),
@@ -466,9 +472,8 @@ public class ProxyAgent extends Agent {
         not.getBody());
   }
 
-  public void basicPublish(int channelId, int ticket, String exchange,
-      String routingKey, boolean mandatory, boolean immediate,
-      BasicProperties props, byte[] body) throws Exception {
+  public void basicPublish(int channelId, String exchange, String routingKey, boolean mandatory,
+      boolean immediate, BasicProperties props, byte[] body) throws Exception {
     AgentId exchangeId = (AgentId) NamingAgent.getSingleton().lookup(exchange);
     //    if (exchangeId == null) {
     //      throw new NameNotFoundException("Exchange " + exchange + " not found");
@@ -549,7 +554,6 @@ public class ProxyAgent extends Agent {
     try {
       AMQP.Queue.BindOk res = queueBind(
           not.getChannelId(),
-          not.getTicket(),
           not.getQueue(),
           not.getExchange(),
           not.getRoutingKey(),
@@ -562,7 +566,7 @@ public class ProxyAgent extends Agent {
     }
   }
   
-  public AMQP.Queue.BindOk queueBind(int channelId, int ticket, String queue, String exchange,
+  public AMQP.Queue.BindOk queueBind(int channelId, String queue, String exchange,
       String routingKey, Map arguments) throws Exception {
     /*
      * If the queue name is empty, the server uses the last queue declared on
@@ -604,7 +608,6 @@ public class ProxyAgent extends Agent {
     try {
       AMQP.Queue.UnbindOk res = queueUnbind(
           not.getChannelId(),
-          not.getTicket(),
           not.getQueue(),
           not.getExchange(),
           not.getRoutingKey(),
@@ -615,7 +618,7 @@ public class ProxyAgent extends Agent {
     }
   }
 
-  public UnbindOk queueUnbind(int channelId, int ticket, String queue, String exchange, String routingKey,
+  public UnbindOk queueUnbind(int channelId, String queue, String exchange, String routingKey,
       Map arguments) throws NameNotFoundException {
     AgentId exchangeId = (AgentId) NamingAgent.getSingleton().lookup(exchange);
     if (exchangeId != null) {
