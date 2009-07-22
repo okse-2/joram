@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2008 CNES
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,8 +27,21 @@ import fr.dyade.aaa.agent.Notification;
 
 public class ClearQueueNot extends Notification {
   
+  /** define serialVersionUID for interoperability */
+  private static final long serialVersionUID = 1L;
+
+  private int messageCount;
+
   public ClearQueueNot() {
     super();
+  }
+
+  public int getMessageCount() {
+    return messageCount;
+  }
+
+  public void setMessageCount(int messageCount) {
+    this.messageCount = messageCount;
   }
 
 }
