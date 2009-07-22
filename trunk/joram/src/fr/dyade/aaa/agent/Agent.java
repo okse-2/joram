@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -272,7 +272,7 @@ public abstract class Agent implements AgentMBean, Serializable {
    * Allocates a new Agent object. This constructor has the same effect
    * as <code>Agent(to, null, false)</code>.
    *
-   * @param to	  Identication of target agent server
+   * @param to	  Identification of target agent server
    *
    * @see Agent#Agent(short, java.lang.String, boolean)
    */
@@ -284,7 +284,7 @@ public abstract class Agent implements AgentMBean, Serializable {
    * Allocates a new Agent object. This constructor has the same effect
    * as <code>Agent(to, name, false)</code>.
    *
-   * @param to	  Identication of target agent server
+   * @param to	  Identification of target agent server
    * @param name  symbolic name
    *
    * @see Agent#Agent(short, java.lang.String, boolean)
@@ -297,7 +297,7 @@ public abstract class Agent implements AgentMBean, Serializable {
    * Allocates a new Agent object. This constructor has the same effect
    * as <code>Agent(to, null, fixed)</code>.
    *
-   * @param to	  Identication of target agent server
+   * @param to	  Identification of target agent server
    * @param fixed if <code>true</code> agent is pinned in memory
    *
    * @see Agent#Agent(short, java.lang.String, boolean)
@@ -310,7 +310,7 @@ public abstract class Agent implements AgentMBean, Serializable {
    * Allocates a new Agent object. The resulting object <b>is not an agent</b>;
    * before it can react to a notification you must deploy it.
    *
-   * @param to	  Identication of target agent server
+   * @param to	  Identification of target agent server
    * @param name  symbolic name
    * @param fixed if <code>true</code> agent is pinned in memory
    *
@@ -455,7 +455,7 @@ public abstract class Agent implements AgentMBean, Serializable {
 
   /**
    * Returns a string representation of this agent, including the agent's
-   * class, name, global identication, and fixed property.
+   * class, name, global identification, and fixed property.
    *
    * @return	A string representation of this agent. 
    */
@@ -615,7 +615,7 @@ public abstract class Agent implements AgentMBean, Serializable {
   }
 
   /**
-   * Permits this agent to destroy it. If necessary, its method should be 
+   * Permits this agent to destroy itself. If necessary, this method should be 
    * overloaded to work properly.
    */
   public void delete() {
@@ -623,8 +623,8 @@ public abstract class Agent implements AgentMBean, Serializable {
   }
 
   /**
-   * Permits this agent to destroy it. If necessary, its method should be
-   *overloaded to work properly. 
+   * Permits this agent to destroy itself. If necessary, this method should be
+   * overloaded to work properly. 
    *
    * @param agent	Id of agent to notify.
    */
@@ -632,6 +632,20 @@ public abstract class Agent implements AgentMBean, Serializable {
     if (deployed)
       sendTo(AgentId.factoryId(id.getTo()),
 	     new AgentDeleteRequest(agent));
+  }
+
+  /**
+   * Permits this agent to destroy itself. If necessary, this method should be
+   * overloaded to work properly.
+   * 
+   * @param agent
+   *          Id of agent to notify.
+   * @param extraInformation
+   *          extra information added when notifying the agent.
+   */
+  public void delete(AgentId agent, Object extraInformation) {
+    if (deployed)
+      sendTo(AgentId.factoryId(id.getTo()), new AgentDeleteRequest(agent, extraInformation));
   }
  
   /**

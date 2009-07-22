@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -142,7 +142,8 @@ final class AgentFactory extends Agent {
 // TODO: (ThreadEngine) Thread.currentThread() ...
         AgentServer.engine.deleteAgent(from);
 	if (((AgentDeleteRequest) not).reply != null)
-          sendTo(((AgentDeleteRequest) not).reply, new DeleteAck(from));
+          sendTo(((AgentDeleteRequest) not).reply, new DeleteAck(from,
+              ((AgentDeleteRequest) not).extraInformation));
       } catch (Exception exc) {
 	if (((AgentDeleteRequest) not).reply != null)
           sendTo(((AgentDeleteRequest) not).reply, new DeleteAck(from, exc));
