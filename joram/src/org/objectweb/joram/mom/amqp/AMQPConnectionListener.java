@@ -380,7 +380,6 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
                 declare.exclusive,
                 declare.autoDelete,
                 declare.arguments,
-                declare.reserved1,
                 channelNumber);
             if (declare.noWait == false) {
               sendMethodToPeer(declareOk, channelNumber);
@@ -399,13 +398,15 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
                 delete.ifUnused,
                 delete.ifEmpty,
                 delete.noWait,
-                delete.reserved1,
                 channelNumber);
             if (delete.noWait == false) {
               sendMethodToPeer(deleteOk, channelNumber);
             }
           } catch (NotUnusedException exc) {
             channelException(channelNumber, AMQP.PRECONDITION_FAILED, exc.getMessage(), AMQP.Queue.INDEX,
+                AMQP.Queue.Delete.INDEX);
+          } catch (NameNotFoundException nnfe) {
+            channelException(channelNumber, AMQP.NOT_FOUND, nnfe.getMessage(), AMQP.Queue.INDEX,
                 AMQP.Queue.Delete.INDEX);
           }
           break;
@@ -419,7 +420,6 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
                 bind.noWait,
                 bind.routingKey,
                 bind.arguments,
-                bind.reserved1,
                 channelNumber);
             if (bind.noWait == false)
               sendMethodToPeer(new AMQP.Queue.BindOk(), channelNumber);
@@ -440,7 +440,6 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
                 unbind.exchange,
                 unbind.routingKey,
                 unbind.arguments,
-                unbind.reserved1,
                 channelNumber);
             sendMethodToPeer(new AMQP.Queue.UnbindOk(), channelNumber);
           } catch (NameNotFoundException exc) {
@@ -454,7 +453,6 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
           momHandler.queuePurge(
               purge.queue,
               purge.noWait,
-              purge.reserved1,
               channelNumber);
           if (purge.noWait == false)
             sendMethodToPeer(new AMQP.Queue.PurgeOk(), channelNumber);
@@ -484,7 +482,7 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
 
         case AMQP.Basic.Get.INDEX:
           AMQP.Basic.Get get = (AMQP.Basic.Get) method;
-          momHandler.basicGet(get.queue, get.noAck, get.reserved1, channelNumber);
+          momHandler.basicGet(get.queue, get.noAck, channelNumber);
 //          if (getResponse != null) {
 //            sendMethodToPeer(new AMQP.Basic.GetOk(
 //                getResponse.getEnvelope().getDeliveryTag(),
@@ -591,9 +589,7 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
                 declare.type,
                 declare.passive,
                 declare.durable,
-                declare.reserved2,
                 declare.arguments,
-                declare.reserved1,
                 channelNumber);
             if (declare.noWait == false) {
               sendMethodToPeer(new AMQP.Exchange.DeclareOk(), channelNumber);
@@ -617,13 +613,15 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
                 delete.exchange,
                 delete.ifUnused,
                 delete.noWait,
-                delete.reserved1,
                 channelNumber);
             if (delete.noWait == false) {
               sendMethodToPeer(new AMQP.Exchange.DeleteOk(), channelNumber);
             }
           } catch (NotUnusedException exc) {
             channelException(channelNumber, AMQP.PRECONDITION_FAILED, exc.getMessage(), AMQP.Exchange.INDEX,
+                AMQP.Exchange.Delete.INDEX);
+          } catch (NameNotFoundException nnfe) {
+            channelException(channelNumber, AMQP.NOT_FOUND, nnfe.getMessage(), AMQP.Exchange.INDEX,
                 AMQP.Exchange.Delete.INDEX);
           }
           break;

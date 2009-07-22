@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2008 CNES
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,8 +32,10 @@ import fr.dyade.aaa.agent.SyncNotification;
 
 public class QueueBindNot extends SyncNotification {
   
+  /** define serialVersionUID for interoperability */
+  private static final long serialVersionUID = 1L;
+
   private int channelId;
-  private int ticket;
   private String queue; 
   private String exchange;
   private String routingKey; 
@@ -47,11 +49,10 @@ public class QueueBindNot extends SyncNotification {
    * @param routingKey
    * @param arguments
    */
-  public QueueBindNot(int channelId, int ticket, String queue, String exchange,
+  public QueueBindNot(int channelId, String queue, String exchange,
       String routingKey, Map arguments) {
     super();
     this.channelId = channelId;
-    this.ticket = ticket;
     this.queue = queue;
     this.exchange = exchange;
     this.routingKey = routingKey;
@@ -61,20 +62,21 @@ public class QueueBindNot extends SyncNotification {
   public int getChannelId() {
     return channelId;
   }
+
   public Map getArguments() {
     return arguments;
   }
+
   public String getExchange() {
     return exchange;
   }
+
   public String getQueue() {
     return queue;
   }
+
   public String getRoutingKey() {
     return routingKey;
-  }
-  public int getTicket() {
-    return ticket;
   }
   
   public AMQP.Queue.BindOk queueBind(AgentId proxyId) throws Exception {

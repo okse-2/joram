@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2008 CNES
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,8 +33,10 @@ import fr.dyade.aaa.agent.SyncNotification;
  */
 public class BasicGetNot extends SyncNotification {
   
+  /** define serialVersionUID for interoperability */
+  private static final long serialVersionUID = 1L;
+
   private int channelId;
-  private int ticket;
   private String queueName;
   private boolean noAck;
   private GetListener callback;
@@ -45,10 +47,9 @@ public class BasicGetNot extends SyncNotification {
    * @param queue
    * @param noAck
    */
-  public BasicGetNot(int channelNumber, int ticket, String queue, boolean noAck, GetListener callback) {
+  public BasicGetNot(int channelNumber, String queue, boolean noAck, GetListener callback) {
     super();
     this.channelId = channelNumber;
-    this.ticket = ticket;
     this.queueName = queue;
     this.noAck = noAck;
     this.callback = callback;
@@ -56,10 +57,6 @@ public class BasicGetNot extends SyncNotification {
 
   public int getChannelId() {
     return channelId;
-  }
-
-  public int getTicket() {
-    return ticket;
   }
 
   public String getQueueName() {

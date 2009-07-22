@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2008 CNES
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,8 +30,10 @@ import fr.dyade.aaa.agent.SyncNotification;
 
 public class ExchangeDeleteNot extends SyncNotification {
   
+  /** define serialVersionUID for interoperability */
+  private static final long serialVersionUID = 1L;
+
   private int channelId;
-  private int ticket;
   private String exchange;
   private boolean ifUnused;
   private boolean nowait;
@@ -43,10 +45,9 @@ public class ExchangeDeleteNot extends SyncNotification {
    * @param ifUnused
    * @param nowait
    */
-  public ExchangeDeleteNot(int channelId, int ticket, String exchange, boolean ifUnused, boolean nowait) {
+  public ExchangeDeleteNot(int channelId, String exchange, boolean ifUnused, boolean nowait) {
     super();
     this.channelId = channelId;
-    this.ticket = ticket;
     this.exchange = exchange;
     this.ifUnused = ifUnused;
     this.nowait = nowait;
@@ -63,10 +64,6 @@ public class ExchangeDeleteNot extends SyncNotification {
 
   public int getChannelId() {
     return channelId;
-  }
-
-  public int getTicket() {
-    return ticket;
   }
 
   public String getExchange() {

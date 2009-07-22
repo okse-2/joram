@@ -37,61 +37,64 @@ public interface MOMHandler {
    * @param exclusive true if we are declaring an exclusive queue
    * @param autoDelete true if we are declaring an autodelete queue (server will delete it when no longer in use)
    * @param arguments other properties (construction arguments) for the queue
-   * @param ticket an access ticket for the appropriate realm
    * @param channelNumber the channel the request came from
    * @return the name of the queue returned to the client
    * @throws Exception if an error is encountered
    */
   public AMQP.Queue.DeclareOk queueDeclare(String queueName, boolean passive, boolean durable,
-      boolean exclusive, boolean autoDelete, Map arguments, int ticket, int channelNumber) throws Exception;
+      boolean exclusive, boolean autoDelete, Map arguments, int channelNumber) throws Exception;
 
   /**
    * Delete a queue, without regard for whether it is in use or has messages on it
    * @param queue the name of the queue
    * @param ifUnused true if the queue should be deleted only if not in use
    * @param ifEmpty true if the queue should be deleted only if empty
-   * @param ticket an access ticket for the appropriate realm
    * @param channelNumber the channel the request came from
    * @return the number of messages purged
    * @throws Exception if an error is encountered
    */
   public AMQP.Queue.DeleteOk queueDelete(String queue, boolean ifUnused, boolean ifEmpty, boolean nowait,
-      int ticket, int channelNumber) throws Exception;
+      int channelNumber) throws Exception;
   
-  public void queuePurge(String queue, boolean nowait, int ticket, int channelNumber) throws Exception;
+  public void queuePurge(String queue, boolean nowait, int channelNumber) throws Exception;
   
   /**
    * Bind a queue to an exchange.
    * @param queue the name of the queue
    * @param exchange the name of the exchange
    * @param nowait 
-   * @param routingKey the routine key to use for the binding
+   * @param routingKey the routing key to use for the binding
    * @param arguments other properties (binding parameters)
-   * @param ticket an access ticket for the appropriate realm
    * @param channelNumber the channel the request came from
    * @throws Exception if an error is encountered
    */
   public void queueBind(String queue, String exchange, boolean nowait, String routingKey, Map arguments,
-      int ticket, int channelNumber) throws Exception;
-  
-
-  public void queueUnbind(String queue, String exchange, String routingKey, Map arguments, int ticket,
       int channelNumber) throws Exception;
+  
+  /**
+   * Unbinds a queue from an exchange.
+   * @param queue the name of the queue
+   * @param exchange the name of the exchange
+   * @param routingKey the routing key to use for the binding
+   * @param arguments other properties (binding parameters)
+   * @param channelNumber the channel the request came from
+   * @throws Exception if an error is encountered
+   */
+  public void queueUnbind(String queue, String exchange, String routingKey, Map arguments, int channelNumber)
+      throws Exception;
 
   /**
    * Retrieve a message from a queue.
    * @param queue the name of the queue
    * @param noAck true if no handshake is required
-   * @param ticket an access ticket for the appropriate realm
    * @param channelNumber the channel the request came from
    * @throws Exception if an error is encountered
    */
-  public void basicGet(String queue, boolean noAck, int ticket, int channelNumber) throws Exception;
+  public void basicGet(String queue, boolean noAck, int channelNumber) throws Exception;
 
   /**
    * Publish a message
-   * @param messageAMQP the message to publish with publishing properties
-   * @param ticket an access ticket for the appropriate realm
+   * @param publishRequest the message to publish with publishing properties
    * @param channelNumber the channel the request came from
    * @throws Exception if an error is encountered
    */
@@ -133,24 +136,20 @@ public interface MOMHandler {
    * @param type the exchange type
    * @param passive true if we are passively declaring a exchange (asserting the exchange already exists)
    * @param durable true if we are declaring a durable exchange (the exchange will survive a server restart)
-   * @param autoDelete true if the server should delete the exchange when it is no longer in use
    * @param arguments other properties (construction arguments) for the exchange
-   * @param ticket an access ticket for the appropriate realm
    * @param channelNumber the channel the request came from
    */
-  public void exchangeDeclare(String exchange, String type, boolean passive, boolean durable,
-      boolean autoDelete, Map arguments, int ticket, int channelNumber) throws Exception;
+  public void exchangeDeclare(String exchange, String type, boolean passive, boolean durable, Map arguments,
+      int channelNumber) throws Exception;
   
   /**
    * Delete an exchange
-   * @param ticket an access ticket for the appropriate realm
    * @param exchange the name of the exchange
    * @param ifUnused true to indicate that the exchange is only to be deleted if it is unused
-   * @param ticket an access ticket for the appropriate realm
    * @param channelNumber the channel the request came from
    */
-  public void exchangeDelete(String exchangeName, boolean ifUnused, boolean nowait, int ticket,
-      int channelNumber) throws Exception;
+  public void exchangeDelete(String exchangeName, boolean ifUnused, boolean nowait, int channelNumber)
+      throws Exception;
   
   /**
    * Gets MOM properties returned to the client on connection start.

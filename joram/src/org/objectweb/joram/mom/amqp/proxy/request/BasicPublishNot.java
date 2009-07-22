@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2008 CNES
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,8 +32,10 @@ import fr.dyade.aaa.agent.Notification;
  */
 public class BasicPublishNot extends Notification {
   
+  /** define serialVersionUID for interoperability */
+  private static final long serialVersionUID = 1L;
+
   private int channelId;
-  private int ticket;
   private String exchange;
   private String routingKey;
   private boolean mandatory;
@@ -51,13 +53,12 @@ public class BasicPublishNot extends Notification {
    * @param props
    * @param body
    */
-  public BasicPublishNot(int channelId, int ticket, String exchange,
+  public BasicPublishNot(int channelId, String exchange,
       String routingKey, boolean mandatory,
       boolean immediate, BasicProperties props,
       byte[] body) {
     super();
     this.channelId = channelId;
-    this.ticket = ticket;
     this.exchange = exchange;
     this.routingKey = routingKey;
     this.mandatory = mandatory;
@@ -70,37 +71,29 @@ public class BasicPublishNot extends Notification {
   public byte[] getBody() {
     return body;
   }
+
   public int getChannelId() {
     return channelId;
   }
+
   public String getExchange() {
     return exchange;
   }
+
   public boolean isImmediate() {
     return immediate;
   }
+
   public boolean isMandatory() {
     return mandatory;
   }
+
   public BasicProperties getProps() {
     return props;
   }
+
   public String getRoutingKey() {
     return routingKey;
   }
-  public int getTicket() {
-    return ticket;
-  }
-  
-/*
-  public AccessRequestOk accessRequest(AgentId proxyId) throws Exception {
-    Object[] res = invoke(proxyId);
-    return (AccessRequestOk)res[0];
-  }
-  
-  public void Return(AccessRequestOk res) {
-    Return(new Object[]{res});
-  }
-  */
 
 }

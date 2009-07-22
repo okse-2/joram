@@ -86,15 +86,14 @@ public class JoramMOMHandler implements MOMHandler {
     return consumeOk;
   }
 
-  public void basicGet(String queue, boolean noAck, int ticket, int channelNumber) throws Exception {
-    BasicGetNot basicGetNot = new BasicGetNot(channelNumber, ticket, queue, noAck,
+  public void basicGet(String queue, boolean noAck, int channelNumber) throws Exception {
+    BasicGetNot basicGetNot = new BasicGetNot(channelNumber, queue, noAck,
         new GetMessageConsumer(channelNumber));
     basicGetNot.basicGet(proxy.getId());
   }
 
   public void basicPublish(PublishRequest publishRequest, int channelNumber) throws Exception {
     BasicPublishNot basicPublish = new BasicPublishNot(channelNumber,
-        publishRequest.getPublish().reserved1,
         publishRequest.getPublish().exchange,
         publishRequest.getPublish().routingKey,
         publishRequest.getPublish().mandatory,
@@ -121,16 +120,15 @@ public class JoramMOMHandler implements MOMHandler {
   }
 
   public void exchangeDeclare(String exchangeName, String type, boolean passive, boolean durable,
-      boolean autoDelete, Map arguments, int ticket, int channelNumber) throws Exception {
-    ExchangeDeclareNot exchangeDeclare = new ExchangeDeclareNot(
-        channelNumber, ticket, exchangeName, type, passive, durable, autoDelete, arguments);
+      Map arguments, int channelNumber) throws Exception {
+    ExchangeDeclareNot exchangeDeclare = new ExchangeDeclareNot(channelNumber, exchangeName, type, passive,
+        durable, arguments);
     exchangeDeclare.exchangeDeclare(proxy.getId());
   }
   
-  public void exchangeDelete(String exchangeName, boolean ifUnused, boolean nowait, int ticket,
-      int channelNumber) throws Exception {
-    ExchangeDeleteNot exchangeDelete = new ExchangeDeleteNot(channelNumber, ticket, exchangeName, ifUnused,
-        nowait);
+  public void exchangeDelete(String exchangeName, boolean ifUnused, boolean nowait, int channelNumber)
+      throws Exception {
+    ExchangeDeleteNot exchangeDelete = new ExchangeDeleteNot(channelNumber, exchangeName, ifUnused, nowait);
     exchangeDelete.exchangeDelete(proxy.getId());
   }
 
@@ -144,37 +142,34 @@ public class JoramMOMHandler implements MOMHandler {
   }
 
   public void queueBind(String queue, String exchange, boolean nowait, String routingKey, Map arguments,
-      int ticket, int channelNumber) throws Exception {
-    QueueBindNot queueBind = new QueueBindNot(channelNumber, ticket, queue, 
-        exchange, routingKey, arguments);
+      int channelNumber) throws Exception {
+    QueueBindNot queueBind = new QueueBindNot(channelNumber, queue, exchange, routingKey, arguments);
     queueBind.queueBind(proxy.getId());
   }
 
-  public void queueUnbind(String queue, String exchange, String routingKey, Map arguments, int ticket,
-      int channelNumber) throws Exception {
-    QueueUnbindNot queueUnbind = new QueueUnbindNot(channelNumber, ticket, queue, exchange, routingKey,
-        arguments);
+  public void queueUnbind(String queue, String exchange, String routingKey, Map arguments, int channelNumber)
+      throws Exception {
+    QueueUnbindNot queueUnbind = new QueueUnbindNot(channelNumber, queue, exchange, routingKey, arguments);
     queueUnbind.queueUnbind(proxy.getId());
   }
 
   public AMQP.Queue.DeclareOk queueDeclare(String queueName, boolean passive, boolean durable,
-      boolean exclusive, boolean autoDelete, Map arguments, int ticket, int channelNumber) throws Exception {
-    QueueDeclareNot queueDeclare = new QueueDeclareNot(
-        channelNumber, ticket, queueName, passive, durable,
-        exclusive, autoDelete, arguments);
+      boolean exclusive, boolean autoDelete, Map arguments, int channelNumber) throws Exception {
+    QueueDeclareNot queueDeclare = new QueueDeclareNot(channelNumber, queueName, passive, durable, exclusive,
+        autoDelete, arguments);
     AMQP.Queue.DeclareOk queueDeclareOk = queueDeclare.queueDeclare(proxy.getId());
     return queueDeclareOk;
   }
 
   public AMQP.Queue.DeleteOk queueDelete(String queue, boolean ifUnused, boolean ifEmpty, boolean nowait,
-      int ticket, int channelNumber) throws Exception {
-    QueueDeleteNot queueDelete = new QueueDeleteNot(channelNumber, ticket, queue, ifUnused, ifEmpty, nowait);
+      int channelNumber) throws Exception {
+    QueueDeleteNot queueDelete = new QueueDeleteNot(channelNumber, queue, ifUnused, ifEmpty, nowait);
     AMQP.Queue.DeleteOk queueDeleteOk = queueDelete.queueDelete(proxy.getId());
     return queueDeleteOk;
   }
 
-  public void queuePurge(String queue, boolean nowait, int ticket, int channelNumber) throws Exception {
-    QueuePurgeNot queuePurge = new QueuePurgeNot(channelNumber, ticket, queue, nowait);
+  public void queuePurge(String queue, boolean nowait, int channelNumber) throws Exception {
+    QueuePurgeNot queuePurge = new QueuePurgeNot(channelNumber, queue, nowait);
     queuePurge.queuePurge(proxy.getId());
   }
 
