@@ -56,7 +56,7 @@ public interface MOMHandler {
   public AMQP.Queue.DeleteOk queueDelete(String queue, boolean ifUnused, boolean ifEmpty, boolean nowait,
       int channelNumber) throws Exception;
   
-  public void queuePurge(String queue, boolean nowait, int channelNumber) throws Exception;
+  public AMQP.Queue.PurgeOk queuePurge(String queue, boolean nowait, int channelNumber) throws Exception;
   
   /**
    * Bind a queue to an exchange.

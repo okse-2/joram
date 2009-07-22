@@ -168,9 +168,10 @@ public class JoramMOMHandler implements MOMHandler {
     return queueDeleteOk;
   }
 
-  public void queuePurge(String queue, boolean nowait, int channelNumber) throws Exception {
+  public AMQP.Queue.PurgeOk queuePurge(String queue, boolean nowait, int channelNumber) throws Exception {
     QueuePurgeNot queuePurge = new QueuePurgeNot(channelNumber, queue, nowait);
-    queuePurge.queuePurge(proxy.getId());
+    AMQP.Queue.PurgeOk purgeOk = queuePurge.queuePurge(proxy.getId());
+    return purgeOk;
   }
 
   public void channelOpen(int channelNumber) throws Exception {
