@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2008 CNES
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,8 +32,10 @@ import fr.dyade.aaa.agent.SyncNotification;
 
 public class QueueDeclareNot extends SyncNotification {
   
+  /** define serialVersionUID for interoperability */
+  private static final long serialVersionUID = 1L;
+
   private int channelId;
-  private int ticket;
   private String queue;
   private boolean passive;
   private boolean durable;
@@ -51,12 +53,11 @@ public class QueueDeclareNot extends SyncNotification {
    * @param autoDelete
    * @param arguments
    */
-  public QueueDeclareNot(int channelId, int ticket, String queue,
+  public QueueDeclareNot(int channelId, String queue,
       boolean passive, boolean durable, boolean exclusive, boolean autoDelete,
       Map arguments) {
     super();
     this.channelId = channelId;
-    this.ticket = ticket;
     this.queue = queue;
     this.passive = passive;
     this.durable = durable;
@@ -68,26 +69,29 @@ public class QueueDeclareNot extends SyncNotification {
   public Map getArguments() {
     return arguments;
   }
+
   public boolean isAutoDelete() {
     return autoDelete;
   }
+
   public int getChannelId() {
     return channelId;
   }
+
   public boolean isDurable() {
     return durable;
   }
+
   public boolean isExclusive() {
     return exclusive;
   }
+
   public boolean isPassive() {
     return passive;
   }
+
   public String getQueue() {
     return queue;
-  }
-  public int getTicket() {
-    return ticket;
   }
   
   public AMQP.Queue.DeclareOk queueDeclare(AgentId proxyId) throws Exception {

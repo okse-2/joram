@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2008 CNES
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,13 +32,14 @@ import fr.dyade.aaa.agent.SyncNotification;
 
 public class ExchangeDeclareNot extends SyncNotification {
   
+  /** define serialVersionUID for interoperability */
+  private static final long serialVersionUID = 1L;
+
   private int channelId;
-  private int ticket;
   private String exchange;
   private String type;
   private boolean passive; 
   private boolean durable; 
-  private boolean autoDelete; 
   private Map arguments;
   
   /**
@@ -51,41 +52,37 @@ public class ExchangeDeclareNot extends SyncNotification {
    * @param autoDelete
    * @param arguments
    */
-  public ExchangeDeclareNot(int channelId, int ticket, String exchange,
-      String type, boolean passive, boolean durable, boolean autoDelete,
+  public ExchangeDeclareNot(int channelId, String exchange, String type, boolean passive, boolean durable,
       Map arguments) {
     super();
     this.channelId = channelId;
-    this.ticket = ticket;
     this.exchange = exchange;
     this.type = type;
     this.passive = passive;
     this.durable = durable;
-    this.autoDelete = autoDelete;
     this.arguments = arguments;
   }
   
   public Map getArguments() {
     return arguments;
   }
-  public boolean isAutoDelete() {
-    return autoDelete;
-  }
+
   public int getChannelId() {
     return channelId;
   }
+
   public boolean isDurable() {
     return durable;
   }
+
   public String getExchange() {
     return exchange;
   }
+
   public boolean isPassive() {
     return passive;
   }
-  public int getTicket() {
-    return ticket;
-  }
+
   public String getType() {
     return type;
   }
