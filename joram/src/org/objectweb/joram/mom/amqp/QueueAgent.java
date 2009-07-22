@@ -84,11 +84,13 @@ public class QueueAgent extends Agent {
     } else if (not instanceof DeleteNot) {
       doReact((DeleteNot) not, from);
     } else if (not instanceof ClearQueueNot) {
-      doReact((ClearQueueNot) not);
+      doReact((ClearQueueNot) not, from);
     } else if (not instanceof AckNot) {
       doReact((AckNot) not);
     } else if (not instanceof RecoverNot) {
       doReact((RecoverNot) not);
+    } else if (not instanceof GetQueueInfoNot) {
+      doReact((GetQueueInfoNot) not, from);
     } else {
       super.react(from, not);
     }
@@ -201,18 +203,24 @@ public class QueueAgent extends Agent {
   }
 
   private void doReact(DeleteNot not, AgentId from) throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "QueueAgent.delete()");
     if (not.isIfEmpty() && toDeliver.size() > 0) {
-      sendTo(from, new DeleteAck(getId()));
+      sendTo(from, new DeleteAck(getId(), new NotEmptyException("Queue not empty.")));
     } else if (not.isIfUnused() && consumers.size() > 0) {
       sendTo(from, new DeleteAck(getId(), new NotUnusedException("Queue not unused.")));
     } else {
       NamingAgent.getSingleton().unbind(getName());
-      delete(from);
+      delete(from, new Integer(toDeliver.size()));
     }
   }
   
-  private void doReact(ClearQueueNot not) {
+  private void doReact(ClearQueueNot not, AgentId from) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "QueueAgent.purge() " + toDeliver.size());
+    not.setMessageCount(toDeliver.size());
     toDeliver.clear();
+    sendTo(from, not);
   }
 
   private void doReact(AckNot not) {
@@ -267,6 +275,13 @@ public class QueueAgent extends Agent {
       Message msg = (Message) iterMsgs.next();
       publish(msg.exchange, msg.routingKey, msg.properties, msg.body, true);
     }
+  }
+
+  private void doReact(GetQueueInfoNot not, AgentId from) {
+    not.setConsumerCount(consumers.size());
+    not.setMessageCount(toDeliver.size());
+    not.setQueueName(name);
+    sendTo(from, not);
   }
 
   static class Message implements Serializable {
