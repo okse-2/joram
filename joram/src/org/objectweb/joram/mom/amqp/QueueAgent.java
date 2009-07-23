@@ -48,6 +48,8 @@ public class QueueAgent extends Agent {
   
   private boolean autodelete;
   
+  private boolean exclusive;
+
   private long msgCounter;
   
   private LinkedList toDeliver;
@@ -56,10 +58,11 @@ public class QueueAgent extends Agent {
   
   private LinkedList consumers;
   
-  public QueueAgent(String name, boolean durable, boolean autodelete) {
+  public QueueAgent(String name, boolean durable, boolean autodelete, boolean exclusive) {
     super(name);
     this.durable = durable;
     this.autodelete = autodelete;
+    this.exclusive = exclusive;
     this.toDeliver = new LinkedList();
     this.consumers = new LinkedList();
     this.toAck = new LinkedList();
@@ -281,6 +284,7 @@ public class QueueAgent extends Agent {
     not.setConsumerCount(consumers.size());
     not.setMessageCount(toDeliver.size());
     not.setQueueName(name);
+    not.setExclusive(exclusive);
     sendTo(from, not);
   }
 
