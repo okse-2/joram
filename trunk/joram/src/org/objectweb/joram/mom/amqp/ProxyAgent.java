@@ -302,7 +302,7 @@ public class ProxyAgent extends Agent {
       if (queue != null && queue.equals("")) {
         queueName = null;
       }
-      QueueAgent queueAgent = new QueueAgent(queueName, durable, autoDelete);
+      QueueAgent queueAgent = new QueueAgent(queueName, durable, autoDelete, exclusive);
       queueAgent.deploy();
       queueName = queueAgent.getName();
       NamingAgent.getSingleton().bind(queueName, queueAgent.getId());
@@ -681,7 +681,11 @@ public class ProxyAgent extends Agent {
   
   private void doReact(GetQueueInfoNot not, AgentId from) {
     QueueDeclareNot syncNot = (QueueDeclareNot) pendingRequests.get(from);
-    syncNot.Return(new AMQP.Queue.DeclareOk(not.getQueueName(), not.getMessageCount(), not.getConsumerCount()));
+    if (not.isExclusive() && !exclusiveQueues.contains(from)) {
+      syncNot.Throw(new ResourceLockedException("No access to this exclusive queue"));
+    } else {
+      syncNot.Return(new AMQP.Queue.DeclareOk(not.getQueueName(), not.getMessageCount(), not.getConsumerCount()));
+    }
   }
 
   private void doReact(ClearQueueNot not, AgentId from) {

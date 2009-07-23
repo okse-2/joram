@@ -23,51 +23,12 @@
  */
 package org.objectweb.joram.mom.amqp;
 
-import fr.dyade.aaa.agent.Notification;
+public class ResourceLockedException extends Exception {
 
-public class GetQueueInfoNot extends Notification {
-  
-  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
-  private boolean exclusive;
-  private int messageCount;
-  private int consumerCount;
-  private String queueName;
-
-  public GetQueueInfoNot() {
-  }
-
-  public String getQueueName() {
-    return queueName;
-  }
-
-  public void setQueueName(String queueName) {
-    this.queueName = queueName;
-  }
-
-  public int getMessageCount() {
-    return messageCount;
-  }
-
-  public void setMessageCount(int messageCount) {
-    this.messageCount = messageCount;
-  }
-
-  public int getConsumerCount() {
-    return consumerCount;
-  }
-
-  public void setConsumerCount(int consumerCount) {
-    this.consumerCount = consumerCount;
-  }
-  
-  public boolean isExclusive() {
-    return exclusive;
-  }
-
-  public void setExclusive(boolean exclusive) {
-    this.exclusive = exclusive;
+  public ResourceLockedException(String message) {
+    super(message);
   }
 
 }
