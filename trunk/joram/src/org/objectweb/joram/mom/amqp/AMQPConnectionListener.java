@@ -303,6 +303,7 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
           return;
         }
         if (method.getMethodId() != AMQP.Channel.Open.INDEX
+            && method.getMethodId() != AMQP.Channel.CloseOk.INDEX
             && channelPublish.get(new Integer(channelNumber)) == null) {
           connectionException(AMQP.CHANNEL_ERROR, "Channel not opened.", AMQP.Channel.INDEX, method
               .getMethodId());
@@ -323,8 +324,10 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
         case AMQP.Channel.Flow.INDEX:
           if (classState == AMQP.Channel.INDEX && methodState == AMQP.Channel.OpenOk.INDEX) {
             // TODO change flow state active/inactive
-            sendMethodToPeer(new AMQP.Channel.FlowOk(((AMQP.Channel.Flow) method).active),
-                channelNumber);
+            //sendMethodToPeer(new AMQP.Channel.FlowOk(((AMQP.Channel.Flow) method).active),
+            //    channelNumber);
+            connectionException(AMQP.NOT_IMPLEMENTED, "Flow method currently not implemented.",
+                AMQP.Channel.INDEX, AMQP.Channel.Flow.INDEX);
           } else
             invalidState(method);
           break;
@@ -386,6 +389,9 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
             }
           } catch (NameNotFoundException nnfe) {
             channelException(channelNumber, AMQP.NOT_FOUND, nnfe.getMessage(), AMQP.Queue.INDEX,
+                AMQP.Queue.Declare.INDEX);
+          } catch (ResourceLockedException rle) {
+            channelException(channelNumber, AMQP.RESOURCE_LOCKED, rle.getMessage(), AMQP.Queue.INDEX,
                 AMQP.Queue.Declare.INDEX);
           }
           break;
@@ -552,6 +558,8 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
           
         case AMQP.Basic.Reject.INDEX:
           //TODO
+          connectionException(AMQP.NOT_IMPLEMENTED, "Reject method currently not implemented.",
+              AMQP.Basic.INDEX, AMQP.Basic.Qos.INDEX);
           break;
 
         case AMQP.Basic.RecoverAsync.INDEX:
@@ -572,6 +580,8 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
 
         case AMQP.Basic.Qos.INDEX:
           //TODO
+          connectionException(AMQP.NOT_IMPLEMENTED, "Qos method currently not implemented.",
+              AMQP.Basic.INDEX, AMQP.Basic.Qos.INDEX);
           break;
 
         default:
@@ -655,19 +665,25 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
         case AMQP.Tx.Select.INDEX:
           AMQP.Tx.Select select = (AMQP.Tx.Select) method;
           //TODO
-          sendMethodToPeer(new AMQP.Tx.SelectOk(), channelNumber);
+          // sendMethodToPeer(new AMQP.Tx.SelectOk(), channelNumber);
+          connectionException(AMQP.NOT_IMPLEMENTED, "Transactions currently not implemented.", AMQP.Tx.INDEX,
+              AMQP.Tx.Select.INDEX);
           break;
 
         case AMQP.Tx.Rollback.INDEX:
           AMQP.Tx.Rollback rollback = (AMQP.Tx.Rollback) method;
-          //TODO
-          sendMethodToPeer(new AMQP.Tx.RollbackOk(), channelNumber);
+          // TODO
+          // sendMethodToPeer(new AMQP.Tx.RollbackOk(), channelNumber);
+          connectionException(AMQP.NOT_IMPLEMENTED, "Transactions currently not implemented.", AMQP.Tx.INDEX,
+              AMQP.Tx.Rollback.INDEX);
           break;
 
         case AMQP.Tx.Commit.INDEX:
           AMQP.Tx.Commit commit = (AMQP.Tx.Commit) method;
           //TODO
-          sendMethodToPeer(new AMQP.Tx.CommitOk(), channelNumber);
+          // sendMethodToPeer(new AMQP.Tx.CommitOk(), channelNumber);
+          connectionException(AMQP.NOT_IMPLEMENTED, "Transactions currently not implemented.", AMQP.Tx.INDEX,
+              AMQP.Tx.Commit.INDEX);
           break;
 
         default:
@@ -799,6 +815,10 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
         process(frame);
       }
 
+    } catch (ClassNotFoundException exc) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, exc.getMessage());
+      connectionException(AMQP.FRAME_ERROR, "Unknown frame.", 0, 0);
     } catch (Exception exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "", exc);
