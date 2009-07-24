@@ -24,6 +24,7 @@
 package org.objectweb.joram.mom.amqp.marshalling;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 
@@ -2830,7 +2831,10 @@ public class AMQP {
 
     private static final long serialVersionUID = 1L;
     
-    public static class BasicProperties {
+    public static class BasicProperties implements Serializable {
+
+      private static final long serialVersionUID = 1L;
+
       public java.lang.String contentType;
       public java.lang.String contentEncoding;
       public Map headers;
