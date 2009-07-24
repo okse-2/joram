@@ -61,12 +61,16 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.DeleteAck;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.SyncNotification;
 
 public class ProxyAgent extends Agent {
   
+  /** define serialVersionUID for interoperability */
+  private static final long serialVersionUID = 1L;
+
   class ChannelContext {
   
     // Links between consumer tags and queue ids
@@ -470,6 +474,17 @@ public class ProxyAgent extends Agent {
   }
 
   private void doReact(BasicGetNot not) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "ProxyAgent.basicPublish(" + not + ")");
+    // Put back this reaction at the end of the engine's list in order to
+    // execute exchanges reactions. This is done to avoid returning a GetEmpty
+    // response if the previously published message is waiting in an exchange reaction.
+    if (not.firsttime) {
+      not.firsttime = false;
+      setNoSave();
+      Channel.sendTo(getId(), not);
+      return;
+    }
     basicGet(not.getChannelId(), not.getQueueName(), not.isNoAck(), not.getCallback());
     not.Return();
   }
@@ -508,6 +523,8 @@ public class ProxyAgent extends Agent {
   }
   
   private void doReact(BasicAckNot not) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "ProxyAgent.basicAck(" + not + ")");
     basicAck(not.getChannelId(), not.getDeliveryTag(), not.isMultiple());
     not.Return();
   }
@@ -520,6 +537,7 @@ public class ProxyAgent extends Agent {
         if (delivery.deliveryTag == deliveryTag && delivery.channelId == channelId) {
           List ackList = new ArrayList(1);
           ackList.add(new Long(delivery.queueMsgId));
+          iter.remove();
           sendTo(delivery.queueId, new AckNot(ackList));
           return;
         }
@@ -535,6 +553,7 @@ public class ProxyAgent extends Agent {
             deliveryMap.put(delivery.queueId, ackList);
           }
           ackList.add(new Long(delivery.queueMsgId));
+          iter.remove();
         } else if (delivery.deliveryTag > deliveryTag) {
           break;
         }
