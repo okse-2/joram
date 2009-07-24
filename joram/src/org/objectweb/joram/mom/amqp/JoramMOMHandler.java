@@ -101,12 +101,6 @@ public class JoramMOMHandler implements MOMHandler {
         publishRequest.getHeader(),
         publishRequest.body);
     Channel.sendTo(proxy.getId(), basicPublish);
-    
-    // Let some time for the message to go to the exchange then the queue.
-    try {
-      Thread.sleep(50);
-    } catch (Exception exc) {
-    }
   }
 
   public void basicRecover(boolean requeue, int channelNumber) {

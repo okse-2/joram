@@ -41,6 +41,8 @@ public class BasicGetNot extends SyncNotification {
   private boolean noAck;
   private GetListener callback;
 
+  public boolean firsttime = true;
+
   /**
    * @param channelNumber
    * @param ticket
