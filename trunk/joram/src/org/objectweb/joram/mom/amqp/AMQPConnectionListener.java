@@ -525,16 +525,18 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "consume = " + consume);
           try {
-            AMQP.Basic.ConsumeOk consumeOk = momHandler.basicConsume(
-                consume.queue,
-                consume.noAck,
-                consume.consumerTag,
-                consume.noLocal,
-                consume.exclusive,
-                consume.noWait,
-                channelNumber);
-            if (consume.noWait == false) {
-              sendMethodToPeer(consumeOk, channelNumber);
+            synchronized (queueOut) {
+              AMQP.Basic.ConsumeOk consumeOk = momHandler.basicConsume(
+                  consume.queue,
+                  consume.noAck,
+                  consume.consumerTag,
+                  consume.noLocal,
+                  consume.exclusive,
+                  consume.noWait,
+                  channelNumber);
+              if (consume.noWait == false) {
+                sendMethodToPeer(consumeOk, channelNumber);
+              }
             }
           } catch (NameNotFoundException nnfe) {
             channelException(channelNumber, AMQP.NOT_FOUND, nnfe.getMessage(), AMQP.Basic.INDEX,
