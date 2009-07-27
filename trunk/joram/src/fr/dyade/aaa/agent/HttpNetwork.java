@@ -32,7 +32,6 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Daemon;
-import fr.dyade.aaa.common.Strings;
 
 /**
  * <tt>HttpNetwork</tt> is a simple implementation of <tt>StreamNetwork</tt>
@@ -500,24 +499,24 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     int nbCnxTry = 0;
     long lastCnxTry = 0;
 
-  protected void open(long currentTimeMillis) throws IOException {
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG,
-                 this.getName() + ", open: " + nbCnxTry);
-    
-    // Open the connection.
-    socket = null;
-    if (nbCnxTry != 0) {
-      if (! (((nbCnxTry < WDNbRetryLevel1) && 
-              ((lastCnxTry + WDRetryPeriod1) < currentTimeMillis)) ||
-             ((nbCnxTry < WDNbRetryLevel2) &&
-              ((lastCnxTry + WDRetryPeriod2) < currentTimeMillis)) ||
-             ((lastCnxTry + WDRetryPeriod3) < currentTimeMillis))) {
-        throw new IOException("Wait for watchdog period");
-      }
-    }
+    protected void open(long currentTimeMillis) throws IOException {
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
+                   this.getName() + ", open: " + nbCnxTry);
 
-    lastCnxTry = currentTimeMillis;
+      // Open the connection.
+      socket = null;
+      if (nbCnxTry != 0) {
+        if (! (((nbCnxTry < WDNbRetryLevel1) && 
+            ((lastCnxTry + WDRetryPeriod1) < currentTimeMillis)) ||
+            ((nbCnxTry < WDNbRetryLevel2) &&
+                ((lastCnxTry + WDRetryPeriod2) < currentTimeMillis)) ||
+                ((lastCnxTry + WDRetryPeriod3) < currentTimeMillis))) {
+          throw new IOException("Wait for watchdog period");
+        }
+      }
+
+      lastCnxTry = currentTimeMillis;
       // Open the connection.
       socket = null;
 
