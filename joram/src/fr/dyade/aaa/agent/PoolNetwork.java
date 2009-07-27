@@ -1237,8 +1237,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
               tryCount++;
               if (tryCount > nbMaxResetTries) {
                 if (logmon.isLoggable(BasicLevel.WARN))
-                  logmon.log(BasicLevel.WARN, getName() + " : after " + nbMaxResetTries
-                      + " attempts, sender is still busy : exit reset().");
+                  logmon.log(BasicLevel.WARN,
+                             getName() + " : after " + nbMaxResetTries + " attempts, sender is still busy : exit reset().");
                 return false;
               }
               if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -1260,11 +1260,13 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         sender.session.sendList.clear();
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,
-              getName() + ", reset - " + waiting.length + " waiting messages");
+                     getName() + ", reset - " + waiting.length + " waiting messages");
         sender.msgToSend.insertMessage(waiting);
       }
-      if (logmon.isLoggable(BasicLevel.WARN))
-        logmon.log(BasicLevel.WARN, getName() + ", reset end (" + sid + ')');
+      
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, getName() + ", reset end (" + sid + ')');
+      
       return true;
     }
     
@@ -1703,7 +1705,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
           throw exc;
         }
       } catch (Exception exc) {
-        if (logmon.isLoggable(BasicLevel.WARN))
+        if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG, getName() + ", connection aborted", exc);
         
         // Try it later, may be a a connection is in progress...
