@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,7 +26,6 @@ import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
-import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.QueueBrowser;
@@ -42,7 +41,7 @@ import framework.TestCase;
 
 
 /**
- * Try to build a producers and consumers with bad queue or topic.
+ * Try to build producers and consumers with bad queue or topic.
  * The client should get an exception and the server should continue to work.
  */
 public class Test58 extends BaseTest {
