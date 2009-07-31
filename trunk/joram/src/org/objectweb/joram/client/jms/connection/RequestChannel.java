@@ -33,11 +33,9 @@ public interface RequestChannel {
   
   public void connect() throws Exception;
 
-  public void send(AbstractJmsRequest obj)
-    throws Exception;
+  public void send(AbstractJmsRequest obj) throws Exception;
 
-  public AbstractJmsReply receive()
-    throws Exception;
+  public AbstractJmsReply receive() throws Exception;
 
   public void close();
 
