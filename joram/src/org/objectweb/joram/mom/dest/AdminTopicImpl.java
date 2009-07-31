@@ -1834,7 +1834,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void doProcess(GetLocalServer request, AgentId replyTo, String msgId) {
     try {
       A3CMLConfig config = AgentServer.getConfig();
-      A3CMLServer a3cmlServer = config.getServer(AgentServer.getServerId());
+      A3CMLServer a3cmlServer = config.getServer(AgentServer.getServerId(), AgentServer.getClusterId());
       distributeReply(replyTo, msgId,
                       new GetLocalServerRep(a3cmlServer.sid,
                                             a3cmlServer.name,
