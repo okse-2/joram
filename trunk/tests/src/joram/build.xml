@@ -124,8 +124,10 @@ description=" --> launch all exceptionlistener tests">
   <target name="tests.ha"
           description=" --> launch all ha tests">
     <antcall target="ha.test1"/>
-    <antcall target="ha.test2"/>
-    <!-- antcall target="ha.test3"/ -->
+    <antcall target="ha.test2-1"/>
+    <antcall target="ha.test2-2"/>
+    <antcall target="ha.test3-1"/>
+    <antcall target="ha.test3-2"/>
     <antcall target="ha.test4-1"/>
     <antcall target="ha.test4-2"/>
     <antcall target="ha.test5-1"/>
@@ -939,7 +941,7 @@ description=" --> launch all exceptionlistener tests">
 
   <!-- test ha -->
   <target name="ha.test1" depends="compile"
-          description=" --> test ha with 2 active server.">
+          description=" --> test ha.">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.ha.HATest"/>
       <param name="testid" value="ha.test1"/>
@@ -950,26 +952,50 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 
-  <target name="ha.test2" depends="compile"
-          description=" --> test ha with 1 active server.">
+  <target name="ha.test2-1" depends="compile"
+          description=" --> test ha - colocated client with queue.">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.ha.HATest2"/>
-      <param name="testid" value="ha.test2"/>
+      <param name="testid" value="ha.test2-1"/>
       <param name="jndiconf" value="ha/jndi.properties"/>
       <param name="a3conf" value="ha/a3servers.xml"/>
-      <param name="jvmargs" value=""/>
+      <param name="jvmargs" value="-Ddest=queue"/>
       <param name="args" value=""/>
     </antcall>
   </target>
 
-  <target name="ha.test3" depends="compile"
-          description=" --> test ha with important message load.">
+  <target name="ha.test2-2" depends="compile"
+          description=" --> test ha - colocated client with topic.">
     <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.ha.HATest3"/>
-      <param name="testid" value="ha.test3"/>
+      <param name="className" value="joram.ha.HATest2"/>
+      <param name="testid" value="ha.test2-2"/>
       <param name="jndiconf" value="ha/jndi.properties"/>
       <param name="a3conf" value="ha/a3servers.xml"/>
-      <param name="jvmargs" value=""/>
+      <param name="jvmargs" value="-Ddest=topic"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="ha.test3-1" depends="compile"
+          description=" --> test ha with important message load on queue.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.ha.HATest3"/>
+      <param name="testid" value="ha.test3-1"/>
+      <param name="jndiconf" value="ha/jndi.properties"/>
+      <param name="a3conf" value="ha/a3servers.xml"/>
+      <param name="jvmargs" value="-Ddest=queue"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="ha.test3-2" depends="compile"
+          description=" --> test ha with important message load on topic.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.ha.HATest3"/>
+      <param name="testid" value="ha.test3-2"/>
+      <param name="jndiconf" value="ha/jndi.properties"/>
+      <param name="a3conf" value="ha/a3servers.xml"/>
+      <param name="jvmargs" value="-Ddest=topic"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -982,7 +1008,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="ha/jndi.properties"/>
       <param name="a3conf" value="ha/a3servers.xml"/>
       <param name="jvmargs"
-             value="-DnbRound=250 -DmsgPerRound=50 -Dpause=500 -Dname=topic"/>
+             value="-DnbRound=100 -DmsgPerRound=50 -Dpause=1000 -Ddest=topic"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -995,7 +1021,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="ha/jndi.properties"/>
       <param name="a3conf" value="ha/a3servers.xml"/>
       <param name="jvmargs"
-             value="-DnbRound=100 -DmsgPerRound=50 -Dpause=1000 -Dname=queue"/>
+             value="-DnbRound=50 -DmsgPerRound=25 -Dpause=1000 -Ddest=queue"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1008,7 +1034,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="ha/jndi.properties"/>
       <param name="a3conf" value="ha/a3servers.xml"/>
       <param name="jvmargs"
-             value="-DnbRound=1000 -DmsgPerRound=100 -Dpause=1000 -Dname=topic"/>
+             value="-DnbRound=1000 -DmsgPerRound=100 -Dpause=1000 -Ddest=topic"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1021,7 +1047,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="ha/jndi.properties"/>
       <param name="a3conf" value="ha/a3servers.xml"/>
       <param name="jvmargs"
-             value="-DnbRound=1000 -DmsgPerRound=100 -Dpause=1000 -Dname=queue"/>
+             value="-DnbRound=1000 -DmsgPerRound=100 -Dpause=1000 -Ddest=queue"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1034,7 +1060,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="ha/jndi.properties"/>
       <param name="a3conf" value="ha/a3servers.xml"/>
       <param name="jvmargs"
-             value="-DnbRound=250 -DmsgPerRound=50 -Dpause=500 -Dname=topic"/>
+             value="-DnbRound=100 -DmsgPerRound=50 -Dpause=500 -Ddest=topic"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1047,7 +1073,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="ha/jndi.properties"/>
       <param name="a3conf" value="ha/a3servers.xml"/>
       <param name="jvmargs"
-             value="-DnbRound=100 -DmsgPerRound=50 -Dpause=1000 -Dname=queue"/>
+             value="-DnbRound=100 -DmsgPerRound=50 -Dpause=1000 -Ddest=queue"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1060,7 +1086,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="ha/jndi.properties"/>
       <param name="a3conf" value="ha/a3servers.xml"/>
       <param name="jvmargs"
-             value="-DnbRound=1000 -DmsgPerRound=100 -Dpause=1000 -Dname=topic"/>
+             value="-DnbRound=1000 -DmsgPerRound=100 -Dpause=1000 -Ddest=topic"/>
       <param name="args" value=""/>
     </antcall>
   </target>
@@ -1073,7 +1099,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jndiconf" value="ha/jndi.properties"/>
       <param name="a3conf" value="ha/a3servers.xml"/>
       <param name="jvmargs"
-             value="-DnbRound=1000 -DmsgPerRound=100 -Dpause=1000 -Dname=queue"/>
+             value="-DnbRound=1000 -DmsgPerRound=100 -Dpause=1000 -Ddest=queue"/>
       <param name="args" value=""/>
     </antcall>
   </target>
