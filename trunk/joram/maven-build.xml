@@ -37,6 +37,7 @@
   <property name="output.dist.dir" value="${basedir}/ship/lib" />
 
   <property file="${src.dir}/build.properties" />
+  <property name="joram.version" value="${joram.major}.${joram.minor}.${joram.build}"/>
 
   <path id="build.lib.path">
     <fileset dir="${builder.lib.dir}">
