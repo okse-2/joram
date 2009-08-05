@@ -22,11 +22,10 @@
  */
 package ha;
 
-import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory;
+import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 
 
 public class HAAdmin {
@@ -36,9 +35,9 @@ public class HAAdmin {
     System.out.println();
     System.out.println("HA administration...");
 
-    javax.jms.TopicConnectionFactory tcf =
-      TopicHATcpConnectionFactory.create("hajoram://localhost:2560,localhost:2561,localhost:2562");
-    ((ConnectionFactory) tcf).getParameters().connectingTimer = 30;
+    javax.jms.ConnectionFactory tcf =
+      HATcpConnectionFactory.create("hajoram://localhost:2560,localhost:2561,localhost:2562");
+    ((HATcpConnectionFactory) tcf).getParameters().connectingTimer = 30;
     
     AdminModule.connect(tcf, "root", "root");
 
