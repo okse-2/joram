@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,8 +22,6 @@
  */
 package joram.ha;
 
-import java.io.File;
-
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.MessageConsumer;
@@ -32,20 +30,16 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
+import org.objectweb.joram.client.jms.Destination;
+import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
 
-import framework.TestCase;
-
-public class HATest3 extends TestCase {
-  public static int nbRound = 500;
+public class HATest3 extends HABaseTest {
   public static int msgPerRound = 1000;
-
-  public static int  pause = 1000;
 
   public HATest3() {
     super();
@@ -57,92 +51,154 @@ public class HATest3 extends TestCase {
     Process p2 = null;
 
     try {
-      System.out.println("Start the replica 0");
-      p0 = startHACollocatedClient((short) 0, null, "0");
+      String type = System.getProperty("dest", "topic");
       
+      // Starts the 3 replicas
+
+      pw.println("Start the replica 0");
+      p0 = CollocatedClient.startHACollocatedClient((short) 0, null, "0", type);
+
       Thread.sleep(2000);
 
-      System.out.println("Start the replica 1");
-      p1 = startHACollocatedClient((short) 0, null, "1");
+      pw.println("Start the replica 1");
+      p1 = CollocatedClient.startHACollocatedClient((short) 0, null, "1", type);
+
+      Thread.sleep(2000);
+
+      pw.println("Start the replica 2");
+      p2 = CollocatedClient.startHACollocatedClient((short) 0, null, "2", type);
 
       Thread.sleep(1000);
 
-      nbRound = Integer.getInteger("nbRound", nbRound).intValue();
-      msgPerRound = Integer.getInteger("msgPerRound", msgPerRound).intValue();
-      pause = Integer.getInteger("pause", pause).intValue();
+      // Connects to active replica (0) and creates the needed administered objects.
+      
+      ConnectionFactory cf = HATcpConnectionFactory.create("hajoram://localhost:2560,localhost:2561,localhost:2562");
+      ((HATcpConnectionFactory) cf).getParameters().cnxPendingTimer = 500;
+      ((HATcpConnectionFactory) cf).getParameters().connectingTimer = 10;
 
-      AdminModule.connect("localhost", 2560, "root", "root", 60);
+      AdminModule.connect(cf, "root", "root");
 
       User user = User.create("anonymous", "anonymous", 0);
 
-      ConnectionFactory cf = HATcpConnectionFactory.create("hajoram://localhost:2560,localhost:2561,localhost:2562");
-      ((HATcpConnectionFactory) cf).getParameters().cnxPendingTimer = 500;
-      ((HATcpConnectionFactory) cf).getParameters().connectingTimer = 30;
+      Destination dest = null;
+      if (type.equals("queue")) {
+        dest = Queue.create(0, "queue");
+      } else {
+        dest = Topic.create(0, "topic");
+      }
+      dest.setFreeReading();
+      dest.setFreeWriting();
 
-      Topic topic = Topic.create(0, "topic");
-      topic.setFreeReading();
-      topic.setFreeWriting();
+      Queue syncq = Queue.create(0, "syncq");
+      syncq.setFreeReading();
+      syncq.setFreeWriting();
 
       AdminModule.disconnect();
 
+      Thread.sleep(1000L);
+
+      pw.println("Start test: " + dest);
+
+      // Creates a connection with the master replica (0) and initializes a session
+      // a producer and a consumer.      
       Connection cnx = cf.createConnection("anonymous", "anonymous");
       Session session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      MessageProducer producer = session.createProducer(topic);
+      MessageProducer producer = session.createProducer(dest);
+      MessageConsumer consumer = session.createConsumer(syncq);
       cnx.start();
-
-//       System.out.println("Start the replica 2");
-//       p1 = startHACollocatedClient((short) 0, null, "2");
-
-//       new HATest.Killer(p0, 0, 10000L).start();
       
+      // Waits for the CollocatedClient
+      TextMessage ack = (TextMessage) consumer.receive(10000);
+      if (ack == null) {
+        assertTrue("No ack from client", false);
+        return;
+      }
+      if (! ack.getText().equals("started")) {
+        assertTrue("Bad ack from client: " + ack.getText(), false);
+        return;
+      }
+
       long start, end;
       TextMessage msg = null;
       int idx = 0;
-      for (int i=0; i<nbRound; i++) {
-        start = System.currentTimeMillis();
-        for (int j=0; j<msgPerRound; j++) {
-          msg = session.createTextMessage("message #" + i + '.' + j);
-          msg.setIntProperty("index", idx++);
-          producer.send(msg);
-        }
-        end = System.currentTimeMillis();
-        System.out.println("Round #" + i + " - " + (end -start));
-        Thread.sleep(pause);
+      
+      // Sends messages and schedule the dead of the master replica and colocated receiver (0)
+      // during the sending (approximately at the middle). The 1st slave replica (1) becomes
+      // master and the sending phase ends.
+      // The messages are partly received by colocated receiver of each master replicas (0 then 1),
+      // the test verify that all sent messages are received.
+      new HATest.Killer(p0, 0, 3000L).start();
+      start = System.currentTimeMillis();
+      for (int j=0; j<msgPerRound; j++) {
+        if ((j%50) == 0) pw.println("Msg sent #" + j);
+        msg = session.createTextMessage("message #" + idx);
+        msg.setIntProperty("index", idx++);
+        producer.send(msg);
       }
+      end = System.currentTimeMillis();
+      pw.println("Round - " + (end -start));
+      
+      // Restarts the killed replica.
+      pw.println("Start the replica 0");
+      p0 = CollocatedClient.startHACollocatedClient((short) 0, null, "0", type);
 
-//       System.out.println("Start the replica 2");
-//       p2 = startHACollocatedClient((short) 0, null, "2");
-
-//       Thread.sleep(2000);
-
-//       new HATest.Killer(p1, 1, pause * (MESSAGE_NUMBER / 2)).start();
-
-//       for (int i = MESSAGE_NUMBER; i < MESSAGE_NUMBER * 2; i++) {
-//         TextMessage msg = session.createTextMessage("message #" + i);
-//         System.out.println("Msg sent: " + msg.getText());
-//         producer.send(msg);
-//         Thread.sleep(pause);
-//       }
-
-//       System.out.println("Start the replica 0");
-//       p0 = startHACollocatedClient((short) 0, null, "0");
-
-//       Thread.sleep(2000);
-
-//       new HATest.Killer(p2, 2, pause * (MESSAGE_NUMBER / 2)).start();
-
-//       for (int i = MESSAGE_NUMBER * 2; i < MESSAGE_NUMBER * 3; i++) {
-//         TextMessage msg = session.createTextMessage("message #" + i);
-//         producer.send(msg);
-//         System.out.println("Msg sent: " + msg.getText());
-//         Thread.sleep(pause);
-//       }
-
-      // Wait to enable the consumer to receive the messages.
       Thread.sleep(5000);
+      
+      // Sends messages and schedule the dead of the master replica and colocated receiver (1)
+      // during the sending (approximately at the middle). The 1st slave replica (2) becomes
+      // master and the sending phase ends.
+      // The messages are partly received by colocated receiver of each master replicas (1 then 2),
+      // the test verify that all sent messages are received.
+      new HATest.Killer(p1, 1, 3000L).start();
+      start = System.currentTimeMillis();
+      for (int j=0; j<msgPerRound; j++) {
+        if ((j%50) == 0) pw.println("Msg sent #" + j);
+        msg = session.createTextMessage("message #" + idx);
+        msg.setIntProperty("index", idx++);
+        producer.send(msg);
+      }
+      end = System.currentTimeMillis();
+      pw.println("Round - " + (end -start));
+      
+      // Restarts the killed replica.
+      pw.println("Start the replica 1");
+      p1 = CollocatedClient.startHACollocatedClient((short) 0, null, "1", type);
 
+      Thread.sleep(5000);
+      
+      // Sends messages and schedule the dead of the master replica and colocated receiver (2)
+      // during the sending (approximately at the middle). The 1st slave replica (0) becomes
+      // master and the sending phase ends.
+      // The messages are partly received by colocated receiver of each master replicas (2 then 0),
+      // the test verify that all sent messages are received.
+      new HATest.Killer(p2, 2, 3000L).start();
+      start = System.currentTimeMillis();
+      for (int j=0; j<msgPerRound; j++) {
+        if ((j%50) == 0) pw.println("Msg sent #" + j);
+        msg = session.createTextMessage("message #" + idx);
+        msg.setIntProperty("index", idx++);
+        producer.send(msg);
+      }
+      end = System.currentTimeMillis();
+      pw.println("Round - " + (end -start));
+      
+      // Restarts the killed replica.
+      pw.println("Start the replica 2");
+      p2 = CollocatedClient.startHACollocatedClient((short) 0, null, "2", type);
+
+      int i=0;
+      for (; i < 3 * msgPerRound; ) {
+        msg = (TextMessage) consumer.receive(1000);
+        if (msg == null) break;
+        if (msg.getText().equals("started")) continue;
+        
+        int idx2 = msg.getIntProperty("index");
+        assertTrue("Bad index", idx2 == i);
+        i = idx2 +1;
+      }
+      assertTrue("Received " + i  + " messages", i == (3 * msgPerRound));
     } catch (Exception exc) {
-      exc.printStackTrace();
+      exc.printStackTrace(pw);
       error(exc);
     } finally {
       if (p0 != null)
@@ -153,27 +209,6 @@ public class HATest3 extends TestCase {
         p2.destroy();
       endTest();
     }
-    System.out.println("end");
-  }
-
-  public static Process startHACollocatedClient(short sid,
-                                                File dir,
-                                                String rid) throws Exception {
-    String[] jvmargs = new String[] {
-//       "-Xmx64m",
-      "-DnbClusterExpected=2",
-      "-DTransaction=fr.dyade.aaa.util.NullTransaction",
-      "-D" + fr.dyade.aaa.common.Debug.DEBUG_DIR_PROPERTY + "=.."};
-
-    String[] args = new String[] { rid };
-
-    Process p =  getAdmin().execAgentServer(sid, dir,
-                                            jvmargs,
-                                            "joram.ha.CollocatedClient",
-                                            args);
-    getAdmin().closeServerStream(p);
-
-    return p;
   }
 
   public static void main(String args[]) {

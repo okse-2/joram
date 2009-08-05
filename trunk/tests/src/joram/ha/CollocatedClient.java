@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,8 +17,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): (ScalAgent D.T.)
- * Contributor(s): Badolle Fabien (ScalAgent D.T.)
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package joram.ha;
 
@@ -29,6 +29,7 @@ import java.io.PrintWriter;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
 import javax.jms.TextMessage;
 
 import org.objectweb.joram.client.jms.Session;
@@ -39,64 +40,105 @@ import org.objectweb.joram.client.jms.Topic;
 
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.ha.local.TopicHALocalConnectionFactory;
+import org.objectweb.joram.client.jms.admin.User;
 
 import fr.dyade.aaa.agent.AgentServer;
 import framework.TestCase;
 
 public class CollocatedClient extends TestCase {
 
+  public static Process startHACollocatedClient(short sid,
+                                                File dir,
+                                                String rid,
+                                                String dest) throws Exception {
+    String[] jvmargs = new String[] {
+                                     "-DnbClusterExpected=2",
+                                     "-DTransaction=fr.dyade.aaa.util.NullTransaction",
+                                     "-Ddest=" + dest};
+
+    String[] args = new String[] { rid };
+
+    Process p =  getAdmin().execAgentServer(sid, dir,
+                                            jvmargs,
+                                            "joram.ha.CollocatedClient",
+                                            args);
+    getAdmin().closeServerStream(p);
+
+    return p;
+  }
+
   public static void main(String[] args) throws Exception {
     AgentServer.init(args);
     AgentServer.start();
-
-    File file = new File("traces" + System.currentTimeMillis() + ".txt");
-    PrintWriter pw = new PrintWriter(new FileOutputStream(file), true);
     
-    AdminModule.connect("localhost", 2560, "root", "root", 60);
+    Thread.sleep(1000L);
+    
+    File file = File.createTempFile("client", ".txt", new File("."));
+    PrintWriter pw = new PrintWriter(new FileOutputStream(file), true);
 
-    String name = System.getProperty("name", "topic");
-    Destination dest = null;
-    if (name.equals("queue")) {
-      dest = Queue.create(0, "queue");
-    } else {
-      dest = Topic.create(0, "topic");
-    }
+    try {
+      ConnectionFactory cf = null;
 
-    pw.println("Destination " + dest);
+      cf = HALocalConnectionFactory.create();
 
-    AdminModule.disconnect();    
+      AdminModule.connect(cf, "root", "root");
 
-    HALocalConnectionFactory cf = new HALocalConnectionFactory();
-    Connection cnx = cf.createConnection("anonymous", "anonymous");
-    Session session = (Session) cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-    session.setTopicActivationThreshold(50);
-    session.setTopicPassivationThreshold(150);
-    session.setTopicAckBufferMax(10);
+      User user = User.create("anonymous", "anonymous", 0);
 
-    MessageConsumer cons = session.createConsumer(dest);
-    cnx.start();
- 
-    int i = 0;
-    int idx = -1;
-    long start = System.currentTimeMillis();
-    pw.println("client#" + args[2] + " start - " + start);
-    pw.flush();
-    while (true) {
-      TextMessage msg = (TextMessage) cons.receive();
-      int idx2 = msg.getIntProperty("index");
-      if ((idx != -1) && (idx2 != idx +1)) {
-        pw.println("Message lost #" + (idx +1) + " - " + idx2);
+      Destination dest = null;
+      if (System.getProperty("dest", "topic").equals("queue")) {
+        dest = Queue.create(0, "queue");
+      } else {
+        dest = Topic.create(0, "topic");
       }
-      idx = idx2;
-      pw.println("client#" + args[2] + " - msg#" + msg.getText());
-      if ((i %1000) == 999) {
-        long end = System.currentTimeMillis();
-        pw.println("Round #" + (i /1000) + " - " + (end - start));
-        start = end;
-      }
-      i++;
+      dest.setFreeReading();
+      dest.setFreeWriting();
+      pw.println(dest);
       pw.flush();
+
+      Queue syncq = Queue.create(0, "syncq");
+      syncq.setFreeReading();
+      syncq.setFreeWriting();
+
+      AdminModule.disconnect();    
+  
+      cf = new HALocalConnectionFactory();      
+      Connection cnx = cf.createConnection("anonymous", "anonymous");
+      Session session = (Session) cnx.createSession(true, Session.AUTO_ACKNOWLEDGE);
+      MessageConsumer cons = session.createConsumer(dest);
+      MessageProducer prod = session.createProducer(syncq);
+      cnx.start();
+
+      TextMessage msg = session.createTextMessage("started");
+      prod.send(msg);
+      session.commit();
+      
+      int i = 0;
+      int idx = -1;
+      long start = System.currentTimeMillis();
+      pw.println("client#" + args[2] + " start - " + start);
+      pw.flush();
+      while (true) {
+        msg = (TextMessage) cons.receive();
+        prod.send(msg);
+        session.commit();
+        
+        int idx2 = msg.getIntProperty("index");
+        if ((idx != -1) && (idx2 != idx +1)) {
+          pw.println("Message lost #" + (idx +1) + " - " + idx2);
+        }
+        idx = idx2;
+        pw.println("client#" + args[2] + " - msg#" + msg.getText());
+        if ((i %1000) == 999) {
+          long end = System.currentTimeMillis();
+          pw.println("Round #" + (i /1000) + " - " + (end - start));
+          start = end;
+        }
+        i++;
+        pw.flush();
+      }
+    } catch (Exception exc) {
+      exc.printStackTrace(pw);
     }
   }
 }

@@ -32,7 +32,6 @@ import javax.jms.TextMessage;
 import javax.jms.JMSException;
 
 import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 import org.objectweb.joram.client.jms.Session;
 import org.objectweb.joram.client.jms.Destination;
@@ -42,15 +41,13 @@ import org.objectweb.joram.client.jms.Topic;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
 
-import framework.TestCase;
-
-public class HATest5 extends TestCase {
-  public static int nbRound = 1000;
-  public static int msgPerRound = 100;
+public class HATest5 extends HABaseTest {
+  public static int nbRound = 100;
+  public static int msgPerRound = 50;
 
   public static int  pause = 1000;
 
-  public String name = "topic";
+  public String type = "topic";
 
   public HATest5() {
     super();
@@ -62,15 +59,19 @@ public class HATest5 extends TestCase {
     Process p[] = new Process[3];
 
     try {
-      System.out.println("Start the replica 0");
+      // Starts the 3 replicas
+      
+      pw.println("Start the replica 0");
       p[0] = startHAServer((short) 0, null, "0");
       
       Thread.sleep(2000);
 
-      System.out.println("Start the replica 1");
+      pw.println("Start the replica 1");
       p[1] = startHAServer((short) 0, null, "1");
+      
+      Thread.sleep(2000);
 
-      System.out.println("Start the replica 2");
+      pw.println("Start the replica 2");
       p[2] = startHAServer((short) 0, null, "2");
 
       Thread.sleep(1000);
@@ -79,29 +80,25 @@ public class HATest5 extends TestCase {
       msgPerRound = Integer.getInteger("msgPerRound", msgPerRound).intValue();
       pause = Integer.getInteger("pause", pause).intValue();
 
-      AdminModule.connect("localhost", 2560, "root", "root", 60);
+      // Connects to active replica (0) and creates the needed administered objects.
+      
+      ConnectionFactory cf = HATcpConnectionFactory.create("hajoram://localhost:2560,localhost:2561,localhost:2562");
+      ((HATcpConnectionFactory) cf).getParameters().cnxPendingTimer = 500;
+      ((HATcpConnectionFactory) cf).getParameters().connectingTimer = 10;
+
+      AdminModule.connect(cf, "root", "root");
 
       User user = User.create("anonymous", "anonymous", 0);
 
-      ConnectionFactory cf = HATcpConnectionFactory.create("hajoram://localhost:2560,localhost:2561,localhost:2562");
-      ((HATcpConnectionFactory) cf).getParameters().cnxPendingTimer = 1000;
-      ((HATcpConnectionFactory) cf).getParameters().connectingTimer = 60;
-
-      Topic topic = Topic.create(0, "topic");
-      topic.setFreeReading();
-      topic.setFreeWriting();
-
-      Queue queue = Queue.create(0, "queue");
-      queue.setFreeReading();
-      queue.setFreeWriting();
-
-      name = System.getProperty("name", name);
+      type = System.getProperty("name", type);
       Destination dest = null;
-      if (name.equals("queue")) {
-        dest = queue;
+      if (type.equals("queue")) {
+        dest = Queue.create(0, "queue");
       } else {
-        dest = topic;
+        dest = Topic.create(0, "topic");
       }
+      dest.setFreeReading();
+      dest.setFreeWriting();
 
       AdminModule.disconnect();
 
@@ -114,20 +111,20 @@ public class HATest5 extends TestCase {
         Thread.sleep(15 * pause);
 
         if (round < nbRound) {
-          System.out.println("Kill the replica " + i);
+          pw.println("Kill the replica " + i);
           p[i].destroy();
 
           Thread.sleep(10 * pause);
         }
 
         if (round < nbRound) {
-          System.out.println("Start the replica " + i);
+          pw.println("Start the replica " + i);
           p[i] = startHAServer((short) 0, null, "" + i);
         }
 
         i = ((i +1) %3);
 
-        System.out.println(" --- round = " + round);
+        pw.println(" --- round = " + round);
       }
     } catch (Exception exc) {
       exc.printStackTrace();
@@ -139,24 +136,6 @@ public class HATest5 extends TestCase {
       endTest();
     }
     System.out.println("end");
-  }
-
-  public static Process startHAServer(short sid,
-                                      File dir,
-                                      String rid) throws Exception {
-    String[] jvmargs = new String[] {
-      "-DnbClusterExpected=2",
-      "-DTransaction=fr.dyade.aaa.util.NullTransaction"};
-
-    String[] args = new String[] { rid };
-
-    Process p =  getAdmin().execAgentServer(sid, dir,
-                                            jvmargs,
-                                            "fr.dyade.aaa.agent.AgentServer",
-                                            args);
-    getAdmin().closeServerStream(p);
-
-    return p;
   }
 
   public static void main(String args[]) {
@@ -193,16 +172,16 @@ public class HATest5 extends TestCase {
             producer.send(msg);
           }
           end = System.currentTimeMillis();
-          System.out.println("Sender - Round #" + i + " - " + (end -start));
+          pw.println("Sender - Round #" + i + " - " + (end -start));
           Thread.sleep(pause);
 
           if ((round +5) < i) {
-            System.out.println("Sender - Pause");
+            pw.println("Sender - Pause");
             Thread.sleep(5 * pause);
           }
         }
       } catch (Exception exc) {
-        exc.printStackTrace();
+        exc.printStackTrace(pw);
         error(exc);
       } finally {
         // Allow to end the test.
@@ -220,9 +199,6 @@ public class HATest5 extends TestCase {
              Destination dest) throws JMSException {
       cnx = cf.createConnection("anonymous", "anonymous");
       session = (Session) cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      session.setTopicActivationThreshold(50);
-      session.setTopicPassivationThreshold(150);
-      session.setTopicAckBufferMax(10);
       consumer = session.createConsumer(dest);
       cnx.start();
     }
@@ -239,16 +215,16 @@ public class HATest5 extends TestCase {
 
             int idx2 = msg.getIntProperty("index");
             if ((idx != -1) && (idx2 != idx +1)) {
-              System.out.println("Message lost #" + (idx +1) + " - " + idx2);
+              pw.println("Message lost #" + (idx +1) + " - " + idx2);
             }
             idx = idx2;
           }
           end = System.currentTimeMillis();
-          System.out.println("Receiver - Round #" + i + " - " + (end -start));
+          pw.println("Receiver - Round #" + i + " - " + (end -start));
           round += 1;
         }
       } catch (Exception exc) {
-        exc.printStackTrace();
+        exc.printStackTrace(pw);
         error(exc);
       } finally {
         // Allow to end the test.
