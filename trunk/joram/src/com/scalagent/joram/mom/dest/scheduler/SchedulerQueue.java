@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -44,16 +44,12 @@ public class SchedulerQueue extends Queue {
   public static String getDestinationType() {
     return QUEUE_SCHEDULER_TYPE;
   }
-    
-  public static void init(String args, boolean firstTime) throws Exception {
-    if (! firstTime) return;
-  }
-    
+
   /**
    * Empty constructor for newInstance(). 
    */ 
   public SchedulerQueue() {}
-    
+
   /**
    * Creates the <tt>QueueImpl</tt>.
    *
@@ -63,12 +59,11 @@ public class SchedulerQueue extends Queue {
   public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
     return new SchedulerQueueImpl(adminId, prop);
   }
-  
-  public void react(AgentId from, Notification not)
-  throws Exception {
+
+  public void react(AgentId from, Notification not) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-          "SchedulerQueue.react(" + from + ',' + not + ')');
+      logger.log(BasicLevel.DEBUG, "SchedulerQueue.react(" + from + ',' + not + ')');
+    
     if (not instanceof SchedulerQueueNot) {
       ((SchedulerQueueImpl) destImpl).condition((SchedulerQueueNot) not);
     } else

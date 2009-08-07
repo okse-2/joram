@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,11 +28,11 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Channel;
 
 /**
- *
+ * Task sending a SchedulerQueueNot to a SchedulerQueue.
  */
 public class SchedulerQueueTask implements ScheduleTask {
-
   private static final long serialVersionUID = 1L;
+  
   private AgentId schedulerQueue = null;
   
   public SchedulerQueueTask(AgentId schedulerQueue) {
@@ -40,12 +40,12 @@ public class SchedulerQueueTask implements ScheduleTask {
   }
   
   /**
-   * task to execute.
+   * Task to execute: send a SchedulerQueueNot to the related SchedulerQueue.
    * 
    * @see com.scalagent.scheduler.ScheduleTask#run()
    */
   public void run() {
-    Channel.sendTo(schedulerQueue, new SchedulerQueueNot(schedulerQueue.toString()));
+    Channel.sendTo(schedulerQueue, new SchedulerQueueNot());
   }
 
 }
