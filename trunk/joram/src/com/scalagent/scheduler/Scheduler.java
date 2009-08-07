@@ -36,7 +36,6 @@ import fr.dyade.aaa.common.TimerTask;
  *
  */
 public class Scheduler implements Serializable {
- 
   private static final long serialVersionUID = 1L;
   public static Logger logger = Debug.getLogger(Scheduler.class.getName());
 
@@ -257,8 +256,8 @@ public class Scheduler implements Serializable {
       wakeUp = new WakeUp();
       timer.schedule(wakeUp, period);
     } catch (Exception exc) {
-      if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN, "Exception in schedule", exc);
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "Exception in schedule", exc);
     }
   }
   
