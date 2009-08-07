@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,14 +25,10 @@ package com.scalagent.joram.mom.dest.scheduler;
 import fr.dyade.aaa.agent.Notification;
 
 /**
- *
+ * Notification from Scheduler to SchedulerQueue.
  */
 public class SchedulerQueueNot extends Notification {
   private static final long serialVersionUID = 1L;
   
-  public String name;
-  
-  public SchedulerQueueNot(String name) {
-    this.name = name;
-  }
+  public SchedulerQueueNot() {}
 }
