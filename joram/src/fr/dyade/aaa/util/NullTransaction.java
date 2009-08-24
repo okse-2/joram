@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -27,23 +27,21 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 
-public class NullTransaction implements Transaction, NullTransactionMBean {
+public final class NullTransaction implements Transaction, NullTransactionMBean {
+  
   // State of the transaction monitor.
-  private int phase = INIT;
+  protected int phase;
 
-  private final void setPhase(int newPhase) {
-    phase = newPhase;
-  }
-
-  /**
-   *
-   */
-  public int getPhase() {
+  public final int getPhase() {
     return phase;
   }
 
-  public String getPhaseInfo() {
+  public final String getPhaseInfo() {
     return PhaseInfo[phase];
+  }
+
+  protected final void setPhase(int newPhase) {
+    phase = newPhase;
   }
 
   public NullTransaction() {}
@@ -77,10 +75,10 @@ public class NullTransaction implements Transaction, NullTransactionMBean {
     return null;
   }
 
-  public synchronized void begin() throws IOException {
+  public final synchronized void begin() throws IOException {
     while (phase != FREE) {
       try {
-	wait();
+        wait();
       } catch (InterruptedException exc) {
       }
     }
@@ -92,35 +90,52 @@ public class NullTransaction implements Transaction, NullTransactionMBean {
     return new String[0];
   }
 
-  public void create(Serializable obj, String name) throws IOException {}
+  public final void create(Serializable obj, String name) throws IOException {}
 
-  public void save(Serializable obj, String name) throws IOException {}
+  public final void create(Serializable obj,
+                     String dirName, String name) throws IOException {}
+
+  public final void save(Serializable obj, String name) throws IOException {}
+
+  public final void save(Serializable obj,
+                         String dirName, String name) throws IOException {}
+
+  public void save(Serializable obj,
+                   String dirName, String name,
+                   boolean first) throws IOException {}
   
-  public void saveByteArray(byte[] buf, String name) throws IOException {}
+  public final void createByteArray(byte[] buf, String name) throws IOException {}
+  
+  public final void createByteArray(byte[] buf,
+                                  String dirName, String name) throws IOException {}
 
-  public Object load(String name) throws IOException, ClassNotFoundException {
+  public final void saveByteArray(byte[] buf, String name) throws IOException {}
+  
+  public final void saveByteArray(byte[] buf,
+                                  String dirName, String name) throws IOException {}
+
+  public void saveByteArray(byte[] buf,
+                            String dirName, String name,
+                            boolean copy,
+                            boolean first) throws IOException {}
+
+  public final Object load(String name) throws IOException, ClassNotFoundException {
     return null;
   }
   
-  public byte[] loadByteArray(String name) throws IOException, ClassNotFoundException {
+  public final Object load(String dirName, String name) throws IOException, ClassNotFoundException {
     return null;
   }
 
-  public void delete(String name) {}
-
-  public void create(Serializable obj, String dirName, String name) throws IOException {}
-
-  public void save(Serializable obj, String dirName, String name) throws IOException {}
-  
-  public void saveByteArray(byte[] buf, String dirName, String name) throws IOException {}
-
-  public Object load(String dirName, String name) throws IOException, ClassNotFoundException {
+  public final byte[] loadByteArray(String name) throws IOException {
     return null;
   }
   
   public byte[] loadByteArray(String dirName, String name) throws IOException {
     return null;
   }
+  
+  public final void delete(String name) {}
 
   public void delete(String dirName, String name) {}
 
@@ -136,13 +151,6 @@ public class NullTransaction implements Transaction, NullTransactionMBean {
       notify();
     }
   }
-
-//   public void rollback() throws IOException {
-//     if (phase != RUN)
-//       throw new IllegalStateException("Can not rollback.");
-
-//     setPhase(ROLLBACK);
-//   }
 
   public synchronized void release() throws IOException {
     if ((phase != RUN) && (phase != COMMIT) && (phase != ROLLBACK))
@@ -165,7 +173,6 @@ public class NullTransaction implements Transaction, NullTransactionMBean {
     // Change the transaction state.
     setPhase(FREE);
   }
-
 
   public synchronized final void close() {
     if (phase == INIT) return;
