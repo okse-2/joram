@@ -367,27 +367,28 @@ public final class Message implements Serializable {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Message.save:" + txname);
 
-    if (!isPersistent())
-      return;
+    if (!isPersistent()) return;
+    
     if (soft) {
       byte[] body = msg.body;
       // sets the body to null to save it in an other file
       msg.body = null;
       try {
-        AgentServer.getTransaction().save(this, txname);
+        AgentServer.getTransaction().create(this, txname);
       } catch (IOException exc) {
         logger.log(BasicLevel.ERROR, "Message named [" + txname + "] could not be saved", exc);
       }
       // save the body
       try {
-        AgentServer.getTransaction().saveByteArray(body, txname + "B");
+        // The body is RO do not copy it.
+        AgentServer.getTransaction().saveByteArray(body, null, txname + "B", false, true);
       } catch (IOException exc) {
         logger.log(BasicLevel.ERROR, "Message named [" + txname + "] could not be saved", exc);
       }
       msg.body = body;
     } else {
       try {
-        AgentServer.getTransaction().save(this, txname);
+        AgentServer.getTransaction().create(this, txname);
       } catch (IOException exc) {
         logger.log(BasicLevel.ERROR, "Message named [" + txname + "] could not be saved", exc);
       }
@@ -405,7 +406,7 @@ public final class Message implements Serializable {
       // sets the body to null to not save it
       msg.body = null;
       try {
-        AgentServer.getTransaction().save(this, txname);
+        AgentServer.getTransaction().create(this, txname);
       } catch (IOException exc) {
         logger.log(BasicLevel.ERROR, "Message named [" + txname + "] could not be saved", exc);
       }
