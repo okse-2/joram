@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,18 +21,13 @@
  */
 package fr.dyade.aaa.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamConstants;
 import java.io.RandomAccessFile;
-import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
@@ -57,7 +52,7 @@ import fr.dyade.aaa.common.TimerTask;
  * @see DBRepository
  * @see MySqlDBRepository
  */
-public final class NTransaction implements Transaction, NTransactionMBean {
+public final class NTransaction extends AbstractTransaction implements NTransactionMBean {
   // Logging monitor
   private static Logger logmon = null;
 
@@ -357,32 +352,12 @@ public final class NTransaction implements Transaction, NTransactionMBean {
   public int getNbLoadedObjects() {
     return repository.getNbLoadedObjects();
   }
-
-  /** Log context associated with each Thread using NTransaction. */
-  private class Context {
-    Hashtable log = null;
-    ByteArrayOutputStream bos = null;
-    ObjectOutputStream oos = null;
-
-    Context() {
-      log = new Hashtable(15);
-      bos = new ByteArrayOutputStream(256);
-    }
-  }
-
+  
   File dir = null;
 
   LogFile logFile = null;
 
   Repository repository = null;
-
-  /**
-   *  ThreadLocal variable used to get the log to associate state with each
-   * thread. The log contains all operations do by the current thread since
-   * the last <code>commit</code>. On commit, its content is added to current
-   * log (memory + disk), then it is freed.
-   */
-  private ThreadLocal perThreadContext = null;
 
   static final boolean debug = false;
 
@@ -403,6 +378,9 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     LogMemoryCapacity = Configuration.getInteger("NTLogMemoryCapacity", LogMemoryCapacity).intValue();
     MaxLogFileSize = Configuration.getInteger("NTLogFileSize", MaxLogFileSize / Mb).intValue() * Mb;
     MaxLogMemorySize = Configuration.getInteger("NTLogMemorySize", MaxLogMemorySize / Kb).intValue() * Kb;
+
+    LogThresholdOperation = Configuration.getInteger("NTLogThresholdOperation", LogThresholdOperation).intValue();
+    Operation.pool = new Pool("NTransaction$Operation", LogThresholdOperation);
 
     logmon = Debug.getLogger(Transaction.class.getName());
     if (logmon.isLoggable(BasicLevel.INFO))
@@ -466,10 +444,6 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     setPhase(FREE);
   }
 
-  public final File getDir() {
-    return dir;
-  }
-
   /**
    * Returns the path of persistence directory.
    *
@@ -479,33 +453,8 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     return dir.getPath();
   }
 
-  // State of the transaction monitor.
-  private int phase = INIT;
-
-  /**
-   *
-   */
-  public int getPhase() {
-    return phase;
-  }
-
-  public String getPhaseInfo() {
-    return PhaseInfo[phase];
-  }
-
-  private final void setPhase(int newPhase) {
+  protected final void setPhase(int newPhase) {
     phase = newPhase;
-  }
-
-  public final synchronized void begin() throws IOException {
-    while (phase != FREE) {
-      try {
-	wait();
-      } catch (InterruptedException exc) {
-      }
-    }
-    // Change the transaction state.
-    setPhase(RUN);
   }
 
   /**
@@ -543,7 +492,8 @@ public final class NTransaction implements Transaction, NTransactionMBean {
             nb -= 1;
           }
           list2[i] = null;
-        } else if (((Operation) logFile.log.get(list2[i])).type == Operation.SAVE) {
+        } else if ((((Operation) logFile.log.get(list2[i])).type == Operation.SAVE) ||
+            (((Operation) logFile.log.get(list2[i])).type == Operation.CREATE)) {
           // The file is added in transaction log
           nb += 1;
         } else {
@@ -564,82 +514,19 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     return list;
   }
 
-  public final void create(Serializable obj, String name) throws IOException {
-    save(obj, null, name, true);
-  }
-
-  public final void save(Serializable obj, String name) throws IOException {
-    save(obj, null, name, false);
-  }
-
-  static private final byte[] OOS_STREAM_HEADER = {
-    (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF),
-    (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF),
-    (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF),
-    (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF)
-  };
-
-  public final void create(Serializable obj,
-                     String dirName, String name) throws IOException {
-    save(obj, dirName, name, true);
-  }
-
-  public final void save(Serializable obj,
-                         String dirName, String name) throws IOException {
-    save(obj, dirName, name, false);
-  }
-
-  private final void save(Serializable obj,
-                          String dirName, String name,
-                          boolean first) throws IOException {
-    if (logmon.isLoggable(BasicLevel.DEBUG)) {
-      if (first)
-        logmon.log(BasicLevel.DEBUG,
-                   "NTransaction, create(" + dirName + '/' + name + ")");
-      else
-        logmon.log(BasicLevel.DEBUG,
-                   "NTransaction, save(" + dirName + '/' + name + ")");
-    }
-
-    Context ctx = (Context) perThreadContext.get();
-    if (ctx.oos == null) {
-      ctx.bos.reset();
-      ctx.oos = new ObjectOutputStream(ctx.bos);
-    } else {
-      ctx.oos.reset();
-      ctx.bos.reset();
-      ctx.bos.write(OOS_STREAM_HEADER, 0, 4);
-    }
-    ctx.oos.writeObject(obj);
-    ctx.oos.flush();
-
-    saveInLog(ctx.bos.toByteArray(), dirName, name, ctx.log, false, first);
-  }
-
-  /**
-   *  Save an object state already serialized. The byte array kept in log is
-   * a copy, so the original one may be modified.
-   */
-  public final void saveByteArray(byte[] buf, String name) throws IOException {
-    saveByteArray(buf, null, name);
-  }
-
   /**
    *  Save an object state already serialized. The byte array in parameter
    * may be modified so we must duplicate it.
    */
-  public final void saveByteArray(byte[] buf,
-                                  String dirName, String name) throws IOException {
-    saveInLog(buf,
-              dirName, name,
-              ((Context) perThreadContext.get()).log, true, false);
-  }
+  protected final void saveInLog(byte[] buf,
+                                 String dirName, String name,
+                                 Hashtable log,
+                                 boolean copy,
+                                 boolean first) throws IOException {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
+                 "NTransaction, saveInLog(" + dirName + '/' + name + ", " + copy + ", " + first + ")");
 
-  private final void saveInLog(byte[] buf,
-                               String dirName, String name,
-                               Hashtable log,
-                               boolean copy,
-                               boolean first) throws IOException {
     Object key = OperationKey.newKey(dirName, name);
     Operation op = null;
     if (first)
@@ -668,10 +555,10 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     Operation op = (Operation) log.get(key);
     if (op != null) {
       if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
-	return op.value;
+        return op.value;
       } else if (op.type == Operation.DELETE) {
-	// The object was deleted.
-	throw new FileNotFoundException();
+        // The object was deleted.
+        throw new FileNotFoundException();
       }
     }
     return null;
@@ -689,45 +576,6 @@ public final class NTransaction implements Transaction, NTransactionMBean {
 
     return null;  
   }
-
-  public final Object load(String name) throws IOException, ClassNotFoundException {
-    return load(null, name);
-  }
-
-  public Object load(String dirName, String name) throws IOException, ClassNotFoundException {
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG,
-                 "NTransaction, load(" + dirName + '/' + name + ")");
-
-    // First searches in the logs a new value for the object.
-    try {
-      byte[] buf = getFromLog(dirName, name);
-      if (buf == null) {
-        // Gets it from disk.
-        buf = repository.load(dirName, name);
-      }
-
-      ByteArrayInputStream bis = new ByteArrayInputStream(buf);
-      ObjectInputStream ois = new ResolverObjectInputStream(bis);	  
-      try {
-        return ois.readObject();
-      } finally {
-        ois.close();
-        bis.close();
-      }
-    } catch (FileNotFoundException exc) {
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG,
-                   "NTransaction, load(" + dirName + '/' + name + ") not found");
-
-      return null;
-    }
-  }
-
-  public final byte[] loadByteArray(String name) throws IOException {
-    return loadByteArray(null, name);
-  }
-
 
   public byte[] loadByteArray(String dirName, String name) throws IOException {
     if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -748,10 +596,6 @@ public final class NTransaction implements Transaction, NTransactionMBean {
 
       return null;
     }
-  }
-
-  public final void delete(String name) {
-    delete(null, name);
   }
   
   public final void delete(String dirName, String name) {
@@ -795,35 +639,14 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     }
   }
 
-//   public final synchronized void rollback() throws IOException {
-//     if (phase != RUN)
-//       throw new IllegalStateException("Can not rollback.");
-
-//     if (logmon.isLoggable(BasicLevel.DEBUG))
-//       logmon.log(BasicLevel.DEBUG, "NTransaction, rollback");
-
-//     setPhase(ROLLBACK);
-//     ((Context) perThreadContext.get()).log.clear();
-//   }
-
-  public final synchronized void release() throws IOException {
-    if ((phase != RUN) && (phase != COMMIT) && (phase != ROLLBACK))
-      throw new IllegalStateException("Can not release transaction.");
-
-    // Change the transaction state.
-    setPhase(FREE);
-    // wake-up an eventually user's thread in begin
-    notify();
-  }
-
   /**
    * Garbage the log file.
    * It waits all transactions termination, then the log file is garbaged
    * and all operations are reported to disk.
    */
   public final synchronized void garbage() {
-    if (logmon.isLoggable(BasicLevel.INFO))
-      logmon.log(BasicLevel.INFO, "NTransaction, garbages");
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, "NTransaction, garbages");
 
     while (phase != FREE) {
       // Wait for the transaction subsystem to be free
@@ -842,8 +665,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     setPhase(FREE);
 
     if (logmon.isLoggable(BasicLevel.INFO)) {
-      logmon.log(BasicLevel.INFO,
-                 "NTransaction, garbaged: " + toString());
+      logmon.log(BasicLevel.INFO, "NTransaction, garbaged: " + toString());
     }
   }
 
@@ -854,8 +676,8 @@ public final class NTransaction implements Transaction, NTransactionMBean {
    * The log file is garbaged, all operations are reported to disk.
    */
   public synchronized void stop() {
-    if (logmon.isLoggable(BasicLevel.INFO))
-      logmon.log(BasicLevel.INFO, "NTransaction, stops");
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, "NTransaction, stops");
 
     while (phase != FREE) {
       // Wait for the transaction subsystem to be free
@@ -874,8 +696,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     setPhase(FREE);
 
     if (logmon.isLoggable(BasicLevel.INFO)) {
-      logmon.log(BasicLevel.INFO,
-                 "NTransaction, stopped: " + toString());
+      logmon.log(BasicLevel.INFO, "NTransaction, stopped: " + toString());
     }
   }
 
@@ -886,8 +707,8 @@ public final class NTransaction implements Transaction, NTransactionMBean {
    * The log file is garbaged then closed.
    */
   public synchronized void close() {
-    if (logmon.isLoggable(BasicLevel.INFO))
-      logmon.log(BasicLevel.INFO, "NTransaction, closes");
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, "NTransaction, closes");
 
     if (phase == INIT) return;
 
@@ -904,8 +725,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     setPhase(INIT);
 
     if (logmon.isLoggable(BasicLevel.INFO)) {
-      logmon.log(BasicLevel.INFO,
-                 "NTransaction, closed: " + toString());
+      logmon.log(BasicLevel.INFO, "NTransaction, closed: " + toString());
     }
   }
 
@@ -983,11 +803,10 @@ public final class NTransaction implements Transaction, NTransactionMBean {
         lockFile.deleteOnExit();
       }
 
-      //  Search for old log file, then apply all committed operation,
-      // finally cleans it.
       log = new Hashtable(LogMemoryCapacity);
 
-      
+      //  Search for old log file, then apply all committed operation,
+      // finally cleans it.
       File logFilePN = new File(dir, "log");
       if ((logFilePN.exists()) && (logFilePN.length() > 0)) {
         logFile = new RandomAccessFile(logFilePN, "r");
@@ -1210,6 +1029,7 @@ public final class NTransaction implements Transaction, NTransactionMBean {
       }
       //  Be careful, do not clear log before all modifications are reported
       // to disk, in order to avoid load errors.
+      // TODO (AF): Do the repository.commit before the log.clear ?
       log.clear();
       logMemorySize = 0;
 
@@ -1230,8 +1050,8 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     }
 
     void stop() {
-      if (logmon.isLoggable(BasicLevel.INFO))
-        logmon.log(BasicLevel.INFO, "NTransaction.LogFile, stops");
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, "NTransaction.LogFile, stops");
 
       try {
         garbage();
@@ -1248,8 +1068,8 @@ public final class NTransaction implements Transaction, NTransactionMBean {
                    lockFile.getAbsolutePath());
       }
 
-      if (logmon.isLoggable(BasicLevel.INFO))
-        logmon.log(BasicLevel.INFO, "NTransaction.LogFile, stopped.");
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG, "NTransaction.LogFile, stopped.");
     }
   }
 
@@ -1262,8 +1082,6 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     StringBuffer strbuf = new StringBuffer();
 
     strbuf.append('(').append(super.toString());
-    strbuf.append(",StartTime=").append(getStartTime());
-    strbuf.append(",MaxLogMemorySize=").append(getMaxLogMemorySize());
     strbuf.append(",LogMemorySize=").append(getLogMemorySize());
     strbuf.append(",LogFileSize=").append(getLogFileSize());
     strbuf.append(",CommitCount=").append(getCommitCount());
@@ -1287,119 +1105,5 @@ public final class NTransaction implements Transaction, NTransactionMBean {
     } else {
       System.err.println("unknown command: " + args[0]);
     }
-  }
-}
-
-final class Operation implements Serializable {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
-  static final int SAVE = 1;
-  static final int CREATE = 4;
-  static final int DELETE = 2;
-  static final int NOOP = 5;	// Create then delete
-  static final int COMMIT = 3;
-  static final int END = 127;
- 
-  int type;
-  String dirName;
-  String name;
-  byte[] value;
-
-  private Operation(int type, String dirName, String name, byte[] value) {
-    this.type = type;
-    this.dirName = dirName;
-    this.name = name;
-    this.value = value;
-  }
-
-  /**
-   * Returns a string representation for this object.
-   *
-   * @return	A string representation of this object. 
-   */
-  public String toString() {
-    StringBuffer strbuf = new StringBuffer();
-
-    strbuf.append('(').append(super.toString());
-    strbuf.append(",type=").append(type);
-    strbuf.append(",dirName=").append(dirName);
-    strbuf.append(",name=").append(name);
-    strbuf.append(')');
-    
-    return strbuf.toString();
-  }
-
-  private static Pool pool = null;
-
-  static {
-    NTransaction.LogThresholdOperation = Configuration.getInteger("NTLogThresholdOperation",
-        NTransaction.LogThresholdOperation).intValue();
-    pool = new Pool("NTransaction$Operation", NTransaction.LogThresholdOperation);
-  }
-
-  static Operation alloc(int type, String dirName, String name) {
-    return alloc(type, dirName, name, null);
-  }
-
-  static Operation alloc(int type,
-                         String dirName, String name,
-                         byte[] value) {
-    Operation op = null;
-    
-    try {
-      op = (Operation) pool.allocElement();
-    } catch (Exception exc) {
-      return new Operation(type, dirName, name, value);
-    }
-    op.type = type;
-    op.dirName = dirName;
-    op.name = name;
-    op.value = value;
-    return op;
-  }
-
-  void free() {
-    /* to let gc do its work */
-    dirName = null;
-    name = null;
-    value = null;
-    pool.freeElement(this);
-  }
-}
-
-final class OperationKey {
-  static Object newKey(String dirName, String name) {
-    if (dirName == null) {
-      return name;
-    } else {
-      return new OperationKey(dirName, name);
-    }
-  }
-
-  private String dirName;
-  private String name;
-
-  private OperationKey(String dirName,
-                       String name) {
-    this.dirName = dirName;
-    this.name = name;
-  }
-
-  public int hashCode() {
-    // Should compute a specific one.
-    return dirName.hashCode();
-  }
-
-  public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj instanceof OperationKey) {
-      OperationKey opk = (OperationKey)obj;
-      if (opk.name.length() != name.length()) return false;
-      if (opk.dirName.length() != dirName.length()) return false;
-      if (!opk.dirName.equals(dirName)) return false;            
-      return opk.name.equals(name);
-    }
-    return false;
   }
 }
