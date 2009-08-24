@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,16 +21,11 @@
  */
 package fr.dyade.aaa.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamConstants;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -56,31 +51,11 @@ import fr.dyade.aaa.common.Pool;
  * @see MySQLDBTransaction
  * @see DerbyDBTransaction
  */
-public abstract class DBTransaction implements Transaction, DBTransactionMBean {
+public abstract class DBTransaction extends AbstractTransaction implements DBTransactionMBean {
   // Logging monitor
   protected static Logger logmon = null;
 
   File dir = null;
-
-  /** Log context associated with each Thread using DBTransaction. */
-  private class Context {
-    Hashtable log = null;
-    ByteArrayOutputStream bos = null;
-    ObjectOutputStream oos = null;
-
-    Context() {
-      log = new Hashtable(15);
-      bos = new ByteArrayOutputStream(256);
-    }
-  }
-
-  /**
-   *  ThreadLocal variable used to get the log to associate state with each
-   * thread. The log contains all operations do by the current thread since
-   * the last <code>commit</code>. On commit, its content is added to current
-   * log (memory + disk), then it is freed.
-   */
-  private ThreadLocal perThreadContext = null;
 
   /**
    *  Number of pooled operation, by default 1000.
@@ -180,10 +155,6 @@ public abstract class DBTransaction implements Transaction, DBTransactionMBean {
    */
   protected abstract void initDB() throws IOException;
 
-  public final File getDir() {
-    return dir;
-  }
-
   /**
    * Returns the path of persistence directory.
    *
@@ -193,35 +164,8 @@ public abstract class DBTransaction implements Transaction, DBTransactionMBean {
     return dir.getPath();
   }
 
-  // State of the transaction monitor.
-  private int phase = INIT;
-  String phaseInfo = PhaseInfo[phase];
-
-  /**
-   *
-   */
-  public int getPhase() {
-    return phase;
-  }
-
-  public String getPhaseInfo() {
-    return phaseInfo;
-  }
-
-  private final void setPhase(int newPhase) {
+  protected final void setPhase(int newPhase) {
     phase = newPhase;
-    phaseInfo = PhaseInfo[phase];
-  }
-
-  public final synchronized void begin() throws IOException {
-    while (phase != FREE) {
-      try {
-	wait();
-      } catch (InterruptedException exc) {
-      }
-    }
-    // Change the transaction state.
-    setPhase(RUN);
   }
 
   /**
@@ -276,63 +220,19 @@ public abstract class DBTransaction implements Transaction, DBTransactionMBean {
     }
   }
 
-  static private final byte[] OOS_STREAM_HEADER = {
-    (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF),
-    (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF),
-    (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF),
-    (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF)
-  };
-  
-  public final void create(Serializable obj, String name) throws IOException {
-    save(obj, null, name);
-  }
-  
-  public final void create(Serializable obj, String dirName, String name) throws IOException {
-    save(obj, dirName, name);
-  }
-
-  public void save(Serializable obj,
-                   String dirName, String name) throws IOException {
-    save(obj, fname(dirName, name));
-  }
-
-  public void save(Serializable obj, String name) throws IOException{
+  protected final void saveInLog(byte[] buf,
+                                 String dirName, String name,
+                                 Hashtable log,
+                                 boolean copy,
+                                 boolean first) throws IOException {
+    String fname = fname(dirName, name);
+    
     if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "DBTransaction, save(" + name + ")");
+      logmon.log(BasicLevel.DEBUG,
+                 "DBTransaction, saveInLog(" + fname + ", " + copy + ", " + first + ")");
 
-    Context ctx = (Context) perThreadContext.get();
-    if (ctx.oos == null) {
-      ctx.bos.reset();
-      ctx.oos = new ObjectOutputStream(ctx.bos);
-    } else {
-      ctx.oos.reset();
-      ctx.bos.reset();
-      ctx.bos.write(OOS_STREAM_HEADER, 0, 4);
-    }
-    ctx.oos.writeObject(obj);
-    ctx.oos.flush();
-
-    saveInLog(ctx.bos.toByteArray(), name, ctx.log, false);
-  }
-
-  public void saveByteArray(byte[] buf,
-                            String dirName, String name) throws IOException {
-    save(buf, fname(dirName, name));
-  }
-
-  public void saveByteArray(byte[] buf, String name) throws IOException{
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "DBTransaction, saveByteArray(" + name + ")");
-
-    saveInLog(buf, name, ((Context) perThreadContext.get()).log, true);
-  }
-
-  private final void saveInLog(byte[] buf,
-                               String name,
-                               Hashtable log,
-                               boolean copy) throws IOException {
-    DBOperation op = DBOperation.alloc(DBOperation.SAVE, name, buf);
-    DBOperation old = (DBOperation) log.put(name, op);
+    DBOperation op = DBOperation.alloc(DBOperation.SAVE, fname, buf);
+    DBOperation old = (DBOperation) log.put(fname, op);
     if (copy) {
       if ((old != null) &&
           (old.type == DBOperation.SAVE) &&
@@ -348,37 +248,21 @@ public abstract class DBTransaction implements Transaction, DBTransactionMBean {
     if (old != null) old.free();
   }
 
-  public Object load(String dirName, String name) throws IOException, ClassNotFoundException {
-    return load(fname(dirName, name));
-  }
-
-  public Object load(String name) throws IOException, ClassNotFoundException {
-    byte[] buf = loadByteArray(name);
-    if (buf != null) {
-      ByteArrayInputStream bis = new ByteArrayInputStream(buf);
-      ObjectInputStream ois = new ResolverObjectInputStream(bis);	  
-      return ois.readObject();
-    }
-    return null;
-  }
-
   public byte[] loadByteArray(String dirName, String name) throws IOException {
-    return loadByteArray(fname(dirName, name));
-  }
+    String fname = fname(dirName, name);
 
-  public synchronized byte[] loadByteArray(String name) throws IOException {
     if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "DBTransaction, loadByteArray(" + name + ")");
+      logmon.log(BasicLevel.DEBUG, "DBTransaction, loadByteArray(" + fname + ")");
 
     // Searchs in the log a new value for the object.
     Hashtable log = ((Context) perThreadContext.get()).log;
-    DBOperation op = (DBOperation) log.get(name);
+    DBOperation op = (DBOperation) log.get(fname);
     if (op != null) {
       if (op.type == DBOperation.SAVE) {
-	return op.value;
+        return op.value;
       } else if (op.type == DBOperation.DELETE) {
-	// The object was deleted.
-	return null;
+        // The object was deleted.
+        return null;
       }
     }
 
@@ -390,29 +274,27 @@ public abstract class DBTransaction implements Transaction, DBTransactionMBean {
 
       if (!rs.next()) return null;
 
-       byte[] content = rs.getBytes(1);
+      byte[] content = rs.getBytes(1);
 
-       rs.close();
-       s.close();
+      rs.close();
+      s.close();
 
-       return content;
+      return content;
     } catch (SQLException sqle) {
       throw new IOException(sqle.getMessage());
     }
   }
 
   public void delete(String dirName, String name) {
-    delete(fname(dirName, name));
-  }
+    String fname = fname(dirName, name);
 
-  public void delete(String name) {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
-                 "DBTransaction, delete(" + name + ")");
+                 "DBTransaction, delete(" + fname + ")");
 
     Hashtable log = ((Context) perThreadContext.get()).log;
-    DBOperation op = DBOperation.alloc(DBOperation.DELETE, name);
-    op = (DBOperation) log.put(name, op);
+    DBOperation op = DBOperation.alloc(DBOperation.DELETE, fname);
+    op = (DBOperation) log.put(fname, op);
     if (op != null) op.free();
   }
 
@@ -479,16 +361,6 @@ public abstract class DBTransaction implements Transaction, DBTransactionMBean {
     } else {
       setPhase(COMMIT);
     }
-  }
-
-  public final synchronized void release() throws IOException {
-    if ((phase != RUN) && (phase != COMMIT) && (phase != ROLLBACK))
-      throw new IllegalStateException("Can not release transaction.");
-
-    // Change the transaction state.
-    setPhase(FREE);
-    // wake-up an eventually user's thread in begin
-    notify();
   }
 
   /**
@@ -587,7 +459,7 @@ final class DBOperation implements Serializable {
   static final int DELETE = 2;
   static final int COMMIT = 3;
   static final int END = 127;
- 
+
   int type;
   String name;
   byte[] value;
@@ -610,7 +482,7 @@ final class DBOperation implements Serializable {
     strbuf.append(",type=").append(type);
     strbuf.append(",name=").append(name);
     strbuf.append(')');
-    
+
     return strbuf.toString();
   }
 
@@ -628,7 +500,7 @@ final class DBOperation implements Serializable {
 
   static DBOperation alloc(int type, String name, byte[] value) {
     DBOperation op = null;
-    
+
     try {
       op = (DBOperation) pool.allocElement();
     } catch (Exception exc) {

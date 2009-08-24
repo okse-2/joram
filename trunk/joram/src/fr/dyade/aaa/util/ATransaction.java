@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -23,7 +23,6 @@
  */
 package fr.dyade.aaa.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
@@ -33,11 +32,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamConstants;
 import java.io.RandomAccessFile;
-import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
@@ -47,9 +42,7 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.agent.Debug;
 import fr.dyade.aaa.common.Pool;
 
-public class ATransaction implements Transaction, Runnable {
-  // State of the transaction monitor.
-  private int phase;
+public final class ATransaction extends AbstractTransaction implements ATransactionMBean, Runnable {
 
   private static Logger logmon = null;
 
@@ -60,32 +53,7 @@ public class ATransaction implements Transaction, Runnable {
   private int commitCount = 0;    // Number of commited transaction in clog.
   private int operationCount = 0; // Number of operations reported to clog.
   private int cumulativeSize = 0; // Byte amount in clog.
-
-  private class Context {
-    Hashtable log = null;
-    ByteArrayOutputStream bos = null;
-    ObjectOutputStream oos = null;
-
-    Context() {
-      log = new Hashtable(15);
-      bos = new ByteArrayOutputStream(256);
-    }
-  }
-
-  static private final byte[] OOS_STREAM_HEADER = {
-                                                   (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF),
-                                                   (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF),
-                                                   (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF),
-                                                   (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF)
-  };
-
-  /**
-   *  ThreadLocal variable used to get the log to associate state with each
-   * thread. The log contains all operations do by the current thread since
-   * the last <code>commit</code>. On commit, its content is added to current
-   * log (clog, memory + disk), then it is freed.
-   */
-  private ThreadLocal perThreadContext = null;
+  
   /**
    *  Log of all operations already commited but not reported on disk
    * by the "garbage" Thread. On event (at least previous log plog must
@@ -124,6 +92,8 @@ public class ATransaction implements Transaction, Runnable {
 
   public final void init(String path) throws IOException {
     phase = INIT;
+
+    Operation.pool = new Pool("Atransaction$Operation", CLEANUP_THRESHOLD_OPERATION);
 
     logmon = Debug.getLogger(Transaction.class.getName());
     if (logmon.isLoggable(BasicLevel.INFO))
@@ -209,24 +179,24 @@ public class ATransaction implements Transaction, Runnable {
           int optype;
           String dirName;
           String name;
-          while ((optype = logFile.read()) != ATOperation.COMMIT) {
+          while ((optype = logFile.read()) != Operation.COMMIT) {
             //  Gets all operations of one committed transaction then
             // adds them to specified log.
             dirName = logFile.readUTF();
             if (dirName.length() == 0) dirName = null;
             name = logFile.readUTF();
 
-            Object key = ATOperationKey.newKey(dirName, name);
+            Object key = OperationKey.newKey(dirName, name);
 
-            ATOperation op = null;
-            if (optype == ATOperation.SAVE) {
+            Operation op = null;
+            if (optype == Operation.SAVE) {
               byte buf[] = new byte[logFile.readInt()];
               logFile.readFully(buf);
-              op = ATOperation.alloc(optype, dirName, name, buf);
-              op = (ATOperation) templog.put(key, op);
+              op = Operation.alloc(optype, dirName, name, buf);
+              op = (Operation) templog.put(key, op);
             } else {
-              op = ATOperation.alloc(optype, dirName, name);
-              op = (ATOperation) templog.put(key, op);
+              op = Operation.alloc(optype, dirName, name);
+              op = (Operation) templog.put(key, op);
             }
             if (op != null) op.free();
           }
@@ -250,27 +220,8 @@ public class ATransaction implements Transaction, Runnable {
     return dir;
   }
 
-  private final void setPhase(int newPhase) {
+  protected final void setPhase(int newPhase) {
     phase = newPhase;
-  }
-
-  public int getPhase() {
-    return phase;
-  }
-
-  public String getPhaseInfo() {
-    return PhaseInfo[phase];
-  }
-
-  public final synchronized void begin() throws IOException {
-    while (phase != FREE) {
-      try {
-        wait();
-      } catch (InterruptedException exc) {
-      }
-    }
-    // Change the transaction state.
-    setPhase(RUN);
   }
 
   // Be careful: only used in Server 
@@ -278,67 +229,21 @@ public class ATransaction implements Transaction, Runnable {
     return dir.list(new StartWithFilter(prefix));
   }
 
-  public final void create(Serializable obj, String name) throws IOException {
-    save(obj, null, name);
-  }
-
-  public final void save(Serializable obj, String name) throws IOException {
-    save(obj, null, name);
-  }
-
-  public final void create(Serializable obj, String dirName, String name) throws IOException {
-    save(obj, dirName, name);
-  }
-
-  public final void save(Serializable obj,
-                         String dirName, String name) throws IOException {
+  protected final void saveInLog(byte[] buf,
+                                 String dirName, String name,
+                                 Hashtable log,
+                                 boolean copy,
+                                 boolean first) throws IOException {
     if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "ATransaction, save(" + dirName + ", " + name + ")");
+      logmon.log(BasicLevel.DEBUG,
+                 "ATransaction, saveInLog(" + dirName + '/' + name + ", " + copy + ", " + first + ")");
 
-    Context ctx = (Context) perThreadContext.get();
-    if (ctx.oos == null) {
-      ctx.bos.reset();
-      ctx.oos = new ObjectOutputStream(ctx.bos);
-    } else {
-      ctx.oos.reset();
-      ctx.bos.reset();
-      ctx.bos.write(OOS_STREAM_HEADER, 0, 4);
-    }
-    ctx.oos.writeObject(obj);
-    ctx.oos.flush();
-
-    saveInLog(ctx.bos.toByteArray(), dirName, name, ctx.log, false);
-  }
-
-  /**
-   *  Save an object state already serialized. The byte array keeped in log is
-   * a copy, so the original one may be modified.
-   */
-  public final void saveByteArray(byte[] buf, String name) throws IOException {
-    saveByteArray(buf, null, name);
-  }
-
-  /**
-   *  Save an object state already serialized. The byte array keeped in log is
-   * a copy, so the original one may be modified.
-   */
-  public final void saveByteArray(byte[] buf,
-                                  String dirName, String name) throws IOException {
-    saveInLog(buf,
-              dirName, name,
-              ((Context) perThreadContext.get()).log, true);
-  }
-
-  private final void saveInLog(byte[] buf,
-                               String dirName, String name,
-                               Hashtable log,
-                               boolean copy) throws IOException {
-    Object key = ATOperationKey.newKey(dirName, name);
-    ATOperation op = ATOperation.alloc(ATOperation.SAVE, dirName, name, buf);
-    ATOperation old = (ATOperation) log.put(key, op);
+    Object key = OperationKey.newKey(dirName, name);
+    Operation op = Operation.alloc(Operation.SAVE, dirName, name, buf);
+    Operation old = (Operation) log.put(key, op);
     if (copy) {
       if ((old != null) &&
-          (old.type == ATOperation.SAVE) &&
+          (old.type == Operation.SAVE) &&
           (old.value.length == buf.length)) {
         // reuse old buffer
         op.value = old.value;
@@ -354,11 +259,11 @@ public class ATransaction implements Transaction, Runnable {
 
   private final byte[] getFromLog(Hashtable log, Object key) throws IOException {
     // Searchs in the log a new value for the object.
-    ATOperation op = (ATOperation) log.get(key);
+    Operation op = (Operation) log.get(key);
     if (op != null) {
-      if (op.type == ATOperation.SAVE) {
+      if (op.type == Operation.SAVE) {
         return op.value;
-      } else if (op.type == ATOperation.DELETE) {
+      } else if (op.type == Operation.DELETE) {
         // The object was deleted.
         throw new FileNotFoundException();
       }
@@ -368,7 +273,7 @@ public class ATransaction implements Transaction, Runnable {
 
   private final byte[] getFromLog(String dirName, String name) throws IOException {
     // First searchs in the logs a new value for the object.
-    Object key = ATOperationKey.newKey(dirName, name);
+    Object key = OperationKey.newKey(dirName, name);
     byte[] buf = getFromLog(((Context) perThreadContext.get()).log, key);
     if (buf != null) return buf;
 
@@ -379,46 +284,6 @@ public class ATransaction implements Transaction, Runnable {
     return null;  
   }
 
-  public final Object load(String name) throws IOException, ClassNotFoundException {
-    return load(null, name);
-  }
-
-  public final Object load(String dirName, String name) throws IOException, ClassNotFoundException {
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "ATransaction, load(" + dirName + ", " + name + ")");
-
-    // First searchs in the logs a new value for the object.
-    try {
-      byte[] buf = getFromLog(dirName, name);
-      if (buf != null) {
-        ByteArrayInputStream bis = new ByteArrayInputStream(buf);
-        ObjectInputStream ois = new ResolverObjectInputStream(bis);	  
-        return ois.readObject();
-      }
-
-      // Gets it from disk.      
-      File file;
-      Object obj;
-      if (dirName == null) {
-        file = new File(dir, name);
-      } else {
-        File parentDir = new File(dir, dirName);
-        file = new File(parentDir, name);
-      }
-      FileInputStream fis = new FileInputStream(file);
-      ObjectInputStream ois = new ResolverObjectInputStream(fis);
-      obj = ois.readObject();
-
-      fis.close();
-      return obj;
-    } catch (FileNotFoundException exc) {
-      return null;
-    }
-  }
-
-  public final byte[] loadByteArray(String name) throws IOException {
-    return loadByteArray(null, name);
-  }
 
   public final byte[] loadByteArray(String dirName, String name) throws IOException {
     // First searchs in the logs a new value for the object.
@@ -449,16 +314,12 @@ public class ATransaction implements Transaction, Runnable {
     }
   }
 
-  public final void delete(String name) {
-    delete(null, name);
-  }
-
   public final void delete(String dirName, String name) {
-    Object key = ATOperationKey.newKey(dirName, name);
+    Object key = OperationKey.newKey(dirName, name);
 
     Hashtable log = ((Context) perThreadContext.get()).log;
-    ATOperation op = ATOperation.alloc(ATOperation.DELETE, dirName, name);
-    op = (ATOperation) log.put(key, op);
+    Operation op = Operation.alloc(Operation.DELETE, dirName, name);
+    op = (Operation) log.put(key, op);
     if (op != null) op.free();
   }
 
@@ -477,9 +338,9 @@ public class ATransaction implements Transaction, Runnable {
     commitCount += 1; // AF: Monitoring
     Hashtable log = ((Context) perThreadContext.get()).log;
     if (! log.isEmpty()) {
-      ATOperation op = null;
+      Operation op = null;
       for (Enumeration e = log.elements(); e.hasMoreElements(); ) {
-        op = (ATOperation) e.nextElement();
+        op = (Operation) e.nextElement();
 
         operationCount += 1; // AF: Monitoring
         // Save the log to disk
@@ -490,17 +351,17 @@ public class ATransaction implements Transaction, Runnable {
           dos.write(emptyUTFString);
         }
         dos.writeUTF(op.name);
-        if (op.type == ATOperation.SAVE) {
+        if (op.type == Operation.SAVE) {
           dos.writeInt(op.value.length);
           dos.write(op.value);
           cumulativeSize += op.value.length; // AF: Monitoring
         }
 
         // Reports all committed operation in clog
-        op = (ATOperation) clog.put(ATOperationKey.newKey(op.dirName, op.name), op);
+        op = (Operation) clog.put(OperationKey.newKey(op.dirName, op.name), op);
         if (op != null) op.free();
       }
-      dos.writeByte(ATOperation.COMMIT);
+      dos.writeByte(Operation.COMMIT);
       dos.flush();
       logFile.write(baos.toByteArray());
       //     baos.writeTo(logFile);
@@ -559,15 +420,8 @@ public class ATransaction implements Transaction, Runnable {
         lock.notify();
       }
     } else {
-      _release();
+      super.release();
     }
-  }
-
-  private final synchronized void _release() {
-    // Change the transaction state.
-    setPhase(FREE);
-    // wake-up an eventually user's thread in begin
-    notify();
   }
 
   /**
@@ -578,11 +432,11 @@ public class ATransaction implements Transaction, Runnable {
       logmon.log(BasicLevel.DEBUG,
                  "ATransaction, Commit(" + log + ")");
 
-    ATOperation op = null;
+    Operation op = null;
     for (Enumeration e = log.elements(); e.hasMoreElements(); ) {
-      op = (ATOperation) e.nextElement();
+      op = (Operation) e.nextElement();
 
-      if (op.type == ATOperation.SAVE) {
+      if (op.type == Operation.SAVE) {
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,
                      "ATransaction, Save (" + op.dirName + ',' + op.name + ')');
@@ -602,7 +456,7 @@ public class ATransaction implements Transaction, Runnable {
         fos.write(op.value);
         fos.getFD().sync();
         fos.close();
-      } else if (op.type == ATOperation.DELETE) {
+      } else if (op.type == Operation.DELETE) {
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,
                      "ATransaction, Delete (" + op.dirName + ',' + op.name + ')');
@@ -636,20 +490,16 @@ public class ATransaction implements Transaction, Runnable {
 
   /**
    * Delete the specified directory if it is empty.
-   * Also recursively delete the parent directories if
-   * they are empty.
+   * Also recursively delete the parent directories if they are empty.
    */
   private final void deleteDir(File dir) {
-    // Check the disk state. It may be false
-    // according to the transaction log but
-    // it doesn't matter because directories
-    // are lazily created.
+    // Check the disk state. It may be false according to the transaction log but
+    // it doesn't matter because directories are lazily created.
     String[] children = dir.list();
     // children may be null if dir doesn't exist any more.
     if (children != null && children.length == 0) {
       dir.delete();
-      if (dir.getAbsolutePath().length() > 
-      this.dir.getAbsolutePath().length()) {
+      if (dir.getAbsolutePath().length() > this.dir.getAbsolutePath().length()) {
         deleteDir(dir.getParentFile());
       }
     }
@@ -765,7 +615,7 @@ public class ATransaction implements Transaction, Runnable {
     logFilePN.renameTo(plogFilePN);
     newLogFile();
 
-    _release();
+    super.release();
 
     commit(plog);
     // commit clears the log and frees Operations object.
@@ -773,113 +623,5 @@ public class ATransaction implements Transaction, Runnable {
 
     if (logmon.isLoggable(BasicLevel.INFO))
       logmon.log(BasicLevel.INFO, "ATransaction, Wakeup: end");
-  }
-}
-
-final class ATOperation implements Serializable {
-  static final int SAVE = 1;
-  static final int DELETE = 2;
-  static final int COMMIT = 3;
-  static final int END = 127;
- 
-  int type;
-  String dirName;
-  String name;
-  byte[] value;
-
-  private ATOperation(int type, String dirName, String name, byte[] value) {
-    this.type = type;
-    this.dirName = dirName;
-    this.name = name;
-    this.value = value;
-  }
-
-  /**
-   * Returns a string representation for this object.
-   *
-   * @return	A string representation of this object. 
-   */
-  public String toString() {
-    StringBuffer strbuf = new StringBuffer();
-
-    strbuf.append('(').append(super.toString());
-    strbuf.append(",type=").append(type);
-    strbuf.append(",dirName=").append(dirName);
-    strbuf.append(",name=").append(name);
-    strbuf.append(')');
-    
-    return strbuf.toString();
-  }
-
-  private static Pool pool = null;
-
-  static {
-    pool = new Pool("Atransaction$ATOperation",
-                    ATransaction.CLEANUP_THRESHOLD_OPERATION);
-  }
-
-  static ATOperation alloc(int type, String dirName, String name) {
-    return alloc(type, dirName, name, null);
-  }
-
-  static ATOperation alloc(int type,
-                         String dirName, String name,
-                         byte[] value) {
-    ATOperation op = null;
-    
-    try {
-      op = (ATOperation) pool.allocElement();
-    } catch (Exception exc) {
-      return new ATOperation(type, dirName, name, value);
-    }
-    op.type = type;
-    op.dirName = dirName;
-    op.name = name;
-    op.value = value;
-    return op;
-  }
-
-  void free() {
-    /* to let gc do its work */
-    dirName = null;
-    name = null;
-    value = null;
-    pool.freeElement(this);
-  }
-}
-
-final class ATOperationKey {
-  static Object newKey(String dirName, String name) {
-    if (dirName == null) {
-      return name;
-    } else {
-      return new ATOperationKey(dirName, name);
-    }
-  }
-
-  private String dirName;
-  private String name;
-
-  private ATOperationKey(String dirName,
-                       String name) {
-    this.dirName = dirName;
-    this.name = name;
-  }
-
-  public int hashCode() {
-    // Should compute a specific one.
-    return dirName.hashCode();
-  }
-
-  public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj instanceof ATOperationKey) {
-      ATOperationKey opk = (ATOperationKey)obj;
-      if (opk.name.length() != name.length()) return false;
-      if (opk.dirName.length() != dirName.length()) return false;
-      if (!opk.dirName.equals(dirName)) return false;            
-      return opk.name.equals(name);
-    }
-    return false;
   }
 }
