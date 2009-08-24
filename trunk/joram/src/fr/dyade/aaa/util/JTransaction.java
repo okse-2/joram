@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -38,6 +38,8 @@ import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import fr.dyade.aaa.common.Configuration;
+import fr.dyade.aaa.common.Pool;
 
 /**
  *  The JTransaction class implements a transactionnal storage.
@@ -49,42 +51,21 @@ import java.util.Hashtable;
 public final class JTransaction implements Transaction, JTransactionMBean {
   public static final String EMPTY_STRING = new String();
 
+  /**
+   *  Number of pooled operation, by default 100.
+   *  This value can be adjusted for a particular server by setting
+   * <code>LogThresholdOperation</code> specific property.
+   * <p>
+   *  These property can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
+   */
+  static int LogThresholdOperation = 100;
+
   private File dir = null;
 
   static private final String LOG = "log";
   private RandomAccessFile logFile = null; 
   private Hashtable log = null;
-
-  // SAVE and DELETE should be static attribute of Operation inner class.
-  // Unfortunately it's unsupported in Java 1.1.x.
-  static final int SAVE = 1;
-  static final int DELETE = 2;
-
-  class Operation implements Serializable {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
-    String dirName;
-    String name;
-    int type;
-    byte[] value = null;
-
-    Operation(int type, String dirName, String name) {
-      this(type, dirName, name, null);
-    }
-
-    Operation(int type, String dirName, String name, byte[] value) {
-      this.type = type;
-      this.dirName = dirName;
-      this.name = name;
-      this.value = value;
-    }
-  }
-
-  // State of the transaction monitor.
-  private int phase;
 
   public JTransaction() {}
 
@@ -119,6 +100,9 @@ public final class JTransaction implements Transaction, JTransactionMBean {
       if (dos != null) dos.close();
     }
 
+    LogThresholdOperation = Configuration.getInteger("LogThresholdOperation", LogThresholdOperation).intValue();
+    Operation.pool = new Pool("JTransaction$Operation", LogThresholdOperation);
+
     // Read the log, then...
     int oldPhase = FREE;
 
@@ -137,12 +121,12 @@ public final class JTransaction implements Transaction, JTransactionMBean {
           if (dirName.length() == 0) dirName = null;
           Object key = OperationKey.newKey(dirName, name);
           op = logFile.read();
-          if (op == SAVE) {
+          if (op == Operation.SAVE) {
             byte buf[] = new byte[logFile.readInt()];
             logFile.readFully(buf);
-            log.put(key, new Operation(SAVE, dirName, name, buf));
+            log.put(key, Operation.alloc(Operation.SAVE, dirName, name, buf));
           } else {
-            log.put(key, new Operation(op, dirName, name));
+            log.put(key, Operation.alloc(op, dirName, name));
           }
         }
       }
@@ -163,30 +147,33 @@ public final class JTransaction implements Transaction, JTransactionMBean {
   public String getPersistenceDir() {
     return dir.getPath();
   }
+  
+  // State of the transaction monitor.
+  protected int phase;
 
-  public int getPhase() {
+  public final int getPhase() {
     return phase;
   }
 
-  public String getPhaseInfo() {
+  public final String getPhaseInfo() {
     return PhaseInfo[phase];
   }
 
-  private void setPhase(int newPhase) throws IOException {
+  protected void setPhase(int newPhase) throws IOException {
     logFile.seek(0L);
     logFile.writeInt(newPhase);
     logFile.getFD().sync();
     phase = newPhase;
   }
 
-  public synchronized void begin() throws IOException {
+  public final synchronized void begin() throws IOException {
     while (phase != FREE) {
       try {
         wait();
       } catch (InterruptedException exc) {
       }
     }
-    // Change the transaction state and save it.
+    // Change the transaction state.
     setPhase(RUN);
   }
 
@@ -194,20 +181,27 @@ public final class JTransaction implements Transaction, JTransactionMBean {
     return dir.list(new StartWithFilter(prefix));
   }
 
-  public void create(Serializable obj, String name) throws IOException {
-    save(obj, null, name);
+  public final void create(Serializable obj, String name) throws IOException {
+    save(obj, null, name, true);
   }
 
-  public void save(Serializable obj, String name) throws IOException {
-    save(obj, null, name);
-  }
-
-  public void create(Serializable obj,
+  public final void create(Serializable obj,
                      String dirName, String name) throws IOException {
-    save(obj, dirName, name);
+    save(obj, dirName, name, true);
   }
 
-  public void save(Serializable obj, String dirName, String name) throws IOException {
+  public final void save(Serializable obj, String name) throws IOException {
+    save(obj, null, name, false);
+  }
+
+  public final void save(Serializable obj,
+                         String dirName, String name) throws IOException {
+    save(obj, dirName, name, false);
+  }
+
+  public void save(Serializable obj,
+                   String dirName, String name,
+                   boolean first) throws IOException {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     ObjectOutputStream oos = new ObjectOutputStream(bos);
     oos.writeObject(obj);
@@ -215,16 +209,32 @@ public final class JTransaction implements Transaction, JTransactionMBean {
     saveByteArray(bos.toByteArray(), dirName, name);
   }
 
-  public void saveByteArray(byte[] buf, String name) throws IOException {
-    saveByteArray(buf, null, name);
+  public final void createByteArray(byte[] buf, String name) throws IOException {
+    saveByteArray(buf, null, name, true, true);
+  }
+  
+  public final void createByteArray(byte[] buf,
+                                  String dirName, String name) throws IOException {
+    saveByteArray(buf, dirName, name, true, true);
+  }
+
+  public final void saveByteArray(byte[] buf, String name) throws IOException {
+    saveByteArray(buf, null, name, true, false);
+  }
+  
+  public final void saveByteArray(byte[] buf,
+                                  String dirName, String name) throws IOException {
+    saveByteArray(buf, dirName, name, true, false);
   }
 
   public void saveByteArray(byte[] buf,
-                            String dirName, String name) throws IOException {
+                            String dirName, String name,
+                            boolean copy,
+                            boolean first) throws IOException {
     if (phase == RUN) {
       // We are during a transaction put the new state in the log.
       Object key = OperationKey.newKey(dirName, name);
-      log.put(key, new Operation(SAVE, dirName, name, buf));
+      log.put(key, Operation.alloc(Operation.SAVE, dirName, name, buf));
     } else {
       // Save the new state on the disk.
       File file;
@@ -243,54 +253,27 @@ public final class JTransaction implements Transaction, JTransactionMBean {
     }
   }
 
-  public Object load(String name) throws IOException, ClassNotFoundException {
+  public final Object load(String name) throws IOException, ClassNotFoundException {
     return load(null, name);
   }
-
-  public Object load(String dirName, String name) throws IOException, ClassNotFoundException {
-    Object obj;
-
-    if (phase == RUN) {
-      // first search in the log a new value for the object.
-      Object key = OperationKey.newKey(dirName, name);
-      Operation op = (Operation) log.get(key);
-      if (op != null) {
-        if (op.type == SAVE) {
-          ByteArrayInputStream bis = new ByteArrayInputStream(op.value);
-          ObjectInputStream ois = new ResolverObjectInputStream(bis);
-
-          return ois.readObject();
-        } else if (op.type == DELETE) {
-          // The object is no longer alive
-          return null;
-        }
+  
+  public final Object load(String dirName, String name) throws IOException, ClassNotFoundException {
+    byte[] buf = loadByteArray(dirName, name);
+    if (buf != null) {
+      ByteArrayInputStream bis = new ByteArrayInputStream(buf);
+      ObjectInputStream ois = new ResolverObjectInputStream(bis);
+      try {
+        return ois.readObject();
+      } finally {
+        ois.close();
+        bis.close();
       }
     }
-
-    try {
-      File file;
-      if (dirName == null) {
-        file = new File(dir, name);
-      } else {
-        File parentDir = new File(dir, dirName);
-        file = new File(parentDir, name);
-      }
-      FileInputStream fis = new FileInputStream(file);
-
-      // I'm not sure we can directly read the object without use
-      // a ByteArrayInputStream.
-      ObjectInputStream ois = new ResolverObjectInputStream(fis);
-      obj = ois.readObject();
-
-      fis.close();
-    } catch (FileNotFoundException exc) {
-      return null;
-    }
-
-    return obj;
+    
+    return null;
   }
 
-  public byte[] loadByteArray(String name) throws IOException {
+  public final byte[] loadByteArray(String name) throws IOException {
     return loadByteArray(null, name);
   }
 
@@ -300,9 +283,9 @@ public final class JTransaction implements Transaction, JTransactionMBean {
       Object key = OperationKey.newKey(dirName, name);
       Operation op = (Operation) log.get(key);
       if (op != null) {
-        if (op.type == SAVE) {
+        if (op.type == Operation.SAVE) {
           return op.value;
-        } else if (op.type == DELETE) {
+        } else if (op.type == Operation.DELETE) {
           // The object is no longer alive
           return null;
         }
@@ -332,7 +315,7 @@ public final class JTransaction implements Transaction, JTransactionMBean {
     }
   }
 
-  public void delete(String name) {
+  public final void delete(String name) {
     delete(null, name);
   }
 
@@ -340,7 +323,7 @@ public final class JTransaction implements Transaction, JTransactionMBean {
     if (phase == RUN) {
       // We are during a transaction mark the object deleted in the log.
       Object key = OperationKey.newKey(dirName, name);
-      log.put(key, new Operation(DELETE, dirName, name));
+      log.put(key, Operation.alloc(Operation.DELETE, dirName, name));
     } else {
       File file;
       if (dirName == null) {
@@ -357,17 +340,14 @@ public final class JTransaction implements Transaction, JTransactionMBean {
 
   /**
    * Delete the specified directory if it is empty.
-   * Also recursively delete the parent directories if
-   * they are empty.
+   * Also recursively delete the parent directories if they are empty.
    */
   private void deleteDir(File dir) {
     String[] children = dir.list();
     // children may be null if dir doesn't exist any more.
-    if (children != null && 
-        children.length == 0) {
+    if (children != null && children.length == 0) {
       dir.delete();
-      if (dir.getAbsolutePath().length() > 
-      this.dir.getAbsolutePath().length()) {
+      if (dir.getAbsolutePath().length() > this.dir.getAbsolutePath().length()) {
         deleteDir(dir.getParentFile());
       }
     }
@@ -388,7 +368,7 @@ public final class JTransaction implements Transaction, JTransactionMBean {
         logFile.writeUTF(EMPTY_STRING);
       }
       logFile.writeByte(op.type);
-      if (op.type == SAVE) {
+      if (op.type == Operation.SAVE) {
         logFile.writeInt(op.value.length);
         logFile.write(op.value);
       }
@@ -409,7 +389,7 @@ public final class JTransaction implements Transaction, JTransactionMBean {
     for (Enumeration e = log.elements(); e.hasMoreElements(); ) {
       Operation op = (Operation) e.nextElement();
 
-      if (op.type == SAVE) {
+      if (op.type == Operation.SAVE) {
         File file;
         if (op.dirName == null) {
           file = new File(dir, op.name);
@@ -424,7 +404,7 @@ public final class JTransaction implements Transaction, JTransactionMBean {
         fos.write(op.value);
         fos.getFD().sync();
         fos.close();
-      } else if (op.type == DELETE) {
+      } else if (op.type == Operation.DELETE) {
         File file;
         if (op.dirName == null) {
           file = new File(dir, op.name);
@@ -441,19 +421,13 @@ public final class JTransaction implements Transaction, JTransactionMBean {
     }
   }
 
-  //   public synchronized void rollback() throws IOException {
-  //     if (phase != RUN)
-  //       throw new NotActiveException("Can not rollback inexistent transaction.");
-  //     setPhase(ROLLBACK);
-  //     log.clear();
-  //   }
-
   public synchronized void release() throws IOException {
-    if ((phase != COMMIT) && (phase != ROLLBACK))
-      throw new NotActiveException("Can not release transaction.");
+    if ((phase != RUN) && (phase != COMMIT) && (phase != ROLLBACK))
+      throw new IllegalStateException("Can not release transaction.");
 
-    // Change the transaction state and save it.
+    // Change the transaction state.
     setPhase(FREE);
+    // wake-up an eventually user's thread in begin
     notify();
   }
 
@@ -485,42 +459,6 @@ public final class JTransaction implements Transaction, JTransactionMBean {
       logFile.close();
       setPhase(INIT);
     } catch (IOException exc) {
-    }
-  }
-
-  private static class OperationKey {
-
-    static Object newKey(String dirName, String name) {
-      if (dirName == null) {
-        return name;
-      } else {
-        return new OperationKey(dirName, name);
-      }
-    }
-
-    private String dirName;
-    private String name;
-
-    private OperationKey(String dirName, String name) {
-      this.dirName = dirName;
-      this.name = name;
-    }
-
-    public int hashCode() {
-      // Should compute a specific one.
-      return dirName.hashCode();
-    }
-
-    public boolean equals(Object obj) {
-      if (this == obj) return true;
-      if (obj instanceof OperationKey) {
-        OperationKey opk = (OperationKey)obj;
-        if (opk.name.length() != name.length()) return false;
-        if (opk.dirName.length() != dirName.length()) return false;
-        if (!opk.dirName.equals(dirName)) return false;            
-        return opk.name.equals(name);
-      }
-      return false;
     }
   }
 }
