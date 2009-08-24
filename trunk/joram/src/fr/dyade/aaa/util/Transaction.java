@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -23,8 +23,12 @@
  */
 package fr.dyade.aaa.util;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.Serializable;
 
+/**
+ * The Transaction interface defines the API of the atomic storage component.
+ */
 public interface Transaction {
   final int INIT = 0;	  // Initialization state
   final int FREE = 1;	  // No transaction 
@@ -41,39 +45,178 @@ public interface Transaction {
   final int Kb = 1024;
   final int Mb = Kb * Kb;
 
+  /**
+   * Initializes the atomic storage component.
+   * 
+   * @param path
+   * @throws IOException
+   */
   void init(String path) throws IOException;
 
   /**
-   *
+   * Returns the transaction state.
+   * @return the transaction state.
    */
   public int getPhase();
-
+  /**
+   * Returns a string representation of the transaction state.
+   * @return the string representation of the transaction state.
+   */
   public String getPhaseInfo();
 
+  /**
+   *  Start a transaction validation, the validation phase needs 3 phases: begin, commit
+   * and release. The begin ensure the mutual exclusion of the current transaction.
+   */
   void begin() throws IOException;
 
-  File getDir();
+  /**
+   * Returns an array of strings naming the objects in the component started by this prefix.
+   * 
+   * @param prefix
+   * @return an array of strings naming the objects in the component started by this prefix.
+   */
   String[] getList(String prefix);
-
+  /**
+   * Returns true if the component is persistent.
+   * @return true if the component is persistent.
+   */
   boolean isPersistent();
 
+  /**
+   * Register the state of a newly created object in the current transaction.
+   * 
+   * @param obj   the object to store.
+   * @param name  the name of the object.
+   */
   void create(Serializable obj, String name) throws IOException;
-  void save(Serializable obj, String name) throws IOException;
-  void saveByteArray(byte[] buf, String name) throws IOException;
-  Object load(String name) throws IOException, ClassNotFoundException;
-  byte[] loadByteArray(String name) throws IOException, ClassNotFoundException;
-  void delete(String name);
-
+  /**
+   * Register the state of a newly created object in the current transaction.
+   * 
+   * @param obj     the object to store.
+   * @param dirName the directory name of the object.
+   * @param name    the name of the object.
+   */
   void create(Serializable obj, String dirName, String name) throws IOException;
+  /**
+   * Register the modified state of an object in the current transaction.
+   * 
+   * @param obj     the object to store.
+   * @param name    the name of the object.
+   */
+  void save(Serializable obj, String name) throws IOException;
+  /**
+   * Register the modified state of an object in the current transaction.
+   * 
+   * @param obj     the object to store.
+   * @param dirName the directory name of the object.
+   * @param name    the name of the object.
+   */
   void save(Serializable obj, String dirName, String name) throws IOException;
+  /**
+   * Register the state of an object in the current transaction.
+   * 
+   * @param obj     the object to store.
+   * @param dirName the directory name of the object.
+   * @param name    the name of the object.
+   * @param first   the object is a new one.
+   */
+  void save(Serializable obj, String dirName, String name, boolean first) throws IOException;
+  
+  /**
+   * Register a new byte array in the current transaction.
+   * 
+   * @param buf   the byte array to store.
+   * @param name  the name of the object.
+   */
+  void createByteArray(byte[] buf, String name) throws IOException;  
+  /**
+   * Register a new byte array in the current transaction.
+   * 
+   * @param buf     the byte array to store.
+   * @param dirName the directory name of the object.
+   * @param name    the name of the object.
+   */
+  void createByteArray(byte[] buf, String dirName, String name) throws IOException;
+  /**
+   * Register a modified byte array in the current transaction.
+   * 
+   * @param buf     the byte array to store.
+   * @param name    the name of the object.
+   */
+  void saveByteArray(byte[] buf, String name) throws IOException;
+  /**
+   * Register a modified byte array in the current transaction.
+   * 
+   * @param buf     the byte array to store.
+   * @param dirName the directory name of the object.
+   * @param name    the name of the object.
+   */
   void saveByteArray(byte[] buf, String dirName, String name) throws IOException;
+  /**
+   * Register a modified byte array in the current transaction.
+   * 
+   * @param buf     the byte array to store.
+   * @param dirName the directory name of the object.
+   * @param name    the name of the object.
+   * @param copy    the byte array can be modified, copy it.
+   * @param first   the object is a new one.
+   */
+  void saveByteArray(byte[] buf, String dirName, String name, boolean copy, boolean first) throws IOException;
+  
+  /**
+   * Load the specified object.
+   * 
+   * @param name    the name of the object.
+   * @return the loaded object.
+   */
+  Object load(String name) throws IOException, ClassNotFoundException;
+  /**
+   * Load the specified object.
+   * 
+   * @param dirName the directory name of the object.
+   * @param name    the name of the object.
+   * @return the loaded object.
+   */
   Object load(String dirName, String name) throws IOException, ClassNotFoundException;
+  /**
+   * Load the specified byte array.
+   * 
+   * @param name    the name of the object.
+   * @return the loaded byte array.
+   */
+  byte[] loadByteArray(String name) throws IOException, ClassNotFoundException;
+  /**
+   * Load the specified byte array.
+   * 
+   * @param dirName the directory name of the object.
+   * @param name    the name of the object.
+   * @return the loaded byte array.
+   */
   byte[] loadByteArray(String dirName, String name) throws IOException;
+  /**
+   * Deletes the specified object.
+   * 
+   * @param name    the name of the object.
+   */
+  void delete(String name);
+  /**
+   * Deletes the specified object.
+   * 
+   * @param dirName the directory name of the object.
+   * @param name    the name of the object.
+   */
   void delete(String dirName, String name);
 
+  /**
+   * Commit the current transaction.
+   * 
+   * @param release if true releases the transaction at the end of the commit.
+   */
   void commit(boolean release) throws IOException;
-//   void rollback() throws IOException;
-
+  /**
+   * Release the mutual exclusion.
+   */
   void release() throws IOException;
 
   /**
