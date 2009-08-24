@@ -15,6 +15,42 @@
     </patternset>
   </target>
 
+  <target name="tests.transaction"
+          description=" --> launch all a3 tests with various transaction implementation">
+    <ant dir="." antfile="build.xml" target="tests.jtransaction"/>
+    <ant dir="." antfile="build.xml" target="tests.atransaction"/>
+    <ant dir="." antfile="build.xml" target="tests.ntransaction"/>
+    <ant dir="." antfile="build.xml" target="tests.ngtransaction"/>
+  </target>
+	
+  <target name="tests.jtransaction"
+          description=" --> launch tests with JTransaction">
+    <antcall target="tests">
+      <param name="transaction" value="fr.dyade.aaa.util.JTransaction"/>
+    </antcall>
+  </target>
+	
+  <target name="tests.atransaction"
+          description=" --> launch tests with ATransaction">
+    <antcall target="tests">
+      <param name="transaction" value="fr.dyade.aaa.util.ATransaction"/>
+    </antcall>
+  </target>
+	
+  <target name="tests.ntransaction"
+          description=" --> launch tests with NTransaction">
+    <antcall target="tests">
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+    </antcall>
+  </target>
+	
+  <target name="tests.ngtransaction"
+          description=" --> launch tests with NGTransaction">
+    <antcall target="tests">
+      <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
+    </antcall>
+  </target>
+
   <target name="tests.all"
           description=" --> launch all a3 tests">
     <ant dir="." antfile="build.xml" target="tests.simple"/>
@@ -1381,6 +1417,62 @@
       <param name="a3conf" value="perf/a3servers0.xml"/>
       <param name="jvmargs" value="-DRecv=0 -DSend=0 -Dbounce=99"/>
     </antcall>
+  </target>
+	
+  <!--  -->
+  <target name="test4.perf" depends="init.a3props,compile">
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.perf.test4"/>
+      <param name="testid" value="test4.perf"/>
+      <param name="a3conf" value="perf/a3serversX.xml"/>
+    	<param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
+      <param name="jvmargs" value="-DnbRound=50 -DnbMsgPerRound=1000 -Dballast=10000"/>
+    </antcall>
+  <!-- 
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.perf.test4"/>
+      <param name="testid" value="test4.perf"/>
+      <param name="a3conf" value="perf/a3serversX.xml"/>
+    	<param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
+      <param name="jvmargs" value="-DnbRound=20 -DnbMsgPerRound=1000 -Dballast=5000"/>
+    </antcall>
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.perf.test4"/>
+      <param name="testid" value="test4.perf"/>
+      <param name="a3conf" value="perf/a3serversX.xml"/>
+    	<param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
+      <param name="jvmargs" value="-DnbRound=20 -DnbMsgPerRound=1000 -Dballast=10000"/>
+    </antcall>
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.perf.test4"/>
+      <param name="testid" value="test4.perf"/>
+      <param name="a3conf" value="perf/a3serversX.xml"/>
+    	<param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
+      <param name="jvmargs" value="-DnbRound=15 -DnbMsgPerRound=1000 -Dballast=50000"/>
+    </antcall>
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.perf.test4"/>
+      <param name="testid" value="test4.perf"/>
+      <param name="a3conf" value="perf/a3serversX.xml"/>
+    	<param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
+      <param name="jvmargs" value="-DnbRound=10 -DnbMsgPerRound=1000 -Dballast=100000"/>
+    </antcall>
+    
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.perf.test4"/>
+      <param name="testid" value="test4.perf"/>
+      <param name="a3conf" value="perf/a3serversX.xml"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="jvmargs" value="-DnbRound=10 -DnbMsgPerRound=20000 -Dballast=100000"/>
+    </antcall>
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.perf.test4"/>
+      <param name="testid" value="test4.perf"/>
+      <param name="a3conf" value="perf/a3serversX.xml"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
+      <param name="jvmargs" value="-DnbRound=10 -DnbMsgPerRound=20000 -Dballast=100000"/>
+    </antcall>
+ -->
   </target>
 
   <!-- Another Agent test [Tree] -->
