@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" copyrightText="Copyright (C) 2009 ScalAgent Distributed Technologies&#xD;&#xA;&#xD;&#xA;This library is free software; you can redistribute it and/or&#xD;&#xA;modify it under the terms of the GNU Lesser General Public&#xD;&#xA;License as published by the Free Software Foundation; either&#xD;&#xA;version 2.1 of the License, or any later version.&#xD;&#xA;&#xD;&#xA;This library is distributed in the hope that it will be useful,&#xD;&#xA;but WITHOUT ANY WARRANTY; without even the implied warranty of&#xD;&#xA;MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU&#xD;&#xA;Lesser General Public License for more details.&#xD;&#xA;&#xD;&#xA;You should have received a copy of the GNU Lesser General Public&#xD;&#xA;License along with this library; if not, write to the Free Software&#xD;&#xA;Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307&#xD;&#xA;USA.&#xD;&#xA;&#xD;&#xA;Initial developer(s): ScalAgent Distributed Technologies&#xD;&#xA;Contributor(s): &#xD;&#xA;"
+    modelDirectory="/org.ow2.joram.design/src" modelPluginID="org.ow2.joram.design"
+    modelName="Joram" importerID="org.eclipse.emf.importer.ecore" complianceLevel="5.0"
+    copyrightFields="false" language="">
+  <foreignModel>joram.ecore</foreignModel>
+  <genPackages prefix="Joram" basePackage="org.ow2.joram.design.model" resource="XML"
+      disposableProviderFactory="true" ecorePackage="joram.ecore#/">
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="joram.ecore#//JoramVersion">
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//JoramVersion/JORAM_5_2_4"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//JoramVersion/JORAM_5_2_3"/>
+    </genEnums>
+    <genClasses image="false" ecoreClass="joram.ecore#//Domain">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//Domain/managedElements"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="joram.ecore#//ManagedElement"/>
+    <genClasses ecoreClass="joram.ecore#//ScalAgentServer">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//ScalAgentServer/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//ScalAgentServer/version"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//ScalAgentServer/hostname"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//ScalAgentServer/services"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//ScalAgentServer/sid"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//ScalAgentServer/StorageDirectory"/>
+    </genClasses>
+    <genClasses ecoreClass="joram.ecore#//JORAM">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//JORAM/jmsObjects"/>
+    </genClasses>
+    <genClasses ecoreClass="joram.ecore#//JoramDomain">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//JoramDomain/name"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="joram.ecore#//JoramService"/>
+    <genClasses ecoreClass="joram.ecore#//AdminProxy">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//AdminProxy/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//AdminProxy/port"/>
+    </genClasses>
+    <genClasses ecoreClass="joram.ecore#//ConnectionManager">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//ConnectionManager/user"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//ConnectionManager/password"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//ConnectionManager/name"/>
+    </genClasses>
+    <genClasses ecoreClass="joram.ecore#//JNDIServer">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//JNDIServer/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//JNDIServer/port"/>
+    </genClasses>
+    <genClasses ecoreClass="joram.ecore#//TCPProxyService">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//TCPProxyService/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//TCPProxyService/port"/>
+    </genClasses>
+    <genClasses ecoreClass="joram.ecore#//NetworkDomain">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//NetworkDomain/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//NetworkDomain/networkClass"/>
+    </genClasses>
+    <genClasses ecoreClass="joram.ecore#//NetworkPort">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//NetworkPort/port"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference joram.ecore#//NetworkPort/server"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference joram.ecore#//NetworkPort/domain"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="joram.ecore#//JMSObject"/>
+    <genClasses ecoreClass="joram.ecore#//Queue">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//Queue/name"/>
+    </genClasses>
+    <genClasses ecoreClass="joram.ecore#//Topic">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//Topic/name"/>
+    </genClasses>
+    <genClasses ecoreClass="joram.ecore#//User">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//User/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//User/password"/>
+    </genClasses>
+  </genPackages>
+</genmodel:GenModel>
