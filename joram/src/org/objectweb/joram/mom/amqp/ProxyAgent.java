@@ -440,7 +440,7 @@ public class ProxyAgent extends Agent {
     String tag = consumerTag;
     if (consumerTag.equals("")) {
       channelContext.consumerTag++;
-      tag = "genTag-" + channelId + "-" + channelContext.consumerTag;
+      tag = "genTag-" + getAgentId() + '-' + channelId + '-' + channelContext.consumerTag;
     }
 
     if (channelContext.consumers.get(tag) != null) {
@@ -595,6 +595,8 @@ public class ProxyAgent extends Agent {
   }
 
   private void doReact(QueueBindNot not) throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "ProxyAgent.queueBind(" + not + ")");
     try {
       AMQP.Queue.BindOk res = queueBind(
           not.getChannelId(),
@@ -649,6 +651,8 @@ public class ProxyAgent extends Agent {
   }
 
   private void doReact(QueueUnbindNot not) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "ProxyAgent.queueUnbind(" + not + ")");
     try {
       AMQP.Queue.UnbindOk res = queueUnbind(
           not.getChannelId(),
