@@ -34,6 +34,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.UnknownAgent;
@@ -57,6 +59,8 @@ public class TopicExchange extends ExchangeAgent {
   
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+
+  public static final Logger logger = fr.dyade.aaa.common.Debug.getLogger(TopicExchange.class.getName());
 
   public static final String DEFAULT_NAME = "amq.topic";
 
@@ -82,10 +86,11 @@ public class TopicExchange extends ExchangeAgent {
 
   public void bind(AgentId queueId, String routingKey, Map arguments) {
     Pattern routingPattern = createPattern(routingKey);
-    List boundQueues = (List) bindings.get(routingPattern);
+    KeyAndPattern keyAndPattern = new KeyAndPattern(routingKey, routingPattern);
+    List boundQueues = (List) bindings.get(keyAndPattern);
     if (boundQueues == null) {
       boundQueues = new ArrayList();
-      bindings.put(routingPattern, boundQueues);
+      bindings.put(keyAndPattern, boundQueues);
     }
     if (!boundQueues.contains(queueId)) {
       boundQueues.add(queueId);
@@ -93,12 +98,16 @@ public class TopicExchange extends ExchangeAgent {
   }
 
   public void unbind(AgentId queueId, String routingKey, Map arguments) {
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "TopicExchange.Unbind(" + queueId + "," + routingKey + ")");
+    }
     Pattern routingPattern = createPattern(routingKey);
-    List boundQueues = (List) bindings.get(routingPattern);
+    KeyAndPattern keyAndPattern = new KeyAndPattern(routingKey, routingPattern);
+    List boundQueues = (List) bindings.get(keyAndPattern);
     if (boundQueues != null) {
       boundQueues.remove(queueId);
       if (boundQueues.size() == 0) {
-        bindings.remove(routingPattern);
+        bindings.remove(keyAndPattern);
       }
     }
   }
@@ -108,10 +117,10 @@ public class TopicExchange extends ExchangeAgent {
     
     Iterator iteratorPatterns = bindings.keySet().iterator();
     while (iteratorPatterns.hasNext()) {
-      Pattern pattern = (Pattern) iteratorPatterns.next();
-      Matcher matcher = pattern.matcher(routingKey);
+      KeyAndPattern keyAndPattern = (KeyAndPattern) iteratorPatterns.next();
+      Matcher matcher = keyAndPattern.pattern.matcher(routingKey);
       if (matcher.matches()) {
-        List boundQueues = (List) bindings.get(pattern);
+        List boundQueues = (List) bindings.get(keyAndPattern);
         destQueues.addAll(boundQueues);
       }
     }
@@ -150,5 +159,41 @@ public class TopicExchange extends ExchangeAgent {
   public boolean isUnused() {
     return bindings.size() == 0;
   }
-  
+
+  /**
+   * Class used to keep trace of the key which leads to the pattern. Useful for
+   * binding and unbinding.
+   */
+  private class KeyAndPattern {
+
+    public String key;
+
+    public Pattern pattern;
+
+    public KeyAndPattern(String key, Pattern pattern) {
+      this.key = key;
+      this.pattern = pattern;
+    }
+
+    public boolean equals(Object obj) {
+      if (this == obj)
+        return true;
+      if (obj == null)
+        return false;
+      if (!(obj instanceof KeyAndPattern))
+        return false;
+      KeyAndPattern other = (KeyAndPattern) obj;
+      return key.equals(other.key);
+    }
+
+    public int hashCode() {
+      return key.hashCode();
+    }
+
+    public String toString() {
+      return key + " + pattern";
+    }
+
+  }
+
 }
