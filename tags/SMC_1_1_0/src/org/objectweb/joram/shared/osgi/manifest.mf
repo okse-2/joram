@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: JORAM :: Shared
+Bundle-SymbolicName: org.objectweb.joram.shared
+Export-Package: fr.dyade.aaa.jndi2.soap,
+ org.objectweb.joram.shared,
+ org.objectweb.joram.shared.admin,
+ org.objectweb.joram.shared.client,
+ org.objectweb.joram.shared.excepts,
+ org.objectweb.joram.shared.messages,
+ org.objectweb.joram.shared.security,
+ org.objectweb.joram.shared.security.jaas,
+ org.objectweb.joram.shared.selectors,
+ org.objectweb.joram.shared.stream,
+ org.objectweb.joram.shared.util
+Bundle-Description: Joram Agent Server
+Bundle-Vendor: Scalagent D.T.
+Bundle-ClassPath: .,
+ JCup.jar
+Import-Package: org.objectweb.util.monolog,
+ org.objectweb.util.monolog.api

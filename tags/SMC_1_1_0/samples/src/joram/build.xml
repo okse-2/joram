@@ -1,0 +1,1391 @@
+<project default="compile" basedir=".">
+
+  <!-- Initializes the environment paths and properties -->
+  <target name="init">
+    <!-- Initializes the directory structure properties -->
+    <property name="src.dir" location="."/>
+    <property name="obj.dir" location="../../classes"/>
+    <property name="lib.dir" location="../../../ship/lib"/>
+    <property name="run.dir" location="../../run"/>
+    <property name="conf.dir" location="../../config"/>
+    <!-- Project classpath needed for execution -->
+    <path id="project.class.path">
+      <pathelement path="${java.class.path}/"/>
+      <fileset dir="${lib.dir}">
+         <include name="*.jar"/>
+      </fileset>
+      <pathelement path="${obj.dir}/joram"/>
+      <pathelement path="${run.dir}"/>
+    </path>
+    <property name="project.class.path" refid="project.class.path"/>
+  </target>
+
+  <!-- Cleans samples - deletes generated files -->
+  <target name="clean" depends="init"
+          description="--> Deletes generated files">
+    <delete dir="${obj.dir}"/>
+    <delete dir="${run.dir}"/>
+  </target>
+
+  <!-- Prepares the compilation phase -->
+  <target name="prepare" depends="init">
+    <delete quiet="true" dir="${obj.dir}"/>
+    <delete quiet="true" dir="${run.dir}"/>
+    <mkdir dir="${obj.dir}/joram"/>
+  </target>
+
+  <!-- Compiles -->
+  <target name="compile" depends="prepare"
+    description="--> Compile all samples">
+    <javac srcdir="${src.dir}"
+           destdir="${obj.dir}/joram"
+           source="1.4" target="1.4" debug="true"
+           deprecation="${deprecation}"
+           optimize="${optimize}"
+           nowarn="${nowarn}"
+           verbose="${verbose}">
+      <classpath refid="project.class.path"/>
+      <include name="**/*.java"/>
+    </javac>
+  </target>
+
+  <!-- Cleans run directory -->
+  <target name="reset" depends="init"
+          description="--> Cleans run directory">
+    <delete dir="${run.dir}"/>
+  </target>
+
+  <!-- Initializes the centralized configuration -->
+  <target name="simple_init" depends="init">
+    <mkdir dir="${run.dir}"/>
+    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
+    <copy file="${conf.dir}/jndi.properties"
+          tofile="${run.dir}/jndi.properties"/>
+    <copy file="${conf.dir}/centralized_a3servers.xml"
+          tofile="${run.dir}/a3servers.xml"
+          overwrite="true"/>
+  </target>
+
+  <!-- Initializes the distributed configuration -->
+  <target name="distributed_init" depends="init">
+    <mkdir dir="${run.dir}"/>
+    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
+    <copy file="${conf.dir}/jndi.properties"
+          tofile="${run.dir}/jndi.properties"
+          overwrite="true"/>
+    <copy file="${conf.dir}/distributed_a3servers.xml"
+          tofile="${run.dir}/a3servers.xml"
+          overwrite="true"/>
+  </target>
+	
+  <!-- Initializes the bridge configuration -->
+  <target name="bridge_init" depends="init">
+    <mkdir dir="${run.dir}"/>
+    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
+    <copy file="${conf.dir}/jndi.properties"
+          tofile="${run.dir}/jndi.properties"
+          overwrite="true"/>
+    <copy file="${conf.dir}/bridge_a3servers.xml"
+          tofile="${run.dir}/a3servers.xml"
+          overwrite="true"/>
+  </target>
+
+  <!-- Initializes the soap configuration -->
+  <target name="soap_init" depends="init">
+    <mkdir dir="${run.dir}"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
+    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
+    <copy file="${conf.dir}/soap_jndi.properties"
+          tofile="${run.dir}/jndi.properties"
+          overwrite="true"/>
+    <copy file="${conf.dir}/soap_a3servers.xml"
+          tofile="${run.dir}/a3servers.xml"
+          overwrite="true"/>
+  </target>
+
+  <!-- Runs the Admin GUI -->
+  <target name="admin_gui" depends="init"
+    description="--> Starts an admin GUI client">
+    <java classname="org.objectweb.joram.client.tools.admin.AdminTool"
+          failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Starts a server -->
+  <target name="server" depends="init">
+    <java classname="fr.dyade.aaa.agent.AgentServer"
+          failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="${sid} ./s${sid}"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
+    </java>
+  </target>
+
+  <!-- Start a server in NullTransaction mode -->
+  <target name="single_server" depends="simple_init"
+          description="--> Starts a single server in non-persistent mode">
+    <antcall target="server">
+      <param name="sid" value="0"/>
+    </antcall>
+  </target>
+
+  <!-- Initializes the jaas configuration -->
+  <target name="jaas_init" depends="init">
+    <mkdir dir="${run.dir}"/>
+    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
+    <copy file="${conf.dir}/jndi.properties"
+          tofile="${run.dir}/jndi.properties"
+          overwrite="true"/>
+    <copy file="${conf.dir}/jaas_a3servers.xml"
+          tofile="${run.dir}/a3servers.xml"
+          overwrite="true"/>
+    <copy file="${src.dir}/jaas/jaas.config"
+          tofile="${run.dir}/jaas.config"
+          overwrite="true"/>
+    <copy file="${src.dir}/jaas/keystore"
+          tofile="${run.dir}/keystore"
+          overwrite="true"/>
+    <copy file="${src.dir}/jaas/carol.properties"
+          tofile="${run.dir}/carol.properties"
+          overwrite="true"/>
+  </target>
+
+  <!-- Start a jaas server -->
+  <target name="jaas_server" depends="jaas_init"
+          description="--> Starts a JAAS server.">
+    <antcall target="server">
+      <param name="sid" value="0"/>
+    </antcall>
+  </target>
+
+
+  <!-- **************************************************
+       * Classic Samples
+       ************************************************** -->
+
+  <!-- Setup the classic configuration -->
+  <target name="classic_admin" depends="init"
+          description="--> Runs a classic administration (for a centralized architecture)">
+    <java classname="classic.ClassicAdmin"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y" / -->
+    </java>
+  </target>
+
+  <!-- Setup the classic configuration -->
+  <target name="classic_adminxml" depends="init"
+          description="--> Runs a classic administration XML (for a centralized architecture)">
+    <copy file="${src.dir}/classic/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
+    <java classname="org.objectweb.joram.client.jms.admin.AdminModule"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="./joramAdmin.xml"/>
+    </java>
+  </target>
+
+  <!-- Runs the classic sender client -->
+  <target name="synchsubscriber" depends="init"
+    description="--> Starts a SynchReqSubscriber client">
+    <java classname="classic.SynchReqSubscriber" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
+      <arg line="./jndi.properties"/>
+    </java>
+  </target>
+
+  <!-- Runs the classic sender client -->
+  <target name="synchpublisher" depends="init"
+    description="--> Starts a SynchReqPublisher client">
+    <java classname="classic.SynchReqPublisher" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="./jndi.properties"/>
+    </java>
+  </target>
+
+  <!-- Runs the classic sender client -->
+  <target name="sender" depends="init"
+    description="--> Starts a Sender client">
+    <java classname="classic.Sender" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the classic sender client with SoftReference messages -->
+  <target name="sendersr" depends="init"
+    description="--> Starts a Sender client with SoftReference messages">
+    <java classname="classic.Sender" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef" />
+    </java>
+  </target>
+
+  <!-- Runs the classic receiver client -->
+  <target name="receiver" depends="init"
+    description="--> Starts a Receiver client">
+    <java classname="classic.Receiver" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the classic subscriber client -->
+  <target name="subscriber" depends="init"
+    description="--> Starts a Subscriber client">
+    <java classname="classic.Subscriber" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the classic publisher client -->
+  <target name="publisher" depends="init"
+    description="--> Starts a Publisher client">
+    <java classname="classic.Publisher" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the classic publisher client with SoftReference messages -->
+  <target name="publishersr" depends="init"
+    description="--> Starts a Publisher client with SoftReference messages">
+    <java classname="classic.Publisher" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef" />
+    </java>
+  </target>
+
+  <!-- Runs the classic consumer client -->
+  <target name="consumer" depends="init"
+    description="--> Starts a Consumer client">
+    <java classname="classic.Consumer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the classic producer client -->
+  <target name="producer" depends="init"
+    description="--> Starts a Producer client">
+    <java classname="classic.Producer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the classic producer client with SoftReference messages -->
+  <target name="producersr" depends="init"
+    description="--> Starts a Producer client with SoftReference messages">
+    <java classname="classic.Producer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef" />
+    </java>
+  </target>
+
+  <!-- Runs the classic browser client -->
+  <target name="browser" depends="init"
+    description="--> Starts a Browser client">
+    <java classname="classic.Browser" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- **************************************************
+       * JAAS Samples
+       ************************************************** -->
+
+  <!-- Setup the classic configuration -->
+  <target name="jaas_admin" depends="init"
+          description="--> Runs a jaas administration">
+    <java classname="jaas.ClassicAdmin"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Djava.security.auth.login.config=${run.dir}/jaas.config -Djava.naming.factory.initial=org.objectweb.carol.jndi.spi.MultiOrbInitialContextFactory" />
+    </java>
+  </target>
+
+  <!-- Setup the classic configuration -->
+  <target name="jaas_adminxml" depends="init"
+          description="--> Runs a jaas administration XML">
+    <copy file="${src.dir}/jaas/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
+    <java classname="org.objectweb.joram.client.jms.admin.AdminModule"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="./joramAdmin.xml"/>
+      <jvmarg line="-Djava.security.auth.login.config=${run.dir}/jaas.config -Djava.naming.factory.initial=org.objectweb.carol.jndi.spi.MultiOrbInitialContextFactory" />
+    </java>
+  </target>
+
+  <!-- Runs the classic sender client -->
+  <target name="jaas_sender" depends="init"
+    description="--> Starts a jaas Sender client">
+    <java classname="jaas.Sender" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Djava.security.auth.login.config=${run.dir}/jaas.config -Djava.naming.factory.initial=org.objectweb.carol.jndi.spi.MultiOrbInitialContextFactory" />
+    </java>
+  </target>
+
+  <!-- Runs the classic receiver client -->
+  <target name="jaas_receiver" depends="init"
+    description="--> Starts a jaas Receiver client">
+    <java classname="jaas.Receiver" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Djava.security.auth.login.config=${run.dir}/jaas.config -Djava.naming.factory.initial=org.objectweb.carol.jndi.spi.MultiOrbInitialContextFactory" />
+    </java>
+  </target>
+
+
+  <!-- **************************************************
+       * Mail queue and topic Samples
+       ************************************************** -->
+
+  <!-- Setup the classic configuration -->
+  <target name="mail_admin" depends="init"
+          description="--> Runs administration stuff for incoming mail">
+    <copy file="${src.dir}/mail/smtp.properties" todir="${run.dir}"/>
+    <copy file="${src.dir}/mail/pop.properties" todir="${run.dir}"/>
+    <java classname="mail.MailAdmin"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the consumer client for mail samples -->
+  <target name="mail_consumer" depends="init"
+    description="--> Starts a Consumer client for mail samples">
+    <java classname="mail.Consumer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the producer client for mail samples -->
+  <target name="mail_producer" depends="init"
+    description="--> Starts a Producer client for mail samples">
+    <java classname="mail.Producer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- **************************************************
+       * Chat Samples
+       ************************************************** -->
+
+  <!-- Setup the chat administration -->
+  <target name="chat_admin" depends="init"
+          description="--> Runs chat administration">
+    <java classname="chat.ChatAdmin"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
+      <classpath path="${project.class.path}"/> 
+    </java>
+  </target>
+
+  <!-- Runs a chat client -->
+  <target name="chat1" depends="init"
+    description="--> Runs chat client as user1">
+    <java classname="chat.SimpleChat" failonerror="no" fork="no">
+      <classpath path="${project.class.path}"/>
+      <arg line="user1"/>
+    </java>
+  </target>
+
+  <!-- Runs an other chat client -->
+  <target name="chat2" depends="init"
+    description="--> Runs chat client as user2">
+    <java classname="chat.SimpleChat" failonerror="no" fork="no">
+      <classpath path="${project.class.path}"/>
+      <arg line="user2"/>
+    </java>
+  </target>
+
+  
+  <!-- Setup the dotcom administration -->
+  <target name="dotcom_admin" depends="init"
+          description="--> Runs dotcom administration">
+      <java classname="dotcom.DotcomAdmin" 
+          failonerror="no" fork="yes"
+          dir="${run.dir}">
+        <classpath path="${project.class.path}"/>
+      </java>
+  </target>
+
+  <!-- Runs the dotcom servers -->
+  <target name="webServers" depends="init"
+    description="--> Runs all dotcom servers">
+    <parallel>
+      <java classname="dotcom.BillingServer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+        <classpath path="${project.class.path}"/>
+      </java>
+      <java classname="dotcom.InventoryServer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+        <classpath path="${project.class.path}"/>
+      </java>
+      <java classname="dotcom.CustomerServer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+        <classpath path="${project.class.path}"/>
+      </java>
+      <java classname="dotcom.ControlServer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+        <classpath path="${project.class.path}"/>
+      </java>
+      <java classname="dotcom.DeliveryServer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+        <classpath path="${project.class.path}"/>
+      </java>
+    </parallel>
+  </target>
+
+  <!-- Runs the dotcom client -->
+  <target name="webClient" depends="init"
+    description="--> Runs dotcom client">
+    <java classname="dotcom.WebServer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+
+  <!-- Setup a distributed architecture -->
+  <target name="server0" depends="distributed_init"
+          description="--> Starts a server for a distributed architecture (w/ id 0)">
+    <antcall target="server">
+      <param name="sid" value="0"/>
+    </antcall>
+  </target>
+  <target name="server1" depends="distributed_init"
+          description="--> Starts a server for a distributed architecture (w/ id 1)">
+    <antcall target="server">
+      <param name="sid" value="1"/>
+    </antcall>
+  </target>
+  <target name="server2" depends="distributed_init"
+          description="--> Starts a server for a distributed architecture (w/ id 2)">
+    <antcall target="server">
+      <param name="sid" value="2"/>
+    </antcall>
+  </target>
+
+  <target name="servers"
+          description="--> Starts all servers">
+    <parallel>
+      <antcall target="server0"/>
+      <antcall target="server1"/>
+      <antcall target="server2"/>
+    </parallel>
+  </target>
+
+  <!-- Runs the archi administration -->
+  <target name="archi_admin" depends="init"
+    description="--> Runs the distributed architecture administration">
+    <java classname="archi.ArchiAdmin" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
+    </java>
+  </target>
+
+  <!-- Runs the archi sender client -->
+  <target name="archi_sender" depends="init"
+    description="--> Runs the distributed architecture Sender client">
+    <java classname="archi.Sender" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the archi receiver client -->
+  <target name="archi_receiver" depends="init"
+    description="--> Runs the distributed architecture Receiver client">
+    <java classname="archi.Receiver" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the archi durable subscriber client -->
+  <target name="archi_sub" depends="init"
+    description="--> Runs the distributed architecture Subscriber client">
+    <java classname="archi.DSubscriber" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the archi publisher client -->
+  <target name="archi_pub" depends="init"
+    description="--> Runs the distributed architecture Publisher client">
+    <java classname="archi.Publisher" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+  
+  <!-- Runs the cluster topic administration -->
+  <target name="topic_cluster_admin" depends="init"
+    description="--> Runs the cluster topic administration">
+    <java classname="cluster.topic.ClusterAdmin" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <target name="topic_cluster_adminxml" depends="init"
+    description="--> Runs the cluster topic administration xml">
+    <copy file="${src.dir}/cluster/topic/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
+    <java classname="org.objectweb.joram.client.jms.admin.AdminModule"
+          failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="./joramAdmin.xml"/>
+      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
+    </java>
+  </target>
+
+  <!-- Runs a cluster topic subscriber -->
+  <target name="topic_cluster_subscriber" depends="init"
+    description="--> Runs a cluster topic subscriber">
+    <input message="server=" addProperty="sid" validargs="-,0,1,2" defaultvalue=""/>
+    <java classname="cluster.topic.Subscriber" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg value="${sid}"/>
+    </java>
+  </target>
+
+  <!-- Runs a cluster topic publisher -->
+  <target name="topic_cluster_publisher" depends="init"
+    description="--> Runs a cluster topic publisher">
+    <input message="server=" addProperty="sid" validargs="-,0,1,2" defaultvalue=""/>
+    <java classname="cluster.topic.Publisher" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg value="${sid}"/>
+    </java>
+  </target>
+
+  <!-- Runs the cluster queue administration -->
+  <target name="queue_cluster_admin" depends="init"
+    description="--> Runs the cluster queue administration">
+    <java classname="cluster.queue.ClusterAdmin" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <target name="queue_cluster_adminxml" depends="init"
+    description="--> Runs the cluster queue administration xml">
+    <copy file="${src.dir}/cluster/queue/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
+    <java classname="org.objectweb.joram.client.jms.admin.AdminModule"
+          failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="./joramAdmin.xml"/>
+      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
+    </java>
+  </target>
+
+  <!-- Runs a queue cluster consumer -->
+  <target name="queue_cluster_consumer" depends="init">
+    <input message="server=" addProperty="sid" validargs="-,0,1,2"/>
+    <java classname="cluster.queue.Consumer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dsleep=5000 -DnbMsgSleep=10"/>
+      <arg value="${sid}"/>
+    </java>
+  </target>
+
+  <!-- Runs a queue cluster producer -->
+  <target name="queue_cluster_producer" depends="init">
+    <input message="server=" addProperty="sid" validargs="-,0,1,2"/>
+    <java classname="cluster.queue.Producer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="${sid} 1000"/>
+    </java>
+  </target>
+
+  <!-- Setup topic tree configuration -->
+  <target name="tree_admin" depends="init"
+    description="--> Runs the topic tree administration">
+    <java classname="topicTree.TreeAdmin" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the tree consumer client -->
+  <target name="tree_consumer" depends="init"
+    description="--> Starts a tree Consumer client">
+    <java classname="topicTree.Consumer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the tree producer client -->
+  <target name="tree_producer" depends="init"
+    description="--> Starts a tree Producer client">
+    <java classname="topicTree.Producer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Setup the dead message queue configuration -->
+  <target name="dmq_admin" depends="init"
+          description="--> Runs a dead message queue administration (for a centralized architecture)">
+    <java classname="deadMQueue.DMQAdmin" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <target name="dmq_adminxml" depends="init"
+          description="--> Runs a dead message queue administration xml (for a centralized architecture)">
+    <copy file="${src.dir}/deadMQueue/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
+    <java classname="org.objectweb.joram.client.jms.admin.AdminModule"
+          failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="./joramAdmin.xml"/>
+    </java>
+  </target>
+
+  <!-- Runs the dead message queue watcher client -->
+  <target name="dmq_watcher" depends="init"
+    description="--> Starts a dead message queue watcher client">
+    <java classname="deadMQueue.DMQWatcher" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the dead message queue client -->
+  <target name="dmq_client" depends="init"
+    description="--> Starts a dead message queue client">
+    <java classname="deadMQueue.DMQClient" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Starts the server side soap service -->
+  <target name="soap_start" depends="soap_init"
+   description="--> Starts the server side soap service">
+    <java classname="org.objectweb.joram.client.jms.soap.SoapServiceStarter"
+          failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="localhost 8080 1 S1"/>
+    </java>
+  </target>
+
+  <!-- Starts the server 1 of the soap configuration -->
+  <target name="soap_server" depends="soap_init"
+   description="--> Starts server 0 of the SOAP configuration">
+    <java classname="fr.dyade.aaa.agent.AgentServer"
+          failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="0 ./s0"/>
+    </java>
+  </target>
+
+  <!-- Runs the soap tests dministrator -->
+  <target name="soap_admin" depends="init"
+    description="--> Starts the SOAP test administrator">
+    <java classname="soap.SoapAdmin" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the soap producer -->
+  <target name="soap_producer" depends="init"
+    description="--> Starts the SOAP tester">
+    <java classname="soap.SoapProducer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the soap consumer -->
+  <target name="soap_consumer" depends="init"
+    description="--> Starts the SOAP consumer">
+    <java classname="soap.SoapConsumer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the perfs tests administrator -->
+  <target name="perfs_admin" depends="init"
+    description="--> Starts the PERFS admin">
+    <java classname="perfs.PerfsAdmin" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the perfs tests sender -->
+  <target name="perfs_sender" depends="init"
+    description="--> Starts the PERFS sender">
+    <java classname="perfs.PerfsSender" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the perfs tests receiver -->
+  <target name="perfs_receiver" depends="init"
+    description="--> Starts the PERFS receiver">
+    <java classname="perfs.PerfsReceiver" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the perfs tests publisher -->
+  <target name="perfs_pub" depends="init"
+    description="--> Starts the PERFS publisher">
+    <java classname="perfs.PerfsPublisher" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the perfs tests subscriber -->
+  <target name="perfs_sub" depends="init"
+    description="--> Starts the PERFS subscriber">
+    <java classname="perfs.PerfsSubscriber" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- BRIDGE TESTS -->
+  <target name="bridge_server0" depends="bridge_init"
+          description="--> Starts a server 0 for bridge">
+    <antcall target="server">
+      <param name="sid" value="0"/>
+    </antcall>
+  </target>
+  <target name="bridge_server1" depends="bridge_init"
+          description="--> Starts a server 1 for bridge">
+    <antcall target="server">
+      <param name="sid" value="1"/>
+    </antcall>
+  </target>
+	
+  <!-- Runs the bridge administration -->
+  <target name="bridge_admin" depends="init"
+    description="--> Runs the BRIDGE sample administration">
+    <java classname="bridge.BridgeAdmin" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the bridge sender -->
+  <target name="bridge_producer" depends="init"
+    description="--> Runs the BRIDGE sample producer">
+    <java classname="bridge.BridgeProducer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the bridge consumer -->
+  <target name="bridge_consumer" depends="init"
+    description="--> Runs the BRIDGE sample consumer">
+    <java classname="bridge.BridgeConsumer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+
+ <!-- Runs the bridge sender -->
+  <target name="bridge_publisher" depends="init"
+    description="--> Runs the BRIDGE sample producer">
+    <java classname="bridge.BridgePublisher" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the bridge consumer -->
+  <target name="bridge_subscriber" depends="init"
+    description="--> Runs the BRIDGE sample consumer">
+    <java classname="bridge.BridgeSubscriber" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+
+
+	
+  <!-- Runs the foreign sender -->
+  <target name="foreign_producer" depends="init"
+    description="--> Runs the foreign sample producer">
+    <java classname="bridge.ForeignProducer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the foreign consumer -->
+  <target name="foreign_consumer" depends="init"
+    description="--> Runs the foreign sample consumer">
+    <java classname="bridge.ForeignConsumer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+
+
+ <!-- Runs the foreign sender -->
+  <target name="foreign_publisher" depends="init"
+    description="--> Runs the foreign sample producer">
+    <java classname="bridge.ForeignPublisher" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the foreign consumer -->
+  <target name="foreign_subscriber" depends="init"
+    description="--> Runs the foreign sample consumer">
+    <java classname="bridge.ForeignSubscriber" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ***************************************************************** -->
+<!-- *                            SSL                                * -->
+<!-- ***************************************************************** -->
+  <target name="sslinit" depends="init">
+    <property name="keystore" location="${run.dir}/joram_ks"/>
+    <property name="keystore_pass" value="jorampass"/>
+  </target>
+
+  <!-- Initializes the ssl centralized configuration -->
+  <target name="sslsimple_init" depends="sslinit">
+    <mkdir dir="${run.dir}"/>
+    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
+    <copy file="${conf.dir}/jndi.properties"
+          tofile="${run.dir}/jndi.properties"/>
+    <copy file="${conf.dir}/sslcentralized_a3servers.xml"
+          tofile="${run.dir}/a3servers.xml"
+          overwrite="true"/>
+    <copy file="${conf.dir}/joram_ks" todir="${run.dir}"/>
+  </target>
+
+  <!-- Start a server in NullTransaction mode -->
+  <target name="sslsingle_server" depends="sslsimple_init">
+    <java classname="fr.dyade.aaa.agent.AgentServer"
+          failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -Dorg.objectweb.joram.keystore=${keystore} -Dorg.objectweb.joram.keystorepass=${keystore_pass}"/>
+      <arg line="0 s0"/>
+    </java>
+  </target>
+
+  <!-- Setup the sslClassic configuration -->
+  <target name="sslclassic_admin" depends="sslinit"
+          description="--> Runs a ssl classic administration (for a centralized architecture)">
+    <java classname="classic.SSLClassicAdmin"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dorg.objectweb.joram.keystore=${keystore} -Dorg.objectweb.joram.keystorepass=${keystore_pass}"/>
+    </java>
+  </target>
+
+  <!-- Runs the sslClassic sender client -->
+  <target name="sslsender" depends="sslinit"
+    description="--> Starts a Sender client">
+    <java classname="classic.Sender" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dorg.objectweb.joram.keystore=${keystore} -Dorg.objectweb.joram.keystorepass=${keystore_pass}"/>
+    </java>
+  </target>
+
+  <!-- Runs the sslClassic receiver client -->
+  <target name="sslreceiver" depends="sslinit"
+    description="--> Starts a Receiver client">
+    <java classname="classic.Receiver" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dorg.objectweb.joram.keystore=${keystore} -Dorg.objectweb.joram.keystorepass=${keystore_pass}"/>
+    </java>
+  </target>
+
+  <!-- Runs the sslClassic subscriber client -->
+  <target name="sslsubscriber" depends="sslinit"
+    description="--> Starts a Subscriber client">
+    <java classname="classic.Subscriber" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dorg.objectweb.joram.keystore=${keystore} -Dorg.objectweb.joram.keystorepass=${keystore_pass}"/>
+    </java>
+  </target>
+
+  <!-- Runs the sslClassic publisher client -->
+  <target name="sslpublisher" depends="sslinit"
+    description="--> Starts a Publisher client">
+    <java classname="classic.Publisher" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dorg.objectweb.joram.keystore=${keystore} -Dorg.objectweb.joram.keystorepass=${keystore_pass}"/>
+    </java>
+  </target>
+
+  <!-- Runs the sslClassic consumer client -->
+  <target name="sslconsumer" depends="sslinit"
+    description="--> Starts a Consumer client">
+    <java classname="classic.Consumer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dorg.objectweb.joram.keystore=${keystore} -Dorg.objectweb.joram.keystorepass=${keystore_pass}"/>
+    </java>
+  </target>
+
+  <!-- Runs the sslClassic producer client -->
+  <target name="sslproducer" depends="sslinit"
+    description="--> Starts a Producer client">
+    <java classname="classic.Producer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dorg.objectweb.joram.keystore=${keystore} -Dorg.objectweb.joram.keystorepass=${keystore_pass}"/>
+    </java>
+  </target>
+
+  <!-- Runs the sslClassic browser client -->
+  <target name="sslbrowser" depends="sslinit"
+    description="--> Starts a Browser client">
+    <java classname="classic.Browser" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dorg.objectweb.joram.keystore=${keystore} -Dorg.objectweb.joram.keystorepass=${keystore_pass}"/>
+    </java>
+  </target>
+
+<!-- ***************************************************************** -->
+<!-- *                            HA                                 * -->
+<!-- ***************************************************************** -->
+  <!-- Initializes the HA configuration -->
+  <target name="ha_init" depends="init">
+    <mkdir dir="${run.dir}"/>
+    <mkdir dir="${run.dir}/ha${haId}"/>
+    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}/ha${haId}"/>
+    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}/ha${haId}"/>
+    <copy file="${conf.dir}/jndi.properties"
+          tofile="${run.dir}/ha${haId}/jndi.properties"
+          overwrite="true"/>
+    <copy file="${conf.dir}/ha_a3servers.xml"
+          tofile="${run.dir}/ha${haId}/a3servers.xml"
+          overwrite="true"/>
+  </target>
+
+  <!-- Starts a HA server -->
+  <target name="ha_server" depends="ha_init">
+    <java classname="fr.dyade.aaa.agent.AgentServer"
+          failonerror="no" fork="yes"
+          dir="${run.dir}/ha${haId}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <arg line="${sid} ./s${sid} ${haId}"/>
+    </java>
+  </target>
+
+  <target name="ha_server0"
+          description="--> Starts a server for a HA architecture (HA #0)">
+    <antcall target="ha_server">
+      <param name="sid" value="0"/>
+      <param name="haId" value="0"/>
+    </antcall>
+  </target>
+  <target name="ha_server1"
+          description="--> Starts a server for a distributed architecture (HA #1)">
+    <antcall target="ha_server">
+      <param name="sid" value="0"/>
+      <param name="haId" value="1"/>
+    </antcall>
+  </target>
+  <target name="ha_server2"
+          description="--> Starts a server for a distributed architecture (HA #2)">
+    <antcall target="ha_server">
+      <param name="sid" value="0"/>
+      <param name="haId" value="2"/>
+    </antcall>
+  </target>
+
+  <!-- Runs the HA administration -->
+  <target name="ha_admin" depends="init"
+    description="--> Runs the ha administration">
+    <java classname="ha.HAAdmin" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs a HA subscriber -->
+  <target name="ha_sub" depends="init"
+    description="--> Runs the ha subscriber">
+    <java classname="ha.Subscriber" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs a HA publisher -->
+  <target name="ha_pub" depends="init"
+    description="--> Runs the ha publisher">
+    <java classname="ha.Publisher" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- ***************************************************************** -->
+  <!-- *                            HA JNDI                            * -->
+  <!-- ***************************************************************** -->
+    <!-- Initializes the HA JNDI configuration -->
+    <target name="hajndi_init" depends="init">
+      <mkdir dir="${run.dir}"/>
+      <mkdir dir="${run.dir}/hajndi${haId}"/>
+      <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}/hajndi${haId}"/>
+      <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}/hajndi${haId}"/>
+      <copy file="${conf.dir}/hajndi_a3servers.xml"
+            tofile="${run.dir}/hajndi${haId}/a3servers.xml"
+            overwrite="true"/>
+    </target>
+
+    <!-- Starts a HA JNDI server -->
+    <target name="hajndi_server" depends="hajndi_init">
+      <java classname="fr.dyade.aaa.agent.AgentServer"
+            failonerror="no" fork="yes"
+            dir="${run.dir}/hajndi${haId}">
+        <classpath path="${project.class.path}"/>
+        <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+        <arg line="${sid} ./s${sid} ${haId}"/>
+      </java>
+    </target>
+
+    <target name="hajndi_server0"
+            description="--> Starts a server for a HA JNDI architecture (HA JNDI #0)">
+      <antcall target="hajndi_server">
+        <param name="sid" value="0"/>
+        <param name="haId" value="0"/>
+      </antcall>
+    </target>
+  
+    <target name="hajndi_server1"
+            description="--> Starts a server for a HA JNDI architecture (HA JNDI #1)">
+      <antcall target="hajndi_server">
+        <param name="sid" value="0"/>
+        <param name="haId" value="1"/>
+      </antcall>
+    </target>
+
+ 	 <target name="hajndi_server3" depends="init"
+           description="--> Starts a server for a HA JNDI architecture (Server #3)">
+ 	   <mkdir dir="${run.dir}"/>
+ 	   <mkdir dir="${run.dir}/hajndi3"/>
+     <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}/hajndi3"/>
+     <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}/hajndi3"/>
+     <copy file="${conf.dir}/hajndi_a3servers.xml"
+           tofile="${run.dir}/hajndi3/a3servers.xml"
+           overwrite="true"/>
+  		<java classname="fr.dyade.aaa.agent.AgentServer"
+    		    failonerror="no" fork="yes"
+      		  dir="${run.dir}/hajndi3">
+    		<classpath path="${project.class.path}"/>
+    		<jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+    		<arg line="3 ./s3"/>
+  		</java>
+		</target>
+  
+    <!-- Runs the HA administration --> 
+ 	 	<target name="hajndi_adminxml" depends="init"
+    	      description="--> Runs a HA JNDI administration XML">
+   	 	<copy file="${src.dir}/hajndi/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
+	    <java classname="org.objectweb.joram.client.jms.admin.AdminModule"
+			      failonerror="no" fork="yes"
+      			dir="${run.dir}">
+      	<classpath path="${project.class.path}"/>
+      	<arg line="./joramAdmin.xml"/>
+    	</java>
+  	</target>
+
+    <!-- Runs a HA JNDI subscriber -->
+    <target name="hajndi_sub" depends="init"
+      description="--> Runs the ha jndi subscriber">
+      <java classname="hajndi.Subscriber" failonerror="no" fork="yes"
+            dir="${run.dir}">
+        <classpath path="${project.class.path}"/>
+      </java>
+    </target>
+
+    <!-- Runs a HA JNDI publisher -->
+    <target name="hajndi_pub" depends="init"
+      description="--> Runs the ha jndi publisher">
+      <java classname="hajndi.Publisher" failonerror="no" fork="yes"
+            dir="${run.dir}">
+        <classpath path="${project.class.path}"/>
+      </java>
+    </target>
+  
+  <!-- Runs a HA JNDI list -->
+  <target name="hajndi_list0" depends="init"
+    description="--> Runs the ha jndi list">
+    <java classname="hajndi.List" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="0"/>
+    </java>
+  </target>
+  
+  <!-- Runs a JNDI list server 3-->
+  <target name="hajndi_list3" depends="init"
+    description="--> Runs the ha jndi list">
+    <java classname="hajndi.List" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+
+
+
+  <!-- ***************************************************************** -->
+  <!-- *                            BRIDGE                             * -->
+  <!-- ***************************************************************** -->
+ <!-- BRIDGE TESTS -->
+  <target name="XAbridge_server0" depends="bridge_init"
+          description="--> Starts a server 0 for bridge">
+    <antcall target="server">
+      <param name="sid" value="0"/>
+    </antcall>
+  </target>
+  <target name="XAbridge_server1" depends="bridge_init"
+          description="--> Starts a server 1 for bridge">
+    <antcall target="server">
+      <param name="sid" value="1"/>
+    </antcall>
+  </target>
+	
+  <!-- Runs the bridge administration -->
+  <target name="XAbridge_admin" depends="init"
+    description="--> Runs the BRIDGE sample administration">
+    <java classname="bridge.XABridgeAdmin" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the bridge sender -->
+  <target name="XAforeign_publisher" depends="init"
+    description="--> Runs the BRIDGE sample producer">
+    <java classname="bridge.XAForeignPublisher" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the bridge consumer -->
+  <target name="XAforeign_subscriber" depends="init"
+    description="--> Runs the BRIDGE sample consumer">
+    <java classname="bridge.XAForeignSubscriber" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+	
+  <!-- Runs the foreign sender -->
+  <target name="XAforeign_producer" depends="init"
+    description="--> Runs the foreign sample producer">
+    <java classname="bridge.XAForeignProducer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the foreign consumer -->
+  <target name="XAforeign_consumer" depends="init"
+    description="--> Runs the foreign sample consumer">
+    <java classname="bridge.XAForeignConsumer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+ <target name="jca" depends="init"
+    description="--> Runs the JCA connector">
+    <copy file="${conf.dir}/joramAdmin.xml" todir="${run.dir}"/>
+    <java classname="connector.Connector" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+  
+  <!-- **************************************************
+       * Monitoring sample
+       ************************************************** -->
+  <!-- Setup the monitoring configuration -->
+  <target name="monitoring_admin" depends="init"
+          description="--> Runs administration stuff for monitoring sample">
+    <java classname="monitoring.MonitoringAdmin"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+  
+  <!-- Runs the producer client -->
+  <target name="monitoring_producer" depends="init"
+    description="--> Starts a Producer client">
+    <java classname="monitoring.Producer" failonerror="no" fork="yes" dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the consumer client -->
+  <target name="monitoring_consumer" depends="init"
+    description="--> Starts a Consumer client">
+    <java classname="monitoring.Consumer" failonerror="no" fork="yes" dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+  
+  <!-- Runs the monitoring -->
+  <target name="monitoring_monitor" depends="init"
+    description="--> Starts a monitoring client">
+    <java classname="monitoring.Monitor" failonerror="no" fork="yes" dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- **************************************************
+       * Collector sample
+       ************************************************** -->
+  <!-- Setup the collector configuration -->
+  <target name="collector_admin" depends="init"
+          description="--> Runs administration stuff for collector sample">
+    <java classname="collector.CollectorAdmin"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+  
+  <!-- Runs the producer client -->
+  <target name="collector_producer" depends="init"
+    description="--> Starts a collector Producer client">
+    <java classname="collector.Producer" failonerror="no" fork="yes" dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the consumer client -->
+  <target name="collector_consumer" depends="init"
+    description="--> Starts a collector Consumer client">
+    <java classname="collector.Consumer" failonerror="no" fork="yes" dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+   
+  <!-- **************************************************
+       * Cron sample
+       ************************************************** -->
+  <!-- cron test -->
+   <target name="cron" depends="init">
+     <mkdir dir="${run.dir}"/>
+     <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
+     <java classname="cron.CronTest"
+           failonerror="no" fork="yes"
+           dir="${run.dir}">
+       <classpath path="${project.class.path}"/>
+     </java>     
+  </target>
+  
+  <!-- **************************************************
+       * FTP sample
+       ************************************************** -->
+  <!-- Setup the FTP configuration -->
+  <target name="ftp_admin" depends="init"
+          description="--> Runs administration stuff for FTP sample">
+    <java classname="ftp.FtpAdmin"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="anonymous anonymous"/>
+    </java>
+  </target>
+  
+  <!-- Runs the producer client -->
+  <target name="ftp_producer" depends="init"
+    description="--> Starts a FTP Producer client">
+    <java classname="ftp.Producer" failonerror="no" fork="yes" dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="ftp.kernel.org welcome.msg"/>
+    </java>
+  </target>
+
+  <!-- Runs the consumer client -->
+  <target name="ftp_receiver" depends="init"
+    description="--> Starts a FTP Receiver client">
+    <java classname="ftp.Receiver" failonerror="no" fork="yes" dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+</project>
