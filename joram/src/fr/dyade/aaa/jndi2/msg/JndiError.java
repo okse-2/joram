@@ -27,10 +27,6 @@ import javax.naming.NamingException;
 
 public class JndiError extends JndiReply {
   
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private NamingException exc;
 
   public JndiError(NamingException exc) {

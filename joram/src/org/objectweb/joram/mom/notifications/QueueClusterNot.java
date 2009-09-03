@@ -27,10 +27,6 @@ import fr.dyade.aaa.agent.Notification;
 
 public class QueueClusterNot extends Notification {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private float rateOfFlow;
 
   public QueueClusterNot(float rateOfFlow) {

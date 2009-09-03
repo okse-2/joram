@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,76 +19,52 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Contributor(s): Nicolas Tachker (ScalAgent)
  */
 package org.objectweb.joram.client.jms.tcp;
 
-import javax.jms.JMSException;
+import org.objectweb.joram.client.jms.XAConnection;
+import org.objectweb.joram.client.jms.admin.AdminModule;
 
-import org.objectweb.joram.client.jms.ConnectionFactory;
-import org.objectweb.joram.client.jms.FactoryParameters;
-import org.objectweb.joram.client.jms.connection.RequestChannel;
-import org.objectweb.joram.shared.security.Identity;
+import java.util.Vector;
+
+import javax.naming.NamingException;
+
 
 /**
  * An <code>XATcpConnectionFactory</code> instance is a factory of
  * TCP connections dedicated to XA communication.
- *  
- * @deprecated Replaced next to Joram 5.2.1 by {@link TcpConnectionFactory}.
  */
-public class XATcpConnectionFactory extends org.objectweb.joram.client.jms.XAConnectionFactory {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
-  /**
-   * Constructs an <code>iXATcpConnectionFactory</code> instance.
-   * This empty constructor is needed for JNDI.
-   * Should only be used for internal purposes.
-   */
-  public XATcpConnectionFactory() {
-    super();
-  }
-  
+public class XATcpConnectionFactory
+             extends org.objectweb.joram.client.jms.XAConnectionFactory
+{
   /**
    * Constructs an <code>iXATcpConnectionFactory</code> instance.
    *
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */
-  private XATcpConnectionFactory(String host, int port) {
+  public XATcpConnectionFactory(String host, int port)
+  {
     super(host, port);
   }
 
   /**
-   * Creates the <code>TcpRequestChannel</code> object specific to the protocol used.
-   * 
-   * @param params          Connection configuration parameters.
-   * @param identity        Client's identity.
-   * @param reliableClass   The protocol specific class.
-   * @return                The <code>RequestChannel</code> object specific to the protocol used.
-   * 
-   * @exception JMSException  A problem occurs during the connection.
-   * 
-   * @see ConnectionFactory#createRequestChannel(FactoryParameters, Identity, String)
-   */
-  protected RequestChannel createRequestChannel(FactoryParameters params,
-                                                Identity identity,
-                                                String reliableClass) throws JMSException {
-    return new TcpRequestChannel(params, identity, reliableClass);
-  }
-
-  /**
-   * Admin method creating a <code>javax.jms.XAConnectionFactory</code> 
-   * instance for creating TCP connections with the default server.
+   * Method inherited from the <code>XAConnectionFactory</code> class.
    *
-   * @exception ConnectException  If the admin connection is closed or broken.
-   * @see #getDefaultServerHost()
-   * @see #getDefaultServerPort()
-   */ 
-  public static javax.jms.XAConnectionFactory create() throws java.net.ConnectException  {
-    return create(getDefaultServerHost(), getDefaultServerPort());
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.XAConnection
+      createXAConnection(String name, String password)
+    throws javax.jms.JMSException {
+    return new XAConnection(params,
+                            new TcpConnection(params, 
+                                              name, 
+                                              password,
+                                              reliableClass));
   }
-
+  
   /**
    * Admin method creating a <code>javax.jms.XAConnectionFactory</code> 
    * instance for creating TCP connections with a given server.
@@ -96,8 +72,11 @@ public class XATcpConnectionFactory extends org.objectweb.joram.client.jms.XACon
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */ 
-  public static javax.jms.XAConnectionFactory create(String host, int port) {
-    return create(host, port, "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
+  public static javax.jms.XAConnectionFactory
+      create(String host, int port) {
+    return create(host, 
+                  port,
+                  "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
   }
 
   /**
@@ -108,9 +87,25 @@ public class XATcpConnectionFactory extends org.objectweb.joram.client.jms.XACon
    * @param port  Server's listening port.
    * @param reliableClass  Reliable class name.
    */ 
-  public static javax.jms.XAConnectionFactory create(String host, int port, String reliableClass) {
+  public static javax.jms.XAConnectionFactory 
+      create(String host, 
+             int port,
+             String reliableClass) {
     XATcpConnectionFactory cf = new XATcpConnectionFactory(host, port);
     cf.setReliableClass(reliableClass);
     return cf;
   }
+
+  /**
+   * Admin method creating a <code>javax.jms.XAConnectionFactory</code> 
+   * instance for creating TCP connections with the local server.
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   */ 
+  public static javax.jms.XAConnectionFactory create()
+                throws java.net.ConnectException
+  {
+    return create(AdminModule.getLocalHost(), AdminModule.getLocalPort());
+  }
+
 }

@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
- * Copyright (C) 2004 - 2000 Bull SA
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,20 +18,19 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
+ * Initial developer(s): Frederic Maistre (Bull SA)
  * Contributor(s): ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.jms;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
 import javax.jms.JMSException;
-
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
+
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 import org.objectweb.joram.shared.client.ProducerMessages;
 import org.objectweb.joram.shared.client.SessAckRequest;
@@ -42,9 +41,6 @@ import org.objectweb.joram.shared.client.XACnxRecoverRequest;
 import org.objectweb.joram.shared.client.XACnxRollback;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.common.Debug;
 
 /**
  * Utility class used by XA connections for managing XA resources.
@@ -61,8 +57,6 @@ public class XAResourceMngr {
   /** Prepared transaction. */
   public static final int PREPARED = 4;
 
-  private static Logger logger = Debug.getLogger(XAResourceMngr.class.getName());
-
   /**
    * The table of known transactions.
    * <p>
@@ -77,6 +71,7 @@ public class XAResourceMngr {
   /** table of Session (key Xid). */
   Hashtable sessionTable;
 
+
   /**
    * Creates a <code>XAResourceMngr</code> instance.
    *
@@ -87,8 +82,8 @@ public class XAResourceMngr {
     transactions = new Hashtable();
     sessionTable = new Hashtable();
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
                                  " XAResourceMngr cnx = " + cnx);
   }
 
@@ -99,11 +94,13 @@ public class XAResourceMngr {
    *                         the RM in an incompatible state with the start
    *                         request.
    */
-  synchronized void start(Xid xid, int flag,
-                          Session sess) throws XAException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                                 " XAResourceMngr start(" + xid + ", " + flag + ", " + sess +")");
+  synchronized void start(Xid xid, int flag, Session sess) 
+    throws XAException {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 " XAResourceMngr start(" + xid +
+                                 ", " + flag +
+                                 ", " + sess +")");
 
     sess.setTransacted(true); // for XAResource.TMRESUME
     sessionTable.put(xid,sess);
@@ -115,26 +112,38 @@ public class XAResourceMngr {
 
       transactions.put(xid, new XAContext());
 
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,
-                                   "--- " + this + ": involved in transaction " + xid.toString()); 
-    } else if (flag == XAResource.TMRESUME) {
-      // Resumed transaction.
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                   "--- "
+                                   + this
+                                   + ": involved in transaction "
+                                   + xid.toString()); 
+    }
+    // Resumed transaction.
+    else if (flag == XAResource.TMRESUME) {
       if (! transactions.containsKey(xid))
         throw new XAException("Can't resume unknown transaction.");
 
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,
-                                   "--- " + this + ": resumes transaction " + xid.toString()); 
-    } else if (flag == XAResource.TMJOIN) {
-      // Already known transaction.
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                   "--- "
+                                   + this
+                                   + ": resumes transaction "
+                                   + xid.toString()); 
+    }
+    // Already known transaction.
+    else if (flag == XAResource.TMJOIN) {
       if (! transactions.containsKey(xid))
         throw new XAException("Can't join unknown transaction.");
 
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,
-                                   "--- " + this + ": joins transaction " + xid.toString()); 
-    } else
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                   "--- "
+                                   + this
+                                   + ": joins transaction "
+                                   + xid.toString()); 
+    }
+    else
       throw new XAException("Invalid flag: " + flag);
 
     setStatus(xid, STARTED);
@@ -146,20 +155,25 @@ public class XAResourceMngr {
    * @exception XAException  If the specified transaction is in an
    *                         incompatible state with the end request.
    */
-  synchronized void end(Xid xid, int flag,
-                        Session sess) throws XAException {
+  synchronized void end(Xid xid, int flag, Session sess) 
+    throws XAException {
     boolean saveResourceState = true;
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                                 "--- " + this + ": end(" + xid + ", " + flag + ", " + sess + ")"); 
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 "--- "
+                                 + this
+                                 + ": end(" + xid
+                                 + ", " + flag
+                                 + ", " + sess + ")"); 
     
     if (flag == XAResource.TMSUSPEND) {
       if (getStatus(xid) != STARTED)
         throw new XAException("Can't suspend non started transaction.");
 
       setStatus(xid, SUSPENDED);
-    } else {
+    }
+    else {
       if (getStatus(xid) != STARTED && getStatus(xid) != SUSPENDED)
         throw new XAException("Can't end non active or non "
                               + "suspended transaction.");
@@ -184,9 +198,12 @@ public class XAResourceMngr {
     }
 
     Session session = (Session) sessionTable.get(xid);
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                                 "--- " + this + ": end(...) session="  + session);
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 "--- "
+                                 + this
+                                 + ": end(...) session=" 
+                                 + session);
 
     if (session != null) {
       session.setTransacted(false);
@@ -201,10 +218,14 @@ public class XAResourceMngr {
    *                         incompatible state with the prepare request,
    *                         or if the request fails.
    */
-  synchronized void prepare(Xid xid) throws XAException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                                 "--- " + this  + ": prepare(" + xid + ")"); 
+  synchronized void prepare(Xid xid) 
+    throws XAException {
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 "--- "
+                                 + this
+                                 + ": prepare(" + xid + ")"); 
     
     try {
       if (getStatus(xid) == ROLLBACK_ONLY)
@@ -212,8 +233,8 @@ public class XAResourceMngr {
 
       XAContext xaC = (XAContext) transactions.get(xid);
 
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG,
                                    "--- "
                                    + this
                                    + ": prepares transaction "
@@ -249,6 +270,7 @@ public class XAResourceMngr {
                                         sessAcks));
 
       setStatus(xid, PREPARED);
+
     } catch (JMSException exc) {
       setStatus(xid, ROLLBACK_ONLY);
       throw new XAException("Prepare request failed: " + exc);
@@ -265,22 +287,31 @@ public class XAResourceMngr {
    *                         incompatible state with the commit request,
    *                         or if the request fails.
    */
-  synchronized void commit(Xid xid) throws XAException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                                 "--- " + this + ": commit(" + xid + ")"); 
+  synchronized void commit(Xid xid) 
+    throws XAException {
+
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 "--- "
+                                 + this
+                                 + ": commit(" + xid + ")"); 
 
     try {
       if (getStatus(xid) != PREPARED)
         throw new XAException("Can't commit non prepared transaction.");
 
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,
-                                   "--- " + this + ": commits transaction " + xid.toString()); 
+      XAContext xaC = (XAContext) transactions.get(xid);
+
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                   "--- "
+                                   + this
+                                   + ": commits transaction "
+                                   + xid.toString()); 
 
       cnx.syncRequest(new XACnxCommit(xid.getBranchQualifier(),
-                                      xid.getFormatId(),
-                                      xid.getGlobalTransactionId())); 
+                                       xid.getFormatId(),
+                                       xid.getGlobalTransactionId())); 
 
       transactions.remove(xid);
       Session session = (Session) sessionTable.get(xid);
@@ -303,11 +334,14 @@ public class XAResourceMngr {
    *                         incompatible state with the rollback request,
    *                         or if the request fails.
    */
-  synchronized void rollback(Xid xid) throws XAException {
+  synchronized void rollback(Xid xid)
+    throws XAException {
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                                 "--- " + this + ": rollback(" + xid + ")");
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 "--- "
+                                 + this
+                                 + ": rollback(" + xid + ")");
 
     try {
       XAContext xaC = (XAContext) transactions.get(xid);
@@ -315,9 +349,12 @@ public class XAResourceMngr {
       if (xaC == null)
         throw new XAException("Unknown transaction.");
 
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,
-                                   "--- " + this + ": rolls back transaction " + xid.toString()); 
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                   "--- "
+                                   + this
+                                   + ": rolls back transaction "
+                                   + xid.toString()); 
 
       Enumeration targets; 
       String target;
@@ -361,9 +398,10 @@ public class XAResourceMngr {
    * @exception XAException  If the specified flag is invalid, or if the
    *                         request fails.
    */
-  synchronized Xid[] recover(int flag) throws XAException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
+  synchronized Xid[] recover(int flag) throws XAException
+  {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
                                  "--- "
                                  + this
                                  + ": recovers transactions.");
@@ -374,22 +412,17 @@ public class XAResourceMngr {
     try {
       XACnxRecoverReply reply =
         (XACnxRecoverReply) cnx.syncRequest(new XACnxRecoverRequest());
-     
-      if (reply == null) {
-        return new Xid[0];  
-      }
-      
+
       Xid[] xids = new Xid[reply.getSize()];
 
       for (int i = 0; i < reply.getSize(); i++) {
         xids[i] = new XidImpl(reply.getBranchQualifier(i),
                               reply.getFormatId(i),
                               reply.getGlobalTransactionId(i));
-        transactions.put(xids[i], new XAContext());
-        setStatus(xids[i], PREPARED);
       }
       return xids;
-    } catch (Exception exc) {
+    }
+    catch (Exception exc) {
       throw new XAException("Recovery request failed: " + exc.getMessage());
     }
   }
@@ -399,7 +432,8 @@ public class XAResourceMngr {
    *
    * @exception XAException  If the transaction is unknown.
    */
-  private void setStatus(Xid xid, int status) throws XAException {
+  private void setStatus(Xid xid, int status) throws XAException
+  {
     XAContext xac = (XAContext) transactions.get(xid);
 
     if (xac == null)
@@ -413,7 +447,8 @@ public class XAResourceMngr {
    *
    * @exception XAException  If the transaction is unknown.
    */
-  private int getStatus(Xid xid) throws XAException  {
+  private int getStatus(Xid xid) throws XAException
+  {
     XAContext xac = (XAContext) transactions.get(xid);
 
     if (xac == null)
@@ -429,8 +464,8 @@ public class XAResourceMngr {
 
     XAResourceMngr other = (XAResourceMngr) o;
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
                                  this + ": equals other = " + other.cnx + 
                                  ", this.cnx = " + cnx +
                                  ", equals = " + cnx.equals(other.cnx));
@@ -442,7 +477,8 @@ public class XAResourceMngr {
 /**
  * Utility class holding a resource's state during transaction progress.
  */
-class XAContext {
+class XAContext
+{
   /** The transaction status. */
   int status;
   /**
@@ -466,7 +502,8 @@ class XAContext {
   /**
    * Constructs an <code>XAContext</code> instance.
    */
-  XAContext() {
+  XAContext()
+  {
     sendings = new Hashtable();
     deliveries = new Hashtable();
   }
@@ -475,7 +512,8 @@ class XAContext {
   /**
    * Adds new sendings performed by the resumed transaction.
    */
-  void addSendings(Hashtable newSendings) {
+  void addSendings(Hashtable newSendings)
+  {
     String newDest;
     ProducerMessages newPM;
     ProducerMessages storedPM;
@@ -496,7 +534,8 @@ class XAContext {
       else {
         msgs = newPM.getMessages();
         for (int i = 0; i < msgs.size(); i++)
-          storedPM.addMessage((org.objectweb.joram.shared.messages.Message) msgs.get(i));
+          storedPM.addMessage((org.objectweb.joram.shared.messages.Message)
+                              msgs.get(i));
       }
     }
   }
@@ -504,7 +543,8 @@ class XAContext {
   /**
    * Adds new deliveries occured within the resumed transaction.
    */
-  void addDeliveries(Hashtable newDeliveries) {
+  void addDeliveries(Hashtable newDeliveries)
+  {
     String newName;
     MessageAcks newAcks;
     MessageAcks storedAcks;

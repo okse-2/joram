@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,28 +23,19 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 /**
  * A <code>CreateDestinationReply</code> instance replies to a
  * destination creation request, produced by the AdminTopic.
  */
 public class CreateDestinationReply extends AdminReply {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1736644771875896265L;
 
   /** Identifier of the created destination. */
   private String id;
 
   private String name;
 
-  // TODO (AF): No longer needed, the destination type is specified in the request,
-  // it must be the same in the reply otherwise an error must be returned !!
-  
-//  private byte type;
+  private String type;
 
   /**
    * Constructs a <code>CreateDestinationReply</code> instance.
@@ -52,14 +43,17 @@ public class CreateDestinationReply extends AdminReply {
    * @param id  The id of the created destination.
    * @param info  Related information.
    */
-  public CreateDestinationReply(String id, String name, String info) {
+  public CreateDestinationReply(
+    String id, 
+    String name,
+    String type,
+    String info) {
     super(true, info);
     this.id = id;
     this.name = name;
+    this.type = type;
   }
 
-  public CreateDestinationReply() { }
-  
   /** Returns the id of the created queue. */
   public final String getId() {
     return id;
@@ -69,29 +63,14 @@ public class CreateDestinationReply extends AdminReply {
     return name;
   }
 
-//  public final byte getType() {
-//    return type;
-//  }
+  public final String getType() {
+    return type;
+  }
 
   public String toString() {
-    return '(' + super.toString() + ",id=" + id + ",name=" + name + ')';
-  }
-  
-  protected int getClassId() {
-    return CREATE_DESTINATION_REPLY;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    id = StreamUtil.readStringFrom(is);
-    name = StreamUtil.readStringFrom(is);
-//    type = StreamUtil.readByteFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    StreamUtil.writeTo(id, os);
-    StreamUtil.writeTo(name, os);
-//    StreamUtil.writeTo(type, os);
+    return '(' + super.toString() +
+      ",id=" + id + 
+      ",name=" + name + 
+      ",type=" + type + ')';
   }
 }

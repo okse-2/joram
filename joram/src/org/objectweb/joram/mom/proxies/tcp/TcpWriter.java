@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
- * Copyright (C) 2004 France Telecom R&D
+ * Copyright (C) 2003 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,16 +23,16 @@
  */
 package org.objectweb.joram.mom.proxies.tcp;
 
-import java.io.IOException;
+import org.objectweb.joram.mom.proxies.*;
+import org.objectweb.joram.shared.client.*;
+import org.objectweb.joram.mom.MomTracing;
 
-import org.objectweb.joram.mom.proxies.AckedQueue;
-import org.objectweb.joram.mom.proxies.ProxyMessage;
-import org.objectweb.joram.shared.client.MomExceptionReply;
+import java.io.*;
+import java.net.*;
+
+import fr.dyade.aaa.util.*;
+
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.common.Daemon;
-import fr.dyade.aaa.common.Debug;
 
 /**
  * The activity responsible for getting the replies
@@ -40,11 +40,10 @@ import fr.dyade.aaa.common.Debug;
  * socket. 
  */
 public class TcpWriter extends Daemon {
-  /** logger */
-  public static Logger logger = Debug.getLogger(TcpWriter.class.getName());
-
+  
   /**
-   * The TCP connection that started this writer.
+   * The TCP connection that started
+   * this writer.
    */
   private TcpConnection tcpConnection;
 
@@ -54,11 +53,16 @@ public class TcpWriter extends Daemon {
 
   /**
    * Creates a new writer.
+   *
+   * @param sock the socket where to write
+   * @param userConnection the connection 
+   * with the user's proxy
+   * @param tcpConnection the TCP connection
    */
   public TcpWriter(IOControl ioctrl,
-                   AckedQueue replyQueue,
+		   AckedQueue replyQueue,
                    TcpConnection tcpConnection) 
-  throws IOException {
+    throws IOException {
     super("tcpWriter");
     this.ioctrl = ioctrl;
     this.replyQueue = replyQueue;
@@ -67,21 +71,23 @@ public class TcpWriter extends Daemon {
   }
 
   public void run() {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,  "TcpWriter.run()");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, 
+        "TcpWriter.run()");
     try {
       while (running) {
-        ProxyMessage msg = replyQueue.get();
-        if ((msg.getObject() instanceof MomExceptionReply) &&
-            (((MomExceptionReply) msg.getObject()).getType() == MomExceptionReply.HBCloseConnection)) {
+        ProxyMessage msg =  
+          (ProxyMessage)replyQueue.get();
+        if (msg.getObject() instanceof Exception) {
           // Exception indicating that the connection
           // has been closed by the heart beat task.
           // (see UserAgent)
           new Thread(new Runnable() {
-            public void run() {            
-              tcpConnection.close();
-            }
-          }).start();
+              public void run() {            
+                tcpConnection.close();
+              }
+            }).start();
         } else {
           ioctrl.send(msg);
           // No queue.pop() !
@@ -89,19 +95,21 @@ public class TcpWriter extends Daemon {
         }
       }
     } catch (Exception exc) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "", exc);
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgProxy.log(
+          BasicLevel.DEBUG, "", exc);
     }
   }
 
   protected void shutdown() {
     close();
   }
-
+    
   protected void close() {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 "TcpWriter.close()", new Exception());
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, 
+        "TcpWriter.close()", new Exception());
     if (ioctrl != null)
       ioctrl.close();
     ioctrl = null;

@@ -22,15 +22,17 @@
  */
 package org.objectweb.joram.mom.proxies;
 
-import org.objectweb.joram.shared.client.AbstractJmsReply;
-
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Notification;
+import org.objectweb.joram.shared.client.AbstractJmsReply;
 
 
 /**
  * The <code>ProxyAgentItf</code> interface defines the methods which must be
  * provided by a proxy agent hosting a <code>ProxyImpl</code> instance.
+ *
+ * @see org.objectweb.joram.shared.tcp.JmsProxy
+ * @see org.objectweb.joram.shared.soap.SoapProxy
  */
 public interface ProxyAgentItf {
   /** Returns the proxy's <code>AgentId</code> identifier. */
@@ -49,6 +51,4 @@ public interface ProxyAgentItf {
 
   public void setNoSave();
   public void setSave();
-
-  public String getName();
 }

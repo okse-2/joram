@@ -28,10 +28,6 @@ import java.text.*;
 
 
 public class ConnectJndiDialog extends JDialog {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private static ConnectJndiDialog dialog;
   private static JLabel hostLabel;
   private static JLabel portLabel;

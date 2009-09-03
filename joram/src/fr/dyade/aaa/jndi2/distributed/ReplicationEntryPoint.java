@@ -21,18 +21,11 @@
  */
 package fr.dyade.aaa.jndi2.distributed;
 
-import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.Notification;
-import fr.dyade.aaa.jndi2.server.EntryPoint;
-import fr.dyade.aaa.jndi2.server.JndiReplyNot;
-import fr.dyade.aaa.jndi2.server.JndiScriptReplyNot;
+import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.jndi2.server.*;
 
 public class ReplicationEntryPoint implements EntryPoint {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private ReplicationManager manager;
   
   public void setRequestManager(ReplicationManager manager) {

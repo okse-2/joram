@@ -26,11 +26,6 @@ import javax.naming.CompositeName;
 
 public class UnbindEvent extends UpdateEvent {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   public UnbindEvent(CompositeName compositeName,NamingContextId updatedContextId,
                      String name) {
     super(compositeName,updatedContextId, name);

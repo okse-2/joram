@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
- * Copyright (C) 2004 Bull SA
+ * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,61 +18,63 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent Distributed Technologies
+ * Initial developer(s): David Feliot (ScalAgent DT)
  * Contributor(s): Frederic Maistre (Bull SA)
  */
 package org.objectweb.joram.client.jms.local;
 
-import javax.jms.JMSException;
+import org.objectweb.joram.client.jms.Connection;
+import org.objectweb.joram.client.jms.TopicConnection;
 
-import org.objectweb.joram.client.jms.ConnectionFactory;
-import org.objectweb.joram.client.jms.FactoryParameters;
-import org.objectweb.joram.client.jms.TopicConnectionFactory;
-import org.objectweb.joram.client.jms.connection.RequestChannel;
-import org.objectweb.joram.shared.security.Identity;
+import javax.naming.NamingException;
 
 /**
  * A <code>TopicLocalConnectionFactory</code> instance is a factory of
  * local connections for Pub/Sub communication.
- *  
- * @deprecated Replaced next to Joram 5.2.1 by {@link LocalConnectionFactory}.
  */
-public class TopicLocalConnectionFactory extends TopicConnectionFactory {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
+public class TopicLocalConnectionFactory
+    extends org.objectweb.joram.client.jms.TopicConnectionFactory {
 
   /**
    * Constructs an empty <code>TopicLocalConnectionFactory</code> instance.
-   * Should only be used for internal purposes.
    */
-  public TopicLocalConnectionFactory() {
+  public TopicLocalConnectionFactory()
+  {
     super("localhost", -1);
   }
 
   /**
-   * Creates the <code>LocalRequestChannel</code> object needed to connect to the
-   * colocated server.
-   * 
-   * @param params          Connection configuration parameters.
-   * @param identity        Client's identity.
-   * @param reliableClass   The protocol specific class.
-   * @return                The <code>RequestChannel</code> object specific to the protocol used.
-   * 
-   * @exception JMSException  A problem occurs during the connection.
-   * 
-   * @see ConnectionFactory#createRequestChannel(FactoryParameters, Identity, String)
+   * Method inherited from the <code>TopicConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  protected RequestChannel createRequestChannel(FactoryParameters params,
-                                                Identity identity,
-                                                String reliableClass) throws JMSException {
-    return new LocalRequestChannel(identity);
+  public javax.jms.TopicConnection
+         createTopicConnection(String name, String password)
+         throws javax.jms.JMSException
+  {
+    LocalConnection lc = new LocalConnection(name, password);
+    return new TopicConnection(params, lc);
   }
+
+  /**
+   * Method inherited from the <code>ConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   */
+  public javax.jms.Connection createConnection(String name, String password)
+                              throws javax.jms.JMSException
+  {
+    LocalConnection lc = new LocalConnection(name, password);
+    return new Connection(params, lc);
+  }
+
 
   /**
    * Admin method creating a <code>javax.jms.TopicConnectionFactory</code>
    * instance for creating local connections.
    */ 
-  public static javax.jms.TopicConnectionFactory create() {
+  public static javax.jms.TopicConnectionFactory create()
+  {
     return new TopicLocalConnectionFactory();
   }
 }

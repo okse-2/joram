@@ -24,11 +24,6 @@ package fr.dyade.aaa.jndi2.impl;
 
 public class ChangeOwnerEvent extends UpdateEvent {
   
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   private Object formerOwnerId;
 
   private NamingContextInfo[] contexts;

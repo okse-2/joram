@@ -26,10 +26,6 @@ import fr.dyade.aaa.agent.*;
 
 public class CloseConnectionNot extends Notification {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private int key;
 
   public CloseConnectionNot(int key) {

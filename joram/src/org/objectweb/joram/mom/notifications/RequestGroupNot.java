@@ -33,10 +33,6 @@ import java.util.Vector;
  */
 public class RequestGroupNot extends AbstractRequest {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private Vector clientMessages;
   
   public RequestGroupNot() {

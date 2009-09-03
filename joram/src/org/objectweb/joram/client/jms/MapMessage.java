@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -19,45 +19,41 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s):ScalAgent Distributed Technologies
+ * Contributor(s): Nicolas Tachker (Bull SA)
  */
 package org.objectweb.joram.client.jms;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Vector;
+import org.objectweb.joram.shared.excepts.MessageValueException;
+import org.objectweb.joram.shared.messages.ConversionHelper;
+
+import java.util.*;
 
 import javax.jms.JMSException;
 import javax.jms.MessageFormatException;
 import javax.jms.MessageNotWriteableException;
 
-import org.objectweb.joram.shared.excepts.MessageValueException;
-import org.objectweb.joram.shared.messages.ConversionHelper;
-
 /**
  * Implements the <code>javax.jms.MapMessage</code> interface.
  */
-public final class MapMessage extends Message implements javax.jms.MapMessage {
+public class MapMessage extends Message implements javax.jms.MapMessage
+{
   /** The wrapped hashmap. */
-  private transient HashMap map;
+  private HashMap map;
+  /** <code>true</code> if the message body is read-only. */
+  private boolean RObody = false;
+
 
   /**
-   * Instantiates a bright new <code>MapMessage</code>.
+   * Instanciates a bright new <code>MapMessage</code>.
    */
-  MapMessage() {
+  MapMessage()
+  {
     super();
-    momMsg.type = org.objectweb.joram.shared.messages.Message.MAP;
     map = new HashMap();
   }
 
   /**
-   * Instantiates a <code>MapMessage</code> wrapping a consumed MOM
+   * Instanciates a <code>MapMessage</code> wrapping a consumed MOM
    * message containing an hashtable.
    *
    * @param sess  The consuming session.
@@ -66,39 +62,33 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    * @exception MessageFormatException  In case of a problem when getting the
    *              MOM message data.
    */
-  MapMessage(Session session,
-             org.objectweb.joram.shared.messages.Message momMsg) throws MessageFormatException {
-    super(session, momMsg);
-
-    ByteArrayInputStream bais = null;
-    ObjectInputStream ois = null;
+  MapMessage(Session sess, org.objectweb.joram.shared.messages.Message momMsg)
+  throws MessageFormatException
+  {
+    super(sess, momMsg);
     try {
-      bais = new ByteArrayInputStream(momMsg.body);
-      ois = new ObjectInputStream(bais);
-      map = (HashMap) ois.readObject();
-    } catch (Exception exc) {
+      map = (HashMap) momMsg.getMap();
+    }
+    catch (Exception exc) {
       MessageFormatException jE =
         new MessageFormatException("Error while getting the body.");
       jE.setLinkedException(exc);
       throw jE;
-    } finally {
-      try {
-        ois.close();
-      } catch (IOException exc) {}
-      try {
-        bais.close();
-      } catch (IOException exc) {}
     }
-  }  
+    RObody = true;
+  }
+  
 
   /** 
    * API method.
    *
    * @exception JMSException  Actually never thrown.
    */
-  public void clearBody() throws JMSException {
+  public void clearBody() throws JMSException
+  {
     super.clearBody();
     map.clear();
+    RObody = false;
   }
 
 
@@ -107,7 +97,8 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    */
-  public void setBoolean(String name, boolean value) throws JMSException {
+  public void setBoolean(String name, boolean value) throws JMSException
+  {
     setObject(name, new Boolean(value));
   }
  
@@ -116,7 +107,8 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    */ 
-  public void setByte(String name, byte value) throws JMSException {
+  public void setByte(String name, byte value) throws JMSException
+  {
     setObject(name, new Byte(value));
   }
  
@@ -125,7 +117,8 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    */   
-  public void setBytes(String name, byte[] value) throws JMSException {
+  public void setBytes(String name, byte[] value) throws JMSException
+  {
     setObject(name, value);
   }
  
@@ -134,9 +127,14 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    */ 
-  public void setBytes(String name, byte[] value, int offset, int length) throws JMSException {
+  public void setBytes(String name, byte[] value, int offset, int length)
+              throws JMSException
+  {
     byte[] buff = new byte[length];
-    System.arraycopy(value, offset, buff, 0, length);
+
+    for (int i = 0; i < length; i++)
+      buff[i] = value[i + offset];
+
     setObject(name, buff);
   }
  
@@ -145,7 +143,8 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    */ 
-  public void setChar(String name, char value) throws JMSException {
+  public void setChar(String name, char value) throws JMSException
+  {
     setObject(name, new Character(value));
   }
  
@@ -154,7 +153,8 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    */ 
-  public void setDouble(String name, double value) throws JMSException {
+  public void setDouble(String name, double value) throws JMSException
+  {
     setObject(name, new Double(value));
   }
  
@@ -163,7 +163,8 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    */   
-  public void setFloat(String name, float value) throws JMSException {
+  public void setFloat(String name, float value) throws JMSException
+  {
     setObject(name, new Float(value));
   }
  
@@ -172,7 +173,8 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    */  
-  public void setInt(String name, int value) throws JMSException {
+  public void setInt(String name, int value) throws JMSException
+  {
     setObject(name, new Integer(value));
   }
  
@@ -181,7 +183,8 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    */ 
-  public void setLong(String name, long value) throws JMSException {
+  public void setLong(String name, long value) throws JMSException
+  {
     setObject(name, new Long(value));
   }
   
@@ -190,7 +193,8 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    */  
-  public void setShort(String name, short value) throws JMSException {
+  public void setShort(String name, short value) throws JMSException
+  {
     setObject(name, new Short(value));
   }
  
@@ -199,7 +203,8 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    *
    * @exception MessageNotWriteableException  If the message body is read-only.
    */   
-  public void setString(String name, String value) throws JMSException {
+  public void setString(String name, String value) throws JMSException
+  {
     setObject(name, value);
   }
 
@@ -209,17 +214,17 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    * @exception MessageNotWriteableException  If the message body is read-only.
    * @exception MessageFormatException  If the value type is invalid.
    */ 
-  public void setObject(String name, Object value) throws JMSException {
+  public void setObject(String name, Object value) throws JMSException
+  {
     if (RObody)
       throw new MessageNotWriteableException("Can't set a value as the message"
                                              + " body is read-only.");
-
     if (name == null || name.equals(""))
       throw new IllegalArgumentException("Invalid null or empty value name.");
 
-    if (value instanceof Boolean || value instanceof Character ||
-        value instanceof Number || value instanceof String ||
-        value instanceof byte[] || value == null)
+    if (value instanceof Boolean || value instanceof Character 
+        || value instanceof Number || value instanceof String
+        || value instanceof byte[] || value == null)
       map.put(name, value);
     else
       throw new MessageFormatException("Can't set non Java primitive type as"
@@ -231,10 +236,12 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    *
    * @exception MessageFormatException  If the value type is invalid.
    */
-  public boolean getBoolean(String name) throws JMSException {
+  public boolean getBoolean(String name) throws JMSException
+  {
     try {
       return ConversionHelper.toBoolean(map.get(name));
-    } catch (MessageValueException mE) {
+    }
+    catch (MessageValueException mE) {
       throw new MessageFormatException(mE.getMessage());
     }
   }
@@ -244,10 +251,12 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    *
    * @exception MessageFormatException  If the value type is invalid.
    */  
-  public byte getByte(String name) throws JMSException {
+  public byte getByte(String name) throws JMSException
+  {
     try {
       return ConversionHelper.toByte(map.get(name));
-    } catch (MessageValueException mE) {
+    }
+    catch (MessageValueException mE) {
       throw new MessageFormatException(mE.getMessage());
     }
   }
@@ -257,10 +266,12 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    *
    * @exception MessageFormatException  If the value type is invalid.
    */  
-  public byte[] getBytes(String name) throws JMSException {
+  public byte[] getBytes(String name) throws JMSException
+  {
     try {
       return ConversionHelper.toBytes(map.get(name));
-    } catch (MessageValueException mE) {
+    }
+    catch (MessageValueException mE) {
       throw new MessageFormatException(mE.getMessage());
     }
   }
@@ -270,10 +281,12 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    *
    * @exception MessageFormatException  If the value type is invalid.
    */  
-  public char getChar(String name) throws JMSException {
+  public char getChar(String name) throws JMSException
+  {
     try {
       return ConversionHelper.toChar(map.get(name));
-    } catch (MessageValueException mE) {
+    }
+    catch (MessageValueException mE) {
       throw new MessageFormatException(mE.getMessage());
     }
   }
@@ -283,10 +296,12 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    *
    * @exception MessageFormatException  If the value type is invalid.
    */   
-  public double getDouble(String name) throws JMSException {
+  public double getDouble(String name) throws JMSException
+  {
     try {
       return ConversionHelper.toDouble(map.get(name));
-    } catch (MessageValueException mE) {
+    }
+    catch (MessageValueException mE) {
       throw new MessageFormatException(mE.getMessage());
     }
   }
@@ -296,10 +311,12 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    *
    * @exception MessageFormatException  If the value type is invalid.
    */  
-  public float getFloat(String name) throws JMSException {
+  public float getFloat(String name) throws JMSException
+  {
     try {
       return ConversionHelper.toFloat(map.get(name));
-    } catch (MessageValueException mE) {
+    }
+    catch (MessageValueException mE) {
       throw new MessageFormatException(mE.getMessage());
     }
   }
@@ -309,10 +326,12 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    *
    * @exception MessageFormatException  If the value type is invalid.
    */  
-  public int getInt(String name) throws JMSException {
+  public int getInt(String name) throws JMSException
+  {
     try {
       return ConversionHelper.toInt(map.get(name));
-    } catch (MessageValueException mE) {
+    }
+    catch (MessageValueException mE) {
       throw new MessageFormatException(mE.getMessage());
     }
   }
@@ -322,10 +341,12 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    *
    * @exception MessageFormatException  If the value type is invalid.
    */  
-  public long getLong(String name) throws JMSException {
+  public long getLong(String name) throws JMSException
+  {
     try {
       return ConversionHelper.toLong(map.get(name));
-    } catch (MessageValueException mE) {
+    }
+    catch (MessageValueException mE) {
       throw new MessageFormatException(mE.getMessage());
     }
   }
@@ -335,7 +356,8 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    *
    * @exception JMSException  Actually never thrown.
    */   
-  public Object getObject(String name) throws JMSException {
+  public Object getObject(String name) throws JMSException
+  {
     return map.get(name);
   }
 
@@ -344,10 +366,12 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    *
    * @exception MessageFormatException  If the value type is invalid.
    */     
-  public short getShort(String name) throws JMSException {
+  public short getShort(String name) throws JMSException
+  {
     try {
       return ConversionHelper.toShort(map.get(name));
-    } catch (MessageValueException mE) {
+    }
+    catch (MessageValueException mE) {
       throw new MessageFormatException(mE.getMessage());
     }
   }
@@ -357,12 +381,21 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    *
    * @exception JMSException  Actually never thrown.
    */   
-  public String getString(String name) throws JMSException {
-    Object value = map.get(name);
-    if (value instanceof byte[])
-      throw new MessageFormatException("Type " + value.getClass().getName() 
-                                       + " can't be converted to String.");
-    return ConversionHelper.toString(map.get(name));
+  public String getString(String name) 
+    throws JMSException {
+    try {
+      Object value = map.get(name);
+      if (value instanceof byte[])
+        throw new MessageValueException("Type " + value.getClass().getName() 
+                                        + " can't be converted to String.");
+      else
+        return ConversionHelper.toString(map.get(name));
+    } catch (Exception exc) {
+      MessageFormatException mfe =
+        new MessageFormatException(exc.getMessage());
+      mfe.setLinkedException(exc);
+      throw mfe;
+    }
   }
 
   /**
@@ -370,7 +403,8 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    *
    * @exception JMSException  Actually never thrown.
    */  
-  public boolean itemExists(String name) throws JMSException {
+  public boolean itemExists(String name) throws JMSException
+  {
     return map.containsKey(name);
   }
 
@@ -379,7 +413,8 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
    *
    * @exception JMSException  Actually never thrown.
    */
-  public Enumeration getMapNames() throws JMSException {
+  public Enumeration getMapNames() 
+    throws JMSException {
     Vector vec = new Vector();
     if (map.keySet() != null) {
       for (Iterator it = map.keySet().iterator(); it.hasNext(); )
@@ -387,29 +422,19 @@ public final class MapMessage extends Message implements javax.jms.MapMessage {
     }
     return vec.elements();
   }
+ 
 
   /**
    * Method actually preparing the message for sending by transfering the
    * local body into the wrapped MOM message.
    *
-   * @exception MessageFormatException  If an error occurs while serializing.
+   * @exception Exception  If an error occurs while serializing.
    */
-  protected void prepare() throws JMSException {
+  protected void prepare() throws Exception
+  {
     super.prepare();
 
-    try {
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      ObjectOutputStream oos = new ObjectOutputStream(baos);
-      oos.writeObject(map);
-      oos.flush();
-      momMsg.body = baos.toByteArray();
-      oos.close();
-      baos.close();
-    } catch (IOException exc) {
-      MessageFormatException jExc =
-        new MessageFormatException("The message body could not be serialized.");
-      jExc.setLinkedException(exc);
-      throw jExc;
-    }
+    momMsg.clearBody(); 
+    momMsg.setMap(map);
   }
 }

@@ -26,7 +26,8 @@ package org.objectweb.joram.client.jms;
 
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
-import javax.jms.JMSSecurityException;
+
+import org.objectweb.util.monolog.api.BasicLevel;
 
 import org.objectweb.joram.client.jms.connection.RequestChannel;
 
@@ -44,7 +45,7 @@ public class XAConnection extends Connection
    * Creates a <code>XAConnection</code> instance.
    *
    * @param factoryParameters  The factory parameters.
-   * @param requestChannel     The actual connection to wrap.
+   * @param connectionImpl     The actual connection to wrap.
    *
    * @exception JMSSecurityException   If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.

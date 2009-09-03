@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2005 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -22,20 +22,19 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
+import java.util.Hashtable;
 import java.util.Enumeration;
 import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.*;
 
 /**
  *  Implementation of Engine that used JGroups in order to improve 
- *  reliability.
+ *  fiability.
  */
 final class HAEngine extends Engine {
   /**  Queue of messages provide from external agent. */ 
@@ -43,7 +42,7 @@ final class HAEngine extends Engine {
 
   /** JGroups component */
   private JGroups jgroups = null;
-  
+
   private static long DEFAULT_HA_TIMEOUT = 10000;
   private static String HA_TIMEOUT_PROPERTY = "fr.dyade.aaa.agent.HAEngine.HA_TIMEOUT";
 
@@ -53,7 +52,7 @@ final class HAEngine extends Engine {
     qinFromExt = new Vector();
     requestor = new Vector();
     
-    timeout = AgentServer.getLong(HA_TIMEOUT_PROPERTY, DEFAULT_HA_TIMEOUT).longValue();
+    timeout = Long.getLong(HA_TIMEOUT_PROPERTY, DEFAULT_HA_TIMEOUT).longValue();
   }
 
   public void setJGroups(JGroups jgroups) {
@@ -144,7 +143,7 @@ final class HAEngine extends Engine {
 
     if (msg != null)
       super.commit();
-    
+
     if (needToSync && (qin.size() == 0)) {
       // Get state server
       getState();
@@ -184,7 +183,7 @@ final class HAEngine extends Engine {
                  " receiveFromJGroups qin.size() = " + qin.size() +
                  ", qinFromExt.size() = " + qinFromExt.size());
 
-    AgentServer.getTransaction().commit(false);
+    AgentServer.getTransaction().commit();
     qinFromExt.addElement(msg);
     postFromExt();
     AgentServer.getTransaction().release();
@@ -193,6 +192,13 @@ final class HAEngine extends Engine {
   volatile boolean needToSync = false;
   volatile Vector requestor = null;
 
+  static private final byte[] OOS_STREAM_HEADER = {
+    (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF),
+    (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF),
+    (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF),
+    (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF)
+  };
+
   /**
    * Get the current state of Engine: agents, messages, etc.
    * This operation is done in transactoion so Engine can't get more
@@ -200,7 +206,7 @@ final class HAEngine extends Engine {
    */
   synchronized void getState() throws Exception {
     if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, AgentServer.getName() + ", getState()");
+      logmon.log(BasicLevel.DEBUG, getName() + ", getState()");
 
     HAStateReply reply = new HAStateReply();
     // Get clock
@@ -234,13 +240,6 @@ final class HAEngine extends Engine {
     baos.reset();
     oos = new ObjectOutputStream(baos);
     try {
-      if (logmon.isLoggable(BasicLevel.DEBUG)) {
-        for (int i=0; i<qinFromExt.size(); i++) {
-          Message msg = (Message) qinFromExt.elementAt(i);
-          logmon.log(BasicLevel.DEBUG,
-                     AgentServer.getName() + " getState() -> " + msg);
-        }
-      }
       oos.writeObject(qinFromExt);
       reply.messages = baos.toByteArray();
     } finally {
@@ -262,7 +261,7 @@ final class HAEngine extends Engine {
 
   synchronized void setState(HAStateReply reply) throws Exception {
     if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, AgentServer.getName() + ", setState()");
+      logmon.log(BasicLevel.DEBUG, getName() + ", setState()");
     
     now = reply.now;
     setStamp(reply.stamp);
@@ -287,11 +286,6 @@ final class HAEngine extends Engine {
         createAgent(agent);
       }
     } catch (EOFException exc) {
-      logmon.log(BasicLevel.WARN,
-                 AgentServer.getName() + " setState()", exc);
-    } catch (Exception exc) {
-      logmon.log(BasicLevel.ERROR,
-                 AgentServer.getName() + " setState()", exc);
     } finally {
       try {
         ois.close();
@@ -302,13 +296,6 @@ final class HAEngine extends Engine {
     ois = new ObjectInputStream(bis);
     try {
       qinFromExt = (Vector) ois.readObject();
-      if (logmon.isLoggable(BasicLevel.DEBUG)) {
-        for (int i=0; i<qinFromExt.size(); i++) {
-          Message msg = (Message) qinFromExt.elementAt(i);
-          logmon.log(BasicLevel.DEBUG,
-                     AgentServer.getName() + " setState() -> " + msg);
-        }
-      }
       postFromExt();
     } finally {
       try {
@@ -327,10 +314,9 @@ final class HAEngine extends Engine {
     } catch (IOException exc) {}
     return obj;
   }
-
+  
   protected void onTimeOut() throws Exception {
     if (! requestor.isEmpty())
       commit();
   }
-  
 }

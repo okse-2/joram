@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,88 +21,76 @@
  */
 package org.objectweb.joram.mom.proxies.tcp;
 
-import java.io.IOException;
-import java.util.Date;
+import org.objectweb.joram.mom.proxies.*;
 
-import org.objectweb.joram.mom.proxies.ReliableConnectionContext;
-import org.objectweb.joram.shared.security.Identity;
+import java.net.*;
+import java.io.*;
+
+import org.objectweb.joram.mom.MomTracing;
+
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.common.Debug;
-import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
- * Handles the TCP connection. Starts the reader and writer threads responsible for
+ * Handles the TCP connection. Starts the
+ * reader and writer threads responsible for
  * reading the requests and writing the replies.
- * Calls the <code>UserConnection</code> in order to invoke the user's proxy and get
- * its replies.
+ * Calls the <code>UserConnection</code> in order
+ * to invoke the user's proxy and get its replies.
  *
  * @see TcpProxyService
  * @see TcpConnectionListener
  */
-public class TcpConnection implements TcpConnectionMBean {
-  /** logger */
-  public static Logger logger = Debug.getLogger(TcpConnection.class.getName());
+public class TcpConnection {
 
   private IOControl ioctrl;
 
   private AgentId proxyId;
 
-  private ReliableConnectionContext ctx;
+  private int key;
+
+  private AckedQueue replyQueue;
+
   /**
-   * The reader thread responsible for reading the requests (input).
+   * The reader thread responsible for
+   * reading the requests (input).
    */
   private TcpReader tcpReader;
 
   /**
-   * The writer thread responsible for writing the replies (output).
+   * The writer thread responsible for
+   * writing the replies (output).
    */
   private TcpWriter tcpWriter;
 
   /**
-   * The TCP proxy service used to register and unregister this connection.
+   * The TCP proxy service used to 
+   * register and unregister this connection.
    */
   private TcpProxyService proxyService;
 
   private boolean closeConnection;
-  
-  private Identity identity;
-  
-  private Date creationDate;
 
   /**
    * Creates a new TCP connection.
    *
-   * @param ioctrl
-   * @param ctx
-   * @param proxyId
+   * @param sock the TCP connection socket
    * @param proxyService the TCP proxy service
-   * @param identity 
    */
-  public TcpConnection(IOControl ioctrl,
-                       ReliableConnectionContext ctx,
-                       AgentId proxyId,
-                       TcpProxyService proxyService,
-                       Identity identity) throws IOException {
-    this.creationDate = new Date();
+  public TcpConnection(
+    IOControl ioctrl,
+    AgentId proxyId,
+    AckedQueue replyQueue,
+    int key,
+    TcpProxyService proxyService,
+    boolean closeConnection) {    
     this.ioctrl = ioctrl;
     this.proxyId = proxyId;
-    this.ctx = ctx;
+    this.replyQueue = replyQueue;
+    this.key = key;
     this.proxyService = proxyService;
-    this.closeConnection = ctx.getHeartBeat() == 0;
-    this.identity = identity;
-    try {
-      MXWrapper.registerMBean(this, "Joram#" + AgentServer.getServerId(), getMBeanName());
-    } catch (Exception e) {
-      logger.log(BasicLevel.DEBUG, "registerMBean", e);
-    }
-  }
-
-  private String getMBeanName() {
-    return proxyService.getMBeanName() + ",id=" + identity.getUserName() + "[" + ctx.getKey() + "]";
+    this.closeConnection = closeConnection;
   }
 
   public final AgentId getProxyId() {
@@ -109,18 +98,27 @@ public class TcpConnection implements TcpConnectionMBean {
   }
 
   public final int getKey() {
-    return ctx.getKey();
+    return key;
   }
 
   /**
    * Starts the connection reader and writer threads.
    */
   void start() throws Exception {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "TcpConnection.start()");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, 
+        "TcpConnection.start()");
     try {
-      tcpWriter = new TcpWriter(ioctrl, ctx.getQueue(), this);
-      tcpReader = new TcpReader(ioctrl, proxyId, this, closeConnection);
+      tcpWriter = new TcpWriter(
+	ioctrl,
+        replyQueue,
+        this);
+      tcpReader = new TcpReader(
+        ioctrl,
+	proxyId,
+        this,
+        closeConnection);
       proxyService.registerConnection(this);
       tcpWriter.start();
       tcpReader.start();
@@ -135,40 +133,16 @@ public class TcpConnection implements TcpConnectionMBean {
    * writer threads.
    * Closes the socket.
    */
-  public void close() {
+  void close() {
     if (tcpWriter != null)
       tcpWriter.stop();
     if (tcpReader != null)
       tcpReader.stop();
     if (ioctrl != null)
       ioctrl.close();
-    try {
-      MXWrapper.unregisterMBean("Joram#" + AgentServer.getServerId(), getMBeanName());
-    } catch (Exception e) {
-      logger.log(BasicLevel.DEBUG, "unregisterMBean", e);
-    }
     ioctrl = null;
-    proxyService.unregisterConnection(this);
-  }
-
-  public String getUserName() {
-    return identity.getUserName();
-  }
-
-  public String getAddress() {
-    return ioctrl.getSocket().toString();
-  }
-
-  public Date getCreationDate() {
-    return creationDate;
-  }
-
-  public long getReceivedCount() {
-    return ioctrl.getReceivedCount();
-  }
-
-  public long getSentCount() {
-    return ioctrl.getSentCount();
+    proxyService.unregisterConnection(
+      TcpConnection.this);
   }
 
 }

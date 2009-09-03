@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,24 +19,25 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Contributor(s):
  */
 package org.objectweb.joram.mom.notifications;
+
+import fr.dyade.aaa.agent.AgentId;
 
 /**
  * An <code>UnclusterRequest</code> instance is used by a client agent
  * for notifying a topic to leave the cluster it is part of.
  */
-public class UnclusterRequest extends AdminRequest {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
+public class UnclusterRequest extends AdminRequest
+{
   /**
    * Constructs an <code>UnclusterRequest</code> instance.
    *
    * @param id  Identifier of the request, may be null.
    */
-  public UnclusterRequest(String id) {
+  public UnclusterRequest(String id)
+  {
     super(id);
   }
 } 

@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Contributor(s):
  */
 package classic;
 
@@ -29,32 +29,37 @@ import javax.naming.*;
 /**
  * Publishes messages on the topic.
  */
-public class Publisher {
+public class Publisher
+{
   static Context ictx = null; 
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws Exception
+  {
+    System.out.println();
     System.out.println("Publishes messages...");
 
     ictx = new InitialContext();
+
     Topic topic = (Topic) ictx.lookup("topic");
     TopicConnectionFactory tcf = (TopicConnectionFactory) ictx.lookup("tcf");
+
     ictx.close();
 
-    TopicConnection cnx = tcf.createTopicConnection();
-    TopicSession session = cnx.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-    TopicPublisher publisher = session.createPublisher(topic);
-    
-    
+    TopicConnection tc = tcf.createTopicConnection();
+    TopicSession ts = tc.createTopicSession(true, 0);
+    TopicPublisher tpub = ts.createPublisher(topic);
+    TextMessage msg = ts.createTextMessage();
 
     int i;
     for (i = 0; i < 10; i++) {
-      TextMessage msg = session.createTextMessage();
       msg.setText("Test number " + i);
-      publisher.publish(msg);
+      tpub.publish(msg);
     }
+
+    ts.commit();
 
     System.out.println(i + " messages published.");
 
-    cnx.close();
+    tc.close();
   }
 }

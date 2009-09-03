@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,11 +25,6 @@ package fr.dyade.aaa.agent;
  * Thrown to indicate that the specified agent serverdoes not exist. 
  */
 public class ExpirationExceededException extends Exception {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   /**
    *  Constructs a new <code>ExpirationExceededException</code> with no
    * detail message.

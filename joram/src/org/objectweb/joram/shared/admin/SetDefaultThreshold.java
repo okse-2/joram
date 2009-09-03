@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,18 +23,12 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 /**
  * A <code>SetDefaultThreshold</code> instance requests to set a given
  * threshold value as the default threshold for a given server.
  */
 public class SetDefaultThreshold extends AdminRequest {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = -6410329762916041723L;
 
   /** Identifier of the server the threshold is set for. */
   private int serverId;
@@ -52,8 +46,6 @@ public class SetDefaultThreshold extends AdminRequest {
     this.threshold = threshold;
   }
 
-  public SetDefaultThreshold() { }
-  
   /** Returns the identifier of the server the threshold is set for. */
   public int getServerId() {
     return serverId;
@@ -62,19 +54,5 @@ public class SetDefaultThreshold extends AdminRequest {
   /** Returns the threshold value. */
   public int getThreshold() {
     return threshold;
-  }
-  
-  protected int getClassId() {
-    return SET_DEFAULT_THRESHOLD;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    serverId = StreamUtil.readIntFrom(is);
-    threshold = StreamUtil.readIntFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    StreamUtil.writeTo(serverId, os);
-    StreamUtil.writeTo(threshold, os);
   }
 }

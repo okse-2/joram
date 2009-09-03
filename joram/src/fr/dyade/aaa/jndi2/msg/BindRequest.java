@@ -28,11 +28,6 @@ import java.io.*;
 
 public class BindRequest extends JndiRequest {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   private Object obj;
 
   private boolean rebind;

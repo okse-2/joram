@@ -1,6 +1,6 @@
 /**
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,6 +23,7 @@
 package fr.dyade.aaa.jndi2.impl;
 
 import javax.naming.*;
+import fr.dyade.aaa.jndi2.impl.*;
 
 /**
  * Thrown when a <code>ContextRecord</code> has not been found
@@ -39,8 +40,6 @@ import javax.naming.*;
  * and creates the missing record.
  */
 public class MissingRecordException extends NamingException {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
 
   private NamingContextId namingContextId;
 

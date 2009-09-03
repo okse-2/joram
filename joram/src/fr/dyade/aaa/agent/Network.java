@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -23,13 +23,13 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.IOException;
+import java.io.*;
+import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.common.Arrays;
-import fr.dyade.aaa.common.Strings;
+import fr.dyade.aaa.util.Arrays;
 
 /**
  * The <code>Network</code> abstract class provides ..
@@ -67,7 +67,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
   }
 
   /**
-   *  Number of try at stage 1, default value is 5.
+   *  Number of try at stage 1, default value is 30.
    *  This value can be adjusted for all network components by setting
    * <code>WDNbRetryLevel1</code> global property or for a particular
    * network by setting <code>\<DomainName\>.WDNbRetryLevel1</code>
@@ -76,7 +76,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    *  Theses properties can be fixed either from <code>java</code> launching
    * command, or in <code>a3servers.xml</code> configuration file.
    */
-  int  WDNbRetryLevel1 = 5;
+  int  WDNbRetryLevel1 = 30;
 
   /**
    * Gets the WDNbRetryLevel1 value.
@@ -98,7 +98,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
 
   /**
    *  Period of time in ms between two connection try at stage 1, default
-   * value is WDActivationPeriod.
+   * value is WDActivationPeriod divided by 2.
    *  This value can be adjusted for all network components by setting
    * <code>WDRetryPeriod1</code> global property or for a particular
    * network by setting <code>\<DomainName\>.WDRetryPeriod1</code>
@@ -106,12 +106,8 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * <p>
    *  Theses properties can be fixed either from <code>java</code> launching
    * command, or in <code>a3servers.xml</code> configuration file.
-   * <p>
-   *  Be careful, in most Network components setting this value to a value
-   * less than WDActivationPeriod is useless. In the same way, the real try
-   * period is depending of the connection timeout.
    */
-  long WDRetryPeriod1 = WDActivationPeriod;
+  long WDRetryPeriod1 = WDActivationPeriod/2;
 
   /**
    * Gets the WDRetryPeriod1 value.
@@ -132,7 +128,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
   }
 
   /**
-   *  Number of try at stage 2, default value is 30.
+   *  Number of try at stage 2, default value is 55.
    *  This value can be adjusted for all network components by setting
    * <code>WDNbRetryLevel2</code> global property or for a particular
    * network by setting <code>\<DomainName\>.WDNbRetryLevel2</code>
@@ -141,7 +137,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    *  Theses properties can be fixed either from <code>java</code> launching
    * command, or in <code>a3servers.xml</code> configuration file.
    */
-  int  WDNbRetryLevel2 = 30;
+  int  WDNbRetryLevel2 = 55;
 
   /**
    * Gets the WDNbRetryLevel2 value.
@@ -163,7 +159,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
 
   /**
    *  Period of time in ms between two connection try at stage 2, default
-   * value is 10000L (10 seconds).
+   * value is 5000L (5 seconds).
    *  This value can be adjusted for all network components by setting
    * <code>WDRetryPeriod2</code> global property or for a particular
    * network by setting <code>\<DomainName\>.WDRetryPeriod2</code>
@@ -171,12 +167,8 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * <p>
    *  Theses properties can be fixed either from <code>java</code> launching
    * command, or in <code>a3servers.xml</code> configuration file.
-   * <p>
-   *  Be careful, in most Network components setting this value to a value
-   * less than WDActivationPeriod is useless. In the same way, the real try
-   * period is depending of the connection timeout.
    */
-  long WDRetryPeriod2 = 10000L;
+  long WDRetryPeriod2 = 5000L;
 
   /**
    * Gets the WDRetryPeriod2 value.
@@ -206,10 +198,6 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * <p>
    *  Theses properties can be fixed either from <code>java</code> launching
    * command, or in <code>a3servers.xml</code> configuration file.
-   * <p>
-   *  Be careful, in most Network components setting this value to a value
-   * less than WDActivationPeriod is useless. In the same way, the real try
-   * period is depending of the connection timeout.
    */
   long WDRetryPeriod3 = 60000L;
 
@@ -231,15 +219,6 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     this.WDRetryPeriod3 = WDRetryPeriod3;
   }
 
-  /**
-   * Gets the number of waiting messages in this engine.
-   *
-   *  return	the number of waiting messages.
-   */
-  public int getNbWaitingMessages() {
-    return qout.size();
-  }
-
   protected Logger logmon = null;
 
   /** Id. of local server. */
@@ -251,17 +230,17 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * is used as index for internal tables.
    */
   protected short[] servers;
-  /** Filename for servers storage. */
+  /** Filename for servers storage */
   transient protected String serversFN = null;
   /** Logical timestamp information for messages in domain, stamp[idxLS)]
    * for messages sent, and stamp[index(id] for messages received.
    */
   private int[] stamp;
-  /** Buffer used to optimize transactions. */
+  /** Buffer used to optimise transactions*/
   private byte[] stampbuf = null;
   /** */
   private int[] bootTS = null;
-  /** Filename for boot time stamp storage. */
+  /** Filename for boot time stamp storage */
   transient protected String bootTSFN = null;
  
   /** The component's name as it appears in logging. */
@@ -322,7 +301,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
 
   /**
    * Insert a message in the <code>MessageQueue</code>.
-   * This method is used during initialization to restore the component
+   * This method is used during initialisation to restore the component
    * state from persistent storage.
    *
    * @param msg		the message
@@ -334,19 +313,13 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
   /**
    * Saves information to persistent storage.
    */
-  public void save() throws IOException {
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, getName() + ".save()");
-  }
+  public void save() throws IOException {}
 
   /**
    * Restores component's information from persistent storage.
    * If it is the first load, initializes it.
    */
   public void restore() throws Exception {
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, getName() + ".restore()");
-
     sid = AgentServer.getServerId();
     idxLS = index(sid);
     // Loads the logical clock.
@@ -383,13 +356,12 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
       }
       // Joins with the new domain configuration:
       if ((servers != null) && !Arrays.equals(servers, s)) {
-        StringBuffer strbuf = new StringBuffer();
-        strbuf.append("Incoherent network configuration: ");
-        Strings.toString(strbuf, servers, -1, 0);
-        strbuf.append(" != ");
-        Strings.toString(strbuf, s, -1, 0);
-
-        logmon.log(BasicLevel.ERROR, strbuf.toString());
+        for (int i=0; i<servers.length; i++)
+          logmon.log(BasicLevel.DEBUG,
+                     "servers[" + i + "]=" + servers[i]);
+        for (int i=0; i<s.length; i++)
+          logmon.log(BasicLevel.DEBUG,
+                     "servers[" + i + "]=" + s[i]);
 
         throw new IOException("Network configuration changed");
       }
@@ -400,7 +372,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * Initializes a new network component. This method is used in order to
    * easily creates and configure a Network component from a class name.
    * So we can use the <code>Class.newInstance()</code> method for create
-   * (without any parameter) the component, then we can initialize it with
+   * (whitout any parameter) the component, then we can initialize it with
    * this method.<br>
    * This method initializes the logical clock for the domain.
    *
@@ -412,26 +384,46 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
   public void init(String name, int port, short[] servers) throws Exception {
     this.name = AgentServer.getName() + '.' + name;
 
-    // Get the logging monitor from current server MonologLoggerFactory
-    // Be careful, logmon is initialized from name and not this.name !!
-    logmon = Debug.getLogger(Network.class.getName() + '.' + name);
-    logmon.log(BasicLevel.INFO, name + ", initialized");
-    
-    if (logmon.isLoggable(BasicLevel.DEBUG)) {
-      StringBuffer strbuf = new StringBuffer(); 
-      strbuf.append(getName()).append(".init(");
-      strbuf.append(name).append(',');
-      strbuf.append(port).append(',');
-      Strings.toString(strbuf, servers, -1, 0);
-      strbuf.append(')');
-
-      logmon.log(BasicLevel.DEBUG, strbuf.toString());
-    }
-    
-    qout = new MessageVector(this.name, AgentServer.getTransaction().isPersistent());
+    qout = new MessageVector(this.name,
+                            AgentServer.getTransaction().isPersistent());
 
     this.domain = name;
     this.port = port;
+
+    // Get the logging monitor from current server MonologLoggerFactory
+    // Be careful, logmon is initialized from name and not this.name !!
+    logmon = Debug.getLogger(Debug.A3Network + '.' + name);
+    logmon.log(BasicLevel.DEBUG, name + ", initialized");
+
+    WDActivationPeriod = Long.getLong("WDActivationPeriod",
+                                      WDActivationPeriod).longValue();
+    WDActivationPeriod = Long.getLong(name + ".WDActivationPeriod",
+                                      WDActivationPeriod).longValue();
+
+    WDNbRetryLevel1 = Integer.getInteger("WDNbRetryLevel1",
+                                         WDNbRetryLevel1).intValue();
+    WDNbRetryLevel1 = Integer.getInteger(name + ".WDNbRetryLevel1",
+                                         WDNbRetryLevel1).intValue();
+
+    WDRetryPeriod1 = Long.getLong("WDRetryPeriod1",
+                                  WDRetryPeriod1).longValue();
+    WDRetryPeriod1 = Long.getLong(name + ".WDRetryPeriod1",
+                                  WDRetryPeriod1).longValue();
+
+    WDNbRetryLevel2 = Integer.getInteger("WDNbRetryLevel2",
+                                         WDNbRetryLevel2).intValue();
+    WDNbRetryLevel2 = Integer.getInteger(name + ".WDNbRetryLevel2",
+                                         WDNbRetryLevel2).intValue();
+
+    WDRetryPeriod2 = Long.getLong("WDRetryPeriod2",
+                                  WDRetryPeriod2).longValue();
+    WDRetryPeriod2 = Long.getLong(name + ".WDRetryPeriod2",
+                                  WDRetryPeriod2).longValue();
+
+    WDRetryPeriod3 = Long.getLong("WDRetryPeriod3",
+                                  WDRetryPeriod3).longValue();
+    WDRetryPeriod3 = Long.getLong(name + ".WDRetryPeriod3",
+                                  WDRetryPeriod3).longValue();
 
     // Sorts the array of server ids into ascending numerical order.
     Arrays.sort(servers);
@@ -440,63 +432,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     this.serversFN = name + "Servers";
     this.bootTSFN = name + "BootTS";
 
-    // Set the properties of the network.
-    setProperties();
-
     restore();
-  }
-
-  /**
-   * Set the properties of the network.
-   * Can be extended by subclasses.
-   */
-  public void setProperties() throws Exception {
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, domain + ", Network.setProperties()");
-
-    WDActivationPeriod = AgentServer.getLong("WDActivationPeriod",
-                                      WDActivationPeriod).longValue();
-    WDActivationPeriod = AgentServer.getLong(domain + ".WDActivationPeriod",
-                                      WDActivationPeriod).longValue();
-
-    WDNbRetryLevel1 = AgentServer.getInteger("WDNbRetryLevel1",
-                                         WDNbRetryLevel1).intValue();
-    WDNbRetryLevel1 = AgentServer.getInteger(domain + ".WDNbRetryLevel1",
-                                         WDNbRetryLevel1).intValue();
-
-    WDRetryPeriod1 = AgentServer.getLong("WDRetryPeriod1",
-                                  WDRetryPeriod1).longValue();
-    WDRetryPeriod1 = AgentServer.getLong(domain + ".WDRetryPeriod1",
-                                  WDRetryPeriod1).longValue();
-
-    WDNbRetryLevel2 = AgentServer.getInteger("WDNbRetryLevel2",
-                                         WDNbRetryLevel2).intValue();
-    WDNbRetryLevel2 = AgentServer.getInteger(domain + ".WDNbRetryLevel2",
-                                         WDNbRetryLevel2).intValue();
-
-    WDRetryPeriod2 = AgentServer.getLong("WDRetryPeriod2",
-                                  WDRetryPeriod2).longValue();
-    WDRetryPeriod2 = AgentServer.getLong(domain + ".WDRetryPeriod2",
-                                  WDRetryPeriod2).longValue();
-
-    WDRetryPeriod3 = AgentServer.getLong("WDRetryPeriod3",
-                                  WDRetryPeriod3).longValue();
-    WDRetryPeriod3 = AgentServer.getLong(domain + ".WDRetryPeriod3",
-                                  WDRetryPeriod3).longValue();
-    
-    if (logmon.isLoggable(BasicLevel.DEBUG)) {
-      StringBuffer strbuf = new StringBuffer();
-      strbuf.append(" setProperties(");
-      strbuf.append("WDActivationPeriod=").append(WDActivationPeriod);
-      strbuf.append(", WDNbRetryLevel1=").append(WDNbRetryLevel1);
-      strbuf.append(", WDRetryPeriod1=").append(WDRetryPeriod1);
-      strbuf.append(", WDNbRetryLevel2=").append(WDNbRetryLevel2);
-      strbuf.append(", WDRetryPeriod2=").append(WDRetryPeriod2);
-      strbuf.append(", WDRetryPeriod3=").append(WDRetryPeriod3);
-      strbuf.append(')');
-      logmon.log(BasicLevel.DEBUG,
-                 getName() + strbuf.toString());
-    }
   }
 
   /**
@@ -504,11 +440,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    *
    * @param id	the unique server id.
    */
-  public synchronized void addServer(short id) throws Exception {
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG,
-                 getName() + ".addServer(" + id + ')');
-
+  synchronized void addServer(short id) throws Exception {
     // First we have to verify that id is not already in servers
     int idx = index(id);
     if (idx >= 0) return;
@@ -560,11 +492,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    *
    * @param id	the unique server id.
    */
-  public synchronized void delServer(short id) throws Exception {
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG,
-                 getName() + ".delServer(" + id + ')');
-
+  synchronized void delServer(short id) throws Exception {
     // First we have to verify that id is already in servers
     int idx = index(id);
     if (idx < 0) return;
@@ -588,7 +516,8 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     if (idx > 0)
       System.arraycopy(stampbuf, 0, newStampBuf, 0, idx*4);
     if (idx < (servers.length-1))
-      System.arraycopy(stampbuf, (idx+1)*4, newStampBuf, idx*4, (servers.length-idx-1)*4);
+      System.arraycopy(stampbuf, (idx+1)*4,
+                       newStampBuf, idx*4, (servers.length-idx-1)*4);
 
     stamp = newStamp;
     stampbuf = newStampBuf;
@@ -627,6 +556,15 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * the filename change too.
    */
   public void post(Message msg) throws Exception {
+    if ((msg.not.expiration > 0) &&
+        (msg.not.expiration < System.currentTimeMillis())) {
+      if (logmon.isLoggable(BasicLevel.DEBUG))
+        logmon.log(BasicLevel.DEBUG,
+                   getName() + ": removes expired notification " +
+                   msg.from + ", " + msg.not);
+      return;
+    }
+
     short to = AgentServer.getServerDesc(msg.to.to).gateway;
     // Allocates a new timestamp. Be careful, if the message needs to be
     // routed we have to use the next destination in timestamp generation.
@@ -730,9 +668,10 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     int fromIdx = index(source);
 
     if (boot != bootTS[fromIdx]) {
-      if ((bootTS[fromIdx] != -1) && (logmon.isLoggable(BasicLevel.WARN)))
+      if (logmon.isLoggable(BasicLevel.WARN))
         logmon.log(BasicLevel.WARN,
-                   getName() + ", reset stamp #" + source + ", " + bootTS[fromIdx] + " -> " + boot);
+                   getName() + ", reset stamp #" + source + ", "
+                   + bootTS[fromIdx] + " -> " + boot);
 
       bootTS[fromIdx] = boot;
       AgentServer.getTransaction().save(bootTS, bootTSFN);
@@ -740,7 +679,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     }
   }
 
-//   int last = -1;
+  int last = -1;
 
   /**
    * Try to deliver the received message to the right consumer.
@@ -764,10 +703,11 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
                           " by " + source);
     }
 
-//     if ((last != -1) && (msg.getStamp() != (last +1)))
-//       logmon.log(BasicLevel.FATAL,
-//                  getName() + ", recv msg#" + msg.getStamp() + " should be #" + (last +1));
-//     last = msg.getStamp();
+    if ((last != -1) && (msg.getStamp() != (last +1)))
+      if (logmon.isLoggable(BasicLevel.WARN))
+        logmon.log(BasicLevel.WARN,
+                   getName() + ", recv msg#" + msg.getStamp() + " should be #" + last);
+    last = msg.getStamp();
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
@@ -801,19 +741,20 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
                    getName() + ", deliver msg#" + msg.getStamp());
 
       Channel.save();
-      AgentServer.getTransaction().commit(false);
+      AgentServer.getTransaction().commit();
       // then commit and validate the message.
       Channel.validate();
       AgentServer.getTransaction().release();
     } else {
 //    it's an already delivered message, we have just to re-send an
-//    acknowledge (see below).
-      AgentServer.getTransaction().commit(true);
+//    aknowledge (see below).
+      AgentServer.getTransaction().commit();
+      AgentServer.getTransaction().release();
     }
   }
 
   /**
-   * Deletes the component, removes all persistent data. The component
+   * Deletes the component, removes all persistent datas. The component
    * may have been previously stopped, and removed from MessageConsumer
    * list.
    * This operation use Transaction calls, you may use commit to validate it.

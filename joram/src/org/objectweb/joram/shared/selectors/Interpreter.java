@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,9 +23,10 @@
  */
 package org.objectweb.joram.shared.selectors;
 
-import java.util.StringTokenizer;
+import org.objectweb.joram.shared.excepts.MessageValueException;
+import org.objectweb.joram.shared.messages.*;
 
-import org.objectweb.joram.shared.messages.Message;
+import java.util.StringTokenizer;
 
 /** 
  * The <code>Interpreter</code> class is used for interpreting selector
@@ -52,18 +53,6 @@ class Interpreter
       return null;
   }
 
-  /** Gets the String value of the given object. */
-  public static String wrapToString(Object value)
-  {
-    if (value == null)
-      return null;
-
-    if (value instanceof byte[])
-      return new String((byte[]) value);
-    else
-      return value.toString();
-  }
-
   /**
    * Retrieves the value of a field following the JMS syntax rules.
    *
@@ -75,31 +64,41 @@ class Interpreter
     Object value = null;
 
     // Checking JMS header fields names:
-    if (name.equals("JMSMessageID")) {
-      value = message.id;
-    } else if (name.equals("JMSPriority")) {
-      value = new Integer(message.priority);
-    } else if (name.equals("JMSTimestamp")) {
-      value = new Long(message.timestamp);
-    } else if (name.equals("JMSCorrelationID")) {
-      value = message.correlationId;
-    } else if (name.equals("JMSDeliveryMode")) {
-      if (message.persistent)
+    if (name.equals("JMSMessageID"))
+      value = message.getIdentifier();
+    else if (name.equals("JMSPriority"))
+      value = new Integer(message.getPriority());
+    else if (name.equals("JMSTimestamp"))
+      value = new Long(message.getTimestamp());
+    else if (name.equals("JMSCorrelationID"))
+      value = message.getCorrelationId();
+    else if (name.equals("JMSDeliveryMode")) {
+      if (message.getPersistent())
           value = "PERSISTENT";
       else
           value = "NON_PERSISTENT";
-    } else if (name.equals("JMSType")) {
-      value = wrapToString(message.getOptionalHeader("JMSType"));
-    } else if (name.startsWith("JMSX")) {
+    }
+    else if (name.equals("JMSType"))
+      value = ConversionHelper.toString(message.getOptionalHeader("JMSType"));
+    // Checking JMSX header names:
+    else if (name.startsWith("JMSX")) {
       if (name.equals("JMSXDeliveryCounts"))
-        // Checking JMSX header names:
         value = new Integer(message.deliveryCount);
       else
         value = message.getOptionalHeader(name);
-    } else {
-      // Checking properties:
-      value = message.getProperty(name);
     }
+    // Checking JORAM specific header names:
+    else if (name.equals("JMS_JORAM_DELETEDDEST"))
+      value = new Boolean(message.deletedDest);
+    else if (name.equals("JMS_JORAM_NOTWRITEABLE"))
+      value = new Boolean(message.notWriteable);
+    else if (name.equals("JMS_JORAM_EXPIRED"))
+      value = new Boolean(message.expired);
+    else if (name.equals("JMS_JORAM_UNDELIVERABLE"))
+      value = new Boolean(message.undeliverable);
+    // Checking properties:
+    else
+      value = message.getObjectProperty(name);
 
     // If the value is a String, replacing its simple quote <'> 
     // by a double one <''> (see JMS 1.1 3.8.1.1):

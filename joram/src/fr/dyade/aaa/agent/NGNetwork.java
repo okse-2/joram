@@ -28,7 +28,7 @@ import java.nio.channels.*;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.common.Daemon;
+import fr.dyade.aaa.util.Daemon;
 
 /**
  * <code>NGNetwork</code> is a new implementation of <code>Network</code>
@@ -582,7 +582,8 @@ public class NGNetwork extends StreamNetwork {
 
           AgentServer.getTransaction().begin();
           testBootTS(sid, boot);
-          AgentServer.getTransaction().commit(true);
+          AgentServer.getTransaction().commit();
+          AgentServer.getTransaction().release();
         } else {
           throw new ConnectException("Can't get status");
         }
@@ -649,7 +650,8 @@ public class NGNetwork extends StreamNetwork {
 
         AgentServer.getTransaction().begin();
         testBootTS(sid, boot);
-        AgentServer.getTransaction().commit(true);
+        AgentServer.getTransaction().commit();
+        AgentServer.getTransaction().release();
 
 	// Fixing sock attribute will prevent any future attempt 
 	this.channel = channel;
@@ -783,7 +785,8 @@ public class NGNetwork extends StreamNetwork {
 
         if (msg.not != null) {
           // Writes notification attributes
-          buf[28] = msg.optToByte();
+          buf[28] = (byte) ((msg.not.persistent?0x01:0) |
+                            (msg.not.detachable?0x10:0));
           // Be careful, the stream header is hard-written in buf[29..32]
           count = 33;
 
@@ -1028,8 +1031,6 @@ public class NGNetwork extends StreamNetwork {
       }
 
       Message readMessage() throws Exception {
-        // AF: Be careful I think that there is an error here. The buffer has
-        // been refilled and may be reallocated !! 
         if (length > 28) {
           // Reads notification attributes
           boolean persistent = ((buf[28] & 0x01) == 0x01) ? true : false;
@@ -1065,7 +1066,8 @@ public class NGNetwork extends StreamNetwork {
         AgentServer.getTransaction().begin();
         msg.delete();
         msg.free();
-        AgentServer.getTransaction().commit(true);
+        AgentServer.getTransaction().commit();
+        AgentServer.getTransaction().release();
 
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,

@@ -51,25 +51,18 @@ public interface NTransactionMBean extends TransactionMBean {
   public int getLogMemorySize();
 
   /**
-   * Returns the maximum size of disk log in Mb, by default 16Mb.
-   *
-   * @return The maximum size of disk log in Mb.
-   */
-  int getMaxLogFileSize();
-
-  /**
-   * Sets the maximum size of disk log in Mb.
-   *
-   * @param size The maximum size of disk log in Mb.
-   */
-  void setMaxLogFileSize(int size);
-
-  /**
-   * Returns the size of disk log in Mb.
+   * Returns the size of disk log in Mb, by default 16Mb.
    *
    * @return The size of disk log in Mb.
    */
   int getLogFileSize();
+
+  /**
+   * Sets the size of disk log in Mb.
+   *
+   * @param size The size of disk log in Mb.
+   */
+  void setLogFileSize(int size);
 
   /**
    * Returns the pool size for <code>operation</code> objects, by default 1000.
@@ -127,13 +120,6 @@ public interface NTransactionMBean extends TransactionMBean {
    * @param timeout The maximum time between two garbages (seconds).
    */
   void setGarbageDelay(int timeout);
-
-  /**
-   * Returns the status of the garbage thread.
-   *
-   * @return The status of the garbage thread.
-   */
-  boolean isGarbageRunning();
 
   /**
    *  Sets asynchronous garbage.

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,10 +27,6 @@ package fr.dyade.aaa.agent;
  */
 public class SyncNotification extends Notification {
   
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private transient Context ctx;
 
   protected SyncNotification() {

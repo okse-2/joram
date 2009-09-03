@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,30 +22,17 @@
  */
 package fr.dyade.aaa.jndi2.impl;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Enumeration;
-import java.util.Vector;
+import java.io.*;
+import java.util.*;
+import javax.naming.*;
 
-import javax.naming.CompositeName;
-import javax.naming.NameNotFoundException;
-import javax.naming.NamingException;
-import javax.naming.NotContextException;
+import fr.dyade.aaa.util.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-
-import fr.dyade.aaa.util.NullTransaction;
-import fr.dyade.aaa.util.Transaction;
-import fr.dyade.aaa.util.management.MXWrapper;
+import org.objectweb.util.monolog.api.Logger;
 
 public class ContextManager 
     implements java.io.Serializable {
-
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
 
   private ContextTable contextIdTable;
 
@@ -72,25 +59,19 @@ public class ContextManager
   }
 
   public void initialize() throws Exception {
-    storageManager.initialize();   
-
-    Enumeration names = storageManager.getContextNames();
-    while (names.hasMoreElements()) {
-      CompositeName name = (CompositeName) names.nextElement();
-      // register MBean
-      registerMBean(getNamingContextFromName(name), name);
-    }
+    storageManager.initialize();
   }
 
   private void put(NamingContext nc) {
-    contextIdTable.put(nc.getId(), nc);
+    contextIdTable.put(nc.getId(), nc);    
   }
 
   private void put(CompositeName name, NamingContext nc) {
     contextNameTable.put(name, nc);
   }
 
-  public NamingContext getNamingContext(NamingContextId ncid) throws NamingException {
+  public NamingContext getNamingContext(NamingContextId ncid) 
+    throws NamingException {
     return getNamingContext(ncid, true);
   }
 
@@ -113,8 +94,10 @@ public class ContextManager
   private NamingContext getNamingContextFromName(CompositeName name) 
     throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, 
-                       "ContextManager.getNamingContextFromName(" + name + ')');
+      Trace.logger.log(
+        BasicLevel.DEBUG, 
+        "ContextManager.getNamingContextFromName(" + 
+        name + ')');
 
     // 1- Try to get the context directly from the cache
     NamingContext nc = contextNameTable.get(name);
@@ -122,15 +105,14 @@ public class ContextManager
 
     // 2- Try to get the context id from the index of
     // the storage manager.
-    NamingContextId ncid = storageManager.getIdFromName(name);
+    NamingContextId ncid = 
+      storageManager.getIdFromName(name);
     if (ncid != null) {
       // 3- Get the naming context
       nc = getNamingContext(ncid);
-      if (nc == null) {
-        // The context no longer exists, thow an Exception. The JNDI server
-        // is in an incoherent state, may be we should reinitialized it.
-        throw new NamingException("Missing context: name=" + name + ", id=" + ncid);
-      }
+      if (nc == null) throw new Error(
+        "Missing context: name=" + name + 
+        ", id=" + ncid);
       put(name, nc);
       return nc;
     } else {
@@ -149,7 +131,8 @@ public class ContextManager
     NamingContext nc = getNamingContextFromName(name);
     if (nc != null) return nc;
 
-    // Go upward the naming path in order to find out which name is missing.
+    // Go upward the naming path in order to
+    // to find out which name is missing.
     CompositeName parentName = name;
     NamingContext parentNc = null;
     int unresolvedIndex = 0;
@@ -206,9 +189,6 @@ public class ContextManager
     contextIdTable.remove(ncid);
     contextNameTable.remove(name);
     storageManager.delete(ncid, name);
-    
-    // unregister MBean
-    unregisterMBean(name);
   }
 
   public NamingContextInfo[] copyNamingContexts(Object serverId) 
@@ -247,16 +227,11 @@ public class ContextManager
       Trace.logger.log(BasicLevel.DEBUG, 
                        "ContextManager.newNamingContext(" + 
                        ownerId + ',' + ncid + ',' + name + ')');
-    
     NamingContext nc = 
       storageManager.newNamingContext(
         ownerId, ncid, name);
     put(nc);
     put(name, nc);
-
-    // register MBean
-    registerMBean(nc, name);
-
     return nc;
   }
 
@@ -289,10 +264,9 @@ public class ContextManager
   }
 
   public NamingContextInfo[] changeOwner(
-      CompositeName cn,
-      Object formerOwnerId,
-      Object newOwnerId)
-  throws NamingException {
+    Object formerOwnerId,
+    Object newOwnerId)
+    throws NamingException {
     Vector updatedContexts = new Vector();
     Enumeration idEnum = storageManager.getContextIds();
     Enumeration nameEnum = storageManager.getContextNames();
@@ -302,12 +276,11 @@ public class ContextManager
       CompositeName name = 
         (CompositeName)nameEnum.nextElement();
       NamingContext nc = getNamingContext(ncid, false);      
-      if (nc.getOwnerId().equals(formerOwnerId) && (name.equals(cn) || cn == null)) {
+      if (nc.getOwnerId().equals(formerOwnerId)) {
         nc.setOwnerId(newOwnerId);
         storageManager.storeNamingContext(nc);
         updatedContexts.addElement(
           new NamingContextInfo(nc, name));
-        reloadMBean(nc);
       }
     }
     NamingContextInfo[] res =
@@ -317,35 +290,10 @@ public class ContextManager
   }
 
   public void resetNamingContext(NamingContext context)
-  throws NamingException {
+    throws NamingException {
     storageManager.storeNamingContext(context);
-    reloadMBean(context);
   }
-  
-  private void registerMBean(NamingContext context, CompositeName cn) {
-    try {
-        MXWrapper.registerMBean(context, "JNDI", "nc=/"+cn);
-    } catch (Exception exc) {
-      Trace.logger.log(BasicLevel.ERROR, context + " jmx failed", exc);
-    }
-  }
-  
-  private void unregisterMBean(CompositeName cn) {
-    try {
-      MXWrapper.unregisterMBean("JNDI", "nc=/"+cn);
-    } catch (Exception exc) {
-      Trace.logger.log(BasicLevel.ERROR, "jmx failed", exc);
-    }
-  }
-  
-  private void reloadMBean(NamingContext context) {
-      CompositeName cn = context.getContextName();
-      if (cn.size() > 0) {
-        unregisterMBean(cn);
-        registerMBean(context, cn);
-      }
-  }
-  
+
   public void writeBag(ObjectOutputStream out)
     throws IOException {
     out.writeObject(contextIdTable);

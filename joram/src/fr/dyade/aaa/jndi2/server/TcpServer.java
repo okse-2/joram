@@ -31,13 +31,15 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.Channel;
-import fr.dyade.aaa.common.Daemon;
+import fr.dyade.aaa.util.Daemon;
 
 public class TcpServer {
 
   private volatile ServerSocket listen;
 
   private Monitor monitors[];  
+
+  private int timeout;
 
   private AgentId serverId;
 
@@ -46,6 +48,7 @@ public class TcpServer {
                    int timeout,
                    AgentId serverId) {
     this.listen = listen;
+    this.timeout = timeout;
     this.monitors = new Monitor[poolSize];
     this.serverId = serverId;
     for (int i = 0; i < monitors.length; i++) {
@@ -115,8 +118,8 @@ public class TcpServer {
             canStop = false;
             Thread.interrupted();
             if (running) {
-              Trace.logger.log(BasicLevel.DEBUG,
-                               this.getName() + ", error during accept", exc);
+              Trace.logger.log(BasicLevel.DEBUG, this.getName()
+                  + ", error during accept", exc);
               try {
                 Thread.sleep(1000);
               } catch (InterruptedException ie) {
@@ -133,8 +136,9 @@ public class TcpServer {
             break loop;
 
           if (Trace.logger.isLoggable(BasicLevel.DEBUG)) {
-            Trace.logger.log(BasicLevel.DEBUG,
-                             this.getName() + ", connection from " + socket.getInetAddress() + ':' + socket.getPort());
+            Trace.logger.log(BasicLevel.DEBUG, this.getName()
+                + ", connection from " + socket.getInetAddress() + ':'
+                + socket.getPort());
           }
 
           try {

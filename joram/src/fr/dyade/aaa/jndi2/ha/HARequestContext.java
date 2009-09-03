@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,17 +21,16 @@
  */
 package fr.dyade.aaa.jndi2.ha;
 
-import org.objectweb.util.monolog.api.BasicLevel;
+import fr.dyade.aaa.jndi2.msg.*;
+import fr.dyade.aaa.jndi2.server.*;
 
-import fr.dyade.aaa.jndi2.msg.IOControl;
-import fr.dyade.aaa.jndi2.msg.JndiReply;
-import fr.dyade.aaa.jndi2.msg.JndiRequest;
-import fr.dyade.aaa.jndi2.server.RequestContext;
-import fr.dyade.aaa.jndi2.server.Trace;
+import java.net.*;
+import java.io.*;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 public class HARequestContext extends RequestContext {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
 
   private transient IOControl ioCtrl;
 
@@ -41,7 +40,7 @@ public class HARequestContext extends RequestContext {
 
   private int id;
 
-  //  private transient HARequestManager manager;
+  private transient HARequestManager manager;
 
   HARequestContext(IOControl ioCtrl,
                    int id) throws Exception {
@@ -83,12 +82,12 @@ public class HARequestContext extends RequestContext {
     }
   }
 
-  //  private void close() {
-  //    // Closes the connection
-  //    ioCtrl.close();
-  //    if (manager != null)
-  //      manager.removeContext(id);
-  //  }
+  private void close() {
+    // Closes the connection
+    ioCtrl.close();
+    if (manager != null)
+      manager.removeContext(id);
+  }
   
   public String toString() {
     return '(' + super.toString() +

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -24,6 +24,10 @@
  */
 package org.objectweb.joram.client.connector;
 
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
+
 import javax.jms.ConnectionFactory;
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
@@ -36,10 +40,6 @@ import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.resource.spi.SecurityException;
 
-import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /** 
@@ -51,10 +51,6 @@ public class DefaultConnectionManager
              implements javax.resource.spi.ConnectionManager,
                         java.io.Serializable
 {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /**
    * Static reference to the local <code>DefaultConnectionManager</code>
    * instance.
@@ -86,16 +82,13 @@ public class DefaultConnectionManager
     
     String userName;
     String password;
-    String identityClass;
     
     if (cxRequest == null) {
       userName = ((ManagedConnectionFactoryImpl) mcf).getUserName();
       password = ((ManagedConnectionFactoryImpl) mcf).getPassword();
-      identityClass = ((ManagedConnectionFactoryImpl) mcf).getIdentityClass();
     } else {
       userName = ((ConnectionRequest) cxRequest).getUserName();
       password = ((ConnectionRequest) cxRequest).getPassword();
-      identityClass = ((ConnectionRequest) cxRequest).getIdentityClass();
     }
     
     String hostName = ((ManagedConnectionFactoryImpl) mcf).getHostName();
@@ -104,19 +97,22 @@ public class DefaultConnectionManager
     
     try {
       if (cxRequest instanceof QueueConnectionRequest) {
-        QueueConnectionFactory factory = QueueTcpConnectionFactory.create(hostName, serverPort);
-        setFactoryParameters((AbstractConnectionFactory) factory, (ManagedConnectionFactoryImpl) mcf);
-        ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
+        QueueConnectionFactory factory =
+          QueueTcpConnectionFactory.create(hostName, serverPort);
+        setFactoryParameters((org.objectweb.joram.client.jms.ConnectionFactory) factory,
+                             (ManagedConnectionFactoryImpl) mcf);
         return factory.createQueueConnection(userName, password);
       } else if (cxRequest instanceof TopicConnectionRequest) {
-        TopicConnectionFactory factory = TopicTcpConnectionFactory.create(hostName, serverPort);
-        setFactoryParameters((AbstractConnectionFactory) factory, (ManagedConnectionFactoryImpl) mcf);
-        ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
+        TopicConnectionFactory factory =
+          TopicTcpConnectionFactory.create(hostName, serverPort);
+        setFactoryParameters((org.objectweb.joram.client.jms.ConnectionFactory) factory,
+                             (ManagedConnectionFactoryImpl) mcf);
         return factory.createTopicConnection(userName, password);
       } else {
-        ConnectionFactory factory = TcpConnectionFactory.create(hostName, serverPort);
-        setFactoryParameters((AbstractConnectionFactory) factory, (ManagedConnectionFactoryImpl) mcf);
-        ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
+        ConnectionFactory factory =
+          TcpConnectionFactory.create(hostName, serverPort);
+        setFactoryParameters((org.objectweb.joram.client.jms.ConnectionFactory) factory,
+                             (ManagedConnectionFactoryImpl) mcf);
         return factory.createConnection(userName, password);
       }
     } catch (IllegalStateException exc) {
@@ -128,19 +124,14 @@ public class DefaultConnectionManager
     }
   }
 
-  private void setFactoryParameters(AbstractConnectionFactory factory , ManagedConnectionFactoryImpl mcf) {
+  private void setFactoryParameters(org.objectweb.joram.client.jms.ConnectionFactory factory , 
+                                    ManagedConnectionFactoryImpl mcf) {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
                                     this + " setFactoryParameters(" + factory + "," + mcf + ")");   
     factory.getParameters().connectingTimer = mcf.getConnectingTimer();
     factory.getParameters().cnxPendingTimer = mcf.getCnxPendingTimer();
     factory.getParameters().txPendingTimer = mcf.getTxPendingTimer();
-    factory.getParameters().asyncSend = mcf.isAsyncSend();
-    factory.getParameters().multiThreadSync = mcf.isMultiThreadSync();
-    factory.getParameters().multiThreadSyncDelay = mcf.getMultiThreadSyncDelay();
-    factory.getParameters().outLocalAddress = mcf.getOutLocalAddress();
-    factory.getParameters().outLocalPort = mcf.getOutLocalPort().intValue();
-    
   }
 
   /**

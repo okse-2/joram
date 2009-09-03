@@ -30,27 +30,28 @@ import java.util.Vector;
  * sending to an administrator client the identifiers of its readers or
  * writers.
  */
-public class Monit_GetUsersRep extends AdminReply {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-  
+public class Monit_GetUsersRep extends AdminReply
+{
   /** Vector of readers' or writers' identifiers. */
   private Vector users;
+
 
   /**
    * Constructs a <code>Monit_GetUsersRep</code> instance.
    *
    * @param request  The request this reply replies to.
-   * @param users  The vector or readers' or writers' identifiers.
+   * @param readers  The vector or readers' or writers' identifiers.
    */
-  public Monit_GetUsersRep(AdminRequest request, Vector users) {
+  public Monit_GetUsersRep(AdminRequest request, Vector users)
+  {
     super(request, true, null);
     this.users = users;
   }
 
   
   /** Returns the vector of readers' or writers' identifiers. */
-  public Vector getUsers() {
+  public Vector getUsers()
+  {
     if (users == null)
       return new Vector();
     return users;

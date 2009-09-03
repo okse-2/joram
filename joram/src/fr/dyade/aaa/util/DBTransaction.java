@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,41 +21,46 @@
  */
 package fr.dyade.aaa.util;
 
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
+import java.util.*;
+
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.Debug;
-import fr.dyade.aaa.common.Pool;
 
-/**
- *  The DBTransaction class implements a transactionnal storage through
- * a JDBC interface. This class is designed to be specialized for different
- * database implementation. 
- *
- * @see Transaction
- * @see MySQLDBTransaction
- * @see DerbyDBTransaction
- */
-public abstract class DBTransaction extends AbstractTransaction implements DBTransactionMBean {
+public final class DBTransaction implements Transaction, DBTransactionMBean {
   // Logging monitor
-  protected static Logger logmon = null;
+  private static Logger logmon = null;
 
   File dir = null;
+
+  /** Log context associated with each Thread using DBTransaction. */
+  private class Context {
+    Hashtable log = null;
+    ByteArrayOutputStream bos = null;
+    ObjectOutputStream oos = null;
+
+    Context() {
+      log = new Hashtable(15);
+      bos = new ByteArrayOutputStream(256);
+    }
+  }
+
+  /**
+   *  ThreadLocal variable used to get the log to associate state with each
+   * thread. The log contains all operations do by the current thread since
+   * the last <code>commit</code>. On commit, its content is added to current
+   * log (memory + disk), then it is freed.
+   */
+  private ThreadLocal perThreadContext = null;
 
   /**
    *  Number of pooled operation, by default 1000.
@@ -87,24 +92,26 @@ public abstract class DBTransaction extends AbstractTransaction implements DBTra
     return startTime;
   }
 
-  protected Connection conn = null;
+  String driver = "org.apache.derby.jdbc.EmbeddedDriver";
+  String connurl = "jdbc:derby:";
 
-  private PreparedStatement insertStmt = null;
-  private PreparedStatement updateStmt = null;
-  private PreparedStatement deleteStmt = null;
+  Connection conn = null;
+
+  PreparedStatement insertStmt = null;
+  PreparedStatement updateStmt = null;
+  PreparedStatement deleteStmt = null;
 
   public DBTransaction() {}
 
   public void init(String path) throws IOException {
     phase = INIT;
 
-    logmon = Debug.getLogger(Transaction.class.getName());
+    logmon = Debug.getLogger(Debug.A3Debug + ".Transaction");
     if (logmon.isLoggable(BasicLevel.INFO))
       logmon.log(BasicLevel.INFO, "DBTransaction, init()");
 
     dir = new File(path);
-    if (!dir.exists())
-      dir.mkdir();
+    if (!dir.exists()) dir.mkdir();
     if (!dir.isDirectory())
       throw new FileNotFoundException(path + " is not a directory.");
 
@@ -113,17 +120,46 @@ public abstract class DBTransaction extends AbstractTransaction implements DBTra
     DataOutputStream ldos = null;
     try {
       File tfc = new File(dir, "TFC");
-      if (!tfc.exists()) {
+      if (! tfc.exists()) {
         ldos = new DataOutputStream(new FileOutputStream(tfc));
         ldos.writeUTF(getClass().getName());
         ldos.flush();
       }
     } finally {
-      if (ldos != null)
-        ldos.close();
+      if (ldos != null) ldos.close();
     }
 
-    initDB();
+    try {
+      Class.forName(driver).newInstance();
+
+      Properties props = new Properties();
+      props.put("user", "user1");
+      props.put("password", "user1");
+
+      conn = DriverManager.getConnection(connurl + new File(dir, "JoramDB").getPath() + ";create=true", props);
+      conn.setAutoCommit(false);
+//         break;
+    } catch (IllegalAccessException exc) {
+        throw new IOException(exc.getMessage());
+      } catch (ClassNotFoundException exc) {
+        throw new IOException(exc.getMessage());
+      } catch (InstantiationException exc) {
+        throw new IOException(exc.getMessage());
+      } catch (SQLException sqle) {
+        throw new IOException(sqle.getMessage());
+    }
+
+    try {
+        // Creating a statement lets us issue commands against the connection.
+        Statement s = conn.createStatement();
+        // We create the table.
+        s.execute("CREATE TABLE JoramDB (name VARCHAR(256), content LONG VARCHAR FOR BIT DATA, PRIMARY KEY(name))");
+        s.close();
+        conn.commit();
+    } catch (SQLException sqle) {
+      if (logmon.isLoggable(BasicLevel.INFO))
+        logmon.log(BasicLevel.INFO, "DBTransaction, init() DB already exists");
+    }
 
     try {
       insertStmt = conn.prepareStatement("INSERT INTO JoramDB VALUES (?, ?)");
@@ -149,11 +185,9 @@ public abstract class DBTransaction extends AbstractTransaction implements DBTra
     setPhase(FREE);
   }
 
-  /**
-   * Instantiates the database driver and creates the table if necessary
-   * @throws IOException
-   */
-  protected abstract void initDB() throws IOException;
+  public final File getDir() {
+    return dir;
+  }
 
   /**
    * Returns the path of persistence directory.
@@ -164,8 +198,35 @@ public abstract class DBTransaction extends AbstractTransaction implements DBTra
     return dir.getPath();
   }
 
-  protected final void setPhase(int newPhase) {
+  // State of the transaction monitor.
+  private int phase = INIT;
+  String phaseInfo = PhaseInfo[phase];
+
+  /**
+   *
+   */
+  public int getPhase() {
+    return phase;
+  }
+
+  public String getPhaseInfo() {
+    return phaseInfo;
+  }
+
+  private final void setPhase(int newPhase) {
     phase = newPhase;
+    phaseInfo = PhaseInfo[phase];
+  }
+
+  public final synchronized void begin() throws IOException {
+    while (phase != FREE) {
+      try {
+	wait();
+      } catch (InterruptedException exc) {
+      }
+    }
+    // Change the transaction state.
+    setPhase(RUN);
   }
 
   /**
@@ -220,19 +281,56 @@ public abstract class DBTransaction extends AbstractTransaction implements DBTra
     }
   }
 
-  protected final void saveInLog(byte[] buf,
-                                 String dirName, String name,
-                                 Hashtable log,
-                                 boolean copy,
-                                 boolean first) throws IOException {
-    String fname = fname(dirName, name);
-    
-    if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG,
-                 "DBTransaction, saveInLog(" + fname + ", " + copy + ", " + first + ")");
+  static private final byte[] OOS_STREAM_HEADER = {
+    (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 8) & 0xFF),
+    (byte)((ObjectStreamConstants.STREAM_MAGIC >>> 0) & 0xFF),
+    (byte)((ObjectStreamConstants.STREAM_VERSION >>> 8) & 0xFF),
+    (byte)((ObjectStreamConstants.STREAM_VERSION >>> 0) & 0xFF)
+  };
 
-    DBOperation op = DBOperation.alloc(DBOperation.SAVE, fname, buf);
-    DBOperation old = (DBOperation) log.put(fname, op);
+  public void save(Serializable obj,
+                   String dirName, String name) throws IOException {
+    save(obj, fname(dirName, name));
+  }
+
+  public void save(Serializable obj, String name) throws IOException{
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, "DBTransaction, save(" + name + ")");
+
+    Context ctx = (Context) perThreadContext.get();
+    if (ctx.oos == null) {
+      ctx.bos.reset();
+      ctx.oos = new ObjectOutputStream(ctx.bos);
+    } else {
+      ctx.oos.reset();
+      ctx.bos.reset();
+      ctx.bos.write(OOS_STREAM_HEADER, 0, 4);
+    }
+    ctx.oos.writeObject(obj);
+    ctx.oos.flush();
+
+    saveInLog(ctx.bos.toByteArray(), name, ctx.log, false);
+  }
+
+  public void saveByteArray(byte[] buf,
+                            String dirName, String name) throws IOException {
+    save(buf, fname(dirName, name));
+  }
+
+  public void saveByteArray(byte[] buf, String name) throws IOException{
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, "DBTransaction, saveByteArray(" + name + ")");
+
+    Context ctx = (Context) perThreadContext.get();
+    saveInLog(buf, name, ((Context) perThreadContext.get()).log, true);
+  }
+
+  private final void saveInLog(byte[] buf,
+                               String name,
+                               Hashtable log,
+                               boolean copy) throws IOException {
+    DBOperation op = DBOperation.alloc(DBOperation.SAVE, name, buf);
+    DBOperation old = (DBOperation) log.put(name, op);
     if (copy) {
       if ((old != null) &&
           (old.type == DBOperation.SAVE) &&
@@ -248,21 +346,37 @@ public abstract class DBTransaction extends AbstractTransaction implements DBTra
     if (old != null) old.free();
   }
 
-  public byte[] loadByteArray(String dirName, String name) throws IOException {
-    String fname = fname(dirName, name);
+  public Object load(String dirName, String name) throws IOException, ClassNotFoundException {
+    return load(fname(dirName, name));
+  }
 
+  public Object load(String name) throws IOException, ClassNotFoundException {
+    byte[] buf = loadByteArray(name);
+    if (buf != null) {
+      ByteArrayInputStream bis = new ByteArrayInputStream(buf);
+      ObjectInputStream ois = new ObjectInputStream(bis);	  
+      return ois.readObject();
+    }
+    return null;
+  }
+
+  public byte[] loadByteArray(String dirName, String name) throws IOException {
+    return loadByteArray(fname(dirName, name));
+  }
+
+  public synchronized byte[] loadByteArray(String name) throws IOException {
     if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "DBTransaction, loadByteArray(" + fname + ")");
+      logmon.log(BasicLevel.DEBUG, "DBTransaction, loadByteArray(" + name + ")");
 
     // Searchs in the log a new value for the object.
     Hashtable log = ((Context) perThreadContext.get()).log;
-    DBOperation op = (DBOperation) log.get(fname);
+    DBOperation op = (DBOperation) log.get(name);
     if (op != null) {
       if (op.type == DBOperation.SAVE) {
-        return op.value;
+	return op.value;
       } else if (op.type == DBOperation.DELETE) {
-        // The object was deleted.
-        return null;
+	// The object was deleted.
+	return null;
       }
     }
 
@@ -274,31 +388,33 @@ public abstract class DBTransaction extends AbstractTransaction implements DBTra
 
       if (!rs.next()) return null;
 
-      byte[] content = rs.getBytes(1);
+       byte[] content = rs.getBytes(1);
 
-      rs.close();
-      s.close();
+       rs.close();
+       s.close();
 
-      return content;
+       return content;
     } catch (SQLException sqle) {
       throw new IOException(sqle.getMessage());
     }
   }
 
   public void delete(String dirName, String name) {
-    String fname = fname(dirName, name);
+    delete(fname(dirName, name));
+  }
 
+  public void delete(String name) {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
-                 "DBTransaction, delete(" + fname + ")");
+                 "DBTransaction, delete(" + name + ")");
 
     Hashtable log = ((Context) perThreadContext.get()).log;
-    DBOperation op = DBOperation.alloc(DBOperation.DELETE, fname);
-    op = (DBOperation) log.put(fname, op);
+    DBOperation op = DBOperation.alloc(DBOperation.DELETE, name);
+    op = (DBOperation) log.put(name, op);
     if (op != null) op.free();
   }
 
-  public final synchronized void commit(boolean release) throws IOException {
+  public final synchronized void commit() throws IOException {
     if (phase != RUN)
       throw new IllegalStateException("Can not commit.");
 
@@ -353,14 +469,29 @@ public abstract class DBTransaction extends AbstractTransaction implements DBTra
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, "DBTransaction, committed");
-    
-    if (release) {
-      // Change the transaction state and save it.
-      setPhase(FREE);
-      notify();
-    } else {
-      setPhase(COMMIT);
-    }
+
+    setPhase(COMMIT);
+  }
+
+  public final synchronized void rollback() throws IOException {
+    if (phase != RUN)
+      throw new IllegalStateException("Can not rollback.");
+
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, "DBTransaction, rollback");
+
+    setPhase(ROLLBACK);
+    ((Context) perThreadContext.get()).log.clear();
+  }
+
+  public final synchronized void release() throws IOException {
+    if ((phase != RUN) && (phase != COMMIT) && (phase != ROLLBACK))
+      throw new IllegalStateException("Can not release transaction.");
+
+    // Change the transaction state.
+    setPhase(FREE);
+    // wake-up an eventually user's thread in begin
+    notify();
   }
 
   /**
@@ -451,15 +582,11 @@ public abstract class DBTransaction extends AbstractTransaction implements DBTra
 }
 
 final class DBOperation implements Serializable {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   static final int SAVE = 1;
   static final int DELETE = 2;
   static final int COMMIT = 3;
   static final int END = 127;
-
+ 
   int type;
   String name;
   byte[] value;
@@ -482,7 +609,7 @@ final class DBOperation implements Serializable {
     strbuf.append(",type=").append(type);
     strbuf.append(",name=").append(name);
     strbuf.append(')');
-
+    
     return strbuf.toString();
   }
 
@@ -500,7 +627,7 @@ final class DBOperation implements Serializable {
 
   static DBOperation alloc(int type, String name, byte[] value) {
     DBOperation op = null;
-
+    
     try {
       op = (DBOperation) pool.allocElement();
     } catch (Exception exc) {

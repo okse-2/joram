@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002 - 2008 ScalAgent Distributed Technologies 
+ * Copyright (C) 2002-2005 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,6 +20,11 @@ package fr.dyade.aaa.agent.conf;
 
 import java.io.*;
 import java.util.*;
+
+import fr.dyade.aaa.agent.*;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import org.kxml.parser.*;
 import org.kxml.*;
@@ -93,7 +98,8 @@ public class A3CMLKXmlWrapper implements A3CMLWrapper {
    * @exception Exception  unspecialized error
    */
   public A3CMLConfig parse(Reader reader,
-                           String configName) throws Exception {
+                            String configName) 
+    throws Exception {
     this.configName = configName;
 
     a3cmlconfig = new A3CMLConfig();

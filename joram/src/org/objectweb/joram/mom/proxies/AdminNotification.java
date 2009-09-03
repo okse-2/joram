@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -19,11 +19,9 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Contributor(s):
  */
 package org.objectweb.joram.mom.proxies;
-
-import org.objectweb.joram.shared.security.Identity;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Notification;
@@ -33,33 +31,45 @@ import fr.dyade.aaa.agent.Notification;
  * An <code>AdminNotification</code> is sent by an administrator's proxy for
  * registering to the local administration topic.
  */
-public class AdminNotification extends Notification {
-
-  private static final long serialVersionUID = 1L;
+public class AdminNotification extends Notification
+{
   /** The proxy's <code>AgentId</code> identifier. */
   private AgentId proxyId;
-  /** The administrator's Identity. */
-  private Identity identity;
+  /** The administrator's name. */
+  private String name;
+  /** The administrator's password. */
+  private String pass;
 
   /**
    * Constructs an <code>AdminNotification</code> instance.
    *
    * @param proxyId  The proxy's identifier.
-   * @param identity administrator identity.
+   * @param name  The name of the administrator.
+   * @param pass  The password of the administrator.
    */
-  AdminNotification(AgentId proxyId, Identity identity) {
+  AdminNotification(AgentId proxyId, String name, String pass)
+  {
     this.proxyId = proxyId;
-    this.identity = identity;
+    this.name = name;
+    this.pass = pass;
   }
 
   
   /** Returns the <code>AgentId</code> of the proxy. */
-  public AgentId getProxyId() {
+  public AgentId getProxyId()
+  {
     return proxyId;
   }
 
-  /** Returns the identity of the administrator. */
-  public Identity getIdentity() {
-    return identity;
+  /** Returns the name of the administrator. */
+  public String getName()
+  {
+    return name;
+  }
+
+  /** Returns the password of the administrator. */
+  public String getPass()
+  {
+    return pass;
   }
 }

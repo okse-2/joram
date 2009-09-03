@@ -1,6 +1,5 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -63,7 +62,6 @@ public class ObjectFactoryImpl implements javax.naming.spi.ObjectFactory
       new Integer((String) ref.get("serverPort").getContent());
     String userName = (String) ref.get("userName").getContent();
     String password = (String) ref.get("password").getContent();
-    String identityClass = (String) ref.get("identityClass").getContent();
 
     ManagedConnectionFactoryImpl mcf = null;
 
@@ -81,7 +79,6 @@ public class ObjectFactoryImpl implements javax.naming.spi.ObjectFactory
     mcf.setServerPort(serverPort);
     mcf.setUserName(userName);
     mcf.setPassword(password);
-    mcf.setIdentityClass(identityClass);
 
     try {
       return mcf.createConnectionFactory();

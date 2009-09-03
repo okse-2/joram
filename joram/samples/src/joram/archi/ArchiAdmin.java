@@ -24,19 +24,17 @@
  */
 package archi;
 
-import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.client.jms.Topic;
-import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.client.jms.admin.*;
+import org.objectweb.joram.client.jms.*;
+import org.objectweb.joram.client.jms.tcp.*;
 
 /**
  * Administers two agent servers for the archi samples.
  */
-public class ArchiAdmin {
-
-  public static void main(String args[]) throws Exception {
-    
+public class ArchiAdmin
+{
+  public static void main(String args[]) throws Exception
+  {
     System.out.println();
     System.out.println("Archi administration...");
 
@@ -44,12 +42,12 @@ public class ArchiAdmin {
     AdminModule.connect("root", "root", 60);
 
     // Creating access for user anonymous on servers 0 and 2:
-    User.create("anonymous", "anonymous", 0);
-    User.create("anonymous", "anonymous", 2);
+    User user0 = User.create("anonymous", "anonymous", 0);
+    User user2 = User.create("anonymous", "anonymous", 2);
 
     // Creating the destinations on server 1:
-    Queue queue = Queue.create(1);
-    Topic topic = Topic.create(1);
+    Queue queue = (Queue) Queue.create(1);
+    Topic topic = (Topic) Topic.create(1);
 
     // Setting free access to the destinations:
     queue.setFreeReading();

@@ -27,10 +27,6 @@ import java.awt.event.*;
 
 
 public class CreateUserDialog extends JDialog {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private static CreateUserDialog dialog;
   private static JLabel nameLabel;
   private static JLabel passwdLabel;

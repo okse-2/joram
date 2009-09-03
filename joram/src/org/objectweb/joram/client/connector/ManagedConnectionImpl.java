@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2004 Bull SA
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,13 +19,10 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
- * Contributor(s): Nicolas Tachker (ScalAgent D.T.)
+ * Contributor(s): Nicolas Tachker (Bull SA)
  *                 Florent Benoit (Bull SA)
  */
 package org.objectweb.joram.client.connector;
-
-import java.io.PrintWriter;
-import java.util.Vector;
 
 import javax.jms.JMSException;
 import javax.jms.Session;
@@ -42,7 +39,11 @@ import javax.resource.spi.IllegalStateException;
 import javax.resource.spi.LocalTransactionException;
 import javax.resource.spi.ManagedConnectionMetaData;
 import javax.resource.spi.ResourceAdapterInternalException;
+import javax.resource.spi.SecurityException;
 import javax.transaction.xa.XAResource;
+
+import java.io.PrintWriter;
+import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -54,7 +55,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
 public class ManagedConnectionImpl
              implements javax.resource.spi.ManagedConnection,
                         javax.resource.spi.LocalTransaction,
-                        javax.jms.ExceptionListener {
+                        javax.jms.ExceptionListener
+{
   /** Central adapter authority. */
   private JoramAdapter ra;
 
@@ -209,7 +211,7 @@ public class ManagedConnectionImpl
 
     OutboundConnection newConn = (OutboundConnection) connection;
     newConn.managedCx = this;
-    newConn.xac = cnx;
+    newConn.xac = (org.objectweb.joram.client.jms.XAConnection) cnx;
   }
 
   /** Adds a connection event listener. */
@@ -301,7 +303,7 @@ public class ManagedConnectionImpl
               // set Session transacted = true
               sess.setTransacted(true);
 
-              session = new org.objectweb.joram.client.jms.XASession(
+              session = (Session) new org.objectweb.joram.client.jms.XASession(
                 (org.objectweb.joram.client.jms.Connection) outboundCnx.xac,
                 sess,
                 xaResourceMngr);
@@ -539,6 +541,7 @@ public class ManagedConnectionImpl
    *                                       is lost.
    * @exception LocalTransactionException  If a local transaction has already
    *                                       begun.
+   * @exception
    */
   public synchronized void begin() throws ResourceException {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -20,13 +20,14 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.Enumeration;
+import java.io.*;
+import java.util.*;
+import java.lang.reflect.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
+import fr.dyade.aaa.util.*;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
@@ -65,8 +66,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * @see Channel
  */
 public abstract class Agent implements AgentMBean, Serializable {
-  /** Define serialVersionUID for interoperability. */
-  static final long serialVersionUID = 1L;
+  static final long serialVersionUID = 2955513886633164244L;
 
   /**
    * <code>true</code> if the agent state has changed.
@@ -94,7 +94,7 @@ public abstract class Agent implements AgentMBean, Serializable {
   }
 
   /**
-   * Indicates to the Engine component that a commit is needed.
+   *
    */
   protected final boolean needToBeCommited() {
     try {
@@ -194,7 +194,7 @@ public abstract class Agent implements AgentMBean, Serializable {
     return fr.dyade.aaa.agent.Debug.A3Agent;
   }
 
-  public static final String nullName = "";
+  protected static final String nullName = "";
 
   /**
    *  the <code>last</code> variable contains the virtual time of the
@@ -272,7 +272,7 @@ public abstract class Agent implements AgentMBean, Serializable {
    * Allocates a new Agent object. This constructor has the same effect
    * as <code>Agent(to, null, false)</code>.
    *
-   * @param to	  Identification of target agent server
+   * @param to	  Identication of target agent server
    *
    * @see Agent#Agent(short, java.lang.String, boolean)
    */
@@ -284,7 +284,7 @@ public abstract class Agent implements AgentMBean, Serializable {
    * Allocates a new Agent object. This constructor has the same effect
    * as <code>Agent(to, name, false)</code>.
    *
-   * @param to	  Identification of target agent server
+   * @param to	  Identication of target agent server
    * @param name  symbolic name
    *
    * @see Agent#Agent(short, java.lang.String, boolean)
@@ -297,7 +297,7 @@ public abstract class Agent implements AgentMBean, Serializable {
    * Allocates a new Agent object. This constructor has the same effect
    * as <code>Agent(to, null, fixed)</code>.
    *
-   * @param to	  Identification of target agent server
+   * @param to	  Identication of target agent server
    * @param fixed if <code>true</code> agent is pinned in memory
    *
    * @see Agent#Agent(short, java.lang.String, boolean)
@@ -310,7 +310,7 @@ public abstract class Agent implements AgentMBean, Serializable {
    * Allocates a new Agent object. The resulting object <b>is not an agent</b>;
    * before it can react to a notification you must deploy it.
    *
-   * @param to	  Identification of target agent server
+   * @param to	  Identication of target agent server
    * @param name  symbolic name
    * @param fixed if <code>true</code> agent is pinned in memory
    *
@@ -374,11 +374,15 @@ public abstract class Agent implements AgentMBean, Serializable {
    * @param stamp	well known stamp
    */
   public Agent(String name, boolean fixed, int stamp) {
-    if (stamp < AgentId.MinWKSIdStamp || stamp > AgentId.MaxWKSIdStamp) {
-      logmon = Debug.getLogger(fr.dyade.aaa.agent.Debug.A3Agent + ".#" + AgentServer.getServerId());
+    if (stamp < AgentId.MinWKSIdStamp ||
+	stamp > AgentId.MaxWKSIdStamp) {
+      logmon = Debug.getLogger(fr.dyade.aaa.agent.Debug.A3Agent +
+                               ".#" + AgentServer.getServerId());
       logmon.log(BasicLevel.ERROR,
-                 AgentServer.getName() + ", well known service stamp out of range: " + stamp);
-      throw new IllegalArgumentException("Well known service stamp out of range: " + stamp);
+                 AgentServer.getName() +
+                 ", well known service stamp out of range: " + stamp);
+      throw new IllegalArgumentException(
+	"Well known service stamp out of range: " + stamp);
     }
     AgentId id = new AgentId(AgentServer.getServerId(),
                              AgentServer.getServerId(),
@@ -434,19 +438,21 @@ public abstract class Agent implements AgentMBean, Serializable {
   public final void deploy(AgentId reply) throws IOException {
     if ((id == null) || id.isNullId()) {
       logmon.log(BasicLevel.ERROR,
-                 AgentServer.getName() + ", can't deploy " + this.toString() + ", id is null");
+                 AgentServer.getName() +
+                 ", can't deploy " + this.toString() + ", id is null");
       throw new IOException("Can't deploy agent, id is null");
     }
     if (deployed) {
       logmon.log(BasicLevel.ERROR,
-                 AgentServer.getName() + ", can't deploy " + this.toString() + ", already deployed");
+                 AgentServer.getName() +
+                 ", can't deploy " + this.toString() + ", already deployed");
       throw new IOException("Can't deploy agent, already deployed");
     }
 
     //  If we use sendTo agent's method the from field is the agent id, and
     // on reception the from node (from.to) can be false.
     Channel.sendTo(AgentId.factoryId(id.getTo()),
-                   new AgentCreateRequest(this, reply));
+		   new AgentCreateRequest(this, reply));
     deployed = true;
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -455,7 +461,7 @@ public abstract class Agent implements AgentMBean, Serializable {
 
   /**
    * Returns a string representation of this agent, including the agent's
-   * class, name, global identification, and fixed property.
+   * class, name, global identication, and fixed property.
    *
    * @return	A string representation of this agent. 
    */
@@ -514,7 +520,7 @@ public abstract class Agent implements AgentMBean, Serializable {
    * <p>
    * This function is not declared <code>final</code> so that derived classes
    * may change their reload policy. The implementation of this method provided
-   * by the <code>Agent</code> class just registers the JMS MBean.
+   * by the <code>Agent</code> class does nothing.
    *
    * @param firstTime		true when first called by the factory
    *
@@ -530,7 +536,7 @@ public abstract class Agent implements AgentMBean, Serializable {
     try {
       MXWrapper.registerMBean(this, "AgentServer", getMBeanName());
     } catch (Exception exc) {
-      logmon.log(BasicLevel.WARN, getName() + " jmx failed", exc);
+      logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
     }
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -540,15 +546,11 @@ public abstract class Agent implements AgentMBean, Serializable {
   }
 
   private String getMBeanName() {
-    StringBuffer strbuf = new StringBuffer();
-    strbuf.append("server=").append(AgentServer.getName());
-    strbuf.append(",cons=Engine#").append(getId().getTo());
-    if (name == nullName)
-      strbuf.append(",agent=").append(getAgentId());
-    else
-      strbuf.append(",agent=").append(name).append('[').append(getAgentId()).append(']');
-    
-    return strbuf.toString();
+    return new StringBuffer()
+      .append("server=").append(AgentServer.getName())
+      .append(",cons=Engine#").append(getId().getTo())
+      .append(",agent=").append((name == nullName)?getId().toString():name)
+      .toString();
   }
 
   /**
@@ -557,7 +559,7 @@ public abstract class Agent implements AgentMBean, Serializable {
    * until reaction commit.
    * <p>
    * Be careful if you use this method outside of an agent reaction,
-   * its behavior is slightly different: each notification is immediately
+   * its behavior is slightly different: each notification is immediatly
    * sent using a local transaction.
    *
    * @see Channel#sendTo
@@ -615,7 +617,7 @@ public abstract class Agent implements AgentMBean, Serializable {
   }
 
   /**
-   * Permits this agent to destroy itself. If necessary, this method should be 
+   * Permits this agent to destroy it. If necessary, its method should be 
    * overloaded to work properly.
    */
   public void delete() {
@@ -623,8 +625,8 @@ public abstract class Agent implements AgentMBean, Serializable {
   }
 
   /**
-   * Permits this agent to destroy itself. If necessary, this method should be
-   * overloaded to work properly. 
+   * Permits this agent to destroy it. If necessary, its method should be
+   *overloaded to work properly. 
    *
    * @param agent	Id of agent to notify.
    */
@@ -632,20 +634,6 @@ public abstract class Agent implements AgentMBean, Serializable {
     if (deployed)
       sendTo(AgentId.factoryId(id.getTo()),
 	     new AgentDeleteRequest(agent));
-  }
-
-  /**
-   * Permits this agent to destroy itself. If necessary, this method should be
-   * overloaded to work properly.
-   * 
-   * @param agent
-   *          Id of agent to notify.
-   * @param extraInformation
-   *          extra information added when notifying the agent.
-   */
-  public void delete(AgentId agent, Object extraInformation) {
-    if (deployed)
-      sendTo(AgentId.factoryId(id.getTo()), new AgentDeleteRequest(agent, extraInformation));
   }
  
   /**
@@ -679,17 +667,14 @@ public abstract class Agent implements AgentMBean, Serializable {
 
   /**
    * Called to inform this agent that it is garbaged and that it should free
-   * any active resources that it has allocated.
+   * any active ressources that it has allocated.
    * A subclass of <code>Agent</code> should override this method if it has
    * any operation that it wants to perform before it is garbaged. For example,
    * an agent with threads (a ProxyAgent for example) would use the initialize
    * method to create the threads and the <code>agentFinalize</code> method to
    * stop them.
-   * <p>
-   * Be careful, the notification sending is not allowed in this method.
-   * <p>
    * The implementation of this method provided by the <code>Agent</code> class
-   * just unregister the JMX MBean if needed.
+   * does nothing.
    *
    * @param lastTime	true when last called by the factory on agent deletion.
    */
@@ -697,7 +682,7 @@ public abstract class Agent implements AgentMBean, Serializable {
     try {
       MXWrapper.unregisterMBean("AgentServer", getMBeanName());
     } catch (Exception exc) {
-      logmon.log(BasicLevel.WARN, getName() + " jmx failed", exc);
+      logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
     }
   }
 }

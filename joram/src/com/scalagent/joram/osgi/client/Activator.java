@@ -1,30 +1,20 @@
 package com.scalagent.joram.osgi.client;
 
-import java.io.Reader;
-import java.util.Hashtable;
-import java.util.Properties;
+import java.io.*;
+import java.util.*;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
+import org.osgi.framework.*;
+
+import javax.naming.*;
 
 import org.objectweb.joram.client.jms.ConnectionFactory;
-import org.objectweb.joram.client.jms.Destination;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
-import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import org.objectweb.joram.client.jms.admin.AdminModule;
 
-import com.scalagent.joram.osgi.client.service.JoramClient;
-
-/**
- * Activator class for Joram client bundle.
- * This bundle allows the use of the Joram's JMS service to the other bundle of
- * the platform. The Joram server can be either remote or colocated.
- */
 public class Activator implements BundleActivator {
 
   private static BundleContext bcontext;
@@ -37,25 +27,26 @@ public class Activator implements BundleActivator {
    * Implements BundleActivator.start().
    *
    * @param context the framework context for the bundle.
-   * @see BundleActivator#start(BundleContext)
    */
   public void start(BundleContext context) throws Exception {
     bcontext = context;
 
     Properties props = new Properties();
-    context.registerService(JoramClient.class.getName(), new JoramClientImpl(), props);
+    context.registerService(
+      com.scalagent.joram.osgi.client.service.JoramClient.class.getName(), 
+      new JoramClientImpl(), props);
   }
 
   /**
    * Implements BundleActivator.stop().
    *
    * @param context the framework context for the bundle.
-   * @see BundleActivator#stop(BundleContext)
    */
   public void stop(BundleContext context) {
   }
 
-  public static class JoramClientImpl implements com.scalagent.joram.osgi.client.service.JoramClient {
+  public static class JoramClientImpl 
+    implements com.scalagent.joram.osgi.client.service.JoramClient {
     /**
      *
      */
@@ -64,7 +55,6 @@ public class Activator implements BundleActivator {
                         int cnxTimer) throws Exception {
       AdminModule.connect(host, port, name, password, cnxTimer);
     }
-    
     /**
      *
      */
@@ -75,8 +65,9 @@ public class Activator implements BundleActivator {
     /**
      *
      */
-    public ConnectionFactory getTcpConnectionFactory(String hostname, int port) throws Exception {
-      return TcpConnectionFactory.create(hostname, port);
+    public ConnectionFactory
+        getTcpConnectionFactory(String hostname, int port) throws Exception {
+      return new TcpConnectionFactory(hostname, port);
     }
 
     /**
@@ -97,42 +88,16 @@ public class Activator implements BundleActivator {
       Thread ct = Thread.currentThread();
       ClassLoader cl = ct.getContextClassLoader();
       ct.setContextClassLoader(JoramClientImpl.class.getClassLoader());
-      
       Context ctx = new InitialContext(prop);
-      
       ct.setContextClassLoader(cl);
       return ctx;
-    }
-    
-    Context ictx;
-    
-    /**
-     * Retrieves the named object.
-     * 
-     * @param name  the name of the object to look up
-     * @return  the object bound to name
-     * 
-     * @throws NamingException  if a naming exception is encountered
-     * 
-     * @see Context#lookup(String)
-     */
-    public Object lookup(String name) throws NamingException {
-      Thread ct = Thread.currentThread();
-      ClassLoader cl = ct.getContextClassLoader();
-      ct.setContextClassLoader(JoramClientImpl.class.getClassLoader());
-      
-      Object obj = ictx.lookup(name);
-      
-      ct.setContextClassLoader(cl);
-      
-      return obj;      
     }
 
     /**
      *
      */
-    public void executeAdminXML(Reader reader) throws Exception {
-      AdminModule.executeAdmin(reader);
+    public boolean executeAdminXML(Reader reader) throws Exception {
+      return AdminModule.executeAdmin(reader);
     }
 
     /**
@@ -140,8 +105,8 @@ public class Activator implements BundleActivator {
      *
      * @exception Exception   If the creation fails.
      */
-    public User createUser(String name, String password) throws Exception {
-      return User.create(name, password);
+    public void createUser(String name, String password) throws Exception {
+      User.create(name, password);
     }
 
     /**
@@ -177,14 +142,14 @@ public class Activator implements BundleActivator {
     /**
      * Returns the list of all destinations that exist on the server.
      */
-    public Destination[] getDestinations() throws Exception {
+    public List getDestinations() throws Exception {
       return AdminModule.getDestinations();
     }
 
     /**
      * Returns the list of all users that exist on a given server.
      */
-    public User[] getUsers() throws Exception {
+    public List getUsers() throws Exception {
       return AdminModule.getUsers();
     }
   }

@@ -1,40 +1,23 @@
 /*
- * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Created on 27 avr. 2006
  *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or any later version.
- * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
- * USA.
- *
- * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * TODO To change the template for this generated file go to
+ * Window - Preferences - Java - Code Style - Code Templates
  */
 package org.objectweb.joram.shared.client;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Vector;
 
-import org.objectweb.joram.shared.stream.StreamUtil;
-
-public final class CommitRequest extends AbstractJmsRequest {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
+/**
+ * @author feliot
+ *
+ * TODO To change the template for this generated type comment go to
+ * Window - Preferences - Java - Code Style - Code Templates
+ */
+public class CommitRequest extends AbstractJmsRequest {
+  
   /**
    * List of ProducerMessages
    */
@@ -51,12 +34,10 @@ public final class CommitRequest extends AbstractJmsRequest {
    * (without or with an acknowledgement).
    */
   private boolean asyncSend = false;
-
-  protected int getClassId() {
-    return COMMIT_REQUEST;
-  }
   
-  public CommitRequest() {}
+  public CommitRequest() {
+    
+  }
   
   public void addProducerMessages(ProducerMessages pm) {
     if (producerMessages == null) producerMessages = new Vector();
@@ -92,85 +73,77 @@ public final class CommitRequest extends AbstractJmsRequest {
     return asyncSend;
   }
   
-  public void toString(StringBuffer strbuf) {
-    super.toString(strbuf);
-    strbuf.append(",producerMessages=").append(producerMessages);
-    strbuf.append(",ackRequests=").append(ackRequests);
-    strbuf.append(",asyncSend=").append(asyncSend);
-    strbuf.append(')');
-  }
-
   /**
-   *  The object implements the writeTo method to write its contents to
-   * the output stream.
-   *
-   * @param os the stream to write the object to
+   * Transforms this request into a hashtable of primitive values that can
+   * be vehiculated through the SOAP protocol.
    */
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-
-    // Serialize the producerMessages Vector
-    if (producerMessages == null) {
-      StreamUtil.writeTo(-1, os);
-    } else {
-      int size = producerMessages.size();
-      StreamUtil.writeTo(size, os);
-      for (int i=0; i<size; i++) {
-        ProducerMessages pm = (ProducerMessages) producerMessages.elementAt(i);
-        pm.writeTo(os);
+  public Hashtable soapCode() {
+    Hashtable h = super.soapCode();
+    
+    // Coding and adding the producerMessages into a array:
+    int size = 0;
+    if (producerMessages != null)
+      size = producerMessages.size();
+    if (size > 0) {
+      Hashtable [] arrayMsg = new Hashtable[size];
+      for (int i = 0; i<size; i++) {
+        ProducerMessages msg = (ProducerMessages) producerMessages.elementAt(0);
+        producerMessages.removeElementAt(0);
+        arrayMsg[i] = msg.soapCode();
       }
+      h.put("producerMessages",arrayMsg);
     }
-
-    //  Serialize the ackRequests Vector
-    if (ackRequests == null) {
-      StreamUtil.writeTo(-1, os);
-    } else {
-      int size = ackRequests.size();
-      StreamUtil.writeTo(size, os);
-      for (int i=0; i<size; i++) {
-        SessAckRequest sar = (SessAckRequest) ackRequests.elementAt(i);
-        sar.writeTo(os);
+    
+    //  Coding and adding the ackRequests into a array:
+    size = 0;
+    if (ackRequests != null)
+      size = ackRequests.size();
+    if (size > 0) {
+      Hashtable [] arrayMsg = new Hashtable[size];
+      for (int i = 0; i<size; i++) {
+        SessAckRequest msg = (SessAckRequest) ackRequests.elementAt(0);
+        ackRequests.removeElementAt(0);
+        arrayMsg[i] = msg.soapCode();
       }
+      h.put("ackRequests",arrayMsg);
     }
-
-    StreamUtil.writeTo(asyncSend, os);
+    
+    return h;
+  }
+  
+  /** 
+   * Transforms a hastable of primitive values into a
+   * <code>CommitRequest</code> request.
+   */
+  public static Object soapDecode(Hashtable h) {
+    CommitRequest req = new CommitRequest();
+    req.setRequestId(((Integer) h.get("requestId")).intValue());
+    req.setTarget((String) h.get("target"));
+    
+    Object [] arrayMsg = (Object []) h.get("producerMessages");
+    if (arrayMsg != null) {
+      for (int i = 0; i<arrayMsg.length; i++)
+        req.addProducerMessages(
+            (ProducerMessages)ProducerMessages.soapDecode(
+                (Hashtable) arrayMsg[i]));
+    }
+    
+    arrayMsg = (Object []) h.get("ackRequests");
+    if (arrayMsg != null) {
+      for (int i = 0; i<arrayMsg.length; i++)
+        req.addAckRequest(
+            (SessAckRequest)SessAckRequest.soapDecode(
+                (Hashtable) arrayMsg[i]));
+    }
+    
+    return req;
   }
 
-  /**
-   *  The object implements the readFrom method to restore its contents from
-   * the input stream.
-   *
-   * @param is the stream to read data from in order to restore the object
-   */
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-
-    // Gets the producerMessages Vector
-    int size = StreamUtil.readIntFrom(is);
-    if (size == -1) {
-      producerMessages = null;
-    } else {
-      producerMessages = new Vector(size);
-      for (int i=0; i<size; i++) {
-        ProducerMessages pm = new ProducerMessages();
-        pm.readFrom(is);
-        producerMessages.addElement(pm);
-      }
-    }
-
-    //  Gets the ackRequests Vector
-    size = StreamUtil.readIntFrom(is);
-    if (size == -1) {
-      ackRequests = null;
-    } else {
-      ackRequests = new Vector(size);
-      for (int i=0; i<size; i++) {
-        SessAckRequest sar = new SessAckRequest();
-        sar.readFrom(is);
-        ackRequests.addElement(sar);
-      }
-    }
-
-    asyncSend = StreamUtil.readBooleanFrom(is);
+  public String toString() {
+    return '(' + super.toString() +
+      ",producerMessages=" + producerMessages + 
+      ",ackRequests=" + ackRequests + 
+      ",asyncSend=" + asyncSend + ')';
   }
+
 }

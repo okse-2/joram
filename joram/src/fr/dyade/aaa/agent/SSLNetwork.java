@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 - 2008 SCALAGENT
+ * Copyright (C) 2003 - 2004 SCALAGENT
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,23 +21,15 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.io.*;
+import java.net.*;
+import javax.net.ssl.*;
+import javax.security.cert.X509Certificate;
 import java.security.KeyStore;
-
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLServerSocket;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.SSLServerSocketFactory;
-import javax.net.ssl.TrustManagerFactory;
+import java.security.SecureRandom;
 
 /**
- * A network component using SSL Sockets.
+ *
  */
 public final class SSLNetwork extends PoolNetwork {
   public final static String SSLCONTEXT = "fr.dyade.aaa.agent.SSLNetwork.SSLContext";
@@ -60,13 +52,7 @@ public final class SSLNetwork extends PoolNetwork {
    */
   public final static String KEYFILE = "SSLNetwork.keyfile";
 
-  /**
-   *
-   */
   SSLSocketFactory socketFactory = null;
-  /**
-   *
-   */
   SSLServerSocketFactory serverSocketFactory = null;
 
   public SSLNetwork() throws Exception {
@@ -93,38 +79,61 @@ public final class SSLNetwork extends PoolNetwork {
   }
 
   /**
-   *  This method creates and returns a SSL server socket which is bound to
-   * the specified port.
+   *  This method creates and returns a socket connected to a ServerSocket at
+   * the specified network address and port. It may be overloaded in subclass,
+   * in order to create particular subclasses of sockets.
+   * <p>
+   *  Due to polymorphism of both factories and sockets, different kinds of
+   * sockets can be used by the same application code. The sockets returned
+   * to the application can be subclasses of <a href="java.net.Socket">
+   * Socket</a>, so that they can directly expose new APIs for features such
+   * as compression, security, or firewall tunneling.
    *
-   * @param port	the port to listen to.
-   * @return		a server socket bound to the specified port.
-   *
-   * @exception IOException	for networking errors
-   */
-  ServerSocket createServerSocket(int port) throws IOException {
-    ServerSocket serverSocket =
-      serverSocketFactory.createServerSocket(port, backlog, inLocalAddr);
-    ((SSLServerSocket) serverSocket).setNeedClientAuth(true);
-    return serverSocket;
-  }
-
-  /**
-   *  This method creates and returns a SSL socket connected to a ServerSocket
-   * at the specified network address and port.
-   *
-   * @param addr	the server address.
+   * @param host	the server host.
    * @param port	the server port.
    * @return		a socket connected to a ServerSocket at the specified
    *			network address and port.
    *
    * @exception IOException	if the connection can't be established
    */
-  Socket createSocket(InetAddress addr, int port) throws IOException {
-    if (addr == null)
-      throw new UnknownHostException();
-
-    // AF: Be careful SSLSocketFactory don't allow to use ConnectTimeout
-    return socketFactory.createSocket(addr, port,
-                                      outLocalAddr, outLocalPort);
+  Socket createSocket(InetAddress host, int port) throws IOException {
+    return socketFactory.createSocket(host, port);
   }
+
+  /**
+   *  This method creates and returns a server socket which uses all network
+   * interfaces on the host, and is bound to the specified port. It may be
+   * overloaded in subclass, in order to create particular subclasses of
+   * server sockets.
+   *
+   * @return		a server socket bound to the specified port.
+   *
+   * @exception IOException	for networking errors
+   */
+  ServerSocket createServerSocket(int port) throws IOException {
+    ServerSocket serverSocket = null;
+    serverSocket = serverSocketFactory.createServerSocket(port);
+    ((SSLServerSocket) serverSocket).setNeedClientAuth(true);
+
+    return serverSocket;
+  }
+
+  /**
+   *  Configures this socket using the socket options established for this
+   * factory. It may be overloaded in subclass, in order to handle particular
+   * subclasses of sockets
+   *
+   * @param Socket	the socket.
+   *
+   * @exception IOException	for networking errors
+   */ 
+  void setSocketOption(Socket sock) throws SocketException {
+    // Don't use TCP data coalescing - ie Nagle's algorithm
+    sock.setTcpNoDelay(true);
+    // Read operation will block indefinitely until requested data arrives
+    sock.setSoTimeout(0);
+    // Set Linger-on-Close timeout.
+    sock.setSoLinger(true, 60);
+  }
+
 }

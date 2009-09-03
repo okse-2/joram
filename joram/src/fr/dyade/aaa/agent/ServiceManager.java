@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -20,17 +20,15 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.NoSuchElementException;
+import java.io.*;
+import java.util.*;
+import java.lang.reflect.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.common.Strings;
+import fr.dyade.aaa.util.*;
+import fr.dyade.aaa.agent.conf.*;
 
 /**
  * Object which manages services.
@@ -40,11 +38,6 @@ import fr.dyade.aaa.common.Strings;
  * persistency service provided by <code>Transaction</code>.
  */
 public class ServiceManager implements Serializable {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   /** the unique <code>ServiceManager</code> in the agent server */
   static ServiceManager manager;
 
@@ -110,7 +103,7 @@ public class ServiceManager implements Serializable {
    *
    * @param desc	service descriptor.
    */
-  public static void start(ServiceDesc desc) throws Exception {
+  static void start(ServiceDesc desc) throws Exception {
     xlogmon.log(BasicLevel.DEBUG,
                 getName() +" start service: " + desc);
 
@@ -119,14 +112,9 @@ public class ServiceManager implements Serializable {
     Class ptypes[] = new Class[2];
     Object args[] = new Object[2];
 
-    ptypes[0] = String.class;
+    ptypes[0] = Class.forName("java.lang.String");
     ptypes[1] = Boolean.TYPE;
-    Class service = null;
-    try {
-      service = Class.forName(desc.getClassName());
-    } catch (ClassNotFoundException cnfe) {
-      service = AgentServer.getResolverRepository().resolveClass(desc.getClassName());
-    }
+    Class service = Class.forName(desc.getClassName());
     Method init = service.getMethod("init", ptypes);
     args[0] = desc.getArguments();
     args[1] = new Boolean(! desc.isInitialized());
@@ -177,12 +165,7 @@ public class ServiceManager implements Serializable {
     // DF: idempotency (could be done in AgentAdmin)
     if (! desc.running) return;
 //       throw new Exception("Service already stopped");
-    Class service;
-    try {
-      service = Class.forName(desc.getClassName());
-    } catch (ClassNotFoundException cnfe) {
-      service = AgentServer.getResolverRepository().resolveClass(desc.getClassName());
-    }
+    Class service = Class.forName(desc.getClassName());
     Method stop = service.getMethod("stopService", new Class[0]);
     stop.invoke(null, new Object[0]);
     desc.running = false;
@@ -193,7 +176,7 @@ public class ServiceManager implements Serializable {
    *
    * @param scname	service class name.
    */
-  public static void stop(String scname) throws Exception {
+  static void stop(String scname) throws Exception {
     ServiceDesc desc = (ServiceDesc) manager.registry.get(scname);
     if (desc == null)
       throw new NoSuchElementException("Unknown service: " + scname);
@@ -233,7 +216,7 @@ public class ServiceManager implements Serializable {
    * @param scname	service class name.
    * @param args	launching arguments.
    */
-  public static void register(String scname, String args) {
+  static void register(String scname, String args) {
     synchronized (manager) {
       ServiceDesc desc = (ServiceDesc) manager.registry.get(scname);
       xlogmon.log(BasicLevel.DEBUG,
@@ -256,10 +239,6 @@ public class ServiceManager implements Serializable {
     synchronized (manager) {
       manager.registry.remove(scname);
     }
-  }
-  
-  public static ServiceDesc getService(String serviceClassName) {
-    return (ServiceDesc) manager.registry.get(serviceClassName);
   }
 
   static ServiceDesc[] getServices() {

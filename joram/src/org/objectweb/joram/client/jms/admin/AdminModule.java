@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -24,100 +24,80 @@
  */
 package org.objectweb.joram.client.jms.admin;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.Reader;
 import java.io.FileReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.FileNotFoundException;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
-import javax.jms.Connection;
-import javax.jms.JMSException;
-import javax.jms.JMSSecurityException;
+import javax.jms.*;
 
-import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.Destination;
-import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.client.jms.ha.local.HALocalConnectionFactory;
-import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
-import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-import org.objectweb.joram.shared.admin.AdminReply;
-import org.objectweb.joram.shared.admin.AdminRequest;
-import org.objectweb.joram.shared.security.SimpleIdentity;
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
+import org.objectweb.joram.client.jms.Topic;
+import org.objectweb.joram.client.jms.TopicConnectionFactory;
+import org.objectweb.joram.client.jms.Message;
+import org.objectweb.joram.client.jms.ha.local.TopicHALocalConnectionFactory;
+import org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory;
+import org.objectweb.joram.client.jms.local.TopicLocalConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
+import org.objectweb.joram.shared.admin.*;
 
-import fr.dyade.aaa.common.Debug;
+import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * The <code>AdminModule</code> class allows to set an administrator
  * connection to a given JORAM server, and provides administration and
  * monitoring methods at a server/platform level.
- * <p>
- * The <code>AdminModule</code> class uses a unique static connection to
- * the Joram server, the connection is opened through connect method and
- * closed by calling disconnect.
- * 
- * @see AdminWrapper
  */
-public final class AdminModule {
+public class AdminModule {
   public static final String ADM_NAME_PROPERTY = "JoramAdminXML";
   public static final String DEFAULT_ADM_NAME = "default";
 
   public static final String REQUEST_TIMEOUT_PROP =
-    "org.objectweb.joram.client.jms.admin.requestTimeout";
+      "org.objectweb.joram.client.jms.admin.requestTimeout";
 
   public static final long DEFAULT_REQUEST_TIMEOUT = 120000;
 
-  /** The host name or IP address of the server the module is connected to. */
+  /** The identifier of the server the module is connected to. */
+  private static int localServer;
+  /** The host name or IP address this client is connected to. */
   protected static String localHost;
   /** The port number of the client connection. */
   protected static int localPort;
 
   /** The connection used to link the administrator and the platform. */
-  private static Connection cnx = null;
+  private static TopicConnection cnx = null;
 
-  /** The administration wrapper needed to interact with the Joram server. */
-  static AdminWrapper wrapper;
+  /** The requestor for sending the synchronous requests. */
+  private static AdminRequestor requestor;
 
-  /**
-   * Returns the administration wrapper.
-   * 
-   * @return The administration wrapper.
-   * @throws ConnectException if no wrapper is defined.
-   */
-  public static AdminWrapper getWrapper() throws ConnectException {
-    if (wrapper == null)
-      throw new ConnectException();
-    
-    return wrapper;
-  }
-  
-  /** <code>true</code> if the underlying JORAM server is HA */
+  /** ObjectMessage sent to the platform. */
+  private static ObjectMessage requestMsg;
+  /** ObjectMessage received from the platform. */
+  private static ObjectMessage replyMsg;
+
+  /** Reply object received from the platform. */
+  protected static AdminReply reply;
+
+  private static int requestCounter;
+
+  private static long requestTimeout =
+      Long.getLong(REQUEST_TIMEOUT_PROP,
+                   DEFAULT_REQUEST_TIMEOUT).longValue();
+
+  /** <code>true</code> if the underlying a JORAM HA server is defined */
   private static boolean isHa = false;
-
-  /**
-   * Tells that the server is an HA one. It allows to build the right connection
-   * factory needed to connect to the server.
-   * 
-   * @param isHa
-   * 
-   * @deprecated Only connect method with connection factory must be used with HA servers. 
-   */
-  public static void setHa(boolean isHa) {
-    AdminModule.isHa = isHa;
-  }
-
-  public static Logger logger = Debug.getLogger(AdminModule.class.getName());
 
   /**
    * This method execute the XML script file that the path is given in
@@ -127,7 +107,7 @@ public final class AdminModule {
    */
   public static void main(String[] args) {
     try {
-      executeXMLAdmin(args[0]);
+      AdminModule.executeXMLAdmin(args[0]);
     } catch (Exception exc) {
       exc.printStackTrace();
     }
@@ -135,188 +115,55 @@ public final class AdminModule {
 
   /**
    * Opens a connection dedicated to administering with the Joram server
-   * which parameters are wrapped by a given <code>ConnectionFactory</code>.
-   * Default administrator login name and password are used for connection
-   * as defined in {@link AbstractConnectionFactory#getDefaultRootLogin()}
-   * and {@link AbstractConnectionFactory#getDefaultRootPassword()}.
+   * which parameters are wrapped by a given
+   * <code>TopicConnectionFactory</code>.
    *
-   * @param cf        The Joram's ConnectionFactory to use for connecting.
-   *
-   * @exception ConnectException  If connecting fails.
-   * @exception AdminException  If the administrator identification is incorrect.
-   * @exception ClassCastException If the ConnectionFactory is not a Joram ConnectionFactory.
-   */
-  public static void connect(javax.jms.ConnectionFactory cf) throws ConnectException, AdminException {
-    doConnect((AbstractConnectionFactory) cf,
-              AbstractConnectionFactory.getDefaultRootLogin(),
-              AbstractConnectionFactory.getDefaultRootPassword(),
-              SimpleIdentity.class.getName());
-  }
-
-  /**
-   * Opens a connection dedicated to administering with the Joram server
-   * which parameters are wrapped by a given <code>ConnectionFactory</code>.
-   *
-   * @param cf        The Joram's ConnectionFactory to use for connecting.
-   * @param name      Administrator's name.
+   * @param cnxFact  The TopicConnectionFactory to use for connecting.
+   * @param name  Administrator's name.
    * @param password  Administrator's password.
    *
    * @exception ConnectException  If connecting fails.
-   * @exception AdminException  If the administrator identification is incorrect.
-   * @exception ClassCastException If the ConnectionFactory is not a Joram ConnectionFactory.
+   * @exception AdminException  If the administrator identification is
+   *              incorrect.
    */
-  public static void connect(javax.jms.ConnectionFactory cf,
+  public static void connect(javax.jms.TopicConnectionFactory cnxFact,
                              String name,
-                             String password) throws ConnectException, AdminException {
-    doConnect((AbstractConnectionFactory) cf,
-              name, password,
-              SimpleIdentity.class.getName());
-  }
+                             String password)
+    throws ConnectException, AdminException {
+    if (cnx != null)
+      return;
 
-  /**
-   * Opens a connection dedicated to administering with the Joram server
-   * which parameters are wrapped by a given <code>ConnectionFactory</code>.
-   *
-   * @param cf            The Joram's ConnectionFactory to use for connecting.
-   * @param name          Administrator's name.
-   * @param password      Administrator's password.
-   * @param identityClass identity class name.
-   *
-   * @exception ConnectException  If connecting fails.
-   * @exception AdminException  If the administrator identification is incorrect.
-   * @exception ClassCastException If the ConnectionFactory is not a Joram ConnectionFactory.
-   */
-  public static void connect(javax.jms.ConnectionFactory cf,
-                             String name,
-                             String password,
-                             String identityClass) throws ConnectException, AdminException {
-    doConnect((AbstractConnectionFactory) cf, name, password, identityClass);
-  }
+    try {
+      cnx = cnxFact.createTopicConnection(name, password);
+      requestor = new AdminRequestor(cnx);
 
-  /**
-   * Opens a connection dedicated to administering with the Joram server
-   * which parameters are wrapped by a given <code>TopicConnectionFactory</code>.
-   *
-   * @param cf        The TopicConnectionFactory to use for connecting.
-   * @param name      Administrator's name.
-   * @param password  Administrator's password.
-   *
-   * @exception ConnectException   If connecting fails.
-   * @exception AdminException     If the administrator identification is incorrect.
-   * @exception ClassCastException If the ConnectionFactory is not a Joram ConnectionFactory.
-   * 
-   * @deprecated No longer use TopicConnectionFactory next to Joram 5.2.
-   */
-  public static void connect(javax.jms.TopicConnectionFactory cf,
-                             String name,
-                             String password) throws ConnectException, AdminException {
-    doConnect((AbstractConnectionFactory) cf, name, password, SimpleIdentity.class.getName());
-  }
+      cnx.start();
 
-  /**
-   * Opens a connection dedicated to administering with the Joram server
-   * which parameters are wrapped by a given <code>TopicConnectionFactory</code>.
-   *
-   * @param cf            The TopicConnectionFactory to use for connecting.
-   * @param name          Administrator's name.
-   * @param password      Administrator's password.
-   * @param identityClass identity class name.
-   *
-   * @exception ConnectException   If connecting fails.
-   * @exception AdminException     If the administrator identification is incorrect.
-   * @exception ClassCastException If the ConnectionFactory is not a Joram ConnectionFactory.
-   * 
-   * @deprecated No longer use TopicConnectionFactory next to Joram 5.2.
-   */
-  public static void connect(javax.jms.TopicConnectionFactory cf,
-                             String name,
-                             String password,
-                             String identityClass) throws ConnectException, AdminException {
-    doConnect((AbstractConnectionFactory) cf, name, password, identityClass);
-  }
+      org.objectweb.joram.client.jms.FactoryParameters params = null;
 
-  /**
-   * Opens a TCP connection with the Joram server running on the default
-   * "localhost" host and listening to the default 16010 port.
-   * Default administrator login name and password are used for connection
-   * as defined in {@link AbstractConnectionFactory#getDefaultRootLogin()}
-   * and {@link AbstractConnectionFactory#getDefaultRootPassword()}.
-   *
-   * @throws UnknownHostException Never thrown.
-   * @throws ConnectException     If connecting fails.
-   * @throws AdminException       If the administrator identification is incorrect.
-   */
-  public static void connect() throws UnknownHostException, ConnectException, AdminException {
-    doConnect("localhost", 16010,
-              AbstractConnectionFactory.getDefaultRootLogin(),
-              AbstractConnectionFactory.getDefaultRootPassword(),
-              0,
-              "org.objectweb.joram.client.jms.tcp.ReliableTcpClient",
-              SimpleIdentity.class.getName());
-  }
+      if (cnxFact instanceof javax.jms.XATopicConnectionFactory)
+        params = ((org.objectweb.joram.client.jms.XAConnectionFactory)
+                  cnxFact).getParameters();
+      else
+        params = ((org.objectweb.joram.client.jms.ConnectionFactory)
+                  cnxFact).getParameters();
 
-  /**
-   * Opens a TCP connection with the Joram server running on the default
-   * "localhost" host and listening to the default 16010 port.
-   *
-   * @param name      Administrator's name.
-   * @param password  Administrator's password.
-   * 
-   * @throws UnknownHostException Never thrown.
-   * @throws ConnectException     If connecting fails.
-   * @throws AdminException       If the administrator identification is incorrect.
-   */
-  public static void connect(String name,
-                             String password) throws UnknownHostException, ConnectException, AdminException {
-    doConnect("localhost", 16010, name, password, 0,
-              "org.objectweb.joram.client.jms.tcp.ReliableTcpClient",
-              SimpleIdentity.class.getName());
-  }
+      localHost = params.getHost();
+      localPort = params.getPort();
 
-  /**
-   * Opens a TCP connection with the Joram server running on the default
-   * "localhost" host and listening to the default 16010 port.
-   *
-   * @param name      Administrator's name.
-   * @param password  Administrator's password.
-   * @param cnxTimer  Timer in seconds during which connecting to the server is attempted.
-   *
-   * @exception UnknownHostException  Never thrown.
-   * @exception ConnectException      If connecting fails.
-   * @exception AdminException        If the administrator identification is incorrect.
-   * 
-   * @deprecated  Next to Joram 5.2 use connect methods with ConnectionFactory.
-   */
-  public static void connect(String name,
-                             String password,
-                             int cnxTimer) throws UnknownHostException, ConnectException, AdminException {
-    doConnect("localhost", 16010, name, password, cnxTimer,
-              "org.objectweb.joram.client.jms.tcp.ReliableTcpClient",
-              SimpleIdentity.class.getName());
-  }
-
-  /**
-   * Opens a TCP connection with the Joram server running on a given host and
-   * listening to a given port.
-   *
-   * @param host      The name or IP address of the host the server is running on.
-   * @param port      The number of the port the server is listening to.
-   * @param name      Administrator's name.
-   * @param password  Administrator's password.
-   *
-   * @exception UnknownHostException  If the host is invalid.
-   * @exception ConnectException      If connecting fails.
-   * @exception AdminException        If the administrator identification is incorrect.
-   */
-  public static void connect(String host,
-                             int port,
-                             String name,
-                             String password) throws UnknownHostException, ConnectException, AdminException {
-    doConnect(host, port,
-              name, password,
-              0,
-              "org.objectweb.joram.client.jms.tcp.ReliableTcpClient",
-              SimpleIdentity.class.getName());
+      // Getting the id of the local server:
+      localServer = requestor.getLocalServerId();
+    } catch (JMSSecurityException exc) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, "", exc);
+      throw new AdminException(exc.getMessage());
+    } catch (JMSException exc) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, "", exc);
+      throw new ConnectException("Connecting failed: " + exc);
+    }
   }
 
   /**
@@ -334,20 +181,75 @@ public final class AdminModule {
    * @exception ConnectException  If connecting fails.
    * @exception AdminException  If the administrator identification is
    *              incorrect.
-   * 
-   * @deprecated  Next to Joram 5.2 use connect methods with ConnectionFactory.
    */
-  public static void connect(String host,
+  public static void connect(String hostName,
                              int port,
                              String name,
                              String password,
-                             int cnxTimer) throws UnknownHostException, ConnectException, AdminException {
-    doConnect(host, port,
-              name, password,
-              cnxTimer,
-              "org.objectweb.joram.client.jms.tcp.ReliableTcpClient",
-              SimpleIdentity.class.getName());
+                             int cnxTimer)
+    throws UnknownHostException, ConnectException, AdminException {
+    connect(hostName,port,name,password,cnxTimer,
+            "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
   }
+
+  /**
+   * Opens a TCP connection with the Joram server running on a given host and
+   * listening to a given port.
+   *
+   * @param host  The name or IP address of the host the server is running on.
+   * @param port  The number of the port the server is listening to.
+   * @param name  Administrator's name.
+   * @param password  Administrator's password.
+   * @param cnxTimer  Timer in seconds during which connecting to the server
+   *          is attempted.
+   * @param reliableClass  Reliable class name.
+   *
+   * @exception UnknownHostException  If the host is invalid.
+   * @exception ConnectException  If connecting fails.
+   * @exception AdminException  If the administrator identification is
+   *              incorrect.
+   */
+  public static void connect(String hostName,
+                             int port,
+                             String name,
+                             String password,
+                             int cnxTimer,
+                             String reliableClass)
+    throws UnknownHostException, ConnectException, AdminException {
+    javax.jms.TopicConnectionFactory cnxFact =null;
+
+    if (isHa) {
+      String urlHa = "hajoram://" + hostName + ":" + port;
+      cnxFact = TopicHATcpConnectionFactory.create(urlHa);
+
+    } else {
+      cnxFact = TopicTcpConnectionFactory.create(hostName, port, reliableClass);
+    }
+
+    ((org.objectweb.joram.client.jms.ConnectionFactory)
+     cnxFact).getParameters().connectingTimer = cnxTimer;
+
+    connect(cnxFact, name, password);
+  }
+
+  /**
+   * Opens a TCP connection with the Joram server running on the default
+   * "locahost" host and listening to the default 16010 port.
+   *
+   * @param name  Administrator's name.
+   * @param password  Administrator's password.
+   * @param cnxTimer  Timer in seconds during which connecting to the server
+   *          is attempted.
+   *
+   * @exception UnknownHostException  Never thrown.
+   * @exception ConnectException  If connecting fails.
+   * @exception AdminException  If the administrator identification is
+   *              incorrect.
+   */
+  public static void connect(String name, String password, int cnxTimer)
+    throws UnknownHostException, ConnectException, AdminException {
+      connect("localhost", 16010, name, password, cnxTimer);
+    }
 
   /**
    * Opens a TCP connection with the Joram server running on the default
@@ -363,270 +265,44 @@ public final class AdminModule {
    * @exception ConnectException  If connecting fails.
    * @exception AdminException  If the administrator identification is
    *              incorrect.
-   * 
-   * @deprecated  Next to Joram 5.2 use connect methods with ConnectionFactory.
    */
   public static void connect(String name,
                              String password,
                              int cnxTimer,
-                             String reliableClass) throws UnknownHostException, ConnectException, AdminException {
-    doConnect("localhost", 16010,
-              name, password,
-              cnxTimer,
-              reliableClass,
-              SimpleIdentity.class.getName());
+                             String reliableClass)
+    throws UnknownHostException, ConnectException, AdminException {
+    connect("localhost", 16010, name, password, cnxTimer, reliableClass);
   }
 
   /**
-   * Opens a TCP connection with the Joram server running on a given host and
-   * listening to a given port.
+   * Opens a connection with the collocated JORAM server.
    *
-   * @param host  The name or IP address of the host the server is running on.
-   * @param port  The number of the port the server is listening to.
    * @param name  Administrator's name.
    * @param password  Administrator's password.
-   * @param cnxTimer  Timer in seconds during which connecting to the server
-   *          is attempted.
-   * @param reliableClass  Reliable class name.
    *
-   * @exception UnknownHostException  If the host is invalid.
-   * @exception ConnectException  If connecting fails.
-   * @exception AdminException  If the administrator identification is
-   *              incorrect.
-   * 
-   * @deprecated  Next to Joram 5.2 use connect methods with ConnectionFactory.
-   */
-  public static void connect(String host,
-                             int port,
-                             String name,
-                             String password,
-                             int cnxTimer,
-                             String reliableClass) throws UnknownHostException, ConnectException, AdminException {
-    doConnect(host, port,
-              name, password,
-              cnxTimer,
-              reliableClass,
-              SimpleIdentity.class.getName());
-  }
-
-  /**
-   * Opens a TCP connection with the Joram server running on a given host and
-   * listening to a given port.
-   *
-   * @param host  The name or IP address of the host the server is running on.
-   * @param port  The number of the port the server is listening to.
-   * @param name  Administrator's name.
-   * @param password  Administrator's password.
-   * @param cnxTimer  Timer in seconds during which connecting to the server is attempted.
-   * @param reliableClass  Reliable class name.
-   * @param identityClass identity class name.
-   *
-   * @exception UnknownHostException  If the host is invalid.
-   * @exception ConnectException  If connecting fails.
-   * @exception AdminException  If the administrator identification is
-   *              incorrect.
-   * 
-   * @deprecated  Next to Joram 5.2 use connect methods with ConnectionFactory.
-   */
-  public static void connect(String host,
-                             int port,
-                             String name,
-                             String password,
-                             int cnxTimer,
-                             String reliableClass,
-                             String identityClass) throws UnknownHostException, ConnectException, AdminException {
-    doConnect(host, port,
-              name, password,
-              cnxTimer,
-              reliableClass,
-              identityClass);
-  }
-
-  /**
-   * Opens a TCP connection with the Joram server running on a given host and
-   * listening to a given port.
-   *
-   * @param host  The name or IP address of the host the server is running on.
-   * @param port  The number of the port the server is listening to.
-   * @param name  Administrator's name.
-   * @param password  Administrator's password.
-   * @param cnxTimer  Timer in seconds during which connecting to the server is attempted.
-   * @param reliableClass  Reliable class name.
-   * @param identityClass identity class name.
-   *
-   * @exception UnknownHostException  If the host is invalid.
    * @exception ConnectException  If connecting fails.
    * @exception AdminException  If the administrator identification is
    *              incorrect.
    */
-  private static void doConnect(String host,
-                                int port,
-                                String name,
-                                String password,
-                                int cnxTimer,
-                                String reliableClass,
-                                String identityClass) throws UnknownHostException, ConnectException, AdminException {
-    ConnectionFactory cf =null;
-
+  public static void collocatedConnect(String name, String password)
+         throws ConnectException, AdminException {
+    JoramTracing.dbgClient.log(BasicLevel.DEBUG, "isHa=" + isHa);
     if (isHa) {
-      String urlHa = "hajoram://" + host + ":" + port;
-      cf = HATcpConnectionFactory.create(urlHa);
-
+      connect(TopicHALocalConnectionFactory.create(), name, password);
     } else {
-      cf = TcpConnectionFactory.create(host, port, reliableClass);
+      connect(TopicLocalConnectionFactory.create(), name, password);
     }
-    cf.getParameters().connectingTimer = cnxTimer;
-
-    doConnect(cf, name, password, identityClass);
-  }
-
-  /**
-   * Opens a connection with the collocated Joram server.
-   * <p>
-   * Default administrator login name and password are used for connection
-   * as defined in {@link AbstractConnectionFactory#getDefaultRootLogin()}
-   * and {@link AbstractConnectionFactory#getDefaultRootPassword()}.
-   *
-   * @throws UnknownHostException Never thrown.
-   * @throws ConnectException     If connecting fails.
-   * @throws AdminException       If the administrator identification is incorrect.
-   */
-  public static void collocatedConnect() throws ConnectException, AdminException {
-    doCollocatedConnect(AbstractConnectionFactory.getDefaultRootLogin(),
-                        AbstractConnectionFactory.getDefaultRootPassword(),
-                        SimpleIdentity.class.getName());
-  }
-
-  /**
-   * Opens a connection with the collocated JORAM server.
-   *
-   * @param name  Administrator's name.
-   * @param password  Administrator's password.
-   *
-   * @exception ConnectException  If connecting fails.
-   * @exception AdminException  If the administrator identification is
-   *              incorrect.
-   */
-  public static void collocatedConnect(String name, String password) throws ConnectException, AdminException {
-    doCollocatedConnect(name, password, SimpleIdentity.class.getName());
-  }
-
-  /**
-   * Opens a connection with the collocated JORAM server.
-   *
-   * @param name  Administrator's name.
-   * @param password  Administrator's password.
-   * @param identityClass identity class name.
-   *
-   * @exception ConnectException  If connecting fails.
-   * @exception AdminException  If the administrator identification is incorrect.
-   * 
-   * @deprecated  Next to Joram 5.2 use connect methods with ConnectionFactory.
-   */
-  public static void collocatedConnect(String name, String password,
-                                       String identityClass) throws ConnectException, AdminException {
-    doCollocatedConnect(name, password, identityClass);
-  }
-  
-  /**
-   * Opens a connection with the collocated JORAM server.
-   *
-   * @param name  Administrator's name.
-   * @param password  Administrator's password.
-   * @param identityClass identity class name.
-   *
-   * @exception ConnectException  If connecting fails.
-   * @exception AdminException  If the administrator identification is incorrect.
-   */
-  public static void doCollocatedConnect(String name, String password,
-                                         String identityClass) throws ConnectException, AdminException {
-    if (isHa) {
-      doConnect(HALocalConnectionFactory.create(),
-                name, password,
-                identityClass);
-    } else {
-      doConnect(LocalConnectionFactory.create(),
-                name, password,
-                identityClass);
-    }
-  }
-
-  /**
-   * Opens a connection dedicated to administering with the Joram server
-   * which parameters are wrapped by a given <code>ConnectionFactory</code>.
-   *
-   * @param cf       The Joram's ConnectionFactory to use for connecting.
-   * @param name          Administrator's name.
-   * @param password      Administrator's password.
-   * @param identityClass identity class name.
-   *
-   * @exception ConnectException  If connecting fails.
-   * @exception AdminException  If the administrator identification is incorrect.
-   */
-  private static void doConnect(AbstractConnectionFactory cf,
-                                String name,
-                                String password,
-                                String identityClass) throws ConnectException, AdminException {
-    // TODO (AF): May be we should throw an exception AlreadyConnected.
-    if (wrapper != null) return;
-
-    //  set identity className
-    cf.setIdentityClassName(identityClass);
-    
-    try {
-      cnx = cf.createConnection(name, password);
-      cnx.start();
-      wrapper = new AdminWrapper(cnx);
-
-      FactoryParameters params = cf.getParameters();
-      localHost = params.getHost();
-      localPort = params.getPort();
-    } catch (JMSSecurityException exc) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "AdminModule.doConnect", exc);
-      throw new AdminException(exc.getMessage());
-    } catch (JMSException exc) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "AdminModule.doConnect", exc);
-      throw new ConnectException("Connecting failed: " + exc);
-    }
-    
-  }
-
-  /**
-   * Method actually sending an <code>AdminRequest</code> instance to
-   * the platform and getting an <code>AdminReply</code> instance.
-   * 
-   * @param request the administration request to send
-   * @return  the reply message
-   *
-   * @exception ConnectException  If the connection to the platform fails.
-   * @exception AdminException  If the platform's reply is invalid, or if
-   *              the request failed.
-   * 
-   * @deprecated
-   */
-  public static AdminReply doRequest(AdminRequest request) throws AdminException, ConnectException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Admin.doRequest(" + request + ')');
-
-    if (wrapper == null)
-      throw new ConnectException("Admin connection not established.");
-
-    return wrapper.doRequest(request);
   }
 
   /** Closes the administration connection. */
   public static void disconnect() {
-    if (wrapper != null) wrapper.close();
-    wrapper = null;
-    
-    if (cnx != null) {
-      try {
-        cnx.close();
-      } catch (JMSException exc) {}
-      cnx = null;
-    }
+    try {
+      if (cnx == null) return;
+      
+      cnx.close();
+    } catch (JMSException exc) {}
+
+    cnx = null;
   }
 
   /**
@@ -639,14 +315,18 @@ public final class AdminModule {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public static void stopServer(int serverId) throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administration connection is closed.");
-    
-    wrapper.stopServer(serverId);
-    
-    if (serverId == getLocalServerId()) {
-      disconnect();
+  public static void stopServer(int serverId)
+    throws ConnectException, AdminException {
+    try {
+      doRequest(new StopServerRequest(serverId));
+
+      if (serverId == localServer)
+        cnx = null;
+    } catch (ConnectException exc) {
+      // ConnectException is intercepted if stopped server is local server.
+      if (serverId != localServer)  throw exc;
+
+      cnx = null;
     }
   }
 
@@ -657,54 +337,73 @@ public final class AdminModule {
    * @exception AdminException  Never thrown.
    */
   public static void stopServer() throws ConnectException, AdminException {
-    stopServer(getLocalServerId());
+    stopServer(localServer);
   }
 
   /**
    * Adds a server to the platform.
    *
-   * @param sid     Id of the added server
-   * @param host    Address of the host where the added server is started
-   * @param domain  Name of the domain where the server is added
-   * @param port    Listening port of the server in the specified domain
-   * @param server  Name of the added server
+   * @param serverId Id of the added server
+   * @param hostName Address of the host where the added server is started
+   * @param domainName Name of the domain where the server is added
+   * @param port Listening port of the server in the specified domain
+   * @param serverName Name of the added server
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
   public static void addServer(int sid,
-                               String host,
-                               String domain,
+                               String hostName,
+                               String domainName,
                                int port,
-                               String server) throws ConnectException, AdminException {
-    addServer(sid, host, domain, port, server, new String[]{}, new String[]{});
+                               String serverName)
+    throws ConnectException, AdminException {
+    addServer(sid,
+              hostName, domainName, port, serverName,
+              null, null);
   }
 
   /**
    * Adds a server to the platform.
    *
-   * @param sid       Id of the added server
-   * @param host      Address of the host where the added server is started
-   * @param domain    Name of the domain where the server is added
-   * @param port      Listening port of the server in the specified domain
-   * @param server    Name of the added server
-   * @param services  Names of the service to start within the server
-   * @param args      Services' arguments
+   * @param serverId Id of the added server
+   * @param hostName Address of the host where the added server is started
+   * @param domainName Name of the domain where the server is added
+   * @param port Listening port of the server in the specified domain
+   * @param serverName Name of the added server
+   * @param serviceNames Names of the service to start within the server
+   * @param args Services' arguments
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
   public static void addServer(int sid,
-                               String host,
-                               String domain,
+                               String hostName,
+                               String domainName,
                                int port,
-                               String server,
-                               String[] services,
-                               String[] args) throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
-
-    wrapper.addServer(sid, host, domain, port, server, services, args);
+                               String serverName,
+                               String[] serviceNames,
+                               String[] serviceArgs)
+    throws ConnectException, AdminException {
+    if (serviceNames != null &&
+        serviceArgs != null) {
+      if (serviceNames.length != serviceArgs.length)
+        throw new AdminException(
+          "Same number of service names and arguments expected");
+    } else {
+      if (serviceNames == null) throw new AdminException(
+        "Expected service names");
+      if (serviceArgs == null) throw new AdminException(
+        "Expected service arguments");
+    }
+    doRequest(new AddServerRequest(
+                sid,
+                hostName,
+                domainName,
+                port,
+                serverName,
+                serviceNames,
+                serviceArgs));
   }
 
   /**
@@ -715,66 +414,45 @@ public final class AdminModule {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public static void removeServer(int sid) throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
-
-    wrapper.removeServer(sid);
+  public static void removeServer(int sid)
+    throws ConnectException, AdminException {
+    doRequest(new RemoveServerRequest(sid));
   }
 
   /**
    * Adds a domain to the platform.
    *
-   * @param domain Name of the added domain.
-   * @param sid Id of the router server that gives access to the added domain.
-   * @param port Listening port in the added domain of the router server.
+   * @param domainName Name of the added domain
+   * @param sid Id of the router server that
+   *            gives access to the added domain
+   * @param port Listening port in the added domain of the
+   *             router server
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public static void addDomain(String domain,
+  public static void addDomain(String domainName,
                                int sid,
-                               int port) throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
-
-    wrapper.addDomain(domain, sid, port);
-  }
-
-  /**
-   * Adds a domain to the platform using a specific network component.
-   *
-   * @param domain Name of the added domain.
-   * @param network    Classname of the network component to use.
-   * @param sid Id of the router server that gives access to the added domain.
-   * @param port Listening port in the added domain of the router server.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  If the request fails.
-   */
-  public static void addDomain(String domain,
-                               String network,
-                               int sid,
-                               int port) throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
-
-    wrapper.addDomain(domain, network, sid, port);
+                               int port)
+    throws ConnectException, AdminException {
+    doRequest(new AddDomainRequest(
+                domainName,
+                sid,
+                port));
   }
 
   /**
    * Removes a domain from the platform.
    *
-   * @param domain Name of the added domain
+   * @param domainName Name of the added domain
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public static void removeDomain(String domain) throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
-
-    wrapper.removeDomain(domain);
+  public static void removeDomain(String domainName)
+    throws ConnectException, AdminException {
+    doRequest(new RemoveDomainRequest(
+                domainName));
   }
 
   /**
@@ -783,52 +461,9 @@ public final class AdminModule {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public static String getConfiguration() throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
-
-    return wrapper.getConfiguration();
-  }
-
-  /**
-   * Returns the default dead message queue for the local server, null if not
-   * set.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
-   */
-  public static Queue getDefaultDMQ() throws ConnectException, AdminException {
-    return getDefaultDMQ(getLocalServerId());
-  }
-
-  /**
-   * Returns the default dead message queue for a given server, null if not set.
-   * <p>
-   * The request fails if the target server does not belong to the platform.
-   * 
-   * @param serverId Unique identifier of the server.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  If the request fails.
-   */
-  public static Queue getDefaultDMQ(int serverId) throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
-
-    return wrapper.getDefaultDMQ(serverId);
-  }
-
-  /**
-   * Sets a given dead message queue as the default DMQ for the local server
-   * (<code>null</code> for unsetting previous DMQ).
-   *
-   * @param dmq  The dmq to be set as the default one.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
-   */
-  public static void setDefaultDMQ(Queue dmq) throws ConnectException, AdminException {
-    setDefaultDMQ(getLocalServerId(), dmq);
+  public static String getConfiguration()
+    throws ConnectException, AdminException {
+    return doRequest(new GetConfigRequest()).getInfo();
   }
 
   /**
@@ -843,109 +478,26 @@ public final class AdminModule {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public static void setDefaultDMQ(int serverId, Queue dmq) throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
-
-    wrapper.setDefaultDMQ(serverId, dmq);
-  }
-
-  /**
-   * Returns the default dead message queue for the local server, null if not
-   * set.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
-   */
-  public static String getDefaultDMQId() throws ConnectException, AdminException {
-    return getDefaultDMQId(getLocalServerId());
-  }
-
-  /**
-   * Returns the default dead message queue for a given server, null if not
-   * set.
-   * <p>
-   * The request fails if the target server does not belong to the platform.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  If the request fails.
-   */
-  public static String getDefaultDMQId(int serverId) throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
-
-    return wrapper.getDefaultDMQId(serverId);
-  }
+  public static void setDefaultDMQ(int serverId, DeadMQueue dmq)
+    throws ConnectException, AdminException
+    {
+      doRequest(new SetDefaultDMQ(serverId, dmq.getName()));
+    }
 
   /**
    * Sets a given dead message queue as the default DMQ for the local server
    * (<code>null</code> for unsetting previous DMQ).
    *
-   * @param dmqId  The dmqId (AgentId) to be set as the default one.
+   * @param dmq  The dmq to be set as the default one.
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
    */
-  public static void setDefaultDMQId(String dmqId) throws ConnectException, AdminException {
-    setDefaultDMQId(getLocalServerId(), dmqId);
-  }
-
-  /**
-   * Sets a given dead message queue as the default DMQ for a given server
-   * (<code>null</code> for unsetting previous DMQ).
-   * <p>
-   * The request fails if the target server does not belong to the platform.
-   *
-   * @param serverId  The identifier of the server.
-   * @param dmqId  The dmqId (AgentId) to be set as the default one.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  If the request fails.
-   */
-  public static void setDefaultDMQId(int serverId, String dmqId) throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
-
-    wrapper.setDefaultDMQId(serverId, dmqId);
-  }
-
-  /**
-   * Returns the default threshold value for the local server, -1 if not set.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
-   */
-  public static int getDefaultThreshold() throws ConnectException, AdminException {
-    return getDefaultThreshold(getLocalServerId());
-  }
-
-  /**
-   * Returns the default threshold value for a given server, -1 if not set.
-   * <p>
-   * The request fails if the target server does not belong to the platform.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  If the request fails.
-   */
-  public static int getDefaultThreshold(int serverId) throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
-
-    return wrapper.getDefaultThreshold(serverId);
-  }
-
-  /**
-   * Sets a given value as the default threshold for the local server (-1 for
-   * unsetting previous value).
-   *
-   * @param threshold  The threshold value to be set.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
-   */
-  public static void setDefaultThreshold(int threshold) throws ConnectException, AdminException {
-    setDefaultThreshold(getLocalServerId(), threshold);
-  }
+  public static void setDefaultDMQ(DeadMQueue dmq)
+    throws ConnectException, AdminException
+    {
+      setDefaultDMQ(localServer, dmq);
+    }
 
   /**
    * Sets a given value as the default threshold for a given server (-1 for
@@ -959,44 +511,54 @@ public final class AdminModule {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public static void setDefaultThreshold(int serverId, int threshold) throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
+  public static void setDefaultThreshold(int serverId, int threshold)
+    throws ConnectException, AdminException
+    {
+      doRequest(new SetDefaultThreshold(serverId, threshold));
+    }
 
-    wrapper.setDefaultThreshold(serverId, threshold);
-  }
+  /**
+   * Sets a given value as the default threshold for the local server (-1 for
+   * unsetting previous value).
+   *
+   * @param threshold  The threshold value to be set.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  Never thrown.
+   */
+  public static void setDefaultThreshold(int threshold)
+    throws ConnectException, AdminException
+    {
+      setDefaultThreshold(localServer, threshold);
+    }
 
-  // TODO (AF): Removes the deprecated getServersIds methods, adds getServersIds and
-  // getServersNames as defined in AdminWrapper.
-  
   /**
    * Returns the list of the platform's servers' identifiers.
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
-   * 
-   * @deprecated No longer supported next to Joram 5.2
    */
-  public static List getServersIds() throws ConnectException, AdminException {
-    return getServersIds(null);
-  }
+  public static List getServersIds() throws ConnectException, AdminException
+    {
+      return getServersIds(null);
+    }
 
   /**
-   * Returns the list of the servers' identifiers that belong to the specified domain
+   * Returns the list of the servers' identifiers that belong
+   * to the specified domain
    *
-   * @param domain  Name of the domain.
-   * 
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
-   * 
-   * @deprecated No longer supported next to Joram 5.2
    */
-  public static List getServersIds(String domain) throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
-
-    int[] serverIds = wrapper.getServersIds(domain);
-    
+  public static List getServersIds(String domainName)
+    throws ConnectException, AdminException {
+    Monitor_GetServersIds request =
+      new Monitor_GetServersIds(
+        AdminModule.getLocalServerId(),
+        domainName);
+    Monitor_GetServersIdsRep reply =
+      (Monitor_GetServersIdsRep) doRequest(request);
+    int[] serverIds = reply.getIds();
     Vector res = new Vector();
     for (int i = 0; i < serverIds.length; i++) {
       res.addElement(new Integer(serverIds[i]));
@@ -1004,51 +566,124 @@ public final class AdminModule {
     return res;
   }
 
-  public static Server[] getServers() throws ConnectException, AdminException {
+  public static Server[] getServers()
+    throws ConnectException, AdminException {
     return getServers(null);
   }
 
+  public static Server[] getServers(String domainName)
+    throws ConnectException, AdminException {
+    Monitor_GetServersIds request =
+      new Monitor_GetServersIds(
+        AdminModule.getLocalServerId(),
+        domainName);
+    Monitor_GetServersIdsRep reply =
+      (Monitor_GetServersIdsRep) doRequest(request);
+    int[] serverIds = reply.getIds();
+    String[] serverNames = reply.getNames();
+    String[] serverHostNames = reply.getHostNames();
+    Server[] servers = new Server[serverIds.length];
+    for (int i = 0; i < serverIds.length; i++) {
+      servers[i] = new Server(serverIds[i],
+                              serverNames[i],
+                              serverHostNames[i]);
+    }
+    return servers;
+  }
+
+  public static Server getLocalServer()
+    throws ConnectException, AdminException {
+    GetLocalServerRep reply =  (GetLocalServerRep)doRequest(
+      new GetLocalServer());
+    return new Server(reply.getId(),
+                      reply.getName(),
+                      reply.getHostName());
+  }
+
   /**
-   * Returns the list of the servers' that belong to the specified domain
+   * Returns the list of the domain names that
+   * contains the specified server.
    *
-   * @param domain  Name of the domain.
-   * @return An array containing the list of the servers of the specified domain.
-   * 
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
    */
-  public static Server[] getServers(String domain) throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
-
-    return wrapper.getServers(domain);
+  public static String[] getDomainNames(int serverId)
+    throws ConnectException, AdminException {
+    GetDomainNames request =
+      new GetDomainNames(serverId);
+    GetDomainNamesRep reply =
+      (GetDomainNamesRep) doRequest(request);
+    return reply.getDomainNames();
   }
 
   /**
-   * Returns the list of the domain names that contains the specified server.
-   * 
-   * @param serverId Unique identifier of the server.
+   * Returns the default dead message queue for a given server, null if not
+   * set.
+   * <p>
+   * The request fails if the target server does not belong to the platform.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public static DeadMQueue getDefaultDMQ(int serverId)
+    throws ConnectException, AdminException
+    {
+      Monitor_GetDMQSettings request = new Monitor_GetDMQSettings(serverId);
+      Monitor_GetDMQSettingsRep reply;
+      reply = (Monitor_GetDMQSettingsRep) doRequest(request);
+
+      if (reply.getDMQName() == null)
+        return null;
+      else
+        return new DeadMQueue(reply.getDMQName());
+    }
+
+  /**
+   * Returns the default dead message queue for the local server, null if not
+   * set.
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
    */
-  public static String[] getDomainNames(int serverId) throws ConnectException, AdminException {
-    return wrapper.getDomainNames(serverId);
-  }
+  public static DeadMQueue getDefaultDMQ()
+    throws ConnectException, AdminException
+    {
+      return getDefaultDMQ(localServer);
+    }
 
   /**
-   * Returns the list of all destinations that exist on the local server,
-   * or an empty list if none exist.
+   * Returns the default threshold value for a given server, -1 if not set.
+   * <p>
+   * The request fails if the target server does not belong to the platform.
    *
-   * @exception ConnectException  If the admin connection is closed or broken.
-   * @exception AdminException  Never thrown.
-   * 
-   * @deprecated No longer supported next to Joram 5.2
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
    */
-  public static List getDestinationsList() throws ConnectException, AdminException {
-    return getDestinationsList(getLocalServerId());
-  }
-  
+  public static int getDefaultThreshold(int serverId)
+    throws ConnectException, AdminException
+    {
+      Monitor_GetDMQSettings request = new Monitor_GetDMQSettings(serverId);
+      Monitor_GetDMQSettingsRep reply;
+      reply = (Monitor_GetDMQSettingsRep) doRequest(request);
+
+      if (reply.getThreshold() == null)
+        return -1;
+      else
+        return reply.getThreshold().intValue();
+    }
+
+  /**
+   * Returns the default threshold value for the local server, -1 if not set.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  Never thrown.
+   */
+  public static int getDefaultThreshold()
+    throws ConnectException, AdminException
+    {
+      return getDefaultThreshold(localServer);
+    }
+
   /**
    * Returns the list of all destinations that exist on a given server,
    * or an empty list if none exist.
@@ -1057,113 +692,61 @@ public final class AdminModule {
    *
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
-   * 
-   * @deprecated No longer supported next to Joram 5.2
    */
-  public static List getDestinationsList(int serverId) throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
-    
-    Destination[] dest = wrapper.getDestinations(serverId);
+  public static List getDestinations(int serverId)
+    throws ConnectException, AdminException
+    {
+      Monitor_GetDestinations request = new Monitor_GetDestinations(serverId);
+      Monitor_GetDestinationsRep reply =
+        (Monitor_GetDestinationsRep) doRequest(request);
+
+      Vector list = new Vector();
+      String[] ids = reply.getIds();
+      String[] names = reply.getNames();
+      String[] types = reply.getTypes();
+      for (int i = 0; i < types.length; i++) {
+        list.addElement(Destination.newInstance(
+                          ids[i], names[i], types[i]));
+      }
+      return list;
+    }
+
+  /**
+   * Returns the list of all destinations that exist on the local server,
+   * or an empty list if none exist.
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  Never thrown.
+   */
+  public static List getDestinations() throws ConnectException, AdminException
+    {
+      return getDestinations(localServer);
+    }
+
+  /**
+   * Returns the list of all destinations that exist on a given server,
+   * or an empty list if none exist.
+   * The request is abort after delay.
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public static List getDestinations(int serverId, long delay)
+    throws ConnectException, AdminException {
+
+    Monitor_GetDestinations request = new Monitor_GetDestinations(serverId);
+    Monitor_GetDestinationsRep reply =
+      (Monitor_GetDestinationsRep) doRequest(request,delay);
 
     Vector list = new Vector();
-    for (int i=0; i < dest.length; i++) {
-      list.addElement(dest[i]);
+    String[] ids = reply.getIds();
+    String[] names = reply.getNames();
+    String[] types = reply.getTypes();
+    for (int i = 0; i < types.length; i++) {
+      list.addElement(Destination.newInstance(
+                        ids[i], names[i], types[i]));
     }
     return list;
-  }
-
-  /**
-   * Returns the list of all destinations that exist on the local server,
-   * or null if none exist.
-   *
-   * @return An array containing the list of all destinations of the local server
-   *         or null if none exists.
-   * 
-   * @exception ConnectException  If the admin connection is closed or broken.
-   * @exception AdminException  Never thrown.
-   */
-  public static Destination[] getDestinations() throws ConnectException, AdminException {
-    return getDestinations(getLocalServerId());
-  }
-  
-  /**
-   * Returns the list of all destinations that exist on a given server,
-   * or null if none exist.
-   * <p>
-   * The request fails if the target server does not belong to the platform.
-   * 
-   * @param serverId The unique identifier of the selected server.
-   * @return An array containing the list of all destinations of the local server
-   *         or null if none exists.
-   *
-   * @exception ConnectException  If the admin connection is closed or broken.
-   * @exception AdminException  If the request fails.
-   */
-  public static Destination[] getDestinations(int serverId) throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
-    
-    return wrapper.getDestinations(serverId);
-  }
-
-  /**
-   * Creates or retrieves a queue destination on a given JORAM server.
-   *
-   * @param serverId   The identifier of the server where deploying the topic.
-   * @param name       The name of the queue.
-   * @param className  The topic class name.
-   * @param prop       The topic properties.
-   *
-   * @exception ConnectException  If the admin connection is closed or broken.
-   * @exception AdminException    If the request fails.
-   * 
-   * @see AdminWrapper#createQueue(int, String, String, Properties)
-   */
-  public static Destination createQueue(int serverId,
-                                 String name,
-                                 String className,
-                                 Properties prop) throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
-    
-    return wrapper.createQueue(serverId, name, className, prop);
-  }
-
-  /**
-   * Creates or retrieves a topic destination on a given JORAM server.
-   *
-   * @param serverId   The identifier of the server where deploying the topic.
-   * @param name       The name of the topic.
-   * @param className  The topic class name.
-   * @param prop       The topic properties.
-   *
-   * @exception ConnectException  If the admin connection is closed or broken.
-   * @exception AdminException    If the request fails.
-   * 
-   * @see AdminWrapper#createTopic(int, String, String, Properties)
-   */
-  public static Destination createTopic(int serverId,
-                                 String name,
-                                 String className,
-                                 Properties prop) throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
-    
-    return wrapper.createTopic(serverId, name, className, prop);
-  }
-
-  /**
-   * Returns the list of all users that exist on the local server, or an empty
-   * list if none exist.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
-   * 
-   * @deprecated No longer supported next to Joram 5.2
-   */
-  public static List getUsersList() throws ConnectException, AdminException {
-    return getUsersList(getLocalServerId());
   }
 
   /**
@@ -1174,124 +757,248 @@ public final class AdminModule {
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
-   * 
-   * @deprecated No longer supported next to Joram 5.2
    */
-  public static List getUsersList(int serverId) throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
+  public static List getUsers(int serverId)
+    throws ConnectException, AdminException
+    {
+      Monitor_GetUsers request = new Monitor_GetUsers(serverId);
+      Monitor_GetUsersRep reply = (Monitor_GetUsersRep) doRequest(request);
 
-    User[] users = wrapper.getUsers(serverId);
+      Vector list = new Vector();
+      Hashtable users = reply.getUsers();
+      String name;
+      for (Enumeration names = users.keys(); names.hasMoreElements();) {
+        name = (String) names.nextElement();
+        list.add(new User(name, (String) users.get(name)));
+      }
+      return list;
+    }
+
+  /**
+   * Returns the list of all users that exist on a given server, or an empty
+   * list if none exist.
+   * The request is abort after delay.
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public static List getUsers(int serverId, long delay)
+    throws ConnectException, AdminException {
+
+    Monitor_GetUsers request = new Monitor_GetUsers(serverId);
+    Monitor_GetUsersRep reply = (Monitor_GetUsersRep) doRequest(request,delay);
 
     Vector list = new Vector();
-    for (int i=0; i < users.length; i++) {
-      list.add(users[i]);
+    Hashtable users = reply.getUsers();
+    String name;
+    for (Enumeration names = users.keys(); names.hasMoreElements();) {
+      name = (String) names.nextElement();
+      list.add(new User(name, (String) users.get(name)));
     }
     return list;
   }
 
   /**
-   * Returns the list of all users that exist on the local server, or null if none exist.
-   *
-   * @return  An array containing all users defined on the local server, or null if none exist.
+   * Returns the list of all users that exist on the local server, or an empty
+   * list if none exist.
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
    */
-  public static User[] getUsers() throws ConnectException, AdminException {
-    return getUsers(getLocalServerId());
-  }
+  public static List getUsers() throws ConnectException, AdminException
+    {
+      return getUsers(localServer);
+    }
 
-  /**
-   * Returns the list of all users that exist on a given server, or null if none exist.
-   * <p>
-   * The request fails if the target server does not belong to the platform.
-   * 
-   * @param serverId  Unique identifier of the given server.
-   * @return  An array containing all users defined on the local server, or null if none exist.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  If the request fails.
-   */
-  public static User[] getUsers(int serverId) throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
-
-    return wrapper.getUsers(serverId);
-  }
-
-  public static Server getLocalServer() throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
-
-    return wrapper.getLocalServer();
-  }
-  
-  /**
-   * Admin method creating a user for a given server and instantiating the
-   * corresponding <code>User</code> object.
-   *
-   * @param name                Name of the user.
-   * @param password            Password of the user.
-   * @param serverId            The identifier of the user's server.
-   * @param identityClassName   By default user/password for SimpleIdentity.
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException    If the request fails.
-   * 
-   * @see AdminWrapper#createUser(String, String, int, String)
-   */ 
-  public static User createUser(String name, String password,
-                         int serverId,
-                         String identityClassName) throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
-
-    return wrapper.createUser(name, password, serverId, identityClassName);
-  }
 
   /**
    * Returns the identifier of the server the module is connected to.
    *
    * @exception ConnectException  If the admin connection is not established.
-   * @throws AdminException 
    */
-  public static int getLocalServerId() throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
+  public static int getLocalServerId() throws ConnectException
+    {
+      if (cnx == null)
+        throw new ConnectException("Administrator not connected.");
 
-    return wrapper.getLocalServerId();
-  }
+      return localServer;
+    }
 
   /**
    * Returns the host name of the server the module is connected to.
    *
    * @exception ConnectException  If the admin connection is not established.
    */
-  public static String getLocalHost() throws ConnectException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
+  public static String getLocalHost() throws ConnectException
+    {
+      if (cnx == null)
+        throw new ConnectException("Administrator not connected.");
 
-    return localHost;
-  }
+      return localHost;
+    }
 
   /**
    * Returns the port number of the server the module is connected to.
    *
    * @exception ConnectException  If the admin connection is not established.
    */
-  public static int getLocalPort() throws ConnectException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
+  public static int getLocalPort() throws ConnectException
+    {
+      if (cnx == null)
+        throw new ConnectException("Administrator not connected.");
 
-    return localPort;
+      return localPort;
+    }
+
+  /**
+   * Method actually sending an <code>AdminRequest</code> instance to
+   * the platform and getting an <code>AdminReply</code> instance.
+   *
+   * @exception ConnectException  If the connection to the platform fails.
+   * @exception AdminException  If the platform's reply is invalid, or if
+   *              the request failed.
+   */
+  public static AdminReply doRequest(AdminRequest request)
+    throws AdminException, ConnectException {
+    return doRequest(request,requestTimeout);
   }
 
-  public static void abortRequest() throws JMSException, ConnectException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
+  /**
+   * Method actually sending an <code>AdminRequest</code> instance to
+   * the platform and getting an <code>AdminReply</code> instance.
+   *
+   * @exception ConnectException  If the connection to the platform fails.
+   * @exception AdminException  If the platform's reply is invalid, or if
+   *              the request failed.
+   */
+  public static AdminReply doRequest(AdminRequest request, long timeout)
+    throws AdminException, ConnectException {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, "AdminModule.doRequest(" + request + ')');
 
-    wrapper.abortRequest();
+    if (cnx == null)
+      throw new ConnectException("Admin connection not established.");
+
+    if (timeout < 1)
+      timeout = requestTimeout;
+
+    try {
+      replyMsg = (ObjectMessage) requestor.request(
+        request, timeout);
+      reply = (AdminReply) replyMsg.getObject();
+
+      if (! reply.succeeded()) {
+        switch (reply.getErrorCode()) {
+        case AdminReply.NAME_ALREADY_USED:
+          throw new NameAlreadyUsedException(reply.getInfo());
+        case AdminReply.START_FAILURE:
+          throw new StartFailureException(reply.getInfo());
+        case AdminReply.SERVER_ID_ALREADY_USED:
+          throw new ServerIdAlreadyUsedException(reply.getInfo());
+        case AdminReply.UNKNOWN_SERVER:
+          throw new UnknownServerException(reply.getInfo());
+        default:
+          throw new AdminException(reply.getInfo());
+        }
+      } else {
+        return reply;
+      }
+    } catch (JMSException exc) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, "", exc);
+      throw new ConnectException("Connection failed: " + exc.getMessage());
+    } catch (ClassCastException exc) {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, "", exc);
+      throw new AdminException("Invalid server reply: " + exc.getMessage());
+    }
+  }
+
+  public static void abortRequest() throws JMSException {
+    if (requestor != null) {
+      requestor.abort();
+    } else throw new JMSException("Not connected");
+  }
+
+  public static class AdminRequestor {
+    private javax.jms.TopicConnection cnx;
+    private javax.jms.TopicSession sess;
+    private javax.jms.Topic topic;
+    private TemporaryTopic tmpTopic;
+    private MessageProducer producer;
+    private MessageConsumer consumer;
+
+    public AdminRequestor(javax.jms.TopicConnection cnx)
+      throws JMSException {
+      this.cnx = cnx;
+      sess = cnx.createTopicSession(
+        false, Session.AUTO_ACKNOWLEDGE);
+      topic = sess.createTopic("#AdminTopic");
+      producer = sess.createProducer(topic);
+      tmpTopic = sess.createTemporaryTopic();
+      consumer = sess.createConsumer(tmpTopic);
+    }
+
+    public javax.jms.Message request(AdminRequest request,
+                                     long timeout) throws JMSException {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG,
+          "AdminModule.AdminRequestor.request(" +
+          request + ',' + timeout + ')');
+
+      requestMsg = sess.createObjectMessage(request);
+      requestMsg.setJMSReplyTo(tmpTopic);
+      producer.send(requestMsg);
+      String correlationId = requestMsg.getJMSMessageID();
+      while (true) {
+        javax.jms.Message reply = consumer.receive(timeout);
+        if (reply == null) {
+          throw new JMSException("Interrupted request");
+        } else {
+          if (correlationId.equals(
+                reply.getJMSCorrelationID())) {
+            return reply;
+          } else {
+            if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+              JoramTracing.dbgClient.log(
+                BasicLevel.DEBUG,
+                "reply id (" + reply.getJMSCorrelationID() +
+                ") != request id (" + correlationId + ")");
+            continue;
+          }
+        }
+      }
+    }
+
+    public void abort() throws JMSException {
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, "AdminModule.AdminRequestor.abort()");
+      consumer.close();
+      consumer = sess.createConsumer(tmpTopic);
+    }
+
+    public int getLocalServerId() {
+      try {
+        String topicName = topic.getTopicName();
+        int ind0 = topicName.indexOf(".");
+        int ind1 = topicName.indexOf(".", ind0 + 1);
+        return Integer.parseInt(topicName.substring(ind0 + 1, ind1));
+      } catch (JMSException exc) {
+        return -1;
+      }
+    }
+
+    public void close() throws JMSException {
+      consumer.close();
+      producer.close();
+      tmpTopic.delete();
+      sess.close();
+    }
   }
 
   /**
@@ -1300,12 +1007,13 @@ public final class AdminModule {
    *
    * @param cfgDir    The directory containing the file.
    * @param cfgFileName    The script filename.
-   * 
+   *
    * @since 4.3.10
    */
-  public static void executeXMLAdmin(String cfgDir,
-                                        String cfgFileName) throws Exception {
-    executeXMLAdmin(new File(cfgDir, cfgFileName).getPath());
+  public static boolean executeXMLAdmin(String cfgDir,
+                                        String cfgFileName)
+    throws Exception {
+    return executeXMLAdmin(new File(cfgDir, cfgFileName).getPath());
   }
 
   /**
@@ -1316,13 +1024,14 @@ public final class AdminModule {
    *
    * @since 4.3.10
    */
-  public static void executeXMLAdmin(String path) throws Exception {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "AdminModule.executeXMLAdmin(" + path + ")");
-    
+  public static boolean executeXMLAdmin(String path) throws Exception {
+    if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgAdmin.log(BasicLevel.DEBUG,"executeXMLAdmin(" + path + ")");
+
+    boolean res = false;
+    Reader reader = null;
 
     // 1st, search XML configuration file in directory.
-    Reader reader = null;
     File cfgFile = new File(path);
     try {
       if (!cfgFile.exists() || !cfgFile.isFile() || (cfgFile.length() == 0)) {
@@ -1332,163 +1041,70 @@ public final class AdminModule {
     } catch (IOException exc) {
       // configuration file seems not exist, search it from the
       // search path used to load classes.
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,
-                   "Unable to find Joram Admin configuration file \"" + cfgFile.getPath() + "\".");
+      if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgAdmin.log(BasicLevel.DEBUG,
+                                  "Unable to find Joram Admin configuration file \"" +
+                                  cfgFile.getPath() + "\".");
       reader = null;
-    }
-    if (reader != null) {
-      executeAdmin(reader);
-      return;
     }
 
     // 2nd, search XML configuration file in path used to load classes.
-    InputStream is = null;
-    ClassLoader classLoader = null;
-    try {
-      classLoader = AdminModule.class.getClassLoader();
-      if (classLoader != null) {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG,
-                     "Trying to find [" + path + "] using AdminModule class loader.");
-        is = classLoader.getResourceAsStream(path);
+    if (reader == null) {
+      ClassLoader classLoader = null;
+      InputStream is = null;
+      try {
+        classLoader = AdminModule.class.getClassLoader();
+        if (classLoader != null) {
+          if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
+            JoramTracing.dbgAdmin.log(BasicLevel.DEBUG,
+                                      "Trying to find [" + path + "] using " +
+                                      classLoader + " class loader.");
+          is = classLoader.getResourceAsStream(path);
+        }
+      } catch (Throwable t) {
+        if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgAdmin.log(BasicLevel.DEBUG,
+                                    "Can't find [" + path + "] using " +
+                                    classLoader + " class loader.",
+                                    t);
+        is = null;
       }
-    } catch (Throwable t) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,
-                   "Can't find [" + path + "] using AdminModule class loader.", t);
-      is = null;
+
+      if (is == null) {
+        // Last ditch attempt: get the resource from the class path.
+        if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgAdmin.log(BasicLevel.DEBUG,
+                                    "Trying to find [" + path +
+                                    "] using ClassLoader.getSystemResource().");
+        is = ClassLoader.getSystemResourceAsStream(path);
+      }
+      if (is != null) {
+        res = executeAdmin(new InputStreamReader(is));
+      }
+    } else {
+      res = executeAdmin(reader);
     }
 
-    if (is == null) {
-      // Last ditch attempt: get the resource from the class path.
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,
-                   "Trying to find [" + path + "] using ClassLoader.getSystemResource().");
-      is = ClassLoader.getSystemResourceAsStream(path);
-    }
-    
-    if (is == null)
-      throw new FileNotFoundException("XML Joram configuration file \"" + path + "\" not found.");
+    if (!res)
+      throw new FileNotFoundException("xml Joram Admin configuration file not found.");
 
-    executeAdmin(new InputStreamReader(is));
+    return res;
   }
 
-  public static void executeAdmin(Reader reader) throws Exception {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "executeAdmin(Reader)");
+  public static boolean executeAdmin(Reader reader)
+    throws Exception {
+    if (JoramTracing.dbgAdmin.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgAdmin.log(BasicLevel.DEBUG, "executeAdmin(" + reader + ")");
 
-    String cfgName = System.getProperty(ADM_NAME_PROPERTY, DEFAULT_ADM_NAME);
+    String cfgName = System.getProperty(AdminModule.ADM_NAME_PROPERTY,
+                                        AdminModule.DEFAULT_ADM_NAME);
 
     JoramSaxWrapper wrapper = new JoramSaxWrapper();
-    wrapper.parse(reader,cfgName);
-  }
-  
-  /**
-   * Export the repository content to an XML file
-   * - only the destinations objects are retrieved in this version
-   * - xml script format of the admin objects (joramAdmin.xml)
-   * 
-   * @param exportDir       target directory where the export file will be put
-   * @param exportFilename  filename of the export file
-   * @throws AdminException if an error occurs
-   */
-  public static void exportRepositoryToFile(String exportDir,
-                                            String exportFilename) throws AdminException {
-
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "export repository to " + exportDir.toString());
-
-    
-    StringBuffer strbuf = new StringBuffer();
-    int indent = 0;
-    strbuf.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                  "<!--\n" +
-                  " Exported JMS objects : \n" +
-                  " - destinations : Topic/Queue \n" +
-                  " The file can be reloaded through the admin interface (joramAdmin.executeXMLAdmin())\n" +
-                  "-->\n" +
-    "<JoramAdmin>\n");
-    indent += 2;
-
-    // Get the list of servers
-    int[] servers;
-    try {
-      servers = wrapper.getServersIds();
-    } catch (Exception exc) {
-      throw new AdminException("exportRepositoryToFile() failed - " + exc);
-    }
-
-    if (servers != null) {
-      // For each server
-      for (int i=0; i<servers.length; i++) {
-        try {
-          // Export the JMS destinations
-          Destination[] dest = wrapper.getDestinations(servers[i]);
-          for (int j=0; j<dest.length; j++) {
-            strbuf.append(dest[j].toXml(indent, servers[i]));
-          }
-        } catch (Exception exc) {
-          throw new AdminException("exportRepositoryToFile() failed - " + exc);
-        }
-      }
-
-      if (logger.isLoggable(BasicLevel.DEBUG)) {
-        logger.log(BasicLevel.DEBUG, "exported objects : \n" + strbuf.toString());
-      }
-    }
-
-    indent -= 2;
-    strbuf.append("</JoramAdmin>");
-
-    // Flush the file in the specified directory
-    File exportFile = null;
-    FileOutputStream fos = null;
-
-    try {
-      exportFile = new File(exportDir, exportFilename);
-      fos = new FileOutputStream(exportFile);
-      fos.write(strbuf.toString().getBytes());
-    } catch(Exception ioe) {
-      throw new AdminException("exportRepositoryToFile() failed - " + ioe);
-    } finally {
-      try {
-        exportFile = null;
-        fos.close();
-      } catch (Exception e) {
-        if (logger.isLoggable(BasicLevel.DEBUG)) {
-          logger.log(BasicLevel.DEBUG, "Unable to close the file  : " + fos);
-        }
-      }
-      if (logger.isLoggable(BasicLevel.DEBUG)) {
-        logger.log(BasicLevel.DEBUG, "File : " + exportDir + "/" + exportFilename + " created");
-      }
-    }
+    return wrapper.parse(reader,cfgName);
   }
 
-  /**
-   * Sets the timeout before abortion of administration requests.
-   * 
-   * @param timeOut The timeout
-   * @throws ConnectException 
-   */
-  public static void setTimeOutToAbortRequest(long timeOut) throws ConnectException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
-    
-    wrapper.setTimeOutToAbortRequest(timeOut);
-  }
 
-  /**
-   * Gets the timeout before abortion of administration requests.
-   * 
-   * @return the timeout
-   * @throws ConnectException 
-   */
-  public static long getTimeOutToAbortRequest() throws ConnectException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
-    
-    return wrapper.getTimeOutToAbortRequest();
+  public static void setHa(boolean isHa) {
+    AdminModule.isHa = isHa;
   }
 }

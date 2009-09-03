@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,20 +23,21 @@
  */
 package fr.dyade.aaa.jndi2.server;
 
+import java.net.*;
+
 import fr.dyade.aaa.agent.*;
 
 /**
- *  This notification must only be used inside an agent server. Its content cannot be
- * serialized so it is not persistent.
+ * This notification must only be used inside
+ * an agent server. It implies that local 
+ * notifications are only cloned (shallow) and
+ * transmitted as objects.
  */
 public class TcpRequestNot extends Notification {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-  
+
   private RequestContext ctx;
 
   public TcpRequestNot(RequestContext ctx) {
-    persistent = false;
     this.ctx = ctx;
   }
 
@@ -47,8 +48,10 @@ public class TcpRequestNot extends Notification {
   /**
    * Appends a string image for this object to the StringBuffer parameter.
    *
-   * @param output  buffer to fill in
-   * @return        <code>output</code> buffer is returned
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
    */
   public StringBuffer toString(StringBuffer output) {
     output.append('(');

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2006 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -24,49 +24,61 @@
  */
 package org.objectweb.joram.client.connector;
 
-import java.util.Iterator;
-import java.util.Set;
-
-import javax.jms.IllegalStateException;
-import javax.jms.JMSException;
-import javax.jms.JMSSecurityException;
-import javax.jms.XAConnection;
-import javax.jms.XAConnectionFactory;
-import javax.jms.XAQueueConnectionFactory;
-import javax.naming.Reference;
-import javax.naming.StringRefAddr;
-import javax.resource.ResourceException;
-import javax.resource.spi.CommException;
-import javax.resource.spi.ConnectionManager;
-import javax.resource.spi.ConnectionRequestInfo;
-import javax.resource.spi.ManagedConnection;
-import javax.resource.spi.SecurityException;
-import javax.security.auth.Subject;
-
-import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 import org.objectweb.joram.client.jms.ha.local.XAHALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.local.XAQueueHALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.XAQueueHATcpConnectionFactory;
 import org.objectweb.joram.client.jms.local.XALocalConnectionFactory;
 import org.objectweb.joram.client.jms.local.XAQueueLocalConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.XAQueueTcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.XAQueueTcpConnectionFactory;
+
+import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
+import javax.jms.IllegalStateException;
+import javax.jms.QueueConnectionFactory;
+import javax.jms.XAConnection;
+import javax.jms.XAQueueConnection;
+import javax.jms.XAConnectionFactory;
+import javax.jms.XAQueueConnectionFactory;
+import javax.naming.StringRefAddr;
+import javax.naming.Reference;
+import javax.resource.ResourceException;
+import javax.resource.spi.CommException;
+import javax.resource.spi.ConnectionManager;
+import javax.resource.spi.ConnectionRequestInfo;
+import javax.resource.spi.ManagedConnection;
+import javax.resource.spi.ResourceAdapter;
+import javax.resource.spi.SecurityException;
+import javax.security.auth.Subject;
+
+import java.io.PrintWriter;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.Vector;
+
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * A <code>ManagedQueueConnectionFactoryImpl</code> instance manages
  * PTP outbound connectivity to a given JORAM server.
  */
-public class ManagedQueueConnectionFactoryImpl extends ManagedConnectionFactoryImpl {
-
-  private static final long serialVersionUID = 1L;
-
+public class ManagedQueueConnectionFactoryImpl
+             extends ManagedConnectionFactoryImpl
+             implements javax.resource.spi.ManagedConnectionFactory,
+                        javax.resource.spi.ResourceAdapterAssociation,
+                        javax.resource.spi.ValidatingManagedConnectionFactory,
+                        java.io.Serializable
+{
   /**
    * Constructs a <code>ManagedQueueConnectionFactoryImpl</code> instance.
    */
-  public ManagedQueueConnectionFactoryImpl() {
-  }
+  public ManagedQueueConnectionFactoryImpl()
+  {}
+
 
   /**
    * Method called by an application server (managed case) for creating an
@@ -107,7 +119,6 @@ public class ManagedQueueConnectionFactoryImpl extends ManagedConnectionFactoryI
     ref.add(new StringRefAddr("serverPort", "" + serverPort));
     ref.add(new StringRefAddr("userName", userName));
     ref.add(new StringRefAddr("password", password));
-    ref.add(new StringRefAddr("identityClass", identityClass));
 
     factory.setReference(ref);
     return factory;
@@ -141,7 +152,6 @@ public class ManagedQueueConnectionFactoryImpl extends ManagedConnectionFactoryI
 
     String userName;
     String password;
-    String identityClass;
 
     String hostName = this.hostName;
     int serverPort = this.serverPort;
@@ -151,7 +161,6 @@ public class ManagedQueueConnectionFactoryImpl extends ManagedConnectionFactoryI
     if (cxRequest == null) {
       userName = this.userName;
       password = this.password;
-      identityClass = this.identityClass; 
     }
     else {
       if (! (cxRequest instanceof ConnectionRequest)) {
@@ -163,7 +172,6 @@ public class ManagedQueueConnectionFactoryImpl extends ManagedConnectionFactoryI
 
       userName = ((ConnectionRequest) cxRequest).getUserName();
       password = ((ConnectionRequest) cxRequest).getPassword();
-      identityClass = ((ConnectionRequest) cxRequest).getIdentityClass();
     }
 
     XAConnection cnx = null;
@@ -176,68 +184,47 @@ public class ManagedQueueConnectionFactoryImpl extends ManagedConnectionFactoryI
     try {
 
         if (isHa) {
-          if (collocated) {
-            if (ra.haURL != null) {
-              if (cxRequest instanceof QueueConnectionRequest) {
-                XAQueueConnectionFactory factory = XAQueueHATcpConnectionFactory.create(ra.haURL);
-                setParameters(factory);
-                ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
-                cnx = factory.createXAQueueConnection(userName, password);
-              } else {
-                XAConnectionFactory factory = XAHATcpConnectionFactory.create(ra.haURL);
-                setParameters(factory);
-                ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
-                cnx = factory.createXAConnection(userName, password);
-              }
-            } else {          
-              if (cxRequest instanceof QueueConnectionRequest) {
-                XAQueueConnectionFactory factory = XAQueueHALocalConnectionFactory.create();
-                setParameters(factory);
-                ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
-                cnx = factory.createXAQueueConnection(userName, password);
-              } else {
-                XAConnectionFactory factory = XAHALocalConnectionFactory.create();
-                setParameters(factory);
-                cnx = factory.createXAConnection(userName, password);
-              }
-            }
-          } else {
-            String urlHa = "hajoram://" + hostName + ":" + serverPort;
-            if (cxRequest instanceof QueueConnectionRequest) {
-              XAQueueConnectionFactory factory = XAQueueHATcpConnectionFactory.create(urlHa);
-              setParameters(factory);
-              ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
-              cnx = factory.createXAQueueConnection(userName, password);
+            if (collocated) {
+                if (cxRequest instanceof QueueConnectionRequest) {
+                    XAQueueConnectionFactory factory = XAQueueHALocalConnectionFactory.create();
+                    setParameters(factory);
+                    cnx = factory.createXAQueueConnection(userName, password);
+                } else {
+                    XAConnectionFactory factory = XAHALocalConnectionFactory.create();
+                    setParameters(factory);
+                    cnx = factory.createXAConnection(userName, password);
+                }
             } else {
-              XAConnectionFactory factory = XAHATcpConnectionFactory.create(urlHa);
-              setParameters(factory);
-              ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
-              cnx = factory.createXAConnection(userName, password);
+                String urlHa = "hajoram://" + hostName + ":" + serverPort;
+                if (cxRequest instanceof QueueConnectionRequest) {
+                    XAQueueConnectionFactory factory = XAQueueHATcpConnectionFactory.create(urlHa);
+                    setParameters(factory);
+                    cnx = factory.createXAQueueConnection(userName, password);
+                } else {
+                    XAConnectionFactory factory = XAHATcpConnectionFactory.create(urlHa);
+                    setParameters(factory);
+                    cnx = factory.createXAConnection(userName, password);
+                }
             }
-          }
         } else {
             if (collocated) {
                 if (cxRequest instanceof QueueConnectionRequest) {
                     XAQueueConnectionFactory factory = XAQueueLocalConnectionFactory.create();
                     setParameters(factory);
-                    ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
                     cnx = factory.createXAQueueConnection(userName, password);
                 } else {
                     XAConnectionFactory factory = XALocalConnectionFactory.create();
                     setParameters(factory);
-                    ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
                     cnx = factory.createXAConnection(userName, password);
                 }
             } else {
                 if (cxRequest instanceof QueueConnectionRequest) {
                     XAQueueConnectionFactory factory = XAQueueTcpConnectionFactory.create(hostName, serverPort);
                     setParameters(factory);
-                    ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
                     cnx = factory.createXAQueueConnection(userName, password);
                 } else {
                     XAConnectionFactory factory = XATcpConnectionFactory.create(hostName, serverPort);
                     setParameters(factory);
-                    ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
                     cnx = factory.createXAConnection(userName, password);
                 }
             }
@@ -285,8 +272,11 @@ public class ManagedQueueConnectionFactoryImpl extends ManagedConnectionFactoryI
    * @exception ResourceException  If the provided connection request info is
    *                               invalid.
    */
-  public ManagedConnection matchManagedConnections(Set connectionSet, Subject subject,
-      ConnectionRequestInfo cxRequest) throws ResourceException {
+  public ManagedConnection
+      matchManagedConnections(Set connectionSet,
+                              Subject subject,
+                              ConnectionRequestInfo cxRequest)
+    throws ResourceException {
 
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
@@ -344,7 +334,8 @@ public class ManagedQueueConnectionFactoryImpl extends ManagedConnectionFactoryI
   }
 
   /** Returns a code depending on the managed factory configuration. */
-  public int hashCode() {
+  public int hashCode()
+  {
     return ("PTP:"
             + hostName
             + ":"
@@ -354,7 +345,8 @@ public class ManagedQueueConnectionFactoryImpl extends ManagedConnectionFactoryI
   }
 
   /** Compares managed factories according to their configuration. */
-  public boolean equals(Object o) {
+  public boolean equals(Object o)
+  {
     if (! (o instanceof ManagedQueueConnectionFactoryImpl))
       return false;
 

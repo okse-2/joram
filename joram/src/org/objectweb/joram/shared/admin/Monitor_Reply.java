@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,33 +22,16 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-
 /**
  * A <code>Monitor_Reply</code> instance is used by a
  * <code>org.objectweb.joram.mom.dest.AdminTopic</code> topic for sending monitoring
  * information to a client monitorer.
  */
 public class Monitor_Reply extends AdminReply {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 3293136458707414680L;
 
   /** Constructs a <code>Monitor_Reply</code> instance. */
   public Monitor_Reply() {
     super(true, null);
-  }
-  
-  protected int getClassId() {
-    return MONITOR_REPLY;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
   }
 }

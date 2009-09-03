@@ -27,10 +27,7 @@ import java.io.*;
  * agent factory.
  */
 public final class AgentCreateRequest extends Notification {
-  /**
-   * 
-   */
-  static final long serialVersionUID = 1L;
+  static final long serialVersionUID = -873215263839213534L;
 
   /** Id. of agent to reply to */
   public AgentId reply;

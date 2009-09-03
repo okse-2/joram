@@ -27,22 +27,12 @@
  */
 package org.objectweb.joram.client.tools.admin;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Iterator;
-import java.util.Queue;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import java.util.*;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import org.objectweb.joram.client.jms.admin.DeadMQueue;
 
 
 /**
@@ -52,11 +42,6 @@ import javax.swing.JTextField;
  * Window>Preferences>Java>Code Generation>Code and Comments
  */
 public class ServerPanel extends JPanel {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   private final AdminController c;
 
   private int id = 0;
@@ -122,7 +107,7 @@ public class ServerPanel extends JPanel {
       int i = dmqCombo.getSelectedIndex();
       if (i > 0) {
         try {
-          c.setDefaultDMQ(id, (org.objectweb.joram.client.jms.Queue) dmqCombo.getSelectedItem());
+          c.setDefaultDMQ(id, (DeadMQueue) dmqCombo.getSelectedItem());
         }
         catch (Exception exc) {
           JOptionPane.showMessageDialog(null, exc.getMessage());
@@ -146,12 +131,12 @@ public class ServerPanel extends JPanel {
 
   public void setDefaultThreshold(String threshold) { thresholdField.setText(threshold); }
 
-  public void setDMQList(java.util.List dmqs, org.objectweb.joram.client.jms.Queue ddmq) {
+  public void setDMQList(java.util.List dmqs, DeadMQueue ddmq) {
   	dmqCombo.removeAllItems();
 	dmqCombo.addItem("No Default DMQ");
 
     for (Iterator i = dmqs.iterator(); i.hasNext();) {
-      Queue dmq = (Queue) i.next();
+      DeadMQueue dmq = (DeadMQueue) i.next();
       dmqCombo.addItem(dmq);
 
       // TODO: This comparison is not very clean and should be improved

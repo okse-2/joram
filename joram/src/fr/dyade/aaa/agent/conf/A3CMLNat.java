@@ -25,10 +25,6 @@ import java.io.*;
  * network address translation.
  */
 public class A3CMLNat implements Serializable {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /** server id. */
   public short sid = -1;
   /** Value of the translation host. */

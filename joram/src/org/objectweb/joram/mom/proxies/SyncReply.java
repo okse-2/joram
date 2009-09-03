@@ -33,10 +33,6 @@ import org.objectweb.joram.shared.client.AbstractJmsReply;
 class SyncReply extends fr.dyade.aaa.agent.Notification
 {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-  /**
    * The identifier of the client context within which which the reply will
    * have to be sent.
    */

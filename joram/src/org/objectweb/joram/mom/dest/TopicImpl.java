@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -32,6 +32,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
 
+import org.objectweb.joram.mom.MomTracing;
+import org.objectweb.joram.mom.notifications.AbstractRequest;
 import org.objectweb.joram.mom.notifications.AdminReply;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.ClusterRequest;
@@ -61,9 +63,11 @@ import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
+import fr.dyade.aaa.agent.UnknownNotificationException;
 
 /**
  * The <code>TopicImpl</code> class implements the MOM topic behaviour,
@@ -79,13 +83,11 @@ import fr.dyade.aaa.agent.UnknownAgent;
  * A topic can't be part of a hierarchy and of a cluster at the same time.
  */
 public class TopicImpl extends DestinationImpl implements TopicImplMBean {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
   /** Identifier of this topic's father, if any. */
   protected AgentId fatherId = null;
   /** Set of cluster fellows, if any. */
   protected Set friends = null;
-
+  
   /** Vector of subscribers' identifiers. */
   protected Vector subscribers;
   /** Table of subscribers' selectors. */
@@ -97,28 +99,88 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
   /**
    * Constructs a <code>TopicImpl</code> instance.
    *
+   * @param destId  Identifier of the agent hosting the topic.
    * @param adminId  Identifier of the administrator of the topic.
    * @param prop     The initial set of properties.
    */
-  public TopicImpl(AgentId adminId, Properties prop) {
-    super(adminId, prop);
+  public TopicImpl(AgentId destId, AgentId adminId, Properties prop) {
+    super(destId, adminId, prop);
     subscribers = new Vector();
     selectors = new Hashtable();
-  }
-
-  /**
-   * Initializes the destination.
-   * 
-   * @param firstTime		true when first called by the factory
-   */
-  public void initialize(boolean firstTime) {
   }
 
   /**
    * Returns a string representation of this destination.
    */
   public String toString() {
-    return "TopicImpl:" + getId().toString();
+    return "TopicImpl:" + destId.toString();
+  }
+
+
+  /**
+   * Distributes the received notifications to the appropriate reactions.
+   *
+   * @exception UnknownNotificationException  If a received notification is
+   *              unexpected by the topic.
+   */
+  public void react(AgentId from, Notification not)
+              throws UnknownNotificationException {
+    alreadySentLocally = false;
+    int reqId = -1;
+    if (not instanceof AbstractRequest)
+      reqId = ((AbstractRequest) not).getRequestId();
+
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "--- " + this
+                                    + ": got " + not.getClass().getName()
+                                    + " with id: " + reqId
+                                    + " from: " + from.toString());
+    try {
+      if (not instanceof ClusterRequest)
+        doReact(from, (ClusterRequest) not);
+      else if (not instanceof ClusterTest)
+        doReact(from, (ClusterTest) not);
+      else if (not instanceof ClusterAck)
+        doReact(from, (ClusterAck) not);
+      else if (not instanceof ClusterNot)
+        doReact(from, (ClusterNot) not);
+      else if (not instanceof UnclusterRequest)
+        doReact(from, (UnclusterRequest) not);
+      else if (not instanceof UnclusterNot)
+        doReact(from, (UnclusterNot) not);
+      else if (not instanceof SetFatherRequest)
+        doReact(from, (SetFatherRequest) not);
+      else if (not instanceof FatherTest)
+        doReact(from, (FatherTest) not);
+      else if (not instanceof FatherAck)
+        doReact(from, (FatherAck) not);
+      else if (not instanceof UnsetFatherRequest)
+        doReact(from, (UnsetFatherRequest) not);
+      else if (not instanceof Monit_GetSubscriptions)
+        doReact(from, (Monit_GetSubscriptions) not);
+      else if (not instanceof Monit_GetFather)
+        doReact(from, (Monit_GetFather) not);
+      else if (not instanceof Monit_GetCluster)
+        doReact(from, (Monit_GetCluster) not);
+      else if (not instanceof SubscribeRequest)
+        doReact(from, (SubscribeRequest) not);
+      else if (not instanceof UnsubscribeRequest)
+        doReact(from, (UnsubscribeRequest) not);
+      else if (not instanceof TopicForwardNot)
+        doReact(from, (TopicForwardNot) not);
+      else if (not instanceof DestinationAdminRequestNot)
+        doReact(from, (DestinationAdminRequestNot) not);
+      else
+        super.react(from, not);
+    }
+    // MOM exceptions are sent to the requester.
+    catch (MomException exc) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.WARN))
+        MomTracing.dbgDestination.log(BasicLevel.WARN, exc);
+
+      AbstractRequest req = (AbstractRequest) not;
+      Channel.sendTo(from, new ExceptionReply(req, exc));
+    }
   }
 
   /**
@@ -128,7 +190,8 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    *
    * @exception AccessException  If the requester is not an administrator.
    */
-  public void clusterRequest(AgentId from, ClusterRequest req) throws AccessException
+  protected void doReact(AgentId from, ClusterRequest req)
+                 throws AccessException
   {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
@@ -136,10 +199,10 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     String info = null;
     if (fatherId != null) {
       info = strbuf.append("Request [").append(req.getClass().getName())
-      .append("], sent to Topic [").append(getId())
-      .append("], successful [false]: topic part of a hierarchy").toString();
+        .append("], sent to Topic [").append(destId)
+        .append("], successful [false]: topic part of a hierarchy").toString();
       strbuf.setLength(0);
-      forward(from, new AdminReply(req, false, info));
+      Channel.sendTo(from, new AdminReply(req, false, info));
       return;
     }
 
@@ -151,18 +214,18 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
       friends = new HashSet();
     }
 
-    if (getId().equals(newFriendId)) {
+    if (destId.equals(newFriendId)) {
       info = strbuf.append("Request [").append(req.getClass().getName())
-      .append("], sent to Topic [").append(getId())
-      .append("], successful [false]: joining topic already")
-      .append(" part of cluster").toString();
+        .append("], sent to Topic [").append(destId)
+        .append("], successful [false]: joining topic already")
+        .append(" part of cluster").toString();
       strbuf.setLength(0);
-      forward(from, new AdminReply(req, false, info));
+      Channel.sendTo(from, new AdminReply(req, false, info));
       return;
     }
 
     ClusterTest not = new ClusterTest(req, from, friends);
-    forward(newFriendId, not);
+    Channel.sendTo(newFriendId, not);
   }
 
   /**
@@ -170,35 +233,36 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    * notification sent by a fellow topic for testing if this topic might be
    * part of a cluster.
    */
-  public void clusterTest(AgentId from, ClusterTest not) {
+  protected void doReact(AgentId from, ClusterTest not)
+  {
     String info = null;
     // The topic is already part of a cluster: can't join an other cluster.
     if (friends != null && ! friends.isEmpty()) {
       if (friends.contains(from)) {
-        info = strbuf.append("Topic [").append(getId())
-        .append("] already joined cluster of topic [").append(from)
-        .append(']').toString();
+        info = strbuf.append("Topic [").append(destId)
+          .append("] already joined cluster of topic [").append(from)
+          .append(']').toString();
         strbuf.setLength(0);
         friends.add(from);
         friends.addAll(not.friends);
         // Remove self if present
-        friends.remove(getId());
-        forward(from, new ClusterAck(not, true, info));
+        friends.remove(destId);
+        Channel.sendTo(from, new ClusterAck(not, true, info));
       } else {
-        info = strbuf.append("Topic [").append(getId())
-        .append("] can't join cluster of topic [").append(from)
-        .append("] as it is already part of a cluster").toString();
+        info = strbuf.append("Topic [").append(destId)
+          .append("] can't join cluster of topic [").append(from)
+          .append("] as it is already part of a cluster").toString();
         strbuf.setLength(0);
-        forward(from, new ClusterAck(not, false, info));
+        Channel.sendTo(from, new ClusterAck(not, false, info));
       }
-      // The topic is already part of a hierarchy: can't join a cluster.
+    // The topic is already part of a hierarchy: can't join a cluster.
     } else if (fatherId != null) {
-      info = strbuf.append("Topic [").append(getId())
-      .append("] can't join cluster of topic [").append(from)
-      .append("] as it is already part of a hierarchy").toString();
+      info = strbuf.append("Topic [").append(destId)
+        .append("] can't join cluster of topic [").append(from)
+        .append("] as it is already part of a hierarchy").toString();
       strbuf.setLength(0);
-      forward(from, new ClusterAck(not, false, info));
-      // The topic is free: joining the cluster.
+      Channel.sendTo(from, new ClusterAck(not, false, info));
+    // The topic is free: joining the cluster.
     } else {
       // state change, so save.
       setSave();
@@ -206,16 +270,17 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
       friends.add(from);
       friends.addAll(not.friends);
       // Remove self if present
-      friends.remove(getId());
-      info = strbuf.append("Topic [").append(getId())
-      .append("] ok for joining cluster of topic [").append(from)
-      .append(']').toString();
+      friends.remove(destId);
+      info = strbuf.append("Topic [").append(destId)
+        .append("] ok for joining cluster of topic [").append(from)
+        .append(']').toString();
       strbuf.setLength(0);
-      forward(from, new ClusterAck(not, true, info));
+      Channel.sendTo(from, new ClusterAck(not, true, info));
 
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,
-                   "Topic " + getId().toString() + " joins cluster of topic " + from.toString());
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic "
+                                      + destId.toString() + " joins cluster"
+                                      + "cluster of topic " + from.toString());
     }
   }
 
@@ -223,32 +288,35 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    * Method implementing the reaction to a <code>ClusterAck</code>
    * notification sent by a topic requested to join the cluster.
    */ 
-  public void clusterAck(AgentId from, ClusterAck ack){ 
+  protected void doReact(AgentId from, ClusterAck ack)
+  { 
     // The topic does not accept to join the cluster: doing nothing.
     if (! ack.ok) {
-      forward(ack.requester, new AdminReply(ack.request, false, ack.info));
+      Channel.sendTo(ack.requester,
+                     new AdminReply(ack.request, false, ack.info));
       return;
     }
-
+  
     ClusterNot newFriendNot = new ClusterNot(from);
     Iterator iterator = friends.iterator();
     while (iterator.hasNext()) {
       // Notifying the current fellow of the joining topic.
-      forward((AgentId) iterator.next(), newFriendNot);
+      Channel.sendTo((AgentId) iterator.next(), newFriendNot);
     }
     // state change, so save.
     setSave();
     friends.add(from);
 
-    String info = strbuf.append("Request [").append(ack.request.getClass().getName())
-    .append("], sent to Topic [").append(getId())
-    .append("], successful [true]: topic [")
-    .append(from).append("] joined cluster").toString();
+    String info = strbuf.append("Request [")
+      .append(ack.request.getClass().getName())
+      .append("], sent to Topic [").append(destId)
+      .append("], successful [true]: topic [")
+      .append(from).append("] joined cluster").toString();
     strbuf.setLength(0);
-    forward(ack.requester, new AdminReply(ack.request, true, info));
+    Channel.sendTo(ack.requester, new AdminReply(ack.request, true, info));
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, info);
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
   }
 
   /**
@@ -256,36 +324,40 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    * notification sent by a fellow topic for notifying this topic
    * of a new cluster fellow.
    */
-  public void clusterNot(AgentId from, ClusterNot not) {
-    if (! not.topicId.equals(getId())) {
+  protected void doReact(AgentId from, ClusterNot not)
+  {
+    if (! not.topicId.equals(destId)) {
       // state change, so save.
       setSave();
       friends.add(not.topicId);
-
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,
-                   "Topic " + not.topicId.toString() + " set as a fellow.");
+        
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic "
+                                      + not.topicId.toString()
+                                      + " set as a fellow.");
     }
   }
-
+ 
   /**
    * Method implementing the reaction to an <code>UnclusterRequest</code>
    * instance requesting this topic to leave the cluster it is part of.
    *
    * @exception AccessException  If the requester is not an administrator.
    */
-  public void unclusterRequest(AgentId from, UnclusterRequest request) throws MomException {
+  protected void doReact(AgentId from, UnclusterRequest request)
+                 throws MomException
+  {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
     if (friends == null || friends.isEmpty()) {
       String info = strbuf.append("Request [")
-      .append(request.getClass().getName())
-      .append("], sent to Topic [").append(getId())
-      .append("], successful [false]: topic not part of a cluster")
-      .toString();
+        .append(request.getClass().getName())
+        .append("], sent to Topic [").append(destId)
+        .append("], successful [false]: topic not part of a cluster")
+        .toString();
       strbuf.setLength(0);
-      forward(from, new AdminReply(request, false, info));
+      Channel.sendTo(from, new AdminReply(request, false, info));
       return;
     }
 
@@ -293,37 +365,39 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     // Notifying each fellow of the leave.
     Iterator iterator = friends.iterator();
     while (iterator.hasNext()) {
-      forward((AgentId) iterator.next(), not);
+      Channel.sendTo((AgentId) iterator.next(), not);
     }
     friends = null;
     // state change, so save.
     setSave();
 
     String info = strbuf.append("Request [")
-    .append(request.getClass().getName())
-    .append("], sent to Topic [").append(getId())
-    .append("], successful [true]: topic left the cluster").toString();
+      .append(request.getClass().getName())
+      .append("], sent to Topic [").append(destId)
+      .append("], successful [true]: topic left the cluster").toString();
     strbuf.setLength(0);
-    forward(from, new AdminReply(request, true, info));
+    Channel.sendTo(from, new AdminReply(request, true, info));
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, info);
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
   }
-
+ 
   /**
    * Method implementing the reaction to an <code>UnclusterNot</code>
    * notification sent by a topic leaving the cluster.
    */
-  public void unclusterNot(AgentId from, UnclusterNot not) {
+  protected void doReact(AgentId from, UnclusterNot not)
+  {
     // state change, so save.
     setSave();
     friends.remove(from);
 
     if (friends.isEmpty()) friends = null;
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "Topic "  + from.toString() + " removed from" + " cluster.");
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Topic "
+                                    + from.toString() + " removed from"
+                                    + " cluster.");
   }
 
   /**
@@ -332,46 +406,49 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    *
    * @exception AccessException  If the requester is not an administrator.
    */
-  public void setFatherRequest(AgentId from, SetFatherRequest request) throws MomException {
+  protected void doReact(AgentId from, SetFatherRequest request)
+                 throws MomException
+  {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
-    if ((fatherId != null) && ! fatherId.equals(request.getFatherId())) {
+    if (fatherId != null) {
       strbuf.append("Request [").append(request.getClass().getName())
-      .append("], sent to Topic [").append(getId())
-      .append("], successful [false]: topic already part of a hierarchy");
-      forward(from, new AdminReply(request, false, strbuf.toString()));
+        .append("], sent to Topic [").append(destId)
+        .append("], successful [false]: topic already part of a hierarchy");
+      Channel.sendTo(from, new AdminReply(request, false, strbuf.toString()));
       strbuf.setLength(0);
       return;
     }
 
     if (friends != null) {
       strbuf.append("Request [").append(request.getClass().getName())
-      .append("], sent to Topic [").append(getId())
-      .append("], successful [false]: topic already part of a cluster");
-      forward(from, new AdminReply(request, false, strbuf.toString()));
+        .append("], sent to Topic [").append(destId)
+        .append("], successful [false]: topic already part of a cluster");
+      Channel.sendTo(from, new AdminReply(request, false, strbuf.toString()));
       strbuf.setLength(0);
       return;
     }
 
-    forward(request.getFatherId(), new FatherTest(request, from));
+    Channel.sendTo(request.getFatherId(), new FatherTest(request, from));
   }
 
   /**
    * Method reacting to a <code>FatherTest</code> notification checking if it
    * can be a father to a topic.
    */ 
-  public void fatherTest(AgentId from, FatherTest not) {
+  protected void doReact(AgentId from, FatherTest not)
+  {
     if (friends != null && ! friends.isEmpty()) {
-      strbuf.append("Topic [").append(getId())
-      .append("] can't accept topic [").append(from)
-      .append("] as a son as it is part of a cluster");
-      forward(from, new FatherAck(not, false, strbuf.toString()));
+      strbuf.append("Topic [").append(destId)
+        .append("] can't accept topic [").append(from)
+        .append("] as a son as it is part of a cluster");
+      Channel.sendTo(from, new FatherAck(not, false, strbuf.toString()));
       strbuf.setLength(0);
     } else {
-      strbuf.append("Topic [").append(getId())
-      .append("] accepts topic [").append(from).append("] as a son");
-      forward(from, new FatherAck(not, true, strbuf.toString()));
+      strbuf.append("Topic [").append(destId)
+        .append("] accepts topic [").append(from).append("] as a son");
+      Channel.sendTo(from, new FatherAck(not, true, strbuf.toString()));
       strbuf.setLength(0);
     }
   }
@@ -380,28 +457,30 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    * Method reacting to a <code>FatherAck</code> notification coming from
    * the topic this topic requested as a father.
    */ 
-  public void fatherAck(AgentId from, FatherAck not) {
+  protected void doReact(AgentId from, FatherAck not)
+  {
     // The topic does not accept to join the hierarchy: doing nothing.
     if (! not.ok) {
-      forward(not.requester, new AdminReply(not.request, false, not.info));
+      Channel.sendTo(not.requester,
+                     new AdminReply(not.request, false, not.info));
       return;
     }
-
+  
     // state change, so save.
     setSave();
     // The topic accepts to be a father: setting it.
     fatherId = from;
-
+  
     String info = strbuf.append("Request [")
-    .append(not.request.getClass().getName())
-    .append("], sent to Topic [").append(getId())
-    .append("], successful [true]: topic [")
-    .append(from).append("] set as father").toString();
+      .append(not.request.getClass().getName())
+      .append("], sent to Topic [").append(destId)
+      .append("], successful [true]: topic [")
+      .append(from).append("] set as father").toString();
     strbuf.setLength(0);
-    forward(not.requester, new AdminReply(not.request, true, info));
-
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, info);
+    Channel.sendTo(not.requester, new AdminReply(not.request, true, info));
+  
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
   }
 
   /**
@@ -410,17 +489,19 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    *
    * @exception AccessException  If the requester is not an administrator.
    */
-  public void unsetFatherRequest(AgentId from, UnsetFatherRequest request) throws MomException {
+  protected void doReact(AgentId from, UnsetFatherRequest request)
+                 throws MomException
+  {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
     String info = null;
     if (fatherId == null) {
       info = strbuf.append("Request [").append(request.getClass().getName())
-      .append("], sent to Topic [").append(getId())
-      .append("], successful [false]: topic is not a son").toString();
+        .append("], sent to Topic [").append(destId)
+        .append("], successful [false]: topic is not a son").toString();
       strbuf.setLength(0);
-      forward(from, new AdminReply(request, false, info));
+      Channel.sendTo(from, new AdminReply(request, false, info));
       return;
     }
 
@@ -429,13 +510,13 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     fatherId = null;
 
     info = strbuf.append("Request [").append(request.getClass().getName())
-    .append("], sent to Topic [").append(getId())
-    .append("], successful [true]: father unset").toString();
+      .append("], sent to Topic [").append(destId)
+      .append("], successful [true]: father unset").toString();
     strbuf.setLength(0);
-    forward(from, new AdminReply(request, true, info));
+    Channel.sendTo(from, new AdminReply(request, true, info));
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, info);
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, info);
   }
 
   /**
@@ -445,11 +526,13 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    *
    * @exception AccessException  If the requester is not the administrator.
    */
-  public void monitGetSubscriptions(AgentId from, Monit_GetSubscriptions not) throws AccessException {
+  protected void doReact(AgentId from, Monit_GetSubscriptions not)
+                 throws AccessException
+  {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
-    forward(from, new Monit_GetNumberRep(not, subscribers.size()));
+    Channel.sendTo(from, new Monit_GetNumberRep(not, subscribers.size()));
   }
 
   /**
@@ -458,7 +541,9 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    *
    * @exception AccessException  If the requester is not the administrator.
    */
-  public void monitGetFather(AgentId from, Monit_GetFather not) throws AccessException {
+  protected void doReact(AgentId from, Monit_GetFather not)
+                 throws AccessException
+  {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
@@ -466,7 +551,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     if (fatherId != null)
       id = fatherId.toString();
 
-    forward(from, new Monit_GetFatherRep(not, id));
+    Channel.sendTo(from, new Monit_GetFatherRep(not, id));
   }
 
   /**
@@ -475,7 +560,9 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    *
    * @exception AccessException  If the requester is not the administrator.
    */
-  public void monitGetCluster(AgentId from, Monit_GetCluster not) throws AccessException {
+  protected void doReact(AgentId from, Monit_GetCluster not)
+                 throws AccessException
+  {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
@@ -486,18 +573,10 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
       while (iterator.hasNext()) {
         cluster.add(iterator.next().toString());
       }
-      cluster.add(getId().toString());
+      cluster.add(destId.toString());
     }
 
-    forward(from, new Monit_GetClusterRep(not, cluster));
-  }
-
-  public void preSubscribe(SubscribeRequest not) {
-    // do nothing
-  }
-
-  public void postSubscribe(SubscribeRequest not) {
-    // do nothing
+    Channel.sendTo(from, new Monit_GetClusterRep(not, cluster));
   }
 
   /**
@@ -506,11 +585,11 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    *
    * @exception AccessException  If the sender is not a READER.
    */
-  public void subscribeRequest(AgentId from, SubscribeRequest not) throws AccessException {
+  protected void doReact(AgentId from, SubscribeRequest not)
+                 throws AccessException
+  {
     if (! isReader(from))
       throw new AccessException("READ right not granted");
-
-    preSubscribe(not);
 
     // Adding new subscriber.
     if (! subscribers.contains(from)) {
@@ -530,42 +609,30 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     else
       selectors.remove(from);
 
-    if (!not.isAsyncSub())
-      forward(from, new SubscribeReply(not));
+    Channel.sendTo(from, new SubscribeReply(not));
 
-    postSubscribe(not);
-
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 "Client " + from + " set as a subscriber with selector " + not.getSelector());
-  }
-
-  public void preUnsubscribe(UnsubscribeRequest not) {
-    // do nothing
-  }
-
-  public void postUnsubscribe(UnsubscribeRequest not) {
-    // do nothing
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
+                                    "Client " + from
+                                    + " set as a subscriber with selector "
+                                    + not.getSelector());
   }
 
   /**
    * Method implementing the reaction to an <code>UnsubscribeRequest</code>
    * instance, requesting to remove a subscriber.
    */
-  public void unsubscribeRequest(AgentId from, UnsubscribeRequest not) {
-
-    preUnsubscribe(not);
-
+  protected void doReact(AgentId from, UnsubscribeRequest not)
+  {
     // state change, so save.
     setSave();
     subscribers.remove(from);
     selectors.remove(from);
 
-    postUnsubscribe(not);
-
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 "Client " + from + " removed from the subscribers.");
+    if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgDestination.log(BasicLevel.DEBUG, 
+                                    "Client " + from
+                                    + " removed from the subscribers.");
   } 
 
   /**
@@ -573,32 +640,33 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    * instance, carrying messages forwarded by a cluster fellow or a
    * hierarchical son.
    */
-  public void topicForwardNot(AgentId from, TopicForwardNot not) { 
+  protected void doReact(AgentId from, TopicForwardNot not)
+  {
     // If the forward comes from a son, forwarding it to the father, if any.
     if (not.toFather && fatherId != null) {
-      forward(fatherId, not);
+      Channel.sendTo(fatherId, not);
       alreadySentLocally = fatherId.getTo() == AgentServer.getServerId();
     }
-
+    
     // Processing the received messages. 
     processMessages(not.messages);
   }
 
-  public void destinationAdminRequestNot(AgentId from, DestinationAdminRequestNot not) {
+  private void doReact(AgentId from, DestinationAdminRequestNot not) {
     org.objectweb.joram.shared.admin.AdminRequest adminRequest = 
       not.getRequest();
     if (adminRequest instanceof GetSubscriberIds) {
-      getSubscriberIds((GetSubscriberIds)adminRequest,
-                       not.getReplyTo(),
-                       not.getRequestMsgId(),
-                       not.getReplyMsgId());
+      doReact((GetSubscriberIds)adminRequest,
+              not.getReplyTo(),
+              not.getRequestMsgId(),
+              not.getReplyMsgId());
     }
   }
 
-  private void getSubscriberIds(GetSubscriberIds request,
-                                AgentId replyTo,
-                                String requestMsgId,
-                                String replyMsgId) {
+  private void doReact(GetSubscriberIds request,
+                       AgentId replyTo,
+                       String requestMsgId,
+                       String replyMsgId) {
     GetSubscriberIdsRep reply = 
       new GetSubscriberIdsRep(getSubscriberIds());
     replyToTopic(reply, replyTo, requestMsgId, replyMsgId);
@@ -620,47 +688,84 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     return res;
   }
 
+  private void replyToTopic(
+    org.objectweb.joram.shared.admin.AdminReply reply,
+    AgentId replyTo,
+    String requestMsgId,
+    String replyMsgId) {
+    Message message = Message.create();
+    message.setCorrelationId(requestMsgId);
+    message.setTimestamp(System.currentTimeMillis());
+    message.setDestination(replyTo.toString(), 
+                           Topic.TOPIC_TYPE);
+    message.setIdentifier(replyMsgId);
+    try {
+      message.setObject(reply);
+      Vector messages = new Vector();
+      messages.add(message);
+      ClientMessages clientMessages = 
+        new ClientMessages(-1, -1, messages);
+      Channel.sendTo(replyTo, clientMessages);
+    } catch (Exception exc) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+        MomTracing.dbgDestination.log(BasicLevel.ERROR, "", exc);
+      throw new Error(exc.getMessage());
+    }
+  }
+
+  /**
+   * The <code>DestinationImpl</code> class calls this method for passing
+   * notifications which have been partly processed, so that they are
+   * specifically processed by the <code>TopicImpl</code> class.
+   */
+  protected void specialProcess(Notification not)
+  {
+    if (not instanceof SetRightRequest)
+      doProcess((SetRightRequest) not);
+    else if (not instanceof ClientMessages)
+      doProcess((ClientMessages) not);
+    else if (not instanceof UnknownAgent)
+      doProcess((UnknownAgent) not);
+    else if (not instanceof DeleteNot)
+      doProcess((DeleteNot) not);
+  }
+  
   /**
    * Method specifically processing a <code>SetRightRequest</code> instance.
    * <p>
    * When a reader is removed, deleting this reader's subscription if any,
    * and sending an <code>ExceptionReply</code> notification to the client.
    */
-  protected void doRightRequest(SetRightRequest not) {
+  protected void doProcess(SetRightRequest not)
+  {
     // If the request does not unset a reader, doing nothing.
     if (not.getRight() != -READ)
       return;
 
-    SetRightRequest rightRequest = preProcess(not);
+    AgentId user = not.getClient();
+    AccessException exc = new AccessException("READ right removed.");
 
-    if (rightRequest != null) {
-      AgentId user = rightRequest.getClient();
-      AccessException exc = new AccessException("READ right removed.");
-
-      // Identified user: removing it.
-      if (user != null) {
-        // state change, so save.
-        setSave();
-        subscribers.remove(user);
-        selectors.remove(user);
-        forward(user, new ExceptionReply(exc));
-      }
-      // Free reading right removed: removing all non readers.
-      else {
-        for (Enumeration subs = subscribers.elements(); 
-        subs.hasMoreElements();) {
-          user = (AgentId) subs.nextElement();
-          if (! isReader(user)) {
-            // state change, so save.
-            setSave();
-            subscribers.remove(user);
-            selectors.remove(user);
-            forward(user, new ExceptionReply(exc));
-          }
+    // Identified user: removing it.
+    if (user != null) {
+      // state change, so save.
+      setSave();
+      subscribers.remove(user);
+      selectors.remove(user);
+      Channel.sendTo(user, new ExceptionReply(exc));
+    }
+    // Free reading right removed: removing all non readers.
+    else {
+      for (Enumeration subs = subscribers.elements(); 
+           subs.hasMoreElements();) {
+        user = (AgentId) subs.nextElement();
+        if (! isReader(user)) {
+          // state change, so save.
+          setSave();
+          subscribers.remove(user);
+          selectors.remove(user);
+          Channel.sendTo(user, new ExceptionReply(exc));
         }
       }
-
-      postProcess(rightRequest);
     }
   }
 
@@ -671,17 +776,11 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    * to the cluster fellows if any.It may finally send
    * <code>TopicMsgsReply</code> instances to the valid subscribers.
    */
-  protected void doClientMessages(AgentId from, ClientMessages not) {
-    ClientMessages clientMsgs = preProcess(from, not);
-
-    if (clientMsgs != null) {
-      // Forwarding the messages to the father or the cluster fellows, if any:
-      forwardMessages(clientMsgs);
-      // Processing the messages:
-      processMessages(clientMsgs);
-
-      postProcess(clientMsgs);
-    }
+  protected void doProcess(ClientMessages not) {
+    // Forwarding the messages to the father or the cluster fellows, if any:
+    forwardMessages(not);
+    // Processing the messages:
+    processMessages(not);
   }
 
   /**
@@ -692,7 +791,8 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    * the deleted client, if any, or sets the father identifier to null if it
    * comes from a deleted father.
    */
-  protected void doUnknownAgent(UnknownAgent uA) {
+  protected void doProcess(UnknownAgent uA)
+  {
     AgentId agId = uA.agent;
     Notification not = uA.not;
 
@@ -702,16 +802,16 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     if (not instanceof ClusterTest) {
       ClusterTest cT = (ClusterTest) not;
       info = strbuf.append("Topic [").append(agId)
-      .append("] can't join cluster as it does not exist").toString();
+        .append("] can't join cluster as it does not exist").toString();
       strbuf.setLength(0);
-      forward(cT.requester, new AdminReply(cT.request, false, info));
+      Channel.sendTo(cT.requester, new AdminReply(cT.request, false, info));
     } else if (not instanceof FatherTest) {
-      // Deleted topic was requested as a father: notifying the requester:
+    // Deleted topic was requested as a father: notifying the requester:
       FatherTest fT = (FatherTest) not;
       info = strbuf.append("Topic [").append(agId)
-      .append("] can't join hierarchy as it does not exist").toString();
+        .append("] can't join hierarchy as it does not exist").toString();
       strbuf.setLength(0);
-      forward(fT.requester, new AdminReply(fT.request, false, info));
+      Channel.sendTo(fT.requester, new AdminReply(fT.request, false, info));
     } else {
       // state change, so save.
       setSave();
@@ -736,13 +836,14 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    * and <code>UnclusterNot</code> notifications to the cluster
    * fellows.
    */
-  protected void doDeleteNot(DeleteNot not) {
+  protected void doProcess(DeleteNot not)
+  {
     AgentId clientId;
 
     // For each subscriber...
     for (int i = 0; i < subscribers.size(); i++) {
       clientId = (AgentId) subscribers.get(i);
-      forward(clientId, new UnknownAgent(getId(), null));
+      Channel.sendTo(clientId, new UnknownAgent(destId, null));
     }
 
     // For each cluster fellow if any...
@@ -751,7 +852,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
       while (iterator.hasNext()) {
         // state change, so save.
         setSave();
-        forward((AgentId) iterator.next(), new UnclusterNot());
+        Channel.sendTo((AgentId) iterator.next(), new UnclusterNot());
       }
       friends = null;
     }
@@ -761,24 +862,28 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    * Actually forwards a vector of messages to the father or the cluster
    * fellows, if any.
    */
-  protected void forwardMessages(ClientMessages messages) {
+  protected void forwardMessages(ClientMessages messages)
+  {
     if (friends != null && ! friends.isEmpty()) {
       AgentId topicId;
       Iterator iterator = friends.iterator();
       while (iterator.hasNext()) {
         topicId = (AgentId) iterator.next();
-        forward(topicId, new TopicForwardNot(messages, false));
+        Channel.sendTo(topicId, new TopicForwardNot(messages, false));
 
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG,
-                     "Messages " + "forwarded to fellow " + topicId.toString());
+        if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Messages "
+                                        + "forwarded to fellow "
+                                        + topicId.toString());
       } 
-    } else if (fatherId != null) {
-      forward(fatherId, new TopicForwardNot(messages, true));
+    }
+    else if (fatherId != null) {
+      Channel.sendTo(fatherId, new TopicForwardNot(messages, true));
 
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,
-                   "Messages " + "forwarded to father " + fatherId.toString());
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG, "Messages "
+                                      + "forwarded to father "
+                                      + fatherId.toString());
     }
   }
 
@@ -787,7 +892,8 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    * valid subscriptions by sending a <code>TopicMsgsReply</code> notification
    * to the valid subscribers.
    */
-  protected void processMessages(ClientMessages not) {
+  protected void processMessages(ClientMessages not)
+  {
     Vector messages = not.getMessages();
     AgentId subscriber;
     boolean local;
@@ -800,39 +906,40 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     setNoSave();
     boolean persistent = false;
 
+    // Browsing the subscribers.
     for (Enumeration subs = subscribers.elements(); subs.hasMoreElements();) {
-      // Browsing the subscribers.
       subscriber = (AgentId) subs.nextElement();
       local = (subscriber.getTo() == AgentServer.getServerId());
       selector = (String) selectors.get(subscriber);
 
+      // Current subscriber does not filter messages: all messages will be
+      // sent.
       if (selector == null || selector.equals("")) {
-        // Current subscriber does not filter messages: all messages
-        // will be sent.
+        // Subscriber not local, or no other sending occured locally: directly
+        // sending the messages.
         if (! local) {
-          // Subscriber not local, or no other sending occurred locally:
-          // directly sending the messages.
           deliverables = messages;
           persistent = true;
         } else if (! alreadySentLocally) {
           deliverables = messages;
           alreadySentLocally = true;
         }
-        // A local sending already occurred: cloning the messages.
+        // A local sending already occured: cloning the messages.
         else {
           deliverables = new Vector();
           for (Enumeration msgs = messages.elements(); msgs.hasMoreElements();)
             deliverables.add(((Message) msgs.nextElement()).clone());
         }
-      } else {
-        // Current subscriber filters messages; sending the matching messages.
+      }
+      // Current subscriber filters messages; sending the matching messages.
+      else {
         deliverables = new Vector();
         for (int i = 0; i < messages.size(); i++) {
           message = (Message) messages.get(i);
-
+        
           if (Selector.matches(message, selector)) {
 
-            // Subscriber not local, or no other sending occurred locally:
+            // Subscriber not local, or no other sending occured locally:
             // directly sending the message.
             if (! local) {
               deliverables.add(message);
@@ -841,7 +948,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
               deliverables.add(message);
               alreadySentLocally = true;
             }
-            // A local sending already occurred: cloning the message.
+            // A local sending already occured: cloning the message.
             else 
               deliverables.add(message.clone());
           }
@@ -851,27 +958,9 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
       if (! deliverables.isEmpty()) {
         TopicMsgsReply topicMsgsReply = new TopicMsgsReply(deliverables);
         topicMsgsReply.setPersistent(persistent);
-        setDmq(topicMsgsReply); 
-        forward(subscriber, topicMsgsReply);
+        Channel.sendTo(subscriber, topicMsgsReply);
         nbMsgsDeliverSinceCreation = nbMsgsDeliverSinceCreation + deliverables.size();
       }
     }
-  }
-
-  private void setDmq(TopicMsgsReply not) {
-    // Setting the producer's DMQ identifier field:
-    if (dmqId != null) {
-      not.setDMQId(dmqId);
-    } else {
-      not.setDMQId(QueueImpl.getDefaultDMQId());
-    }
-  }
-
-  public void setAlreadySentLocally(boolean alreadySentLocally) {
-    this.alreadySentLocally = alreadySentLocally;
-  }
-
-  public long getNbMsgsReceiveSinceCreation() {
-    return nbMsgsReceiveSinceCreation;
   }
 }

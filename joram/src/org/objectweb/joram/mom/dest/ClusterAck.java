@@ -33,10 +33,6 @@ import org.objectweb.joram.mom.notifications.ClusterRequest;
  */
 class ClusterAck extends Notification
 {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /** The originial client request. */
   ClusterRequest request;
   /** The original requester. */

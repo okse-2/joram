@@ -30,10 +30,8 @@ import java.util.Vector;
  * A <code>DenyRequest</code> instance is used by a client agent
  * for denying one or many messages on a queue.
  */
-public class DenyRequest extends AbstractRequest {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-  
+public class DenyRequest extends AbstractRequest
+{
   /** Message identifier. */
   private String msgId = null;
   /** Vector of message identifiers. */
@@ -56,11 +54,12 @@ public class DenyRequest extends AbstractRequest {
   /**
    * Constructs an <code>DenyRequest</code> instance.
    *
-   * @param clientContext Identifies a client context.
-   * @param requestId     Request identifier.
-   * @param msgId         Message identifier.
+   * @param clientContext  Identifies a client context.
+   * @param requestId  Request identifier.
+   * @param msgIds  Message identifier.
    */
-  public DenyRequest(int clientContext, int requestId, String msgId) {
+  public DenyRequest(int clientContext, int requestId, String msgId)
+  {
     super(clientContext, requestId);
     this.msgId = msgId;
   }
@@ -70,13 +69,15 @@ public class DenyRequest extends AbstractRequest {
    *
    * @param clientContext  Identifies a client context.
    */
-  public DenyRequest(int clientContext) {
+  public DenyRequest(int clientContext)
+  {
     super(clientContext, -1);
   }
 
 
   /** Returns the denied messages' identifiers. */
-  public Enumeration getIds() {
+  public Enumeration getIds()
+  {
     if (msgIds == null) {
       msgIds = new Vector();
       if (msgId != null)

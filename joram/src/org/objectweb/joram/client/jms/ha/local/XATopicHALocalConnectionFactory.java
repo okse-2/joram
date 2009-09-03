@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
- * Copyright (C) 2004 Bull SA
+ * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,60 +18,91 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent Distributed Technologies
+ * Initial developer(s): David Feliot (ScalAgent DT)
  */
 package org.objectweb.joram.client.jms.ha.local;
 
-import javax.jms.JMSException;
+import org.objectweb.joram.client.jms.XAConnection;
+import org.objectweb.joram.client.jms.XATopicConnection;
+import org.objectweb.joram.client.jms.Connection;
+import org.objectweb.joram.client.jms.TopicConnection;
 
-import org.objectweb.joram.client.jms.ConnectionFactory;
-import org.objectweb.joram.client.jms.FactoryParameters;
-import org.objectweb.joram.client.jms.XATopicConnectionFactory;
-import org.objectweb.joram.client.jms.connection.RequestChannel;
-import org.objectweb.joram.shared.security.Identity;
+import javax.naming.NamingException;
 
 /**
  * An <code>XATopicHALocalConnectionFactory</code> instance is a factory of
  * local connections for XA Pub/Sub HA communication.
- *  
- * @deprecated Replaced next to Joram 5.2.1 by {@link HALocalConnectionFactory}.
  */
-public class XATopicHALocalConnectionFactory extends XATopicConnectionFactory {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
+public class XATopicHALocalConnectionFactory
+    extends org.objectweb.joram.client.jms.XATopicConnectionFactory
+{
   /**
    * Constructs an <code>XATopicLocalConnectionFactory</code> instance.
-   * Should only be used for internal purposes.
    */
-  public XATopicHALocalConnectionFactory() {
-    super("localhost", -1);
+  public XATopicHALocalConnectionFactory()
+  {
+    super("", -1);
   }
 
   /**
-   * Creates the <code>HALocalRequestChannel</code> object needed to connect to the
-   * colocated HA server.
-   * 
-   * @param params          Connection configuration parameters.
-   * @param identity        Client's identity.
-   * @param reliableClass   The protocol specific class.
-   * @return                The <code>RequestChannel</code> object specific to the protocol used.
-   * 
-   * @exception JMSException  A problem occurs during the connection.
-   * 
-   * @see ConnectionFactory#createRequestChannel(FactoryParameters, Identity, String)
+   * Method inherited from the <code>XATopicConnectionFactory</code> class..
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  protected RequestChannel createRequestChannel(FactoryParameters params,
-                                                Identity identity,
-                                                String reliableClass) throws JMSException {
-    return new HALocalRequestChannel(identity);
+  public javax.jms.XATopicConnection
+      createXATopicConnection(String name, String password)
+    throws javax.jms.JMSException
+  {
+    HALocalConnection lc = new HALocalConnection(name, password);
+    return new XATopicConnection(params, lc);
   }
+
+  /**
+   * Method inherited from the <code>XAConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   */
+  public javax.jms.XAConnection
+      createXAConnection(String name, String password)
+    throws javax.jms.JMSException
+  {
+    HALocalConnection lc = new HALocalConnection(name, password);
+    return new XAConnection(params, lc);
+  }
+
+  /**
+   * Method inherited from the <code>TopicConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   */
+  public javax.jms.TopicConnection
+      createTopicConnection(String name, String password)
+    throws javax.jms.JMSException
+  {
+    HALocalConnection lc = new HALocalConnection(name, password);
+    return new TopicConnection(params, lc);
+  }
+
+  /**
+   * Method inherited from the <code>ConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.Connection createConnection(String name, String password)
+    throws javax.jms.JMSException
+  {
+    HALocalConnection lc = new HALocalConnection(name, password);
+    return new Connection(params, lc);
+  }
+
 
   /**
    * Admin method creating a <code>javax.jms.XATopicConnectionFactory</code>
    * instance for creating local connections.
    */ 
-  public static javax.jms.XATopicConnectionFactory create() {
+  public static javax.jms.XATopicConnectionFactory create()
+  {
     return new XATopicHALocalConnectionFactory();
   }
 }

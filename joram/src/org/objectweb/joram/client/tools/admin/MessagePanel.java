@@ -22,16 +22,13 @@
 package org.objectweb.joram.client.tools.admin;
 
 import java.awt.*;
+import java.awt.event.*;
 import javax.swing.*;
 import java.util.*;
 
 import javax.jms.*;
 
 public class MessagePanel extends JPanel {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private JTextArea msgDisplay;
 
   public MessagePanel() {

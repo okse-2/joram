@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,69 +19,26 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Contributor(s):
  */
 package org.objectweb.joram.shared.client;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
+import java.util.Vector;
+import java.util.Hashtable;
+import java.util.Enumeration;
 
 /**
  * A <code>ConsumerDenyRequest</code> instance is used by a
  * <code>MessageConsumer</code> for denying a received message.
  */
-public final class ConsumerDenyRequest extends AbstractJmsRequest {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
+public class ConsumerDenyRequest extends AbstractJmsRequest
+{
   /** Message identifier. */
   private String id;
-
-  /** Sets the denied message identifier. */
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  /** Returns the denied message identifier. */
-  public String getId() {
-    return id;
-  }
-
   /** <code>true</code> if the request is destinated to a queue. */
   private boolean queueMode;
-
-  /** Sets the target destination type. */
-  public void setQueueMode(boolean queueMode) {
-    this.queueMode = queueMode;
-  }
-
-  /** Returns <code>true</code> if the request is destinated to a queue. */
-  public boolean getQueueMode() {
-    return queueMode;
-  }
-
   /** <code>true</code> if the request must not be acked by the server. */
   private boolean doNotAck = false;
-
-  /** Sets the server ack policy. */
-  public void setDoNotAck(boolean doNotAck) {
-    this.doNotAck = doNotAck;
-  }
-
-  /**
-   * Returns <code>true</code> if the request must not be acked by the 
-   * server.
-   */
-  public boolean getDoNotAck() {
-    return doNotAck;
-  }
-
-  protected int getClassId() {
-    return CONSUMER_DENY_REQUEST;
-  }
 
   /**
    * Constructs a <code>ConsumerDenyRequest</code> instance.
@@ -91,7 +48,8 @@ public final class ConsumerDenyRequest extends AbstractJmsRequest {
    * @param queueMode  <code>true</code> if this request is destinated to
    *          a queue.
    */
-  public ConsumerDenyRequest(String targetName, String id, boolean queueMode) {
+  public ConsumerDenyRequest(String targetName, String id, boolean queueMode)
+  {
     super(targetName);
     this.id = id;
     this.queueMode = queueMode;
@@ -108,7 +66,8 @@ public final class ConsumerDenyRequest extends AbstractJmsRequest {
    *          the server.
    */
   public ConsumerDenyRequest(String targetName, String id, boolean queueMode,
-                             boolean doNotAck) {
+                             boolean doNotAck)
+  {
     super(targetName);
     this.id = id;
     this.queueMode = queueMode;
@@ -118,35 +77,64 @@ public final class ConsumerDenyRequest extends AbstractJmsRequest {
   /**
    * Constructs a <code>ConsumerDenyRequest</code> instance.
    */
-  public ConsumerDenyRequest() {}
+  public ConsumerDenyRequest()
+  {}
 
-  /* ***** ***** ***** ***** *****
-   * Streamable interface
-   * ***** ***** ***** ***** ***** */
+  /** Sets the denied message identifier. */
+  public void setId(String id)
+  {
+    this.id = id;
+  }
 
-  /**
-   *  The object implements the writeTo method to write its contents to
-   * the output stream.
-   *
-   * @param os the stream to write the object to
-   */
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    StreamUtil.writeTo(id, os);
-    StreamUtil.writeTo(queueMode, os);
-    StreamUtil.writeTo(doNotAck, os);
+  /** Sets the target destination type. */
+  public void setQueueMode(boolean queueMode)
+  {
+    this.queueMode = queueMode;
+  }
+
+  /** Sets the server ack policy. */
+  public void setDoNotAck(boolean doNotAck)
+  {
+    this.doNotAck = doNotAck;
+  }
+
+  /** Returns the denied message identifier. */
+  public String getId()
+  {
+    return id;
+  }
+
+  /** Returns <code>true</code> if the request is destinated to a queue. */
+  public boolean getQueueMode()
+  {
+    return queueMode;
   }
 
   /**
-   *  The object implements the readFrom method to restore its contents from
-   * the input stream.
-   *
-   * @param is the stream to read data from in order to restore the object
+   * Returns <code>true</code> if the request must not be acked by the 
+   * server.
    */
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    id = StreamUtil.readStringFrom(is);
-    queueMode = StreamUtil.readBooleanFrom(is);
-    doNotAck = StreamUtil.readBooleanFrom(is);
+  public boolean getDoNotAck()
+  {
+    return doNotAck;
+  }
+
+  public Hashtable soapCode() {
+    Hashtable h = super.soapCode();
+    if (id != null)
+      h.put("id",id);
+    h.put("queueMode",new Boolean(queueMode));
+    h.put("doNotAck",new Boolean(doNotAck));
+    return h;
+  }
+
+  public static Object soapDecode(Hashtable h) {
+    ConsumerDenyRequest req = new ConsumerDenyRequest();
+    req.setRequestId(((Integer) h.get("requestId")).intValue());
+    req.setTarget((String) h.get("target"));
+    req.setId((String) h.get("id"));
+    req.setQueueMode(((Boolean) h.get("queueMode")).booleanValue());
+    req.setDoNotAck(((Boolean) h.get("doNotAck")).booleanValue());
+    return req;
   }
 }

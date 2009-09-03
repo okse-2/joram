@@ -31,11 +31,6 @@ package org.objectweb.joram.client.jms.admin;
 public class AdminException extends Exception
 {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
    * Constructs an <code>AdminException</code> instance.
    *
    * @param info  Information about the exception.

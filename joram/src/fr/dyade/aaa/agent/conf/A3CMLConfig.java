@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,25 +18,19 @@
  */
 package fr.dyade.aaa.agent.conf;
 
-import java.io.ByteArrayInputStream;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
+import java.io.*;
+import java.util.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
+import fr.dyade.aaa.util.Transaction;
+import fr.dyade.aaa.agent.Debug;
 import fr.dyade.aaa.agent.AgentServer;
 
 public class A3CMLConfig implements Serializable {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
+  /** use serialVersionUID for interoperability */
+  private static final long serialVersionUID = -2497621374376654935L;
 
   /** Hashtable of all domains */
   public Hashtable domains = null;
@@ -422,13 +416,13 @@ public class A3CMLConfig implements Serializable {
     A3CMLProperty prop = null;
     if (cid == AgentServer.NULL_ID) {
       A3CMLServer server = getServer(sid);
-      prop = server.getProperty(name);
+      prop = (A3CMLProperty) server.getProperty(name);
     } else {
       A3CMLCluster cluster = getCluster(sid);
       A3CMLServer server = cluster.getServer(cid);
-      prop = server.getProperty(name);
+      prop = (A3CMLProperty) server.getProperty(name);
       if (prop == null)
-        prop = cluster.getProperty(name);
+        prop = (A3CMLProperty) cluster.getProperty(name);
     }
     return prop;
   }
@@ -510,7 +504,7 @@ public class A3CMLConfig implements Serializable {
 
     // Temporary fix, reset visited and gateway fields
     reset();
-
+    
     // Search alls directly accessible domains.
     for (Enumeration n = root.networks.elements(); n.hasMoreElements();) {
       A3CMLNetwork network = (A3CMLNetwork)  n.nextElement();
@@ -523,7 +517,7 @@ public class A3CMLConfig implements Serializable {
       Log.logger.log(BasicLevel.DEBUG,
                      "configure - toExplore.add(" + domain + ")");
     }
-
+    
     root.visited = true;
     root.gateway = -1;
     root.hops = 0;
@@ -539,8 +533,8 @@ public class A3CMLConfig implements Serializable {
 
       // Parse all nodes of this domain
       for (Enumeration s = domain.servers.elements();
-      s.hasMoreElements();) {
-        A3CMLServer server = (A3CMLServer) s.nextElement();
+	   s.hasMoreElements();) {
+	A3CMLServer server = (A3CMLServer) s.nextElement();
 
         if (server.visited) continue;
 
@@ -561,7 +555,7 @@ public class A3CMLConfig implements Serializable {
         // If the server is a router then add the accessible domains
         // to the list.
         for (Enumeration n = server.networks.elements();
-        n.hasMoreElements();) {
+             n.hasMoreElements();) {
           A3CMLNetwork network = (A3CMLNetwork)  n.nextElement();
           A3CMLDomain d2 = (A3CMLDomain) domains.get(network.domain);
 
@@ -574,7 +568,7 @@ public class A3CMLConfig implements Serializable {
             // The server is directly accessible from root server by
             // this network interface; fixes the communication port
             // for this server.
-
+            
             // AF 03/11/2004 - It seems in fact the domain is the one we are
             // exploring, so if the server is directly accessible its listen
             // port is the one of this network...
@@ -584,12 +578,12 @@ public class A3CMLConfig implements Serializable {
 
           // If the domain is already explored then there is more
           // than one route to this domain.
-
+          
           //if (d2.gateway != -1)
           // throw new Exception("more than one route to: " + domain);
-
+            
           // if (d2.hops != -1)
-          //             throw new Exception("more than one route to: " + domain);
+//             throw new Exception("more than one route to: " + domain);
           d2.hops = domain.hops +1;
 
           // The domain is not already explored.
@@ -610,8 +604,8 @@ public class A3CMLConfig implements Serializable {
       A3CMLServer server = (A3CMLServer) s.nextElement();
       if (Log.logger.isLoggable(BasicLevel.DEBUG))
         Log.logger.log(BasicLevel.DEBUG, "configure - verify " + server);
-      if (! server.visited)
-        throw new Exception(server + " inaccessible");
+        if (! server.visited)
+          throw new Exception(server + " inaccessible");
     }
 
     // Search alls directly accessible domains, then set special routes
@@ -642,6 +636,7 @@ public class A3CMLConfig implements Serializable {
         }
       }
     }
+
   }
 
   /**
@@ -676,7 +671,7 @@ public class A3CMLConfig implements Serializable {
     // add global properties in domainConf.
     for (Enumeration p = properties.elements(); p.hasMoreElements(); ) {
       A3CMLProperty property = (A3CMLProperty) p.nextElement();
-      domainConf.addProperty(property.duplicate());
+      domainConf.addProperty(((A3CMLProperty) property).duplicate());
     }
 
     try {
@@ -684,7 +679,7 @@ public class A3CMLConfig implements Serializable {
       // add domain "ADMIN_DOMAIN" in domainConf.
       A3CMLDomain d0 = getDomain(AgentServer.ADMIN_DOMAIN);
       domainConf.addDomain(new A3CMLDomain(d0.name,d0.network));
-      A3CMLServer s0 = domainConf.getServer(AgentServer.getServerId());
+      A3CMLServer s0 = (A3CMLServer) domainConf.getServer(AgentServer.getServerId());
       d0 = domainConf.getDomain(AgentServer.ADMIN_DOMAIN);
       d0.addServer(s0);
       for (int i = 0; i < s0.networks.size(); ) {
@@ -753,7 +748,7 @@ public class A3CMLConfig implements Serializable {
     // add global properties in domainConf.
     for (Enumeration p = properties.elements(); p.hasMoreElements(); ) {
       A3CMLProperty property = (A3CMLProperty) p.nextElement();
-      domainConf.addProperty(property.duplicate());
+      domainConf.addProperty(((A3CMLProperty) property).duplicate());
     }
     
     try {
@@ -761,7 +756,7 @@ public class A3CMLConfig implements Serializable {
       // add domain "ADMIN_DOMAIN" in domainConf.
       A3CMLDomain d0 = getDomain(AgentServer.ADMIN_DOMAIN);
       domainConf.addDomain(new A3CMLDomain(d0.name,d0.network));
-      A3CMLServer s0 = domainConf.getServer(AgentServer.getServerId());
+      A3CMLServer s0 = (A3CMLServer) domainConf.getServer(AgentServer.getServerId());
       d0 = domainConf.getDomain(AgentServer.ADMIN_DOMAIN);
       d0.addServer(s0);
       for (int i = 0; i < s0.networks.size(); ) {
@@ -795,30 +790,20 @@ public class A3CMLConfig implements Serializable {
   }
     
   /**
-   * read object from a serialized file.
+   * read object from a serialized file,
+   * in cfgDir if null, search object in 
+   * path used to load classes
    *
+   * @param cfgDir        read obj in this directory
+   * @param cfgFileName   serialized file name
    * @exception           Exception
    */
-//  public static A3CMLConfig load(File dir) throws Exception {
   public static A3CMLConfig load() throws Exception {
+    // Get the logging monitor from current server MonoLog.loggeritorFactory
     if (Log.logger.isLoggable(BasicLevel.DEBUG))
       Log.logger.log(BasicLevel.DEBUG, "Config.load()");
     
     A3CMLConfig a3config = (A3CMLConfig) AgentServer.getTransaction().load(AgentServer.DEFAULT_SER_CFG_FILE);
-        
-//    File file;
-//    file = new File(dir, AgentServer.DEFAULT_SER_CFG_FILE);
-//    FileInputStream fis = new FileInputStream(file);
-//    byte[] buf = new byte[(int) file.length()];
-//    for (int nb = 0; nb < buf.length;) {
-//      int ret = fis.read(buf, nb, buf.length - nb);
-//      if (ret == -1)
-//        throw new EOFException();
-//      nb += ret;
-//    }
-//    fis.close();
-//    ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(buf));
-//    A3CMLConfig a3config = (A3CMLConfig) ois.readObject();
 
     if (a3config == null) {
       Log.logger.log(BasicLevel.WARN,
@@ -832,7 +817,7 @@ public class A3CMLConfig implements Serializable {
   }
 
   /**
-   * Gets a <code>A3CMLConfig</code> serialized object from file.
+   * Gets a <code>A3CMLConfig</code> serialialized object from file.
    *
    * @param path   path of serialized configuration file
    * @return	   the <code>A3CMLConfig</code> object if file exists and is
@@ -842,6 +827,7 @@ public class A3CMLConfig implements Serializable {
    *	unspecialized exception when reading and parsing the configuration file
    */
   public static A3CMLConfig getConfig(String path) throws Exception {
+    // Get the logging monitor from current server MonoLog.loggeritorFactory
     if (Log.logger.isLoggable(BasicLevel.DEBUG))
       Log.logger.log(BasicLevel.DEBUG, "Config.load(" + path + ")");
     

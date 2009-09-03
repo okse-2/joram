@@ -32,10 +32,6 @@ package fr.dyade.aaa.agent;
  */
 public class UnknownNotification extends Notification {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /** The target agent id. */
   public AgentId agent;
   /** The failing notification. */

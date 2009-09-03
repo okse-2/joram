@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -22,49 +22,19 @@
  */
 package fr.dyade.aaa.jndi2.server;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.util.*;
+import java.io.*;
+import javax.naming.*;
 
-import javax.naming.Binding;
-import javax.naming.NameClassPair;
-import javax.naming.NamingException;
+import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.jndi2.impl.*; 
+import fr.dyade.aaa.jndi2.msg.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.agent.Notification;
-import fr.dyade.aaa.jndi2.impl.MissingContextException;
-import fr.dyade.aaa.jndi2.impl.MissingRecordException;
-import fr.dyade.aaa.jndi2.impl.NotOwnerException;
-import fr.dyade.aaa.jndi2.impl.ObjectRecord;
-import fr.dyade.aaa.jndi2.impl.Record;
-import fr.dyade.aaa.jndi2.impl.ServerImpl;
-import fr.dyade.aaa.jndi2.msg.BindRequest;
-import fr.dyade.aaa.jndi2.msg.ChangeOwnerRequest;
-import fr.dyade.aaa.jndi2.msg.CreateSubcontextRequest;
-import fr.dyade.aaa.jndi2.msg.DestroySubcontextRequest;
-import fr.dyade.aaa.jndi2.msg.JndiAdminRequest;
-import fr.dyade.aaa.jndi2.msg.JndiError;
-import fr.dyade.aaa.jndi2.msg.JndiReadRequest;
-import fr.dyade.aaa.jndi2.msg.JndiReply;
-import fr.dyade.aaa.jndi2.msg.JndiRequest;
-import fr.dyade.aaa.jndi2.msg.ListBindingsReply;
-import fr.dyade.aaa.jndi2.msg.ListBindingsRequest;
-import fr.dyade.aaa.jndi2.msg.ListReply;
-import fr.dyade.aaa.jndi2.msg.ListRequest;
-import fr.dyade.aaa.jndi2.msg.LookupReply;
-import fr.dyade.aaa.jndi2.msg.LookupRequest;
-import fr.dyade.aaa.jndi2.msg.UnbindRequest;
-
-public class RequestManager implements LifeCycleListener, Serializable {
-
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
+public class RequestManager 
+    implements LifeCycleListener, java.io.Serializable {
 
   private Container container;
 
@@ -99,7 +69,8 @@ public class RequestManager implements LifeCycleListener, Serializable {
   public void agentFinalize(boolean lastTime) {}
 
   /**
-   * Returns the root naming context owner identifier.
+   * Returns the root naming context owner
+   * identifier.
    * May be overridden by a subclass.
    */
   protected AgentId getRootOwnerId() {
@@ -172,7 +143,8 @@ public class RequestManager implements LifeCycleListener, Serializable {
     throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
-                       "RequestManager.invokeWriteRequest(" + reqCtx + ',' + ')');
+                       "RequestManager.invokeWriteRequest(" + 
+                       reqCtx + ',' + ')');
     try {
       JndiRequest request = reqCtx.getRequest();
       JndiReply reply;
@@ -216,7 +188,8 @@ public class RequestManager implements LifeCycleListener, Serializable {
     }
   }
 
-  private void bind(BindRequest request) throws NamingException {
+  private void bind(BindRequest request) 
+    throws NamingException {
     if (request.isRebind()) {
       impl.rebind(
         request.getName(), 
@@ -228,36 +201,43 @@ public class RequestManager implements LifeCycleListener, Serializable {
     } 
   }
 
-  private void unbind(UnbindRequest request) throws NamingException {
+  private void unbind(UnbindRequest request) 
+    throws NamingException {
     impl.unbind(request.getName());
   }
 
-  private Record lookup(LookupRequest request) throws NamingException {
+  private Record lookup(LookupRequest request) 
+    throws NamingException {
     return impl.lookup(request.getName());
   }
 
-  private NameClassPair[] list(ListRequest request) throws NamingException {
+  private NameClassPair[] list(ListRequest request) 
+    throws NamingException {
     return impl.list(request.getName());
   }
 
-  private Binding[] listBindings(ListBindingsRequest request) throws NamingException {
+  private Binding[] listBindings(ListBindingsRequest request) 
+    throws NamingException {
     return impl.listBindings(request.getName());
   }
 
-  protected void createSubcontext(CreateSubcontextRequest request) throws NamingException {
+  protected void createSubcontext(CreateSubcontextRequest request) 
+    throws NamingException {
     impl.createSubcontext(
       request.getName());
   }
 
-  private void destroySubcontext(DestroySubcontextRequest request) throws NamingException {
+  private void destroySubcontext(DestroySubcontextRequest request)
+    throws NamingException {
     impl.destroySubcontext(
       request.getName());
   }
 
-  protected void changeOwner(ChangeOwnerRequest request) throws NamingException {
-    AgentId newOwnerId;
+  protected void changeOwner(ChangeOwnerRequest request)
+    throws NamingException {
+    AgentId serverId;
     try {
-      newOwnerId =
+      serverId =
         AgentId.fromString(request.getOwnerId());
     } catch (Exception exc) {
       NamingException ne = 
@@ -265,9 +245,9 @@ public class RequestManager implements LifeCycleListener, Serializable {
       ne.setRootCause(exc);
       throw ne;
     }
-    if (getId().equals(newOwnerId))
+    if (getId().equals(serverId))
       throw new NamingException("Server already owner");
-    impl.changeOwner(request.getName(), newOwnerId);
+    impl.changeOwner(serverId);
   }
 
   /**

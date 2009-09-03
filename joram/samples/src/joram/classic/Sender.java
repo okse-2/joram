@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,10 +29,13 @@ import javax.naming.*;
 /**
  * Sends messages on the queue.
  */
-public class Sender {
+public class Sender
+{
   static Context ictx = null; 
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws Exception
+  {
+    System.out.println();
     System.out.println("Sends messages on the queue...");
 
     ictx = new InitialContext();
@@ -40,18 +43,21 @@ public class Sender {
     QueueConnectionFactory qcf = (QueueConnectionFactory) ictx.lookup("qcf");
     ictx.close();
 
-    QueueConnection cnx = qcf.createQueueConnection();
-    QueueSession session = cnx.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
-    QueueSender sender = session.createSender(queue);
-    
-    for (int i = 0; i < 10; i++) {
-      TextMessage msg = session.createTextMessage();
+    QueueConnection qc = qcf.createQueueConnection();
+    QueueSession qs = qc.createQueueSession(true, 0);
+    QueueSender qsend = qs.createSender(queue);
+    TextMessage msg = qs.createTextMessage();
+
+    int i;
+    for (i = 0; i < 10; i++) {
       msg.setText("Test number " + i);
-      sender.send(msg);
+      qsend.send(msg);
     }
 
-    System.out.println("10 messages sent.");
+    qs.commit();
 
-    cnx.close();
+    System.out.println(i + " messages sent.");
+
+    qc.close();
   }
 }

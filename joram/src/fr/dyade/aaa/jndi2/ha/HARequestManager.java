@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,28 +21,21 @@
  */
 package fr.dyade.aaa.jndi2.ha;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Hashtable;
+import java.util.*;
+import java.io.*;
+
+import javax.naming.*;
+
+import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.jndi2.server.*;
+import fr.dyade.aaa.jndi2.msg.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-
-import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.agent.BagSerializer;
-import fr.dyade.aaa.jndi2.msg.JndiReply;
-import fr.dyade.aaa.jndi2.server.LifeCycleListener;
-import fr.dyade.aaa.jndi2.server.RequestManager;
-import fr.dyade.aaa.jndi2.server.TcpRequestNot;
-import fr.dyade.aaa.jndi2.server.Trace;
+import org.objectweb.util.monolog.api.Logger;
 
 public class HARequestManager 
     implements LifeCycleListener, BagSerializer, java.io.Serializable {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   public static final int IDEMPOTENT = -2;
   public static final int NOT_IDEMPOTENT = -1;
 

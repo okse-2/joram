@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,9 @@
 package fr.dyade.aaa.agent;
 
 import java.util.Enumeration;
+
+import fr.dyade.aaa.util.*;
+import fr.dyade.aaa.agent.conf.*;
 
 public class SCServer implements SCServerMBean {
   public SCServer() {

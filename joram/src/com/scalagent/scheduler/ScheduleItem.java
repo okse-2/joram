@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,40 +23,44 @@ package com.scalagent.scheduler;
 
 import java.io.*;
 import java.util.*;
+import fr.dyade.aaa.agent.*;
+
 
 /**
  * Implements a double linked list of <code>ScheduleEvent</code> objects.
  * Both ends are marked with a <code>null</code> value. Events are ordered in
  * increasing order of dates.
+ * <p>
+ * The <code>status</code> field associated with the <code>ScheduleEvent</code>
+ * is used by the <code>Scheduler</code> agent, and is set to <code>true</code>
+ * when the <code>true</code> <code>Condition</code> notification has been sent
+ * and the <code>Scheduler</code> agent waits for the duration to expire before
+ * sending the <code>false</code> condition and resetting the field.
  *
  * @see		Scheduler
  * @see		ScheduleEvent
  */
 public class ScheduleItem implements Serializable {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-  
   /** may be of a derived class */
   ScheduleEvent event;
   /** next schedule date */
   Date date;
+  /** last sent condition status */
+  boolean status;
   /** previous item, null terminated */
   ScheduleItem prev;
   /** next item, null terminated */
   ScheduleItem next;
-  /** the schedule task */
-  ScheduleTask task;
 
   /**
    * Creates an item.
    *
-   * @param event	event to schedule.
-   * @param task task to execute.
+   * @param event	event to schedule
    */
-  public ScheduleItem(ScheduleEvent event, ScheduleTask task) {
+  public ScheduleItem(ScheduleEvent event) {
     this.event = event;
-    this.task = task;
     date = null;
+    status = false;
     prev = null;
     next = null;
   }
@@ -72,10 +76,10 @@ public class ScheduleItem implements Serializable {
     for (ScheduleItem item = this; item != null; item = item.next) {
       output.append("(event=");
       output.append(item.event.toString());
-      output.append(",task=");
-      output.append(item.task.toString());
       output.append(",date=");
       output.append(item.date);
+      output.append(",status=");
+      output.append(item.status);
       output.append("),");
     }
     output.append("null)");

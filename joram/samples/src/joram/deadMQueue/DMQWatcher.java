@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,47 +19,42 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Contributor(s):
  */
 package deadMQueue;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.MessageConsumer;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-import javax.naming.Context;
-import javax.naming.InitialContext;
+import javax.jms.*;
+import javax.naming.*;
 
 /**
  * Listens to the dead message queues.
  */
-public class DMQWatcher {
-  public static void main(String[] args) throws Exception {
-    System.out.println("Listens to the dead message queue...");
+public class DMQWatcher
+{
+  static Context ictx = null; 
 
-    Context ictx = new InitialContext();
-    Queue dmq = (Queue) ictx.lookup("dmq");
-    ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cf");
+  public static void main(String[] args) throws Exception
+  {
+    System.out.println();
+    System.out.println("Listens to the dead message queues...");
+
+    ictx = new InitialContext();
+    Queue userDmq = (Queue) ictx.lookup("userDmq");
+    Queue destDmq = (Queue) ictx.lookup("destDmq");
+    ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cnxFact");
     ictx.close();
 
-    Connection cnx = cf.createConnection("anonymous", "anonymous");
+    Connection cnx = cf.createConnection("dmq", "dmq");
 
-    Session session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-    MessageConsumer consumer = session.createConsumer(dmq);
+    Session session = cnx.createSession(true, 0);
+    MessageConsumer userWatcher = session.createConsumer(userDmq);
+    MessageConsumer destWatcher = session.createConsumer(destDmq);
+    userWatcher.setMessageListener(new DMQListener("User DMQ"));
+    destWatcher.setMessageListener(new DMQListener("Dest DMQ"));
 
     cnx.start();
-    
-    for (int i=0; i<3; i++) {
-      TextMessage msg = (TextMessage) consumer.receive();
-      System.out.println("\nreceives: " + msg.getText());
-      System.out.println("JMS_JORAM_ERRORCOUNT=" + msg.getIntProperty("JMS_JORAM_ERRORCOUNT"));
-      System.out.println("JMSXDeliveryCount=" + msg.getIntProperty("JMSXDeliveryCount"));
-      System.out.println("JMS_JORAM_ERRORCAUSE_1=" + msg.getStringProperty("JMS_JORAM_ERRORCAUSE_1"));
-      System.out.println("JMS_JORAM_ERRORCODE_1=" + msg.getStringProperty("JMS_JORAM_ERRORCODE_1"));
-    }
 
+    System.in.read();
     cnx.close();
   }
 }

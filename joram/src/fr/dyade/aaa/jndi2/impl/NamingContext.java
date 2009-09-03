@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,52 +23,27 @@
  */
 package fr.dyade.aaa.jndi2.impl;
 
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Vector;
-
-import javax.naming.Binding;
-import javax.naming.CompositeName;
-import javax.naming.Context;
-import javax.naming.InvalidNameException;
-import javax.naming.NameClassPair;
-import javax.naming.NamingException;
-import javax.naming.Reference;
+import fr.dyade.aaa.util.*;
+import java.util.*;
+import java.io.*;
+import javax.naming.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.Channel;
-import fr.dyade.aaa.common.Strings;
-import fr.dyade.aaa.jndi2.msg.ChangeOwnerRequest;
-import fr.dyade.aaa.jndi2.msg.CreateSubcontextRequest;
-import fr.dyade.aaa.jndi2.msg.DestroySubcontextRequest;
-import fr.dyade.aaa.jndi2.msg.JndiRequest;
-import fr.dyade.aaa.jndi2.msg.UnbindRequest;
-import fr.dyade.aaa.jndi2.server.JndiScriptRequestNot;
-
-public class NamingContext implements NamingContextMBean, Serializable, Cloneable {
-
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
+public class NamingContext implements Serializable, Cloneable {
 
   private NamingContextId id;
 
   private Object ownerId;
 
   private Vector records;
-  
-  private CompositeName contextName;
 
   public NamingContext(NamingContextId id,
-                       Object ownerId,
-                       CompositeName contextName) {
+                       Object ownerId) {
     this.id = id;
     this.ownerId = ownerId;
     records = new Vector();
-    this.contextName = contextName;
   }
 
   public final NamingContextId getId() {
@@ -91,8 +66,8 @@ public class NamingContext implements NamingContextMBean, Serializable, Cloneabl
     return null;
   } 
   
-  public Enumeration getEnumRecord() {
-    Vector elt=new Vector();
+ public Enumeration getEnumRecord() {
+     Vector elt=new Vector();
     for (int i = 0; i < records.size(); i++) {
       Record r = (Record)records.elementAt(i);
       elt.add(r);
@@ -101,10 +76,10 @@ public class NamingContext implements NamingContextMBean, Serializable, Cloneabl
   } 
 
   public void addRecord(Record record) {
-    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG,"\nadd record : "+record +
-          " vector record : " + records +"\n");
-    records.addElement(record);
+      if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+	  Trace.logger.log(BasicLevel.DEBUG,"\n\nadd record : "+record +
+			   " vector record : "+records +"\n\n");
+      records.addElement(record);
   }
 
   public boolean removeRecord(String name) {
@@ -190,76 +165,9 @@ public class NamingContext implements NamingContextMBean, Serializable, Cloneabl
     buf.append('(' + super.toString());
     buf.append(",id=" + id);
     buf.append(",ownerId=" + ownerId);
-    buf.append(",name=" + contextName);
     buf.append(",records=");
     Strings.toString(buf, records);
     buf.append(')');
     return buf.toString();
   }
-
-  public CompositeName getContextName() {
-    return contextName;  
-  }
-  
-  // ======== MBean implementation ===========
-  public String[] getNamingContext() {
-    String[] array = new String[records.size()];
-     for (int i=0; i < records.size(); i++) {
-      Record r = (Record)records.elementAt(i);
-      if (r instanceof ObjectRecord) 
-        array[i] = r.getName();
-      else
-        array[i] = "(javax.naming.Context)- " + r.getName();
-    }
-    return array;    
-  }
-  
-  public String getStrOwnerId() {
-    return ownerId.toString();
-  }
-
-  public void setStrOwnerId(String strOwnerId) {
-    if (!strOwnerId.equals(ownerId.toString()))
-      sendTo(new ChangeOwnerRequest((CompositeName) contextName.clone(), strOwnerId));
-  }
-
-  public void createSubcontext(String ctxName) throws NamingException {
-    CompositeName cn = (CompositeName) contextName.clone();
-    if (contextName != null)
-      cn.add(ctxName);
-    else
-      cn = getCompositeName(ctxName);
-    sendTo(new CreateSubcontextRequest(cn));
-  }
-
-  public void destroySubcontext() throws NamingException {
-    sendTo(new DestroySubcontextRequest(contextName));
-  }
-
-  public String lookup(String name) throws NamingException {
-    Record rec = getRecord(name);
-    if (rec != null)
-      return rec.toString();
-    return null;
-  }
-
-  public void unbind(String name) throws NamingException {
-    CompositeName cn = (CompositeName) contextName.clone();
-    if (contextName != null)
-      cn.add(name);
-    else
-      cn = getCompositeName(name);
-    sendTo(new UnbindRequest(cn));
-  }
-  
-  private CompositeName getCompositeName(String path) throws InvalidNameException {
-    if (path.startsWith("/"))
-      return new CompositeName(path.substring(1, path.length()));
-    return new CompositeName(path);
-  }
-  
-  private void sendTo(JndiRequest request) {
-    Channel.sendTo((AgentId)ownerId, new JndiScriptRequestNot(new JndiRequest[]{request}));
-  }
-  // ======== end MBean implementation ===========
 }

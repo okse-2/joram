@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -23,18 +23,16 @@
  */
 package org.objectweb.joram.mom.dest;
 
-import java.util.Properties;
+import java.util.*;
 
-import org.objectweb.joram.mom.notifications.AckJoinQueueCluster;
-import org.objectweb.joram.mom.notifications.JoinQueueCluster;
-import org.objectweb.joram.mom.notifications.LBCycleLife;
-import org.objectweb.joram.mom.notifications.LBMessageGive;
-import org.objectweb.joram.mom.notifications.LBMessageHope;
-import org.objectweb.joram.mom.notifications.LeaveQueueCluster;
-import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.mom.dest.Queue;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.Notification;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.mom.MomTracing;
 
 /**
  * A <code>ClusterQueue</code> agent is an agent hosting a MOM queue, and which
@@ -43,9 +41,6 @@ import fr.dyade.aaa.agent.Notification;
  * @see ClusterQueueImpl
  */
 public class ClusterQueue extends Queue {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
   /**
    * Empty constructor for newInstance(). 
    */ 
@@ -58,35 +53,7 @@ public class ClusterQueue extends Queue {
    * @param prop     The initial set of properties.
    */
   public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
-    ClusterQueueImpl queueImpl = new ClusterQueueImpl(adminId, prop);
+    ClusterQueueImpl queueImpl = new ClusterQueueImpl(getId(), adminId, prop);
     return queueImpl;
-  }
-  
-  /**
-   * Distributes the received notifications to the appropriate reactions.
-   * @throws Exception 
-   */
-  public void react(AgentId from, Notification not)
-    throws Exception {
-
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "--- " + this + " react(" + from + "," + not + ")");
-
-    if (not instanceof AckJoinQueueCluster)
-      ((ClusterQueueImpl) destImpl).ackJoinQueueCluster((AckJoinQueueCluster) not);
-    else if (not instanceof JoinQueueCluster)
-      ((ClusterQueueImpl) destImpl).joinQueueCluster((JoinQueueCluster) not);
-    else if (not instanceof LeaveQueueCluster)
-      ((ClusterQueueImpl) destImpl).removeQueueCluster(((LeaveQueueCluster) not).removeQueue);
-    else if (not instanceof LBMessageGive)
-      ((ClusterQueueImpl) destImpl).lBMessageGive(from, (LBMessageGive) not);
-    else if (not instanceof LBMessageHope)
-      ((ClusterQueueImpl) destImpl).lBMessageHope(from, (LBMessageHope) not);
-    else if (not instanceof LBCycleLife)
-      ((ClusterQueueImpl) destImpl).lBCycleLife(from, (LBCycleLife) not);
-    else {
-      super.react(from, not);
-    }
   }
 }

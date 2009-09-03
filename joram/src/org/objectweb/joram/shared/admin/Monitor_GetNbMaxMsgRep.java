@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,19 +22,13 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 
 /**
  * A <code>Monitor_GetNbMaxMsgRep</code> instance replies to a get NbMaxMsg,
  * monitoring request.
  */
 public class Monitor_GetNbMaxMsgRep extends Monitor_Reply {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 4583933031253199342L;
 
   /** nbMaxMsg value (-1 no limit).*/
   private int nbMaxMsg;
@@ -46,24 +40,8 @@ public class Monitor_GetNbMaxMsgRep extends Monitor_Reply {
     this.nbMaxMsg = nbMaxMsg;
   }
   
-  public Monitor_GetNbMaxMsgRep() { }
-  
   /** Returns the nbMaxMsg value. */
   public int getNbMaxMsg() {
     return nbMaxMsg;
-  }
-  
-  protected int getClassId() {
-    return MONITOR_GET_NB_MAX_MSG_REP;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    nbMaxMsg = StreamUtil.readIntFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    StreamUtil.writeTo(nbMaxMsg, os);
   }
 }

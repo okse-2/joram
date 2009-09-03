@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,14 +22,8 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 public class GetDomainNames extends AdminRequest {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = -2057860375696581227L;
 
   private int serverId;
 
@@ -37,21 +31,7 @@ public class GetDomainNames extends AdminRequest {
     this.serverId = serverId;
   }
 
-  public GetDomainNames() { }
-  
   public final int getServerId() {
     return serverId;
-  }
-  
-  protected int getClassId() {
-    return GET_DOMAIN_NAMES;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    serverId = StreamUtil.readIntFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    StreamUtil.writeTo(serverId, os);
   }
 }

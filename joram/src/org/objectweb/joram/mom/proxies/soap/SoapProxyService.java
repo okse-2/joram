@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2004 France Telecom R&D
+ * Copyright (C) 2003 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - France Telecom R&D
  * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -24,26 +24,20 @@
  */
 package org.objectweb.joram.mom.proxies.soap;
 
-import java.util.Hashtable;
-
-import org.objectweb.joram.mom.dest.AdminTopic;
-import org.objectweb.joram.mom.notifications.GetProxyIdNot;
-import org.objectweb.joram.mom.proxies.ConnectionManager;
-import org.objectweb.joram.mom.proxies.OpenConnectionNot;
-import org.objectweb.joram.mom.proxies.StandardConnectionContext;
-import org.objectweb.joram.shared.client.AbstractJmsMessage;
-import org.objectweb.joram.shared.client.AbstractJmsReply;
-import org.objectweb.joram.shared.client.AbstractJmsRequest;
-import org.objectweb.joram.shared.client.CnxCloseReply;
-import org.objectweb.joram.shared.excepts.StateException;
-import org.objectweb.joram.shared.security.Identity;
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.common.Debug;
-import fr.dyade.aaa.common.Queue;
+import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.util.Queue;
+import org.objectweb.joram.mom.MomTracing;
+import org.objectweb.joram.mom.proxies.*;
+import org.objectweb.joram.shared.client.*;
+import org.objectweb.joram.shared.excepts.*;
+import org.objectweb.joram.mom.notifications.*;
+
+import java.util.*;
+import java.lang.reflect.*;
+
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * The <code>SoapProxyService</code> class implements the SOAP service
@@ -52,13 +46,11 @@ import fr.dyade.aaa.common.Queue;
  * <p>
  */
 public class SoapProxyService {
-  /** logger */
-  public static Logger logger = Debug.getLogger(SoapProxyService.class.getName());
 
   private Hashtable connections;
 
   /**
-   * Service method: called by the SOAP client for instantiating the SOAP
+   * Service method: called by the SOAP client for instanciating the SOAP
    * service and starting the embedded JORAM server.
    *
    * @param serverId  Identifier of the embedded server.
@@ -66,45 +58,58 @@ public class SoapProxyService {
    *
    * @exception Exception  If the embedded server could not start.
    */
-  public void start(int serverId, String serverName) throws Exception {
+  public void start(int serverId, String serverName) throws Exception
+  {
     String[] args = {"" + serverId, serverName};
     AgentServer.init(args);
     AgentServer.start();
 
     connections = new Hashtable();
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "SoapProxyService started.");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "SoapProxyService started.");
   }
 
   /**
    * Service method: returns the identifier of a given user connection, 
    * or -1 if it is not a valid user of the SOAP proxy.
    *
-   * @param identityMap Map of the user Identity.
+   * @param userName User's name.
+   * @param userPassword User's password.
    * @param heartBeat
    * @return connection identifier
    * @exception Exception  If the proxy is not deployed.
    */
-  public int setConnection(Hashtable identityMap, 
-                           int heartBeat) throws Exception {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "SoapProxyService.setConnection(" + identityMap + ',' + heartBeat + ')');
+  public int setConnection(String userName, 
+                           String userPassword, 
+                           int heartBeat)
+    throws Exception
+  {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, "SoapProxyService.setConnection(" + 
+        userName + ',' + 
+        userPassword + ',' + 
+        heartBeat + ')');
 
-    Identity identity = (Identity) Identity.soapDecode(identityMap);
-    
-    GetProxyIdNot gpin = new GetProxyIdNot(identity, null);
+    GetProxyIdNot gpin = new GetProxyIdNot(userName, userPassword, null);
     AgentId proxyId;
-    gpin.invoke(AdminTopic.getDefault());
+    gpin.invoke(new AgentId(AgentServer.getServerId(),
+                            AgentServer.getServerId(),
+                            AgentId.JoramAdminStamp));
     proxyId = gpin.getProxyId();
     
-    OpenConnectionNot ocn = new OpenConnectionNot(false, heartBeat);	
+    OpenConnectionNot ocn = new OpenConnectionNot(
+      false, heartBeat);	
     ocn.invoke(proxyId);
 
-    StandardConnectionContext cc = (StandardConnectionContext) ocn.getConnectionContext();
-    ProxyConnectionContext pcc = new ProxyConnectionContext(proxyId, cc.getQueue());
-    connections.put(new ConnectionKey(identity.getUserName(), cc.getKey()), pcc);
+    StandardConnectionContext cc = 
+      (StandardConnectionContext)ocn.getConnectionContext();
+    ProxyConnectionContext pcc = new ProxyConnectionContext(
+      proxyId,
+      (Queue)cc.getQueue());
+    connections.put(new ConnectionKey(
+      userName, cc.getKey()), pcc);
     
     return cc.getKey();
   }
@@ -119,22 +124,36 @@ public class SoapProxyService {
    *
    * @exception Exception  If the connection has been closed.
    */
-  public void send(String name, int cnxId, java.util.Hashtable h) throws Exception {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "SoapProxyService.send(" + name + ',' + cnxId + ',' + h + ')');
+  public void send(String name, int cnxId, java.util.Hashtable h) throws Exception
+  {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, "SoapProxyService.send(" + 
+        name + ',' + cnxId + ',' + h + ')');
 
-    AbstractJmsRequest request = (AbstractJmsRequest) AbstractJmsMessage.soapDecode(h);
+    String className = (String) h.get("className");
+    Class clazz = Class.forName(className);
+    Class [] classParam = { new Hashtable().getClass() };
+    Method m = clazz.getMethod("soapDecode",classParam);
+    AbstractJmsRequest request = 
+      (AbstractJmsRequest) m.invoke(null,new Object[]{h});
     
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "--- " + this + " forwards request " + request + " with id " + request.getRequestId());
-
-    ProxyConnectionContext ctx = (ProxyConnectionContext) connections.get(new ConnectionKey(name, cnxId));
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "--- " + this
+                              + " passes request " + request + " with id "
+                              + request.getRequestId() + " to proxy's cnx "
+                              + cnxId);
+    ProxyConnectionContext ctx = 
+      (ProxyConnectionContext)connections.get(
+        new ConnectionKey(name, cnxId));
     if (ctx == null) {
       throw new StateException("Connection " + name + ':' + cnxId + " closed.");
     } else {
-      ConnectionManager.sendToProxy(ctx.proxyId, cnxId, request, request);
+      ConnectionManager.sendToProxy(
+          ctx.proxyId,
+          cnxId,
+          request, 
+          request);
     }
   }
 
@@ -147,9 +166,11 @@ public class SoapProxyService {
    *
    * @exception Exception  If the connection has been closed.
    */
-  public java.util.Hashtable getReply(String name, int cnxId) throws Exception {
+  public java.util.Hashtable getReply(String name, int cnxId) throws Exception
+  {
     ConnectionKey ckey = new ConnectionKey(name, cnxId);
-    ProxyConnectionContext ctx = (ProxyConnectionContext) connections.get(ckey);
+    ProxyConnectionContext ctx = 
+      (ProxyConnectionContext)connections.get(ckey);
     if (ctx == null) {
       throw new StateException("Connection " + name + ':' + cnxId + " closed.");
     } else {
@@ -158,7 +179,8 @@ public class SoapProxyService {
         connections.remove(ckey);
         throw (Exception)obj;
       } else {
-        AbstractJmsReply reply = (AbstractJmsReply) obj;
+        AbstractJmsReply reply = 
+          (AbstractJmsReply)obj;
         ctx.replyQueue.pop();
         if (reply instanceof CnxCloseReply) {
           connections.remove(ckey);
@@ -172,7 +194,8 @@ public class SoapProxyService {
     private String userName;
     private int key;
 
-    public ConnectionKey(String userName, int key) {
+    public ConnectionKey(String userName,
+                         int key) {
       this.userName = userName;
       this.key = key;
     }

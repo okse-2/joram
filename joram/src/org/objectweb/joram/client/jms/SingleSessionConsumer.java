@@ -27,6 +27,7 @@ import javax.jms.MessageListener;
 
 import org.objectweb.joram.client.jms.connection.RequestMultiplexer;
 import org.objectweb.joram.shared.client.ConsumerMessages;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  *

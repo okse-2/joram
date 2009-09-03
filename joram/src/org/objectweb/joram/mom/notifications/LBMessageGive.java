@@ -27,10 +27,6 @@ import org.objectweb.joram.mom.notifications.ClientMessages;
 
 public class LBMessageGive extends LBLoadingFactor {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private ClientMessages clientMessages;
 
   public LBMessageGive(long validityPeriode,

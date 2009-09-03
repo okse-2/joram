@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,8 @@
 package fr.dyade.aaa.util;
 
 import java.io.File;
+import java.io.ByteArrayInputStream;
+import java.io.ObjectInputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 
@@ -35,13 +37,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- *  This class allows to use a database through JDBC as repository with the
- * NTransaction module.
- *
- * @see NTransaction
- * @see Repository
- */
 final class DBRepository implements Repository {
   String driver = "org.apache.derby.jdbc.EmbeddedDriver";
   String connurl = "jdbc:derby:";
@@ -203,24 +198,24 @@ final class DBRepository implements Repository {
     nbsaved += 1;
   }
 
-//   /**
-//    * Loads the object.
-//    *
-//    * @return The loaded object or null if it does not exist.
-//    */
-//   public Object loadobj(String dirName, String name) throws IOException, ClassNotFoundException {
-//     byte[] content = load(dirName, name); 
+  /**
+   * Loads the object.
+   *
+   * @return The loaded object or null if it does not exist.
+   */
+  public Object loadobj(String dirName, String name) throws IOException, ClassNotFoundException {
+    byte[] content = load(dirName, name); 
 
-//     ByteArrayInputStream bis = new ByteArrayInputStream(content);
-//     ObjectInputStream ois = new ObjectInputStream(bis);
-//     try {
-//       Object obj = ois.readObject();
-//       return obj;
-//     } finally {
-//       ois.close();
-//       bis.close();
-//     }
-//   }
+    ByteArrayInputStream bis = new ByteArrayInputStream(content);
+    ObjectInputStream ois = new ObjectInputStream(bis);
+    try {
+      Object obj = ois.readObject();
+      return obj;
+    } finally {
+      ois.close();
+      bis.close();
+    }
+  }
 
   /**
    * Loads the byte array.

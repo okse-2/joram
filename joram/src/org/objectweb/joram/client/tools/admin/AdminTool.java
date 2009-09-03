@@ -21,63 +21,26 @@
  */
 package org.objectweb.joram.client.tools.admin;
 
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.event.*;
+import javax.swing.tree.*;
+import javax.jms.*;
+import java.util.List;
+import java.util.Iterator;
 import java.net.ConnectException;
 
-import javax.jms.Message;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.JEditorPane;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTree;
-import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
-import javax.swing.event.TreeModelEvent;
-import javax.swing.event.TreeModelListener;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.DefaultTreeSelectionModel;
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeNode;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
-
+import org.objectweb.joram.client.jms.admin.*;
+import org.objectweb.joram.client.jms.tcp.*;
 import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.client.jms.admin.AdminException;
-import org.objectweb.joram.client.jms.admin.Subscription;
-import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.client.jms.Topic;
+
+import org.objectweb.util.monolog.api.*;
 
 public class AdminTool extends JFrame
     implements ControllerEventListener
 {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   private static AdminTool adminTool = null;
 
   private final AdminController c;
@@ -487,17 +450,22 @@ public class AdminTool extends JFrame
         SubscriptionRootTreeNode subRootTn = 
           (SubscriptionRootTreeNode)subTn.getParent();
         UserTreeNode userTn = (UserTreeNode)subRootTn.getParent();
-//         ServerTreeNode serverTn = userTn.getParentServerTreeNode();
-//         subscriptionPanel.setSubscription(subtn.getSubscription());
+        ServerTreeNode serverTn = userTn.getParentServerTreeNode();
+        // subscriptionPanel.setSubscription(subtn.getSubscription());
 //         subscriptionPanel.setServerId(serverTn.getServerId());
 //         subscriptionPanel.setUserName(userTn.getUserName());
 //         subscriptionPanel.loadMessageIds();
 //         ((CardLayout) editPanel.getLayout()).show(editPanel, "subscription");
         if (subTn.getChildCount() == 0) {
-          String[] ids = userTn.getUser().getMessageIds(subTn.getSubscription().getName());
+          String[] ids = userTn.getUser().getMessageIds(
+            subTn.getSubscription().getName());
           for (int i = 0; i < ids.length; i++) {
-            MessageTreeNode msgNode = new MessageTreeNode(c, ids[i]);
-            c.getAdminTreeModel().insertNodeInto(msgNode, subTn, subTn.getChildCount());
+            MessageTreeNode msgNode = new MessageTreeNode(
+              c, ids[i]);
+            c.getAdminTreeModel().insertNodeInto(
+              msgNode, 
+              subTn,
+              subTn.getChildCount());
           }
         }
       } else if (selection instanceof MessageTreeNode) {
@@ -511,14 +479,17 @@ public class AdminTool extends JFrame
           SubscriptionRootTreeNode subRootTn = 
             (SubscriptionRootTreeNode)subTn.getParent();
           UserTreeNode userTn = (UserTreeNode)subRootTn.getParent();
-//        ServerTreeNode serverTn = userTn.getParentServerTreeNode();
-          msg = userTn.getUser().getMessage(subTn.getSubscription().getName(), msgTn.getMessageId());
+          ServerTreeNode serverTn = userTn.getParentServerTreeNode();
+          msg = userTn.getUser().readMessage(
+            subTn.getSubscription().getName(), 
+            msgTn.getMessageId());
         } else {
           MessageRootTreeNode msgRootTn = 
             (MessageRootTreeNode)parentTn;
           QueueTreeNode queueTn = 
             (QueueTreeNode)msgRootTn.getParent();
-          msg = queueTn.getQueue().getMessage(msgTn.getMessageId());
+          msg = queueTn.getQueue().readMessage(
+            msgTn.getMessageId());
         }
         messagePanel.setMessage(msg);
         ((CardLayout) editPanel.getLayout()).show(editPanel, "message");
@@ -564,11 +535,6 @@ public class AdminTool extends JFrame
 
   private class JndiConnectAction extends AbstractAction
   {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public JndiConnectAction()
       {
         super("Connect...");
@@ -607,11 +573,6 @@ public class AdminTool extends JFrame
 
   private class JndiDisconnectAction extends AbstractAction
   {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public JndiDisconnectAction()
       {
         super("Disconnect");
@@ -642,11 +603,6 @@ public class AdminTool extends JFrame
 
   private class JndiRefreshAction extends AbstractAction
   {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public JndiRefreshAction()
       {
         super("Refresh", AdminToolConstants.refreshIcon);
@@ -666,11 +622,6 @@ public class AdminTool extends JFrame
 
   private class JndiCreateFactoryAction extends AbstractAction
   {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public JndiCreateFactoryAction()
       {
         super("Create Connection Factory...");
@@ -693,11 +644,6 @@ public class AdminTool extends JFrame
 
   private class AdminConnectAction extends AbstractAction
   {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public AdminConnectAction()
       {
         super("Connect...");
@@ -740,11 +686,6 @@ public class AdminTool extends JFrame
 
   private class AdminDisconnectAction extends AbstractAction
   {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public AdminDisconnectAction()
       {
         super("Disconnect");
@@ -775,11 +716,6 @@ public class AdminTool extends JFrame
 
   private class AdminRefreshAction extends AbstractAction
   {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public AdminRefreshAction()
       {
         super("Refresh", AdminToolConstants.refreshIcon);
@@ -797,11 +733,6 @@ public class AdminTool extends JFrame
 
   private class ExitAction extends AbstractAction
   {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public ExitAction() { super("Exit"); }
     
     public void actionPerformed(ActionEvent e)
@@ -812,11 +743,6 @@ public class AdminTool extends JFrame
 
   private class ConfigTreeCellRenderer extends DefaultTreeCellRenderer
   {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public ConfigTreeCellRenderer() {
       super();
       setClosedIcon(AdminToolConstants.collapsedIcon);

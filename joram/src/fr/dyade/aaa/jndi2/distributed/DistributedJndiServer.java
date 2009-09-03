@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,20 +21,21 @@
  */
 package fr.dyade.aaa.jndi2.distributed;
 
-import java.net.ServerSocket;
-import java.util.StringTokenizer;
-import java.util.Vector;
+import java.io.*;
+import java.util.*;
+import java.net.*;
+import javax.naming.*;
+
+import fr.dyade.aaa.jndi2.msg.*;
+import fr.dyade.aaa.jndi2.impl.*;
+import fr.dyade.aaa.jndi2.server.*;
+import fr.dyade.aaa.jndi2.server.Trace;
+import fr.dyade.aaa.util.*;
+import fr.dyade.aaa.agent.*;
+//import fr.dyade.aaa.agent.conf.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-
-import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.jndi2.server.AgentEntryPoint;
-import fr.dyade.aaa.jndi2.server.Container;
-import fr.dyade.aaa.jndi2.server.JndiServer;
-import fr.dyade.aaa.jndi2.server.TcpEntryPoint;
-import fr.dyade.aaa.jndi2.server.TcpServer;
-import fr.dyade.aaa.jndi2.server.Trace;
+import org.objectweb.util.monolog.api.Logger;
 
 /**
  * Class of a JNDI server that belongs to a distributed JNDI
@@ -71,11 +72,11 @@ public class DistributedJndiServer {
     // if the socket can't be created (even if firstTime is false).
     ServerSocket serverSocket = new ServerSocket(port);
 
-    int poolSize = AgentServer.getInteger(
+    int poolSize = Integer.getInteger(
       JndiServer.POOL_SIZE_PROP, 
       JndiServer.DEFAULT_POOL_SIZE).intValue();
 
-    int timeout = AgentServer.getInteger(
+    int timeout = Integer.getInteger(
       JndiServer.SO_TIMEOUT_PROP,
       JndiServer.DEFAULT_SO_TIMEOUT).intValue();
 

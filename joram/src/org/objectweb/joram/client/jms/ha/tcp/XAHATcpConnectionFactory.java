@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -20,62 +20,41 @@
  *
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): Benoit Pelletier (Bull SA)
- *                 Nicolas Tachker (ScalAgent DT)
  */
 package org.objectweb.joram.client.jms.ha.tcp;
 
-import javax.jms.JMSException;
-
-import org.objectweb.joram.client.jms.ConnectionFactory;
-import org.objectweb.joram.client.jms.FactoryParameters;
-import org.objectweb.joram.client.jms.connection.RequestChannel;
-import org.objectweb.joram.shared.security.Identity;
+import org.objectweb.joram.client.jms.*;
 
 /**
- * An <code>XAHATcpConnectionFactory</code> instance is a factory of XA
- * connections over TCP to HA server.
- *  
- * @deprecated Replaced next to Joram 5.2.1 by {@link HATcpConnectionFactory}.
+ * An <code>XAHATcpConnectionFactory</code> instance is a factory of
+ * tcp connections dedicated to XA HA communication.
  */
-public class XAHATcpConnectionFactory extends org.objectweb.joram.client.jms.XAConnectionFactory {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
+public class XAHATcpConnectionFactory
+  extends org.objectweb.joram.client.jms.XAConnectionFactory {
 
   /**
    * Constructs an <code>XAHATcpConnectionFactory</code> instance.
-   * Needed by ObjectFactory, should only be used for internal purposes.
    */
-  public XAHATcpConnectionFactory() {
-    super();
-  }
-
-  /**
-   * Constructs an <code>XAHATcpConnectionFactory</code> instance.
-   * 
-   * @param url The Joram HA URL.
-   */
-  private XAHATcpConnectionFactory(String url) {
+  public XAHATcpConnectionFactory(String url) {
     super(url);
   }
 
-  /**
-   * Creates the <code>HATcpRequestChannel</code> object needed to connect to the
-   * remote HA server.
-   * 
-   * @param params          Connection configuration parameters.
-   * @param identity        Client's identity.
-   * @param reliableClass   The protocol specific class.
-   * @return                The <code>RequestChannel</code> object specific to the protocol used.
-   * 
-   * @exception JMSException  A problem occurs during the connection.
-   * 
-   * @see ConnectionFactory#createRequestChannel(FactoryParameters, Identity, String)
-   */
-  protected RequestChannel createRequestChannel(FactoryParameters params,
-                                                Identity identity,
-                                                String reliableClass) throws JMSException {
-    return new HATcpRequestChannel(params.getUrl(), params, identity, reliableClass);
+  public XAHATcpConnectionFactory() {
+	  super();
   }
+
+  /**
+   * Method inherited from the <code>XAConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   */
+  public javax.jms.XAConnection
+      createXAConnection(String name, String password)
+    throws javax.jms.JMSException {
+      HATcpConnection lc = new HATcpConnection(
+        params.getUrl(), params, name, password, reliableClass);
+      return new XAConnection(params, lc);
+    }
 
   /**
    * Admin method creating a <code>javax.jms.XAConnectionFactory</code>
@@ -94,7 +73,8 @@ public class XAHATcpConnectionFactory extends org.objectweb.joram.client.jms.XAC
    * @param url URL of the HA Joram server
    * @param reliableClass  Reliable class name.
    */
-  public static javax.jms.XAConnectionFactory create(String url, String reliableClass) {
+  public static javax.jms.XAConnectionFactory
+      create(String url, String reliableClass) {
     XAHATcpConnectionFactory cf = new XAHATcpConnectionFactory(url);
     cf.setReliableClass(reliableClass);
     return cf;

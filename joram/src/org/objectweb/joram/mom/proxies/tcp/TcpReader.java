@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
- * Copyright (C) 2004 France Telecom R&D
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,26 +25,26 @@ package org.objectweb.joram.mom.proxies.tcp;
 
 import java.io.IOException;
 
+import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.joram.mom.proxies.CloseConnectionNot;
 import org.objectweb.joram.mom.proxies.ConnectionManager;
+import org.objectweb.joram.mom.proxies.FlowControl;
+import org.objectweb.joram.mom.proxies.MultiCnxSync;
 import org.objectweb.joram.mom.proxies.ProxyMessage;
+import org.objectweb.joram.mom.proxies.RequestNot;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
-
+import org.objectweb.joram.shared.client.ProducerMessages;
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Channel;
-import fr.dyade.aaa.common.Daemon;
-import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.util.Daemon;
 
 /**
  * The activity responsible for reading the requests from the socket and invoke
  * the user's proxy.
  */
 public class TcpReader extends Daemon {
-  /** logger */
-  public static Logger logger = Debug.getLogger(TcpReader.class.getName());
 
   /**
    * The TCP connection that started this reader.
@@ -59,11 +59,16 @@ public class TcpReader extends Daemon {
 
   /**
    * Creates a new reader.
+   * 
+   * @param sock
+   *          the socket to read
+   * @param userConnection
+   *          the connection with the user's proxy
+   * @param tcpConnection
+   *          the TCP connection
    */
-  public TcpReader(IOControl ioctrl,
-                   AgentId proxyId,
-                   TcpConnection tcpConnection,
-                   boolean closeConnection) throws IOException {
+  public TcpReader(IOControl ioctrl, AgentId proxyId,
+      TcpConnection tcpConnection, boolean closeConnection) throws IOException {
     super("tcpReader");
     this.ioctrl = ioctrl;
     this.proxyId = proxyId;
@@ -72,24 +77,26 @@ public class TcpReader extends Daemon {
   }
 
   public void run() {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "TcpReader.run()");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpReader.run()");
     try {
       while (running) {
         ProxyMessage msg = ioctrl.receive();
         canStop = false;
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "TcpReader reads msg: " + msg);
-        ConnectionManager.sendToProxy(proxyId,
-                                      tcpConnection.getKey(),
-                                      (AbstractJmsRequest)msg.getObject(), 
-                                      msg);
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpReader reads msg: "
+              + msg);
+        ConnectionManager.sendToProxy(
+            proxyId,
+            tcpConnection.getKey(),
+            (AbstractJmsRequest)msg.getObject(), 
+            msg);
         canStop = true;
       }
     } catch (Throwable error) {
       canStop = false;
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "", error);
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", error);
     } finally {
       canStop = false;
       if (closeConnection) {
@@ -109,8 +116,8 @@ public class TcpReader extends Daemon {
   }
 
   protected void close() {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "TcpReader.close()");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, "TcpReader.close()");
     if (ioctrl != null)
       ioctrl.close();
     ioctrl = null;

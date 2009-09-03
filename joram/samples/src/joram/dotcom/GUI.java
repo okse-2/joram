@@ -76,7 +76,7 @@ class GUI {
   JButton closeButton ;
   
   /** 
-   * Creates a GUI used to order items (instantiated by WebOrdering).
+   * Creates a GUI used to order items (instanciated by WebOrdering).
    *
    * @param title		title of the frame
    * @param ser			calling thread
@@ -191,7 +191,7 @@ class GUI {
   
   /** 
    * Creates a GUI used to validate incoming OrderMessages 
-   * (instantiated by CustomerTreatment, StockTreatment, ControlTreatment).
+   * (instanciated by CustomerTreatment, StockTreatment, ControlTreatment).
    *
    * @param title		title of the frame
    * @param okBut		label of okButton
@@ -258,7 +258,7 @@ class GUI {
   
   /** 
    * Creates a GUI used to display a message reception 
-   * (instantiated by CustomerTreatement, DeliveryTreatement).
+   * (instanciated by CustomerTreatement, DeliveryTreatement).
    *
    * @param title		title of the frame
    * @param info		info to display
@@ -352,7 +352,7 @@ class GUI {
  * @see		WebServer
  */
 class RadioButtonListener implements ActionListener {
-  /** Thread instantiating the GUI. */
+  /** Thread instanciating the GUI. */
   Servers server ;
 
   /**

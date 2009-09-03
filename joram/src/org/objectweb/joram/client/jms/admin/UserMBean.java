@@ -22,9 +22,10 @@
  */
 package org.objectweb.joram.client.jms.admin;
 
+import org.objectweb.joram.client.jms.Message;
+import org.objectweb.joram.client.jms.admin.Subscription;
 import java.net.ConnectException;
-import java.util.Properties;
-
+import java.util.List;
 import javax.jms.JMSException;
 
 public interface UserMBean {
@@ -42,9 +43,9 @@ public interface UserMBean {
     throws ConnectException, AdminException;
 
   /**
-   * Admin method setting a given dead message queue Id for this user.
+   * Admin method setting a given dead message queue for this user.
    */
-  public void setDMQId(String dmqId)
+  public void setDMQ(DeadMQueue dmq)
     throws ConnectException, AdminException;
 
   /**
@@ -60,9 +61,9 @@ public interface UserMBean {
     throws ConnectException, AdminException;
 
   /** 
-   * Returns the dead message queue Id for this user, null if not set.
+   * Returns the dead message queue for this user, null if not set.
    */
-  public String getDMQId()
+  public DeadMQueue getDMQ()
     throws ConnectException, AdminException;
 
   /** 
@@ -74,6 +75,9 @@ public interface UserMBean {
   /**
    * Returns the subscriptions owned by a user.
    */
+  public List getSubscriptionList() 
+    throws ConnectException, AdminException;
+
   public Subscription[] getSubscriptions()
     throws AdminException, ConnectException;
 
@@ -89,14 +93,8 @@ public interface UserMBean {
   public String[] getMessageIds(String subName)
     throws ConnectException, AdminException;
 
-  public String getMessageDigest(String subName,
-                                 String msgId) throws AdminException, ConnectException, JMSException;
-
-  public Properties getMessageHeader(String subName,
-                                     String msgId) throws ConnectException, AdminException, JMSException;
-
-  public Properties getMessageProperties(String subName,
-                                         String msgId) throws ConnectException, AdminException, JMSException;
+  public Message readMessage(String subName, String msgId)
+    throws AdminException, ConnectException, JMSException;
 
   public void deleteMessage(String subName, String msgId)
     throws AdminException, ConnectException;

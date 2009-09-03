@@ -33,10 +33,6 @@ import fr.dyade.aaa.agent.AgentId;
  */
 public class SetDMQRequest extends AdminRequest
 {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /** The dead message queue identifier, <code>null</code> for no DMQ. */
   private AgentId dmqId;
 

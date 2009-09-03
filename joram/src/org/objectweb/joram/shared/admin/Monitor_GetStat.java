@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,18 +22,12 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 /**
  * A <code>Monitor_GetStat</code> instance requests the
  * statistic of the destination.
  */
 public class Monitor_GetStat extends Monitor_Request {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = -4556399140524209310L;
 
   /** Identifier of the destination. */
   private String destId;
@@ -47,24 +41,8 @@ public class Monitor_GetStat extends Monitor_Request {
     this.destId = destId;
   }
 
-  public Monitor_GetStat() { }
-  
   /** Returns the identifier of the destination. */
   public String getDest() {
     return destId;
-  }
-  
-  protected int getClassId() {
-    return MONITOR_GET_STAT;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    destId = StreamUtil.readStringFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    StreamUtil.writeTo(destId, os);
   }
 }

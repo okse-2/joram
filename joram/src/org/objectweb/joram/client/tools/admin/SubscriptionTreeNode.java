@@ -21,23 +21,14 @@
  */
 package org.objectweb.joram.client.tools.admin;
 
-import javax.swing.AbstractAction;
-import javax.swing.ImageIcon;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPopupMenu;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
+import java.util.*;
+import javax.swing.*;
+import javax.swing.tree.*;
 
-import org.objectweb.joram.client.jms.admin.Subscription;
+import org.objectweb.joram.client.jms.admin.*;
 
 class SubscriptionTreeNode extends DefaultMutableTreeNode
     implements AdminTreeNode {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   private AdminController c;
   
   private Subscription sub;
@@ -105,11 +96,6 @@ class SubscriptionTreeNode extends DefaultMutableTreeNode
 
   
   private class ClearSubscriptionAction extends AbstractAction {
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
 
     public ClearSubscriptionAction() {
       super("Clear", AdminToolConstants.trashIcon);

@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,30 +19,28 @@
  * USA.
  *
  * Initial developer(s): Sofiane Chibani
- * Contributor(s): ScalAgent Distributed Technologies
+ * Contributor(s): David Feliot, Nicolas Tachker
  */
 package fr.dyade.aaa.jndi2.client;
 
-import java.util.Hashtable;
-import java.util.StringTokenizer;
-
-import javax.naming.CompositeName;
-import javax.naming.Context;
-import javax.naming.NamingException;
-import javax.naming.spi.InitialContextFactory;
+import javax.naming.spi.*;
+import javax.naming.*;
+import java.util.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 public class NamingContextFactory implements InitialContextFactory {
+
   /**
-   * Name of the property which defines the listener port used when
-   * creating an initial context using this factory.
+   *  This property which defines the listener port must be passed
+   *  when creating an initial context using this factory.
    */
   public final static String JAVA_PORT_PROPERTY = "java.naming.factory.port";
 
   /**
-   * Name of the property which defines the host name used when
-   * creating an initial context using this factory.
+   *  This property which defines the host name must be passed
+   *  when creating an initial context using this factory.
    */
   public final static String JAVA_HOST_PROPERTY = "java.naming.factory.host";
 
@@ -71,67 +69,59 @@ public class NamingContextFactory implements InitialContextFactory {
    * aren't strings, if the port string does not represent a valid number, 
    * or if an exception is thrown from the NamingContext constructor.
    */
-  public Context getInitialContext(Hashtable env) throws NamingException {
+  public Context getInitialContext(Hashtable env)
+    throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, 
-                       "NamingContextFactory.getInitialContext(" + env + ')');
-
-    return new NamingContextImpl(getNamingConnection(env), 
-                                 new CompositeName());    
+      Trace.logger.log(
+        BasicLevel.DEBUG, 
+        "NamingContextFactory.getInitialContext(" + env + ')');
+    return new fr.dyade.aaa.jndi2.client.NamingContextImpl(
+      getNamingConnection(env), 
+      new CompositeName());    
   }
 
-  public static NamingConnection getNamingConnection(Hashtable env) throws NamingException {
+  public static NamingConnection getNamingConnection(
+    Hashtable env) 
+    throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, 
-                       "NamingContextFactory.getNamingConnection(" + env + ')');
-
+      Trace.logger.log(
+        BasicLevel.DEBUG, 
+        "NamingContextFactory.getNamingConnection(" + env + ')'); 
     try {
-      String host;
-      int port;
-      
+      NamingConnection namingConnection;
       // The URL format is scn://host:port
       String url = (String) env.get(SCN_PROVIDER_URL);
-      if (url == null)
-        url = (String) env.get(Context.PROVIDER_URL);
+      if (url == null) url = (String) env.get(Context.PROVIDER_URL);
       if (url != null && !url.equals("")) {
         StringTokenizer tokenizer = new StringTokenizer(url, "/:,");
         if (! tokenizer.hasMoreElements()) 
           throw new NamingException("URL not valid:" + url);
         String protocol = tokenizer.nextToken();        
         if (protocol.equals("scn")) {
-          host = tokenizer.nextToken();
+          String host = tokenizer.nextToken();
           String portStr = tokenizer.nextToken();
-          port = Integer.parseInt(portStr);
+          int port = Integer.parseInt(portStr);
+          namingConnection = new SimpleNamingConnection(host, port, env);
         } else {
           throw new NamingException("Unknown protocol:" + protocol);
         }
       } else {        
-        host = (String) env.get(SCN_HOST_PROPERTY);
-        if (host == null)
-          host = System.getProperty(SCN_HOST_PROPERTY);
-        if (host == null) 
-          host = (String) env.get(JAVA_HOST_PROPERTY);
-        if (host == null)
-          host = System.getProperty(JAVA_HOST_PROPERTY);
-        if (host == null)
-          host = "localhost";
+        String host = (String) env.get(SCN_HOST_PROPERTY);
+        if (host == null) host = (String) System.getProperty(SCN_HOST_PROPERTY);
+        if (host == null) host = (String) env.get(JAVA_HOST_PROPERTY);
+        if (host == null) host = (String) System.getProperty(JAVA_HOST_PROPERTY);
+        if (host == null) host = "localhost";
 
         String portStr = (String) env.get(SCN_PORT_PROPERTY);
-        if (portStr == null)
-          portStr = System.getProperty(SCN_PORT_PROPERTY);
-        if (portStr == null)
-          portStr = (String) env.get(JAVA_PORT_PROPERTY);
-        if (portStr == null)
-          portStr = System.getProperty(JAVA_PORT_PROPERTY);
-        if (portStr == null)
-          portStr = "16400";
+        if (portStr == null) portStr = (String) System.getProperty(SCN_PORT_PROPERTY);
+        if (portStr == null) portStr = (String) env.get(JAVA_PORT_PROPERTY);
+        if (portStr == null) portStr = (String) System.getProperty(JAVA_PORT_PROPERTY);
+        if (portStr == null) portStr = "16400";
 
-        port = Integer.parseInt(portStr);
+        int port = Integer.parseInt(portStr);
+        namingConnection = new SimpleNamingConnection(
+          host, port, env);
       }
-
-      SimpleNamingConnection namingConnection = new SimpleNamingConnection(host, port, env);
-      namingConnection.init(host, port, env);
-
       return namingConnection;
     } catch (NumberFormatException e) {
       NamingException nx = new NamingException();

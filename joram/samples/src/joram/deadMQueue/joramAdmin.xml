@@ -1,38 +1,65 @@
 <?xml version="1.0"?>
 
 <JoramAdmin>
+  
+  
   <AdminModule>
-    <connect host="localhost" port="16010"
-             name="root" password="root"/>
+    <connect host="localhost"
+             port="16010"
+             name="root"
+             password="root"/>
   </AdminModule>
+  
+  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.TcpConnectionFactory">
+    <tcp host="localhost"
+         port="16010"/>
+    <jndi name="cnxFact"/>
+  </ConnectionFactory>
+  
+  <User name="dmq"
+        password="dmq"
+        serverId="0"/>
+  
+  <DMQueue name="userDmq"
+           serverId="0">
+    <reader user="dmq"/>
+    <writer user="dmq"/>
+    <jndi name="userDmq"/>
+  </DMQueue>
+  
+  <DMQueue name="destDmq"
+           serverId="0">
+    <reader user="dmq"/>
+    <writer user="dmq"/>
+    <jndi name="destDmq"/>
+  </DMQueue>
+  
+  <User name="anonymous"
+        password="anonymous"
+        serverId="0"
+        dmq="userDmq"
+        threshold="2"/>
+  
+  <Queue name="queue"
+         dmq="destDmq"
+         threshold="2">
+    <freeReader/>
+    <freeWriter/>
+    <jndi name="queue"/>
+  </Queue>
+  
+  <Topic name="topic"
+         dmq="destDmq">
+    <freeReader/>
+    <freeWriter/>
+    <jndi name="topic"/>
+  </Topic>
   
   <InitialContext>
     <property name="java.naming.factory.initial" value="fr.dyade.aaa.jndi2.client.NamingContextFactory"/>
     <property name="java.naming.factory.host" value="localhost"/>
     <property name="java.naming.factory.port" value="16400"/>
   </InitialContext>
-
-  <User name="anonymous" password="anonymous"/>
-
-  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.TcpConnectionFactory">
-    <tcp host="localhost" port="16010"/>
-    <jndi name="cf"/>
-  </ConnectionFactory>
-
-  <DMQueue name="dmq">
-    <freeReader/>
-    <freeWriter/>
-    <jndi name="dmq"/>
-  </DMQueue>
-
-  <Queue name="queue1" dmq="dmq" threshold="2">
-    <freeReader/>
-    <freeWriter/>
-    <jndi name="queue1"/>
-  </Queue>
-
-  <Queue name="queue2" dmq="dmq">
-    <jndi name="queue2"/>
-  </Queue>
-
+  
+  
 </JoramAdmin>

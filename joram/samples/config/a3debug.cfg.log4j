@@ -35,7 +35,8 @@ logger.fr.dyade.aaa.level WARN
 #logger.fr.dyade.aaa.jndi2.client.level DEBUG
 #logger.fr.dyade.aaa.jndi2.server.level DEBUG
 
-#logger.org.objectweb.joram.mom.level DEBUG
-#logger.org.objectweb.joram.client.jms.level DEBUG
-#logger.org.objectweb.joram.client.connector.level DEBUG
-#logger.org.objectweb.joram.shared.level DEBUG
+#logger.org.objectweb.joram.mom.Destination.level DEBUG
+#logger.org.objectweb.joram.mom.Proxy.level DEBUG
+
+#logger.org.objectweb.joram.client.jms.Admin.level DEBUG
+#logger.org.objectweb.joram.client.jms.Client.level DEBUG

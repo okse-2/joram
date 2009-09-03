@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,50 +17,28 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Initial developer(s): Frederic Maistre (Bull SA)
+ * Contributor(s):
  */
 package org.objectweb.joram.shared.client;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
+import java.util.Hashtable;
 import java.util.Vector;
 
-import org.objectweb.joram.shared.stream.StreamUtil;
 
 /**
  * A <code>XACnxRecoverReply</code> replies to a
  * <code>XACnxRecoverRequest</code> and carries transaction identifiers.
  */
-public final class XACnxRecoverReply extends AbstractJmsReply {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
+public class XACnxRecoverReply extends AbstractJmsReply
+{
   /** Branch qualifiers. */
   private Vector bqs;
-
-  public void setBQS(Vector bqs) {
-    this.bqs = bqs;
-  }
-
   /** Format identifiers. */
   private Vector fis;
-
-  public void setFIS(Vector fis) {
-    this.fis = fis;
-  }
-
   /** Global transaction identifiers. */
   private Vector gtis;
 
-  public void setGTIS(Vector gtis) {
-    this.gtis = gtis;
-  }
-
-  protected int getClassId() {
-    return XA_CNX_RECOVER_REPLY;
-  }
 
   /**
    * Constructs a <code>XACnxRecoverReply</code> instance. 
@@ -72,9 +49,10 @@ public final class XACnxRecoverReply extends AbstractJmsReply {
    * @param gtis  Global transaction identifiers.
    */
   public XACnxRecoverReply(XACnxRecoverRequest req,
-                           Vector bqs,
-                           Vector fis,
-                           Vector gtis) {
+                            Vector bqs,
+                            Vector fis,
+                            Vector gtis)
+  {
     super(req.getRequestId());
     this.bqs = bqs;
     this.fis = fis;
@@ -84,96 +62,66 @@ public final class XACnxRecoverReply extends AbstractJmsReply {
   /**
    * Constructs a <code>XACnxRecoverReply</code> instance. 
    */
-  public XACnxRecoverReply() {}
+  public XACnxRecoverReply()
+  {}
 
+  
   /** Returns the number of transaction identifiers. */
-  public int getSize() {
+  public int getSize()
+  {
     return bqs.size();
   }
 
   /** Returns a branch qualifier. */
-  public byte[] getBranchQualifier(int index) {
+  public byte[] getBranchQualifier(int index)
+  {
     return (byte[]) bqs.get(index);
   }
 
   /** Returns a format identifier. */
-  public int getFormatId(int index) {
+  public int getFormatId(int index)
+  {
     return ((Integer) fis.get(index)).intValue();
   }
 
   /** Returns a global transaction identifier. */
-  public byte[] getGlobalTransactionId(int index) {
+  public byte[] getGlobalTransactionId(int index)
+  {
     return (byte[]) gtis.get(index);
   }
 
-  /* ***** ***** ***** ***** *****
-   * Streamable interface
-   * ***** ***** ***** ***** ***** */
-
-  private static void writeVectorOfByteArrayTo(Vector v, OutputStream os) throws IOException {
-    if (v == null) {
-      StreamUtil.writeTo(-1, os);
-    } else {
-      int size = v.size();
-      StreamUtil.writeTo(size, os);
-      for (int i=0; i<size; i++) {
-        StreamUtil.writeTo((byte []) v.elementAt(i), os);
-      }
-    }
+  public void setBQS(Vector bqs)
+  {
+    this.bqs = bqs;
   }
 
-  private static Vector readVectorOfByteArrayFrom(InputStream is) throws IOException {
-    int size = StreamUtil.readIntFrom(is);
-    if (size == -1) {
-      return null;
-    } else {
-      Vector v = new Vector(size);
-      for (int i=0; i<size; i++) {
-        v.addElement(StreamUtil.readByteArrayFrom(is));
-      }
-      return v;
-    }
+  public void setFIS(Vector fis)
+  {
+    this.fis = fis;
   }
 
-  /**
-   *  The object implements the writeTo method to write its contents to
-   * the output stream.
-   *
-   * @param os the stream to write the object to
-   */
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    writeVectorOfByteArrayTo(bqs, os);
-    if (fis == null) {
-      StreamUtil.writeTo(-1, os);
-    } else {
-      int size = fis.size();
-      StreamUtil.writeTo(size, os);
-      for (int i=0; i<size; i++) {
-        StreamUtil.writeTo(((Integer) fis.elementAt(i)).intValue(), os);
-      }
-    }
-    writeVectorOfByteArrayTo(gtis, os);
+  public void setGTIS(Vector gtis)
+  {
+    this.gtis = gtis;
   }
 
-  /**
-   *  The object implements the readFrom method to restore its contents from
-   * the input stream.
-   *
-   * @param is the stream to read data from in order to restore the object
-   */
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    bqs = readVectorOfByteArrayFrom(is);
-    int size = StreamUtil.readIntFrom(is);
-    if (size == -1) {
-      fis = null;
-    } else {
-      fis = new Vector(size);
-      for (int i=0; i<size; i++) {
-        fis.addElement(new Integer(StreamUtil.readIntFrom(is)));
-      }
-    }
-    gtis = readVectorOfByteArrayFrom(is);
+
+  public Hashtable soapCode()
+  {
+    Hashtable h = super.soapCode();
+    h.put("bqs", bqs);
+    h.put("fis", bqs);
+    h.put("gtis", bqs);
+    return h;
+  }
+
+  public static Object soapDecode(Hashtable h)
+  {
+    XACnxRecoverReply req = new XACnxRecoverReply();
+    req.setCorrelationId(((Integer) h.get("correlationId")).intValue());
+    req.setBQS((Vector) h.get("bqs"));
+    req.setFIS((Vector) h.get("fis"));
+    req.setGTIS((Vector) h.get("gtis"));
+    return req;
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,8 +16,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent Distributed Technologies
- * Contributor(s):
  */
 package fr.dyade.aaa.agent;
 
@@ -27,6 +25,8 @@ import java.util.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.agent.*;
 
 public class SCAdminHelper {
   /** Hashtable that contain all <code>Process</code> of running AgentServer */
@@ -47,51 +47,18 @@ public class SCAdminHelper {
    * @param sid		id of agent server to start
    */
   public String startAgentServer(short sid) throws Exception {
-    return startAgentServer(sid, null, null, null, null);
+    return startAgentServer(sid, null, null);
   }
 
   /**
-   * Starts an agent server from its id using specific jvmargs.
+   * Starts an agent server from its id.
    *
    * @param sid		id of agent server to start
-   * @param jvmargs	arguments to pass to the created java program
+   * @param jvmarg	arguments to pass to the created java program
    */
   public String startAgentServer(short sid,
-                                 String[] jvmargs) throws Exception {
-    return startAgentServer(sid, null, jvmargs, null, null);
-  }
-
-  /**
-   * Starts an agent server from its id using specific jvmargs and storage
-   * directory.
-   *
-   * @param sid		id of agent server to start
-   * @param dir		new working directory for the created agent server,
-   *	current working directory if <code>null</code>
-   * @param jvmargs	arguments to pass to the created java program
-   */
-  public String startAgentServer(short sid,
-                                 File dir,
-                                 String[] jvmargs) throws Exception {
-    return startAgentServer(sid, dir, jvmargs, null, null);
-  }
-
-  /**
-   * Starts an agent server from its id using specific jvmargs and storage
-   * directory.
-   *
-   * @param sid		id of agent server to start
-   * @param dir		new working directory for the created agent server,
-   *	                current working directory if <code>null</code>
-   * @param jvmargs	arguments to pass to the created java program
-   * @param args	additional arguments to pass to the created java
-   *                    program
-   */
-  public String startAgentServer(short sid,
-                                 File dir,
-                                 String[] jvmargs,
-				 String[] args) throws Exception {
-    return startAgentServer(sid, dir, jvmargs, null, args);
+                                 String[] jvmarg) throws Exception {
+    return startAgentServer(sid, null, jvmarg, null);
   }
 
   /**
@@ -100,16 +67,38 @@ public class SCAdminHelper {
    * @param sid		id of agent server to start
    * @param dir		new working directory for the created agent server,
    *	current working directory if <code>null</code>
-   * @param jvmargs	arguments to pass to the created java program
-   * @param className   the name of the main class
-   * @param args	additional arguments to pass to the created java
-   *                    program
+   * @param jvmarg	arguments to pass to the created java program
    */
   public String startAgentServer(short sid,
                                  File dir,
-                                 String[] jvmargs,
+                                 String[] jvmarg) throws Exception {
+    return startAgentServer(sid, dir, jvmarg, 
+                            "fr.dyade.aaa.agent.AgentServer", null);
+  }
+
+  public String startAgentServer(short sid,
+                                 File dir,
+                                 String[] jvmarg,
+				 String[] servarg) throws Exception {
+    return startAgentServer(sid, dir, jvmarg, 
+                            "fr.dyade.aaa.agent.AgentServer", servarg);
+  }
+
+  /**
+   * Starts an agent server from its id.
+   *
+   * @param sid		id of agent server to start
+   * @param dir		new working directory for the created agent server,
+   *	current working directory if <code>null</code>
+   * @param jvmarg	arguments to pass to the created java program
+   * @param className   the name of the main class
+   * @param servarg	additional arguments to pass to the created java program
+   */
+  public String startAgentServer(short sid,
+                                 File dir,
+                                 String[] jvmarg,
                                  String className,
-				 String[] args) throws Exception {
+				 String[] servarg) throws Exception {
     logmon.log(BasicLevel.DEBUG,
                "SCAdmin: start AgentServer#" + sid);
 
@@ -127,33 +116,6 @@ public class SCAdminHelper {
       }
     }
 
-    p = execAgentServer(sid, dir, jvmargs, className, args);
-    ASP.put(new Short(sid), p);
-    String ret = waitServerStarting(p);
-    closeServerStream(p);
-
-    return ret;
-  }
-
-  /**
-   * Runs an agent server from its id and specific parameters.
-   *
-   * @param sid		id of agent server to start
-   * @param dir		new working directory for the created agent server,
-   *	current working directory if <code>null</code>
-   * @param jvmargs	arguments to pass to the created java program
-   * @param className   the name of the main class
-   * @param args	additional arguments to pass to the created java
-   *                    program
-   */
-  public Process execAgentServer(short sid,
-                                 File dir,
-                                 String[] jvmargs,
-                                 String className,
-                                 String[] args) throws Exception {
-    logmon.log(BasicLevel.DEBUG,
-               "SCAdmin: run AgentServer#" + sid);
-
     String javapath = 
       new File(new File(System.getProperty("java.home"), "bin"),
                "java").getPath();
@@ -163,45 +125,29 @@ public class SCAdminHelper {
     argv.addElement(javapath);
     argv.addElement("-classpath");
     argv.addElement(classpath);
-    if (jvmargs != null) {
-      for (int i=0; i<jvmargs.length; i++)
-        argv.addElement(jvmargs[i]);
+    if (jvmarg != null) {
+      for (int i=0; i<jvmarg.length; i++)
+        argv.addElement(jvmarg[i]);
     }
-    argv.addElement("-Dcom.sun.management.jmxremote");
-    argv.addElement("-DMXServer=com.scalagent.jmx.JMXServer");
-
-    if (className == null)
-      className = "fr.dyade.aaa.agent.AgentServer";
     argv.addElement(className);
     argv.addElement(Short.toString(sid));
     argv.addElement("s" + sid);
-    if (args != null) {
-      for (int i=0; i<args.length; i++)
-        argv.addElement(args[i]);
+    if (servarg != null) {
+      for (int i=0; i<servarg.length; i++)
+        argv.addElement(servarg[i]);
     }
 
     String[] command = new String[argv.size()];
     argv.copyInto(command);
 
     logmon.log(BasicLevel.DEBUG,
-               "SCAdmin" + ": launches AgentServer#" + sid);
-
-    Process p = null;
+               "SCAdmin" + ": starts AgentServer#" + sid);
     if (dir == null) {
       p = Runtime.getRuntime().exec(command);
     } else {
       p = Runtime.getRuntime().exec(command, null, dir);
     }
-    
-    return p;
-  }
-
-  /**
-   *  Waits for the starting of an AgentServer pointed out by its process.
-   *
-   * @param p	the AgentServer process.
-   */
-  public String waitServerStarting(Process p) throws Exception {
+    ASP.put(new Short(sid), p);
     BufferedReader br =
       new BufferedReader(new InputStreamReader(p.getInputStream()));
     String line = br.readLine();
@@ -217,16 +163,8 @@ public class SCAdminHelper {
         line = strBuf.toString();
       }
     }
-    return line;
-  }
-
-  /**
-   *  Closes all subsequent streams of the process to avoid deadlock due to
-   * limited buffer size.
-   *
-   * @param p	the AgentServer process.
-   */
-  public void closeServerStream(Process p) throws Exception {
+    // Close all streams of subprocess in order to avoid deadlock due
+    // to limited buffer size.
     try {
       p.getInputStream().close();
     } catch (Exception exc) {}
@@ -236,6 +174,7 @@ public class SCAdminHelper {
     try {
       p.getErrorStream().close();
     } catch (Exception exc) {}
+    return line;
   }
 
   /**

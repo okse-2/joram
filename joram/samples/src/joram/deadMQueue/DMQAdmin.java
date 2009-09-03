@@ -1,8 +1,8 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,52 +20,60 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Contributor(s):
  */
 package deadMQueue;
 
-import javax.jms.ConnectionFactory;
-
-import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.admin.DeadMQueue;
-import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.client.jms.admin.*;
+import org.objectweb.joram.client.jms.*;
+import org.objectweb.joram.client.jms.tcp.*;
 
 /**
  * Administers an agent server for the deadMQueue samples.
  */
-public class DMQAdmin {
-
-  public static void main(String[] args) throws Exception {
+public class DMQAdmin
+{
+  public static void main(String[] args) throws Exception
+  {
+    System.out.println();
     System.out.println("DMQ administration...");
 
     AdminModule.connect("root", "root", 60);
 
-    User.create("anonymous", "anonymous", 0);    
+    Queue queue = (Queue) Queue.create(0);
+    Topic topic = (Topic) Topic.create(0);
 
-    ConnectionFactory cf = TcpConnectionFactory.create("localhost", 16010);
+    DeadMQueue userDmq = (DeadMQueue) DeadMQueue.create(0);
+    DeadMQueue destDmq = (DeadMQueue) DeadMQueue.create(0);
 
-    DeadMQueue dmq = (DeadMQueue) DeadMQueue.create(0);
-    dmq.setFreeReading();
-    dmq.setFreeWriting();
-    
-    Queue queue1 = Queue.create(0);
-    queue1.setFreeReading();
-    queue1.setFreeWriting();
+    User ano = User.create("anonymous", "anonymous", 0);
+    User dmq = User.create("dmq", "dmq", 0);
 
-    queue1.setDMQ(dmq);
-    queue1.setThreshold(2);
-    
-    Queue queue2 = Queue.create(0);
+    javax.jms.ConnectionFactory cnxFact =
+      TcpConnectionFactory.create("localhost", 16010);
 
-    queue2.setDMQ(dmq);
+    ano.setDMQ(userDmq);
+    queue.setDMQ(destDmq);
+    topic.setDMQ(destDmq);
+
+    ano.setThreshold(2);
+    queue.setThreshold(2);
+
+    queue.setFreeReading();
+    queue.setFreeWriting();
+    topic.setFreeReading();
+    topic.setFreeWriting();
+    userDmq.setReader(dmq);
+    userDmq.setWriter(dmq);
+    destDmq.setReader(dmq);
+    destDmq.setWriter(dmq);
 
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
-    jndiCtx.bind("queue1", queue1);
-    jndiCtx.bind("queue2", queue2);
-    jndiCtx.bind("dmq", dmq);
-    jndiCtx.bind("cf", cf);
+    jndiCtx.bind("queue", queue);
+    jndiCtx.bind("topic", topic);
+    jndiCtx.bind("userDmq", userDmq);
+    jndiCtx.bind("destDmq", destDmq);
+    jndiCtx.bind("cnxFact", cnxFact);
     jndiCtx.close();
 
     AdminModule.disconnect();

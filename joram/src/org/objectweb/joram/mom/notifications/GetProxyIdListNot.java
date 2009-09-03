@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,20 +18,20 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent Distributed Technologies
+ * Initial developer(s): David Feliot (ScalAgent)
  * Contributor(s):
  */
 package org.objectweb.joram.mom.notifications;
 
 import fr.dyade.aaa.agent.*;
 
+import java.util.*;
+
 /**
  * Transient notification
  */
 public class GetProxyIdListNot extends SyncNotification {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
+  
   public void Return(AgentId[] proxyIds) {
     Return(new Object[]{proxyIds});
   }

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -20,76 +20,107 @@
  *
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): Benoit Pelletier (Bull SA)
- *                 Nicolas Tachker (ScalAgent DT)
  */
 package org.objectweb.joram.client.jms.ha.tcp;
 
-import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
 
-import org.objectweb.joram.client.jms.ConnectionFactory;
-import org.objectweb.joram.client.jms.FactoryParameters;
-import org.objectweb.joram.client.jms.connection.RequestChannel;
-import org.objectweb.joram.shared.security.Identity;
+import org.objectweb.joram.client.jms.Connection;
+import org.objectweb.joram.client.jms.TopicConnection;
+import org.objectweb.joram.client.jms.XAConnection;
+import org.objectweb.joram.client.jms.XATopicConnection;
 
 /**
  * An <code>XATopicHATcpConnectionFactory</code> instance is a factory of
  * tcp connections for XA Pub/Sub HA communication.
- *  
- * @deprecated Replaced next to Joram 5.2.1 by {@link HATcpConnectionFactory}.
  */
-public class XATopicHATcpConnectionFactory extends org.objectweb.joram.client.jms.XATopicConnectionFactory {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
-  /**
-   * Constructs an <code>XATopicHATcpConnectionFactory</code> instance.
-   * Needed by ObjectFactory, should only be used for internal purposes.
-   */
-  public XATopicHATcpConnectionFactory() {
-    super();  
-  }
+public class XATopicHATcpConnectionFactory
+    extends org.objectweb.joram.client.jms.XATopicConnectionFactory {
 
   /**
    * Constructs an <code>XATopicTcpConnectionFactory</code> instance.
-   * 
-   * @param url The Joram HA URL.
    */
-  private XATopicHATcpConnectionFactory(String url) {
-    super(url);
+  public XATopicHATcpConnectionFactory(String url)
+    {
+      super(url);
+    }
+
+  public XATopicHATcpConnectionFactory() {
+	super();  
   }
+  
+  /**
+   * Method inherited from the <code>XATopicConnectionFactory</code> class..
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   */
+  public javax.jms.XATopicConnection
+      createXATopicConnection(String name, String password)
+    throws javax.jms.JMSException
+    {
+      HATcpConnection lc = new HATcpConnection(
+          getParameters().getUrl(), params, name, password, reliableClass);
+      return new XATopicConnection(params, lc);
+    }
 
   /**
-   * Creates the <code>HATcpRequestChannel</code> object needed to connect to the
-   * remote HA server.
-   * 
-   * @param params          Connection configuration parameters.
-   * @param identity        Client's identity.
-   * @param reliableClass   The protocol specific class.
-   * @return                The <code>RequestChannel</code> object specific to the protocol used.
-   * 
-   * @exception JMSException  A problem occurs during the connection.
-   * 
-   * @see ConnectionFactory#createRequestChannel(FactoryParameters, Identity, String)
+   * Method inherited from the <code>XAConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
    */
-  protected RequestChannel createRequestChannel(FactoryParameters params,
-                                                Identity identity,
-                                                String reliableClass) throws JMSException {
-    return new HATcpRequestChannel(params.getUrl(), params, identity, reliableClass);
-  }
+  public javax.jms.XAConnection
+      createXAConnection(String name, String password)
+    throws javax.jms.JMSException
+    {
+      HATcpConnection lc = new HATcpConnection(
+          getParameters().getUrl(), params, name, password, reliableClass);
+      return new XAConnection(params, lc);
+    }
+
+  /**
+   * Method inherited from the <code>TopicConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   */
+  public javax.jms.TopicConnection
+      createTopicConnection(String name, String password)
+    throws javax.jms.JMSException
+    {
+      HATcpConnection lc = new HATcpConnection(
+          getParameters().getUrl(), params, name, password, reliableClass);
+      return new TopicConnection(params, lc);
+    }
+
+  /**
+   * Method inherited from the <code>ConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.Connection createConnection(String name, String password)
+    throws javax.jms.JMSException
+    {
+      HATcpConnection lc = new HATcpConnection(
+          getParameters().getUrl(), params, name, password, reliableClass);
+      return new Connection(params, lc);
+    }
+
 
   /**
    * Admin method creating a <code>javax.jms.XATopicConnectionFactory</code>
    * instance for creating tcp connections.
    */
   public static javax.jms.XATopicConnectionFactory create(String url) {
-    return create(url, "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
+    return create(url,
+                  "org.objectweb.joram.client.jms.tcp.ReliableTcpClient");
   }
 
   /**
    * Admin method creating a <code>javax.jms.XATopicConnectionFactory</code>
    * instance for creating tcp connections.
    */
-  public static javax.jms.XATopicConnectionFactory create(String url, String reliableClass) {
+  public static javax.jms.XATopicConnectionFactory
+      create(String url, String reliableClass) {
     XATopicHATcpConnectionFactory cf = new XATopicHATcpConnectionFactory(url);
     cf.setReliableClass(reliableClass);
     return cf;

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2007 France Telecom R&D
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -24,36 +24,30 @@
  */
 package org.objectweb.joram.client.jms.admin;
 
-import java.net.ConnectException;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.Random;
-
-import javax.naming.NamingException;
-import javax.naming.RefAddr;
-import javax.naming.Reference;
-import javax.naming.StringRefAddr;
-
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.shared.admin.SetReader;
 import org.objectweb.joram.shared.admin.SetWriter;
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.common.Debug;
+
+import javax.naming.*;
+
+import java.net.ConnectException;
+import java.util.Hashtable;
+import java.util.Properties;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.Random;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.shared.JoramTracing;
 
 /**
  * A base class for clustered destinations.
  */
 public class ClusterDestination extends Destination {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
 
-  private static Logger logger = Debug.getLogger(ClusterDestination.class.getName());
-  
   protected Hashtable cluster = null;
 
   /**
@@ -68,8 +62,9 @@ public class ClusterDestination extends Destination {
    */ 
   public ClusterDestination(Hashtable cluster) {
     this.cluster = cluster;
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + ": cluster = " + cluster);
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, 
+                                 this + ": cluster = " + cluster);
   }
 
   public void setCluster(Hashtable cluster) {
@@ -192,6 +187,7 @@ public class ClusterDestination extends Destination {
       strbuf.append("cluster#").append(i).append(".key");
       ref.add(new StringRefAddr(strbuf.toString(),
                                 (String) entries[i].getKey()));
+
       Destination dest = (Destination) entries[i].getValue();
 
       strbuf.setLength(0);
@@ -203,6 +199,7 @@ public class ClusterDestination extends Destination {
   /** Restores the administered object from a naming reference. */
   public void fromReference(Reference ref) throws NamingException {
     cluster = new Hashtable();
+
     int i = 0;
     Destination dest = null;
     StringBuffer strbuf = new StringBuffer(20);

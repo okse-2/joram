@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,40 +19,21 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Contributor(s):
  */
 package org.objectweb.joram.shared.client;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
+import java.util.Hashtable;
+import java.util.Enumeration;
 
 /**
  * A <code>QBrowseRequest</code> instance is sent by a 
  * <code>QueueBrowser</code> when requesting an enumeration.
  */
-public final class QBrowseRequest extends AbstractJmsRequest {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
+public class QBrowseRequest extends AbstractJmsRequest
+{
   /** The selector for filtering messages. */
   private String selector;
-
-  /** Sets the selector. */
-  public void setSelector(String selector) {
-    this.selector = selector;
-  }
-
-  /** Returns the selector for filtering the messages. */
-  public String getSelector() {
-    return selector;
-  }
-
-  protected int getClassId() {
-    return QBROWSE_REQUEST;
-  }
 
   /**
    * Constructs a <code>QBrowseRequest</code> instance.
@@ -60,7 +41,8 @@ public final class QBrowseRequest extends AbstractJmsRequest {
    * @param to  Name of the queue to browse. 
    * @param selector  The selector for filtering messages, if any.
    */
-  public QBrowseRequest(String to, String selector) {
+  public QBrowseRequest(String to, String selector)
+  {
     super(to);
     this.selector = selector;
   }
@@ -68,31 +50,33 @@ public final class QBrowseRequest extends AbstractJmsRequest {
   /**
    * Constructs a <code>QBrowseRequest</code> instance.
    */
-  public QBrowseRequest() {}
+  public QBrowseRequest()
+  {}
 
-  /* ***** ***** ***** ***** *****
-   * Streamable interface
-   * ***** ***** ***** ***** ***** */
-
-  /**
-   *  The object implements the writeTo method to write its contents to
-   * the output stream.
-   *
-   * @param os the stream to write the object to
-   */
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    StreamUtil.writeTo(selector, os);
+  /** Sets the selector. */
+  public void setSelector(String selector)
+  {
+    this.selector = selector;
   }
 
-  /**
-   *  The object implements the readFrom method to restore its contents from
-   * the input stream.
-   *
-   * @param is the stream to read data from in order to restore the object
-   */
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    selector = StreamUtil.readStringFrom(is);
+  /** Returns the selector for filtering the messages. */
+  public String getSelector()
+  {
+    return selector;
+  }
+
+  public Hashtable soapCode() {
+    Hashtable h = super.soapCode();
+    if (selector != null)
+      h.put("selector",selector);
+    return h;
+  }
+
+  public static Object soapDecode(Hashtable h) {
+    QBrowseRequest req = new QBrowseRequest();
+    req.setRequestId(((Integer) h.get("requestId")).intValue());
+    req.setTarget((String) h.get("target"));
+    req.setSelector((String) h.get("selector"));
+    return req;
   }
 }

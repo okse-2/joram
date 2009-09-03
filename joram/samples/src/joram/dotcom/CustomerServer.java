@@ -69,8 +69,8 @@ public class CustomerServer {
       TopicSubscriber ts = tsession.createSubscriber(topicOrders);
       
       // creating a FifoQueue to hold incoming messages from topicOrders 
-      fr.dyade.aaa.common.Queue queue ;
-      queue = new fr.dyade.aaa.common.Queue() ;
+      fr.dyade.aaa.util.Queue queue ;
+      queue = new fr.dyade.aaa.util.Queue() ;
 	  		
       // arise the MessageListener 
       TopicListener customerListener = new TopicListener(tsession, queue);
@@ -117,7 +117,7 @@ class CustomerTreatment implements Runnable, Servers {
   /** QueueSender sending messages. */
   QueueSender qs ;
   /** FifoQueue holding OrderMessages received from topicOrders. */
-  fr.dyade.aaa.common.Queue queue ;
+  fr.dyade.aaa.util.Queue queue ;
   /** OrderMessage got from the FifoQueue. */
   OrderMessage orderMsg ;
   /** Lock to wait for graphical interaction. */
@@ -134,7 +134,7 @@ class CustomerTreatment implements Runnable, Servers {
    * @param tc			TopicConnection created in CustomerServer.
    * @param tsession		TopicSession created in CustomerServer.
    */
-  CustomerTreatment(fr.dyade.aaa.common.Queue queue, TopicConnection tc, TopicSession tsession) {
+  CustomerTreatment(fr.dyade.aaa.util.Queue queue, TopicConnection tc, TopicSession tsession) {
     this.queue = queue ;
     this.tc = tc ;
     this.tsession = tsession ;

@@ -22,7 +22,7 @@
  All Rights Reserved.
 -->
 
-<!ELEMENT JoramAdmin (AdminModule | ConnectionFactory | User | Destination | Queue | Topic | DMQueue | Cluster | Server | InitialContext)*>
+<!ELEMENT JoramAdmin (AdminModule | ConnectionFactory | User | Destination | Queue | Topic | DMQueue | Cluster | InitialContext)*>
 <!ATTLIST JoramAdmin name CDATA "default">
 
 <!ELEMENT AdminModule (connect | collocatedConnect)*>
@@ -32,22 +32,19 @@
 <!ATTLIST connect
 	host          CDATA "localhost"
 	port          CDATA "16010"
-  name          CDATA "root"
-  password      CDATA "root"
-  cnxTimer      CDATA "60"
-  reliableClass CDATA "org.objectweb.joram.client.jms.tcp.ReliableTcpClient"
-  identityClass CDATA "org.objectweb.joram.shared.security.SimpleIdentity">
+        name          CDATA "root"
+        password      CDATA "root"
+        cnxTimer      CDATA "60"
+        reliableClass CDATA "org.objectweb.joram.client.jms.tcp.ReliableTcpClient">
 
 <!ELEMENT collocatedConnect EMPTY>
 <!ATTLIST collocatedConnect
         name     CDATA "root"
-        password CDATA "root"
-        identityClass CDATA "org.objectweb.joram.shared.security.SimpleIdentity">
+        password CDATA "root">
 
 <!ELEMENT ConnectionFactory (tcp | local | hatcp | halocal | soap | jndi)*>
 <!ATTLIST ConnectionFactory
-	class CDATA #REQUIRED
-	identityClass CDATA "org.objectweb.joram.shared.security.SimpleIdentity">
+	class CDATA #REQUIRED>
 
 <!ELEMENT tcp EMPTY>
 <!ATTLIST tcp
@@ -75,20 +72,13 @@
 <!ATTLIST jndi
 	name CDATA #REQUIRED>
 
-<!ELEMENT Server EMPTY>
-<!ATTLIST Server
-        serverId CDATA "0"
-        threshold CDATA "-1"
-        dmq      CDATA "">
-
 <!ELEMENT User EMPTY>
 <!ATTLIST User
 	name     CDATA #REQUIRED
 	password CDATA #REQUIRED
-  threshold CDATA "-1"
-  dmq      CDATA ""
-  serverId CDATA "0"
-  identityClass CDATA "org.objectweb.joram.shared.security.SimpleIdentity">
+        threshold CDATA "-1"
+        dmq      CDATA ""
+        serverId CDATA "0">
 
 <!ELEMENT Destination (property | reader | writer | freeReader | freeWriter | jndi)*>
 <!ATTLIST Destination

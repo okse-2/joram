@@ -1,4 +1,10 @@
 /*
+ * Created on May 31, 2003
+ *
+ * To change the template for this generated file go to
+ * Window>Preferences>Java>Code Generation>Code and Comments
+ */
+/*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  *
  * This library is free software; you can redistribute it and/or
@@ -21,24 +27,12 @@
  */
 package org.objectweb.joram.client.tools.admin;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Iterator;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import java.util.*;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-
-import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.admin.*;
 
 
 /**
@@ -48,11 +42,6 @@ import org.objectweb.joram.client.jms.admin.User;
  * Window>Preferences>Java>Code Generation>Code and Comments
  */
 public class UserPanel extends JPanel {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   private final AdminController c;
 
   private User user = null;
@@ -118,7 +107,7 @@ public class UserPanel extends JPanel {
       int i = dmqCombo.getSelectedIndex();
       if (i > 0) {
         try {
-          c.setUserDMQ(user, (Queue) dmqCombo.getSelectedItem());
+          c.setUserDMQ(user, (DeadMQueue) dmqCombo.getSelectedItem());
         }
         catch (Exception exc) {
           JOptionPane.showMessageDialog(null, exc.getMessage());
@@ -144,12 +133,12 @@ public class UserPanel extends JPanel {
 
   public void setThreshold(String threshold) { thresholdField.setText(threshold); }
 
-  public void setDMQList(java.util.List dmqs, Queue ddmq) {
+  public void setDMQList(java.util.List dmqs, DeadMQueue ddmq) {
   	dmqCombo.removeAllItems();
 	dmqCombo.addItem("No Dead Message Queue");
 
     for (Iterator i = dmqs.iterator(); i.hasNext();) {
-      Queue dmq = (Queue) i.next();
+      DeadMQueue dmq = (DeadMQueue) i.next();
       dmqCombo.addItem(dmq);
 
       // TODO: This comparison is not very clean and should be improved

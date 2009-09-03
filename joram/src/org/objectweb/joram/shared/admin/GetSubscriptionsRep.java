@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,14 +22,8 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 public class GetSubscriptionsRep extends AdminReply {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1734741581653138720L;
 
   private String[] subNames;
 
@@ -50,8 +44,6 @@ public class GetSubscriptionsRep extends AdminReply {
     this.durable = durable;
   }
 
-  public GetSubscriptionsRep() { }
-  
   public final String[] getSubNames() {
     return subNames;
   }
@@ -66,25 +58,5 @@ public class GetSubscriptionsRep extends AdminReply {
 
   public final boolean[] getDurable() {
     return durable;
-  }
-  
-  protected int getClassId() {
-    return GET_SUBSCRIPTIONS_REP;
-  }
-    
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    subNames = StreamUtil.readArrayOfStringFrom(is);
-    topicIds = StreamUtil.readArrayOfStringFrom(is);
-    messageCounts = StreamUtil.readArrayOfIntFrom(is);
-    durable = StreamUtil.readArrayOfBooleanFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    StreamUtil.writeArrayOfStringTo(subNames, os);
-    StreamUtil.writeArrayOfStringTo(topicIds, os);
-    StreamUtil.writeArrayOfIntTo(messageCounts, os);
-    StreamUtil.writeArrayOfBooleanTo(durable, os);
   }
 }

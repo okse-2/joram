@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2002 - 2005 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,11 +22,13 @@
 package fr.dyade.aaa.agent;
 
 import java.io.*;
+import java.net.*;
 import java.util.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
+import fr.dyade.aaa.agent.*;
 import fr.dyade.aaa.agent.conf.*;
 
 public class SCAdminBase {
@@ -57,117 +59,32 @@ public class SCAdminBase {
     return startAgentServer(sid, null);
   }
 
-  /**
-   * Starts an agent server from its id using specific storage directory.
-   * JVM arguments are initialized from A3 configuration.
-   *
-   * @param sid		id of agent server to start
-   * @param dir		new working directory for the created agent server,
-   *	                current working directory if <code>null</code>
-   */
   public String startAgentServer(short sid,
                                  File dir) throws Exception {
     StringTokenizer st = new StringTokenizer(a3config.getJvmArgs(sid));
     int nb = st.countTokens();
-    String[] jvmargs = new String[nb];
-    for (int i=0; i<nb; i++){
+    String[] jvmargs = new String[nb+2];
+    int i=0;
+    for (; i<nb; i++){
       jvmargs[i] = st.nextToken();
     }
+    jvmargs[i++] = "-Dcom.sun.management.jmxremote";
+    jvmargs[i++] = "-DMXServer=com.scalagent.jmx.JMXServer";
 
     return scadmin.startAgentServer(sid, dir, jvmargs);
   }
 
-  /**
-   * Starts an agent server from its id using specific jvmargs and storage
-   * directory.
-   *
-   * @param sid		id of agent server to start
-   * @param dir		new working directory for the created agent server,
-   *	current working directory if <code>null</code>
-   * @param jvmargs	arguments to pass to the created java program
-   */
   public String startAgentServer(short sid,
                                  File dir,
                                  String[] jvmargs) throws Exception {
     return scadmin.startAgentServer(sid, dir, jvmargs);
   }
 
-  /**
-   * Starts an agent server from its id using specific jvmargs and storage
-   * directory.
-   *
-   * @param sid		id of agent server to start
-   * @param dir		new working directory for the created agent server,
-   *	                current working directory if <code>null</code>
-   * @param jvmargs	arguments to pass to the created java program
-   * @param args	additional arguments to pass to the created java
-   *                    program
-   */
   public String startAgentServer(short sid,
                                  File dir,
                                  String[] jvmargs,
 				 String[] servargs) throws Exception {
     return scadmin.startAgentServer(sid, dir, jvmargs, servargs);
-  }
-
-  /**
-   * Starts an agent server from its id.
-   *
-   * @param sid		id of agent server to start
-   * @param dir		new working directory for the created agent server,
-   *	current working directory if <code>null</code>
-   * @param jvmargs	arguments to pass to the created java program
-   * @param className   the name of the main class
-   * @param args	additional arguments to pass to the created java
-   *                    program
-   */
-  public String startAgentServer(short sid,
-                                 File dir,
-                                 String[] jvmargs,
-                                 String className,
-				 String[] args) throws Exception {
-    return scadmin.startAgentServer(sid, dir, jvmargs, className, args);
-  }
-
-  /**
-   * Runs an agent server from its id and specific parameters.
-   *
-   * @param name	id of agent server to start
-   * @param sid		id of agent server to start
-   * @param dir		new working directory for the created agent server,
-   *	current working directory if <code>null</code>
-   * @param jvmargs	arguments to pass to the created java program
-   * @param className   the name of the main class
-   * @param args	additional arguments to pass to the created java
-   *                    program
-   */
-  public Process execAgentServer(short sid,
-                                 File dir,
-                                 String[] jvmargs,
-                                 String className,
-                                 String[] args) throws Exception {
-    return scadmin.execAgentServer(sid, dir, jvmargs, className, args);
-  }
-
-  /**
-   *  Waits for the starting of an AgentServer pointed out by its process.
-   * Closes all subsequent streams of the process to avoid deadlock due to
-   * limited buffer size.
-   *
-   * @param p	the AgentServer process.
-   */
-  public String waitServerStarting(Process p) throws Exception {
-    return scadmin.waitServerStarting(p);
-  }
-
-  /**
-   *  Closes all subsequent streams of the process to avoid deadlock due to
-   * limited buffer size.
-   *
-   * @param p	the AgentServer process.
-   */
-  public void closeServerStream(Process p) throws Exception {
-    scadmin.closeServerStream(p);
   }
 
   /**

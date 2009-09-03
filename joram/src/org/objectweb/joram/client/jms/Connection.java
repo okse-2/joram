@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -42,31 +42,13 @@ import org.objectweb.joram.shared.client.CnxConnectRequest;
 import org.objectweb.joram.shared.client.CnxStartRequest;
 import org.objectweb.joram.shared.client.CnxStopRequest;
 import org.objectweb.joram.shared.client.ConsumerSubRequest;
+
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.util.Debug;
 
 /**
  * Implements the <code>javax.jms.Connection</code> interface.
- * <p>
- * A Connection object allows the client's active connection to the Joram
- * server. Connections support concurrent use, it serves several purposes:
- * <ul>
- * <li>It encapsulates the real connection with the Joram server (for example
- * an open TCP/IP socket between the client and the server).
- * <li>It needs the client authentication.
- * <li>It specifies a unique client identifier.
- * <li>It supports the ExceptionListener object. 
- * </ul>
- * A Joram client typically creates a connection, one or more sessions, and a
- * number of message producers and consumers. 
- * <br>
- * When a connection is created, it is in stopped mode that means that no
- * messages are being delivered. In order to minimize any client confusion
- * that may result from asynchronous message delivery during setup, it is
- * typical to leave the connection in stopped mode until setup is complete.
- * A message producer can send messages while a connection is stopped.
  */
 public class Connection implements javax.jms.Connection {
   public static Logger logger = Debug.getLogger(Connection.class.getName());
@@ -87,7 +69,7 @@ public class Connection implements javax.jms.Connection {
     public static final int START = 1;
 
     /**
-     * Status of the connection when it is closed.
+     * Status of the conenction when it is closed.
      */
     public static final int CLOSE = 2;
 
@@ -114,36 +96,17 @@ public class Connection implements javax.jms.Connection {
   /** Connection meta data. */
   private ConnectionMetaData metaData = null;
 
-  class AtomicCounter {
-    long value;
-    StringBuffer strbuf;
-    int initial;
-
-    AtomicCounter(String prefix) {
-      value = 0;
-      strbuf = new StringBuffer(prefix.length() + 20);
-      strbuf.append(prefix);
-      initial = strbuf.length();
-    }
-
-    synchronized String nextValue() {
-      strbuf.setLength(initial);
-      strbuf.append(value++);
-      return strbuf.toString();
-    }
-  }
-
   /** Sessions counter. */
-  private AtomicCounter sessionsC;
+  private int sessionsC = 0;
 
   /** Messages counter. */
-  private AtomicCounter messagesC;
+  private int messagesC = 0;
 
   /** Subscriptions counter. */
-  private AtomicCounter subsC;
+  private int subsC = 0;
 
   /** Client's agent proxy identifier. */
-  private String proxyId;
+  String proxyId;
 
   /** Connection key. */
   private int key;
@@ -175,21 +138,19 @@ public class Connection implements javax.jms.Connection {
    * Creates a <code>Connection</code> instance.
    *
    * @param factoryParameters  The factory parameters.
-   * @param requestChannel  The actual connection to wrap.
+   * @param connectionImpl  The actual connection to wrap.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
   public Connection(FactoryParameters factoryParameters,
-                    RequestChannel requestChannel) throws JMSException {
-    // AF: This method shouldn't be public but it is actually used by AbstractFactory
-    // in admin package (merge in future in ConnectionFactory class).
+                    RequestChannel requestChannel) 
+    throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 "Connection.<init>(" + factoryParameters + ',' + requestChannel + ')');
-    // We need to clone the FactoryParameter Object to avoid side-effect with
-    // external modifications.
-    this.factoryParameters = (FactoryParameters) factoryParameters.clone();
+                 "Connection.<init>(" + factoryParameters +
+                 ',' + requestChannel + ')');
+    this.factoryParameters = factoryParameters;
     mtpx = new RequestMultiplexer(this,
                                   requestChannel,
                                   factoryParameters.cnxPendingTimer);
@@ -211,20 +172,21 @@ public class Connection implements javax.jms.Connection {
     CnxConnectReply rep = (CnxConnectReply) requestor.request(req);
     proxyId = rep.getProxyId();
     key = rep.getCnxKey();
-
-    sessionsC = new AtomicCounter("c" + key + 's');
-    messagesC = new AtomicCounter("ID:" + proxyId.substring(1) + 'c' + key + 'm');
-    subsC = new AtomicCounter("c"  + key + "sub");
-
-    stringImage = "Connection[" + proxyId + ':' + key + ']';
-    hashCode = (proxyId.hashCode() & 0xFFFF0000) + key;
+    
+    stringImage = "Cnx:" + proxyId + ':' + key;
+    hashCode = stringImage.hashCode();
 
     mtpx.setDemultiplexerDaemonName(toString());
   }
 
+  private final String newTrace(String trace) {
+    return "Connection[" + proxyId + ':' + key + ']' + trace;
+  }
+
   private void setStatus(int status) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, stringImage + ".setStatus(" + Status.toString(status) + ')');
+      logger.log(BasicLevel.DEBUG, 
+                 newTrace(".setStatus(" + Status.toString(status) + ')'));
     this.status = status;
   }
 
@@ -242,162 +204,41 @@ public class Connection implements javax.jms.Connection {
   }
   
   /**
-   * Returns <code>true</code> if the parameter is a <code>Connection</code> instance
-   * sharing the same proxy identifier and connection key.
+   * Specializes this Object method; returns <code>true</code> if the
+   * parameter is a <code>Connection</code> instance sharing the same
+   * proxy identifier and connection key.
    */
   public boolean equals(Object obj) {
-    if (obj == this) return true;
-
-    if (obj instanceof Connection) {
-      Connection cnx = (Connection) obj;
-      return (proxyId.equals(cnx.proxyId) && (key == cnx.key));
-    }
-    return false;
+    return (obj instanceof Connection) && (hashCode() == obj.hashCode()) && toString().equals(obj.toString());
   }
 
-  /**
-   *  Returns the duration in seconds during which a JMS transacted (non XA)
-   * session might be pending; above that duration the session is rolled back
-   * and closed; the 0 value means "no timer".
-   *
-   * @return the duration in seconds during which a JMS transacted (non XA)
-   * session might be pending.
-   *
-   * @see FactoryParameters#txPendingTimer
-   */
-  public final long getTxPendingTimer() {
+  final long getTxPendingTimer() {
     return factoryParameters.txPendingTimer;
   }
   
-  /** 
-   *  Indicates whether the messages consumed are implicitly acknowledged
-   * or not. If true messages are immediately removed from queue when
-   * delivered and there is none acknowledge message from client to server.
-   * <p>
-   *  This attribute is inherited from FactoryParameters, by default false.
-   *
-   * @return true if messages produced are implicitly acknowledged.
-   *
-   * @see FactoryParameters#implicitAck
-   * @see Session#isImplicitAck()
-   */
-  public final boolean getImplicitAck() {
-    return factoryParameters.implicitAck;
-  }
-
-  /** 
-   *  Indicates whether the messages produced are asynchronously sent
-   * or not (without or with acknowledgement).
-   * <p>
-   *  This attribute is inherited from FactoryParameters, by default false. 
-   *
-   * @return true if messages produced are asynchronously sent.
-   *
-   * @see FactoryParameters#asyncSend
-   * @see Session#isAsyncSend()
-   */
-  public final boolean getAsyncSend() {
+  final boolean getAsyncSend() {
     return factoryParameters.asyncSend;
   }
   
-  /**
-   *  Get the maximum number of messages that can be read at once from a queue
-   * for this Connection.
-   * <p>
-   *  This attribute is inherited from FactoryParameters, default value is 1.
-   * 
-   * @return    The maximum number of messages that can be read at once from
-   *            a queue.
-   *
-   * @see FactoryParameters#queueMessageReadMax
-   * @see Session#getQueueMessageReadMax()
-   */
-  public final int getQueueMessageReadMax() {
+  final int getQueueMessageReadMax() {
     return factoryParameters.queueMessageReadMax;
   }
   
-  /**
-   *  Get the maximum number of acknowledgements that can be buffered when
-   * using Session.DUPS_OK_ACKNOWLEDGE mode for this Connection.
-   * <p>
-   *  This attribute is inherited from FactoryParameters, default value is 0.
-   *
-   * @return The Maximum number of acknowledgements that can be buffered when
-   *         using Session.DUPS_OK_ACKNOWLEDGE mode.
-   *
-   * @see FactoryParameters#topicAckBufferMax
-   * @see Session#getTopicAckBufferMax()
-   */
-  public final int getTopicAckBufferMax() {
+  final int getTopicAckBufferMax() {
     return factoryParameters.topicAckBufferMax;
   }
   
-  /**
-   * Get the threshold of passivation for this Connection.
-   * <p>
-   * This threshold is the maximum messages number over which the
-   * subscription is passivated.
-   * <p>
-   *  This attribute is inherited from FactoryParameters, default value is
-   * Integer.MAX_VALUE.
-   *
-   * @return The maximum messages number over which the subscription
-   *         is passivated.
-   *
-   * @see FactoryParameters#topicPassivationThreshold
-   * @see Session#getTopicPassivationThreshold()
-   */
-  public final int getTopicPassivationThreshold() {
+  final int getTopicActivationThreshold() {
+    return factoryParameters.topicActivationThreshold;
+  }
+
+  final int getTopicPassivationThreshold() {
     return factoryParameters.topicPassivationThreshold;
   }
   
   /**
-   * Get the threshold of activation for this Connection.
-   * <p>
-   * This threshold is the minimum messages number below which
-   * the subscription is activated.
-   * <p>
-   *  This attribute is inherited from FactoryParameters, default value is 0.
-   *
-   * @return The minimum messages number below which the subscription
-   *         is activated.
-   *
-   * @see FactoryParameters#topicActivationThreshold
-   * @see Session#getTopicActivationThreshold()
-   */
-  public final int getTopicActivationThreshold() {
-    return factoryParameters.topicActivationThreshold;
-  }
-  
-  /**
-   * Returns the local IP address on which the TCP connection is activated. 
-   * <p>
-   * This attribute is inherited from FactoryParameters.
-   *  
-   * @return the local IP address on which the TCP connection is activated.
-   *
-   * @see FactoryParameters#outLocalAddress
-   */
-  public final String getOutLocalAddress() {
-    return factoryParameters.outLocalAddress;
-  }
-
-  /**
-   * Returns the local IP address port on which the TCP connection is activated
-   * <p>
-   * This attribute is inherited from FactoryParameters.
-   *  
-   * @return the local IP address port on which the TCP connection is activated.
-   *
-   * @see FactoryParameters#outLocalPort
-   */
-  public final int getOutLocalPort() {
-    return factoryParameters.outLocalPort;
-  }
-  
-  /**
-   * Checks if the connection is closed. If true raises an
-   * IllegalStateException.
+   * Checks if the connecion is closed. If true
+   * raises an IllegalStateException.
    */
   final protected synchronized void checkClosed() throws IllegalStateException {
     if (status == Status.CLOSE ||  mtpx.isClosed()) 
@@ -413,14 +254,17 @@ public class Connection implements javax.jms.Connection {
    *              not exist.
    * @exception JMSException  If the method fails for any other reason.
    */
-  public synchronized javax.jms.ConnectionConsumer createConnectionConsumer(javax.jms.Destination dest, 
-                                                                            String selector,
-                                                                            javax.jms.ServerSessionPool sessionPool,
-                                                                            int maxMessages) throws JMSException {
+  public synchronized javax.jms.ConnectionConsumer
+      createConnectionConsumer(
+        javax.jms.Destination dest, 
+        String selector,
+        javax.jms.ServerSessionPool sessionPool,
+        int maxMessages) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 stringImage + ".createConnectionConsumer(" + dest + ',' + selector + ',' +
-                 sessionPool + ',' + maxMessages + ')');
+                 newTrace(".createConnectionConsumer(" + dest +
+                          ',' +selector + ',' + sessionPool +
+                          ',' + maxMessages + ')'));
     checkClosed();
     return createConnectionConsumer(dest, null, selector, sessionPool, maxMessages);
   }
@@ -442,12 +286,13 @@ public class Connection implements javax.jms.Connection {
                                       int maxMessages) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 stringImage + ".createDurableConnectionConsumer(" + topic + ',' + subName + ',' + selector + ',' +
-                 sessPool + ',' + maxMessages + ')');
+                 newTrace(".createDurableConnectionConsumer(" + 
+                          topic + ',' + subName + ',' + selector + ',' + 
+                          sessPool + ',' + maxMessages + ')'));
     checkClosed();
     if (subName == null) 
       throw new JMSException("Invalid subscription name: " + subName);
-    return createConnectionConsumer(topic, subName, selector, sessPool, maxMessages);
+    return createConnectionConsumer((Destination) topic, subName, selector, sessPool, maxMessages);
   }
   
   private synchronized javax.jms.ConnectionConsumer
@@ -489,7 +334,7 @@ public class Connection implements javax.jms.Connection {
         durable = true;
       }
       requestor.request(new ConsumerSubRequest(((Destination) dest).getName(),
-          targetName, selector, false, durable, false));
+          targetName, selector, false, durable));
     }
     
     MultiSessionConsumer msc =
@@ -526,7 +371,7 @@ public class Connection implements javax.jms.Connection {
     throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
-                 stringImage + ".createSession(" + transacted + ',' +  acknowledgeMode + ')');
+                 newTrace(".createSession(" + transacted + ',' +  acknowledgeMode + ')'));
     checkClosed();
     Session session = new Session(
       this,
@@ -607,7 +452,9 @@ public class Connection implements javax.jms.Connection {
    */
   public synchronized void start() throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, stringImage + ".start()"); 
+      logger.log(
+        BasicLevel.DEBUG, 
+        newTrace(".start()")); 
     checkClosed();
     
     // Ignoring the call if the connection is started:
@@ -639,14 +486,16 @@ public class Connection implements javax.jms.Connection {
    */
   public void stop() throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, stringImage + ".stop()");
+      logger.log(
+        BasicLevel.DEBUG, 
+        newTrace(".stop()"));
     checkClosed();
 
     synchronized (this) {
       if (status == Status.STOP)
         return;
     }
-    
+
     // At this point, the server won't deliver messages anymore,
     // the connection just waits for the sessions to have finished their
     // processings.
@@ -658,7 +507,7 @@ public class Connection implements javax.jms.Connection {
       Session session = (Session) sessions.get(i);
       session.stop();
     }
-    
+
     synchronized (this) {
       if (status == Status.STOP)
         return;
@@ -680,8 +529,10 @@ public class Connection implements javax.jms.Connection {
    */
   public void close() throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, stringImage + ".close()");
-
+      logger.log(
+        BasicLevel.DEBUG, 
+        newTrace(".close()"));
+    
     closer.close();
   }
 
@@ -707,7 +558,6 @@ public class Connection implements javax.jms.Connection {
       
     Vector sessionsToClose = (Vector)sessions.clone();
     sessions.clear();
-    mtpx.closing();
     
     for (int i = 0; i < sessionsToClose.size(); i++) {
       Session session = 
@@ -761,7 +611,8 @@ public class Connection implements javax.jms.Connection {
    */
   public void cleanup() {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, stringImage +".cleanup()");
+      logger.log(
+        BasicLevel.DEBUG, newTrace(".cleanup()"));
     
     // Closing the sessions:
     // Session session;
@@ -784,18 +635,27 @@ public class Connection implements javax.jms.Connection {
   }
 
   /** Returns a new session identifier. */
-  String nextSessionId() {
-    return sessionsC.nextValue();
+  synchronized String nextSessionId() {
+    if (sessionsC == Integer.MAX_VALUE)
+      sessionsC = 0;
+    sessionsC++;
+    return "c" + key + "s" + sessionsC;
   }
  
   /** Returns a new message identifier. */
-  String nextMessageId() {
-    return messagesC.nextValue();
+  synchronized String nextMessageId() {
+    if (messagesC == Integer.MAX_VALUE)
+      messagesC = 0;
+    messagesC++;
+    return "ID:" + proxyId.substring(1) + "c" + key + "m" + messagesC;
   }
 
   /** Returns a new subscription name. */
-  String nextSubName() {
-    return subsC.nextValue();
+  synchronized String nextSubName() {
+    if (subsC == Integer.MAX_VALUE)
+      subsC = 0;
+    subsC++;
+    return "c"  + key + "sub" + subsC;
   }
 
   /**
@@ -803,7 +663,9 @@ public class Connection implements javax.jms.Connection {
    */
   synchronized void closeSession(Session session) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, stringImage + ".closeSession(" + session + ')');
+      logger.log(
+        BasicLevel.DEBUG, 
+        newTrace(".closeSession(" + session + ')'));
     sessions.removeElement(session);
   }
 
@@ -813,14 +675,16 @@ public class Connection implements javax.jms.Connection {
    */
   synchronized void closeConnectionConsumer(MultiSessionConsumer cc) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, stringImage + ".closeConnectionConsumer(" + cc + ')');
+      logger.log(BasicLevel.DEBUG, 
+                 newTrace(".closeConnectionConsumer(" + cc + ')'));
     cconsumers.removeElement(cc);
   }
 
   synchronized AbstractJmsReply syncRequest(
     AbstractJmsRequest request) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, stringImage + ".syncRequest(" + request + ')');
+      logger.log(BasicLevel.DEBUG, 
+                 newTrace(".syncRequest(" + request + ')'));
     return requestor.request(request);
   }
 

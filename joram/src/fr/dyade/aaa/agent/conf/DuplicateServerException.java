@@ -23,11 +23,6 @@ package fr.dyade.aaa.agent.conf;
  */
 public class DuplicateServerException extends Exception {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
    *  Constructs a new <code>DuplicateServerException</code> with no
    * detail message.
    */

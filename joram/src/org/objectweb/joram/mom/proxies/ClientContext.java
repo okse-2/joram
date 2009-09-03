@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 200 ScalAgent Distributed Technologies
- * Copyright (C) 2004 France Telecom R&D
+ * Copyright (C) 2003 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - France Telecom R&D
  * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -24,32 +24,24 @@
  */
 package org.objectweb.joram.mom.proxies; 
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import fr.dyade.aaa.agent.AgentId;
+import org.objectweb.joram.mom.MomTracing;
+import org.objectweb.joram.shared.client.AbstractJmsReply;
+import org.objectweb.joram.shared.client.XACnxPrepare;
+
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.io.*;
 
-import org.objectweb.joram.shared.client.AbstractJmsReply;
-import org.objectweb.joram.shared.client.XACnxPrepare;
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.common.Debug;
 
 /**
  * The <code>ClientContext</code> class holds the data related to a client
  * context.
  */
-class ClientContext implements java.io.Serializable {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-  
-  /** logger */
-  public static Logger logger = Debug.getLogger(ClientContext.class.getName());
-
+class ClientContext implements java.io.Serializable
+{
   /** The proxy's agent identifier. */
   private AgentId proxyId;
 
@@ -84,7 +76,8 @@ class ClientContext implements java.io.Serializable {
    * @param proxyId  The proxy's agent identifier. 
    * @param id  Identifier of the context.
    */
-  ClientContext(AgentId proxyId, int id) {
+  ClientContext(AgentId proxyId, int id)
+  {
     this.proxyId = proxyId;
     this.id = id;
 
@@ -102,15 +95,18 @@ class ClientContext implements java.io.Serializable {
   }
  
   /** Returns the identifier of the context. */
-  int getId() {
+  int getId()
+  {
     return id;
   }
 
   /** Sets the activation status of the context. */
   void setActivated(boolean started) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "ClientContext[" + proxyId + ',' + id + "].setActivated(" + started + ')');
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG,
+        "ClientContext[" + proxyId + ',' + id + 
+        "].setActivated(" + started + ')');
     this.started = started;
   }
 
@@ -121,22 +117,21 @@ class ClientContext implements java.io.Serializable {
   }
 
   /** Adds a temporary destination identifier. */
-  void addTemporaryDestination(AgentId destId) {
+  void addTemporaryDestination(AgentId destId)
+  {
     tempDestinations.add(destId);
     proxy.setSave();
   }
    
-  Enumeration getTempDestinations() {
-    //Creates an enumeration not backed by tempDestinations
-    Vector tempDests = new Vector();
-    for(Enumeration dests = tempDestinations.elements(); dests.hasMoreElements(); ){  
-      tempDests.addElement(dests.nextElement());
-    }
-    return tempDests.elements();
+  /** Returns the temporary destinations' identifiers. */
+  Enumeration getTempDestinations()
+  {
+    return tempDestinations.elements();
   }
 
   /** Removes a temporary destination identifier. */
-  void removeTemporaryDestination(AgentId destId) {
+  void removeTemporaryDestination(AgentId destId)
+  {
     deliveringQueues.remove(destId);
     tempDestinations.remove(destId);
     proxy.setSave();
@@ -144,58 +139,71 @@ class ClientContext implements java.io.Serializable {
 
   /** Adds a pending delivery. */
   void addPendingDelivery(AbstractJmsReply reply) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "ClientContext[" + proxyId + ',' + id + "].addPendingDelivery(" + reply + ')');
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG,
+        "ClientContext[" + proxyId + ',' + id + 
+        "].addPendingDelivery(" + reply + ')');
     repliesBuffer.add(reply);
   }
 
   /** Returns the pending deliveries. */
-  Enumeration getPendingDeliveries() {
+  Enumeration getPendingDeliveries()
+  {
     return repliesBuffer.elements();
   }
 
   /** Clears the pending deliveries buffer. */
-  void clearPendingDeliveries() {
+  void clearPendingDeliveries()
+  {
     repliesBuffer.clear();
   }
 
   /** Adds an active subscription name. */
-  void addSubName(String subName) {
+  void addSubName(String subName)
+  {
     activeSubs.add(subName);
   }
 
   /** Returns the active subscriptions' names. */
-  Enumeration getActiveSubs() {
+  Enumeration getActiveSubs()
+  {
     return activeSubs.elements();
   }
 
   /** Removes an active subscription name. */
-  void removeSubName(String subName) {
+  void removeSubName(String subName)
+  {
     activeSubs.remove(subName);
   }
   
   /** Cancels a "receive" request. */
-  void cancelReceive(int cancelledRequestId) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 "ClientContext[" + proxyId + ':' + id + "].cancelReceive(" + cancelledRequestId + ')');
+  void cancelReceive(int cancelledRequestId)
+  {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, 
+        "ClientContext[" + proxyId + ':' + id + 
+        "].cancelReceive(" + cancelledRequestId + ')');
     this.cancelledRequestId = cancelledRequestId;
   }
 
   /** Returns the cancelled "receive" request identifier. */
-  int getCancelledReceive() {
+  int getCancelledReceive()
+  {
     return cancelledRequestId;
   }
 
   /** Adds the identifier of a delivering queue. */ 
-  void addDeliveringQueue(AgentId queueId) {
+  void addDeliveringQueue(AgentId queueId)
+  {
     deliveringQueues.put(queueId, queueId);
     proxy.setSave();
   }
 
   /** Returns the identifiers of the delivering queues. */
-  Enumeration getDeliveringQueues() {
+  Enumeration getDeliveringQueues()
+  {
     return deliveringQueues.keys();
   }
   
@@ -207,11 +215,15 @@ class ClientContext implements java.io.Serializable {
    * @param asyncReplyCount
    */
   void addMultiReplyContext(int requestId, int asyncReplyCount) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 "ClientContext[" + proxyId + ':' + id + "].addMultiReplyContext(" + requestId + ',' + asyncReplyCount + ')');
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, 
+        "ClientContext[" + proxyId + ':' + id + 
+        "].addMultiReplyContext(" + requestId + ',' + asyncReplyCount + ')');
     if (commitTable == null) commitTable = new Hashtable();
-    commitTable.put(new Integer(requestId), new MultiReplyContext(asyncReplyCount));
+    commitTable.put(
+        new Integer(requestId), 
+        new MultiReplyContext(asyncReplyCount));
     proxy.setSave();
   }
   
@@ -226,15 +238,17 @@ class ClientContext implements java.io.Serializable {
    * or if the context doesn't exist
    */
   int setReply(int requestId) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 "ClientContext[" + proxyId + ':' + id + "].setReply(" + requestId + ')');
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, 
+        "ClientContext[" + proxyId + ':' + id + 
+        "].setReply(" + requestId + ')');
     if (commitTable == null) return 0;
-    Integer ctxKey = new Integer(requestId);
-    MultiReplyContext ctx = (MultiReplyContext)commitTable.get(ctxKey);
-    if (ctx == null) {
-      return 0;
-    } else {
+    Integer ctxKey = (Integer)new Integer(requestId);
+    MultiReplyContext ctx = 
+      (MultiReplyContext)commitTable.get(ctxKey);
+    if (ctx == null) return 0;
+    else {
       ctx.counter--;
       if (ctx.counter == 0) {
         commitTable.remove(ctxKey);
@@ -253,7 +267,8 @@ class ClientContext implements java.io.Serializable {
   }
 
   /** Registers a given transaction "prepare". */
-  void registerTxPrepare(Object key, XACnxPrepare prepare) throws Exception {
+  void registerTxPrepare(Object key, XACnxPrepare prepare) throws Exception
+  {
     if (transactionsTable == null)
       transactionsTable = new Hashtable();
 
@@ -266,7 +281,8 @@ class ClientContext implements java.io.Serializable {
   }
 
   /** Returns and deletes a given transaction "prepare". */
-  XACnxPrepare getTxPrepare(Object key) {
+  XACnxPrepare getTxPrepare(Object key)
+  {
     XACnxPrepare prepare = null;
     if (transactionsTable != null) {
       prepare = (XACnxPrepare) transactionsTable.remove(key);
@@ -275,17 +291,9 @@ class ClientContext implements java.io.Serializable {
     return prepare;
   }
 
-  /**
-   * 
-   * @param key XID
-   * @return true if prepared transation.
-   */
-  public boolean isPrepared(Object key) {
-    return transactionsTable.containsKey(key);
-  }
-  
   /** Returns the identifiers of the prepared transactions. */
-  Enumeration getTxIds() {
+  Enumeration getTxIds()
+  {
     if (transactionsTable == null)
       return new Hashtable().keys();
     return transactionsTable.keys();
@@ -299,7 +307,8 @@ class ClientContext implements java.io.Serializable {
     repliesBuffer = (Vector)in.readObject();
   }
 
-  public void writeBag(ObjectOutputStream out) throws IOException {
+  public void writeBag(ObjectOutputStream out)
+    throws IOException {
     out.writeBoolean(started);
     out.writeInt(cancelledRequestId);
     out.writeObject(activeSubs);

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -27,7 +27,6 @@ package org.objectweb.joram.mom.proxies;
 
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
-import org.objectweb.joram.shared.excepts.MomException;
 
 
 /**
@@ -41,7 +40,7 @@ public interface ConnectionContext {
   
   public void pushReply(AbstractJmsReply reply);
   
-  public void pushError(MomException exc);
+  public void pushError(Exception exc);
   
   public boolean isClosed();
   

@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -25,9 +24,6 @@ package fr.dyade.aaa.agent;
  */
 public class DeleteAck extends Notification { 
 
-  /** Define serialVersionUID for interoperability. */
-  private static final long serialVersionUID = 1L;
-
   public AgentId agent = null;
 
   public static final int OK = 0;
@@ -36,19 +32,11 @@ public class DeleteAck extends Notification {
 
   public int status = OK;
 
-  public Object extraInformation;
-
   public Throwable exc;
 
   public DeleteAck(AgentId agent) {
     this.status = OK;
     this.agent = agent;
-  }
-
-  public DeleteAck(AgentId agent, Object extraInformation) {
-    this.status = OK;
-    this.agent = agent;
-    this.extraInformation = extraInformation;
   }
 
   public DeleteAck(AgentId agent, Throwable exc) {

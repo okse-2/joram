@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Contributor(s):
  */
 package org.objectweb.joram.mom.dest;
 
@@ -31,10 +31,8 @@ import org.objectweb.joram.mom.notifications.SetFatherRequest;
  * A <code>FatherAck</code> instance is a notification sent by a topic
  * requested to be a hierarchical father.
  */
-class FatherAck extends Notification {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-  
+class FatherAck extends Notification
+{
   /** The originial client request. */
   SetFatherRequest request;
   /** The original requester. */
@@ -52,7 +50,8 @@ class FatherAck extends Notification {
    * @param ok  <code>true</code> if the topic can be a father.
    * @param info  Related info.
    */
-  FatherAck(FatherTest fatherTest, boolean ok, String info)  {
+  FatherAck(FatherTest fatherTest, boolean ok, String info)
+  {
     this.request = fatherTest.request;
     this.requester = fatherTest.requester;
     this.ok = ok;

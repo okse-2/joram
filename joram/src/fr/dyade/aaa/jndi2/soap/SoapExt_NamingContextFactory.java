@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2003 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,7 @@ package fr.dyade.aaa.jndi2.soap;
 
 import fr.dyade.aaa.jndi2.client.NamingContextFactory;
 
+import javax.naming.CompositeName;
 import javax.naming.Context;
 import javax.naming.NamingException;
 
@@ -34,7 +35,8 @@ import java.util.Hashtable;
  * Extends the <code>NamingContextFactory</code> for allowing clients to
  * access JNDI through a SOAP service.
  */
-public class SoapExt_NamingContextFactory extends NamingContextFactory {
+public class SoapExt_NamingContextFactory extends NamingContextFactory
+{
   /**
    * Extended method returning when requested a JNDI initial context for
    * accessing a SOAP service.
@@ -43,7 +45,8 @@ public class SoapExt_NamingContextFactory extends NamingContextFactory {
    *
    * @exception NamingException  Thrown if the parameters are invalid.
    */
-  public Context getInitialContext(Hashtable env) throws NamingException {
+  public Context getInitialContext(Hashtable env) throws NamingException
+  {
     String soapHost = (String) env.get("java.naming.factory.soapservice.host");
 
     // No SOAP service described in the configuration, building a "classical"

@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,76 +19,27 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Contributor(s):
  */
 package org.objectweb.joram.shared.client;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
+import java.util.Hashtable;
+import java.util.Enumeration;
 
 /**
  * A <code>ConsumerReceiveRequest</code> is sent by a
  * <code>MessageConsumer</code> when requesting a message.
  */
-public final class ConsumerReceiveRequest extends AbstractJmsRequest {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
+public class ConsumerReceiveRequest extends AbstractJmsRequest
+{
   /** The selector for filtering messages on a queue. */
   private String selector;
-
-  /** Sets the selector. */
-  public void setSelector(String selector) {
-    this.selector = selector;
-  }
-
-  /** Returns the selector for filtering the messages. */
-  public String getSelector() {
-    return selector;
-  }
-
   /** The time to live value of the request (negative for infinite). */
   private long timeToLive;
-
-  /** Sets the time to live value. */
-  public void setTimeToLive(long timeToLive) {
-    this.timeToLive = timeToLive;
-  }
-
-  /** Returns the time to live value in milliseconds. */
-  public long getTimeToLive() {
-    return timeToLive;
-  }
-
   /** <code>true</code> if the request is destinated to a queue. */
   private boolean queueMode;
 
-  /** Sets the target destination type. */
-  public void setQueueMode(boolean queueMode) {
-    this.queueMode = queueMode;
-  }
-
-  /** Returns <code>true</code> if the request is destinated to a queue. */
-  public boolean getQueueMode() {
-    return queueMode;
-  }
-
   private boolean receiveAck;
-
-  public void setReceiveAck(boolean receiveAck) {
-    this.receiveAck = receiveAck;
-  }
-
-  public final boolean getReceiveAck() {
-    return receiveAck;
-  }
-
-  protected int getClassId() {
-    return CONSUMER_RECEIVE_REQUEST;
-  }
 
   /**
    * Constructs a <code>ConsumerReceiveRequest</code>.
@@ -101,7 +52,8 @@ public final class ConsumerReceiveRequest extends AbstractJmsRequest {
    *          queue.
    */
   public ConsumerReceiveRequest(String targetName, String selector,
-                                long timeToLive, boolean queueMode) {
+                                long timeToLive, boolean queueMode)
+  {
     super(targetName);
     this.selector = selector;
     this.timeToLive = timeToLive;
@@ -112,37 +64,71 @@ public final class ConsumerReceiveRequest extends AbstractJmsRequest {
   /**
    * Constructs a <code>ConsumerReceiveRequest</code>.
    */
-  public ConsumerReceiveRequest() {}
+  public ConsumerReceiveRequest()
+  {}
 
-  /* ***** ***** ***** ***** *****
-   * Streamable interface
-   * ***** ***** ***** ***** ***** */
-
-  /**
-   *  The object implements the writeTo method to write its contents to
-   * the output stream.
-   *
-   * @param os the stream to write the object to
-   */
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    StreamUtil.writeTo(selector, os);
-    StreamUtil.writeTo(timeToLive, os);
-    StreamUtil.writeTo(queueMode, os);
-    StreamUtil.writeTo(receiveAck, os);
+  public void setReceiveAck(boolean receiveAck) {
+    this.receiveAck = receiveAck;
   }
 
-  /**
-   *  The object implements the readFrom method to restore its contents from
-   * the input stream.
-   *
-   * @param is the stream to read data from in order to restore the object
-   */
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    selector = StreamUtil.readStringFrom(is);
-    timeToLive = StreamUtil.readLongFrom(is);
-    queueMode = StreamUtil.readBooleanFrom(is);
-    receiveAck = StreamUtil.readBooleanFrom(is);
+  public final boolean getReceiveAck() {
+    return receiveAck;
+  }
+
+  /** Sets the selector. */
+  public void setSelector(String selector)
+  {
+    this.selector = selector;
+  }
+
+  /** Sets the time to live value. */
+  public void setTimeToLive(long timeToLive)
+  {
+    this.timeToLive = timeToLive;
+  }
+
+  /** Sets the target destination type. */
+  public void setQueueMode(boolean queueMode)
+  {
+    this.queueMode = queueMode;
+  }
+
+  /** Returns the selector for filtering the messages. */
+  public String getSelector()
+  {
+    return selector;
+  }
+
+  /** Returns the time to live value in milliseconds. */
+  public long getTimeToLive()
+  {
+    return timeToLive;
+  }
+
+  /** Returns <code>true</code> if the request is destinated to a queue. */
+  public boolean getQueueMode()
+  {
+    return queueMode;
+  }
+
+  public Hashtable soapCode() {
+    Hashtable h = super.soapCode();
+    if (selector != null)
+      h.put("selector",selector);
+    h.put("timeToLive",new Long(timeToLive));
+    h.put("queueMode",new Boolean(queueMode));
+    h.put("receiveAck",new Boolean(receiveAck));
+    return h;
+  }
+
+  public static Object soapDecode(Hashtable h) {
+    ConsumerReceiveRequest req = new ConsumerReceiveRequest();
+    req.setRequestId(((Integer) h.get("requestId")).intValue());
+    req.setTarget((String) h.get("target"));
+    req.setSelector((String) h.get("selector"));
+    req.setQueueMode(((Boolean) h.get("queueMode")).booleanValue());
+    req.setTimeToLive(((Long) h.get("timeToLive")).longValue());
+    req.receiveAck = ((Boolean) h.get("receiveAck")).booleanValue();
+    return req;
   }
 }

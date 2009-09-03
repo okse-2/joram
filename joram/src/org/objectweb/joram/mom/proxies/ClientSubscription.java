@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,41 +22,31 @@
  */
 package org.objectweb.joram.mom.proxies;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Channel;
+import org.objectweb.joram.mom.MomTracing;
+import org.objectweb.joram.mom.dest.DeadMQueueImpl;
+import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.shared.client.ConsumerMessages;
+import org.objectweb.joram.shared.messages.Message;
+import org.objectweb.joram.shared.selectors.Selector;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.IOException;
 
-import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.TabularData;
-
-import org.objectweb.joram.mom.dest.QueueImpl;
-import org.objectweb.joram.mom.messages.Message;
-import org.objectweb.joram.mom.messages.MessageJMXWrapper;
-import org.objectweb.joram.mom.util.DMQManager;
-import org.objectweb.joram.shared.MessageErrorConstants;
-import org.objectweb.joram.shared.client.ConsumerMessages;
-import org.objectweb.joram.shared.selectors.Selector;
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.common.Debug;
 
 /**
  * The <code>ClientSubscription</code> class holds the data of a client
  * subscription, and the methods managing the delivery and acknowledgement
  * of the messages.
  */
-class ClientSubscription implements ClientSubscriptionMBean, Serializable {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-  
-  public static Logger logger = Debug.getLogger(ClientSubscription.class.getName());
-  
+class ClientSubscription implements java.io.Serializable {
   /** The proxy's agent identifier. */
   private AgentId proxyId;
   /** <code>true</code> if the subscription is durable. */
@@ -78,7 +68,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    */
   private Integer threshold;
 
-  /** Max number of Message stored in the queue (-1 no limit). */
+  /** nb Max of Message store in queue (-1 no limit). */
   protected int nbMaxMsg = -1;
 
   /** Vector of identifiers of the messages to deliver. */
@@ -115,19 +105,13 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   /** Expiration time of the "receive" request, if any. */
   private transient long requestExpTime;
 
-  /**
-   * Proxy messages table. Be careful: currently this table is shared between
-   * all subscription.
-   */
+  /** Proxy messages table. */
   private transient Hashtable messagesTable;
 
+  /** string proxy agent id */
+  private transient String proxyStringId;
+  
   private transient ProxyAgentItf proxy;
-  
-  /** the number of erroneous messages forwarded to the DMQ */
-  protected long nbMsgsSentToDMQSinceCreation = 0;
-  
-  /** the number of delivered messages */
-  protected long nbMsgsDeliveredSinceCreation = 0;
 
   /**
    * Constructs a <code>ClientSubscription</code> instance.
@@ -155,7 +139,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
                      boolean noLocal,
                      AgentId dmqId,
                      Integer threshold,
-                     Hashtable messagesTable) {
+                     Hashtable messagesTable)
+  {
     this.proxyId = proxyId;
     this.contextId = contextId;
     this.subRequestId = reqId;
@@ -178,8 +163,11 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     requestId = -1;
     toListener = false;
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + ": created.");
+    proxyStringId = proxyId.toString();
+
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              this + ": created.");
   }
 
 //    public String dump() {
@@ -208,47 +196,51 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
 //      return buff.toString();
 //    }
 
-  public String toString() {
+  public String toString()
+  {
     return "ClientSubscription" + proxyId + name;
   }
 
+
   /** Returns the subscription's context identifier. */
-  public int getContextId() {
+  int getContextId()
+  {
     return contextId;
   }
 
   /** Returns the identifier of the subscribing request. */
-  public int getSubRequestId() {
+  int getSubRequestId()
+  {
     return subRequestId;
   }
 
   /** Returns the name of the subscription. */
-  public String getName() {
+  String getName()
+  {
     return name;
   }
 
   /** Returns the identifier of the subscription topic. */
-  public AgentId getTopicId() {
+  AgentId getTopicId()
+  {
     return topicId;
-  }
-  
-  /** Returns the identifier of the subscription topic. */
-  public String getTopicIdAsString() {
-    return topicId.toString();
   }
 
   /** Returns the selector. */
-  public String getSelector() {
+  String getSelector()
+  {
     return selector;
   }
 
   /** Returns <code>true</code> if the subscription is durable. */
-  public boolean getDurable() {
+  boolean getDurable()
+  {
     return durable;
   }
 
   /** Returns <code>true</code> if the subscription is active. */
-  public boolean getActive() {
+  boolean getActive()
+  {
     return active;
   }
 
@@ -278,7 +270,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    *
    * @return The number of pending message for the subscription.
    */
-  public int getPendingMessageCount() {
+  int getMessageCount() {
     return messageIds.size();
   }
 
@@ -287,7 +279,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    *
    * @return the list of message's identifiers for the subscription.
    */
-  public String[] getMessageIds() {
+  String[] getMessageIds() {
     String[] res = new String[messageIds.size()];
     messageIds.copyInto(res);
     return res;
@@ -300,16 +292,22 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   /**
    * Re-initializes the client subscription.
    * 
+   * @param proxyStringId  string proxy id.
    * @param messagesTable  Proxy's table where storing the messages.
    * @param persistedMessages  Proxy's persisted messages.
    * @param denyDeliveredMessages Denies already delivered messages.
    */
-  void reinitialize(Hashtable messagesTable,
+  void reinitialize(String proxyStringId,
+                    Hashtable messagesTable,
                     Vector persistedMessages,
-                    boolean denyDeliveredMessages) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "ClientSubscription[" + this + "].reinitialize()");
+                    boolean denyDeliveredMessages)
+  {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              "ClientSubscription[" + this + 
+                              "].reinitialize()");
     
+    this.proxyStringId = proxyStringId;
     this.messagesTable = messagesTable;
 
     // Browsing the persisted messages.
@@ -320,20 +318,24 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
       msgId = message.getIdentifier();
 
       if (messageIds.contains(msgId) || deliveredIds.contains(msgId)) {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, " -> contains message " + msgId);
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgProxy.log(
+            BasicLevel.DEBUG,
+            " -> contains message " + msgId);
         message.acksCounter++;
         message.durableAcksCounter++;
         
         if (message.acksCounter == 1) {
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, " -> messagesTable.put(" + msgId + ')');
+          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+            MomTracing.dbgProxy.log(
+              BasicLevel.DEBUG,
+              " -> messagesTable.put(" + msgId + ')');
           messagesTable.put(msgId, message);
         }
 //          if (message.durableAcksCounter == 1) {
-        // if (logger.isLoggable(BasicLevel.DEBUG))
-        // logger.log(
-        //                BasicLevel.DEBUG,
+//            if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+//              MomTracing.dbgProxy.log(
+//                BasicLevel.DEBUG,
 //                " -> save message " + message);
 // it's alredy save.
 //          message.save(proxyStringId);          
@@ -362,7 +364,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
                   int reqId,
                   AgentId topicId,
                   String selector,
-                  boolean noLocal) {
+                  boolean noLocal)
+  {
     this.contextId = contextId;
     this.subRequestId = reqId;
     this.topicId = topicId;
@@ -378,14 +381,16 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     // Some updated attributes are persistent
     save();
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + ": reactivated.");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              this + ": reactivated.");
   }
 
-  /** De-activates the subscription, denies the non acknowledged messages. */  
+  /** De-activates the subscription, denies the non acknowledgded messages. */  
   void deactivate() {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "ClientSubscription.deactivate()");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              "ClientSubscription.deactivate()");
 
     unsetListener();
     unsetReceiver();
@@ -398,8 +403,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     // deliveredIds is persistent
     save();
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + ": deactivated.");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              this + ": deactivated.");
   }
 
   void setActive(boolean active) {
@@ -411,34 +417,38 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    *
    * @param requestId  Identifier of the listener request.
    */   
-  void setListener(int requestId) {
+  void setListener(int requestId)
+  {
     this.requestId = requestId;
     toListener = true;
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + ": listener set.");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              this + ": listener set.");
   }
 
   /** Unsets the listener. */
-  void unsetListener() {
+  void unsetListener()
+  {
     requestId = -1;
     toListener = false;
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + ": listener unset.");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              this + ": listener unset.");
   }
 
   /**
    * Sets a receiver request.
-   * 
-   * @param requestId
-   *            Identifier of the "receive" request.
-   * @param timeToLive
-   *            Request's time to live value.
+   *
+   * @param requestId  Identifier of the "receive" request.
+   * @param timeToLive  Request's time to live value.
    */
   void setReceiver(int requestId, long timeToLive) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + ".setReceiver(" + requestId + "," + timeToLive + ")");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              this + ".setReceiver(" + requestId + 
+                              "," + timeToLive + ")");
 
     this.requestId = requestId;
     toListener = false;
@@ -451,20 +461,23 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
 
   /** Unsets a receiver request. */
   void unsetReceiver() {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + ".unsetReceiver()");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              this + ".unsetReceiver()");
     requestId = -1;
     requestExpTime = 0;
   }
 
   /** Sets the subscription's dead message queue identifier. */
-  void setDMQId(AgentId dmqId) {
+  void setDMQId(AgentId dmqId)
+  {
     this.dmqId = dmqId;
     save();
   }
 
   /** Sets the subscription's threshold value. */
-  void setThreshold(Integer threshold) {
+  void setThreshold(Integer threshold)
+  {
     this.threshold = threshold;
     save();
   }
@@ -474,38 +487,36 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    * Browses messages and keeps those which will have to be delivered
    * to the subscriber.
    */
-  // AF: TODO we should parse each message for each subscription
-  // see ProxyImpl.doFwd
   void browseNewMessages(Vector newMessages) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + ".browseNewMessages(" + newMessages + ')');
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                              this + ".browseNewMessages(" + 
+                              newMessages + ')');
     // Browsing the messages one by one.
     Message message;
     String msgId;
-    DMQManager dmqManager = null;
     for (Enumeration e = newMessages.elements(); e.hasMoreElements();) {
       message = (Message) e.nextElement();
       msgId = message.getIdentifier();
 
       // test nbMaxMsg
       if (nbMaxMsg > -1 && nbMaxMsg <= messageIds.size()) {
-        if (dmqManager == null) {
-          dmqManager = new DMQManager(dmqId, null);
-        }
-        nbMsgsSentToDMQSinceCreation++;
-        dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.QUEUE_FULL);
+        ClientMessages deadMessages = new ClientMessages();
+        deadMessages.addMessage(message);
+        sendToDMQ(deadMessages);
         continue;
       }
 
       // Keeping the message if filtering is successful.
-      if (noFiltering ||
-          (Selector.matches(message.getHeaderMessage(), selector) &&
-           (! noLocal || ! msgId.startsWith(proxyId.toString().substring(1) + "c" + contextId + "m", 3)))) {
+      if (noFiltering
+          || (Selector.matches(message, selector)
+              && (! noLocal
+                  || ! msgId.startsWith(proxyId.toString().substring(1) + "c" + contextId + "m", 3)))) {
 
         // It's the first delivery, adds the message to the proxy's table
         if (message.acksCounter == 0)
           messagesTable.put(msgId, message);
-        
+
         message.acksCounter++;
         if (durable)
           message.durableAcksCounter++;
@@ -513,12 +524,10 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
         messageIds.add(msgId);
         save();
 
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, this + ": added msg " + msgId + " for delivery.");
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+                                  this + ": added msg " + msgId + " for delivery.");
       }
-    }
-    if (dmqManager != null) {
-      dmqManager.sendToDMQ();
     }
   }
 
@@ -526,19 +535,24 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    * Launches a delivery sequence, either for a listener, or for a receiver.
    */
   ConsumerMessages deliver() {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "ClientSubscription[" + proxyId + ',' + topicId + ',' + name
-          + "].deliver()");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG,
+        "ClientSubscription[" + proxyId + ',' + 
+        topicId + ',' + name + "].deliver()");
 
     // Returning null if no request exists:
     if (requestId == -1)
       return null;
 
      // Returning null if a "receive" request has expired:
-    if (!toListener && requestExpTime > 0 && System.currentTimeMillis() >= requestExpTime) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, this + ": receive request " + requestId
-            + " expired.");
+    if (! toListener
+        && requestExpTime > 0
+        && System.currentTimeMillis() >= requestExpTime) {
+      if (MomTracing.dbgDestination.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgDestination.log(BasicLevel.DEBUG,
+                                      this + ": receive request " + requestId
+                                      + " expired.");
       requestId = -1;
       requestExpTime = 0;
       return null;
@@ -551,10 +565,11 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     int insertionIndex = -1;
     int prior;
     Vector deliverables = new Vector();
-    DMQManager dmqManager = null;
+    ClientMessages deadMessages = null;
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, " -> messageIds.size() = " + messageIds.size());
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, 
+          " -> messageIds.size() = " + messageIds.size());
     
     // Delivering to a listener.
     if (toListener) {
@@ -573,10 +588,10 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
             // Setting the message's deliveryCount and denied fields.
             deliveryAttempts = (Integer) deniedMsgs.get(id);
             if (deliveryAttempts == null)
-              message.setDeliveryCount(1);
+              message.deliveryCount = 1;
             else {
-              message.setDeliveryCount(deliveryAttempts.intValue() +1);
-              message.setRedelivered();
+              message.deliveryCount = deliveryAttempts.intValue() + 1;
+              message.denied = true;
             }
 
             // Inserting it according to its priority.
@@ -594,13 +609,16 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
               }
             }
             lastPrior = message.getPriority();
-            deliverables.add(insertionIndex, message.getFullMessage().clone());
+            deliverables.insertElementAt(message.clone(), insertionIndex);
 
-            if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, this + ": message " + id + " added for delivery.");
-          } else {
-            // Invalid message: removing and adding it to the vector of dead
-            // messages.
+            if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+              MomTracing.dbgProxy.log(BasicLevel.DEBUG, 
+                                      this + ": message " + id
+                                      + " added for delivery.");
+          }
+          // Invalid message: removing and adding it to the vector of dead
+          // messages.
+          else {
             messagesTable.remove(id);
             // Deleting the message, if needed.
             if (durable)
@@ -609,22 +627,22 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
             // Setting the message's deliveryCount, denied and expired fields.
             deliveryAttempts = (Integer) deniedMsgs.remove(id);
             if (deliveryAttempts != null) {
-              message.setDeliveryCount(deliveryAttempts.intValue() +1);
-              message.setRedelivered();
+              message.deliveryCount = deliveryAttempts.intValue();
+              message.denied = true;
             }
-            if (dmqManager == null) {
-              dmqManager = new DMQManager(dmqId, null);
-            }
-            nbMsgsSentToDMQSinceCreation++;
-            dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.EXPIRED);
+            message.expired = true;
+            if (deadMessages == null)
+              deadMessages = new ClientMessages();
+            deadMessages.addMessage(message);
           }
-        } else {
-          // Message has already been deleted.
-          deniedMsgs.remove(id);
         }
+        // Message has already been deleted.
+        else
+          deniedMsgs.remove(id);
       }
-    } else {
-      // Delivering to a receiver: getting the highest priority message.
+    }
+    // Delivering to a receiver: getting the highest priority message.
+    else {
       int highestP = -1;
       Message keptMsg = null;
       // Browsing the non delivered messages.
@@ -632,15 +650,17 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
       while (i < messageIds.size()) {
         id = (String) messageIds.elementAt(i);
         message = (Message) messagesTable.get(id);
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, " -> message = " + message);
-
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgProxy.log(
+            BasicLevel.DEBUG, " -> message = " + message);
+        
         // Message still exists.
         if (message != null) {
           // Checking valid message.
           if (message.isValid(System.currentTimeMillis())) {
-            if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, " -> valid message");
+            if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+              MomTracing.dbgProxy.log(
+                BasicLevel.DEBUG, " -> valid message");
             // Higher priority: keeping the message.
             if (message.getPriority() > highestP) {
               highestP = message.getPriority();
@@ -649,11 +669,13 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
 
             // get next message
             i++;
-          } else {
-            // Invalid message: removing and adding it to the vector of dead
-            // messages.
-            if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, " -> invalid message");
+          }
+          // Invalid message: removing and adding it to the vector of dead
+          // messages.
+          else {
+            if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+              MomTracing.dbgProxy.log(
+                BasicLevel.DEBUG, " -> invalid message");
             messageIds.remove(id);
             save();
             messagesTable.remove(id);
@@ -664,21 +686,19 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
             // Setting the message's deliveryCount, denied and expired fields.
             deliveryAttempts = (Integer) deniedMsgs.remove(id);
             if (deliveryAttempts != null) {
-              message.setDeliveryCount(deliveryAttempts.intValue());
-              message.setRedelivered();
+              message.deliveryCount = deliveryAttempts.intValue();
+              message.denied = true;
             }
-            
-            if (dmqManager == null) {
-              dmqManager = new DMQManager(dmqId, null);
-            }
-            nbMsgsSentToDMQSinceCreation++;
-            dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.EXPIRED);
+            message.expired = true;
+            deadMessages = new ClientMessages();
+            deadMessages.addMessage(message);
           }
-        } else {
-          // Message has already been deleted.
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, " -> deleted message");
-
+        }
+        // Message has already been deleted.
+        else {
+          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+            MomTracing.dbgProxy.log( 
+              BasicLevel.DEBUG, " -> deleted message " + id);
           messageIds.remove(id);
           deniedMsgs.remove(id);
           save();
@@ -694,33 +714,34 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
         // Setting the message's deliveryCount and denied fields.
         deliveryAttempts = (Integer) deniedMsgs.get(keptMsg.getIdentifier());
         if (deliveryAttempts == null)
-          keptMsg.setDeliveryCount(1);
+          keptMsg.deliveryCount = 1;
         else {
-          keptMsg.setDeliveryCount(deliveryAttempts.intValue() +1);
-          keptMsg.setRedelivered();
+          keptMsg.deliveryCount = deliveryAttempts.intValue() + 1;
+          keptMsg.denied = true;
         }
-        deliverables.add(keptMsg.getFullMessage().clone());
+        deliverables.add(keptMsg.clone());
 
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger
-              .log(BasicLevel.DEBUG, this + ": message " + keptMsg.getIdentifier() + " added for delivery.");
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgProxy.log(BasicLevel.DEBUG, 
+                                  this + ": message " + keptMsg.getIdentifier()
+                                  + " added for delivery.");
       } else {
         i++;
       }
     }
    
     // Sending the dead messages to the DMQ, if any:
-    if (dmqManager != null)
-      dmqManager.sendToDMQ();
+    if (deadMessages != null)
+      sendToDMQ(deadMessages);
 
     // Finally, returning the reply or null:
     if (! deliverables.isEmpty()) {
-      nbMsgsDeliveredSinceCreation += deliverables.size();
       ConsumerMessages consM = new ConsumerMessages(requestId,
                                                     deliverables,
                                                     name,
                                                     false);
-      if (! toListener) requestId = -1;
+      if (! toListener)
+        requestId = -1;
 
       return consM;
     }
@@ -738,8 +759,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   }
 
   void acknowledge(String id) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + ": acknowledges message: " + id);
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, 
+                              this + ": acknowledges message: " + id);
     
     deliveredIds.remove(id);
     deniedMsgs.remove(id);
@@ -748,7 +770,15 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     
     // Message may be null if it is not valid anymore
     if (msg != null) {
-      decrAckCounters(id, msg);
+      msg.acksCounter--;
+      if (msg.acksCounter == 0)
+        messagesTable.remove(id);
+      if (durable) {
+        msg.durableAcksCounter--;
+        
+        if (msg.durableAcksCounter == 0)
+          msg.delete();
+      }
     }
   }
 
@@ -756,15 +786,16 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    * Denies messages.
    */
   void deny(Enumeration denies) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + ".deny(" + denies + ')');
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, 
+                              this + ".deny(" + denies + ')');
     String id;
-    Message message;
+    Message msg;
+    ClientMessages deadMessages = null;
     int deliveryAttempts = 1;
     int i;
     String currentId;
     long currentO;
-    DMQManager dmqManager = null;
 
     denyLoop:
     while (denies.hasMoreElements()) {
@@ -772,41 +803,54 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
 
       String deliveredMsgId = (String)deliveredIds.remove(id);
       if (deliveredMsgId == null) {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, this + ": cannot deny message: " + id);
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgProxy.log(BasicLevel.DEBUG, 
+                                  this + ": cannot denies message: " + id);
 
         continue denyLoop;
       }
       save();
       
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, this + ": deny message: " + id);
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG, 
+                                this + ": denies message: " + id);
       
-      message = (Message) messagesTable.get(id);
+      msg = (Message) messagesTable.get(id);
       
       // Message may be null if it is not valid anymore
-      if (message == null) continue denyLoop;
+      if (msg == null) continue denyLoop;
       
       Integer value = (Integer) deniedMsgs.get(id);
       if (value != null)
         deliveryAttempts = value.intValue() + 1;
       
-      // If maximum delivery attempts is reached, the message is no more
-      // deliverable to this subscriber.
+      // If maximum delivery attempts reached, the message is no more
+      // deliverable to this sbscriber.
       if (isUndeliverable(deliveryAttempts)) {
         deniedMsgs.remove(id);
-        message.setDeliveryCount(deliveryAttempts);
-        if (dmqManager == null)
-          dmqManager = new DMQManager(dmqId, null);
-        nbMsgsSentToDMQSinceCreation++;
-        dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.UNDELIVERABLE);
-        decrAckCounters(id, message);
-      } else {
-        // Else, putting it back to the deliverables vector according to its
-        // original delivery order, and adding a new entry for it in the
-        // denied messages table.
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, " -> put back to the messages to deliver");
+        msg.deliveryCount = deliveryAttempts;
+        msg.undeliverable = true;
+        if (deadMessages == null)
+          deadMessages = new ClientMessages();
+        deadMessages.addMessage(msg);
+        
+        msg.acksCounter--;
+        if (msg.acksCounter == 0)
+          messagesTable.remove(id);
+        
+        if (durable) {
+          msg.durableAcksCounter--;
+          if (msg.durableAcksCounter == 0)
+            msg.delete();
+        }
+      }
+      // Else, putting it back to the deliverables vector according to its
+      // original delivery order, and adding a new entry for it in the
+      // denied messages table.
+      else {
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgProxy.log(BasicLevel.DEBUG, 
+                                  " -> put back to the messages to deliver");
         
         i = 0;
         insertLoop:
@@ -817,7 +861,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
           // Message may be null if it is not valid anymore
           if (currentMessage != null) {
             currentO = currentMessage.order;
-            if (currentO > message.order) {
+            if (currentO > msg.order) {
               break insertLoop;
             } else {
               i++;
@@ -834,8 +878,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     }
 
     // Sending dead messages to the DMQ, if needed:
-    if (dmqManager != null)
-      dmqManager.sendToDMQ();
+    if (deadMessages != null)
+      sendToDMQ(deadMessages);
 
   }
 
@@ -843,13 +887,30 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    * Decreases the subscription's messages acknowledgement expectations,
    * deletes those not to be consumed anymore.
    */
-  void delete() {
+  void delete()
+  {
     for (Enumeration e = deliveredIds.keys(); e.hasMoreElements();)
       messageIds.add(e.nextElement());
-
+    save();
+    
+    String id;
+    Message msg;
     for (Enumeration allMessageIds = messageIds.elements();
          allMessageIds.hasMoreElements();) {
-      removeMessage((String) allMessageIds.nextElement());
+
+      id = (String) allMessageIds.nextElement();
+      msg = (Message) messagesTable.get(id);
+
+      if (msg != null) {
+        msg.acksCounter--;
+        if (msg.acksCounter == 0)
+          messagesTable.remove(id);
+        if (durable) {
+          msg.durableAcksCounter--;
+          if (msg.durableAcksCounter == 0)
+            msg.delete();
+        }
+      }
     }
   }
 
@@ -858,91 +919,69 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    * Returns <code>true</code> if a given value matches the threshold value
    * for this user.
    */
-  private boolean isUndeliverable(int deliveryAttempts) {
+  private boolean isUndeliverable(int deliveryAttempts)
+  {
     if (threshold != null)
-      return (deliveryAttempts >= threshold.intValue());
-    else if (QueueImpl.getDefaultThreshold() != null)
-      return (deliveryAttempts >= QueueImpl.getDefaultThreshold().intValue());
+      return deliveryAttempts == threshold.intValue();
+    else if (DeadMQueueImpl.getDefaultThreshold() != null)
+      return deliveryAttempts == DeadMQueueImpl.getDefaultThreshold().intValue();
     return false;
   }
-  
-  public long getNbMsgsSentToDMQSinceCreation() {
-    return nbMsgsSentToDMQSinceCreation;
+
+  /**
+   * Method used for sending messages to the appropriate dead message queue.
+   */
+  private void sendToDMQ(ClientMessages messages)
+  {
+    if (dmqId != null)
+      Channel.sendTo(dmqId, messages);
+    else if (DeadMQueueImpl.getId() != null)
+      Channel.sendTo(DeadMQueueImpl.getId(), messages);
   }
 
-  public long getNbMsgsDeliveredSinceCreation() {
-    return nbMsgsDeliveredSinceCreation;
-  }
-
-  Message getSubscriptionMessage(String msgId) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "ClientSubscription.getSubscriptionMessage(" + msgId + ')');
-    
+  Message getMessage(String msgId) {
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, 
+        "ClientSubscription.getMessage(" + msgId + ')');
     int index = messageIds.indexOf(msgId);
     if (index < 0) {
       // The message has been delivered
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, " -> message not found");
-      
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgProxy.log(
+          BasicLevel.DEBUG, " -> message not found");
       return null;
     } else {
       return (Message) messagesTable.get(msgId);
     }
   }
-  
-  /**
-   * Returns the description of a particular pending message. The message is
-   * pointed out through its unique identifier.
-   * 
-   * @param msgId The unique message's identifier.
-   * @return the description of the message.
-   * 
-   * @see org.objectweb.joram.mom.messages.MessageJMXWrapper
-   */
-  public CompositeData getMessage(String msgId) throws Exception {
-    Message msg = getSubscriptionMessage(msgId);
-    if (msg == null) return null;
-    
-    return MessageJMXWrapper.createCompositeDataSupport(msg);
-  }
 
-  /**
-   * Returns the description of all pending messages.
-   * 
-   * @return the description of the message.
-   * 
-   * @see org.objectweb.joram.mom.messages.MessageJMXWrapper
-   */
-  public TabularData getMessages() throws Exception {
-    return MessageJMXWrapper.createTabularDataSupport(messagesTable, messageIds);
-  }
-
-  public void deleteMessage(String msgId) {
+  void deleteMessage(String msgId) {
     messageIds.remove(msgId);
-    Message message = removeMessage(msgId);
+    Message msg = removeMessage(msgId);
     save();
-    if (message != null) {
-      DMQManager dmqManager = new DMQManager(dmqId, null);
-      nbMsgsSentToDMQSinceCreation++;
-      dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.ADMIN_DELETED);
-      dmqManager.sendToDMQ();
+    if (msg != null) {
+      ClientMessages deadMessages = new ClientMessages();
+      deadMessages.addMessage(msg);
+      sendToDMQ(deadMessages);
     }
   }
 
-  public void clear() {
-    DMQManager dmqManager = null;
+  void clear() {
+    ClientMessages deadMessages = null;
     for (int i = 0; i < messageIds.size(); i++) {
       String msgId = (String)messageIds.elementAt(i);
-      Message message = removeMessage(msgId);
-      if (message != null) {
-        if (dmqManager == null)
-          dmqManager = new DMQManager(dmqId, null);
-        nbMsgsSentToDMQSinceCreation++;
-        dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.ADMIN_DELETED);
+      Message msg = removeMessage(msgId);
+      if (msg != null) {
+        if (deadMessages == null) {
+          deadMessages = new ClientMessages();
+        }
+        deadMessages.addMessage(msg);
       }
     }
-    if (dmqManager != null)
-      dmqManager.sendToDMQ();
+    if (deadMessages != null) {
+      sendToDMQ(deadMessages);
+    }
     messageIds.clear();
     save();
   }
@@ -954,22 +993,18 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    * @param msgId    The unique message's identifier.
    */
   Message removeMessage(String msgId) {
-    Message message = (Message) messagesTable.get(msgId);
-    if (message != null) {
-      decrAckCounters(msgId, message);
+    Message msg = (Message) messagesTable.get(msgId);
+    if (msg != null) {
+      msg.acksCounter--;
+      if (msg.acksCounter == 0)
+        messagesTable.remove(msgId);
+      if (durable) {
+        msg.durableAcksCounter--;
+        if (msg.durableAcksCounter == 0)
+          msg.delete();
+      }
     }
-    return message;
-  }
-
-  private void decrAckCounters(String msgId, Message message) {
-    message.acksCounter--;
-    if (message.acksCounter == 0)
-      messagesTable.remove(msgId);
-    if (durable) {
-      message.durableAcksCounter--;
-      if (message.durableAcksCounter == 0)
-        message.delete();
-    }
+    return msg;
   }
   
   private void save() {
@@ -978,8 +1013,12 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
 
   public void readBag(ObjectInputStream in) 
     throws IOException, ClassNotFoundException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "ClientSubscription[" + proxyId + "].readbag()");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG,
+        "ClientSubscription[" + 
+        proxyId + 
+        "].readbag()");
 
     contextId = in.readInt();
     subRequestId = in.readInt();
@@ -993,8 +1032,12 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
 
   public void writeBag(ObjectOutputStream out)
     throws IOException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "ClientSubscription[" + proxyId + "].writeBag()");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG,
+        "ClientSubscription[" + 
+        proxyId + 
+        "].writeBag()");
 
     out.writeInt(contextId);
     out.writeInt(subRequestId);
@@ -1004,9 +1047,5 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     out.writeInt(requestId);
     out.writeBoolean(toListener);
     out.writeLong(requestExpTime);
-  }
-
-  void cleanMessageIds() {
-    messageIds.retainAll(messagesTable.keySet());
   }
 }

@@ -21,29 +21,16 @@
  */
 package org.objectweb.joram.client.tools.admin;
 
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
+import javax.swing.*;
+import javax.swing.tree.*;
 
-import javax.swing.AbstractAction;
-import javax.swing.ImageIcon;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPopupMenu;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-
-import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.client.jms.admin.Server;
-import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.admin.*;
 
 
 class ServerTreeNode extends DefaultMutableTreeNode
     implements AdminTreeNode
 {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private AdminController c;
   private Server serverDesc;
   private DestinationRootTreeNode destRoot;
@@ -148,7 +135,7 @@ class ServerTreeNode extends DefaultMutableTreeNode
     for (int i = 0; i < destRoot.getChildCount(); i++){
       DestinationTreeNode dtn = (DestinationTreeNode) destRoot.getChildAt(i);
       try {
-        Queue dmq = (Queue) dtn.getDestination();
+        DeadMQueue dmq = (DeadMQueue) dtn.getDestination();
         rs.add(dmq);
       }
       catch (ClassCastException cce) {}
@@ -162,7 +149,7 @@ class ServerTreeNode extends DefaultMutableTreeNode
     for (int i = 0; i < userRoot.getChildCount(); i++){
       UserTreeNode utn = (UserTreeNode) userRoot.getChildAt(i);
       try {
-        User user = utn.getUser();
+        User user = (User) utn.getUser();
         rs.add(user);
       }
       catch (ClassCastException cce) {}
@@ -172,11 +159,6 @@ class ServerTreeNode extends DefaultMutableTreeNode
   }
 
   private class CreateDestinationAction extends AbstractAction {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public CreateDestinationAction() {
       super("Create Destination...");
     }
@@ -204,11 +186,6 @@ class ServerTreeNode extends DefaultMutableTreeNode
 
   private class StopServerAction extends AbstractAction
   {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public StopServerAction()
       {
         super("Stop Server", AdminToolConstants.stopIcon);
@@ -233,11 +210,6 @@ class ServerTreeNode extends DefaultMutableTreeNode
   }
 
   private class CreateUserAction extends AbstractAction {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public CreateUserAction() {
       super("Create User...");
     }
@@ -277,11 +249,6 @@ class ServerTreeNode extends DefaultMutableTreeNode
   }
 
   private class CreateDomainAction extends AbstractAction {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public CreateDomainAction() {
       super("Create Domain...");
     }
@@ -307,11 +274,6 @@ class ServerTreeNode extends DefaultMutableTreeNode
   }
 
   private class DeleteServerAction extends AbstractAction {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public DeleteServerAction() {
       super("Delete Server");
     }

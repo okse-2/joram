@@ -24,11 +24,6 @@
 package org.objectweb.joram.client.jms.admin;
 
 public class NameAlreadyUsedException extends AdminException {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   public NameAlreadyUsedException(String info) {
     super(info);
   }

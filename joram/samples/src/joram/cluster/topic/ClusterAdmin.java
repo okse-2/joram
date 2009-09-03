@@ -24,30 +24,24 @@
  */
 package cluster.topic;
 
-import org.objectweb.joram.client.jms.ConnectionFactory;
-import org.objectweb.joram.client.jms.Topic;
-import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.admin.ClusterConnectionFactory;
-import org.objectweb.joram.client.jms.admin.ClusterTopic;
-import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.client.jms.admin.*;
+import org.objectweb.joram.client.jms.*;
+import org.objectweb.joram.client.jms.tcp.*;
 
 /**
  * Administers three agent servers for the cluster of topics sample.
  */
 public class ClusterAdmin {
-  
   public static void main(String[] args) throws Exception {
-    
     System.out.println();
     System.out.println("Cluster of topics administration...");
 
     AdminModule.connect("root", "root", 60);
     javax.naming.Context ictx = new javax.naming.InitialContext();
 
-    User.create("anonymous", "anonymous", 0);
-    User.create("anonymous", "anonymous", 1);
-    User.create("anonymous", "anonymous", 2); 
+    User user0 = User.create("anonymous", "anonymous", 0);
+    User user1 = User.create("anonymous", "anonymous", 1);
+    User user2 = User.create("anonymous", "anonymous", 2); 
 
     ConnectionFactory cf0 = (ConnectionFactory) TcpConnectionFactory.create("localhost", 16010);
     ConnectionFactory cf1 = (ConnectionFactory) TcpConnectionFactory.create("localhost", 16011);
@@ -63,9 +57,9 @@ public class ClusterAdmin {
     clusterCF.addConnectionFactory("server2", cf2);
     ictx.rebind("clusterCF", clusterCF);
 
-    Topic topic0 = Topic.create(0);
-    Topic topic1 = Topic.create(1);
-    Topic topic2 = Topic.create(2);
+    Topic topic0 = (Topic) Topic.create(0);
+    Topic topic1 = (Topic) Topic.create(1);
+    Topic topic2 = (Topic) Topic.create(2);
     
     System.out.println("topic0 = " + topic0);
     System.out.println("topic1 = " + topic1);

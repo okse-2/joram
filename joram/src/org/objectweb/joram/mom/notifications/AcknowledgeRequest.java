@@ -32,10 +32,6 @@ import java.util.Vector;
  */
 public class AcknowledgeRequest extends AbstractRequest
 {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /** Message identifier. */
   private String msgId = null;
   /** Vector of message identifiers. */

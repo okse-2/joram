@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -23,10 +22,8 @@ package fr.dyade.aaa.agent;
 
 public class AgentCreateReply extends Notification {
 
-  /**
-   * 
-   */
-  static final long serialVersionUID = 1L;
+
+  static final long serialVersionUID = 8123502821909657657L;
 
   public AgentId agent;
 

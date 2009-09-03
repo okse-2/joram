@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,18 +23,12 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 /**
  * A <code>SetUserDMQ</code> instance requests to set a given DMQ as the
  * DMQ for a given user.
  */
 public class SetUserDMQ extends AdminRequest {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1950998954181292735L;
 
   /** Identifier of the user's proxy the DMQ is set for. */
   private String userProxId;
@@ -44,16 +38,14 @@ public class SetUserDMQ extends AdminRequest {
   /**
    * Constructs a <code>SetUserDMQ</code> instance.
    *
-   * @param userProxId  Identifier of the user's proxy the DMQ is set for.
-   * @param dmqId       Identifier of the DMQ.
+   * @param userId  Identifier of the user's proxy the DMQ is set for.
+   * @param dmqId  Identifier of the DMQ.
    */
   public SetUserDMQ(String userProxId, String dmqId) {
     this.userProxId = userProxId;
     this.dmqId = dmqId;
   }
 
-  public SetUserDMQ() { }
-  
   /** Returns the ProxId of the user the DMQ is set for. */
   public String getUserProxId() {
     return userProxId;
@@ -62,19 +54,5 @@ public class SetUserDMQ extends AdminRequest {
   /** Returns the identifier of the DMQ. */
   public String getDmqId() {
     return dmqId;
-  }
-  
-  protected int getClassId() {
-    return SET_USER_DMQ;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    userProxId = StreamUtil.readStringFrom(is);
-    dmqId = StreamUtil.readStringFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    StreamUtil.writeTo(userProxId, os);
-    StreamUtil.writeTo(dmqId, os);
   }
 }

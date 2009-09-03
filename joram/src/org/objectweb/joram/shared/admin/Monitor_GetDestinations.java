@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,18 +22,12 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 /**
  * A <code>Monitor_GetDestinations</code> instance requests the list of
  * the destinations of a given server.
  */
 public class Monitor_GetDestinations extends Monitor_Request {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = -2789988058172395896L;
 
   /** Identifier of the target server. */
   private int serverId;
@@ -47,24 +41,8 @@ public class Monitor_GetDestinations extends Monitor_Request {
     this.serverId = serverId;
   }
 
-  public Monitor_GetDestinations() { }
-  
   /** Returns the identifier of the target server. */
   public int getServerId() {
     return serverId;
-  }
-  
-  protected int getClassId() {
-    return MONITOR_GET_DESTINATIONS;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    serverId = StreamUtil.readIntFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    StreamUtil.writeTo(serverId, os);
   }
 }

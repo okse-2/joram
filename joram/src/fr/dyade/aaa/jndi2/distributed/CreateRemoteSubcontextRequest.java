@@ -22,17 +22,14 @@
  */
 package fr.dyade.aaa.jndi2.distributed;
 
-import javax.naming.CompositeName;
+import fr.dyade.aaa.jndi2.msg.*;
+import fr.dyade.aaa.jndi2.impl.*;
 
-import fr.dyade.aaa.jndi2.msg.CreateSubcontextRequest;
+import javax.naming.*;
 
 public class CreateRemoteSubcontextRequest 
     extends CreateSubcontextRequest {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private Object ownerId;
 
   public CreateRemoteSubcontextRequest(CompositeName name,

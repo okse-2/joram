@@ -22,7 +22,20 @@
     <jndi name="cf"/>
   </ConnectionFactory>
   
-  <User name="anonymous" password="anonymous"/>
+  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory">
+    <tcp host="localhost"
+         port="16010"/>
+    <jndi name="tcf"/>
+  </ConnectionFactory>
+  
+  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory">
+    <tcp host="localhost"
+         port="16010"/>
+    <jndi name="qcf"/>
+  </ConnectionFactory>
+  
+  <User name="anonymous"
+        password="anonymous"/>
 
   <Queue name="queue">
     <freeReader/>

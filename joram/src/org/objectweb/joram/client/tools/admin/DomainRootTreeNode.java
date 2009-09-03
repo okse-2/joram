@@ -21,16 +21,13 @@
  */
 package org.objectweb.joram.client.tools.admin;
 
+import java.util.*;
 import javax.swing.*;
 import javax.swing.tree.*;
 
 class DomainRootTreeNode extends DefaultMutableTreeNode
     implements AdminTreeNode {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private ServerTreeNode parentServerTreeNode;
   
   public DomainRootTreeNode(ServerTreeNode parentServerTreeNode) {

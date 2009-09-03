@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -30,7 +30,9 @@ import javax.jms.JMSException;
 /**
  * Implements the <code>javax.jms.QueueReceiver</code> interface.
  */
-public class QueueReceiver extends MessageConsumer implements javax.jms.QueueReceiver {
+public class QueueReceiver extends MessageConsumer
+                           implements javax.jms.QueueReceiver
+{
   /**
    * Constructs a receiver.
    *
@@ -47,7 +49,8 @@ public class QueueReceiver extends MessageConsumer implements javax.jms.QueueRec
   }
 
   /** Returns a string view of this receiver. */
-  public String toString() {
+  public String toString()
+  {
     return "QueueRec:" + sess.getId();
   }
 
@@ -56,7 +59,8 @@ public class QueueReceiver extends MessageConsumer implements javax.jms.QueueRec
    *
    * @exception IllegalStateException  If the receiver is closed.
    */
-  public javax.jms.Queue getQueue() throws JMSException {
+  public javax.jms.Queue getQueue() throws JMSException
+  {
     checkClosed();
     return (javax.jms.Queue) dest;
   }

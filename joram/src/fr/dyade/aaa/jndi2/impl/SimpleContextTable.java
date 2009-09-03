@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,11 +23,11 @@
 package fr.dyade.aaa.jndi2.impl;
 
 import java.util.*;
+import java.lang.ref.*;
 
-public class SimpleContextTable implements ContextTable, java.io.Serializable {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-  
+public class SimpleContextTable 
+    implements ContextTable, java.io.Serializable {
+
   private Hashtable table;
 
   public SimpleContextTable() {

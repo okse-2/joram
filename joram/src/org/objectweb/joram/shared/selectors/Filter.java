@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -31,12 +31,7 @@
 
 package org.objectweb.joram.shared.selectors;
 
-import java.util.StringTokenizer;
-import java.util.regex.Pattern;
-
-import java_cup.runtime.Scanner;
-import java_cup.runtime.Symbol;
-
+import java_cup.runtime.*;
 import org.objectweb.joram.shared.messages.Message;
 
 /** CUP v0.10j generated parser.
@@ -731,9 +726,10 @@ class CUP$Filter$actions {
 		int stleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
 		int stright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
 		String st = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-
-		RESULT = sts + "\b" + st.substring(1, st.length() - 1);
-		CUP$Filter$result = new java_cup.runtime.Symbol(3/*strings*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
+		
+                  RESULT = sts + st.substring(1, st.length() - 1);
+                
+              CUP$Filter$result = new java_cup.runtime.Symbol(3/*strings*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
             }
           return CUP$Filter$result;
 
@@ -825,7 +821,13 @@ class CUP$Filter$actions {
                     }
                     stBuffRes.append('$');
                     st1 = stBuffRes.toString(); 
-                    RESULT = new Boolean(!Pattern.matches(st1, (String) Interpreter.interpret(id, message, syntaxType)));
+                    org.apache.regexp.RE regExp =
+                      new org.apache.regexp.RE(st1);
+
+                    RESULT =
+                      new Boolean(! regExp.match((String)
+                                                 Interpreter.interpret
+                                                 (id, message, syntaxType)));
                   }
 
                   // Comparison of non like values returns FALSE.
@@ -876,7 +878,13 @@ class CUP$Filter$actions {
                     }
                     stBuffRes.append('$');
                     st1 = stBuffRes.toString(); 
-                    RESULT = new Boolean(Pattern.matches(st1, (String) Interpreter.interpret(id, message, syntaxType)));
+                    org.apache.regexp.RE regExp =
+                      new org.apache.regexp.RE(st1);
+
+                    RESULT =
+                      new Boolean(regExp.match((String)
+                                               Interpreter.interpret
+                                               (id, message, syntaxType)));
                   }
 
                   // Comparison of non like values returns FALSE.
@@ -918,8 +926,12 @@ class CUP$Filter$actions {
                     }
                     stBuff.append('$');
 
-                    st = stBuff.toString();
-                    RESULT = new Boolean(!Pattern.matches(st, (String) Interpreter.interpret(id, message, syntaxType)));
+                    st = stBuff.toString(); 
+                    org.apache.regexp.RE regExp = new org.apache.regexp.RE(st);
+                    RESULT =
+                      new Boolean(! regExp.match((String)
+                                                 Interpreter.interpret
+                                                 (id, message, syntaxType)));
                   }
                   // Comparison of non like values returns FALSE.
                   else
@@ -960,8 +972,13 @@ class CUP$Filter$actions {
                     }
                     stBuff.append('$');
 
-                    st = stBuff.toString();
-                    RESULT = new Boolean(Pattern.matches(st, (String) Interpreter.interpret(id, message, syntaxType)));
+                    st = stBuff.toString(); 
+                    org.apache.regexp.RE regExp = new org.apache.regexp.RE(st);
+
+                    RESULT =
+                      new Boolean(regExp.match((String)
+                                               Interpreter.interpret
+                                               (id, message, syntaxType)));
                   }
                   // Comparison of non like values returns FALSE.
                   else
@@ -982,25 +999,20 @@ class CUP$Filter$actions {
 		int stsright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-1)).right;
 		String sts = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-1)).value;
 		
-		Object value = Interpreter.interpret(id, message, syntaxType);
-		if (value == null)
-		  RESULT = null;
+                  if (Interpreter.interpret(id, message, syntaxType) == null)
+                    RESULT = null;
 
-		else if (value instanceof String) {
-		  StringTokenizer st = new StringTokenizer(sts, "\b");
-		  boolean match = true;
-		  while (st.hasMoreTokens()) {
-		    String current = st.nextToken();
-		    if (current.equals(value)) {
-		      match = false;
-		      break;
-		    }
-		  }
-		  RESULT = new Boolean(match);
+                  else if (Interpreter.interpret(id, message, syntaxType)
+                           instanceof String)
+                    RESULT =
+                      new Boolean(sts.indexOf((String)
+                                              Interpreter.interpret
+                                              (id, message, syntaxType))
+                                              == -1);
 
-		  // Comparison of non like values returns FALSE.
-		} else
-		  RESULT = new Boolean("FALSE");
+                  // Comparison of non like values returns FALSE.
+                  else
+                    RESULT = new Boolean("FALSE");
                 
               CUP$Filter$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-5)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
             }
@@ -1017,24 +1029,20 @@ class CUP$Filter$actions {
 		int stsright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-1)).right;
 		String sts = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-1)).value;
 		
-		Object value = Interpreter.interpret(id, message, syntaxType);
-		if (value == null)
-		  RESULT = null;
+                  if (Interpreter.interpret(id, message, syntaxType) == null)
+                    RESULT = null;
 
-		else if (value instanceof String) {
-		  StringTokenizer st = new StringTokenizer(sts, "\b");
-		  boolean match = false;
-		  while (st.hasMoreTokens()) {
-		    String current = st.nextToken();
-		    if (current.equals(value)) {
-		      match = true;
-		      break;
-		    }
-		  }
-		  RESULT = new Boolean(match);
-		  // Comparison of non like values returns FALSE.
-		} else
-		  RESULT = new Boolean("FALSE");
+                  else if (Interpreter.interpret(id, message, syntaxType)
+                           instanceof String)
+                    RESULT =
+                      new Boolean(sts.indexOf((String)
+                                              Interpreter.interpret
+                                              (id, message, syntaxType))
+                                              != -1);
+
+                  // Comparison of non like values returns FALSE.
+                  else
+                    RESULT = new Boolean("FALSE");
                 
               CUP$Filter$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-4)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
             }

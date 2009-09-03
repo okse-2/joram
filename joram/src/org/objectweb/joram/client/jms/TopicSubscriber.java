@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -24,14 +24,15 @@
 package org.objectweb.joram.client.jms;
 
 import javax.jms.IllegalStateException;
-import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
 
 
 /**
  * Implements the <code>javax.jms.TopicSubscriber</code> interface.
  */
-public class TopicSubscriber extends MessageConsumer implements javax.jms.TopicSubscriber {
+public class TopicSubscriber extends MessageConsumer
+                             implements javax.jms.TopicSubscriber
+{
   /**
    * Constructs a subscriber.
    *
@@ -42,25 +43,28 @@ public class TopicSubscriber extends MessageConsumer implements javax.jms.TopicS
    * @param noLocal <code>true</code> if the subscriber does not wish to
    *          consume messages published through the same connection.
    *
-   * @exception InvalidDestinationException if an invalid destination is specified.
    * @exception IllegalStateException  If the connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
    */
-  TopicSubscriber(Session sess, Destination topic, String name, String selector, boolean noLocal) throws JMSException {
+  TopicSubscriber(Session sess, Destination topic, String name, String selector,
+                  boolean noLocal) throws JMSException {
     super(sess, topic, selector, name, noLocal);
   }
 
    /** Returns a string view of this receiver. */
-  public String toString() {
+  public String toString()
+  {
     return "TopicSub:" + targetName;
   }
+
 
   /** 
    * API method.
    *
    * @exception IllegalStateException  If the subscriber is closed.
    */
-  public boolean getNoLocal() throws JMSException {
+  public boolean getNoLocal() throws JMSException
+  {
     checkClosed();
     return noLocal;
   }
@@ -70,7 +74,8 @@ public class TopicSubscriber extends MessageConsumer implements javax.jms.TopicS
    *
    * @exception IllegalStateException  If the subscriber is closed.
    */
-  public javax.jms.Topic getTopic() throws JMSException {
+  public javax.jms.Topic getTopic() throws JMSException
+  {
     checkClosed();
     return (javax.jms.Topic) dest;
   }

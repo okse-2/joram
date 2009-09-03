@@ -56,6 +56,11 @@
          <config-property-value>s0</config-property-value>
       </config-property>
       <config-property>
+         <config-property-name>AdminFile</config-property-name>
+         <config-property-type>java.lang.String</config-property-type>
+         <config-property-value>joram-admin.cfg</config-property-value>
+      </config-property>
+      <config-property>
          <config-property-name>AdminFileXML</config-property-name>
          <config-property-type>java.lang.String</config-property-type>
          <config-property-value>joramAdmin.xml</config-property-value>
@@ -69,11 +74,6 @@
          <config-property-name>ServerPort</config-property-name>
          <config-property-type>java.lang.Integer</config-property-type>
          <config-property-value>16010</config-property-value>
-      </config-property>
-      <config-property>
-         <config-property-name>HAURL</config-property-name>
-         <config-property-type>java.lang.String</config-property-type>
-         <config-property-value>hajoram://localhost:16010,localhost:16011</config-property-value>
       </config-property>
       <config-property>
          <config-property-name>ConnectingTimer</config-property-name>
@@ -115,21 +115,6 @@
          <config-property-type>java.lang.Boolean</config-property-type>
          <config-property-value>false</config-property-value>
       </config-property>
-      <config-property>
-         <config-property-name>RootName</config-property-name>
-         <config-property-type>java.lang.String</config-property-type>
-         <config-property-value>root</config-property-value>
-      </config-property>
-      <config-property>
-         <config-property-name>RootPasswd</config-property-name>
-         <config-property-type>java.lang.String</config-property-type>
-         <config-property-value>root</config-property-value>
-      </config-property>
-      <config-property>
-         <config-property-name>IdentityClass</config-property-name>
-         <config-property-type>java.lang.String</config-property-type>
-         <config-property-value>org.objectweb.joram.shared.security.SimpleIdentity</config-property-value>
-      </config-property>
       <outbound-resourceadapter>
          <connection-definition>
             <managedconnectionfactory-class>org.objectweb.joram.client.connector.ManagedQueueConnectionFactoryImpl</managedconnectionfactory-class>
@@ -142,11 +127,6 @@
               <config-property-name>Password</config-property-name>
               <config-property-type>java.lang.String</config-property-type>
               <config-property-value>anonymous</config-property-value>
-            </config-property>
-            <config-property>
-              <config-property-name>IdentityClass</config-property-name>
-              <config-property-type>java.lang.String</config-property-type>
-              <config-property-value>org.objectweb.joram.shared.security.SimpleIdentity</config-property-value>
             </config-property>
             <config-property>
               <config-property-name>Collocated</config-property-name>
@@ -171,11 +151,6 @@
               <config-property-value>anonymous</config-property-value>
             </config-property>
             <config-property>
-              <config-property-name>IdentityClass</config-property-name>
-              <config-property-type>java.lang.String</config-property-type>
-              <config-property-value>org.objectweb.joram.shared.security.SimpleIdentity</config-property-value>
-            </config-property>
-            <config-property>
               <config-property-name>Collocated</config-property-name>
               <config-property-type>java.lang.Boolean</config-property-type>
               <config-property-value>true</config-property-value>
@@ -198,25 +173,9 @@
               <config-property-value>anonymous</config-property-value>
             </config-property>
             <config-property>
-              <config-property-name>IdentityClass</config-property-name>
-              <config-property-type>java.lang.String</config-property-type>
-              <config-property-value>org.objectweb.joram.shared.security.SimpleIdentity</config-property-value>
-            </config-property>            
-            <config-property>
               <config-property-name>Collocated</config-property-name>
               <config-property-type>java.lang.Boolean</config-property-type>
               <config-property-value>true</config-property-value>
-            </config-property>
-            <config-property>
-              <config-property-name>outLocalAddress</config-property-name>
-              <config-property-type>java.lang.String</config-property-type>
-              <!-- Empty value corresponds to INADDRANY (wildcard address) -->
-              <config-property-value></config-property-value>
-            </config-property>
-            <config-property>
-              <config-property-name>outLocalPort</config-property-name>
-              <config-property-type>java.lang.Integer</config-property-type>
-              <config-property-value>0</config-property-value>
             </config-property>
             <connectionfactory-interface>javax.jms.ConnectionFactory</connectionfactory-interface>
             <connectionfactory-impl-class>org.objectweb.joram.client.connector.OutboundConnectionFactory</connectionfactory-impl-class>

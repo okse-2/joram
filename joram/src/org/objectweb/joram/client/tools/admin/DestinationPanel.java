@@ -22,27 +22,17 @@
  */
 package org.objectweb.joram.client.tools.admin;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
 import java.util.Iterator;
+import javax.jms.*;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import org.objectweb.joram.client.jms.admin.*;
 
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.client.jms.admin.DeadMQueue;
-import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.Topic;
 
 /**
  * @author afedoro
@@ -51,11 +41,6 @@ import org.objectweb.joram.client.jms.admin.User;
  * Window>Preferences>Java>Code Generation>Code and Comments
  */
 public class DestinationPanel extends JPanel {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   private final AdminController c;
 
   private Destination dest = null;
@@ -245,7 +230,7 @@ public class DestinationPanel extends JPanel {
   public void setDestination(Destination dest) {
     this.dest = dest;
     idLabel.setText(dest.getName());
-    typeLabel.setText(dest.getAdminName());
+    typeLabel.setText(dest.getType());
     String name = c.findDestinationJndiName(dest);
     nameLabel.setText((name == null ? "Unknown" : name));
   }
@@ -281,12 +266,12 @@ public class DestinationPanel extends JPanel {
     freeWrite.setSelected(val);
   }
 
-  public void setDMQList(java.util.List dmqs, Queue ddmq) {
+  public void setDMQList(java.util.List dmqs, DeadMQueue ddmq) {
     dmqCombo.removeAllItems();
     dmqCombo.addItem("No Dead Message Queue");
 
     for (Iterator i = dmqs.iterator(); i.hasNext();) {
-      Queue dmq = (Queue) i.next();
+      DeadMQueue dmq = (DeadMQueue) i.next();
       dmqCombo.addItem(dmq);
 
       // TODO: This comparison is not very clean and should be improved

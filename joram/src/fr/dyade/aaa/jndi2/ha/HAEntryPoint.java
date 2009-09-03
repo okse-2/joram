@@ -21,20 +21,14 @@
  */
 package fr.dyade.aaa.jndi2.ha;
 
-import org.objectweb.util.monolog.api.BasicLevel;
+import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.jndi2.server.*;
 
-import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.Notification;
-import fr.dyade.aaa.jndi2.server.EntryPoint;
-import fr.dyade.aaa.jndi2.server.TcpRequestNot;
-import fr.dyade.aaa.jndi2.server.Trace;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 public class HAEntryPoint implements EntryPoint {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private HARequestManager manager;
 
   public void setHARequestManager(HARequestManager manager) {

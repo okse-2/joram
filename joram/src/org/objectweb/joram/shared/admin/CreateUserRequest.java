@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2003 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,66 +23,45 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.security.Identity;
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 /**
  * A <code>CreateUserRequest</code> instance requests the creation of a JMS
  * user proxy.
  */
 public class CreateUserRequest extends AdminRequest {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 5772076673534562231L;
 
-  /** Identity contain Name of the user and password or subject */
-  private Identity identity;
+  /** Name of the user. */
+  private String userName;
+  /** Password of the user. */
+  private String userPass;
   /** Id of the server where deploying the proxy. */
   private int serverId;
 
   /**
    * Constructs a <code>CreateUserRequest</code> instance.
    *
-   * @param identity  The authentication of the user.
+   * @param userName  The name of the user.
+   * @param userPass  The password of the user.
    * @param serverId  The id of the server where deploying its proxy.
    */
-  public CreateUserRequest(Identity identity, int serverId) {
-    this.identity = identity;
+  public CreateUserRequest(String userName, String userPass, int serverId) {
+    this.userName = userName;
+    this.userPass = userPass;
     this.serverId = serverId;
   }
 
-  public CreateUserRequest() { }
+  /** Returns the name of the user to create. */
+  public String getUserName() {
+    return userName;
+  }
   
-  /**
-   * @return identity (contains the name and 
-   * password or Subject of the user to create).
-   */
-  public Identity getIdentity() {
-    return identity;
+  /** Returns the password of the user. */
+  public String getUserPass() {
+    return userPass;
   }
 
   /** Returns the id of the server where deploying its proxy. */
   public int getServerId() {
     return serverId;
-  }
-  
-  protected int getClassId() {
-    return CREATE_USER_REQUEST;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    serverId = StreamUtil.readIntFrom(is);
-    try {
-      identity = Identity.read(is);
-    } catch (Exception e) {
-      throw new IOException(e.getClass() + ":: " + e.getMessage());
-    }
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    StreamUtil.writeTo(serverId, os);
-    Identity.write(identity, os);
   }
 }

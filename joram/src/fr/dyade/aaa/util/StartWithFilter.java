@@ -21,8 +21,11 @@
 package fr.dyade.aaa.util;
 
 import java.io.*;
+import java.util.*;
 
 public class StartWithFilter implements FilenameFilter {
+
+
   private String prefix;
 
   public StartWithFilter(String prefix) {

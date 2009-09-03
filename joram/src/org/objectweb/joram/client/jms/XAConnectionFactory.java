@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 2007 France Telecom R&D
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -25,47 +25,70 @@
  */
 package org.objectweb.joram.client.jms;
 
+import javax.naming.*;
+import javax.jms.JMSException;
+
 import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.shared.JoramTracing;
+
 /**
- * Implements the <code>javax.jms.XAConnectionFactory</code> interfaces: Queue, Topic and unified.
- * @see javax.jms.XAConnectionFactory
- * @deprecated Replaced next to Joram 5.2.1 by {@link ConnectionFactory}.
+ * Implements the <code>javax.jms.XAConnectionFactory</code> interface.
  */
-public abstract class XAConnectionFactory extends AbstractConnectionFactory
-  implements javax.jms.XAConnectionFactory, javax.jms.XAQueueConnectionFactory, javax.jms.XATopicConnectionFactory {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
+public abstract class XAConnectionFactory
+                extends AbstractConnectionFactory
+                implements javax.jms.XAConnectionFactory {
+  /**
+   * Constructs an <code>XAConnectionFactory</code> dedicated to a given
+   * server.
+   *
+   * @param host  Name or IP address of the server's host.
+   * @param port  Server's listening port.
+   */
+  public XAConnectionFactory(String host, int port) {
+    super(host, port);
+  }
+
+  /**
+   * Constructs an <code>XAConnectionFactory</code> dedicated to a given
+   * server.
+   *
+   * @param url joram ha url
+   */
+  public XAConnectionFactory(String url) {
+    super(url);
+  }
 
   /**
    * Constructs an empty <code>ConnectionFactory</code>.
-   * Needed by ObjectFactory, should only be used for internal purposes.
    */
   public XAConnectionFactory() {
     super();
   }
 
-  /**
-   * Constructs an <code>XAConnectionFactory</code> dedicated to a given server.
-   *
-   * @param host  Name or IP address of the server's host.
-   * @param port  Server's listening port.
-   */
-  protected XAConnectionFactory(String host, int port) {
-    super(host, port);
-  }
-
-  /**
-   * Constructs an <code>XAConnectionFactory</code> dedicated to a given server.
-   *
-   * @param url joram url
-   */
-  protected XAConnectionFactory(String url) {
-    super(url);
-  }
-
   /** Returns a string view of the connection factory. */
   public String toString() {
     return "XACF:" + params.getHost() + "-" + params.getPort();
+  }
+
+  /**
+   * API method, implemented according to the communication protocol.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public abstract javax.jms.XAConnection
+      createXAConnection(String name, String password) throws JMSException;
+
+  /**
+   * API method.
+   *
+   * @exception JMSSecurityException  If the default identification is
+   *              incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.XAConnection createXAConnection() throws JMSException {
+    return createXAConnection(getDefaultLogin(), getDefaultPassword());
   }
 }

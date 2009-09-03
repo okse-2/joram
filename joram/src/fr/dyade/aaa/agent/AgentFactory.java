@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -20,13 +20,10 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.*;
+import java.util.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-
-import fr.dyade.aaa.util.ResolverObjectInputStream;
 
 /**
  * <code>Agent</code> used to allow remote agent creation. Every agent
@@ -48,10 +45,6 @@ import fr.dyade.aaa.util.ResolverObjectInputStream;
  * to remotely delete agents.
  */
 final class AgentFactory extends Agent {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /**
    * Allocates a new <code>AgentFactory</code> agent.
    * An <code>AgentFactory</code> agent must be created on every agent
@@ -98,7 +91,7 @@ final class AgentFactory extends Agent {
       try {
 	// Restore the new agent state.
 	ObjectInputStream ois =
-	  new ResolverObjectInputStream(
+	  new ObjectInputStream(
 	    new ByteArrayInputStream(
 	      cnot.agentState, 0, cnot.agentState.length));
 	Agent ag = (Agent) ois.readObject();
@@ -142,8 +135,7 @@ final class AgentFactory extends Agent {
 // TODO: (ThreadEngine) Thread.currentThread() ...
         AgentServer.engine.deleteAgent(from);
 	if (((AgentDeleteRequest) not).reply != null)
-          sendTo(((AgentDeleteRequest) not).reply, new DeleteAck(from,
-              ((AgentDeleteRequest) not).extraInformation));
+          sendTo(((AgentDeleteRequest) not).reply, new DeleteAck(from));
       } catch (Exception exc) {
 	if (((AgentDeleteRequest) not).reply != null)
           sendTo(((AgentDeleteRequest) not).reply, new DeleteAck(from, exc));

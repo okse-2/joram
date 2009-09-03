@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,20 +20,6 @@ package fr.dyade.aaa.agent;
 
 public interface HttpNetworkMBean extends NetworkMBean {
   /**
-   * Gets the proxyhost value.
-   *
-   * @return the proxyhost value
-   */
-  String getProxyhost();
-  
-  /**
-   * Gets the proxyport value.
-   *
-   * @return the proxyport value
-   */
-  long getProxyport();
-
-  /**
    * Gets the activationPeriod value.
    *
    * @return the activationPeriod value
@@ -46,11 +32,4 @@ public interface HttpNetworkMBean extends NetworkMBean {
    * @param activationPeriod	the activationPeriod value
    */
   void setActivationPeriod(long activationPeriod);
-
-  /**
-   * Gets the NbDaemon value.
-   *
-   * @return the NbDaemon value
-   */
-  public long getNbDaemon();
 }

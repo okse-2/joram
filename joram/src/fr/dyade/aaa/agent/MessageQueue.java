@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -23,7 +23,12 @@
  */
 package fr.dyade.aaa.agent;
 
-import fr.dyade.aaa.common.EmptyQueueException;
+import java.io.*;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.EmptyQueueException;
 
 /**
  * Interface <code>MessageQueue</code> represents a First-In-First-Out (FIFO)

@@ -1,6 +1,5 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -27,6 +26,7 @@ import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 import javax.resource.spi.ConnectionManager;
+import javax.resource.spi.ConnectionRequestInfo;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -34,12 +34,12 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * An <code>OutboundQueueConnectionFactory</code> instance is used for
  * getting a PTP connection to an underlying JORAM server.
  */
-public class OutboundQueueConnectionFactory extends OutboundConnectionFactory implements
-    javax.jms.QueueConnectionFactory {
-  
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
+public class OutboundQueueConnectionFactory
+             extends OutboundConnectionFactory
+             implements javax.jms.QueueConnectionFactory,
+                        java.io.Serializable,
+                        javax.resource.Referenceable
+{
   /**
    * Constructs an <code>OutboundQueueConnectionFactory</code> instance.
    *
@@ -47,7 +47,8 @@ public class OutboundQueueConnectionFactory extends OutboundConnectionFactory im
    * @param cxManager  Manager for connection pooling.
    */
   OutboundQueueConnectionFactory(ManagedConnectionFactoryImpl mcf,
-                                 ConnectionManager cxManager) {
+                                 ConnectionManager cxManager)
+  {
     super(mcf, cxManager);
 
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
@@ -66,7 +67,8 @@ public class OutboundQueueConnectionFactory extends OutboundConnectionFactory im
    *                                   is not reachable.
    * @exception JMSException           Generic exception.
    */
-  public javax.jms.QueueConnection createQueueConnection() throws JMSException {
+  public javax.jms.QueueConnection createQueueConnection() 
+    throws JMSException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createQueueConnection()");
 
@@ -82,7 +84,8 @@ public class OutboundQueueConnectionFactory extends OutboundConnectionFactory im
    *                                   is not reachable.
    * @exception JMSException           Generic exception.
    */
-  public javax.jms.QueueConnection createQueueConnection(String userName, String password)
+  public javax.jms.QueueConnection
+      createQueueConnection(String userName, String password)
     throws JMSException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
@@ -91,7 +94,7 @@ public class OutboundQueueConnectionFactory extends OutboundConnectionFactory im
 
     try {
       QueueConnectionRequest cxRequest =
-        new QueueConnectionRequest(userName, password, mcf.getIdentityClass());
+        new QueueConnectionRequest(userName, password);
 
       Object o = cxManager.allocateConnection(mcf, cxRequest);
 

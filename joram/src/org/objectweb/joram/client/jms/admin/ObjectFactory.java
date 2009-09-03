@@ -25,10 +25,8 @@ package org.objectweb.joram.client.jms.admin;
 
 import javax.naming.*;
 
+import org.objectweb.joram.shared.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.common.Debug;
 
 /**
  * The <code>ObjectFactory</code> class is used by the naming service
@@ -36,16 +34,16 @@ import fr.dyade.aaa.common.Debug;
  */
 public class ObjectFactory implements javax.naming.spi.ObjectFactory {
 
-  private static Logger logger = Debug.getLogger(ObjectFactory.class.getName());
-
   /** Returns an instance of an object given its reference. */
   public Object getObjectInstance(Object obj,
                                   Name name,
                                   Context ctx,
                                   java.util.Hashtable env) throws Exception {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "ObjectFactory.getObjectInstance(" + obj + ',' + name + ',' + ctx + ',' + env + ')');
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                 "ObjectFactory.getObjectInstance(" +
+                                 obj + ',' + name + ',' +
+                                 ctx + ',' + env + ')');
 
     Reference ref = (Reference) obj;
     AdministeredObject ao = null;
@@ -54,8 +52,8 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory {
       ao = (AdministeredObject) clazz.newInstance();
       ao.fromReference(ref);
     } catch (Exception exc) {
-      if (logger.isLoggable(BasicLevel.ERROR))
-        logger.log(BasicLevel.ERROR, "", exc);
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+        JoramTracing.dbgClient.log(BasicLevel.ERROR, "", exc);
     }
     return ao;
   }

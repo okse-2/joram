@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2005 Bull SA
+ * Copyright (C) 2005 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,6 +32,7 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.xml.sax.Attributes;
 import org.w3c.dom.*;
 
 
@@ -48,9 +48,8 @@ public class Wrapper {
   }
 
   /**
-   * Parses the RA's configuration file from an input stream.
-   * 
-   * @param in  The input stream.
+   *
+   * @param reader   Reader
    * @exception Exception  unspecialized error
    */
   public String parse(InputStream in) throws Exception {
@@ -116,10 +115,9 @@ public class Wrapper {
 
 
  /**
-   * Update the configuration from the properties in parameter.
-   * 
-   * @param in   The input stream
-   * @param map  The map containing the updates.
+   *
+   * @param reader   Reader
+   * @param map      update by this properties
    * @exception Exception  unspecialized error
    */
   public String update(InputStream in, Map map) throws Exception {

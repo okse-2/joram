@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,77 +19,61 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Contributor(s):
  */
 package deadMQueue;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.DeliveryMode;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-import javax.jms.JMSException;
-import javax.naming.Context;
-import javax.naming.InitialContext;
+import org.objectweb.joram.client.jms.admin.*;
+
+import javax.jms.*;
+import javax.naming.*;
 
 /**
  * Producer/Consumer generating dead messages.
  */
-public class DMQClient {
-  public static void main(String[] args) throws Exception {
-    Context ictx = new InitialContext();
-    Queue queue1 = (Queue) ictx.lookup("queue1");
-    Queue queue2 = (Queue) ictx.lookup("queue2");
-    ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cf");
+public class DMQClient
+{
+  static Context ictx = null; 
+
+  public static void main(String[] args) throws Exception
+  {
+    ictx = new InitialContext();
+    Queue queue = (Queue) ictx.lookup("queue");
+    Topic topic = (Topic) ictx.lookup("topic");
+    ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cnxFact");
     ictx.close();
 
     Connection cnx = cf.createConnection();
     Session prodSession = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
     Session consSession = cnx.createSession(true, 0);
+    MessageProducer qProducer = prodSession.createProducer(queue);
+    MessageProducer tProducer = prodSession.createProducer(topic);
     
-    MessageProducer producer1 = prodSession.createProducer(queue1);
-    MessageProducer producer2 = prodSession.createProducer(queue2);
-    MessageConsumer consumer = consSession.createConsumer(queue1);
+    MessageConsumer qConsumer = consSession.createConsumer(queue);
+    MessageConsumer tConsumer = consSession.createConsumer(topic);
 
     cnx.start();
 
-    // Producing messages with a very short time to live: 20 ms.
-    System.out.println("Sends Message1 with a very short time to live");
-    TextMessage msg = prodSession.createTextMessage("Message1");
-    producer1.send(msg, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, 20);
-    
-    // Waiting for the message to be expired.
-    System.out.println("Waits for the message to be expired");
-    Thread.sleep(100);
+    TextMessage msg = prodSession.createTextMessage();
 
-    msg = (TextMessage) consumer.receiveNoWait();
-    System.out.println("receives: " + msg);
-    
-    // Producing "undeliverable" messages
-    System.out.println("Send Message2");   
-    msg = prodSession.createTextMessage("Message2");
-    producer1.send(msg);
-    
-    msg = (TextMessage) consumer.receive();
-    System.out.println("Receives: " + msg.getText() + " then deny it!");
+    // Producing expired messages:
+    msg.setText("Expiry test");
+    qProducer.send(msg, javax.jms.DeliveryMode.NON_PERSISTENT, 4, 1);
+    tProducer.send(msg, javax.jms.DeliveryMode.NON_PERSISTENT, 4, 1);
+
+    qConsumer.receiveNoWait();
+    tConsumer.receiveNoWait();
+
+    // Producing "undeliverable" messages: 
+    msg.setText("Undeliverability test");
+    qProducer.send(msg);
+    tProducer.send(msg);
+    qConsumer.receive();
+    tConsumer.receive();
     consSession.rollback();
-    
-    msg = (TextMessage) consumer.receive();
-    System.out.println("Receives: " + msg.getText() + " then deny it!");
+    qConsumer.receive();
+    tConsumer.receive();
     consSession.rollback();
-        
-    // Producing "forbidden" messages
-    System.out.println("Send Message3");   
-    msg = prodSession.createTextMessage("Message3");
-    try {
-      producer2.send(msg);
-    } catch (JMSException exc) {
-      System.out.println(exc.getMessage());
-    }
 
     cnx.close();
   }

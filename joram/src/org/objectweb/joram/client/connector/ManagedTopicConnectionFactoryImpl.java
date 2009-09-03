@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2006 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -24,49 +24,63 @@
  */
 package org.objectweb.joram.client.connector;
 
-import java.util.Iterator;
-import java.util.Set;
-
-import javax.jms.IllegalStateException;
-import javax.jms.JMSException;
-import javax.jms.JMSSecurityException;
-import javax.jms.XAConnection;
-import javax.jms.XAConnectionFactory;
-import javax.jms.XATopicConnectionFactory;
-import javax.naming.Reference;
-import javax.naming.StringRefAddr;
-import javax.resource.ResourceException;
-import javax.resource.spi.CommException;
-import javax.resource.spi.ConnectionManager;
-import javax.resource.spi.ConnectionRequestInfo;
-import javax.resource.spi.ManagedConnection;
-import javax.resource.spi.SecurityException;
-import javax.security.auth.Subject;
-
-import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 import org.objectweb.joram.client.jms.ha.local.XAHALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.local.XATopicHALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.XATopicHATcpConnectionFactory;
 import org.objectweb.joram.client.jms.local.XALocalConnectionFactory;
+import org.objectweb.joram.client.jms.local.XAQueueLocalConnectionFactory;
 import org.objectweb.joram.client.jms.local.XATopicLocalConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.XAQueueTcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.XATopicTcpConnectionFactory;
+
+import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
+import javax.jms.JMSSecurityException;
+import javax.jms.IllegalStateException;
+import javax.jms.TopicConnectionFactory;
+import javax.jms.XAConnection;
+import javax.jms.XATopicConnection;
+import javax.jms.XAConnectionFactory;
+import javax.jms.XATopicConnectionFactory;
+import javax.naming.StringRefAddr;
+import javax.naming.Reference;
+import javax.resource.ResourceException;
+import javax.resource.spi.CommException;
+import javax.resource.spi.ConnectionManager;
+import javax.resource.spi.ConnectionRequestInfo;
+import javax.resource.spi.ManagedConnection;
+import javax.resource.spi.ResourceAdapter;
+import javax.resource.spi.SecurityException;
+import javax.security.auth.Subject;
+
+import java.io.PrintWriter;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.Vector;
+
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * A <code>ManagedTopicConnectionFactoryImpl</code> instance manages
  * PubSub outbound connectivity to a given JORAM server.
  */
-public class ManagedTopicConnectionFactoryImpl extends ManagedConnectionFactoryImpl {
-
-  private static final long serialVersionUID = 1L;
-
+public class ManagedTopicConnectionFactoryImpl
+             extends ManagedConnectionFactoryImpl
+             implements javax.resource.spi.ManagedConnectionFactory,
+                        javax.resource.spi.ResourceAdapterAssociation,
+                        javax.resource.spi.ValidatingManagedConnectionFactory,
+                        java.io.Serializable
+{
   /**
    * Constructs a <code>ManagedTopicConnectionFactoryImpl</code> instance.
    */
-  public ManagedTopicConnectionFactoryImpl() {
-  }
+  public ManagedTopicConnectionFactoryImpl()
+  {}
+
 
   /**
    * Method called by an application server (managed case) for creating an
@@ -76,7 +90,8 @@ public class ManagedTopicConnectionFactoryImpl extends ManagedConnectionFactoryI
    *
    * @exception ResourceException  Never thrown.
    */
-  public Object createConnectionFactory(ConnectionManager cxManager) throws ResourceException {
+  public Object createConnectionFactory(ConnectionManager cxManager)
+    throws ResourceException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                     this + " createConnectionFactory(" + cxManager + ")");
@@ -90,7 +105,8 @@ public class ManagedTopicConnectionFactoryImpl extends ManagedConnectionFactoryI
    *
    * @exception ResourceException  Never thrown.
    */
-  public Object createConnectionFactory() throws ResourceException {
+  public Object createConnectionFactory()
+    throws ResourceException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createConnectionFactory()");
 
@@ -106,7 +122,6 @@ public class ManagedTopicConnectionFactoryImpl extends ManagedConnectionFactoryI
     ref.add(new StringRefAddr("serverPort", "" + serverPort));
     ref.add(new StringRefAddr("userName", userName));
     ref.add(new StringRefAddr("password", password));
-    ref.add(new StringRefAddr("identityClass", identityClass));
 
     factory.setReference(ref);
     return factory;
@@ -128,8 +143,10 @@ public class ManagedTopicConnectionFactoryImpl extends ManagedConnectionFactoryI
    *                                   or if connecting fails for any other
    *                                   reason.
    */
-  public ManagedConnection createManagedConnection(Subject subject, ConnectionRequestInfo cxRequest)
-      throws ResourceException {
+  public ManagedConnection
+         createManagedConnection(Subject subject,
+                                 ConnectionRequestInfo cxRequest)
+    throws ResourceException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                     this + " createManagedConnection(" + subject +
@@ -137,7 +154,6 @@ public class ManagedTopicConnectionFactoryImpl extends ManagedConnectionFactoryI
 
     String userName;
     String password;
-    String identityClass;
 
     String hostName = this.hostName;
     int serverPort = this.serverPort;
@@ -147,7 +163,6 @@ public class ManagedTopicConnectionFactoryImpl extends ManagedConnectionFactoryI
     if (cxRequest == null) {
       userName = this.userName;
       password = this.password;
-      identityClass = this.identityClass;
     }
     else {
       if (! (cxRequest instanceof ConnectionRequest)) {
@@ -159,7 +174,6 @@ public class ManagedTopicConnectionFactoryImpl extends ManagedConnectionFactoryI
 
       userName = ((ConnectionRequest) cxRequest).getUserName();
       password = ((ConnectionRequest) cxRequest).getPassword();
-      identityClass = ((ConnectionRequest) cxRequest).getIdentityClass();
     }
 
     XAConnection cnx = null;
@@ -170,76 +184,54 @@ public class ManagedTopicConnectionFactoryImpl extends ManagedConnectionFactoryI
     }
 
     try {
-      if (isHa) {
-        if (collocated) {
-          if (ra.haURL != null) {
-            if (cxRequest instanceof TopicConnectionRequest) {
-              XATopicConnectionFactory factory = XATopicHATcpConnectionFactory.create(ra.haURL);
-              setParameters(factory);
-              ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
-              cnx = factory.createXATopicConnection(userName, password);
+        if (isHa) {
+            if (collocated) {
+                if (cxRequest instanceof TopicConnectionRequest) {
+                    XATopicConnectionFactory factory = XATopicHALocalConnectionFactory.create();
+                    setParameters(factory);
+                    cnx = factory.createXATopicConnection(userName, password);
+                } else {
+                    XAConnectionFactory factory = XAHALocalConnectionFactory.create();
+                    setParameters(factory);
+                    cnx = factory.createXAConnection(userName, password);
+                }
             } else {
-              XAConnectionFactory factory = XAHATcpConnectionFactory.create(ra.haURL);
-              setParameters(factory);
-              ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
-              cnx = factory.createXAConnection(userName, password);
+                String urlHa = "hajoram://" + hostName + ":" + serverPort;
+                if (cxRequest instanceof TopicConnectionRequest) {
+                    XATopicConnectionFactory factory = XATopicHATcpConnectionFactory.create(urlHa);
+                    setParameters(factory);
+                    cnx = factory.createXATopicConnection(userName, password);
+                } else {
+                    XAConnectionFactory factory = XAHATcpConnectionFactory.create(urlHa);
+                    setParameters(factory);
+                    cnx = factory.createXAConnection(userName, password);
+                }
             }
-          } else {
-            if (cxRequest instanceof TopicConnectionRequest) {
-              XATopicConnectionFactory factory = XATopicHALocalConnectionFactory.create();
-              setParameters(factory);
-              ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
-              cnx = factory.createXATopicConnection(userName, password);
+        } else {
+            if (collocated) {
+                if (cxRequest instanceof TopicConnectionRequest) {
+                    XATopicConnectionFactory factory = XATopicLocalConnectionFactory.create();
+                    setParameters(factory);
+                    cnx = factory.createXATopicConnection(userName, password);
+                } else {
+                    XAConnectionFactory factory = XALocalConnectionFactory.create();
+                    setParameters(factory);
+                    cnx = factory.createXAConnection(userName, password);
+                }
             } else {
-              XAConnectionFactory factory = XAHALocalConnectionFactory.create();
-              setParameters(factory);
-              ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
-              cnx = factory.createXAConnection(userName, password);
+                if (cxRequest instanceof TopicConnectionRequest) {
+                    XATopicConnectionFactory factory = XATopicTcpConnectionFactory.create(hostName, serverPort);
+                    setParameters(factory);
+                    cnx = factory.createXATopicConnection(userName, password);
+                } else {
+                    XAConnectionFactory factory = XATcpConnectionFactory.create(hostName, serverPort);
+                    setParameters(factory);
+                    cnx = factory.createXAConnection(userName, password);
+                }
             }
-          }
-        } else {
-          String urlHa = "hajoram://" + hostName + ":" + serverPort;
-          if (cxRequest instanceof TopicConnectionRequest) {
-            XATopicConnectionFactory factory = XATopicHATcpConnectionFactory.create(urlHa);
-            setParameters(factory);
-            ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
-            cnx = factory.createXATopicConnection(userName, password);
-          } else {
-            XAConnectionFactory factory = XAHATcpConnectionFactory.create(urlHa);
-            setParameters(factory);
-            ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
-            cnx = factory.createXAConnection(userName, password);
-          }
         }
-      } else {
-        if (collocated) {
-          if (cxRequest instanceof TopicConnectionRequest) {
-            XATopicConnectionFactory factory = XATopicLocalConnectionFactory.create();
-            setParameters(factory);
-            ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
-            cnx = factory.createXATopicConnection(userName, password);
-          } else {
-            XAConnectionFactory factory = XALocalConnectionFactory.create();
-            setParameters(factory);
-            ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
-            cnx = factory.createXAConnection(userName, password);
-          }
-        } else {
-          if (cxRequest instanceof TopicConnectionRequest) {
-            XATopicConnectionFactory factory = XATopicTcpConnectionFactory.create(hostName, serverPort);
-            setParameters(factory);
-            ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
-            cnx = factory.createXATopicConnection(userName, password);
-          } else {
-            XAConnectionFactory factory = XATcpConnectionFactory.create(hostName, serverPort);
-            setParameters(factory);
-            ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
-            cnx = factory.createXAConnection(userName, password);
-          }
-        }
-      }
-      if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+        if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+            AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
                                       this + " createManagedConnection cnx = " + cnx);
     } catch (IllegalStateException exc) {
         if (out != null)
@@ -280,8 +272,11 @@ public class ManagedTopicConnectionFactoryImpl extends ManagedConnectionFactoryI
    * @exception ResourceException  If the provided connection request info is
    *                               invalid.
    */
-  public ManagedConnection matchManagedConnections(Set connectionSet, Subject subject,
-      ConnectionRequestInfo cxRequest) throws ResourceException {
+  public ManagedConnection
+         matchManagedConnections(Set connectionSet,
+                                 Subject subject,
+                                 ConnectionRequestInfo cxRequest)
+    throws ResourceException {
 
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
@@ -339,7 +334,8 @@ public class ManagedTopicConnectionFactoryImpl extends ManagedConnectionFactoryI
   }
 
   /** Returns a code depending on the managed factory configuration. */
-  public int hashCode() {
+  public int hashCode()
+  {
     return ("PubSub:"
             + hostName
             + ":"
@@ -349,7 +345,8 @@ public class ManagedTopicConnectionFactoryImpl extends ManagedConnectionFactoryI
   }
 
   /** Compares managed factories according to their configuration. */
-  public boolean equals(Object o) {
+  public boolean equals(Object o)
+  {
     if (! (o instanceof ManagedTopicConnectionFactoryImpl))
       return false;
 

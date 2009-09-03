@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,17 +26,20 @@ package org.objectweb.joram.mom.dest;
 import java.util.Properties;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.AgentServer;
 
 /**
  * A <code>DeadMQueue</code> agent is an agent hosting a MOM dead message
- * queue, and which behavior is provided by a <code>DeadMQueueImpl</code>
+ * queue, and which behaviour is provided by a <code>DeadMQueueImpl</code>
  * instance.
  *
- * @deprecated Since Joram 5.2 every Queue can be a DeadMQueue
+ * @see DeadMQueueImpl
  */
 public class DeadMQueue extends Queue {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
+
+  public static String getDestinationType() {
+    return "queue.dmq";
+  }
 
   /**
    * Empty constructor for newInstance(). 
@@ -50,8 +53,6 @@ public class DeadMQueue extends Queue {
    * @param prop     The initial set of properties.
    */
   public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
-    DestinationImpl dest = new QueueImpl(adminId, prop);
-    dest.setFreeWriting(true);
-    return dest;
+    return new DeadMQueueImpl(getId(), adminId, prop);
   }
 }

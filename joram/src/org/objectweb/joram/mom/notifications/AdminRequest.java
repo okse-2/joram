@@ -26,22 +26,26 @@ package org.objectweb.joram.mom.notifications;
  * An <code>AdminRequest</code> is used by a client agent for sending an
  * administration request to a destination agent.
  */
-public abstract class AdminRequest extends AbstractNotification {
+public abstract class AdminRequest extends AbstractNotification
+{
   /** Field used for identifying the request. */
   private String id;
+
 
   /**
    * Constructs an <code>AdminRequest</code>.
    *
    * @param id  Identifier of the request, may be null.
    */
-  public AdminRequest(String id) {
+  public AdminRequest(String id)
+  {
     this.id = id;
   }
 
 
   /** Returns the request identifier, null if not used. */
-  public String getId() {
+  public String getId()
+  {
     return id;
   }
 }

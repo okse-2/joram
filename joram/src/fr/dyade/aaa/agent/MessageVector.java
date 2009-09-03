@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2005 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,10 +21,12 @@
  */
 package fr.dyade.aaa.agent;
 
+import java.io.*;
+
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.common.EmptyQueueException;
+import fr.dyade.aaa.util.EmptyQueueException;
 
 /**
  * Class <code>MessageVector</code> represents a persistent vector of
@@ -55,7 +57,7 @@ final class MessageVector implements MessageQueue {
   private int first;
   /**
    * The number of messages in this <tt>MessageVector</tt> object. Components
-   * <tt>data[first]</tt> through <tt>data[(first+count-1)%length]</tt> are the
+   * <tt>data[first]</tt> through <tt>data[(first+count)%length]</tt> are the
    * actual items.
    */
   private int count;
@@ -294,36 +296,6 @@ final class MessageVector implements MessageQueue {
   }
 
   /**
-   *  Removes the first messages with a timestamp less than the specified one.
-   * Be careful with the use of this method, in particular it does not take in
-   * account the multiples incoming nodes.
-   */
-  synchronized Message removeExpired(long currentTimeMillis) {
-    if (validated == 0) return null;
-    
-    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG,
-                 logmsg + "removeExpired - " + currentTimeMillis);
-
-    for (int i = 0; i<validated; i++) {
-      Message msg = getMessageAt(i);
-      if ((msg.not != null) && 
-          (msg.not.expiration > 0) &&
-          (currentTimeMillis >= msg.not.expiration)) {
-        removeMessageAt(i);
-        validated -= 1;
-    
-        if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
-          logmon.log(BasicLevel.DEBUG, logmsg + "remove #" + msg.getStamp());
-
-        return msg;
-      }
-    }
-
-    return null;
-  }
-
-  /**
    * Inserts the specified message to this <code>MessageVector</code> at
    * the specified index. Each component in this vector with an index greater
    * or equal to the specified index is shifted upward.
@@ -403,33 +375,24 @@ final class MessageVector implements MessageQueue {
    * @param index	the index of the message to remove.
    */
   void removeMessageAt(int index) {
-    if (index == 0) {
-      // It is the first element, just move the start of the list.
-      data[first] = null; /* let gc do its work */
-      first = (first +1)%data.length;
-    } else if (index == (count -1)) {
-      // It is the last element, just move the end of the list.
-      data[(first + index) %data.length] = null; /* let gc do its work */
-    } else if ((first + index) < data.length) {
-      // Moves the start of the box to the empty 'box'
+    if ((first + index) < data.length) {
+      // Moves the start of the vector +1 to the empty 'box'
       System.arraycopy(data, first,
                        data, first +1, index);
       // Erase the old first 'box'
-      data[first] = null; /* let gc do its work */
+      data[first] = null; /* to let gc do its work */
       // Move the first ptr +1, and decrease counter
       first = (first +1)%data.length;
+      count -= 1;
     } else {
       // Moves the end of the vector -1 to the empty 'box'
       System.arraycopy(data, (first + index)%data.length +1,
                        data, (first + index)%data.length, count - index -1);
       // Erase the old last 'box'
-      data[(first + count -1)%data.length] = null; /* let gc do its work */
+      data[(first + count -1)%data.length] = null; /* to let gc do its work */
+      // Decrease counter
+      count -= 1;
     }
-
-    // Decrease the counter
-    count -= 1;
-    // If there is no more element, moves the empty list to the beginning of
-    // the vector.
     if (count == 0) first = 0;
 
     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
@@ -495,7 +458,8 @@ final class MessageVector implements MessageQueue {
      * @return The message to which this reference refers.
      */
     public Message getMessage() {
-      return null != ref ? ref : (Message) this.get();
+      if (ref != null) return ref;
+      return (Message) get();
     }
 
     /**
@@ -541,13 +505,8 @@ final class MessageVector implements MessageQueue {
   }
 
   final class TransactionError extends Error {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     TransactionError(Throwable cause) {
-      super(cause.getMessage());
+      super(cause);
     }
   }
 }

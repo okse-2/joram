@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,12 +24,17 @@ package com.scalagent.joram.mom.dest.mail;
 
 import java.util.Properties;
 
-import org.objectweb.joram.mom.dest.DestinationImpl;
-import org.objectweb.joram.mom.dest.Queue;
+import org.objectweb.joram.mom.proxies.ConnectionManager;
+import org.objectweb.joram.mom.dest.*;
 
+import fr.dyade.aaa.util.TimerTask;
+import fr.dyade.aaa.util.Timer;
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.Notification;
-import fr.dyade.aaa.agent.WakeUpTask;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.mom.MomTracing;
 
 /**
  * A <code>JavaMailQueue</code> agent is an agent hosting a MOM queue, and
@@ -38,8 +43,6 @@ import fr.dyade.aaa.agent.WakeUpTask;
  * @see JavaMailQueueImpl
  */
 public class JavaMailQueue extends Queue {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
 
   public static final String MAIL_QUEUE_TYPE = "queue.mail";
 
@@ -59,10 +62,11 @@ public class JavaMailQueue extends Queue {
    * @param prop     The initial set of properties.
    */
   public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
-    return new JavaMailQueueImpl(adminId, prop);
+    JavaMailQueueImpl queueImpl = new JavaMailQueueImpl(getId(), adminId, prop);
+    return queueImpl;
   }
 
-  private transient WakeUpTask poptask;
+  private transient PopTask poptask;
 
   /**
    * Gives this agent an opportunity to initialize after having been deployed,
@@ -75,18 +79,51 @@ public class JavaMailQueue extends Queue {
    */
   protected void agentInitialize(boolean firstTime) throws Exception {
     super.agentInitialize(firstTime);
-    poptask = new WakeUpTask(getId(), WakeUpPopNot.class);
-    poptask.schedule(((JavaMailQueueImpl) destImpl).getPopPeriod());
+    poptask = new PopTask(getId());
+    poptask.schedule();
   }
 
   public void react(AgentId from, Notification not) throws Exception {
     if (not instanceof WakeUpPopNot) {
       if (poptask == null)
-        poptask = new WakeUpTask(getId(), WakeUpPopNot.class);
-      poptask.schedule(((JavaMailQueueImpl) destImpl).getPopPeriod());
+        poptask = new PopTask(getId());
+      poptask.schedule();
       ((JavaMailQueueImpl) destImpl).doPop();
     } else {
       super.react(from, not);
+    }
+  }
+
+  /**
+   * Timer task responsible for doing a pop.
+   */
+  private class PopTask extends TimerTask {    
+    private AgentId to;
+  
+    public PopTask(AgentId to) {
+      this.to = to;
+    }
+  
+    /** Method called when the timer expires. */
+    public void run() {
+      try {
+        Channel.sendTo(to, new WakeUpPopNot());
+      } catch (Exception e) {}
+    }
+
+    public void schedule() {
+      long period = ((JavaMailQueueImpl) destImpl).getPopPeriod();
+
+      if (period > 0) {
+        try {
+          Timer timer = ConnectionManager.getTimer();
+          timer.schedule(this, period);
+        } catch (Exception exc) {
+          if (MomTracing.dbgDestination.isLoggable(BasicLevel.ERROR))
+            MomTracing.dbgDestination.log(BasicLevel.ERROR,
+                                          "--- " + this + " Queue(...)", exc);
+        }
+      }
     }
   }
 }

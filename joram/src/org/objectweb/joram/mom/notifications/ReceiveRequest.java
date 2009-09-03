@@ -29,10 +29,6 @@ package org.objectweb.joram.mom.notifications;
  */
 public class ReceiveRequest extends AbstractRequest {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-  /**
    * String selector for filtering messages, null or empty for no selection.
    */
   private String selector;

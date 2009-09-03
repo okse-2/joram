@@ -22,15 +22,15 @@
  */
 package ha;
 
-import javax.jms.Connection;
-import javax.jms.MessageConsumer;
-import javax.jms.Session;
-import javax.jms.TopicConnectionFactory;
-
+import org.objectweb.joram.client.jms.admin.*;
+import org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory;
 import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.Topic;
-import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory;
+import javax.jms.Connection;
+import javax.jms.Session;
+import javax.jms.MessageConsumer;
+import javax.jms.TextMessage;
+import javax.jms.TopicConnectionFactory;
 
 public class Subscriber {
 
@@ -39,7 +39,7 @@ public class Subscriber {
     System.out.println();
     System.out.println("Subscribes and listens to topic...");
 
-    // use joram Admin instead of Jndi.
+    // use joram Admin insteadof Jndi.
     TopicConnectionFactory tcf =
       TopicHATcpConnectionFactory.create("hajoram://localhost:2560,localhost:2561,localhost:2562");
     ((ConnectionFactory)tcf).getParameters().connectingTimer = 30;

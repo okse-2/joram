@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -22,26 +22,25 @@ package fr.dyade.aaa.agent;
 
 import java.io.*;
 import java.net.*;
+import java.text.*;
 import java.util.*;
 import java.lang.reflect.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
+import fr.dyade.aaa.util.Daemon;
 import fr.dyade.aaa.agent.conf.A3CML;
 import fr.dyade.aaa.agent.conf.A3CMLConfig;
-import fr.dyade.aaa.common.Daemon;
 
 /**
- * A <code>AdminProxy</code> service provides a TCP service allowing remote
- * administration of agent servers.
+ * A <code>AdminProxy</code> service provides an interface to access
+ * to administration functions in running agent servers.
  * <p>
  * The <code>AdminProxy</code> service can be configured by the way of
  * service argument:
- * <ul>
- * <li>the TCP port number, by default this port is 8091.
- * <li>the number of monitor needed to handled requests.
- * </ul>
+ * the TCP port number, by default this port is 8091.
+ * the number of monitor needed to handled requests.
  */
 public class AdminProxy {
 
@@ -51,14 +50,14 @@ public class AdminProxy {
 
   /** Property that define the TCP listen port */
   public final static String LISTENPORT = "fr.dyade.aaa.agent.AdminProxy.port";
-  /** The TCP listen port, by default 8091 */
+  /** The TCP listen port */
   private static int port = 8091;
   /** The number of monitors.*/
   private static int nbm;
   /** Property that define the number of monitor */
   public final static String NBMONITOR = "fr.dyade.aaa.agent.AdminProxy.nbm";
   /** Hashtable that contain all <code>Process</code> of running AgentServer */
-  //   Hashtable ASP = null;
+//   Hashtable ASP = null;
 
   AdminMonitor monitors[] = null;
   ServerSocket listen = null;
@@ -76,7 +75,7 @@ public class AdminProxy {
   public static void init(String args, boolean firstTime) throws Exception {
     try {
       if (args.length()!=0) {
-        port = Integer.parseInt(args);
+	port = Integer.parseInt(args);
       } else {
         port = Integer.parseInt(AgentServer.getProperty(LISTENPORT, "8091"));
       }
@@ -92,14 +91,14 @@ public class AdminProxy {
 
     // Get the logging monitor from current server MonologMonitorFactory
     xlogmon = Debug.getLogger(Debug.A3Service + ".AdminProxy" +
-                              ".#" + AgentServer.getServerId());
+                               ".#" + AgentServer.getServerId());
 
     if (proxy != null) {
       xlogmon.log(BasicLevel.ERROR,
                   "AdminProxy#" + AgentServer.getServerId() +
-      ": already initialized.");
+                  ": already initialized.");
       throw new Exception("AdminProxy" + ".#" + AgentServer.getServerId() +
-      ": already initialized.");
+                          ": already initialized.");
     }
 
     try {
@@ -126,13 +125,13 @@ public class AdminProxy {
       } catch (BindException exc) {
         if (i > 5) throw exc;
         try {
-          // Wait ~15s: n*(n+1)*500 ms with n=5
+	  // Wait ~15s: n*(n+1)*500 ms with n=5
           Thread.sleep(i * 500);
         } catch (InterruptedException e) {}
       }
     }
 
-    //     ASP = new Hashtable();
+//     ASP = new Hashtable();
 
     monitors = new AdminMonitor[nbm];
     for (int i=0; i<monitors.length; i++) {
@@ -227,7 +226,7 @@ public class AdminProxy {
      */
     public String toString() {
       return "(" + super.toString() +
-      ",socket=" + socket + ")";
+	",socket=" + socket + ")";
     }
 
     public void run() {
@@ -250,9 +249,9 @@ public class AdminProxy {
           try {
             // Get the streams
             reader = new BufferedReader(
-                                        new InputStreamReader(socket.getInputStream()));
+              new InputStreamReader(socket.getInputStream()));
             writer = new PrintWriter(socket.getOutputStream(), true);
-
+	  
             // Reads then parses the request
             doRequest(reader.readLine());
 
@@ -285,7 +284,7 @@ public class AdminProxy {
     protected void close() {
       try {
         logmon.log(BasicLevel.DEBUG, getName() + ", closing: " + listen);
-        listen.close();
+	listen.close();
       } catch (Exception exc) {}
       listen = null;
     }
@@ -301,182 +300,182 @@ public class AdminProxy {
       logmon.log(BasicLevel.DEBUG, getName() + ", request=" + request);
 
       try {
-        // Tokenizes the request to parse it.
-        StringTokenizer st = new StringTokenizer(request);
+	// Tokenizes the request to parse it.
+	StringTokenizer st = new StringTokenizer(request);
 
-        cmd = st.nextToken();
-        if (cmd.equals(STOP_SERVER)) {
+	cmd = st.nextToken();
+	if (cmd.equals(STOP_SERVER)) {
           // Stop the AgentServer
-          AgentServer.stop(false);
+	  AgentServer.stop(false);
           logmon.log(BasicLevel.WARN, getName() + ", bye.");
-        } else if (cmd.equals(CRASH_SERVER)) {
+	} else if (cmd.equals(CRASH_SERVER)) {
           // Kill the AgentServer
           logmon.log(BasicLevel.WARN, getName() + ", crash!");
-          System.exit(0);
-        } else if (cmd.equals(GC)) {
-          Runtime runtime = Runtime.getRuntime();
-          writer.println("before: " +
-                         runtime.freeMemory() + " octets free / " +
-                         runtime.totalMemory() + " octets.");
-          runtime.gc();
-          writer.println("after: " +
-                         runtime.freeMemory() + " octets free / " +
-                         runtime.totalMemory() + " octets.");
-        } else if (cmd.equals(SET_VARIABLE)) {
-          try {
-            if (st.countTokens() != 2)
-              throw new Exception("Usage: set property value");
+	  System.exit(0);
+	} else if (cmd.equals(GC)) {
+	  Runtime runtime = Runtime.getRuntime();
+	  writer.println("before: " +
+			 runtime.freeMemory() + " octets free / " +
+			 runtime.totalMemory() + " octets.");
+	  runtime.gc();
+	  writer.println("after: " +
+			 runtime.freeMemory() + " octets free / " +
+			 runtime.totalMemory() + " octets.");
+	} else if (cmd.equals(SET_VARIABLE)) {
+	  try {
+	    if (st.countTokens() != 2)
+	      throw new Exception("Usage: set property value");
 
-            String property = st.nextToken();
-            String value = st.nextToken();
+	    String property = st.nextToken();
+	    String value = st.nextToken();
 
-            // finds variable class and name
-            int pindex = property.lastIndexOf('.');
-            if (pindex == -1) {
-              // bad formed property name, ignores
-              throw new Exception("bad formed property name: " + property);
-            }
-            String varClassName = property.substring(0, pindex);
-            String varName = property.substring(pindex + 1);
+	    // finds variable class and name
+	    int pindex = property.lastIndexOf('.');
+	    if (pindex == -1) {
+	      // bad formed property name, ignores
+	      throw new Exception("bad formed property name: " + property);
+	    }
+	    String varClassName = property.substring(0, pindex);
+	    String varName = property.substring(pindex + 1);
 
-            try {
-              // finds variable
-              Class varClass = Class.forName(varClassName);
-              Field var = varClass.getDeclaredField(varName);
-              // sets variable according to its type
-              String varType = var.getType().getName();
-              if (varType.equals("boolean") ||
-                  varType.equals("java.lang.Boolean")) {
-                var.set(null, new Boolean(value));
-              } else if (varType.equals("int") ||
-                  varType.equals("java.lang.Integer")) {
-                var.set(null, new Integer(value));
-              } else if (varType.equals("java.lang.String")) {
-                var.set(null, value);
-              } else {
-                throw new Exception("error setting property " +
-                                    varClassName + "." + varName +
-                                    ": unexpected type " + varType);
-              }
-            } catch (Exception exc) {
-              if (debug) exc.printStackTrace(writer);
-              throw new Exception("error setting property " +
-                                  varClassName + "." + varName +
-                                  ": " + exc.getMessage());
-            }
-            writer.println("done.");
-          } catch (Exception exc) {
-            writer.println(exc.getMessage());
-          }
-        } else if (cmd.equals(GET_VARIABLE)) {
-          try {
-            if (st.countTokens() != 1)
-              throw new Exception("Usage: get property");
+	    try {
+	      // finds variable
+	      Class varClass = Class.forName(varClassName);
+	      Field var = varClass.getDeclaredField(varName);
+	      // sets variable according to its type
+	      String varType = var.getType().getName();
+	      if (varType.equals("boolean") ||
+		  varType.equals("java.lang.Boolean")) {
+		var.set(null, new Boolean(value));
+	      } else if (varType.equals("int") ||
+			 varType.equals("java.lang.Integer")) {
+		var.set(null, new Integer(value));
+	      } else if (varType.equals("java.lang.String")) {
+		var.set(null, value);
+	      } else {
+		throw new Exception("error setting property " +
+				    varClassName + "." + varName +
+				    ": unexpected type " + varType);
+	      }
+	    } catch (Exception exc) {
+	      if (debug) exc.printStackTrace(writer);
+	      throw new Exception("error setting property " +
+				  varClassName + "." + varName +
+				  ": " + exc.getMessage());
+	    }
+	    writer.println("done.");
+	  } catch (Exception exc) {
+	    writer.println(exc.getMessage());
+	  }
+	} else if (cmd.equals(GET_VARIABLE)) {
+	  try {
+	    if (st.countTokens() != 1)
+	      throw new Exception("Usage: get property");
 
-            String property = st.nextToken();
+	    String property = st.nextToken();
 
-            // finds variable class and name
-            int pindex = property.lastIndexOf('.');
-            if (pindex == -1) {
-              // bad formed property name, ignores
-              throw new Exception("bad formed property name: " + property);
-            }
-            String varClassName = property.substring(0, pindex);
-            String varName = property.substring(pindex + 1);
+	    // finds variable class and name
+	    int pindex = property.lastIndexOf('.');
+	    if (pindex == -1) {
+	      // bad formed property name, ignores
+	      throw new Exception("bad formed property name: " + property);
+	    }
+	    String varClassName = property.substring(0, pindex);
+	    String varName = property.substring(pindex + 1);
 
-            try {
-              // finds variable
-              Class varClass = Class.forName(varClassName);
-              Field var = varClass.getDeclaredField(varName);
-              // get the variable value
-              Object value = var.get(null);
-              writer.println(property + " = " + value);
-            } catch (Exception exc) {
-              if (debug) exc.printStackTrace(writer);
-              throw new Exception("error getting property " +
-                                  varClassName + "." + varName +
-                                  ": " + exc.getMessage());
-            }
-          } catch (Exception exc) {
-            writer.println(exc.getMessage());
-          }
-        } else if (cmd.equals(THREADS)) {
-          String group = null;
-          if (st.hasMoreTokens())
-            group = st.nextToken();
+	    try {
+	      // finds variable
+	      Class varClass = Class.forName(varClassName);
+	      Field var = varClass.getDeclaredField(varName);
+	      // get the variable value
+	      Object value = var.get(null);
+	      writer.println(property + " = " + value);
+	    } catch (Exception exc) {
+	      if (debug) exc.printStackTrace(writer);
+	      throw new Exception("error getting property " +
+				  varClassName + "." + varName +
+				  ": " + exc.getMessage());
+	    }
+	  } catch (Exception exc) {
+	    writer.println(exc.getMessage());
+	  }
+	} else if (cmd.equals(THREADS)) {
+	  String group = null;
+	  if (st.hasMoreTokens())
+	    group = st.nextToken();
 
-          ThreadGroup tg = Thread.currentThread().getThreadGroup();
-          while (tg.getParent() != null)
-            tg = tg.getParent();
-          int nbt = tg.activeCount();
-          Thread[] tab = new Thread[nbt];
-          tg.enumerate(tab);
+	  ThreadGroup tg = Thread.currentThread().getThreadGroup();
+	  while (tg.getParent() != null)
+	    tg = tg.getParent();
+	  int nbt = tg.activeCount();
+	  Thread[] tab = new Thread[nbt];
+	  tg.enumerate(tab);
 
-          for (int j=0; j<nbt; j++) {
-            if ((group != null) &&
-                ! tab[j].getThreadGroup().getName().equals(group))
-              continue;
-            writer.println("+----------------------------------------");
-            writer.println("[" +
-                           ((group==null)?(tab[j].getThreadGroup().getName() + "."):"") +
-                           tab[j].getName() + "]" +
-                           (tab[j].isAlive()?" alive":"") +
-                           (tab[j].isDaemon()?" daemon":"") + "\n " +
-                           tab[j]);
-          }
-        } else if (cmd.equals(LIST_MCONS)) {
+	  for (int j=0; j<nbt; j++) {
+	    if ((group != null) &&
+		! tab[j].getThreadGroup().getName().equals(group))
+	      continue;
+	    writer.println("+----------------------------------------");
+	    writer.println("[" +
+			   ((group==null)?(tab[j].getThreadGroup().getName() + "."):"") +
+			   tab[j].getName() + "]" +
+			   (tab[j].isAlive()?" alive":"") +
+			   (tab[j].isDaemon()?" daemon":"") + "\n " +
+			   tab[j]);
+	  }
+	} else if (cmd.equals(LIST_MCONS)) {
           for (Enumeration c=AgentServer.getConsumers();
-          c.hasMoreElements(); ) {
+               c.hasMoreElements(); ) {
             MessageConsumer cons = (MessageConsumer) c.nextElement();
-            writer.println("+----------------------------------------");
-            writer.println(cons);
-          }
-        } else if (cmd.equals(START_MCONS)) {
-          String domain = null;
-          if (st.hasMoreTokens()) {
-            // start the identified consumer.
-            domain = st.nextToken();
-          }
+	    writer.println("+----------------------------------------");
+	    writer.println(cons);
+	  }
+	} else if (cmd.equals(START_MCONS)) {
+	  String domain = null;
+	  if (st.hasMoreTokens()) {
+	    // start the identified consumer.
+	    domain = st.nextToken();
+	  }
           for (Enumeration c=AgentServer.getConsumers();
-          c.hasMoreElements(); ) {
+               c.hasMoreElements(); ) {
             MessageConsumer cons = (MessageConsumer) c.nextElement();
-
-            if (((domain == null) || domain.equals(cons.getName()))) {
-              try {
-                cons.start();
-                writer.println("start " + cons.getName() + " done.");
-              } catch (Exception exc) {
-                writer.println("Can't start "+ cons.getName() + ": " +
-                               exc.getMessage());
-                if (debug) exc.printStackTrace(writer);
-              }
-            }
-          }
-        } else if (cmd.equals(STOP_MCONS)) {
-          String domain = null;
-          if (st.hasMoreTokens()) {
-            // stop the identified consumer.
-            domain = st.nextToken();
-          }
+	  
+	    if (((domain == null) || domain.equals(cons.getName()))) {
+	      try {
+		cons.start();
+		writer.println("start " + cons.getName() + " done.");
+	      } catch (Exception exc) {
+		writer.println("Can't start "+ cons.getName() + ": " +
+			       exc.getMessage());
+		if (debug) exc.printStackTrace(writer);
+	      }
+	    }
+	  }
+	} else if (cmd.equals(STOP_MCONS)) {
+	  String domain = null;
+	  if (st.hasMoreTokens()) {
+	    // stop the identified consumer.
+	    domain = st.nextToken();
+	  }
           for (Enumeration c=AgentServer.getConsumers();
-          c.hasMoreElements(); ) {
+               c.hasMoreElements(); ) {
             MessageConsumer cons = (MessageConsumer) c.nextElement();
-
-            if (((domain == null) || domain.equals(cons.getName()))) {
-              cons.stop();
-              writer.println("stop " + cons.getName() + " done.");
-            }
-          }
-        } else if (cmd.equals(LIST_SERVICE)) {
-          ServiceDesc services[] = ServiceManager.getServices();
-          for (int i=0; i<services.length; i++ ){
-            writer.println("+----------------------------------------");
-            writer.println(services[i].getClassName() + " (" +
-                           services[i].getArguments() + ")" +
-                           (services[i].isInitialized()?" initialized ":"") +
-                           (services[i].isRunning()?" running":""));
-          }
-        } else if (cmd.equals(ADD_SERVICE)) {
+	  
+	    if (((domain == null) || domain.equals(cons.getName()))) {
+	      cons.stop();
+	      writer.println("stop " + cons.getName() + " done.");
+	    }
+	  }
+	} else if (cmd.equals(LIST_SERVICE)) {
+	  ServiceDesc services[] = ServiceManager.getServices();
+	  for (int i=0; i<services.length; i++ ){
+	    writer.println("+----------------------------------------");
+	    writer.println(services[i].getClassName() + " (" +
+			   services[i].getArguments() + ")" +
+			   (services[i].isInitialized()?" initialized ":"") +
+			   (services[i].isRunning()?" running":""));
+	  }
+	} else if (cmd.equals(ADD_SERVICE)) {
           try {
             // Add a new Service
             String sclass = null;
@@ -501,30 +500,30 @@ public class AdminProxy {
           } catch (Exception exc) {
             writer.println(exc.getMessage());
           } 
-        } else if (cmd.equals(REMOVE_SERVICE)) {
-          // Remove an existing Service
-          String sclass = null;
-          try {
-            sclass = st.nextToken();
-          } catch (NoSuchElementException exc) {
-            writer.println("Usage: " + REMOVE_SERVICE + " <sclass> [<args>]");
+	} else if (cmd.equals(REMOVE_SERVICE)) {
+	  // Remove an existing Service
+	  String sclass = null;
+	  try {
+	    sclass = st.nextToken();
+	  } catch (NoSuchElementException exc) {
+	    writer.println("Usage: " + REMOVE_SERVICE + " <sclass> [<args>]");
             return;
-          }
-          try {
-            ServiceManager.stop(sclass);
-            writer.println("Service <" + sclass + "> stopped.");
-          } catch (Exception exc) {
-            writer.println("Can't stop service: " + exc.getMessage());
-            if (debug) exc.printStackTrace(writer);
-          }
-          try {
-            ServiceManager.unregister(sclass);
-            writer.println("Service <" + sclass + "> unregistred.");
-          } catch (Exception exc) {
-            writer.println("Can't unregister service: " + exc.getMessage());
-            if (debug) exc.printStackTrace(writer);
-          }
-        } else if (cmd.equals(DUMP)) {
+	  }
+	  try {
+	    ServiceManager.stop(sclass);
+	    writer.println("Service <" + sclass + "> stopped.");
+	  } catch (Exception exc) {
+	    writer.println("Can't stop service: " + exc.getMessage());
+	    if (debug) exc.printStackTrace(writer);
+	  }
+	  try {
+	    ServiceManager.unregister(sclass);
+	    writer.println("Service <" + sclass + "> unregistred.");
+	  } catch (Exception exc) {
+	    writer.println("Can't unregister service: " + exc.getMessage());
+	    if (debug) exc.printStackTrace(writer);
+	  }
+	} else if (cmd.equals(DUMP)) {
           AgentId id = null;
           try {
             id = AgentId.fromString(st.nextToken());
@@ -538,8 +537,8 @@ public class AdminProxy {
             writer.println("Can't launch server: " + exc.getMessage());
             if (debug) exc.printStackTrace(writer);
           }
-        } else if (cmd.equals(NONE)) {
-        } else if (cmd.equals(PING)) {
+	} else if (cmd.equals(NONE)) {
+	} else if (cmd.equals(PING)) {
           writer.println(AgentServer.getServerId());
         } else if (cmd.equals(CONFIG)) {
           try {
@@ -587,37 +586,37 @@ public class AdminProxy {
             writer.println("OK");
           }
         } else if (cmd.equals(HELP)) {
-          writer.println(
-                         "Description of available commands:\n" +
-                         "\t" + HELP +
-                         "\n\t\tGives the summary of the options.\n" +
-                         "\t" + STOP_SERVER +
-                         "\n\t\tStops the server.\n" +
-                         "\t" + SET_VARIABLE + "variable value" +
-                         "\n\t\tSet the specified static variable with the given value.\n" +
-                         "\t" + GET_VARIABLE +
-                         "\n\t\tReturn the value of the specified static variable.\n" +
-                         "\t" + GC + 
-                         "\n\t\tRun the garbage collector in the specified A3 server.\n" +
-                         "\t" + THREADS + " [group]" +
-                         "\n\t\tList all threads in server JVM.\n" +
-                         "\t" + LIST_MCONS +
-                         "\n\t\tList all defined consumers.\n" +
-                         "\t" + START_MCONS + " [domain]" +
-                         "\n\t\tStarts the specified MessageConsumer.\n" +
-                         "\t" + STOP_MCONS + " [domain]" +
-                         "\n\t\tStops the specified MessageConsumer.\n" +
-                         "\t" + LIST_SERVICE +
-                         "\n\t\tList all registered services.\n" +
-                         "\t" + ADD_SERVICE + " classname arguments" +
-                         "\n\t\tRegisters and starts the specified Service.\n" +
-                         "\t" + REMOVE_SERVICE + " classname" +
-                         "\n\t\tStops then unregister the specified Service.\n" + 
-                         "\t" + CONFIG + 
-          "\n\t\tReturns the configuration of the server in XML format.\n");
-        } else {
-          writer.println("unknown command:" + cmd);
-        }
+	  writer.println(
+	    "Description of available commands:\n" +
+	    "\t" + HELP +
+	    "\n\t\tGives the summary of the options.\n" +
+	    "\t" + STOP_SERVER +
+	    "\n\t\tStops the server.\n" +
+	    "\t" + SET_VARIABLE + "variable value" +
+	    "\n\t\tSet the specified static variable with the given value.\n" +
+	    "\t" + GET_VARIABLE +
+	    "\n\t\tReturn the value of the specified static variable.\n" +
+	    "\t" + GC + 
+	    "\n\t\tRun the garbage collector in the specified A3 server.\n" +
+	    "\t" + THREADS + " [group]" +
+	    "\n\t\tList all threads in server JVM.\n" +
+	    "\t" + LIST_MCONS +
+	    "\n\t\tList all defined consumers.\n" +
+	    "\t" + START_MCONS + " [domain]" +
+	    "\n\t\tStarts the specified MessageConsumer.\n" +
+	    "\t" + STOP_MCONS + " [domain]" +
+	    "\n\t\tStops the specified MessageConsumer.\n" +
+	    "\t" + LIST_SERVICE +
+	    "\n\t\tList all registered services.\n" +
+	    "\t" + ADD_SERVICE + " classname arguments" +
+	    "\n\t\tRegisters and starts the specified Service.\n" +
+	    "\t" + REMOVE_SERVICE + " classname" +
+	    "\n\t\tStops then unregister the specified Service.\n" + 
+            "\t" + CONFIG + 
+            "\n\t\tReturns the configuration of the server in XML format.\n");
+	} else {
+	  writer.println("unknown command:" + cmd);
+	}
       } finally {
       }
     }

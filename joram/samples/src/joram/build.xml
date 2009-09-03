@@ -79,19 +79,6 @@
           tofile="${run.dir}/a3servers.xml"
           overwrite="true"/>
   </target>
-	
-  <!-- Initializes the bridge configuration -->
-  <target name="bridge_init" depends="init">
-    <mkdir dir="${run.dir}"/>
-    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
-    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
-    <copy file="${conf.dir}/jndi.properties"
-          tofile="${run.dir}/jndi.properties"
-          overwrite="true"/>
-    <copy file="${conf.dir}/bridge_a3servers.xml"
-          tofile="${run.dir}/a3servers.xml"
-          overwrite="true"/>
-  </target>
 
   <!-- Initializes the soap configuration -->
   <target name="soap_init" depends="init">
@@ -136,37 +123,6 @@
     </antcall>
   </target>
 
-  <!-- Initializes the jaas configuration -->
-  <target name="jaas_init" depends="init">
-    <mkdir dir="${run.dir}"/>
-    <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}"/>
-    <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
-    <copy file="${conf.dir}/jndi.properties"
-          tofile="${run.dir}/jndi.properties"
-          overwrite="true"/>
-    <copy file="${conf.dir}/jaas_a3servers.xml"
-          tofile="${run.dir}/a3servers.xml"
-          overwrite="true"/>
-    <copy file="${src.dir}/jaas/jaas.config"
-          tofile="${run.dir}/jaas.config"
-          overwrite="true"/>
-    <copy file="${src.dir}/jaas/keystore"
-          tofile="${run.dir}/keystore"
-          overwrite="true"/>
-    <copy file="${src.dir}/jaas/carol.properties"
-          tofile="${run.dir}/carol.properties"
-          overwrite="true"/>
-  </target>
-
-  <!-- Start a jaas server -->
-  <target name="jaas_server" depends="jaas_init"
-          description="--> Starts a JAAS server.">
-    <antcall target="server">
-      <param name="sid" value="0"/>
-    </antcall>
-  </target>
-
-
   <!-- **************************************************
        * Classic Samples
        ************************************************** -->
@@ -191,27 +147,6 @@
       dir="${run.dir}">
       <classpath path="${project.class.path}"/>
       <arg line="./joramAdmin.xml"/>
-    </java>
-  </target>
-
-  <!-- Runs the classic sender client -->
-  <target name="synchsubscriber" depends="init"
-    description="--> Starts a SynchReqSubscriber client">
-    <java classname="classic.SynchReqSubscriber" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
-      <arg line="./jndi.properties"/>
-    </java>
-  </target>
-
-  <!-- Runs the classic sender client -->
-  <target name="synchpublisher" depends="init"
-    description="--> Starts a SynchReqPublisher client">
-    <java classname="classic.SynchReqPublisher" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <arg line="./jndi.properties"/>
     </java>
   </target>
 
@@ -276,7 +211,6 @@
     description="--> Starts a Consumer client">
     <java classname="classic.Consumer" failonerror="no" fork="yes"
           dir="${run.dir}">
-      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
       <classpath path="${project.class.path}"/>
     </java>
   </target>
@@ -306,54 +240,6 @@
     <java classname="classic.Browser" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-
-  <!-- **************************************************
-       * JAAS Samples
-       ************************************************** -->
-
-  <!-- Setup the classic configuration -->
-  <target name="jaas_admin" depends="init"
-          description="--> Runs a jaas administration">
-    <java classname="jaas.ClassicAdmin"
-      failonerror="no" fork="yes"
-      dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <jvmarg line="-Djava.security.auth.login.config=${run.dir}/jaas.config -Djava.naming.factory.initial=org.objectweb.carol.jndi.spi.MultiOrbInitialContextFactory" />
-    </java>
-  </target>
-
-  <!-- Setup the classic configuration -->
-  <target name="jaas_adminxml" depends="init"
-          description="--> Runs a jaas administration XML">
-    <copy file="${src.dir}/jaas/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
-    <java classname="org.objectweb.joram.client.jms.admin.AdminModule"
-      failonerror="no" fork="yes"
-      dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <arg line="./joramAdmin.xml"/>
-      <jvmarg line="-Djava.security.auth.login.config=${run.dir}/jaas.config -Djava.naming.factory.initial=org.objectweb.carol.jndi.spi.MultiOrbInitialContextFactory" />
-    </java>
-  </target>
-
-  <!-- Runs the classic sender client -->
-  <target name="jaas_sender" depends="init"
-    description="--> Starts a jaas Sender client">
-    <java classname="jaas.Sender" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <jvmarg line="-Djava.security.auth.login.config=${run.dir}/jaas.config -Djava.naming.factory.initial=org.objectweb.carol.jndi.spi.MultiOrbInitialContextFactory" />
-    </java>
-  </target>
-
-  <!-- Runs the classic receiver client -->
-  <target name="jaas_receiver" depends="init"
-    description="--> Starts a jaas Receiver client">
-    <java classname="jaas.Receiver" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <jvmarg line="-Djava.security.auth.login.config=${run.dir}/jaas.config -Djava.naming.factory.initial=org.objectweb.carol.jndi.spi.MultiOrbInitialContextFactory" />
     </java>
   </target>
 
@@ -507,7 +393,6 @@
     <java classname="archi.ArchiAdmin" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
     </java>
   </target>
 
@@ -546,7 +431,6 @@
       <classpath path="${project.class.path}"/>
     </java>
   </target>
-  
   <!-- Runs the cluster topic administration -->
   <target name="topic_cluster_admin" depends="init"
     description="--> Runs the cluster topic administration">
@@ -791,20 +675,6 @@
     </java>
   </target>
 
-  <!-- BRIDGE TESTS -->
-  <target name="bridge_server0" depends="bridge_init"
-          description="--> Starts a server 0 for bridge">
-    <antcall target="server">
-      <param name="sid" value="0"/>
-    </antcall>
-  </target>
-  <target name="bridge_server1" depends="bridge_init"
-          description="--> Starts a server 1 for bridge">
-    <antcall target="server">
-      <param name="sid" value="1"/>
-    </antcall>
-  </target>
-	
   <!-- Runs the bridge administration -->
   <target name="bridge_admin" depends="init"
     description="--> Runs the BRIDGE sample administration">
@@ -831,78 +701,6 @@
       <classpath path="${project.class.path}"/>
     </java>
   </target>
-
-
- <!-- Runs the bridge sender -->
-  <target name="bridge_publisher" depends="init"
-    description="--> Runs the BRIDGE sample producer">
-    <java classname="bridge.BridgePublisher" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-
-  <!-- Runs the bridge consumer -->
-  <target name="bridge_subscriber" depends="init"
-    description="--> Runs the BRIDGE sample consumer">
-    <java classname="bridge.BridgeSubscriber" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-
-
-
-	
-  <!-- Runs the foreign sender -->
-  <target name="foreign_producer" depends="init"
-    description="--> Runs the foreign sample producer">
-    <java classname="bridge.ForeignProducer" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-
-  <!-- Runs the foreign consumer -->
-  <target name="foreign_consumer" depends="init"
-    description="--> Runs the foreign sample consumer">
-    <java classname="bridge.ForeignConsumer" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-
-
-
- <!-- Runs the foreign sender -->
-  <target name="foreign_publisher" depends="init"
-    description="--> Runs the foreign sample producer">
-    <java classname="bridge.ForeignPublisher" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-
-  <!-- Runs the foreign consumer -->
-  <target name="foreign_subscriber" depends="init"
-    description="--> Runs the foreign sample consumer">
-    <java classname="bridge.ForeignSubscriber" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1096,296 +894,4 @@
     </java>
   </target>
 
-  <!-- ***************************************************************** -->
-  <!-- *                            HA JNDI                            * -->
-  <!-- ***************************************************************** -->
-    <!-- Initializes the HA JNDI configuration -->
-    <target name="hajndi_init" depends="init">
-      <mkdir dir="${run.dir}"/>
-      <mkdir dir="${run.dir}/hajndi${haId}"/>
-      <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}/hajndi${haId}"/>
-      <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}/hajndi${haId}"/>
-      <copy file="${conf.dir}/hajndi_a3servers.xml"
-            tofile="${run.dir}/hajndi${haId}/a3servers.xml"
-            overwrite="true"/>
-    </target>
-
-    <!-- Starts a HA JNDI server -->
-    <target name="hajndi_server" depends="hajndi_init">
-      <java classname="fr.dyade.aaa.agent.AgentServer"
-            failonerror="no" fork="yes"
-            dir="${run.dir}/hajndi${haId}">
-        <classpath path="${project.class.path}"/>
-        <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
-        <arg line="${sid} ./s${sid} ${haId}"/>
-      </java>
-    </target>
-
-    <target name="hajndi_server0"
-            description="--> Starts a server for a HA JNDI architecture (HA JNDI #0)">
-      <antcall target="hajndi_server">
-        <param name="sid" value="0"/>
-        <param name="haId" value="0"/>
-      </antcall>
-    </target>
-  
-    <target name="hajndi_server1"
-            description="--> Starts a server for a HA JNDI architecture (HA JNDI #1)">
-      <antcall target="hajndi_server">
-        <param name="sid" value="0"/>
-        <param name="haId" value="1"/>
-      </antcall>
-    </target>
-
- 	 <target name="hajndi_server3" depends="init"
-           description="--> Starts a server for a HA JNDI architecture (Server #3)">
- 	   <mkdir dir="${run.dir}"/>
- 	   <mkdir dir="${run.dir}/hajndi3"/>
-     <copy file="${conf.dir}/a3config.dtd" todir="${run.dir}/hajndi3"/>
-     <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}/hajndi3"/>
-     <copy file="${conf.dir}/hajndi_a3servers.xml"
-           tofile="${run.dir}/hajndi3/a3servers.xml"
-           overwrite="true"/>
-  		<java classname="fr.dyade.aaa.agent.AgentServer"
-    		    failonerror="no" fork="yes"
-      		  dir="${run.dir}/hajndi3">
-    		<classpath path="${project.class.path}"/>
-    		<jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
-    		<arg line="3 ./s3"/>
-  		</java>
-		</target>
-  
-    <!-- Runs the HA administration --> 
- 	 	<target name="hajndi_adminxml" depends="init"
-    	      description="--> Runs a HA JNDI administration XML">
-   	 	<copy file="${src.dir}/hajndi/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
-	    <java classname="org.objectweb.joram.client.jms.admin.AdminModule"
-			      failonerror="no" fork="yes"
-      			dir="${run.dir}">
-      	<classpath path="${project.class.path}"/>
-      	<arg line="./joramAdmin.xml"/>
-    	</java>
-  	</target>
-
-    <!-- Runs a HA JNDI subscriber -->
-    <target name="hajndi_sub" depends="init"
-      description="--> Runs the ha jndi subscriber">
-      <java classname="hajndi.Subscriber" failonerror="no" fork="yes"
-            dir="${run.dir}">
-        <classpath path="${project.class.path}"/>
-      </java>
-    </target>
-
-    <!-- Runs a HA JNDI publisher -->
-    <target name="hajndi_pub" depends="init"
-      description="--> Runs the ha jndi publisher">
-      <java classname="hajndi.Publisher" failonerror="no" fork="yes"
-            dir="${run.dir}">
-        <classpath path="${project.class.path}"/>
-      </java>
-    </target>
-  
-  <!-- Runs a HA JNDI list -->
-  <target name="hajndi_list0" depends="init"
-    description="--> Runs the ha jndi list">
-    <java classname="hajndi.List" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <arg line="0"/>
-    </java>
-  </target>
-  
-  <!-- Runs a JNDI list server 3-->
-  <target name="hajndi_list3" depends="init"
-    description="--> Runs the ha jndi list">
-    <java classname="hajndi.List" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-
-
-
-
-  <!-- ***************************************************************** -->
-  <!-- *                            BRIDGE                             * -->
-  <!-- ***************************************************************** -->
- <!-- BRIDGE TESTS -->
-  <target name="XAbridge_server0" depends="bridge_init"
-          description="--> Starts a server 0 for bridge">
-    <antcall target="server">
-      <param name="sid" value="0"/>
-    </antcall>
-  </target>
-  <target name="XAbridge_server1" depends="bridge_init"
-          description="--> Starts a server 1 for bridge">
-    <antcall target="server">
-      <param name="sid" value="1"/>
-    </antcall>
-  </target>
-	
-  <!-- Runs the bridge administration -->
-  <target name="XAbridge_admin" depends="init"
-    description="--> Runs the BRIDGE sample administration">
-    <java classname="bridge.XABridgeAdmin" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-
-  <!-- Runs the bridge sender -->
-  <target name="XAforeign_publisher" depends="init"
-    description="--> Runs the BRIDGE sample producer">
-    <java classname="bridge.XAForeignPublisher" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-
-  <!-- Runs the bridge consumer -->
-  <target name="XAforeign_subscriber" depends="init"
-    description="--> Runs the BRIDGE sample consumer">
-    <java classname="bridge.XAForeignSubscriber" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-	
-  <!-- Runs the foreign sender -->
-  <target name="XAforeign_producer" depends="init"
-    description="--> Runs the foreign sample producer">
-    <java classname="bridge.XAForeignProducer" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-
-  <!-- Runs the foreign consumer -->
-  <target name="XAforeign_consumer" depends="init"
-    description="--> Runs the foreign sample consumer">
-    <java classname="bridge.XAForeignConsumer" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-
- <target name="jca" depends="init"
-    description="--> Runs the JCA connector">
-    <copy file="${conf.dir}/joramAdmin.xml" todir="${run.dir}"/>
-    <java classname="connector.Connector" failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-  
-  <!-- **************************************************
-       * Monitoring sample
-       ************************************************** -->
-  <!-- Setup the monitoring configuration -->
-  <target name="monitoring_admin" depends="init"
-          description="--> Runs administration stuff for monitoring sample">
-    <java classname="monitoring.MonitoringAdmin"
-      failonerror="no" fork="yes"
-      dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-  
-  <!-- Runs the producer client -->
-  <target name="monitoring_producer" depends="init"
-    description="--> Starts a Producer client">
-    <java classname="monitoring.Producer" failonerror="no" fork="yes" dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-
-  <!-- Runs the consumer client -->
-  <target name="monitoring_consumer" depends="init"
-    description="--> Starts a Consumer client">
-    <java classname="monitoring.Consumer" failonerror="no" fork="yes" dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-  
-  <!-- Runs the monitoring -->
-  <target name="monitoring_monitor" depends="init"
-    description="--> Starts a monitoring client">
-    <java classname="monitoring.Monitor" failonerror="no" fork="yes" dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-
-  <!-- **************************************************
-       * Collector sample
-       ************************************************** -->
-  <!-- Setup the collector configuration -->
-  <target name="collector_admin" depends="init"
-          description="--> Runs administration stuff for collector sample">
-    <java classname="collector.CollectorAdmin"
-      failonerror="no" fork="yes"
-      dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-  
-  <!-- Runs the producer client -->
-  <target name="collector_producer" depends="init"
-    description="--> Starts a collector Producer client">
-    <java classname="collector.Producer" failonerror="no" fork="yes" dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-
-  <!-- Runs the consumer client -->
-  <target name="collector_consumer" depends="init"
-    description="--> Starts a collector Consumer client">
-    <java classname="collector.Consumer" failonerror="no" fork="yes" dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-   
-  <!-- **************************************************
-       * Cron sample
-       ************************************************** -->
-  <!-- cron test -->
-   <target name="cron" depends="init">
-     <mkdir dir="${run.dir}"/>
-     <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}"/>
-     <java classname="cron.CronTest"
-           failonerror="no" fork="yes"
-           dir="${run.dir}">
-       <classpath path="${project.class.path}"/>
-     </java>     
-  </target>
-  
-  <!-- **************************************************
-       * FTP sample
-       ************************************************** -->
-  <!-- Setup the FTP configuration -->
-  <target name="ftp_admin" depends="init"
-          description="--> Runs administration stuff for FTP sample">
-    <java classname="ftp.FtpAdmin"
-      failonerror="no" fork="yes"
-      dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <arg line="anonymous anonymous"/>
-    </java>
-  </target>
-  
-  <!-- Runs the producer client -->
-  <target name="ftp_producer" depends="init"
-    description="--> Starts a FTP Producer client">
-    <java classname="ftp.Producer" failonerror="no" fork="yes" dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-      <arg line="ftp.kernel.org welcome.msg"/>
-    </java>
-  </target>
-
-  <!-- Runs the consumer client -->
-  <target name="ftp_receiver" depends="init"
-    description="--> Starts a FTP Receiver client">
-    <java classname="ftp.Receiver" failonerror="no" fork="yes" dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
 </project>

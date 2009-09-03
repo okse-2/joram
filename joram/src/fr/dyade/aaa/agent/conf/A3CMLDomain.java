@@ -27,10 +27,6 @@ import org.objectweb.util.monolog.api.*;
  * The class <code>A3CMLDomain</code> describes an agent server domain.
  */
 public class A3CMLDomain implements Serializable {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /** Name of the domain. */
   public String name = null;
   /** Full name of Java class */

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,18 +23,12 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 /** 
  * A <code>SetCluster</code> instance is used for adding a given topic
  * to a cluster an other topic is part of, or for creating a new cluster.
  */
 public class SetCluster extends AdminRequest {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 3888475137454407781L;
 
   /**
    * Identifier of the topic already part of a cluster, or chosen as the
@@ -47,17 +41,16 @@ public class SetCluster extends AdminRequest {
   /**
    * Constructs a <code>SetCluster</code> instance.
    *
-   * @param initId  Identifier of the topic already part of a cluster, or
-   *                chosen as the initiator.
-   * @param topId  Identifier of the topic joining the cluster, or the initiator.
+   * @param initName  Identifier of the topic already part of a cluster, or
+   *          chosen as the initiator.
+   * @param topName  Identifier of the topic joining the cluster, or the
+   *          initiator.
    */
   public SetCluster(String initId, String topId) {
     this.initId = initId;
     this.topId = topId;
   }
 
-  public SetCluster() { }
-  
   /**
    * Returns the identifier of the topic already part of a cluster, or chosen
    * as the initiator.
@@ -72,19 +65,5 @@ public class SetCluster extends AdminRequest {
    */
   public String getTopId() {
     return topId;
-  }
-  
-  protected int getClassId() {
-    return SET_CLUSTER;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    initId = StreamUtil.readStringFrom(is);
-    topId = StreamUtil.readStringFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    StreamUtil.writeTo(initId, os);
-    StreamUtil.writeTo(topId, os);
   }
 }

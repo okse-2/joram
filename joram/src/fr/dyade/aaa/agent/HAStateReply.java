@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004 - France Telecom R&D
- * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,10 +28,6 @@ import java.io.Serializable;
  * Message used by the master component to send the server state.
  */
 public class HAStateReply implements Serializable {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /** Engine state */
   long now;
   int stamp;

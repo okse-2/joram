@@ -26,11 +26,6 @@ import fr.dyade.aaa.agent.*;
 
 public class ResetCollocatedConnectionsNot extends Notification {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   public ResetCollocatedConnectionsNot() {
     persistent = false;
   }

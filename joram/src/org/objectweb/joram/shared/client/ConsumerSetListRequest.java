@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,67 +19,30 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Contributor(s):
  */
 package org.objectweb.joram.shared.client;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
+import java.util.Hashtable;
+import java.util.Enumeration;
 
-import org.objectweb.joram.shared.stream.StreamUtil;
-
-import fr.dyade.aaa.common.Strings;
+import fr.dyade.aaa.util.Strings;
 
 /**
  * A <code>ConsumerSetListRequest</code> is sent by a
  * <code>MessageConsumer</code> on which a message listener is set.
  */
-public final class ConsumerSetListRequest extends AbstractJmsRequest {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-  
+public class ConsumerSetListRequest extends AbstractJmsRequest
+{
   /** Selector for filtering messages on a queue. */
   private String selector;
-
-  /** Sets the selector. */
-  public void setSelector(String selector) {
-    this.selector = selector;
-  }
-
-  /** Returns the selector for filtering messages. */
-  public String getSelector() {
-    return selector;
-  }
 
   /** <code>true</code> if the request is destinated to a queue. */
   private boolean queueMode;
   
-  /** Sets the target destination type. */
-  public void setQueueMode(boolean queueMode) {
-    this.queueMode = queueMode;
-  }
-
-  /** Returns <code>true</code> if the request is destinated to a queue. */
-  public boolean getQueueMode() {
-    return queueMode;
-  }
-
   private String[] msgIdsToAck;
 
-  public final String[] getMessageIdsToAck() {
-    return msgIdsToAck;
-  }
-
   private int msgCount;
-
-  public final int getMessageCount() {
-    return msgCount;
-  }
-
-  protected int getClassId() {
-    return CONSUMER_SET_LIST_REQUEST;
-  }
 
   /**
    * Constructs a <code>ConsumerSetListRequest</code>.
@@ -93,7 +56,8 @@ public final class ConsumerSetListRequest extends AbstractJmsRequest {
                                 String selector, 
                                 boolean queueMode,
                                 String[] msgIdsToAck,
-                                int msgCount) {
+                                int msgCount)
+  {
     super(targetName);
     this.selector = selector;
     this.queueMode = queueMode;
@@ -104,44 +68,68 @@ public final class ConsumerSetListRequest extends AbstractJmsRequest {
   /**
    * Constructs a <code>ConsumerSetListRequest</code>.
    */
-  public ConsumerSetListRequest() {
+  public ConsumerSetListRequest()
+  {}
+
+  /** Sets the selector. */
+  public void setSelector(String selector)
+  {
+    this.selector = selector;
   }
 
-  public void toString(StringBuffer strbuf) {
-    super.toString(strbuf);
-    strbuf.append(",selector=").append(selector);
-    strbuf.append(",queueMode=").append(queueMode);
-    strbuf.append(",msgIdsToAck=");
-    Strings.toString(strbuf, msgIdsToAck);
-    strbuf.append(",msgCount=").append(msgCount);
-    strbuf.append(')');
+  /** Sets the target destination type. */
+  public void setQueueMode(boolean queueMode)
+  {
+    this.queueMode = queueMode;
   }
 
-  /**
-   *  The object implements the writeTo method to write its contents to
-   * the output stream.
-   *
-   * @param os the stream to write the object to
-   */
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    StreamUtil.writeTo(selector, os);
-    StreamUtil.writeTo(queueMode, os);
-    StreamUtil.writeArrayOfStringTo(msgIdsToAck, os);
-    StreamUtil.writeTo(msgCount, os);
+  /** Returns the selector for filtering messages. */
+  public String getSelector()
+  {
+    return selector;
   }
 
-  /**
-   *  The object implements the readFrom method to restore its contents from
-   * the input stream.
-   *
-   * @param is the stream to read data from in order to restore the object
-   */
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    selector = StreamUtil.readStringFrom(is);
-    queueMode = StreamUtil.readBooleanFrom(is);
-    msgIdsToAck = StreamUtil.readArrayOfStringFrom(is);
-    msgCount = StreamUtil.readIntFrom(is);
+  /** Returns <code>true</code> if the request is destinated to a queue. */
+  public boolean getQueueMode()
+  {
+    return queueMode;
+  }
+
+  public final String[] getMessageIdsToAck() {
+    return msgIdsToAck;
+  }
+
+  public final int getMessageCount() {
+    return msgCount;
+  }
+
+  public Hashtable soapCode() {
+    Hashtable h = super.soapCode();
+    if (selector != null)
+      h.put("selector",selector);
+    h.put("queueMode",new Boolean(queueMode));
+    if (msgIdsToAck != null)
+      h.put("msgIdsToAck", msgIdsToAck);
+    h.put("msgCount", new Integer(msgCount));
+    return h;
+  }
+
+  public static Object soapDecode(Hashtable h) {
+    ConsumerSetListRequest req = new ConsumerSetListRequest();
+    req.setRequestId(((Integer) h.get("requestId")).intValue());
+    req.setTarget((String) h.get("target"));
+    req.setSelector((String) h.get("selector"));
+    req.setQueueMode(((Boolean) h.get("queueMode")).booleanValue());
+    req.msgIdsToAck = (String[]) h.get("msgIdsToAck");
+    req.msgCount = ((Integer) h.get("msgCount")).intValue();
+    return req;
+  }
+
+  public String toString() {
+    return '(' + super.toString() +
+      ",selector=" + selector + 
+      ",queueMode=" + queueMode +
+      ",msgIdsToAck=" + Strings.toString(msgIdsToAck) + 
+      ",msgCount=" + msgCount + ')';
   }
 }

@@ -22,24 +22,17 @@
  */
 package fr.dyade.aaa.jndi2.server;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Vector;
+import java.util.*;
+import java.io.*;
+
+import fr.dyade.aaa.agent.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.agent.Agent;
-import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.BagSerializer;
-import fr.dyade.aaa.agent.Notification;
-
-public class Container extends Agent implements BagSerializer {
-
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
+public class Container 
+    extends Agent 
+    implements BagSerializer {
 
   private Vector entryPoints;
 

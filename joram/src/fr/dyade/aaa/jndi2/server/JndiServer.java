@@ -23,12 +23,15 @@
  */
 package fr.dyade.aaa.jndi2.server;
 
-import java.net.ServerSocket;
+import java.io.*;
+import javax.naming.*;
+import java.net.*;
+import java.util.*;
+
+import fr.dyade.aaa.agent.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-
-import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.AgentServer;
+import org.objectweb.util.monolog.api.Logger;
 
 /**
  * Class of a JNDI centralized server. This is an
@@ -36,11 +39,14 @@ import fr.dyade.aaa.agent.AgentServer;
  * or agent notifications.
  */
 public class JndiServer {
-  public static final String SO_TIMEOUT_PROP = "fr.dyade.aaa.jndi2.server.soTimeout";
+
+  public static final String SO_TIMEOUT_PROP = 
+      "fr.dyade.aaa.jndi2.server.soTimeout";
 
   public static final int DEFAULT_SO_TIMEOUT = 10000;
 
-  public static final String POOL_SIZE_PROP = "fr.dyade.aaa.jndi2.server.poolSize";
+  public static final String POOL_SIZE_PROP = 
+      "fr.dyade.aaa.jndi2.server.poolSize";
 
   public static final int DEFAULT_POOL_SIZE = 3;
   
@@ -48,22 +54,25 @@ public class JndiServer {
 
   public static void init(String args, boolean firstTime) throws Exception {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG,
-                       "JndiServer.init(" + args + ',' + firstTime + ')');
-    
+      Trace.logger.log(BasicLevel.DEBUG, "JndiServer.init(" + 
+                       args + ',' + firstTime + ')');
     int port = Integer.parseInt(args);
 
     // Create the socket here in order to throw an exception
     // if the socket can't be created (even if firstTime is false).
     ServerSocket serverSocket = new ServerSocket(port);
 
-    int poolSize = AgentServer.getInteger(POOL_SIZE_PROP, DEFAULT_POOL_SIZE).intValue();
+    int poolSize = Integer.getInteger(
+      POOL_SIZE_PROP, DEFAULT_POOL_SIZE).intValue();
 
-    int timeout = AgentServer.getInteger(SO_TIMEOUT_PROP, DEFAULT_SO_TIMEOUT).intValue();
+    int timeout = Integer.getInteger(
+      SO_TIMEOUT_PROP, DEFAULT_SO_TIMEOUT).intValue();
 
-    tcpServer = new TcpServer(serverSocket,
-                              poolSize, timeout,
-                              getDefault());
+    tcpServer = new TcpServer(
+      serverSocket,
+      poolSize, 
+      timeout,
+      getDefault());
 
     if (firstTime) {
       RequestManager manager = new RequestManager();

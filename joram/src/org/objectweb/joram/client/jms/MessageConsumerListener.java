@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -22,34 +22,37 @@
  */
 package org.objectweb.joram.client.jms;
 
-import java.util.Vector;
-
-import javax.jms.MessageListener;
-import javax.jms.JMSException;
-
 import org.objectweb.joram.shared.client.AbstractJmsReply;
+import org.objectweb.joram.shared.client.ConsumerCloseSubRequest;
 import org.objectweb.joram.shared.client.ConsumerMessages;
 import org.objectweb.joram.shared.client.ConsumerSetListRequest;
 import org.objectweb.joram.shared.client.ConsumerUnsetListRequest;
 import org.objectweb.joram.shared.client.ConsumerAckRequest;
 import org.objectweb.joram.shared.client.ActivateConsumerRequest;
+import org.objectweb.joram.shared.client.ConsumerUnsubRequest;
 import org.objectweb.joram.client.jms.connection.ReplyListener;
 import org.objectweb.joram.client.jms.connection.AbortedRequestException;
 import org.objectweb.joram.client.jms.connection.RequestMultiplexer;
 
-import fr.dyade.aaa.common.Debug;
-import fr.dyade.aaa.common.StoppedQueueException;
+import fr.dyade.aaa.util.Debug;
+import fr.dyade.aaa.util.StoppedQueueException;
+
+import javax.jms.MessageListener;
+import javax.jms.JMSException;
+import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 /**
- * This class listens to replies asynchronously returned by the user proxy 
- * for a message consumer.
+ * This class listens to replies 
+ * asynchronously returned by the user proxy for
+ * a message consumer.
  */
 abstract class MessageConsumerListener implements ReplyListener {
   
-  public static Logger logger = Debug.getLogger(MessageConsumerListener.class.getName());
+  public static Logger logger = 
+    Debug.getLogger(MessageConsumerListener.class.getName());
 
   /**
    * Status of the message consumer listener.
@@ -101,21 +104,26 @@ abstract class MessageConsumerListener implements ReplyListener {
   private Vector messagesToAck;
   
   /**
-   * The number of messages which are in queue (Session.qin)
+   * The number of messages which
+   * are in queue (Session.qin)
    * waiting for being consumed.
    */
   private volatile int messageCount;
   
   /**
-   * The receive status of this message listener:
-   *  - WAIT_FOR_REPLY if a reply is expected from the destination
-   *  - CONSUMING_REPLY if a reply is being consumed and no new request has
-   *    been sent
+   * The receve status of this message
+   * listener:
+   * WAIT_FOR_REPLY if a reply is expected
+   * from the destination
+   * CONSUMING_REPLY if a reply is being
+   * consumed and no new request has been
+   * sent
    */
   private volatile int receiveStatus;
   
   /**
-   * Indicates whether the topic message input has been passivated or not.
+   * Indicates whether the topic message
+   * input has been passivated or not.
    */
   private boolean topicMsgInputPassivated;
   
@@ -132,10 +140,10 @@ abstract class MessageConsumerListener implements ReplyListener {
   private MessageListener listener;
   
   MessageConsumerListener(boolean queueMode,
-                          boolean durable,
+      					  boolean durable,
                           String selector,
                           String targetName,
-                          MessageListener listener,
+      					  MessageListener listener,
                           int queueMessageReadMax,
                           int topicActivationThreshold,
                           int topicPassivationThreshold,
@@ -143,12 +151,11 @@ abstract class MessageConsumerListener implements ReplyListener {
                           RequestMultiplexer reqMultiplexer) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 "MessageConsumerListener(" + queueMode +
-                 ',' + durable + ',' + selector + ',' + targetName + 
-                 ',' + listener + ',' + queueMessageReadMax + 
-                 ',' + topicActivationThreshold +
-                 ',' + topicPassivationThreshold +
-                 ',' + topicAckBufferMax + ',' + reqMultiplexer + ')');
+          "MessageConsumerListener(" + queueMode +
+          ',' + durable + ',' + selector + ',' + targetName + ',' +
+          listener + ',' + queueMessageReadMax + ',' +
+          topicActivationThreshold + ',' + topicPassivationThreshold + ',' +
+          topicAckBufferMax + ',' + reqMultiplexer + ')');
     this.queueMode = queueMode;
     this.durable = durable;
     this.selector = selector;
@@ -173,29 +180,32 @@ abstract class MessageConsumerListener implements ReplyListener {
 
   protected void setStatus(int status) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "MessageConsumerListener.setStatus(" + Status.toString(status) + ')');
+      logger.log(
+        BasicLevel.DEBUG, "MessageConsumerListener.setStatus(" +
+        Status.toString(status) + ')');
     this.status = status;
   }
   
   private void setReceiveStatus(int s) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "MessageConsumerListener.setReceiveStatus(" + ReceiveStatus.toString(s) + ')');
+      logger.log(
+        BasicLevel.DEBUG, "MessageConsumerListener.setReceiveStatus(" +
+        ReceiveStatus.toString(s) + ')');
     receiveStatus = s;
   }
   
   /**
    * Decrease the message count.
-   * Synchronized with the method replyReceived() that increments the 
+   * Synchronized with the method replyReceived()
+   * that increments the 
    * messageCount += cm.getMessageCount();
    * 
    * @return the decreased value
    */
   private int decreaseMessageCount(int ackMode) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "MessageConsumerListener.decreaseMessageCount()");
+      logger.log(
+        BasicLevel.DEBUG, "MessageConsumerListener.decreaseMessageCount()");
     
     synchronized (this) {
       messageCount--;
@@ -461,22 +471,18 @@ abstract class MessageConsumerListener implements ReplyListener {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "MessageConsumerListener.onMessage(" + msg + ')');
     if (listener != null) {
+      try {
         synchronized (this) {
           if (status == Status.RUN) {
             setStatus(Status.ON_MSG);
           } else {
-            // Notify threads trying to close the listener.
-          notifyAll();
             throw new javax.jms.IllegalStateException("Message listener closed");
           }
         }
-
-      try {
         activateListener(msg, listener, ackMode);
       } finally {
         synchronized (this) {
-          if (status == Status.ON_MSG)
-            setStatus(Status.RUN);
+          setStatus(Status.RUN);
 
           // Notify threads trying to close the listener.
           notifyAll();

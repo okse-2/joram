@@ -23,32 +23,29 @@
  */
 package cluster.queue;
 
-import java.util.Properties;
-
-import org.objectweb.joram.client.jms.ConnectionFactory;
+import org.objectweb.joram.client.jms.admin.*;
+import org.objectweb.joram.client.jms.*;
+import org.objectweb.joram.client.jms.tcp.*;
+import org.objectweb.joram.shared.admin.*;
 import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.admin.ClusterConnectionFactory;
-import org.objectweb.joram.client.jms.admin.ClusterQueue;
-import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+
+import java.util.Properties;
+import java.util.Hashtable;
 
 /**
  * Administers three agent servers for the cluster sample.
  */
 public class ClusterAdmin {
-  
   public static void main(String[] args) throws Exception {
-    
     System.out.println();
     System.out.println("Cluster of queues administration...");
 
     AdminModule.connect("root", "root", 60);
     javax.naming.Context ictx = new javax.naming.InitialContext();
 
-    User.create("anonymous", "anonymous", 0);
-    User.create("anonymous", "anonymous", 1);
-    User.create("anonymous", "anonymous", 2);
+    User user0 = User.create("anonymous", "anonymous", 0);
+    User user1 = User.create("anonymous", "anonymous", 1);
+    User user2 = User.create("anonymous", "anonymous", 2);
 
     ConnectionFactory cf0 = (ConnectionFactory) TcpConnectionFactory.create("localhost", 16010);
     ConnectionFactory cf1 = (ConnectionFactory) TcpConnectionFactory.create("localhost", 16011);

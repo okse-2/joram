@@ -1,6 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,64 +18,36 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent Distributed Technologies
+ * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s):
  */
 package org.objectweb.joram.shared.client;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
-
+import java.util.Hashtable;
+import java.util.Enumeration;
 import java.util.Vector;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
 
 /**
  * A <code>ConsumerAckRequest</code> instance is used by a
  * <code>MessageConsumer</code> for acknowledging a received message.
  */
-public final class ConsumerAckRequest extends AbstractJmsRequest {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
+public class ConsumerAckRequest extends AbstractJmsRequest
+{
   /** Message identifier. */
   private Vector ids;
-
-  /** Sets the acknowledged message identifier. */
-  public void addId(String id) {
-    ids.addElement(id);
-  }
-
-  /** Returns the acknowledged message identifier. */
-  public Vector getIds() {
-    return ids;
-  }
-
   /** <code>true</code> if the request is destinated to a queue. */
   private boolean queueMode;
-
-  /** Sets the target destination type. */
-  public void setQueueMode(boolean queueMode) {
-    this.queueMode = queueMode;
-  }
-
-  /** Returns <code>true</code> if the request is for a queue. */
-  public boolean getQueueMode() {
-    return queueMode;
-  }
-
-  protected int getClassId() {
-    return CONSUMER_ACK_REQUEST;
-  }
 
   /**
    * Constructs a <code>ConsumerAckRequest</code> instance.
    *
    * @param targetName  Name of the target queue or subscription.
-   * @param queueMode  <code>true</code> if this request is for a queue.
+   * @param id  The message identifier.
+   * @param queueMode  <code>true</code> if this request is destinated to
+   *          a queue.
    */
-  public ConsumerAckRequest(String targetName, boolean queueMode) {
+  public ConsumerAckRequest(String targetName, boolean queueMode)
+  {
     super(targetName);
     ids = new Vector();
     this.queueMode = queueMode;
@@ -83,33 +56,54 @@ public final class ConsumerAckRequest extends AbstractJmsRequest {
   /**
    * Constructs a <code>ConsumerAckRequest</code> instance.
    */
-  public ConsumerAckRequest() {}
+  public ConsumerAckRequest()
+  {}
 
-  /* ***** ***** ***** ***** *****
-   * Streamable interface
-   * ***** ***** ***** ***** ***** */
-
-  /**
-   *  The object implements the writeTo method to write its contents to
-   * the output stream.
-   *
-   * @param os the stream to write the object to
-   */
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    StreamUtil.writeVectorOfStringTo(ids, os);
-    StreamUtil.writeTo(queueMode, os);
+  /** Sets the acknowledged message identifier. */
+  public void addId(String id) {
+    ids.addElement(id);
   }
 
-  /**
-   *  The object implements the readFrom method to restore its contents from
-   * the input stream.
-   *
-   * @param is the stream to read data from in order to restore the object
-   */
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    ids = StreamUtil.readVectorOfStringFrom(is);
-    queueMode = StreamUtil.readBooleanFrom(is);
+  /** Sets the target destination type. */
+  public void setQueueMode(boolean queueMode)
+  {
+    this.queueMode = queueMode;
+  }
+
+  /** Returns the acknowledged message identifier. */
+  public Vector getIds() {
+    return ids;
+  }
+
+  /** Returns <code>true</code> if the request is destinated to a queue. */
+  public boolean getQueueMode()
+  {
+    return queueMode;
+  }
+
+  public Hashtable soapCode() {
+    Hashtable h = super.soapCode();
+    if (ids.size() > 0) {
+      String[] idArray = new String[ids.size()];
+      ids.copyInto(idArray);
+      h.put("ids", idArray);
+    }
+    h.put("queueMode",new Boolean(queueMode));
+    return h;
+  }
+
+  public static Object soapDecode(Hashtable h) {
+    ConsumerAckRequest req = new ConsumerAckRequest();
+    req.setRequestId(((Integer) h.get("requestId")).intValue());
+    req.setTarget((String) h.get("target"));
+    req.ids = new Vector();
+    String[] idArray = (String[]) h.get("ids");
+    if (idArray != null) {
+      for (int i = 0; i < idArray.length; i++) {
+        req.ids.addElement(idArray[i]);
+      }
+    }
+    req.setQueueMode(((Boolean) h.get("queueMode")).booleanValue());
+    return req;
   }
 }

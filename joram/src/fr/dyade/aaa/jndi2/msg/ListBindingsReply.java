@@ -29,10 +29,6 @@ import java.util.*;
 
 public class ListBindingsReply extends JndiReply {
   
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private Binding[] bindings;
 
   public ListBindingsReply(Binding[] bindings) {

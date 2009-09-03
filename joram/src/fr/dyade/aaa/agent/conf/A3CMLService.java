@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,15 +18,13 @@
  */
 package fr.dyade.aaa.agent.conf;
 
-import java.io.Serializable;
+import java.io.*;
+import java.util.*;
 
 /**
  * The class <code>A3CMLService</code> describes a service.
  */
 public class A3CMLService implements Serializable {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
   public String classname = null;
   public String args = null;
 
@@ -35,6 +33,7 @@ public class A3CMLService implements Serializable {
     this.classname = classname;
     this.args = args;
   }
+
 
   public A3CMLService duplicate() throws Exception {
     A3CMLService clone = new A3CMLService(classname, args);

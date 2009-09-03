@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
- * Copyright (C) 2004 France Telecom R&D
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,19 +23,11 @@
 package org.objectweb.joram.mom.proxies;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-import org.objectweb.joram.mom.dest.Destination;
-
-import fr.dyade.aaa.common.Debug;
+import org.objectweb.joram.mom.MomTracing;
 
 import java.util.*;
 
 public class AckedQueue implements java.io.Serializable {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
-  /** logger */
-  public static Logger logger = Debug.getLogger(AckedQueue.class.getName());
 
   private Vector list;
 
@@ -47,8 +39,9 @@ public class AckedQueue implements java.io.Serializable {
   }
 
   public void push(ProxyMessage msg) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "AckedQueue.push(" + msg + ')');
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, "AckedQueue.push(" + msg + ')');
     synchronized (list) {
       list.addElement(msg);
       list.notify();
@@ -56,11 +49,12 @@ public class AckedQueue implements java.io.Serializable {
   }
 
   public ProxyMessage get() throws InterruptedException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "AckedQueue.get()");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, "AckedQueue.get()");
     synchronized (list) { 
       while ((list.size() - current) == 0) {
-        list.wait();
+	list.wait();
       }      
       ProxyMessage msg = 
         (ProxyMessage)list.elementAt(current);
@@ -70,30 +64,33 @@ public class AckedQueue implements java.io.Serializable {
   }
 
   public void ack(long ackId) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "AckedQueue.ack(" + ackId + ')');
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, "AckedQueue.ack(" + ackId + ')');
     synchronized (list) {
       while (list.size() > 0) {
         ProxyMessage m = 
-          (ProxyMessage)list.elementAt(0);
-        if (ackId < m.getId()) {          
-          return;
-        } else {
-          // acked
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "AckedQueue acked " + m.getId());
-          list.removeElementAt(0);
+	  (ProxyMessage)list.elementAt(0);
+	if (ackId < m.getId()) {          
+	  return;
+	} else {
+	  // acked
+          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+            MomTracing.dbgProxy.log(
+              BasicLevel.DEBUG, "AckedQueue acked " + m.getId());
+	  list.removeElementAt(0);
           if (current > 0) {
             current--;
           }
-        }
+	}
       }
     }
   }
 
   public void reset() {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "AckedQueue.reset()");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, "AckedQueue.reset()");
     current = 0;
   }
 }

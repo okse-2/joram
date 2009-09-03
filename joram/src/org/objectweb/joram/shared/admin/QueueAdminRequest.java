@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,22 +22,14 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
-public abstract class QueueAdminRequest extends AdminRequest {
-  private static final long serialVersionUID = 1L;
+public class QueueAdminRequest extends AdminRequest {
+  private static final long serialVersionUID = -8124722332265512547L;
 
   private String queueId;
 
   public QueueAdminRequest(String queueId) {
     this.queueId = queueId;
   }
-  
-  public QueueAdminRequest() { }
 
   public final String getQueueId() {
     return queueId;
@@ -46,17 +38,5 @@ public abstract class QueueAdminRequest extends AdminRequest {
   public String toString() {
     return '(' + super.toString() +
       ",queueId=" + queueId + ')';
-  }
-  
-  protected int getClassId() {
-    return QUEUE_ADMIN_REQUEST;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-   queueId = StreamUtil.readStringFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    StreamUtil.writeTo(queueId, os);
   }
 }

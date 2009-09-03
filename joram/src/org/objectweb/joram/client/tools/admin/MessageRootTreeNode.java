@@ -1,15 +1,11 @@
 package org.objectweb.joram.client.tools.admin;
 
+import java.util.*;
 import javax.swing.*;
 import javax.swing.tree.*;
 
 class MessageRootTreeNode extends DefaultMutableTreeNode
     implements AdminTreeNode {
-
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
 
   public MessageRootTreeNode() {
     super("Messages");

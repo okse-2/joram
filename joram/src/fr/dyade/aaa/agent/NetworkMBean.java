@@ -131,10 +131,4 @@ public interface NetworkMBean {
    */
   public void setWDRetryPeriod3(long WDRetryPeriod3);
 
-  /**
-   * Gets the number of waiting messages in this engine.
-   *
-   *  return	the number of waiting messages.
-   */
-  public int getNbWaitingMessages();
 }

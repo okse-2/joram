@@ -26,11 +26,6 @@ import fr.dyade.aaa.agent.*;
 
 public class ReturnConnectionNot extends Notification {
   
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   private OpenConnectionNot not;
 
   private ConnectionContext ctx;

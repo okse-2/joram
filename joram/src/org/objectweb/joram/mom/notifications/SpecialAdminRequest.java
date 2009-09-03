@@ -23,18 +23,15 @@
  */
 package org.objectweb.joram.mom.notifications;
 
+import fr.dyade.aaa.agent.AgentId;
 import org.objectweb.joram.shared.admin.SpecialAdmin;
 
 /**
  * A <code>SpecialAdminRequest</code> instance is used by a destination agent
- * to do special administration.
+ * to do special admimistration.
  */
 public class SpecialAdminRequest extends AdminRequest {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private SpecialAdmin request;
 
   /**

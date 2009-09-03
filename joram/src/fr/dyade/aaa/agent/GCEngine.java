@@ -18,7 +18,15 @@
  */
 package fr.dyade.aaa.agent;
 
+import java.io.IOException;
+import java.util.Hashtable;
+import java.util.Enumeration;
+import java.util.Vector;
+
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.*;
 
 /**
  *  Implementation of Engine that used Group-Commit in order to improve 
@@ -32,15 +40,14 @@ final class GCEngine extends Engine {
   GCEngine() throws Exception {
     super();
 
-    NbMaxLoop = AgentServer.getInteger("NbMaxLoop", NbMaxLoop).intValue();
+    NbMaxLoop = Integer.getInteger("NbMaxLoop", NbMaxLoop).intValue();
     needToBeCommited = false;
   }
 
   /**
-   * Commit the agent reaction in case of right termination:
-   * <ul>
-   * <li>suppress the processed notification from message queue, then deletes
-   * it ;
+   * Commit the agent reaction in case of rigth termination:<ul>
+   * <li>suppress the processed notification from message queue,
+   * then deletes it ;
    * <li>push all new notifications in qin and qout, and saves them ;
    * <li>saves the agent state ;
    * <li>then commit the transaction to validate all changes.
@@ -90,7 +97,7 @@ final class GCEngine extends Engine {
       // Post all notifications temporary keeped in mq in the rigth consumers,
       // then saves changes.
       dispatch();
-      AgentServer.getTransaction().commit(false);
+      AgentServer.getTransaction().commit();
       // The transaction has commited, then validate all messages.
       Channel.validate();
     }

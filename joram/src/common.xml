@@ -24,7 +24,7 @@
     <property name="lib.dir" location="../lib"/>
     <property name="build.dir" location="../build"/>
     <property name="ship.dir" location="../ship"/>
-    <property name="doc.dir" location="../javadoc"/>
+    <property name="doc.dir" location="../doc"/>
     <property name="test.dir" location="../test/src"/>
     <property name="licenses.dir" location="../licenses"/>
 

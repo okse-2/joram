@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004 - France Telecom R&D
- * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,10 +29,6 @@ import org.jgroups.Address;
  * Message used by a slave component to request the server state.
  */
 public class HAStateRequest implements Serializable {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /**
    * The requestor address. This address is actually unused as the
    * reply is broadcasted to all components (to keep order with other

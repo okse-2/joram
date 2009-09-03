@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,18 +23,12 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 /**
  * A <code>SetDestinationDMQ</code> instance requests to set a given DMQ as
  * the DMQ for a given destination.
  */
 public class SetDestinationDMQ extends AdminRequest {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 9220290918885980583L;
 
   /** Identifier of the destination the DMQ is set for. */
   private String destId;
@@ -52,7 +46,6 @@ public class SetDestinationDMQ extends AdminRequest {
     this.dmqId = dmqId;
   }
 
-  public SetDestinationDMQ() { }
   
   /** Returns the identifier of the destination the DMQ is set for. */
   public String getDestId() {
@@ -62,19 +55,5 @@ public class SetDestinationDMQ extends AdminRequest {
   /** Returns the identifier of the DMQ. */
   public String getDmqId() {
     return dmqId;
-  }
-  
-  protected int getClassId() {
-    return SET_DESTINATION_DMQ;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    destId = StreamUtil.readStringFrom(is);
-    dmqId = StreamUtil.readStringFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    StreamUtil.writeTo(destId, os);
-    StreamUtil.writeTo(dmqId, os);
   }
 }

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 2007 France Telecom R&D
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -25,59 +25,68 @@
  */
 package org.objectweb.joram.client.jms;
 
+import javax.naming.*;
+import javax.jms.JMSException;
+
 import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 
-/**
- * Implements all the <code>javax.jms.ConnectionFactory</code> interfaces.
- * <p>
- * A ConnectionFactory object encapsulates a set of configuration parameters defined by
- * an administrator. A client needs to use it to create a connection with a Joram server.
- * 
- * @see javax.jms.ConnectionFactory
- * @see javax.jms.QueueConnectionFactory
- * @see javax.jms.TopicConnectionFactory
- * @see javax.jms.XAConnectionFactory
- * @see javax.jms.XAQueueConnectionFactory
- * @see javax.jms.XATopicConnectionFactory
- */
-/**
- *
- */
-public abstract class ConnectionFactory extends AbstractConnectionFactory
-  implements javax.jms.ConnectionFactory, javax.jms.QueueConnectionFactory, javax.jms.TopicConnectionFactory,
-             javax.jms.XAConnectionFactory, javax.jms.XAQueueConnectionFactory, javax.jms.XATopicConnectionFactory{
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.shared.JoramTracing;
 
-  /**
-   * Constructs an empty <code>ConnectionFactory</code>.
-   * Needed by ObjectFactory, should only be used for internal purposes.
-   */
-  public ConnectionFactory() {
-    super();
-  }
-
+/**
+ * Implements the <code>javax.jms.ConnectionFactory</code> interface.
+ */
+public abstract class ConnectionFactory
+                extends AbstractConnectionFactory
+                implements javax.jms.ConnectionFactory {
   /**
    * Constructs a <code>ConnectionFactory</code> dedicated to a given server.
    *
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */
-  protected ConnectionFactory(String host, int port) {
+  public ConnectionFactory(String host, int port) {
     super(host, port);
   }
 
   /**
    * Constructs a <code>ConnectionFactory</code> dedicated to a given server.
    *
-   * @param url  joram url.
+   * @param url  joram ha url.
    */
-  protected ConnectionFactory(String url) {
+  public ConnectionFactory(String url) {
     super(url);
+  }
+
+  /**
+   * Constructs an empty <code>ConnectionFactory</code>.
+   */
+  public ConnectionFactory() {
+    super();
   }
 
   /** Returns a string view of the connection factory. */
   public String toString() {
     return "CF:" + params.getHost() + "-" + params.getPort();
+  }
+
+  /**
+   * API method, implemented according to the communication protocol.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public abstract javax.jms.Connection
+      createConnection(String name, String password) throws JMSException;
+
+  /**
+   * API method.
+   *
+   * @exception JMSSecurityException  If the default identification is
+   *              incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.Connection createConnection() throws JMSException {
+    return createConnection(getDefaultLogin(), getDefaultPassword());
   }
 }

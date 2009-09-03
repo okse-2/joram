@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2007 - ScalAgent DT
+ * Copyright (C) 2003 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,42 +17,39 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
- * Contributor(s): 
+ * Initial developer(s): Frederic Maistre (Bull SA)
+ * Contributor(s):
  */
 package bridge;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
-import javax.jms.TextMessage;
+import javax.jms.*;
 
 /**
  * Produces messages on the foreign destination.
  */
-public class BridgeProducer {
-  public static void main(String[] args) throws Exception {
+public class BridgeProducer
+{
+  public static void main(String[] args) throws Exception
+  {
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
-    Destination joramDest = (Destination) jndiCtx.lookup("joramQueue");
-    ConnectionFactory joramCF = (ConnectionFactory) jndiCtx.lookup("joramCF");
+    Queue queue = (Queue) jndiCtx.lookup("foreignDest");
+    QueueConnectionFactory cnxFact =  
+      (QueueConnectionFactory) jndiCtx.lookup("foreignCF");
     jndiCtx.close();
 
-    Connection joramCnx = joramCF.createConnection();
-    Session joramSess = joramCnx.createSession(true, 0);
-    MessageProducer joramSender = joramSess.createProducer(joramDest);
+    QueueConnection cnx = cnxFact.createQueueConnection();
+    QueueSession sess = cnx.createQueueSession(true, 0);
+    QueueSender sender = sess.createSender(queue);
 
-    TextMessage msg = joramSess.createTextMessage();
+    TextMessage msg = sess.createTextMessage();
 
     for (int i = 1; i < 11; i++) {
-      msg.setText("Joram message number " + i);
-      System.out.println("send msg = " + msg.getText());
-      joramSender.send(msg);
+      msg.setText("Foreign message number " + i);
+      sender.send(msg);
     }
 
-    joramSess.commit();
+    sess.commit();
 
-    joramCnx.close();
+    cnx.close();
   }
 }

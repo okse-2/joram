@@ -24,21 +24,18 @@ package org.objectweb.joram.mom.notifications;
 
 import fr.dyade.aaa.agent.AgentId;
 
-public class RegisterDestNot extends fr.dyade.aaa.agent.Notification {
+public class RegisterDestNot 
+    extends fr.dyade.aaa.agent.Notification {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private AgentId id;
   private String name;
   private String className;
-  private byte type;
+  private String type;
   
   public RegisterDestNot(AgentId id,
                          String name,
                          String className,
-                         byte type) {
+                         String type) {
     this.id = id;
     this.name = name;
     this.className = className;
@@ -57,8 +54,12 @@ public class RegisterDestNot extends fr.dyade.aaa.agent.Notification {
     return className;
   }
   
-  public final byte getType() {
+  public final String getType() {
     return type;
+  }
+  
+  public boolean isAssignableTo(String assignedType) {
+    return type.startsWith(assignedType);
   }
 
   /**

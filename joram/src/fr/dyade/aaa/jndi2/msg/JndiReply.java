@@ -25,11 +25,6 @@ package fr.dyade.aaa.jndi2.msg;
 
 public class JndiReply implements java.io.Serializable {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   public JndiReply() { }
 
 } 

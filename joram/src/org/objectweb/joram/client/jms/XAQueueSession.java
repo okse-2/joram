@@ -1,8 +1,8 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2004 Bull SA
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,12 +24,16 @@
  */
 package org.objectweb.joram.client.jms;
 
+import java.util.*;
+
 import javax.jms.JMSException;
 
 /**
  * Implements the <code>javax.jms.XAQueueSession</code> interface.
  */
-public class XAQueueSession extends XASession implements javax.jms.XAQueueSession {
+public class XAQueueSession extends XASession 
+                            implements javax.jms.XAQueueSession
+{
   /**
    * Constructs an <code>XAQueueSession</code> instance.
    *
@@ -40,40 +44,49 @@ public class XAQueueSession extends XASession implements javax.jms.XAQueueSessio
    */
   XAQueueSession(XAQueueConnection cnx, 
                  QueueSession qs, 
-                 XAResourceMngr rm) throws JMSException {
+                 XAResourceMngr rm) throws JMSException
+  {
     super(cnx, qs, rm);
   }
 
   
   /** Returns a String image of this session. */
-  public String toString() {
+  public String toString()
+  {
     return "XAQueueSess:" + sess.getId();
   }
 
 
   /** API method. */ 
-  public javax.jms.QueueSession getQueueSession() throws JMSException {
+  public javax.jms.QueueSession getQueueSession() throws JMSException
+  {
     return (QueueSession) sess;
   }
 
   /**
    * Delegates the call to the wrapped JMS session.
    */
-  public javax.jms.QueueSender createSender(Queue queue) throws JMSException {
+  public javax.jms.QueueSender createSender(Queue queue)
+         throws JMSException
+  {
     return ((QueueSession) sess).createSender(queue);
   }
 
   /**
    * Delegates the call to the wrapped JMS session.
    */
-  public javax.jms.QueueReceiver createReceiver(Queue queue, String selector) throws JMSException {
+  public javax.jms.QueueReceiver createReceiver(Queue queue, String selector)
+         throws JMSException
+  {
     return ((QueueSession) sess).createReceiver(queue, selector);
   }
 
   /**
    * Delegates the call to the wrapped JMS session.
    */
-  public javax.jms.QueueReceiver createReceiver(Queue queue) throws JMSException {
+  public javax.jms.QueueReceiver createReceiver(Queue queue)
+         throws JMSException
+  {
     return ((QueueSession) sess).createReceiver(queue);
   }
 }

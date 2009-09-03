@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -20,11 +20,13 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.IOException;
-import java.util.Vector;
+import java.io.*;
+import java.util.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.util.*;
 
 /**
  * Class <code>Channel</code> realizes the interface for sending messages.
@@ -43,7 +45,8 @@ public class Channel {
    * @return	the corresponding <code>Channel</code>'s instance.
    */
   static Channel newInstance() throws Exception {
-    String cname = AgentServer.getProperty("Channel", "fr.dyade.aaa.agent.Channel");
+    String cname = System.getProperty("Channel",
+                                      "fr.dyade.aaa.agent.Channel");
     Class cclass = Class.forName(cname);
     channel = (Channel) cclass.newInstance();
     return channel;
@@ -89,7 +92,8 @@ public class Channel {
    * @exception IOException
    *	error when accessing the local persistent storage
    */
-  public final static void sendTo(AgentId to, Notification not) {
+  public final static void sendTo(AgentId to,
+				  Notification not) {
 //     try {
 //       EngineThread thread = (EngineThread) Thread.currentThread();
 //       // Use the engine's sendTo method that push message in temporary queue
@@ -203,7 +207,7 @@ public class Channel {
       AgentServer.getTransaction().begin();
       consumer.post(msg);
       consumer.save();
-      AgentServer.getTransaction().commit(false);
+      AgentServer.getTransaction().commit();
       // then commit and validate the message.
       consumer.validate();
       AgentServer.getTransaction().release();

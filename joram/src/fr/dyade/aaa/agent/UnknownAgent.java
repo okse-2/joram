@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -28,10 +28,8 @@ package fr.dyade.aaa.agent;
  * @see Engine
  */
 public class UnknownAgent extends Notification {
-  /**
-   * 
-   */
-  static final long serialVersionUID = 1L;
+
+  static final long serialVersionUID = 3125179672784868254L;
 
   /** The non-existent target agent id. */
   public AgentId agent;

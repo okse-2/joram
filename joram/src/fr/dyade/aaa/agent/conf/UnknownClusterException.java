@@ -23,11 +23,6 @@ package fr.dyade.aaa.agent.conf;
  */
 public class UnknownClusterException extends Exception {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
    *  Constructs a new <code>UnknownClusterException</code> with no
    * detail message.
    */

@@ -1,6 +1,5 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -20,28 +19,33 @@
  *
  * Initial developer(s): Frederic Maistre (Bull SA)
  * Contributor(s): Nicolas Tachker (Bull SA)
- *                 ScalAgent Distributed Technologies
  */
 package org.objectweb.joram.client.connector;
+
 
 /**
  * A <code>QueueConnectionRequest</code> instance wraps a user connection
  * request for performing PTP messaging.
  */
-public class QueueConnectionRequest extends ConnectionRequest {
+public class QueueConnectionRequest
+             extends ConnectionRequest
+             implements javax.resource.spi.ConnectionRequestInfo
+{
   /**
    * Constructs a <code>QueueConnectionRequest</code> instance.
    *
    * @param userName  Name of the user requesting a connection.
    * @param password  Password of the user requesting a connection.
-   * @param identityClass identity class name
    */
-  public QueueConnectionRequest(String userName, String password, String identityClass) {
-    super(userName, password, identityClass);
+  public QueueConnectionRequest(String userName, String password)
+  {
+    super(userName, password);
   } 
 
+
   /** Returns a code based on the wrapped user identity. */
-  public int hashCode() {
+  public int hashCode()
+  {
     return ("PTP:" + userName).hashCode();
   }
 }

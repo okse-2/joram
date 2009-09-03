@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,52 +18,37 @@
  * USA.
  *
  * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
 package org.objectweb.joram.client.jms.ha.local;
 
-import javax.jms.JMSException;
+import org.objectweb.joram.client.jms.*;
 
-import org.objectweb.joram.client.jms.ConnectionFactory;
-import org.objectweb.joram.client.jms.FactoryParameters;
-import org.objectweb.joram.client.jms.connection.RequestChannel;
-import org.objectweb.joram.shared.security.Identity;
+public class HALocalConnectionFactory 
+    extends org.objectweb.joram.client.jms.ConnectionFactory {
 
-public class HALocalConnectionFactory extends ConnectionFactory {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
-  /**
-   * Constructs a <code>HALocalConnectionFactory</code> instance.
-   * Needed by ObjectFactory, should only be used for internal purposes.
-   */
   public HALocalConnectionFactory() {
-    super("localhost", -1);
+    super("", -1);
   }
 
   /**
-   * Creates the <code>HALocalRequestChannel</code> object needed to connect to the
-   * colocated HA server.
-   * 
-   * @param params          Connection configuration parameters.
-   * @param identity        Client's identity.
-   * @param reliableClass   The protocol specific class.
-   * @return                The <code>RequestChannel</code> object specific to the protocol used.
-   * 
-   * @exception JMSException  A problem occurs during the connection.
-   * 
-   * @see ConnectionFactory#createRequestChannel(FactoryParameters, Identity, String)
+   * Method inherited from the <code>ConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
    */
-  protected RequestChannel createRequestChannel(FactoryParameters params,
-                                                Identity identity,
-                                                String reliableClass) throws JMSException {
-    return new HALocalRequestChannel(identity);
+  public javax.jms.Connection
+      createConnection(String name, String password)
+    throws javax.jms.JMSException {
+    HALocalConnection lc = new HALocalConnection(name, password);
+    return new Connection(params, lc);
   }
 
   /**
    * Admin method creating a <code>javax.jms.ConnectionFactory</code>
    * instance for creating HA local connections with a given server.
    */ 
-  public static ConnectionFactory create() {
+  public static javax.jms.ConnectionFactory create() {
     return new HALocalConnectionFactory();
   }
 }

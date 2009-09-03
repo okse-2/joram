@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,9 +22,10 @@
  */
 package fr.dyade.aaa.jndi2.soap;
 
-import java.util.Hashtable;
-
 import javax.naming.NamingException;
+
+import java.util.Hashtable;
+import java.lang.reflect.Method;
 
 /**
  * The <code>SoapObjectHelper</code> class provides static methods for
@@ -32,7 +33,8 @@ import javax.naming.NamingException;
  *
  * @see SoapObjectItf
  */
-public class SoapObjectHelper {
+public class SoapObjectHelper
+{
   /**
    * Codes an given object into a Hashtable transportable by the SOAP protocol.
    *
@@ -54,7 +56,8 @@ public class SoapObjectHelper {
    *
    * @exception NamingException  If the Hashtable could not be decoded.
    */
-  public static Object soapDecode(Hashtable codedObject) throws NamingException {
+  public static Object soapDecode(Hashtable codedObject) throws NamingException
+  {
     Object object = null;
 
     try {

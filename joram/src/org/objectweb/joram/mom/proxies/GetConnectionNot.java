@@ -26,10 +26,6 @@ import fr.dyade.aaa.agent.*;
 
 public class GetConnectionNot extends SyncNotification {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private int key;
 
   public GetConnectionNot(int key) {

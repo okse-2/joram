@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
@@ -24,13 +24,13 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.Serializable;
+import java.io.*;
 import java.net.InetAddress;
-import java.util.Enumeration;
 import java.util.Vector;
+import java.util.Enumeration;
 
-import fr.dyade.aaa.common.SocketAddress;
-import fr.dyade.aaa.common.Strings;
+import fr.dyade.aaa.util.Strings;
+import fr.dyade.aaa.util.SocketAddress;
 
 /**
  * Description of an agent server. It is used by <code>Channel</code> and
@@ -39,17 +39,13 @@ import fr.dyade.aaa.common.Strings;
  * it's very important to make all modifiers package.
  */
 public final class ServerDesc implements Serializable {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /**  Server unique identifier. */
   short sid;
   /** Server name. */
   String name;
   /**
    * The IP address of the server.
-   * It contains hostname and port ({@link fr.dyade.aaa.common.SocketAddress
+   * It contains hostname and port ({@link fr.dyade.aaa.util.SocketAddress
    * <code>SocketAddress</code>}) of remote server. The communication port
    * is set only if the server is directly accessible from this node; in
    * this case it corresponds to the communication port of the server in the
@@ -70,7 +66,7 @@ public final class ServerDesc implements Serializable {
   /**
    * Domain description of this server.
    */
-  private transient MessageConsumer domain = null;
+  transient MessageConsumer domain = null;
 
   /** True if there is no waiting messages for this server. */
   transient volatile boolean active = true;
@@ -156,7 +152,7 @@ public final class ServerDesc implements Serializable {
     sockAddrs.addElement(new SocketAddress(hostname, port));
   }
 
-  public void updateSockAddr(String hostname, int port) {
+  void updateSockAddr(String hostname, int port) {
     sockAddrs.remove(0);
     sockAddrs.insertElementAt(new SocketAddress(hostname,port), 0);
   }
@@ -192,10 +188,6 @@ public final class ServerDesc implements Serializable {
   public short getGateway() {
     return gateway;
   }
-  
-  public void setGateway(short id) {
-    gateway = id;
-  }
 
   public String getDomainName() {
     return domain.getDomainName();
@@ -225,13 +217,5 @@ public final class ServerDesc implements Serializable {
     strBuf.append(",domain=").append(domain);
     strBuf.append(")");
     return strBuf.toString();
-  }
-
-  public void setDomain(MessageConsumer domain) {
-    this.domain = domain;
-  }
-
-  public MessageConsumer getDomain() {
-    return domain;
   }
 }

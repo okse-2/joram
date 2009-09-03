@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 2004 Bull SA
+ * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,6 +26,7 @@ import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 import javax.resource.spi.ConnectionManager;
+import javax.resource.spi.ConnectionRequestInfo;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -34,12 +34,12 @@ import org.objectweb.util.monolog.api.BasicLevel;
  * An <code>OutboundTopicConnectionFactory</code> instance is used for
  * getting a PubSub connection to an underlying JORAM server.
  */
-public class OutboundTopicConnectionFactory extends OutboundConnectionFactory implements
-    javax.jms.TopicConnectionFactory {
-  
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
+public class OutboundTopicConnectionFactory
+             extends OutboundConnectionFactory
+             implements javax.jms.TopicConnectionFactory,
+                        java.io.Serializable,
+                        javax.resource.Referenceable
+{
   /**
    * Constructs an <code>OutboundTopicConnectionFactory</code> instance.
    *
@@ -66,7 +66,8 @@ public class OutboundTopicConnectionFactory extends OutboundConnectionFactory im
    *                                   is not reachable.
    * @exception JMSException           Generic exception.
    */
-  public javax.jms.TopicConnection createTopicConnection() throws JMSException {
+  public javax.jms.TopicConnection createTopicConnection() 
+    throws JMSException {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createTopicConnection()");
     
@@ -82,7 +83,8 @@ public class OutboundTopicConnectionFactory extends OutboundConnectionFactory im
    *                                   is not reachable.
    * @exception JMSException           Generic exception.
    */
-  public javax.jms.TopicConnection createTopicConnection(String userName, String password)
+  public javax.jms.TopicConnection
+      createTopicConnection(String userName, String password)
     throws JMSException {
 
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
@@ -92,7 +94,7 @@ public class OutboundTopicConnectionFactory extends OutboundConnectionFactory im
 
     try {
       TopicConnectionRequest cxRequest =
-        new TopicConnectionRequest(userName, password, mcf.getIdentityClass());
+        new TopicConnectionRequest(userName, password);
 
       Object o = cxManager.allocateConnection(mcf, cxRequest);
 

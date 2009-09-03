@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,34 +22,58 @@
  */
 package com.scalagent.joram.mom.dest.scheduler;
 
+import org.objectweb.joram.mom.dest.*;
+import org.objectweb.joram.shared.admin.*;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Properties;
 
-import org.objectweb.joram.mom.dest.DestinationImpl;
-import org.objectweb.joram.mom.dest.Queue;
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
+import fr.dyade.aaa.agent.Agent;
+import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.Debug;
+import fr.dyade.aaa.agent.BagSerializer;
+import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.UnknownNotificationException;
 
 public class SchedulerQueue extends Queue {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
-  public static Logger logger = Debug.getLogger(SchedulerQueue.class.getName());
-
+  
   public static final String QUEUE_SCHEDULER_TYPE = "queue_scheduler";
 
   public static String getDestinationType() {
     return QUEUE_SCHEDULER_TYPE;
   }
-
+    
+  public static void init(String args, boolean firstTime) throws Exception {
+    if (! firstTime) return;
+  }
+    
   /**
    * Empty constructor for newInstance(). 
    */ 
   public SchedulerQueue() {}
-
+    
+// AF: To be removed.
+//   /**
+//    * Constructs a <code>Queue</code> agent. 
+//    *
+//    * @param adminId  Identifier of the agent which will be the administrator
+//    *          of the queue.
+//    */ 
+//   public SchedulerQueue(AgentId adminId) {
+//     super(adminId);
+//   }
+    
+//   /**
+//    * Constructor with parameter for fixing the queue or not.
+//    */ 
+//   public SchedulerQueue(boolean fixed) {
+//     super(fixed);
+//   }
+    
   /**
    * Creates the <tt>QueueImpl</tt>.
    *
@@ -57,17 +81,7 @@ public class SchedulerQueue extends Queue {
    * @param prop     The initial set of properties.
    */
   public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
-    return new SchedulerQueueImpl(adminId, prop);
-  }
-
-  public void react(AgentId from, Notification not) throws Exception {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "SchedulerQueue.react(" + from + ',' + not + ')');
-    
-    if (not instanceof SchedulerQueueNot) {
-      ((SchedulerQueueImpl) destImpl).condition((SchedulerQueueNot) not);
-    } else
-      super.react(from, not);
+    return new SchedulerQueueImpl(getId(), adminId, prop);
   }
 }
 

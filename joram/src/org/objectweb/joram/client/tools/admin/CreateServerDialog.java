@@ -26,10 +26,6 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class CreateServerDialog extends JDialog {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private static CreateServerDialog dialog;
   private static JLabel nameLabel;
   private static JLabel hostNameLabel;

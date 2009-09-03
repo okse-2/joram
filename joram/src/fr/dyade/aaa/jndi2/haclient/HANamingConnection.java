@@ -22,22 +22,17 @@
  */
 package fr.dyade.aaa.jndi2.haclient;
 
-import java.io.IOException;
-import java.net.Socket;
-import java.util.Hashtable;
-import java.util.Vector;
+import java.net.*;
+import java.io.*;
+import java.util.*;
+import javax.naming.*;
 
-import javax.naming.NamingException;
+import fr.dyade.aaa.jndi2.client.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.jndi2.client.NamingConnection;
-import fr.dyade.aaa.jndi2.client.Trace;
-import fr.dyade.aaa.jndi2.msg.BindRequest;
-import fr.dyade.aaa.jndi2.msg.IOControl;
-import fr.dyade.aaa.jndi2.msg.JndiReadRequest;
-import fr.dyade.aaa.jndi2.msg.JndiReply;
-import fr.dyade.aaa.jndi2.msg.JndiRequest;
+import fr.dyade.aaa.jndi2.msg.*;
 
 public class HANamingConnection implements NamingConnection {
 
@@ -139,8 +134,8 @@ public class HANamingConnection implements NamingConnection {
         ioCtrl = new IOControl(socket);
         return;
       } catch (IOException exc) {
-        if (Trace.logger.isLoggable(BasicLevel.WARN))
-          Trace.logger.log(BasicLevel.WARN, "NamingConnection.open()", exc);
+        if (Trace.logger.isLoggable(BasicLevel.ERROR))
+          Trace.logger.log(BasicLevel.ERROR, "NamingConnection.open()", exc);
         // Put the faulty address at the end of the list
         addresses.removeElementAt(0);
         addresses.addElement(sa);

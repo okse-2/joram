@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,8 @@
  */
 package fr.dyade.aaa.jndi2.soap;
 
+import javax.naming.NamingException;
+
 import java.util.Hashtable;
 
 
@@ -30,7 +32,8 @@ import java.util.Hashtable;
  * object which may be registered and/or retrieved to/from JNDI through the
  * SOAP protocol.
  */
-public interface SoapObjectItf {
+public interface SoapObjectItf
+{
   /**
    * Method coding the <code>SoapObjectItf</code> object into a Hashtable
    * transportable by the SOAP procotol.

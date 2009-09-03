@@ -25,14 +25,10 @@ package fr.dyade.aaa.jndi2.server;
 
 import fr.dyade.aaa.jndi2.msg.*;
 import fr.dyade.aaa.agent.Notification;
-import fr.dyade.aaa.common.Strings;
+import fr.dyade.aaa.util.Strings;
 
 public class JndiScriptReplyNot extends Notification {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private JndiReply[] replies;
 
   public JndiScriptReplyNot(JndiReply[] replies) {

@@ -23,16 +23,15 @@
  */
 package fr.dyade.aaa.jndi2.soap;
 
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
 import java.util.Hashtable;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import fr.dyade.aaa.common.Debug;
-
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
 /**
  * The <code>JndiSoapService</code> class implements a JNDI access through a
@@ -41,9 +40,11 @@ import org.objectweb.util.monolog.api.Logger;
  * Actually, this service is a "classical" JNDI client accessing the JNDI
  * server.
  */
-public class JndiSoapService {
-  public static final Logger logger = 
-    Debug.getLogger(JndiSoapService.class.getName());
+public class JndiSoapService
+{
+  
+  public static final Logger logger = fr.dyade.aaa.util.Debug.getLogger(
+      JndiSoapService.class.getName());
   
   /** The service's <code>Context</code>. */
   private Context ctx;
@@ -57,7 +58,8 @@ public class JndiSoapService {
    * @exception NamingException  If the JNDI server is not reachable or if
    *              the parameters are invalid.
    */
-  public void init(String jndiHost, int jndiPort) throws NamingException {
+  public void init(String jndiHost, int jndiPort) throws NamingException
+  {
     java.util.Hashtable env = new java.util.Hashtable();
     env.put("java.naming.factory.initial",
             "fr.dyade.aaa.jndi2.client.NamingContextFactory");
@@ -75,7 +77,8 @@ public class JndiSoapService {
    * @exception NamingException  If the binding fails, or if the object could
    *              not be decoded.
    */
-  public void bind(String name, Hashtable map) throws NamingException {
+  public void bind(String name, Hashtable map) throws NamingException
+  {
     ctx.bind(name, SoapObjectHelper.soapDecode(map));
   }
 
@@ -88,7 +91,8 @@ public class JndiSoapService {
    * @exception NamingException  If the rebinding fails, or if the object could
    *              not be decoded.
    */
-  public void rebind(String name, Hashtable map) throws NamingException {
+  public void rebind(String name, Hashtable map) throws NamingException
+  {
     ctx.rebind(name, SoapObjectHelper.soapDecode(map));
   }
 
@@ -98,7 +102,8 @@ public class JndiSoapService {
    * @exception NamingException  If the lookup fails or if the object is not
    *              codable.
    */
-  public Hashtable lookup(String name) throws NamingException {
+  public Hashtable lookup(String name) throws NamingException
+  {
     try {
     return SoapObjectHelper.soapCode(ctx.lookup(name));
     } catch (Throwable exc) {
@@ -113,7 +118,8 @@ public class JndiSoapService {
    *
    * @exception NamingException  If the unbinding fails.
    */
-  public void unbind(String name) throws NamingException {
+  public void unbind(String name) throws NamingException
+  {
     ctx.unbind(name);
   }
 }

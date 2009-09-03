@@ -31,16 +31,9 @@ package org.objectweb.joram.mom.notifications;
 public class SubscribeRequest extends AbstractRequest
 {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-  /**
    * Selector for filtering messages, null or empty string for no selection.
    */
   private String selector;
-  
-  /** asynchronous subscription request. */
-  private boolean asyncSub = false;
 
 
   /**
@@ -50,22 +43,13 @@ public class SubscribeRequest extends AbstractRequest
    * @param requestId  Request identifier.
    * @param selector  Selector expression for filtering messages, null or 
    *          empty string for no selection.
-   * @param asyncSub true if asynchronous subscription.
    */
-  public SubscribeRequest(int clientContext, int requestId, String selector, boolean asyncSub)
+  public SubscribeRequest(int clientContext, int requestId, String selector)
   {
     super(clientContext, requestId);
     this.selector = selector;
-    this.asyncSub = asyncSub;
   }
 
-  /**
-   * 
-   * @return true for asynchronous subscription request.
-   */
-  public boolean isAsyncSub() {
-    return asyncSub;
-  }
 
   /** Returns the selector. */
   public String getSelector()

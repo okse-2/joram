@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies 
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -20,12 +20,13 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
+import java.util.Date;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.common.Pool;
+import fr.dyade.aaa.util.*;
 
 /**
  * The internal message structure.
@@ -37,8 +38,7 @@ import fr.dyade.aaa.common.Pool;
  * </ul>
  */
 final class Message implements Serializable {
-  /** define serialVersionUID for interoperability */
-  static final long serialVersionUID = 1L;
+  static final long serialVersionUID =  -2179939607085028300L;
 
   /** <code>AgentId</code> of sender. */
   transient AgentId from;
@@ -99,27 +99,10 @@ final class Message implements Serializable {
 
   final static int LENGTH = 25;
 
-  final static byte NULL       = (byte) 0x00;
-  final static byte NOTNULL    = (byte) 0x40;
-  final static byte PERSISTENT = (byte) 0x01;
-  final static byte DETACHABLE = (byte) 0x02;
+  final static int PERSISTENT = 0x01;
+  final static int DETACHABLE = 0x10;
 
-  byte optToByte() {
-    if (not != null)
-      return (byte) (Message.NOTNULL |
-                     (not.persistent?Message.PERSISTENT:0) |
-                     (not.detachable?Message.DETACHABLE:0));
-
-    // Should never happened
-    return NULL;
-  }
-
-  void optFromByte(byte opt) {
-    if (not != null) {
-      not.persistent = ((opt & Message.PERSISTENT) != 0);
-      not.detachable = ((opt & Message.DETACHABLE) != 0);
-    }
-  }
+  transient private byte iobuf[] = new byte [LENGTH];
 
   /**
    *  The writeObject method is responsible for writing the state of the
@@ -127,40 +110,59 @@ final class Message implements Serializable {
    * method can restore it.
    *  Be careful this method should only be used for saving messages in
    * persistent storage, sending messages will be done by another way.
-   * It is also used for HA synchronization.
    */
-  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-    // Writes sender's AgentId
-    out.writeShort(from.from);
-    out.writeShort(from.to);
-    out.writeInt(from.stamp);
-    // Writes adressee's AgentId
-    out.writeShort(to.from);
-    out.writeShort(to.to);
-    out.writeInt(to.stamp);
-    // Writes source server id of message
-    out.writeShort(source);
-    // Writes destination server id of message
-    out.writeShort(dest);
-    // Writes stamp of message
-    out.writeInt(stamp);
+  private void writeObject(java.io.ObjectOutputStream out)
+       throws IOException {
+    int idx = writeToBuf(iobuf, 0);
 
-    if (not == null) {
-      Debug.getLogger(getClass().getName()).log(BasicLevel.ERROR,
-                                                "Message.writeObject() -> null notification.");
+    // Writes notification attributes
+    iobuf[idx++] = (byte) ((not.persistent?PERSISTENT:0) |
+                           (not.detachable?DETACHABLE:0));
 
-      out.write(NULL);
-    } else {
-      // Writes notification attributes
-      out.write(optToByte());
-      if (! not.detachable) {
-        // Writes notification object
-        out.writeObject(not);
-      } else {
-        Debug.getLogger(getClass().getName()).log(BasicLevel.DEBUG,
-                                                  "Message.writeObject() -> detachable notification: " + not);
-      }
+    // Writes data on stream
+    out.write(iobuf, 0, LENGTH);
+    
+    if (! not.detachable) {
+      // Writes notification object
+      out.writeObject(not);
     }
+  }
+
+  /**
+   *  Write the Message internal state to the buffer.
+   */
+  int writeToBuf(byte[] buf, int idx) {
+      // Writes sender's AgentId
+    buf[idx++] = (byte) (from.from >>>  8);
+    buf[idx++] = (byte) (from.from >>>  0);
+    buf[idx++] = (byte) (from.to >>>  8);
+    buf[idx++] = (byte) (from.to >>>  0);
+    buf[idx++] = (byte) (from.stamp >>>  24);
+    buf[idx++] = (byte) (from.stamp >>>  16);
+    buf[idx++] = (byte) (from.stamp >>>  8);
+    buf[idx++] = (byte) (from.stamp >>>  0);
+    // Writes adressee's AgentId
+    buf[idx++]  = (byte) (to.from >>>  8);
+    buf[idx++]  = (byte) (to.from >>>  0);
+    buf[idx++] = (byte) (to.to >>>  8);
+    buf[idx++] = (byte) (to.to >>>  0);
+    buf[idx++] = (byte) (to.stamp >>>  24);
+    buf[idx++] = (byte) (to.stamp >>>  16);
+    buf[idx++] = (byte) (to.stamp >>>  8);
+    buf[idx++] = (byte) (to.stamp >>>  0);
+    // Writes source server id of message
+    buf[idx++]  = (byte) (source >>>  8);
+    buf[idx++]  = (byte) (source >>>  0);
+    // Writes destination server id of message
+    buf[idx++] = (byte) (dest >>>  8);
+    buf[idx++] = (byte) (dest >>>  0);
+    // Writes stamp of message
+    buf[idx++] = (byte) (stamp >>>  24);
+    buf[idx++] = (byte) (stamp >>>  16);
+    buf[idx++] = (byte) (stamp >>>  8);
+    buf[idx++] = (byte) (stamp >>>  0);
+
+    return idx;
   }
 
   /**
@@ -171,40 +173,47 @@ final class Message implements Serializable {
    */
   private void readObject(java.io.ObjectInputStream in)
        throws IOException, ClassNotFoundException {
-    // Reads sender's AgentId
-    from = new AgentId(in.readShort(), in.readShort(), in.readInt());
-    // Reads adressee's AgentId
-    to = new AgentId(in.readShort(), in.readShort(), in.readInt());
-    // Reads source server id of message
-    source = in.readShort();
-    // Reads destination server id of message
-    dest = in.readShort();
-    // Reads stamp of message
-    stamp = in.readInt();
+    iobuf = new byte[25];
+    in.readFully(iobuf, 0, 25);
 
-    int opt = in.read();
-    if (opt == NULL) {
-      Debug.getLogger(getClass().getName()).log(BasicLevel.ERROR,
-                                                "Message.readObject -> null notification.");
+    int idx = readFromBuf(iobuf, 0);
 
-      not = null;
-    } else {
-      // Reads notification attributes
-      boolean persistent = ((opt & PERSISTENT) != 0);
-      boolean detachable = ((opt & DETACHABLE) != 0);
+    // Reads notification attributes
+    boolean persistent = ((iobuf[idx] & PERSISTENT) == 0)?false:true;
+    boolean detachable = ((iobuf[idx] & DETACHABLE) == 0)?false:true;
 
-      if (! detachable) {
-        // Reads notification object
-        not = (Notification) in.readObject();
-        not.detachable = detachable;
-        not.persistent = persistent;
-        not.detached = false;
-      } else {
-        Debug.getLogger(getClass().getName()).log(BasicLevel.DEBUG,
-                                                  "Message.readObject -> " + opt);
-
-      }
+    if (! detachable) {
+      // Reads notification object
+      not = (Notification) in.readObject();
+      not.detachable = false;
+      not.detached = false;
     }
+  }
+
+  int readFromBuf(byte[] buf, int idx) {
+    // Reads sender's AgentId
+    from = new AgentId(
+      (short) (((buf[idx++] & 0xFF) <<  8) + (buf[idx++] & 0xFF)),
+      (short) (((buf[idx++] & 0xFF) <<  8) + (buf[idx++] & 0xFF)),
+      ((buf[idx++] & 0xFF) << 24) + ((buf[idx++] & 0xFF) << 16) +
+      ((buf[idx++] & 0xFF) <<  8) + ((buf[idx++] & 0xFF) <<  0));
+    // Reads adressee's AgentId
+    to = new AgentId(
+      (short) (((buf[idx++] & 0xFF) <<  8) + (buf[idx++] & 0xFF)),
+      (short) (((buf[idx++] & 0xFF) <<  8) + (buf[idx++] & 0xFF)),
+      ((buf[idx++] & 0xFF) << 24) + ((buf[idx++] & 0xFF) << 16) +
+      ((buf[idx++] & 0xFF) <<  8) + ((buf[idx++] & 0xFF) <<  0));
+    // Reads source server id of message
+    source = (short) (((buf[idx++] & 0xFF) <<  8) + 
+                      ((buf[idx++] & 0xFF) <<  0));
+    // Reads destination server id of message
+    dest = (short) (((buf[idx++] & 0xFF) <<  8) +
+                    ((buf[idx++] & 0xFF) <<  0));
+    // Reads stamp of message
+    stamp = ((buf[idx++] & 0xFF) << 24) + ((buf[idx++] & 0xFF) << 16) +
+      ((buf[idx++] & 0xFF) <<  8) + ((buf[idx++] & 0xFF) <<  0);
+
+    return idx;
   }
 
   transient private String stringId = null;
@@ -231,10 +240,10 @@ final class Message implements Serializable {
    */
   void save() throws IOException {
     if (isPersistent()) {
-      AgentServer.getTransaction().create(this, toStringId());
+      AgentServer.getTransaction().save(this, toStringId());
       if (not.detachable) {
         not.messageId = StringId.toStringId('N', '_', dest, stamp, -1);
-        AgentServer.getTransaction().create(not, not.messageId);
+        AgentServer.getTransaction().save(not, not.messageId);
       }
     }
   }
@@ -251,7 +260,6 @@ final class Message implements Serializable {
   load(String name) throws IOException, ClassNotFoundException {
     Message msg = (Message) AgentServer.getTransaction().load(name);
     if (msg.not == null) {
-      // AF: cela n'a aucun sens !!
       String messageId = StringId.toStringId('N', '_', msg.dest, msg.stamp, -1);
       msg.not = (Notification) AgentServer.getTransaction().load(messageId);
       msg.not.messageId = messageId;
@@ -269,7 +277,7 @@ final class Message implements Serializable {
   void delete()  throws IOException {
     if (isPersistent()) {
       AgentServer.getTransaction().delete(toStringId());
-      if ((not != null) && (not.detachable && ! not.detached)) {
+      if (not.detachable && ! not.detached) {
         // The Notification is not stored with message, and it is not detached
         // so it may be deleted individually.
         AgentServer.getTransaction().delete(not.getMessageId());
@@ -285,7 +293,7 @@ final class Message implements Serializable {
   private static Pool pool = null;
 
   static {
-    int size = AgentServer.getInteger("fr.dyade.aaa.agent.Message$Pool.size", 150).intValue();
+    int size = Integer.getInteger("fr.dyade.aaa.agent.Message$Pool.size", 150).intValue();
     pool = new Pool("Message", size);
   }
 
@@ -326,8 +334,8 @@ final class Message implements Serializable {
   }
   
   private void set(AgentId from, AgentId to, Notification not) {
-    this.from = from;
-    this.to = to;
+    this.from = (AgentId) from;
+    this.to = (AgentId) to;
     if (not != null) {
       this.not = (Notification) not.clone();
       this.not.detached = not.detached;

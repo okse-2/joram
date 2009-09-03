@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -24,8 +24,8 @@ package org.objectweb.joram.client.jms.connection;
 
 import java.util.Timer;
 
-import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
+import org.objectweb.joram.shared.client.AbstractJmsReply;
 
 public interface RequestChannel {
   
@@ -33,11 +33,12 @@ public interface RequestChannel {
   
   public void connect() throws Exception;
 
-  public void send(AbstractJmsRequest obj) throws Exception;
+  public void send(AbstractJmsRequest obj)
+    throws Exception;
 
-  public AbstractJmsReply receive() throws Exception;
+  public AbstractJmsReply receive()
+    throws Exception;
 
   public void close();
 
-  public void closing();
 }

@@ -22,19 +22,14 @@
  */
 package fr.dyade.aaa.jndi2.server;
 
-import org.objectweb.util.monolog.api.BasicLevel;
+import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.jndi2.msg.*;
 
-import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.Notification;
-import fr.dyade.aaa.jndi2.msg.JndiReply;
-import fr.dyade.aaa.jndi2.msg.JndiRequest;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 public class AgentEntryPoint implements EntryPoint {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private RequestManager manager;
 
   public void setRequestManager(RequestManager manager) {

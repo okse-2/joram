@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,75 +23,51 @@
  */
 package org.objectweb.joram.client.jms;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.TimerTask;
-import java.util.Vector;
-
-import javax.jms.IllegalStateException;
-import javax.jms.InvalidDestinationException;
-import javax.jms.JMSException;
-import javax.jms.MessageFormatException;
-import javax.jms.TransactionRolledBackException;
-
 import org.objectweb.joram.client.jms.connection.RequestMultiplexer;
 import org.objectweb.joram.client.jms.connection.Requestor;
-import org.objectweb.joram.shared.client.AbstractJmsReply;
-import org.objectweb.joram.shared.client.AbstractJmsRequest;
-import org.objectweb.joram.shared.client.CommitRequest;
-import org.objectweb.joram.shared.client.ConsumerAckRequest;
-import org.objectweb.joram.shared.client.ConsumerDenyRequest;
-import org.objectweb.joram.shared.client.ConsumerMessages;
-import org.objectweb.joram.shared.client.ConsumerReceiveRequest;
-import org.objectweb.joram.shared.client.ConsumerUnsubRequest;
-import org.objectweb.joram.shared.client.GetAdminTopicReply;
-import org.objectweb.joram.shared.client.GetAdminTopicRequest;
-import org.objectweb.joram.shared.client.ProducerMessages;
-import org.objectweb.joram.shared.client.SessAckRequest;
-import org.objectweb.joram.shared.client.SessCreateTDReply;
-import org.objectweb.joram.shared.client.SessCreateTQRequest;
-import org.objectweb.joram.shared.client.SessCreateTTRequest;
-import org.objectweb.joram.shared.client.SessDenyRequest;
+import org.objectweb.joram.shared.client.*;
+
+import java.util.*;
+
+import javax.jms.JMSException;
+import javax.jms.TransactionRolledBackException;
+import javax.jms.IllegalStateException;
+import javax.jms.MessageFormatException;
+
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.util.Debug;
 
 /**
  * Implements the <code>javax.jms.Session</code> interface.
- * <p>
- * A Session object is a single-threaded context for producing and consuming
- * messages. A session serves several purposes:
- * <ul>
- * <li>It is a factory for message producers and consumers.</li>
- * <li>It is a factory for Joram specific message.</li>
- * <li>It defines a serial order for the messages it consumes and the messages
- * it produces.</li>
- * <li>It retains messages it consumes until they have been acknowledged.</li>
- * <li>It serializes execution of message listeners registered with its message
- * consumers.</li>
- * <li>It is a factory for TemporaryTopics and TemporaryQueues.</li>
- * <li>It supports a single series of transactions that combine work spanning
- * its producers and consumers into atomic units.</li>
- * </ul>
- *  A session can create and service multiple message producers and consumers.
  */
 public class Session implements javax.jms.Session {
 
-  public static Logger logger = Debug.getLogger(Session.class.getName());
+  public static Logger logger = 
+    Debug.getLogger(Session.class.getName());
+  
+  
+  public static final String RECEIVE_ACK =
+      "org.objectweb.joram.client.jms.receiveAck";
+
+  public static boolean receiveAck =
+      Boolean.getBoolean(RECEIVE_ACK);
 
   /**
    * Status of the session
    */
   private static class Status {
     /**
-     * Status of the session when the connection is stopped.
+     * Status of the session
+     * when the connection is stopped.
      * This is the initial status.
      */
     public static final int STOP = 0;
 
     /**
-     * Status of the session when the connection is started.
+     * Status of the session when the connection
+     * is started.
      */
     public static final int START = 1;
 
@@ -119,12 +95,14 @@ public class Session implements javax.jms.Session {
     public static final int NONE = 0;
 
     /**
-     * The session is used to synchronously receive messages.
+     * The session is used to
+     * synchronously receive messages.
      */
     public static final int RECEIVE = 1;
 
     /**
-     * The session is used to asynchronously listen to messages.
+     * The session is used to asynchronously listen
+     * to messages.
      */
     public static final int LISTENER = 2;
 
@@ -143,15 +121,22 @@ public class Session implements javax.jms.Session {
 
   /**
    * The status of the current request.
-   * Only valid in when the session is used to synchronously receive messages
-   * (RECEIVE mode).
+   * Only valid in the mode RECEIVE.
    */  
   private static class RequestStatus {
-    /** No request. This is the initial status. */
+    /**
+     * No request. This is the initial status.
+     */
     public static final int NONE = 0;
-    /**  A request is running (pending). */
+
+    /**
+     * A request is running (pending).
+     */
     public static final int RUN = 1;
-    /**  The request is done. */
+
+    /**
+     * The request is done.
+     */
     public static final int DONE = 2;
 
     private static final String[] names = {
@@ -196,7 +181,7 @@ public class Session implements javax.jms.Session {
   private Vector browsers;
 
   /** FIFO queue holding the asynchronous server deliveries. */
-  private fr.dyade.aaa.common.Queue repliesIn;
+  private fr.dyade.aaa.util.Queue repliesIn;
 
   /** Daemon distributing asynchronous server deliveries. */
   private SessionDaemon daemon;
@@ -223,46 +208,56 @@ public class Session implements javax.jms.Session {
   Hashtable deliveries;
 
   /**
-   * The request multiplexer used to communicate with the user proxy.
+   * The request multiplexer used to communicate
+   * with the user proxy.
    */
   private RequestMultiplexer mtpx;
 
   /**
-   * The requestor used by the session to communicate with the user proxy.
+   * The requestor used by the session 
+   * to communicate
+   * with the user proxy.
    */
   private Requestor requestor;
 
   /**
-   * The requestor used by the session to make 'receive' with the user
-   * proxy. This second requestor is necessary because it must be closed
+   * The requestor used by the session 
+   * to make 'receive'
+   * with the user proxy. This second requestor 
+   * is necessary because it must be closed
    * during the session close (see method close).
    */
   private Requestor receiveRequestor;
 
   /**
-   * Indicates that the session has been recovered by a message listener.
-   * Doesn't need to be volatile because it is only used by the SessionDaemon
-   * thread.
+   * Indicates that the session has been 
+   * recovered by a message listener.
+   * Doesn't need to be volatile because
+   * it is only used by the SessionDaemon thread.
    */
   private boolean recover;
 
   /**
-   * Status of the session: STOP, START, CLOSE
+   * Status of the session:
+   * STOP, START, CLOSE
    */
   private int status;
 
   /**
-   * Mode of the session: NONE, RECEIVE, LISTENER, APP_SERVER
+   * Mode of the session:
+   * NONE, RECEIVE, LISTENER, APP_SERVER
    */
   private int sessionMode;
 
   /**
-   * Status of the request: NONE, RUN, DONE.
+   * Status of the request:
+   * NONE, RUN, DONE.
    */
   private int requestStatus;
 
   /**
-   * The message consumer currently making a request (null if none).
+   * The message consumer currently
+   * making a request (null if none).
    */
   private MessageConsumer pendingMessageConsumer;
 
@@ -270,312 +265,58 @@ public class Session implements javax.jms.Session {
    * The current active control thread.
    */
   private Thread singleThreadOfControl;
+
+  /**
+   * Status boolean indicating whether
+   * the message input is activated or not
+   * for the message listeners.
+   */
+  private boolean passiveMsgInput;
   
   /**
-   * Used to synchronize the method close()
+   * Used to synchronize the
+   * method close()
    */
   private Closer closer;
-
-  /**
-   *  Indicates whether the messages consumed are implicitly acknowledged
-   * or not. When true messages are immediately removed from queue when
-   * delivered.
-   *  Contrary to Session's AUTO_ACKNOWLEDGE mode there is none acknowledge
-   * message from client to server.
-   * 
-   * @see FactoryParameters#implicitAck
-   */
-  private boolean implicitAck;
   
-  /** 
-   *  Indicates whether the messages consumed are implicitly acknowledged
-   * or not. If true messages are immediately removed from queue when
-   * delivered.
-   * <p>
-   *  This attribute is inherited from Connection at initialization,
-   * by default false. 
-   *
-   * @return true if messages produced are implicitly acknowledged.
-   * @see #implicitAck
-   */
-  public boolean isImplicitAck() {
-    return implicitAck;
-  }
-
   /**
-   *  Sets implicit acknowledge for this session.
-   * <p>
-   *  Determines whether the messages produced are implicitly acknowledged
-   * or not. If set to true the messages are immediately removed from queue
-   * when delivered.
-   * <p>
-   *  This attribute is inherited from Connection at initialization,
-   * by default false. 
-   * 
-   * @param implicitAck if true sets implicit acknowledge for this session.
-   * @see #implicitAck
-   */
-  public void setImplicitAck(boolean implicitAck) {
-    this.implicitAck = implicitAck;
-  }
-
-  /**
-   *  Indicates whether the messages produced are asynchronously sent
-   * or not (without or with acknowledgment).
-   * 
-   * @see FactoryParameters#asyncSend
+   * Indicates whether the messages produced are asynchronously
+   * sent or not (without or with acknowledgement)
    */
   private boolean asyncSend;
 
-  /** 
-   *  Indicates whether the messages produced are asynchronously sent
-   * or not (without or with acknowledgment).
-   * <p>
-   *  This attribute is inherited from Connection at initialization,
-   * by default false. 
-   *
-   * @return true if messages produced are asynchronously sent.
-   * @see #asyncSend
-   */
-  public boolean isAsyncSend() {
-    return asyncSend;
-  }
-
   /**
-   *  Sets asynchronously sending for this session.
-   * <p>
-   *  Determines whether the messages produced are asynchronously sent
-   * or not (without or with acknowledgement).
-   * <p>
-   *  This attribute is inherited from Connection at initialization,
-   * by default false. 
-   * 
-   * @param asyncSend	if true sets asynchronous sending for this session.
-   * @see #asyncSend
-   */
-  public void setAsyncSend(boolean asyncSend) {
-    this.asyncSend = asyncSend;
-  }
-
-  /**
-   *  Maximum number of messages that can be read at once from a queue.
-   * <p>
-   *  This attribute is inherited from Connection at initialization,
-   * default value is 1.
-   *
-   * @see FactoryParameters#queueMessageReadMax
+   * Maximum number of messages that can be
+   * read at once from a queue.
    */
   private int queueMessageReadMax;
   
   /**
-   *  Get the maximum number of messages that can be read at once from a queue
-   * for this Session.
-   * <p>
-   *  This attribute is inherited from Connection at initialization,
-   * default value is 1.
-   * 
-   * @return    The maximum number of messages that can be read at once from
-   *            a queue.
-   *
-   * @see #queueMessageReadMax
-   */
-  public final int getQueueMessageReadMax() {
-    return queueMessageReadMax;
-  }
-    
-  /**
-   *  Set the maximum number of messages that can be read at once from a queue
-   * for this Session.
-   * <p>
-   *  This attribute is inherited from Connection at initialization,
-   * default value is 1.
-   * 
-   * @param queueMessageReadMax	The maximum number of messages that can be
-   *				read at once from a queue.
-   *
-   * @see #queueMessageReadMax
-   */
-  public void setQueueMessageReadMax(int queueMessageReadMax) {
-    this.queueMessageReadMax = queueMessageReadMax;
-  }
-
-  /**
-   *  Maximum number of acknowledgements that can be buffered when using
+   * Maximum number of acknowledgements
+   * that can be buffered in
    * Session.DUPS_OK_ACKNOWLEDGE mode.
-   * <p>
-   *  This attribute is inherited from Connection at initialization,
-   *  default value is 0.
-   * 
-   * @see FactoryParameters#topicAckBufferMax
+   * Default is 0.
    */
   private int topicAckBufferMax;
-
-  /**
-   *  Get the maximum number of acknowledgements that can be buffered when
-   * using Session.DUPS_OK_ACKNOWLEDGE mode for this session.
-   * <p>
-   *  This attribute is inherited from Connection at initialization,
-   *  default value is 0.
-   *
-   * @return The Maximum number of acknowledgements that can be buffered when
-   *         using Session.DUPS_OK_ACKNOWLEDGE mode.
-   *
-   * @see #topicAckBufferMax
-   */
-  public final int getTopicAckBufferMax() {
-    return topicAckBufferMax;
-  }
   
   /**
-   * Set the maximum number of acknowledgements that can be buffered when
-   * using Session.DUPS_OK_ACKNOWLEDGE mode for this session.
-   * <p>
-   *  This attribute is inherited from Connection at initialization,
-   *  default value is 0.
-   *
-   * @param topicAckBufferMax The Maximum number of acknowledgements that
-   *			      can be buffered in Session.DUPS_OK_ACKNOWLEDGE
-   *			      mode.
-   *
-   * @see #topicAckBufferMax
-   */
-  public void setTopicAckBufferMax(int topicAckBufferMax) {
-    this.topicAckBufferMax = topicAckBufferMax;
-  }
-
-  /**
-   *  This threshold is the maximum messages number over which the
-   * subscription is passivated.
-   * <p>
-   *  This attribute is inherited from Connection at initialization,
-   * default value is Integer.MAX_VALUE.
-   *
-   * @see FactoryParameters#topicPassivationThreshold
+   * This threshold is the maximum messages 
+   * number over
+   * which the subscription is passivated.
+   * 
    */
   private int topicPassivationThreshold;
-
-  /**
-   * Get the threshold of passivation for this session.
-   * <p>
-   * This threshold is the maximum messages number over which the
-   * subscription is passivated.
-   * <p>
-   *  This attribute is inherited from Connection at initialization,
-   * default value is Integer.MAX_VALUE.
-   *
-   * @return The maximum messages number over which the subscription
-   *         is passivated.
-   *
-   * @see #topicPassivationThreshold
-   */
-  public final int getTopicPassivationThreshold() {
-    return topicPassivationThreshold;
-  }
   
   /**
-   * Set the threshold of passivation for this session.
-   * <p>
-   * This threshold is the maximum messages number over which the
-   * subscription is passivated.
-   * <p>
-   *  This attribute is inherited from Connection at initialization,
-   * default value is Integer.MAX_VALUE.
-   *
-   * @param topicPassivationThreshold The maximum messages number over which
-   *				      the subscription is passivated.
-   *
-   * @see #topicPassivationThreshold
-   */
-  public void setTopicPassivationThreshold(int topicPassivationThreshold) {
-    this.topicPassivationThreshold = topicPassivationThreshold;
-  }
-
-  /**
-   * This threshold is the minimum messages number below which
+   * This threshold is the minimum 
+   * messages number below which
    * the subscription is activated.
-   * <p>
-   *  This attribute is inherited from Connection at initialization,
-   * default value is 0.
-   *
-   * @see FactoryParameters#topicActivationThreshold
+   * 
    */
   private int topicActivationThreshold;
-
-  /**
-   * Get the threshold of activation for this session.
-   * <p>
-   * This threshold is the minimum messages number below which
-   * the subscription is activated.
-   * <p>
-   *  This attribute is inherited from Connection at initialization,
-   * default value is 0.
-   *
-   * @see #topicActivationThreshold
-   *
-   * @return The minimum messages number below which the subscription
-   *         is activated.
-   */
-  public final int getTopicActivationThreshold() {
-    return topicActivationThreshold;
-  }
-
-  /**
-   * Set the threshold of activation for this session.
-   * <p>
-   * This threshold is the minimum messages number below which
-   * the subscription is activated.
-   * <p>
-   *  This attribute is inherited from Connection at initialization,
-   * default value is 0.
-   *
-   * @param topicActivationThreshold The minimum messages number below which
-   *			   	     the subscription is activated.
-   *
-   * @see #topicActivationThreshold
-   */
-  public void setTopicActivationThreshold(int topicActivationThreshold) {
-    this.topicActivationThreshold = topicActivationThreshold;
-  }
-
-  /**
-   *  Indicates whether the subscription requests are asynchronously handled
-   * or not.
-   * <p>
-   *  Default value is false, the subscription is handled synchronously so the
-   * topic must be accessible.
-   */
-  private boolean asyncSub = false;
-
-  /** 
-   *  Indicates whether the subscription request is asynchronously handled
-   * or not.
-   * <p>
-   *  Default value is false, the subscription is handled synchronously so the
-   * topic must be accessible.
-   *
-   * @return true if the subscription requests are asynchronously handled.
-   */
-  public boolean isAsyncSub() {
-    return asyncSub;
-  }
-
-  /** 
-   * Sets asynchronous subscription for this session. 
-   * <p>
-   *  Determines whether the subscription request is asynchronously handled
-   * or not.
-   * <p>
-   *  Default value is false, the subscription is handled synchronously so the
-   * topic must be accessible.
-   *
-   * @param asyncSub if true sets  asynchronous subscription for this session.
-   */
-  public void setAsyncSub(boolean asyncSub) {
-    this.asyncSub = asyncSub;
-  }
-
+  
   private MessageConsumerListener messageConsumerListener;
-
+  
   /**
    * Opens a session.
    *
@@ -614,7 +355,7 @@ public class Session implements javax.jms.Session {
     consumers = new Vector();
     producers = new Vector();
     browsers = new Vector();
-    repliesIn = new fr.dyade.aaa.common.Queue();
+    repliesIn = new fr.dyade.aaa.util.Queue();
     sendings = new Hashtable();
     deliveries = new Hashtable();
     
@@ -627,9 +368,6 @@ public class Session implements javax.jms.Session {
         cnx.getTxPendingTimer() * 1000);
     }
     
-    // Retrieves default parameters from connection. The user can configure
-    // the session through get/set methods.
-    implicitAck = cnx.getImplicitAck();
     asyncSend = cnx.getAsyncSend();
     queueMessageReadMax = cnx.getQueueMessageReadMax();
     topicAckBufferMax = cnx.getTopicAckBufferMax();
@@ -683,7 +421,8 @@ public class Session implements javax.jms.Session {
   
   /**
    * Checks if the session is closed. 
-   * If true, an IllegalStateException is raised.
+   * If true, an IllegalStateException
+   * is raised.
    */  
   protected synchronized void checkClosed() 
     throws IllegalStateException {
@@ -693,7 +432,8 @@ public class Session implements javax.jms.Session {
   }
 
   /**
-   * Checks if the calling thread is the thread of control. If not, 
+   * Checks if the calling thread is 
+   * the thread of control. If not, 
    * an IllegalStateException is raised.
    */
   private synchronized void checkThreadOfControl() 
@@ -704,8 +444,9 @@ public class Session implements javax.jms.Session {
   }
 
   /**
-   * Checks the session mode. If it is not the expected session mode,
-   * raises an IllegalStateException.
+   * Checks the session mode. If it is not 
+   * the expected session mode, raises an illegal state
+   * exception.
    *
    * @param expectedSessionMode the expected session mode.
    */
@@ -758,14 +499,7 @@ public class Session implements javax.jms.Session {
   public void setTransacted(boolean t) {
     if (status != Status.CLOSE) {
       transacted = t;
-//      if (!t) {
-//        autoAck = true;
-//      }
     }
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-            "Session.setTransacted transacted = " + transacted +
-            ", autoAck = " + autoAck);
     // else should throw an exception but not expected in
     // the connector.
   }
@@ -794,7 +528,6 @@ public class Session implements javax.jms.Session {
   }
 
   /**
-   * Creates a Message object.
    * API method.
    *
    * @exception IllegalStateException  If the session is closed.
@@ -806,7 +539,6 @@ public class Session implements javax.jms.Session {
   }
 
   /**
-   * Creates a <code>TextMessage</code> object.
    * API method.
    *
    * @exception IllegalStateException  If the session is closed.
@@ -818,7 +550,6 @@ public class Session implements javax.jms.Session {
   }
 
   /**
-   * Creates a <code>TextMessage</code> object with the specified text.
    * API method.
    *
    * @exception IllegalStateException  If the session is closed.
@@ -832,7 +563,6 @@ public class Session implements javax.jms.Session {
   }
   
   /**
-   * Creates a <code>BytesMessage</code> object.
    * API method.
    *
    * @exception IllegalStateException  If the session is closed.
@@ -844,7 +574,6 @@ public class Session implements javax.jms.Session {
   }
 
   /**
-   * Creates a <code>MapMessage</code> object.
    * API method.
    *
    * @exception IllegalStateException  If the session is closed.
@@ -856,7 +585,6 @@ public class Session implements javax.jms.Session {
   }
 
   /**
-   * Creates a <code>ObjectMessage</code> object.
    * API method.
    *
    * @exception IllegalStateException  If the session is closed.
@@ -868,7 +596,6 @@ public class Session implements javax.jms.Session {
   }
 
   /**
-   * Creates a <code>ObjectMessage</code> object.
    * API method.
    *
    * @exception IllegalStateException  If the session is closed.
@@ -883,7 +610,6 @@ public class Session implements javax.jms.Session {
   }
 
   /**
-   * Creates a <code>StreamMessage</code> object.
    * API method.
    *
    * @exception IllegalStateException  If the session is closed.
@@ -895,17 +621,14 @@ public class Session implements javax.jms.Session {
   }
 
   /**
-   * Creates a QueueBrowser object to peek at the messages on the specified queue using a message selector.
    * API method
-   * 
-   * @param queue     the queue to browse
-   * @param selector  the expression allowing to filter messages 
-   * 
-   * @exception IllegalStateException       if the session is closed.
-   * @exception InvalidDestinationException if an invalid destination is specified.
-   * @exception InvalidSelectorException    if the message selector is invalid.
+   *
+   * @exception IllegalStateException  If the session is closed.
    */
-   public synchronized javax.jms.QueueBrowser createBrowser(javax.jms.Queue queue, String selector) throws JMSException {
+  public synchronized javax.jms.QueueBrowser
+      createBrowser(javax.jms.Queue queue, 
+                    String selector)
+    throws JMSException {
     checkClosed();
     checkThreadOfControl();
     QueueBrowser qb = new QueueBrowser(this, (Queue) queue, selector);
@@ -914,15 +637,13 @@ public class Session implements javax.jms.Session {
   }
 
   /**
-   * Creates a QueueBrowser object to peek at the messages on the specified queue.
    * API method
    *
-   * @param queue     the queue to browse
-   * 
-   * @exception IllegalStateException       if the session is closed.
-   * @exception InvalidDestinationException if an invalid destination is specified.
+   * @exception IllegalStateException  If the session is closed.
    */
-  public synchronized javax.jms.QueueBrowser createBrowser(javax.jms.Queue queue) throws JMSException {
+  public synchronized javax.jms.QueueBrowser 
+      createBrowser(javax.jms.Queue queue)
+    throws JMSException {
     checkClosed();
     checkThreadOfControl();
     QueueBrowser qb =  new QueueBrowser(this, (Queue) queue, null);
@@ -931,126 +652,130 @@ public class Session implements javax.jms.Session {
   }
 
   /**
-   * Creates a MessageProducer to send messages to the specified destination.
    * API method.
    *
-   * @param dest  the Destination to send to, or null if this is a producer which does not have
-   *              a specified destination.
-   *              
-   * @exception InvalidDestinationException if an invalid destination is specified.
-   * @exception IllegalStateException  If the session is closed or if the connection is broken.
-   * @exception JMSException  If the creation fails for any other reason.
-   */
-  public synchronized javax.jms.MessageProducer createProducer(javax.jms.Destination dest) throws JMSException {
-    checkClosed();
-    checkThreadOfControl();
-    MessageProducer mp = new MessageProducer(this, (Destination) dest);
-    addProducer(mp);
-    return mp;
-  }
-  
-  /**
-   * Creates a MessageConsumer for the specified destination using a message selector.
-   * API method.
-   * 
-   * @param dest  the Destination to send to, or null if this is a producer which does not have
-   *              a specified destination.
-   *
-   * @exception InvalidDestinationException if an invalid destination is specified.
-   * @exception IllegalStateException  If the session is closed or if the
-   *              connection is broken.
-   * @exception JMSException  If the creation fails for any other reason.
-   */
-  public synchronized javax.jms.MessageConsumer createConsumer(javax.jms.Destination dest,
-                                                               String selector,
-                                                               boolean noLocal) throws JMSException {
-    checkClosed();
-    checkThreadOfControl();
-    MessageConsumer mc = new MessageConsumer(this, (Destination) dest, selector, null, noLocal);
-    addConsumer(mc);
-    return mc;
-  }
-
-  /**
-   * Creates a MessageConsumer for the specified destination using a
-   * message selector.
-   * API method.
-   *
-   * @param dest      the Destination to send to, or null if this is a producer which does not have
-   *                  a specified destination.
-   * @param selector  The selector allowing to filter messages.
-   *
-   * @exception InvalidDestinationException if an invalid destination is specified.
-   * @exception IllegalStateException  If the session is closed or if the
-   *              connection is broken.
-   * @exception JMSException  If the creation fails for any other reason.
-   */
-  public synchronized javax.jms.MessageConsumer createConsumer(javax.jms.Destination dest, 
-                                                               String selector) throws JMSException {
-    checkClosed();
-    checkThreadOfControl();
-    MessageConsumer mc = new MessageConsumer(this, (Destination) dest, selector);
-    addConsumer(mc);
-    return mc;
-  }
-
-  /**
-   * Creates a MessageConsumer for the specified destination.
-   * API method.
-   *
-   * @exception InvalidDestinationException if an invalid destination is specified.
-   * @exception IllegalStateException  If the session is closed or if the
-   *              connection is broken.
-   * @exception JMSException  If the creation fails for any other reason.
-   */
-  public synchronized javax.jms.MessageConsumer createConsumer(javax.jms.Destination dest) throws JMSException {
-    checkClosed();
-    checkThreadOfControl();
-    MessageConsumer mc = new MessageConsumer(this, (Destination) dest, null);
-    addConsumer(mc);
-    return mc;
-  }
-
-  /**
-   * Creates or retrieves a durable subscription with the specified name.
-   * API method.
-   *
-   * @exception InvalidDestinationException if an invalid destination is specified.
    * @exception IllegalStateException  If the session is closed or if the 
    *              connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
    */
-  public synchronized javax.jms.TopicSubscriber createDurableSubscriber(javax.jms.Topic topic,
-                                                                        String name,
-                                                                        String selector,
-                                                                        boolean noLocal) throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 "Session.createDurableSubscriber(" + topic + ',' + name + ',' + selector + ',' + noLocal + ')');
+  public synchronized javax.jms.MessageProducer createProducer(
+    javax.jms.Destination dest)
+    throws JMSException {
     checkClosed();
     checkThreadOfControl();
-    TopicSubscriber ts = new TopicSubscriber(this, (Topic) topic, name, selector, noLocal);
+    MessageProducer mp = new MessageProducer(
+      this, 
+      (Destination) dest);
+    addProducer(mp);
+    return mp;
+  }
+
+  /**
+   * API method.
+   *
+   * @exception IllegalStateException  If the session is closed or if the
+   *              connection is broken.
+   * @exception JMSException  If the creation fails for any other reason.
+   */
+  public synchronized javax.jms.MessageConsumer
+      createConsumer(javax.jms.Destination dest, 
+                     String selector,
+                     boolean noLocal) 
+    throws JMSException {
+    checkClosed();
+    checkThreadOfControl();
+    MessageConsumer mc = new MessageConsumer(
+      this, (Destination) dest, 
+      selector, null,
+      noLocal);
+    addConsumer(mc);
+    return mc;
+  }
+
+  /**
+   * API method.
+   *
+   * @exception IllegalStateException  If the session is closed or if the
+   *              connection is broken.
+   * @exception JMSException  If the creation fails for any other reason.
+   */
+  public synchronized javax.jms.MessageConsumer
+      createConsumer(javax.jms.Destination dest, 
+                     String selector)
+    throws JMSException {
+    checkClosed();
+    checkThreadOfControl();
+    MessageConsumer mc = new MessageConsumer(
+      this, (Destination) dest, selector);
+    addConsumer(mc);
+    return mc;
+  }
+
+  /**
+   * API method.
+   *
+   * @exception IllegalStateException  If the session is closed or if the
+   *              connection is broken.
+   * @exception JMSException  If the creation fails for any other reason.
+   */
+  public synchronized javax.jms.MessageConsumer 
+      createConsumer(javax.jms.Destination dest)
+    throws JMSException {
+    checkClosed();
+    checkThreadOfControl();
+    MessageConsumer mc = new MessageConsumer(
+      this, (Destination) dest, null);
+    addConsumer(mc);
+    return mc;
+  }
+
+  /**
+   * API method.
+   *
+   * @exception IllegalStateException  If the session is closed or if the 
+   *              connection is broken.
+   * @exception JMSException  If the creation fails for any other reason.
+   */
+  public synchronized javax.jms.TopicSubscriber
+      createDurableSubscriber(javax.jms.Topic topic, 
+                              String name,
+                              String selector,
+                              boolean noLocal) 
+    throws JMSException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(
+        BasicLevel.DEBUG, 
+        "Session.createDurableSubscriber(" + 
+        topic + ',' + name + ',' + 
+        selector + ',' + noLocal + ')');
+    checkClosed();
+    checkThreadOfControl();
+    TopicSubscriber ts = new TopicSubscriber(
+      this, (Topic) topic, name, selector, noLocal);
     addConsumer(ts);
     return ts;
   }
 
   /**
-   * Creates or retrieves a durable subscription with the specified name.
    * API method.
    *
-   * @exception InvalidDestinationException if an invalid destination is specified.
    * @exception IllegalStateException  If the session is closed or if the 
    *              connection is broken.
    * @exception JMSException  If the creation fails for any other reason.
    */
-  public synchronized javax.jms.TopicSubscriber createDurableSubscriber(javax.jms.Topic topic, 
-                                                                        String name) throws JMSException {
+  public synchronized javax.jms.TopicSubscriber
+      createDurableSubscriber(javax.jms.Topic topic, 
+                              String name)
+    throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 "Session.createDurableSubscriber(" + topic + ',' + name + ')');
+      logger.log(
+        BasicLevel.DEBUG, 
+        "Session.createDurableSubscriber(" + 
+        topic + ',' + name + ')');
     checkClosed();
     checkThreadOfControl();
-    TopicSubscriber ts = new TopicSubscriber(this, (Topic) topic, name, null, false);
+    TopicSubscriber ts = new TopicSubscriber(
+      this, (Topic) topic, name, null, false);
     addConsumer(ts);
     return ts;
   }
@@ -1060,10 +785,10 @@ public class Session implements javax.jms.Session {
    *
    * @exception IllegalStateException  If the session is closed.
    */
-  public synchronized javax.jms.Queue createQueue(String queueName) throws JMSException {
+  public synchronized javax.jms.Queue createQueue(
+    String queueName) 
+    throws JMSException {
     checkClosed();
-    checkThreadOfControl();
-    
     return new Queue(queueName);
   }
 
@@ -1073,7 +798,9 @@ public class Session implements javax.jms.Session {
    * @exception IllegalStateException  If the session is closed.
    * @exception JMSException  If the topic creation failed.
    */
-  public synchronized javax.jms.Topic createTopic(String topicName) throws JMSException {
+  public synchronized javax.jms.Topic createTopic(
+    String topicName) 
+    throws JMSException {
     checkClosed();
     checkThreadOfControl();
 
@@ -1104,7 +831,8 @@ public class Session implements javax.jms.Session {
    *              connection is broken.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public synchronized javax.jms.TemporaryQueue createTemporaryQueue() throws JMSException {
+  public synchronized javax.jms.TemporaryQueue createTemporaryQueue() 
+    throws JMSException {
     checkClosed();
     checkThreadOfControl();
 
@@ -1121,7 +849,8 @@ public class Session implements javax.jms.Session {
    *              connection is broken.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public synchronized javax.jms.TemporaryTopic createTemporaryTopic() throws JMSException {
+  public synchronized javax.jms.TemporaryTopic createTemporaryTopic() 
+    throws JMSException {
     checkClosed();
     checkThreadOfControl();
 
@@ -1136,15 +865,15 @@ public class Session implements javax.jms.Session {
     int load = repliesIn.size();
 
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "-- " + this + ": loaded with " + load +
-                 " message(s) and started.");
-
+      logger.log(BasicLevel.DEBUG, "-- " + this
+                                 + ": loaded with " + load
+                                 + " message(s) and started.");
     try {
       // Processing the current number of messages in the queue:
       for (int i = 0; i < load; i++) {
         org.objectweb.joram.shared.messages.Message momMsg = 
           (org.objectweb.joram.shared.messages.Message) repliesIn.pop();
+        String msgId = momMsg.getIdentifier();
         
         onMessage(momMsg, messageConsumerListener);
       }
@@ -1185,7 +914,7 @@ public class Session implements javax.jms.Session {
       logger.log(BasicLevel.DEBUG, "--- " + this
                                  + ": committing...");
 
-    // If the transaction was scheduled: canceling.
+    // If the transaction was scheduled: cancelling.
     if (scheduled) {
       closingTask.cancel();
       scheduled = false;
@@ -1267,7 +996,7 @@ public class Session implements javax.jms.Session {
       logger.log(BasicLevel.DEBUG, "--- " + this
                                  + ": rolling back...");
 
-    // If the transaction was scheduled: canceling.
+    // If the transaction was scheduled: cancelling.
     if (scheduled) {
       closingTask.cancel();
       scheduled = false;
@@ -1352,21 +1081,24 @@ public class Session implements javax.jms.Session {
   }
 
   /**
-   * Closes the session.
    * API method.
    *
    * @exception JMSException
    */
   public void close() throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Session.close()");
+      logger.log(
+        BasicLevel.DEBUG, 
+        "Session.close()");
     closer.close();
   }
 
   /**
    * This class synchronizes the close.
-   * Close can't be synchronized with 'this' because the Session must be
-   * accessed concurrently during its closure. So we need a second lock.
+   * Close can't be synchronized with 'this' 
+   * because the Session must be accessed
+   * concurrently during its closure. So
+   * we need a second lock.
    */
   class Closer {
     synchronized void close() 
@@ -1379,7 +1111,7 @@ public class Session implements javax.jms.Session {
     synchronized (this) {
       if (status == Status.CLOSE) return;
     }
-   
+    
     // Don't synchronize the consumer closure because
     // it could deadlock with message listeners or
     // client threads still using the session.
@@ -1492,7 +1224,7 @@ public class Session implements javax.jms.Session {
    * This method must be carefully used. When the session is stopped, the
    * connection might very well going on pushing deliveries in the
    * session's queue. If the session is never re-started, these deliveries
-   * will never be popped out, and this may lead to a situation of consumed
+   * will never be poped out, and this may lead to a situation of consumed
    * but never acknowledged messages.
    * <p>
    * This fatal situation never occurs as the <code>stop()</code> method is
@@ -1502,9 +1234,11 @@ public class Session implements javax.jms.Session {
    */
   synchronized void stop() {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Session.stop()");
-
-    if (status == Status.STOP || status == Status.CLOSE) return;
+      logger.log(
+        BasicLevel.DEBUG,
+        "Session.stop()");
+    if (status == Status.STOP ||
+        status == Status.CLOSE) return;
 
     // DF: According to JMS 1.1 java doc
     // the method stop "blocks until receives in progress have completed." 
@@ -1519,7 +1253,7 @@ public class Session implements javax.jms.Session {
 //     }
 
     doStop();
-    
+
     setStatus(Status.STOP);
   }
 
@@ -1538,17 +1272,20 @@ public class Session implements javax.jms.Session {
    * @param dest  The destination the message is destinated to.
    * @param msg  The message.
    */
-  private void prepareSend(Destination dest,
-                           org.objectweb.joram.shared.messages.Message msg) throws JMSException {
+  private void prepareSend(
+    Destination dest, 
+    org.objectweb.joram.shared.messages.Message msg) 
+    throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "Session.prepareSend(" + dest + ',' + msg + ')');
-
+      logger.log(
+        BasicLevel.DEBUG,
+        "Session.prepareSend(" + dest + ',' + msg + ')');
     checkClosed();
     checkThreadOfControl();
     
     // If the transaction was scheduled, cancelling:
-    if (scheduled) closingTask.cancel();
+    if (scheduled)
+      closingTask.cancel();
 
     ProducerMessages pM = (ProducerMessages) sendings.get(dest.getName());
     if (pM == null) {
@@ -1558,7 +1295,8 @@ public class Session implements javax.jms.Session {
     pM.addMessage(msg);
 
     // If the transaction was scheduled, re-scheduling it:
-    if (scheduled) closingTask.start();
+    if (scheduled)
+      closingTask.start();
   }
 
   /** 
@@ -1676,9 +1414,10 @@ public class Session implements javax.jms.Session {
   }
 
   /**
-   * Called by MessageConsumer.
-   * This method is not synchronized because it can be concurrently called
-   * by close() and Connection.stop().
+   * Called by MessageConsumer
+   * Not synchronized because ot it can be
+   * concurrently called by close()
+   * and Connection.stop().
    */
   javax.jms.Message receive(
     long requestTimeToLive,
@@ -1689,21 +1428,33 @@ public class Session implements javax.jms.Session {
     boolean queueMode) 
     throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 "Session.receive(" + requestTimeToLive + ',' + 
-                 waitTimeOut + ',' +  targetName + ',' + 
-                 selector + ',' + queueMode + ')');
+      logger.log(
+        BasicLevel.DEBUG, 
+        "Session.receive(" + 
+        requestTimeToLive + ',' + 
+        waitTimeOut + ',' + 
+        targetName + ',' + 
+        selector + ',' + 
+        queueMode + ')');
     preReceive(mc);
     try {
       ConsumerMessages reply = null;
       ConsumerReceiveRequest request =
-        new ConsumerReceiveRequest(targetName, selector, 
-                                   requestTimeToLive, queueMode);
-      if (implicitAck) request.setReceiveAck(true);
-      reply = (ConsumerMessages) receiveRequestor.request(request, waitTimeOut);
+        new ConsumerReceiveRequest(
+          targetName, 
+          selector, 
+          requestTimeToLive,
+          queueMode);
+      if (receiveAck) request.setReceiveAck(true);
+      reply =
+        (ConsumerMessages)receiveRequestor.request(
+          request,
+          waitTimeOut);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, " -> reply = " + reply);
+        logger.log(
+          BasicLevel.DEBUG, 
+          " -> reply = " + reply);
         
       synchronized (this) {
         // The session may have been 
@@ -1718,19 +1469,24 @@ public class Session implements javax.jms.Session {
         if (reply != null) {
           Vector msgs = reply.getMessages();
           if (msgs != null && ! msgs.isEmpty()) {
-            Message msg = Message.wrapMomMessage(this, (org.objectweb.joram.shared.messages.Message) msgs.get(0));
-            String msgId = msg.getJMSMessageID();
+            org.objectweb.joram.shared.messages.Message msg =
+              (org.objectweb.joram.shared.messages.Message) msgs.get(0);
+            String msgId = msg.getIdentifier();
             
             // Auto ack: acknowledging the message:
-            if (autoAck && ! implicitAck) {
-              ConsumerAckRequest req = new ConsumerAckRequest(targetName, queueMode);
+            if (autoAck && ! receiveAck) {
+              ConsumerAckRequest req = 
+                new ConsumerAckRequest(
+                  targetName,
+                  queueMode);
               req.addId(msgId);
               mtpx.sendRequest(req);
             } else {
-              prepareAck(targetName, msgId, queueMode);
+              prepareAck(targetName,
+                         msgId,
+                         queueMode);
             }
-            msg.session = this;
-            return msg;
+            return Message.wrapMomMessage(this, msg);
           } else {
             return null;
           }
@@ -1962,14 +1718,29 @@ public class Session implements javax.jms.Session {
   }
 
   /**
-   * Called by ConnectionConsumer in order to distribute a message through the 
-   * method run(). Session mode is APP_SERVER.
+   * Called by ConnectionConsumer in order
+   * to distribute a message through the 
+   * method run().
+   * (session mode is APP_SERVER)
    */
-  void onMessage(org.objectweb.joram.shared.messages.Message msg) {
+  void onMessage(org.objectweb.joram.shared.messages.Message momMsg) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Session.onMessage(" + msg + ')');
+      logger.log(BasicLevel.DEBUG, "Session.onMessage(" + momMsg + ')');
+    repliesIn.push(momMsg);
+  }
 
-    repliesIn.push(msg);
+  /**
+   * Called by:
+   * - method run (application server thread) synchronized
+   */
+  private void ackMessage(String targetName, 
+                          String msgId,
+                          boolean queueMode) 
+    throws JMSException {
+    ConsumerAckRequest ack = new ConsumerAckRequest(
+      targetName, queueMode);
+    ack.addId(msgId);
+    mtpx.sendRequest(ack);
   }
 
   /**
@@ -1984,8 +1755,12 @@ public class Session implements javax.jms.Session {
                            boolean queueMode) 
     throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 "Session.denyMessage(" + targetName + ',' + msgId + ',' + queueMode + ')');
+      logger.log(
+        BasicLevel.DEBUG, 
+        "Session.denyMessage(" + 
+        targetName + ',' + 
+        msgId + ',' + 
+        queueMode + ')');
     ConsumerDenyRequest cdr = new ConsumerDenyRequest(
       targetName, msgId, queueMode);
     if (queueMode) {
@@ -2003,47 +1778,70 @@ public class Session implements javax.jms.Session {
   private void onMessages(MessageListenerContext ctx) throws JMSException {
     Vector msgs = ctx.messages.getMessages();
     for (int i = 0; i < msgs.size(); i++) {
-      onMessage((org.objectweb.joram.shared.messages.Message) msgs.elementAt(i),
-                ctx.consumerListener);
+      onMessage(
+        (org.objectweb.joram.shared.messages.Message)msgs.elementAt(i),
+        ctx.consumerListener);
     }
   }
 
   /**
-   * Called by onMessages()
+   * Called by onMessage()
    */
-  void onMessage(org.objectweb.joram.shared.messages.Message momMsg,
-                 MessageConsumerListener mcl) throws JMSException {
-    String msgId = momMsg.id;
+  private Message prepareMessage(
+    org.objectweb.joram.shared.messages.Message momMsg,
+    String targetName,
+    boolean queueMode) throws JMSException {
+    if (! autoAck) {
+      prepareAck(targetName, 
+                 momMsg.getIdentifier(), 
+                 queueMode);
+    }
     
-    if (! autoAck)
-      prepareAck(mcl.getTargetName(), msgId, mcl.getQueueMode());
-
-    Message msg = null;
+    Message msg;
     try {
-      msg = Message.wrapMomMessage(this, momMsg);      
+      return Message.wrapMomMessage(this, momMsg);      
     } catch (JMSException jE) {
       // Catching a JMSException means that the building of the Joram
       // message went wrong: denying the message:
-      if (autoAck)
-        denyMessage(mcl.getTargetName(), msgId, mcl.getQueueMode());
-      return;
+      if (autoAck) {
+        denyMessage(targetName, 
+                    momMsg.getIdentifier(), 
+                    queueMode);
+      }
+      return null;
     }
-    msg.session = this;
+  }
+  
+  /**
+   * Called by onMessages()
+   */
+  void onMessage(
+    org.objectweb.joram.shared.messages.Message momMsg,
+    MessageConsumerListener consumerListener) throws JMSException {
+    
+    Message msg = prepareMessage(
+      momMsg, 
+      consumerListener.getTargetName(),
+      consumerListener.getQueueMode());
+    
+    if (msg == null) return;
     
     try {
       if (messageListener == null) {
         // Standard JMS (MessageConsumer)
-        mcl.onMessage(msg, acknowledgeMode);
+        consumerListener.onMessage(msg, acknowledgeMode);
       } else {
         // ASF (ConnectionConsumer)
-        mcl.onMessage(msg, messageListener, acknowledgeMode);
+        consumerListener.onMessage(msg, messageListener, acknowledgeMode);
       }
     } catch (JMSException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "", exc);
-
-      if (autoAck || mcl.isClosed()) {
-        denyMessage(mcl.getTargetName(), msgId, mcl.getQueueMode());
+        logger.log(
+          BasicLevel.DEBUG, "", exc);
+      if (autoAck || consumerListener.isClosed()) {
+        denyMessage(consumerListener.getTargetName(), 
+                    momMsg.getIdentifier(), 
+                    consumerListener.getQueueMode());
       }
       return;
     }
@@ -2052,14 +1850,18 @@ public class Session implements javax.jms.Session {
       // The session has been recovered by the
       // listener thread.
       if (autoAck) {
-        denyMessage(mcl.getTargetName(), msgId, mcl.getQueueMode());
+        denyMessage(consumerListener.getTargetName(), 
+                    momMsg.getIdentifier(), 
+                    consumerListener.getQueueMode());
       } else {
         doRecover();
         recover = false;
       }
     } else {
       if (autoAck) {
-        mcl.ack(msgId, acknowledgeMode);
+        consumerListener.ack(
+            momMsg.getIdentifier(), 
+            acknowledgeMode);
       }
     }
   }
@@ -2068,64 +1870,82 @@ public class Session implements javax.jms.Session {
    * Called by MessageProducer.
    */
   synchronized void send(Destination dest, 
-                         javax.jms.Message msg,
+                         javax.jms.Message message,
                          int deliveryMode, 
                          int priority,
                          long timeToLive,
                          boolean timestampDisabled) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "Session.send(" + dest + ',' + msg + ',' +
-                 deliveryMode + ',' + priority + ',' + timeToLive + ',' + timestampDisabled + ')');
+      logger.log(
+        BasicLevel.DEBUG,
+        "Session.send(" + 
+        dest + ',' +
+        message + ',' + 
+        deliveryMode + ',' + 
+        priority + ',' + 
+        timeToLive + ',' + 
+        timestampDisabled + ')');
     
     checkClosed();
     checkThreadOfControl();
 
     // Updating the message property fields:
     String msgID = cnx.nextMessageId();
-    msg.setJMSMessageID(msgID);
-    msg.setJMSDeliveryMode(deliveryMode);
-    msg.setJMSDestination(dest);
+    message.setJMSMessageID(msgID);
+    message.setJMSDeliveryMode(deliveryMode);
+    message.setJMSDestination(dest);
     if (timeToLive == 0) {
-      msg.setJMSExpiration(0);
+      message.setJMSExpiration(0);
     } else {
-      msg.setJMSExpiration(System.currentTimeMillis() + timeToLive);
+      message.setJMSExpiration(System.currentTimeMillis() + timeToLive);
     } 
-    msg.setJMSPriority(priority);
+    message.setJMSPriority(priority);
     if (! timestampDisabled) {
-      msg.setJMSTimestamp(System.currentTimeMillis());
+      message.setJMSTimestamp(System.currentTimeMillis());
     }
     
-    Message joramMsg = null;
-    try {
-      joramMsg = (Message) msg;
-    } catch (ClassCastException exc) {
+    org.objectweb.joram.shared.messages.Message momMsg = null;
+    if (message instanceof org.objectweb.joram.client.jms.Message) {
+      // If the message to send is a proprietary one, getting the MOM message
+      // it wraps:
+      momMsg = ((Message) message).getMomMessage();
+    } else if (message instanceof javax.jms.Message) {
+      // If the message to send is a non proprietary JMS message, building
+      // a proprietary message and then getting the MOM message it wraps:
       try {
-        // If the message to send is a non proprietary JMS message, try
-        // to convert it.
-        joramMsg = Message.convertJMSMessage(msg);
+        Message joramMessage = Message.convertJMSMessage(message);
+        momMsg = joramMessage.getMomMessage();
       } catch (JMSException jE) {
-        MessageFormatException mE =
-          new MessageFormatException("Message to send is invalid.");
+        MessageFormatException mE = new MessageFormatException("Message to"
+                                                               + " send is"
+                                                               + " invalid.");
         mE.setLinkedException(jE);
         throw mE;
       }
+    } else {
+      // If not, building a new request and sending it:
+      MessageFormatException mE = new MessageFormatException("Message to"
+                                                             + " send is"
+                                                             + " invalid.");
+      throw mE;
     }
-    joramMsg.prepare();
 
     if (transacted) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "Buffering the message.");
       // If the session is transacted, keeping the request for later delivery:
-      prepareSend(dest, (org.objectweb.joram.shared.messages.Message) joramMsg.momMsg.clone());
+      prepareSend(
+        dest,
+        (org.objectweb.joram.shared.messages.Message) momMsg.clone());
     } else {
-      ProducerMessages pM = new ProducerMessages(dest.getName(),
-                                                 (org.objectweb.joram.shared.messages.Message) joramMsg.momMsg.clone());
+      ProducerMessages pM = 
+        new ProducerMessages(dest.getName(),
+                             (org.objectweb.joram.shared.messages.Message) momMsg.clone());
       
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "Sending " + joramMsg);
+        logger.log(BasicLevel.DEBUG, "Sending " + momMsg);
       
-      if (asyncSend || (! joramMsg.momMsg.persistent)) {
+      if (asyncSend || (! momMsg.getPersistent())) {
         // Asynchronous sending
         pM.setAsyncSend(true);     
         mtpx.sendRequest(pM);
@@ -2163,6 +1983,70 @@ public class Session implements javax.jms.Session {
   public final boolean isAutoAck() {
     return autoAck;
   }
+
+  private void activateMessageInput() throws JMSException {
+    for (int i = 0; i < consumers.size(); i++) {
+      MessageConsumer cons = 
+        (MessageConsumer) consumers.elementAt(i);
+      cons.activateMessageInput();
+    }
+    passiveMsgInput = false;
+  }
+
+  private void passivateMessageInput() throws JMSException {
+    for (int i = 0; i < consumers.size(); i++) {
+      MessageConsumer cons = 
+        (MessageConsumer) consumers.elementAt(i);
+      cons.passivateMessageInput();
+    }
+    passiveMsgInput = true;
+  }
+
+  /**
+   * Set asyncSend for this Session.
+   * 
+   * @param b
+   */
+  public void setAsyncSend(boolean b) {
+    asyncSend = b;
+  }
+  
+  /**
+   * Set queueMessageReadMax for this Session.
+   * 
+   * @param i
+   */
+  public void setQueueMessageReadMax(int i) {
+    queueMessageReadMax = i;
+  }
+  
+  public final int getQueueMessageReadMax() {
+    return queueMessageReadMax;
+  }
+  
+  public final int getTopicAckBufferMax() {
+    return topicAckBufferMax;
+  }
+  
+  public void setTopicAckBufferMax(int i) {
+    topicAckBufferMax = i;
+  }
+  
+  public final int getTopicActivationThreshold() {
+    return topicActivationThreshold;
+  }
+  
+  public void setTopicActivationThreshold(int i) {
+    topicActivationThreshold = i;
+  }
+  
+  public final int getTopicPassivationThreshold() {
+    return topicPassivationThreshold;
+  }
+  
+  public void setTopicPassivationThreshold(int i) {
+    topicPassivationThreshold = i;
+  }
   
   /**
    * The <code>SessionCloseTask</code> class is used by non-XA transacted
@@ -2196,7 +2080,7 @@ public class Session implements javax.jms.Session {
   /**
    * This thread controls the session in mode LISTENER.
    */
-  private class SessionDaemon extends fr.dyade.aaa.common.Daemon {
+  private class SessionDaemon extends fr.dyade.aaa.util.Daemon {
     SessionDaemon() {
       super("Connection#" + cnx + " - Session#" + ident);
     }

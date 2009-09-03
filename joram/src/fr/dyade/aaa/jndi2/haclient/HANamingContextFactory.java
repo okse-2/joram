@@ -22,18 +22,14 @@
  */
 package fr.dyade.aaa.jndi2.haclient;
 
-import java.util.Hashtable;
-import java.util.StringTokenizer;
+import javax.naming.spi.*;
+import javax.naming.*;
+import java.util.*;
 
-import javax.naming.CompositeName;
-import javax.naming.Context;
-import javax.naming.NamingException;
-import javax.naming.spi.InitialContextFactory;
+import fr.dyade.aaa.jndi2.client.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-
-import fr.dyade.aaa.jndi2.client.NamingConnection;
-import fr.dyade.aaa.jndi2.client.Trace;
+import org.objectweb.util.monolog.api.Logger;
 
 public class HANamingContextFactory implements InitialContextFactory {
 
@@ -83,7 +79,7 @@ public class HANamingContextFactory implements InitialContextFactory {
       if (url == null) {
         url = getEnvProperty(env, Context.PROVIDER_URL);
       }
-    
+      
       if (url != null) {
         StringTokenizer tokenizer = new StringTokenizer(url, "/:,");
         if (! tokenizer.hasMoreElements()) 

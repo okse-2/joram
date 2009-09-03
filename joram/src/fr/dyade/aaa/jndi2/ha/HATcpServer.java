@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,19 +21,17 @@
  */
 package fr.dyade.aaa.jndi2.ha;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.io.*;
+import java.net.*;
+import java.util.*;
+
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
-import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.agent.Channel;
-import fr.dyade.aaa.common.Daemon;
-import fr.dyade.aaa.jndi2.msg.IOControl;
-import fr.dyade.aaa.jndi2.server.TcpRequestNot;
-import fr.dyade.aaa.jndi2.server.Trace;
+import fr.dyade.aaa.util.*;
+import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.jndi2.server.*;
+import fr.dyade.aaa.jndi2.msg.*;
 
 public class HATcpServer {
 

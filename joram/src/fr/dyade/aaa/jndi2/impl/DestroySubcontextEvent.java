@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,12 +22,12 @@
  */
 package fr.dyade.aaa.jndi2.impl;
 
+import javax.naming.*;
+
 import javax.naming.CompositeName;
 
 public class DestroySubcontextEvent extends UpdateEvent {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-  
+
   private CompositeName path;
 
   public DestroySubcontextEvent(NamingContextId updatedContextId,
@@ -37,7 +37,12 @@ public class DestroySubcontextEvent extends UpdateEvent {
     this.path = path;
   }
 
+    /*  public final CompositeName getPath() {
+    return path;
+    }*/
+
   public String toString() {
-    return '(' + super.toString() + ",path=" + path + ')';
+    return '(' + super.toString() +
+      ",path=" + path + ')';
   }
 }

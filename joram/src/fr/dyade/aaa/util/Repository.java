@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,8 +27,6 @@ import java.io.IOException;
 /**
  *  This interface defines a repository for serializable objects and bytes
  * array.
- *
- * @see NTransaction
  */
 public interface Repository {
   /**
@@ -55,12 +53,12 @@ public interface Repository {
    */
   public byte[] load(String dirName, String name) throws IOException;
 
-//   /**
-//    * Loads the object.
-//    *
-//    * @return The loaded object or null if it does not exist.
-//    */
-//   public Object loadobj(String dirName, String name) throws IOException, ClassNotFoundException;
+  /**
+   * Loads the object.
+   *
+   * @return The loaded object or null if it does not exist.
+   */
+  public Object loadobj(String dirName, String name) throws IOException, ClassNotFoundException;
 
   /**
    * Deletes the corresponding objects in repository.

@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,12 +30,7 @@ import org.objectweb.util.monolog.api.Logger;
 
 public class LookupReply extends JndiReply {
   
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  public static final Logger logger = fr.dyade.aaa.common.Debug.getLogger(
+  public static final Logger logger = fr.dyade.aaa.util.Debug.getLogger(
       LookupReply.class.getName());
   
   private Object obj;
@@ -49,18 +44,19 @@ public class LookupReply extends JndiReply {
   }
 
   public final static Object resolveObject(Object obj) throws NamingException {
-    if (! (obj instanceof Reference))
+    if (obj instanceof Reference) {
+      try {
+        return javax.naming.spi.NamingManager.getObjectInstance(
+          obj, null, null, null);
+      } catch (Exception e) {
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "", e);
+        NamingException ne = new NamingException(e.getMessage());
+        ne.setRootCause(e);
+        throw ne;
+      }
+    } else {
       return obj;
-
-    try {
-      return javax.naming.spi.NamingManager.getObjectInstance(
-        obj, null, null, null);
-    } catch (Exception e) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "", e);
-      NamingException ne = new NamingException(e.getMessage());
-      ne.setRootCause(e);
-      throw ne;
     }
   }
 }

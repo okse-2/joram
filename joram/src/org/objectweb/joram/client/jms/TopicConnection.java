@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,19 +31,21 @@ import org.objectweb.joram.client.jms.connection.RequestChannel;
 /**
  * Implements the <code>javax.jms.TopicConnection</code> interface.
  */
-public class TopicConnection extends Connection implements javax.jms.TopicConnection {
+public class TopicConnection extends Connection
+    implements javax.jms.TopicConnection {
 
   /**
    * Creates a <code>TopicConnection</code> instance.
    *
    * @param factoryParameters  The factory parameters.
-   * @param requestChannel     The actual connection to wrap.
+   * @param connectionImpl  The actual connection to wrap.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
   public TopicConnection(FactoryParameters factoryParameters,
-                         RequestChannel requestChannel) throws JMSException {
+                         RequestChannel requestChannel) 
+    throws JMSException {
     super(factoryParameters, requestChannel);
   }
 
@@ -56,27 +58,16 @@ public class TopicConnection extends Connection implements javax.jms.TopicConnec
    *              not exist.
    * @exception JMSException  If the method fails for any other reason.
    */
-  public javax.jms.ConnectionConsumer createConnectionConsumer(javax.jms.Topic topic,
-                                                               String selector,
-                                                               javax.jms.ServerSessionPool sessionPool,
-                                                               int maxMessages) throws JMSException {
-    return super.createConnectionConsumer(topic, selector, sessionPool, maxMessages);
-  }
-
-  /**
-   * API method.
-   * 
-   * @exception IllegalStateException  If the connection is closed.
-   * @exception JMSException  In case of an invalid acknowledge mode.
-   */
-  public javax.jms.TopicSession createTopicSession(boolean transacted,
-                                                   int acknowledgeMode) throws JMSException {
-    checkClosed();
-    TopicSession ts = new TopicSession(this, 
-                                       transacted, acknowledgeMode, 
-                                       getRequestMultiplexer());
-    addSession(ts);
-    return ts;
+  public javax.jms.ConnectionConsumer
+         createConnectionConsumer(javax.jms.Topic topic, String selector,
+                                  javax.jms.ServerSessionPool sessionPool,
+                                  int maxMessages) 
+    throws JMSException {
+    return super.createConnectionConsumer(
+      topic,
+      selector,
+      sessionPool, 
+      maxMessages);
   }
 
   /**
@@ -88,11 +79,37 @@ public class TopicConnection extends Connection implements javax.jms.TopicConnec
    *              not exist.
    * @exception JMSException  If the method fails for any other reason.
    */
-  public javax.jms.ConnectionConsumer createDurableConnectionConsumer(javax.jms.Topic topic, 
-                                                                      String subName,
-                                                                      String selector,
-                                                                      javax.jms.ServerSessionPool sessPool,
-                                                                      int maxMessages) throws JMSException {
-    return super.createDurableConnectionConsumer(topic, subName, selector, sessPool, maxMessages);
+  public javax.jms.ConnectionConsumer
+         createDurableConnectionConsumer(javax.jms.Topic topic, String subName,
+                                         String selector,
+                                         javax.jms.ServerSessionPool sessPool,
+                                         int maxMessages) throws JMSException
+  {
+    return super.createDurableConnectionConsumer(
+      topic, 
+      subName, 
+      selector,
+      sessPool, 
+      maxMessages);
+  }
+
+  /**
+   * API method.
+   * 
+   * @exception IllegalStateException  If the connection is closed.
+   * @exception JMSException  In case of an invalid acknowledge mode.
+   */
+  public javax.jms.TopicSession
+         createTopicSession(boolean transacted, int acknowledgeMode)
+         throws JMSException
+  {
+    checkClosed();
+    TopicSession ts = new TopicSession(
+      this, 
+      transacted, 
+      acknowledgeMode, 
+      getRequestMultiplexer());
+    addSession(ts);
+    return ts;
   }
 }

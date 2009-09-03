@@ -22,24 +22,17 @@
  */
 package org.objectweb.joram.mom.proxies;
 
-import org.objectweb.joram.shared.client.AbstractJmsMessage;
-
 public class ProxyMessage implements java.io.Serializable {
-
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
 
   private long id;
 
   private long ackId;
 
-  private AbstractJmsMessage obj;
+  private Object obj;
 
   public ProxyMessage(long id, 
                       long ackId,
-                      AbstractJmsMessage obj) {
+                      Object obj) {
     this.id = id;
     this.ackId = ackId;
     this.obj = obj;
@@ -53,7 +46,7 @@ public class ProxyMessage implements java.io.Serializable {
     return ackId;
   }
 
-  public final AbstractJmsMessage getObject() {
+  public final Object getObject() {
     return obj;
   }
 

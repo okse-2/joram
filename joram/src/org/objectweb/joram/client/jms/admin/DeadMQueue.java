@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,48 +19,26 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Contributor(s):
  */
 package org.objectweb.joram.client.jms.admin;
 
-import java.net.ConnectException;
-
 import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.Destination;
+
+import java.net.ConnectException;
 
 
 /**
  * The <code>DeadMQueue</code> class allows administrators to manipulate
  * dead message queues.
- * 
- * @deprecated Since Joram 5.2.2 the DeadMQueue is a simply a Queue.
  */
-public class DeadMQueue extends Queue {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
+public class DeadMQueue extends org.objectweb.joram.client.jms.Queue {
 
-  public static Queue createDeadMQueue(String agentId, String name) {
-    DeadMQueue dest = new DeadMQueue();
-    
-    dest.agentId = agentId;
-    dest.adminName = name;
-    dest.type = QUEUE_TYPE;
+  private final static String DMQ_TYPE = "queue.dmq";
 
-    return dest;
-  }
-
-  /**
-   * Admin method creating and deploying a dead message queue on the
-   * local server. 
-   * <p>
-   * The request fails if the destination deployment fails server side.
-   * <p>
-   * Be careful this method use the static AdminModule connection.
-   *
-   * @exception ConnectException  If the admin connection is closed or broken.
-   * @exception AdminException  If the request fails.
-   */
-  public static Queue create() throws ConnectException, AdminException {
-    return create(AdminModule.getLocalServerId());
+  public static boolean isDeadMQueue(String type) {
+    return Destination.isAssignableTo(type, DMQ_TYPE);
   }
 
   /**
@@ -68,9 +46,7 @@ public class DeadMQueue extends Queue {
    * server.
    * <p>
    * The request fails if the target server does not belong to the platform,
-   * or if the destination deployment fails server side.
-   * <p>
-   * Be careful this method use the static AdminModule connection.
+   * or if the destination deployement fails server side.
    *
    * @param serverId   The identifier of the server where deploying the queue.
    *
@@ -78,35 +54,46 @@ public class DeadMQueue extends Queue {
    * @exception AdminException  If the request fails.
    */
   public static Queue create(int serverId) throws ConnectException, AdminException {
-    return create(serverId, (String) null);
+    DeadMQueue dmq = new DeadMQueue();
+    doCreate(serverId,
+             null,
+             "org.objectweb.joram.mom.dest.DeadMQueue",
+             null,
+             dmq,
+             DMQ_TYPE);
+    return dmq;
+  }
+
+  public static Queue create(int serverId, String name) throws ConnectException, AdminException {
+    DeadMQueue dmq = new DeadMQueue();
+    doCreate(serverId,
+             name,
+             "org.objectweb.joram.mom.dest.DeadMQueue",
+             null,
+             dmq,
+             DMQ_TYPE);
+    return dmq;
   }
 
   /**
-   * Admin method creating and deploying a dead message queue on a given
-   * server.
+   * Admin method creating and deploying a dead message queue on the
+   * local server. 
    * <p>
-   * The request fails if the target server does not belong to the platform,
-   * or if the destination deployment fails server side.
-   * <p>
-   * Be careful this method use the static AdminModule connection.
-   *
-   * @param serverId    The identifier of the server where deploying the queue.
-   * @param name        The name of the created queue.
+   * The request fails if the destination deployement fails server side.
    *
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  public static Queue create(int serverId, String name) throws ConnectException, AdminException {
-    DeadMQueue dmq = new DeadMQueue();
-    doCreate(serverId, name, DEAD_MQUEUE, null, dmq, QUEUE_TYPE);
-    return dmq;
+  public static Queue create() throws ConnectException, AdminException
+  {
+    return create(AdminModule.getLocalServerId());
   }
 
   // Used by jndi2 SoapObjectHelper
   public DeadMQueue() {}
   
   public DeadMQueue(String name) {
-    super(name, QUEUE_TYPE);
+    super(name, DMQ_TYPE);
   }
 
   public String toString() {

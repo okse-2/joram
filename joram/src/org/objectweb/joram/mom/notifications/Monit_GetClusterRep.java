@@ -31,10 +31,6 @@ import java.util.Vector;
  */
 public class Monit_GetClusterRep extends AdminReply
 {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /** Topics identifiers. */
   private Vector topics;
 

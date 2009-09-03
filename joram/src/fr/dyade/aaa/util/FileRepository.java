@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,19 +21,8 @@
  */
 package fr.dyade.aaa.util;
 
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 
-/**
- *  This class allows to use a filesystem directory as repository with the
- * NTransaction module.
- *
- * @see NTransaction
- * @see Repository
- */
 final class FileRepository implements Repository {
   File dir = null;
 
@@ -124,33 +113,33 @@ final class FileRepository implements Repository {
     nbsaved += 1;
   }
 
-//   /**
-//    * Loads the object.
-//    *
-//    * @return The loaded object or null if it does not exist.
-//    */
-//   public Object loadobj(String dirName, String name) throws IOException, ClassNotFoundException {
-//     File file;
-//     Object obj;
-//     if (dirName == null) {
-//       file = new File(dir, name);
-//     } else {
-//       File parentDir = new File(dir, dirName);
-//       file = new File(parentDir, name);
-//     }
+  /**
+   * Loads the object.
+   *
+   * @return The loaded object or null if it does not exist.
+   */
+  public Object loadobj(String dirName, String name) throws IOException, ClassNotFoundException {
+    File file;
+    Object obj;
+    if (dirName == null) {
+      file = new File(dir, name);
+    } else {
+      File parentDir = new File(dir, dirName);
+      file = new File(parentDir, name);
+    }
 
-//     FileInputStream fis = new FileInputStream(file);
-//     ObjectInputStream ois = new ObjectInputStream(fis);
-//     try {
-//       obj = ois.readObject();
-//     } finally {
-//       ois.close();
-//       fis.close();
-//     }
+    FileInputStream fis = new FileInputStream(file);
+    ObjectInputStream ois = new ObjectInputStream(fis);
+    try {
+      obj = ois.readObject();
+    } finally {
+      ois.close();
+      fis.close();
+    }
 
-//     nbloaded += 1;
-//     return obj;
-//   }
+    nbloaded += 1;
+    return obj;
+  }
 
   /**
    * Loads the byte array.
@@ -183,10 +172,12 @@ final class FileRepository implements Repository {
    * Deletes the corresponding objects in repository.
    */
   public void delete(String dirName, String name) throws IOException {
+    File file;
     if (dirName == null) {
       if (! new File(dir, name).delete()) baddeleted += 1;
     } else {
       File parentDir = new File(dir, dirName);
+      file = new File(parentDir, name);
       if (! new File(parentDir, name).delete()) baddeleted += 1;
       deleteDir(parentDir);
     }

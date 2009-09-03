@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2007 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 ScalAgent Distributed Technologies
  * Copyright (C) 2007 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -29,14 +29,14 @@ import javax.naming.Reference;
 
 import fr.dyade.aaa.jndi2.soap.SoapObjectItf;
 
+import org.objectweb.joram.shared.JoramTracing;
+import org.objectweb.util.monolog.api.BasicLevel;
+
 /**
  * The <code>AdministeredObject</code> class is the parent class of all
  * JORAM administered objects.
  */
 public abstract class  AdministeredObject implements Serializable, javax.naming.Referenceable, SoapObjectItf {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
   public final Reference getReference() throws NamingException {
     Reference ref = null;
     ref = new Reference(this.getClass().getName(), ObjectFactory.class.getName(), null);

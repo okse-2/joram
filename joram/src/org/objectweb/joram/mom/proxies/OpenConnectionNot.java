@@ -26,11 +26,6 @@ import fr.dyade.aaa.agent.*;
 
 public class OpenConnectionNot extends SyncNotification {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   private boolean reliable;
   
   private int heartBeat;

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -22,6 +22,7 @@
  */
 package org.objectweb.joram.client.jms.connection;
 
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Set;
 import java.util.Timer;
@@ -34,16 +35,18 @@ import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
 
 import org.objectweb.joram.client.jms.Connection;
+import org.objectweb.joram.client.jms.JoramTracing;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.ConsumerMessages;
+import org.objectweb.joram.shared.client.JmsRequestGroup;
 import org.objectweb.joram.shared.client.MomExceptionReply;
 import org.objectweb.joram.shared.client.PingRequest;
 import org.objectweb.joram.shared.client.SessDenyRequest;
+import org.objectweb.joram.shared.excepts.AccessException;
+import org.objectweb.joram.shared.excepts.DestinationException;
+import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.common.Debug;
 
 public class RequestMultiplexer {
 
@@ -51,14 +54,13 @@ public class RequestMultiplexer {
     public static final int OPEN = 0;
     public static final int CLOSE = 1;
     
-    private static final String[] names = {"OPEN", "CLOSE"};
+    private static final String[] names = {
+      "OPEN", "CLOSE"};
 
     public static String toString(int status) {
       return names[status];
     }
   }
-  
-  private static Logger logger = Debug.getLogger(RequestMultiplexer.class.getName());
 
   private Connection cnx;
 
@@ -99,9 +101,8 @@ public class RequestMultiplexer {
     try {
       channel.connect();
     } catch (Exception exc) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "", exc);
-      if (timer != null) timer.cancel();
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", exc);
       throw new JMSException(exc.toString());
     }
     
@@ -115,25 +116,24 @@ public class RequestMultiplexer {
       try {
         heartBeatTask.start();
       } catch (Exception exc) {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "", exc);
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", exc);
         throw new JMSException(exc.toString());
       }
     }
   }
 
   private void setStatus(int status) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "RequestMultiplexer.setStatus(" + Status.toString(status) + ')');
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, 
+        "RequestMultiplexer.setStatus(" + 
+        Status.toString(status) + ')');
     this.status = status;
   }
   
   public boolean isClosed() {
     return status == Status.CLOSE;
-  }
-  
-  public void closing() {
-    channel.closing();
   }
 
   public void setExceptionListener(
@@ -145,7 +145,9 @@ public class RequestMultiplexer {
     return exceptionListener;
   }
 
-  public void sendRequest(AbstractJmsRequest request) throws JMSException {
+  public void sendRequest(
+    AbstractJmsRequest request)
+    throws JMSException {
     sendRequest(request, null);
   }
   
@@ -174,8 +176,8 @@ public class RequestMultiplexer {
     try {
       channel.send(request);
     } catch (Exception exc) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "", exc);
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", exc);
       JMSException jmsExc = new JMSException(exc.toString());
       jmsExc.setLinkedException(exc);
       throw jmsExc;
@@ -192,8 +194,10 @@ public class RequestMultiplexer {
    * (actually requestors).
    */
   public void close() {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "RequestMultiplexer.close()");
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, 
+        "RequestMultiplexer.close()");
     
     synchronized (this) {
       if (status == Status.CLOSE)
@@ -206,13 +210,19 @@ public class RequestMultiplexer {
       setStatus(Status.CLOSE);
     }
 
-    if (heartBeatTask != null) heartBeatTask.cancel();
-    if (timer != null) timer.cancel();
+    if (heartBeatTask != null)
+      heartBeatTask.cancel();
+
+    if (timer != null)
+      timer.cancel();
+    
     channel.close();
+
     demtpx.stop();
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, " -> requestsTable=" + requestsTable);
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, " -> requestsTable=" + requestsTable);
     
     // The requests table can't be accessed
     // either by an external thread (status CLOSE)
@@ -252,9 +262,10 @@ public class RequestMultiplexer {
    * (actually requestors).
    */
   public void abortRequest(int requestId) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "RequestMultiplexer.abortRequest(" + requestId + ')');
-    
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, 
+        "RequestMultiplexer.abortRequest(" + requestId + ')');
     ReplyListener rl = doAbortRequest(requestId);    
     if (rl != null) {
       rl.replyAborted(requestId);
@@ -262,9 +273,10 @@ public class RequestMultiplexer {
   }
   
   private synchronized ReplyListener doAbortRequest(int requestId) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "RequestMultiplexer.doAbortRequest(" + requestId + ')');
-    
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, "RequestMultiplexer.doAbortRequest(" + 
+        requestId + ')');
     if (status == Status.CLOSE) return null;
     return (ReplyListener)requestsTable.remove(
       new Integer(requestId));
@@ -276,22 +288,22 @@ public class RequestMultiplexer {
    * as the close waits for the demultiplexer to stop.
    */
   private void route(AbstractJmsReply reply) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "RequestMultiplexer.route(" + reply + ')');
-    
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, 
+        "RequestMultiplexer.route(" + reply + ')');
     int requestId = reply.getCorrelationId();
     Integer requestKey = new Integer(requestId);
     ReplyListener rl = (ReplyListener)requestsTable.get(requestKey);
     if (reply instanceof MomExceptionReply) {
-      MomExceptionReply excReply = (MomExceptionReply) reply;
-      int excType =  excReply.getType();
+      MomException momExc = ((MomExceptionReply)reply).getException();
       JMSException jmsExc = null;
-      if (excType == MomExceptionReply.AccessException) {
-        jmsExc = new JMSSecurityException(excReply.getMessage());
-      } else if (excType == MomExceptionReply.DestinationException) {
-        jmsExc = new InvalidDestinationException(excReply.getMessage());
+      if (momExc instanceof AccessException) {
+        jmsExc = new JMSSecurityException(momExc.getMessage());
+      } else if (momExc instanceof DestinationException) {
+        jmsExc = new InvalidDestinationException(momExc.getMessage());
       } else {
-        jmsExc = new JMSException(excReply.getMessage());
+        jmsExc = new JMSException(momExc.getMessage());
       }
       if (rl instanceof ErrorListener) {
         ((ErrorListener)rl).errorReceived(requestId, jmsExc);
@@ -300,29 +312,35 @@ public class RequestMultiplexer {
         onException(jmsExc);
       }
     } else {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, " -> rl = " + rl + ')');
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, " -> rl = " + rl + ')');
       if (rl != null) {
         try {
           if (rl.replyReceived(reply)) {
             requestsTable.remove(requestKey);
           }
         } catch (AbortedRequestException exc) {
-          logger.log(BasicLevel.WARN, " -> Request aborted: " + requestId);
+          JoramTracing.dbgClient.log(
+            BasicLevel.WARN, 
+            " -> Request aborted: " + requestId);
           abortReply(reply);
         }
       } else {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, " -> Listener not found for the reply: " + requestId);
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
+          JoramTracing.dbgClient.log(
+            BasicLevel.WARN, 
+            " -> Listener not found for the reply: " + requestId);
         abortReply(reply);
       }
     }
   }
 
   private void abortReply(AbstractJmsReply reply) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "RequestMultiplexer.abortReply(" + reply + ')');
-    
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, "RequestMultiplexer.abortReply(" + 
+        reply + ')');
     if (reply instanceof ConsumerMessages) {
       deny((ConsumerMessages)reply);
     }
@@ -330,22 +348,27 @@ public class RequestMultiplexer {
   }
 
   public void deny(ConsumerMessages messages) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "RequestMultiplexer.deny(" + messages + ')');
-
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, "RequestMultiplexer.deny(" + 
+        messages + ')');
     Vector msgList = messages.getMessages();
     Vector ids = new Vector();
     for (int i = 0; i < msgList.size(); i++) {
-      ids.addElement(((org.objectweb.joram.shared.messages.Message) msgList.elementAt(i)).id);
+      org.objectweb.joram.shared.messages.Message msg =
+        (org.objectweb.joram.shared.messages.Message) msgList.elementAt(i);
+      ids.addElement(msg.getIdentifier());
     }
-    SessDenyRequest deny = new SessDenyRequest(messages.comesFrom(),
-                                               ids,
-                                               messages.getQueueMode());
+    SessDenyRequest deny = new SessDenyRequest(
+      messages.comesFrom(),
+      ids,
+      messages.getQueueMode());
     try {
       sendRequest(deny);
     } catch (JMSException exc) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "", exc);
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, "", exc);
       // Connection failure
       // Nothing to do
     }
@@ -364,8 +387,9 @@ public class RequestMultiplexer {
   }
 
   private void onException(Exception exc) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "RequestMultiplexer.onException(" + exc + ')');
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, "RequestMultiplexer.onException(" + exc + ')');
     JMSException jmsExc;
     if (exc instanceof JMSException) {
       jmsExc = (JMSException) exc;
@@ -376,17 +400,18 @@ public class RequestMultiplexer {
       exceptionListener.onException(jmsExc);
   }
 
-  public void schedule(TimerTask task, long period) {
+  public void schedule(TimerTask task,
+                       long period) {
     if (timer != null) {
       try {
         timer.schedule(task, period);
       } catch (Exception exc) {
-        if (logger.isLoggable(BasicLevel.ERROR))
-          logger.log(BasicLevel.ERROR, "", exc);
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+          JoramTracing.dbgClient.log(BasicLevel.ERROR, "", exc);
       }
     }
   }
-
+  
   public void setDemultiplexerDaemonName(String name) {
     demtpx.setName(name);
   }
@@ -395,7 +420,7 @@ public class RequestMultiplexer {
     return demtpx.getName();
   }
 
-  private class DemultiplexerDaemon extends fr.dyade.aaa.common.Daemon {
+  private class DemultiplexerDaemon extends fr.dyade.aaa.util.Daemon {
     DemultiplexerDaemon() {
       // The real name is set later when
       // the proxy id and connection id are known
@@ -411,9 +436,17 @@ public class RequestMultiplexer {
           AbstractJmsReply reply;
           try {
             reply = channel.receive();
+            if (reply instanceof ConsumerMessages) {
+              java.util.Vector msgs = ((ConsumerMessages)reply).getMessages();
+              // set momMessage read-only
+              for (int i = 0; i < msgs.size(); i++ )
+                ((org.objectweb.joram.shared.messages.Message)
+                 msgs.elementAt(i)).setReadOnly();
+            }
           } catch (Exception exc) {
-            if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, "Exception during receive", exc);
+            if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+              JoramTracing.dbgClient.log(BasicLevel.DEBUG,
+                                         "Exception during receive", exc);
             // Check if the connection is not already
             // closed (the exception may occur as a consequence
             // of a closure or at the same time as an independant
@@ -439,12 +472,6 @@ public class RequestMultiplexer {
           }
           canStop = false; 
           route(reply);
-          if (!running && isClosed()) {
-            if (logger.isLoggable(BasicLevel.DEBUG))
-              logger.log(BasicLevel.DEBUG, "DemultiplexerDaemon ended and Socket closed.");
-            onExceptionRunner oer = new onExceptionRunner(new Exception("DemultiplexerDaemon ended and Socket closed."));
-            new Thread(oer).start();
-          }
         }
       } finally {
         finish();
@@ -478,8 +505,9 @@ public class RequestMultiplexer {
       try {
         RequestMultiplexer.this.cnx.close();
       } catch (JMSException exc2) {
-        if (logger.isLoggable(BasicLevel.WARN))
-          logger.log(BasicLevel.WARN, "Error during close", exc2);
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.WARN))
+          JoramTracing.dbgClient.log(BasicLevel.WARN,
+              "Error during close", exc2);
       }
       
       onException(exc);
@@ -507,14 +535,13 @@ public class RequestMultiplexer {
           sendRequest(new PingRequest());
         }
       } catch (Exception exc) {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "", exc);
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", exc);
       }
     }
 
     public void start() throws Exception {
-      if (timer != null)
-        timer.schedule(this, heartBeat, heartBeat);
+      timer.schedule(this, heartBeat, heartBeat);
     }
   }
 

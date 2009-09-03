@@ -30,6 +30,13 @@ public interface TransactionMBean {
   boolean isPersistent();
 
   /**
+   * Returns the path of persistence directory.
+   *
+   * @return The path of persistence directory.
+   */
+  String getPersistenceDir(); 
+
+  /**
    *
    */
   public int getPhase();

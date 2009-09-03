@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -23,26 +23,23 @@
  */
 package org.objectweb.joram.mom.proxies.tcp;
 
-import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.objectweb.joram.mom.MomTracing;
 import org.objectweb.joram.mom.notifications.GetProxyIdNot;
+import org.objectweb.joram.mom.proxies.AckedQueue;
 import org.objectweb.joram.mom.proxies.GetConnectionNot;
 import org.objectweb.joram.mom.proxies.OpenConnectionNot;
 import org.objectweb.joram.mom.proxies.ReliableConnectionContext;
-import org.objectweb.joram.shared.security.Identity;
-import org.objectweb.joram.shared.stream.MetaData;
-import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.common.Daemon;
-import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.util.Daemon;
 
 /**
  * Listens to the TCP connections from the JMS clients.
@@ -52,9 +49,15 @@ import fr.dyade.aaa.common.Debug;
  * right user's proxy.
  */
 public class TcpConnectionListener extends Daemon {
-  /** logger */
-  public static Logger logger = Debug.getLogger(TcpConnectionListener.class.getName());
+  /**
+   * The server socket listening to connections from the JMS clients.
+   */
+  private ServerSocket serverSocket;
 
+  private DataInputStream dis;
+
+  private DataOutputStream dos;
+  
   /**
    * The TCP proxy service 
    */
@@ -65,59 +68,45 @@ public class TcpConnectionListener extends Daemon {
   /**
    * Creates a new connection listener
    *
-   * @param proxyService  the TCP proxy service associated with this connection listener
-   * @param timeout       the timeout
+   * @param serverSocket the server socket to listen to
+   * @param proxyService the TCP proxy service of this
+   * connection listener
    */
-  public TcpConnectionListener(TcpProxyService proxyService, int timeout) {
+  public TcpConnectionListener(ServerSocket serverSocket,
+                               TcpProxyService proxyService,
+                               int timeout) {
     super("TcpConnectionListener");
+    this.serverSocket = serverSocket;
     this.proxyService = proxyService;
     this.timeout = timeout;
   }
 
   public void run() {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "TcpConnectionListener.run()");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(
+        BasicLevel.DEBUG, "TcpConnectionListener.run()");
 
-    // Wait for the administration topic deployment.
-    // TODO (AF): a synchronization would be much better.
+    // Wait for the admin topic deployment.
+    // (a synchronization would be much better)
     try {
       Thread.sleep(2000);
     } catch (InterruptedException exc) {
       // continue
     }
 
+    loop:
     while (running) {
       canStop = true;
-      try {
-        acceptConnection();
-      } catch (Exception exc) {}
-    }
-  }
-
-  static class NetOutputStream extends ByteArrayOutputStream {
-    private OutputStream os = null;
-
-    NetOutputStream(Socket sock) throws IOException {
-      super(1024);
-      reset();
-      os = sock.getOutputStream();
-    }
-
-    public void reset() {
-      count = 4;
-    }
-
-    public void send() throws IOException {
-      try {
-        buf[0] = (byte) ((count -4) >>>  24);
-        buf[1] = (byte) ((count -4) >>>  16);
-        buf[2] = (byte) ((count -4) >>>  8);
-        buf[3] = (byte) ((count -4) >>>  0);
-
-        writeTo(os);
-        os.flush();
-      } finally {
-        reset();
+      if (serverSocket != null) {
+        try {
+          acceptConnection();
+        } catch (Exception exc) {
+          if (running) {
+            continue loop;
+          } else {
+            break loop;
+          }
+        }
       }
     }
   }
@@ -127,14 +116,15 @@ public class TcpConnectionListener extends Daemon {
    * right user's proxy, creates and starts the <code>TcpConnection</code>.
    */
   private void acceptConnection() throws Exception {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "TcpConnectionListener.acceptConnection()");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG,
+          "TcpConnectionListener.acceptConnection()");
 
-    Socket sock = proxyService.getServerSocket().accept();
+    Socket sock = serverSocket.accept();
     String inaddr = sock.getInetAddress().getHostAddress();
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, " -> accept connection");
+    if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+      MomTracing.dbgProxy.log(BasicLevel.DEBUG, " -> accept connection");
 
     try {
       sock.setTcpNoDelay(true);
@@ -144,72 +134,74 @@ public class TcpConnectionListener extends Daemon {
       // and blocks this listener.
       sock.setSoTimeout(timeout);
 
-      InputStream is = sock.getInputStream();
-      NetOutputStream nos = new NetOutputStream(sock);
+      dis = new DataInputStream(sock.getInputStream());
+      dos = new DataOutputStream(sock.getOutputStream());
 
-      byte[] magic = StreamUtil.readByteArrayFrom(is, 8);
-      for (int i=0; i<5; i++) {
-        if (magic[i] != MetaData.joramMagic[i])
-          throw new IllegalAccessException("Bad magic number:" + new String(magic, 0, 5) + magic[5] + '.' + magic[6] + '/' + magic[7]);
-      }
-      if (magic[7] != MetaData.joramMagic[7])
-        throw new IllegalAccessException("Bad protocol version number");
-
-      Identity identity = Identity.read(is);
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, " -> read identity = " + identity);
-
-      int key = StreamUtil.readIntFrom(is);
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, " -> read key = " + key);
-
+      String userName = dis.readUTF();
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG, " -> read userName = "
+            + userName);
+      String userPassword = dis.readUTF();
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG, " -> read userPassword = "
+            + userPassword);
+      int key = dis.readInt();
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG, " -> read key = " + key);
       int heartBeat = 0;
       if (key == -1) {
-        heartBeat = StreamUtil.readIntFrom(is);
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, " -> read heartBeat = " + heartBeat);
+        heartBeat = dis.readInt();
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgProxy.log(BasicLevel.DEBUG, " -> read heartBeat = "
+              + heartBeat);
       }
 
-      GetProxyIdNot gpin = new GetProxyIdNot(identity, inaddr);
+      GetProxyIdNot gpin = new GetProxyIdNot(userName, userPassword, inaddr);
       AgentId proxyId;
       try {
-        gpin.invoke(new AgentId(AgentServer.getServerId(), AgentServer.getServerId(),  AgentId.JoramAdminStamp));
+        gpin.invoke(new AgentId(AgentServer.getServerId(),
+                                AgentServer.getServerId(),
+                                AgentId.JoramAdminStamp));
         proxyId = gpin.getProxyId();
       } catch (Exception exc) {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "", exc);
-        StreamUtil.writeTo(1, nos);
-        StreamUtil.writeTo(exc.getMessage(), nos);
-        nos.send();
+        if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+          MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
+        dos.writeInt(1);
+        dos.writeUTF(exc.toString());
         return;
       }
 
       IOControl ioctrl;
-      ReliableConnectionContext ctx;
+      AckedQueue replyQueue;
       if (key == -1) {
         OpenConnectionNot ocn = new OpenConnectionNot(true, heartBeat);
         ocn.invoke(proxyId);
-        StreamUtil.writeTo(0, nos);
-        ctx = (ReliableConnectionContext) ocn.getConnectionContext();
+        dos.writeInt(0);
+        ReliableConnectionContext ctx =
+          (ReliableConnectionContext)ocn.getConnectionContext();
         key = ctx.getKey();
-        StreamUtil.writeTo(key, nos);
-        nos.send();
+        dos.writeInt(ctx.getKey());
+        dos.flush();
+        replyQueue = (AckedQueue) ctx.getQueue();
         ioctrl = new IOControl(sock);
       } else {
         GetConnectionNot gcn = new GetConnectionNot(key);
         try {
           gcn.invoke(proxyId);
         } catch (Exception exc) {
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "", exc);
-          StreamUtil.writeTo(1, nos);
-          StreamUtil.writeTo(exc.getMessage(), nos);
-          nos.send();
+          if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+            MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
+          dos.writeInt(1);
+          dos.writeUTF(exc.getMessage());
+          dos.flush();
           return;
         }
-        ctx = (ReliableConnectionContext) gcn.getConnectionContext();
-        StreamUtil.writeTo(0, nos);
-        nos.send();
+        ReliableConnectionContext ctx =
+          (ReliableConnectionContext)gcn.getConnectionContext();
+        replyQueue = ctx.getQueue();
+        heartBeat = ctx.getHeartBeat();
+        dos.writeInt(0);
+        dos.flush();
         ioctrl = new IOControl(sock, ctx.getInputCounter());
 
         TcpConnection tcpConnection = proxyService.getConnection(proxyId, key);
@@ -222,26 +214,26 @@ public class TcpConnectionListener extends Daemon {
       // wait for requests.
       sock.setSoTimeout(0);
 
-      TcpConnection tcpConnection = new TcpConnection(ioctrl, ctx, proxyId, proxyService, identity);
+      TcpConnection tcpConnection = new TcpConnection(ioctrl, proxyId,
+          replyQueue, key, proxyService, heartBeat == 0);
       tcpConnection.start();
-    } catch (IllegalAccessException exc) {
-      if (logger.isLoggable(BasicLevel.ERROR))
-        logger.log(BasicLevel.ERROR, "", exc);
-      sock.close();
-      throw exc;
-    } catch (IOException exc) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "", exc);
+    } catch (Exception exc) {
+      if (MomTracing.dbgProxy.isLoggable(BasicLevel.DEBUG))
+        MomTracing.dbgProxy.log(BasicLevel.DEBUG, "", exc);
       sock.close();
       throw exc;
     }
   }
-
+  
   protected void shutdown() {
     close();
   }
-
+    
   protected void close() {
-    proxyService.resetServerSocket();
+    try {
+      if (serverSocket != null)
+        serverSocket.close();
+    } catch (IOException exc) {}
+    serverSocket = null;
   }
 }

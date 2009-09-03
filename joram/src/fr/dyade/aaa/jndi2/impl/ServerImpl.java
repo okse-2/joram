@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,23 +23,14 @@
  */
 package fr.dyade.aaa.jndi2.impl;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
+import java.util.*;
+import javax.naming.*;
 
-import javax.naming.Binding;
-import javax.naming.CompositeName;
-import javax.naming.ContextNotEmptyException;
-import javax.naming.NameAlreadyBoundException;
-import javax.naming.NameClassPair;
-import javax.naming.NameNotFoundException;
-import javax.naming.NamingException;
-import javax.naming.NotContextException;
+import fr.dyade.aaa.util.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-
-import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.util.Transaction;
+import org.objectweb.util.monolog.api.Logger;
 
 public class ServerImpl {
 
@@ -90,7 +81,7 @@ public class ServerImpl {
     contextManager = new ContextManager(
       transaction, serverId, rootOwnerId);
     
-    looseCoupling = AgentServer.getBoolean(LOOSE_COUPLING);
+    looseCoupling = Boolean.getBoolean(LOOSE_COUPLING);
   }
 
   public void setUpdateListener(UpdateListener updateListener) {
@@ -102,15 +93,15 @@ public class ServerImpl {
     // Creates the root naming context if this
     // server owns it.
     if (rootOwnerId.equals(serverId) || looseCoupling ) {
-      if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-        Trace.logger.log(BasicLevel.DEBUG, "ServerImpl.initialize : create root NamingContext" );
-      NamingContext rootNc = 
+	if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+	    Trace.logger.log(BasicLevel.DEBUG, "ServerImpl.initialize : create root NamingContext" );
+	NamingContext rootNc = 
         contextManager.getRootNamingContext();
       if (rootNc == null) {
-        rootNc = contextManager.newNamingContext(
-            serverId, 
-            null, 
-            new CompositeName());
+        contextManager.newNamingContext(
+          serverId, 
+          null, 
+          new CompositeName());
       }
     }
   }
@@ -270,7 +261,7 @@ public class ServerImpl {
    */
   public Record lookup(CompositeName path) throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, "ServerImpl.lookup(" + path + ')');
+      Trace.logger.log(BasicLevel.DEBUG, "ServerImpl.lookup(" + path + ')');    
 
     if (path.size() == 0) {
       return null;
@@ -608,15 +599,15 @@ public class ServerImpl {
   }
 
 
-  public void changeOwner(CompositeName name, Object newOwnerId)
+  public void changeOwner(Object formerOwnerId)
     throws NamingException {
     NamingContextInfo[] contexts = 
       contextManager.changeOwner(
-          name, serverId, newOwnerId);  
+        formerOwnerId, serverId);    
     if (updateListener != null) {
       updateListener.onUpdate(
         new ChangeOwnerEvent(
-          newOwnerId,
+          formerOwnerId,
           contexts));
     }
   }

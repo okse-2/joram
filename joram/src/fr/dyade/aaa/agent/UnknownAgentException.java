@@ -30,11 +30,6 @@ package fr.dyade.aaa.agent;
  */
 public class UnknownAgentException extends Exception {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
    *  Constructs a new <code>UnknownAgentException</code> with no
    * detail message.
    */

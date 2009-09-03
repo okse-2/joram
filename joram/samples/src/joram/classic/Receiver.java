@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,10 +29,13 @@ import javax.naming.*;
 /**
  * Requests messages on the queue.
  */
-public class Receiver {
+public class Receiver
+{
   static Context ictx = null; 
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws Exception
+  {
+    System.out.println();
     System.out.println("Requests to receive messages...");
 
     ictx = new InitialContext();
@@ -40,14 +43,16 @@ public class Receiver {
     QueueConnectionFactory qcf = (QueueConnectionFactory) ictx.lookup("qcf");
     ictx.close();
 
-    QueueConnection cnx = qcf.createQueueConnection();
-    QueueSession session = cnx.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
-    QueueReceiver receiver = session.createReceiver(queue);
+    QueueConnection qc = qcf.createQueueConnection();
+    QueueSession qs = qc.createQueueSession(true, 0);
+    QueueReceiver qrec = qs.createReceiver(queue);
+    Message msg;
 
-    cnx.start();
+    qc.start();
 
-    for (int i = 0; i < 10; i++) {
-      Message msg = receiver.receive();
+    int i;
+    for (i = 0; i < 10; i++) {
+      msg = qrec.receive();
       if (msg instanceof TextMessage)
         System.out.println("Msg received: " + ((TextMessage) msg).getText());
       else if (msg instanceof ObjectMessage)
@@ -57,8 +62,11 @@ public class Receiver {
         System.out.println("Msg received: " + msg);
     }
 
-    System.out.println("10 messages received.");
+    qs.commit();
 
-    cnx.close();
+    System.out.println();
+    System.out.println(i + " messages received.");
+
+    qc.close();
   }
 }

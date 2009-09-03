@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,24 +21,18 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-import java.util.Enumeration;
+import java.util.*;
+import java.io.*;
+
+import fr.dyade.aaa.agent.conf.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.agent.conf.A3CML;
-import fr.dyade.aaa.agent.conf.A3CMLConfig;
-import fr.dyade.aaa.agent.conf.A3CMLDomain;
-import fr.dyade.aaa.agent.conf.A3CMLNetwork;
-import fr.dyade.aaa.agent.conf.A3CMLServer;
-import fr.dyade.aaa.agent.conf.A3CMLService;
-
 public class ServerConfigHelper {
-  
-  private static Logger logger = Debug.getLogger(ServerConfigHelper.class.getName());
+
+  private static Logger logger = Debug.getLogger(
+    "fr.dyade.aaa.agent.ServerConfigHelper");
 
   private boolean autoCommit;
 
@@ -47,48 +41,52 @@ public class ServerConfigHelper {
   }
 
   public boolean addDomain(String domainName,
-                           String network,
                            int routerId,
-                           int port) throws Exception {
+                           int port) 
+    throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 "ServerConfigHelper.addDomain(" + domainName + ',' + network + ',' + routerId + ',' + port + ')');
+                 "ServerConfigHelper.addDomain(" + 
+                 domainName +
+                 ',' + routerId + ',' + 
+                 port + ')');
 
     // Check configuration consistency (may fail)
     A3CMLConfig a3cmlConfig = AgentServer.getConfig();
-    
     if (a3cmlConfig.domains.get(domainName) != null) 
-      throw new NameAlreadyUsedException("Domain name already used: " + domainName);
-    
+      throw new NameAlreadyUsedException(
+        "Domain name already used: " + domainName);
     if (a3cmlConfig.servers.get(new Short((short)routerId)) == null)
       throw new Exception("Server not found: " + routerId);
     
     // Update the configuration (can't fail)
-    A3CMLDomain domain = new A3CMLDomain(domainName, network);
+    A3CMLDomain domain = new A3CMLDomain(
+      domainName, 
+      fr.dyade.aaa.agent.SimpleNetwork.class.getName());
     a3cmlConfig.addDomain(domain);
-    A3CMLServer a3cmlServer = a3cmlConfig.getServer((short) routerId);
+    A3CMLServer a3cmlServer = a3cmlConfig.getServer((short)routerId);
     domain.addServer(a3cmlServer);
     A3CMLNetwork a3cmlNetwork = new A3CMLNetwork(domainName, port);
     a3cmlServer.addNetwork(a3cmlNetwork);
 
-    A3CMLServer root = a3cmlConfig.getServer(AgentServer.getServerId());
+    A3CMLServer root = a3cmlConfig.getServer(
+      AgentServer.getServerId());
     a3cmlConfig.configure(root);
 
     boolean res = false;
     if (routerId == AgentServer.getServerId()) {
       // Create and start the run-time entities (may fail)
-      Network net = (Network) Class.forName(network).newInstance();
-      
-      // GS: Network name is set earlier than normal to have a well formed name
-      // for the MBean in addConsumer method.
-      net.name = AgentServer.getName() + '.' + domainName;
-      AgentServer.addConsumer(domainName, net);
+      Network network = 
+        (Network) fr.dyade.aaa.agent.SimpleNetwork.class.newInstance();
+      AgentServer.addConsumer(domainName, network);
       
       try {
         short[] sids = new short[1];
-        sids[0] = (short) routerId;
-        net.init(domainName, port, sids);
-        net.start();
+        sids[0] = (short)routerId;
+        network.init(domainName, 
+                     port, 
+                     sids);
+        network.start();
       } catch (Exception exc) {
         if (logger.isLoggable(BasicLevel.ERROR))
           logger.log(BasicLevel.ERROR, "", exc);
@@ -166,18 +164,23 @@ public class ServerConfigHelper {
                         String hostName, 
                         String domainName,
                         int port,
-                        String name) throws Exception {
+                        String name)
+    throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 "ServerConfigHelper.addServer(" + sid + ',' + hostName + ',' + domainName + ',' + port + ',' + name + ')');
-    
-    // Adds the server in the ACML configuration graph
-    
+                 "ServerConfigHelper.addServer(" + 
+                 sid + ',' + 
+                 hostName + ',' + 
+                 domainName + ',' + 
+                 port + ',' + 
+                 name + ')');
     A3CMLConfig a3cmlConfig = AgentServer.getConfig();
     if (a3cmlConfig.servers.get(new Integer(sid)) != null)
-      throw new ServerIdAlreadyUsedException("Server id already used: " + sid);
+      throw new ServerIdAlreadyUsedException(
+        "Server id already used: " + sid);
     
-    A3CMLDomain domain = a3cmlConfig.getDomain(domainName);
+    A3CMLDomain domain = 
+        (A3CMLDomain) a3cmlConfig.getDomain(domainName);
     
     A3CMLServer server = new A3CMLServer((short)sid, name, hostName);
     a3cmlConfig.addServer(server);
@@ -190,30 +193,21 @@ public class ServerConfigHelper {
     A3CMLServer root = a3cmlConfig.getServer(AgentServer.getServerId());
     a3cmlConfig.configure(root);
     
-    // Adds the server in the configuration structure
-    
-    ServerDesc desc = new ServerDesc((short)sid, name, hostName, -1);
-    AgentServer.addServerDesc(desc);
-    AgentServer.initServerDesc(desc, server);
-    
-    // TODO (AF): There is a problem with HttpNetwork.
-
-//    if (desc.gateway == desc.sid) {
-    if (server.hops == 1) {
-      // The server is directly accessible, adds it to the corresponding Network component
-      if (desc.getDomain() instanceof Network) {
-        Network net = (Network) desc.getDomain();
-        net.stop();
-        net.addServer((short)sid);
-        net.start();
+    ServerDesc serverDesc = new ServerDesc(
+      (short)sid,
+      name,
+      hostName,
+      -1);
+    AgentServer.addServerDesc(serverDesc);
+    AgentServer.initServerDesc(serverDesc, server);
+    if (serverDesc.gateway == serverDesc.sid) {
+      if (serverDesc.domain instanceof Network) {
+        ((Network) serverDesc.domain).addServer((short)sid);
       } else {
-        throw new Error("Unknown gateway type: " + desc.getDomain());
+        throw new Error("Unknown gateway type: " + 
+                        serverDesc.domain);
       }
-    } else {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "ServerConfigHelper.addServer -> desc = " + desc);
     }
-
 
     if (autoCommit) commit();
   }
@@ -246,11 +240,9 @@ public class ServerConfigHelper {
       ServerDesc servDesc = 
         AgentServer.removeServerDesc((short)sid);
       
-      if (servDesc.getDomain() instanceof Network) {
-        Network net = (Network) servDesc.getDomain();
-        net.stop();
-        net.delServer(servDesc.sid);
-        net.start();
+      if (servDesc.domain instanceof Network) {
+        Network nw = (Network) servDesc.domain;
+        nw.delServer(servDesc.sid);
       }
       
       for (Enumeration e = AgentServer.elementsServerDesc(); 
@@ -258,7 +250,7 @@ public class ServerConfigHelper {
         ServerDesc sd = (ServerDesc)e.nextElement();
         if (sd.gateway == sid) {
           sd.gateway = -1;
-          sd.setDomain(null);
+          sd.domain = null;
         }
       }
 
@@ -318,11 +310,14 @@ public class ServerConfigHelper {
 
   public void commit() throws Exception {
     A3CMLConfig a3cmlConfig = AgentServer.getConfig();
-    if (AgentServer.getTransaction() instanceof fr.dyade.aaa.util.NullTransaction) {
-      // TODO (AF): NullTransaction is not significant. 
-      String cfgDir = System.getProperty(AgentServer.CFG_DIR_PROPERTY, AgentServer.DEFAULT_CFG_DIR);
-      String cfgFile = System.getProperty(AgentServer.CFG_FILE_PROPERTY, AgentServer.DEFAULT_CFG_FILE);
-      FileOutputStream fos = new FileOutputStream(new File(cfgDir, cfgFile));
+    if (AgentServer.getTransaction() instanceof 
+        fr.dyade.aaa.util.NullTransaction) {
+      String cfgDir = System.getProperty(AgentServer.CFG_DIR_PROPERTY, 
+                                         AgentServer.DEFAULT_CFG_DIR);
+      String cfgFile = System.getProperty(AgentServer.CFG_FILE_PROPERTY,
+                                          AgentServer.DEFAULT_CFG_FILE);
+      FileOutputStream fos = new FileOutputStream(
+        new File(cfgDir, cfgFile));
       PrintWriter out = new PrintWriter(fos);
       A3CML.toXML(a3cmlConfig, out);
       out.flush();
@@ -336,33 +331,18 @@ public class ServerConfigHelper {
   }
 
   public static class ServerIdAlreadyUsedException extends Exception {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public ServerIdAlreadyUsedException(String info) {
       super(info);
     }
   }
   
   public static class NameAlreadyUsedException extends Exception {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public NameAlreadyUsedException(String info) {
       super(info);
     }
   }
 
   public static class StartFailureException extends Exception {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
     public StartFailureException(String info) {
       super(info);
     }

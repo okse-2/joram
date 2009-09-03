@@ -36,10 +36,6 @@ import fr.dyade.aaa.agent.Notification;
  */
 class ClusterTest extends Notification
 {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /** The original client request. */
   ClusterRequest request;
   /** The original requester. */

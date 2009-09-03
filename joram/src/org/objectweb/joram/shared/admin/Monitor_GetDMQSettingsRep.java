@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,19 +22,13 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 
 /**
  * A <code>Monitor_GetDMQSettingsRep</code> instance holds the dead message
  * queue and threshold settings of a server, a destination or a user.
  */
 public class Monitor_GetDMQSettingsRep extends Monitor_Reply {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = -2656581907891308694L;
 
   /** DMQ identifier. */
   private String dmqId;
@@ -49,14 +43,9 @@ public class Monitor_GetDMQSettingsRep extends Monitor_Reply {
    */
   public Monitor_GetDMQSettingsRep(String dmqId, Integer threshold) {
     this.dmqId = dmqId;
-    if (threshold != null)
-      this.threshold = threshold;
-    else
-      this.threshold = new Integer(-1);
+    this.threshold = threshold;
   }
 
-  public Monitor_GetDMQSettingsRep() { }
-  
   /** Returns the DMQ identifier. */
   public String getDMQName() {
     return dmqId;
@@ -65,21 +54,5 @@ public class Monitor_GetDMQSettingsRep extends Monitor_Reply {
   /** Returns the threshold. */
   public Integer getThreshold() {
     return threshold;
-  }
-  
-  protected int getClassId() {
-    return MONITOR_GET_DMQ_SETTINGS_REP;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    dmqId = StreamUtil.readStringFrom(is);
-    threshold = new Integer(StreamUtil.readIntFrom(is));
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    StreamUtil.writeTo(dmqId, os);
-    StreamUtil.writeTo(threshold.intValue(), os);
   }
 }

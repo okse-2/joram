@@ -1,25 +1,22 @@
 package com.scalagent.joram.osgi.server;
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.Reader;
-import java.util.List;
-import java.util.Properties;
+import java.io.*;
+import java.util.*;
 
-import org.objectweb.joram.client.jms.ConnectionFactory;
-import org.objectweb.joram.client.jms.Destination;
-import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.client.jms.Topic;
-import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import org.osgi.framework.*;
 
 import com.scalagent.joram.osgi.server.service.JoramAdmin;
 
+import org.objectweb.joram.client.jms.ConnectionFactory;
+import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
+import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.Topic;
+
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.agent.Debug;
+import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.agent.conf.*;
 
 public class Activator implements BundleActivator {
 
@@ -131,8 +128,8 @@ public class Activator implements BundleActivator {
     /**
      *
      */
-    public void executeAdminXML(Reader reader) throws Exception {
-      AdminModule.executeAdmin(reader);
+    public boolean executeAdminXML(Reader reader) throws Exception {
+      return AdminModule.executeAdmin(reader);
     }
 
     /**
@@ -192,8 +189,8 @@ public class Activator implements BundleActivator {
     /**
      * Returns the list of all destinations that exist on the server.
      */
-    public Destination[] getDestinations() throws Exception {
-      Destination[] destinations = null;
+    public List getDestinations() throws Exception {
+      List destinations = null;;
       try {
         AdminModule.collocatedConnect(rootUserName, rootPassword);
         destinations = AdminModule.getDestinations();
@@ -206,8 +203,8 @@ public class Activator implements BundleActivator {
     /**
      * Returns the list of all users that exist on a given server.
      */
-    public User[] getUsers() throws Exception {
-      User[] users = null;
+    public List getUsers() throws Exception {
+      List users = null;;
       try {
         AdminModule.collocatedConnect(rootUserName, rootPassword);
         users = AdminModule.getUsers();

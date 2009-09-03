@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2005 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,10 +18,11 @@
  */
 package fr.dyade.aaa.util.management;
 
-import java.util.Set;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+import org.objectweb.util.monolog.api.LoggerFactory;
 
-import javax.management.MBeanAttributeInfo;
-import javax.management.ObjectName;
+import fr.dyade.aaa.util.Debug;
 
 public final class MXWrapper {
   /**
@@ -32,68 +33,56 @@ public final class MXWrapper {
   public final static String ServerImpl = "MXServer";
 
   public static MXServer mxserver = null;
-  
-  public static void init() throws Exception {
-    if (mxserver != null)
-      return;
+
+  public static void init() {
+    if (mxserver != null) return;
+
     String mxname = System.getProperty(ServerImpl);
-    if ((mxname != null) && (mxname.length() > 0))
-      Class.forName(mxname).newInstance();
-  }
-  
-  public static String objectName(String domain, String name) {
-    StringBuffer strbuf = new StringBuffer();
-    strbuf.append(domain).append(':').append(name);
-    return strbuf.toString();
+
+    // Be careful, do not call Debug.getLogger before initializing the
+    // MXServer (see Debug.init).
+
+    try {
+      if ((mxname != null) && (mxname.length() > 0))
+        Class.forName(mxname).newInstance();
+    } catch (Exception exc) {
+      Debug.getLogger("fr.dyade.aaa.util.management").log(
+        BasicLevel.ERROR, "can't instantiate MXServer: " + mxname, exc);
+    }
+
+    Debug.getLogger("fr.dyade.aaa.util.management").log(
+      BasicLevel.INFO, "MXWrapper.ServerImpl -> " + mxname);
   }
 
-  public static String  registerMBean(Object bean, String domain, String name) throws Exception {
-    return registerMBean(bean, objectName(domain, name));
-  }
-  
-  public static String registerMBean(Object bean, String fullName) throws Exception {
-    if (mxserver == null)
-      return null;
-    return mxserver.registerMBean(bean, fullName);
+  public static void registerMBean(Object bean,
+                                   String domain,
+                                   String name) throws Exception {
+    if (mxserver == null) return;
+
+    Debug.getLogger("fr.dyade.aaa.util.management").log(
+      BasicLevel.INFO, "registerMBean: " + name + " -> " + mxserver);
+
+    mxserver.registerMBean(bean, domain, name);
   }
 
-  public static void unregisterMBean(String domain, String name) throws Exception {
-    unregisterMBean(objectName(domain, name));
-  }
+  public static void unregisterMBean(String domain, 
+                                     String name) throws Exception {
+    if (mxserver == null) return;
 
-  public static void unregisterMBean(String fullName) throws Exception {
-    if (mxserver == null)
-      return;
-    mxserver.unregisterMBean(fullName);
+    Debug.getLogger("fr.dyade.aaa.util.management").log(
+      BasicLevel.INFO, "unregisterMBean: " + name + " -> " + mxserver);
+
+    mxserver.unregisterMBean(domain, name);
   }
 
   public static void setMXServer(MXServer server) {
+    Debug.getLogger("fr.dyade.aaa.util.management").log(
+      BasicLevel.INFO, "setMXServer: " + server);
+
     mxserver = server;
   }
 
   public static MXServer getMXServer() {
     return mxserver;
   }
-  
-  public static Object getAttribute(ObjectName objectName, String attribute) throws Exception {
-    if (mxserver == null) {
-      return null;
-    }
-    return mxserver.getAttribute(objectName, attribute);
-  }
-  
-  public static MBeanAttributeInfo[] getAttributes(ObjectName objectName) throws Exception {
-    if (mxserver == null) {
-      return null;
-    }
-    return mxserver.getAttributes(objectName);
-  }
-  
-  public static Set queryNames(ObjectName objectName) {
-    if (mxserver == null) {
-      return null;
-    }
-    return mxserver.queryNames(objectName);
-  }
-  
 }

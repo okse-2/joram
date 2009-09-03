@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -24,23 +24,15 @@
  */
 package org.objectweb.joram.client.jms;
 
-import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
+import javax.jms.JMSException;
 
 /**
  * Implements the <code>javax.jms.TopicConnectionFactory</code> interface.
- *  
- * @deprecated Replaced next to Joram 5.2.1 by {@link ConnectionFactory}.
  */
-public abstract class TopicConnectionFactory extends AbstractConnectionFactory implements javax.jms.TopicConnectionFactory {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
-  /**
-   * Constructs an empty <code>TopicConnectionFactory</code>.
-   * Needed by ObjectFactory, should only be used for internal purposes.
-   */
-  public TopicConnectionFactory() {}
-
+public abstract class TopicConnectionFactory
+                      extends ConnectionFactory
+                      implements javax.jms.TopicConnectionFactory
+{
   /**
    * Constructs a <code>TopicConnectionFactory</code> dedicated to a given
    * server.
@@ -48,22 +40,53 @@ public abstract class TopicConnectionFactory extends AbstractConnectionFactory i
    * @param host  Name or IP address of the server's host.
    * @param port  Server's listening port.
    */
-  protected TopicConnectionFactory(String host, int port) {
-    super(host, port);
-  }
+  public TopicConnectionFactory(String host, int port)
+    {
+      super(host, port);
+    }
 
   /**
    * Constructs a <code>TopicConnectionFactory</code> dedicated to a given server.
    *
    * @param url  joram ha url.
    */
-  protected TopicConnectionFactory(String url) {
+  public TopicConnectionFactory(String url) {
     super(url);
   }
 
 
+  /**
+   * Constructs an empty <code>TopicConnectionFactory</code>.
+   */
+  public TopicConnectionFactory()
+    {}
+
+
   /** Returns a string view of the connection factory. */
-  public String toString() {
-    return "TCF:" + params.getHost() + "-" + params.getPort();
-  }
+  public String toString()
+    {
+      return "TCF:" + params.getHost() + "-" + params.getPort();
+    }
+
+  /**
+   * API method, implemented according to the communication protocol.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public abstract javax.jms.TopicConnection
+      createTopicConnection(String name, String password)
+    throws JMSException;
+
+  /**
+   * API method.
+   *
+   * @exception JMSSecurityException  If the default identification is
+   *              incorrect.
+   * @exception IllegalStateException  If the server is not listening.
+   */
+  public javax.jms.TopicConnection createTopicConnection() throws JMSException
+    {
+      return createTopicConnection(getDefaultLogin(), getDefaultPassword());
+    }
 }

@@ -33,10 +33,6 @@ import fr.dyade.aaa.agent.AgentId;
  */
 public class ClusterRequest extends AdminRequest
 {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /** The identifier of the topic the target topic must set a cluster with. */
   private AgentId topicId;
 

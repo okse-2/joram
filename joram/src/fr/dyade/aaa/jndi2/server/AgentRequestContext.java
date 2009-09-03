@@ -28,11 +28,6 @@ import fr.dyade.aaa.jndi2.msg.*;
 public class AgentRequestContext 
     extends RequestContext {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   private JndiRequest request;
 
   private AgentId from;

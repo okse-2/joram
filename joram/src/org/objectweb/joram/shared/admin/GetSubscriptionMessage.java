@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,64 +22,28 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 public class GetSubscriptionMessage extends SubscriptionAdminRequest {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = -6415435591049976630L;
+
 
   private String subName;
-  private String msgId;
-  private boolean fullMessage;
 
-  public GetSubscriptionMessage(String userId,
-                                String subName,
-                                String msgId) {
-    this(userId, subName, msgId, true);
-  }
-  
-  public GetSubscriptionMessage(String userId,
-                                String subName,
-                                String msgId,
-                                boolean fullMessage) {
+  private String msgId;
+
+  public GetSubscriptionMessage(
+    String userId,
+    String subName,
+    String msgId) {
     super(userId);
     this.subName = subName;
     this.msgId = msgId;
-    this.fullMessage = fullMessage;
   }
 
-  public GetSubscriptionMessage() { }
-  
   public final String getSubscriptionName() {
     return subName;
   }
 
   public final String getMessageId() {
     return msgId;
-  }
-  
-  public final boolean getFullMessage() {
-    return fullMessage;
-  }
-
-  protected int getClassId() {
-    return GET_SUBSCRIPTION_MESSAGE;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    subName = StreamUtil.readStringFrom(is);
-    msgId = StreamUtil.readStringFrom(is);
-    fullMessage = StreamUtil.readBooleanFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    StreamUtil.writeTo(subName, os);
-    StreamUtil.writeTo(msgId, os);
-    StreamUtil.writeTo(fullMessage, os);
   }
 }

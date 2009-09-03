@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
- * Copyright (C) 2004 France Telecom R&D
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,45 +23,36 @@
  */
 package org.objectweb.joram.client.jms.tcp;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.Timer;
-import java.util.Vector;
+import fr.dyade.aaa.util.*;
 
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import java.util.Timer;
+
+import javax.jms.*;
 import javax.jms.IllegalStateException;
-import javax.jms.JMSException;
-import javax.jms.JMSSecurityException;
 
 import org.objectweb.joram.client.jms.FactoryParameters;
-import org.objectweb.joram.shared.client.AbstractJmsMessage;
-import org.objectweb.joram.shared.security.Identity;
-import org.objectweb.joram.shared.stream.MetaData;
-import org.objectweb.joram.shared.stream.StreamUtil;
+import org.objectweb.joram.client.jms.JoramTracing;
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.common.Debug;
-import fr.dyade.aaa.common.SocketFactory;
 
 public class ReliableTcpClient {
-  public static Logger logger = Debug.getLogger(ReliableTcpClient.class.getName());
 
   public static final int INIT = 0;
   public static final int CONNECT = 1;
   public static final int CLOSE = 2;
 
-  public static final String[] statusNames = {"INIT", "CONNECT", "CLOSE"};
+  public static final String[] statusNames =
+  {"INIT", "CONNECT", "CLOSE"};
 
-  protected FactoryParameters params;
+  private FactoryParameters params;
 
-  protected Identity identity;
+  private String name;
+  
+  private String password;
 
-  protected int key;
+  private int key;
 
   private ReliableTcpConnection connection;
 
@@ -89,29 +80,34 @@ public class ReliableTcpClient {
   }
 
   public void init(FactoryParameters params, 
-      Identity identity,
-      boolean reconnect) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-          "ReliableTcpClient.init(" + params + ',' + identity + ',' + reconnect + ')');
-
+                   String name,
+                   String password,
+                   boolean reconnect) {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, 
+        "ReliableTcpClient.init(" + 
+        params + ',' + name + ',' + password + ',' + reconnect + ')');
     this.params = params;
+    this.name = name;
+    this.password = password;
     this.reconnect = reconnect;
     if (params.cnxPendingTimer > 0)
       this.reconnectTimeout =
         Math.max(2*params.cnxPendingTimer,
-            (params.connectingTimer*1000)+params.cnxPendingTimer);
+                 (params.connectingTimer*1000)+params.cnxPendingTimer);
     addresses = new Vector();
     key = -1;
-    this.identity = identity;
-    
     setStatus(INIT);
   }
 
   private void setStatus(int status) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 "ReliableTcpClient[" + identity + ',' + key + "].setStatus(" + statusNames[status] + ')');
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, 
+        "ReliableTcpClient[" + name + ',' + key + 
+        "].setStatus(" +
+        statusNames[status] + ')');
     this.status = status;
   }
 
@@ -120,9 +116,11 @@ public class ReliableTcpClient {
   }
 
   public synchronized void connect(boolean reconnect) throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 "ReliableTcpClient[" + identity + ',' + key + "].connect(" + reconnect + ')');
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, 
+        "ReliableTcpClient[" + name + ',' + key + 
+        "].connect(" + reconnect + ')');
     
     if (status != INIT) 
       throw new IllegalStateException("Connect: state error");
@@ -155,37 +153,40 @@ public class ReliableTcpClient {
         } catch (JMSSecurityException exc) {
           throw exc;
         } catch (UnknownHostException uhe) {
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "ReliableTcpClient.connect", uhe); 
+          if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+            JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", uhe); 
           IllegalStateException jmsExc =
-            new IllegalStateException("Server's host is unknown: " + sa.hostName);
+            new IllegalStateException(
+              "Server's host is unknown: " + 
+              sa.hostName);
           jmsExc.setLinkedException(uhe);
           throw jmsExc;
         } catch (IOException ioe) {
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "ReliableTcpClient.connect", ioe); 
+          if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+            JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", ioe); 
           // continue
         } catch (JMSException jmse) {
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "ReliableTcpClient.connect", jmse); 
+          if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+            JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", jmse); 
           // continue
         } catch (Exception e) {
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "ReliableTcpClient.connect", e); 
+          if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+            JoramTracing.dbgClient.log(BasicLevel.DEBUG, "", e); 
           // continue
         }
       }
       long currentTime = System.currentTimeMillis();
 
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,
-                   " -> currentTime = " + currentTime + ",endTime = " + endTime);
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, " -> currentTime = " + currentTime + 
+          ",endTime = " + endTime);
       
       // Keep on trying as long as timer is ok:
       if (currentTime < endTime) {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG,
-                     " -> retry connection " + identity + ',' + key);
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgClient.log(
+            BasicLevel.DEBUG, " -> retry connection " + name + ',' + key);
         
         if (currentTime + nextSleep > endTime) {
           nextSleep = endTime - currentTime;    
@@ -195,21 +196,24 @@ public class ReliableTcpClient {
         try {
           wait(nextSleep);
         } catch (InterruptedException intExc) {
-          throw new IllegalStateException("Could not open the connection with "
+          IllegalStateException jmsExc =
+            new IllegalStateException("Could not open the connection"
+                                      + " with "
                                       + addresses + ": interrupted");
         }          
 
         // Trying again!
         nextSleep = nextSleep * 2;
       } else {
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG,
-                       " -> close connection " + identity + ',' + key);
+          if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+            JoramTracing.dbgClient.log(
+              BasicLevel.DEBUG, " -> close connection " + name + ',' + key);
 
           // If timer is over, throwing an IllegalStateException:
           long attemptsT = (System.currentTimeMillis() - startTime) / 1000;
           IllegalStateException jmsExc =
-            new IllegalStateException("Could not connect to JMS server with "
+            new IllegalStateException("Could not connect to JMS server"
+                                      + " with "
                                       + addresses
                                       + " after " + attemptsC
                                       + " attempts during "
@@ -220,112 +224,106 @@ public class ReliableTcpClient {
     }
   }
 
-  protected Socket createSocket(String hostname, int port) throws Exception {
-    InetAddress addr = InetAddress.getByName(hostname);
-
-    InetAddress outLocalAddr = null;
-    String outLocalAddrStr = params.outLocalAddress;
-    if (outLocalAddrStr != null)
-      outLocalAddr = InetAddress.getByName(outLocalAddrStr);
-
-    int outLocalPort = params.outLocalPort;
-    
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "ReliableTcpClient[" + identity + ',' + key + "].createSocket(" +
-                 hostname + "," + port + ") on interface " + outLocalAddrStr + ":" + outLocalPort);
-
-    SocketFactory factory = SocketFactory.getFactory(params.socketFactory);
-    Socket socket = factory.createSocket(addr, port,
-                                         outLocalAddr, outLocalPort,
-                                         params.connectingTimer *1000);
-
-    return socket;
+  protected Socket createSocket(String hostName, int port) 
+    throws Exception {
+    return new Socket(hostName, port);
   }
 
-  private void doConnect(String hostname, int port) throws Exception, JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "ReliableTcpClient[" + identity + ',' + key + "].doConnect(" + hostname + "," + port + ")");
-    Socket socket = createSocket(hostname, port);
+  private void doConnect(String hostName, int port) 
+    throws Exception, JMSException {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, "ReliableTcpClient[" + 
+        name + ',' + key + "].doConnect(" + 
+	hostName + ',' + port + ')');
 
-    socket.setTcpNoDelay(params.TcpNoDelay);
-    socket.setSoTimeout(params.SoTimeout);
-    if (params.SoLinger >= 0)
-      socket.setSoLinger(true, params.SoLinger);
+    Socket socket = createSocket(hostName, port);    
+    socket.setTcpNoDelay(true);
+    socket.setSoTimeout(0);
+    socket.setSoLinger(true, 1000);
     
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    OutputStream os = socket.getOutputStream();
-    InputStream is = socket.getInputStream();
-
-    // Writes the Joram magic number
-    baos.write(MetaData.joramMagic);
+    DataOutputStream dos = 
+      new DataOutputStream(socket.getOutputStream());
+    DataInputStream dis = 
+      new DataInputStream(socket.getInputStream());
     
-    // Writes the user identity
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, " -> write identity = " + identity);
-    Identity.write(identity, baos);
-
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, " -> write key = " + key);
-    StreamUtil.writeTo(key, baos);
-
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+	JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, 
+          " -> write name = " + name);
+    dos.writeUTF(name);
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+	JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, 
+          " -> write password = " + password);
+    dos.writeUTF(password);
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+	JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, 
+          " -> write key = " + key);
+    dos.writeInt(key);
+    
     if (key == -1) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, " -> open new connection");      
-      StreamUtil.writeTo(reconnectTimeout, baos);
-      baos.writeTo(os);
-      os.flush();
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, " -> open new connection");      
+      dos.writeInt(reconnectTimeout);
+      dos.flush();
 
-      int len = StreamUtil.readIntFrom(is);
-      int res = StreamUtil.readIntFrom(is);
+      int res = dis.readInt();
       if (res > 0) {
-        String info = StreamUtil.readStringFrom(is);
+        String info = dis.readUTF();
         throwSecurityError(info);
+      } else {
+        key = dis.readInt();
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgClient.log(
+            BasicLevel.DEBUG, " -> key = " + name + ',' + key);
+        connection = 
+          new ReliableTcpConnection(timer);
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgClient.log(
+            BasicLevel.DEBUG, " -> init reliable connection");
+        connection.init(socket);
       }
-
-      key = StreamUtil.readIntFrom(is);
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, " -> key = " + identity.getUserName() + ',' + key);
-      connection = new ReliableTcpConnection(timer);
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, " -> init reliable connection");
     } else {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, " -> reopen connection " + identity + ',' + key);
-      baos.writeTo(os);
-      os.flush();
-
-      int len = StreamUtil.readIntFrom(is);
-      int res = StreamUtil.readIntFrom(is);
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, " -> read res = " + res);
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(
+          BasicLevel.DEBUG, " -> reopen connection " + name + ',' + key);
+      int res = dis.readInt();
+      if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+        JoramTracing.dbgClient.log(
+	  BasicLevel.DEBUG, " -> read res = " + res);
       if (res > 0) {
-        String info = StreamUtil.readStringFrom(is);
+        String info = dis.readUTF();
         throwSecurityError(info);
+      } else {
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgClient.log(
+            BasicLevel.DEBUG, " -> reset reliable connection");
+        connection.init(socket);
       }
-
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, " -> reset reliable connection");
     }
-
-    connection.init(socket);
   }
 
   private void throwSecurityError(String info) 
     throws JMSSecurityException {
     JMSSecurityException jmsExc = 
-      new JMSSecurityException("Can't open the connection with the server " +
-                               params.getHost() + " on port " +
-                               params.getPort() + ": " + info);
+      new JMSSecurityException(
+        "Can't open the connection with the"
+        + " server " + params.getHost()
+        + " on port " + params.getPort()
+        + ": " + info);
     throw jmsExc;
   }
 
-  public void send(AbstractJmsMessage request) 
+  public void send(Object request) 
     throws Exception {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log( BasicLevel.DEBUG, 
-                  "ReliableTcpClient[" + identity + ',' + key + "].send(" + request + ')');
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, 
+        "ReliableTcpClient[" + name + ',' + key + 
+        "].send(" + request + ')');
     if (status == CLOSE) throw new IOException("Closed connection");
     if (status != CONNECT) {
       if (reconnect) waitForReconnection();
@@ -336,9 +334,10 @@ public class ReliableTcpClient {
         connection.send(request);
         return;
       } catch (IOException exc) {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG,
-                     "ReliableTcpClient[" + identity + ',' + key + "]", exc);
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgClient.log(
+            BasicLevel.DEBUG, "ReliableTcpClient[" + 
+            name + ',' + key + "]", exc);
         if (reconnect) {
           waitForReconnection();
         } else {
@@ -349,17 +348,20 @@ public class ReliableTcpClient {
     }
   }
 
-  public Object receive() throws Exception {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "ReliableTcpClient[" + identity + ',' + key + "].receive()");
+  public Object receive() 
+    throws Exception {
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, 
+        "ReliableTcpClient[" + name + ',' + key + "].receive()");
     while (true) {
       try {        
         return connection.receive();
       } catch (IOException exc) {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG,
-                     "ReliableTcpClient[" + identity + ',' + key + "]", exc);
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+          JoramTracing.dbgClient.log(
+            BasicLevel.DEBUG, "ReliableTcpClient[" + 
+            name + ',' + key + "]", exc);
         if (reconnect) {
           reconnect();
         } else {
@@ -371,9 +373,9 @@ public class ReliableTcpClient {
   }
 
   private synchronized void waitForReconnection() throws Exception {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "ReliableTcpClient[" + identity + ',' + key + "].waitForReconnection()");
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "ReliableTcpClient[" + name
+          + ',' + key + "].waitForReconnection()");
     while (status == INIT) {
       try {
         wait();
@@ -390,9 +392,9 @@ public class ReliableTcpClient {
   }
 
   private synchronized void reconnect() throws Exception {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "ReliableTcpClient[" + identity + ',' + key + "].reconnect()");
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(BasicLevel.DEBUG, "ReliableTcpClient[" + name
+          + ',' + key + "].reconnect()");
     switch (status) {
     case CONNECT:
       setStatus(INIT);
@@ -414,13 +416,13 @@ public class ReliableTcpClient {
   }
 
   public synchronized void close() {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 "ReliableTcpClient[" + identity + ',' + key + "].close()");
+    if (JoramTracing.dbgClient.isLoggable(BasicLevel.DEBUG))
+      JoramTracing.dbgClient.log(
+        BasicLevel.DEBUG, 
+        "ReliableTcpClient[" + name + ',' + key + "].close()");
     if (status != CLOSE) {
       setStatus(CLOSE);
       connection.close();
-      this.identity = null;
     }
   }
 
@@ -429,9 +431,14 @@ public class ReliableTcpClient {
   }
 
   public String toString() {
-    return '(' + super.toString() + ",params=" + params + ",name=" + identity + 
-      ",key=" + key + ",connection=" + connection + 
-      ",status=" + statusNames[status] + ",addresses=" + addresses + ')';
+    return '(' + super.toString() + 
+      ",params=" + params + 
+      ",name=" + name + 
+      ",password=" + password + 
+      ",key=" + key + 
+      ",connection=" + connection + 
+      ",status=" + statusNames[status] + 
+      ",addresses=" + addresses + ')';
   }
 
   static class ServerAddress {
@@ -444,11 +451,8 @@ public class ReliableTcpClient {
     }
 
     public String toString() {
-      return "(hostName=" + hostName + ",port=" + port + ')';
+      return "(hostName=" + hostName + 
+        ",port=" + port + ')';
     }
-  }
-
-  public void stopReconnections() {
-    reconnect = false;
   }
 }

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,18 +23,12 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
-
 /**
  * A <code>CreateUserReply</code> instance replies to a user creation request,
  * produced by the AdminTopic.
  */
 public class CreateUserReply extends AdminReply {
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2904798747244634284L;
 
   /** Identifier of the user's proxy. */
   private String id;
@@ -50,24 +44,8 @@ public class CreateUserReply extends AdminReply {
     this.id = id;
   }
 
-  public CreateUserReply() { }
-  
   /** Returns the id of the user's proxy. */
   public String getProxId() {
     return id;
-  }
-  
-  protected int getClassId() {
-    return CREATE_USER_REPLY;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    id = StreamUtil.readStringFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    StreamUtil.writeTo(id, os);
   }
 }

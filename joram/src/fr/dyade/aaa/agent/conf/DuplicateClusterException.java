@@ -23,11 +23,6 @@ package fr.dyade.aaa.agent.conf;
  */
 public class DuplicateClusterException extends Exception {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
    *  Constructs a new <code>DuplicateClusterException</code> with no
    * detail message.
    */

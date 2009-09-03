@@ -22,16 +22,8 @@
  */
 package fr.dyade.aaa.jndi2.msg;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamConstants;
-import java.io.OutputStream;
-import java.net.Socket;
+import java.io.*;
+import java.net.*;
 
 public class IOControl {
   /**
@@ -50,7 +42,7 @@ public class IOControl {
    * of time.
    */
   private static int socketTimeOut =
-    Integer.getInteger(SOCKET_SOTIMEOUT, 0).intValue();
+      Integer.getInteger(SOCKET_SOTIMEOUT, 0).intValue();
 
   private Socket socket;
 

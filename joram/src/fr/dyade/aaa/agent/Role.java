@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -21,17 +20,12 @@
 
 package fr.dyade.aaa.agent;
 
-import java.io.Serializable;
+import java.io.*;
 
 /**
  * A role wraps an AgentId. It is identified by a name.
  */
 public class Role implements Serializable {
-    /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
     /**
      * The wrapped <code>AgentId</code>.
      */

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
- * Copyright (C) 2004 France Telecom R&D
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -24,31 +24,15 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.io.*;
+import java.util.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 import org.objectweb.util.monolog.api.LoggerFactory;
 
-import fr.dyade.aaa.agent.conf.A3CML;
-import fr.dyade.aaa.agent.conf.A3CMLCluster;
-import fr.dyade.aaa.agent.conf.A3CMLConfig;
-import fr.dyade.aaa.agent.conf.A3CMLDomain;
-import fr.dyade.aaa.agent.conf.A3CMLNat;
-import fr.dyade.aaa.agent.conf.A3CMLNetwork;
-import fr.dyade.aaa.agent.conf.A3CMLProperty;
-import fr.dyade.aaa.agent.conf.A3CMLServer;
-import fr.dyade.aaa.agent.conf.A3CMLService;
-import fr.dyade.aaa.common.Configuration;
-import fr.dyade.aaa.common.Timer;
-import fr.dyade.aaa.util.ResolverRepository;
-import fr.dyade.aaa.util.Transaction;
+import fr.dyade.aaa.util.*;
+import fr.dyade.aaa.agent.conf.*;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
@@ -58,9 +42,9 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * {@link Channel <code>Channel</code>},
  * {@link Network <code>Network</code>s}.
  * This class contains the main method for AgentServer, for example to
- * activate a server you have to run this class with two parameters: the
- * server id. and the path of the root of persistency. You can also use
- * a specialized main calling methods init and start.
+ * acivate a server you have to run this class with two parameters: the
+ * server id. and the path of the root of persistancy. You can also use
+ * a specialized main calling methods initi and start.
  * <p><hr>
  * To start the agents server an XML configuration file describing the
  * architecture of the agent platform is needed. By default, this file is 
@@ -86,7 +70,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * <li>A service can be declared on any of these servers by inserting a
  * <code>service</code> element describing it.
  * </ul>
- * <li>Additionally, you can define property for the global configuration
+ * <li>Additonnaly, you can define property for the global configuration
  * or for a particular server, it depends where you define it: in the
  * <code>config</code> element or in a server one.
  * </ul>
@@ -165,7 +149,7 @@ public final class AgentServer {
   
   public final static String A3CMLWRP_PROPERTY = "fr.dyade.aaa.agent.A3CMLWrapper";
   public final static String DEFAULT_A3CMLWRP = "fr.dyade.aaa.agent.conf.A3CMLSaxWrapper";
-  
+
   static ThreadGroup tgroup = null;
 
   public static ThreadGroup getThreadGroup() {
@@ -176,7 +160,7 @@ public final class AgentServer {
    * Static reference to the engine. Used in <code>Channel.sendTo</code> to
    * know if the method is called from a react or no.
    * <p><hr>
-   * AF: I think we must suppress this dependency in order to be able to run
+   * AF: I think we must supress this dependency in order to be able to run
    * multiples engine.
    */
   static Engine engine = null;
@@ -189,7 +173,7 @@ public final class AgentServer {
   }
 
   /** Static reference to the transactional monitor. */
-  static Transaction transaction = null;
+  private static Transaction transaction = null;
 
   /**
    * Returns the agent server transaction context.
@@ -200,41 +184,30 @@ public final class AgentServer {
 
   private static JGroups jgroups = null;
   private static short clusterId = NULL_ID;
-  
-  /**
-   * Test HA server.
-   * 
-   * @return true if the server is HA.
-   */
-  public static boolean isHAServer() {
-    return (jgroups != null);
+
+  private static ConfigController configController;
+
+  public static ConfigController getConfigController() {
+    return configController;
   }
 
-  /**
-   * Test if the server is a master (coordinator).
-   * 
-   * @return true if the server HA is a master.
-   */
-  public static boolean isMasterHAServer() {
-    if (jgroups != null)
-      return jgroups.isCoordinator();
-    return false;
-  }
-  
   /**
    * Static references to all messages consumers initialized in this
    * agent server (including <code>Engine</code>).
    */
   private static Hashtable consumers = null;
 
-  public static void addConsumer(String domain, MessageConsumer cons) throws Exception {
+  static void addConsumer(String domain,
+                          MessageConsumer cons) throws Exception {
     if (consumers.containsKey(domain))
       throw new Exception("Consumer for domain " + domain + " already exist");
 
     consumers.put(domain, cons);
 
     try {
-      MXWrapper.registerMBean(cons, "AgentServer", "server=" + getName() + ",cons=" + cons.getName());
+      MXWrapper.registerMBean(cons,
+                              "AgentServer",
+                              "server=" + getName() + ",cons=" + cons.getName());
     } catch (Exception exc) {
       logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
     }
@@ -247,37 +220,22 @@ public final class AgentServer {
       return consumers.elements();
   }
 
-  public static MessageConsumer getConsumer(String domain) throws Exception {
+  static MessageConsumer getConsumer(String domain) throws Exception {
     if (! consumers.containsKey(domain))
       throw new Exception("Unknown consumer for domain " + domain);
     return (MessageConsumer) consumers.get(domain);
   }
 
-  public static void removeConsumer(String domain) {
+  static void removeConsumer(String domain) {
     MessageConsumer cons = (MessageConsumer) consumers.remove(domain);
-    if (cons != null) {
-      cons.stop();
-      try {
-        MXWrapper.unregisterMBean("AgentServer", "server=" + getName() + ",cons=" + cons.getName());
-      } catch (Exception exc) {
-        logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
-      }
-    }
-  }
-  
-  /**
-   * Timer provided by the agent server.
-   */
-  private static Timer timer;
+    if (cons != null) cons.stop();
 
-  /**
-   * Returns a shared timer provided by the agent server.
-   */
-  public static final Timer getTimer() {
-    if (timer == null) {
-      timer = new Timer();
+    try {
+      MXWrapper.unregisterMBean("AgentServer",
+                                "server=" + getName() + ",cons=" + cons.getName());
+    } catch (Exception exc) {
+      logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
     }
-    return timer;
   }
 
   /** Static reference to the configuration. */
@@ -294,12 +252,12 @@ public final class AgentServer {
     setConfig(a3config, false);
   }
 
-  public final static void setConfig(A3CMLConfig a3config,
+  final static void setConfig(A3CMLConfig a3config,
                               boolean force) throws Exception {
     if (! force) {
       synchronized(status) {
         if (status.value != Status.INSTALLED)
-          throw new Exception("cannot set config, bad status: " + getStatusInfo());
+          throw new Exception("cannot set config, bad status: " + status.value);
       }
     }
     AgentServer.a3config = a3config;
@@ -340,15 +298,6 @@ public final class AgentServer {
   public final static String getName() {
     return name;
   }
-  
-  static ResolverRepository resolverRepo = null;
-
-  public static ResolverRepository getResolverRepository() {
-    if (resolverRepo == null) {
-      resolverRepo = new ResolverRepository();
-    }
-    return resolverRepo;
-  }
 
   /**
    * Returns the identifier of the agent server which name is specified.
@@ -369,7 +318,7 @@ public final class AgentServer {
    * @return	   the value with the specified key value.
    */
   public static String getProperty(String key) {
-    return Configuration.getProperty(key);
+    return System.getProperty(key);
   }
 
   /**
@@ -381,7 +330,7 @@ public final class AgentServer {
    * @return	   the value with the specified key value.
    */
   public static String getProperty(String key, String value) {
-    return Configuration.getProperty(key, value);
+    return System.getProperty(key, value);
   }
 
   /**
@@ -392,7 +341,11 @@ public final class AgentServer {
    * @return 	the Integer value of the property.
    */
   public static Integer getInteger(String key) {
-    return Configuration.getInteger(key);
+    try {
+      return Integer.getInteger(key);
+    } catch (Exception exc) {
+      return null;
+    }
   }
 
   /**
@@ -404,57 +357,22 @@ public final class AgentServer {
    * @return 	the Integer value of the property.
    */
   public static Integer getInteger(String key, int value) {
-    return Configuration.getInteger(key, value);
-  }
-
-  /**
-   * Determines the integer value of the server property with the specified
-   * name.
-   * 
-   * @param key
-   *          property name.
-   * @return the Integer value of the property.
-   */
-  public static Long getLong(String key) {
-    return Configuration.getLong(key);
-  }
-
-  /**
-   * Determines the long value of the server property with the specified name.
-   * 
-   * @param key
-   *          property name.
-   * @param value
-   *          a default value.
-   * @return the Integer value of the property.
-   */
-  public static Long getLong(String key, long value) {
-    return Configuration.getLong(key, value);
-  }
-
-  /**
-   * Determines the boolean value of the server property with the specified
-   * name.
-   * 
-   * @param key
-   *          property name.
-   * @param value
-   *          a default value.
-   * @return the boolean value of the property.
-   */
-  public static boolean getBoolean(String key) {
-    return Configuration.getBoolean(key);
+    try {
+      return Integer.getInteger(key, value);
+    } catch (Exception exc) {
+      return null;
+    }
   }
 
   /** Static description of all known agent servers in ascending order. */
   private static ServersHT servers = null;
 
-  public static void addServerDesc(ServerDesc desc) throws Exception {
+  static void addServerDesc(ServerDesc desc) throws Exception {
     if (desc == null) return;
     servers.put(desc);
   }
 
-  public static ServerDesc removeServerDesc(short sid) throws Exception {
+  static ServerDesc removeServerDesc(short sid) throws Exception {
     return servers.remove(sid);
   }
 
@@ -481,7 +399,7 @@ public final class AgentServer {
    * @param sid	agent server id.
    * @return	the server's descriptor.
    */
-  public final static ServerDesc getServerDesc(short sid) throws UnknownServerException {
+  final static ServerDesc getServerDesc(short sid) throws UnknownServerException {
     ServerDesc serverDesc = servers.get(sid);
     if (serverDesc == null)
       throw new UnknownServerException("Unknow server id. #" + sid);
@@ -495,7 +413,7 @@ public final class AgentServer {
    * @return	the corresponding message consumer.
    */
   final static MessageConsumer getConsumer(short sid) throws UnknownServerException {
-    return getServerDesc(sid).getDomain();
+    return getServerDesc(sid).domain;
   }
 
   /**
@@ -616,7 +534,7 @@ public final class AgentServer {
     }
 
     initServices(root, local);
-    local.setDomain(engine);
+    local.domain = engine;
 
 //     if (logmon.isLoggable(BasicLevel.DEBUG)) {
 //       for (int i=0; i<servers.length; i++) {
@@ -650,8 +568,9 @@ public final class AgentServer {
                    "engine [" + engine + "] is not a HAEngine");
     }
 
-    // Search all directly accessible domains.
-    for (Enumeration n = root.networks.elements(); n.hasMoreElements();) {
+    // Search alls directly accessible domains.
+    for (Enumeration n = root.networks.elements();
+	 n.hasMoreElements();) {
       A3CMLNetwork network = (A3CMLNetwork) n.nextElement();
 
       A3CMLDomain domain = getConfig().getDomain(network.domain);
@@ -661,8 +580,8 @@ public final class AgentServer {
         // Initializes it with domain description. Be careful, this array
         // is kept in consumer, don't reuse it!!
         consumer.init(domain.name, network.port, domain.getServersId());
-        if (consumer instanceof SimpleNetwork && jgroups != null) {
-          //NTA modify to SimpleHANetwork
+        if (consumer instanceof SimpleNetwork &&
+            jgroups != null) {//NTA modify to SimpleHANetwork
           ((SimpleNetwork) consumer).setJGroups(jgroups);
           jgroups.setNetWork((SimpleNetwork) consumer);
         }
@@ -678,7 +597,7 @@ public final class AgentServer {
     }
   }
 
-  public static void initServerDesc(ServerDesc desc,
+  static void initServerDesc(ServerDesc desc,
                              A3CMLServer server) throws Exception {
     desc.gateway = server.gateway;
     // For each server set the gateway to the real next destination of
@@ -694,7 +613,7 @@ public final class AgentServer {
           logmon.log(BasicLevel.DEBUG, getName() + " : NAT sDesc = " + desc);
       }
     }
-    desc.setDomain(getConsumer(server.domain));
+    desc.domain = getConsumer(server.domain);
   }   
 
   private static ServerDesc
@@ -733,11 +652,7 @@ public final class AgentServer {
     if (a3config.properties != null) {
       for (Enumeration e = a3config.properties.elements(); e.hasMoreElements();) {
         A3CMLProperty p = (A3CMLProperty) e.nextElement();
-        Configuration.putProperty(p.name, p.value);
-
-        if (logmon.isLoggable(BasicLevel.DEBUG))
-          logmon.log(BasicLevel.DEBUG,
-                     getName() + " : Adds global property: " + p.name + " = " + p.value);
+        System.getProperties().put(p.name,p.value);
       }
     }
 
@@ -753,16 +668,10 @@ public final class AgentServer {
         Enumeration e = cluster.properties.elements();
         do {
           A3CMLProperty p = (A3CMLProperty) e.nextElement();
-          Configuration.putProperty(p.name, p.value);
-
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG,
-                       getName() + " : Adds cluster property: " +
-                       p.name + " = " + p.value);
+          System.getProperties().put(p.name,p.value);
         } while (e.hasMoreElements());
       }
-      if (cluster != null)
-        server = cluster.getServer(cid);
+      server = cluster.getServer(cid);
     } else {
       server = a3config.getServer(sid);
     }
@@ -772,17 +681,12 @@ public final class AgentServer {
       Enumeration e = server.properties.elements();
       do {
         A3CMLProperty p = (A3CMLProperty) e.nextElement();
-        Configuration.putProperty(p.name, p.value);
-
-        if (logmon.isLoggable(BasicLevel.DEBUG))
-          logmon.log(BasicLevel.DEBUG,
-                     getName() + " : Adds server property: " +
-                     p.name + " = " + p.value);
+        System.getProperties().put(p.name,p.value);
       } while (e.hasMoreElements());
     }
   }
   
-  public static class Status {
+  static class Status {
     public static final int INSTALLED = 0;
     public static final int INITIALIZING = 0x1;
     public static final int INITIALIZED = 0x2;
@@ -818,7 +722,7 @@ public final class AgentServer {
    * agents may be created and deployed, and notifications may be sent using
    * the <code>Channel</code> <code>sendTo</code> function.
    *
-   * @param args	launching arguments, the first one is the server id
+   * @param args	lauching arguments, the first one is the server id
    *			and the second one the persistency directory.
    * @return		number of arguments consumed in args
    *
@@ -843,6 +747,8 @@ public final class AgentServer {
 
     init(sid, path, null, cid);
 
+    configController = new ConfigController();
+
     return 2;
   }
 
@@ -851,7 +757,7 @@ public final class AgentServer {
       synchronized(status) {
         if (status.value != Status.STOPPED) {
           logmon.log(BasicLevel.WARN,
-                     getName() + ", force status: " + getStatusInfo());
+                     getName() + ", force status: " + status.value);
         }
         status.value = Status.STOPPED;
       }
@@ -867,7 +773,7 @@ public final class AgentServer {
     synchronized(status) {
       if (status.value != Status.STOPPED) {
         logmon.log(BasicLevel.WARN,
-                   getName() + ", cannot reset, bad status: " + getStatusInfo());
+                   getName() + ", cannot reset, bad status: " + status.value);
         return;
       }
       status.value = Status.RESETING;
@@ -958,13 +864,10 @@ public final class AgentServer {
                           String path,
                           LoggerFactory loggerFactory,
                           short cid) throws Exception {
-    if (cid == NULL_ID)
-      name = new StringBuffer("AgentServer#").append(sid).toString();
-    else
-      name = new StringBuffer("AgentServer#").append(sid).append('.').append(cid).toString();
+    name = new StringBuffer("AgentServer#").append(sid).toString();
 
     if (loggerFactory != null) Debug.setLoggerFactory(loggerFactory);
-    logmon = Debug.getLogger(AgentServer.class.getName() + ".#" + sid);
+    logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer.#" + sid);
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + ", init()", new Exception());
@@ -977,7 +880,7 @@ public final class AgentServer {
         reset();
       }
       if (status.value != Status.INSTALLED)
-        throw new Exception("cannot initialize, bad status: " + getStatusInfo());
+        throw new Exception("cannot initialize, bad status: " + status.value);
       status.value = Status.INITIALIZING;
     }
 
@@ -985,26 +888,17 @@ public final class AgentServer {
       serverId = sid; 
 
       tgroup = new ThreadGroup(getName()) {
-        public void uncaughtException(Thread t, Throwable e) {
-          if (e instanceof VirtualMachineError) {
-            if (logmon.isLoggable(BasicLevel.FATAL)) {
-              logmon.log(BasicLevel.FATAL,
+          public void uncaughtException(Thread t, Throwable e) {
+            if (logmon.isLoggable(BasicLevel.WARN)) {
+              logmon.log(BasicLevel.WARN,
                          "Abnormal termination for " +
                          t.getThreadGroup().getName() + "." + t.getName(),
                          e);
-              // AF: Should be AgentServer.stop() ?
-              System.exit(-1);
-            }
-          } else {
-            if (logmon.isLoggable(BasicLevel.WARN)) {
-              logmon.log(BasicLevel.WARN,
-                         "Abnormal termination for " + t.getThreadGroup().getName() + "." + t.getName(), e);
             }
           }
-        }
-      };
+        };
    
-      //  Try to get transaction type from disk, then initialize the right
+      //  Try to get transaction type from disk, then initialize the rigth
       // transaction manager and get the configuration.
       File dir = new File(path);
       if (dir.exists() && dir.isDirectory()) {
@@ -1017,15 +911,18 @@ public final class AgentServer {
             Class tclass = Class.forName(tname);
             transaction = (Transaction) tclass.newInstance();
           } catch (Exception exc) {
-            logmon.log(BasicLevel.FATAL, getName() + ", can't instantiate transaction manager", exc);
-            throw new Exception("Can't instantiate transaction manager");
+            logmon.log(BasicLevel.FATAL,
+                       getName() + ", can't instanciate transaction manager",
+                       exc);
+            throw new Exception("Can't instanciate transaction manager");
           } finally {
             if (dis != null) dis.close();
           }
           try {
             transaction.init(path);
           } catch (IOException exc) {
-            logmon.log(BasicLevel.FATAL, getName() + ", can't start transaction manager", exc);
+            logmon.log(BasicLevel.FATAL,
+                       getName() + ", can't start transaction manager", exc);
             throw new Exception("Can't start transaction manager");
           }
         }
@@ -1037,7 +934,7 @@ public final class AgentServer {
       // There are two steps because the configuration step needs the
       // transaction components to be initialized.
       if (transaction != null) {
-        // Try to read the serialized configuration (through transaction)
+        // Try to read the serialiazed configuration (trough transaction)
         try {
           a3config = A3CMLConfig.load();
         } catch (Exception exc) {
@@ -1051,7 +948,8 @@ public final class AgentServer {
         try {
           a3config = A3CMLConfig.getConfig(DEFAULT_SER_CFG_FILE);
         } catch (Exception exc) {
-          logmon.log(BasicLevel.WARN, getName() + ", serialized a3cmlconfig not found");
+          logmon.log(BasicLevel.WARN,
+                     getName() + ", serialized a3cmlconfig not found");
         }
 
         if (a3config == null) {
@@ -1059,16 +957,21 @@ public final class AgentServer {
           try {
             a3config = A3CML.getXMLConfig();
           } catch (Exception exc) {
-            logmon.log(BasicLevel.WARN, getName() + ", XML configuration file not found");
+            logmon.log(BasicLevel.WARN,
+                       getName() + ", XML configuration file not found");
           }
         }
 
         if (a3config == null) {
           // 3rd, Generate A3CMLConfig base.
-          logmon.log(BasicLevel.WARN, "Generate default configuration");
-          A3CMLDomain d = new A3CMLDomain(ADMIN_DOMAIN, SimpleNetwork.class.getName());
+          logmon.log(BasicLevel.WARN,
+                     "Generate default configuration");
+          A3CMLDomain d = new A3CMLDomain(ADMIN_DOMAIN,
+                                          "fr.dyade.aaa.agent.SimpleNetwork");
           A3CMLServer s = new A3CMLServer((short) 0, ADMIN_SERVER, "localhost");
           s.networks.addElement(new A3CMLNetwork(ADMIN_DOMAIN, 27300));
+          s.services.addElement(new A3CMLService("fr.dyade.aaa.agent.AgentAdmin",null));
+          s.services.addElement(new A3CMLService("fr.dyade.aaa.agent.HttpDebug","20080"));
           d.addServer(s);
           a3config = new A3CMLConfig();
           a3config.addDomain(d);
@@ -1078,30 +981,30 @@ public final class AgentServer {
 
       // if JGroups
       if (cid > NULL_ID) clusterId = cid;
-      
+
       // set properties
       setProperties(serverId, clusterId);
 
       // Initializes the JMX Wrapper
-      try {
-        MXWrapper.init();
-      } catch (Exception exc) {
-        logmon.log(BasicLevel.ERROR, "can't instantiate MXServer.", exc);
-      }
+      MXWrapper.init();
 
       if (transaction == null) {
         try {
-          String tname = getProperty("Transaction", "fr.dyade.aaa.util.NTransaction");
+          String tname = getProperty("Transaction",
+                                     "fr.dyade.aaa.util.NTransaction");
+          Class tclass = Class.forName(tname);
           transaction = (Transaction) Class.forName(tname).newInstance();
         } catch (Exception exc) {
-          logmon.log(BasicLevel.FATAL, getName() + ", can't instantiate transaction manager", exc);
-          throw new Exception("Can't instantiate transaction manager");
+          logmon.log(BasicLevel.FATAL,
+                     getName() + ", can't instanciate transaction manager", exc);
+          throw new Exception("Can't instanciate transaction manager");
         }
 
         try {
           transaction.init(path);
         } catch (IOException exc) {
-          logmon.log(BasicLevel.FATAL, getName() + ", can't start transaction manager", exc);
+          logmon.log(BasicLevel.FATAL,
+                     getName() + ", can't start transaction manager", exc);
           throw new Exception("Can't start transaction manager");
         }
       }
@@ -1112,11 +1015,11 @@ public final class AgentServer {
                                 "server=" + getName() + ",cons=Transaction");
       } catch (Exception exc) {
         if (logmon == null)
-          logmon = Debug.getLogger(AgentServer.class.getName());
+          logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer");
         logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
       }
 
-      // save A3CMLConfig (Maybe we can omit it in some case).
+      // save A3CMLConfig (May be we can omit it in some case).
       a3config.save();
 
       try {
@@ -1151,14 +1054,7 @@ public final class AgentServer {
             // deliver to its consumer (Engine or Network component). So we have
             // to insert it in the queue of this consumer.
             try {
-              getServerDesc(msg.getDest()).getDomain().insert(msg);
-            } catch (UnknownServerException exc) {
-              logmon.log(BasicLevel.ERROR,
-                         getName() + ", discard message to unknown server id#" +
-                         msg.getDest());
-              msg.delete();
-              msg.free();
-              continue;
+              getServerDesc(msg.getDest()).domain.insert(msg);
             } catch (NullPointerException exc) {
               logmon.log(BasicLevel.ERROR,
                          getName() + ", discard message to unknown server id#" +
@@ -1199,7 +1095,7 @@ public final class AgentServer {
         //  Initialize services.
         ServiceManager.init();
 
-        logmon.log(BasicLevel.INFO,
+        logmon.log(BasicLevel.DEBUG,
                    getName() + ", ServiceManager initialized");
 
         /* Actually get Services from A3CML configuration file. */
@@ -1221,21 +1117,22 @@ public final class AgentServer {
       engine.init();
 
       // If the server is part of an HA group starts the JGroup component
-      if (jgroups != null) jgroups.init(sid);
+      if (jgroups != null) jgroups.init(getName());
 
       logmon.log(BasicLevel.WARN,
                  getName() + ", initialized at " + new Date());
 
       // Commit all changes.
       transaction.begin();
-      transaction.commit(true);
+      transaction.commit();
+      transaction.release();
 
       try {
         SCServerMBean bean = new SCServer();
         MXWrapper.registerMBean(bean, "AgentServer", "server=" + getName());
       } catch (Exception exc) {
         if (logmon == null)
-          logmon = Debug.getLogger(AgentServer.class.getName());
+          logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer");
         logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
       }
     } catch (Exception exc) {
@@ -1253,7 +1150,7 @@ public final class AgentServer {
         // re-initialization..
         status.value = Status.INSTALLED;
       }
-      throw new Exception(t.getMessage());
+      throw new Exception(t);
     }
 
     synchronized(status) {
@@ -1302,7 +1199,7 @@ public final class AgentServer {
     synchronized(status) {
       if ((status.value != Status.INITIALIZED) &&
           (status.value != Status.STOPPED))
-        throw new Exception("cannot start, bad status: " + getStatusInfo());
+        throw new Exception("cannot start, bad status: " + status.value);
       status.value = Status.STARTING;
     }
 
@@ -1314,7 +1211,7 @@ public final class AgentServer {
           // Be careful, we have to save ServiceManager after start (initialized
           // attribute).
           ServiceManager.save();
-          logmon.log(BasicLevel.INFO,
+          logmon.log(BasicLevel.DEBUG,
                      getName() + ", ServiceManager started");
         }
       } catch (Exception exc) {
@@ -1348,11 +1245,12 @@ public final class AgentServer {
 
       // Commit all changes.
       transaction.begin();
-      transaction.commit(true);
+      transaction.commit();
+      transaction.release();
     } catch (Exception exc) {
       logmon.log(BasicLevel.ERROR, getName() + "Cannot start", exc);
       synchronized(status) {
-        // TODO AF: Will be replaced by a BAD_STARTED status allowing the
+        // AF: Will be replaced by a BAD_STARTED status allowing the
         // stop and reset..
         status.value = Status.STOPPED;
       }
@@ -1360,11 +1258,11 @@ public final class AgentServer {
     } catch (Throwable t) {
       logmon.log(BasicLevel.ERROR, getName() + "Cannot start", t);
       synchronized(status) {
-        // TODO AF: Will be replaced by a BAD_STARTED status allowing the
+        // AF: Will be replaced by a BAD_STARTED status allowing the
         // stop and reset..
         status.value = Status.STOPPED;
       }
-      throw new Exception(t.getMessage());
+      throw new Exception(t);
     }
 
     synchronized(status) {
@@ -1382,7 +1280,7 @@ public final class AgentServer {
    * if this method is called from a server's thread it should result a
    * dead-lock.
    *
-   * @param sync	If true the stop is processed synchronously, otherwise
+   * @param sync	If true the stop is precessed synchronous, otherwise
    *			a thread is created and the method returns.
    */
   public static void stop(boolean sync) {
@@ -1396,7 +1294,7 @@ public final class AgentServer {
    * if this method is called from a server's thread it should result a
    * dead-lock.
    *
-   * @param sync	If true the stop is processed synchronously, otherwise
+   * @param sync	If true the stop is precessed synchronous, otherwise
    *			a thread is created and the method returns.
    * @param delay       if sync is false then the thread in charge of
    *                    stopping the server waits this delay before
@@ -1408,13 +1306,10 @@ public final class AgentServer {
     if (sync == true) {
       stopper.run();
     } else {
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, getName() + ", stop()", new Exception());
-
       // Creates a thread to execute AgentServer.stop in order to
       // avoid deadlock.
       Thread t = new Thread(stopper);
-      t.setDaemon(false);
+      t.setDaemon(true);
       t.start();
     }
   }
@@ -1457,17 +1352,13 @@ public final class AgentServer {
       if ((status.value != Status.STARTED) &&
           (status.value != Status.STOPPED)) {
         logmon.log(BasicLevel.WARN,
-                   getName() + "cannot stop, bad status: " + getStatusInfo());
+                   getName() + "cannot stop, bad status: " + status.value);
         return;
       }
       status.value = Status.STOPPING;
     }
 
     try {
-      if (timer != null)
-        timer.cancel();
-      timer = null;
-      
       // If the server is part of an HA group stops the JGroup component
       if (jgroups != null) jgroups.disconnect();
 
@@ -1488,9 +1379,10 @@ public final class AgentServer {
           }
         }
       }
-      
       // Stop all services.
       ServiceManager.stop();
+      // Stop all drivers
+      Driver.stopAll();
 
       // Wait for all threads before stop the TM !!
       while (true) {
@@ -1509,12 +1401,13 @@ public final class AgentServer {
                      tab[j]);
         }
         try {
-          Thread.sleep(1000);
+          Thread.sleep(2500);
         } catch (InterruptedException e) {}
       }
 
       // Stop the transaction manager.
       if (transaction != null) transaction.stop();
+
       // Wait for the transaction manager stop
 
       Runtime.getRuntime().gc();
@@ -1553,13 +1446,13 @@ public final class AgentServer {
     try {
       init(args);
     } catch (Throwable exc) {
-      System.out.println(getName() + "initialization failed: " + ERRORSTRING);
+      System.out.println(getName() + "initialisation failed: " + ERRORSTRING);
       System.out.println(exc.toString());
       System.out.println(ENDSTRING);
       if (logmon == null)
-        logmon = Debug.getLogger(AgentServer.class.getName());
+        logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer");
       logmon.log(BasicLevel.ERROR,
-                 getName() + " initialization failed", exc);
+                 getName() + " initialisation failed", exc);
       System.exit(1);
     }
 
@@ -1579,7 +1472,7 @@ public final class AgentServer {
       System.out.print(exc.toString());
       System.out.println(ENDSTRING);
       if (logmon == null)
-        logmon = Debug.getLogger(AgentServer.class.getName());
+        logmon = Debug.getLogger(Debug.A3Debug + ".AgentServer");
       logmon.log(BasicLevel.ERROR, getName() + " failed", exc);
       System.exit(1);
     }

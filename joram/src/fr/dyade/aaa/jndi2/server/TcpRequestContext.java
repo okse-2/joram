@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,14 +24,15 @@ package fr.dyade.aaa.jndi2.server;
 
 import fr.dyade.aaa.jndi2.msg.*;
 
+import java.io.*;
 import java.net.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
-public class TcpRequestContext extends RequestContext {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
+public class TcpRequestContext 
+    extends RequestContext {
+  
   private transient IOControl ioCtrl;
 
   private JndiRequest request;
@@ -43,26 +44,23 @@ public class TcpRequestContext extends RequestContext {
 
   public JndiRequest getRequest() {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, "TcpRequestContext.getRequest()"); 
+      Trace.logger.log(BasicLevel.DEBUG, 
+                       "TcpRequestContext.getRequest()"); 
     return request;
   }
 
   public void reply(JndiReply reply) {
-    if (ioCtrl == null) {
-      Trace.logger.log(BasicLevel.WARN, "TcpRequestContext.reply(" + reply + ") ioCtrl is null");
-      return;
-    }
-      
     try {
       ioCtrl.writeObject(reply);
     } catch (Exception exc) {
-      Trace.logger.log(BasicLevel.ERROR, "TcpRequestContext.reply(" + reply + ")", exc);
+      Trace.logger.log(BasicLevel.ERROR, "", exc);
     } finally {
       ioCtrl.close();
     }
   }
   
   public String toString() {
-    return '(' + super.toString() + ",request=" + request + ')';
+    return '(' + super.toString() +
+      ",request=" + request + ')';
   }
 }

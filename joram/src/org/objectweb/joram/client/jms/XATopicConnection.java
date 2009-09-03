@@ -31,7 +31,8 @@ import org.objectweb.joram.client.jms.connection.RequestChannel;
 /**
  * Implements the <code>javax.jms.XATopicConnection</code> interface.
  */
-public class XATopicConnection extends TopicConnection implements javax.jms.XATopicConnection {
+public class XATopicConnection extends TopicConnection
+    implements javax.jms.XATopicConnection {
 
   /** Resource manager instance. */
   private XAResourceMngr rm;
@@ -40,13 +41,14 @@ public class XATopicConnection extends TopicConnection implements javax.jms.XATo
    * Creates an <code>XATopicConnection</code> instance.
    *
    * @param factoryParameters  The factory parameters.
-   * @param requestChannel     The actual connection to wrap.
+   * @param connectionImpl  The actual connection to wrap.
    *
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
   public XATopicConnection(FactoryParameters factoryParameters,
-                           RequestChannel requestChannel) throws JMSException {
+                           RequestChannel requestChannel) throws JMSException
+  {
     super(factoryParameters, requestChannel);
     rm = new XAResourceMngr(this);
   }
@@ -57,8 +59,9 @@ public class XATopicConnection extends TopicConnection implements javax.jms.XATo
    * @exception IllegalStateException  If the connection is closed.
    * @exception JMSException  In case of an invalid acknowledge mode.
    */
-  public javax.jms.TopicSession createTopicSession(boolean transacted, 
-                                                   int acknowledgeMode) throws JMSException {
+  public javax.jms.TopicSession
+         createTopicSession(boolean transacted, int acknowledgeMode)
+         throws JMSException {
     return super.createTopicSession(transacted, acknowledgeMode);
   }
 
@@ -67,7 +70,8 @@ public class XATopicConnection extends TopicConnection implements javax.jms.XATo
    *
    * @exception IllegalStateException  If the connection is closed.
    */
-  public javax.jms.XATopicSession createXATopicSession() throws JMSException {
+  public javax.jms.XATopicSession createXATopicSession() throws JMSException
+  {
     checkClosed();
     TopicSession s = new TopicSession(this, true, 0, getRequestMultiplexer());
     XATopicSession xas = new XATopicSession(this, s, rm);
@@ -81,7 +85,9 @@ public class XATopicConnection extends TopicConnection implements javax.jms.XATo
    * @exception IllegalStateException  If the connection is closed.
    * @exception JMSException  In case of an invalid acknowledge mode.
    */
-  public javax.jms.Session createSession(boolean transacted, int acknowledgeMode) throws JMSException {
+  public javax.jms.Session
+         createSession(boolean transacted, int acknowledgeMode)
+         throws JMSException {
     return super.createSession(transacted, acknowledgeMode);
   }
 
@@ -90,7 +96,8 @@ public class XATopicConnection extends TopicConnection implements javax.jms.XATo
    *
    * @exception IllegalStateException  If the connection is closed.
    */
-  public javax.jms.XASession createXASession() throws JMSException {
+  public javax.jms.XASession createXASession() throws JMSException
+  {
     checkClosed();
     Session s = new Session(this, true, 0, getRequestMultiplexer());
     XASession xas = new XASession(this, s, rm);

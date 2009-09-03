@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 2007 France Telecom
  *
  * This library is free software; you can redistribute it and/or
@@ -23,34 +23,28 @@
  */
 package org.objectweb.joram.client.jms.admin;
 
-import java.util.Enumeration;
+import javax.naming.*;
+
+import javax.jms.JMSException;
+import javax.jms.Connection;
+
 import java.util.Hashtable;
+import java.util.Enumeration;
+import java.util.Properties;
 import java.util.Map;
 import java.util.Random;
 
-import javax.jms.Connection;
-import javax.jms.JMSException;
-import javax.jms.JMSSecurityException;
-import javax.naming.NamingException;
-import javax.naming.RefAddr;
-import javax.naming.Reference;
-import javax.naming.StringRefAddr;
-
 import org.objectweb.joram.client.jms.ConnectionFactory;
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
+import org.objectweb.joram.client.jms.admin.AdministeredObject;
 
-import fr.dyade.aaa.common.Debug;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.joram.shared.JoramTracing;
 
 /**
  * A base class for clustered connection factories.
  */
 public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.admin.AdministeredObject implements javax.jms.ConnectionFactory {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
 
-  private static Logger logger = Debug.getLogger(ClusterConnectionFactory.class.getName());
-  
   protected Hashtable cluster = null;
 
   /** 
@@ -154,17 +148,8 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
     return "ClusterConnectionFactory:" + cluster;
   }
 
-  /**
-   * @return the cluster hashtable.
-   */
-  public Hashtable getCluster() {
-    return cluster;
-  }
-  
   /** Sets the naming reference of an administered object. */
   public void toReference(Reference ref) throws NamingException {
-    if (cluster == null) return;
-
     Map.Entry entries[] = new Map.Entry [cluster.size()];
     cluster.entrySet().toArray(entries);
 
@@ -174,6 +159,7 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
       strbuf.append("CF#").append(i).append(".key");
       ref.add(new StringRefAddr(strbuf.toString(),
                                 (String) entries[i].getKey()));
+
       ConnectionFactory cf = (ConnectionFactory) entries[i].getValue();
 
       strbuf.setLength(0);
@@ -188,6 +174,8 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
 
   /** Restores the administered object from a naming reference. */
   public void fromReference(Reference ref) throws NamingException {
+    if (cluster == null) cluster = new Hashtable();
+
     int i = 0;
     StringBuffer strbuf = new StringBuffer(15);
 
@@ -208,11 +196,10 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
         strbuf.append("CF#").append(i);
         cf.fromReference(ref, strbuf.toString());
 
-        if (cluster == null) cluster = new Hashtable();
         cluster.put(key, cf);
       } catch (Exception exc) {
-        if (logger.isLoggable(BasicLevel.ERROR))
-          logger.log(BasicLevel.ERROR, "", exc);
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+          JoramTracing.dbgClient.log(BasicLevel.ERROR, "", exc);
       }
       i++;
     }
@@ -228,7 +215,6 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
   public Hashtable code() {
     Hashtable h = new Hashtable();
 
-    if (cluster == null) return h;
     Map.Entry entries[] = new Map.Entry [cluster.size()];
     cluster.entrySet().toArray(entries);
 
@@ -236,7 +222,7 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
     for (int i=0; i<entries.length; i++) {
       strbuf.setLength(0);
       strbuf.append("CF#").append(i).append(".key");
-      h.put(strbuf.toString(), entries[i].getKey());
+      h.put(strbuf.toString(), (String) entries[i].getKey());
 
       ConnectionFactory cf = (ConnectionFactory) entries[i].getValue();
 
@@ -284,11 +270,10 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
 
         cluster.put(key, cf);
       } catch (Exception exc) {
-        if (logger.isLoggable(BasicLevel.ERROR))
-          logger.log(BasicLevel.ERROR, "", exc);
+        if (JoramTracing.dbgClient.isLoggable(BasicLevel.ERROR))
+          JoramTracing.dbgClient.log(BasicLevel.ERROR, "", exc);
       }
       i++;
     }
   }
-
 }

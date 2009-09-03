@@ -24,31 +24,27 @@
  */
 package classic;
 
-import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.client.jms.Topic;
-import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
+import org.objectweb.joram.client.jms.admin.*;
+import org.objectweb.joram.client.jms.*;
+import org.objectweb.joram.client.jms.tcp.*;
 
 
 /**
  * Administers an agent server for the classic samples.
  */
-public class ClassicAdmin {
-
-  public static void main(String[] args) throws Exception {
-    
+public class ClassicAdmin
+{
+  public static void main(String[] args) throws Exception
+  {
     System.out.println();
     System.out.println("Classic administration...");
 
     AdminModule.connect("root", "root", 60);
 
-    Queue queue = Queue.create("queue");
-    Topic topic = Topic.create("topic");
+    Queue queue = (Queue) Queue.create("queue");
+    Topic topic = (Topic) Topic.create("topic");
     
-    User.create("anonymous", "anonymous");
+    User user = User.create("anonymous", "anonymous");
 
     queue.setFreeReading();
     topic.setFreeReading();

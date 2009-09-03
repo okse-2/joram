@@ -30,11 +30,6 @@ package org.objectweb.joram.mom.notifications;
 public class UnsetFatherRequest extends AdminRequest
 {
   /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
-  /**
    * Constructs an <code>UnsetFatherRequest</code> instance.
    *
    * @param id  Identifier of the request, may be null.

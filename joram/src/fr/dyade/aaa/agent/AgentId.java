@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -23,8 +23,8 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
+import fr.dyade.aaa.util.*;
 
 /**
  * <code>AgentIdStamp</code> class defines static members, variable and
@@ -38,9 +38,6 @@ import java.io.Serializable;
  * class.
  */
 final class AgentIdStamp implements Serializable {
-  /** Define serialVersionUID for interoperability. */
-  private static final long serialVersionUID = 1L;
-
   /** Static reference to local <code>AgentIdStamp</code> object. */
   static AgentIdStamp stamp = null;
 
@@ -50,7 +47,7 @@ final class AgentIdStamp implements Serializable {
   private int remote;
 
   /**
-   * Initializes <code>AgentIdStamp</code> class.
+   * Initializes <code>AgentIdStamp</code> classe.
    *
    * @exception IOException		IO problem during loading.
    * @exception ClassNotFoundException	should never happened
@@ -156,8 +153,7 @@ final class AgentIdStamp implements Serializable {
  * @see AgentIdStamp
  */
 public final class AgentId implements Serializable {
-  /** Define serialVersionUID for interoperability. */
-  static final long serialVersionUID = 1L;
+  static final long serialVersionUID = -5096976989176739863L;
 
   //  Declares all fields transient in order to avoid useless
   // description of each during serialization.
@@ -210,8 +206,8 @@ public final class AgentId implements Serializable {
   public static final int NullIdStamp = 0;
   /** Reserved stamp for factory <code>AgentId</code>. */
   public static final int FactoryIdStamp = 1;
-  /** Reserved stamp for admin <code>AgentId</code>, now unused. */
-//  public static final int AdminIdStamp = 2;
+  /** Reserved stamp for admin <code>AgentId</code>. */
+  public static final int AdminIdStamp = 2;
   /** Maximum reserved stamp for system services. */
   public static final int MaxSystemIdStamp = 2;
 
@@ -237,12 +233,10 @@ public final class AgentId implements Serializable {
   public static int JoramAdminStamp = 10;
   /** Reserved stamp for JORAM administration proxy <code>AgentId</code>. */
   public static int JoramAdminPxStamp = 11;
-  /** Reserved stamp for JMS topic <code>AgentId</code> in charge of sending control events. */
+  /** Reserved stamp for JMS topic <code>AgentId</code> in charge ofsending control events. */
   public static int ControlTopicStamp = 12;
   /** Reserved stamp for the server reconfiguration agent <code>AgentId</code> . */
   public static int ServerConfigStamp = 13;
-  /** Reserved stamp for ResourceAgent. */
-  public static int ResourceAgentStamp = 14;
   /** Maximum reserved stamp for well known services. */
   public static int MaxWKSIdStamp = 1024;
   /** Maximum reserved stamp. */
@@ -270,6 +264,11 @@ public final class AgentId implements Serializable {
    * @see AgentFactory
    */
   static AgentId factoryId;
+  /**
+   * <code>AgentId</code> for local admin agent.
+   * @see AgentAdmin
+   */
+  public static AgentId adminId;
 
   /**
    * Returns the <code>AgentId</code> for a remote factory agent.
@@ -297,6 +296,9 @@ public final class AgentId implements Serializable {
     factoryId = new AgentId(AgentServer.getServerId(),
 			    AgentServer.getServerId(),
 			    FactoryIdStamp);
+    adminId = new AgentId(AgentServer.getServerId(),
+			    AgentServer.getServerId(),
+			    AdminIdStamp);
     // Initialize stamp values
     AgentIdStamp.init();
   }
@@ -395,9 +397,9 @@ public final class AgentId implements Serializable {
    * @return	The <code>AgentId</code> object represented by the argument.
    */
   public static final AgentId fromString(String str) {
-    if ((str == null) || (str.length() == 0)) return null;
+    if (str == null) return null;
     if (str.charAt(0) != '#')
-      throw new IllegalArgumentException(str + ": bad agent identifier");
+      throw new IllegalArgumentException(str + ": bad id");
 
     try {
       int start = 1;

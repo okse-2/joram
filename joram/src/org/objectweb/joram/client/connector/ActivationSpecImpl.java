@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2004 - Bull SA
- * Copyright (C) 2008 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,7 +27,6 @@ import javax.resource.spi.IllegalStateException;
 import javax.resource.spi.InvalidPropertyException;
 import javax.resource.spi.ResourceAdapter;
 
-import org.objectweb.joram.shared.security.SimpleIdentity;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
@@ -40,11 +38,6 @@ public class ActivationSpecImpl
                   javax.resource.spi.ResourceAdapterAssociation,
                   java.io.Serializable
 {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   /**
    * Value for the property <code>acknowledgeMode</code>
    * defined in the MDB deployment descriptor.
@@ -66,8 +59,6 @@ public class ActivationSpecImpl
   private String userName = "anonymous";
   /** User password. */
   private String password = "anonymous";
-  /** identity class name. */
-  String identityClass = SimpleIdentity.class.getName();
 
   /** Message selector. */
   private String messageSelector = null;
@@ -153,7 +144,7 @@ public class ActivationSpecImpl
                                   + "resource adapter: "
                                   + ra.getClass().getName());
 
-    this.ra = ra;
+    this.ra = (JoramAdapter) ra;
   }
 
   /** Returns the resource adapter central authority instance. */
@@ -196,11 +187,6 @@ public class ActivationSpecImpl
     this.password = password;
   }
 
-  /** set the identity class name. */
-  public void setIdentityClass(String identityClass) {
-    this.identityClass = identityClass;
-  }
-  
   /** Sets the message selector. */
   public void setMessageSelector(String messageSelector)
   {
@@ -259,11 +245,6 @@ public class ActivationSpecImpl
     return password;
   }
 
-  /** Returns the identity class name. */
-  public String getIdentityClass() {
-    return identityClass;  
-  }
-  
   /** Returns the message selector. */
   public String getMessageSelector()
   {

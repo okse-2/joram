@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,58 +19,25 @@
  * USA.
  *
  * Initial developer(s): Frederic Maistre (INRIA)
- * Contributor(s): ScalAgent Distributed Technologies
+ * Contributor(s):
  */
 package org.objectweb.joram.shared.client;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.IOException;
-
+import java.util.Hashtable;
+import java.util.Enumeration;
 import java.util.Vector;
-
-import org.objectweb.joram.shared.stream.StreamUtil;
 
 /**
  * A <code>SessAckRequest</code> instance is used by a <code>Session</code>
  * for acknowledging the messages it consumed.
  */
-public final class SessAckRequest extends AbstractJmsRequest {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
+public class SessAckRequest extends AbstractJmsRequest
+{
   /** Vector of message identifiers. */
   private Vector ids;
-
-  /** Sets the vector of identifiers. */
-  public void setIds(Vector ids) {
-    this.ids = ids;
-  }
-
-  public void addId(String id) {
-    ids.addElement(id);
-  }
-
-  /** Returns the vector of acknowledged messages identifiers. */
-  public Vector getIds() {
-    return ids;
-  }
-
   /** <code>true</code> if the request is destinated to a queue. */
   private boolean queueMode;
 
-  /** Sets the target destination type. */
-  public void setQueueMode(boolean queueMode) {
-    this.queueMode = queueMode;
-  }
-
-  /** Returns <code>true</code> if the request is destinated to a queue. */
-  public boolean getQueueMode() {
-    return queueMode;
-  }
-
-  protected int getClassId() {
-    return SESS_ACK_REQUEST;
-  }
 
   /**
    * Constructs a <code>SessAckRequest</code> instance.
@@ -80,7 +47,8 @@ public final class SessAckRequest extends AbstractJmsRequest {
    * @param queueMode  <code>true</code> if this request is destinated to a
    *          queue.
    */
-  public SessAckRequest(String targetName, Vector ids, boolean queueMode) {
+  public SessAckRequest(String targetName, Vector ids, boolean queueMode)
+  {
     super(targetName);
     this.ids = ids;
     this.queueMode = queueMode;
@@ -93,31 +61,62 @@ public final class SessAckRequest extends AbstractJmsRequest {
     ids = new Vector();
   }
 
-  /* ***** ***** ***** ***** *****
-   * Streamable interface
-   * ***** ***** ***** ***** ***** */
 
-  /**
-   *  The object implements the writeTo method to write its contents to
-   * the output stream.
-   *
-   * @param os the stream to write the object to
-   */
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    StreamUtil.writeVectorOfStringTo(ids, os);
-    StreamUtil.writeTo(queueMode, os);
+  /** Sets the vector of identifiers. */
+  public void setIds(Vector ids)
+  {
+    this.ids = ids;
   }
 
-  /**
-   *  The object implements the readFrom method to restore its contents from
-   * the input stream.
-   *
-   * @param is the stream to read data from in order to restore the object
-   */
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    ids = StreamUtil.readVectorOfStringFrom(is);
-    queueMode = StreamUtil.readBooleanFrom(is);
+  public void addId(String id) {
+    ids.addElement(id);
+  }
+
+  /** Sets the target destination type. */
+  public void setQueueMode(boolean queueMode)
+  {
+    this.queueMode = queueMode;
+  }
+
+  /** Returns the vector of acknowledged messages identifiers. */
+  public Vector getIds()
+  {
+    return ids;
+  }
+
+  /** Returns <code>true</code> if the request is destinated to a queue. */
+  public boolean getQueueMode()
+  {
+    return queueMode;
+  }
+
+  public Hashtable soapCode() {
+    Hashtable h = super.soapCode();
+    h.put("queueMode",new Boolean(queueMode));
+    // Coding and adding the messages into a array:
+    int size = ids.size();
+    if (size > 0) {
+      String [] arrayId = new String[size];
+      for (int i = 0; i<size; i++) {
+        arrayId[i] = (String) ids.elementAt(0);
+        ids.removeElementAt(0);
+      }
+      if (arrayId != null)
+        h.put("arrayId",arrayId);
+    }
+    return h;
+  }
+
+  public static Object soapDecode(Hashtable h) {
+    SessAckRequest req = new SessAckRequest();
+    req.setRequestId(((Integer) h.get("requestId")).intValue());
+    req.setTarget((String) h.get("target"));
+    req.setQueueMode(((Boolean) h.get("queueMode")).booleanValue());
+    String [] arrayId = (String []) h.get("arrayId");
+    if (arrayId != null) {
+      for (int i = 0; i<arrayId.length; i++)
+        req.addId(arrayId[i]);
+    }
+    return req;
   }
 }

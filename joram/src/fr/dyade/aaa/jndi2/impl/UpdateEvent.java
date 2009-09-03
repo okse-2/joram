@@ -26,11 +26,6 @@ import javax.naming.CompositeName;
 
 public class UpdateEvent implements java.io.Serializable {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
-
   private NamingContextId updatedContextId;
 
   private String name;

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): David Feliot
- * Contributor(s):
+ * Contributor(s): Nicolas Tachker (ScalAgent)
  */
 package fr.dyade.aaa.jndi2.scn;
 
@@ -49,7 +49,7 @@ public class scnURLContext implements Context {
   public final static Logger logger;
   
   static {
-    logger = fr.dyade.aaa.common.Debug.getLogger("fr.dyade.aaa.jndi2.scn");    
+    logger = fr.dyade.aaa.util.Debug.getLogger("fr.dyade.aaa.jndi2.scn");    
   }
 
   static private final String URL_PREFIX = "scn:comp/";

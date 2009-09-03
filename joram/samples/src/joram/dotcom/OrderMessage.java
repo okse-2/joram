@@ -36,10 +36,6 @@ package dotcom;
  * @see		DeliveryTreatment
  */
 public class OrderMessage implements java.io.Serializable {
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   /** Order id. */
   int id ;
   /** Item ordered. */

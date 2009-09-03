@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2007 - ScalAgent DT
+ * Copyright (C) 2003 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,35 +17,35 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
- * Contributor(s): 
+ * Initial developer(s): Frederic Maistre (Bull SA)
+ * Contributor(s):
  */
 package bridge;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.MessageConsumer;
-import javax.jms.Session;
+import javax.jms.*;
 
 /**
  * Consumes messages on a foreign destination through the JORAM bridge.
  */
-public class BridgeConsumer {
-  public static void main(String[] args) throws Exception {
+public class BridgeConsumer
+{
+  public static void main(String[] args) throws Exception
+  {
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
-    Destination joramDest = (Destination) jndiCtx.lookup("joramQueue");
-    ConnectionFactory joramCF = (ConnectionFactory) jndiCtx.lookup("joramCF");
+    Destination dest = (Destination) jndiCtx.lookup("bridgeD");
+    ConnectionFactory cnxFact = (ConnectionFactory) jndiCtx.lookup("cf");
     jndiCtx.close();
 
-    Connection joramCnx = joramCF.createConnection();
-    Session joramSess = joramCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-    MessageConsumer joramCons = joramSess.createConsumer(joramDest);
-    joramCons.setMessageListener(new MsgListener("joram"));
-    joramCnx.start();  
-    
+    Connection cnx = cnxFact.createConnection();
+    Session sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+    MessageConsumer cons = sess.createConsumer(dest);
+ 
+    cons.setMessageListener(new MsgListener());
+
+    cnx.start();
+
     System.in.read();
 
-    joramCnx.close();
+    cnx.close();
   }
 }

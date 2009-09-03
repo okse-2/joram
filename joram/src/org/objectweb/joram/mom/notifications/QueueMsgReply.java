@@ -32,9 +32,6 @@ import java.util.*;
  * <code>ReceiveRequest</code> by sending a message to a client.
  */
 public class QueueMsgReply extends AbstractReply {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-  
   /** The message sent by the queue. */
   private Vector messages;
 
@@ -42,6 +39,7 @@ public class QueueMsgReply extends AbstractReply {
    * Constructs a <code>QueueMsgReply</code> instance.
    *
    * @param req  The <code>ReceiveRequest</code> actually replied.
+   * @param message  The message to send.
    */
   public QueueMsgReply(ReceiveRequest req) {
     super(req.getClientContext(), req.getRequestId());
@@ -64,8 +62,10 @@ public class QueueMsgReply extends AbstractReply {
   /**
    * Appends a string image for this object to the StringBuffer parameter.
    *
-   * @param output 	buffer to fill in
-   * @return <code>output</code> buffer is returned
+   * @param output
+   *	buffer to fill in
+   * @return
+	<code>output</code> buffer is returned
    */
   public StringBuffer toString(StringBuffer output) {
     output.append('(');

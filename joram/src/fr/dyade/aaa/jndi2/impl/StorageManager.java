@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,18 +22,14 @@
  */
 package fr.dyade.aaa.jndi2.impl;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.io.*;
+import java.util.*;
+import javax.naming.*;
 
-import javax.naming.CompositeName;
-import javax.naming.NamingException;
+import fr.dyade.aaa.util.*;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-
-import fr.dyade.aaa.util.Transaction;
+import org.objectweb.util.monolog.api.Logger;
 
 public class StorageManager {
 
@@ -64,11 +60,13 @@ public class StorageManager {
     if (contextCounterL == null) {
       contextCounter = 0;
     } else {
-      contextCounter = contextCounterL.longValue();
+      contextCounter = 
+        ((Long)contextCounterL).longValue();
     }
 
     // Load the context index
-    nameToIdIndex = (Hashtable)transaction.load(CTX_INDEX);
+    nameToIdIndex = (Hashtable)transaction.load(
+      CTX_INDEX);
     if (nameToIdIndex == null) {
       nameToIdIndex = new Hashtable();
     }
@@ -86,7 +84,8 @@ public class StorageManager {
       ncid = newNamingContextId();
     }
     NamingContext nc = new NamingContext(
-      ncid, ownerId, name);
+      ncid,
+      ownerId);
     addNamingContext(
       nc, 
       name);
@@ -98,7 +97,9 @@ public class StorageManager {
     throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
-                       "StorageManager.addNamingContext(" +  nc + ',' +  name + ')');
+                       "StorageManager.addNamingContext(" + 
+                       nc + ',' + 
+                       name + ')');
     nameToIdIndex.put(name, nc.getId());
     storeIndex();
     storeNamingContext(nc);    
@@ -125,7 +126,8 @@ public class StorageManager {
     throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
-                       "StorageManager.storeNamingContext(" + nc + ')');
+                       "StorageManager.storeNamingContext(" + 
+                       nc + ')');
     try {
       transaction.save(nc, ROOT, nc.getId().toString());
     } catch (IOException exc) {
@@ -138,16 +140,19 @@ public class StorageManager {
   public NamingContext loadNamingContext(NamingContextId ncid) 
     throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, 
-                       "StorageManager.loadNamingContext(" + ncid + ')');
+      Trace.logger.log(
+        BasicLevel.DEBUG, 
+        "StorageManager.loadNamingContext(" + 
+        ncid + ')');
     return loadNamingContext(ncid.toString());
   }
   
   public NamingContext loadNamingContext(String fileName) 
     throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, 
-                       "StorageManager.loadNamingContext(" + fileName + ')');
+      Trace.logger.log(
+        BasicLevel.DEBUG, 
+        "StorageManager.loadNamingContext(" + fileName + ')');
     try {
       Object obj = transaction.load(
         ROOT, fileName);
@@ -176,7 +181,8 @@ public class StorageManager {
     throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
-                       "StorageManager.delete(" + ncid + ',' + name + ')');
+                       "StorageManager.delete(" + 
+                       ncid + ',' + name + ')');
     transaction.delete(ROOT, ncid.toString());
     nameToIdIndex.remove(name);
     storeIndex();

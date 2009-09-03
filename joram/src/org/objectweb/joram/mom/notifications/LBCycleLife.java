@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -23,56 +23,33 @@
  */
 package org.objectweb.joram.mom.notifications;
 
+import org.objectweb.joram.mom.notifications.ClientMessages;
 import java.util.Hashtable;
-import java.util.List;
+import java.util.Vector;
 
 public class LBCycleLife extends QueueClusterNot {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 1L;
   private ClientMessages clientMessages;
   private Hashtable visitTable;
 
-  /**
-   * 
-   * @param rateOfFlow
-   */
   public LBCycleLife(float rateOfFlow) {
     super(rateOfFlow);
     visitTable = new Hashtable();
   }
   
-  /**
-   * 
-   * @param clientMessages
-   */
   public void setClientMessages(ClientMessages clientMessages) {
     this.clientMessages = clientMessages;
   }
 
-  /**
-   * 
-   * @return ClientMessages
-   */
   public ClientMessages getClientMessages() {
     return clientMessages;
   }
 
-  /**
-   * 
-   * @param msgId
-   * @param visit
-   */
-  public void putInVisitTable(String msgId, List visit) {
+  public void putInVisitTable(String msgId,
+                              Vector visit) {
     visitTable.put(msgId,visit);
   }
 
-  /**
-   * 
-   * @return visitTable
-   */
   public Hashtable getVisitTable() {
     return visitTable;
   }
@@ -82,7 +59,8 @@ public class LBCycleLife extends QueueClusterNot {
    *
    * @param output
    *	buffer to fill in
-   * @return <code>output</code> buffer is returned
+   * @return
+	<code>output</code> buffer is returned
    */
   public StringBuffer toString(StringBuffer output) {
     output.append('(');

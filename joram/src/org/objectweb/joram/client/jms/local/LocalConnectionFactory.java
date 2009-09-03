@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
- * Copyright (C) 2004 Bull SA
+ * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2004 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,52 +23,46 @@
  */
 package org.objectweb.joram.client.jms.local;
 
-import javax.jms.JMSException;
+import org.objectweb.joram.client.jms.Connection;
 
-import org.objectweb.joram.client.jms.ConnectionFactory;
-import org.objectweb.joram.client.jms.FactoryParameters;
-import org.objectweb.joram.client.jms.connection.RequestChannel;
-import org.objectweb.joram.shared.security.Identity;
+import javax.naming.NamingException;
 
 /**
- * A <code>LocalConnectionFactory</code> instance is a factory of local connections.
+ * A <code>LocalConnectionFactory</code> instance is a factory of
+ * local connections.
  */
-public class LocalConnectionFactory extends ConnectionFactory {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
+public class LocalConnectionFactory
+    extends org.objectweb.joram.client.jms.ConnectionFactory
+{
   /**
    * Constructs a <code>QueueLocalConnectionFactory</code> instance.
-   * Should only be used for internal purposes.
    */
-  public LocalConnectionFactory() {
+  public LocalConnectionFactory()
+  {
     super("localhost", -1);
   }
 
   /**
-   * Creates the <code>LocalRequestChannel</code> object needed to connect to the
-   * colocated server.
-   * 
-   * @param params          Connection configuration parameters.
-   * @param identity        Client's identity.
-   * @param reliableClass   The protocol specific class.
-   * @return                The <code>RequestChannel</code> object specific to the protocol used.
-   * 
-   * @exception JMSException  A problem occurs during the connection.
-   * 
-   * @see ConnectionFactory#createRequestChannel(FactoryParameters, Identity, String)
+   * Method inherited from the <code>ConnectionFactory</code> class.
+   *
+   * @exception JMSSecurityException  If the user identification is incorrect.
+   * @exception IllegalStateException  If the server is not listening.
    */
-  protected RequestChannel createRequestChannel(FactoryParameters params,
-                                                Identity identity,
-                                                String reliableClass) throws JMSException {
-    return new LocalRequestChannel(identity);
+  public javax.jms.Connection
+      createConnection(String name, String password)
+    throws javax.jms.JMSException
+  {
+    LocalConnection lc = new LocalConnection(name, password);
+    return new Connection(params, lc);
   }
-  
+
+
   /**
    * Admin method creating a <code>javax.jms.ConnectionFactory</code>
    * instance for creating local connections.
    */ 
-  public static ConnectionFactory create() {
+  public static javax.jms.ConnectionFactory create()
+  {
     return new LocalConnectionFactory();
   }
 }

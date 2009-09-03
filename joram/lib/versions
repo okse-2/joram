@@ -14,6 +14,5 @@ midpapi.jar             ?
 ow_monolog.jar          2.1.1
 soap.jar                ?
 soap.war                ?
-derby.jar		10.3.1.4
+derby.jar		10.1.2.1
 hsqldb.jar		1.8.0.4
-mysql-connector-java-5.1.5-bin.jar		5.1.5
