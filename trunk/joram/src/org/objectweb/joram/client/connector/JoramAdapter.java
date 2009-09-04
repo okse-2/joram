@@ -948,7 +948,10 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
       logger.log(BasicLevel.DEBUG,
       "Deactivating Endpoint on JORAM adapter.");
 
-    ((InboundConsumer) consumers.remove(spec)).close();
+    InboundConsumer consumer = (InboundConsumer) consumers.remove(spec);
+    if (consumer != null) {
+    	consumer.close();
+    }
   }
 
   /**
