@@ -291,8 +291,7 @@ public class ContextManager
   public NamingContextInfo[] changeOwner(
       CompositeName cn,
       Object formerOwnerId,
-      Object newOwnerId)
-  throws NamingException {
+      Object newOwnerId) throws NamingException {
     Vector updatedContexts = new Vector();
     Enumeration idEnum = storageManager.getContextIds();
     Enumeration nameEnum = storageManager.getContextNames();
@@ -326,7 +325,7 @@ public class ContextManager
     try {
         MXWrapper.registerMBean(context, "JNDI", "nc=/"+cn);
     } catch (Exception exc) {
-      Trace.logger.log(BasicLevel.ERROR, context + " jmx failed", exc);
+      Trace.logger.log(BasicLevel.WARN, context + " jmx failed", exc);
     }
   }
   
@@ -334,7 +333,7 @@ public class ContextManager
     try {
       MXWrapper.unregisterMBean("JNDI", "nc=/"+cn);
     } catch (Exception exc) {
-      Trace.logger.log(BasicLevel.ERROR, "jmx failed", exc);
+      Trace.logger.log(BasicLevel.WARN, "jmx failed", exc);
     }
   }
   
