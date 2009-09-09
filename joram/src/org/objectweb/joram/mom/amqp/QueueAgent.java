@@ -40,6 +40,9 @@ import fr.dyade.aaa.agent.DeleteAck;
 import fr.dyade.aaa.agent.Notification;
 
 public class QueueAgent extends Agent {
+
+  /** define serialVersionUID for interoperability */
+  private static final long serialVersionUID = 1L;
   
   public final static Logger logger = 
     fr.dyade.aaa.common.Debug.getLogger(QueueAgent.class.getName());
@@ -56,20 +59,24 @@ public class QueueAgent extends Agent {
   
   private LinkedList toAck;
   
-  private LinkedList consumers;
+  private transient LinkedList consumers;
   
   public QueueAgent(String name, boolean durable, boolean autodelete, boolean exclusive) {
     super(name);
     this.durable = durable;
     this.autodelete = autodelete;
     this.exclusive = exclusive;
-    this.toDeliver = new LinkedList();
-    this.consumers = new LinkedList();
-    this.toAck = new LinkedList();
   }
   
   protected void agentInitialize(boolean firstTime) throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "QueueAgent.agentInitialize(" + firstTime + ")");
     super.agentInitialize(firstTime);
+    if (firstTime) {
+      this.toDeliver = new LinkedList();
+      this.toAck = new LinkedList();
+    }
+    this.consumers = new LinkedList();
     if (!firstTime && !durable) {
       delete();
     }
@@ -290,6 +297,9 @@ public class QueueAgent extends Agent {
 
   static class Message implements Serializable {
 
+    /** define serialVersionUID for interoperability */
+    private static final long serialVersionUID = 1L;
+
     private String exchange;
     private String routingKey;
     private BasicProperties properties;
@@ -313,7 +323,7 @@ public class QueueAgent extends Agent {
   }
   
   
-  static class DeliverContext implements Serializable {
+  static class DeliverContext {
 
     private Listener consumer;
     private boolean isSubscription;
