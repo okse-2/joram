@@ -100,7 +100,8 @@ public class JoramMOMHandler implements MOMHandler {
         publishRequest.getPublish().immediate,
         publishRequest.getHeader(),
         publishRequest.body);
-    Channel.sendTo(proxy.getId(), basicPublish);
+    //Channel.sendTo(proxy.getId(), basicPublish);
+    basicPublish.basicPublish(proxy.getId());
   }
 
   public void basicRecover(boolean requeue, int channelNumber) {
