@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -64,10 +64,6 @@ public abstract class AbstractNotification
 
   public void setPersistent(boolean persistent) {
     this.persistent = persistent;
-  }
-  
-  public final boolean getPersistent() {
-    return persistent;
   }
 
   /**
