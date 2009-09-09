@@ -571,7 +571,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
                  "AdminTopicImpl.clientMessages(" + msgs + ')');
-    if (! msgs.getPersistent() && !msgs.getAsyncSend()) {
+    if (!msgs.isPersistent() && !msgs.getAsyncSend()) {
       // Means that this notification has been sent by a local
       // proxy (optimization). Must acknowledge it.
       forward(from, new SendReplyNot(msgs.getClientContext(), msgs.getRequestId()));

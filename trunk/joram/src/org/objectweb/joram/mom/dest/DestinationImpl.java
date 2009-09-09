@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -486,7 +486,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     // for topic performance : must send reply after process ClientMessage
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    if (! not.getPersistent() && !not.getAsyncSend()) {
+    if (!not.isPersistent() && !not.getAsyncSend()) {
       forward(from, new SendReplyNot(not.getClientContext(), not.getRequestId()));
     }
   }
@@ -609,7 +609,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // for topic performance : must send reply after process ClientMessage
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    if (! not.getPersistent() && replies.size() > 0) {
+    if (!not.isPersistent() && replies.size() > 0) {
       forward(from, new SendRepliesNot(replies));
     }
   }
