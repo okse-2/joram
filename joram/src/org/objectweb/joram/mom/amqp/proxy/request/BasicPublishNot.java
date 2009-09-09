@@ -25,12 +25,13 @@ package org.objectweb.joram.mom.amqp.proxy.request;
 
 import org.objectweb.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 
-import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.SyncNotification;
 
 /**
  * Transient notification.
  */
-public class BasicPublishNot extends Notification {
+public class BasicPublishNot extends SyncNotification {
   
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
@@ -94,6 +95,14 @@ public class BasicPublishNot extends Notification {
 
   public String getRoutingKey() {
     return routingKey;
+  }
+
+  public void basicPublish(AgentId proxyId) throws Exception {
+    invoke(proxyId);
+  }
+
+  public void Return() {
+    Return(null);
   }
 
 }

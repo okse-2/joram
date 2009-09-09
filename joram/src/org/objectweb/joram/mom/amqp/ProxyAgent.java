@@ -510,6 +510,7 @@ public class ProxyAgent extends Agent {
         not.isImmediate(),
         not.getProps(),
         not.getBody());
+    not.Return();
   }
 
   public void basicPublish(int channelId, String exchange, String routingKey, boolean mandatory,
