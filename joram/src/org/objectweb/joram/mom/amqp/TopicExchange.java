@@ -23,6 +23,7 @@
  */
 package org.objectweb.joram.mom.amqp;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -66,11 +67,11 @@ public class TopicExchange extends ExchangeAgent {
 
   private static Pattern createPattern(String routingPattern) {
     String newPattern = routingPattern;
-    newPattern = newPattern.replaceAll("\\*", "[a-zA-Z0-9]+");
+    newPattern = newPattern.replaceAll("\\*", "[a-zA-Z0-9]*");
 
-    newPattern = newPattern.replaceAll("\\.#\\.", ".([a-zA-Z0-9]+.)*");
-    newPattern = newPattern.replaceAll("\\.#", "(.[a-zA-Z0-9]+)*");
-    newPattern = newPattern.replaceAll("#\\.", "([a-zA-Z0-9]+.)*");
+    newPattern = newPattern.replaceAll("\\.#\\.", ".([a-zA-Z0-9]*.)*");
+    newPattern = newPattern.replaceAll("\\.#", "(.[a-zA-Z0-9]*)*");
+    newPattern = newPattern.replaceAll("#\\.", "([a-zA-Z0-9]*.)*");
     newPattern = newPattern.replaceAll("#", "[a-zA-Z0-9\\.]*");
 
     newPattern = newPattern.replaceAll("\\.", "\\\\.");
@@ -164,7 +165,10 @@ public class TopicExchange extends ExchangeAgent {
    * Class used to keep trace of the key which leads to the pattern. Useful for
    * binding and unbinding.
    */
-  private class KeyAndPattern {
+  private class KeyAndPattern implements Serializable {
+
+    /** define serialVersionUID for interoperability */
+    private static final long serialVersionUID = 1L;
 
     public String key;
 
