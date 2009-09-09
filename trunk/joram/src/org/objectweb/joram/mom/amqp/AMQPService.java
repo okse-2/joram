@@ -28,6 +28,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.StringTokenizer;
 
+import org.objectweb.joram.mom.amqp.marshalling.AMQP;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -61,7 +62,7 @@ public class AMQPService {
   /**
    * Default value for the pool size.
    */
-  public static final int DEFAULT_POOL_SIZE = 1;
+  public static final int DEFAULT_POOL_SIZE = 10;
   /**
    * Default value for the TCP BACKLOG property.
    */
@@ -102,14 +103,30 @@ public class AMQPService {
     port = DEFAULT_PORT;
     address = DEFAULT_BINDADDRESS;
     if (args != null) {
-      StringTokenizer st = new StringTokenizer(args);      
+      StringTokenizer st = new StringTokenizer(args);
 
-      if (st.hasMoreTokens())
-        port = Integer.parseInt(st.nextToken());
-      
-      if (st.hasMoreTokens()) {
-        address = st.nextToken();
+      String param = st.nextToken();
+      if (param.equals("0-8")) {
+        AMQP.PROTOCOL.MAJOR = 8;
+        AMQP.PROTOCOL.MINOR = 0;
+        AMQP.Connection.Close.INDEX = 60;
+        AMQP.Connection.CloseOk.INDEX = 61;
+        AMQP.Connection.mids = new int[] { 10, 11, 20, 21, 30, 31, 40, 41, 60, 61 };
+
+        if (st.hasMoreTokens())
+          port = Integer.parseInt(st.nextToken());
+
+        if (st.hasMoreTokens()) {
+          address = st.nextToken();
+        }
+      } else {
+        port = Integer.parseInt(param);
+
+        if (st.hasMoreTokens()) {
+          address = st.nextToken();
+        }
       }
+
     }
  
     int backlog = AgentServer.getInteger(BACKLOG_PROP, DEFAULT_BACKLOG).intValue();

@@ -271,25 +271,22 @@ public class AMQPConnectionListener extends Daemon implements Consumer {
             invalidState(method);
           break;
 
-        case AMQP.Connection.Close.INDEX:
-          methodState = NO_STATE;
-          classState = NO_STATE;
-          channelPublish.clear();
-          momHandler.connectionClose();
-          sendMethodToPeer(new AMQP.Connection.CloseOk(), channelNumber);
-          break;
-
-        case AMQP.Connection.CloseOk.INDEX:
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "CLOSE_OK");
-          methodState = NO_STATE;
-          classState = NO_STATE;
-          sock.close();
-          break;
-
         default:
-          invalidState(method);
-          break;
+          if (method.getMethodId()== AMQP.Connection.Close.INDEX) {
+            methodState = NO_STATE;
+            classState = NO_STATE;
+            channelPublish.clear();
+            momHandler.connectionClose();
+            sendMethodToPeer(new AMQP.Connection.CloseOk(), channelNumber);
+          } else if (method.getMethodId()== AMQP.Connection.CloseOk.INDEX) {
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, "CLOSE_OK");
+            methodState = NO_STATE;
+            classState = NO_STATE;
+            sock.close();
+          } else {
+            invalidState(method);
+          }
         }
         break;
 

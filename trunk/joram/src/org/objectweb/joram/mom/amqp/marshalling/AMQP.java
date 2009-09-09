@@ -29,14 +29,12 @@ import java.util.Date;
 import java.util.Map;
 
 public class AMQP {
+
   public static class PROTOCOL {
-    public static final int MAJOR = 0;
-    public static final int MINOR = 9;
+    public static int MAJOR = 0;
+    public static int MINOR = 9;
     public static final int PORT = 5672;
   }
-
-    
-
 
   /**
    * The connection class provides methods for a client to establish a network connection to a server, and for both peers to operate the connection thereafter.
@@ -127,21 +125,8 @@ public class AMQP {
     public java.lang.String getClassName() { 
       return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection";
     }
-    
-  
-    public static final int METHOD_CONNECTION_START = 10;
-    public static final int METHOD_CONNECTION_START_OK = 11;
-    public static final int METHOD_CONNECTION_SECURE = 20;
-    public static final int METHOD_CONNECTION_SECURE_OK = 21;
-    public static final int METHOD_CONNECTION_TUNE = 30;
-    public static final int METHOD_CONNECTION_TUNE_OK = 31;
-    public static final int METHOD_CONNECTION_OPEN = 40;
-    public static final int METHOD_CONNECTION_OPEN_OK = 41;
-    public static final int METHOD_CONNECTION_CLOSE = 50;
-    public static final int METHOD_CONNECTION_CLOSE_OK = 51;
-  
 
-    public static final int[] mids = { 10, 11, 20, 21, 30, 31, 40, 41, 50, 51 };
+    public static int[] mids = { 10, 11, 20, 21, 30, 31, 40, 41, 50, 51 };
     
     public static final java.lang.String[] methodnames = {
       "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection$Start",
@@ -853,7 +838,7 @@ public class AMQP {
        */
       public int methodId;
 
-      public final static int INDEX = 50;
+      public static int INDEX = 50;
 
       /**
        * This method indicates that the sender wants to close the connection.
@@ -935,7 +920,7 @@ public class AMQP {
   
     private static final long serialVersionUID = 1L;
   
-      public final static int INDEX = 51;
+      public static int INDEX = 51;
       
       
   /**
@@ -1001,15 +986,6 @@ public class AMQP {
     public java.lang.String getClassName() { 
       return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Channel";
     }
-    
-  
-    public static final int METHOD_CHANNEL_OPEN = 10;
-    public static final int METHOD_CHANNEL_OPEN_OK = 11;
-    public static final int METHOD_CHANNEL_FLOW = 20;
-    public static final int METHOD_CHANNEL_FLOW_OK = 21;
-    public static final int METHOD_CHANNEL_CLOSE = 40;
-    public static final int METHOD_CHANNEL_CLOSE_OK = 41;
-  
 
     public static final int[] mids = { 10, 11, 20, 21, 40, 41 };
     
@@ -1470,13 +1446,6 @@ public class AMQP {
     public java.lang.String getClassName() { 
       return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Exchange";
     }
-    
-  
-    public static final int METHOD_EXCHANGE_DECLARE = 10;
-    public static final int METHOD_EXCHANGE_DECLARE_OK = 11;
-    public static final int METHOD_EXCHANGE_DELETE = 20;
-    public static final int METHOD_EXCHANGE_DELETE_OK = 21;
-  
 
     public static final int[] mids = { 10, 11, 20, 21 };
     
@@ -1879,19 +1848,6 @@ public class AMQP {
     public java.lang.String getClassName() { 
       return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue";
     }
-    
-  
-    public static final int METHOD_QUEUE_DECLARE = 10;
-    public static final int METHOD_QUEUE_DECLARE_OK = 11;
-    public static final int METHOD_QUEUE_BIND = 20;
-    public static final int METHOD_QUEUE_BIND_OK = 21;
-    public static final int METHOD_QUEUE_UNBIND = 50;
-    public static final int METHOD_QUEUE_UNBIND_OK = 51;
-    public static final int METHOD_QUEUE_PURGE = 30;
-    public static final int METHOD_QUEUE_PURGE_OK = 31;
-    public static final int METHOD_QUEUE_DELETE = 40;
-    public static final int METHOD_QUEUE_DELETE_OK = 41;
-  
 
     public static final int[] mids = { 10, 11, 20, 21, 50, 51, 30, 31, 40, 41 };
     
@@ -3044,26 +3000,6 @@ public class AMQP {
     public java.lang.String getClassName() { 
       return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic";
     }
-    
-  
-    public static final int METHOD_BASIC_QOS = 10;
-    public static final int METHOD_BASIC_QOS_OK = 11;
-    public static final int METHOD_BASIC_CONSUME = 20;
-    public static final int METHOD_BASIC_CONSUME_OK = 21;
-    public static final int METHOD_BASIC_CANCEL = 30;
-    public static final int METHOD_BASIC_CANCEL_OK = 31;
-    public static final int METHOD_BASIC_PUBLISH = 40;
-    public static final int METHOD_BASIC_RETURN = 50;
-    public static final int METHOD_BASIC_DELIVER = 60;
-    public static final int METHOD_BASIC_GET = 70;
-    public static final int METHOD_BASIC_GET_OK = 71;
-    public static final int METHOD_BASIC_GET_EMPTY = 72;
-    public static final int METHOD_BASIC_ACK = 80;
-    public static final int METHOD_BASIC_REJECT = 90;
-    public static final int METHOD_BASIC_RECOVER_ASYNC = 100;
-    public static final int METHOD_BASIC_RECOVER = 110;
-    public static final int METHOD_BASIC_RECOVER_OK = 111;
-  
 
     public static final int[] mids = { 10, 11, 20, 21, 30, 31, 40, 50, 60, 70, 71, 72, 80, 90, 100, 110, 111 };
     
@@ -4573,15 +4509,6 @@ public class AMQP {
     public java.lang.String getClassName() { 
       return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Tx";
     }
-    
-  
-    public static final int METHOD_TX_SELECT = 10;
-    public static final int METHOD_TX_SELECT_OK = 11;
-    public static final int METHOD_TX_COMMIT = 20;
-    public static final int METHOD_TX_COMMIT_OK = 21;
-    public static final int METHOD_TX_ROLLBACK = 30;
-    public static final int METHOD_TX_ROLLBACK_OK = 31;
-  
 
     public static final int[] mids = { 10, 11, 20, 21, 30, 31 };
     
