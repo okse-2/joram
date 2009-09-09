@@ -27,10 +27,10 @@ import fr.dyade.aaa.agent.Notification;
 
 public class ReceiveNot extends Notification {
   
-  private int channelId;
-  private GetListener callback;
-  private ProxyAgent proxy;
-  private boolean noAck;
+  private transient int channelId;
+  private transient GetListener callback;
+  private transient ProxyAgent proxy;
+  private transient boolean noAck;
 
   /**
    * @param channelId
@@ -40,6 +40,7 @@ public class ReceiveNot extends Notification {
    */
   public ReceiveNot(int channelId, GetListener callback, ProxyAgent proxyAgent, boolean noAck) {
     super();
+    persistent = false;
     this.channelId = channelId;
     this.callback = callback;
     this.proxy = proxyAgent;
