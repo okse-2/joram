@@ -13,7 +13,6 @@ REM  Building the Classpath
 set CLASSPATH=%JORAM_LIBS%\joram-mom.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\joram-shared.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\JCup.jar
-set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\jakarta-regexp-1.2.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\ow_monolog.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\jmxri.jar
 set CLASSPATH=%CLASSPATH%;%RUN_DIR%
