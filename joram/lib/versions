@@ -1,8 +1,7 @@
 JCup.jar                ?
 activation.jar          1.0.2
 connector-1_5.jar       1.5
-jakarta-regexp-1.2.jar  1.2
-javagroups-all.jar      ?
+jgroups-all.jar         ?
 jms.jar                 1.1
 jmxri.jar               1.2.8
 jmxtools.jar            1.2.8
