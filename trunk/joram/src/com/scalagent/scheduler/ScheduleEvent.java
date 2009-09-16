@@ -39,9 +39,7 @@ import java.util.Date;
  * @see		Scheduler
  */
 public class ScheduleEvent implements Serializable {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   /** event name */
   protected String name;
