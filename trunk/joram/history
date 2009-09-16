@@ -1,4 +1,39 @@
 +==============================================================================
+| 2009/09/16 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix in Scheduler: no longer use recursion to serialize the ScheduleItem
+list (It can produce stack overflow with big number of items).
+###############################################################################
+# 2009/09/08 | Joram 5.2.5 tag.
+###############################################################################
++==============================================================================
+| 2009/09/04 | Adriana Danes - Bull S.A. 
++------------+-----------------------------------------------------------------
+ Bug fix in Joram Adapter: Avoid a NPE when stopping an application with 2 MDBs
+'sharing' a same destination.
++==============================================================================
+| 2009/08/24 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Improves transaction component:
+ - Extends the Transaction interface and extracts a generic common part to all
+ transactions implementation: class AbstractTransaction.
+ - Shares Operation and OperationKey classes.
+ - 1st implementation of optimized transaction component: NGTransaction.
+ Improves Joram's messages storage, uses Transaction.Create operations and
+avoid copy for the body.
++==============================================================================
+| 2009/08/07 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix in the SchedulerQueue, reinitializes the scheduler object in order to
+allow a clean restart.
++==============================================================================
+| 2009/07/29 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix a bug with HA servers: the administration connection still block at
+initialisation. In adminTopicImpl use the clusterId to get the A3CML server's
+structure. This fix allow to get information about the local server but a
+similar problem remain about eventual other HA servers.
++==============================================================================
 | 2009/06/29 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  In order to avoid MOM malfunctioning verify that the destination identifier
