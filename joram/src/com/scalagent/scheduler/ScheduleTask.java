@@ -28,7 +28,6 @@ import java.io.Serializable;
  *
  */
 public interface ScheduleTask extends Serializable {
-
   /** Method called by the scheduler when the task is ready to execute. */
   public void run();
 }
