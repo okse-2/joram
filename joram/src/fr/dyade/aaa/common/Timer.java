@@ -27,8 +27,8 @@ import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * This class is a facility for scheduling tasks future execution.
- *
- * <p>It is a simplified version of the timer provided by the jdk1.3.
+ * <p>
+ * It is a simplified version of the timer provided by the jdk1.3.
  */
 public class Timer {
   /** <code>true</code> if the timer has been cancelled. */
@@ -53,8 +53,7 @@ public class Timer {
    *              been cancelled, or if the task is already scheduled.
    * @exception IllegalArgumentException  If the delay is negative.
    */
-  public synchronized void schedule(TimerTask task, long delay)
-    throws Exception {
+  public synchronized void schedule(TimerTask task, long delay) throws Exception {
     if (cancelled)
       throw new IllegalStateException("Timer has been cancelled.");
     if (tasks.contains(task))
@@ -70,7 +69,6 @@ public class Timer {
     if (!daemon.started)
       daemon.start();
     this.notify();
-
   }
 
   /** Cancels the timer and all its non executed tasks. */
@@ -96,12 +94,12 @@ public class Timer {
       if (currentTask.wakeupTime > wakeupTime) {
         tasks.insertElementAt(task, i);
         break;
-      } else
+      } else {
         i++;
+      }
     }
     if (i == tasks.size())
       tasks.addElement(task);
-
   }
 }
 
