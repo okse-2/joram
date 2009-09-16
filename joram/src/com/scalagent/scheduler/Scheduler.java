@@ -36,15 +36,17 @@ import fr.dyade.aaa.common.TimerTask;
  *
  */
 public class Scheduler implements Serializable {
-  private static final long serialVersionUID = 1L;
+  /** define serialVersionUID for interoperability */
+  private static final long serialVersionUID = 2L;
+  
   public static Logger logger = Debug.getLogger(Scheduler.class.getName());
 
   /** events list */
-  private ScheduleItem items;
+  private transient ScheduleItem items;
   /** the timer */
   private transient Timer timer;
   /** Current task schedule in Timer */
-  private WakeUp wakeUp;
+  private transient WakeUp wakeUp;
 
   /**
    * Creates the default scheduler.
@@ -106,7 +108,7 @@ public class Scheduler implements Serializable {
    * @param event
    * @param task task to execute.
    */
-  private void insertItem(ScheduleEvent event, ScheduleTask task) throws Exception {
+  private void insertItem(ScheduleEvent event, ScheduleTask task) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Scheduler.insertItem(" + event + ", " + task + ')');
     
@@ -131,7 +133,7 @@ public class Scheduler implements Serializable {
    *
    * @param newItem		item to insert
    */
-  private void insertItem(ScheduleItem newItem) throws Exception {
+  private void insertItem(ScheduleItem newItem) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Scheduler.insertItem(" + newItem + ')');
     
@@ -278,8 +280,24 @@ public class Scheduler implements Serializable {
     }
   }
   
+  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+    for (ScheduleItem item = items; item != null; item = item.next) {
+      out.writeObject(item.event);
+      out.writeObject(item.task);
+    }
+    out.writeObject(null);
+  }
+
+  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+    ScheduleEvent event = (ScheduleEvent) in.readObject();
+    while (event != null) {
+      ScheduleTask task = (ScheduleTask) in.readObject();
+      insertItem(event, task);
+      event = (ScheduleEvent) in.readObject();
+    }
+  }
+
   public class WakeUp extends TimerTask implements Serializable {
- 
     private static final long serialVersionUID = 1L;
 
     public void run() {
@@ -297,6 +315,5 @@ public class Scheduler implements Serializable {
       }
       
     }
-
   }
 }
