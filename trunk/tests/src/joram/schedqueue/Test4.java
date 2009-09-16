@@ -57,7 +57,7 @@ public class Test4 extends framework.TestCase {
       TestCase.startAgentServer((short)0);
       Thread.sleep(1000L);
 
-      int NbMsg = 5000;
+      int NbMsg = 1000;
       
       ConnectionFactory cf = TcpConnectionFactory.create("localhost", 16010);
       
@@ -92,7 +92,7 @@ public class Test4 extends framework.TestCase {
       Thread.sleep(10000L);
       
       for (i=0; i<NbMsg; i++) {
-        msg = cons.receive(30000);
+        msg = cons.receive(60000);
         if (msg == null) break;
         assertTrue("Bad order of messages", msg.getJMSMessageID().equals(msgid[i]));
       }
@@ -100,12 +100,45 @@ public class Test4 extends framework.TestCase {
       
       cnx.close();
       
-      Thread.sleep(30000L);
+      Thread.sleep(1000L);
+      
+      cnx = cf.createConnection();
+      sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      cons = sess.createConsumer(queue);
+      prod = sess.createProducer(queue);
+      cnx.start();
 
-//      TestCase.stopAgentServer((short)0);
-//      Thread.sleep(1000L);
-//      TestCase.startAgentServer((short)0);
-//      Thread.sleep(1000L);
+      scheduleDate = System.currentTimeMillis() + 10000L;
+      
+      for (i=0; i<NbMsg; i++) {
+        msg = sess.createMessage();
+        msg.setLongProperty("scheduleDate", scheduleDate);
+        prod.send(msg);
+        msgid[i] = msg.getJMSMessageID();
+        scheduleDate += 10L;
+      }
+
+      cnx.close();
+      
+      TestCase.stopAgentServer((short)0);
+      Thread.sleep(1000L);
+      TestCase.startAgentServer((short)0);
+      Thread.sleep(5000L);
+      
+      cnx = cf.createConnection();
+      sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      cons = sess.createConsumer(queue);
+      prod = sess.createProducer(queue);
+      cnx.start();
+
+      for (i=0; i<NbMsg; i++) {
+        msg = cons.receive(30000);
+        if (msg == null) break;
+        assertTrue("Bad order of messages, expected " + msgid[i], msg.getJMSMessageID().equals(msgid[i]));
+      }
+      assertTrue("Bad number of msg #" + i, i == NbMsg);
+      
+      cnx.close();
     } catch(Throwable exc) {
       exc.printStackTrace();
       error(exc);
