@@ -345,9 +345,10 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
 
     NbMaxAgents = AgentServer.getInteger("NbMaxAgents", NbMaxAgents).intValue();
     qin = new MessageVector(name, AgentServer.getTransaction().isPersistent());
-    if (! AgentServer.getTransaction().isPersistent()) {
-      NbMaxAgents = Integer.MAX_VALUE;
-    }
+    // No longer needed, see Engine.garbage.
+//    if (! AgentServer.getTransaction().isPersistent()) {
+//      NbMaxAgents = Integer.MAX_VALUE;
+//    }
     mq = new Queue();
 
     isRunning = false;
@@ -516,6 +517,9 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    * from memory all the agents which have not been accessed for a time.
    */
   void garbage() {
+    if (! AgentServer.getTransaction().isPersistent())
+      return;
+    
     if (agents.size() < (NbMaxAgents + fixedAgentIdList.size()))
       return;
 
