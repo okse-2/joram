@@ -48,19 +48,16 @@ import fr.dyade.aaa.util.ResolverObjectInputStream;
  * to remotely delete agents.
  */
 final class AgentFactory extends Agent {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+
   /**
    * Allocates a new <code>AgentFactory</code> agent.
    * An <code>AgentFactory</code> agent must be created on every agent
    * server the first time it runs.
    */
   AgentFactory(AgentId factoryId) {
-    super("AgentFactory#" + AgentServer.getServerId(),
-	  true,
-	  factoryId);
+    super("AgentFactory#" + AgentServer.getServerId(), true, factoryId);
   }
 
   /**
@@ -83,6 +80,7 @@ final class AgentFactory extends Agent {
   protected void agentInitialize(boolean firstTime) throws Exception {
     super.agentInitialize(firstTime);
   }
+
   /**
    * Reacts to notifications ... .
    *
@@ -96,64 +94,60 @@ final class AgentFactory extends Agent {
     if (not instanceof AgentCreateRequest) {
       AgentCreateRequest cnot = (AgentCreateRequest) not;
       try {
-	// Restore the new agent state.
-	ObjectInputStream ois =
-	  new ResolverObjectInputStream(
-	    new ByteArrayInputStream(
-	      cnot.agentState, 0, cnot.agentState.length));
-	Agent ag = (Agent) ois.readObject();
-	try {
-	  ois.close();
-	} catch (IOException exc) {}
+        // Restore the new agent state.
+        ObjectInputStream ois =
+          new ResolverObjectInputStream(new ByteArrayInputStream(cnot.agentState, 0, cnot.agentState.length));
+        Agent ag = (Agent) ois.readObject();
+        try {
+          ois.close();
+        } catch (IOException exc) {}
 
         // Initializes and creates the agent
-// TODO: (ThreadEngine) Thread.currentThread() ...
+        // TODO: (ThreadEngine) Thread.currentThread() ...
         AgentServer.engine.createAgent(cnot.deploy, ag);
 
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,
-                     "AgentFactory" + id +
-                     ", create Agent" + ag.id + " [" + ag.name + "]");
-	if (cnot.reply != null) {
+                     "AgentFactory" + id + ", create Agent" + ag.id + " [" + ag.name + "]");
+        if (cnot.reply != null) {
           AgentCreateReply reply = new AgentCreateReply(ag.getId());
           reply.setContext(cnot.getContext());
-	  sendTo(cnot.reply, reply);          
+          sendTo(cnot.reply, reply);          
         }
       } catch (Throwable error) {
- 	//  If there is an explicit reply request send it the
-	// ExceptionNotification to the requester else to the
-	// sender.
-	cnot.agentState = null;
+        //  If there is an explicit reply request send it the
+        // ExceptionNotification to the requester else to the
+        // sender.
+        cnot.agentState = null;
         logmon.log(BasicLevel.ERROR,
                    "AgentFactory" + id + ", can't create Agent" + cnot.deploy,
                    error);
         ExceptionNotification excNot = 
-          new ExceptionNotification(
-            getId(), cnot, new AgentException(error));
+          new ExceptionNotification(getId(), cnot, new AgentException(error));
         excNot.setContext(cnot.getContext());
-	if (cnot.reply != null) {
-	  sendTo(cnot.reply, excNot);
-	} else {
-	  sendTo(from, excNot);
-	}
+        if (cnot.reply != null) {
+          sendTo(cnot.reply, excNot);
+        } else {
+          sendTo(from, excNot);
+        }
       }
     } else if (not instanceof AgentDeleteRequest) {
       try {
-// TODO: (ThreadEngine) Thread.currentThread() ...
+        // TODO: (ThreadEngine) Thread.currentThread() ...
         AgentServer.engine.deleteAgent(from);
-	if (((AgentDeleteRequest) not).reply != null)
-          sendTo(((AgentDeleteRequest) not).reply, new DeleteAck(from,
-              ((AgentDeleteRequest) not).extraInformation));
+        if (((AgentDeleteRequest) not).reply != null)
+          sendTo(((AgentDeleteRequest) not).reply,
+                 new DeleteAck(from, ((AgentDeleteRequest) not).extraInformation));
       } catch (Exception exc) {
-	if (((AgentDeleteRequest) not).reply != null)
+        if (((AgentDeleteRequest) not).reply != null)
           sendTo(((AgentDeleteRequest) not).reply, new DeleteAck(from, exc));
       }
     } else {
       try {
-	super.react(from, not);
+        super.react(from, not);
       } catch (Exception exc) {
-	sendTo(from,
-	       new ExceptionNotification(getId(), not, exc));
+        sendTo(from,
+               new ExceptionNotification(getId(), not, exc));
       }
     }
   }
