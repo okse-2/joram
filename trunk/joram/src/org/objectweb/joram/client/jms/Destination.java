@@ -393,19 +393,24 @@ public abstract class Destination extends AdministeredObject implements javax.jm
   // Object name of the MBean if it is registered.
   transient protected String JMXBeanName = null;
 
-  public String registerMBean(String base) {
-    if (MXWrapper.mxserver == null) return null;
-
+  public static String getJMXBeanName(String base, Destination dest) {
+    String agentId = dest.agentId;
     int sid = Integer.parseInt(agentId.substring(agentId.indexOf('.') +1, agentId.lastIndexOf('.')));
     StringBuffer buf = new StringBuffer();
     buf.append(base);
-    if (isQueue())
+    if (dest.isQueue())
       buf.append(":type=Queue,location=server#");
     else
       buf.append(":type=Topic,location=server#");
-    buf.append(sid).append(",name=").append(getAdminName()).append('[').append(getName()).append(']');
-    JMXBeanName = buf.toString();
+    buf.append(sid).append(",name=").append(dest.getAdminName()).append('[').append(dest.getName()).append(']');
     
+    return buf.toString();
+  }
+  
+  public String registerMBean(String base) {
+    if (MXWrapper.mxserver == null) return null;
+
+    JMXBeanName = getJMXBeanName(base, this);
     try {
        MXWrapper.registerMBean(this, JMXBeanName);
     } catch (Exception e) {
