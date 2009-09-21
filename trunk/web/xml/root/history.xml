@@ -12,6 +12,13 @@
 
   <body>
     <s1 name="JORAM History">
+      <subtitle>September 21, 2009: JORAM 5.2.5 is released</subtitle>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
+      <p>It introduces some improvements and bug fixes.</p>
+      <p>This version is bundled in <a href="http://jonas.ow2.org/">Jonas</a> 4.10.5 and 5.1.0.</p>
+      <p>It is tagged in SVN (JORAM_5_2_5), the complete list of changes can be viewed either in
+      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
+      <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/trunk/joram/history">SVN history</a>.</p>
     
       <subtitle>June 4, 2009: JORAM 5.2.4 is released</subtitle>
       <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
