@@ -12,6 +12,54 @@
 
   <body>
   
+    <s1 name="JORAM release 5.2.5 (September 21, 2009)">
+      <p>Joram 5.2.5 is available in the SVN repository with tag JORAM_5_2_5.</p>
+      <s2 name="New features and improvements">
+      <ul>
+        <li>Improves transaction component and persistancy handling:
+        <ul>
+          <li>Extends the Transaction interface and extracts a generic common part to all transactions
+          implementation: class AbstractTransaction,</li>
+          <li>Shares Operation and OperationKey classes,</li>
+          <li>1st implementation of optimized transaction component: NGTransaction,</li>
+          <li>Improves Joram's messages storage, uses Transaction.Create operations and avoid copy for the body.</li>
+        </ul>
+        </li>
+        <li>Administration and monitoring enhancements:
+        <ul>
+          <li>Improved JMX monitoring for mail destinations,</li>
+          <li>Enhances messages view from queue and subscription in JMX console,</li>
+          <li>Extends JoramAdapter MBean: getServersIds, getServersNames, etc,</li>
+          <li>1st version of a component (JoramAdminConnect) allowing the administration of Joram through a
+          JMX console. It uses JoramAdmin MBean component to handle remote servers.</li>
+        </ul>
+        </li>        
+      </ul>
+      </s2>
+      <s2 name="Bug fixes">
+      <ul>
+        <li>Bug fix in Joram Adapter: Avoid a NPE when stopping an application with 2 MDBs 'sharing' a same
+        destination.</li>
+        <li>Bug fix in the SchedulerQueue, reinitializes the scheduler object in order to allow a clean
+        restart.</li>
+        <li>Fix a bug with HA servers: the administration connection still block at initialisation.
+        In adminTopicImpl use the clusterId to get the A3CML server's structure. This fix allow to get
+        information about the local server but a similar problem remain about eventual other HA servers.</li>
+        <li>In order to avoid MOM malfunctioning verify that the destination identifier is valid when setting
+        a DMQ.</li>
+        <li>Resets the deliveryCount attribute when sending a message.</li>
+        <li>In the isUndeliverable method of QueueImpl and ProxyImpl now verify that the number of delivery
+        attempts is not greater or equals to the threshold (previously strict equality).</li>
+        <li>Potential bug fix in AgentId.fromString if the incoming string is empty.</li>
+        <li>Bug fix: Avoid to see all messages related to any user's subscription.</li>
+        <li>Bug fix: Avoid NPE if default DMQ is reseted (set to null).</li>
+        <li>Administration interactions with a wrong user don't hang anymore and an understandable response
+        is returned.</li>
+      </ul>
+      </s2>
+    </s1>
+  
+  
     <s1 name="JORAM release 5.2.4 (June 4, 2009)">
       <p>Joram 5.2.4 is available in the SVN repository with tag JORAM_5_2_4.
        This release provides many features and changes:</p>

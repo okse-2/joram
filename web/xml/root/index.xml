@@ -38,6 +38,15 @@
    
       <s2 name="Latest News">
       
+        <subtitle>September 21, 2009: JORAM 5.2.5 is released</subtitle>
+        <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
+        <p>It introduces some improvements and bug fixes.</p>
+        <p>This version is bundled in <a href="http://jonas.ow2.org/">Jonas</a> 4.10.5 and 5.1.0.</p>
+        <p>It is tagged in SVN (JORAM_5_2_5), the complete list of changes can be viewed either in
+        <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
+        <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/trunk/joram/history">SVN history</a>.</p>
+      
+      
         <subtitle>June 4, 2009: JORAM 5.2.4 is released</subtitle>
         <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
         <p>It introduces many improvements and some bug fixes, essentially:</p>
@@ -53,18 +62,7 @@
         <p>It is tagged in SVN (JORAM_5_2_4), the complete list of changes can be viewed either in
         <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
         <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/trunk/joram/history">SVN history</a>.</p>
-      
-      
-      	<subtitle>March 4, 2009: JORAM 5.2.1 is released</subtitle>
-      	<p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
-      	<p>It introduces many improvements and some bug fixes, essentially:</p>
-        <ul>
-          <li>JAAS authentication,</li>
-          <li>Supplies New destination allowing data collect.</li>
-        </ul>
-      	<p>It is tagged in SVN (JORAM_5_2_1), the complete list of changes can be viewed either in
-      	<a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
-      	<a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/trunk/joram/history">SVN history</a>.</p>
+
 
 	      <subtitle>November 19th and 20th, 2008: JORAM Training Session, Grenoble, France</subtitle>
 	      <p>A two-day training session about JORAM is scheduled in Grenoble; it will be delivered in french language.</p>
@@ -101,27 +99,16 @@
       	<a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in 
       	<a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/tags/JORAM_4_3_34/joram/history?rev=2398">SVN history</a>.</p>
 
-	      <subtitle>April 22, 2008: JORAM 5.0.9 is released</subtitle>
-	      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
-	      <p>It is tagged in SVN (JORAM_5_0_9), the complete list of changes can be viewed either in
-	      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
-	      <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/tags/JORAM_5_0_9/joram/history?rev=2271">SVN history</a>.</p>
 
 	      <subtitle>April 10, 2008: JORAM is released on <a href="http://www.ohloh.net/projects/4238">Ohloh</a></subtitle>
 	      <p>Joram has been added on ohloh a funny website offering automated metrics on open source projects. If you are using Joram, please stack it.</p>
 
-	      <subtitle>February 12, 2008: JORAM 4.3.32 is released</subtitle>
-	      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically
-	      fixes some bug and adds improvements and configuration tips.</p>
-	      <p>This version is bundled in <a href="http://jonas.ow2.org/">Jonas 4.9</a>.</p>
-	      <p>It is tagged in SVN (JORAM_4_3_32), the complete list of changes can be viewed either in
-	      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
-	      <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/tags/JORAM_4_3_32/joram/history?rev=2159">SVN history</a>.</p>
 
         <subtitle>January 18, 2006</subtitle>
         <p>JORAM is acknowledged as the best open source MOM implementation, according to
         <a href="http://jdj.sys-con.com/read/171303_3.htm">JDJ's readers</a>, challenging
         proprietary products from IBM, Sun and TIBCO.</p>
+
 
 	      <subtitle>September 26th, 2005: JORAM Survey Synthesis</subtitle>
 	      <p>A synthesis of the JORAM Survey is available <a href="http://www.scalagent.com/pages/en/datasheet/050926-JORAM_Survey-Synthesis.pdf">here</a>.</p>
