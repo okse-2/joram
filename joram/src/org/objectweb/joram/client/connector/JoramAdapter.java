@@ -557,16 +557,15 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
       }
 
       if (platformConfigDir != null) {
-        System.setProperty("fr.dyade.aaa.agent.A3CONF_DIR", platformConfigDir);
-        System.setProperty("fr.dyade.aaa.DEBUG_DIR", platformConfigDir);
+        System.setProperty(AgentServer.CFG_DIR_PROPERTY, platformConfigDir);
+        System.setProperty(Debug.DEBUG_DIR_PROPERTY, platformConfigDir);
       }
 
       try {
         AgentServer.init(serverId, serverName, null, clusterId);
         AgentServer.start();
         if (logger.isLoggable(BasicLevel.INFO))
-          logger.log(BasicLevel.INFO,
-          "  - Collocated JORAM server has successfully started.");
+          logger.log(BasicLevel.INFO, "JoramAdapter - Collocated JORAM server has successfully started.");
       } catch (Exception exc) {
         AgentServer.stop();
         AgentServer.reset(true);
