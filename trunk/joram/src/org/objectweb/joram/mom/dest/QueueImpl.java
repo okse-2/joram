@@ -366,17 +366,18 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     if (persistedMsgs != null) {
       Message persistedMsg;
       AgentId consId;
+      
       while (! persistedMsgs.isEmpty()) {
         persistedMsg = (Message) persistedMsgs.remove(0);
         consId = (AgentId) consumers.get(persistedMsg.getIdentifier());
+        
         if (consId == null) {
           if (!addMessage(persistedMsg)) {
             persistedMsg.delete();
           }
         } else if (isLocal(consId)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG,
-                       " -> deny " + persistedMsg.getIdentifier());
+            logger.log(BasicLevel.DEBUG, " -> deny " + persistedMsg.getIdentifier());
           consumers.remove(persistedMsg.getIdentifier());
           contexts.remove(persistedMsg.getIdentifier());
           if (!addMessage(persistedMsg)) {
