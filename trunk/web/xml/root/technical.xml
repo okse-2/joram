@@ -14,20 +14,25 @@
 
     <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
 
-      <subtitle>As a standalone software, JORAM has been downloaded more than 100,000 times</subtitle>
+    <p>JORAM has been made available for download since May 2000.</p>
+    <p>As a standalone software, JORAM has been downloaded more than 100,000 times.</p>
+      
+    <table border="0">
+  	<tr>
+	    <td><img src="images/joram.png" alt="JORAM Logo" height="140" width="300" border="0" hspace="2"/></td>
+	    <td valign="middle"></td>
+	  </tr>
+    </table>
 
-      <table border="0">
-      <tr>
-        <td><img src="images/joram.png" alt="JORAM logo" height="140" width="300" border="0" hspace="2"/></td>
-	      <td valign="middle"></td>
-      </tr>
-      </table>
+      <s2 name="Presentation">
       
       <p><strong>JORAM</strong> incorporates a 100% pure Java implementation of <strong>JMS</strong>
       (Java Message Service API released by Sun Microsystem, Inc.). It provides access to a MOM
       (Message Oriented Middleware), built on top of the <a href="http://www.scalagent.com/">ScalAgent D.T.</a>
       agents based distributed platform.</p>
       <p> JORAM is an <strong>open source</strong> software released under the <strong>LGPL</strong> license.</p>
+      
+      </s2>
 
       <s2 name="Specification">
 
