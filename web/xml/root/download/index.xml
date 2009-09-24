@@ -12,10 +12,12 @@
 
   <body>
 
-    <s1 name="Downloading...">
-      <s2 name="JORAM source and binary packages">
+    <s1 name="JORAM source and binary packages">
+
+      <s2 name="stable distribution from OW2 Forge ">
 	
-	    <p>The JORAM source and binary packages are available from the ObjectWeb Forge file repository page.</p>
+	    <p>The JORAM source and binary packages are available from the
+	    <a href="http://forge.objectweb.org/project/showfiles.php?group_id=4">OW2 Forge</a>.</p>
       
 	    <p>The latest release packages are:</p>
 	    <ul>
@@ -23,8 +25,7 @@
         libraries, the graphical tool library, the J2ME kJORAM client library and the JORAM
         samples sources;</li>
 	      <li><code>joram-5.*-src.tgz</code>, including JORAM client and MOM
-        sources, the graphical tool sources, the J2ME kJORAM client sources and the JORAM samples
-        sources;</li>
+        sources, and the JORAM samples sources;</li>
 	      <li><code>joram-jonasadapter-5.*.rar</code> ,JCA Adapter for Jonas </li>
 	      <li><code>joram-raconfig-5.*.tgz</code>, facilities enabling configuration of JCA rars.</li>
 	      <li><code>joram-5.*-RA.rar</code>, the resource adapter for a collocated JORAM server within any J2EE 1.4 compliant 
