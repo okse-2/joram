@@ -97,7 +97,6 @@
     	<include name="org/objectweb/joram/shared/security/SimpleIdentity.java"/>
 
       <include name="org/objectweb/joram/client/**/*.java"/>
-      <exclude name="org/objectweb/joram/client/tools/**/*.java"/>
       <include name="org/objectweb/joram/mom/**/*.java"/>
       <exclude name="org/objectweb/joram/mom/amqp/**/*.java"/>
       <!-- End - Needed for JORAM -->
@@ -641,8 +640,6 @@
              bottom="Copyright &#xA9; 2000 - 2009 Scalagent D.T. - All rights reserved">
       <doctitle><![CDATA[<h1>Joram(TM) ${version} User Documentation</h1>]]></doctitle>
       <package name="org.objectweb.joram.*"/>
-      <package name="org.objectweb.joram.*"/>
-    	<excludepackage name="org.objectweb.joram.client.tools.*"/>
       <excludepackage name="org.objectweb.joram.mom.amqp.*"/>
     </javadoc>
   </target>
