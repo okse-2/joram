@@ -43,7 +43,7 @@
     <tr>
       <td align="center" valign="middle">
       <a href="http://www.rd.francetelecom.com/">
-      <img src="images/partners/logo-ftrd.gif" alt="France Telecom RD logo" border="0" height="26" width="110"/></a>
+      <img src="images/partners/logo-ftrd.gif" alt="France Telecom RD logo" border="0" height="33" width="140"/></a>
       </td>
       <td>
       <p><a href="http://www.rd.francetelecom.com">France Telecom R&amp;D</a> is the main sponsor of many advanced functions in Joram:</p>
@@ -64,6 +64,26 @@
       <p><a href="http://www.bull.com">Bull</a> is the main sponsor of the JCA1.5 Resource Adapter included in Joram since version 4.1.</p>
       </td>
     </tr>
+       
+    <tr>
+      <td align="center" valign="middle">
+      <a href="http://www.cnes.fr/">
+      <img src="images/partners/CNES2.png" alt="CNES logo" border="0" height="49" width="140"/></a>
+      </td>
+      <td>
+      <p><a href="http://www.cnes.fr">CNES</a> .</p>
+      </td>
+    </tr>
+       
+    <tr>
+      <td align="center" valign="middle">
+      <a href="http://www.agence-nationale-recherche.fr/">
+      <img src="images/partners/anr_logo.jpg" alt="ANR logo" border="0" height="60" width="140"/></a>
+      </td>
+      <td>
+      <p><a href="http://www.agence-nationale-recherche.fr">ANR</a> .</p>
+      </td>
+    </tr>
         
     </table>		
     </s1>
@@ -82,7 +102,7 @@
     </tr>	
     <tr>
     <td align="center" valign="middle">
-    <img src="images/partners/dyade.gif" alt="Dyade logo" width="270" border="0" height="65"/>
+    <img src="images/partners/dyade.gif" alt="Dyade logo" width="210" border="0" height="50"/>
     </td>
     <td><p>The G.I.E. Dyade was a BULL/INRIA advanced research joint venture. Its goals was the conception and development
     of new technological components for future information systems.</p>
@@ -91,7 +111,7 @@
     <tr>
     <td rowspan="1" colspan="1" valign="middle" align="center">
     <a href="http://www.inria.fr/">
-    <img src="images/partners/inria.gif" border="0" width="166" height="45" alt="INRIA logo" align="middle"/></a>
+    <img src="images/partners/inria.gif" border="0" width="210" height="57" alt="INRIA logo" align="middle"/></a>
     </td>
     <td rowspan="1" colspan="1" valign="middle" align="left">
     <a href="http://www.inria.fr/">INRIA</a> is the French National Institute for Research in Computer Science and Control.

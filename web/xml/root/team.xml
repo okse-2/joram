@@ -12,7 +12,7 @@
 
   <body>
     <s1 name="Team">
-      <subtitle>Project Team and Contributors</subtitle>
+      <s2 name="Project Team and Contributors">
 
       <p>Here is the list of all contributors to Joram, past and present :</p>
       <ul>
@@ -20,8 +20,10 @@
       <li>Fabien Badolle</li>
       <li>Roland Balter (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
       <li>Luc Bellissard (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
+      <li>Abdenbi Benammour</li>
       <li>Laurent Chauvirey</li>
       <li>Philippe Coq (<a href="http://www.bull.com/">Bull</a>)</li>
+      <li>Adriana Danes (<a href="http://www.bull.com/">Bull</a>)</li>
       <li>Xavier Etchevers</li>
       <li>Alexander Fedorowicz</li>
       <li>David Feliot (<a href="http://www.scalagent.com/">ScalAgent</a>)</li>
@@ -43,6 +45,7 @@
       </ul>
 
       <p>If you feel forgotten, please <a href="mailto:joram-team@ow2.org">contact</a> us.</p>
+      </s2>
     </s1>
   </body>
 </document>
