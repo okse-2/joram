@@ -31,7 +31,7 @@ import org.objectweb.joram.client.jms.admin.User;
  * Tests basic server reconfiguration: 2 initial servers in a SimpleNetwork domain
  *  - Adds a third server (S2) in the domain D0, then removes it.
  *  - Adds a third server (S3) in the domain D0, then removes it.
- *  - Removes S2 and the useless dommain (D0).
+ *  - Removes S2 and the useless domain (D0).
  *  
  * This test works with classic networks: SimpleNetwork, PoolNetwork, etc.
  */

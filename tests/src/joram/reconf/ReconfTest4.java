@@ -30,10 +30,13 @@ import org.objectweb.joram.client.jms.admin.User;
 import fr.dyade.aaa.agent.SimpleNetwork;
 
 /**
- * Tests basic server reconfiguration: 2 initial servers in a SimpleNetwork domain
- *  - Adds a third server (S2) in the domain D0, then removes it.
- *  - Adds a third server (S3) in the domain D0, then removes it.
- *  - Removes S2 and the useless dommain (D0).
+ * Tests basic server reconfiguration: a unique server in the initial configuration
+ *  - Adds a domain D0.
+ *  - Adds 5 servers (S1, S2, S3, S4 and S5) in the domain D0, then starts them.
+ *  - Crashes S1 then removes it.
+ *  - Adds S6 in the domain D0.
+ *  - Crashes S3, restarts it, then removes it.
+ *  - Iteratively removes the servers S2, S3, S4, S5 and S6, then the unused domain (D0).
  *  
  * This test works with classic networks: SimpleNetwork, PoolNetwork, etc.
  */
