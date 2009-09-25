@@ -16,14 +16,13 @@
 
     <table border="0" width="100%">
   	<tr>
-	    <td align="left"></td>
+	    <td align="left" rowspan="2">
+	      <img src="images/joram.png" alt="JORAM Logo" height="140" width="300" border="0" hspace="2"/>
+      </td>
 	    <td align="center"></td>
 	    <td align="right"><script type="text/javascript" src="http://www.ohloh.net/p/4238/widgets/project_thin_badge.js"></script></td>
 	  </tr>
   	<tr>
-	    <td align="left">
-	      <img src="images/joram.png" alt="JORAM Logo" height="140" width="300" border="0" hspace="2"/>
-      </td>
 	    <td align="center"></td>
 	    <td align="left">
 	      <p>JORAM has been made available for download since May 2000.<br></br>
