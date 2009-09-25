@@ -14,13 +14,21 @@
 
     <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
 
-    <p>JORAM has been made available for download since May 2000.</p>
-    <p>As a standalone software, JORAM has been downloaded more than 100,000 times.</p>
-      
-    <table border="0">
+    <table border="0" width="100%">
   	<tr>
-	    <td><img src="images/joram.png" alt="JORAM Logo" height="140" width="300" border="0" hspace="2"/></td>
-	    <td valign="middle"></td>
+	    <td align="left"></td>
+	    <td align="center"></td>
+	    <td align="right"><script type="text/javascript" src="http://www.ohloh.net/p/4238/widgets/project_thin_badge.js"></script></td>
+	  </tr>
+  	<tr>
+	    <td align="left">
+	      <img src="images/joram.png" alt="JORAM Logo" height="140" width="300" border="0" hspace="2"/>
+      </td>
+	    <td align="center"></td>
+	    <td align="left">
+	      <p>JORAM has been made available for download since May 2000.<br></br>
+        As a standalone software, JORAM has been downloaded more than 100,000 times.</p>
+	    </td>
 	  </tr>
     </table>
 
@@ -78,6 +86,16 @@
       Interested? Contact <a href="mailto:joram-team@ow2.org">us</a> or check the
       <a href="dev/corner.html">developer's corner</a>.</p>
 
+      </s2>
+      <s2 name="Statistics by Ohloh">
+        <table border="0">
+  	    <tr>
+	      <td><script type="text/javascript" src="http://www.ohloh.net/p/4238/widgets/project_basic_stats.js"></script></td>
+	      <td></td>
+	      <td><script type="text/javascript" src="http://www.ohloh.net/p/4238/widgets/project_languages.js"></script></td>
+	      </tr>
+    </table>
+      
       </s2>  
     </s1>
   </body>
