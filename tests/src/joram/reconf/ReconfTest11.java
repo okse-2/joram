@@ -147,7 +147,7 @@ public class ReconfTest11 extends ReconfTestBase {
               ((TcpConnectionFactory) cfi).getParameters().connectingTimer = 20;
               AdminModule.connect(cfi, "root", "root");
 
-              System.out.println("trace4: " + sid + " ok");
+              System.out.println("trace4: " + sid + "ok");
             } catch( Throwable t ) {
               System.out.println("trace4: " + sid + " nok");
               t.printStackTrace();
