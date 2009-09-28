@@ -1,0 +1,254 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE project [
+    <!ENTITY common SYSTEM "../../common.xml">
+]>
+
+<project default="tests" basedir=".">
+
+  <property file="env.properties"/>
+
+  <target name="tests">
+    <ant dir="odis" antfile="build.xml" target="tests.odis"/>
+    <ant dir="carrieriq" antfile="build.xml" target="tests.carrieriq"/>
+    <ant dir="itgw" antfile="build.xml" target="tests.itgw"/>
+  </target>
+
+  <target name="init.src">
+    <!-- Tests specific sources set -->
+    <patternset id="specific">
+      <include name="joram/**/*.java"/>
+    </patternset>
+  </target>
+
+  <!-- Include generic part -->
+  &common;
+
+  <target name="init.test.joram" depends="init">
+    <antcall target="init.test" inheritAll="true">
+      <param name="a3debug" value="a3debug.cfg"/>
+    </antcall>
+    <copy file="${jndiconf}" tofile="${test.dir}/jndi.properties" />
+  </target>
+
+  <target name="test.run">
+    <java classname="${className}"
+        failonerror="no" fork="yes" maxmemory="256m"
+        dir="${test.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -Dframework.TestCase.TestId=0 -Dframework.TestCase.OutFile=${report.file} ${jvmargs}"/>
+      <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
+      <arg line="${arg}"/>
+    </java>
+  </target>
+
+  <target name="test.start" depends="init.test.joram">
+    <antcall target="test.run" inheritAll="true"/>
+  </target>
+
+  <!--
+    - ODIS Tests
+    -->
+  <target name="tests.odis" depends="test1.odis" />
+
+  <target name="test1.odis">
+    <antcall target="test.start" inheritAll="true">
+      <param name="className" value="joram.odis.Test1" />
+      <param name="jndiconf" value="odis/jndi.properties" />
+      <param name="a3conf" value="odis/a3servers1.xml" />
+      <param name="engine" value="fr.dyade.aaa.agent.Engine" />
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction" />
+      <param name="jvmargs" value="" />
+    </antcall>
+  </target>
+
+  <!--
+    - CarrierIQ Tests
+    -->
+
+  <target name="init.test.carrieriq" depends="init">
+    <delete dir="${test.dir}"/>
+    <mkdir dir="${test.dir}"/>
+    <copy file="carrieriq/a3servers.xml" tofile="${test.dir}/a3servers.xml"/>
+    <copy file="carrieriq/a3debug.cfg" tofile="${test.dir}/a3debug.cfg"/>
+  </target>
+
+  <target name="carrieriq.broker.run" depends="init.test.carrieriq">
+    <java classname="joram.carrieriq.Broker"
+        failonerror="no" fork="yes" maxmemory="256m"
+        dir="${test.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <arg line=""/>
+    </java>
+  </target>
+
+  <target name="carrieriq.producer.run" depends="init">
+    <java classname="joram.carrieriq.Producer"
+        failonerror="no" fork="yes" maxmemory="256m"
+        dir="${test.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line=""/>
+      <arg line=""/>
+    </java>
+  </target>
+
+  <target name="carrieriq.consumer.run" depends="init">
+    <java classname="joram.carrieriq.Consumer"
+        failonerror="no" fork="yes" maxmemory="256m"
+        dir="${test.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line=""/>
+      <arg line=""/>
+    </java>
+  </target>
+
+  <target name="carrieriq.converter.run" depends="init">
+    <java classname="joram.carrieriq.Converter"
+        failonerror="no" fork="yes" maxmemory="256m"
+        dir="${test.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line=""/>
+      <arg line=""/>
+    </java>
+  </target>
+
+  <target name="carrieriq.ccons.run" depends="init">
+    <java classname="joram.carrieriq.ConcurrentConsumer"
+        failonerror="no" fork="yes" maxmemory="256m"
+        dir="${test.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line=""/>
+      <arg line=""/>
+    </java>
+  </target>
+
+  <!--
+    - Nortel Tests
+    -->
+
+  <target name="init.test.nortel" depends="init">
+    <delete dir="${test.dir}"/>
+    <mkdir dir="${test.dir}"/>
+    <copy file="nortel/a3servers.xml" tofile="${test.dir}/a3servers.xml"/>
+    <copy file="nortel/jndi.properties" tofile="${test.dir}/jndi.properties"/>
+    <copy file="nortel/a3debug.cfg" tofile="${test.dir}/a3debug.cfg"/>
+  </target>
+
+  <target name="nortel.server.run" depends="init.test.nortel">
+    <java classname="fr.dyade.aaa.agent.AgentServer"
+        failonerror="no" fork="yes" maxmemory="256m"
+        dir="${test.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <arg line="0 ./s0"/>
+    </java>
+  </target>
+
+  <target name="nortel.broker.run" depends="init.test.nortel">
+    <java classname="com.nortel.oam.test3.broker.Broker"
+        failonerror="no" fork="yes" maxmemory="256m"
+        dir="${test.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <arg line=""/>
+    </java>
+  </target>
+
+  <target name="nortel.producer.debug" depends="init">
+    <java classname="com.nortel.oam.test3.core.Producer"
+        failonerror="no" fork="yes" maxmemory="256m"
+        dir="${test.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Xdebug -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y"/>
+      <arg line=""/>
+    </java>
+  </target>
+
+  <target name="nortel.producer.run" depends="init">
+    <java classname="com.nortel.oam.test3.core.Producer"
+        failonerror="no" fork="yes" maxmemory="256m"
+        dir="${test.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line=""/>
+      <arg line=""/>
+    </java>
+  </target>
+
+  <target name="nortel.consumer.run" depends="init">
+    <java classname="com.nortel.oam.test3.core.Consumer"
+        failonerror="no" fork="yes" maxmemory="256m"
+        dir="${test.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line=""/>
+      <arg line=""/>
+    </java>
+  </target>
+
+  <target name="test.nortel" depends="init">
+    <parallel>
+      <antcall target="nortel.broker.run" inheritAll="true"/>
+      <sequential>
+        <sleep seconds="5"/>
+        <antcall target="nortel.producer.run" inheritAll="true"/>
+      </sequential>
+    </parallel>
+  </target>
+
+  <target name="test.nortel1" depends="init">
+    <parallel>
+      <antcall target="nortel.server.run" inheritAll="true"/>
+      <sequential>
+        <sleep seconds="5"/>
+        <parallel>
+          <antcall target="nortel.broker.run" inheritAll="true"/>
+          <sequential>
+            <sleep seconds="5"/>
+            <antcall target="nortel.producer.run" inheritAll="true"/>
+          </sequential>
+        </parallel>
+      </sequential>
+    </parallel>
+  </target>
+
+  <!-- Test ITGW -->
+  <target name="test1.itgw" depends="init,compile">
+    <antcall target="init.test.joram" inheritAll="true">
+      <param name="jndiconf" value="itgw/jndi.properties"/>
+      <param name="a3conf" value="itgw/a3servers1.xml"/>
+      <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
+      <param name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
+    </antcall>
+    <parallel>
+      <antcall target="test.run" inheritAll="true">
+        <param name="className" value="joram.itgw.Consumer"/>
+        <param name="jvmargs" value="-DNbClients=4 -DDestination=org.objectweb.joram.client.jms.Queue -Dorg.objectweb.joram.client.jms.queueMsgCount=100"/>
+      </antcall>
+      <sequential>
+        <sleep seconds="1"/>
+        <parallel>
+          <antcall target="test.run" inheritAll="true">
+            <param name="className" value="joram.itgw.Producer"/>
+            <param name="jndiconf" value="perfs/jndi.properties"/>
+            <param name="jvmargs" value="-DlocalSID=1 -DDestination=org.objectweb.joram.client.jms.Queue -DNbRound=100 -DNbMsgPerRound=500 -DMsgSize=100"/>
+          </antcall>
+          <antcall target="test.run" inheritAll="true">
+            <param name="className" value="joram.itgw.Producer"/>
+            <param name="jndiconf" value="perfs/jndi.properties"/>
+            <param name="jvmargs" value="-DlocalSID=2 -DDestination=org.objectweb.joram.client.jms.Queue -DNbRound=100 -DNbMsgPerRound=500 -DMsgSize=100"/>
+          </antcall>
+          <antcall target="test.run" inheritAll="true">
+            <param name="className" value="joram.itgw.Producer"/>
+            <param name="jndiconf" value="perfs/jndi.properties"/>
+            <param name="jvmargs" value="-DlocalSID=3 -DDestination=org.objectweb.joram.client.jms.Queue -DNbRound=100 -DNbMsgPerRound=500 -DMsgSize=100"/>
+          </antcall>
+          <antcall target="test.run" inheritAll="true">
+            <param name="className" value="joram.itgw.Producer"/>
+            <param name="jndiconf" value="perfs/jndi.properties"/>
+            <param name="jvmargs" value="-DlocalSID=4 -DDestination=org.objectweb.joram.client.jms.Queue -DNbRound=100 -DNbMsgPerRound=500 -DMsgSize=100"/>
+          </antcall>
+        </parallel>
+      </sequential>
+    </parallel>
+  </target>
+</project>
