@@ -147,7 +147,7 @@ public class ReconfTest11 extends ReconfTestBase {
               ((TcpConnectionFactory) cfi).getParameters().connectingTimer = 20;
               AdminModule.connect(cfi, "root", "root");
 
-              System.out.println("trace4: " + sid + "ok");
+              System.out.println("trace4: " + sid + " ok");
             } catch( Throwable t ) {
               System.out.println("trace4: " + sid + " nok");
               t.printStackTrace();
@@ -171,6 +171,16 @@ public class ReconfTest11 extends ReconfTestBase {
       AdminModule.stopServer(2);
       // Then clean the configuration: the server is not reachable anymore.
       AdminModule.removeServer(2);
+      
+//      // First stop the server because it must be reachable in order to be stopped.
+//      AdminModule.stopServer(3);
+      // Then clean the configuration: the server is not reachable anymore.
+      AdminModule.removeServer(3);
+      
+      // First stop the server because it must be reachable in order to be stopped.
+      AdminModule.stopServer(4);
+      // Then clean the configuration: the server is not reachable anymore.
+      AdminModule.removeServer(4);
 
       AdminModule.removeDomain("D0");
 
