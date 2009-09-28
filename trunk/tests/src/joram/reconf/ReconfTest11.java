@@ -49,10 +49,10 @@ import fr.dyade.aaa.agent.SimpleNetwork;
  *  
  * This test works with classic networks: SimpleNetwork, PoolNetwork, etc.
  */
-public class ReconfTest10 extends ReconfTestBase {
+public class ReconfTest11 extends ReconfTestBase {
 
   public static void main(String[] args) {
-    new ReconfTest10().run();
+    new ReconfTest11().run();
   }
 
   public void run() {
@@ -62,16 +62,18 @@ public class ReconfTest10 extends ReconfTestBase {
 
       Thread.sleep(1000L);
       
-      TcpConnectionFactory cf0 = (TcpConnectionFactory) TcpConnectionFactory.create("localhost", 2560);
-      cf0.getParameters().connectingTimer = 20;
+      ConnectionFactory cf0 = TcpConnectionFactory.create("localhost", 2560);
+      ((TcpConnectionFactory) cf0).getParameters().connectingTimer = 20;
       AdminModule.connect((ConnectionFactory) cf0, "root", "root" );
       
       User.create("anonymous", "anonymous", 0);
       
-      // Adds a domain D0 and a server S1.
+      // Adds a domain D0.
       
       AdminModule.addDomain("D0", network, 0, 17770);
 
+      // Adds a server s1, deploy it and start it.
+      
       AdminModule.addServer(1, "localhost", "D0", 17771, "s1",
                             new String[]{"org.objectweb.joram.mom.proxies.tcp.TcpProxyService"},
                             new String[]{"2561"});
@@ -84,6 +86,8 @@ public class ReconfTest10 extends ReconfTestBase {
       Queue q0 = checkQueue((short) 0);
       Queue q1 = checkQueue((short) 1);
 
+      // Adds a server s2, deploy it and start it.
+
       AdminModule.addServer(2, "localhost", "D0", 17772, "s1",
                             new String[]{"org.objectweb.joram.mom.proxies.tcp.TcpProxyService"},
                             new String[]{"2562"});
@@ -95,6 +99,29 @@ public class ReconfTest10 extends ReconfTestBase {
       
       Queue q2 = checkQueue((short) 2);
 
+      // Adds a server s3, deploy it but don't start it.
+
+      AdminModule.addServer(3, "localhost", "D0", 17773, "s3",
+                            new String[]{"org.objectweb.joram.mom.proxies.tcp.TcpProxyService"},
+                            new String[]{"2563"});
+
+      System.out.println("trace3: " + AdminModule.getConfiguration());
+
+      // Adds a server s4, deploy it and start it.
+
+      AdminModule.addServer(4, "localhost", "D0", 17774, "s4",
+                            new String[]{"org.objectweb.joram.mom.proxies.tcp.TcpProxyService"},
+                            new String[]{"2564"});
+
+      System.out.println("trace4: " + AdminModule.getConfiguration());
+      
+      deployAgentServer((short) 4, "./s4");
+      startAgentServer((short) 4, new File("./s4"), new String[] {"-DNTNoLockFile=true"});
+      
+      Queue q4 = checkQueue((short) 4);
+
+      // Test all running servers through a connection to server s1
+      
       ConnectionFactory cf1 = TcpConnectionFactory.create("localhost", 2561);
       
       User.create("anonymous", "anonymous", 1);
@@ -102,6 +129,38 @@ public class ReconfTest10 extends ReconfTestBase {
       checkQueue(cf1, q0);
       checkQueue(cf1, q1);
       checkQueue(cf1, q2);
+      checkQueue(cf1, q4);
+      
+      System.out.println("trace3");
+      
+      Map<String,Boolean> retValue = new HashMap();
+      try {
+        Server[] servers = AdminModule.getServers();
+        AdminModule.disconnect();
+
+        if( servers != null ) {
+          for( int i=0; i<servers.length; i++ ) {
+            String serverName = servers[i].getName() + " (" + servers[i].getHostName() + ")";
+            int sid = servers[i].getId();
+            try {
+              ConnectionFactory cfi = TcpConnectionFactory.create(servers[i].getHostName(), 2560 + sid);
+              ((TcpConnectionFactory) cfi).getParameters().connectingTimer = 20;
+              AdminModule.connect(cfi, "root", "root");
+
+              System.out.println("trace4: " + sid + " ok");
+            } catch( Throwable t ) {
+              System.out.println("trace4: " + sid + " nok");
+              t.printStackTrace();
+            } finally {
+              AdminModule.disconnect();
+            }
+          }
+        }
+      } finally {
+          AdminModule.disconnect();
+      }
+
+      AdminModule.connect((ConnectionFactory) cf0, "root", "root" );
       
       // First stop the server because it must be reachable in order to be stopped.
       AdminModule.stopServer(1);

@@ -2212,6 +2212,18 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
+	
+  <target name="reconf.test11" depends="init.a3props,compile"
+          description=" --> test reconfiguration server - PoolNetwork">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="reconf.test11"/>
+      <param name="className" value="joram.reconf.ReconfTest11"/>
+      <param name="jndiconf" value="reconf/jndi.properties"/>
+      <param name="a3conf" value="reconf/a3servers.xml"/>
+      <param name="jvmargs" value="-DNetwork=fr.dyade.aaa.agent.PoolNetwork"/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
 
 	<!-- end test reconf -->
 

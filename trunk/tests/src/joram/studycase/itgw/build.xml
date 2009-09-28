@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE project [
+    <!ENTITY common SYSTEM "file:../../../common.xml">
+]>
+
+<project default="tests" basedir="../..">
+
+  <!--
+    - ITGW Tests
+    -->
+  <target name="tests" depends="test1.itgw"/>
+
+  <target name="init.src">
+    <!-- Tests specific sources set -->
+    <patternset id="specific">
+      <include name="joram/studycase/itgw/*.java"/>
+    </patternset>
+  </target>
+
+  <!-- Include generic part -->
+  &common;
+
+  <target name="init.test.itgw" depends="init">
+    <delete dir="${test.dir}"/>
+    <mkdir dir="${test.dir}"/>
+    <copy file="${a3conf}" tofile="${test.dir}/a3servers.xml"/>
+    <replace file="${test.dir}/a3servers.xml"
+             token="@engine@" value="${engine}"/>
+    <replace file="${test.dir}/a3servers.xml"
+             token="@transaction@" value="${transaction}"/>
+    <replace file="${test.dir}/a3servers.xml"
+             token="@network@" value="${network}"/>
+    <replace file="${test.dir}/a3servers.xml"
+             token="@multiCnxSync@" value="${multiCnx}"/>
+
+    <copy file="a3debug.cfg" tofile="${test.dir}/a3debug.cfg"/>
+    <copy file="${jndiconf}" tofile="${test.dir}/jndi.properties"/>
+  </target>
+
+  <target name="test.run">
+    <java classname="${className}"
+        failonerror="no" fork="yes" maxmemory="256m"
+        dir="${test.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-Dframework.TestCase.TestId=0 -Dframework.TestCase.OutFile=${report.file} ${jvmargs}"/>
+      <arg line="${arg}"/>
+    </java>
+  </target>
+
+  <!-- Test -->
+  <target name="test1.itgw" depends="init,compile">
+    <antcall target="init.test.itgw" inheritAll="true">
+      <param name="jndiconf" value="studycase/itgw/jndi.properties"/>
+      <param name="a3conf" value="studycase/itgw/a3servers1.xml"/>
+      <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
+      <param name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
+    </antcall>
+    <parallel>
+      <antcall target="test.run" inheritAll="true">
+        <param name="className" value="joram.studycase.itgw.Consumer"/>
+        <param name="jvmargs" value="-DNbClients=4 -DDestination=org.objectweb.joram.client.jms.Queue -Dorg.objectweb.joram.client.jms.queueMsgCount=100"/>
+      </antcall>
+      <sequential>
+        <sleep seconds="1"/>
+        <parallel>
+          <antcall target="test.run" inheritAll="true">
+            <param name="className" value="joram.studycase.itgw.Producer"/>
+            <param name="jndiconf" value="studycase/itgw/jndi.properties"/>
+            <param name="jvmargs" value="-DlocalSID=1 -DDestination=org.objectweb.joram.client.jms.Queue -DNbRound=100 -DNbMsgPerRound=500 -DMsgSize=100"/>
+          </antcall>
+          <antcall target="test.run" inheritAll="true">
+            <param name="className" value="joram.studycase.itgw.Producer"/>
+            <param name="jndiconf" value="studycase/itgw/jndi.properties"/>
+            <param name="jvmargs" value="-DlocalSID=2 -DDestination=org.objectweb.joram.client.jms.Queue -DNbRound=100 -DNbMsgPerRound=500 -DMsgSize=100"/>
+          </antcall>
+          <antcall target="test.run" inheritAll="true">
+            <param name="className" value="joram.studycase.itgw.Producer"/>
+            <param name="jndiconf" value="studycase/itgw/jndi.properties"/>
+            <param name="jvmargs" value="-DlocalSID=3 -DDestination=org.objectweb.joram.client.jms.Queue -DNbRound=100 -DNbMsgPerRound=500 -DMsgSize=100"/>
+          </antcall>
+          <antcall target="test.run" inheritAll="true">
+            <param name="className" value="joram.studycase.itgw.Producer"/>
+            <param name="jndiconf" value="studycase/itgw/jndi.properties"/>
+            <param name="jvmargs" value="-DlocalSID=4 -DDestination=org.objectweb.joram.client.jms.Queue -DNbRound=100 -DNbMsgPerRound=500 -DMsgSize=100"/>
+          </antcall>
+        </parallel>
+      </sequential>
+    </parallel>
+  </target>
+
+</project>
