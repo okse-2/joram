@@ -53,5 +53,5 @@ if $cygwin; then
   CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
 fi
 
-echo "== Launching a non persistent server#0 =="
-cd $RUN_DIR; exec $JAVA_HOME/bin/java -classpath $CLASSPATH fr.dyade.aaa.agent.AgentServer 0 ./s0
+echo "== Launching a non persistent server#0 with SSLProxyService =="
+cd $RUN_DIR; exec $JAVA_HOME/bin/java -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -Dkeystore=%RUN_DIR%\joram_ks -Dkeystore_pass=passpass -classpath $CLASSPATH fr.dyade.aaa.agent.AgentServer 0 ./s0

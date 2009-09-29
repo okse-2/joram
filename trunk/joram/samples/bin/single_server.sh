@@ -57,4 +57,4 @@ fi
 echo $CLASSPATH
 
 echo "== Launching a non persistent server#0 =="
-cd $RUN_DIR; exec "${JAVA_HOME}"/bin/java -classpath $CLASSPATH fr.dyade.aaa.agent.AgentServer 0 ./s0
+cd $RUN_DIR; exec "${JAVA_HOME}"/bin/java -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -classpath $CLASSPATH fr.dyade.aaa.agent.AgentServer 0 ./s0

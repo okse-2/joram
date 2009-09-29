@@ -66,4 +66,4 @@ if $cygwin; then
 fi
 
 echo "== Launching a persistent server#$1 =="
-cd $RUN_DIR; exec $JAVA_HOME/bin/java -classpath $CLASSPATH fr.dyade.aaa.agent.AgentServer $1 ./s$1
+cd $RUN_DIR; exec "${JAVA_HOME}"/bin/java  -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -classpath $CLASSPATH fr.dyade.aaa.agent.AgentServer $1 ./s$1
