@@ -116,6 +116,17 @@
     </java>
   </target>
 
+  <!-- Runs the Admin Mbean adapter -->
+  <target name="admin_jmx" depends="init"
+    description="--> Starts an admin MBean adapter client">
+    <java classname="org.objectweb.joram.client.jms.admin.JoramAdminConnect"
+          failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
   <!-- Starts a server -->
   <target name="server" depends="init">
     <java classname="fr.dyade.aaa.agent.AgentServer"
