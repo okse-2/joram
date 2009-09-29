@@ -24,8 +24,10 @@ copy %CONFIG_DIR%\sslcentralized_a3servers.xml %RUN_DIR%\a3servers.xml
 copy %CONFIG_DIR%\jndi.properties %RUN_DIR%\jndi.properties
 copy %CONFIG_DIR%\joram_ks %RUN_DIR%\joram_ks
 
-echo == Launching a non persistent server#0 ==
-start /D %RUN_DIR% /B %JAVA_HOME%\bin\java -Dkeystore=%RUN_DIR%\joram_ks -Dkeystore_pass=passpass -classpath %CLASSPATH% fr.dyade.aaa.agent.AgentServer 0 ./s0
+set PATH=%JAVA_HOME%\bin;%PATH%
+
+echo == Launching a non persistent server#0 with SSLProxyService ==
+start /D %RUN_DIR% /B %JAVA_HOME%\bin\java -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -Dkeystore=%RUN_DIR%\joram_ks -Dkeystore_pass=passpass -classpath %CLASSPATH% fr.dyade.aaa.agent.AgentServer 0 ./s0
 goto end
 :nokHome
 echo The JORAM_HOME environment variable is not defined correctly

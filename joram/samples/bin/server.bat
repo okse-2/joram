@@ -22,8 +22,10 @@ copy %CONFIG_DIR%\a3debug.cfg %RUN_DIR%\a3debug.cfg
 copy %CONFIG_DIR%\distributed_a3servers.xml %RUN_DIR%\a3servers.xml
 copy %CONFIG_DIR%\jndi.properties %RUN_DIR%\jndi.properties
 
+set PATH=%JAVA_HOME%\bin;%PATH%
+
 echo == Launching a persistent server#%1 ==
-start /D %RUN_DIR% /B %JAVA_HOME%\bin\java -classpath %CLASSPATH% fr.dyade.aaa.agent.AgentServer %1 ./s%1
+start /D %RUN_DIR% /B java -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -classpath %CLASSPATH% fr.dyade.aaa.agent.AgentServer %1 ./s%1
 goto end
 :nokHome
 echo The JORAM_HOME environment variable is not defined correctly
