@@ -59,7 +59,7 @@ public class MonitoringTimerTask extends java.util.TimerTask {
     this.attlist = attlist;
     
     try {
-      writer = new FileWriter(new File(path));
+      writer = new FileWriter(path, true);
     } catch (IOException exc) {
       logger.log(BasicLevel.ERROR,
                  "MonitoringTimerTask.<init>, cannot open file \"" + path + "\"", exc);
