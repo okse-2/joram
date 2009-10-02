@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
  * USA.
  *
  * Initial developer(s): ScalAgent Distributed Technologies
- * Contributor(s):
+ * Contributor(s): Abdenbi Benammour
  */
 package org.objectweb.joram.shared.security.jaas;
 
@@ -93,6 +93,16 @@ public class JonasIdentity extends Identity {
    * @see org.objectweb.joram.shared.security.Identity#setIdentity(java.lang.String, java.lang.String)
    */
   public void setIdentity(String user, String passwd) throws Exception {
+	 setIdentity(user, passwd, null); 
+  }
+  /**
+   * sets the identity based on the user, password and the JAAS entry name.
+   * @param user the username
+   * @param passwd the password
+   * @param pJaasEntryName the JAAS entry name (within the JAAS configuration file).
+   * @throws Exception if an error occurs while trying to authenticate.
+   */
+  public void setIdentity(String user, String passwd, String pJaasEntryName) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "JonasIdentity.setIdentity(" + user + ", ****)");
 
@@ -102,7 +112,14 @@ public class JonasIdentity extends Identity {
           "JonasIdentity.setIdentity principal = " + principal);
 
     try {
-      String jaasEntryName = System.getProperty("joram.security.jaas.entryName", JAAS_ENTRY_NAME);
+      String jaasEntryName=null;
+      if (Boolean.getBoolean("joram.security.jaas.entryName")) {
+    	  jaasEntryName = System.getProperty("joram.security.jaas.entryName");
+      } else if (pJaasEntryName!=null) {
+    	  jaasEntryName = pJaasEntryName;
+      } else {
+    	  jaasEntryName = JAAS_ENTRY_NAME; //default
+      }
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "setIdentity: jaasEntryName = "  + jaasEntryName);
       loginContext = new LoginContext(jaasEntryName, new NoInputCallbackHandler(user, passwd));
