@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import org.objectweb.joram.mom.dest.AdminTopic;
 import org.objectweb.joram.mom.notifications.GetProxyIdNot;
 import org.objectweb.joram.mom.proxies.GetConnectionNot;
 import org.objectweb.joram.mom.proxies.OpenConnectionNot;
@@ -134,7 +135,7 @@ public class TcpConnectionListener extends Daemon {
     String inaddr = sock.getInetAddress().getHostAddress();
 
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, " -> accept connection");
+      logger.log(BasicLevel.DEBUG, " -> accept connection from " + inaddr);
 
     try {
       sock.setTcpNoDelay(true);
@@ -154,7 +155,12 @@ public class TcpConnectionListener extends Daemon {
       }
       if (magic[7] != MetaData.joramMagic[7])
         throw new IllegalAccessException("Bad protocol version number");
-
+      
+      long dt = Math.abs(StreamUtil.readLongFrom(is) - System.currentTimeMillis());
+      if (dt > 1000)
+        logger.log(BasicLevel.WARN, " -> clock synchronization between client and server: " + dt);
+      StreamUtil.writeTo(dt, nos);
+      
       Identity identity = Identity.read(is);
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> read identity = " + identity);
@@ -173,7 +179,7 @@ public class TcpConnectionListener extends Daemon {
       GetProxyIdNot gpin = new GetProxyIdNot(identity, inaddr);
       AgentId proxyId;
       try {
-        gpin.invoke(new AgentId(AgentServer.getServerId(), AgentServer.getServerId(),  AgentId.JoramAdminStamp));
+        gpin.invoke(AdminTopic.getDefault());
         proxyId = gpin.getProxyId();
       } catch (Exception exc) {
         if (logger.isLoggable(BasicLevel.DEBUG))

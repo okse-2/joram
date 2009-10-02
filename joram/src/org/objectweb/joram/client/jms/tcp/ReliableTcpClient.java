@@ -260,6 +260,8 @@ public class ReliableTcpClient {
 
     // Writes the Joram magic number
     baos.write(MetaData.joramMagic);
+    // Writes the current date
+    StreamUtil.writeTo(System.currentTimeMillis(), baos);
     
     // Writes the user identity
     if (logger.isLoggable(BasicLevel.DEBUG))
@@ -272,12 +274,16 @@ public class ReliableTcpClient {
 
     if (key == -1) {
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, " -> open new connection");      
+        logger.log(BasicLevel.DEBUG, " -> connection opened, initializes new connection");
       StreamUtil.writeTo(reconnectTimeout, baos);
       baos.writeTo(os);
       os.flush();
 
       int len = StreamUtil.readIntFrom(is);
+      long dt = StreamUtil.readLongFrom(is);
+      if (dt > 1000)
+        logger.log(BasicLevel.WARN, " -> clock synchronization between client and server: " + dt);
+
       int res = StreamUtil.readIntFrom(is);
       if (res > 0) {
         String info = StreamUtil.readStringFrom(is);
@@ -292,7 +298,7 @@ public class ReliableTcpClient {
         logger.log(BasicLevel.DEBUG, " -> init reliable connection");
     } else {
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, " -> reopen connection " + identity + ',' + key);
+        logger.log(BasicLevel.DEBUG, " -> reinitializes connection " + identity + ',' + key);
       baos.writeTo(os);
       os.flush();
 
