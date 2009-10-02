@@ -273,8 +273,7 @@ public class ServerConfigHelper {
     throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
-                 "ServerConfigHelper.addService(" + 
-                 sid + ',' + className + ',' + args + ')');
+                 "ServerConfigHelper.addService(" + sid + ',' + className + ',' + args + ')');
     A3CMLConfig a3cmlConfig = AgentServer.getConfig();
     A3CMLServer a3cmlServer = a3cmlConfig.getServer((short)sid);
     A3CMLService a3cmlService = new A3CMLService(className, args);
@@ -283,9 +282,7 @@ public class ServerConfigHelper {
     if (sid == AgentServer.getServerId()) {
       try {
         ServiceManager.register(className, args);
-        ServiceDesc desc = 
-          (ServiceDesc) ServiceManager.manager.registry.get(
-            className);
+        ServiceDesc desc = (ServiceDesc) ServiceManager.manager.registry.get(className);
         if (! desc.running) {
           ServiceManager.start(desc);
         }
