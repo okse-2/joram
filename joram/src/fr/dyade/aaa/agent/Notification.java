@@ -27,9 +27,7 @@ import java.io.Serializable;
  * notification's class has Notification as a superclass.
  */
 public class Notification implements Serializable, Cloneable {
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   static final long serialVersionUID = 1L;
 
   /**
@@ -186,16 +184,6 @@ public class Notification implements Serializable, Cloneable {
   }
 
   /**
-   * Provides a string image for this object.
-   *
-   * @return	a string representation for this object.
-   */
-  public final String toString() {
-    StringBuffer output = new StringBuffer();
-    return toString(output).toString();
-  }
-
-  /**
    * 
    * @return The agentId identifying the agent to which the notification is sent
    *         when it is expired.
@@ -238,4 +226,13 @@ public class Notification implements Serializable, Cloneable {
     return output;
   }
 
+  /**
+   * Provides a string image for this object.
+   *
+   * @return  a string representation for this object.
+   */
+  public final String toString() {
+    StringBuffer output = new StringBuffer();
+    return toString(output).toString();
+  }
 }
