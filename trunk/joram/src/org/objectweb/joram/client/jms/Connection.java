@@ -20,9 +20,11 @@
  *
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s): ScalAgent Distributed Technologies
+ *                 Abdenbi Benammour
  */
 package org.objectweb.joram.client.jms;
 
+import java.util.List;
 import java.util.Vector;
 
 import javax.jms.IllegalStateException;
@@ -395,6 +397,26 @@ public class Connection implements javax.jms.Connection {
     return factoryParameters.outLocalPort;
   }
   
+  /**
+   * returns the list of IN message interceptors.
+   * <br>Each IN message interceptor is {@link MessageInterceptor#handle(javax.jms.Message) called}
+   * when {@link Session#receive() receiving} a message.
+   * <br>The execution follows the order of the elements within the list.
+   * @return the list of the IN message interceptors.
+   */
+  public final List getInInterceptors(){
+	  return factoryParameters.inInterceptors;
+  }
+  /**
+   * returns the list of OUT message interceptors.
+   * <br>Each OUT message interceptor is {@link MessageInterceptor#handle(javax.jms.Message) called}
+   * when {@link Session#send() sending} a message.
+   * <br>The execution follows the order of the elements within the list.
+   * @return the list of the OUT message interceptors.
+   */
+  public final List getOutInterceptors(){
+	  return factoryParameters.outInterceptors;
+  }
   /**
    * Checks if the connection is closed. If true raises an
    * IllegalStateException.
