@@ -26,11 +26,9 @@ package fr.dyade.aaa.agent;
  * local agent from a collocated thread.
  */
 public class SyncNotification extends Notification {
-  
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+  
   private transient Context ctx;
 
   protected SyncNotification() {
