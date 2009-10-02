@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -20,11 +20,14 @@
  *
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s): ScalAgent Distributed Technologies
+ *                 Abdenbi Benammour
  */
 package org.objectweb.joram.client.jms;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 import java.util.TimerTask;
 import java.util.Vector;
 
@@ -100,8 +103,7 @@ public class Session implements javax.jms.Session {
      */
     public static final int CLOSE = 2;
 
-    private static final String[] names = {
-      "STOP", "START", "CLOSE"};
+		private static final String[] names = {"STOP", "START", "CLOSE"};
 
     public static String toString(int status) {
       return names[status];
@@ -133,8 +135,7 @@ public class Session implements javax.jms.Session {
      */
     public static final int APP_SERVER = 3;
 
-    private static final String[] names = {
-      "NONE", "RECEIVE", "LISTENER", "APP_SERVER"};
+		private static final String[] names = {"NONE", "RECEIVE", "LISTENER", "APP_SERVER"};
 
     public static String toString(int status) {
       return names[status];
@@ -154,8 +155,7 @@ public class Session implements javax.jms.Session {
     /**  The request is done. */
     public static final int DONE = 2;
 
-    private static final String[] names = {
-      "NONE", "RUN", "DONE"};
+		private static final String[] names = {"NONE", "RUN", "DONE"};
 
     public static String toString(int status) {
       return names[status];
@@ -576,6 +576,25 @@ public class Session implements javax.jms.Session {
 
   private MessageConsumerListener messageConsumerListener;
 
+	private List inInterceptors;
+	private List outInterceptors;
+	
+	/**
+	 * Sets the list of IN message interceptors.
+	 * @param pInInterceptors
+	 */
+	public void setInMessageInterceptors(List pInInterceptors){
+		inInterceptors = pInInterceptors;
+	}
+	
+	/**
+	 * Sets the OUT message interceptor.
+	 * @param pOutInterceptor
+	 */
+	public void setOutMessageInterceptors(List pOutInterceptors){
+		outInterceptors = pOutInterceptors;
+	}
+	
   /**
    * Opens a session.
    *
@@ -639,6 +658,10 @@ public class Session implements javax.jms.Session {
     setStatus(Status.STOP);
     setSessionMode(SessionMode.NONE);
     setRequestStatus(RequestStatus.NONE);
+    
+		//add interceptors...
+		inInterceptors = cnx.getInInterceptors();
+		outInterceptors= cnx.getOutInterceptors();
   }
 
   /**
@@ -775,9 +798,7 @@ public class Session implements javax.jms.Session {
    *
    * @exception JMSException  Actually never thrown.
    */
-  public synchronized void setMessageListener(
-    javax.jms.MessageListener messageListener)
-    throws JMSException {
+	public synchronized void setMessageListener(javax.jms.MessageListener messageListener) throws JMSException {
     checkSessionMode(SessionMode.APP_SERVER);
     this.messageListener = messageListener;
   }
@@ -787,9 +808,7 @@ public class Session implements javax.jms.Session {
    *
    * @exception JMSException  Actually never thrown.
    */
-  public synchronized javax.jms.MessageListener 
-      getMessageListener() 
-    throws JMSException {
+	public synchronized javax.jms.MessageListener getMessageListener() throws JMSException {
     return messageListener;
   }
 
@@ -799,8 +818,7 @@ public class Session implements javax.jms.Session {
    *
    * @exception IllegalStateException  If the session is closed.
    */
-  public synchronized javax.jms.Message createMessage() 
-    throws JMSException {
+	public synchronized javax.jms.Message createMessage() throws JMSException {
     checkClosed();
     return new Message();
   }
@@ -811,8 +829,7 @@ public class Session implements javax.jms.Session {
    *
    * @exception IllegalStateException  If the session is closed.
    */
-  public synchronized javax.jms.TextMessage createTextMessage() 
-    throws JMSException {
+	public synchronized javax.jms.TextMessage createTextMessage() throws JMSException {
     checkClosed();
     return new TextMessage();
   }
@@ -823,8 +840,7 @@ public class Session implements javax.jms.Session {
    *
    * @exception IllegalStateException  If the session is closed.
    */
-  public synchronized javax.jms.TextMessage createTextMessage(String text)
-    throws JMSException {
+	public synchronized javax.jms.TextMessage createTextMessage(String text) throws JMSException {
     checkClosed();
     TextMessage message =  new TextMessage();
     message.setText(text);
@@ -837,8 +853,7 @@ public class Session implements javax.jms.Session {
    *
    * @exception IllegalStateException  If the session is closed.
    */
-  public synchronized javax.jms.BytesMessage createBytesMessage()
-    throws JMSException {
+	public synchronized javax.jms.BytesMessage createBytesMessage() throws JMSException {
     checkClosed();
     return new BytesMessage();
   }
@@ -849,8 +864,7 @@ public class Session implements javax.jms.Session {
    *
    * @exception IllegalStateException  If the session is closed.
    */
-  public synchronized javax.jms.MapMessage createMapMessage()
-    throws JMSException {
+	public synchronized javax.jms.MapMessage createMapMessage() throws JMSException {
     checkClosed();
     return new MapMessage();
   }
@@ -861,8 +875,7 @@ public class Session implements javax.jms.Session {
    *
    * @exception IllegalStateException  If the session is closed.
    */
-  public synchronized javax.jms.ObjectMessage createObjectMessage()
-    throws JMSException {
+	public synchronized javax.jms.ObjectMessage createObjectMessage() throws JMSException {
     checkClosed();
     return new ObjectMessage();
   }
@@ -873,9 +886,7 @@ public class Session implements javax.jms.Session {
    *
    * @exception IllegalStateException  If the session is closed.
    */
-  public synchronized javax.jms.ObjectMessage createObjectMessage(
-    java.io.Serializable obj)
-    throws JMSException {
+	public synchronized javax.jms.ObjectMessage createObjectMessage(java.io.Serializable obj) throws JMSException {
     checkClosed();
     ObjectMessage message = new ObjectMessage(); 
     message.setObject(obj);
@@ -888,8 +899,7 @@ public class Session implements javax.jms.Session {
    *
    * @exception IllegalStateException  If the session is closed.
    */
-  public synchronized javax.jms.StreamMessage createStreamMessage()
-    throws JMSException {
+	public synchronized javax.jms.StreamMessage createStreamMessage() throws JMSException {
     checkClosed();
     return new StreamMessage();
   }
@@ -1108,8 +1118,7 @@ public class Session implements javax.jms.Session {
     checkClosed();
     checkThreadOfControl();
 
-    SessCreateTDReply reply =
-      (SessCreateTDReply) requestor.request(new SessCreateTQRequest());
+		SessCreateTDReply reply = (SessCreateTDReply) requestor.request(new SessCreateTQRequest());
     String tempDest = reply.getAgentId();
     return new TemporaryQueue(tempDest, cnx);
   }
@@ -1125,8 +1134,7 @@ public class Session implements javax.jms.Session {
     checkClosed();
     checkThreadOfControl();
 
-    SessCreateTDReply reply =
-      (SessCreateTDReply) requestor.request(new SessCreateTTRequest());
+		SessCreateTDReply reply = (SessCreateTDReply) requestor.request(new SessCreateTTRequest());
     String tempDest = reply.getAgentId();
     return new TemporaryTopic(tempDest, cnx);
   }
@@ -1170,20 +1178,16 @@ public class Session implements javax.jms.Session {
    */
   public synchronized void commit() throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG,
-        "Session.commit()");
+			logger.log(BasicLevel.DEBUG, "Session.commit()");
 
     checkClosed();
     checkThreadOfControl();
 
-    if (! transacted)
-      throw new IllegalStateException("Can't commit a non transacted"
-                                      + " session.");
+		if (!transacted)
+			throw new IllegalStateException("Can't commit a non transacted" + " session.");
 
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "--- " + this
-                                 + ": committing...");
+			logger.log(BasicLevel.DEBUG, "--- " + this + ": committing...");
 
     // If the transaction was scheduled: canceling.
     if (scheduled) {
@@ -1197,8 +1201,7 @@ public class Session implements javax.jms.Session {
       
       Enumeration producerMessages = sendings.elements();
       while (producerMessages.hasMoreElements()) {
-        ProducerMessages pM = 
-          (ProducerMessages) producerMessages.nextElement();
+				ProducerMessages pM = (ProducerMessages) producerMessages.nextElement();
         commitReq.addProducerMessages(pM);
       }
       sendings.clear();
@@ -1252,9 +1255,7 @@ public class Session implements javax.jms.Session {
    */
   public synchronized void rollback() throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG,
-        "Session.rollback()");
+			logger.log(BasicLevel.DEBUG, "Session.rollback()");
 
     checkClosed();
     checkThreadOfControl();
@@ -1289,9 +1290,7 @@ public class Session implements javax.jms.Session {
    */
   public synchronized void recover() throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG,
-        "Session.recover()");
+			logger.log(BasicLevel.DEBUG, "Session.recover()");
 
     checkClosed();
     checkThreadOfControl();
@@ -1300,11 +1299,9 @@ public class Session implements javax.jms.Session {
       throw new IllegalStateException("Can't recover a transacted session.");
     
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "--- " + this
-                                 + " recovering...");
+			logger.log(BasicLevel.DEBUG, "--- " + this + " recovering...");
 
-    if (daemon != null &&  
-        daemon.isCurrentThread()) {
+		if (daemon != null && daemon.isCurrentThread()) {
       recover = true;
     } else {
       doRecover();
@@ -1369,8 +1366,7 @@ public class Session implements javax.jms.Session {
    * accessed concurrently during its closure. So we need a second lock.
    */
   class Closer {
-    synchronized void close() 
-      throws JMSException {
+		synchronized void close() throws JMSException {
       doClose();
     }
   }
@@ -1384,45 +1380,39 @@ public class Session implements javax.jms.Session {
     // it could deadlock with message listeners or
     // client threads still using the session.
 
-    Vector consumersToClose = (Vector)consumers.clone();
+		Vector consumersToClose = (Vector) consumers.clone();
     consumers.clear();
     for (int i = 0; i < consumersToClose.size(); i++) {
-      MessageConsumer mc = 
-        (MessageConsumer)consumersToClose.elementAt(i);
+			MessageConsumer mc = (MessageConsumer) consumersToClose.elementAt(i);
       try {
         mc.close();
       } catch (JMSException exc) {
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(
-            BasicLevel.DEBUG, "", exc);
+					logger.log(BasicLevel.DEBUG, "", exc);
       }
     }
     
-    Vector browsersToClose = (Vector)browsers.clone();
+		Vector browsersToClose = (Vector) browsers.clone();
     browsers.clear();
     for (int i = 0; i < browsersToClose.size(); i++) {
-      QueueBrowser qb = 
-        (QueueBrowser)browsersToClose.elementAt(i);
+			QueueBrowser qb = (QueueBrowser) browsersToClose.elementAt(i);
       try {
         qb.close();
       } catch (JMSException exc) {
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(
-            BasicLevel.DEBUG, "", exc);
+					logger.log(BasicLevel.DEBUG, "", exc);
       }
     }
     
-    Vector producersToClose = (Vector)producers.clone();
+		Vector producersToClose = (Vector) producers.clone();
     producers.clear();
     for (int i = 0; i < producersToClose.size(); i++) {
-      MessageProducer mp = 
-        (MessageProducer)producersToClose.elementAt(i);
+			MessageProducer mp = (MessageProducer) producersToClose.elementAt(i);
       try {
         mp.close();
       } catch (JMSException exc) {
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(
-            BasicLevel.DEBUG, "", exc);
+					logger.log(BasicLevel.DEBUG, "", exc);
       }
     }
     
@@ -1461,9 +1451,7 @@ public class Session implements javax.jms.Session {
    */
   synchronized void start() {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, 
-        "Session.start()");
+			logger.log(BasicLevel.DEBUG, "Session.start()");
 
     if (status == Status.CLOSE) return;
     if (status == Status.START) return;
@@ -1476,9 +1464,7 @@ public class Session implements javax.jms.Session {
 
   private void doStart() {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, 
-        "Session.doStart()");
+			logger.log(BasicLevel.DEBUG, "Session.doStart()");
     repliesIn.start();
     daemon = new SessionDaemon();
     daemon.setDaemon(false);
@@ -1592,8 +1578,7 @@ public class Session implements javax.jms.Session {
     acks.addId(id);
 
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, " -> acks = " + acks);
+			logger.log(BasicLevel.DEBUG, " -> acks = " + acks);
 
     // If the transaction must be scheduled, scheduling it:
     if (closingTask != null) {
@@ -1608,8 +1593,7 @@ public class Session implements javax.jms.Session {
    */
   synchronized void acknowledge() throws JMSException {
     checkClosed();
-    if (transacted ||
-        acknowledgeMode != javax.jms.Session.CLIENT_ACKNOWLEDGE) {
+		if (transacted || acknowledgeMode != javax.jms.Session.CLIENT_ACKNOWLEDGE) {
       return;
     }
     doAcknowledge();
@@ -1652,9 +1636,7 @@ public class Session implements javax.jms.Session {
    */
   private void deny() throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, 
-        "Session.deny()");
+			logger.log(BasicLevel.DEBUG, "Session.deny()");
     Enumeration targets = deliveries.keys();
     while (targets.hasMoreElements()) {
       String target = (String) targets.nextElement();
@@ -1696,10 +1678,9 @@ public class Session implements javax.jms.Session {
     preReceive(mc);
     try {
       ConsumerMessages reply = null;
-      ConsumerReceiveRequest request =
-        new ConsumerReceiveRequest(targetName, selector, 
-                                   requestTimeToLive, queueMode);
-      if (implicitAck) request.setReceiveAck(true);
+			ConsumerReceiveRequest request = new ConsumerReceiveRequest(targetName, selector, requestTimeToLive, queueMode);
+			if (implicitAck)
+				request.setReceiveAck(true);
       reply = (ConsumerMessages) receiveRequestor.request(request, waitTimeOut);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
@@ -1730,6 +1711,22 @@ public class Session implements javax.jms.Session {
               prepareAck(targetName, msgId, queueMode);
             }
             msg.session = this;
+						//Add in interception...
+						if ((inInterceptors != null) && (!inInterceptors.isEmpty())) {
+						  for (Iterator it=inInterceptors.iterator(); it.hasNext(); ) {
+						    MessageInterceptor interceptor = (MessageInterceptor) it.next();
+						    if (logger.isLoggable(BasicLevel.DEBUG))
+						      logger.log(BasicLevel.DEBUG,
+						                 "Intercepting the message after receiving by " + interceptor.getClass().getName());
+						    
+						    try {
+						      interceptor.handle(msg, this);
+						    } catch(Throwable t) {
+						      if (logger.isLoggable(BasicLevel.WARN))
+						        logger.log(BasicLevel.WARN, "Warning while interception (continue anyway...)", t);
+						    }
+						  }
+						}
             return msg;
           } else {
             return null;
@@ -1790,9 +1787,7 @@ public class Session implements javax.jms.Session {
    */
   private synchronized void postReceive() {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, 
-        "Session.postReceive()");
+			logger.log(BasicLevel.DEBUG, "Session.postReceive()");
 
     singleThreadOfControl = null;
     pendingMessageConsumer = null;
@@ -1804,8 +1799,7 @@ public class Session implements javax.jms.Session {
   /**
    * Called here and by sub-classes.
    */
-  protected synchronized void addConsumer(
-    MessageConsumer mc) {
+	protected synchronized void addConsumer(MessageConsumer mc) {
     consumers.addElement(mc);
   }
 
@@ -1814,9 +1808,7 @@ public class Session implements javax.jms.Session {
    */
   synchronized void closeConsumer(MessageConsumer mc) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, 
-        "Session.closeConsumer(" + mc + ')');
+			logger.log(BasicLevel.DEBUG, "Session.closeConsumer(" + mc + ')');
     consumers.removeElement(mc);
 
     if (pendingMessageConsumer == mc) {
@@ -1843,14 +1835,11 @@ public class Session implements javax.jms.Session {
   /**
    * Called by Connection (i.e. temporary destinations deletion)
    */
-  synchronized void checkConsumers(String agentId) 
-    throws JMSException {
+	synchronized void checkConsumers(String agentId) throws JMSException {
     for (int j = 0; j < consumers.size(); j++) {
-      MessageConsumer cons = 
-        (MessageConsumer) consumers.elementAt(j);
+			MessageConsumer cons = (MessageConsumer) consumers.elementAt(j);
       if (agentId.equals(cons.dest.agentId)) {
-        throw new JMSException(
-          "Consumers still exist for this temp queue.");
+				throw new JMSException("Consumers still exist for this temp queue.");
       }
     }
   }
@@ -1882,9 +1871,7 @@ public class Session implements javax.jms.Session {
   synchronized MessageConsumerListener addMessageListener(
     MessageConsumerListener mcl) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(
-        BasicLevel.DEBUG, 
-        "Session.addMessageListener(" + mcl + ')');
+			logger.log(BasicLevel.DEBUG, "Session.addMessageListener(" + mcl + ')');
     checkClosed();
     checkThreadOfControl();
 
@@ -1892,8 +1879,7 @@ public class Session implements javax.jms.Session {
 
     mcl.start();
     
-    if (status == Status.START &&
-        listenerCount == 0) {
+		if (status == Status.START && listenerCount == 0) {
       doStart();
     }
 
@@ -2003,8 +1989,7 @@ public class Session implements javax.jms.Session {
   private void onMessages(MessageListenerContext ctx) throws JMSException {
     Vector msgs = ctx.messages.getMessages();
     for (int i = 0; i < msgs.size(); i++) {
-      onMessage((org.objectweb.joram.shared.messages.Message) msgs.elementAt(i),
-                ctx.consumerListener);
+			onMessage((org.objectweb.joram.shared.messages.Message) msgs.elementAt(i), ctx.consumerListener);
     }
   }
 
@@ -2105,10 +2090,25 @@ public class Session implements javax.jms.Session {
         // to convert it.
         joramMsg = Message.convertJMSMessage(msg);
       } catch (JMSException jE) {
-        MessageFormatException mE =
-          new MessageFormatException("Message to send is invalid.");
+        MessageFormatException mE = new MessageFormatException("Message to send is invalid.");
         mE.setLinkedException(jE);
         throw mE;
+      }
+    }
+		//Add out interception...
+    if ((outInterceptors != null) && (!outInterceptors.isEmpty())) {
+      for (Iterator it=outInterceptors.iterator(); it.hasNext(); ) {
+        MessageInterceptor interceptor = (MessageInterceptor) it.next();
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG,
+                     "Intercepting the message before sending by " + interceptor.getClass().getName());
+
+        try {
+          interceptor.handle(joramMsg, this);
+        } catch(Throwable t) {
+          if (logger.isLoggable(BasicLevel.WARN))
+            logger.log(BasicLevel.WARN, "Warning while interception (continue anyway...)",t);
+        }
       }
     }
     joramMsg.prepare();

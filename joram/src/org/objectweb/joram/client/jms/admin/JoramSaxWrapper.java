@@ -19,14 +19,18 @@
  *
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): Benoit Pelletier (Bull SA)
+ *                 Abdenbi Benammour
  */
 package org.objectweb.joram.client.jms.admin;
 
 import java.io.Reader;
 import java.lang.reflect.Method;
 import java.net.ConnectException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -138,6 +142,10 @@ public class JoramSaxWrapper extends DefaultHandler {
   /** Syntaxic name for Cluster element */
   static final String ELT_CLUSTER_ELEMENT = "ClusterElement";
 
+  static final String ELT_IN_INTERCEPTORS="inInterceptors";
+  static final String ELT_OUT_INTERCEPTORS="outInterceptors";
+  static final String ELT_INTERCEPTOR="interceptor";
+  
   /** Syntaxic name for name attribute */
   static final String ATT_NAME = "name";
   /** Syntaxic name for login attribute */
@@ -209,6 +217,10 @@ public class JoramSaxWrapper extends DefaultHandler {
   boolean freeReading = false;
   boolean freeWriting = false;
 
+  List inInterceptorClassname= new ArrayList();
+  List outInterceptorClassname= new ArrayList();
+  List currentInterceptorList;
+  
   InitialContext jndiCtx = null;
   
   /**
@@ -658,6 +670,17 @@ public class JoramSaxWrapper extends DefaultHandler {
         cluster.clear();
       } else if (rawName.equals(ELT_CLUSTER_CF)) {
         cluster.clear();
+      } else if (rawName.equals(ELT_IN_INTERCEPTORS)) {
+    	  currentInterceptorList = inInterceptorClassname;  
+      } else if (rawName.equals(ELT_OUT_INTERCEPTORS)) {
+    	  currentInterceptorList = outInterceptorClassname;
+      } else if (rawName.equals(ELT_INTERCEPTOR)) {
+    	  String interceptorCN = atts.getValue(ATT_CLASSNAME);
+          if (isSet(interceptorCN)) {
+        	  currentInterceptorList.add(interceptorCN);
+          } else {
+        	  throw new SAXException("Element \"" + rawName + "\" must provide \"" + ATT_CLASSNAME + "\" attribute. ");
+          }
       } else {
         throw new SAXException("unknown element \"" + rawName + "\"");
       }
@@ -732,7 +755,24 @@ public class JoramSaxWrapper extends DefaultHandler {
             toBind.put(jndiName, obj);
           jndiName = null;
           // Register the CF in order to handle it later (cluster, etc.)
-          if (isSet(name)) cfs.put(name, obj);
+          if (isSet(name)){
+        	  cfs.put(name, obj);
+          }
+          //Add interceptors if any
+          if ((inInterceptorClassname!=null) && (!inInterceptorClassname.isEmpty())) {
+            for (Iterator it=inInterceptorClassname.iterator(); it.hasNext(); ) {
+              String iicn = (String) it.next();
+        		  ((AbstractConnectionFactory) obj).getParameters().addInInterceptor(iicn);
+        	  }
+        	  inInterceptorClassname.clear();
+          }
+          if ((outInterceptorClassname != null) && (!outInterceptorClassname.isEmpty())) {
+            for (Iterator it=outInterceptorClassname.iterator(); it.hasNext(); ) {
+              String oicn = (String) it.next();
+        		  ((AbstractConnectionFactory) obj).getParameters().addOutInterceptor(oicn);
+        	  }
+        	  outInterceptorClassname.clear();
+          }
           className = null;
           obj = null;
           identityClass = null;
@@ -1036,6 +1076,12 @@ public class JoramSaxWrapper extends DefaultHandler {
           if (isSet(jndiName))
             toBind.put(jndiName, clusterTopic);
           jndiName = null;
+        }else if (rawName.equals(ELT_IN_INTERCEPTORS)){
+      	  //NOTHING-TO-DO  
+        } else if (rawName.equals(ELT_OUT_INTERCEPTORS)){
+          //NOTHING-TO-DO
+        } else if (rawName.equals(ELT_INTERCEPTOR)){
+          //NOTHING-TO-DO
         } else {
           throw new SAXException("unknown element \"" + rawName + "\"");
         }
