@@ -120,9 +120,12 @@ public class JoramAdmin implements JoramAdminMBean {
    * Specifies how much time a command has to complete before If the command
    * does not complete within the specified time, it is canceled and an exception
    * is generated.
+   * <p>
+   * Be careful, the value can be changed prior to the connection only using
+   * the <code>AdminRequestor.REQUEST_TIMEOUT_PROP</code> property.
    * 
    * @param timeOut the maximum time before a command is canceled.
-   * @throws ConnectException A problem occurs during connection.
+   * @throws ConnectException if the connection is not established.
    */
   public void setTimeOutToAbortRequest(long timeOut) throws ConnectException {
     wrapper.setTimeOutToAbortRequest(timeOut);
@@ -132,7 +135,7 @@ public class JoramAdmin implements JoramAdminMBean {
    * Gets the maximum time a command has to complete before it is canceled.
    * 
    * @return the maximum time before a command is canceled
-   * @throws ConnectException A problem occurs during connection.
+   * @throws ConnectException if the connection is not established.
    */
   public long getTimeOutToAbortRequest() throws ConnectException {
     return wrapper.getTimeOutToAbortRequest();
