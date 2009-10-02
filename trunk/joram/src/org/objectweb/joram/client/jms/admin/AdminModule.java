@@ -73,11 +73,6 @@ public final class AdminModule {
   public static final String ADM_NAME_PROPERTY = "JoramAdminXML";
   public static final String DEFAULT_ADM_NAME = "default";
 
-  public static final String REQUEST_TIMEOUT_PROP =
-    "org.objectweb.joram.client.jms.admin.requestTimeout";
-
-  public static final long DEFAULT_REQUEST_TIMEOUT = 120000;
-
   /** The host name or IP address of the server the module is connected to. */
   protected static String localHost;
   /** The port number of the client connection. */
@@ -1468,9 +1463,12 @@ public final class AdminModule {
 
   /**
    * Sets the timeout before abortion of administration requests.
+   * <p>
+   * Be careful, the value can be changed prior to the connection only using
+   * the <code>AdminRequestor.REQUEST_TIMEOUT_PROP</code> property.
    * 
    * @param timeOut The timeout
-   * @throws ConnectException 
+   * @throws ConnectException if the connection is not established.
    */
   public static void setTimeOutToAbortRequest(long timeOut) throws ConnectException {
     if (wrapper == null)
@@ -1483,7 +1481,7 @@ public final class AdminModule {
    * Gets the timeout before abortion of administration requests.
    * 
    * @return the timeout
-   * @throws ConnectException 
+   * @throws ConnectException if the connection is not established.
    */
   public static long getTimeOutToAbortRequest() throws ConnectException {
     if (wrapper == null)

@@ -82,21 +82,15 @@ public class AdminWrapper {
   public static final String ADM_NAME_PROPERTY = "JoramAdminXML";
   public final static String DEFAULT_ADM_NAME = "default";
   
-  public static final String REQUEST_TIMEOUT_PROP = "org.objectweb.joram.client.jms.admin.requestTimeout";
-
-  public final static long DEFAULT_REQUEST_TIMEOUT = 60000;
-
-  private long requestTimeout = DEFAULT_REQUEST_TIMEOUT;
-  
   /**
    * Set the maximum time in ms before aborting request.
    * 
    * @param timeOut the maximum time in ms before aborting request.
-   * @throws ConnectException 
+   * @throws ConnectException if the connection is not established.
    */
   public final void setTimeOutToAbortRequest(long timeOut) throws ConnectException {
     if (requestor == null)
-      throw new ConnectException("Admin connection not established.");
+      throw new ConnectException("Connection not established.");
     
     requestor.setRequestTimeout(timeOut);
   }
@@ -105,11 +99,11 @@ public class AdminWrapper {
    * Returns the maximum time in ms before aborting request.
    * 
    * @return the maximum time in ms before aborting request.
-   * @throws ConnectException 
+   * @throws ConnectException if the connection is not established.
    */
   public final long getTimeOutToAbortRequest() throws ConnectException {
     if (requestor == null)
-      throw new ConnectException("Admin connection not established.");
+      throw new ConnectException("Connection not established.");
 
     return requestor.getRequestTimeout();
   }
@@ -125,7 +119,6 @@ public class AdminWrapper {
    * @throws JMSException A problem occurs during initialization.
    */
   public AdminWrapper(Connection cnx) throws JMSException, ConnectException, AdminException {
-    requestTimeout = Long.getLong(REQUEST_TIMEOUT_PROP, requestTimeout).longValue();
     requestor = new AdminRequestor(cnx);
     // Get basic informations about local server. 
     getLocalServer();
@@ -249,7 +242,7 @@ public class AdminWrapper {
   /**
    * Adds a domain to the platform.
    * <p>
-   * The domain will use the default network component "Simplenetwork".
+   * The domain will use the default network component "SimpleNetwork".
    * 
    * @param domain    Name of the added domain.
    * @param sid       Id of the router server that gives access to the added domain.

@@ -60,14 +60,37 @@ public final class AdminRequestor {
   // The message consumer to receive replies.
   private MessageConsumer consumer;
   
+  /**
+   * Property allowing to set the timeout before aborting a request.
+   *
+   * @see requestTimeout
+   */
   public static final String REQUEST_TIMEOUT_PROP = "org.objectweb.joram.client.jms.admin.requestTimeout";
 
+  /**
+   * Defines the default value for timeout before aborting a request.
+   * <p>
+   * Default value is 60.000 ms.
+   *
+   * @see requestTimeout
+   */
   public final static long DEFAULT_REQUEST_TIMEOUT = 60000;
 
+  /**
+   * Defines the maximum time in milliseconds before aborting a request.
+   * <p>
+   * Default value is 60.000 ms.
+   * <p>
+   *  This value can be adjusted by setting
+   * <code>org.objectweb.joram.client.jms.admin.requestTimeout</code> property.
+   * 
+   * @see DEFAULT_REQUEST_TIMEOUT
+   * @see REQUEST_TIMEOUT_PROP
+   */
   private long requestTimeout = DEFAULT_REQUEST_TIMEOUT;
   
   /**
-   * Set the maximum time in ms before aborting request.
+   * Set the maximum time in ms before aborting arequest.
    * 
    * @param requestTimeout the maximum time in ms before aborting request.
    */
@@ -76,7 +99,7 @@ public final class AdminRequestor {
   }
 
   /**
-   * Returns the maximum time in ms before aborting request.
+   * Returns the maximum time in ms before aborting a request.
    * 
    * @return the maximum time in ms before aborting request.
    */
@@ -95,6 +118,8 @@ public final class AdminRequestor {
    * @throws JMSException if Joram fails to create the AdminRequestor due to some internal error.
    */
   public AdminRequestor(javax.jms.Connection cnx) throws JMSException {
+    requestTimeout = Long.getLong(REQUEST_TIMEOUT_PROP, requestTimeout).longValue();
+    
     try {
       // Creates the needed session.
       session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
