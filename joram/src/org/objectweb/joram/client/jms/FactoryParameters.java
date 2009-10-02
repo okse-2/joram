@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -24,7 +24,11 @@
  */
 package org.objectweb.joram.client.jms;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.StringTokenizer;
 
 import javax.naming.RefAddr;
 import javax.naming.Reference;
@@ -208,6 +212,25 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
   public int outLocalPort = 0;
 
   /**
+   * List of Message interceptors while receiving a message.
+   * <br>These interceptors are called when <code>Session#receive()</code> is called.
+   * <br>The execution follows the order of the elements within the list.
+   * <br>This property is facultative. If set, then the
+   * {@link MessageInterceptor#handle(javax.jms.Message) callback method of the IN interceptors}
+   * are called. 
+   */
+  public final List inInterceptors = new ArrayList();
+  /**
+   * List of Message interceptors while sending a message.
+   * <br>These interceptors are called when <code>Session#send()</code> is called.
+   * <br>The execution follows the order of the elements within the list.
+   * <br>This property is facultative. If set, then the 
+   * {@link MessageInterceptor#handle(javax.jms.Message) callback method of the OUT interceptors}
+   * are called. 
+   */
+  public final List outInterceptors = new ArrayList();
+  
+  /**
    * Constructs a <code>FactoryParameters</code> instance.
    *
    * @param host  Name of host hosting the server to create connections with.
@@ -284,6 +307,10 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
     ref.add(new StringRefAddr(prefix + ".outLocalPort", new Integer(outLocalPort).toString()));
     if (outLocalAddress != null)
       ref.add(new StringRefAddr(prefix + ".outLocalAddress", outLocalAddress));
+    if(!inInterceptors.isEmpty())
+      ref.add(new StringRefAddr(prefix + ".inInterceptors", getListInInterceptorClassName()));
+    if(outInterceptors!=null)
+        ref.add(new StringRefAddr(prefix + ".outInterceptors", getListOutInterceptorClassName()));
   }
 
 //   public void fromReference(Reference ref) {
@@ -321,6 +348,14 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
     RefAddr outLocalAddressRef = ref.get(prefix + ".outLocalAddress");
     if (outLocalAddressRef != null)
       outLocalAddress = (String) outLocalAddressRef.getContent();
+    RefAddr interceptorRef = ref.get(prefix + ".inInterceptors");
+    if(interceptorRef!=null){
+    	setListInInterceptorClassName((String)interceptorRef.getContent());
+    }
+    interceptorRef = ref.get(prefix + ".outInterceptors");
+    if(interceptorRef!=null){
+    	setListOutInterceptorClassName((String)interceptorRef.getContent());
+    }
   }
 
   public Hashtable code(Hashtable h, String prefix) {
@@ -353,7 +388,10 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
     h.put(prefix + ".outLocalPort", new Integer(outLocalPort));
     if (outLocalAddress != null)
       h.put(prefix + ".outLocalAddress", outLocalAddress);
-
+    if(inInterceptors!=null)
+      h.put(prefix + ".inInterceptors", getListInInterceptorClassName());
+    if(outInterceptors!=null)
+        h.put(prefix + ".outInterceptors", getListOutInterceptorClassName());
     return h;
   }
 
@@ -384,6 +422,14 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
     topicActivationThreshold = ((Integer) h.get(prefix + ".topicActivationThreshold")).intValue();
     outLocalPort = ((Integer) h.get(prefix + ".outLocalPort")).intValue();
     outLocalAddress = (String) h.get(prefix + ".outLocalAddress");
+    String listInterceptorClassNames = (String) h.get(prefix + ".inInterceptors");
+    if(listInterceptorClassNames!=null){
+    	setListInInterceptorClassName(listInterceptorClassNames);
+    }
+    listInterceptorClassNames = (String) h.get(prefix + ".outInterceptors");
+    if(listInterceptorClassNames!=null){
+    	setListOutInterceptorClassName(listInterceptorClassNames);
+    }
   }
 
   public Object clone() {
@@ -397,22 +443,114 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
   }
   
   public String toString() {
-    return '(' + super.toString() +
-      ",host=" + host +
-      ",port=" + port +
-      ",url" + url +
-      ",connectingTimer=" + connectingTimer +
-      ",txPendingTimer=" + txPendingTimer +
-      ",cnxPendingTimer=" + cnxPendingTimer +
-      ",implicitAck=" + implicitAck +
-      ",asyncSend=" + asyncSend +
-      ",topicAckBufferMax=" + topicAckBufferMax +
-      ",multiThreadSync=" + multiThreadSync +
-      ",multiThreadSyncDelay=" + multiThreadSyncDelay +
-      ",multiThreadSyncThreshold=" + multiThreadSyncThreshold +
-      ",topicPassivationThreshold=" + topicPassivationThreshold +
-      ",topicActivationThreshold=" + topicActivationThreshold +
-      ",outLocalAddress=" + outLocalAddress +
-      ",outLocalPort=" + outLocalPort + ')';
+	StringBuffer strbuf = new StringBuffer();
+	
+	strbuf.append('(').append(super.toString());
+	strbuf.append(",host=").append(host);
+  strbuf.append(",port=").append(port);
+  strbuf.append(",url").append(url);
+  strbuf.append(",connectingTimer=").append(connectingTimer);
+  strbuf.append(",txPendingTimer=").append(txPendingTimer);
+  strbuf.append(",cnxPendingTimer=").append(cnxPendingTimer);
+  strbuf.append(",implicitAck=").append(implicitAck);
+  strbuf.append(",asyncSend=").append(asyncSend);
+  strbuf.append(",topicAckBufferMax=").append(topicAckBufferMax);
+  strbuf.append(",multiThreadSync=").append(multiThreadSync);
+  strbuf.append(",multiThreadSyncDelay=").append(multiThreadSyncDelay);
+  strbuf.append(",multiThreadSyncThreshold=").append(multiThreadSyncThreshold);
+  strbuf.append(",topicPassivationThreshold=").append(topicPassivationThreshold);
+  strbuf.append(",topicActivationThreshold=").append(topicActivationThreshold);
+  strbuf.append(",outLocalAddress=").append(outLocalAddress);
+  strbuf.append(",outLocalPort=").append(outLocalPort);
+  
+  if(inInterceptors!=null)
+    strbuf.append(",inInterceptors=").append(getListInInterceptorClassName());
+  if(outInterceptors!=null)
+    strbuf.append(",outInterceptors=").append(getListOutInterceptorClassName());
+  
+  return strbuf.toString();
+  }
+  
+  // Methods needed to manage interceptors in administration stuff.
+  
+  public void addInInterceptor(String pInterceptorClassName) {
+	  addInterceptor(pInterceptorClassName, inInterceptors);
+  }
+  
+  public void addOutInterceptor(String pInterceptorClassName) {
+	  addInterceptor(pInterceptorClassName,outInterceptors);
+  }
+  
+  private void addInterceptor(String pInterceptorClassName, List pInterceptors) {
+    if (pInterceptorClassName != null) {
+      try {
+        pInterceptors.add((MessageInterceptor)Class.forName(pInterceptorClassName).newInstance());
+      } catch(Throwable t) {
+        t.printStackTrace();
+      }
+    }
+  }
+  
+  public boolean removeInInterceptor(String pInterceptorClassName) {
+	  return removeInterceptor(pInterceptorClassName, inInterceptors);
+  }
+  
+  public boolean removeOutInterceptor(String pInterceptorClassName) {
+	  return removeInterceptor(pInterceptorClassName, outInterceptors);
+  }
+  
+  public boolean removeInterceptor(String pInterceptorClassName, List pInterceptors) {
+    boolean removed = false;
+    if (pInterceptorClassName != null) {
+      for(Iterator it=pInterceptors.iterator();it.hasNext();) {
+        if (pInterceptorClassName.equals(it.next().getClass())) {
+          removed=true;
+          it.remove();
+        }
+      }
+    }
+    return removed;
+  }
+  
+  // Methods needed to serialize interceptors in Reference (JNDOI).
+  
+  private static final String INTERCEPTOR_CLASS_NAME_SEPARATOR =",";
+  
+  private String getListInInterceptorClassName(){
+	  return getListInterceptorClassName(inInterceptors);
+  }
+  
+  private String getListOutInterceptorClassName(){
+	  return getListInterceptorClassName(outInterceptors);
+  }
+  
+  private String getListInterceptorClassName(List pInterceptors) {
+    if (!pInterceptors.isEmpty()) {
+      StringBuffer cns = new StringBuffer();
+      for (Iterator it= pInterceptors.iterator();it.hasNext();) {
+        cns.append(it.next().getClass().getName());
+        if (it.hasNext()) cns.append(INTERCEPTOR_CLASS_NAME_SEPARATOR);
+      }
+      return cns.toString();
+    } else {
+      return null;
+    }
+  } 
+  
+  private void setListInInterceptorClassName(String pListInterceptorClassName){
+	  setListInterceptorClassName(pListInterceptorClassName,inInterceptors);
+  }
+  
+  private void setListOutInterceptorClassName(String pListInterceptorClassName){
+	  setListInterceptorClassName(pListInterceptorClassName,outInterceptors);
+  }
+  
+  private void setListInterceptorClassName(String pListInterceptorClassName, List pInterceptors) {
+    if (pListInterceptorClassName != null) {
+      StringTokenizer cns = new StringTokenizer(pListInterceptorClassName,INTERCEPTOR_CLASS_NAME_SEPARATOR);
+      while (cns.hasMoreTokens()) {
+        addInterceptor(cns.nextToken(), pInterceptors);
+      }
+    }
   }
 }
