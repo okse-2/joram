@@ -1,4 +1,21 @@
 +==============================================================================
+| 2009/10/02 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds NGTransaction component.
+ Verify clock synchronization between client and server at connection time,
+updates the protocol version to 5.3.
+ Adds interceptors mechanism.
+ Bug fix in Joram administration: setting the time-out to abort request now
+works (either through setter method or environment property).
+ 1st version of MonitoringTimerTask.
+ Update common.xml to compile Joram with JDK1.5 (needed for NGTransaction).
++==============================================================================
+| 2009/09/21 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix in Engine: no longer set NbMaxAgents to Integer.MAX_VALUE with
+NullTransaction component. This number is incremented with the number of fixed
+agents and becomes negative, then it produces strange behavior in the garbage.
++==============================================================================
 | 2009/09/16 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Bug fix in Scheduler: no longer use recursion to serialize the ScheduleItem
