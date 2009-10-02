@@ -62,7 +62,10 @@
 
       <include name="fr/dyade/aaa/util/NullTransaction.java"/>
       <include name="fr/dyade/aaa/util/JTransaction.java"/>
+      <!-- include name="fr/dyade/aaa/util/ATransaction.java"/ -->
       <include name="fr/dyade/aaa/util/NTransaction.java"/>
+      <include name="fr/dyade/aaa/util/NGTransaction.java"/>
+      <!-- include name="fr/dyade/aaa/util/NTransactionNEW.java"/ -->
       <include name="fr/dyade/aaa/util/FileRepository.java"/>
       <include name="fr/dyade/aaa/util/DBRepository.java"/>
       <include name="fr/dyade/aaa/util/MySQLDBTransaction.java"/>
