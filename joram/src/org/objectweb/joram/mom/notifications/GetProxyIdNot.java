@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,10 +31,7 @@ import fr.dyade.aaa.agent.*;
  * Transient notification
  */
 public class GetProxyIdNot extends SyncNotification {
-  
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   private Identity identity;
@@ -60,6 +57,22 @@ public class GetProxyIdNot extends SyncNotification {
 
   public final AgentId getProxyId() {
     return (AgentId)getValue(0);
+  }
+  
+  /**
+   * Appends a string image for this object to the StringBuffer parameter.
+   * 
+   * @param output buffer to fill in
+   * @return <code>output</code> buffer is returned
+   */
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    output.append(super.toString());
+    output.append(",identity=").append(identity);
+    output.append(",inaddr=").append(inaddr);
+    output.append(')');
+
+    return output;
   }
 }
 
