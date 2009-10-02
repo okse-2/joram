@@ -113,9 +113,7 @@ public class Requestor implements ReplyListener, ErrorListener {
     // Nothing to do.
   }
 
-  public synchronized AbstractJmsReply request(
-    AbstractJmsRequest request) 
-    throws JMSException {
+  public synchronized AbstractJmsReply request(AbstractJmsRequest request) throws JMSException {
     return request(request, defaultRequestTimeout);
   }
 
