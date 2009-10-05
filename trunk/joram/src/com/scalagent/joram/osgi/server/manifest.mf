@@ -6,4 +6,4 @@ Bundle-Description: A bundle that start a Joram server
 Bundle-Vendor: Scalagent D.T.
 Bundle-Version: 0.0.1
 Manifest-Version: 1.0
-Bundle-ClassPath: .,joram-mom.jar,joram-shared.jar,ow_monolog.jar,JCup.jar,jakarta-regexp-1.2.jar
+Bundle-ClassPath: .,joram-mom.jar,joram-shared.jar,ow_monolog.jar,JCup.jar
