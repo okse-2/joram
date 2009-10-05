@@ -20,6 +20,7 @@
  */
 package fr.dyade.aaa.common;
 
+import java.util.List;
 import java.util.Vector;
 
 
@@ -35,10 +36,16 @@ import java.util.Vector;
  * method. To be able to use the queue again, it must be re-started through
  * the <code>start()</code> method.
  */
-public class Queue extends Vector {
+public class Queue {
+
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
-  
+
+  /**
+   * The list holding queue elements.
+   */
+  private List elements = new Vector();
+
   /**
    * <code>true</code> if a producer called the <code>stop()</code>
    * method.
@@ -68,7 +75,7 @@ public class Queue extends Vector {
     if (stopping)
       throw new StoppedQueueException();
 
-    addElement(item);
+    elements.add(item);
     notify();
   }
 
@@ -84,7 +91,7 @@ public class Queue extends Vector {
     if (closed)
       throw new InterruptedException();
 
-    return elementAt(0);
+    return elements.get(0);
   }
 
   /**
@@ -97,8 +104,8 @@ public class Queue extends Vector {
     if (size() == 0)
       throw new EmptyQueueException();
     
-    Object obj = elementAt(0);
-    removeElementAt(0);
+    Object obj = elements.get(0);
+    elements.remove(0);
 
     if (stopping && size() == 0)
       notify();
@@ -118,8 +125,8 @@ public class Queue extends Vector {
     if (closed)
       throw new InterruptedException();
 
-    Object obj = elementAt(0);
-    removeElementAt(0);
+    Object obj = elements.get(0);
+    elements.remove(0);
 
     if (stopping && size() == 0)
       notify();
@@ -151,4 +158,26 @@ public class Queue extends Vector {
     closed = true;
     notifyAll();
   }
+
+  /**
+   * Returns true if this queue contains no elements.
+   */
+  public boolean isEmpty() {
+    return elements.isEmpty();
+  }
+
+  /**
+   * Removes all of the elements from this queue.
+   */
+  public void clear() {
+    elements.clear();
+  }
+
+  /**
+   * Returns the number of elements in this list.
+   */
+  public int size() {
+    return elements.size();
+  }
+
 }
