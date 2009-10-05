@@ -325,7 +325,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    * order to ensure the mutual exclusion.
    */
   final void clean() {
-    mq.removeAllElements();
+    mq.clear();
   }
 
   protected Logger logmon = null;
