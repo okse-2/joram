@@ -45,7 +45,7 @@
     <patternset id="specific.compile.sources" >
       <include name="fr/dyade/aaa/agent/AgentServer.java"/>
       <include name="fr/dyade/aaa/agent/Engine.java"/>
-      <include name="fr/dyade/aaa/agent/GCEngine.java"/>
+      <!--include name="fr/dyade/aaa/agent/GCEngine.java"/ -->
       <include name="fr/dyade/aaa/agent/HAEngine.java"/>
       <include name="fr/dyade/aaa/agent/SimpleNetwork.java"/>
       <include name="fr/dyade/aaa/agent/PoolNetwork.java"/>
