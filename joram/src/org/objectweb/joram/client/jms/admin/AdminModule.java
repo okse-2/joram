@@ -78,6 +78,9 @@ public final class AdminModule {
   /** The port number of the client connection. */
   protected static int localPort;
 
+  /** Lock object used to avoid multiple connections in case of concurrent connect. */
+  private static Object lock = new Object();
+  
   /** The connection used to link the administrator and the platform. */
   private static Connection cnx = null;
 
@@ -562,30 +565,35 @@ public final class AdminModule {
                                 String name,
                                 String password,
                                 String identityClass) throws ConnectException, AdminException {
-    // TODO (AF): May be we should throw an exception AlreadyConnected.
-    if (wrapper != null) return;
+    synchronized(lock) {
+      if (wrapper != null) {
+        // We should throw an exception, the asked connection may use a different CF in
+        // order to connect to another server!
+        logger.log(BasicLevel.DEBUG, "AdminModule.doConnect: Already connected.");
+        throw new ConnectException("Already connected.");
+      }
 
-    //  set identity className
-    cf.setIdentityClassName(identityClass);
-    
-    try {
-      cnx = cf.createConnection(name, password);
-      cnx.start();
-      wrapper = new AdminWrapper(cnx);
+      //  set identity className
+      cf.setIdentityClassName(identityClass);
 
-      FactoryParameters params = cf.getParameters();
-      localHost = params.getHost();
-      localPort = params.getPort();
-    } catch (JMSSecurityException exc) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "AdminModule.doConnect", exc);
-      throw new AdminException(exc.getMessage());
-    } catch (JMSException exc) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "AdminModule.doConnect", exc);
-      throw new ConnectException("Connecting failed: " + exc);
+      try {
+        cnx = cf.createConnection(name, password);
+        cnx.start();
+        wrapper = new AdminWrapper(cnx);
+
+        FactoryParameters params = cf.getParameters();
+        localHost = params.getHost();
+        localPort = params.getPort();
+      } catch (JMSSecurityException exc) {
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "AdminModule.doConnect", exc);
+        throw new AdminException(exc.getMessage());
+      } catch (JMSException exc) {
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "AdminModule.doConnect", exc);
+        throw new ConnectException("Connecting failed: " + exc);
+      }
     }
-    
   }
 
   /**
