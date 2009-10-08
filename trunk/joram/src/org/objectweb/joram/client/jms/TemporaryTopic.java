@@ -66,11 +66,9 @@ public class TemporaryTopic extends Topic implements javax.jms.TemporaryTopic {
    * @exception IllegalStateException  If the connection is closed or broken.
    * @exception JMSException  If the request fails for any other reason.
    */
-  public void delete() throws JMSException
-  {
+  public void delete() throws JMSException {
     if (cnx == null)
-      throw new JMSSecurityException("Forbidden call as this TemporaryQueue"
-                                     + " does not belong to this connection.");
+      throw new JMSSecurityException("Forbidden call as this TemporaryQueue does not belong to this connection.");
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "--- " + this + ": deleting...");
@@ -89,8 +87,7 @@ public class TemporaryTopic extends Topic implements javax.jms.TemporaryTopic {
    * Returns the connection this temporary topic belongs to,
    * <code>null</code> if not known.
    */
-  Connection getCnx()
-  {
+  Connection getCnx() {
     return cnx;
   }
 }

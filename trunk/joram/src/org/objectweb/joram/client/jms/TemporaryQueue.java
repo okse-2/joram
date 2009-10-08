@@ -67,8 +67,7 @@ public class TemporaryQueue extends Queue implements javax.jms.TemporaryQueue {
    */
   public void delete() throws JMSException {
     if (cnx == null)
-      throw new JMSSecurityException("Forbidden call as this TemporaryQueue"
-                                     + " does not belong to this connection.");
+      throw new JMSSecurityException("Forbidden call as this TemporaryQueue does not belong to this connection.");
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "--- " + this + ": deleting...");
