@@ -752,11 +752,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
         request = (AdminRequest) msg.getAdminMessage();
 
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG,
-                     "--- " + this + ": got " + msg.getAdminMessage());
+          logger.log(BasicLevel.DEBUG, "--- " + this + ": got " + request);
       } catch (ClassCastException exc) {
-        logger.log(BasicLevel.ERROR,
-                   "--- " + this + ": got bad AdminRequest");
+        logger.log(BasicLevel.ERROR, "--- " + this + ": got bad AdminRequest");
         if (request == null) {
           info = strbuf.append("Unexpected request to AdminTopic on server [")
           .append(serverId).append("]: ").append(exc.getMessage()).toString();
