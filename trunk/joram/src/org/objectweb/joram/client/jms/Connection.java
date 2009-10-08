@@ -732,14 +732,12 @@ public class Connection implements javax.jms.Connection {
     mtpx.closing();
     
     for (int i = 0; i < sessionsToClose.size(); i++) {
-      Session session = 
-        (Session) sessionsToClose.elementAt(i);
+      Session session = (Session) sessionsToClose.elementAt(i);
       try {
         session.close();
       } catch (JMSException exc) {
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(
-            BasicLevel.DEBUG, "", exc);
+          logger.log(BasicLevel.DEBUG, "", exc);
       }
     }
     
@@ -747,25 +745,21 @@ public class Connection implements javax.jms.Connection {
     cconsumers.clear();
     
     for (int i = 0; i < consumersToClose.size(); i++) {
-      MultiSessionConsumer consumer = 
-        (MultiSessionConsumer) consumersToClose.elementAt(i);
+      MultiSessionConsumer consumer = (MultiSessionConsumer) consumersToClose.elementAt(i);
       try {
         consumer.close();
       } catch (JMSException exc) {
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(
-            BasicLevel.DEBUG, "", exc);
+          logger.log( BasicLevel.DEBUG, "", exc);
       }
     }
 
-    
     try {
       CnxCloseRequest closeReq = new CnxCloseRequest();
       requestor.request(closeReq);
     } catch (JMSException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(
-          BasicLevel.DEBUG, "", exc);
+        logger.log(BasicLevel.DEBUG, "", exc);
     }
     
     mtpx.close();
@@ -839,8 +833,7 @@ public class Connection implements javax.jms.Connection {
     cconsumers.removeElement(cc);
   }
 
-  synchronized AbstractJmsReply syncRequest(
-    AbstractJmsRequest request) throws JMSException {
+  synchronized AbstractJmsReply syncRequest(AbstractJmsRequest request) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, stringImage + ".syncRequest(" + request + ')');
     return requestor.request(request);
