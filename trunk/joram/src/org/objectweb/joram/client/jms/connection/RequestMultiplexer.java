@@ -149,8 +149,7 @@ public class RequestMultiplexer {
     sendRequest(request, null);
   }
   
-  public void sendRequest(AbstractJmsRequest request, ReplyListener listener)
-      throws JMSException {
+  public void sendRequest(AbstractJmsRequest request, ReplyListener listener) throws JMSException {
 
     synchronized (this) {
       if (status == Status.CLOSE)
