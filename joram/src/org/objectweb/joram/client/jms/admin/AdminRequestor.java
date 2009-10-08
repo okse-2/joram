@@ -198,12 +198,19 @@ public final class AdminRequestor {
       throw new AdminException("Invalid server reply: " + exc.getMessage());
     }
 
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "AdminRequestor.request(" + request + ") -> " + reply);
+
     throwException(reply);
     return reply;
   }
   
-  /** Throws an exception corresponding to the error code of the reply if needed. 
-   * @param reply */
+  /**
+   * Throws an exception corresponding to the error code of the reply if needed. 
+   * 
+   * @param reply The reply to verify.
+   * @exception AdminException The exception corresponding to the error code in the reply.
+   */
   private final void throwException(AdminReply reply) throws AdminException {
     if (! reply.succeeded()) {
       switch (reply.getErrorCode()) {
