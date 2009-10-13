@@ -139,7 +139,10 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "EXCEPTION:: initIdentity", e);
       throw new JMSException(e.getClass() + ":: " + e.getMessage());
+    } catch (JMSException exc) {
+      throw exc;
     } catch (Exception e) {
+      // Wrap the incoming exception.
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "EXCEPTION:: initIdentity", e);
       throw new JMSException(e.getClass() + ":: " + e.getMessage());
