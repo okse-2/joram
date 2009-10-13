@@ -4192,7 +4192,6 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="jca.test.run" inheritAll="true">
       <param name="className" value="joram.connector.ConnectorTest2"/>
       <param name="testid" value="jca.test2"/>
-      <param name="jvmargs" value="-Dcolocated=true"/>
       <param name="args" value=""/>
       <param name="a3conf" value="connector/a3servers.xml"/>
       <param name="jndiconf" value="connector/jndi.properties"/>
