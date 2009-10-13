@@ -25,17 +25,7 @@
     
   <target name="tests.noperf.all"
           description=" --> launch all no perf joram tests">
-    <antcall target="tests.messages"/>
-    <antcall target="tests.property"/>
-    <antcall target="tests.selector"/>
-    <antcall target="tests.temporary"/>
-    <antcall target="tests.ack"/>
-    <antcall target="base.test_Brows_Q"/>
-    <antcall target="base.test_MsgList_T"/>
-    <antcall target="base.test_Exp_Q"/>
-    <antcall target="base.test_Multi_Q"/>
-    <antcall target="tests.transacted"/>
-    <antcall target="tests.exceptionlistener"/>
+    <antcall target="tests.base"/>
     <antcall target="tests.recovery"/>
     <antcall target="tests.dist"/>
     <antcall target="tests.admin"/>
@@ -58,6 +48,21 @@
     <antcall target="tests.monitoring"/>
   </target>
 
+	<target name="tests.base"
+  				description=" --> launch all base tests">
+    <antcall target="tests.messages"/>
+    <antcall target="tests.property"/>
+    <antcall target="tests.selector"/>
+    <antcall target="tests.temporary"/>
+    <antcall target="tests.ack"/>
+    <antcall target="base.test_Brows_Q"/>
+    <antcall target="base.test_MsgList_T"/>
+    <antcall target="base.test_Exp_Q"/>
+    <antcall target="base.test_Multi_Q"/>
+    <antcall target="tests.transacted"/>
+    <antcall target="tests.exceptionlistener"/>
+	</target>
+		
   <target name="tests.messages"
           description=" --> launch all messages tests">
     <antcall target="base.test_Q_M"/>
@@ -385,6 +390,13 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="monit.Test"/>
     <antcall target="monit.Test2"/>
   	<antcall target="monit.Test3"/>
+  </target>
+
+  <target name="tests.pool"
+          description=" --> launch all pool tests">
+    <antcall target="pool.Test1"/>
+    <antcall target="pool.Test2"/>
+ 	<antcall target="pool.Test3"/>
   </target>
 
   <!--
@@ -2844,79 +2856,11 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 
-  <target name="perf.test34_bis" depends="init.a3props,compile"
-          description=" --> test : msg/s with different parameter :NbMsg, NTLogMemorySize ">
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.perfs.Test34"/>
-      <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="jndiconf" value="perfs/jndi.properties"/>
-      <param name="a3conf" value="perfs/a3servers1.xml"/>
-      <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DNbMsg=1000"/>
-    </antcall>
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.perfs.Test34"/>
-      <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="jndiconf" value="perfs/jndi.properties"/>
-      <param name="a3conf" value="perfs/a3servers1.xml"/>
-      <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DNbMsg=10000"/>
-    </antcall>
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.perfs.Test34"/>
-      <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="jndiconf" value="perfs/jndi.properties"/>
-      <param name="a3conf" value="perfs/a3servers1.xml"/>
-      <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef -DNbMsg=10000"/>
-    </antcall>
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.perfs.Test34"/>
-      <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="jndiconf" value="perfs/jndi.properties"/>
-      <param name="a3conf" value="perfs/a3servers1.xml"/>
-      <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DNbMsg=1000"/>
-    </antcall>
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.perfs.Test34"/>
-      <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="jndiconf" value="perfs/jndi.properties"/>
-      <param name="a3conf" value="perfs/a3servers1.xml"/>
-      <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DNbMsg=10000"/>
-    </antcall>
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.perfs.Test34"/>
-      <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="jndiconf" value="perfs/jndi.properties"/>
-      <param name="a3conf" value="perfs/a3servers1.xml"/>
-      <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef -DNbMsg=10000"/>
-    </antcall>
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.perfs.Test34"/>
-      <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="jndiconf" value="perfs/jndi.properties"/>
-      <param name="a3conf" value="perfs/a3servers1.xml"/>
-      <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef -DNbMsg=50000"/>
-    </antcall>
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.perfs.Test34"/>
-      <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="jndiconf" value="perfs/jndi.properties"/>
-      <param name="a3conf" value="perfs/a3servers1.xml"/>
-      <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=32 -DNTLogMemorySize=16384 -DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef -DNbMsg=80000"/>
-    </antcall>
-  </target>
-
   <target name="perf.test34" depends="init.a3props,compile"
           description=" --> test : msg/s with different parameter :NbMsg, NTLogMemorySize / launch with target all">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test34"/>
-      <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
@@ -2924,7 +2868,7 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test34"/>
-      <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
@@ -2932,7 +2876,7 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test34"/>
-      <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
@@ -2940,7 +2884,7 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test34"/>
-      <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
@@ -2948,7 +2892,7 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test34"/>
-      <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
@@ -2956,7 +2900,7 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test34"/>
-      <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
@@ -2964,7 +2908,7 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test34"/>
-      <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
@@ -2972,7 +2916,7 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test34"/>
-      <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
@@ -3005,7 +2949,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test55"/>
       <param name="testid" value="perf.test55"/>
-      <param name="engine" value="fr.dyade.aaa.agent.GCEngine"/>
+      <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
@@ -4216,17 +4160,12 @@ description=" --> launch all exceptionlistener tests">
       <param name="joramAdmin" value="connector/joramAdmin3.xml"/>
     </antcall>
   </target>
-
-  <target name="jca.test2" description=" --> test joram connector remote server)">
-    <antcall target="jca.test2.1"/>
-    <antcall target="jca.test2.2"/>
-  </target>
 	
-  <target name="jca.test2.1" depends="init.a3props,compile"
+  <target name="jca.test1.4" depends="init.a3props,compile"
           description=" --> test joram connector (remote server)">
     <antcall target="jca.test.run" inheritAll="true">
       <param name="className" value="joram.connector.ConnectorTest1"/>
-      <param name="testid" value="jca.test2.1"/>
+      <param name="testid" value="jca.test1.4"/>
       <param name="jvmargs" value="-Dcolocated=false"/>
       <param name="args" value=""/>
       <param name="a3conf" value="connector/a3servers.xml"/>
@@ -4235,16 +4174,29 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 	
-  <target name="jca.test2.2" depends="init.a3props,compile"
+  <target name="jca.test1.5" depends="init.a3props,compile"
           description=" --> test joram connector (remote server)">
     <antcall target="jca.test.run" inheritAll="true">
       <param name="className" value="joram.connector.ConnectorTest1"/>
-      <param name="testid" value="jca.test2.2"/>
+      <param name="testid" value="jca.test1.5"/>
       <param name="jvmargs" value="-Dcolocated=false"/>
       <param name="args" value=""/>
       <param name="a3conf" value="connector/a3servers.xml"/>
       <param name="jndiconf" value="connector/jndi.properties"/>
       <param name="joramAdmin" value="connector/joramAdmin3.xml"/>
+    </antcall>
+  </target>
+	
+  <target name="jca.test2" depends="init.a3props,compile"
+          description=" --> test joram connector with external client (colocated server)">
+    <antcall target="jca.test.run" inheritAll="true">
+      <param name="className" value="joram.connector.ConnectorTest2"/>
+      <param name="testid" value="jca.test2"/>
+      <param name="jvmargs" value="-Dcolocated=true"/>
+      <param name="args" value=""/>
+      <param name="a3conf" value="connector/a3servers.xml"/>
+      <param name="jndiconf" value="connector/jndi.properties"/>
+      <param name="joramAdmin" value="connector/joramAdmin4.xml"/>
     </antcall>
   </target>
 
@@ -4376,6 +4328,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="ttl.Test1_Topic" depends="init.a3props,compile"
           description=" --> test ttl with with 2 distributed serveurs and a topic">
     <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="ttl.Test1_Topic"/>
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="joram.ttl.Test1_Topic"/>
       <param name="jndiconf" value="ttl/jndi.properties"/>
@@ -4388,6 +4341,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="ttl.Test2_Queue" depends="init.a3props,compile"
           description=" --> test ttl with with 2 distributed serveurs and a queue">
     <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="ttl.Test2_Queue"/>
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="joram.ttl.Test2_Queue"/>
       <param name="jndiconf" value="ttl/jndi.properties"/>
@@ -4402,6 +4356,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="sub.Sub" depends="init.a3props,compile"
           description=" --> test about creation of subscriber">
     <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="sub.Sub"/>
       <param name="className" value="joram.sub.Sub"/>
       <param name="jndiconf" value="sub/jndi.properties"/>
       <param name="a3conf" value="sub/a3servers.xml"/>
@@ -4414,6 +4369,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="monit.Test" depends="init.a3props,compile"
           description=" --> Simple monitoring">
     <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="monit.Test"/>
       <param name="className" value="joram.monitoring.TestMonitoringTopic"/>
       <param name="jndiconf" value="monitoring/jndi.properties"/>
       <param name="a3conf" value="monitoring/a3servers.xml"/>
@@ -4425,6 +4381,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="monit.Test2" depends="init.a3props,compile"
           description=" --> Tests changing monitoring properties">
     <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="monit.Test2"/>
       <param name="className" value="joram.monitoring.TestMonitoringTopic2"/>
       <param name="jndiconf" value="monitoring/jndi.properties"/>
       <param name="a3conf" value="monitoring/a3servers.xml"/>
@@ -4436,9 +4393,46 @@ description=" --> launch all exceptionlistener tests">
   <target name="monit.Test3" depends="init.a3props,compile"
           description=" --> Tests monitoring as a service.">
     <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="monit.Test3"/>
       <param name="className" value="joram.monitoring.TestMonitoringTopic3"/>
       <param name="jndiconf" value="monitoring/jndi.properties"/>
       <param name="a3conf" value="monitoring/a3servers2.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+  
+  <target name="pool.Test1" depends="init.a3props,compile"
+          description=" --> Tests pool of Connection.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="pool.Test1"/>
+      <param name="className" value="joram.pooled.Test1"/>
+      <param name="jndiconf" value="pooled/jndi.properties"/>
+      <param name="a3conf" value="pooled/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+  
+  <target name="pool.Test2" depends="init.a3props,compile"
+          description=" --> Tests pool of Connection.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="pool.Test2"/>
+      <param name="className" value="joram.pooled.Test2"/>
+      <param name="jndiconf" value="pooled/jndi.properties"/>
+      <param name="a3conf" value="pooled/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+  
+  <target name="pool.Test3" depends="init.a3props,compile"
+          description=" --> Tests pool of Connection.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="pool.Test3"/>
+      <param name="className" value="joram.pooled.Test3"/>
+      <param name="jndiconf" value="pooled/jndi.properties"/>
+      <param name="a3conf" value="pooled/a3servers.xml"/>
       <param name="jvmargs" value=""/>
       <param name="args" value=""/>
     </antcall>
