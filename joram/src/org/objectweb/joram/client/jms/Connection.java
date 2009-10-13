@@ -236,7 +236,12 @@ public class Connection implements javax.jms.Connection {
 
   /** String image of the connection. */
   public String toString() {
-    return stringImage;
+    StringBuffer strbuf = new StringBuffer();
+    strbuf.append('(').append(super.toString());
+    strbuf.append(",proxyId=").append(proxyId);
+    strbuf.append(",key=").append(key);
+    strbuf.append(')');
+    return strbuf.toString();
   }
 
   public int hashCode() {
@@ -542,10 +547,8 @@ public class Connection implements javax.jms.Connection {
    * @exception IllegalStateException  If the connection is closed.
    * @exception JMSException  In case of an invalid acknowledge mode.
    */
-  public synchronized javax.jms.Session
-      createSession(boolean transacted, 
-                    int acknowledgeMode)
-    throws JMSException {
+  public synchronized javax.jms.Session createSession(boolean transacted, 
+                                                      int acknowledgeMode) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
                  stringImage + ".createSession(" + transacted + ',' +  acknowledgeMode + ')');
@@ -574,8 +577,7 @@ public class Connection implements javax.jms.Connection {
    *
    * @exception IllegalStateException  If the connection is closed.
    */
-  public synchronized void
-      setExceptionListener(javax.jms.ExceptionListener listener) throws JMSException {
+  public synchronized void setExceptionListener(javax.jms.ExceptionListener listener) throws JMSException {
     checkClosed();
     mtpx.setExceptionListener(listener);
   }
@@ -596,8 +598,7 @@ public class Connection implements javax.jms.Connection {
    * @exception IllegalStateException  Systematically thrown.
    */
   public void setClientID(String clientID) throws JMSException {
-    throw new IllegalStateException("ClientID is already set by the"
-                                    + " provider.");
+    throw new IllegalStateException("ClientID is already set by the provider.");
   }
 
   /**
@@ -785,14 +786,12 @@ public class Connection implements javax.jms.Connection {
     sessions.clear();
 
     for (int i = 0; i < sessionsToClose.size(); i++) {
-      Session session = 
-        (Session) sessionsToClose.elementAt(i);
+      Session session = (Session) sessionsToClose.elementAt(i);
       try {
         session.close();
       } catch (JMSException exc) {
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(
-            BasicLevel.DEBUG, "", exc);
+          logger.log(BasicLevel.DEBUG, "", exc);
       }
     }
     
