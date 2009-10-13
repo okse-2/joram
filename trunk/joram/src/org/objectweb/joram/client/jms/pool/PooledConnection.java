@@ -65,7 +65,6 @@ public class PooledConnection implements Connection {
    * 
    * @see javax.jms.Connection#close()
    */
-  @Override
   public void close() throws JMSException {
     // Cleans the connection, remove the ExceptionListener, stops it..
     delegate.cleanup();
@@ -78,7 +77,6 @@ public class PooledConnection implements Connection {
   /**
    * @see javax.jms.Connection#createConnectionConsumer(javax.jms.Destination, java.lang.String, javax.jms.ServerSessionPool, int)
    */
-  @Override
   public ConnectionConsumer createConnectionConsumer(Destination dest,
                                                      String selector,
                                                      ServerSessionPool sessionPool,
@@ -89,7 +87,6 @@ public class PooledConnection implements Connection {
   /**
    * @see javax.jms.Connection#createDurableConnectionConsumer(javax.jms.Topic, java.lang.String, java.lang.String, javax.jms.ServerSessionPool, int)
    */
-  @Override
   public ConnectionConsumer createDurableConnectionConsumer(Topic topic, 
                                                             String subName,
                                                             String selector,
@@ -101,7 +98,6 @@ public class PooledConnection implements Connection {
   /**
    * @see javax.jms.Connection#createSession(boolean, int)
    */
-  @Override
   public Session createSession(boolean transacted, int acknowledgeMode) throws JMSException {
     return delegate.createSession(transacted, acknowledgeMode);
   }
@@ -109,7 +105,6 @@ public class PooledConnection implements Connection {
   /**
    * @see javax.jms.Connection#getClientID()
    */
-  @Override
   public String getClientID() throws JMSException {
     return delegate.getClientID();
   }
@@ -117,7 +112,6 @@ public class PooledConnection implements Connection {
   /**
    * @see javax.jms.Connection#getExceptionListener()
    */
-  @Override
   public ExceptionListener getExceptionListener() throws JMSException {
     return delegate.getExceptionListener();
   }
@@ -125,7 +119,6 @@ public class PooledConnection implements Connection {
   /**
    * @see javax.jms.Connection#getMetaData()
    */
-  @Override
   public ConnectionMetaData getMetaData() throws JMSException {
     return delegate.getMetaData();
   }
@@ -133,7 +126,6 @@ public class PooledConnection implements Connection {
   /**
    * @see javax.jms.Connection#setClientID(java.lang.String)
    */
-  @Override
   public void setClientID(String clientID) throws JMSException {
     delegate.setClientID(clientID);
   }
@@ -141,7 +133,6 @@ public class PooledConnection implements Connection {
   /**
    * @see javax.jms.Connection#setExceptionListener(javax.jms.ExceptionListener)
    */
-  @Override
   public void setExceptionListener(ExceptionListener listener) throws JMSException {
     delegate.setExceptionListener(listener);
   }
@@ -149,7 +140,6 @@ public class PooledConnection implements Connection {
   /**
    * @see javax.jms.Connection#start()
    */
-  @Override
   public void start() throws JMSException {
     delegate.start();
   }
@@ -157,7 +147,6 @@ public class PooledConnection implements Connection {
   /**
    * @see javax.jms.Connection#stop()
    */
-  @Override
   public void stop() throws JMSException {
     delegate.stop();
   }
@@ -165,7 +154,6 @@ public class PooledConnection implements Connection {
   /**
    * @see java.lang.Object#toString()
    */
-  @Override
   public String toString() {
     StringBuffer strbuf = new StringBuffer();
     strbuf.append('(').append(super.toString());
