@@ -98,7 +98,10 @@ public class RequestMultiplexer {
     channel.setTimer(timer);
     try {
       channel.connect();
+    } catch (JMSException exc) {
+      throw exc;
     } catch (Exception exc) {
+      // Wraps the incoming exception
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "", exc);
       if (timer != null) timer.cancel();
@@ -136,8 +139,7 @@ public class RequestMultiplexer {
     channel.closing();
   }
 
-  public void setExceptionListener(
-    javax.jms.ExceptionListener exceptionListener) {
+  public void setExceptionListener(javax.jms.ExceptionListener exceptionListener) {
     this.exceptionListener = exceptionListener;
   }
 
