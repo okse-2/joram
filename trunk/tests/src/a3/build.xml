@@ -15,10 +15,100 @@
     </patternset>
   </target>
 
+  <target name="tests"
+          description=" --> launch all tests with default configuration: base, recovery, perf">
+    <ant dir="." antfile="build.xml" target="tests.base"/>
+    <ant dir="." antfile="build.xml" target="tests.recovery"/>
+    <ant dir="." antfile="build.xml" target="tests.perf"/>
+  </target>
+
+  <target name="tests.http"
+          description=" -->  launch all http tests">
+    <ant dir="." antfile="build.xml" target="tests.http.base"/>
+    <ant dir="." antfile="build.xml" target="tests.http.recovery"/>
+  </target>
+
+  <!--
+    - Launch all a3 tests with various network 'standard' configuration.
+    -->
+
+  <target name="tests.all"
+          description=" --> launch all a3 tests with various 'standard' configuration">
+    <!-- SimpleNetwork + JTransaction -->
+    <antcall target="tests">
+      <param name="transaction" value="fr.dyade.aaa.util.JTransaction"/>
+      <param name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
+    </antcall>
+    <!-- SimpleNetwork + NTransaction -->
+    <antcall target="tests">
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
+    </antcall>
+    <!-- PoolNetwork + NTransaction -->
+    <antcall target="tests">
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
+    </antcall>
+    <!-- HttpNetwork + NTransaction -->
+    <antcall target="tests.http"/>
+    <!-- PoolNetwork + NGTransaction
+    <antcall target="tests">
+      <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
+      <param name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
+    </antcall>
+  	 -->
+  </target>
+
+  <!--
+    - Launch all a3 tests with various network implementation.
+    - We should exclude centralized tests.
+    -->
+	
+  <target name="tests.network"
+          description=" --> launch all a3 tests with various network implementation">
+    <ant dir="." antfile="build.xml" target="tests.simple"/>
+    <ant dir="." antfile="build.xml" target="tests.pool"/>
+    <ant dir="." antfile="build.xml" target="tests.ng"/>
+    <ant dir="." antfile="build.xml" target="tests.udp"/>
+    <ant dir="." antfile="build.xml" target="tests.http"/>
+  </target>
+
+  <target name="tests.simple"
+          description=" --> launch tests with SimpleNetwork">
+    <antcall target="tests">
+      <param name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
+    </antcall>
+  </target>
+
+  <target name="tests.pool"
+          description=" --> launch tests with PoolNetwork">
+    <antcall target="tests">
+      <param name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
+    </antcall>
+  </target>
+
+  <target name="tests.ng"
+          description=" --> launch tests with NGNetwork">
+    <antcall target="tests">
+      <param name="network" value="fr.dyade.aaa.agent.NGNetwork"/>
+    </antcall>
+  </target>
+
+  <target name="tests.udp"
+          description=" --> launch tests with UDPNetwork">
+    <antcall target="tests">
+      <param name="network" value="fr.dyade.aaa.agent.UDPNetwork"/>
+    </antcall>
+  </target>
+
+  <!--
+    - Launch all a3 tests with various transaction implementation.
+    - We should exclude tests defined with NullTransaction.
+    -->
+
   <target name="tests.transaction"
           description=" --> launch all a3 tests with various transaction implementation">
     <ant dir="." antfile="build.xml" target="tests.jtransaction"/>
-    <ant dir="." antfile="build.xml" target="tests.atransaction"/>
     <ant dir="." antfile="build.xml" target="tests.ntransaction"/>
     <ant dir="." antfile="build.xml" target="tests.ngtransaction"/>
   </target>
@@ -49,60 +139,6 @@
     <antcall target="tests">
       <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
     </antcall>
-  </target>
-
-  <target name="tests.all"
-          description=" --> launch all a3 tests">
-    <ant dir="." antfile="build.xml" target="tests.simple"/>
-    <ant dir="." antfile="build.xml" target="tests.pool"/>
-    <ant dir="." antfile="build.xml" target="tests.ng"/>
-    <ant dir="." antfile="build.xml" target="tests.udp"/>
-    <ant dir="." antfile="build.xml" target="tests.http"/>
-  </target>
-
-  <!--
-    - We should divide tests: centralized vs distributed.
-    -->
-
-  <target name="tests.simple"
-          description=" --> launch tests with SimpleNetwork">
-    <antcall target="tests">
-      <param name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
-    </antcall>
-  </target>
-
-  <target name="tests.pool"
-          description=" --> launch tests with PoolNetwork">
-    <antcall target="tests">
-      <param name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
-    </antcall>
-  </target>
-
-  <target name="tests.ng"
-          description=" --> launch tests with NGNetwork">
-    <antcall target="tests">
-      <param name="network" value="fr.dyade.aaa.agent.NGNetwork"/>
-    </antcall>
-  </target>
-
-  <target name="tests.udp"
-          description=" --> launch tests with UDPNetwork">
-    <antcall target="tests">
-      <param name="network" value="fr.dyade.aaa.agent.UDPNetwork"/>
-    </antcall>
-  </target>
-
-  <target name="tests"
-          description=" --> launch tests: base, recovery, perf">
-    <ant dir="." antfile="build.xml" target="tests.base"/>
-    <ant dir="." antfile="build.xml" target="tests.recovery"/>
-    <ant dir="." antfile="build.xml" target="tests.perf"/>
-  </target>
-
-  <target name="tests.http"
-          description=" -->  launch all http tests">
-    <ant dir="." antfile="build.xml" target="tests.http.base"/>
-    <ant dir="." antfile="build.xml" target="tests.http.recovery"/>
   </target>
 
   <target name="tests.base">
