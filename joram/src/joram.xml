@@ -206,6 +206,7 @@
         <include name="org/objectweb/joram/client/jms/*.class"/>
         <include name="org/objectweb/joram/client/jms/admin/*.class"/>
         <include name="org/objectweb/joram/client/jms/connection/*.class"/>
+      	<include name="org/objectweb/joram/client/jms/pool/*.class"/>
         <include name="org/objectweb/joram/client/jms/local/*.class"/>
         <include name="org/objectweb/joram/client/jms/soap/*.class"/>
         <include name="org/objectweb/joram/client/jms/tcp/*.class"/>
