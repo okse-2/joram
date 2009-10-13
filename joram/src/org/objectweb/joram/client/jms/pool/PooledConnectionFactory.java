@@ -74,6 +74,7 @@ public class PooledConnectionFactory implements ConnectionFactory {
    * @param cf  The ConnectionFactory used to really create the connections.
    */
   public PooledConnectionFactory(ConnectionFactory cf) {
+    this(cf, 10);
   }
   
   /**
@@ -101,7 +102,6 @@ public class PooledConnectionFactory implements ConnectionFactory {
    * @exception JMSSecurityException  If the default identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  @Override
   public Connection createConnection() throws JMSException {
     return createConnection(cf.getDefaultLogin(), cf.getDefaultPassword());
   }
@@ -118,7 +118,6 @@ public class PooledConnectionFactory implements ConnectionFactory {
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not listening.
    */
-  @Override
   public synchronized Connection createConnection(String name,
                                                   String password) throws JMSException {
     if (pool == null)
