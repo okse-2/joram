@@ -66,9 +66,10 @@
     <copy todir="${output.tmp.dir}">
       <fileset dir="${builder.dir}" includes="*.pom" />
     </copy>
+    <echo>"${joram.version}"</echo>
     <replace dir="${output.tmp.dir}"
              token="@VERSION@"
-             value="${joram.major}.${joram.minor}.${joram.build}" />
+             value="${joram.version}" />
 
     <!-- ================================================ -->
     <!--                  JORAM POMs                    -->
@@ -84,7 +85,16 @@
     <m2:pom id="rar.pom" file="${output.tmp.dir}/joram_ra_for_jonas.pom" />
   </target>
 
-
+  <!-- =================================
+    target: install SNAPSHOT
+    ================================= -->
+  <target name="install_snapshot"
+  				description="--> Install SNAPSHOT artifacts">	
+    <antcall target="install" inheritAll="true">
+      <param name="joram.version" value="SNAPSHOT"/>
+    </antcall>
+  </target>
+    
   <!-- =================================
     target: install
     ================================= -->
@@ -147,6 +157,16 @@
     </sequential>
   </macrodef>
 
+  <!-- =================================
+    target: deploy SNAPSHOT
+    ================================= -->
+  <target name="deploy_snapshot"
+  				description="--> Deploy SNAPSHOT artifacts">	
+    <antcall target="deploy" inheritAll="true">
+      <param name="joram.version" value="SNAPSHOT"/>
+    </antcall>
+  </target>
+  
   <!-- =================================
     target: deploy
     ================================= -->
