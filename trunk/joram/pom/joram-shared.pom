@@ -44,11 +44,6 @@
       <version>1.1</version>
     </dependency>
     <dependency>
-      <groupId>jakarta-regexp</groupId>
-      <artifactId>jakarta-regexp</artifactId>
-      <version>1.4</version>
-    </dependency>
-    <dependency>
       <groupId>org.objectweb.monolog</groupId>
       <artifactId>monolog</artifactId>
       <version>2.1.8</version>
