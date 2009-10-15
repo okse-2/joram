@@ -65,7 +65,7 @@ public class A3CMLServer implements Serializable {
                      String hostname) throws Exception {
     this.sid = sid;
     if ((name == null) || (name.length() == 0))
-      this.name = "s#" + sid;
+      this.name = "server" + sid;
     else
       this.name = name;
     this.hostname = hostname;

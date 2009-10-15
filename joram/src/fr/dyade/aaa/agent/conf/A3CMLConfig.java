@@ -237,6 +237,13 @@ public class A3CMLConfig implements Serializable {
     Short id = new Short(server.sid);
     if (servers.containsKey(id))
       throw new DuplicateServerException("Duplicate server id. #" + server.sid);
+    
+    for (Enumeration s = servers.elements(); s.hasMoreElements(); ) {
+      A3CMLServer serv = (A3CMLServer) s.nextElement();
+      if (serv.name.equals(server.name))
+        throw new DuplicateServerException("Duplicate server name. " + server.name);
+    }
+    
     servers.put(id, server);
   }
   
@@ -304,6 +311,18 @@ public class A3CMLConfig implements Serializable {
     throw new UnknownServerException("Unknown server " + name);
   }
 
+  /**
+   * Gets a server name from its identifier.
+   *
+   * @param name  The server identifier.
+   * @return    The server name.
+   * @exception UnknownServerException
+   *      If the server does not exist.
+   */
+  public String getServerNameById(short sid) throws UnknownServerException {
+    return getServer(sid).name;
+  }
+  
   /**
    * Returns true if the configuration contains a server with specified name.
    *
