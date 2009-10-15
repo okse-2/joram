@@ -341,6 +341,14 @@ public final class AgentServer {
     return name;
   }
   
+  public final static String getServerName() {
+    try {
+      return getConfig().getServerNameById(getServerId());
+    } catch (Exception e) {
+      return getName();
+    }
+  }
+  
   static ResolverRepository resolverRepo = null;
 
   public static ResolverRepository getResolverRepository() {
