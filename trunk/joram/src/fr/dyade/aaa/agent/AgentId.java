@@ -243,6 +243,8 @@ public final class AgentId implements Serializable {
   public static int ServerConfigStamp = 13;
   /** Reserved stamp for ResourceAgent. */
   public static int ResourceAgentStamp = 14;
+  /** Reserved stamp for AMQPAgent. */
+  public static int AMQPAgentStamp = 15;
   /** Maximum reserved stamp for well known services. */
   public static int MaxWKSIdStamp = 1024;
   /** Maximum reserved stamp. */
