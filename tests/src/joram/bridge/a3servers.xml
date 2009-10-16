@@ -9,7 +9,6 @@
 
   <server id="0" name="S0" hostname="localhost">
     <network domain="D1" port="16301"/>
-    <service class="fr.dyade.aaa.agent.AgentAdmin" args="0"/>
     <service class="fr.dyade.aaa.agent.AdminProxy" args="7890"/>
     <service class="org.objectweb.joram.mom.proxies.ConnectionManager" args="root root"/>
     <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" args="16010"/>
@@ -18,7 +17,6 @@
 
   <server id="1" name="S1" hostname="localhost">
     <network domain="D1" port="16302"/>
-    <service class="fr.dyade.aaa.agent.AgentAdmin" args="1"/>
     <service class="fr.dyade.aaa.agent.AdminProxy" args="7891"/>
     <service class="org.objectweb.joram.mom.proxies.ConnectionManager" args="root root"/>
     <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" args="16011"/>
