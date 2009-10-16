@@ -14,7 +14,7 @@
 
     <s1 name="JORAM source and binary packages">
 
-      <s2 name="stable distribution from OW2 Forge ">
+      <s2 name="stable distribution from OW2 Forge">
 	
 	    <p>The JORAM source and binary packages are available from the
 	    <a href="http://forge.objectweb.org/project/showfiles.php?group_id=4">OW2 Forge</a>.</p>
@@ -43,7 +43,16 @@
 	    on Windows. Please consult the <a href="../doc/index.html">JORAM documentation</a> for installation
 	    instructions and a tutorial.</p>
       </s2>
-
+      
+      <s2 name="Latest snpashots from Continuous Integration Build Tool">
+      <p>The latest development snapshots are available from
+      <a href="http://bamboo.ow2.org/download/JORAM-ANT/artifacts/latest/Releases">Continuous Integration Build Tool</a>.
+      This will be built automatically from the current development code after each change in the SVN code base.</p>
+      <p>If you need quickly a fix for a particular bug, you may be able to find a fixed Joram release here well
+      before the fix makes it into the next release version. On the other hand, these snapshots might sometimes
+      be unstable.</p>
+      </s2>
+      
       <s2 name="JORAM SVN code base">
 	    <p>For getting the latest stable JORAM version, or for the current development release, you have to
       use <a href="http://forge.objectweb.org/plugins/scmsvn/index.php?group_id=4">SVN</a>.</p>
@@ -55,7 +64,7 @@
       <p>The latest stable release tag is <strong>JORAM_5_1_0</strong>. For getting the current development release
       (potentially unstable), check out joram with no tag.</p>
       
-      <p>Snapshots of the SVN are generated each day at 00:00 AM CEST, they are available at:</p>
+      <p>Snapshots of the SVN code base are generated each day at 00:00 AM CEST, they are available at:</p>
 	    <ul>
 	      <li><a href="http://forge.objectweb.org/svnsnapshots/joram-joram-svn-latest.tar.gz">Joram</a>.</li>
 	      <li><a href="http://forge.objectweb.org/svnsnapshots/joram-kjoram-svn-latest.tar.gz">kJoram</a>.</li>
