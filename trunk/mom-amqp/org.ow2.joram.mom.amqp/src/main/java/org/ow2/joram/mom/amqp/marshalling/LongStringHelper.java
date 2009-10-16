@@ -1,4 +1,4 @@
-package org.objectweb.joram.mom.amqp.marshalling;
+package org.ow2.joram.mom.amqp.marshalling;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

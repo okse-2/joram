@@ -21,14 +21,14 @@
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s):
  */
-package org.objectweb.joram.mom.amqp.marshalling;
+package org.ow2.joram.mom.amqp.marshalling;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 
-import org.objectweb.joram.mom.amqp.exceptions.SyntaxErrorException;
+import org.ow2.joram.mom.amqp.exceptions.SyntaxErrorException;
 
 public class AMQP {
 
