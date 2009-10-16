@@ -81,12 +81,12 @@ public class AMQP {
   public static final int[] ids = { 10, 20, 40, 50, 60, 90 };
   
   public static final java.lang.String[] classnames = {
-    "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection",
-    "org.objectweb.joram.mom.amqp.marshalling.AMQP$Channel",
-    "org.objectweb.joram.mom.amqp.marshalling.AMQP$Exchange",
-    "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue",
-    "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic",
-    "org.objectweb.joram.mom.amqp.marshalling.AMQP$Tx"
+    "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection",
+    "org.ow2.joram.mom.amqp.marshalling.AMQP$Channel",
+    "org.ow2.joram.mom.amqp.marshalling.AMQP$Exchange",
+    "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue",
+    "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic",
+    "org.ow2.joram.mom.amqp.marshalling.AMQP$Tx"
   };
   
     public static final int FRAME_METHOD = 1;
@@ -125,22 +125,22 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection";
     }
 
     public static int[] mids = { 10, 11, 20, 21, 30, 31, 40, 41, 50, 51 };
     
     public static final java.lang.String[] methodnames = {
-      "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection$Start",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection$StartOk",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection$Secure",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection$SecureOk",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection$Tune",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection$TuneOk",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection$Open",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection$OpenOk",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection$Close",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection$CloseOk"
+      "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection$Start",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection$StartOk",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection$Secure",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection$SecureOk",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection$Tune",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection$TuneOk",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection$Open",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection$OpenOk",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection$Close",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection$CloseOk"
     };
     
     private static int getPosition(int id) {
@@ -212,7 +212,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection$Start";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection$Start";
       
     }
     
@@ -221,7 +221,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection";
     }
 
     public void readFrom(AMQPInputStream in) throws IOException, SyntaxErrorException {
@@ -310,7 +310,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection$StartOk";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection$StartOk";
       
     }
     
@@ -319,7 +319,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection";
     }
 
     public void readFrom(AMQPInputStream in) throws IOException, SyntaxErrorException {
@@ -388,7 +388,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection$Secure";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection$Secure";
       
     }
     
@@ -397,7 +397,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -452,7 +452,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection$SecureOk";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection$SecureOk";
       
     }
     
@@ -461,7 +461,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -532,7 +532,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection$Tune";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection$Tune";
       
     }
     
@@ -541,7 +541,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -616,7 +616,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection$TuneOk";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection$TuneOk";
       
     }
     
@@ -625,7 +625,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -700,7 +700,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection$Open";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection$Open";
       
     }
     
@@ -709,7 +709,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -774,7 +774,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection$OpenOk";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection$OpenOk";
       
     }
     
@@ -783,7 +783,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -862,7 +862,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection$Close";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection$Close";
       
     }
     
@@ -871,7 +871,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -936,7 +936,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection$CloseOk";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection$CloseOk";
       
     }
     
@@ -945,7 +945,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Connection";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -984,18 +984,18 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Channel";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Channel";
     }
 
     public static final int[] mids = { 10, 11, 20, 21, 40, 41 };
     
     public static final java.lang.String[] methodnames = {
-      "org.objectweb.joram.mom.amqp.marshalling.AMQP$Channel$Open",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Channel$OpenOk",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Channel$Flow",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Channel$FlowOk",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Channel$Close",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Channel$CloseOk"
+      "org.ow2.joram.mom.amqp.marshalling.AMQP$Channel$Open",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Channel$OpenOk",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Channel$Flow",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Channel$FlowOk",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Channel$Close",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Channel$CloseOk"
     };
     
     private static int getPosition(int id) {
@@ -1045,7 +1045,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Channel$Open";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Channel$Open";
       
     }
     
@@ -1054,7 +1054,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Channel";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Channel";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -1109,7 +1109,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Channel$OpenOk";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Channel$OpenOk";
       
     }
     
@@ -1118,7 +1118,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Channel";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Channel";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -1182,7 +1182,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Channel$Flow";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Channel$Flow";
       
     }
     
@@ -1191,7 +1191,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Channel";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Channel";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -1246,7 +1246,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Channel$FlowOk";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Channel$FlowOk";
       
     }
     
@@ -1255,7 +1255,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Channel";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Channel";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -1325,7 +1325,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Channel$Close";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Channel$Close";
       
     }
     
@@ -1334,7 +1334,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Channel";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Channel";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -1396,7 +1396,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Channel$CloseOk";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Channel$CloseOk";
       
     }
     
@@ -1405,7 +1405,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Channel";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Channel";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -1444,16 +1444,16 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Exchange";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Exchange";
     }
 
     public static final int[] mids = { 10, 11, 20, 21 };
     
     public static final java.lang.String[] methodnames = {
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Exchange$Declare",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Exchange$DeclareOk",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Exchange$Delete",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Exchange$DeleteOk" };
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Exchange$Declare",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Exchange$DeclareOk",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Exchange$Delete",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Exchange$DeleteOk" };
     
     private static int getPosition(int id) {
       for (int i = 0; i < AMQP.Exchange.mids.length; i++) {
@@ -1555,7 +1555,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Exchange$Declare";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Exchange$Declare";
       
     }
     
@@ -1564,7 +1564,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Exchange";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Exchange";
     }
 
     public void readFrom(AMQPInputStream in) throws IOException, SyntaxErrorException {
@@ -1651,7 +1651,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Exchange$DeclareOk";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Exchange$DeclareOk";
       
     }
     
@@ -1660,7 +1660,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Exchange";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Exchange";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -1728,7 +1728,7 @@ public class AMQP {
       }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Exchange$Delete";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Exchange$Delete";
       
     }
     
@@ -1737,7 +1737,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Exchange";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Exchange";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -1797,7 +1797,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Exchange$DeleteOk";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Exchange$DeleteOk";
       
     }
     
@@ -1806,7 +1806,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Exchange";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Exchange";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -1845,22 +1845,22 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue";
     }
 
     public static final int[] mids = { 10, 11, 20, 21, 50, 51, 30, 31, 40, 41 };
     
     public static final java.lang.String[] methodnames = {
-      "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue$Declare",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue$DeclareOk",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue$Bind",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue$BindOk",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue$Unbind",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue$UnbindOk",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue$Purge",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue$PurgeOk",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue$Delete",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue$DeleteOk"
+      "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue$Declare",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue$DeclareOk",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue$Bind",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue$BindOk",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue$Unbind",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue$UnbindOk",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue$Purge",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue$PurgeOk",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue$Delete",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue$DeleteOk"
     };
     
     private static int getPosition(int id) {
@@ -1966,7 +1966,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue$Declare";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue$Declare";
       
     }
     
@@ -1975,7 +1975,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue";
     }
 
     public void readFrom(AMQPInputStream in) throws IOException, SyntaxErrorException {
@@ -2079,7 +2079,7 @@ public class AMQP {
       }
 
     public java.lang.String getMethodName() {
-        return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue$DeclareOk";
+        return "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue$DeclareOk";
       
     }
     
@@ -2088,7 +2088,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -2193,7 +2193,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue$Bind";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue$Bind";
       
     }
     
@@ -2202,7 +2202,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue";
     }
 
     public void readFrom(AMQPInputStream in) throws IOException, SyntaxErrorException {
@@ -2272,7 +2272,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue$BindOk";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue$BindOk";
       
     }
     
@@ -2281,7 +2281,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -2351,7 +2351,7 @@ public class AMQP {
       }
 
     public java.lang.String getMethodName() {
-        return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue$Unbind";
+        return "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue$Unbind";
 
       }
     
@@ -2360,7 +2360,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue";
     }
 
     public void readFrom(AMQPInputStream in) throws IOException, SyntaxErrorException {
@@ -2423,7 +2423,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue$UnbindOk";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue$UnbindOk";
       
     }
     
@@ -2432,7 +2432,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -2493,7 +2493,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue$Purge";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue$Purge";
       
     }
     
@@ -2502,7 +2502,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -2566,7 +2566,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue$PurgeOk";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue$PurgeOk";
       
     }
     
@@ -2575,7 +2575,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -2655,7 +2655,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue$Delete";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue$Delete";
       
     }
     
@@ -2664,7 +2664,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -2738,7 +2738,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue$DeleteOk";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue$DeleteOk";
       
     }
     
@@ -2747,7 +2747,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Queue";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -2995,29 +2995,29 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic";
     }
 
     public static final int[] mids = { 10, 11, 20, 21, 30, 31, 40, 50, 60, 70, 71, 72, 80, 90, 100, 110, 111 };
     
     public static final java.lang.String[] methodnames = {
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$Qos",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$QosOk",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$Consume",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$ConsumeOk",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$Cancel",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$CancelOk",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$Publish",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$Return",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$Deliver",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$Get",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$GetOk",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$GetEmpty",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$Ack",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$Reject",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$RecoverAsync",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$Recover",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$RecoverOk" };
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$Qos",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$QosOk",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$Consume",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$ConsumeOk",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$Cancel",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$CancelOk",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$Publish",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$Return",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$Deliver",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$Get",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$GetOk",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$GetEmpty",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$Ack",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$Reject",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$RecoverAsync",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$Recover",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$RecoverOk" };
     
     private static int getPosition(int id) {
       for (int i = 0; i < AMQP.Basic.mids.length; i++) {
@@ -3097,7 +3097,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$Qos";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$Qos";
       
     }
     
@@ -3106,7 +3106,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -3166,7 +3166,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$QosOk";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$QosOk";
       
     }
     
@@ -3175,7 +3175,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -3268,7 +3268,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$Consume";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$Consume";
       
     }
     
@@ -3277,7 +3277,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic";
     }
 
       public void readFrom(AMQPInputStream in) throws IOException, SyntaxErrorException {
@@ -3367,7 +3367,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$ConsumeOk";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$ConsumeOk";
       
     }
     
@@ -3376,7 +3376,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -3442,7 +3442,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$Cancel";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$Cancel";
       
     }
     
@@ -3451,7 +3451,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -3510,7 +3510,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$CancelOk";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$CancelOk";
       
     }
     
@@ -3519,7 +3519,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -3612,7 +3612,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$Publish";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$Publish";
       
     }
     
@@ -3621,7 +3621,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -3719,7 +3719,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$Return";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$Return";
       
     }
     
@@ -3728,7 +3728,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -3826,7 +3826,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-        return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$Deliver";
+        return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$Deliver";
 
       }
     
@@ -3835,7 +3835,7 @@ public class AMQP {
       }
 
     public java.lang.String getClassName() {
-        return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic";
+        return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic";
       }
 
     public void readFrom(AMQPInputStream in) throws IOException {
@@ -3921,7 +3921,7 @@ public class AMQP {
       }
 
     public java.lang.String getMethodName() {
-        return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$Get";
+        return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$Get";
 
       }
 
@@ -3930,7 +3930,7 @@ public class AMQP {
       }
 
     public java.lang.String getClassName() {
-        return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic";
+        return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic";
       }
 
     public void readFrom(AMQPInputStream in) throws IOException {
@@ -4020,7 +4020,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$GetOk";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$GetOk";
       
     }
     
@@ -4029,7 +4029,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -4105,7 +4105,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$GetEmpty";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$GetEmpty";
       
     }
     
@@ -4114,7 +4114,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -4181,7 +4181,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$Ack";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$Ack";
       
     }
     
@@ -4190,7 +4190,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -4260,7 +4260,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$Reject";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$Reject";
       
     }
     
@@ -4269,7 +4269,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -4333,7 +4333,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$RecoverAsync";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$RecoverAsync";
       
     }
     
@@ -4342,7 +4342,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -4402,7 +4402,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$Recover";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$Recover";
       
     }
     
@@ -4411,7 +4411,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -4456,7 +4456,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic$RecoverOk";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic$RecoverOk";
       
     }
     
@@ -4465,7 +4465,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Basic";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -4504,18 +4504,18 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Tx";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Tx";
     }
 
     public static final int[] mids = { 10, 11, 20, 21, 30, 31 };
     
     public static final java.lang.String[] methodnames = {
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Tx$Select",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Tx$SelectOk",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Tx$Commit",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Tx$CommitOk",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Tx$Rollback",
-        "org.objectweb.joram.mom.amqp.marshalling.AMQP$Tx$RollbackOk" };
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Tx$Select",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Tx$SelectOk",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Tx$Commit",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Tx$CommitOk",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Tx$Rollback",
+        "org.ow2.joram.mom.amqp.marshalling.AMQP$Tx$RollbackOk" };
     
     private static int getPosition(int id) {
       for (int i = 0; i < AMQP.Tx.mids.length; i++) {
@@ -4559,7 +4559,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Tx$Select";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Tx$Select";
       
     }
     
@@ -4568,7 +4568,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Tx";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Tx";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -4610,7 +4610,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Tx$SelectOk";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Tx$SelectOk";
       
     }
     
@@ -4619,7 +4619,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Tx";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Tx";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -4664,7 +4664,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Tx$Commit";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Tx$Commit";
       
     }
     
@@ -4673,7 +4673,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Tx";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Tx";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -4716,7 +4716,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Tx$CommitOk";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Tx$CommitOk";
       
     }
     
@@ -4725,7 +4725,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Tx";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Tx";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -4773,7 +4773,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Tx$Rollback";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Tx$Rollback";
       
     }
     
@@ -4782,7 +4782,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Tx";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Tx";
     }
 
     public void readFrom(AMQPInputStream in)
@@ -4825,7 +4825,7 @@ public class AMQP {
     }
 
     public java.lang.String getMethodName() {
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Tx$RollbackOk";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Tx$RollbackOk";
       
     }
     
@@ -4834,7 +4834,7 @@ public class AMQP {
     }
 
     public java.lang.String getClassName() { 
-      return "org.objectweb.joram.mom.amqp.marshalling.AMQP$Tx";
+      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Tx";
     }
 
     public void readFrom(AMQPInputStream in)
