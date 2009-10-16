@@ -21,17 +21,17 @@
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s):
  */
-package org.objectweb.joram.mom.amqp.marshalling;
+package org.ow2.joram.mom.amqp.marshalling;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 
-import org.objectweb.joram.mom.amqp.exceptions.FrameErrorException;
-import org.objectweb.joram.mom.amqp.exceptions.SyntaxErrorException;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
+import org.ow2.joram.mom.amqp.exceptions.FrameErrorException;
+import org.ow2.joram.mom.amqp.exceptions.SyntaxErrorException;
 
 import fr.dyade.aaa.common.Debug;
 
