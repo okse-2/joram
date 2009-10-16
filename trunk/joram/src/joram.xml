@@ -667,6 +667,10 @@
     </javadoc>
   </target>
 
+  <target name="clean.releases" depends="init.joram">
+  	<delete dir="${releases.dir}"/>
+  </target>
+  
   <!-- SNAPSHOT -->
   <target name="snapshot" depends="init">
     <!-- If version is not set, fix it -->
@@ -676,7 +680,7 @@
 
   <!-- RELEASES -->
   <target name="releases"
-          depends="clean,release.src,release.jar,release.doc"
+          depends="clean,clean.releases,release.src,release.jar,release.doc"
           description="--> Builds a Joram complete distribution.">
     <antcall target="ship.adapter" inheritAll="true"/>
     <copy file="${ship.dir}/lib/joram.rar"
