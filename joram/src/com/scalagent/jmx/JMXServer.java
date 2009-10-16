@@ -53,8 +53,8 @@ public class JMXServer implements MXServer {
     try {
       // Try to get the default platform MBeanServer (since JDK 1.5)
       Class clazz = Class.forName("java.lang.management.ManagementFactory");
-      Method method = clazz.getMethod("getPlatformMBeanServer", null);
-      mxserver = (MBeanServer) method.invoke(null, null);
+      Method method = clazz.getMethod("getPlatformMBeanServer");
+      mxserver = (MBeanServer) method.invoke(null);
     } catch (Exception exc) {
       // Prior JDK1.5 (with JMXRI implementation).
       mxserver = MBeanServerFactory.createMBeanServer("AgentServer");
