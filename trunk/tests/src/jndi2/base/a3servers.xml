@@ -5,7 +5,6 @@
   <server id="0" name="s0" hostname="localhost">
     <network domain="D0" port="27300"/>
     <service class="fr.dyade.aaa.agent.AdminProxy" args="8090"/>
-    <service class="fr.dyade.aaa.agent.HttpDebug" args="9000"/>
     <service class="fr.dyade.aaa.jndi2.server.JndiServer" args="16600"/>
   </server>
 </config>
