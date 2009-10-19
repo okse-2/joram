@@ -162,8 +162,10 @@
     ================================= -->
   <target name="deploy_snapshot"
   				description="--> Deploy SNAPSHOT artifacts">	
-    <antcall target="deploy" inheritAll="true">
+    <!-- Execute the internal target -->
+    <antcall target="internal:deploy">
       <param name="joram.version" value="SNAPSHOT"/>
+      <param name="deploy.joram" value="true"/>
     </antcall>
   </target>
   
@@ -171,7 +173,6 @@
     target: deploy
     ================================= -->
   <target name="deploy"
-          depends="update"
           description="--> Deploy artifacts">
 
     <!-- Ask confirmation for deployment -->
@@ -195,7 +196,7 @@
   <!-- - - - - - - - - - - - - - - - - -
           target: internal:deploy
          - - - - - - - - - - - - - - - - - -->
-    <target name="internal:deploy" if="deploy.joram">
+    <target name="internal:deploy" depends="update" if="deploy.joram">
 
       <!-- Deploy the parent -->
       <m2:install-provider artifactId="wagon-ssh" version="1.0-alpha-7" />
