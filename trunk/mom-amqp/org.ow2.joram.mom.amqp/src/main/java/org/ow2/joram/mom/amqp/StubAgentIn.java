@@ -413,7 +413,9 @@ public class StubAgentIn implements DeliveryListener {
   public static Message basicGet(AMQP.Basic.Get basicGet, short serverId, long proxyId)
       throws NotFoundException, ResourceLockedException, TransactionException {
     Message msg = StubLocal.basicGet(basicGet.queue, basicGet.noAck, serverId, proxyId);
-    msg.queueName = basicGet.queue;
+    if (msg != null) {
+      msg.queueName = basicGet.queue;
+    }
     return msg;
   }
 
