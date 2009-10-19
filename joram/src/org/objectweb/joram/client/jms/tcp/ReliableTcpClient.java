@@ -45,6 +45,8 @@ import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
+import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.common.Configuration;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.SocketFactory;
 
@@ -79,32 +81,57 @@ public class ReliableTcpClient {
    * of connectingTimer and cnxPendingTimer from the connection parameters.
    */
   private int reconnectTimeout = 0;
-  
+
   private Timer timer;
 
-  public ReliableTcpClient() {}
-  
+  /**
+   *  Name of the boolean property allowing the verification of the synchronization
+   * between the client and server clock. When true a warning is generated if there
+   * is more than one second between the two clocks. This property allows the protocol
+   * compatibility in 5.2 versions, this verification will be enabled by default in 5.3
+   * version.
+   * <p>
+   *  This property can be fixed either from <code>java</code> launching command, or
+   * in <code>a3servers.xml</code> configuration file. By default the value is false. 
+   */
+  public static final String VERIFY_CLOCK_SYNCHRO = "org.objectweb.joram.TcpConnection.verifyClockSynchro";
+
+  /**
+   *  Boolean value allowing the verification of the synchronization between the
+   * client and server clock. When true a warning is generated if there is more
+   * than one second between the two clocks. This property allows the protocol
+   * compatibility in 5.2 versions, this verification will be enabled by default
+   * in 5.3 version.
+   * <p>
+   *  This property can be fixed either from <code>java</code> launching command, or
+   * in <code>a3servers.xml</code> configuration file. By default the value is false.
+   */
+  private final boolean verifyClockSynchro;
+
+  public ReliableTcpClient() {
+    this.verifyClockSynchro = Configuration.getBoolean("VERIFY_CLOCK_SYNCHRO");
+  }
+
   public void setTimer(Timer timer2) {
     timer = timer2;
   }
 
   public void init(FactoryParameters params, 
-      Identity identity,
-      boolean reconnect) {
+                   Identity identity,
+                   boolean reconnect) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
-          "ReliableTcpClient.init(" + params + ',' + identity + ',' + reconnect + ')');
+                 "ReliableTcpClient.init(" + params + ',' + identity + ',' + reconnect + ')');
 
     this.params = params;
     this.reconnect = reconnect;
     if (params.cnxPendingTimer > 0)
-      this.reconnectTimeout =
-        Math.max(2*params.cnxPendingTimer,
-            (params.connectingTimer*1000)+params.cnxPendingTimer);
+      this.reconnectTimeout = Math.max(2*params.cnxPendingTimer,
+                                       (params.connectingTimer*1000)+params.cnxPendingTimer);
     addresses = new Vector();
     key = -1;
     this.identity = identity;
-    
+
     setStatus(INIT);
   }
 
@@ -123,7 +150,7 @@ public class ReliableTcpClient {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
                  "ReliableTcpClient[" + identity + ',' + key + "].connect(" + reconnect + ')');
-    
+
     if (status != INIT) 
       throw new IllegalStateException("Connect: state error");
 
@@ -157,8 +184,7 @@ public class ReliableTcpClient {
         } catch (UnknownHostException uhe) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "ReliableTcpClient.connect", uhe); 
-          IllegalStateException jmsExc =
-            new IllegalStateException("Server's host is unknown: " + sa.hostName);
+          IllegalStateException jmsExc = new IllegalStateException("Server's host is unknown: " + sa.hostName);
           jmsExc.setLinkedException(uhe);
           throw jmsExc;
         } catch (IOException ioe) {
@@ -180,42 +206,38 @@ public class ReliableTcpClient {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG,
                    " -> currentTime = " + currentTime + ",endTime = " + endTime);
-      
+
       // Keep on trying as long as timer is ok:
       if (currentTime < endTime) {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG,
                      " -> retry connection " + identity + ',' + key);
-        
+
         if (currentTime + nextSleep > endTime) {
           nextSleep = endTime - currentTime;    
         }      
-        
+
         // Sleeping for a while:
         try {
           wait(nextSleep);
         } catch (InterruptedException intExc) {
-          throw new IllegalStateException("Could not open the connection with "
-                                      + addresses + ": interrupted");
+          throw new IllegalStateException("Could not open the connection with " + addresses + ": interrupted");
         }          
 
         // Trying again!
         nextSleep = nextSleep * 2;
       } else {
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG,
-                       " -> close connection " + identity + ',' + key);
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG,
+                     " -> close connection " + identity + ',' + key);
 
-          // If timer is over, throwing an IllegalStateException:
-          long attemptsT = (System.currentTimeMillis() - startTime) / 1000;
-          IllegalStateException jmsExc =
-            new IllegalStateException("Could not connect to JMS server with "
-                                      + addresses
-                                      + " after " + attemptsC
-                                      + " attempts during "
-                                      + attemptsT + " secs: server is"
-                                      + " not listening" );
-          throw jmsExc;
+        // If timer is over, throwing an IllegalStateException:
+        long attemptsT = (System.currentTimeMillis() - startTime) / 1000;
+        IllegalStateException jmsExc =
+          new IllegalStateException("Could not connect to JMS server with " + addresses
+                                    + " after " + attemptsC + " attempts during "
+                                    + attemptsT + " secs: server is not listening" );
+        throw jmsExc;
       }
     }
   }
@@ -229,7 +251,7 @@ public class ReliableTcpClient {
       outLocalAddr = InetAddress.getByName(outLocalAddrStr);
 
     int outLocalPort = params.outLocalPort;
-    
+
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
                  "ReliableTcpClient[" + identity + ',' + key + "].createSocket(" +
@@ -253,16 +275,18 @@ public class ReliableTcpClient {
     socket.setSoTimeout(params.SoTimeout);
     if (params.SoLinger >= 0)
       socket.setSoLinger(true, params.SoLinger);
-    
+
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     OutputStream os = socket.getOutputStream();
     InputStream is = socket.getInputStream();
 
     // Writes the Joram magic number
     baos.write(MetaData.joramMagic);
-    // Writes the current date
-    StreamUtil.writeTo(System.currentTimeMillis(), baos);
-    
+    if (verifyClockSynchro) {
+      // Writes the current date
+      StreamUtil.writeTo(System.currentTimeMillis(), baos);
+    }
+
     // Writes the user identity
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, " -> write identity = " + identity);
@@ -280,10 +304,12 @@ public class ReliableTcpClient {
       os.flush();
 
       int len = StreamUtil.readIntFrom(is);
-      long dt = StreamUtil.readLongFrom(is);
-      if (dt > 1000)
-        logger.log(BasicLevel.WARN, " -> clock synchronization between client and server: " + dt);
-
+      if (verifyClockSynchro) {
+        long dt = StreamUtil.readLongFrom(is);
+        if (dt > 1000)
+          logger.log(BasicLevel.WARN, " -> clock synchronization between client and server: " + dt);
+      }
+      
       int res = StreamUtil.readIntFrom(is);
       if (res > 0) {
         String info = StreamUtil.readStringFrom(is);
@@ -319,7 +345,7 @@ public class ReliableTcpClient {
   }
 
   private void throwSecurityError(String info) 
-    throws JMSSecurityException {
+  throws JMSSecurityException {
     JMSSecurityException jmsExc = 
       new JMSSecurityException("Can't open the connection with the server " +
                                params.getHost() + " on port " +
@@ -328,7 +354,7 @@ public class ReliableTcpClient {
   }
 
   public void send(AbstractJmsMessage request) 
-    throws Exception {
+  throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log( BasicLevel.DEBUG, 
                   "ReliableTcpClient[" + identity + ',' + key + "].send(" + request + ')');
@@ -436,8 +462,8 @@ public class ReliableTcpClient {
 
   public String toString() {
     return '(' + super.toString() + ",params=" + params + ",name=" + identity + 
-      ",key=" + key + ",connection=" + connection + 
-      ",status=" + statusNames[status] + ",addresses=" + addresses + ')';
+    ",key=" + key + ",connection=" + connection + 
+    ",status=" + statusNames[status] + ",addresses=" + addresses + ')';
   }
 
   static class ServerAddress {
