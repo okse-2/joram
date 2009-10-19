@@ -82,7 +82,9 @@
     <m2:pom id="raconfig.pom" file="${output.tmp.dir}/joram-raconfig.pom" />
     <m2:pom id="config.pom" file="${output.tmp.dir}/joram-config.pom" />
     <m2:pom id="shared.pom" file="${output.tmp.dir}/joram-shared.pom" />
-    <m2:pom id="rar.pom" file="${output.tmp.dir}/joram_ra_for_jonas.pom" />
+    <m2:pom id="ra_for_jonas.pom" file="${output.tmp.dir}/joram_ra_for_jonas.pom" />
+    <m2:pom id="ra_remote.pom" file="${output.tmp.dir}/joram_ra_remote.pom" />
+    <m2:pom id="ra.pom" file="${output.tmp.dir}/joram_ra.pom" />
   </target>
 
   <!-- =================================
@@ -137,9 +139,17 @@
     </m2:install>
 
     <m2:install file="${output.dist.dir}/joram_for_jonas_ra.rar">
-      <m2:pom refid="rar.pom" />
+      <m2:pom refid="ra_for_jonas.pom" />
     </m2:install>
 
+    <m2:install file="${output.dist.dir}/joram_ra.rar">
+      <m2:pom refid="ra.pom" />
+    </m2:install>
+  
+    <m2:install file="${output.dist.dir}/joram_ra_remote.rar">
+      <m2:pom refid="ra_remote.pom" />
+    </m2:install>
+    
   </target>
 
   <!-- - - - - - - - - - - - - - - - - - - - - -
@@ -225,9 +235,15 @@
       <maven-deploy pomRefId="shared.pom"
                     file="${output.dist.dir}/joram-shared.jar" />
 
-      <maven-deploy pomRefId="rar.pom"
+      <maven-deploy pomRefId="ra_for_jonas.pom"
                     file="${output.dist.dir}/joram_for_jonas_ra.rar" />
-
+      
+      <maven-deploy pomRefId="ra.pom"
+                          file="${output.dist.dir}/joram_ra.rar" />
+      
+      <maven-deploy pomRefId="ra_remote.pom"
+                          file="${output.dist.dir}/joram_ra_remote.rar" />
+      
     </target>
 
 </project>
