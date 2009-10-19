@@ -91,7 +91,7 @@
   <target name="install_snapshot"
   				description="--> Install SNAPSHOT artifacts">	
     <antcall target="install" inheritAll="true">
-      <param name="joram.version" value="SNAPSHOT"/>
+      <param name="joram.version" value="${joram.major}.${joram.minor}-SNAPSHOT"/>
     </antcall>
   </target>
     
@@ -164,7 +164,7 @@
   				description="--> Deploy SNAPSHOT artifacts">	
     <!-- Execute the internal target -->
     <antcall target="internal:deploy">
-      <param name="joram.version" value="SNAPSHOT"/>
+      <param name="joram.version" value="${joram.major}.${joram.minor}-SNAPSHOT"/>
       <param name="deploy.joram" value="true"/>
     </antcall>
   </target>
