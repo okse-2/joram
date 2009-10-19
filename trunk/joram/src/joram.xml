@@ -685,12 +685,12 @@
     <antcall target="ship.adapter" inheritAll="true"/>
     <copy file="${ship.dir}/lib/joram.rar"
           tofile="${releases.dir}/joram-${version}-RA.rar"/>
-    <delete file="${ship.dir}/lib/joram.rar"/>
+    <!-- delete file="${ship.dir}/lib/joram.rar"/ -->
   	
     <antcall target="ship.remoteadapter" inheritAll="true"/>
     <copy file="${ship.dir}/lib/joram.rar"
           tofile="${releases.dir}/joram-${version}-remoteRA.rar"/>
-    <delete file="${ship.dir}/lib/joram.rar"/>
+    <!-- delete file="${ship.dir}/lib/joram.rar"/ -->
   	
     <antcall target="ship.jonasadapter" inheritAll="true"/>
     <copy file="${ship.dir}/lib/joram_for_jonas_ra.rar"
