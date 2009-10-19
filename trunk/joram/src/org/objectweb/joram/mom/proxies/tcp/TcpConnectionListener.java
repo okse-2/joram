@@ -42,6 +42,7 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.common.Configuration;
 import fr.dyade.aaa.common.Daemon;
 import fr.dyade.aaa.common.Debug;
 
@@ -64,6 +65,31 @@ public class TcpConnectionListener extends Daemon {
   private int timeout;
 
   /**
+   *  Name of the boolean property allowing the verification of the synchronization
+   * between the client and server clock. When true a warning is generated if there
+   * is more than one second between the two clocks. This property allows the protocol
+   * compatibility in 5.2 versions, this verification will be enabled by default in 5.3
+   * version.
+   * <p>
+   *  This property can be fixed either from <code>java</code> launching command, or
+   * in <code>a3servers.xml</code> configuration file. By default the value is false. 
+   */
+  public static final String VERIFY_CLOCK_SYNCHRO = 
+    "org.objectweb.joram.TcpConnection.verifyClockSynchro";
+
+  /**
+   *  Boolean value allowing the verification of the synchronization between the
+   * client and server clock. When true a warning is generated if there is more
+   * than one second between the two clocks. This property allows the protocol
+   * compatibility in 5.2 versions, this verification will be enabled by default
+   * in 5.3 version.
+   * <p>
+   *  This property can be fixed either from <code>java</code> launching command, or
+   * in <code>a3servers.xml</code> configuration file. By default the value is false.
+   */
+  private final boolean verifyClockSynchro;
+
+  /**
    * Creates a new connection listener
    *
    * @param proxyService  the TCP proxy service associated with this connection listener
@@ -73,6 +99,7 @@ public class TcpConnectionListener extends Daemon {
     super("TcpConnectionListener");
     this.proxyService = proxyService;
     this.timeout = timeout;
+    this.verifyClockSynchro = Configuration.getBoolean("VERIFY_CLOCK_SYNCHRO");
   }
 
   public void run() {
@@ -82,7 +109,7 @@ public class TcpConnectionListener extends Daemon {
     // Wait for the administration topic deployment.
     // TODO (AF): a synchronization would be much better.
     try {
-      Thread.sleep(2000);
+      Thread.sleep(500);
     } catch (InterruptedException exc) {
       // continue
     }
@@ -140,8 +167,7 @@ public class TcpConnectionListener extends Daemon {
     try {
       sock.setTcpNoDelay(true);
 
-      // Fix bug when the client doesn't
-      // use the right protocol (e.g. Telnet)
+      // Fix bug when the client doesn't use the right protocol (e.g. Telnet)
       // and blocks this listener.
       sock.setSoTimeout(timeout);
 
@@ -151,15 +177,18 @@ public class TcpConnectionListener extends Daemon {
       byte[] magic = StreamUtil.readByteArrayFrom(is, 8);
       for (int i=0; i<5; i++) {
         if (magic[i] != MetaData.joramMagic[i])
-          throw new IllegalAccessException("Bad magic number:" + new String(magic, 0, 5) + magic[5] + '.' + magic[6] + '/' + magic[7]);
+          throw new IllegalAccessException("Bad magic number:" +
+                                           new String(magic, 0, 5) + magic[5] + '.' + magic[6] + '/' + magic[7]);
       }
       if (magic[7] != MetaData.joramMagic[7])
         throw new IllegalAccessException("Bad protocol version number");
       
-      long dt = Math.abs(StreamUtil.readLongFrom(is) - System.currentTimeMillis());
-      if (dt > 1000)
-        logger.log(BasicLevel.WARN, " -> clock synchronization between client and server: " + dt);
-      StreamUtil.writeTo(dt, nos);
+      if (verifyClockSynchro) {
+        long dt = Math.abs(StreamUtil.readLongFrom(is) - System.currentTimeMillis());
+        if (dt > 1000)
+          logger.log(BasicLevel.WARN, " -> clock synchronization between client and server: " + dt);
+        StreamUtil.writeTo(dt, nos);
+      }
       
       Identity identity = Identity.read(is);
       if (logger.isLoggable(BasicLevel.DEBUG))
