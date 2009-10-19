@@ -69,7 +69,7 @@ public class StubLocal {
       throw new PreconditionFailedException("Queue not unused.");
     }
     Naming.unbindQueue(queueName);
-    if (queue.isDurable() && Naming.isLocal(queueName))
+    if (queue.isDurable())
       queue.deleteQueue(queueName);
 
     // Unbind exchanges bound to the queue
@@ -203,7 +203,7 @@ public class StubLocal {
     }
     Naming.unbindExchange(exchangeName);
     
-    if (exchange.durable && Naming.isLocal(exchangeName))
+    if (exchange.durable)
       exchange.deleteExchange();
 
     // Unbind queues bound to the exchange
