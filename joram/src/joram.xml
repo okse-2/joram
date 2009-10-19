@@ -695,7 +695,7 @@
     <antcall target="ship.jonasadapter" inheritAll="true"/>
     <copy file="${ship.dir}/lib/joram_for_jonas_ra.rar"
           tofile="${releases.dir}/joram-jonasadapter-${version}.rar"/>
-    <delete file="${ship.dir}/lib/joram_for_jonas_ra.rar"/>
+    <!-- delete file="${ship.dir}/lib/joram_for_jonas_ra.rar"/ -->
   	
     <antcall target="ship.adapter.bin" inheritAll="true"/>
 
