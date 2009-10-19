@@ -134,11 +134,17 @@ public class HeadersExchange extends IExchange {
           if (argument.equals("x-match")) {
             continue;
           }
-          if (bindArguments.get(argument) == null && properties.headers.containsKey(argument)
-              || bindArguments.get(argument).equals(LongStringHelper.asLongString("")) && properties.headers.containsKey(argument)
-              || bindArguments.get(argument).equals(properties.headers.get(argument))) {
-            destQueues.addAll(bindings.get(bindArguments));
-            break;
+          if (bindArguments.get(argument) == null) {
+            if (properties.headers.containsKey(argument)) {
+              destQueues.addAll(bindings.get(bindArguments));
+              break;
+            }
+          } else {
+            if (bindArguments.get(argument).equals(LongStringHelper.asLongString("")) && properties.headers.containsKey(argument)
+                || bindArguments.get(argument).equals(properties.headers.get(argument))) {
+              destQueues.addAll(bindings.get(bindArguments));
+              break;
+            }
           }
         }
       }
@@ -150,11 +156,17 @@ public class HeadersExchange extends IExchange {
           if (argument.equals("x-match")) {
             continue;
           }
-          if (bindArguments.get(argument) == null && !properties.headers.containsKey(argument)
-              || bindArguments.get(argument).equals(LongStringHelper.asLongString("")) && !properties.headers.containsKey(argument)
-              || !bindArguments.get(argument).equals(properties.headers.get(argument))) {
-            matched = false;
-            break;
+          if (bindArguments.get(argument) == null) {
+            if (!properties.headers.containsKey(argument)) {
+              matched = false;
+              break;
+            }
+          } else {
+            if (bindArguments.get(argument).equals(LongStringHelper.asLongString("")) && !properties.headers.containsKey(argument)
+                || !bindArguments.get(argument).equals(properties.headers.get(argument))) {
+              matched = false;
+              break;
+            }
           }
         }
         if (matched) {
