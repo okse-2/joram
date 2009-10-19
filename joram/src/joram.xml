@@ -336,12 +336,17 @@
           todir="${ship.dir}/bin"/>
   </target>
 
+  <!-- Ships all JORAM JCA 1.5 adapters -->
+  <target name="ship.adapters" depends="ship.adapter,ship.remoteadapter,ship.jonasadapter"
+          description="--> Ships all JORAM JCA adapters">
+  </target>
+    
   <!-- Ships a JORAM JCA 1.5 adapter -->
   <target name="ship.adapter" depends="ship.joram"
           description="--> Ships a JORAM JCA adapter">
     <copy file="${src.dir}/org/objectweb/joram/client/connector/ra.xml"
           tofile="${build.dir}/META-INF/ra.xml"/>
-    <jar jarfile="${ship.dir}/lib/joram.rar">
+    <jar jarfile="${ship.dir}/lib/joram_ra.rar">
       <manifest>
         <attribute name="Specification-Title" value="JMS"/>
         <attribute name="Specification-Version" value="1.1"/>
@@ -374,7 +379,7 @@
           description="--> Ships a JORAM JCA adapter for non collocated use">
     <copy file="${src.dir}/org/objectweb/joram/client/connector/ra-remote.xml"
           tofile="${build.dir}/META-INF/ra.xml"/>
-    <jar jarfile="${ship.dir}/lib/joram.rar">
+    <jar jarfile="${ship.dir}/lib/joram_ra_remote.rar">
       <manifest>
         <attribute name="Specification-Title" value="JMS"/>
         <attribute name="Specification-Version" value="1.1"/>
@@ -682,20 +687,13 @@
   <target name="releases"
           depends="clean,clean.releases,release.src,release.jar,release.doc"
           description="--> Builds a Joram complete distribution.">
-    <antcall target="ship.adapter" inheritAll="true"/>
-    <copy file="${ship.dir}/lib/joram.rar"
+    <antcall target="ship.adapters" inheritAll="true"/>
+    <copy file="${ship.dir}/lib/joram_ra.rar"
           tofile="${releases.dir}/joram-${version}-RA.rar"/>
-    <!-- delete file="${ship.dir}/lib/joram.rar"/ -->
-  	
-    <antcall target="ship.remoteadapter" inheritAll="true"/>
-    <copy file="${ship.dir}/lib/joram.rar"
+    <copy file="${ship.dir}/lib/joram_ra_remote.rar"
           tofile="${releases.dir}/joram-${version}-remoteRA.rar"/>
-    <!-- delete file="${ship.dir}/lib/joram.rar"/ -->
-  	
-    <antcall target="ship.jonasadapter" inheritAll="true"/>
     <copy file="${ship.dir}/lib/joram_for_jonas_ra.rar"
           tofile="${releases.dir}/joram-jonasadapter-${version}.rar"/>
-    <!-- delete file="${ship.dir}/lib/joram_for_jonas_ra.rar"/ -->
   	
     <antcall target="ship.adapter.bin" inheritAll="true"/>
 
