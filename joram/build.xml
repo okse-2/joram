@@ -13,6 +13,13 @@
     <ant dir="src" antfile="joram.xml" target="releases"/>
   </target>
 
+  <!-- JORAM snapshot releases target -->
+  <target name="snapshot"
+          description="--> Builds a Joram complete snapshot distribution.">
+    <ant dir="src" antfile="joram.xml" target="snapshot"/>
+    <ant antfile="maven-build.xml" target="deploy_snapshot" />
+  </target>
+  
   <!-- JORAM shipment target -->
   <target name="ship"
           description="--> Build jars needed to use Joram">
