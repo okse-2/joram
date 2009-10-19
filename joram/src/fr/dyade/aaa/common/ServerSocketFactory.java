@@ -54,8 +54,8 @@ public abstract class ServerSocketFactory {
     ServerSocketFactory serverSocketFactory = null;
     try {
       Class factoryClass = Class.forName(DefaultFactory);
-      Method method = factoryClass.getMethod("getFactory");
-      serverSocketFactory = (ServerSocketFactory) method.invoke(null);
+      Method method = factoryClass.getMethod("getFactory", (Class[]) null);
+      serverSocketFactory = (ServerSocketFactory) method.invoke(null, (Object[]) null);
     } catch (Exception exc) {
       logger.log(BasicLevel.ERROR,
                  "Unable to instantiate default SocketFactory: " + DefaultFactory, exc);
@@ -74,8 +74,8 @@ public abstract class ServerSocketFactory {
   	ServerSocketFactory serverSocketFactory = null;
     try {
       Class factoryClass = Class.forName(ssfcn);
-      Method method = factoryClass.getMethod("getFactory");
-      serverSocketFactory = (ServerSocketFactory) method.invoke(null);
+      Method method = factoryClass.getMethod("getFactory", (Class[]) null);
+      serverSocketFactory = (ServerSocketFactory) method.invoke(null, (Object[]) null);
     } catch (Exception exc) {
       logger.log(BasicLevel.ERROR,
                  "Use default SocketFactory, unable to instantiate : " + ssfcn, exc);
