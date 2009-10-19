@@ -73,7 +73,7 @@ public class DirectExchange extends IExchange {
     super(name, durable);
     bindings = new HashMap<String, Set<String>>();
     if (durable)
-      saveExchange();
+      createExchange();
   }
 
   public synchronized void bind(String queueName, String routingKey, Map<String, Object> arguments) {
@@ -91,7 +91,8 @@ public class DirectExchange extends IExchange {
       saveExchange();
   }
 
-  public synchronized void unbind(String queueName, String routingKey, Map<String, Object> arguments) {   
+  public synchronized void unbind(String queueName, String routingKey, Map<String, Object> arguments)
+      throws NotFoundException {
     Set<String> boundQueues = bindings.get(routingKey);
     if (boundQueues != null) {
       boundQueues.remove(queueName);
@@ -100,6 +101,8 @@ public class DirectExchange extends IExchange {
       }
       if (durable)
         saveExchange();
+    } else {
+      throw new NotFoundException("Unknown routing key: " + routingKey);
     }
   }
 

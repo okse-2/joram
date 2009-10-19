@@ -96,7 +96,8 @@ public abstract class IExchange implements Serializable {
 
   public abstract void bind(String queueName, String routingKey, Map<String, Object> arguments);
 
-  public abstract void unbind(String queueName, String routingKey, Map<String, Object> arguments);
+  public abstract void unbind(String queueName, String routingKey, Map<String, Object> arguments)
+      throws NotFoundException;
   
   public abstract boolean isUnused();
 
@@ -128,11 +129,23 @@ public abstract class IExchange implements Serializable {
     return exchange;
   }
 
+  protected final void createExchange() {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "IExchange.createExchange(" + name + ')');
+    try {
+      transaction.create(this, saveName);
+    } catch (IOException e) {
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "IExchange.createExchange ERROR::", e);
+      //throw new TransactionException(e.getMessage());  
+    }
+  }
+
   protected final void saveExchange() {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "IExchange.saveExchange(" + name + ')');
     try {
-      transaction.create(this, saveName);
+      transaction.save(this, saveName);
     } catch (IOException e) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "IExchange.saveExchange ERROR::", e);

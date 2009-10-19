@@ -85,7 +85,7 @@ public class HeadersExchange extends IExchange {
     super(name, durable);
     bindings = new HashMap<Map<String, Object>, Set<String>>();
     if (durable)
-      saveExchange();
+      createExchange();
   }
 
   public synchronized void bind(String queueName, String routingKey, Map<String, Object> arguments) {
@@ -100,7 +100,8 @@ public class HeadersExchange extends IExchange {
       saveExchange();
   }
 
-  public synchronized void unbind(String queueName, String routingKey, Map<String, Object> arguments) {
+  public synchronized void unbind(String queueName, String routingKey, Map<String, Object> arguments)
+      throws NotFoundException {
     Set<String> boundQueues = bindings.get(arguments);
     if (boundQueues != null) {
       boundQueues.remove(queueName);
@@ -110,6 +111,8 @@ public class HeadersExchange extends IExchange {
       if (durable) {
         saveExchange();
       }
+    } else {
+      throw new NotFoundException("Unknown headers: " + arguments);
     }
   }
 
