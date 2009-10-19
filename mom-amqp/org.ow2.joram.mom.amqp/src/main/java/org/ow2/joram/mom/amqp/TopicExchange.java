@@ -89,7 +89,7 @@ public class TopicExchange extends IExchange {
     super(name, durable);
     bindings = new HashMap<KeyAndPattern, Set<String>>();
     if (durable)
-      saveExchange();
+      createExchange();
   }
 
   public synchronized void bind(String queueName, String routingKey, Map<String, Object> arguments) {
@@ -105,7 +105,8 @@ public class TopicExchange extends IExchange {
       saveExchange();
   }
 
-  public synchronized void unbind(String queueName, String routingKey, Map<String, Object> arguments) {
+  public synchronized void unbind(String queueName, String routingKey, Map<String, Object> arguments)
+      throws NotFoundException {
     if (logger.isLoggable(BasicLevel.DEBUG)) {
       logger.log(BasicLevel.DEBUG, "TopicExchange.Unbind(" + queueName + "," + routingKey + ")");
     }
@@ -120,6 +121,8 @@ public class TopicExchange extends IExchange {
       if (durable) {
         saveExchange();
       }
+    } else {
+      throw new NotFoundException("Unknown topic: " + routingKey);
     }
   }
 

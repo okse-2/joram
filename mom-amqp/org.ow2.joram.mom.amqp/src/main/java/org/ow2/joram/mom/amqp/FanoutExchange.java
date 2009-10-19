@@ -61,7 +61,7 @@ public class FanoutExchange extends IExchange {
     super(name, durable);
     boundQueues = new HashSet<String>();
     if (durable)
-      saveExchange();
+      createExchange();
   }
 
   public synchronized void bind(String queueName, String routingKey, Map<String, Object> arguments) {
@@ -71,8 +71,12 @@ public class FanoutExchange extends IExchange {
     }
   }
 
-  public synchronized void unbind(String queueName, String routingKey, Map<String, Object> arguments) {
-    boundQueues.remove(queueName);
+  public synchronized void unbind(String queueName, String routingKey, Map<String, Object> arguments)
+      throws NotFoundException {
+    boolean removed = boundQueues.remove(queueName);
+    if (!removed) {
+      throw new NotFoundException("Queue not bound: " + queueName);
+    }
     if (durable) {
       saveExchange();
     }
