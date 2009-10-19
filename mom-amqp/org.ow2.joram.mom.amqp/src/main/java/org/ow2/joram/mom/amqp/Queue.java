@@ -503,6 +503,13 @@ public class Queue implements Serializable {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Queue.deleteQueue(" + queueName + ')');
     transaction.delete(PREFIX_QUEUE + Naming.getLocalName(queueName));
+    deleteAllMessage(toDeliver);
+    deleteAllMessage(toAck);
+    Iterator<String> iterBoundExchanges = boundExchanges.iterator();
+    while (iterBoundExchanges.hasNext()) {
+      String exchangeName = iterBoundExchanges.next();
+      deleteBoundExchange(exchangeName);
+    }
   }
   
   private void saveBoundExchange(String exchange) throws TransactionException {
