@@ -292,10 +292,7 @@
     <copy file="${lib.dir}/activation.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/JCup.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/jms.jar" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/jndi.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/jta.jar" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/jmxri.jar" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/jmxtools.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/mail.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/ow_monolog.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/soap.jar" todir="${ship.dir}/lib"/>
@@ -304,13 +301,11 @@
     <copy file="${lib.dir}/jgroups-all.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/commons-logging-api.jar" todir="${ship.dir}/lib"/>
     <!-- copy file="${lib.dir}/kxml.jar" todir="${ship.dir}/lib"/ -->
-    <copy file="${lib.dir}/midpapi.jar" todir="${ship.dir}/lib"/>
     <!-- copy file="${lib.dir}/hsqldb.jar" todir="${ship.dir}/lib"/ -->
     <!-- copy file="${lib.dir}/derby.jar" todir="${ship.dir}/lib"/ -->
     <copy file="${build.dir}/joram-shared.jar" todir="${ship.dir}/lib"/>
     <copy file="${build.dir}/joram-mom.jar" todir="${ship.dir}/lib"/>
     <copy file="${build.dir}/joram-client.jar" todir="${ship.dir}/lib"/>
-    <copy file="${build.dir}/joram-gui.jar" todir="${ship.dir}/lib"/>
     <copy file="${build.dir}/joram-connector.jar" todir="${ship.dir}/lib"/>
     <copy file="${build.dir}/joram-config.jar" todir="${ship.dir}/lib"/>
     <copy file="${build.dir}/joram-raconfig.jar" todir="${ship.dir}/lib"/>
