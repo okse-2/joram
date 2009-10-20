@@ -22,7 +22,6 @@
  */
 package fr.dyade.aaa.common;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Enumeration;
@@ -41,12 +40,21 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
- * The <code>MonitoringTopicImpl</code> class implements the monitoring
- * behavior, regularly delivering monitoring messages to subscribers.
+ * The <code>MonitoringTimerTask</code> class allows to periodically watch JMX attributes
+ * and store the corresponding values to a file in CSV format.
  */
-public class MonitoringTimerTask extends java.util.TimerTask {
+public class MonitoringTimerTask extends java.util.TimerTask implements MonitoringTimerTaskMBean {
   /** Time between two monitoring events */
   protected long period;
+  
+  /**
+   * Returns the period value of this queue, -1 if not set.
+   * 
+   * @return the period value of this queue; -1 if not set.
+   */
+  public long getPeriod() {
+    return period;
+  }
 
   Properties attlist = null;
 
@@ -140,5 +148,42 @@ public class MonitoringTimerTask extends java.util.TimerTask {
       writer.flush();
     } catch (IOException exc) {
     }
+  }
+
+  /**
+   * Returns the comma separated list of all monitored attributes.
+   * 
+   * @return the comma separated list of all monitored attributes.
+   */
+  public String[] getMonitoredAttributes() {
+    int i = 0;
+    String[] ret = new String[attlist.size()];
+    for (Enumeration e = attlist.keys(); e.hasMoreElements();) {
+      String mbean = (String) e.nextElement();
+      ret[i++] = mbean + '=' + attlist.getProperty(mbean);
+    }
+    return ret;
+  }
+  
+  /**
+   * Add the specified attributes to the list of monitored attributes.
+   * If the Mbean is already monitored, the specified list of attributes
+   * overrides the existing one.
+   * 
+   * @param MBeanName   the name of the MBean.
+   * @param attributes  the comma separated list of attributes to monitor.
+   */
+  public void addMonitoredAttributes(String MBeanName, String attributes) {
+    attlist.put(MBeanName, attributes);
+  }
+  
+  /**
+   * Removes all the attributes of the specified MBean in the list of
+   * monitored attributes.
+   * 
+   * @param MBeanName the name of the MBean.
+   */
+  public void delMonitoredAttributes(String MBeanName) {
+    attlist.remove(MBeanName);
   }
 }
