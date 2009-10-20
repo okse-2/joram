@@ -27,10 +27,12 @@ package fr.dyade.aaa.agent;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Properties;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -46,6 +48,7 @@ import fr.dyade.aaa.agent.conf.A3CMLProperty;
 import fr.dyade.aaa.agent.conf.A3CMLServer;
 import fr.dyade.aaa.agent.conf.A3CMLService;
 import fr.dyade.aaa.common.Configuration;
+import fr.dyade.aaa.common.MonitoringTimerTask;
 import fr.dyade.aaa.common.Timer;
 import fr.dyade.aaa.util.ResolverRepository;
 import fr.dyade.aaa.util.Transaction;
@@ -153,19 +156,125 @@ public final class AgentServer {
 
   private static Logger logmon = null;
 
+  /**
+   *  Name of property allowing to configure the directory to search the XML
+   * server configuration.
+   * <p>
+   *  Be careful, the XML server configuration file is normally used only for the
+   * initial starting of the server, the configuration is then atomically maintained
+   * in the persistence directory.
+   * <p>
+   *  This property can only be fixed either from <code>java</code> launching
+   * command.
+   */
   public final static String CFG_DIR_PROPERTY = "fr.dyade.aaa.agent.A3CONF_DIR";
+  /**
+   *  Default value of the directory to search the XML server configuration,
+   * value is null.
+   */
   public final static String DEFAULT_CFG_DIR = null;
-  
+
+  /**
+   *  Name of property allowing to configure the filename of the XML server
+   * configuration.
+   * <p>
+   *  Be careful, the XML server configuration file is normally used only for the
+   * initial starting of the server, the configuration is then atomically maintained
+   * in the persistence directory.
+   * <p>
+   *  This property can only be fixed either from <code>java</code> launching
+   * command.
+   */
   public final static String CFG_FILE_PROPERTY = "fr.dyade.aaa.agent.A3CONF_FILE";
+  /**
+   *  Default value of the filename of the XML server configuration, value is
+   * <code>a3servers.xml</code>.
+   */
   public final static String DEFAULT_CFG_FILE = "a3servers.xml";
+  
+  /**
+   *  Default value of the filename of the serialized server configuration in the
+   * persistence directory, value is <code>a3cmlconfig</code>.
+   * <p>
+   *  Removing this file allows to load anew the XML configuration file at the next
+   * starting of the server. Be careful, doing this can generate incoherence in the
+   * global configuration.
+   */
   public final static String DEFAULT_SER_CFG_FILE = "a3cmlconfig";
   
   public final static String CFG_NAME_PROPERTY = "fr.dyade.aaa.agent.A3CONF_NAME";
   public final static String DEFAULT_CFG_NAME = "default";
   
+  /**
+   *  Name of property allowing to configure the XML wrapper used to read the server
+   * configuration.
+   * <p>
+   *  This property can only be fixed either from <code>java</code> launching
+   * command.
+   */
   public final static String A3CMLWRP_PROPERTY = "fr.dyade.aaa.agent.A3CMLWrapper";
+  /**
+   *  Default value of the XML wrapper used to read server configuration, this default
+   * value implies the use of the default SaxWrapper.
+   */
   public final static String DEFAULT_A3CMLWRP = "fr.dyade.aaa.agent.conf.A3CMLSaxWrapper";
   
+  /**
+   *  Name of property allowing to fix the pathname of a configuration file for a
+   * monitoring task in the server.
+   * <p>
+   *  This property can be fixed either from <code>java</code> launching command,
+   * or in <code>a3servers.xml</code> configuration file.
+   * 
+   * @see fr.dyade.aaa.common.MonitoringTimerTask
+   */
+  public final static String MONITORING_CONFIG_PATH_PROPERTY = "fr.dyade.aaa.agent.MONITORING_CONFIG_PATH";
+  /**
+   *  Default value for the pathname of a configuration file for a monitoring
+   * task in the server, value is <code>monitoring.props</code>.
+   * <p>
+   *  If the file does not exist the timer task is not launched.
+   * 
+   * @see fr.dyade.aaa.common.MonitoringTimerTask
+   */
+  public final static String DEFAULT_MONITORING_CONFIG_PATH = "monitoring.props";
+  
+  /**
+   *  Name of property allowing to fix the pathname of the results file for the
+   * monitoring task in the server.
+   * <p>
+   *  This property can be fixed either from <code>java</code> launching command,
+   * or in <code>a3servers.xml</code> configuration file.
+   * 
+   * @see fr.dyade.aaa.common.MonitoringTimerTask
+   */
+  public final static String MONITORING_RESULT_PATH_PROPERTY = "fr.dyade.aaa.agent.MONITORING_CONFIG_PATH";
+  /**
+   *  Default value for the pathname of the pathname of the results file for the
+   * monitoring task in the server, value is <code>monitoringStats.csv</code>.
+   * 
+   * @see fr.dyade.aaa.common.MonitoringTimerTask
+   */
+  public final static String DEFAULT_MONITORING_RESULT_PATH = "monitoringStats.csv";
+  
+  /**
+   *  Name of property allowing to fix the scanning period for the monitoring
+   * task in the server.
+   * <p>
+   *  This property can be fixed either from <code>java</code> launching command,
+   * or in <code>a3servers.xml</code> configuration file.
+   * 
+   * @see fr.dyade.aaa.common.MonitoringTimerTask
+   */
+  public final static String MONITORING_CONFIG_PERIOD_PROPERTY = "fr.dyade.aaa.agent.MONITORING_CONFIG_PERIOD";
+  /**
+   *  Default value for the pathname of the scanning period for the  monitoring
+   * task in the server, value is <code>5000L</code> (5 seconds).
+   * 
+   * @see fr.dyade.aaa.common.MonitoringTimerTask
+   */
+  public final static long DEFAULT_MONITORING_CONFIG_PERIOD = 5000L;
+
   static ThreadGroup tgroup = null;
 
   public static ThreadGroup getThreadGroup() {
@@ -279,7 +388,9 @@ public final class AgentServer {
     }
     return timer;
   }
-
+  
+  private static MonitoringTimerTask monitoringTimerTask = null;
+  
   /** Static reference to the configuration. */
   private static A3CMLConfig a3config = null;
 
@@ -887,25 +998,20 @@ public final class AgentServer {
       for (; e.hasMoreElements();) {
         MessageConsumer cons = (MessageConsumer) e.nextElement();
         try {
-          MXWrapper.unregisterMBean(
-            "AgentServer",
-            "server=" + getName() + ",cons=" + cons.getName());
+          MXWrapper.unregisterMBean("AgentServer", "server=" + getName() + ",cons=" + cons.getName());
         } catch (Exception exc) {
           logmon.log(BasicLevel.DEBUG,
-                     getName() + ", jmx failed: " +
-                     "server=" + getName() + ",cons=" + cons.getName(), exc);
+                     getName() + ", jmx failed: " + "server=" + getName() + ",cons=" + cons.getName(), exc);
         }
       }
       consumers = null;
     }
 
     try {
-      MXWrapper.unregisterMBean("AgentServer",
-                                "server=" + getName() + ",cons=Transaction");
+      MXWrapper.unregisterMBean("AgentServer", "server=" + getName() + ",cons=Transaction");
     } catch (Exception exc) {
       logmon.log(BasicLevel.DEBUG,
-                 getName() + ", jmx failed: " +
-                 "server=" + getName() + ",cons=Transaction", exc);
+                 getName() + ", jmx failed: " + "server=" + getName() + ",cons=Transaction", exc);
     }
 
     if (transaction != null) transaction.close();
@@ -1116,8 +1222,7 @@ public final class AgentServer {
 
       try {
         MXWrapper.registerMBean(transaction,
-                                "AgentServer",
-                                "server=" + getName() + ",cons=Transaction");
+                                "AgentServer", "server=" + getName() + ",cons=Transaction");
       } catch (Exception exc) {
         if (logmon == null)
           logmon = Debug.getLogger(AgentServer.class.getName());
@@ -1378,7 +1483,32 @@ public final class AgentServer {
     synchronized(status) {
       status.value = Status.STARTED;
     }
+    
+    String config = getProperty(MONITORING_CONFIG_PATH_PROPERTY, DEFAULT_MONITORING_CONFIG_PATH);
+    try {
+      // if "monitoring.props" file exists configure a MonitoringTimerTask.
+      File file = new File(config);
+      if (file.exists()) {
+        long period = getLong(MONITORING_CONFIG_PERIOD_PROPERTY, DEFAULT_MONITORING_CONFIG_PERIOD);
+        String results = getProperty(MONITORING_RESULT_PATH_PROPERTY, DEFAULT_MONITORING_RESULT_PATH);
+        
+        Properties monitoringProps = new Properties();
+        monitoringProps.load(new FileReader(file));
+        monitoringTimerTask = new MonitoringTimerTask(new java.util.Timer(true), period, results, monitoringProps);
 
+        try {
+          MXWrapper.registerMBean(monitoringTimerTask,
+                                  "AgentServer", "server=" + getName() + ",cons=Monitoring");
+        } catch (Exception exc) {
+          if (logmon == null)
+            logmon = Debug.getLogger(AgentServer.class.getName());
+          logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
+        }
+      }
+    } catch (Exception exc) {
+      logmon.log(BasicLevel.WARN, getName() + "Cannot read monitoring configuration file: " + config, exc);
+    }
+    
     if (errBuf == null) return null;
     return errBuf.toString();
   }
@@ -1472,6 +1602,10 @@ public final class AgentServer {
     }
 
     try {
+      if (monitoringTimerTask != null)
+        monitoringTimerTask.cancel();
+      monitoringTimerTask = null;
+      
       if (timer != null)
         timer.cancel();
       timer = null;
