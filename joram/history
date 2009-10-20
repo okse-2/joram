@@ -1,4 +1,27 @@
 +==============================================================================
+| 2009/10/19 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Removes JMXRIHttpService class, no longer used, depends of JMXRITools.jar.
+ Adds a MonitoringTimerTask to the AgentServer class allowing the periodic
+monitoring of the server's attributes.
+ Adds JMX MBean interface to MonitoringTopic and MonitoringTimerTask classes.
+ Removes unused jars in ship/lib: jndi, jmxri, jmxtools.
++==============================================================================
+| 2009/10/19 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds JMX control of monitored attributes in MonitoringTopic, allows to view,
+add and remove attributes.
++==============================================================================
+| 2009/10/13 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Implements a pool of connections through a dedicated ConnectionFactory.
++==============================================================================
+| 2009/10/08 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: avoid concurrent connections in AdminModule static administration
+component.
+ Bug fix: no longer deserializes two times the adminMessage.
++==============================================================================
 | 2009/10/02 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Adds NGTransaction component.
