@@ -4,8 +4,7 @@ Bundle-Name: JORAM :: Client
 Bundle-SymbolicName: org.objectweb.joram.client
 Bundle-Description: Joram Agent Server
 Bundle-Vendor: Scalagent D.T.
-Bundle-ClassPath: .,
- jndi.jar
+Bundle-ClassPath: .
 Bundle-Activator: org.objectweb.joram.client.osgi.Activator
 Import-Package: com.scalagent.jmx,
  fr.dyade.aaa.agent;resolution:=optional,
@@ -13,6 +12,7 @@ Import-Package: com.scalagent.jmx,
  fr.dyade.aaa.jndi2.soap,
  fr.dyade.aaa.util.management,
  javax.jms,
+ javax.naming,
  org.objectweb.joram.mom.dest;resolution:=optional,
  org.objectweb.joram.mom.notifications;resolution:=optional,
  org.objectweb.joram.mom.proxies;resolution:=optional,
