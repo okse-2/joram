@@ -583,9 +583,6 @@
         <include name="org/objectweb/joram/client/osgi/Activator.class"/>
         <include name="org/objectweb/joram/client/jms/**/*.class"/>
       </fileset>
-      <fileset dir="${lib.dir}">
-        <include name="jndi.jar"/>
-      </fileset>
     </jar>
     
     <jar jarfile="${build.dir}/joram-shared-bundle.jar" manifest="${src.dir}/org/objectweb/joram/shared/osgi/manifest.mf">
