@@ -1493,7 +1493,7 @@ public final class AgentServer {
         String results = getProperty(MONITORING_RESULT_PATH_PROPERTY, DEFAULT_MONITORING_RESULT_PATH);
         
         Properties monitoringProps = new Properties();
-        monitoringProps.load(new FileReader(file));
+        monitoringProps.load(new FileInputStream(file));
         monitoringTimerTask = new MonitoringTimerTask(new java.util.Timer(true), period, results, monitoringProps);
 
         try {
