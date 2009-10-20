@@ -16,9 +16,7 @@ set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\joram-client.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\joram-shared.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\JCup.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\jms.jar
-set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\jndi.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\ow_monolog.jar
-set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\jmxri.jar
 set CLASSPATH=%CLASSPATH%;%RUN_DIR%
 
 echo == Launching the graphical administration tool ==
