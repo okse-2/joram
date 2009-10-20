@@ -23,7 +23,6 @@
 package org.objectweb.joram.mom.dest;
 
 public interface MonitoringTopicImplMBean extends TopicImplMBean {
-
   /**
    * Returns the period value of this queue, -1 if not set.
    * 
@@ -39,4 +38,28 @@ public interface MonitoringTopicImplMBean extends TopicImplMBean {
    */
   void setPeriod(long period);
 
+  /**
+   * Returns the comma separated list of all monitored attributes.
+   * 
+   * @return the comma separated list of all monitored attributes.
+   */
+  String[] getMonitoredAttributes();
+  
+  /**
+   * Add the specified attributes to the list of monitored attributes.
+   * If the Mbean is already monitored, the specified list of attributes
+   * overrides the existing one.
+   * 
+   * @param MBeanName   the name of the MBean.
+   * @param attributes  the comma separated list of attributes to monitor.
+   */
+  void addMonitoredAttributes(String MBeanName, String attributes);
+  
+  /**
+   * Removes all the attributes of the specified MBean in the list of
+   * monitored attributes.
+   * 
+   * @param MBeanName the name of the MBean.
+   */
+  void delMonitoredAttributes(String MBeanName);
 }
