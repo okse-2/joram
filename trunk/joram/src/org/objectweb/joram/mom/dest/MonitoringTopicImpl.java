@@ -259,4 +259,41 @@ public class MonitoringTopicImpl extends TopicImpl implements MonitoringTopicImp
     return receivedMessagesCount;
   }
 
+  /**
+   * Returns the comma separated list of all monitored attributes.
+   * 
+   * @return the comma separated list of all monitored attributes.
+   */
+  public String[] getMonitoredAttributes() {
+    int i = 0;
+    String[] ret = new String[monitoringProperties.size()];
+    for (Enumeration e = monitoringProperties.keys(); e.hasMoreElements();) {
+      String mbean = (String) e.nextElement();
+      ret[i++] = mbean + '=' +monitoringProperties.getProperty(mbean);
+    }
+    return ret;
+  }
+  
+  /**
+   * Add the specified attributes to the list of monitored attributes.
+   * If the Mbean is already monitored, the specified list of attributes
+   * overrides the existing one.
+   * 
+   * @param MBeanName   the name of the MBean.
+   * @param attributes  the comma separated list of attributes to monitor.
+   */
+  public void addMonitoredAttributes(String MBeanName, String attributes) {
+    monitoringProperties.put(MBeanName, attributes);
+  }
+  
+  /**
+   * Removes all the attributes of the specified MBean in the list of
+   * monitored attributes.
+   * 
+   * @param MBeanName the name of the MBean.
+   */
+  public void delMonitoredAttributes(String MBeanName) {
+    monitoringProperties.remove(MBeanName);
+  }
+
 }
