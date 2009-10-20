@@ -266,20 +266,6 @@
         <include name="a3servers.xml"/>
       </fileset>
     </jar>
-    
-    <jar jarfile="${build.dir}/joram-gui.jar">
-      <manifest>
-        <attribute name="Specification-Title" value="JMS"/>
-        <attribute name="Specification-Version" value="1.1"/>
-        <attribute name="Specification-Vendor" value="Sun Microsystems Inc."/>
-        <attribute name="Implementation-Title" value="Joram"/>
-        <attribute name="Implementation-Version" value="${version}"/> 
-        <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
-      </manifest>
-      <metainf dir="${licenses.dir}">
-        <include name="NOTICE.TXT"/>
-      </metainf>
-    </jar>
   </target>
 
   <!-- Ships a JORAM distribution -->

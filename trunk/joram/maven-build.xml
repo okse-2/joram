@@ -77,7 +77,6 @@
     <m2:pom id="parent.pom" file="${output.tmp.dir}/joram-parent.pom" />
     <m2:pom id="client.pom" file="${output.tmp.dir}/joram-client.pom" />
     <m2:pom id="connector.pom" file="${output.tmp.dir}/joram-connector.pom" />
-    <m2:pom id="gui.pom" file="${output.tmp.dir}/joram-gui.pom" />
     <m2:pom id="mom.pom" file="${output.tmp.dir}/joram-mom.pom" />
     <m2:pom id="raconfig.pom" file="${output.tmp.dir}/joram-raconfig.pom" />
     <m2:pom id="config.pom" file="${output.tmp.dir}/joram-config.pom" />
@@ -116,10 +115,6 @@
 
     <m2:install file="${output.dist.dir}/joram-connector.jar">
       <m2:pom refid="connector.pom" />
-    </m2:install>
-
-    <m2:install file="${output.dist.dir}/joram-gui.jar">
-      <m2:pom refid="gui.pom" />
     </m2:install>
 
     <m2:install file="${output.dist.dir}/joram-mom.jar">
@@ -222,9 +217,6 @@
 
       <maven-deploy pomRefId="connector.pom"
                     file="${output.dist.dir}/joram-connector.jar" />
-
-      <maven-deploy pomRefId="gui.pom"
-                    file="${output.dist.dir}/joram-gui.jar" />
 
       <maven-deploy pomRefId="mom.pom"
                     file="${output.dist.dir}/joram-mom.jar" />
