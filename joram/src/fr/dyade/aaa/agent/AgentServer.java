@@ -1489,7 +1489,7 @@ public final class AgentServer {
       // if "monitoring.props" file exists configure a MonitoringTimerTask.
       File file = new File(config);
       if (file.exists()) {
-        long period = getLong(MONITORING_CONFIG_PERIOD_PROPERTY, DEFAULT_MONITORING_CONFIG_PERIOD);
+        long period = getLong(MONITORING_CONFIG_PERIOD_PROPERTY, DEFAULT_MONITORING_CONFIG_PERIOD).longValue();
         String results = getProperty(MONITORING_RESULT_PATH_PROPERTY, DEFAULT_MONITORING_RESULT_PATH);
         
         Properties monitoringProps = new Properties();
