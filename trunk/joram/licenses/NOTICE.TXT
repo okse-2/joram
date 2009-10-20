@@ -1,11 +1,11 @@
    =========================================================================
    ==  NOTICE file corresponding to the section 6.a of                    ==
    ==  the GNU Lesser General Public License, Version 2.1,                ==
-   ==  in this case for the ObjectWeb Joram distribution.                 ==
+   ==  in this case for the OW2 Joram distribution.                       ==
    =========================================================================
 
-   Joram is a software distributed by the ObjectWeb consortium, it can
-   be downloaded at http://joram.objectweb.org
+   Joram is a software distributed by the OW2 consortium, it can
+   be downloaded at http://joram.ow2.org
 
    You should have received a copy of the GNU Lesser General Public License
    along with this library; if not, it is available to the Free Software
