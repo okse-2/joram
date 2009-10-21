@@ -42,4 +42,11 @@ public interface TcpProxyServiceMBean extends ConnectionManagerMBean {
    */
   public int getTcpListenersPoolSize();
 
+  /**
+   * Gets the number of connections rejected due to a wrong protocol header.
+   * 
+   * @return the number of connections rejected due to a wrong protocol header.
+   */
+  public int getProtocolErrorCount();
+
 }

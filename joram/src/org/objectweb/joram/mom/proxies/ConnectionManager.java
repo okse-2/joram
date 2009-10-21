@@ -301,4 +301,22 @@ public class ConnectionManager implements ConnectionManagerMBean {
   public String getMBeanName() {
     return MBEAN_NAME;
   }
+
+  public int getFailedLoginCount() {
+    int failedCount = 0;
+    for (Iterator iterator = managers.iterator(); iterator.hasNext();) {
+      ConnectionManagerMBean cnxManager = (ConnectionManagerMBean) iterator.next();
+      failedCount += cnxManager.getFailedLoginCount();
+    }
+    return failedCount;
+  }
+
+  public int getInitiatedConnectionCount() {
+    int initCount = 0;
+    for (Iterator iterator = managers.iterator(); iterator.hasNext();) {
+      ConnectionManagerMBean cnxManager = (ConnectionManagerMBean) iterator.next();
+      initCount += cnxManager.getInitiatedConnectionCount();
+    }
+    return initCount;
+  }
 }

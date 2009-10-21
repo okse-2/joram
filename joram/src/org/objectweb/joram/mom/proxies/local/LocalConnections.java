@@ -40,7 +40,14 @@ public class LocalConnections implements LocalConnectionsMBean {
   /** Lists the opened local connections. */
   private List connections = new ArrayList();
 
+  /** If true, creation of new connections is available. */
   private boolean activated = true;
+
+  /** Number of failed login attempts. */
+  private int failedLoginCount;
+
+  /** Number of local connections initiated since agent server start. */
+  private int initiatedConnectionCount;
 
   public void activate() {
     activated = true;
@@ -84,6 +91,22 @@ public class LocalConnections implements LocalConnectionsMBean {
 
   public String getMBeanName() {
     return MBEAN_NAME;
+  }
+
+  public int getFailedLoginCount() {
+    return failedLoginCount;
+  }
+
+  public synchronized void increaseFailedLoginCount() {
+    failedLoginCount++;
+  }
+
+  public int getInitiatedConnectionCount() {
+    return initiatedConnectionCount;
+  }
+
+  public synchronized void increaseInitiatedConnectionCount() {
+    initiatedConnectionCount++;
   }
 
 }
