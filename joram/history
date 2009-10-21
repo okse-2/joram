@@ -1,4 +1,9 @@
 +==============================================================================
+| 2009/10/21 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Extended JMX monitoring for connections: show the number of connections
+created since server start and show the number of failed connection creations.
++==============================================================================
 | 2009/10/19 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Removes JMXRIHttpService class, no longer used, depends of JMXRITools.jar.
