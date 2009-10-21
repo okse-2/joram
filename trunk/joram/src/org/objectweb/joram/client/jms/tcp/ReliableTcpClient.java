@@ -45,7 +45,6 @@ import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Configuration;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.SocketFactory;
@@ -233,10 +232,9 @@ public class ReliableTcpClient {
 
         // If timer is over, throwing an IllegalStateException:
         long attemptsT = (System.currentTimeMillis() - startTime) / 1000;
-        IllegalStateException jmsExc =
-          new IllegalStateException("Could not connect to JMS server with " + addresses
-                                    + " after " + attemptsC + " attempts during "
-                                    + attemptsT + " secs: server is not listening" );
+        IllegalStateException jmsExc = new IllegalStateException("Could not connect to JMS server with "
+            + addresses + " after " + attemptsC + " attempts during " + attemptsT
+            + " secs: server is not listening or server protocol version is not compatible with client.");
         throw jmsExc;
       }
     }
