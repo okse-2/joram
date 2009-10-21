@@ -76,9 +76,12 @@ public class LocalRequestChannel implements RequestChannel, LocalRequestChannelM
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "LocalConnection.connect()");
 
-    if (!LocalConnections.getCurrentInstance().isActivated()) {
+    LocalConnections localConnections = LocalConnections.getCurrentInstance();
+    if (!localConnections.isActivated()) {
       throw new IllegalStateException("Local connections have been deactivated.");
     }
+
+    localConnections.increaseInitiatedConnectionCount();
 
     if (AgentServer.getStatus() != AgentServer.Status.STARTED) {
       if ((AgentServer.getStatus() != AgentServer.Status.INITIALIZED) &&
@@ -86,13 +89,13 @@ public class LocalRequestChannel implements RequestChannel, LocalRequestChannelM
         if (logger.isLoggable(BasicLevel.ERROR))
           logger.log(BasicLevel.ERROR,
                      "LocalConnection.connect(), server is not initialized: " + AgentServer.getStatusInfo() + '.');
-
-        throw new Exception();
+        throw new Exception("Server is not initialized.");
       }
 
       if (logger.isLoggable(BasicLevel.WARN))
         logger.log(BasicLevel.WARN,
                    "LocalConnection.connect(), server is not started: " + AgentServer.getStatusInfo() + '.');
+      throw new Exception("Server is not started.");
     }
 
     GetProxyIdNot gpin = new GetProxyIdNot(identity, null);
@@ -102,6 +105,7 @@ public class LocalRequestChannel implements RequestChannel, LocalRequestChannelM
     } catch (Exception exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "", exc);
+      localConnections.increaseFailedLoginCount();
       throw new JMSException(exc.getMessage());
     }
 
@@ -118,7 +122,7 @@ public class LocalRequestChannel implements RequestChannel, LocalRequestChannelM
       throw jmse;
     }
 
-    LocalConnections.getCurrentInstance().addLocalConnection(this);
+    localConnections.addLocalConnection(this);
     try {
       MXWrapper.registerMBean(this, "Joram#" + AgentServer.getServerId(), getMBeanName());
     } catch (Exception e) {
