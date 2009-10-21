@@ -115,7 +115,7 @@ public class TcpConnectionListener extends Daemon {
     super("TcpConnectionListener");
     this.proxyService = proxyService;
     this.timeout = timeout;
-    this.verifyClockSynchro = Configuration.getBoolean("VERIFY_CLOCK_SYNCHRO");
+    this.verifyClockSynchro = Configuration.getBoolean(VERIFY_CLOCK_SYNCHRO);
   }
 
   public void run() {
