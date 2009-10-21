@@ -188,8 +188,13 @@ public class Queue implements Serializable {
     if (consumers.size() > 0) {
       if (toDeliver.size() > 0) {
         toDeliver.add(msg);
-        if (durable && !recover)
+        if (durable) {
+          if (recover) {
+            toAck.remove(msg);
+            deleteMessage(msg.queueMsgId);
+          }
           saveMessage(msg);
+        }
         return;
       }
       Iterator<Entry<SubscriptionKey, Subscription>> iterEntries = consumers.entrySet().iterator();
@@ -215,8 +220,13 @@ public class Queue implements Serializable {
         throw new NoConsumersException("No consumer available for immediate publication.");
       } else {
         toDeliver.add(msg);
-        if (durable && !recover)
+        if (durable) {
+          if (recover) {
+            toAck.remove(msg);
+            deleteMessage(msg.queueMsgId);
+          }
           saveMessage(msg);
+        }
       }
     }
   }
