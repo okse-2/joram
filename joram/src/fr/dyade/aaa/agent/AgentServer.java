@@ -27,7 +27,6 @@ package fr.dyade.aaa.agent;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Enumeration;
@@ -248,7 +247,7 @@ public final class AgentServer {
    * 
    * @see fr.dyade.aaa.common.MonitoringTimerTask
    */
-  public final static String MONITORING_RESULT_PATH_PROPERTY = "fr.dyade.aaa.agent.MONITORING_CONFIG_PATH";
+  public final static String MONITORING_RESULT_PATH_PROPERTY = "fr.dyade.aaa.agent.MONITORING_RESULT_PATH";
   /**
    *  Default value for the pathname of the pathname of the results file for the
    * monitoring task in the server, value is <code>monitoringStats.csv</code>.
