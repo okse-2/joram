@@ -696,13 +696,13 @@ public class Proxy implements DeliveryListener {
       logger.log(BasicLevel.DEBUG, "Proxy.connectionClose()");
 
     // Close each remaining channel
-    Set<Integer> channelsIds = channelContexts.keySet();
-    for (Iterator<Integer> iterator = channelsIds.iterator(); iterator.hasNext();) {
+    Integer[] channelsIds = channelContexts.keySet().toArray(new Integer[channelContexts.size()]);
+    for (int i = 0; i < channelsIds.length; i++) {
       try {
-        channelClose(iterator.next().intValue());
+        channelClose(channelsIds[i].intValue());
       } catch (AMQPException exc) {
-        // TODO Auto-generated catch block
-        exc.printStackTrace();
+        if (logger.isLoggable(BasicLevel.WARN))
+          logger.log(BasicLevel.WARN, "Error while cleaning channel " + channelsIds[i], exc);
       }
     }
 
@@ -717,9 +717,9 @@ public class Proxy implements DeliveryListener {
         } else {
           queueDelete(new AMQP.Queue.Delete(0, queue.getName(), false, false, true));
         }
-      } catch (Exception exc) {
-        // TODO Auto-generated catch block
-        exc.printStackTrace();
+      } catch (AMQPException exc) {
+        if (logger.isLoggable(BasicLevel.WARN))
+          logger.log(BasicLevel.WARN, "Error while cleaning exclusive queue " + queue, exc);
       }
     }
 
