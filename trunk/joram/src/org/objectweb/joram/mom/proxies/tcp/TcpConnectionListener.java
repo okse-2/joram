@@ -41,7 +41,6 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Configuration;
 import fr.dyade.aaa.common.Daemon;
 import fr.dyade.aaa.common.Debug;
@@ -88,6 +87,23 @@ public class TcpConnectionListener extends Daemon {
    * in <code>a3servers.xml</code> configuration file. By default the value is false.
    */
   private final boolean verifyClockSynchro;
+
+  /**
+   * Number of times this connection listener has encountered an erroneous
+   * authentication.
+   */
+  private int failedLoginCount;
+
+  /**
+   * Number of connections started with this connection listener.
+   */
+  private int connectionCount;
+
+  /**
+   * Number of times this connection listener has encountered an erroneous magic
+   * number or protocol version.
+   */
+  private int protocolErrorCount;
 
   /**
    * Creates a new connection listener
@@ -161,6 +177,8 @@ public class TcpConnectionListener extends Daemon {
     Socket sock = proxyService.getServerSocket().accept();
     String inaddr = sock.getInetAddress().getHostAddress();
 
+    connectionCount++;
+
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, " -> accept connection from " + inaddr);
 
@@ -176,12 +194,16 @@ public class TcpConnectionListener extends Daemon {
 
       byte[] magic = StreamUtil.readByteArrayFrom(is, 8);
       for (int i=0; i<5; i++) {
-        if (magic[i] != MetaData.joramMagic[i])
-          throw new IllegalAccessException("Bad magic number:" +
-                                           new String(magic, 0, 5) + magic[5] + '.' + magic[6] + '/' + magic[7]);
+        if (magic[i] != MetaData.joramMagic[i]) {
+          protocolErrorCount++;
+          throw new IllegalAccessException("Bad magic number:" + new String(magic, 0, 5) + magic[5] + '.'
+              + magic[6] + '/' + magic[7]);
+        }
       }
-      if (magic[7] != MetaData.joramMagic[7])
+      if (magic[7] != MetaData.joramMagic[7]) {
+        protocolErrorCount++;
         throw new IllegalAccessException("Bad protocol version number");
+      }
       
       if (verifyClockSynchro) {
         long dt = Math.abs(StreamUtil.readLongFrom(is) - System.currentTimeMillis());
@@ -213,6 +235,7 @@ public class TcpConnectionListener extends Daemon {
       } catch (Exception exc) {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, "", exc);
+        failedLoginCount++;
         StreamUtil.writeTo(1, nos);
         StreamUtil.writeTo(exc.getMessage(), nos);
         nos.send();
@@ -278,5 +301,17 @@ public class TcpConnectionListener extends Daemon {
 
   protected void close() {
     proxyService.resetServerSocket();
+  }
+
+  public int getFailedLoginCount() {
+    return failedLoginCount;
+  }
+
+  public int getInitiatedConnectionCount() {
+    return connectionCount;
+  }
+
+  public int getProtocolErrorCount() {
+    return protocolErrorCount;
   }
 }

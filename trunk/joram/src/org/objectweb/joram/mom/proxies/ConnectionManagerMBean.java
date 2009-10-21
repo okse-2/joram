@@ -61,4 +61,18 @@ public interface ConnectionManagerMBean {
    */
   public String getMBeanName();
 
+  /**
+   * Gets the number of connections rejected due to a failed authentication.
+   * 
+   * @return the number of connections rejected due to a failed authentication.
+   */
+  public int getFailedLoginCount();
+
+  /**
+   * Gets the number of initiated connections since server start.
+   * 
+   * @return the number of initiated connection.
+   */
+  public int getInitiatedConnectionCount();
+
 }
