@@ -29,6 +29,10 @@
       </ul>
 			</s2>
 			
+			<s2 name="Joram Tutorials">
+      <p>A growing set of <a href="tutorials.html">tutorials</a> are now available.</p>
+			</s2>
+			
       <s2 name="API documentation">
       <ul>
         <li>Browsing the user <a href="../current/javadoc/">Joram 5.2 javadoc</a>.</li>
@@ -37,7 +41,7 @@
       </ul>
       </s2>
     </s1>
-			
+
     <s1 name="Other documentation">
       <s2 name="JORAM show">
       <p>The latest JORAM slides show, presented at the Objectweb conference
