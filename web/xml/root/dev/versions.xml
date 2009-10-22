@@ -12,6 +12,43 @@
 
   <body>
   
+    <s1 name="JORAM release 5.2.6 (October 23, 2009)">
+      <p>Joram 5.2.6 is available in the SVN repository with tag JORAM_5_2_6.</p>
+      <s2 name="New features and improvements">
+      <ul>
+        <li>1st implementation of optimized transaction component: NGTransaction.</li>
+        <li>Implements a pool of connections through a dedicated ConnectionFactory.</li>
+        <li>Adds an interception mechanism in connection and session components.</li>
+        <li>Administration and monitoring enhancements:<ul>
+          <li>Extended JMX monitoring for connections: show the number of connections
+ 					created since server start and show the number of failed connection creations.</li>
+          <li>Adds a MonitoringTimerTask to the AgentServer class allowing the periodic
+					monitoring of the server's attributes</li>
+          <li>Adds JMX control of monitored attributes in MonitoringTopic, allows to view,
+					add and remove attributes.</li>
+					<li>Removes JMXRIHttpService class, no longer used, depends of JMXRITools.jar.</li>
+					<li>Removes unused jars in ship/lib: jndi, jmxri, jmxtools.</li>
+        </ul></li>
+        <li>Optional verification of clock synchronization between client and server at connection
+				time. THis mechanism will be activated by default in 5.3 release.</li>
+				<li>Update common.xml to compile Joram with JDK1.5.</li>
+      </ul>
+      </s2>
+      <s2 name="Bug fixes">
+      <ul>
+        <li>Avoid concurrent connections in AdminModule static administration component (AdminModule).</li>
+        <li>Bug fix in Joram administration: setting the time-out to abort request now
+				works (either through setter method or environment property).</li>
+        <li>Bug fix in Scheduler: no longer use recursion to serialize the ScheduleItem
+				list (It can produce stack overflow with big number of items).</li>
+        <li>Potential bug fix in Engine: no longer set NbMaxAgents to Integer.MAX_VALUE with
+				NullTransaction component. This number is incremented with the number of fixed
+				agents and becomes negative, then it produces strange behavior in the garbage..</li>
+        <li>Avoid to deserialize two times the AdminMessage.</li>
+      </ul>
+      </s2>
+    </s1>
+  
     <s1 name="JORAM release 5.2.5 (September 21, 2009)">
       <p>Joram 5.2.5 is available in the SVN repository with tag JORAM_5_2_5.</p>
       <s2 name="New features and improvements">
@@ -21,7 +58,6 @@
           <li>Extends the Transaction interface and extracts a generic common part to all transactions
           implementation: class AbstractTransaction,</li>
           <li>Shares Operation and OperationKey classes,</li>
-          <li>1st implementation of optimized transaction component: NGTransaction,</li>
           <li>Improves Joram's messages storage, uses Transaction.Create operations and avoid copy for the body.</li>
         </ul>
         </li>

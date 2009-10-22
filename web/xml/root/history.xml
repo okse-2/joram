@@ -12,6 +12,23 @@
 
   <body>
     <s1 name="JORAM History">
+      <s2 name="October 23, 2009: JORAM 5.2.6 is released">
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
+      <p>It introduces some improvements and bug fixes, essentially:</p>
+      <ul>
+        <li>Pool of connections through a dedicated ConnectionFactory.</li>
+        <li>Interceptors mechanism in connection and session components.</li>
+        <li>JMX monitoring extensions:<ul>
+        <li>statistics about connection errors,</li>
+        <li>Mbeans for MonitoringTimerTask and MonitoringTopic.</li>
+        </ul></li>
+        <li>Optional verification of clock synchronization.</li>
+        <li>NGTransaction component,</li>
+      </ul>
+      <p>It is tagged in SVN (JORAM_5_2_6), the complete list of changes can be viewed either in
+      <a href="dev/versions.html">code updates</a> or in
+      <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/trunk/joram/history">SVN history</a>.</p>
+      </s2>
     
 	    <s2 name="December 2nd and 3rd, 2009: JORAM Training Session, Grenoble, France">
 	      <p>A two-day training session about JORAM is scheduled in Grenoble; it will be delivered in french language.</p>
@@ -25,6 +42,15 @@
 	      best practices that will enable to take advantage of its advanced properties for complex networked environments.</p>
 	      <p>Detailed information about this training session is available online
 	      <a href="http://www.scalagent.com/pages/fr/datasheet/091202-JORAM-formation.pdf ">(PDF, in french only)</a></p>
+      </s2>
+       
+      <s2 name="October 16, 2009: Joram Snapshot are now available">
+      <p>The latest development snapshots are now available from
+      <a href="http://bamboo.ow2.org/download/JORAM-ANT/artifacts/latest/Releases">Continuous Integration Build Tool</a>.
+      This will be built automatically from the current development code after each change in the SVN code base.</p>
+      <p>If you need quickly a fix for a particular bug, you may be able to find a fixed Joram release here well
+      before the fix makes it into the next release version. On the other hand, these snapshots might sometimes
+      be unstable.</p>
       </s2>
     
       <s2 name="September 21, 2009: JORAM 5.2.5 is released">
