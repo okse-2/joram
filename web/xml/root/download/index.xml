@@ -61,7 +61,8 @@
 	    <strong>joram</strong>,  <strong>xoram</strong> or <strong>kjoram</strong> modules. The <strong>tests</strong>
 	    module contains the tests for all the components of Joram.</p>
 
-      <p>The latest stable release tag is <strong>JORAM_5_1_0</strong>. For getting the current development release
+      <p>The latest stable release tag and the description of all Joram's versions can be found in
+      <a href="../dev/versions.html">Code updates</a>. For getting the current development release
       (potentially unstable), check out joram with no tag.</p>
       
       <p>Snapshots of the SVN code base are generated each day at 00:00 AM CEST, they are available at:</p>
