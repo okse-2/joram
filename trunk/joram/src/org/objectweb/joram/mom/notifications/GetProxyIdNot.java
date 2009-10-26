@@ -25,7 +25,8 @@ package org.objectweb.joram.mom.notifications;
 
 import org.objectweb.joram.shared.security.Identity;
 
-import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.SyncNotification;
 
 /**
  * Transient notification
@@ -67,7 +68,7 @@ public class GetProxyIdNot extends SyncNotification {
    */
   public StringBuffer toString(StringBuffer output) {
     output.append('(');
-    output.append(super.toString());
+    super.toString(output);
     output.append(",identity=").append(identity);
     output.append(",inaddr=").append(inaddr);
     output.append(')');
