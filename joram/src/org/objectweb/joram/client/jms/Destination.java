@@ -82,7 +82,12 @@ public abstract class Destination extends AdministeredObject implements javax.jm
 
   public static Logger logger = Debug.getLogger(Destination.class.getName());
 
-  /** Identifier of the agent destination. */
+  /**
+   * Identifier of the agent destination.
+   * 
+   * Be careful when using directly this attribute, it is null in clustered
+   * destination even the getDestination method is called.
+   */
   protected String agentId;
 
   /** Name given by the administrator. */
@@ -160,7 +165,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * @exception InvalidDestinationException if the destination identifier is invalid.
    */
   public void check() throws InvalidDestinationException {
-    checkId(agentId);
+    checkId(getName());
   }
   
   /**
@@ -895,7 +900,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * @see org.objectweb.joram.client.jms.DestinationMBean#getStatistics()
    */
   public Hashtable getStatistics() throws ConnectException, AdminException {
-    Monitor_GetStat request = new Monitor_GetStat(agentId);
+    Monitor_GetStat request = new Monitor_GetStat(getName());
     Monitor_GetStatRep reply = (Monitor_GetStatRep) doRequest(request);
     return  reply.getStats();
   }
