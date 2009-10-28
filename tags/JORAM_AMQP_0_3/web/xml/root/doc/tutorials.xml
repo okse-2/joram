@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="joram-team@ow2.org">JORAM team</author>
+    <title>Documentation</title>
+    <filename>index.xml</filename>
+    <pathtoroot>..</pathtoroot>
+  </properties>
+
+  <body>
+
+    <s1 name="JORAM tutorials">
+      <s2 name="Samples">
+    
+      <p>Tutorials about the samples included in the Joram distribution:</p>
+      <ul>
+        <li><a href="tutorials/classic/classic.htm">Classic</a> sample: this example
+        simply demonstrates sending and receiving messages either on queues or topics.</li>
+        <li><a href="tutorials/clusterq/clusterQ.htm">Clustered queue</a> sample: this
+        example shows the use of clustered queues either for load-balancing or availability.</li>
+      </ul>
+			</s2>
+			
+      <s2 name="JMX Administration">
+      <p>Tutorials about the JMX administration:</p>
+      <ul>
+        <li><a href="tutorials/adminjmx/adminjmx.htm">1st steps</a>.</li>
+      </ul>
+      </s2>
+    </s1>
+  </body>
+
+</document> 

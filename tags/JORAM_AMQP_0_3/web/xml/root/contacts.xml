@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<!DOCTYPE document SYSTEM '../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="joram-team@ow2.org">JORAM team</author>
+    <title>Mailing lists</title>
+    <filename>mailing.xml</filename>
+    <pathtoroot>.</pathtoroot>
+  </properties>
+
+  <body>
+
+    <s1 name="Contacts">
+
+    <subtitle>JORAM community</subtitle>
+    <p>The JORAM community is reachable through the
+    <a href="mailto:joram@ow2.org">joram@ow2.org</a> forum.</p>
+    
+    <p>For joining this community, you may
+    <a href="http://mail.ow2.org/wws/arc/joram">subscribe</a>.</p>
+
+    <p>For getting in touch with the JORAM development team only, send a
+    mail to the <a href="mailto:joram-team@ow2.org">joram-team@ow2.org</a>
+    address (this address is not meant to get support requests).</p>
+
+    <subtitle>JOnAS community</subtitle>
+    <p>The JOnAS community includes skilled people using JORAM/JMS within
+    the JOnAS application server. It is reachable through the
+    <a href="mailto:jonas@ow2.org">jonas@ow2.org</a> forum.</p>
+    
+    </s1>
+
+  </body>
+
+</document>
