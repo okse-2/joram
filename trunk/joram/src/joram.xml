@@ -596,17 +596,46 @@
     </jar>
   </target>
 
-  <target name="ship.osgi" depends="build.osgi" description="--> Creates a Joram OSGi shipment.">
+  <target name="ship.osgi" depends="build.osgi"
+  	description="--> Creates a Joram OSGi shipment.">
     <mkdir dir="${ship.dir}" />
     <mkdir dir="${ship.dir}/lib" />
-    <copy file="${build.dir}/joram-common-util-bundle.jar" todir="${ship.dir}/lib"/>
-    <copy file="${build.dir}/joram-rt-bundle.jar" todir="${ship.dir}/lib"/>
-    <copy file="${build.dir}/joram-jndi-bundle.jar" todir="${ship.dir}/lib"/>
-    <copy file="${build.dir}/joram-mom-bundle.jar" todir="${ship.dir}/lib"/>
-    <copy file="${build.dir}/joram-mail-bundle.jar" todir="${ship.dir}/lib"/>
-    <copy file="${build.dir}/joram-ftp-bundle.jar" todir="${ship.dir}/lib"/>
-    <copy file="${build.dir}/joram-client-bundle.jar" todir="${ship.dir}/lib"/>
-    <copy file="${build.dir}/joram-shared-bundle.jar" todir="${ship.dir}/lib"/>
+  
+    <copy file="${lib.dir}/activation.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/JCup.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/jms.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/jta.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/mail.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/ow_monolog.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/soap.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/soap.war" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/connector-1_5.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/jgroups-all.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/commons-logging-api.jar" todir="${ship.dir}/lib"/>
+    <!-- copy file="${lib.dir}/kxml.jar" todir="${ship.dir}/lib"/ -->
+    <!-- copy file="${lib.dir}/hsqldb.jar" todir="${ship.dir}/lib"/ -->
+    <!-- copy file="${lib.dir}/derby.jar" todir="${ship.dir}/lib"/ -->
+  	
+    <copy file="${build.dir}/joram-common-util.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-rt.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-jndi.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-mom.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-mail.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-ftp.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-client.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-shared.jar" todir="${ship.dir}/lib"/>
+
+  	<mkdir dir="${ship.dir}/licenses"/>
+    <copy todir="${ship.dir}/licenses" flatten="yes">
+      <fileset dir="${licenses.dir}">
+        <include name="APACHE_LICENSE.TXT"/>
+        <include name="CUP_LICENSE.TXT"/>
+        <include name="LGPL_HEADER.TXT"/>
+        <include name="LGPL_LICENSE.TXT"/>
+        <include name="NOTICE.TXT"/>
+      </fileset>
+    </copy>
+
   </target>
 
   
