@@ -3,7 +3,7 @@
   <groupId>org.ow2.joram</groupId>
   <artifactId>mom.amqp</artifactId>
   <name>JORAM</name>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.3</version>
   <url>http://joram.ow2.org/</url>
   <organization>
     <name>Scalagent D.T.</name>
@@ -53,7 +53,7 @@
     <dependency>
       <groupId>org.objectweb.joram</groupId>
       <artifactId>joram-mom</artifactId>
-      <version>SNAPSHOT</version>
+      <version>5.2.6</version>
     </dependency>
   </dependencies>
 </project>
