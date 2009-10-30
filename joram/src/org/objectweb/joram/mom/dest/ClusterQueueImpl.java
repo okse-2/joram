@@ -54,7 +54,7 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.UnknownNotificationException;
 
 /**
- * The <code>ClusterQueueImpl</code> class implements the MOM queue behaviour,
+ * The <code>ClusterQueueImpl</code> class implements the MOM queue behavior,
  * basically storing messages and delivering them upon clients requests or
  * delivering to an other cluster queue.
  */
