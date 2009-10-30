@@ -38,7 +38,8 @@
     <antcall target="tests.xa"/>
     <antcall target="tests.bridge"/>
     <antcall target="tests.schedqueue"/>
-    <antcall target="tests.cluster"/>
+    <antcall target="tests.clusterTopic"/>
+    <antcall target="tests.clusterQueue"/>
     <antcall target="tests.hierarchical"/>
     <antcall target="tests.ssl"/>
     <antcall target="tests.jca"/>
@@ -336,15 +337,21 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="schedqueue.test4"/>
   </target>
 
-  <target name="tests.cluster"
-          description=" --> launch all cluster tests">
-    <antcall target="cluster.test1"/>
-    <antcall target="cluster.test2"/>
+  <target name="tests.clusterTopic"
+          description=" --> launch all cluster topic tests">
+    <antcall target="cluster.testT1"/>
+    <antcall target="cluster.testT2"/>
+    </target>
+
+    <target name="tests.clusterQueue"
+            description=" --> launch all cluster queue tests">
     <antcall target="cluster.testQ1"/>
     <antcall target="cluster.testQ2"/>
     <antcall target="cluster.testQ3"/>
     <antcall target="cluster.testQ4"/>
     <antcall target="cluster.testQ5"/>
+    <antcall target="cluster.testQ6"/>
+    <antcall target="cluster.testQ7"/>
   </target>
 
   <target name="tests.hierarchical"
@@ -3990,25 +3997,26 @@ description=" --> launch all exceptionlistener tests">
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
-
   <!-- end scheduler test -->
 
 
   <!-- test cluster -->
-  <target name="cluster.test1" depends="init.a3props,compile"
+  <target name="cluster.testT1" depends="init.a3props,compile"
           description=" -->  test topic cluster send and receive message">
     <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.cluster.Test1"/>
+      <param name="className" value="joram.cluster.TestT1"/>
+      <param name="testid" value="cluster.testT1"/>
       <param name="jndiconf" value="cluster/jndi.properties"/>
       <param name="a3conf" value="cluster/a3servers.xml"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
 
-  <target name="cluster.test2" depends="init.a3props,compile"
+  <target name="cluster.testT2" depends="init.a3props,compile"
           description=" -->  Test : can't cluster an already clustered topic">
     <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.cluster.Test2"/>
+      <param name="className" value="joram.cluster.TestT2"/>
+      <param name="testid" value="cluster.testT2"/>
       <param name="jndiconf" value="cluster/jndi.properties"/>
       <param name="a3conf" value="cluster/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -4016,7 +4024,7 @@ description=" --> launch all exceptionlistener tests">
   </target>
 
   <target name="cluster.testQ1" depends="init.a3props,compile"
-          description=" --> test simple cluster queue with producer on receiver on the same queue">
+          description=" --> Test local receiving if producer and consumer">
     <antcall target="test.run" inheritAll="true">
       <param name="testid" value="cluster.testQ1"/>
       <param name="className" value="joram.cluster.TestQ1"/>
@@ -4027,7 +4035,7 @@ description=" --> launch all exceptionlistener tests">
   </target>
 
   <target name="cluster.testQ2" depends="init.a3props,compile"
-          description=" --> producer on queue 2, receiver on queue 0 and 1, check two receiver receive messages">
+          description=" --> Test message forwarding when no consumer">
     <antcall target="test.run" inheritAll="true">
       <param name="testid" value="cluster.testQ2"/>
       <param name="className" value="joram.cluster.TestQ2"/>
@@ -4038,7 +4046,7 @@ description=" --> launch all exceptionlistener tests">
   </target>
 
   <target name="cluster.testQ3" depends="init.a3props,compile"
-          description=" -->  fix big period and check no recieve any message ">
+          description=" --> Test request forwarding when no producer">
     <antcall target="test.run" inheritAll="true">
       <param name="testid" value="cluster.testQ3"/>
       <param name="className" value="joram.cluster.TestQ3"/>
@@ -4059,7 +4067,6 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 
-
   <target name="cluster.testQ5" depends="init.a3props,compile"
           description=" --> check consumThreshold property ">
     <antcall target="test.run" inheritAll="true">
@@ -4067,6 +4074,29 @@ description=" --> launch all exceptionlistener tests">
       <param name="className" value="joram.cluster.TestQ5"/>
       <param name="jndiconf" value="cluster/jndi.properties"/>
       <param name="a3conf" value="cluster/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
+
+  <target name="cluster.testQ6" depends="init.a3props,compile"
+          description=" --> check ClusterDestination and ClusterConnectionFactory objects">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="cluster.testQ6"/>
+      <param name="className" value="joram.cluster.TestQ6"/>
+      <param name="jndiconf" value="cluster/jndi.properties"/>
+      <param name="a3conf" value="cluster/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
+
+  <target name="cluster.testQ7" depends="init.a3props,compile"
+          description=" --> check XML scripts for clusters">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="cluster.testQ7"/>
+      <param name="className" value="joram.cluster.TestQ7"/>
+      <param name="jndiconf" value="cluster/jndi.properties"/>
+      <param name="a3conf" value="cluster/a3servers.xml"/>
+    	<param name="joramAdmin" value="cluster/joramAdmin.xml"/>
       <param name="jvmargs" value=""/>
     </antcall>
   </target>

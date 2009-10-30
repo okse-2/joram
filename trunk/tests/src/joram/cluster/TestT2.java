@@ -30,31 +30,27 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
 import framework.TestCase;
 
 /**
- * Test : can't cluster an already clustered topic
- * 
+ * Test: can't cluster an already clustered topic
  */
-public class Test2 extends TestCase {
+public class TestT2 extends TestCase {
 
   public static void main(String[] args) {
-    new Test2().run();
+    new TestT2().run();
   }
 
   public void run() {
     try {
-      System.out.println("server start");
       startAgentServer((short) 0);
       startAgentServer((short) 1);
       startAgentServer((short) 2);
       startAgentServer((short) 3);
 
       admin();
-      System.out.println("admin config ok");
 
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);
     } finally {
-      System.out.println("Server stop ");
       stopAgentServer((short) 0);
       stopAgentServer((short) 1);
       stopAgentServer((short) 2);
@@ -64,7 +60,7 @@ public class Test2 extends TestCase {
   }
 
   public void admin() throws Exception {
-    // conexion
+    // connection
     AdminModule.connect("root", "root", 60);
 
     Topic top0 = Topic.create(0);
