@@ -43,7 +43,6 @@ public class DeadMQueue extends Queue {
     
     dest.agentId = agentId;
     dest.adminName = name;
-    dest.type = QUEUE_TYPE;
 
     return dest;
   }
@@ -106,7 +105,7 @@ public class DeadMQueue extends Queue {
   public DeadMQueue() {}
   
   public DeadMQueue(String name) {
-    super(name, QUEUE_TYPE);
+    super(name);
   }
 
   public String toString() {

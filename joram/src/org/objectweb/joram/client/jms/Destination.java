@@ -42,7 +42,6 @@ import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.AdminWrapper;
 import org.objectweb.joram.client.jms.admin.AdministeredObject;
-import org.objectweb.joram.client.jms.admin.DeadMQueue;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.admin.XmlSerializer;
 import org.objectweb.joram.shared.DestinationConstants;
@@ -89,9 +88,38 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * destination even the getDestination method is called.
    */
   protected String agentId;
+  /**
+   * Returns the internal name of the destination.
+   * This unique name is chosen internally by the MOM.
+   * 
+   * @return the internal name of the destination.
+   */
+  public String getName() {
+    return agentId;
+  }
 
-  /** Name given by the administrator. */
-  protected String adminName;
+  /**
+   * Check the destination identifier.
+   * 
+   * @exception InvalidDestinationException if the destination identifier is invalid.
+   */
+  public void check() throws InvalidDestinationException {
+    checkId(getName());
+  }
+  
+  /**
+   * Check the specified destination identifier.
+   * 
+   * @exception InvalidDestinationException if an invalid destination identifier is specified.
+   */
+  public static void checkId(String id)  throws InvalidDestinationException {
+    if (id == null)
+      throw new InvalidDestinationException("Undefined (null) destination identifier.");
+    
+    if (id.matches("#\\d+\\.\\d+\\.\\d+")) return;
+    
+    throw new InvalidDestinationException("Bad destination identifier:" + id);
+  }
 
   /**
    * Constant defining the type of a topic destination.
@@ -118,29 +146,17 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * Type of the destination: Queue or Topic, Temporary or not.
    * @see #getType()
    */
-  protected byte type;
-
-  // Used by jndi2 SoapObjectHelper
-  public Destination() {}
-
-  protected Destination(byte type) {
-    this.type = type;
-  }
-
-  protected Destination(String id, byte type) {
-    agentId = id;
-    this.type = type;
-  }
+  private byte type;
 
   /**
-   * Returns the internal name of the destination.
-   * This unique name is chosen internally by the MOM.
-   * 
-   * @return the internal name of the destination.
+   * Returns the type of the destination: queue or topic, temporary or not.
    */
-  public String getName() {
-    return agentId;
+  public byte getType() {
+    return type;
   }
+
+  /** Name given by the administrator. */
+  protected String adminName;
 
   /**
    * Returns the symbolic administration name of the destination.
@@ -152,36 +168,17 @@ public abstract class Destination extends AdministeredObject implements javax.jm
     return adminName;
   }
 
-  /**
-   * Returns the type of the destination: queue or topic, temporary or not.
-   */
-  protected final byte getType() {
-    return type;
+  public Destination() {}
+
+  protected Destination(byte type) {
+    this.type = type;
   }
 
-  /**
-   * Check the destination identifier.
-   * 
-   * @exception InvalidDestinationException if the destination identifier is invalid.
-   */
-  public void check() throws InvalidDestinationException {
-    checkId(getName());
+  protected Destination(String id, byte type) {
+    agentId = id;
+    this.type = type;
   }
-  
-  /**
-   * Check the specified destination identifier.
-   * 
-   * @exception InvalidDestinationException if an invalid destination identifier is specified.
-   */
-  public static void checkId(String id)  throws InvalidDestinationException {
-    if (id == null)
-      throw new InvalidDestinationException("Undefined (null) destination identifier.");
-    
-    if (id.matches("#\\d+\\.\\d+\\.\\d+")) return;
-    
-    throw new InvalidDestinationException("Bad destination identifier:" + id);
-  }
-  
+
   /**
    * Returns <code>true</code> if the parameter object is a Joram destination
    * wrapping the same agent identifier.

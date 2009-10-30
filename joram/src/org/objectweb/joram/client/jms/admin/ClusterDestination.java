@@ -140,6 +140,13 @@ public class ClusterDestination extends Destination {
   public String getName() {
     return getDestination().getName();
   }
+  
+  /**
+   * Returns the type of the destination: queue or topic, temporary or not.
+   */
+  public byte getType() {
+    return getDestination().getType();
+  }
 
   public void setReader(User user) throws ConnectException, AdminException {
     for (Enumeration dests = cluster.elements(); dests.hasMoreElements();) {
