@@ -1,4 +1,17 @@
 +==============================================================================
+| 2009/10/30 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+Fix a potential issue using clustered destination:
+ - no longer access directly type attribute (now private attribute of the
+ Destination class).
+ - implements getType method in ClusterDestination allowing a correct value of
+ destination type in message after sending.
++==============================================================================
+| 2009/10/26 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: the destination identifier checking generates an exception with
+clustered destination. No longer use directly agentId attribute.
++==============================================================================
 | 2009/10/26 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Fix infinite recursion in GetProxyIdNot.toString(StringBuffer) method.
