@@ -132,11 +132,12 @@ public class Queue extends Destination implements BagSerializer {
 //      else if (not instanceof DestinationAdminRequestNot)
 //        ((QueueImpl)destImpl).destinationAdminRequestNot(from, (DestinationAdminRequestNot) not);
       else if (not instanceof WakeUpNot) {
+        setNoSave();
         if (task == null)
           task = new WakeUpTask(getId(), WakeUpNot.class);
         task.schedule(((QueueImpl) destImpl).getPeriod());
         ((QueueImpl)destImpl).wakeUpNot((WakeUpNot) not);
-      }else
+      } else
         super.react(from, not);
 
     } catch (MomException exc) {
