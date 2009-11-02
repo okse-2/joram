@@ -22,13 +22,11 @@
  */
 package joram.connector;
 
-import javax.jms.Destination;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.naming.Context;
 import javax.naming.InitialContext;
-
 
 import org.objectweb.joram.client.connector.ActivationSpecImpl;
 import org.objectweb.joram.client.connector.JoramAdapter;
@@ -51,7 +49,7 @@ public class ConnectorTest1 extends TestCase {
     new ConnectorTest1().run();
   }
 
-  public void run(){  
+  public void run() {
     try{
       colocated = Boolean.getBoolean("colocated");
       System.out.println("colocated=" + colocated);
@@ -60,7 +58,7 @@ public class ConnectorTest1 extends TestCase {
         startAgentServer((short) 0);
       
       JoramAdapter ja= new JoramAdapter() ;
-      ja.setCollocatedServer(colocated);
+      ja.setCollocatedServer(new Boolean(colocated));
       ja.start(new ResourceBootstrapContext(new JWorkManager(1, 5, 5000)));
       
       Thread.sleep(5000);
@@ -83,14 +81,14 @@ public class ConnectorTest1 extends TestCase {
 
       final OutboundSession os =(OutboundSession) oc.createSession(false,0);
 
-      final OutboundProducer prod = (OutboundProducer) os.createProducer((Destination)queue);
-      final OutboundProducer prod1 = (OutboundProducer) os.createProducer((Destination)topic);
-      final OutboundProducer prod2 = (OutboundProducer) os.createProducer((Destination)topic);
-      final OutboundProducer prod3 = (OutboundProducer) os.createProducer((Destination)anotherQueue);
+      final OutboundProducer prod = (OutboundProducer) os.createProducer(queue);
+      final OutboundProducer prod1 = (OutboundProducer) os.createProducer(topic);
+      final OutboundProducer prod2 = (OutboundProducer) os.createProducer(topic);
+      final OutboundProducer prod3 = (OutboundProducer) os.createProducer(anotherQueue);
 
-      OutboundConsumer cons = (OutboundConsumer) os.createConsumer((Destination)queue);
-      OutboundConsumer cons1 = (OutboundConsumer) os.createConsumer((Destination)topic);	
-      OutboundConsumer cons3 = (OutboundConsumer) os.createConsumer((Destination)anotherQueue);  
+      OutboundConsumer cons = (OutboundConsumer) os.createConsumer(queue);
+      OutboundConsumer cons1 = (OutboundConsumer) os.createConsumer(topic);
+      OutboundConsumer cons3 = (OutboundConsumer) os.createConsumer(anotherQueue);
 
       oc.start();
 
@@ -186,7 +184,7 @@ public class ConnectorTest1 extends TestCase {
         }
       }.start();
 
-      Thread.sleep(300000);  // wait onMessage
+      Thread.sleep(10000); // wait onMessage
       assertTrue("counter1=" + counter1 + " should be 101", counter1 == 101);
       assertTrue("counter2=" + counter2 + " should be 101", counter2 == 101);
       assertTrue("counter3=" + counter3 + " should be 101", counter3 == 101 );
@@ -196,8 +194,8 @@ public class ConnectorTest1 extends TestCase {
       exc.printStackTrace();
       error(exc);
     } finally {
-      if (! colocated)
-        stopAgentServerExt((short)0);
+      if (!colocated)
+        stopAgentServer((short) 0);
       endTest();
     }
   }
