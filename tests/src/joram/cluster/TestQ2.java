@@ -54,10 +54,10 @@ public class TestQ2 extends TestQBase {
       startAgentServer((short)2);
 
       Properties prop = new Properties();
-      prop.setProperty("period","10");
+      prop.setProperty("period","1000");
       prop.setProperty("producThreshold","5");
       prop.setProperty("consumThreshold","2");
-      prop.setProperty("autoEvalThreshold","true");
+      prop.setProperty("autoEvalThreshold","false");
       prop.setProperty("waitAfterClusterReq","100");
       admin(prop);
 
