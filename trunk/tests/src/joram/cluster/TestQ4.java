@@ -26,7 +26,6 @@ import java.util.Properties;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
@@ -35,8 +34,6 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
-
-import joram.cluster.TestQ1.MsgListenerCluster;
 
 import org.objectweb.joram.client.jms.Queue;
 
@@ -59,7 +56,7 @@ public class TestQ4 extends TestQBase {
       prop.setProperty("period","60000");
       prop.setProperty("producThreshold","5");
       prop.setProperty("consumThreshold","2");
-      prop.setProperty("autoEvalThreshold","true");
+      prop.setProperty("autoEvalThreshold","false");
       prop.setProperty("waitAfterClusterReq","100");
       admin(prop);
 
