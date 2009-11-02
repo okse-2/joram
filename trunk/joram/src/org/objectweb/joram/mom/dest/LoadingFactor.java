@@ -321,23 +321,20 @@ public class LoadingFactor implements Serializable {
         (producerStatus == ProducerStatus.PRODUCER_NO_ACTIVITY))
       return;
 
-    if (producThreshold < nbOfPendingMessages)
+    if (producThreshold < nbOfPendingMessages) {
       nbMsgGive = nbOfPendingMessages - producThreshold;
-
+      if (nbOfPendingRequests < 1)
+        nbMsgGive = nbOfPendingMessages;
+    }
+    
     if (consumThreshold < nbOfPendingRequests)
-      nbMsgHope = nbOfPendingRequests;
-
-    //      if (nbOfPendingRequests > nbOfPendingMessages)
-    //        nbMsgHope = nbOfPendingRequests - nbOfPendingMessages;
-    //      else
-    //        nbMsgGive = nbOfPendingMessages - nbOfPendingRequests;
+      nbMsgHope = 10 * nbOfPendingRequests;
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
                  "LoadingFactor.dispatchAndSendTo" +
                  "\nnbMsgHope=" + nbMsgHope +
                  ", nbMsgGive=" + nbMsgGive);
-
 
     if (consumerStatus == ConsumerStatus.CONSUMER_HIGH_ACTIVITY)
       processHope(nbMsgHope,clusters);
