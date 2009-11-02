@@ -462,10 +462,13 @@ public class ClusterQueueImpl extends QueueImpl {
    * @param not AckJoinQueueCluster
    */
   public void ackJoinQueueCluster(AckJoinQueueCluster not) {
+    boolean update = false;
     for (Enumeration e = not.clusters.keys(); e.hasMoreElements(); ) {
       AgentId id = (AgentId) e.nextElement();
-      if (! clusters.containsKey(id))
+      if (! clusters.containsKey(id)) {
         clusters.put(id,not.clusters.get(id));
+        update = true;
+      }
     }
     for (Enumeration e = not.clients.keys(); e.hasMoreElements(); ) {
       AgentId user = (AgentId) e.nextElement();
@@ -480,6 +483,15 @@ public class ClusterQueueImpl extends QueueImpl {
     freeReading = freeReading | not.freeReading;
     freeWriting = freeWriting | not.freeWriting;
   
+    if (update) {
+      sendToCluster(
+          new AckJoinQueueCluster(loadingFactor.getRateOfFlow(),
+                                  clusters,
+                                  clients,
+                                  freeReading,
+                                  freeWriting));
+    }
+    
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
                  "--- " + this +
@@ -525,8 +537,9 @@ public class ClusterQueueImpl extends QueueImpl {
     clusters.put(from,new Float(not.getRateOfFlow()));
 
     ClientMessages cm = not.getClientMessages();
-    if (cm != null)
+    if (cm != null) {
       doClientMessages(from, cm);
+    }
   }
 
   /**
