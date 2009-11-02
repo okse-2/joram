@@ -37,7 +37,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 
 /**
- * Test : check consumThreshold property
+ * Test : check use of cluster administered objects.
  */
 public class TestQ6 extends TestQBase {
 

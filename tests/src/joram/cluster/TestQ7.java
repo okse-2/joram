@@ -35,7 +35,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 
 /**
- * Test : check consumThreshold property
+ * Test : check administration through XML script.
  */
 public class TestQ7 extends TestQBase {
 
