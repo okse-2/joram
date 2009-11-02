@@ -56,8 +56,8 @@ public class TestQ5 extends TestQBase {
       prop.setProperty("period","60000");
       prop.setProperty("producThreshold","10");
       prop.setProperty("consumThreshold","1");
-      prop.setProperty("autoEvalThreshold","true");
-      prop.setProperty("waitAfterClusterReq","100");
+      prop.setProperty("autoEvalThreshold","false");
+      prop.setProperty("waitAfterClusterReq","10");
       admin(prop);
 
       Context  ictx = new InitialContext();
