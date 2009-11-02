@@ -26,8 +26,11 @@ package org.objectweb.joram.mom.dest;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import org.objectweb.joram.mom.messages.Message;
 import org.objectweb.joram.mom.notifications.AckJoinQueueCluster;
@@ -75,7 +78,7 @@ public class ClusterQueueImpl extends QueueImpl {
    * key = msgId
    * value = date 
    */
-  private Hashtable timeTable;
+  private LinkedHashMap timeTable;
 
   /**
    * key = msgId value = List (alreadyVisit)
@@ -145,7 +148,7 @@ public class ClusterQueueImpl extends QueueImpl {
                                       consumThreshold,
                                       autoEvalThreshold,
                                       waitAfterClusterReq);
-    timeTable = new Hashtable();
+    timeTable = new LinkedHashMap();
     visitTable = new Hashtable();
     clusterDeliveryCount = 0;
   }
@@ -336,14 +339,17 @@ public class ClusterQueueImpl extends QueueImpl {
     // if is true forwards message to the next (no visited) clusterQueue.
     List toGive = new ArrayList();
     long oldTime = System.currentTimeMillis() - timeThreshold;
-    for (Enumeration e = timeTable.keys(); e.hasMoreElements(); ) {
-      String msgId = (String) e.nextElement();
+    
+    Set keySet = timeTable.keySet();
+    Iterator it = keySet.iterator();
+    while (it.hasNext()) {
+      String msgId = (String) it.next();
       if (((Long) timeTable.get(msgId)).longValue() < oldTime) {
         toGive.add(msgId);
         storeMsgIdInVisitTable(msgId, getId());
       }
     }
-
+    
     if (toGive.isEmpty()) return;
 
     Hashtable table = new Hashtable();
