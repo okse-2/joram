@@ -71,11 +71,9 @@ public class ClusterAdmin {
     prop.setProperty("autoEvalThreshold","true");
     prop.setProperty("waitAfterClusterReq","100");
 
-    String ClusterQueueCN = "org.objectweb.joram.mom.dest.ClusterQueue";
-
-    Queue queue0 = Queue.create(0, null, ClusterQueueCN, prop);
-    Queue queue1 = Queue.create(1, null, ClusterQueueCN, prop);
-    Queue queue2 = Queue.create(2, null, ClusterQueueCN, prop);
+    Queue queue0 = Queue.create(0, null, Queue.CLUSTER_QUEUE, prop);
+    Queue queue1 = Queue.create(1, null, Queue.CLUSTER_QUEUE, prop);
+    Queue queue2 = Queue.create(2, null, Queue.CLUSTER_QUEUE, prop);
     
     System.out.println("queue0 = " + queue0);
     System.out.println("queue1 = " + queue1);
