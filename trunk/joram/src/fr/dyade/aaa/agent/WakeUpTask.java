@@ -47,7 +47,7 @@ public class WakeUpTask extends TimerTask {
     if (AgentServer.isHAServer() && !AgentServer.isMasterHAServer())
       return;
 
-    if (period != -1) {
+    if (period > 0) {
       try {
         timer = AgentServer.getTimer();
         timer.schedule(this, period);
