@@ -7,4 +7,3 @@
      <service class="fr.dyade.aaa.jndi2.server.JndiServer" args="16400"/>
   </server>
  </config>
- 

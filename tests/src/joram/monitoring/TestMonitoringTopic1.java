@@ -22,7 +22,7 @@
  */
 package joram.monitoring;
 
-import java.util.Enumeration;
+import java.util.Properties;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -30,7 +30,6 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
-import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -44,14 +43,14 @@ import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import framework.TestCase;
 
 /**
- * Tests retrieving the AdminTopic created as a service.
+ * Tests retrieving the agentId of the AdminTopic using the MonitoringTopic.
  */
-public class TestMonitoringTopic3 extends TestCase implements MessageListener {
+public class TestMonitoringTopic1 extends TestCase implements MessageListener {
 
   private int nbReceived;
 
   public static void main(String[] args) {
-    new TestMonitoringTopic3().run();
+    new TestMonitoringTopic1().run();
   }
 
   public void run() {
@@ -59,7 +58,7 @@ public class TestMonitoringTopic3 extends TestCase implements MessageListener {
       startAgentServer((short) 0);
 
       admin();
-      
+
       Context ictx = new InitialContext();
       Topic topic = (Topic) ictx.lookup("MonitoringTopic");
       ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cf");
@@ -67,37 +66,17 @@ public class TestMonitoringTopic3 extends TestCase implements MessageListener {
 
       Connection cnx = cf.createConnection();
       Session sessionc = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      Session sessionp = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      cnx.start();
 
       // create a producer and a consumer
       MessageConsumer consumer = sessionc.createConsumer(topic);
-      MessageProducer producer = sessionp.createProducer(topic);
 
       // the consumer records on the topic
       consumer.setMessageListener(this);
       
-      cnx.start();
-      
-      Thread.sleep(10000);
-      
-      assertTrue(nbReceived == 0);
-      
-      Message msg = sessionp.createMessage();
-      msg.setStringProperty("AgentServer:server=AgentServer#0,cons=Transaction", "LogMemorySize,GarbageRatio");
-      producer.send(msg);
-      
       Thread.sleep(10000);
 
-      assertTrue(nbReceived == 1);
-      
-      msg = sessionp.createMessage();
-      msg.setLongProperty("period", 2000L);
-      msg.setStringProperty("AgentServer:server=AgentServer#0,cons=Transaction", "LogMemorySize,GarbageRatio");
-      producer.send(msg);
-      
-      Thread.sleep(10000);
-
-      assertTrue(nbReceived > 3);
+      assertTrue(nbReceived > 2);
       
       cnx.close();
     } catch (Throwable exc) {
@@ -115,11 +94,16 @@ public class TestMonitoringTopic3 extends TestCase implements MessageListener {
   public void admin() throws Exception {
     // connection 
     AdminModule.connect("localhost", 2560, "root", "root", 60);
+    
+    Properties properties = new Properties();
+    properties.put("period", "2000");
+    properties.put("Joram#0:name=JoramAdminTopic,*", "DestinationId");
+    
+    // create a Topic   
+    Topic topic = Topic.create(0, "MonitoringTopic", Topic.MONITORING_TOPIC, properties);
 
     // create a user
     User.create("anonymous", "anonymous");
-    
-    Topic topic = Topic.create("JoramMonitoringTopic");
     
     // set permissions
     topic.setFreeReading();
@@ -137,18 +121,12 @@ public class TestMonitoringTopic3 extends TestCase implements MessageListener {
 
   public void onMessage(Message message) {
     nbReceived++;
-    //  System.out.println("\n --> Message received :" + message);
-    int nbMonitoringResults = 0;
+//  System.out.println("\n --> Message received :" + message);
     try {
-      Enumeration enumNames = message.getPropertyNames();
-      while (enumNames.hasMoreElements()) {
-        nbMonitoringResults++;
-        String name = (String) enumNames.nextElement();
-        //      System.out.println(name + " : " + message.getObjectProperty(name));
-      }
+      String id = message.getStringProperty("Joram#0:type=Destination,name=JoramAdminTopic:DestinationId");
+      assertTrue("#0.0.10".equals(id));
     } catch (JMSException exc) {
       addError(exc);
     }
-    assertEquals(2, nbMonitoringResults);
   }
 }
