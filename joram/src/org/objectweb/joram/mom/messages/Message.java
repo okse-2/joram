@@ -30,8 +30,6 @@ import java.lang.ref.SoftReference;
 import java.util.Vector;
 
 import org.objectweb.joram.shared.excepts.MessageException;
-import org.objectweb.joram.shared.excepts.MessageROException;
-import org.objectweb.joram.shared.excepts.MessageValueException;
 import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -268,29 +266,15 @@ public final class Message implements Serializable {
 
   /**
    * Sets a property value.
+   * If the value is not a Java primitive object its string representation is used.
    *
    * @param name  The property name.
    * @param value  The property value.
    *
-   * @exception MessageROException
-   * 	If the message properties are read-only.
-   * @exception MessageValueException
-   *	If the value is not a Java primitive object.
-   * @exception IllegalArgumentException
-   *	If the key name is illegal (null or empty string).
+   * @exception IllegalArgumentException  If the key name is illegal (null or empty string).
    */
   public void setObjectProperty(String name, Object value) throws MessageException {
-    if (name == null || name.equals(""))
-      throw new IllegalArgumentException("Invalid property name: " + name);
-
-    if (value instanceof Boolean ||
-        value instanceof Number ||
-        value instanceof String) {
-      msg.setProperty(name, value);
-    } else {
-      throw new MessageValueException("Can't set non primitive Java object"
-                                      + " as a property value.");
-    }
+    msg.setProperty(name, value);
   }
 
   //   /**
@@ -341,7 +325,7 @@ public final class Message implements Serializable {
    * @param currentTime	The current time to verify the expiration time.
    */
   public boolean isValid(long currentTime) {
-    return msg.expiration == 0 || msg.expiration > currentTime;
+    return (msg.expiration <= 0) || (msg.expiration > currentTime);
   }
 
   /** Name used to store the message */

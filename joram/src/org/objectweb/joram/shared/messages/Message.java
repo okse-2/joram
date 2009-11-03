@@ -112,14 +112,25 @@ public final class Message implements Cloneable, Serializable, Streamable {
 
   /**
    * Sets a property value.
+   * If the value is not a Java primitive object its string representation is used.
    *
-   * @param name  The property name.
+   * @param name    The property name.
    * @param value  The property value.
+   *
+   * @exception IllegalArgumentException  If the key name is illegal (null or empty string).
    */
   public void setProperty(String name, Object value) {
+    if (name == null || name.equals(""))
+      throw new IllegalArgumentException("Invalid property name: " + name);
+    
     if (properties == null)
       properties = new Properties();
-    properties.put(name, value);
+    
+    if (value instanceof Boolean || value instanceof Number || value instanceof String) {
+      properties.put(name, value);
+    } else {
+      properties.put(name, value.toString());
+    }
   }
 
   /** The message identifier. */
