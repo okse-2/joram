@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,46 +23,33 @@
 package org.objectweb.joram.mom.dest;
 
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.Properties;
-import java.util.Set;
-import java.util.StringTokenizer;
-
-import javax.management.MBeanAttributeInfo;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
+import java.util.Vector;
 
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
-import org.objectweb.joram.shared.excepts.MessageValueException;
 import org.objectweb.joram.shared.messages.ConversionHelper;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  * The <code>MonitoringTopicImpl</code> class implements the monitoring
  * behavior, regularly delivering monitoring messages to subscribers.
  */
 public class MonitoringTopicImpl extends TopicImpl implements MonitoringTopicImplMBean {
-
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   
-  /** Prefix for monitored MBeans names */
-  private static final String monitoringPrefix = "MBeanMonitoring:";
-
   /** Time between two monitoring events. One minute by default. */
-  protected long period = 60000;
+  protected long period = -1;
   
   /** Counter of messages produced by this Monitoring topic. */
   private long msgCounter = 0;
   
   /** The various elements to monitor. */
-  private Properties monitoringProperties;
+  private Vector elements;
   
   /** Tells if the messages produced are persistent. */
   private boolean isPersistent = false;
@@ -72,43 +59,33 @@ public class MonitoringTopicImpl extends TopicImpl implements MonitoringTopicImp
   
   /** The duration of produced messages. */
   private long expiration = -1;
-  
-  /**
-   * Number of messages received. Can't use nbMsgsReceiveSinceCreation because
-   * we process our own created messages.
-   */
-  private int receivedMessagesCount = 0;
 
-  public MonitoringTopicImpl(AgentId adminId, Properties prop) {
-    super(adminId, prop);
-    monitoringProperties = new Properties();
-    if (prop != null) {
-      Enumeration enumProperties = prop.keys();
-      while (enumProperties.hasMoreElements()) {
-        String propName = (String) enumProperties.nextElement();
-        Object property = prop.get(propName);
-        if (property instanceof String && propName.startsWith(monitoringPrefix)) {
-          monitoringProperties.put(propName.substring(monitoringPrefix.length()), property);
+  public MonitoringTopicImpl(AgentId adminId, Properties properties) {
+    super(adminId, properties);
+    elements = new Vector();
+
+    if (properties != null) {
+      Enumeration e = properties.keys();
+      while (e.hasMoreElements()) {
+        String name = (String) e.nextElement();
+
+        try {
+          if (name.equals("period"))
+            period = ConversionHelper.toLong(properties.get("period"));
+          else if (name.equals("persistent"))
+            isPersistent = ConversionHelper.toBoolean(properties.get("persistent"));
+          else if (name.equals("priority"))
+            priority = ConversionHelper.toInt(properties.get("priority"));
+          else if (name.equals("expiration"))
+            expiration = ConversionHelper.toLong(properties.get("expiration"));
+          else {
+            String attributes = (String) properties.get(name);
+            elements.add(new MonitoringElement(name, attributes));
+          }
+        } catch (Exception exc) {
+          logger.log(BasicLevel.ERROR, "MonitoringTopicImpl.<init>: bad initialization.", exc);
         }
       }
-      try {
-        if (prop.get("period") != null)
-          period = ConversionHelper.toLong(prop.get("period"));
-        if (prop.get("persistent") != null)
-          isPersistent = ConversionHelper.toBoolean(prop.get("persistent"));
-        if (prop.get("priority") != null)
-          priority = ConversionHelper.toInt(prop.get("priority"));
-        if (prop.get("expiration") != null)
-          expiration = ConversionHelper.toLong(prop.get("expiration"));
-      } catch (MessageValueException exc) {
-        logger.log(BasicLevel.ERROR, exc);
-      }
-    } else {
-      // Default monitoring options
-      monitoringProperties.put("Joram#" + AgentServer.getServerId() + ":type=User,*",
-          "NbMsgsDeliveredSinceCreation, NbMsgsSentToDMQSinceCreation, PendingMessageCount");
-      monitoringProperties.put("Joram#" + AgentServer.getServerId() + ":type=Destination,*",
-          "NbMsgsDeliverSinceCreation, NbMsgsReceiveSinceCreation, NbMsgsSentToDMQSinceCreation");
     }
   }
 
@@ -125,38 +102,6 @@ public class MonitoringTopicImpl extends TopicImpl implements MonitoringTopicImp
     return period;
   }
   
-  public ClientMessages preProcess(AgentId from, ClientMessages msgs) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Change monitoring properties.");
-    // New monitoring properties
-    monitoringProperties.clear();
-    Message msg = (Message) msgs.getMessages().get(msgs.getMessages().size() - 1);
-    if (msg.properties != null) {
-      Enumeration enumProperties = msg.properties.keys();
-      while (enumProperties.hasMoreElements()) {
-        String propName = (String) enumProperties.nextElement();
-        Object property = msg.properties.get(propName);
-        if (property instanceof String && propName.startsWith(monitoringPrefix)) {
-          monitoringProperties.put(propName.substring(monitoringPrefix.length()), property);
-        }
-      }
-      try {
-        if (msg.properties.get("period") != null)
-          period = ConversionHelper.toLong(msg.properties.get("period"));
-        if (msg.properties.get("persistent") != null)
-          isPersistent = ConversionHelper.toBoolean(msg.properties.get("persistent"));
-        if (msg.properties.get("priority") != null)
-          priority = ConversionHelper.toInt(msg.properties.get("priority"));
-        if (msg.properties.get("expiration") != null)
-          expiration = ConversionHelper.toLong(msg.properties.get("expiration"));
-      } catch (MessageValueException exc) {
-        logger.log(BasicLevel.ERROR, exc);
-      }
-    }
-    receivedMessagesCount += msgs.getMessages().size();
-    return null;
-  }
-  
   /**
    * Sets or unsets the period for this queue.
    * 
@@ -164,11 +109,57 @@ public class MonitoringTopicImpl extends TopicImpl implements MonitoringTopicImp
    *          The period value to be set or -1 for unsetting previous value.
    */
   public void setPeriod(long period) {
-    if ((this.period == -1L) && (period != -1L)) {
+    if ((this.period < 0) && (period > 0)) {
       // Schedule the CleaningTask.
       forward(getId(), new WakeUpNot());
     }
     this.period = period;
+  }
+
+  public ClientMessages preProcess(AgentId from, ClientMessages cm) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "MonitoringQueueImpl. preProcess(" + from + ", " + cm + ')');
+    
+    long period = this.period;
+    
+    Vector msgs = cm.getMessages();
+    for (int i=0; i<msgs.size(); i++) {
+      Message msg = (Message) msgs.elementAt(i);
+      
+      if (msg.properties != null) {
+        // New monitoring properties
+        elements.clear();
+        
+        Enumeration e = msg.properties.keys();
+        while (e.hasMoreElements()) {
+          String name = (String) e.nextElement();
+
+          try {
+            if (name.equals("period"))
+              period = ConversionHelper.toLong(msg.properties.get("period"));
+            else if (name.equals("persistent"))
+              isPersistent = ConversionHelper.toBoolean(msg.properties.get("persistent"));
+            else if (name.equals("priority"))
+              priority = ConversionHelper.toInt(msg.properties.get("priority"));
+            else if (name.equals("expiration"))
+              expiration = ConversionHelper.toLong(msg.properties.get("expiration"));
+            else {
+              String attributes = (String) msg.properties.get(name);
+              elements.add(new MonitoringElement(name, attributes));
+            }
+          } catch (Exception exc) {
+            logger.log(BasicLevel.ERROR, "MonitoringTopicImpl.<init>: bad configuration.", exc);
+          }
+        }
+        
+        msg.properties = null;
+        MonitoringHelper.getJMXValues(msg, elements);
+      }
+    }
+    
+    setPeriod(period);
+    
+    return cm;
   }
   
   private String createMessageId() {
@@ -191,72 +182,17 @@ public class MonitoringTopicImpl extends TopicImpl implements MonitoringTopicImp
     message.persistent = isPersistent;
     message.setDestination(getId().toString(), message.TOPIC_TYPE);
     message.priority = priority;
-    if (expiration > -1) {
+    if (expiration > 0) {
       message.expiration = currentTime + expiration;
     } else {
-      message.expiration = currentTime + 2 * period;
+      message.expiration = 0;
     }
     
-    Enumeration enumMBeans = monitoringProperties.keys();
-    while (enumMBeans.hasMoreElements()) {
-      String mbeanName = (String) enumMBeans.nextElement();
-      String mbeanAttr = (String) monitoringProperties.get(mbeanName);
-      
-      try {
-        Set mBeans = MXWrapper.queryNames(new ObjectName(mbeanName));
-        if (mBeans != null) {
-          for (Iterator iterator = mBeans.iterator(); iterator.hasNext();) {
-            ObjectName mBean = (ObjectName) iterator.next();
-            StringTokenizer st = new StringTokenizer(mbeanAttr, ",");
-            while (st.hasMoreTokens()) {
-              String token = st.nextToken();
-              if (token.equals("*")) {
-                try {
-                  MBeanAttributeInfo[] attributes = MXWrapper.getAttributes(mBean);
-                  if (attributes != null) {
-                    for (int i = 0; i < attributes.length; i++) {
-                      setMessageProperty(message, mBean, attributes[i].getName());
-                    }
-                  }
-                } catch (Exception exc) {
-                  if (logger.isLoggable(BasicLevel.WARN))
-                    logger.log(BasicLevel.ERROR, " getAttributes  on " + mBean + " error.", exc);
-                }
-              } else {
-                setMessageProperty(message, mBean, token.trim());
-              }
-            }
-          }
-        }
-      } catch (MalformedObjectNameException exc) {
-        logger.log(BasicLevel.ERROR, "Invalid MBean name : " + mbeanName, exc);
-      }
-    }
-
+    MonitoringHelper.getJMXValues(message, elements);
     ClientMessages clientMessages = new ClientMessages(-1, -1, message);
+    
+    forwardMessages(clientMessages);
     processMessages(clientMessages);
-  }
-  
-  private void setMessageProperty(Message message, ObjectName mbeanName, String attrName) {
-    try {
-      Object monit = MXWrapper.getAttribute(mbeanName, attrName);
-      if (monit != null) {
-        if (monit instanceof Boolean || monit instanceof Byte || monit instanceof Short
-            || monit instanceof Integer || monit instanceof Long || monit instanceof Float
-            || monit instanceof Double || monit instanceof String) {
-          message.setProperty(mbeanName + "," + attrName, monit);
-        } else {
-          message.setProperty(mbeanName + "," + attrName, monit.toString());
-        }
-      }
-    } catch (Exception exc) {
-      if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN, " getAttribute " + attrName + " on " + mbeanName + " error.", exc);
-    }
-  }
-  
-  public long getNbMsgsReceiveSinceCreation() {
-    return receivedMessagesCount;
   }
 
   /**
@@ -265,12 +201,16 @@ public class MonitoringTopicImpl extends TopicImpl implements MonitoringTopicImp
    * @return the comma separated list of all monitored attributes.
    */
   public String[] getMonitoredAttributes() {
-    int i = 0;
-    String[] ret = new String[monitoringProperties.size()];
-    for (Enumeration e = monitoringProperties.keys(); e.hasMoreElements();) {
-      String mbean = (String) e.nextElement();
-      ret[i++] = mbean + '=' +monitoringProperties.getProperty(mbean);
+    String[] ret = new String[elements.size()];
+    
+    for (int i=0; i<ret.length; i++) {
+      StringBuffer strbuf = new StringBuffer();
+      MonitoringElement element = (MonitoringElement) elements.elementAt(i);
+      strbuf.append(element.mbean).append('=');
+      for (int j=0; j<element.attributes.length; j++)
+        strbuf.append(element.attributes[j]).append(',');
     }
+
     return ret;
   }
   
@@ -283,17 +223,23 @@ public class MonitoringTopicImpl extends TopicImpl implements MonitoringTopicImp
    * @param attributes  the comma separated list of attributes to monitor.
    */
   public void addMonitoredAttributes(String MBeanName, String attributes) {
-    monitoringProperties.put(MBeanName, attributes);
+    elements.add(new MonitoringElement(MBeanName, attributes));
   }
   
   /**
    * Removes all the attributes of the specified MBean in the list of
    * monitored attributes.
    * 
-   * @param MBeanName the name of the MBean.
+   * @param mbean the name of the MBean.
    */
-  public void delMonitoredAttributes(String MBeanName) {
-    monitoringProperties.remove(MBeanName);
+  public void delMonitoredAttributes(String mbean) {
+    for (int i=0; i<elements.size();) {
+      MonitoringElement element = (MonitoringElement) elements.elementAt(i);
+      if (element.mbean.equals(mbean)) {
+        elements.removeElementAt(i);
+      } else {
+        i++;
+      }
+    }
   }
-
 }

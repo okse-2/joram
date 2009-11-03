@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -38,40 +38,61 @@ import fr.dyade.aaa.agent.WakeUpTask;
  * Agent of the monitoring topic. Schedules the monitoring.
  */
 public class MonitoringTopic extends Topic {
-
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   
+  /**
+   * Task sending a WakeUpNot to the topic.
+   */
   private transient WakeUpTask task;
 
   /**
    * Empty constructor for newInstance().
    */
-  public MonitoringTopic() {
+  public MonitoringTopic() {}
+  
+  protected void agentInitialize(boolean firstTime) throws Exception {
+    super.agentInitialize(firstTime);
+    task = new WakeUpTask(getId(), WakeUpNot.class);
+    task.schedule(((MonitoringTopicImpl) destImpl).getPeriod());
+  }
+
+  /**
+   * Creates an instance of MonitoringTopic.
+   * 
+   * @see org.objectweb.joram.mom.dest.Topic#createsImpl(fr.dyade.aaa.agent.AgentId, java.util.Properties)
+   */
+  public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "MonitoringTopic.createImpl()");
+    DestinationImpl dest = new MonitoringTopicImpl(adminId, prop);
+    return dest;
   }
   
+  /**
+   *  Static method allowing the creation of a default MonitoringTopic through a
+   * service. This topic is registered with the name "JoramMonitoringTopic".
+   * 
+   * @param args        useless.
+   * @param firstTime   The topic is created only at the first initialization.
+   * @throws Exception  
+   */
   public static void init(String args, boolean firstTime) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "MonitoringTopic.init(" + args + ',' + firstTime + ')');
     
     if (!firstTime) return;
     
-    MonitoringTopic monitTopic = new MonitoringTopic();
-    monitTopic.setName("JoramMonitoringTopic");
-    monitTopic.init(null, null);
-    monitTopic.deploy();
+    MonitoringTopic topic = new MonitoringTopic();
+    topic.setName("JoramMonitoringTopic");
+    topic.init(null, null);
+    topic.deploy();
     
-    RegisterDestNot regDestNot = new RegisterDestNot(monitTopic.getId(),
-                                                     monitTopic.getName(),
+    RegisterDestNot regDestNot = new RegisterDestNot(topic.getId(),
+                                                     topic.getName(),
                                                      MonitoringTopic.class.getName(),
                                                      DestinationConstants.TOPIC_TYPE);
     Channel.sendTo(AdminTopic.getDefault(), regDestNot);
-  }
-  
-  protected void agentInitialize(boolean firstTime) throws Exception {
-    super.agentInitialize(firstTime);
-    task = new WakeUpTask(getId(), WakeUpNot.class);
-    task.schedule(((MonitoringTopicImpl) destImpl).getPeriod());
   }
   
   public void react(AgentId from, Notification not) throws Exception {
@@ -85,12 +106,4 @@ public class MonitoringTopic extends Topic {
     } else
       super.react(from, not);
   }
-
-  public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "MonitoringTopic.createImpl()");
-    DestinationImpl dest = new MonitoringTopicImpl(adminId, prop);
-    return dest;
-  }
-  
 }
