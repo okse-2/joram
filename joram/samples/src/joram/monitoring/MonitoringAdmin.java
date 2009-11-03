@@ -24,45 +24,59 @@ package monitoring;
 
 import java.util.Properties;
 
+import javax.jms.ConnectionFactory;
+
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
+/**
+ * Creates 2 monitoring destinations: a queue and topic.
+ * This code needs a previous administration phase creating at least
+ * a connection factory.
+ */
 public class MonitoringAdmin {
   
   public static void main(String[] args) throws Exception {
-    
     System.out.println("Monitoring administration...");
 
-    AdminModule.connect("root", "root", 60);
+    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
+    ConnectionFactory cf = (ConnectionFactory) jndiCtx.lookup("cf");
     
-    Queue queue = Queue.create("MonitoredQueue");
-    queue.setFreeReading();
-    queue.setFreeWriting();
+    AdminModule.connect(cf, "root", "root");
+    
+//    Queue queue = Queue.create("MonitoredQueue");
+//    queue.setFreeReading();
+//    queue.setFreeWriting();
+//    jndiCtx.bind("queue", queue);
     
     Properties topicProps = new Properties();
-    topicProps.put("period", "2000");
-    topicProps.put("MBeanMonitoring:Joram#0:type=Destination,name=MonitoredQueue",
-        "NbMsgsDeliverSinceCreation, NbMsgsReceiveSinceCreation, PendingMessageCount");
+    topicProps.put("period", "5000");
+    topicProps.put("Joram#0:type=Destination,name=queue",
+                   "NbMsgsDeliverSinceCreation,NbMsgsReceiveSinceCreation,PendingMessageCount,NbMsgsSentToDMQSinceCreation");
+    topicProps.put("Joram#0:type=Destination,name=topic",
+                   "NbMsgsDeliverSinceCreation,NbMsgsReceiveSinceCreation,NbMsgsSentToDMQSinceCreation");
     
-    Topic topic = Topic.create(0, "MonitoringTopic", "org.objectweb.joram.mom.dest.MonitoringTopic",
-        topicProps);
-    topic.setFreeReading();
-    topic.setFreeWriting();
+    Topic mTopic = Topic.create(0, "MonitoringTopic", Topic.MONITORING_TOPIC, topicProps);
+    mTopic.setFreeReading();
+    mTopic.setFreeWriting();
+    jndiCtx.bind("MonitoringTopic", mTopic);
     
-    User.create("anonymous", "anonymous");
+    Queue mQueue = Queue.create(0, "MonitoringQueue", Queue.MONITORING_QUEUE, null);
+    mQueue.setFreeReading();
+    mQueue.setFreeWriting();
+    jndiCtx.bind("MonitoringQueue", mQueue);
+    
+//    User.create("anonymous", "anonymous");
 
-    javax.jms.ConnectionFactory cf = TcpConnectionFactory.create("localhost", 16010);
+//     cf = TcpConnectionFactory.create("localhost", 16010);
+//    jndiCtx.bind("cf", cf);
 
-    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
-    jndiCtx.bind("cf", cf);
-    jndiCtx.bind("queue", queue);
-    jndiCtx.bind("MonitoringTopic", topic);
     jndiCtx.close();
-
     AdminModule.disconnect();
+    
     System.out.println("Admin closed.");
   }
 }
