@@ -35,8 +35,7 @@ import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
-
-import org.objectweb.joram.client.jms.Topic;
+import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
@@ -44,14 +43,14 @@ import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import framework.TestCase;
 
 /**
- * Tests retrieving the AdminTopic created as a service.
+ * Tests modifying parameters monitored by the MonitoringTopic.
  */
-public class TestMonitoringTopic3 extends TestCase implements MessageListener {
+public class TestMonitoringQueue2 extends TestCase implements MessageListener {
 
   private int nbReceived;
 
   public static void main(String[] args) {
-    new TestMonitoringTopic3().run();
+    new TestMonitoringQueue2().run();
   }
 
   public void run() {
@@ -59,9 +58,9 @@ public class TestMonitoringTopic3 extends TestCase implements MessageListener {
       startAgentServer((short) 0);
 
       admin();
-      
+
       Context ictx = new InitialContext();
-      Topic topic = (Topic) ictx.lookup("MonitoringTopic");
+      Queue queue = (Queue) ictx.lookup("MonitoringQueue");
       ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cf");
       ictx.close();
 
@@ -70,14 +69,14 @@ public class TestMonitoringTopic3 extends TestCase implements MessageListener {
       Session sessionp = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
       // create a producer and a consumer
-      MessageConsumer consumer = sessionc.createConsumer(topic);
-      MessageProducer producer = sessionp.createProducer(topic);
+      MessageConsumer consumer = sessionc.createConsumer(queue);
+      MessageProducer producer = sessionp.createProducer(queue);
 
-      // the consumer records on the topic
+      // the consumer records on the queue
       consumer.setMessageListener(this);
       
       cnx.start();
-      
+
       Thread.sleep(10000);
       
       assertTrue(nbReceived == 0);
@@ -110,26 +109,27 @@ public class TestMonitoringTopic3 extends TestCase implements MessageListener {
   }
 
   /**
-   * Admin : Create topic and a user anonymous use jndi
+   * Admin : Create queue and a user anonymous use jndi
    */
   public void admin() throws Exception {
     // connection 
     AdminModule.connect("localhost", 2560, "root", "root", 60);
+    
+    // create a queue
+    Queue queue = Queue.create(0, "MonitoringQueue", Queue.MONITORING_QUEUE, null);
 
     // create a user
     User.create("anonymous", "anonymous");
     
-    Topic topic = Topic.create("JoramMonitoringTopic");
-    
     // set permissions
-    topic.setFreeReading();
-    topic.setFreeWriting();
+    queue.setFreeReading();
+    queue.setFreeWriting();
 
     javax.jms.ConnectionFactory cf = TcpConnectionFactory.create("localhost", 2560);
 
     Context jndiCtx = new InitialContext();
     jndiCtx.bind("cf", cf);
-    jndiCtx.bind("MonitoringTopic", topic);
+    jndiCtx.bind("MonitoringQueue", queue);
     jndiCtx.close();
 
     AdminModule.disconnect();
@@ -137,14 +137,14 @@ public class TestMonitoringTopic3 extends TestCase implements MessageListener {
 
   public void onMessage(Message message) {
     nbReceived++;
-    //  System.out.println("\n --> Message received :" + message);
+//    System.out.println("\n --> Message received :" + message);
     int nbMonitoringResults = 0;
     try {
       Enumeration enumNames = message.getPropertyNames();
       while (enumNames.hasMoreElements()) {
         nbMonitoringResults++;
         String name = (String) enumNames.nextElement();
-        //      System.out.println(name + " : " + message.getObjectProperty(name));
+//        System.out.println(name + " : " + message.getObjectProperty(name));
       }
     } catch (JMSException exc) {
       addError(exc);
