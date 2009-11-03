@@ -22,7 +22,9 @@
  */
 package monitoring;
 
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.Vector;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -66,18 +68,27 @@ public class Monitor {
   
   static class MonitorMsgListener implements MessageListener {
     public void onMessage(Message message) {
-      System.out.println(" ");
-      System.out.println(" --> Monitoring message received :");
       try {
-        Enumeration enumNames = message.getPropertyNames();
-        while (enumNames.hasMoreElements()) {
-          String name = (String) enumNames.nextElement();
-          System.out.println(name + " : " + message.getObjectProperty(name));
-        }
+        doReport(message);
       } catch (JMSException exc) {
         exc.printStackTrace();
       }
     }
+  }
+  
+  static void doReport(Message message) throws JMSException {
+    System.out.println("\n --> Monitoring message received :");
+    Vector v = new Vector();
+    Enumeration enumNames = message.getPropertyNames();
+    while (enumNames.hasMoreElements()) {
+      String name = (String) enumNames.nextElement();
+      v.add(name + " : " + message.getObjectProperty(name));
+    }
+    String [] a = new String[v.size()];
+    v.toArray(a);
+    Arrays.sort(a);
+    for (int i=0; i<a.length; i++)
+      System.out.println(a[i]);
   }
   
 }
