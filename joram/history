@@ -1,4 +1,10 @@
 +==============================================================================
+| 2009/11/03 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Implements either implicit (periodic) or explicit behavior for monitoring
+topics. Implements monitoring queue and factorizes common behavior in an
+helper class.
++==============================================================================
 | 2009/10/30 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
 Fix a potential issue using clustered destination:
