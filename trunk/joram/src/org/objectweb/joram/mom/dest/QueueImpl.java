@@ -115,7 +115,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    *               value.
    */
   public void setPeriod(long period) {
-    if ((this.period == -1L) && (period != -1L)) {
+    if ((this.period < 0) && (period > 0)) {
       // Schedule the CleaningTask.
       forward(getId(), new WakeUpNot());
     }
@@ -1472,6 +1472,28 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     else if (QueueImpl.defaultThreshold != null)
       return (message.getDeliveryCount() >= QueueImpl.defaultThreshold.intValue());
     return false;
+  }
+  
+  /**
+   * Adds the client messages in the queue.
+   * 
+   * @param clientMsgs client message notification.
+   */
+  public void addClientMessages(ClientMessages clientMsgs) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "CollectorQueueImpl.storeClientMessage(" + clientMsgs + ')'); 
+    
+    if (clientMsgs != null) {
+      Message msg;
+      // Storing each received message:
+      for (Enumeration msgs = clientMsgs.getMessages().elements(); msgs.hasMoreElements();) {
+        msg = new Message((org.objectweb.joram.shared.messages.Message) msgs.nextElement());
+        msg.order = arrivalsCounter++;
+        storeMessage(msg);
+      }
+    }
+    // Launching a delivery sequence:
+    deliverMessages(0);
   }
 
   public void readBag(ObjectInputStream in) throws IOException, ClassNotFoundException {
