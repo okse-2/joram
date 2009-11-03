@@ -29,35 +29,28 @@ import javax.naming.*;
 /**
  * Consumes messages from the queue and from the topic.
  */
-public class Consumer
-{
+public class Consumer {
   static Context ictx = null; 
 
-  public static void main(String[] args) throws Exception
-  {
-    System.out.println();
-    System.out.println("Listens to the queue and to the topic...");
+  public static void main(String[] args) throws Exception {
+    System.out.println("Listens to " + args[0]);
 
     ictx = new InitialContext();
-    Queue queue = (Queue) ictx.lookup("queue");
-    Topic topic = (Topic) ictx.lookup("topic");
+    Destination dest = (Destination) ictx.lookup(args[0]);
     ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cf");
     ictx.close();
 
     Connection cnx = cf.createConnection();
     Session sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-    MessageConsumer recv = sess.createConsumer(queue);
-    MessageConsumer subs = sess.createConsumer(topic);
+    MessageConsumer recv = sess.createConsumer(dest);
 
-    recv.setMessageListener(new MsgListener("Queue listener"));
-    subs.setMessageListener(new MsgListener("Topic listener"));
+    recv.setMessageListener(new MsgListener("Listener on " + args[0]));
 
     cnx.start();
 
     System.in.read();
     cnx.close();
 
-    System.out.println();
     System.out.println("Consumer closed.");
   }
 }
