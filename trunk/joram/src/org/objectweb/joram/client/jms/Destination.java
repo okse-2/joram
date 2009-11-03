@@ -340,7 +340,9 @@ public abstract class Destination extends AdministeredObject implements javax.jm
   public static final String SCHEDULER_QUEUE = "com.scalagent.joram.mom.dest.scheduler.SchedulerQueue";
   public static final String COLLECTOR_QUEUE = "com.scalagent.joram.mom.dest.collector.CollectorQueue";
   public static final String COLLECTOR_TOPIC = "com.scalagent.joram.mom.dest.collector.CollectorTopic";
-
+  public static final String MONITORING_QUEUE = "org.objectweb.joram.mom.dest.MonitoringQueue";
+  public static final String MONITORING_TOPIC = "org.objectweb.joram.mom.dest.MonitoringTopic";
+  
   /**
    * Administration method creating or retrieving a destination with a given name on a
    * given server, and returning its identifier.
