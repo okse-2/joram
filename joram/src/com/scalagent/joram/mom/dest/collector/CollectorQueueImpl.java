@@ -229,28 +229,6 @@ public class CollectorQueueImpl extends QueueImpl implements CollectorDestinatio
   }
   
   /**
-   * store the client messages in the collector queue.
-   * 
-   * @param clientMsgs client message notification.
-   */
-  public void storeClientMessage(ClientMessages clientMsgs) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "CollectorQueueImpl.storeClientMessage(" + clientMsgs + ')'); 
-    
-    if (clientMsgs != null) {
-      org.objectweb.joram.mom.messages.Message msg;
-      // Storing each received message:
-      for (Enumeration msgs = clientMsgs.getMessages().elements(); msgs.hasMoreElements();) {
-        msg = new org.objectweb.joram.mom.messages.Message((Message) msgs.nextElement());
-        msg.order = arrivalsCounter++;
-        storeMessage(msg);
-      }
-    }
-    // Launching a delivery sequence:
-    deliverMessages(0);
-  }
-
-  /**
    * get properties.
    * 
    * @see com.scalagent.joram.mom.dest.collector.CollectorDestination#getProperties()
@@ -288,6 +266,6 @@ public class CollectorQueueImpl extends QueueImpl implements CollectorDestinatio
     ClientMessages clientMsgs = CollectorHelper.createClientMessages(msg);
     
     // store message in this queue (CollectorQueue).
-    storeClientMessage(clientMsgs);
+    addClientMessages(clientMsgs);
   }
 }
