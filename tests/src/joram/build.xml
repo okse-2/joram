@@ -394,9 +394,12 @@ description=" --> launch all exceptionlistener tests">
   
   <target name="tests.monitoring"
           description=" --> launch all monitoring tests">
-    <antcall target="monit.Test"/>
-    <antcall target="monit.Test2"/>
-  	<antcall target="monit.Test3"/>
+    <antcall target="monitoring.TestT1"/>
+    <antcall target="monitoring.TestT2"/>
+  	<antcall target="monitoring.TestT3"/>
+    <antcall target="monitoring.TestQ1"/>
+    <antcall target="monitoring.TestQ2"/>
+  	<antcall target="monitoring.TestQ3"/>
   </target>
 
   <target name="tests.pool"
@@ -4395,11 +4398,11 @@ description=" --> launch all exceptionlistener tests">
   </target>
   <!-- end SUB tests -->
 
-  <target name="monit.Test" depends="init.a3props,compile"
+  <target name="monitoring.TestT1" depends="init.a3props,compile"
           description=" --> Simple monitoring">
     <antcall target="test.run" inheritAll="true">
-      <param name="testid" value="monit.Test"/>
-      <param name="className" value="joram.monitoring.TestMonitoringTopic"/>
+      <param name="testid" value="monitoring.TestT1"/>
+      <param name="className" value="joram.monitoring.TestMonitoringTopic1"/>
       <param name="jndiconf" value="monitoring/jndi.properties"/>
       <param name="a3conf" value="monitoring/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -4407,10 +4410,10 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
   
-  <target name="monit.Test2" depends="init.a3props,compile"
+  <target name="monitoring.TestT2" depends="init.a3props,compile"
           description=" --> Tests changing monitoring properties">
     <antcall target="test.run" inheritAll="true">
-      <param name="testid" value="monit.Test2"/>
+      <param name="testid" value="monitoring.TestT2"/>
       <param name="className" value="joram.monitoring.TestMonitoringTopic2"/>
       <param name="jndiconf" value="monitoring/jndi.properties"/>
       <param name="a3conf" value="monitoring/a3servers.xml"/>
@@ -4419,10 +4422,10 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
   
-  <target name="monit.Test3" depends="init.a3props,compile"
+  <target name="monitoring.TestT3" depends="init.a3props,compile"
           description=" --> Tests monitoring as a service.">
     <antcall target="test.run" inheritAll="true">
-      <param name="testid" value="monit.Test3"/>
+      <param name="testid" value="monitoring.TestT3"/>
       <param name="className" value="joram.monitoring.TestMonitoringTopic3"/>
       <param name="jndiconf" value="monitoring/jndi.properties"/>
       <param name="a3conf" value="monitoring/a3servers2.xml"/>
@@ -4430,7 +4433,43 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
+
+  <target name="monitoring.TestQ1" depends="init.a3props,compile"
+          description=" --> Simple monitoring">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="monitoring.TestQ1"/>
+      <param name="className" value="joram.monitoring.TestMonitoringQueue1"/>
+      <param name="jndiconf" value="monitoring/jndi.properties"/>
+      <param name="a3conf" value="monitoring/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
   
+  <target name="monitoring.TestQ2" depends="init.a3props,compile"
+          description=" --> Tests changing monitoring properties">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="monitoring.TestQ2"/>
+      <param name="className" value="joram.monitoring.TestMonitoringQueue2"/>
+      <param name="jndiconf" value="monitoring/jndi.properties"/>
+      <param name="a3conf" value="monitoring/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+  
+  <target name="monitoring.TestQ3" depends="init.a3props,compile"
+          description=" --> Tests monitoring as a service.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="monitoring.TestA3"/>
+      <param name="className" value="joram.monitoring.TestMonitoringQueue3"/>
+      <param name="jndiconf" value="monitoring/jndi.properties"/>
+      <param name="a3conf" value="monitoring/a3servers2.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
   <target name="pool.Test1" depends="init.a3props,compile"
           description=" --> Tests pool of Connection.">
     <antcall target="test.run" inheritAll="true">
