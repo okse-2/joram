@@ -372,7 +372,6 @@ public class Filter extends java_cup.runtime.lr_parser {
 /** Cup generated class to encapsulate user supplied action code.*/
 class CUP$Filter$actions {
 
-
   private Message message;
   private String syntaxType;
 
@@ -383,7 +382,6 @@ class CUP$Filter$actions {
     this.syntaxType = syntaxType;
   }
 
-
   private final Filter parser;
 
   /** Constructor */
@@ -392,1027 +390,922 @@ class CUP$Filter$actions {
   }
 
   /** Method with the actual generated action code. */
-  public final java_cup.runtime.Symbol CUP$Filter$do_action(
-    int                        CUP$Filter$act_num,
-    java_cup.runtime.lr_parser CUP$Filter$parser,
-    java.util.Stack            CUP$Filter$stack,
-    int                        CUP$Filter$top)
-    throws java.lang.Exception
+  public final java_cup.runtime.Symbol CUP$Filter$do_action(int CUP$Filter$act_num,
+      java_cup.runtime.lr_parser CUP$Filter$parser, java.util.Stack CUP$Filter$stack, int CUP$Filter$top)
+      throws java.lang.Exception {
+    /* Symbol object for return from actions */
+    java_cup.runtime.Symbol CUP$Filter$result;
+
+    /* select the action based on the action number */
+    switch (CUP$Filter$act_num) {
+    /* . . . . . . . . . . . . . . . . . . . . */
+    case 42: // lit_expr ::= BOOLEAN 
     {
-      /* Symbol object for return from actions */
-      java_cup.runtime.Symbol CUP$Filter$result;
+      Object RESULT = null;
+      Boolean bool = (Boolean) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
 
-      /* select the action based on the action number */
-      switch (CUP$Filter$act_num)
-        {
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 42: // lit_expr ::= BOOLEAN 
-            {
-              Object RESULT = null;
-		int boolleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int boolright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Boolean bool = (Boolean)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  RESULT = bool;
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(5/*lit_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
+      RESULT = bool;
 
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 41: // lit_expr ::= STRING 
-            {
-              Object RESULT = null;
-		int stleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int stright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		String st = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  RESULT = st.substring(1, st.length() - 1);
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(5/*lit_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 40: // lit_expr ::= SHORT 
-            {
-              Object RESULT = null;
-		int numleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int numright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Short num = (Short)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  RESULT = num;
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(5/*lit_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 39: // lit_expr ::= INT 
-            {
-              Object RESULT = null;
-		int numleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int numright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Integer num = (Integer)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  RESULT = num;
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(5/*lit_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 38: // lit_expr ::= MIN_LONG 
-            {
-              Object RESULT = null;
-		int numleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int numright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Long num = (Long)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  RESULT = num;
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(5/*lit_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 37: // lit_expr ::= LONG 
-            {
-              Object RESULT = null;
-		int numleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int numright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Long num = (Long)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  RESULT = num;
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(5/*lit_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 36: // lit_expr ::= FLOAT 
-            {
-              Object RESULT = null;
-		int numleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int numright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Float num = (Float)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  RESULT = num;
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(5/*lit_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 35: // lit_expr ::= DOUBLE 
-            {
-              Object RESULT = null;
-		int numleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int numright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Double num = (Double)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  RESULT = num;
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(5/*lit_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 34: // lit_expr ::= ID 
-            {
-              Object RESULT = null;
-		int idleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int idright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		String id = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  RESULT = Interpreter.interpret(id, message, syntaxType);
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(5/*lit_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 33: // lit_expr ::= LPAREN expr RPAREN 
-            {
-              Object RESULT = null;
-		int eleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-1)).left;
-		int eright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-1)).right;
-		Object e = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-1)).value;
-		
-                  RESULT = e;
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(5/*lit_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 32: // expr ::= lit_expr 
-            {
-              Object RESULT = null;
-		int litleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int litright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Object lit = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  RESULT = lit;
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(4/*expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 31: // expr ::= MIN_LONG expr 
-            {
-              Object RESULT = null;
-		int eleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int eright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Object e = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		 
-                  RESULT = e;
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(4/*expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-1)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 30: // expr ::= MINUS expr 
-            {
-              Object RESULT = null;
-		int eleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int eright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Object e = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  if (e instanceof Double)
-                    RESULT = new Double(-((Double) e).doubleValue());
-                  else if (e instanceof Float)
-                    RESULT = new Float(-((Float) e).floatValue());
-                  else if (e instanceof Long)
-                    RESULT = new Long(-((Long) e).longValue());
-                  else if (e instanceof Integer)
-                    RESULT = new Integer(-((Integer) e).intValue());
-                 // else if (e instanceof Short)
-                 //   RESULT = new Short(-((Short) e).shortValue());
-                  else
-                    RESULT = null;
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(4/*expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-1)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 29: // expr ::= PLUS expr 
-            {
-              Object RESULT = null;
-		int eleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int eright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Object e = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  if (e instanceof Double)
-                    RESULT = (Double) e;
-                  else if (e instanceof Float)
-                    RESULT = (Float) e;
-                  else if (e instanceof Long)
-                    RESULT = (Long) e;
-                  else if (e instanceof Integer)
-                    RESULT = (Integer) e;
-                  else if (e instanceof Short)
-                    RESULT = (Short) e;
-                  else
-                    RESULT = null;
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(4/*expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-1)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 28: // expr ::= expr DIVIDE expr 
-            {
-              Object RESULT = null;
-		int e1left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left;
-		int e1right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).right;
-		Object e1 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-2)).value;
-		int e2left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int e2right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  if (e1 instanceof Number && e2 instanceof Number)
-                    RESULT = new Double(((Number) e1).doubleValue()
-                                        / ((Number) e2).doubleValue());
-                  else
-                    RESULT = null;
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(4/*expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 27: // expr ::= expr TIMES expr 
-            {
-              Object RESULT = null;
-		int e1left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left;
-		int e1right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).right;
-		Object e1 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-2)).value;
-		int e2left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int e2right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  if (e1 instanceof Number && e2 instanceof Number)
-                    RESULT = new Double(((Number) e1).doubleValue()
-                                        * ((Number) e2).doubleValue());
-                  else
-                    RESULT = null;
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(4/*expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 26: // expr ::= expr MINUS expr 
-            {
-              Object RESULT = null;
-		int e1left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left;
-		int e1right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).right;
-		Object e1 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-2)).value;
-		int e2left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int e2right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  if (e1 instanceof Number && e2 instanceof Number)
-                    RESULT = new Double(((Number) e1).doubleValue()
-                                        - ((Number) e2).doubleValue());
-                  else
-                    RESULT = null;
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(4/*expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 25: // expr ::= expr PLUS expr 
-            {
-              Object RESULT = null;
-		int e1left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left;
-		int e1right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).right;
-		Object e1 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-2)).value;
-		int e2left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int e2right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  if (e1 instanceof Number && e2 instanceof Number)
-                    RESULT = new Double(((Number) e1).doubleValue()
-                                        + ((Number) e2).doubleValue());
-                  else
-                    RESULT = null;
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(4/*expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 24: // strings ::= STRING 
-            {
-              String RESULT = null;
-		int stleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int stright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		String st = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  RESULT = st.substring(1, st.length() - 1);
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(3/*strings*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 23: // strings ::= strings COMMA STRING 
-            {
-              String RESULT = null;
-		int stsleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left;
-		int stsright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).right;
-		String sts = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-2)).value;
-		int stleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int stright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		String st = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-
-		RESULT = sts + "\b" + st.substring(1, st.length() - 1);
-		CUP$Filter$result = new java_cup.runtime.Symbol(3/*strings*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 22: // comp_expr ::= expr 
-            {
-              Boolean RESULT = null;
-		int eleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int eright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Object e = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  if (e instanceof Boolean)
-                    RESULT = (Boolean) e;
-                  else
-                    RESULT = null;
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 21: // comp_expr ::= ID IS NOT NULL 
-            {
-              Boolean RESULT = null;
-		int idleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-3)).left;
-		int idright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-3)).right;
-		String id = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-3)).value;
-		
-                  RESULT = new Boolean(Interpreter.interpret(id, message,
-                                                             syntaxType)
-                                       != null);
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-3)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 20: // comp_expr ::= ID IS NULL 
-            {
-              Boolean RESULT = null;
-		int idleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left;
-		int idright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).right;
-		String id = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-2)).value;
-		
-                  RESULT = new Boolean(Interpreter.interpret(id, message,
-                                                             syntaxType)
-                                       == null);
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 19: // comp_expr ::= ID NOT LIKE STRING ESCAPE STRING 
-            {
-              Boolean RESULT = null;
-		int idleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-5)).left;
-		int idright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-5)).right;
-		String id = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-5)).value;
-		int st1left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left;
-		int st1right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).right;
-		String st1 = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-2)).value;
-		int st2left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int st2right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		String st2 = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  if (Interpreter.interpret(id, message, syntaxType) == null)
-                    RESULT = null;
-
-                  else if (Interpreter.interpret(id, message, syntaxType)
-                           instanceof String) {
-                    StringBuffer stBuff = new StringBuffer(st1.substring(1, st1.length() - 1));
-                    StringBuffer stBuffRes = new StringBuffer();
-                    stBuffRes.append('^');
-                    char esc = st2.charAt(1);
-                    for (int i = 0; i < stBuff.length(); i++) {
-                      if (stBuff.charAt(i) == esc) {
-                        i++;
-                        stBuffRes.append(stBuff.charAt(i));
-                      } else if (stBuff.charAt(i) == '_')
-                        stBuffRes.append('.');
-                      else if (stBuff.charAt(i) == '%') {
-                        stBuffRes.append('.');
-                        stBuffRes.append('*');
-                        i++ ;
-                      } else {
-                        stBuffRes.append(stBuff.charAt(i));
-                      }
-                    }
-                    stBuffRes.append('$');
-                    st1 = stBuffRes.toString(); 
-                    RESULT = new Boolean(!Pattern.matches(st1, (String) Interpreter.interpret(id, message, syntaxType)));
-                  }
-
-                  // Comparison of non like values returns FALSE.
-                  else
-                    RESULT = new Boolean("FALSE");
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-5)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 18: // comp_expr ::= ID LIKE STRING ESCAPE STRING 
-            {
-              Boolean RESULT = null;
-		int idleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-4)).left;
-		int idright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-4)).right;
-		String id = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-4)).value;
-		int st1left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left;
-		int st1right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).right;
-		String st1 = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-2)).value;
-		int st2left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int st2right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		String st2 = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-
-                  if (Interpreter.interpret(id, message, syntaxType) == null)
-                    RESULT = null;
-
-                  else if (Interpreter.interpret(id, message, syntaxType)
-                           instanceof String) {
-                    StringBuffer stBuff = new StringBuffer(st1.substring(1, st1.length() - 1));
-                    StringBuffer stBuffRes = new StringBuffer();
-                    stBuffRes.append('^');
-                    char esc = st2.charAt(1);
-                    for (int i = 0; i < stBuff.length(); i++) {
-                      if (stBuff.charAt(i) == esc) {
-                        i++;
-                        stBuffRes.append(stBuff.charAt(i));
-                      } else if (stBuff.charAt(i) == '_')
-                        stBuffRes.append('.');
-                      else if (stBuff.charAt(i) == '%') {
-                        stBuffRes.append('.');
-                        stBuffRes.append('*');
-                        i++ ;
-                      } else {
-                        stBuffRes.append(stBuff.charAt(i));
-                      }
-                    }
-                    stBuffRes.append('$');
-                    st1 = stBuffRes.toString(); 
-                    RESULT = new Boolean(Pattern.matches(st1, (String) Interpreter.interpret(id, message, syntaxType)));
-                  }
-
-                  // Comparison of non like values returns FALSE.
-                  else
-                    RESULT = new Boolean("FALSE");
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-4)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 17: // comp_expr ::= ID NOT LIKE STRING 
-            {
-              Boolean RESULT = null;
-		int idleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-3)).left;
-		int idright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-3)).right;
-		String id = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-3)).value;
-		int stleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int stright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		String st = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  if (Interpreter.interpret(id, message, syntaxType) == null)
-                    RESULT = null;
-
-                  else if (Interpreter.interpret(id, message, syntaxType)
-                           instanceof String) {
-                    StringBuffer stBuff =
-                      new StringBuffer(st.substring(1, st.length() - 1));
-                    stBuff.insert(0, '^');
-
-                    for (int i = 0; i < stBuff.length(); i++) {
-                      if (stBuff.charAt(i) == '_')
-                        stBuff.setCharAt(i, '.');
-                      else if (stBuff.charAt(i) == '%') {
-                        stBuff.setCharAt(i, '.');
-                        stBuff.insert(i + 1, '*');
-                        i++ ;
-                      }
-                    }
-                    stBuff.append('$');
-
-                    st = stBuff.toString();
-                    RESULT = new Boolean(!Pattern.matches(st, (String) Interpreter.interpret(id, message, syntaxType)));
-                  }
-                  // Comparison of non like values returns FALSE.
-                  else
-                    RESULT = new Boolean("FALSE");
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-3)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 16: // comp_expr ::= ID LIKE STRING 
-            {
-              Boolean RESULT = null;
-		int idleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left;
-		int idright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).right;
-		String id = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-2)).value;
-		int stleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int stright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		String st = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  if (Interpreter.interpret(id, message, syntaxType) == null)
-                    RESULT = null;
-
-                  if (Interpreter.interpret(id, message, syntaxType)
-                      instanceof String) {
-                    StringBuffer stBuff =
-                      new StringBuffer(st.substring(1, st.length() - 1));
-                    stBuff.insert(0, '^');
-
-                    for (int i = 0; i < stBuff.length(); i++) {
-                      if (stBuff.charAt(i) == '_')
-                        stBuff.setCharAt(i, '.');
-                      else if (stBuff.charAt(i) == '%') {
-                        stBuff.setCharAt(i, '.');
-                        stBuff.insert(i + 1, '*');
-                        i++ ;
-                      }
-                    }
-                    stBuff.append('$');
-
-                    st = stBuff.toString();
-                    RESULT = new Boolean(Pattern.matches(st, (String) Interpreter.interpret(id, message, syntaxType)));
-                  }
-                  // Comparison of non like values returns FALSE.
-                  else
-                    RESULT = new Boolean("FALSE");
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 15: // comp_expr ::= ID NOT IN LPAREN strings RPAREN 
-            {
-              Boolean RESULT = null;
-		int idleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-5)).left;
-		int idright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-5)).right;
-		String id = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-5)).value;
-		int stsleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-1)).left;
-		int stsright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-1)).right;
-		String sts = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-1)).value;
-		
-		Object value = Interpreter.interpret(id, message, syntaxType);
-		if (value == null)
-		  RESULT = null;
-
-		else if (value instanceof String) {
-		  StringTokenizer st = new StringTokenizer(sts, "\b");
-		  boolean match = true;
-		  while (st.hasMoreTokens()) {
-		    String current = st.nextToken();
-		    if (current.equals(value)) {
-		      match = false;
-		      break;
-		    }
-		  }
-		  RESULT = new Boolean(match);
-
-		  // Comparison of non like values returns FALSE.
-		} else
-		  RESULT = new Boolean("FALSE");
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-5)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 14: // comp_expr ::= ID IN LPAREN strings RPAREN 
-            {
-              Boolean RESULT = null;
-		int idleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-4)).left;
-		int idright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-4)).right;
-		String id = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-4)).value;
-		int stsleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-1)).left;
-		int stsright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-1)).right;
-		String sts = (String)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-1)).value;
-		
-		Object value = Interpreter.interpret(id, message, syntaxType);
-		if (value == null)
-		  RESULT = null;
-
-		else if (value instanceof String) {
-		  StringTokenizer st = new StringTokenizer(sts, "\b");
-		  boolean match = false;
-		  while (st.hasMoreTokens()) {
-		    String current = st.nextToken();
-		    if (current.equals(value)) {
-		      match = true;
-		      break;
-		    }
-		  }
-		  RESULT = new Boolean(match);
-		  // Comparison of non like values returns FALSE.
-		} else
-		  RESULT = new Boolean("FALSE");
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-4)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 13: // comp_expr ::= expr NOTBETWEEN expr AND expr 
-            {
-              Boolean RESULT = null;
-		int e1left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-4)).left;
-		int e1right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-4)).right;
-		Object e1 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-4)).value;
-		int e2left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left;
-		int e2right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).right;
-		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-2)).value;
-		int e3left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int e3right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Object e3 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  if (e1 == null || e2 == null || e3 == null)
-                    RESULT = null;
-
-                  else if (e1 instanceof Number && e2 instanceof Number 
-                           && e3 instanceof Number)
-                    RESULT = new Boolean((((Number) e1).doubleValue()
-                                          < ((Number) e2).doubleValue())
-                                         || (((Number) e1).doubleValue()
-                                             > ((Number) e3).doubleValue()));
-
-                  // Comparison of non like values returns FALSE.
-                  else
-                    RESULT = new Boolean("FALSE");
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-4)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 12: // comp_expr ::= expr BETWEEN expr AND expr 
-            {
-              Boolean RESULT = null;
-		int e1left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-4)).left;
-		int e1right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-4)).right;
-		Object e1 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-4)).value;
-		int e2left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left;
-		int e2right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).right;
-		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-2)).value;
-		int e3left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int e3right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Object e3 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  if (e1 == null || e2 == null || e3 == null)
-                    RESULT = null;
-
-                  else if (e1 instanceof Number && e2 instanceof Number
-                           && e3 instanceof Number)
-                    RESULT = new Boolean((((Number) e1).doubleValue()
-                                          >= ((Number) e2).doubleValue())
-                                         && (((Number) e1).doubleValue()
-                                             <= ((Number) e3).doubleValue()));
-
-                  // Comparison of non like values returns FALSE.
-                  else
-                    RESULT = new Boolean("FALSE");
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-4)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 11: // comp_expr ::= expr NEQ expr 
-            {
-              Boolean RESULT = null;
-		int e1left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left;
-		int e1right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).right;
-		Object e1 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-2)).value;
-		int e2left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int e2right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  if (e1 == null || e2 == null)
-                    RESULT = null;
-
-                  else if (e1 instanceof Number && e2 instanceof Number)
-                    RESULT = new Boolean(((Number) e1).doubleValue()
-                                         != ((Number) e2).doubleValue());
-
-                  else if (e1 instanceof Boolean && e2 instanceof Boolean)
-                    RESULT = new Boolean(!
-                                         ((Boolean) e1).equals((Boolean) e2));
-
-                  else if (e1 instanceof String && e2 instanceof String)
-                    RESULT = new Boolean(! ((String) e1).equals((String) e2));
-
-                  else if (e1 instanceof Boolean && e2 instanceof Number)
-                    RESULT = new Boolean(!(
-                      (((Boolean) e1).booleanValue() == true) ? 
-                      (((Number) e2).doubleValue() == 0)? true:false :
-                      (((Number) e2).doubleValue() != 0)? true:false));
-
-                  else if (e1 instanceof Number && e2 instanceof Boolean)
-                    RESULT = new Boolean(!(
-                      (((Boolean) e2).booleanValue() == true) ? 
-                      (((Number) e1).doubleValue() == 0)? true:false :
-                      (((Number) e1).doubleValue() != 0)? true:false));
-
-                  // Comparison of non like values returns FALSE.
-                  else
-                    RESULT = new Boolean("FALSE");
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 10: // comp_expr ::= expr EQ expr 
-            {
-              Boolean RESULT = null;
-		int e1left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left;
-		int e1right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).right;
-		Object e1 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-2)).value;
-		int e2left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int e2right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  if (e1 == null || e2 == null)
-                    RESULT = null;
-
-                  else if (e1 instanceof Number && e2 instanceof Number)
-                    RESULT = new Boolean(((Number) e1).doubleValue()
-                                         == ((Number) e2).doubleValue());
-
-                  else if (e1 instanceof Boolean && e2 instanceof Boolean)
-                    RESULT = new Boolean(((Boolean) e1).equals((Boolean) e2));
-
-                  else if (e1 instanceof String && e2 instanceof String)
-                    RESULT = new Boolean(((String) e1).equals((String) e2));
-
-                  else if (e1 instanceof Boolean && e2 instanceof Number)
-                    RESULT = new Boolean(
-                      (((Boolean) e1).booleanValue() == true) ? 
-                      (((Number) e2).doubleValue() == 0)? true:false :
-                      (((Number) e2).doubleValue() != 0)? true:false);
-
-                  else if (e1 instanceof Number && e2 instanceof Boolean)
-                    RESULT = new Boolean(
-                      (((Boolean) e2).booleanValue() == true) ? 
-                      (((Number) e1).doubleValue() == 0)? true:false :
-                      (((Number) e1).doubleValue() != 0)? true:false);
-
-                  // Comparison of non like values returns FALSE.
-                  else
-                    RESULT = new Boolean("FALSE");
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 9: // comp_expr ::= expr LE expr 
-            {
-              Boolean RESULT = null;
-		int e1left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left;
-		int e1right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).right;
-		Object e1 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-2)).value;
-		int e2left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int e2right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  if (e1 == null || e2 == null)
-                    RESULT = null;
-
-                  else if (e1 instanceof Number && e2 instanceof Number)
-                    RESULT = new Boolean(((Number) e1).doubleValue()
-                                         <= ((Number) e2).doubleValue());
-
-                  // Comparison of non like values returns FALSE.
-                  else
-                    RESULT = new Boolean("FALSE");
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 8: // comp_expr ::= expr LT expr 
-            {
-              Boolean RESULT = null;
-		int e1left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left;
-		int e1right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).right;
-		Object e1 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-2)).value;
-		int e2left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int e2right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  if (e1 == null || e2 == null)
-                    RESULT = null;
-
-                  else if (e1 instanceof Number && e2 instanceof Number)
-                    RESULT = new Boolean(((Number) e1).doubleValue()
-                                         < ((Number) e2).doubleValue());
-
-                  // Comparison of non like values returns FALSE.
-                  else
-                    RESULT = new Boolean("FALSE");
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 7: // comp_expr ::= expr GE expr 
-            {
-              Boolean RESULT = null;
-		int e1left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left;
-		int e1right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).right;
-		Object e1 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-2)).value;
-		int e2left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int e2right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  if (e1 == null || e2 == null)
-                    RESULT = null;
-
-                  else if (e1 instanceof Number && e2 instanceof Number)
-                    RESULT = new Boolean(((Number) e1).doubleValue()
-                                         >= ((Number) e2).doubleValue());
-
-                  // Comparison of non like values returns FALSE.
-                  else
-                    RESULT = new Boolean("FALSE");
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 6: // comp_expr ::= expr GT expr 
-            {
-              Boolean RESULT = null;
-		int e1left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left;
-		int e1right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).right;
-		Object e1 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-2)).value;
-		int e2left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int e2right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  if (e1 == null || e2 == null)
-                    RESULT = null;
-
-                  else if (e1 instanceof Number && e2 instanceof Number)
-                    RESULT = new Boolean(((Number) e1).doubleValue()
-                                         > ((Number) e2).doubleValue());
-
-                  // Comparison of non like values returns FALSE.
-                  else
-                    RESULT = new Boolean("FALSE");
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 5: // comp_expr ::= LPAREN cond_expr RPAREN 
-            {
-              Boolean RESULT = null;
-		int condleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-1)).left;
-		int condright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-1)).right;
-		Boolean cond = (Boolean)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-1)).value;
-		
-                  RESULT = cond;
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 4: // cond_expr ::= comp_expr 
-            {
-              Boolean RESULT = null;
-		int compleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int compright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Boolean comp = (Boolean)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  RESULT = comp;
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(1/*cond_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 3: // cond_expr ::= NOT cond_expr 
-            {
-              Boolean RESULT = null;
-		int condleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int condright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Boolean cond = (Boolean)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  if (cond != null)
-                    RESULT = new Boolean(! cond.booleanValue());
-
-                  else
-                    RESULT = new Boolean("FALSE");
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(1/*cond_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-1)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 2: // cond_expr ::= cond_expr AND cond_expr 
-            {
-              Boolean RESULT = null;
-		int cond1left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left;
-		int cond1right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).right;
-		Boolean cond1 = (Boolean)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-2)).value;
-		int cond2left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int cond2right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Boolean cond2 = (Boolean)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  if (cond1 != null && cond2 != null)
-                    RESULT = new Boolean(cond1.booleanValue()
-                                         && cond2.booleanValue());
-
-                  else
-                    RESULT = new Boolean("FALSE");
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(1/*cond_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 1: // $START ::= cond_expr EOF 
-            {
-              Object RESULT = null;
-		int start_valleft = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-1)).left;
-		int start_valright = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-1)).right;
-		Boolean start_val = (Boolean)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-1)).value;
-		RESULT = start_val;
-              CUP$Filter$result = new java_cup.runtime.Symbol(0/*$START*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-1)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          /* ACCEPT */
-          CUP$Filter$parser.done_parsing();
-          return CUP$Filter$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 0: // cond_expr ::= cond_expr OR cond_expr 
-            {
-              Boolean RESULT = null;
-		int cond1left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left;
-		int cond1right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).right;
-		Boolean cond1 = (Boolean)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-2)).value;
-		int cond2left = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).left;
-		int cond2right = ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right;
-		Boolean cond2 = (Boolean)((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top-0)).value;
-		
-                  if (cond1 != null && cond2 != null)
-                    RESULT = new Boolean(cond1.booleanValue()
-                                         || cond2.booleanValue());
-
-                  else if (cond1 == null && cond2 != null)
-                    RESULT = cond2;
-
-                  else if (cond1 != null && cond2 == null)
-                    RESULT = cond1;
-
-                  else
-                    RESULT = new Boolean("FALSE");
-                
-              CUP$Filter$result = new java_cup.runtime.Symbol(1/*cond_expr*/, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-2)).left, ((java_cup.runtime.Symbol)CUP$Filter$stack.elementAt(CUP$Filter$top-0)).right, RESULT);
-            }
-          return CUP$Filter$result;
-
-          /* . . . . . .*/
-          default:
-            throw new Exception(
-               "Invalid action number found in internal parse table");
-
-        }
+      CUP$Filter$result = new java_cup.runtime.Symbol(5/* lit_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
     }
-}
+      return CUP$Filter$result;
 
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 41: // lit_expr ::= STRING 
+    {
+      Object RESULT = null;
+      String st = (String) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      RESULT = st.substring(1, st.length() - 1);
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(5/* lit_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 40: // lit_expr ::= SHORT 
+    {
+      Object RESULT = null;
+      Short num = (Short) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      RESULT = num;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(5/* lit_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 39: // lit_expr ::= INT 
+    {
+      Object RESULT = null;
+      Integer num = (Integer) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      RESULT = num;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(5/* lit_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 38: // lit_expr ::= MIN_LONG 
+    {
+      Object RESULT = null;
+      Long num = (Long) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      RESULT = num;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(5/* lit_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 37: // lit_expr ::= LONG 
+    {
+      Object RESULT = null;
+      Long num = (Long) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      RESULT = num;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(5/* lit_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 36: // lit_expr ::= FLOAT 
+    {
+      Object RESULT = null;
+      Float num = (Float) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      RESULT = num;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(5/* lit_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 35: // lit_expr ::= DOUBLE 
+    {
+      Object RESULT = null;
+      Double num = (Double) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      RESULT = num;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(5/* lit_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 34: // lit_expr ::= ID 
+    {
+      Object RESULT = null;
+      String id = (String) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      RESULT = Interpreter.interpret(id, message, syntaxType);
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(5/* lit_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 33: // lit_expr ::= LPAREN expr RPAREN 
+    {
+      Object RESULT = null;
+      Object e = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 1)).value;
+
+      RESULT = e;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(5/* lit_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 32: // expr ::= lit_expr 
+    {
+      Object RESULT = null;
+      Object lit = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      RESULT = lit;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(4/* expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 31: // expr ::= MIN_LONG expr 
+    {
+      Object RESULT = null;
+      Object e = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      RESULT = e;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(4/* expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 1)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 30: // expr ::= MINUS expr 
+    {
+      Object RESULT = null;
+      Object e = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      if (e instanceof Double)
+        RESULT = new Double(-((Double) e).doubleValue());
+      else if (e instanceof Float)
+        RESULT = new Float(-((Float) e).floatValue());
+      else if (e instanceof Long)
+        RESULT = new Long(-((Long) e).longValue());
+      else if (e instanceof Integer)
+        RESULT = new Integer(-((Integer) e).intValue());
+      // else if (e instanceof Short)
+      //   RESULT = new Short(-((Short) e).shortValue());
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(4/* expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 1)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 29: // expr ::= PLUS expr 
+    {
+      Object RESULT = null;
+      Object e = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      if (e instanceof Double)
+        RESULT = e;
+      else if (e instanceof Float)
+        RESULT = e;
+      else if (e instanceof Long)
+        RESULT = e;
+      else if (e instanceof Integer)
+        RESULT = e;
+      else if (e instanceof Short)
+        RESULT = e;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(4/* expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 1)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 28: // expr ::= expr DIVIDE expr 
+    {
+      Object RESULT = null;
+      Object e1 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).value;
+      Object e2 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      if (e1 instanceof Number && e2 instanceof Number)
+        RESULT = new Double(((Number) e1).doubleValue() / ((Number) e2).doubleValue());
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(4/* expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 27: // expr ::= expr TIMES expr 
+    {
+      Object RESULT = null;
+      Object e1 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).value;
+      Object e2 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      if (e1 instanceof Number && e2 instanceof Number)
+        RESULT = new Double(((Number) e1).doubleValue() * ((Number) e2).doubleValue());
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(4/* expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 26: // expr ::= expr MINUS expr 
+    {
+      Object RESULT = null;
+      Object e1 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).value;
+      Object e2 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      if (e1 instanceof Number && e2 instanceof Number)
+        RESULT = new Double(((Number) e1).doubleValue() - ((Number) e2).doubleValue());
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(4/* expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 25: // expr ::= expr PLUS expr 
+    {
+      Object RESULT = null;
+      Object e1 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).value;
+      Object e2 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      if (e1 instanceof Number && e2 instanceof Number)
+        RESULT = new Double(((Number) e1).doubleValue() + ((Number) e2).doubleValue());
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(4/* expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 24: // strings ::= STRING 
+    {
+      String RESULT = null;
+      String st = (String) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      RESULT = st.substring(1, st.length() - 1);
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(3/* strings */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 23: // strings ::= strings COMMA STRING 
+    {
+      String RESULT = null;
+      String sts = (String) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).value;
+      String st = (String) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      RESULT = sts + "\b" + st.substring(1, st.length() - 1);
+      CUP$Filter$result = new java_cup.runtime.Symbol(3/* strings */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 22: // comp_expr ::= expr 
+    {
+      Boolean RESULT = null;
+      Object e = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      if (e instanceof Boolean)
+        RESULT = (Boolean) e;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 21: // comp_expr ::= ID IS NOT NULL 
+    {
+      Boolean RESULT = null;
+      String id = (String) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 3)).value;
+
+      RESULT = new Boolean(Interpreter.interpret(id, message, syntaxType) != null);
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 3)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 20: // comp_expr ::= ID IS NULL 
+    {
+      Boolean RESULT = null;
+      String id = (String) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).value;
+
+      RESULT = new Boolean(Interpreter.interpret(id, message, syntaxType) == null);
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 19: // comp_expr ::= ID NOT LIKE STRING ESCAPE STRING 
+    {
+      Boolean RESULT = null;
+      String id = (String) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 5)).value;
+      String st1 = (String) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).value;
+      String st2 = (String) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      if (Interpreter.interpret(id, message, syntaxType) == null)
+        RESULT = null;
+
+      else if (Interpreter.interpret(id, message, syntaxType) instanceof String) {
+        StringBuffer stBuff = new StringBuffer(st1.substring(1, st1.length() - 1));
+        StringBuffer stBuffRes = new StringBuffer();
+        stBuffRes.append('^');
+        char esc = st2.charAt(1);
+        for (int i = 0; i < stBuff.length(); i++) {
+          if (stBuff.charAt(i) == esc) {
+            i++;
+            stBuffRes.append(stBuff.charAt(i));
+          } else if (stBuff.charAt(i) == '_')
+            stBuffRes.append('.');
+          else if (stBuff.charAt(i) == '%') {
+            stBuffRes.append('.');
+            stBuffRes.append('*');
+            i++;
+          } else {
+            stBuffRes.append(stBuff.charAt(i));
+          }
+        }
+        stBuffRes.append('$');
+        st1 = stBuffRes.toString();
+        RESULT = new Boolean(!Pattern.matches(st1, (String) Interpreter.interpret(id, message, syntaxType)));
+      }
+
+      // Comparison of non like values returns FALSE.
+      else
+        RESULT = Boolean.FALSE;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 5)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 18: // comp_expr ::= ID LIKE STRING ESCAPE STRING 
+    {
+      Boolean RESULT = null;
+      String id = (String) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 4)).value;
+      String st1 = (String) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).value;
+      String st2 = (String) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      if (Interpreter.interpret(id, message, syntaxType) == null)
+        RESULT = null;
+
+      else if (Interpreter.interpret(id, message, syntaxType) instanceof String) {
+        StringBuffer stBuff = new StringBuffer(st1.substring(1, st1.length() - 1));
+        StringBuffer stBuffRes = new StringBuffer();
+        stBuffRes.append('^');
+        char esc = st2.charAt(1);
+        for (int i = 0; i < stBuff.length(); i++) {
+          if (stBuff.charAt(i) == esc) {
+            i++;
+            stBuffRes.append(stBuff.charAt(i));
+          } else if (stBuff.charAt(i) == '_')
+            stBuffRes.append('.');
+          else if (stBuff.charAt(i) == '%') {
+            stBuffRes.append('.');
+            stBuffRes.append('*');
+            i++;
+          } else {
+            stBuffRes.append(stBuff.charAt(i));
+          }
+        }
+        stBuffRes.append('$');
+        st1 = stBuffRes.toString();
+        RESULT = new Boolean(Pattern.matches(st1, (String) Interpreter.interpret(id, message, syntaxType)));
+      }
+
+      // Comparison of non like values returns FALSE.
+      else
+        RESULT = Boolean.FALSE;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 4)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 17: // comp_expr ::= ID NOT LIKE STRING 
+    {
+      Boolean RESULT = null;
+      String id = (String) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 3)).value;
+      String st = (String) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      if (Interpreter.interpret(id, message, syntaxType) == null)
+        RESULT = null;
+
+      else if (Interpreter.interpret(id, message, syntaxType) instanceof String) {
+        StringBuffer stBuff = new StringBuffer(st.substring(1, st.length() - 1));
+        stBuff.insert(0, '^');
+
+        for (int i = 0; i < stBuff.length(); i++) {
+          if (stBuff.charAt(i) == '_')
+            stBuff.setCharAt(i, '.');
+          else if (stBuff.charAt(i) == '%') {
+            stBuff.setCharAt(i, '.');
+            stBuff.insert(i + 1, '*');
+            i++;
+          }
+        }
+        stBuff.append('$');
+
+        st = stBuff.toString();
+        RESULT = new Boolean(!Pattern.matches(st, (String) Interpreter.interpret(id, message, syntaxType)));
+      }
+      // Comparison of non like values returns FALSE.
+      else
+        RESULT = Boolean.FALSE;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 3)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 16: // comp_expr ::= ID LIKE STRING 
+    {
+      Boolean RESULT = null;
+      String id = (String) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).value;
+      String st = (String) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      if (Interpreter.interpret(id, message, syntaxType) == null)
+        RESULT = null;
+
+      if (Interpreter.interpret(id, message, syntaxType) instanceof String) {
+        StringBuffer stBuff = new StringBuffer(st.substring(1, st.length() - 1));
+        stBuff.insert(0, '^');
+
+        for (int i = 0; i < stBuff.length(); i++) {
+          if (stBuff.charAt(i) == '_')
+            stBuff.setCharAt(i, '.');
+          else if (stBuff.charAt(i) == '%') {
+            stBuff.setCharAt(i, '.');
+            stBuff.insert(i + 1, '*');
+            i++;
+          }
+        }
+        stBuff.append('$');
+
+        st = stBuff.toString();
+        RESULT = new Boolean(Pattern.matches(st, (String) Interpreter.interpret(id, message, syntaxType)));
+      }
+      // Comparison of non like values returns FALSE.
+      else
+        RESULT = Boolean.FALSE;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 15: // comp_expr ::= ID NOT IN LPAREN strings RPAREN 
+    {
+      Boolean RESULT = null;
+      String id = (String) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 5)).value;
+      String sts = (String) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 1)).value;
+
+      Object value = Interpreter.interpret(id, message, syntaxType);
+      if (value == null)
+        RESULT = null;
+
+      else if (value instanceof String) {
+        StringTokenizer st = new StringTokenizer(sts, "\b");
+        boolean match = true;
+        while (st.hasMoreTokens()) {
+          String current = st.nextToken();
+          if (current.equals(value)) {
+            match = false;
+            break;
+          }
+        }
+        RESULT = new Boolean(match);
+
+        // Comparison of non like values returns FALSE.
+      } else
+        RESULT = Boolean.FALSE;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 5)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 14: // comp_expr ::= ID IN LPAREN strings RPAREN 
+    {
+      Boolean RESULT = null;
+      String id = (String) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 4)).value;
+      String sts = (String) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 1)).value;
+
+      Object value = Interpreter.interpret(id, message, syntaxType);
+      if (value == null)
+        RESULT = null;
+
+      else if (value instanceof String) {
+        StringTokenizer st = new StringTokenizer(sts, "\b");
+        boolean match = false;
+        while (st.hasMoreTokens()) {
+          String current = st.nextToken();
+          if (current.equals(value)) {
+            match = true;
+            break;
+          }
+        }
+        RESULT = new Boolean(match);
+        // Comparison of non like values returns FALSE.
+      } else
+        RESULT = Boolean.FALSE;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 4)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 13: // comp_expr ::= expr NOTBETWEEN expr AND expr 
+    {
+      Boolean RESULT = null;
+      Object e1 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 4)).value;
+      Object e2 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).value;
+      Object e3 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      if (e1 == null || e2 == null || e3 == null)
+        RESULT = null;
+
+      else if (e1 instanceof Number && e2 instanceof Number && e3 instanceof Number)
+        RESULT = new Boolean((((Number) e1).doubleValue() < ((Number) e2).doubleValue())
+            || (((Number) e1).doubleValue() > ((Number) e3).doubleValue()));
+
+      // Comparison of non like values returns FALSE.
+      else
+        RESULT = Boolean.FALSE;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 4)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 12: // comp_expr ::= expr BETWEEN expr AND expr 
+    {
+      Boolean RESULT = null;
+      Object e1 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 4)).value;
+      Object e2 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).value;
+      Object e3 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      if (e1 == null || e2 == null || e3 == null)
+        RESULT = null;
+
+      else if (e1 instanceof Number && e2 instanceof Number && e3 instanceof Number)
+        RESULT = new Boolean((((Number) e1).doubleValue() >= ((Number) e2).doubleValue())
+            && (((Number) e1).doubleValue() <= ((Number) e3).doubleValue()));
+
+      // Comparison of non like values returns FALSE.
+      else
+        RESULT = Boolean.FALSE;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 4)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 11: // comp_expr ::= expr NEQ expr 
+    {
+      Boolean RESULT = null;
+      Object e1 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).value;
+      Object e2 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      if (e1 == null || e2 == null)
+        RESULT = null;
+
+      else if (e1 instanceof Number && e2 instanceof Number)
+        RESULT = new Boolean(((Number) e1).doubleValue() != ((Number) e2).doubleValue());
+
+      else if (e1 instanceof Boolean && e2 instanceof Boolean)
+        RESULT = new Boolean(!((Boolean) e1).equals((Boolean) e2));
+
+      else if (e1 instanceof String && e2 instanceof String)
+        RESULT = new Boolean(!((String) e1).equals((String) e2));
+
+      else if (e1 instanceof Boolean && e2 instanceof Number)
+        RESULT = new Boolean(
+            !((((Boolean) e1).booleanValue() == true) ? (((Number) e2).doubleValue() == 0) ? true : false
+                : (((Number) e2).doubleValue() != 0) ? true : false));
+
+      else if (e1 instanceof Number && e2 instanceof Boolean)
+        RESULT = new Boolean(
+            !((((Boolean) e2).booleanValue() == true) ? (((Number) e1).doubleValue() == 0) ? true : false
+                : (((Number) e1).doubleValue() != 0) ? true : false));
+
+      // Comparison of non like values returns FALSE.
+      else
+        RESULT = Boolean.FALSE;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 10: // comp_expr ::= expr EQ expr 
+    {
+      Boolean RESULT = null;
+      Object e1 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).value;
+      Object e2 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      if (e1 == null || e2 == null)
+        RESULT = null;
+
+      else if (e1 instanceof Number && e2 instanceof Number)
+        RESULT = new Boolean(((Number) e1).doubleValue() == ((Number) e2).doubleValue());
+
+      else if (e1 instanceof Boolean && e2 instanceof Boolean)
+        RESULT = new Boolean(((Boolean) e1).equals((Boolean) e2));
+
+      else if (e1 instanceof String && e2 instanceof String)
+        RESULT = new Boolean(((String) e1).equals((String) e2));
+
+      else if (e1 instanceof Boolean && e2 instanceof Number)
+        RESULT = new Boolean(
+            (((Boolean) e1).booleanValue() == true) ? (((Number) e2).doubleValue() == 0) ? true : false
+                : (((Number) e2).doubleValue() != 0) ? true : false);
+
+      else if (e1 instanceof Number && e2 instanceof Boolean)
+        RESULT = new Boolean(
+            (((Boolean) e2).booleanValue() == true) ? (((Number) e1).doubleValue() == 0) ? true : false
+                : (((Number) e1).doubleValue() != 0) ? true : false);
+
+      // Comparison of non like values returns FALSE.
+      else
+        RESULT = Boolean.FALSE;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 9: // comp_expr ::= expr LE expr 
+    {
+      Boolean RESULT = null;
+      Object e1 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).value;
+      Object e2 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      if (e1 == null || e2 == null)
+        RESULT = null;
+
+      else if (e1 instanceof Number && e2 instanceof Number)
+        RESULT = new Boolean(((Number) e1).doubleValue() <= ((Number) e2).doubleValue());
+
+      // Comparison of non like values returns FALSE.
+      else
+        RESULT = Boolean.FALSE;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 8: // comp_expr ::= expr LT expr 
+    {
+      Boolean RESULT = null;
+      Object e1 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).value;
+      Object e2 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      if (e1 == null || e2 == null)
+        RESULT = null;
+
+      else if (e1 instanceof Number && e2 instanceof Number)
+        RESULT = new Boolean(((Number) e1).doubleValue() < ((Number) e2).doubleValue());
+
+      // Comparison of non like values returns FALSE.
+      else
+        RESULT = Boolean.FALSE;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 7: // comp_expr ::= expr GE expr 
+    {
+      Boolean RESULT = null;
+      Object e1 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).value;
+      Object e2 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      if (e1 == null || e2 == null)
+        RESULT = null;
+
+      else if (e1 instanceof Number && e2 instanceof Number)
+        RESULT = new Boolean(((Number) e1).doubleValue() >= ((Number) e2).doubleValue());
+
+      // Comparison of non like values returns FALSE.
+      else
+        RESULT = Boolean.FALSE;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 6: // comp_expr ::= expr GT expr 
+    {
+      Boolean RESULT = null;
+      Object e1 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).value;
+      Object e2 = ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      if (e1 == null || e2 == null)
+        RESULT = null;
+
+      else if (e1 instanceof Number && e2 instanceof Number)
+        RESULT = new Boolean(((Number) e1).doubleValue() > ((Number) e2).doubleValue());
+
+      // Comparison of non like values returns FALSE.
+      else
+        RESULT = Boolean.FALSE;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 5: // comp_expr ::= LPAREN cond_expr RPAREN 
+    {
+      Boolean RESULT = null;
+      Boolean cond = (Boolean) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 1)).value;
+
+      RESULT = cond;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 4: // cond_expr ::= comp_expr 
+    {
+      Boolean RESULT = null;
+      Boolean comp = (Boolean) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      RESULT = comp;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(1/* cond_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 3: // cond_expr ::= NOT cond_expr 
+    {
+      Boolean RESULT = null;
+      Boolean cond = (Boolean) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      if (cond != null)
+        RESULT = new Boolean(!cond.booleanValue());
+
+      else
+        RESULT = Boolean.FALSE;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(1/* cond_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 1)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 2: // cond_expr ::= cond_expr AND cond_expr 
+    {
+      Boolean RESULT = null;
+      Boolean cond1 = (Boolean) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).value;
+      Boolean cond2 = (Boolean) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      if (cond1 != null && cond2 != null)
+        RESULT = new Boolean(cond1.booleanValue() && cond2.booleanValue());
+
+      else
+        RESULT = Boolean.FALSE;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(1/* cond_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 1: // $START ::= cond_expr EOF 
+    {
+      Object RESULT = null;
+      Boolean start_val = (Boolean) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 1)).value;
+      RESULT = start_val;
+      CUP$Filter$result = new java_cup.runtime.Symbol(0/* $START */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 1)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      /* ACCEPT */
+      CUP$Filter$parser.done_parsing();
+      return CUP$Filter$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 0: // cond_expr ::= cond_expr OR cond_expr 
+    {
+      Boolean RESULT = null;
+      Boolean cond1 = (Boolean) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).value;
+      Boolean cond2 = (Boolean) ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).value;
+
+      if (cond1 != null && cond2 != null)
+        RESULT = new Boolean(cond1.booleanValue() || cond2.booleanValue());
+
+      else if (cond1 == null && cond2 != null)
+        RESULT = cond2;
+
+      else if (cond1 != null && cond2 == null)
+        RESULT = cond1;
+
+      else
+        RESULT = Boolean.FALSE;
+
+      CUP$Filter$result = new java_cup.runtime.Symbol(1/* cond_expr */,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Filter$stack.elementAt(CUP$Filter$top - 0)).right, RESULT);
+    }
+      return CUP$Filter$result;
+
+      /* . . . . . . */
+    default:
+      throw new Exception("Invalid action number found in internal parse table");
+
+    }
+  }
+}
