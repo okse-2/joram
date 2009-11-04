@@ -395,7 +395,7 @@ public class User extends AdministeredObject implements UserMBean {
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public DeadMQueue getDMQ() throws ConnectException, AdminException {
+  public Queue getDMQ() throws ConnectException, AdminException {
     Monitor_GetDMQSettings request;
     request = new Monitor_GetDMQSettings(proxyId);
     Monitor_GetDMQSettingsRep reply;
@@ -404,7 +404,7 @@ public class User extends AdministeredObject implements UserMBean {
     if (reply.getDMQName() == null)
       return null;
 
-    DeadMQueue dmq = new DeadMQueue(reply.getDMQName());
+    Queue dmq = new DeadMQueue(reply.getDMQName());
     if (wrapper != null)
       dmq.setWrapper(wrapper);
 
@@ -420,7 +420,7 @@ public class User extends AdministeredObject implements UserMBean {
    * @exception AdminException  If the request fails.
    */
   public String getDMQId() throws ConnectException, AdminException {
-    DeadMQueue dmq = getDMQ();  
+    Queue dmq = getDMQ();
     if (dmq == null)
       return null;
     else
