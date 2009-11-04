@@ -76,8 +76,11 @@ public class Monitor {
     }
   }
   
+  static int nbmsg = 0;
+  
   static void doReport(Message message) throws JMSException {
-    System.out.println("\n --> Monitoring message received :");
+    nbmsg += 1;
+    System.out.println("\033[2J\n --> Monitoring message received: " + nbmsg);
     Vector v = new Vector();
     Enumeration enumNames = message.getPropertyNames();
     while (enumNames.hasMoreElements()) {
