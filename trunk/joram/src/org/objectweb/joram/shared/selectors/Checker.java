@@ -31,7 +31,8 @@
 
 package org.objectweb.joram.shared.selectors;
 
-import java_cup.runtime.*;
+import java_cup.runtime.Symbol;
+
 import org.objectweb.joram.shared.excepts.SelectorException;
 
 /** CUP v0.10j generated parser.
@@ -363,838 +364,727 @@ class CUP$Checker$actions {
   }
 
   /** Method with the actual generated action code. */
-  public final java_cup.runtime.Symbol CUP$Checker$do_action(
-    int                        CUP$Checker$act_num,
-    java_cup.runtime.lr_parser CUP$Checker$parser,
-    java.util.Stack            CUP$Checker$stack,
-    int                        CUP$Checker$top)
-    throws java.lang.Exception
+  public final java_cup.runtime.Symbol CUP$Checker$do_action(int CUP$Checker$act_num,
+      java_cup.runtime.lr_parser CUP$Checker$parser, java.util.Stack CUP$Checker$stack, int CUP$Checker$top)
+      throws java.lang.Exception {
+    /* Symbol object for return from actions */
+    java_cup.runtime.Symbol CUP$Checker$result;
+
+    /* select the action based on the action number */
+    switch (CUP$Checker$act_num) {
+    /* . . . . . . . . . . . . . . . . . . . . */
+    case 42: // lit_expr ::= BOOLEAN 
     {
-      /* Symbol object for return from actions */
-      java_cup.runtime.Symbol CUP$Checker$result;
+      Object RESULT = null;
+      Boolean bool = (Boolean) ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
 
-      /* select the action based on the action number */
-      switch (CUP$Checker$act_num)
-        {
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 42: // lit_expr ::= BOOLEAN 
-            {
-              Object RESULT = null;
-		int boolleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int boolright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Boolean bool = (Boolean)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  RESULT = bool;
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(5/*lit_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
+      RESULT = bool;
 
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 41: // lit_expr ::= STRING 
-            {
-              Object RESULT = null;
-		int stleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int stright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		String st = (String)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  RESULT = st.substring(1, st.length() - 1);
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(5/*lit_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 40: // lit_expr ::= SHORT 
-            {
-              Object RESULT = null;
-		int numleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int numright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Short num = (Short)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  RESULT = num;
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(5/*lit_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 39: // lit_expr ::= INT 
-            {
-              Object RESULT = null;
-		int numleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int numright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Integer num = (Integer)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  RESULT = num;
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(5/*lit_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 38: // lit_expr ::= MIN_LONG 
-            {
-              Object RESULT = null;
-		int numleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int numright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Long num = (Long)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  RESULT = num;
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(5/*lit_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 37: // lit_expr ::= LONG 
-            {
-              Object RESULT = null;
-		int numleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int numright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Long num = (Long)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  RESULT = num;
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(5/*lit_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 36: // lit_expr ::= FLOAT 
-            {
-              Object RESULT = null;
-		int numleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int numright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Float num = (Float)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  RESULT = num;
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(5/*lit_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 35: // lit_expr ::= DOUBLE 
-            {
-              Object RESULT = null;
-		int numleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int numright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Double num = (Double)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  RESULT = num;
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(5/*lit_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 34: // lit_expr ::= ID 
-            {
-              Object RESULT = null;
-		int idleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int idright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		String id = (String)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  if (id.equals("TRUE") || id.equals("FALSE") || id.equals("NULL"))
-                    throw new SelectorException("Invalid ID TRUE, FALSE or FALSE");
-                  // id type and value are not known at that step!
-                  RESULT = null;
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(5/*lit_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 33: // lit_expr ::= LPAREN expr RPAREN 
-            {
-              Object RESULT = null;
-		int eleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-1)).left;
-		int eright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-1)).right;
-		Object e = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-1)).value;
-		
-                  RESULT = e;
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(5/*lit_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 32: // expr ::= lit_expr 
-            {
-              Object RESULT = null;
-		int litleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int litright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Object lit = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  RESULT = lit;
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(4/*expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 31: // expr ::= MIN_LONG expr 
-            {
-              Object RESULT = null;
-		int eleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int eright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Object e = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		 
-                  RESULT = new Long(0);
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(4/*expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-1)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 30: // expr ::= MINUS expr 
-            {
-              Object RESULT = null;
-		int eleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int eright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Object e = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  if (e instanceof String || e instanceof Boolean)
-                    throw new SelectorException("Numeric type expected"
-                                                + " after '-'");
-                  if (e instanceof Double)
-                    RESULT = new Double(0);
-                  else if (e instanceof Float)
-                    RESULT = new Float(0);
-                  else if (e instanceof Long)
-                    RESULT = new Long(0);
-                  else if (e instanceof Integer)
-                    RESULT = new Integer(0);
-                  else if (e instanceof Short)
-                    RESULT = new Short((short)0);
-                  else
-                    RESULT = new Double(0);
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(4/*expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-1)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 29: // expr ::= PLUS expr 
-            {
-              Object RESULT = null;
-		int eleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int eright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Object e = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  if (e instanceof String || e instanceof Boolean)
-                    throw new SelectorException("Numeric type expected"
-                                                + " after '+'");
-
-                  else 
-                    RESULT = new Double(0);
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(4/*expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-1)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 28: // expr ::= expr DIVIDE expr 
-            {
-              Object RESULT = null;
-		int e1left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left;
-		int e1right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).right;
-		Object e1 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-2)).value;
-		int e2left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int e2right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  if (e1 instanceof String || e1 instanceof Boolean)
-                    throw new SelectorException("Numeric type expected"
-                                                + " before '/'");
-
-                  else if (e2 instanceof String || e2 instanceof Boolean)
-                    throw new SelectorException("Numeric type expected"
-                                                + " after '/'");
-
-                  else 
-                    RESULT = new Double(0);
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(4/*expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 27: // expr ::= expr TIMES expr 
-            {
-              Object RESULT = null;
-		int e1left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left;
-		int e1right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).right;
-		Object e1 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-2)).value;
-		int e2left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int e2right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  if (e1 instanceof String || e1 instanceof Boolean)
-                    throw new SelectorException("Numeric type expected"
-                                                + " before '*'");
-
-                  else if (e2 instanceof String || e2 instanceof Boolean)
-                    throw new SelectorException("Numeric type expected"
-                                                + " after '*'");
-
-                  else 
-                    RESULT = new Double(0);
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(4/*expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 26: // expr ::= expr MINUS expr 
-            {
-              Object RESULT = null;
-		int e1left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left;
-		int e1right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).right;
-		Object e1 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-2)).value;
-		int e2left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int e2right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  if (e1 instanceof String || e1 instanceof Boolean)
-                    throw new SelectorException("Numeric type expected"
-                                                + " before '-'");
-
-                  else if (e2 instanceof String || e2 instanceof Boolean)
-                    throw new SelectorException("Numeric type expected"
-                                                + " after '-'");
-
-                  else 
-                    RESULT = new Double(0);
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(4/*expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 25: // expr ::= expr PLUS expr 
-            {
-              Object RESULT = null;
-		int e1left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left;
-		int e1right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).right;
-		Object e1 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-2)).value;
-		int e2left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int e2right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  if (e1 instanceof String || e1 instanceof Boolean)
-                    throw new SelectorException("Numeric type expected"
-                                                + " before '+'");
-
-                  else if (e2 instanceof String || e2 instanceof Boolean)
-                    throw new SelectorException("Numeric type expected"
-                                                + " after '+'");
-
-                  else 
-                    RESULT = new Double(0);
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(4/*expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 24: // strings ::= STRING 
-            {
-              String RESULT = null;
-		int stleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int stright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		String st = (String)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  RESULT = st.substring(1, st.length() - 1);
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(3/*strings*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 23: // strings ::= strings COMMA STRING 
-            {
-              String RESULT = null;
-		int stsleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left;
-		int stsright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).right;
-		String sts = (String)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-2)).value;
-		int stleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int stright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		String st = (String)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  RESULT = sts + st.substring(1, st.length() - 1);
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(3/*strings*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 22: // comp_expr ::= expr 
-            {
-              Boolean RESULT = null;
-		int eleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int eright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Object e = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  if (e instanceof String || e instanceof Double)
-                    throw new SelectorException("Boolean type expected");
-
-                  RESULT = new Boolean("TRUE");
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 21: // comp_expr ::= ID IS NOT NULL 
-            {
-              Boolean RESULT = null;
-		int idleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-3)).left;
-		int idright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-3)).right;
-		String id = (String)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-3)).value;
-		
-                  RESULT = new Boolean("TRUE");
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-3)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 20: // comp_expr ::= ID IS NULL 
-            {
-              Boolean RESULT = null;
-		int idleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left;
-		int idright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).right;
-		String id = (String)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-2)).value;
-		
-                  RESULT = new Boolean("TRUE");
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 19: // comp_expr ::= ID NOT LIKE STRING ESCAPE STRING 
-            {
-              Boolean RESULT = null;
-		int idleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-5)).left;
-		int idright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-5)).right;
-		String id = (String)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-5)).value;
-		int st1left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left;
-		int st1right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).right;
-		String st1 = (String)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-2)).value;
-		int st2left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int st2right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		String st2 = (String)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  // id type can't be checked at that point!
-                  RESULT = new Boolean("TRUE");
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-5)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 18: // comp_expr ::= ID LIKE STRING ESCAPE STRING 
-            {
-              Boolean RESULT = null;
-		int idleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-4)).left;
-		int idright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-4)).right;
-		String id = (String)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-4)).value;
-		int st1left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left;
-		int st1right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).right;
-		String st1 = (String)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-2)).value;
-		int st2left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int st2right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		String st2 = (String)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  // id type can't be checked at that point!
-                  RESULT = new Boolean("TRUE");
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-4)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 17: // comp_expr ::= ID NOT LIKE STRING 
-            {
-              Boolean RESULT = null;
-		int idleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-3)).left;
-		int idright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-3)).right;
-		String id = (String)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-3)).value;
-		int stleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int stright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		String st = (String)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  // id type can't be checked at that point!
-                  RESULT = new Boolean("TRUE");
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-3)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 16: // comp_expr ::= ID LIKE STRING 
-            {
-              Boolean RESULT = null;
-		int idleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left;
-		int idright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).right;
-		String id = (String)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-2)).value;
-		int stleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int stright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		String st = (String)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  // id type can't be checked at that point!
-                  RESULT = new Boolean("TRUE");
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 15: // comp_expr ::= ID NOT IN LPAREN strings RPAREN 
-            {
-              Boolean RESULT = null;
-		int idleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-5)).left;
-		int idright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-5)).right;
-		String id = (String)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-5)).value;
-		int stsleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-1)).left;
-		int stsright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-1)).right;
-		String sts = (String)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-1)).value;
-		
-                  // id type can't be checked at that point!
-                  RESULT = new Boolean("TRUE");
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-5)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 14: // comp_expr ::= ID IN LPAREN strings RPAREN 
-            {
-              Boolean RESULT = null;
-		int idleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-4)).left;
-		int idright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-4)).right;
-		String id = (String)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-4)).value;
-		int stsleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-1)).left;
-		int stsright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-1)).right;
-		String sts = (String)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-1)).value;
-		
-                  // id type can't be checked at that point!
-                  RESULT = new Boolean("TRUE");
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-4)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 13: // comp_expr ::= expr NOTBETWEEN expr AND expr 
-            {
-              Boolean RESULT = null;
-		int e1left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-4)).left;
-		int e1right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-4)).right;
-		Object e1 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-4)).value;
-		int e2left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left;
-		int e2right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).right;
-		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-2)).value;
-		int e3left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int e3right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Object e3 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  if (e1 instanceof String || e1 instanceof Boolean)
-                    throw new SelectorException("Numeric type expected"
-                                                + " before 'NOT BETWEEN'");
-
-                  else if (e2 instanceof String || e2 instanceof Boolean)
-                    throw new SelectorException("Numeric type expected"
-                                                + " after 'BETWEEN'");
-
-                  else if (e3 instanceof String || e3 instanceof Boolean)
-                    throw new SelectorException("Numeric type expected"
-                                                + " after 'AND'");
-
-                  else
-                    RESULT = new Boolean("TRUE");
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-4)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 12: // comp_expr ::= expr BETWEEN expr AND expr 
-            {
-              Boolean RESULT = null;
-		int e1left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-4)).left;
-		int e1right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-4)).right;
-		Object e1 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-4)).value;
-		int e2left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left;
-		int e2right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).right;
-		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-2)).value;
-		int e3left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int e3right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Object e3 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  if (e1 instanceof String || e1 instanceof Boolean)
-                    throw new SelectorException("Numeric type expected"
-                                                + " before 'BETWEEN'");
-
-                  else if (e2 instanceof String || e2 instanceof Boolean)
-                    throw new SelectorException("Numeric type expected"
-                                                + " after 'BETWEEN'");
-
-                  else if (e3 instanceof String || e3 instanceof Boolean)
-                    throw new SelectorException("Numeric type expected"
-                                                + " after 'AND'");
-
-                  else
-                    RESULT = new Boolean("TRUE");
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-4)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 11: // comp_expr ::= expr NEQ expr 
-            {
-              Boolean RESULT = null;
-		int e1left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left;
-		int e1right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).right;
-		Object e1 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-2)).value;
-		int e2left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int e2right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  RESULT = new Boolean("TRUE");
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 10: // comp_expr ::= expr EQ expr 
-            {
-              Boolean RESULT = null;
-		int e1left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left;
-		int e1right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).right;
-		Object e1 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-2)).value;
-		int e2left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int e2right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  if (e1 instanceof Boolean && e2 instanceof Number)
-                    throw new SelectorException("Invalid id TRUE, FALSE or NULL");
-
-                  RESULT = new Boolean("TRUE");
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 9: // comp_expr ::= expr LE expr 
-            {
-              Boolean RESULT = null;
-		int e1left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left;
-		int e1right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).right;
-		Object e1 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-2)).value;
-		int e2left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int e2right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  if (e1 instanceof String || e1 instanceof Boolean)
-                    throw new SelectorException("Numeric type expected"
-                                                + " before '<='");
-
-                  else if (e2 instanceof String || e2 instanceof Boolean)
-                    throw new SelectorException("Numeric type expected"
-                                                + " after '<='");
-
-                  else
-                    RESULT = new Boolean("TRUE");
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 8: // comp_expr ::= expr LT expr 
-            {
-              Boolean RESULT = null;
-		int e1left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left;
-		int e1right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).right;
-		Object e1 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-2)).value;
-		int e2left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int e2right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  if (e1 instanceof String || e1 instanceof Boolean)
-                    throw new SelectorException("Numeric type expected"
-                                                + " before '<'");
-
-                  else if (e2 instanceof String || e2 instanceof Boolean)
-                    throw new SelectorException("Numeric type expected"
-                                                + " after '<'");
-
-                  else
-                    RESULT = new Boolean("TRUE");
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 7: // comp_expr ::= expr GE expr 
-            {
-              Boolean RESULT = null;
-		int e1left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left;
-		int e1right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).right;
-		Object e1 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-2)).value;
-		int e2left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int e2right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  if (e1 instanceof String || e1 instanceof Boolean)
-                    throw new SelectorException("Numeric type expected"
-                                                + " before '>='");
-
-                  else if (e2 instanceof String || e2 instanceof Boolean)
-                    throw new SelectorException("Numeric type expected"
-                                                + " after '>='");
-
-                  else
-                    RESULT = new Boolean("TRUE");
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 6: // comp_expr ::= expr GT expr 
-            {
-              Boolean RESULT = null;
-		int e1left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left;
-		int e1right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).right;
-		Object e1 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-2)).value;
-		int e2left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int e2right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Object e2 = (Object)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  if (e1 instanceof String || e1 instanceof Boolean)
-                    throw new SelectorException("Numeric type expected"
-                                                + " before '>'");
-
-                  else if (e2 instanceof String || e2 instanceof Boolean)
-                    throw new SelectorException("Numeric type expected"
-                                                + " after '>'");
-
-                  else
-                    RESULT = new Boolean("TRUE");
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 5: // comp_expr ::= LPAREN cond_expr RPAREN 
-            {
-              Boolean RESULT = null;
-		int condleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-1)).left;
-		int condright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-1)).right;
-		Boolean cond = (Boolean)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-1)).value;
-		
-                  RESULT = cond;
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(2/*comp_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 4: // cond_expr ::= comp_expr 
-            {
-              Boolean RESULT = null;
-		int compleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int compright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Boolean comp = (Boolean)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  RESULT = comp;
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(1/*cond_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 3: // cond_expr ::= NOT cond_expr 
-            {
-              Boolean RESULT = null;
-		int condleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int condright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Boolean cond = (Boolean)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  RESULT = new Boolean(! cond.booleanValue());
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(1/*cond_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-1)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 2: // cond_expr ::= cond_expr AND cond_expr 
-            {
-              Boolean RESULT = null;
-		int cond1left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left;
-		int cond1right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).right;
-		Boolean cond1 = (Boolean)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-2)).value;
-		int cond2left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int cond2right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Boolean cond2 = (Boolean)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  RESULT = new Boolean(cond1.booleanValue()
-                                       && cond2.booleanValue());
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(1/*cond_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 1: // $START ::= cond_expr EOF 
-            {
-              Object RESULT = null;
-		int start_valleft = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-1)).left;
-		int start_valright = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-1)).right;
-		Boolean start_val = (Boolean)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-1)).value;
-		RESULT = start_val;
-              CUP$Checker$result = new java_cup.runtime.Symbol(0/*$START*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-1)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          /* ACCEPT */
-          CUP$Checker$parser.done_parsing();
-          return CUP$Checker$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 0: // cond_expr ::= cond_expr OR cond_expr 
-            {
-              Boolean RESULT = null;
-		int cond1left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left;
-		int cond1right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).right;
-		Boolean cond1 = (Boolean)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-2)).value;
-		int cond2left = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).left;
-		int cond2right = ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right;
-		Boolean cond2 = (Boolean)((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top-0)).value;
-		
-                  // Using AND instead of OR so that
-                  // both cond1 and cond2 are checked.
-                  RESULT = new Boolean(cond1.booleanValue()
-                                       && cond2.booleanValue());
-                
-              CUP$Checker$result = new java_cup.runtime.Symbol(1/*cond_expr*/, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-2)).left, ((java_cup.runtime.Symbol)CUP$Checker$stack.elementAt(CUP$Checker$top-0)).right, RESULT);
-            }
-          return CUP$Checker$result;
-
-          /* . . . . . .*/
-          default:
-            throw new Exception(
-               "Invalid action number found in internal parse table");
-
-        }
+      CUP$Checker$result = new java_cup.runtime.Symbol(5/* lit_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
     }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 41: // lit_expr ::= STRING 
+    {
+      Object RESULT = null;
+      String st = (String) ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      RESULT = st.substring(1, st.length() - 1);
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(5/* lit_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 40: // lit_expr ::= SHORT 
+    {
+      Object RESULT = null;
+      Short num = (Short) ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      RESULT = num;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(5/* lit_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 39: // lit_expr ::= INT 
+    {
+      Object RESULT = null;
+      Integer num = (Integer) ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      RESULT = num;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(5/* lit_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 38: // lit_expr ::= MIN_LONG 
+    {
+      Object RESULT = null;
+      Long num = (Long) ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      RESULT = num;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(5/* lit_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 37: // lit_expr ::= LONG 
+    {
+      Object RESULT = null;
+      Long num = (Long) ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      RESULT = num;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(5/* lit_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 36: // lit_expr ::= FLOAT 
+    {
+      Object RESULT = null;
+      Float num = (Float) ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      RESULT = num;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(5/* lit_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 35: // lit_expr ::= DOUBLE 
+    {
+      Object RESULT = null;
+      Double num = (Double) ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      RESULT = num;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(5/* lit_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 34: // lit_expr ::= ID 
+    {
+      Object RESULT = null;
+      String id = (String) ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      if (id.equals("TRUE") || id.equals("FALSE") || id.equals("NULL"))
+        throw new SelectorException("Invalid ID TRUE, FALSE or FALSE");
+      // id type and value are not known at that step!
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(5/* lit_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 33: // lit_expr ::= LPAREN expr RPAREN 
+    {
+      Object RESULT = null;
+      Object e = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 1)).value;
+
+      RESULT = e;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(5/* lit_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 32: // expr ::= lit_expr 
+    {
+      Object RESULT = null;
+      Object lit = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      RESULT = lit;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(4/* expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 31: // expr ::= MIN_LONG expr 
+    {
+      Object RESULT = null;
+      RESULT = new Long(0);
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(4/* expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 1)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 30: // expr ::= MINUS expr 
+    {
+      Object RESULT = null;
+      Object e = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      if (e instanceof String || e instanceof Boolean)
+        throw new SelectorException("Numeric type expected" + " after '-'");
+      if (e instanceof Double)
+        RESULT = new Double(0);
+      else if (e instanceof Float)
+        RESULT = new Float(0);
+      else if (e instanceof Long)
+        RESULT = new Long(0);
+      else if (e instanceof Integer)
+        RESULT = new Integer(0);
+      else if (e instanceof Short)
+        RESULT = new Short((short) 0);
+      else
+        RESULT = new Double(0);
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(4/* expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 1)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 29: // expr ::= PLUS expr 
+    {
+      Object RESULT = null;
+      Object e = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      if (e instanceof String || e instanceof Boolean)
+        throw new SelectorException("Numeric type expected" + " after '+'");
+
+      else
+        RESULT = new Double(0);
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(4/* expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 1)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 28: // expr ::= expr DIVIDE expr 
+    {
+      Object RESULT = null;
+      Object e1 = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).value;
+      Object e2 = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      if (e1 instanceof String || e1 instanceof Boolean)
+        throw new SelectorException("Numeric type expected" + " before '/'");
+
+      else if (e2 instanceof String || e2 instanceof Boolean)
+        throw new SelectorException("Numeric type expected" + " after '/'");
+
+      else
+        RESULT = new Double(0);
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(4/* expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 27: // expr ::= expr TIMES expr 
+    {
+      Object RESULT = null;
+      Object e1 = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).value;
+      Object e2 = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      if (e1 instanceof String || e1 instanceof Boolean)
+        throw new SelectorException("Numeric type expected" + " before '*'");
+
+      else if (e2 instanceof String || e2 instanceof Boolean)
+        throw new SelectorException("Numeric type expected" + " after '*'");
+
+      else
+        RESULT = new Double(0);
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(4/* expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 26: // expr ::= expr MINUS expr 
+    {
+      Object RESULT = null;
+      Object e1 = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).value;
+      Object e2 = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      if (e1 instanceof String || e1 instanceof Boolean)
+        throw new SelectorException("Numeric type expected" + " before '-'");
+
+      else if (e2 instanceof String || e2 instanceof Boolean)
+        throw new SelectorException("Numeric type expected" + " after '-'");
+
+      else
+        RESULT = new Double(0);
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(4/* expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 25: // expr ::= expr PLUS expr 
+    {
+      Object RESULT = null;
+      Object e1 = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).value;
+      Object e2 = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      if (e1 instanceof String || e1 instanceof Boolean)
+        throw new SelectorException("Numeric type expected" + " before '+'");
+
+      else if (e2 instanceof String || e2 instanceof Boolean)
+        throw new SelectorException("Numeric type expected" + " after '+'");
+
+      else
+        RESULT = new Double(0);
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(4/* expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 24: // strings ::= STRING 
+    {
+      String RESULT = null;
+      String st = (String) ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      RESULT = st.substring(1, st.length() - 1);
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(3/* strings */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 23: // strings ::= strings COMMA STRING 
+    {
+      String RESULT = null;
+      String sts = (String) ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).value;
+      String st = (String) ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      RESULT = sts + st.substring(1, st.length() - 1);
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(3/* strings */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 22: // comp_expr ::= expr 
+    {
+      Boolean RESULT = null;
+      Object e = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      if (e instanceof String || e instanceof Double)
+        throw new SelectorException("Boolean type expected");
+
+      RESULT = Boolean.TRUE;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 21: // comp_expr ::= ID IS NOT NULL 
+    {
+      Boolean RESULT = null;
+      RESULT = Boolean.TRUE;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 3)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 20: // comp_expr ::= ID IS NULL 
+    {
+      Boolean RESULT = null;
+      RESULT = Boolean.TRUE;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 19: // comp_expr ::= ID NOT LIKE STRING ESCAPE STRING 
+    {
+      Boolean RESULT = null;
+      // id type can't be checked at that point!
+      RESULT = Boolean.TRUE;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 5)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 18: // comp_expr ::= ID LIKE STRING ESCAPE STRING 
+    {
+      Boolean RESULT = null;
+      // id type can't be checked at that point!
+      RESULT = Boolean.TRUE;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 4)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 17: // comp_expr ::= ID NOT LIKE STRING 
+    {
+      Boolean RESULT = null;
+      // id type can't be checked at that point!
+      RESULT = Boolean.TRUE;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 3)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 16: // comp_expr ::= ID LIKE STRING 
+    {
+      Boolean RESULT = null;
+      // id type can't be checked at that point!
+      RESULT = Boolean.TRUE;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 15: // comp_expr ::= ID NOT IN LPAREN strings RPAREN 
+    {
+      Boolean RESULT = null;
+      // id type can't be checked at that point!
+      RESULT = Boolean.TRUE;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 5)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 14: // comp_expr ::= ID IN LPAREN strings RPAREN 
+    {
+      Boolean RESULT = null;
+      // id type can't be checked at that point!
+      RESULT = Boolean.TRUE;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 4)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 13: // comp_expr ::= expr NOTBETWEEN expr AND expr 
+    {
+      Boolean RESULT = null;
+      Object e1 = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 4)).value;
+      Object e2 = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).value;
+      Object e3 = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      if (e1 instanceof String || e1 instanceof Boolean)
+        throw new SelectorException("Numeric type expected" + " before 'NOT BETWEEN'");
+
+      else if (e2 instanceof String || e2 instanceof Boolean)
+        throw new SelectorException("Numeric type expected" + " after 'BETWEEN'");
+
+      else if (e3 instanceof String || e3 instanceof Boolean)
+        throw new SelectorException("Numeric type expected" + " after 'AND'");
+
+      else
+        RESULT = Boolean.TRUE;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 4)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 12: // comp_expr ::= expr BETWEEN expr AND expr 
+    {
+      Boolean RESULT = null;
+      Object e1 = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 4)).value;
+      Object e2 = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).value;
+      Object e3 = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      if (e1 instanceof String || e1 instanceof Boolean)
+        throw new SelectorException("Numeric type expected" + " before 'BETWEEN'");
+
+      else if (e2 instanceof String || e2 instanceof Boolean)
+        throw new SelectorException("Numeric type expected" + " after 'BETWEEN'");
+
+      else if (e3 instanceof String || e3 instanceof Boolean)
+        throw new SelectorException("Numeric type expected" + " after 'AND'");
+
+      else
+        RESULT = Boolean.TRUE;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 4)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 11: // comp_expr ::= expr NEQ expr 
+    {
+      Boolean RESULT = null;
+      RESULT = Boolean.TRUE;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 10: // comp_expr ::= expr EQ expr 
+    {
+      Boolean RESULT = null;
+      Object e1 = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).value;
+      Object e2 = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      if (e1 instanceof Boolean && e2 instanceof Number)
+        throw new SelectorException("Invalid id TRUE, FALSE or NULL");
+
+      RESULT = Boolean.TRUE;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 9: // comp_expr ::= expr LE expr 
+    {
+      Boolean RESULT = null;
+      Object e1 = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).value;
+      Object e2 = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      if (e1 instanceof String || e1 instanceof Boolean)
+        throw new SelectorException("Numeric type expected" + " before '<='");
+
+      else if (e2 instanceof String || e2 instanceof Boolean)
+        throw new SelectorException("Numeric type expected" + " after '<='");
+
+      else
+        RESULT = Boolean.TRUE;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 8: // comp_expr ::= expr LT expr 
+    {
+      Boolean RESULT = null;
+      Object e1 = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).value;
+      Object e2 = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      if (e1 instanceof String || e1 instanceof Boolean)
+        throw new SelectorException("Numeric type expected" + " before '<'");
+
+      else if (e2 instanceof String || e2 instanceof Boolean)
+        throw new SelectorException("Numeric type expected" + " after '<'");
+
+      else
+        RESULT = Boolean.TRUE;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 7: // comp_expr ::= expr GE expr 
+    {
+      Boolean RESULT = null;
+      Object e1 = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).value;
+      Object e2 = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      if (e1 instanceof String || e1 instanceof Boolean)
+        throw new SelectorException("Numeric type expected" + " before '>='");
+
+      else if (e2 instanceof String || e2 instanceof Boolean)
+        throw new SelectorException("Numeric type expected" + " after '>='");
+
+      else
+        RESULT = Boolean.TRUE;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 6: // comp_expr ::= expr GT expr 
+    {
+      Boolean RESULT = null;
+      Object e1 = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).value;
+      Object e2 = ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      if (e1 instanceof String || e1 instanceof Boolean)
+        throw new SelectorException("Numeric type expected" + " before '>'");
+
+      else if (e2 instanceof String || e2 instanceof Boolean)
+        throw new SelectorException("Numeric type expected" + " after '>'");
+
+      else
+        RESULT = Boolean.TRUE;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 5: // comp_expr ::= LPAREN cond_expr RPAREN 
+    {
+      Boolean RESULT = null;
+      Boolean cond = (Boolean) ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 1)).value;
+
+      RESULT = cond;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(2/* comp_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 4: // cond_expr ::= comp_expr 
+    {
+      Boolean RESULT = null;
+      Boolean comp = (Boolean) ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      RESULT = comp;
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(1/* cond_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 3: // cond_expr ::= NOT cond_expr 
+    {
+      Boolean RESULT = null;
+      Boolean cond = (Boolean) ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      RESULT = new Boolean(!cond.booleanValue());
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(1/* cond_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 1)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 2: // cond_expr ::= cond_expr AND cond_expr 
+    {
+      Boolean RESULT = null;
+      Boolean cond1 = (Boolean) ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).value;
+      Boolean cond2 = (Boolean) ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      RESULT = new Boolean(cond1.booleanValue() && cond2.booleanValue());
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(1/* cond_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 1: // $START ::= cond_expr EOF 
+    {
+      Object RESULT = null;
+      Boolean start_val = (Boolean) ((java_cup.runtime.Symbol) CUP$Checker$stack
+          .elementAt(CUP$Checker$top - 1)).value;
+      RESULT = start_val;
+      CUP$Checker$result = new java_cup.runtime.Symbol(0/* $START */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 1)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      /* ACCEPT */
+      CUP$Checker$parser.done_parsing();
+      return CUP$Checker$result;
+
+      /* . . . . . . . . . . . . . . . . . . . . */
+    case 0: // cond_expr ::= cond_expr OR cond_expr 
+    {
+      Boolean RESULT = null;
+      Boolean cond1 = (Boolean) ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).value;
+      Boolean cond2 = (Boolean) ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).value;
+
+      // Using AND instead of OR so that
+      // both cond1 and cond2 are checked.
+      RESULT = new Boolean(cond1.booleanValue() && cond2.booleanValue());
+
+      CUP$Checker$result = new java_cup.runtime.Symbol(1/* cond_expr */,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 2)).left,
+          ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 0)).right, RESULT);
+    }
+      return CUP$Checker$result;
+
+      /* . . . . . . */
+    default:
+      throw new Exception("Invalid action number found in internal parse table");
+
+    }
+  }
 }
 
