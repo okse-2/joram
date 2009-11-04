@@ -45,13 +45,14 @@ public class MonitoringHelper {
   
   public static void getJMXValues(Message message, Vector elements) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "MonitoringHelper.getJMXValues()");
+      logger.log(BasicLevel.DEBUG, "MonitoringHelper.getJMXValues() -> " + elements.size());
     
-    logger.log(BasicLevel.FATAL, "MonitoringHelper.getJMXValues() -> " + elements.size());
     for (int i=0; i<elements.size(); i++) {
       MonitoringElement element = (MonitoringElement) elements.elementAt(i);
 
-      logger.log(BasicLevel.FATAL, "MonitoringHelper.getJMXValues() -> " + element.mbean);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "MonitoringHelper.getJMXValues() -> " + element.mbean);
+      
       try {
         Set mBeans = MXWrapper.queryNames(new ObjectName(element.mbean));
         if (mBeans != null) {
@@ -88,5 +89,58 @@ public class MonitoringHelper {
     Object value = MXWrapper.getAttribute(mbeanName, attrName);
     if (value != null)
       message.setProperty(mbeanName + ":" + attrName, value);
+  }
+  
+  /**
+   * Returns the comma separated list of all monitored attributes.
+   * 
+   * @param elements the various elements to monitor.
+   * @return the comma separated list of all monitored attributes.
+   */
+  public static String[] getMonitoredAttributes(Vector elements) {
+    String[] ret = new String[elements.size()];
+    
+    for (int i=0; i<ret.length; i++) {
+      StringBuffer strbuf = new StringBuffer();
+      MonitoringElement element = (MonitoringElement) elements.elementAt(i);
+      strbuf.append(element.mbean).append('=').append(element.attributes[0]);
+      for (int j=1; j<element.attributes.length; j++)
+        strbuf.append(',').append(element.attributes[j]);
+      ret[i] = strbuf.toString();
+      strbuf.setLength(0);
+    }
+
+    return ret;
+  }
+  
+  /**
+   * Add the specified attributes to the list of monitored attributes.
+   * If the Mbean is already monitored, the specified list of attributes
+   * overrides the existing one.
+   * 
+   * @param elements    the various elements to monitor.
+   * @param MBeanName   the name of the MBean.
+   * @param attributes  the comma separated list of attributes to monitor.
+   */
+  public static void addMonitoredAttributes(Vector elements, String MBeanName, String attributes) {
+    elements.add(new MonitoringElement(MBeanName, attributes));
+  }
+  
+  /**
+   * Removes all the attributes of the specified MBean in the list of
+   * monitored attributes.
+   * 
+   * @param elements the various elements to monitor.
+   * @param mbean     the name of the MBean.
+   */
+  public static void delMonitoredAttributes(Vector elements, String mbean) {
+    for (int i=0; i<elements.size();) {
+      MonitoringElement element = (MonitoringElement) elements.elementAt(i);
+      if (element.mbean.equals(mbean)) {
+        elements.removeElementAt(i);
+      } else {
+        i++;
+      }
+    }
   }
 }

@@ -23,9 +23,52 @@
 package org.objectweb.joram.mom.dest;
 
 /**
- *
+ * JMX interface for the monitoring queue.
  */
 public interface MonitoringQueueImplMBean extends QueueImplMBean {
+  /**
+   * Returns true if the messages produced are persistent.
+   * 
+   * @return true if the messages produced are persistent.
+   */
+  public boolean isMessagePersistent();
+  
+  /**
+   * Sets the DeliveryMode value for the produced messages.
+   * if the parameter is true the messages produced are persistent.
+   * 
+   * @param isPersistent if true the messages produced are persistent.
+   */
+  public void setMessagePersistent(boolean isPersistent);
+  
+  /**
+   * Returns the priority  of produced messages.
+   * 
+   * @return the priority of produced messages.
+   */
+  public int getPriority();
+
+  /**
+   * Sets the priority of produced messages.
+   * 
+   * @param priority the priority to set.
+   */
+  public void setPriority(int priority);
+  
+  /**
+   * Returns the expiration value for produced messages.
+   * 
+   * @return the expiration value for produced messages.
+   */
+  public long getExpiration();
+
+  /**
+   * Sets the expiration value for produced messages.
+   * 
+   * @param expiration the expiration to set.
+   */
+  public void setExpiration(long expiration);
+
   /**
    * Returns the comma separated list of all monitored attributes.
    * 
