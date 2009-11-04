@@ -51,11 +51,66 @@ public class MonitoringQueueImpl extends QueueImpl implements MonitoringQueueImp
   /** Tells if the messages produced are persistent. */
   private boolean isPersistent = false;
   
+  /**
+   * Returns true if the messages produced are persistent.
+   * 
+   * @return true if the messages produced are persistent.
+   */
+  public boolean isMessagePersistent() {
+    return isPersistent;
+  }
+  
+  /**
+   * Sets the DeliveryMode value for the produced messages.
+   * if the parameter is true the messages produced are persistent.
+   * 
+   * @param isPersistent if true the messages produced are persistent.
+   */
+  public void setMessagePersistent(boolean isPersistent) {
+    this.isPersistent = isPersistent;
+  }
+  
   /** The priority of produced messages. */
   private int priority = 4;
   
+  /**
+   * Returns the priority  of produced messages.
+   * 
+   * @return the priority of produced messages.
+   */
+  public int getPriority() {
+    return priority;
+  }
+
+  /**
+   * Sets the priority of produced messages.
+   * 
+   * @param priority the priority to set.
+   */
+  public void setPriority(int priority) {
+    this.priority = priority;
+  }
+
   /** The duration of produced messages. */
   private long expiration = -1;
+
+  /**
+   * Returns the expiration value for produced messages.
+   * 
+   * @return the expiration value for produced messages.
+   */
+  public long getExpiration() {
+    return expiration;
+  }
+
+  /**
+   * Sets the expiration value for produced messages.
+   * 
+   * @param expiration the expiration to set.
+   */
+  public void setExpiration(long expiration) {
+    this.expiration = expiration;
+  }
 
   /**
    * Constructs a <code>MonitoringQueueImpl</code> instance.
@@ -189,17 +244,7 @@ public class MonitoringQueueImpl extends QueueImpl implements MonitoringQueueImp
    * @return the comma separated list of all monitored attributes.
    */
   public String[] getMonitoredAttributes() {
-    String[] ret = new String[elements.size()];
-    
-    for (int i=0; i<ret.length; i++) {
-      StringBuffer strbuf = new StringBuffer();
-      MonitoringElement element = (MonitoringElement) elements.elementAt(i);
-      strbuf.append(element.mbean).append('=');
-      for (int j=0; j<element.attributes.length; j++)
-        strbuf.append(element.attributes[j]).append(',');
-    }
-
-    return ret;
+    return MonitoringHelper.getMonitoredAttributes(elements);
   }
   
   /**
@@ -211,7 +256,7 @@ public class MonitoringQueueImpl extends QueueImpl implements MonitoringQueueImp
    * @param attributes  the comma separated list of attributes to monitor.
    */
   public void addMonitoredAttributes(String MBeanName, String attributes) {
-    elements.add(new MonitoringElement(MBeanName, attributes));
+    MonitoringHelper.addMonitoredAttributes(elements, MBeanName, attributes);
   }
   
   /**
@@ -221,14 +266,7 @@ public class MonitoringQueueImpl extends QueueImpl implements MonitoringQueueImp
    * @param mbean the name of the MBean.
    */
   public void delMonitoredAttributes(String mbean) {
-    for (int i=0; i<elements.size();) {
-      MonitoringElement element = (MonitoringElement) elements.elementAt(i);
-      if (element.mbean.equals(mbean)) {
-        elements.removeElementAt(i);
-      } else {
-        i++;
-      }
-    }
+    MonitoringHelper.delMonitoredAttributes(elements, mbean);
   }
 
   public String toString() {
