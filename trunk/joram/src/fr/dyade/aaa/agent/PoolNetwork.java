@@ -1131,14 +1131,15 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
             }
 //            // Be careful, don't send the current message it will be sent in order with all
 //            // other messages from sendList.
-//            continue;
+            if (session == null)
+              continue;
           }
 
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG, getName() + ", send(" + msgToSend + ')');
-          
+
           // Send a message 
-          if (! msgToSend.isEmpty()) session.send();
+          if (!msgToSend.isEmpty()) session.send();
 
           // Release this sender if needed
           waiting = true;
@@ -1204,7 +1205,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
           nbFree -= 1;
           Sender sender = free[nbFree];
           free[nbFree] = null; /* to let gc do its work */
-
+          
           sender.session = session;
           session.sender = sender;
         }
@@ -1318,7 +1319,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     public void stop() {
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, getName() + "poolSender.stop()");
-      
+
       // Stops all senders associated to a network session.
       for (int i=0; i<sessions.length; i++) {
         if ((sessions[i] != null) && (sessions[i].sender != null)) {
@@ -1326,16 +1327,28 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
           sessions[i].sender = null;
           sender.session = null;
           sender.stop(); 
-          
+          sessions[i] = null;
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG, getName() + "senders["+i+"].stop() done.");
         }
       }
+      
       // Stops free sender kept in the pool.
       while (nbFree > 0) {
         nbFree -= 1;
         free[nbFree].stop(); free[nbFree] = null;
         
+      }
+      
+      // Stops all pending senders
+      for (int i = 0; i<senders.size(); i++) {
+        Sender sender = (Sender) senders.get(i);
+        if (sender != null && sender.isRunning()) {
+          sender.session = null;
+          sender.stop(); 
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG, getName() + "senders["+i+"].stop() done.");
+        }
       }
     }
   }
