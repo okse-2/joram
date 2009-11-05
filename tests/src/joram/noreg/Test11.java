@@ -34,7 +34,6 @@ import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 
-
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
@@ -81,12 +80,13 @@ public class Test11 extends BaseTest {
   }
 
   public void run() {
+    short sid = 0;
     try {
       AgentServer.init((short) 0, "s0", null);
       AgentServer.start();
 
       Thread.sleep(1000L);
-      short sid = Integer.getInteger("sid", 0).shortValue();
+      sid = Integer.getInteger("sid", 0).shortValue();
       boolean asynchronous = Boolean.getBoolean("async");
 
       if (sid != 0) {
@@ -189,13 +189,13 @@ public class Test11 extends BaseTest {
 
       AdminModule.disconnect();
 
-      if (sid != 0)
-        framework.TestCase.stopAgentServer(sid);
-
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);
     } finally {
+      if (sid != 0) {
+        framework.TestCase.stopAgentServer(sid);
+      }
       AgentServer.stop();
       endTest();
     }
