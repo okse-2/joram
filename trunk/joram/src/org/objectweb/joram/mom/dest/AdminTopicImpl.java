@@ -1016,7 +1016,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
         } catch (ClassNotFoundException cnfe) {
           dest = (Destination) AgentServer.getResolverRepository().resolveClass(className).newInstance();
         }
-        if (destName != null) dest.name = destName;
+        dest.setName(destName);
         ((AdminDestinationItf) dest).init(adminId, properties);
       } catch (Exception exc) {
         logger.log(BasicLevel.ERROR,
@@ -1234,9 +1234,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
         //        }
 
         UserAgent proxy = new UserAgent();
-        if (name != null) {
-          proxy.name = name;
-        }
+        proxy.setName(name);
         proxId = proxy.getId();
 
         try {

@@ -149,17 +149,19 @@ public abstract class Agent implements AgentMBean, Serializable {
    * is detailed in <a href="AgentId.html">AgentId</a> class.
    */
   transient AgentId id;
+  
   /** Symbolic name of the agent */
-  public transient String name;
+  transient String name;
 
   /**
    * Returns this <code>Agent</code>'s name.
+   * If the name is not set returns the string representation of its unique id.
    *
    * @return this <code>Agent</code>'s name.
    */
   public String getName() {
-    if ((name == null) || (name == nullName)) {
-      return getClass().getName() + id.toString();
+    if ((name == null) || (name.length() == 0)) {
+      return id.toString();
     } else {
       return name;
     }
@@ -171,10 +173,7 @@ public abstract class Agent implements AgentMBean, Serializable {
    * @param name	the <code>Agent</code>'s name.
    */
   public void setName(String name) {
-    if (name == null)
-      this.name = nullName;
-    else
-      this.name = name;
+    this.name = name;
   }
 
   /**
@@ -194,8 +193,6 @@ public abstract class Agent implements AgentMBean, Serializable {
     return fr.dyade.aaa.agent.Debug.A3Agent;
   }
 
-  public static final String nullName = "";
-
   /**
    *  the <code>last</code> variable contains the virtual time of the
    * last access. It is used by swap-out policy.
@@ -204,18 +201,22 @@ public abstract class Agent implements AgentMBean, Serializable {
    */
   transient long last;
 
-  private void writeObject(java.io.ObjectOutputStream out)
-    throws IOException {
+  public static final String emptyString = "";
+
+  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+    if (name == null)
+      out.writeUTF(emptyString);
+    else
       out.writeUTF(name);
-      out.writeBoolean(fixed);
+    out.writeBoolean(fixed);
   }
 
-  private void readObject(java.io.ObjectInputStream in)
-    throws IOException, ClassNotFoundException {
-      if ((name = in.readUTF()).equals(nullName))
-	name = nullName;
-      fixed = in.readBoolean();
-      updated = true;
+  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+    name = in.readUTF();
+    if (name.length() == 0)
+      name = null;
+    fixed = in.readBoolean();
+    updated = true;
   }
 
   /**
@@ -345,10 +346,7 @@ public abstract class Agent implements AgentMBean, Serializable {
   }
 
   private void initState(String name, boolean fixed, AgentId id) {
-    if (name == null)
-      this.name = nullName;
-    else
-      this.name = name;
+    this.name = name;
     this.fixed = fixed;
     this.id = id;
     // Get the logging monitor from current server MonologLoggerFactory
@@ -530,20 +528,20 @@ public abstract class Agent implements AgentMBean, Serializable {
     try {
       MXWrapper.registerMBean(this, "AgentServer", getMBeanName());
     } catch (Exception exc) {
-      logmon.log(BasicLevel.WARN, getName() + " jmx failed", exc);
+      logmon.log(BasicLevel.WARN,
+                 "Agent" + id + " [" + name + "] jmx failed", exc);
     }
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
-                 "Agent" + id + " [" + name +
-                 (firstTime?"] , first initialized":"] , initialized"));
+                 "Agent" + id + " [" + name + "], initialized: " + firstTime);
   }
 
   private String getMBeanName() {
     StringBuffer strbuf = new StringBuffer();
     strbuf.append("server=").append(AgentServer.getName());
     strbuf.append(",cons=Engine#").append(getId().getTo());
-    if (name == nullName)
+    if ((name == null) || (name.length() == 0))
       strbuf.append(",agent=").append(getAgentId());
     else
       strbuf.append(",agent=").append(name).append('[').append(getAgentId()).append(']');
@@ -697,7 +695,12 @@ public abstract class Agent implements AgentMBean, Serializable {
     try {
       MXWrapper.unregisterMBean("AgentServer", getMBeanName());
     } catch (Exception exc) {
-      logmon.log(BasicLevel.WARN, getName() + " jmx failed", exc);
+      logmon.log(BasicLevel.WARN,
+                 "Agent" + id + " [" + name + "] jmx failed", exc);
     }
+
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG,
+                 "Agent" + id + " [" + name + "],  finalize: " + lastTime);
   }
 }
