@@ -218,12 +218,31 @@ public class Properties implements Cloneable {
   }
 
   /**
-   * Maps the specified <code>key</code> to the specified 
-   * <code>value</code> in this hashtable. Neither the key nor the 
-   * value can be <code>null</code>. <p>
-   *
-   * The value can be retrieved by calling the <code>get</code> method 
-   * with a key that is equal to the original key. 
+   * Calls the method put.
+   * <p>
+   * Provided to Enforce the use of primitive type for values.
+   * The value returned is the result of the call to put.
+   * 
+   * @param key     the key to be placed into this property object.
+   * @param value   the value corresponding to key.
+   * @return        the previous value of the specified key in this property object, or null if it did not have one.
+   */
+  public Object setProperty(String key, Object value) throws ClassCastException {
+    if ((value instanceof Number) || (value instanceof String)) {
+      return put(key, value);
+    }
+    throw new ClassCastException("Bad property value: " + value.getClass());
+  }
+  
+  /**
+   * Maps the specified <code>key</code> to the specified <code>value</code>
+   * in this hashtable. Neither the key nor the value can be <code>null</code>.
+   * <p>
+   * The value can be retrieved by calling the <code>get</code> method with a
+   * key that is equal to the original key. 
+   * 
+   * Be careful only primitive type can be used as value, in the other case an
+   * exception will be thrown at serialization.
    *
    * @param      key     the hashtable key.
    * @param      value   the value.
@@ -235,9 +254,8 @@ public class Properties implements Cloneable {
    */
   public synchronized Object put(String key, Object value) {
     // Make sure the value is not null
-    if (value == null) {
-      throw new NullPointerException();
-    }
+    if (value == null) throw new NullPointerException();
+
 
     // Makes sure the key is not already in the hashtable.
     Entry tab[] = table;
