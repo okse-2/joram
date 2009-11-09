@@ -38,7 +38,7 @@ import framework.TestCase;
  *        - stop server 1, delete directory s1
  *        - start server 1, lookup with ctx1
  *        - bind /B with ctx0 and lookup with ctx1,ctx2
- *
+ * TODO (AF): this test should be in the nocoupling package.
  */
 
 
@@ -103,6 +103,8 @@ public class JndiTest6 extends TestCase {
       ctx2.createSubcontext("/S2");
       ctx2.bind("/S2/C", "C");
 
+      Thread.sleep(1500);
+      
       // Verify data on S0
       System.out.println("Verify on S0");
       assertEquals("A", ctx0.lookup("/S0/A"));
@@ -132,7 +134,6 @@ public class JndiTest6 extends TestCase {
       
       // rebinds object on S1
       System.out.println("Rebind on S1");
-//       ctx1 = new InitialContext(env1);
       try {
         ctx1.createSubcontext("/S1");
       } catch (Exception exc) {
@@ -140,7 +141,9 @@ public class JndiTest6 extends TestCase {
       }
       ctx1.rebind("/S1/B", "B1");
       
-      // Verify data on S2
+      Thread.sleep(1500);
+
+      // Verify data on S1
       System.out.println("Verify on S1");
       assertEquals("A", ctx1.lookup("/S0/A"));
       assertEquals("B1", ctx1.lookup("/S1/B"));
@@ -148,7 +151,7 @@ public class JndiTest6 extends TestCase {
       // Verify data on S0
       System.out.println("Verify on S0");
       assertEquals("B1", ctx0.lookup("/S1/B"));
-      // Verify data on S1
+      // Verify data on S2
       System.out.println("Verify on S2");
       assertEquals("B1", ctx2.lookup("/S1/B"));
     } catch (Exception exc) {
