@@ -524,12 +524,16 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
   }
 
   /**
-   * Overrides the destination method to add pending message counter
+   * This method allows to exclude some JMX attribute of getJMXStatistics method.
+   * It excludes.
+   * 
+   * @param attrName name of attribute to test.
+   * @return true if the attribute is a valid one.
    */
-  protected Hashtable getStatisticHashtable() {
-    Hashtable stats = super.getStatisticHashtable();
-    stats.put("pendingMessageCount", new Long(getPendingMessageCount()));
-    return stats;
+  protected boolean isValidJMXAttribute(String attrName) {
+    if ("Messages".equals(attrName))
+      return false;
+    return super.isValidJMXAttribute(attrName);
   }
 
   /**
