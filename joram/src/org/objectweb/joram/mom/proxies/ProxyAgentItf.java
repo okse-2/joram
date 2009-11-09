@@ -51,4 +51,6 @@ public interface ProxyAgentItf {
   public void setSave();
 
   public String getName();
+  
+  public String getMBeanName();
 }
