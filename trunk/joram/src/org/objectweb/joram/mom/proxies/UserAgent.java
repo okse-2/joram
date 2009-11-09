@@ -119,25 +119,30 @@ public final class UserAgent extends Agent implements BagSerializer, ProxyAgentI
     cleaningTask = new WakeUpTask(getId(), WakeUpNot.class);
     cleaningTask.schedule(proxyImpl.getPeriod());
     try {
-      MXWrapper.registerMBean(proxyImpl, "Joram#"+AgentServer.getServerId(), getMBeanName());
+      MXWrapper.registerMBean(proxyImpl, getMBeanName());
     } catch (Exception exc) {
-      logger.log(BasicLevel.WARN, this + " jmx failed", exc);
+      logger.log(BasicLevel.DEBUG, this + " jmx failed", exc);
     }
   }
 
   /** Finalizes the agent before it is garbaged. */
   public void agentFinalize(boolean lastTime) {
     try {
-      MXWrapper.unregisterMBean("Joram#"+AgentServer.getServerId(), getMBeanName());
+      MXWrapper.unregisterMBean(getMBeanName());
     } catch (Exception exc) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, this + " jmx failed", exc);
+      logger.log(BasicLevel.DEBUG, this + " jmx failed", exc);
     }
     super.agentFinalize(lastTime);
   }
 
-  private String getMBeanName() {
-    return new StringBuffer().append("type=User").append(",name=").append((name == nullName) ? getId().toString() : name).toString();
+  public String getMBeanName() {
+    StringBuffer strbuf = new StringBuffer();
+    
+    strbuf.append("Joram#").append(AgentServer.getServerId());
+    strbuf.append(':');
+    strbuf.append("type=User,name=").append(getName());
+    
+    return strbuf.toString();
   }
 
   /**
