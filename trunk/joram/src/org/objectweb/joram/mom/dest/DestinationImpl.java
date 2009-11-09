@@ -30,6 +30,9 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
+import javax.management.MBeanAttributeInfo;
+import javax.management.ObjectName;
+
 import org.objectweb.joram.mom.notifications.AdminReply;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.DestinationAdminRequestNot;
@@ -62,6 +65,7 @@ import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  * The <code>DestinationImpl</code> class implements the common behaviour of
@@ -87,6 +91,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    * Reference to the agent hosting the destination.
    */
   protected transient Destination agent;
+  
   /** Identifier of the agent hosting the destination. */
   public final AgentId getId() {
   	return (agent == null)?AgentId.nullId:agent.getId();
@@ -428,24 +433,56 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    *
    * @exception AccessException  If the requester is not the administrator.
    */
-  public void monitGetStat(AgentId from, Monit_GetStat not) throws AccessException {
+  public final void monitGetStat(AgentId from, Monit_GetStat not) throws AccessException {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
-    forward(from, new Monit_GetStatRep(not, getStatisticHashtable()));
+    forward(from, new Monit_GetStatRep(not, getJMXStatistics()));
   }
 
   /**
-   * Gets some statistics about the destination
+   * This method allows to exclude some JMX attribute of getJMXStatistics method.
+   * It must be overloaded in subclass.
    * 
-   * @return a Hashtable with some information statistics about the destination.
-   *         Keys are String describing the values.
+   * @param attrName name of attribute to test.
+   * @return true if the attribute is a valid one.
    */
-  protected Hashtable getStatisticHashtable() {
-    Hashtable stats = new Hashtable();
-    stats.put("nbMsgsReceiveSinceCreation", new Long(getNbMsgsReceiveSinceCreation()));
-    stats.put("nbMsgsDeliverSinceCreation", new Long(getNbMsgsDeliverSinceCreation()));
-    stats.put("nbMsgsSendToDMQSinceCreation", new Long(getNbMsgsSentToDMQSinceCreation()));
-    stats.put("creationDate", new Long(creationDate));
+  protected boolean isValidJMXAttribute(String attrName) {
+    if (attrName == null)
+      return false;
+    return true;
+  }
+  
+  /**
+   * Returns values of all valid JMX attributes about the destination.
+   * 
+   * @return a Hashtable containing the values of all valid JMX attributes about the destination.
+   *         The keys are the name of corresponding attributes.
+   */
+  protected final Hashtable getJMXStatistics() {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "DestinationImpl.getJMXStatistics()");
+
+    Hashtable stats = null;
+
+    try {
+      ObjectName mbeanName = new ObjectName(agent.getMBeanName());
+
+      MBeanAttributeInfo[] attributes = MXWrapper.getAttributes(mbeanName);
+      stats = new Hashtable(attributes.length);
+      if (attributes != null) {
+        for (int k=0; k<attributes.length; k++) {
+          String name = attributes[k].getName();
+          if (isValidJMXAttribute(name)) {
+            Object value = MXWrapper.getAttribute(mbeanName, name);
+            if ((value != null) && ((value instanceof String) || (value instanceof Number)))
+              stats.put(name, value);
+          }
+        }
+      }
+    } catch (Exception exc) {
+      logger.log(BasicLevel.ERROR, " getAttributes  on " + agent.getMBeanName() + " error.", exc);
+    }
+
     return stats;
   }
 
