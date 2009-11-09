@@ -59,6 +59,8 @@ public class MonitoringQueue extends Queue {
     return dest;
   }
   
+  private final static String JoramMonitoringQueue = "JoramMonitoringQueue";
+  
   /**
    *  Static method allowing the creation of a default MonitoringQueue through a
    * service. This topic is registered with the name "JoramMonitoringQueue".
@@ -74,12 +76,12 @@ public class MonitoringQueue extends Queue {
     if (!firstTime) return;
     
     MonitoringQueue queue = new MonitoringQueue();
-    queue.setName("JoramMonitoringQueue");
+    queue.setName(JoramMonitoringQueue);
     queue.init(null, null);
     queue.deploy();
     
     RegisterDestNot regDestNot = new RegisterDestNot(queue.getId(),
-                                                     queue.getName(),
+                                                     JoramMonitoringQueue,
                                                      MonitoringQueue.class.getName(),
                                                      DestinationConstants.QUEUE_TYPE);
     Channel.sendTo(AdminTopic.getDefault(), regDestNot);

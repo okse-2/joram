@@ -69,6 +69,8 @@ public class MonitoringTopic extends Topic {
     return dest;
   }
   
+  private final static String JoramMonitoringTopicName = "JoramMonitoringTopic";
+  
   /**
    *  Static method allowing the creation of a default MonitoringTopic through a
    * service. This topic is registered with the name "JoramMonitoringTopic".
@@ -84,12 +86,12 @@ public class MonitoringTopic extends Topic {
     if (!firstTime) return;
     
     MonitoringTopic topic = new MonitoringTopic();
-    topic.setName("JoramMonitoringTopic");
+    topic.setName(JoramMonitoringTopicName);
     topic.init(null, null);
     topic.deploy();
     
     RegisterDestNot regDestNot = new RegisterDestNot(topic.getId(),
-                                                     topic.getName(),
+                                                     JoramMonitoringTopicName,
                                                      MonitoringTopic.class.getName(),
                                                      DestinationConstants.TOPIC_TYPE);
     Channel.sendTo(AdminTopic.getDefault(), regDestNot);
