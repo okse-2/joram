@@ -131,7 +131,7 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
     destImpl.initialize(firstTime);
     
     try {
-      MXWrapper.registerMBean(destImpl, "Joram#"+AgentServer.getServerId(), getMBeanName());
+      MXWrapper.registerMBean(destImpl, getMBeanName());
     } catch (Exception exc) {
       logger.log(BasicLevel.ERROR, this + " jmx failed", exc);
     }
@@ -140,7 +140,7 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
   /** Finalizes the agent before it is garbaged. */
   public void agentFinalize(boolean lastTime) {
     try {
-      MXWrapper.unregisterMBean("Joram#"+AgentServer.getServerId(), getMBeanName());
+      MXWrapper.unregisterMBean(getMBeanName());
     } catch (Exception exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "Destination.agentFinalize", exc);
@@ -148,11 +148,14 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
     super.agentFinalize(lastTime);
   }
 
-  private String getMBeanName() {
-    return new StringBuffer()
-      .append("type=Destination")
-      .append(",name=").append((name==nullName)?getId().toString():name)
-      .toString();
+  public String getMBeanName() {
+    StringBuffer strbuf = new StringBuffer();
+    
+    strbuf.append("Joram#").append(AgentServer.getServerId());
+    strbuf.append(':');
+    strbuf.append("type=Destination,name=").append(getName());
+    
+    return strbuf.toString();
   }
 
   /**
