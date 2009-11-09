@@ -67,8 +67,8 @@ public class Monitor_GetStatRep extends Monitor_Reply {
       stats = new Hashtable(size*4/3);
       for (int i=0; i< size; i++) {
         String key = StreamUtil.readStringFrom(is);
-        long value = StreamUtil.readLongFrom(is);
-        stats.put(key, new Long(value));
+        Object value = StreamUtil.readObjectFrom(is);
+        stats.put(key, value);
       }
     }
   }
@@ -83,8 +83,7 @@ public class Monitor_GetStatRep extends Monitor_Reply {
       for (Enumeration keys = stats.keys(); keys.hasMoreElements(); ) {
         String key = (String) keys.nextElement();
         StreamUtil.writeTo(key, os);
-        long value = ((Long) stats.get(key)).longValue();
-        StreamUtil.writeTo(value, os);
+        StreamUtil.writeObjectTo(stats.get(key), os);
       }
     }
   }
