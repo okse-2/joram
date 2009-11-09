@@ -894,7 +894,10 @@ public abstract class Destination extends AdministeredObject implements javax.jm
   }
 
   /**
-   * Return a set of statistic values from the destination.
+   * Returns values of all valid JMX attributes about the destination.
+   * 
+   * @return a Hashtable containing the values of all valid JMX attributes about the destination.
+   *         The keys are the name of corresponding attributes.
    * 
    * @see org.objectweb.joram.client.jms.DestinationMBean#getStatistics()
    */

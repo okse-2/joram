@@ -147,7 +147,10 @@ public interface DestinationMBean {
   public Hashtable getStatistic() throws ConnectException, AdminException;
 
   /**
-   * Return a set of statistic values from the destination.
+   * Returns values of all valid JMX attributes about the destination.
+   * 
+   * @return a Hashtable containing the values of all valid JMX attributes about the destination.
+   *         The keys are the name of corresponding attributes.
    */
   public Hashtable getStatistics() throws ConnectException, AdminException;
 }
