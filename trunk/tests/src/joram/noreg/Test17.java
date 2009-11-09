@@ -157,7 +157,6 @@ public class Test17 extends BaseTest implements ExceptionListener, MessageListen
 
         nbClose += 1;
         close();
-        Thread.sleep(500L);
 
         connect();
       }
