@@ -67,6 +67,7 @@
     <javac srcdir="${src.dir}:${obj.dir}"
            destdir="${obj.dir}"
            source="1.5"
+           target="1.5"
            debug="${debug}"
            deprecation="${deprecation}"
            optimize="${optimize}"
