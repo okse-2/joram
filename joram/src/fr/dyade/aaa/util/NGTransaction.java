@@ -811,13 +811,15 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
 
           if (op.type == Operation.NOOP) continue;
 
-//        if (logmon.isLoggable(BasicLevel.DEBUG))
+//        if (logmon.isLoggable(BasicLevel.DEBUG)) {
 //           if (op.type == Operation.SAVE) {
 //             logmon.log(BasicLevel.DEBUG, "NTransaction save " + op.name);
 //           } else if (op.type == Operation.CREATE) {
 //             logmon.log(BasicLevel.DEBUG, "NTransaction create " + op.name);
 //           } else if (op.type == Operation.DELETE) {
 //             logmon.log(BasicLevel.DEBUG, "NTransaction delete " + op.name);
+//           } else {
+//             logmon.log(BasicLevel.DEBUG, "NTransaction unknown(" + op.type + ") " + op.name);
 //           }
 //        }
 
@@ -881,6 +883,9 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
       logFile[logidx%nbLogFile].seek(current);
       logFile[logidx%nbLogFile].write(buf, 0, count);
 
+//      if (logmon.isLoggable(BasicLevel.DEBUG)) {
+//        logmon.log(DEBUG, "NTransaction commit(): " + current + ", " + count);
+      
       // AF: May be we can avoid this second synchronous write, using a
       // marker: determination d'un marqueur lie au log courant (date en
       // millis par exemple), ecriture du marqueur au debut du log, puis
@@ -953,27 +958,27 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
       
       logFile[op.logidx%nbLogFile].seek(op.logptr);
       int optype = logFile[op.logidx%nbLogFile].read();    
-      if ((optype != Operation.CREATE) && (optype != Operation.SAVE) &&
-          (logmon.isLoggable(BasicLevel.DEBUG))) {
-        logmon.log(BasicLevel.DEBUG, "getFromLog#" + op.logidx + ": " + optype + ", " + op.type);
-      }
+//      if ((optype != Operation.CREATE) && (optype != Operation.SAVE) &&
+//          (logmon.isLoggable(BasicLevel.DEBUG))) {
+//        logmon.log(BasicLevel.DEBUG, "getFromLog#" + op.logidx + ": " + optype + ", " + op.type);
+//      }
 
       String dirName = logFile[op.logidx%nbLogFile].readUTF();
       if (dirName.length() == 0) dirName = null;
       String name = logFile[op.logidx%nbLogFile].readUTF();
 
-      if (((dirName != null) && (! dirName.equals(op.dirName))) || (! name.equals(op.name)) &&
-          (logmon.isLoggable(BasicLevel.DEBUG))) {
-        logmon.log(BasicLevel.DEBUG,
-                   "getFromLog#" + op.logidx + ": " + dirName + '/' + name + ", " + op.dirName + '/' + op.name);
-      }
+//      if (((dirName != null) && (! dirName.equals(op.dirName))) || (! name.equals(op.name)) &&
+//          (logmon.isLoggable(BasicLevel.DEBUG))) {
+//        logmon.log(BasicLevel.DEBUG,
+//                   "getFromLog#" + op.logidx + ": " + dirName + '/' + name + ", " + op.dirName + '/' + op.name);
+//      }
 
       byte buf[] = new byte[logFile[op.logidx%nbLogFile].readInt()];
       logFile[op.logidx%nbLogFile].readFully(buf);
 
-      if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG,
-                   "getFromLog#" + op.logidx + ", buf=" + Arrays.toString(buf));
+//      if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
+//        logmon.log(BasicLevel.DEBUG,
+//                   "getFromLog#" + op.logidx + ", buf=" + Arrays.toString(buf));
 
       return buf;
     }
