@@ -1267,27 +1267,6 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     }
   }
 
-
-  /**
-   * Processes a <code>CreateUserRequest</code> instance requesting the
-   * creation of a <code>UserAgent</code> for a given user and save Agent
-   * AdminTopic. (used by ScalAgent mediation)
-   *
-   * @exception UnknownServerException  If the target server does not exist.
-   * @exception RequestException  If the user already exists but with a
-   *              different password, or if the proxy deployment failed.
-   * @throws IOException transaction exception
-   */
-  public static void CreateUserAndSave(
-                                       CreateUserRequest request,
-                                       AgentId replyTo,
-                                       String msgId)
-  throws UnknownServerException, RequestException, IOException {
-    ref.doProcess(request, replyTo, msgId);
-    //  save Agent AdminTopic
-    AgentServer.getTransaction().save(ref.agent, ref.getId().toString()); 
-  }
-
   /**
    * Processes an <code>UpdateUser</code> instance requesting to modify the
    * identification of a user.
@@ -2505,6 +2484,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   public static class DestinationDesc implements java.io.Serializable {
     /** define serialVersionUID for interoperability */
     private static final long serialVersionUID = 1L;
+    
     private AgentId id;
     private String name;
     private String className;
@@ -2537,18 +2517,43 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     }
 
     public String toString() {
-      return '(' + super.toString() +
-      ",id=" + id +
-      ",name=" + name + 
-      ",className=" + className + 
-      ",type=" + type + ')';
+      StringBuffer strbuf = new StringBuffer();
+      
+      strbuf.append('(').append(super.toString());
+      strbuf.append(",id=").append(id);
+      strbuf.append(",name=").append(name);
+      strbuf.append(",className=").append(className);
+      strbuf.append(",type=").append(type).append(')');
+      
+      return strbuf.toString();
     }
   }
   
   // ================================================================================
   // This code below is needed by external applications. The interface between these
   // applications and Joram needs to be defined.
+  // TODO (AF): This code should be moved in an helper class.
   // ================================================================================
+
+  /**
+   * Processes a <code>CreateUserRequest</code> instance requesting the
+   * creation of a <code>UserAgent</code> for a given user and save Agent
+   * AdminTopic. (used by ScalAgent mediation)
+   *
+   * @exception UnknownServerException  If the target server does not exist.
+   * @exception RequestException  If the user already exists but with a
+   *              different password, or if the proxy deployment failed.
+   * @throws IOException transaction exception
+   * 
+   * @deprecated
+   */
+  public static void CreateUserAndSave(CreateUserRequest request,
+                                       AgentId replyTo,
+                                       String msgId) throws UnknownServerException, RequestException, IOException {
+    ref.doProcess(request, replyTo, msgId);
+    //  save Agent AdminTopic
+    AgentServer.getTransaction().save(ref.agent, ref.getId().toString()); 
+  }
 
   /**
    * Instantiating the destination class or retrieving the destination
