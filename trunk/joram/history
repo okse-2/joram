@@ -1,4 +1,9 @@
 +==============================================================================
+| 2009/11/10 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ The Destination.getStatistics method now returns all the convertible JMX
+attributes of this destination (depending of the real type of the destination).
++==============================================================================
 | 2009/11/03 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Implements either implicit (periodic) or explicit behavior for monitoring
