@@ -25,14 +25,11 @@ package org.objectweb.joram.mom.dest;
 import java.util.Properties;
 
 import org.objectweb.joram.mom.notifications.RegisterDestNot;
-import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Channel;
-import fr.dyade.aaa.agent.Notification;
-import fr.dyade.aaa.agent.WakeUpTask;
 
 /**
  * Agent of the monitoring topic. Schedules the monitoring.
@@ -40,11 +37,6 @@ import fr.dyade.aaa.agent.WakeUpTask;
 public class MonitoringTopic extends Topic {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
-  
-  /**
-   * Task sending a WakeUpNot to the topic.
-   */
-  private transient WakeUpTask task;
 
   /**
    * Empty constructor for newInstance().
@@ -53,8 +45,6 @@ public class MonitoringTopic extends Topic {
   
   protected void agentInitialize(boolean firstTime) throws Exception {
     super.agentInitialize(firstTime);
-    task = new WakeUpTask(getId(), WakeUpNot.class);
-    task.schedule(((MonitoringTopicImpl) destImpl).getPeriod());
   }
 
   /**
@@ -97,15 +87,11 @@ public class MonitoringTopic extends Topic {
     Channel.sendTo(AdminTopic.getDefault(), regDestNot);
   }
   
-  public void react(AgentId from, Notification not) throws Exception {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "MonitoringTopic.react(" + from + ',' + not + ')');
-    if (not instanceof WakeUpNot) {
-      if (task == null)
-        task = new WakeUpTask(getId(), WakeUpNot.class);
-      task.schedule(((MonitoringTopicImpl) destImpl).getPeriod());
-      ((MonitoringTopicImpl) destImpl).wakeUpNot((WakeUpNot) not);
-    } else
-      super.react(from, not);
+  /**
+   * Stops the <code>MonitoringTopic</code> service.
+   */ 
+  public static void stopService() {
+    //nothing to do
+    // unregister ?
   }
 }

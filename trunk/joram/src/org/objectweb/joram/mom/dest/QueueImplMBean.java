@@ -27,21 +27,6 @@ import javax.management.openmbean.TabularData;
 
 public interface QueueImplMBean extends DestinationImplMBean {
   /**
-   * Returns  the period value of this queue, -1 if not set.
-   *
-   * @return the period value of this queue; -1 if not set.
-   */
-  long getPeriod();
-
-  /**
-   * Sets or unsets the period for this queue.
-   *
-   * @param period The period value to be set or -1 for unsetting previous
-   *               value.
-   */
-  void setPeriod(long period);
-
-  /**
    * Returns  the threshold value of this queue, -1 if not set.
    *
    * @return the threshold value of this queue; -1 if not set.

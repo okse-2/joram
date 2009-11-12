@@ -49,12 +49,15 @@ import org.objectweb.joram.mom.notifications.RequestGroupNot;
 import org.objectweb.joram.mom.notifications.SetDMQRequest;
 import org.objectweb.joram.mom.notifications.SetRightRequest;
 import org.objectweb.joram.mom.notifications.SpecialAdminRequest;
+import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.mom.proxies.SendRepliesNot;
 import org.objectweb.joram.mom.proxies.SendReplyNot;
 import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.excepts.AccessException;
+import org.objectweb.joram.shared.excepts.MessageValueException;
 import org.objectweb.joram.shared.excepts.RequestException;
+import org.objectweb.joram.shared.messages.ConversionHelper;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -80,6 +83,9 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    */
   private boolean deletable = false;
 
+  /** period to run task at regular interval: cleaning, load-balancing, etc. */
+  private long period = -1L;
+  
   /**
    * Identifier of the destination's administrator.
    * In any case the local administration topic is authorized to handle the
@@ -147,6 +153,15 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     if (creationDate == -1)
       creationDate = System.currentTimeMillis();
 
+    try {
+      if (prop != null)
+        period = ConversionHelper.toLong(prop.get("period"));
+    } catch (MessageValueException e) {
+      period = -1L;
+    } catch (NumberFormatException e) {
+      period = -1L;
+    }
+    
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, this + ", created.");
   }
@@ -189,6 +204,36 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     return deletable;
   }
 
+  /**
+   * Returns  the period value of this destination, -1 if not set.
+   *
+   * @return the period value of this destination; -1 if not set.
+   */
+  public long getPeriod() {
+    return period;
+  }
+
+  /**
+   * Sets or unsets the period for this destination.
+   *
+   * @param period The period value to be set or -1 for unsetting previous
+   *               value (ignore 0).
+   */
+  public void setPeriod(long period) {
+    if ((this.period < 0) && (period > 0)) {
+      // Schedule the CleaningTask.
+      WakeUpNot not = new WakeUpNot();
+      if (this.period != period) {
+        not.update = true;
+      }
+      forward(getId(), not);
+    }
+    if (period != 0)
+      this.period = period;
+  }
+  
+  public abstract void wakeUpNot(WakeUpNot not);
+    
   /**
    * Method implementing the reaction to a <code>SetRightRequest</code>
    * notification requesting rights to be set for a user.
@@ -734,6 +779,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     out.writeLong(nbMsgsReceiveSinceCreation);
     out.writeLong(nbMsgsDeliverSinceCreation);
     out.writeLong(nbMsgsSentToDMQSinceCreation);
+    out.writeLong(period);
   }
 
   private void readObject(java.io.ObjectInputStream in)
@@ -749,6 +795,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     nbMsgsReceiveSinceCreation = in.readLong();
     nbMsgsDeliverSinceCreation = in.readLong();
     nbMsgsSentToDMQSinceCreation = in.readLong();
+    period = in.readLong();
   }
 
   // DestinationMBean interface

@@ -37,6 +37,7 @@ import org.objectweb.joram.mom.notifications.RequestGroupNot;
 import org.objectweb.joram.mom.notifications.SetDMQRequest;
 import org.objectweb.joram.mom.notifications.SetRightRequest;
 import org.objectweb.joram.mom.notifications.SpecialAdminRequest;
+import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -49,6 +50,7 @@ import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
 import fr.dyade.aaa.agent.UnknownNotificationException;
+import fr.dyade.aaa.agent.WakeUpTask;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.util.management.MXWrapper;
 
@@ -69,6 +71,8 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
    */
   protected DestinationImpl destImpl;
 
+  protected transient WakeUpTask task;
+  
   /**
    * Empty constructor for newInstance(). 
    */ 
@@ -93,6 +97,8 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
   public final void init(AgentId adminId, Properties props) {
     destImpl = createsImpl(adminId, props);
     destImpl.setAgent(this);
+    if (destImpl.getPeriod() > -1)
+      task = new WakeUpTask(getId(), WakeUpNot.class, destImpl.getPeriod());
   }
 
   /**
@@ -201,6 +207,11 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
           // the DestinationItf instance.
           super.react(from, not);
         }
+      } else if (not instanceof WakeUpNot) {
+        setNoSave();
+        if (task == null || ((WakeUpNot) not).update)
+          setPeriod(destImpl.getPeriod());
+        destImpl.wakeUpNot((WakeUpNot) not);
       } else if (not instanceof DestinationAdminRequestNot)
         destImpl.destinationAdminRequestNot(from, (DestinationAdminRequestNot) not);
       else
@@ -217,6 +228,17 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
     }
   }
   
+  public void setPeriod(long period) {
+    if (task == null) {
+      task = new WakeUpTask(getId(), WakeUpNot.class, period);
+    } else {
+      // cancel task
+      task.cancel();
+      // Schedules the wake up task period.
+      if (period > 0)
+        task = new WakeUpTask(getId(), WakeUpNot.class, period);
+    }
+  }
   
   protected void setNoSave() {
     if (logger.isLoggable(BasicLevel.DEBUG))

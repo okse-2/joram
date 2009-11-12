@@ -42,9 +42,6 @@ public class MonitoringTopicImpl extends TopicImpl implements MonitoringTopicImp
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   
-  /** Time between two monitoring events. One minute by default. */
-  protected long period = -1;
-  
   /** Counter of messages produced by this Monitoring topic. */
   private long msgCounter = 0;
   
@@ -125,9 +122,9 @@ public class MonitoringTopicImpl extends TopicImpl implements MonitoringTopicImp
         String name = (String) e.nextElement();
 
         try {
-          if (name.equals("period"))
-            period = ConversionHelper.toLong(properties.get("period"));
-          else if (name.equals("persistent"))
+          if (name.equals("period")) {
+            //nothing to do, see DestinationImpl
+          } else if (name.equals("persistent"))
             isPersistent = ConversionHelper.toBoolean(properties.get("persistent"));
           else if (name.equals("priority"))
             priority = ConversionHelper.toInt(properties.get("priority"));
@@ -148,34 +145,11 @@ public class MonitoringTopicImpl extends TopicImpl implements MonitoringTopicImp
     super.initialize(firstTime);
   }
 
-  /**
-   * Returns the time between two monitoring events, one minute if not set.
-   * 
-   * @return the period value of this queue; one minute if not set.
-   */
-  public long getPeriod() {
-    return period;
-  }
-  
-  /**
-   * Sets or unsets the period for this queue.
-   * 
-   * @param period
-   *          The period value to be set or -1 for unsetting previous value.
-   */
-  public void setPeriod(long period) {
-    if ((this.period < 0) && (period > 0)) {
-      // Schedule the CleaningTask.
-      forward(getId(), new WakeUpNot());
-    }
-    this.period = period;
-  }
-
   public ClientMessages preProcess(AgentId from, ClientMessages cm) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "MonitoringQueueImpl. preProcess(" + from + ", " + cm + ')');
     
-    long period = this.period;
+    long period = getPeriod();
     
     Vector msgs = cm.getMessages();
     for (int i=0; i<msgs.size(); i++) {
@@ -242,7 +216,6 @@ public class MonitoringTopicImpl extends TopicImpl implements MonitoringTopicImp
     } else {
       message.expiration = 0;
     }
-    
     MonitoringHelper.getJMXValues(message, elements);
     ClientMessages clientMessages = new ClientMessages(-1, -1, message);
     
