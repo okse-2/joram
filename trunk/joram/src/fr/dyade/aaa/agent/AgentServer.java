@@ -32,6 +32,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
+import java.util.Timer;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -48,7 +49,6 @@ import fr.dyade.aaa.agent.conf.A3CMLServer;
 import fr.dyade.aaa.agent.conf.A3CMLService;
 import fr.dyade.aaa.common.Configuration;
 import fr.dyade.aaa.common.MonitoringTimerTask;
-import fr.dyade.aaa.common.Timer;
 import fr.dyade.aaa.util.ResolverRepository;
 import fr.dyade.aaa.util.Transaction;
 import fr.dyade.aaa.util.management.MXWrapper;
