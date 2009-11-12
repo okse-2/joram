@@ -23,11 +23,10 @@
 package cron;
 
 import java.util.Date;
+import java.util.Timer;
 
 import com.scalagent.scheduler.CronEvent;
 import com.scalagent.scheduler.Scheduler;
-
-import fr.dyade.aaa.common.Timer;
 
 public class CronTest {
 
