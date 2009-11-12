@@ -1,4 +1,13 @@
 +==============================================================================
+| 2009/11/12 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+All ScalAgent timer replaced by java timer.
+ClusterQueue :
+  Add a better ordering messages in cluster queue.
+  Bug fix in join cluster queue.
+PoolNetwork : 
+  Fix a possible incomplete closure of PoolSender, and possible NPE.
++==============================================================================
 | 2009/11/10 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  The Destination.getStatistics method now returns all the convertible JMX
