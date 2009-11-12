@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -37,8 +39,6 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.common.Configuration;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.Pool;
-import fr.dyade.aaa.common.Timer;
-import fr.dyade.aaa.common.TimerTask;
 
 /**
  *  The NTransaction class implements a transactional storage.
@@ -244,7 +244,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
         NTransaction.this.timer = new Timer();
       if (logFile.garbageTimeOut > 0) {
         try {
-          NTransaction.this.timer.schedule(this, logFile.garbageTimeOut);
+          NTransaction.this.timer.schedule(this, logFile.garbageTimeOut, logFile.garbageTimeOut);
         } catch (Exception exc) {
           logmon.log(BasicLevel.ERROR,
                      "NTransaction, cannot schedule garbage task ", exc);
@@ -257,12 +257,6 @@ public final class NTransaction extends AbstractTransaction implements NTransact
       if (logFile.garbageTimeOut > 0) {
         if (System.currentTimeMillis() > (logFile.lastGarbageTime + logFile.garbageTimeOut)) {
           garbage();
-        }
-        try {
-          timer.schedule(this, logFile.garbageTimeOut);
-        } catch (Exception exc) {
-          logmon.log(BasicLevel.ERROR,
-                     "NTransaction, cannot schedule garbage task ", exc);
         }
       }
     }
