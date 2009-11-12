@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -129,4 +129,19 @@ public interface DestinationImplMBean {
    * @return the number of erroneous messages forwarded to the DMQ.
    */
   long getNbMsgsSentToDMQSinceCreation();
+  
+  /**
+   * Returns the period value of this destination, -1 if not set.
+   * 
+   * @return the period value of this destination; -1 if not set.
+   */
+  long getPeriod();
+
+  /**
+   * Sets or unsets the period for this destination.
+   * 
+   * @param period
+   *          The period value to be set or -1 for unsetting previous value.
+   */
+  void setPeriod(long period);
 }

@@ -27,21 +27,6 @@ package org.objectweb.joram.mom.dest;
  */
 public interface MonitoringTopicImplMBean extends TopicImplMBean {
   /**
-   * Returns the period value of this queue, -1 if not set.
-   * 
-   * @return the period value of this queue; -1 if not set.
-   */
-  long getPeriod();
-
-  /**
-   * Sets or unsets the period for this queue.
-   * 
-   * @param period
-   *          The period value to be set or -1 for unsetting previous value.
-   */
-  void setPeriod(long period);
-  
-  /**
    * Returns true if the messages produced are persistent.
    * 
    * @return true if the messages produced are persistent.

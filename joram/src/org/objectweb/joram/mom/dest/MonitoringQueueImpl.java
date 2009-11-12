@@ -128,9 +128,9 @@ public class MonitoringQueueImpl extends QueueImpl implements MonitoringQueueImp
         String name = (String) e.nextElement();
 
         try {
-          if (name.equals("period"))
-            period = ConversionHelper.toLong(properties.get("period"));
-          else if (name.equals("persistent"))
+          if (name.equals("period")) {
+            //nothing to do, see DestinationImpl
+          } else if (name.equals("persistent"))
             isPersistent = ConversionHelper.toBoolean(properties.get("persistent"));
           else if (name.equals("priority"))
             priority = ConversionHelper.toInt(properties.get("priority"));
@@ -163,7 +163,7 @@ public class MonitoringQueueImpl extends QueueImpl implements MonitoringQueueImp
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "MonitoringQueueImpl. preProcess(" + from + ", " + cm + ')');
     
-    long period = this.period;
+    long period = getPeriod();
     
     Vector msgs = cm.getMessages();
     for (int i=0; i<msgs.size(); i++) {

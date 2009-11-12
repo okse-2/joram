@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -40,7 +40,6 @@ import org.objectweb.joram.mom.notifications.Monit_GetPendingRequests;
 import org.objectweb.joram.mom.notifications.ReceiveRequest;
 import org.objectweb.joram.mom.notifications.SetNbMaxMsgRequest;
 import org.objectweb.joram.mom.notifications.SetThreshRequest;
-import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -50,7 +49,6 @@ import fr.dyade.aaa.agent.BagSerializer;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.ExpiredNot;
 import fr.dyade.aaa.agent.Notification;
-import fr.dyade.aaa.agent.WakeUpTask;
 
 /**
  * A <code>Queue</code> agent is an agent hosting a MOM queue, and which
@@ -81,8 +79,6 @@ public class Queue extends Destination implements BagSerializer {
     return new QueueImpl(adminId, prop);
   }
 
-  private transient WakeUpTask task;
-
   /**
    * Gives this agent an opportunity to initialize after having been deployed,
    * and each time it is loaded into memory.
@@ -94,8 +90,6 @@ public class Queue extends Destination implements BagSerializer {
    */
   protected void agentInitialize(boolean firstTime) throws Exception {
     super.agentInitialize(firstTime);
-    task = new WakeUpTask(getId(), WakeUpNot.class);
-    task.schedule(((QueueImpl) destImpl).getPeriod());
   }
   
   /**
@@ -131,13 +125,7 @@ public class Queue extends Destination implements BagSerializer {
         ((QueueImpl) destImpl).handleExpiredNot(from, (ExpiredNot) not);
 //      else if (not instanceof DestinationAdminRequestNot)
 //        ((QueueImpl)destImpl).destinationAdminRequestNot(from, (DestinationAdminRequestNot) not);
-      else if (not instanceof WakeUpNot) {
-        setNoSave();
-        if (task == null)
-          task = new WakeUpTask(getId(), WakeUpNot.class);
-        task.schedule(((QueueImpl) destImpl).getPeriod());
-        ((QueueImpl)destImpl).wakeUpNot((WakeUpNot) not);
-      } else
+      else
         super.react(from, not);
 
     } catch (MomException exc) {

@@ -139,7 +139,7 @@ public class ClusterQueueImpl extends QueueImpl {
         timeThreshold = 
           Long.valueOf(prop.getProperty("timeThreshold")).longValue();
       } catch (NumberFormatException exc) {
-        timeThreshold = period;
+        timeThreshold = getPeriod();
       }
     }
     

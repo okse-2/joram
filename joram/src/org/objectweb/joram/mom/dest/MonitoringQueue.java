@@ -86,4 +86,12 @@ public class MonitoringQueue extends Queue {
                                                      DestinationConstants.QUEUE_TYPE);
     Channel.sendTo(AdminTopic.getDefault(), regDestNot);
   }
+  
+  /**
+   * Stops the <code>MonitoringQueue</code> service.
+   */ 
+  public static void stopService() {
+    //nothing to do
+    // unregister ?
+  }
 }

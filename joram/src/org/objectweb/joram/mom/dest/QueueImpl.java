@@ -93,34 +93,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
 
   public static Logger logger = Debug.getLogger(QueueImpl.class.getName());
 
-  /** period to run task at regular interval: cleaning, load-balancing, etc. */
-  protected long period = -1;
-
   /** Static value holding the default DMQ identifier for a server. */
   static AgentId defaultDMQId = null;
-
-  /**
-   * Returns  the period value of this queue, -1 if not set.
-   *
-   * @return the period value of this queue; -1 if not set.
-   */
-  public long getPeriod() {
-    return period;
-  }
-
-  /**
-   * Sets or unsets the period for this queue.
-   *
-   * @param period The period value to be set or -1 for unsetting previous
-   *               value.
-   */
-  public void setPeriod(long period) {
-    if ((this.period < 0) && (period > 0)) {
-      // Schedule the CleaningTask.
-      forward(getId(), new WakeUpNot());
-    }
-    this.period = period;
-  }
 
   /**
    * Threshold above which messages are considered as undeliverable because
@@ -332,14 +306,6 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    */
   public QueueImpl(AgentId adminId, Properties prop) {
     super(adminId, prop);
-
-    try {
-      if (prop != null)
-        period = Long.valueOf(prop.getProperty("period")).longValue();
-    } catch (NumberFormatException exc) {
-      period = -1L;
-    }
-
     consumers = new Hashtable();
     contexts = new Hashtable();
     requests = new Vector();

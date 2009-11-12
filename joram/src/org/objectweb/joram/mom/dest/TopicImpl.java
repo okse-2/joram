@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -51,6 +51,7 @@ import org.objectweb.joram.mom.notifications.TopicMsgsReply;
 import org.objectweb.joram.mom.notifications.UnclusterRequest;
 import org.objectweb.joram.mom.notifications.UnsetFatherRequest;
 import org.objectweb.joram.mom.notifications.UnsubscribeRequest;
+import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.shared.admin.GetSubscriberIds;
 import org.objectweb.joram.shared.admin.GetSubscriberIdsRep;
 import org.objectweb.joram.shared.excepts.AccessException;
@@ -121,6 +122,10 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     return "TopicImpl:" + getId().toString();
   }
 
+  public void wakeUpNot(WakeUpNot not) {
+    // nothing to do
+  }
+  
   /**
    * Method implementing the reaction to a <code>ClusterRequest</code>
    * instance requesting to add a topic to the cluster, or to set a
@@ -128,8 +133,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    *
    * @exception AccessException  If the requester is not an administrator.
    */
-  public void clusterRequest(AgentId from, ClusterRequest req) throws AccessException
-  {
+  public void clusterRequest(AgentId from, ClusterRequest req) throws AccessException {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
