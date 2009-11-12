@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,13 +24,13 @@ package com.scalagent.scheduler;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.Debug;
-import fr.dyade.aaa.common.Timer;
-import fr.dyade.aaa.common.TimerTask;
 
 /**
  *
@@ -98,8 +98,10 @@ public class Scheduler implements Serializable {
     // inserts event in list
     insertItem(event, task);
 
-    // checks for ripe items
-    checkItems();
+    if (items != null && items.event.equals(event)) {
+      // checks only if the first item.
+      checkItems();
+    }
   }
 
   /**
@@ -176,7 +178,7 @@ public class Scheduler implements Serializable {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Scheduler.checkItems()");
     Date now = new Date();
-
+    
     checkLoop:
       for (ScheduleItem item = items; item != null;) {
         if (item.date != null &&
@@ -217,7 +219,6 @@ public class Scheduler implements Serializable {
     if (items != null) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "Scheduler.checkItems nextDate = " + items.date);
-      
       schedule(items.event, items.date.getTime() - now.getTime());
     }
   }
@@ -230,7 +231,7 @@ public class Scheduler implements Serializable {
    */
   private void removeItem(ScheduleItem item) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Scheduler.removeItem(" + item + ')');
+      logger.log(BasicLevel.DEBUG, "Scheduler.removeItem(item) event=" + item.event + ", task=" + item.task);
     
     if (item.next != null)
       item.next.prev = item.prev;
@@ -239,8 +240,6 @@ public class Scheduler implements Serializable {
     else
       item.prev.next = item.next;
     item.prev = item.next = null;
-    
-    //cancel(item.event);
   }
   
   
@@ -273,7 +272,8 @@ public class Scheduler implements Serializable {
       logger.log(BasicLevel.DEBUG, "Scheduler.cancel() wakeUp = " + wakeUp);
     
     try {
-      wakeUp.cancel();
+      if (wakeUp != null)
+        wakeUp.cancel();
     } catch (Exception exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "Exception Scheduler.cancel wakeUp = " + wakeUp, exc);
@@ -302,12 +302,13 @@ public class Scheduler implements Serializable {
 
     public void run() {
       try {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "WakeUp.run");
+        if (items != null) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "WakeUp.run items.event=" + items.event + ", items.task=" + items.task);
 
-        // the task is ready to execute, called run method.
-        items.task.run();
-        
+          // the task is ready to execute, called run method.
+          items.task.run();
+        }
         checkItems();
       } catch (Exception e) {
         if (logger.isLoggable(BasicLevel.WARN))
