@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,18 +25,15 @@ package com.scalagent.joram.mom.dest.collector;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.joram.shared.util.Properties;
-import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.Debug;
-import fr.dyade.aaa.agent.WakeUpTask;
 
 /**
  * 
  */
 public class CollectorHelper {
   public static Logger logger = Debug.getLogger(CollectorHelper.class.getName());
-  public static final long DEFAULT_PERIODE = 60000L;
   
   /**
    * create shared message.
@@ -78,35 +75,5 @@ public class CollectorHelper {
    */
   public static ClientMessages createClientMessages(Message msg) {
     return new ClientMessages(-1, -1, msg);
-  }
-  
-  /**
-   * convert the string period to long and schedule task.
-   * 
-   * @param task the collector task.
-   * @param periodStr the period in ms.
-   */
-  public static void scheduleTask(WakeUpTask task, String periodStr) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "CollectorHelper.scheduleTask(" + periodStr + ')'); 
-    long collectorPeriod = DEFAULT_PERIODE;
-    if (periodStr != null)
-      collectorPeriod = Long.valueOf(periodStr).longValue();
-    // set collector task period
-    task.schedule(collectorPeriod);
-  }
-  
-  /**
-   * cancel task.
-   * 
-   * @param task the collector task.
-   */
-  public static void cancelTask(WakeUpTask task) {
-    try {
-      // cancel all collector task
-      task.cancel();
-    } catch (Exception e) {
-      //nothing to do
-    }
   }
 }
