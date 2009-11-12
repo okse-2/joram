@@ -27,14 +27,14 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
-import fr.dyade.aaa.common.Timer;
-import fr.dyade.aaa.common.TimerTask;
 
 public class SuicideServerSocket extends ServerSocket {
   
