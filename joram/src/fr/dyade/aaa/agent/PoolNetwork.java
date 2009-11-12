@@ -1327,7 +1327,6 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
           sessions[i].sender = null;
           sender.session = null;
           sender.stop(); 
-          sessions[i] = null;
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG, getName() + "senders["+i+"].stop() done.");
         }
