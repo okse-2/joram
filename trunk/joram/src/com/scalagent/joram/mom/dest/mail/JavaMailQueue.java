@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -75,15 +75,13 @@ public class JavaMailQueue extends Queue {
    */
   protected void agentInitialize(boolean firstTime) throws Exception {
     super.agentInitialize(firstTime);
-    poptask = new WakeUpTask(getId(), WakeUpPopNot.class);
-    poptask.schedule(((JavaMailQueueImpl) destImpl).getPopPeriod());
+    poptask = new WakeUpTask(getId(), WakeUpPopNot.class, ((JavaMailQueueImpl) destImpl).getPopPeriod());
   }
 
   public void react(AgentId from, Notification not) throws Exception {
     if (not instanceof WakeUpPopNot) {
       if (poptask == null)
-        poptask = new WakeUpTask(getId(), WakeUpPopNot.class);
-      poptask.schedule(((JavaMailQueueImpl) destImpl).getPopPeriod());
+        poptask = new WakeUpTask(getId(), WakeUpPopNot.class, ((JavaMailQueueImpl) destImpl).getPopPeriod());
       ((JavaMailQueueImpl) destImpl).doPop();
     } else {
       super.react(from, not);
