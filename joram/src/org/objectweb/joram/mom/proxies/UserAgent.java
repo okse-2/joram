@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -25,10 +25,12 @@ package org.objectweb.joram.mom.proxies;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.TimerTask;
 
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
@@ -116,8 +118,7 @@ public final class UserAgent extends Agent implements BagSerializer, ProxyAgentI
 
     super.agentInitialize(firstTime);
     proxyImpl.initialize(firstTime);
-    cleaningTask = new WakeUpTask(getId(), WakeUpNot.class);
-    cleaningTask.schedule(proxyImpl.getPeriod());
+    cleaningTask = new WakeUpTask(getId(), WakeUpNot.class, proxyImpl.getPeriod());
     try {
       MXWrapper.registerMBean(proxyImpl, getMBeanName());
     } catch (Exception exc) {
@@ -189,9 +190,9 @@ public final class UserAgent extends Agent implements BagSerializer, ProxyAgentI
           logger.log(BasicLevel.ERROR, "--- " + this + " Proxy(...)", exc);
       }
 
-      if (cleaningTask == null)
-        cleaningTask = new WakeUpTask(getId(), WakeUpNot.class);
-      cleaningTask.schedule(proxyImpl.getPeriod());
+      if (cleaningTask == null) {
+        cleaningTask = new WakeUpTask(getId(), WakeUpNot.class, proxyImpl.getPeriod());
+      }
 
 
     } else {
@@ -431,8 +432,7 @@ public final class UserAgent extends Agent implements BagSerializer, ProxyAgentI
    * Timer task responsible for closing the connection if 
    * it has not sent any requests for the duration 'timeout'.
    */
-  class HeartBeatTask extends fr.dyade.aaa.common.TimerTask implements
-  java.io.Serializable {
+  class HeartBeatTask extends TimerTask implements Serializable {
     /**
      * 
      */
@@ -443,8 +443,11 @@ public final class UserAgent extends Agent implements BagSerializer, ProxyAgentI
     private Integer key;
 
     private long lastRequestDate;
+    
+    private boolean schedule = false;
 
     HeartBeatTask(int timeout, Integer key) {
+      schedule = false;
       this.timeout = timeout;
       this.key = key;
     }
@@ -461,18 +464,29 @@ public final class UserAgent extends Agent implements BagSerializer, ProxyAgentI
                                             "Connection " + getId() + ':' + key + " closed");
         ctx.pushError(exc);
       } else {
-        start();
+        if (!schedule)
+          start();
       }
     }
 
     public void start() {
       try {
-        AgentServer.getTimer().schedule(this, timeout);
+        if (!schedule) {
+          AgentServer.getTimer().schedule(this, timeout, timeout);
+          schedule = true;
+        }
       } catch (Exception exc) {
         throw new Error(exc.toString());
       }
     }
 
+    public void reStart() {
+      this.cancel();
+      HeartBeatTask hbt = new HeartBeatTask(timeout, key);
+      heartBeatTasks.put(key, hbt);
+      hbt.start();
+    }
+    
     public void touch() {
       lastRequestDate = System.currentTimeMillis();
     }
@@ -502,7 +516,7 @@ public final class UserAgent extends Agent implements BagSerializer, ProxyAgentI
       Enumeration tasks = heartBeatTasks.elements();
       while (tasks.hasMoreElements()) {
         HeartBeatTask task = (HeartBeatTask) tasks.nextElement();
-        task.start();
+        task.reStart();
       }
     }
 
