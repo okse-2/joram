@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -91,7 +91,6 @@ public class CollectorTopicImpl extends TopicImpl implements CollectorDestinatio
       logger.log(BasicLevel.DEBUG, "CollectorTopicImpl.initialize(" + firstTime + ')'); 
     super.initialize(firstTime);
     if (firstTime) {
-      task = new WakeUpTask(getId(), CollectorWakeUpNot.class);
       // execute collector wake up.
       collectorWakeUp();
     }
@@ -191,7 +190,27 @@ public class CollectorTopicImpl extends TopicImpl implements CollectorDestinatio
       // TODO Auto-generated catch block
     }
     
-    CollectorHelper.scheduleTask(task, getCollectorPeriod());
+    // get collector period
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "CollectorQueueImpl: getCollectorPeriod = " + getCollectorPeriod()); 
+    long collectorPeriod = DEFAULT_PERIODE;
+    if (getCollectorPeriod() != null)
+      collectorPeriod = Long.valueOf(getCollectorPeriod()).longValue();
+    
+    if (task == null) {
+      // create a new task.
+      task = new WakeUpTask(getId(), CollectorWakeUpNot.class, collectorPeriod);
+    } else {
+      try {
+        // cancel all collector task
+        task.cancel();
+        // Schedules the wake up task period (getCollectorPeriod()).
+        task.schedule(collectorPeriod);
+      } catch (Exception e) {
+        if (logger.isLoggable(BasicLevel.ERROR))
+          logger.log(BasicLevel.ERROR, "CollectorQueueImpl:ERROR::: getCollectorPeriod task=" + task, e); 
+      }
+    }
   }
   
   /**
@@ -215,8 +234,6 @@ public class CollectorTopicImpl extends TopicImpl implements CollectorDestinatio
         }
       }
       if (prop != null && !prop.isEmpty()) {
-        CollectorHelper.cancelTask(task);
-        task = new WakeUpTask(getId(), CollectorWakeUpNot.class);
         setProperties(prop);
       }
       return null;
