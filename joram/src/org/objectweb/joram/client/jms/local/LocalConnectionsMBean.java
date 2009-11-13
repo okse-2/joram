@@ -19,7 +19,7 @@
  *
  * Initial developer(s): ScalAgent Distributed Technologies
  */
-package org.objectweb.joram.mom.proxies.local;
+package org.objectweb.joram.client.jms.local;
 
 import org.objectweb.joram.mom.proxies.ConnectionManagerMBean;
 
