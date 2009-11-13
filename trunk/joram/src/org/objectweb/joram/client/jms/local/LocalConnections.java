@@ -19,12 +19,11 @@
  *
  * Initial developer(s): ScalAgent Distributed Technologies
  */
-package org.objectweb.joram.mom.proxies.local;
+package org.objectweb.joram.client.jms.local;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.objectweb.joram.client.jms.local.LocalRequestChannel;
 import org.objectweb.joram.mom.proxies.ConnectionManager;
 
 /**
