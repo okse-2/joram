@@ -525,6 +525,21 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         }
       }
     }
+    
+    if (poolSender != null) {
+      // Stops all pending senders
+      for (int i = 0; i<poolSender.senders.size(); i++) {
+        Sender sender = (Sender) poolSender.senders.get(i);
+        if (sender != null && sender.isRunning()) {
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG, getName() + ", stop pending sender = " + sender);
+          sender.stop(); 
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG, getName() + "senders["+i+"].stop() done.");
+        }
+      }
+    }
+    
     activeSessions.clear();
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, getName() + ", stopped");
@@ -1337,17 +1352,6 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         nbFree -= 1;
         free[nbFree].stop(); free[nbFree] = null;
         
-      }
-      
-      // Stops all pending senders
-      for (int i = 0; i<senders.size(); i++) {
-        Sender sender = (Sender) senders.get(i);
-        if (sender != null && sender.isRunning()) {
-          sender.session = null;
-          sender.stop(); 
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG, getName() + "senders["+i+"].stop() done.");
-        }
       }
     }
   }
