@@ -65,6 +65,7 @@ public class AsyncTest extends TestCase {
 
       startAgentServer((short) 1, (File) null,
                        new String[] { "-DTransaction=fr.dyade.aaa.util.NullTransaction" });
+      Thread.sleep(2000);
 
       cf = TcpConnectionFactory.create("localhost", 2560);
 
