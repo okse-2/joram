@@ -52,6 +52,7 @@ public class Test_Trans_Q3 extends TestCase {
     try {
       System.out.println("server start");
       startAgentServer((short) 0);
+      Thread.sleep(2000);
 
       admin();
       System.out.println("admin config ok");
