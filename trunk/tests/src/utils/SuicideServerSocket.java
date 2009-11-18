@@ -38,7 +38,7 @@ import fr.dyade.aaa.common.Debug;
 
 public class SuicideServerSocket extends ServerSocket {
   
-  private static Logger logger = Debug.getLogger(SuicideServerSocket.class.getName());
+  static Logger logger = Debug.getLogger(SuicideServerSocket.class.getName());
 
   private static int MIN_SURVIVAL_TIME = AgentServer.getInteger("ServerSocketMinSurvivalTime", 10000).intValue();
 
@@ -48,12 +48,16 @@ public class SuicideServerSocket extends ServerSocket {
 
   public SuicideServerSocket(int port, int backlog, InetAddress bindAddr) throws IOException {
     super(port, backlog, bindAddr);
-    logger.log(BasicLevel.ERROR, "Server socket creation on port: " + port);
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Server socket creation on port: " + port);
+    }
   }
 
   public SuicideServerSocket(int port, int backlog) throws IOException {
     super(port, backlog);
-    logger.log(BasicLevel.ERROR, "Server socket creation on port: " + port);
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Server socket creation on port: " + port);
+    }
   }
   
   public Socket accept() throws IOException {
