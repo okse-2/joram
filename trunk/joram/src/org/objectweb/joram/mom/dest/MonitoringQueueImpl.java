@@ -42,7 +42,7 @@ public class MonitoringQueueImpl extends QueueImpl implements MonitoringQueueImp
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   
-  /** Counter of messages produced by this Monitoring topic. */
+  /** Counter of messages produced by this Monitoring queue. */
   private long msgCounter = 0;
 
   /** The various elements to monitor. */
@@ -141,7 +141,7 @@ public class MonitoringQueueImpl extends QueueImpl implements MonitoringQueueImp
             elements.add(new MonitoringElement(name, attributes));
           }
         } catch (Exception exc) {
-          logger.log(BasicLevel.ERROR, "MonitoringTopicImpl.<init>: bad initialization.", exc);
+          logger.log(BasicLevel.ERROR, "MonitoringQueueImpl.<init>: bad initialization.", exc);
         }
       }
     }
@@ -191,7 +191,7 @@ public class MonitoringQueueImpl extends QueueImpl implements MonitoringQueueImp
               elements.add(new MonitoringElement(name, attributes));
             }
           } catch (Exception exc) {
-            logger.log(BasicLevel.ERROR, "MonitoringTopicImpl.<init>: bad configuration.", exc);
+            logger.log(BasicLevel.ERROR, "MonitoringQueueImpl.<init>: bad configuration.", exc);
           }
         }
       
@@ -216,7 +216,7 @@ public class MonitoringQueueImpl extends QueueImpl implements MonitoringQueueImp
    */
   public void wakeUpNot(WakeUpNot not) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "--- " + this + " MonitoringTopicImpl.wakeUpNot(" + not + ")");
+      logger.log(BasicLevel.DEBUG, "--- " + this + " MonitoringQueueImpl.wakeUpNot(" + not + ")");
     
     super.wakeUpNot(not);
     
@@ -225,7 +225,7 @@ public class MonitoringQueueImpl extends QueueImpl implements MonitoringQueueImp
     message.id = createMessageId();
     message.timestamp = currentTime;
     message.persistent = isPersistent;
-    message.setDestination(getId().toString(), message.TOPIC_TYPE);
+    message.setDestination(getId().toString(), message.QUEUE_TYPE);
     message.priority = priority;
     if (expiration > 0) {
       message.expiration = currentTime + expiration;
