@@ -54,10 +54,11 @@ public class Test58 extends BaseTest {
       writeIntoFile("===================== start test 58 =====================");
 
       TestCase.startAgentServer((short)0);
+      Thread.sleep(2000);
 
       ConnectionFactory cf = TcpBaseTest.createConnectionFactory();
       AdminModule.connect(cf);
-      User user = User.create("anonymous", "anonymous", 0);
+      User.create("anonymous", "anonymous", 0);
       AdminModule.disconnect();
 
       Connection cnx = cf.createConnection();
