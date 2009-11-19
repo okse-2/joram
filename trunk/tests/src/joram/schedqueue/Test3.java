@@ -29,8 +29,8 @@ import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 
-import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
@@ -55,7 +55,7 @@ public class Test3 extends framework.TestCase {
   public void run() {
     try {
       TestCase.startAgentServer((short)0);
-      Thread.sleep(1000L);
+      Thread.sleep(2000L);
 
       ConnectionFactory cf = TcpConnectionFactory.create("localhost", 16010);
       
@@ -71,7 +71,7 @@ public class Test3 extends framework.TestCase {
       TestCase.stopAgentServer((short)0);
       Thread.sleep(1000L);
       TestCase.startAgentServer((short)0);
-      Thread.sleep(1000L);
+      Thread.sleep(2000L);
       
       cnx = cf.createConnection();
       sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -102,7 +102,7 @@ public class Test3 extends framework.TestCase {
       TestCase.stopAgentServer((short)0);
       Thread.sleep(1000L);
       TestCase.startAgentServer((short)0);
-      Thread.sleep(1000L);
+      Thread.sleep(2000L);
       
       cnx = cf.createConnection();
       sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -140,7 +140,7 @@ public class Test3 extends framework.TestCase {
       TestCase.stopAgentServer((short)0);
       Thread.sleep(1000L);
       TestCase.startAgentServer((short)0);
-      Thread.sleep(1000L);
+      Thread.sleep(2000L);
       
       cnx = cf.createConnection();
       sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);

@@ -29,8 +29,8 @@ import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 
-import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
@@ -55,7 +55,7 @@ public class Test4 extends framework.TestCase {
   public void run() {
     try {
       TestCase.startAgentServer((short)0);
-      Thread.sleep(1000L);
+      Thread.sleep(2000L);
 
       int NbMsg = 1000;
       
