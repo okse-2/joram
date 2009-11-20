@@ -692,10 +692,10 @@ public class AdminWrapper {
    * The request fails if the target server does not belong to the platform,
    * or if the destination deployment fails server side.
    *
-   * @param serverId   The identifier of the server where deploying the topic.
+   * @param serverId   The identifier of the server where deploying the queue.
    * @param name       The name of the queue.
-   * @param className  The topic class name.
-   * @param prop       The topic properties.
+   * @param className  The queue class name.
+   * @param prop       The queue properties.
    *
    * @exception ConnectException  If the admin connection is closed or broken.
    * @exception AdminException    If the request fails.
