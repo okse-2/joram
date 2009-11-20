@@ -211,7 +211,8 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
         setNoSave();
         if (task == null || ((WakeUpNot) not).update)
           setPeriod(destImpl.getPeriod());
-        destImpl.wakeUpNot((WakeUpNot) not);
+        if (destImpl.getPeriod() > 0)
+          destImpl.wakeUpNot((WakeUpNot) not);
       } else if (not instanceof DestinationAdminRequestNot)
         destImpl.destinationAdminRequestNot(from, (DestinationAdminRequestNot) not);
       else
