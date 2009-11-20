@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,20 +22,25 @@
  */
 package org.objectweb.joram.shared.util;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.util.ConcurrentModificationException;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.ConcurrentModificationException;
 
-import org.objectweb.joram.shared.stream.*;
+import org.objectweb.joram.shared.stream.StreamUtil;
 
 /**
  *  This class implements a set of properties, which maps keys to values.
  * Only string object can be used as a key, all primitives type can be used
  * as a value. <p>
  */
-public class Properties implements Cloneable {
+public class Properties implements Serializable, Cloneable {
   /** The total number of entries in the hash table. */
   private transient int count;
   /** The hash table data. */
@@ -720,5 +725,17 @@ public class Properties implements Cloneable {
     }
 
     return p;
+  }
+  
+  /** ***** ***** ***** ***** ***** ***** ***** *****
+   * Serializable interface
+   * ***** ***** ***** ***** ***** ***** ***** ***** */
+
+  private void writeObject(ObjectOutputStream out) throws IOException {
+    writeTo(out);
+  }
+
+  private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    readFrom(in);
   }
 }
