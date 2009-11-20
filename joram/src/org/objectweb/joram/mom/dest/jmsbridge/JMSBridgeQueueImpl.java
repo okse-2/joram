@@ -276,4 +276,8 @@ public class JMSBridgeQueueImpl extends QueueImpl {
     jmsModule.close(); 
     super.doDeleteNot(not);
   }
+  
+  protected void close() {
+    jmsModule.close(); 
+  }
 }
