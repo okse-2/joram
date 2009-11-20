@@ -220,16 +220,13 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    *               value (ignore 0).
    */
   public void setPeriod(long period) {
-    if ((this.period < 0) && (period > 0)) {
-      // Schedule the CleaningTask.
+    if (this.period != period) {
+      // Schedule the task.
       WakeUpNot not = new WakeUpNot();
-      if (this.period != period) {
-        not.update = true;
-      }
+      not.update = true;
       forward(getId(), not);
-    }
-    if (period != 0)
       this.period = period;
+    }
   }
   
   public abstract void wakeUpNot(WakeUpNot not);
