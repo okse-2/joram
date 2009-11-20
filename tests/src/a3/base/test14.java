@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2001 ScalAgent Distributed Technologies
+ * Copyright (C)  2001 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,9 @@
 
 package a3.base;
 
-import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.agent.Agent;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Notification;
 import framework.TestCase;
 
 public class test14 extends TestCase {
@@ -34,7 +36,7 @@ public class test14 extends TestCase {
   protected void setUp() throws Exception {
     timeout = 15000L;
 
-    startAgentServer((short) 1);
+    startAgentServer((short) 1, new String[] { "-DNTNoLockFile=true" });
 
     Test14Master master = new Test14Master();
     Test14Slave slave = new Test14Slave((short) 1);
@@ -78,7 +80,7 @@ public class test14 extends TestCase {
           TestCase.assertTrue(((Test14Not) not).creation);
           // Stop, then start AgentServer#1
           crashAgentServer((short) 1);
-          startAgentServer((short) 1);
+          startAgentServer((short) 1, new String[] { "-DNTNoLockFile=true" });
           // Then send a not to slave in order to reload it !!
           sendTo(slave, new Notification());
           break;

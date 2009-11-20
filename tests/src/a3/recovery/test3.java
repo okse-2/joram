@@ -1,9 +1,32 @@
 /*
- * Copyright (C) 2001 - SCALAGENT
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C)  2001 - 2009 ScalAgent Distributed Technologies
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
+ *
+ * Initial developer(s): ScalAgent D.T.
+ * Contributor(s): 
  */
 package a3.recovery;
 
-import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.agent.Agent;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.DeleteNot;
+import fr.dyade.aaa.agent.Notification;
+import fr.dyade.aaa.agent.UnknownAgent;
 import framework.TestCase;
 
 public class test3 extends TestCase {
@@ -12,7 +35,7 @@ public class test3 extends TestCase {
   }
 
   protected void setUp() throws Exception {
-    startAgentServer((short) 1);
+    startAgentServer((short) 1, new String[] { "-DNTNoLockFile=true" });
 
     timeout = Long.getLong("timeout", 60000L).longValue();
 
@@ -79,7 +102,7 @@ public class test3 extends TestCase {
           }
           crashAgentServer((short) 1);
 	  Thread.sleep(1000);
-          startAgentServer((short) 1);
+          startAgentServer((short) 1, new String[] { "-DNTNoLockFile=true" });
 
           sendTo(slave1, new Echo());
         } else if (state == 3) {
@@ -105,7 +128,7 @@ public class test3 extends TestCase {
           stopAgentServer((short) 1);
 	  // Wait in order to prevent WAIT status on TCP connection
 	  Thread.currentThread().sleep(2000L);
-          startAgentServer((short) 1);
+          startAgentServer((short) 1, new String[] { "-DNTNoLockFile=true" });
 
           sendTo(slave2, new Echo());
         } else if (state < 100) {
