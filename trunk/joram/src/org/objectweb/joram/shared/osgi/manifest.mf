@@ -2,7 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: JORAM :: Shared
 Bundle-SymbolicName: org.objectweb.joram.shared
-Export-Package: fr.dyade.aaa.jndi2.soap,
+Export-Package: fr.dyade.aaa.jndi2.msg,
+ fr.dyade.aaa.jndi2.soap,
  org.objectweb.joram.shared,
  org.objectweb.joram.shared.admin,
  org.objectweb.joram.shared.client,
@@ -15,7 +16,9 @@ Export-Package: fr.dyade.aaa.jndi2.soap,
  org.objectweb.joram.shared.util
 Bundle-Description: Joram Agent Server
 Bundle-Vendor: Scalagent D.T.
-Bundle-ClassPath: .,
- JCup.jar
-Import-Package: org.objectweb.util.monolog,
+Import-Package: fr.dyade.aaa.common,
+ java_cup.runtime,
+ javax.naming,
+ javax.naming.spi,
+ org.objectweb.util.monolog,
  org.objectweb.util.monolog.api
