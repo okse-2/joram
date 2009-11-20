@@ -7,7 +7,9 @@ Export-Package: com.scalagent.jmx,
  fr.dyade.aaa.util.management
 Import-Package: javax.management;resolution:=optional,
  org.objectweb.util.monolog,
- org.objectweb.util.monolog.api
+ org.objectweb.util.monolog.api,
+ org.osgi.framework
+DynamicImport-Package: *
 Bundle-Description: Joram Agent Server
 Bundle-Vendor: Scalagent D.T.
-Bundle-ClassPath: .
+Bundle-Activator: fr.dyade.aaa.common.osgi.Activator
