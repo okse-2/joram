@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2001 ScalAgent Distributed Technologies
+ * Copyright (C)  2001 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -46,7 +46,7 @@ public class test9 extends TestCase {
   static int  nbStopTask =0;
 
   protected void setUp() throws Exception {
-    startAgentServer(ServerPong);
+    startAgentServer(ServerPong, new String[] { "-DNTNoLockFile=true" });
 
     int bounce = Integer.getInteger("bounce", 150).intValue();
     // bounce = 100;
@@ -146,23 +146,26 @@ public class test9 extends TestCase {
           sendTo(queue, new Message(bounce));
         } else if (not instanceof StopNot) {
           if (rand.nextBoolean()) {
-	    System.out.println("stop");
+            System.out.println("stop");
             TestCase.stopAgentServer(test9.ServerPong);
           } else {
-	    System.out.println("crash");
+            System.out.println("crash");
             TestCase.crashAgentServer(test9.ServerPong);
-	  }
-	  // Wait in order to prevent WAIT status on TCP connection
-	  Thread.sleep(500L);
-	  // Start server#1
-	  TestCase.startAgentServer(test9.ServerPong);
-	  nbStopTask++;
-	  if(nbStopTask > 20 ) endTest();
-	} else if (not instanceof Message) {
+          }
+          // Wait in order to prevent WAIT status on TCP connection
+          Thread.sleep(500L);
+          // Start server#1
+          TestCase.startAgentServer(test9.ServerPong, new String[] { "-DNTNoLockFile=true" });
+          nbStopTask++;
+          if (nbStopTask > 20)
+            endTest();
+        } else if (not instanceof Message) {
           Message msg = (Message) not;
 
-	  if ((bounce %10) == 0) System.out.println("bounce: " + bounce);
-          if (bounce == 1) System.out.println("last");
+          if ((bounce % 10) == 0)
+            System.out.println("bounce: " + bounce);
+          if (bounce == 1)
+            System.out.println("last");
           assertTrue(from.equals(queue));
           assertEquals(msg.bounce, bounce);
 

@@ -22,9 +22,12 @@
  */
 package a3.recovery;
 
-import java.util.*;
+import java.util.Random;
+import java.util.Timer;
 
-import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.agent.Agent;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Notification;
 import framework.TestCase;
 
 public class test1 extends TestCase {
@@ -40,7 +43,7 @@ public class test1 extends TestCase {
   static Random rand = null;
   
   protected void setUp() throws Exception {
-    startAgentServer(ServerPong);
+    startAgentServer(ServerPong, new String[] { "-DNTNoLockFile=true" });
 
     int bounce = Integer.getInteger("bounce", 1500).intValue();
     timeout = 250L * bounce;
@@ -82,7 +85,7 @@ public class test1 extends TestCase {
       // Wait in order to prevent WAIT status on TCP connection
       Thread.currentThread().sleep(500L);
       // Start server#1
-      TestCase.startAgentServer(ServerPong);
+      TestCase.startAgentServer(ServerPong, new String[] { "-DNTNoLockFile=true" });
     }
 
 //    timer.schedule(new StopTask(ping.getId(), new StopNot()), 5000L, 15000L);
