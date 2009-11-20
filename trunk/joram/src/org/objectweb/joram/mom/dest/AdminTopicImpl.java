@@ -26,8 +26,11 @@ package org.objectweb.joram.mom.dest;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -160,6 +163,7 @@ import fr.dyade.aaa.agent.conf.A3CMLConfig;
 import fr.dyade.aaa.agent.conf.A3CMLDomain;
 import fr.dyade.aaa.agent.conf.A3CMLNetwork;
 import fr.dyade.aaa.agent.conf.A3CMLServer;
+import fr.dyade.aaa.common.LoadClassLock;
 
 /**
  * The <code>AdminTopicImpl</code> class implements the admin topic behavior,
@@ -181,7 +185,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * <b>Key:</b> destination name<br>
    * <b>Object:</b> destination agent identifier
    */
-  private Hashtable destinationsTable;
+  private Map destinationsTable;
 
   /**
    * Table holding the TCP users identifications.
@@ -189,14 +193,15 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * <b>Key:</b> user name<br>
    * <b>Object:</b> user password
    */
-  private Hashtable usersTable;
+  private Map usersTable;
+
   /**
    * Table holding the TCP users proxies identifiers.
    * <p>
    * <b>Key:</b> user name<br>
    * <b>Object:</b> proxy's identifier
    */
-  private Hashtable proxiesTable;
+  private Map proxiesTable;
 
   /**
    * Table keeping the administrator's requests.
@@ -204,7 +209,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * <b>Key:</b> request's message identifier<br>
    * <b>Value:</b> request's message ReplyTo field
    */
-  private Hashtable requestsTable;
+  private Map requestsTable;
   /** Counter of messages produced by this AdminTopic. */
   private long msgCounter = 0;
 
@@ -273,8 +278,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   /** Method used by proxies for retrieving their name. */
   public String getName(AgentId proxyId) {
     String name;
-    for (Enumeration e = proxiesTable.keys(); e.hasMoreElements();) {
-      name = (String) e.nextElement();
+    for (Iterator e = proxiesTable.keySet().iterator(); e.hasNext();) {
+      name = (String) e.next();
       if (proxyId.equals(proxiesTable.get(name)))
         return name;
     }
@@ -284,8 +289,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   /** Method used by proxies for retrieving their password. */
   public Object getPassword(AgentId proxyId) {
     String name;
-    for (Enumeration e = proxiesTable.keys(); e.hasMoreElements();) {
-      name = (String) e.nextElement();
+    for (Iterator e = proxiesTable.keySet().iterator(); e.hasNext();) {
+      name = (String) e.next();
       if (proxyId.equals(proxiesTable.get(name)))
         return usersTable.get(name);
     }
@@ -393,9 +398,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
   public void GetProxyIdListNot(GetProxyIdListNot not) {
     Vector idList = new Vector();
-    Enumeration ids = proxiesTable.elements();
-    while (ids.hasMoreElements()) {
-      AgentId aid = (AgentId)ids.nextElement();
+    Iterator ids = proxiesTable.values().iterator();
+    while (ids.hasNext()) {
+      AgentId aid = (AgentId) ids.next();
       idList.addElement(aid);
     }
     AgentId[] res = new AgentId[idList.size()];
@@ -424,7 +429,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
   public void RegisterDestNot(RegisterDestNot not) {
     String name = not.getName();
-    if (name == null || destinationsTable.contains(name))
+    if (name == null || destinationsTable.containsKey(name))
       return;
 
     DestinationDesc destDesc = new DestinationDesc(not.getId(), not.getName(), not.getClassName(), not.getType());
@@ -449,8 +454,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     AgentId proxyId;
     Monitor_GetUsersRep reply = new Monitor_GetUsersRep();
 
-    for (Enumeration names = proxiesTable.keys(); names.hasMoreElements();) {
-      name = (String) names.nextElement();
+    for (Iterator names = proxiesTable.keySet().iterator(); names.hasNext();) {
+      name = (String) names.next();
       proxyId = (AgentId) proxiesTable.get(name);
 
       if (users.contains(proxyId))
@@ -1011,10 +1016,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       // Instantiating the destination class.
       Destination dest = null;
       try {
-        try {
+        synchronized (LoadClassLock.lock) {
           dest = (Destination) Class.forName(className).newInstance();
-        } catch (ClassNotFoundException cnfe) {
-          dest = (Destination) AgentServer.getResolverRepository().resolveClass(className).newInstance();
         }
         dest.setName(destName);
         ((AdminDestinationItf) dest).init(adminId, properties);
@@ -1070,10 +1073,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       // The destination is  local, process the request.
       String info;
 
-      Enumeration destinations = destinationsTable.elements();
-      while (destinations.hasMoreElements()) {
-        DestinationDesc destDesc = 
-          (DestinationDesc)destinations.nextElement();
+      Iterator destinations = destinationsTable.values().iterator();
+      while (destinations.hasNext()) {
+        DestinationDesc destDesc = (DestinationDesc) destinations.next();
         if (destDesc.getId().equals(destId)) {
           destinationsTable.remove(destDesc.getName());
           break;
@@ -1851,14 +1853,13 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
                          AgentId replyTo,
                          String msgId) throws UnknownServerException {
     if (checkServerId(request.getServerId())) {
-      Enumeration destinations = destinationsTable.elements();
+      Iterator destinations = destinationsTable.values().iterator();
       String[] ids = new String[destinationsTable.size()];
       String[] names = new String[destinationsTable.size()];
       byte[] types = new byte[destinationsTable.size()];
       int i = 0;
-      while (destinations.hasMoreElements()) {
-        DestinationDesc destDesc = 
-          (DestinationDesc)destinations.nextElement();
+      while (destinations.hasNext()) {
+        DestinationDesc destDesc = (DestinationDesc) destinations.next();
         ids[i] = destDesc.getId().toString();
         names[i] = destDesc.getName();
         types[i] = destDesc.getType();
@@ -1887,8 +1888,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       Monitor_GetUsersRep reply = new Monitor_GetUsersRep();
 
       String name; 
-      for (Enumeration names = proxiesTable.keys(); names.hasMoreElements();) {
-        name = (String) names.nextElement();
+      for (Iterator names = proxiesTable.keySet().iterator(); names.hasNext();) {
+        name = (String) names.next();
         reply.addUser(name, ((AgentId) proxiesTable.get(name)).toString());
       }
 
@@ -2434,7 +2435,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     message.id = createMessageId();
     message.correlationId = msgId;
     message.timestamp = System.currentTimeMillis();
-    message.setDestination(getId().toString(), message.TOPIC_TYPE);
+    message.setDestination(getId().toString(), Message.TOPIC_TYPE);
     try {
       message.setAdminMessage(reply);
       ClientMessages clientMessages = new ClientMessages(-1, -1, message);
@@ -2481,7 +2482,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     }
   }
 
-  public static class DestinationDesc implements java.io.Serializable {
+  public static class DestinationDesc implements Serializable {
     /** define serialVersionUID for interoperability */
     private static final long serialVersionUID = 1L;
     
