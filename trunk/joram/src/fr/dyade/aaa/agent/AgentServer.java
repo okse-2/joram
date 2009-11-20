@@ -47,9 +47,9 @@ import fr.dyade.aaa.agent.conf.A3CMLNetwork;
 import fr.dyade.aaa.agent.conf.A3CMLProperty;
 import fr.dyade.aaa.agent.conf.A3CMLServer;
 import fr.dyade.aaa.agent.conf.A3CMLService;
+import fr.dyade.aaa.agent.osgi.Activator;
 import fr.dyade.aaa.common.Configuration;
 import fr.dyade.aaa.common.MonitoringTimerTask;
-import fr.dyade.aaa.util.ResolverRepository;
 import fr.dyade.aaa.util.Transaction;
 import fr.dyade.aaa.util.management.MXWrapper;
 
@@ -274,6 +274,8 @@ public final class AgentServer {
    */
   public final static long DEFAULT_MONITORING_CONFIG_PERIOD = 5000L;
 
+  public static boolean isOSGi = false;
+
   static ThreadGroup tgroup = null;
 
   public static ThreadGroup getThreadGroup() {
@@ -457,15 +459,6 @@ public final class AgentServer {
     } catch (Exception e) {
       return getName();
     }
-  }
-  
-  static ResolverRepository resolverRepo = null;
-
-  public static ResolverRepository getResolverRepository() {
-    if (resolverRepo == null) {
-      resolverRepo = new ResolverRepository();
-    }
-    return resolverRepo;
   }
 
   /**
@@ -1432,7 +1425,7 @@ public final class AgentServer {
       } catch (Exception exc) {
         logmon.log(BasicLevel.FATAL,
                    getName() + ", can't initialize services", exc);
-        throw new Exception("Can't initialize services");
+        throw new Exception("Can't initialize services: " + exc.getMessage());
       }
 
       // Now we can start all message consumers.
@@ -1661,6 +1654,10 @@ public final class AgentServer {
       Runtime.getRuntime().gc();
       System.runFinalization();
 
+      if (isOSGi) {
+        Activator.stopFramework();
+      }
+
       logmon.log(BasicLevel.WARN, getName() + ", stopped at " + new Date());
     } catch (Throwable t) {
       logmon.log(BasicLevel.ERROR, getName() + "Cannot stop", t);
@@ -1679,6 +1676,7 @@ public final class AgentServer {
   public static final String OKSTRING = "OK";
   public static final String ERRORSTRING = "ERROR";
   public static final String ENDSTRING = "END";
+
   /**
    * Main for a standard agent server.
    * The start arguments include in first position the identifier of the
