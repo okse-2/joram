@@ -21,23 +21,55 @@
  */
 package org.objectweb.joram.mom.osgi;
 
+import java.util.Properties;
+
+import org.objectweb.joram.mom.dest.MonitoringQueue;
+import org.objectweb.joram.mom.dest.MonitoringTopic;
+import org.objectweb.joram.mom.proxies.ConnectionManager;
+import org.objectweb.joram.mom.proxies.tcp.SSLTcpProxyService;
+import org.objectweb.joram.mom.proxies.tcp.TcpProxyService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 
-import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.util.Resolver;
+import fr.dyade.aaa.common.Service;
 
 public class Activator implements BundleActivator {
   
-  private Resolver resolver;
+  private ServiceRegistration connectionManagerRegistration;
+
+  private ServiceRegistration tcpProxyServiceRegistration;
+
+  private ServiceRegistration sslTcpProxyServiceRegistration;
+
+  private ServiceRegistration monitoringTopicRegistration;
+
+  private ServiceRegistration monitoringQueueRegistration;
 
   public void start(BundleContext context) throws Exception {
-    resolver = new MOMResolver();
-    AgentServer.getResolverRepository().registerResolver(resolver);
+    Properties props = new Properties();
+    props.put(Service.SERVICE_NAME_PROP, ConnectionManager.class.getName());
+    connectionManagerRegistration = context.registerService(Service.class.getName(), new Service(), props);
+
+    props.put(Service.SERVICE_NAME_PROP, TcpProxyService.class.getName());
+    tcpProxyServiceRegistration = context.registerService(Service.class.getName(), new Service(), props);
+
+    props.put(Service.SERVICE_NAME_PROP, SSLTcpProxyService.class.getName());
+    sslTcpProxyServiceRegistration = context.registerService(Service.class.getName(), new Service(), props);
+
+    props.put(Service.SERVICE_NAME_PROP, MonitoringTopic.class.getName());
+    monitoringTopicRegistration = context.registerService(Service.class.getName(), new Service(), props);
+
+    props.put(Service.SERVICE_NAME_PROP, MonitoringQueue.class.getName());
+    monitoringQueueRegistration = context.registerService(Service.class.getName(), new Service(), props);
   }
 
   public void stop(BundleContext context) throws Exception {
-    AgentServer.getResolverRepository().unregisterResolver(resolver);
+    connectionManagerRegistration.unregister();
+    tcpProxyServiceRegistration.unregister();
+    sslTcpProxyServiceRegistration.unregister();
+    monitoringTopicRegistration.unregister();
+    monitoringQueueRegistration.unregister();
   }
 
 }
