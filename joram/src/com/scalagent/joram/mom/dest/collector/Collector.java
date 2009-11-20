@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,6 +23,7 @@
 package com.scalagent.joram.mom.dest.collector;
 
 import java.io.IOException;
+import java.util.Properties;
 
 
 
@@ -45,4 +46,11 @@ public interface Collector {
    * @param collectorDest the destination Queue or Topic.
    */
   public void setCollectorDestination(CollectorDestination collectorDest);
+
+  /**
+   * set collector properties.
+   * 
+   * @param properties The initial set of properties.
+   */
+  public void setProperties(Properties properties);
 }

@@ -29,7 +29,12 @@ import org.objectweb.joram.shared.util.Properties;
  */
 public interface CollectorDestination {
   
-  public static final long DEFAULT_PERIODE = 60000L;
+  public static final String DEFAULT_COLLECTOR = "com.scalagent.joram.mom.dest.collector.URLCollector";
+  public static final long DEFAULT_PERIODE = 600000L;
+  public static final String CLASS_NAME = "collector.className";
+  public static final String PERSISTENT_MSG = "persistent";
+  public static final String EXPIRATION_MSG = "expiration";
+  public static final String PRIORITY_MSG = "priority";
   
   /**
    * send message.
@@ -39,11 +44,4 @@ public interface CollectorDestination {
    * @param properties message properties.
    */
   public void sendMessage(int type, byte[] body, Properties properties);
-  
-  /**
-   * return the collector destination properties.
-   * 
-   * @return properties.
-   */
-  public java.util.Properties getProperties();
 }

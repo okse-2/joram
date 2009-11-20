@@ -25,16 +25,18 @@ package com.scalagent.joram.mom.dest.collector;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Properties;
+import java.util.Vector;
 
 import org.objectweb.joram.mom.dest.QueueImpl;
 import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.mom.notifications.WakeUpNot;
+import org.objectweb.joram.shared.messages.ConversionHelper;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Debug;
-import fr.dyade.aaa.agent.WakeUpTask;
 
 /**
  * The <code>CollectorQueueImpl</code> class implements the MOM collector queue behavior,
@@ -46,42 +48,138 @@ public class CollectorQueueImpl extends QueueImpl implements CollectorDestinatio
   
   public static Logger logger = Debug.getLogger(CollectorQueueImpl.class.getName());
   
-  public static final String DEFAULT_COLLECTOR = "com.scalagent.joram.mom.dest.collector.URLCollector";
-  
-  private Properties prop = null;
   private Collector collector;
   private long messageExpiration = 0;
-  private boolean messagePersistent = true;
+  private boolean messagePersistent = false;
   private long count = 0;
-  private WakeUpTask task;
+  
+  /** Tells if the messages produced are persistent. */
+  private boolean isPersistent = false;
   
   /**
-   * constructor.
+   * Returns true if the messages produced are persistent.
    * 
-   * @param adminId admin agent.
-   * @param prop properties.
+   * @return true if the messages produced are persistent.
    */
-  public CollectorQueueImpl(AgentId adminId, Properties prop) {
-    super(adminId, prop);
-    this.prop = prop;
-    setMessageExpiration(prop.getProperty("collector.expirationMessage"));
-    setMessagePersistent(prop.getProperty("collector.persistentMessage"));
-    
-    String className = prop.getProperty("collector.ClassName", DEFAULT_COLLECTOR);
-    Class clazz;
-    try {
-      clazz = Class.forName(className);
-      collector = (Collector) clazz.newInstance();
-      collector.setCollectorDestination(this);
-      
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "CollectorQueueImpl.<init> prop = " + prop + ", collector = " + collector);
-
-    } catch (Exception e) {
-      // TODO: handle exception
-    }
+  public boolean isMessagePersistent() {
+    return isPersistent;
+  }
+  
+  /**
+   * Sets the DeliveryMode value for the produced messages.
+   * if the parameter is true the messages produced are persistent.
+   * 
+   * @param isPersistent if true the messages produced are persistent.
+   */
+  public void setMessagePersistent(boolean isPersistent) {
+    this.isPersistent = isPersistent;
+  }
+  
+  /** The priority of produced messages. */
+  private int priority = 4;
+  
+  /**
+   * Returns the priority  of produced messages.
+   * 
+   * @return the priority of produced messages.
+   */
+  public int getPriority() {
+    return priority;
   }
 
+  /**
+   * Sets the priority of produced messages.
+   * 
+   * @param priority the priority to set.
+   */
+  public void setPriority(int priority) {
+    this.priority = priority;
+  }
+
+  /** The duration of produced messages. */
+  private long expiration = -1;
+
+  /**
+   * Returns the expiration value for produced messages.
+   * 
+   * @return the expiration value for produced messages.
+   */
+  public long getExpiration() {
+    return expiration;
+  }
+
+  /**
+   * Sets the expiration value for produced messages.
+   * 
+   * @param expiration the expiration to set.
+   */
+  public void setExpiration(long expiration) {
+    this.expiration = expiration;
+  }
+
+  
+  /**
+   * Constructs a <code>CollectorQueueImpl</code> instance.
+   * 
+   * @param adminId Identifier of the administrator of the queue.
+   * @param prop    The initial set of properties.
+   */
+  public CollectorQueueImpl(AgentId adminId, Properties properties) {
+    super(adminId, properties);
+
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "CollectorQueueImpl.<init> prop = " + properties );
+    
+    if (properties != null) {
+      Enumeration e = properties.keys();
+      while (e.hasMoreElements()) {
+        String name = (String) e.nextElement();
+        
+        try {
+          if (name.equals(WAKEUP_PERIOD)) {
+            //nothing to do, see DestinationImpl
+          } else if (name.equals(PERSISTENT_MSG))
+            isPersistent = ConversionHelper.toBoolean(properties.get(PERSISTENT_MSG));
+          else if (name.equals(PRIORITY_MSG))
+            priority = ConversionHelper.toInt(properties.get(PRIORITY_MSG));
+          else if (name.equals(EXPIRATION_MSG))
+            expiration = ConversionHelper.toLong(properties.get(EXPIRATION_MSG));
+          else if (name.equals(CLASS_NAME)) {
+            String className = ConversionHelper.toString(properties.get(CLASS_NAME));
+            if (className == null)
+              className = DEFAULT_COLLECTOR;
+            createCollector(className, properties);
+          }
+        } catch (Exception exc) {
+          logger.log(BasicLevel.ERROR, "CollectorQueueImpl.<init>: bad initialization.", exc);
+        }
+      }
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "CollectorQueueImpl.<init> period = " + getPeriod() + ", collector = " + collector);
+    }
+  }
+  
+  private void createCollector(String className, Properties properties) 
+  throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+    Class clazz;
+    clazz = Class.forName(className);
+    collector = (Collector) clazz.newInstance();
+    collector.setCollectorDestination(this);
+    collector.setProperties(properties);
+  }
+
+  private Properties transform(org.objectweb.joram.shared.util.Properties properties) {
+    if (properties == null)
+      return null;
+    Properties prop = new Properties();
+    Enumeration e = properties.keys();
+    while (e.hasMoreElements()) {
+      String key = (String) e.nextElement();
+      prop.put(key, properties.get(key));
+    }
+    return prop;
+  }
+  
   /**
    * create wake up task and wake up this collector.
    * 
@@ -91,128 +189,32 @@ public class CollectorQueueImpl extends QueueImpl implements CollectorDestinatio
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "CollectorQueueImpl.initialize(" + firstTime + ')'); 
     super.initialize(firstTime);
+    
     if (firstTime) {
-      // execute collector wake up.
-      collectorWakeUp();
-    }
-  }
-  
-  /**
-   * set properties, messageExpiration, messagePersistence 
-   * and wake up this collector if period changed.
-   * 
-   * @param prop properties.
-   */
-  public void setProperties(Properties prop) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "CollectorQueueImpl.setProperties(" + prop + ')'); 
-          
-    String period = this.prop.getProperty("collector.period");
-    this.prop = prop;
-    setMessageExpiration(prop.getProperty("collector.expirationMessage"));
-    setMessagePersistent(prop.getProperty("collector.persistentMessage"));
-    if (! period.equals(prop.getProperty("collector.period"))) {
-      // execute collector wake up.
-      collectorWakeUp();
-    }
-  }
-  
-  /**
-   * add a property (used by MBean).
-   * 
-   * @param key
-   * @param value
-   * @see com.scalagent.joram.mom.dest.collector.CollectorQueueImplMBean#addProperty(java.lang.String, java.lang.String)
-   */
-  public void setProperty(String key, String value) {
-    if (this.prop == null) 
-      return;
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,"setProperty(" + key + ", " + value + ')');
-
-    if (key.equals("collector.period")) {
-      if (! value.equals(prop.getProperty("collector.period"))) {
-        this.prop.setProperty(key, value);
-        collectorWakeUp();
+      try {
+        if (collector != null)
+          collector.check();
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
       }
-    } else {
-      this.prop.setProperty(key, value);
-      setProperties(this.prop);
     }
-  }
-  
-  /**
-   * set the message expiration.
-   * 
-   * @param expiration message expiration.
-   */
-  public void setMessageExpiration(String expiration) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "CollectorQueueImpl.setMessageExpiration(" + expiration + ')'); 
-    
-    if (expiration != null) {
-      messageExpiration = Long.valueOf(expiration).longValue();
-    }
-  }
-  
-  /**
-   * set the message persistence.
-   * 
-   * @param persistent true if persistent.
-   */
-  public void setMessagePersistent(String persistent) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "CollectorQueueImpl.setMessagePersistent(" + persistent + ')'); 
-    
-    if (persistent != null) {
-      messagePersistent = Boolean.valueOf(persistent).booleanValue();
-    }
-  }
-  
-  /**
-   * get the collector period.
-   * 
-   * @return string collector period.
-   */
-  public String getCollectorPeriod() {
-    return prop.getProperty("collector.period");
   }
   
   /**
    * wake up the collector (do check)
    * and schedule task.
    */
-  public void collectorWakeUp() {
+  public void wakeUpNot(WakeUpNot not) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "CollectorQueueImpl.collectorWakeUp()"); 
+    
+    super.wakeUpNot(not);
     
     try {
       collector.check();
     } catch (IOException e) {
       // TODO Auto-generated catch block
     }  
-    
-    // get collector period
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "CollectorQueueImpl: getCollectorPeriod = " + getCollectorPeriod()); 
-    long collectorPeriod = DEFAULT_PERIODE;
-    if (getCollectorPeriod() != null)
-      collectorPeriod = Long.valueOf(getCollectorPeriod()).longValue();
-    
-    if (task == null) {
-      // create a new task.
-      task = new WakeUpTask(getId(), CollectorWakeUpNot.class, collectorPeriod);
-    } else {
-      try {
-        // cancel all collector task
-        task.cancel();
-        // Schedules the wake up task period (getCollectorPeriod()).
-        task = new WakeUpTask(getId(), CollectorWakeUpNot.class, collectorPeriod);
-      } catch (Exception e) {
-        if (logger.isLoggable(BasicLevel.ERROR))
-          logger.log(BasicLevel.ERROR, "CollectorQueueImpl:ERROR::: getCollectorPeriod task=" + task, e); 
-      }
-    }
   }
   
   /**
@@ -220,39 +222,49 @@ public class CollectorQueueImpl extends QueueImpl implements CollectorDestinatio
    * 
    * @see org.objectweb.joram.mom.dest.DestinationImpl#preProcess(fr.dyade.aaa.agent.AgentId, org.objectweb.joram.mom.notifications.ClientMessages)
    */
-  public ClientMessages preProcess(AgentId from, ClientMessages msgs) {
+  public ClientMessages preProcess(AgentId from, ClientMessages cm) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Change collector properties. preProcess(" + from + ", " + msgs + ')');
-    Properties prop = new Properties();
-    try  {
-      Message msg = (Message) msgs.getMessages().get(msgs.getMessages().size() - 1);
+      logger.log(BasicLevel.DEBUG, "Change collector properties. preProcess(" + from + ", " + cm + ')');
+    
+    long period = getPeriod();
+    
+    
+    Vector msgs = cm.getMessages();
+    for (int i=0; i<msgs.size(); i++) {
+      Message msg = (Message) msgs.elementAt(i);
+      
       if (msg.properties != null) {
         Enumeration enumProperties = msg.properties.keys();
         while (enumProperties.hasMoreElements()) {
           String key = (String) enumProperties.nextElement();
-          Object value = msg.properties.get(key);
-          prop.put(key, value);
+          
+          try {
+            if (key.equals(WAKEUP_PERIOD))
+              period = ConversionHelper.toLong(msg.properties.get(WAKEUP_PERIOD));
+            else if (key.equals(PERSISTENT_MSG))
+              isPersistent = ConversionHelper.toBoolean(msg.properties.get(PERSISTENT_MSG));
+            else if (key.equals(PRIORITY_MSG))
+              priority = ConversionHelper.toInt(msg.properties.get(PRIORITY_MSG));
+            else if (key.equals(EXPIRATION_MSG))
+              expiration = ConversionHelper.toLong(msg.properties.get(EXPIRATION_MSG));
+            else if (key.equals(CLASS_NAME)) {
+              String className = ConversionHelper.toString(msg.properties.get(CLASS_NAME));
+              if (className == null)
+                className = DEFAULT_COLLECTOR;
+              createCollector(className, transform(msg.properties));
+            }
+          } catch (Exception exc) {
+            logger.log(BasicLevel.ERROR, "CollectorQueueImpl.<init>: bad configuration.", exc);
+          }
         }
       }
-      if (prop != null && !prop.isEmpty()) {
-        // update properties
-        setProperties(prop);
-      }
-      return null;
-    } catch (Exception e) {
-      return msgs;
+      msg.properties = null;
     }
+    setPeriod(period);
+      
+    return null;
   }
-  
-  /**
-   * get properties.
-   * 
-   * @see com.scalagent.joram.mom.dest.collector.CollectorDestination#getProperties()
-   */
-  public Properties getProperties() {
-    return prop;
-  }
-
+ 
   /**
    * send message and properties.
    * Here just construct the client messages and call storeClientMessage.
@@ -283,5 +295,10 @@ public class CollectorQueueImpl extends QueueImpl implements CollectorDestinatio
     
     // store message in this queue (CollectorQueue).
     addClientMessages(clientMsgs);
+  }
+  
+
+  public String toString() {
+    return "CollectorQueueImpl:" + getId().toString();
   }
 }

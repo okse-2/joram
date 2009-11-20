@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,6 +30,8 @@ import java.io.Serializable;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.objectweb.joram.shared.excepts.MessageValueException;
+import org.objectweb.joram.shared.messages.ConversionHelper;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.joram.shared.util.Properties;
 
@@ -40,17 +42,25 @@ import org.objectweb.joram.shared.util.Properties;
 public class URLCollector implements Collector, Serializable {
  
   private static final long serialVersionUID = 1L;
+  
+  public static final String FILE = "collector.file";
+  public static final String PATH = "collector.path";
+  public static final String HOST = "collector.host";
+  public static final String URL = "collector.url";
+  public static final String TYPE = "collector.type";
+  
   private CollectorDestination collectorDest;
-  private Properties prop = null;
+  private String urlStr = null;
+  private int type = Message.BYTES;
   
   /**
    * get the file.
    * 
-   * @param spec the URL
+   * @param spec the String to parse as a URL.
    * @return the file in byte format.
    * @throws IOException
    */
-  private byte[] getResource(String spec) throws IOException {
+  private byte[] getResource(String spec, Properties prop) throws IOException {
     ByteArrayOutputStream baos = null;
     BufferedOutputStream bos = null;
     try {
@@ -62,11 +72,9 @@ public class URLCollector implements Collector, Serializable {
     baos = new ByteArrayOutputStream();
     bos = new BufferedOutputStream(baos);
     
-    if (prop == null)
-      prop = new Properties();
-    prop.put("collector.file", url.getFile());
-    prop.put("collector.path", url.getPath());
-    prop.put("collector.host", url.getHost());
+    prop.put(FILE, url.getFile());
+    prop.put(PATH, url.getPath());
+    prop.put(HOST, url.getHost());
     
     
     int c = is.read();
@@ -91,20 +99,23 @@ public class URLCollector implements Collector, Serializable {
    * @see com.scalagent.joram.mom.dest.collector.Collector#check()
    */
   public void check() throws IOException {
-    String spec = collectorDest.getProperties().getProperty("collector.url");
-    String typeStr = collectorDest.getProperties().getProperty("collector.type");
-    int type = Message.BYTES;
-    if (typeStr != null)
-      type = Integer.valueOf(typeStr).intValue();
-    
-    if (prop == null)
-      prop = new Properties();
-    prop.put("collector.url", spec);
-    collectorDest.sendMessage(type, getResource(spec), prop);
+    Properties prop = new Properties();
+    prop.put(URL, urlStr);
+    byte[] tab = getResource(urlStr, prop);
+    collectorDest.sendMessage(type, tab, prop);
   }
 
   public void setCollectorDestination(CollectorDestination collectorDest) {
     this.collectorDest = collectorDest;
+  }
+
+  public void setProperties(java.util.Properties properties) {
+    urlStr = properties.getProperty(URL);
+    try {
+      type = ConversionHelper.toByte(properties.getProperty(TYPE));
+    } catch (MessageValueException e) {
+      type = Message.BYTES;
+    }    
   }
 
 }
