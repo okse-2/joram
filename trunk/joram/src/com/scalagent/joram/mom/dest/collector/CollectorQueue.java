@@ -26,16 +26,10 @@ import java.util.Properties;
 
 import org.objectweb.joram.mom.dest.DestinationImpl;
 import org.objectweb.joram.mom.dest.Queue;
-import org.objectweb.joram.mom.notifications.AbstractRequest;
-import org.objectweb.joram.mom.notifications.ExceptionReply;
-import org.objectweb.joram.shared.excepts.MomException;
-import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.Debug;
-import fr.dyade.aaa.agent.Notification;
 
 /**
  * A <code>CollectorQueue</code> agent is an agent hosting a MOM queue.
@@ -80,29 +74,14 @@ public class CollectorQueue extends Queue {
     super.agentInitialize(firstTime);
   }
   
-  /**
-   * Distributes the received notifications to the appropriate reactions.
-   * @throws Exception 
-   */
-  public void react(AgentId from, Notification not) throws Exception {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "CollectorQueue.react(" + from + ',' + not + ')');
-
-    try {     
-      if (not instanceof CollectorWakeUpNot) {
-        ((CollectorQueueImpl)destImpl).collectorWakeUp();
-      } else
-        super.react(from, not);
-
-    } catch (MomException exc) {
-      // MOM Exceptions are sent to the requester.
-      if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN, exc);
-
-      if (not instanceof AbstractRequest) {
-        AbstractRequest req = (AbstractRequest) not;
-        Channel.sendTo(from, new ExceptionReply(req, exc));
-      }
-    }
-  }
+//  /**
+//   * Distributes the received notifications to the appropriate reactions.
+//   * @throws Exception 
+//   */
+//  public void react(AgentId from, Notification not) throws Exception {
+//    if (logger.isLoggable(BasicLevel.DEBUG))
+//      logger.log(BasicLevel.DEBUG, "CollectorQueue.react(" + from + ',' + not + ')');
+//
+//    super.react(from, not);
+//  }
 }

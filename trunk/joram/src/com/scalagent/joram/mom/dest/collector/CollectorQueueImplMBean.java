@@ -22,8 +22,6 @@
  */
 package com.scalagent.joram.mom.dest.collector;
 
-import java.util.Properties;
-
 import org.objectweb.joram.mom.dest.QueueImplMBean;
 
 /**
@@ -32,15 +30,45 @@ import org.objectweb.joram.mom.dest.QueueImplMBean;
 public interface CollectorQueueImplMBean extends QueueImplMBean {
 
   /**
-   * add a property.
+   * Returns true if the messages produced are persistent.
    * 
-   * @param key 
-   * @param value
+   * @return true if the messages produced are persistent.
    */
-  public void setProperty(String key, String value);
+  public boolean isMessagePersistent();
   
   /**
-   * @return the collector queue properties 
+   * Sets the DeliveryMode value for the produced messages.
+   * if the parameter is true the messages produced are persistent.
+   * 
+   * @param isPersistent if true the messages produced are persistent.
    */
-  public Properties getProperties();
+  public void setMessagePersistent(boolean isPersistent);
+  
+  /**
+   * Returns the priority  of produced messages.
+   * 
+   * @return the priority of produced messages.
+   */
+  public int getPriority();
+
+  /**
+   * Sets the priority of produced messages.
+   * 
+   * @param priority the priority to set.
+   */
+  public void setPriority(int priority);
+  
+  /**
+   * Returns the expiration value for produced messages.
+   * 
+   * @return the expiration value for produced messages.
+   */
+  public long getExpiration();
+
+  /**
+   * Sets the expiration value for produced messages.
+   * 
+   * @param expiration the expiration to set.
+   */
+  public void setExpiration(long expiration);
 }
