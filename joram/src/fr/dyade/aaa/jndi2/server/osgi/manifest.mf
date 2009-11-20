@@ -5,11 +5,12 @@ Bundle-Vendor: Scalagent D.T.
 Export-Package: fr.dyade.aaa.jndi2.distributed,
  fr.dyade.aaa.jndi2.ha,
  fr.dyade.aaa.jndi2.impl,
- fr.dyade.aaa.jndi2.msg,
  fr.dyade.aaa.jndi2.server
 Import-Package: com.scalagent.jmx,
  fr.dyade.aaa.agent,
  fr.dyade.aaa.common,
+ fr.dyade.aaa.jndi2.msg,
+ fr.dyade.aaa.jndi2.soap,
  fr.dyade.aaa.util,
  fr.dyade.aaa.util.management,
  javax.naming,
