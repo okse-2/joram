@@ -11,8 +11,11 @@ Import-Package: com.scalagent.jmx,
  javax.xml.parsers,
  org.objectweb.util.monolog,
  org.objectweb.util.monolog.api,
+ org.osgi.framework,
+ org.osgi.util.tracker,
  org.xml.sax,
  org.xml.sax.helpers
+DynamicImport-Package: *
 Bundle-Description: Joram Agent Server
 Bundle-Vendor: Scalagent D.T.
-Bundle-ClassPath: .
+Bundle-Activator: fr.dyade.aaa.agent.osgi.Activator
