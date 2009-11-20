@@ -47,6 +47,7 @@
     <antcall target="tests.ttl"/>
     <antcall target="tests.sub"/>
     <antcall target="tests.monitoring"/>
+    <antcall target="tests.collector"/>
   </target>
 
 	<target name="tests.base"
