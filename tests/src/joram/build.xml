@@ -402,6 +402,14 @@ description=" --> launch all exceptionlistener tests">
   	<antcall target="monitoring.TestQ3"/>
   </target>
 
+  <target name="tests.collector"
+          description=" --> launch all collector tests">
+    <antcall target="collector.TestT1"/>
+    <antcall target="collector.TestT2"/>
+    <antcall target="collector.TestQ1"/>
+    <antcall target="collector.TestQ2"/>
+  </target>
+  
   <target name="tests.pool"
           description=" --> launch all pool tests">
     <antcall target="pool.Test1"/>
@@ -4461,7 +4469,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="monitoring.TestQ3" depends="init.a3props,compile"
           description=" --> Tests monitoring as a service.">
     <antcall target="test.run" inheritAll="true">
-      <param name="testid" value="monitoring.TestA3"/>
+      <param name="testid" value="monitoring.TestQ3"/>
       <param name="className" value="joram.monitoring.TestMonitoringQueue3"/>
       <param name="jndiconf" value="monitoring/jndi.properties"/>
       <param name="a3conf" value="monitoring/a3servers2.xml"/>
@@ -4470,6 +4478,54 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 
+  <target name="collector.TestQ1" depends="init.a3props,compile"
+          description=" --> Simple collector">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="collector.TestQ1"/>
+      <param name="className" value="joram.collector.TestCollectorQueue1"/>
+      <param name="jndiconf" value="collector/jndi.properties"/>
+      <param name="a3conf" value="collector/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+  
+  <target name="collector.TestQ2" depends="init.a3props,compile"
+          description=" --> Simple collector">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="collector.TestQ2"/>
+      <param name="className" value="joram.collector.TestCollectorQueue2"/>
+      <param name="jndiconf" value="collector/jndi.properties"/>
+      <param name="a3conf" value="collector/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+    
+  <target name="collector.TestT1" depends="init.a3props,compile"
+          description=" --> Simple collector">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="collector.TestT1"/>
+      <param name="className" value="joram.collector.TestCollectorTopic1"/>
+      <param name="jndiconf" value="collector/jndi.properties"/>
+      <param name="a3conf" value="collector/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+  
+  <target name="collector.TestT2" depends="init.a3props,compile"
+          description=" --> Simple collector">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="collector.TestT2"/>
+      <param name="className" value="joram.collector.TestCollectorTopic2"/>
+      <param name="jndiconf" value="collector/jndi.properties"/>
+      <param name="a3conf" value="collector/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+  
   <target name="pool.Test1" depends="init.a3props,compile"
           description=" --> Tests pool of Connection.">
     <antcall target="test.run" inheritAll="true">
