@@ -26,7 +26,7 @@ import java.io.ObjectInputStream;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
-import fr.dyade.aaa.util.ResolverObjectInputStream;
+import fr.dyade.aaa.common.LoadClassLock;
 
 /**
  * <code>Agent</code> used to allow remote agent creation. Every agent
@@ -95,9 +95,12 @@ final class AgentFactory extends Agent {
       AgentCreateRequest cnot = (AgentCreateRequest) not;
       try {
         // Restore the new agent state.
-        ObjectInputStream ois =
-          new ResolverObjectInputStream(new ByteArrayInputStream(cnot.agentState, 0, cnot.agentState.length));
-        Agent ag = (Agent) ois.readObject();
+        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(cnot.agentState, 0,
+            cnot.agentState.length));
+        Agent ag;
+        synchronized (LoadClassLock.lock) {
+          ag = (Agent) ois.readObject();
+        }
         try {
           ois.close();
         } catch (IOException exc) {}

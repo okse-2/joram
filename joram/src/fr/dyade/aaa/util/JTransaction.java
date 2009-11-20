@@ -39,6 +39,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
 import fr.dyade.aaa.common.Configuration;
+import fr.dyade.aaa.common.LoadClassLock;
 import fr.dyade.aaa.common.Pool;
 
 /**
@@ -261,9 +262,11 @@ public final class JTransaction implements Transaction, JTransactionMBean {
     byte[] buf = loadByteArray(dirName, name);
     if (buf != null) {
       ByteArrayInputStream bis = new ByteArrayInputStream(buf);
-      ObjectInputStream ois = new ResolverObjectInputStream(bis);
+      ObjectInputStream ois = new ObjectInputStream(bis);
       try {
-        return ois.readObject();
+        synchronized (LoadClassLock.lock) {
+          return ois.readObject();
+        }
       } finally {
         ois.close();
         bis.close();
