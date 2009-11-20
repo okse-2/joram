@@ -71,11 +71,13 @@ import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
- * The <code>DestinationImpl</code> class implements the common behaviour of
+ * The <code>DestinationImpl</code> class implements the common behavior of
  * MOM destinations.
  */
 public abstract class DestinationImpl implements java.io.Serializable, DestinationImplMBean {  
   public static Logger logger = Debug.getLogger(DestinationImpl.class.getName());
+  
+  public static final String WAKEUP_PERIOD = "period";
   
   /**
    * <code>true</code> if the destination successfully processed a deletion
@@ -155,7 +157,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
 
     try {
       if (prop != null)
-        period = ConversionHelper.toLong(prop.get("period"));
+        period = ConversionHelper.toLong(prop.get(WAKEUP_PERIOD));
     } catch (MessageValueException e) {
       period = -1L;
     } catch (NumberFormatException e) {

@@ -122,7 +122,7 @@ public class MonitoringTopicImpl extends TopicImpl implements MonitoringTopicImp
         String name = (String) e.nextElement();
 
         try {
-          if (name.equals("period")) {
+          if (name.equals(WAKEUP_PERIOD)) {
             //nothing to do, see DestinationImpl
           } else if (name.equals("persistent"))
             isPersistent = ConversionHelper.toBoolean(properties.get("persistent"));
@@ -164,8 +164,8 @@ public class MonitoringTopicImpl extends TopicImpl implements MonitoringTopicImp
           String name = (String) e.nextElement();
 
           try {
-            if (name.equals("period"))
-              period = ConversionHelper.toLong(msg.properties.get("period"));
+            if (name.equals(WAKEUP_PERIOD))
+              period = ConversionHelper.toLong(msg.properties.get(WAKEUP_PERIOD));
             else if (name.equals("persistent"))
               isPersistent = ConversionHelper.toBoolean(msg.properties.get("persistent"));
             else if (name.equals("priority"))
