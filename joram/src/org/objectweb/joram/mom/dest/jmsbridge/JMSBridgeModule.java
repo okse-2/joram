@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -147,8 +147,8 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
    *          foreign JMS server.
    */
   public JMSBridgeModule(Properties prop) {
-    if (logger.isLoggable(BasicLevel.FATAL))
-      logger.log(BasicLevel.FATAL, "<init>(" + prop + ')');
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "<init>(" + prop + ')');
 
     jndiFactory = prop.getProperty("jndiFactory");
     jndiUrl = prop.getProperty("jndiUrl");
@@ -459,6 +459,13 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
   public void close() {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "close()");
+
+    try {
+      consumerCnx.setExceptionListener(null);
+      producerCnx.setExceptionListener(null);
+    } catch (JMSException exc1) {
+      logger.log(BasicLevel.ERROR, "", exc1);
+    }
     
     try {
       producerCnx.stop();
@@ -468,10 +475,10 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
     unsetMessageListener();
 
     try {
-      consumerDaemon.interrupt();
+      consumerDaemon.stop();
     } catch (Exception exc) {}
     try {
-      reconnectionDaemon.interrupt();
+      reconnectionDaemon.stop();
     } catch (Exception exc) {}
 
     try {
@@ -704,14 +711,13 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
   }
 
   /**
-   * Acknowledges a message successfuly delivered to the foreign JMS server.
+   * Acknowledges a message successfully delivered to the foreign JMS server.
    */
   protected void acknowledge(Message message) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "acknowledge(" + message + ')');
     Channel.sendTo(agentId, new JMSBridgeAckNot(message.id));
   }
-
 
   /** 
    * The <code>StartupDaemon</code> thread is responsible for retrieving
@@ -732,14 +738,16 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
         logger.log(BasicLevel.DEBUG, "run()");
       
       javax.naming.Context jndiCtx = null;
+      ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
       try {
         canStop = true;
 
         // Administered objects still to be retrieved: getting them from
         // JNDI.
-        if ((!isXA && cnxFact == null) ||
-            (isXA && xaCnxFact == null) ||
-            dest == null) {
+        if ((!isXA && cnxFact == null) || (isXA && xaCnxFact == null) || dest == null) {
+
+          Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+
           if (jndiFactory == null || jndiUrl == null)
             jndiCtx = new javax.naming.InitialContext();
           else {
@@ -837,6 +845,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, "Exception:: notUsableMessage=" + notUsableMessage, exc);
       } finally {
+        Thread.currentThread().setContextClassLoader(oldClassLoader);
         // Closing the JNDI context.
         try {
           jndiCtx.close();
@@ -1024,10 +1033,13 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
               try {
                 if (logger.isLoggable(BasicLevel.DEBUG))
                   logger.log(BasicLevel.DEBUG, "run(): wait");
-                consumerLock.wait(); 
+                canStop = true;
+                consumerLock.wait();
+                canStop = false;
                 if (logger.isLoggable(BasicLevel.DEBUG))
                   logger.log(BasicLevel.DEBUG, "run(): after wait");
-                process();
+                if (running)
+                  process();
               } catch (InterruptedException e2) {
                 break;
               }
@@ -1135,6 +1147,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
     
     /** Shuts the daemon down. */
     public void shutdown() {
+      consumerLock.notify();
     }
 
     /** Releases the daemon's resources. */
