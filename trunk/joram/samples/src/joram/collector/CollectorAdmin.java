@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -44,12 +44,12 @@ public class CollectorAdmin {
     AdminModule.connect("root", "root", 60);
 
     Properties prop = new Properties();
-    prop.setProperty("collector.expirationMessage", "0");
-    prop.setProperty("collector.persistentMessage", "true");
-    prop.setProperty("collector.period", "300000");
+    prop.setProperty("expiration", "0");
+    prop.setProperty("persistent", "true");
+    prop.setProperty("period", "300000");
     prop.setProperty("collector.url", url);
     prop.setProperty("collector.type", "" + Message.BYTES);
-    prop.setProperty("collector.ClassName", "com.scalagent.joram.mom.dest.collector.URLCollector");
+    prop.setProperty("collector.className", "com.scalagent.joram.mom.dest.collector.URLCollector");
     
     Queue queue = Queue.create(0, "queue", "com.scalagent.joram.mom.dest.collector.CollectorQueue", prop);
 //    Topic topic = Topic.create(0, "topic", "com.scalagent.joram.mom.dest.collector.CollectorTopic", prop);
