@@ -27,7 +27,7 @@ import java.io.ObjectStreamConstants;
 import java.io.Serializable;
 import java.util.Hashtable;
 
-import org.objectweb.util.monolog.api.BasicLevel;
+import fr.dyade.aaa.common.LoadClassLock;
 
 /**
  *  The AbstractTransaction class implements the common part of the Transaction
@@ -311,9 +311,11 @@ public abstract class AbstractTransaction implements Transaction {
     byte[] buf = loadByteArray(dirName, name);
     if (buf != null) {
       ByteArrayInputStream bis = new ByteArrayInputStream(buf);
-      ObjectInputStream ois = new ResolverObjectInputStream(bis);
+      ObjectInputStream ois = new ObjectInputStream(bis);
       try {
-        return ois.readObject();
+        synchronized (LoadClassLock.lock) {
+          return ois.readObject();
+        }
       } finally {
         ois.close();
         bis.close();
