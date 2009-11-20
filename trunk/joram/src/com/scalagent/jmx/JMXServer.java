@@ -22,6 +22,10 @@
 package com.scalagent.jmx;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Map;
 import java.util.Set;
 
 import javax.management.InstanceAlreadyExistsException;
@@ -34,6 +38,9 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import javax.management.RuntimeOperationsException;
 
+import org.osgi.framework.ServiceRegistration;
+
+import fr.dyade.aaa.common.osgi.Activator;
 import fr.dyade.aaa.util.management.MXServer;
 import fr.dyade.aaa.util.management.MXWrapper;
 
@@ -42,7 +49,11 @@ import fr.dyade.aaa.util.management.MXWrapper;
  */
 public class JMXServer implements MXServer {
   
-  public MBeanServer mxserver = null;
+  private MBeanServer mxserver = null;
+
+  private Map registeredServices = new HashMap();
+
+  public static boolean registerAsService = false;
 
   public JMXServer(MBeanServer mxserver) {
     this.mxserver = mxserver;
@@ -62,11 +73,46 @@ public class JMXServer implements MXServer {
     MXWrapper.setMXServer(this);
   }
 
+  private void registerOSGi(Object obj, ObjectName objName) {
+    if (!registerAsService) {
+      return;
+    }
+    Hashtable registrationProperties = objName.getKeyPropertyList();
+    registrationProperties.put("domain", objName.getDomain());
+    if (registeredServices.containsKey(objName)) {
+      ServiceRegistration registration = (ServiceRegistration) registeredServices.get(objName);
+      registration.setProperties(registrationProperties);
+      return;
+    } else {
+      Set serviceNames = new HashSet();
+      computeOSGiServiceNames(obj.getClass(), obj, serviceNames);
+      ServiceRegistration registration = Activator.context.registerService((String[]) serviceNames
+          .toArray(new String[serviceNames.size()]), obj, registrationProperties);
+      registeredServices.put(objName, registration);
+    }
+  }
+
+  private void computeOSGiServiceNames(Class beanClass, Object bean, Set registered) {
+    if (beanClass == null) {
+      return;
+    }
+    Class[] interfaces = beanClass.getInterfaces();
+    for (int i = 0; i < interfaces.length; i++) {
+      if (interfaces[i].getName().endsWith("MBean") && !registered.contains(interfaces[i].getName())) {
+        registered.add(interfaces[i].getName());
+        computeOSGiServiceNames(interfaces[i], bean, registered);
+      }
+    }
+    computeOSGiServiceNames(beanClass.getSuperclass(), bean, registered);
+  }
+
   public String registerMBean(Object bean, String fullName) throws Exception {
     if (mxserver == null) return null;
-    
+    //    Debug.getLogger("toto").log(BasicLevel.ERROR, "Register MBean: " + fullName);
     try {
-      mxserver.registerMBean(bean, new ObjectName(fullName));
+      ObjectName objName = ObjectName.getInstance(fullName);
+      mxserver.registerMBean(bean, objName);
+      registerOSGi(bean, objName);
     } catch (InstanceAlreadyExistsException exc) {
       // The MBean is already under the control of the MBean server.
       throw exc;
@@ -89,7 +135,14 @@ public class JMXServer implements MXServer {
     if (mxserver == null)
       return;
     try {
-      mxserver.unregisterMBean(new ObjectName(fullName));
+      ObjectName objName = ObjectName.getInstance(fullName);
+      mxserver.unregisterMBean(objName);
+      if (registerAsService) {
+        ServiceRegistration registration = (ServiceRegistration) registeredServices.remove(objName);
+        if (registration != null) {
+          registration.unregister();
+        }
+      }
     } catch (InstanceNotFoundException exc) {
       // The MBean is not registered in the MBean server.
       throw exc;
