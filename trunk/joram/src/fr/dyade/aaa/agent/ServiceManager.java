@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -24,12 +24,16 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
+import fr.dyade.aaa.agent.osgi.JoramServiceTracker;
+import fr.dyade.aaa.common.LoadClassLock;
 import fr.dyade.aaa.common.Strings;
 
 /**
@@ -72,6 +76,11 @@ public class ServiceManager implements Serializable {
     if (manager == null) {
       manager = new ServiceManager();
     }
+
+    if (manager.trackers == null) {
+      manager.trackers = new HashMap();
+    }
+
   }
 
   /**
@@ -98,6 +107,8 @@ public class ServiceManager implements Serializable {
   /** repository holding <code>Service</code>s */
   Hashtable registry;
 
+  transient Map trackers;
+
   /**
    * Default constructor.
    */
@@ -111,31 +122,42 @@ public class ServiceManager implements Serializable {
    * @param desc	service descriptor.
    */
   public static void start(ServiceDesc desc) throws Exception {
-    xlogmon.log(BasicLevel.DEBUG,
-                getName() +" start service: " + desc);
+    if (!AgentServer.isOSGi) {
+      doStart(desc);
+    } else {
+      // In OSGi context, start a service tracker to start the service
+      // when it becomes available.
+      JoramServiceTracker tracker = new JoramServiceTracker(desc);
+
+      manager.trackers.put(desc.scname, null);
+      if (xlogmon.isLoggable(BasicLevel.DEBUG))
+        xlogmon.log(BasicLevel.DEBUG, "Tracker for " + desc.scname + " created.");
+      tracker.open();
+    }
+  }
+
+  public static void doStart(ServiceDesc desc) throws Exception {
+    if (xlogmon.isLoggable(BasicLevel.DEBUG))
+      xlogmon.log(BasicLevel.DEBUG, getName() + " start service: " + desc);
 
     if (desc.running)
       throw new Exception("Service already running");
-    Class ptypes[] = new Class[2];
-    Object args[] = new Object[2];
+    Class ptypes[] = new Class[] { String.class, Boolean.TYPE };
+    Object args[] = new Object[] { desc.getArguments(), new Boolean(!desc.isInitialized()) };
 
-    ptypes[0] = String.class;
-    ptypes[1] = Boolean.TYPE;
     Class service = null;
-    try {
+    synchronized (LoadClassLock.lock) {
       service = Class.forName(desc.getClassName());
-    } catch (ClassNotFoundException cnfe) {
-      service = AgentServer.getResolverRepository().resolveClass(desc.getClassName());
     }
     Method init = service.getMethod("init", ptypes);
-    args[0] = desc.getArguments();
-    args[1] = new Boolean(! desc.isInitialized());
+
     init.invoke(null, args);
     desc.running = true;
     desc.initialized = true;
 
-    xlogmon.log(BasicLevel.DEBUG,
-                getName() + " service started");
+    if (xlogmon.isLoggable(BasicLevel.DEBUG)) {
+      xlogmon.log(BasicLevel.DEBUG, getName() + " service started");
+    }
   }
 
   /**
@@ -159,7 +181,7 @@ public class ServiceManager implements Serializable {
 	 e.hasMoreElements() ;) {
       ServiceDesc desc = (ServiceDesc) e.nextElement();
       try {
-	start(desc);
+        start(desc);
       } catch (Exception exc) {
         xlogmon.log(BasicLevel.ERROR,
                    getName() + ", cannot start service:" +
@@ -173,19 +195,30 @@ public class ServiceManager implements Serializable {
    *
    * @param desc	service descriptor.
    */
-  static void stop(ServiceDesc desc) throws Exception {
+  public static void stop(ServiceDesc desc) throws Exception {
+
+    if (AgentServer.isOSGi) {
+      JoramServiceTracker tracker = (JoramServiceTracker) manager.trackers.remove(desc.scname);
+      if (tracker != null) {
+        tracker.close();
+        if (xlogmon.isLoggable(BasicLevel.DEBUG))
+          xlogmon.log(BasicLevel.DEBUG, "tracker for " + desc.scname + " stopped.");
+      }
+    }
+
     // DF: idempotency (could be done in AgentAdmin)
     if (! desc.running) return;
 //       throw new Exception("Service already stopped");
     Class service;
-    try {
+    synchronized (LoadClassLock.lock) {
       service = Class.forName(desc.getClassName());
-    } catch (ClassNotFoundException cnfe) {
-      service = AgentServer.getResolverRepository().resolveClass(desc.getClassName());
     }
     Method stop = service.getMethod("stopService", new Class[0]);
-    stop.invoke(null, new Object[0]);
+    stop.invoke(null, (Object[]) null);
     desc.running = false;
+
+    if (xlogmon.isLoggable(BasicLevel.DEBUG))
+      xlogmon.log(BasicLevel.DEBUG, "Service " + desc.scname + " stopped.");
   }
 
   /**
@@ -204,25 +237,23 @@ public class ServiceManager implements Serializable {
    * Stops all running services.
    */
   static void stop() {
-    if ((manager == null) ||
-        (manager.registry == null)) return;
+    if ((manager == null) || (manager.registry == null))
+      return;
 
-    for (Enumeration e = manager.registry.elements();
-	 e.hasMoreElements() ;) {
+    for (Enumeration e = manager.registry.elements(); e.hasMoreElements();) {
       ServiceDesc desc = (ServiceDesc) e.nextElement();
       try {
         if (xlogmon.isLoggable(BasicLevel.DEBUG))
-          xlogmon.log(BasicLevel.DEBUG,
-                      getName() + ", stops: " + desc);
+          xlogmon.log(BasicLevel.DEBUG, getName() + ", stops: " + desc);
 
-	if (desc.running) stop(desc);
+        if (desc.running)
+          stop(desc);
 
         if (xlogmon.isLoggable(BasicLevel.DEBUG))
-          xlogmon.log(BasicLevel.DEBUG,
-                      getName() + ", service stopped");
+          xlogmon.log(BasicLevel.DEBUG, getName() + ", service stopped");
       } catch (Throwable exc) {
-        xlogmon.log(BasicLevel.WARN,
-                   getName() + ", cannot stop service: " + desc, exc);
+        if (xlogmon.isLoggable(BasicLevel.WARN))
+          xlogmon.log(BasicLevel.WARN, getName() + ", cannot stop service: " + desc, exc);
       }
     }
   }
@@ -236,8 +267,8 @@ public class ServiceManager implements Serializable {
   public static void register(String scname, String args) {
     synchronized (manager) {
       ServiceDesc desc = (ServiceDesc) manager.registry.get(scname);
-      xlogmon.log(BasicLevel.DEBUG,
-                  getName() + ", register " + scname + " -> " + desc);
+      if (xlogmon.isLoggable(BasicLevel.DEBUG))
+        xlogmon.log(BasicLevel.DEBUG, getName() + ", register " + scname + " -> " + desc);
       if (desc == null) {
         desc =  new ServiceDesc(scname, args);
         manager.registry.put(scname, desc);

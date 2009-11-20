@@ -21,23 +21,51 @@
  */
 package fr.dyade.aaa.jndi2.server.osgi;
 
+import java.util.Properties;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 
-import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.util.Resolver;
+import fr.dyade.aaa.common.Service;
+import fr.dyade.aaa.jndi2.distributed.DistributedJndiServer;
+import fr.dyade.aaa.jndi2.ha.HADistributedJndiServer;
+import fr.dyade.aaa.jndi2.ha.HAJndiServer;
+import fr.dyade.aaa.jndi2.server.JndiServer;
 
 public class Activator implements BundleActivator {
   
-  private Resolver resolver;
+  private ServiceRegistration jndiServerRegistration;
+
+  private ServiceRegistration distributedJndiServerRegistration;
+
+  private ServiceRegistration haJndiServerRegistration;
+
+  private ServiceRegistration haDistributedJndiServerRegistration;
 
   public void start(BundleContext context) throws Exception {
-    resolver = new JNDIResolver();
-    AgentServer.getResolverRepository().registerResolver(resolver);
+    Properties props = new Properties();
+    props.put(Service.SERVICE_NAME_PROP, JndiServer.class.getName());
+    jndiServerRegistration = context.registerService(Service.class.getName(), new Service(), props);
+    
+    props = new Properties();
+    props.put(Service.SERVICE_NAME_PROP, DistributedJndiServer.class.getName());
+    distributedJndiServerRegistration = context.registerService(Service.class.getName(), new Service(), props);
+    
+    props = new Properties();
+    props.put(Service.SERVICE_NAME_PROP, HAJndiServer.class.getName());
+    haJndiServerRegistration = context.registerService(Service.class.getName(), new Service(), props);
+    
+    props = new Properties();
+    props.put(Service.SERVICE_NAME_PROP, HADistributedJndiServer.class.getName());
+    haDistributedJndiServerRegistration = context.registerService(Service.class.getName(), new Service(), props);
   }
 
   public void stop(BundleContext context) throws Exception {
-    AgentServer.getResolverRepository().unregisterResolver(resolver);
+    jndiServerRegistration.unregister();
+    distributedJndiServerRegistration.unregister();
+    haJndiServerRegistration.unregister();
+    haDistributedJndiServerRegistration.unregister();
   }
 
 }
