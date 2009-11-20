@@ -76,4 +76,9 @@ public class JMSBridgeTopic extends Topic {
     else
       super.react(from, not);
   }
+
+  public void agentFinalize(boolean lastTime) {
+    super.agentFinalize(lastTime);
+    ((JMSBridgeTopicImpl) destImpl).close();
+  }
 }

@@ -77,4 +77,9 @@ public class JMSBridgeQueue extends Queue {
     else
       super.react(from, not);
   }
+
+  public void agentFinalize(boolean lastTime) {
+    super.agentFinalize(lastTime);
+    ((JMSBridgeQueueImpl) destImpl).close();
+  }
 }
