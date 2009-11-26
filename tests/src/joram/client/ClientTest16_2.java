@@ -29,9 +29,9 @@ import javax.jms.JMSException;
 import javax.jms.Session;
 import javax.jms.TopicSubscriber;
 
+import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-import org.objectweb.joram.client.jms.Topic;
 
 import framework.TestCase;
 
@@ -42,7 +42,14 @@ public class ClientTest16_2 extends TestCase {
   }
 
   public void run() {
+    int telnetPort = -1;
     try {
+      try {
+        telnetPort = Integer.getInteger("osgi.shell.telnet.port").intValue();
+      } catch (NullPointerException npe) {
+        error(new Exception("Must specify a telnet port to use stopAgentServerExt"));
+      }
+
       AdminModule.connect("localhost", 2560, "root", "root", 20);
 
       Topic topic = Topic.create(0, "test_topic");
@@ -57,7 +64,7 @@ public class ClientTest16_2 extends TestCase {
       try{
         TopicSubscriber consumer = recSession.createDurableSubscriber(topic, "test_sub");
         assertTrue(consumer!=null);
-      }catch(JMSException exc){
+      } catch (JMSException exc) {
         System.out.println("OK -> create fail");
         //if time in build permit reconnection before connectingTimer
         assertTrue(exc instanceof javax.jms.JMSException);
@@ -73,7 +80,9 @@ public class ClientTest16_2 extends TestCase {
       exc.printStackTrace();
       error(exc);
     } finally {
-      stopAgentServerExt((short)0);
+      if (telnetPort != -1) {
+        stopAgentServerExt(telnetPort);
+      }
       endTest();
     }
   }
