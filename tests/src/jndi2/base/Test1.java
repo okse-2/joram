@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2002 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2002 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -73,8 +73,8 @@ public class Test1 extends TestCase {
       properties.put("java.naming.factory.host", "localhost");
       properties.put("java.naming.factory.port", "16600");
     
-      startAgentServer((short)0, (File)null, 
-                       new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+      startAgentServer((short) 0, (File) null, new String[] { "-DNTNoLockFile=true",
+          "-DTransaction=fr.dyade.aaa.util.NTransaction" });
 
       Context ctx = new InitialContext();
 
@@ -192,8 +192,8 @@ public class Test1 extends TestCase {
         
       Thread.sleep(2000);
       
-      startAgentServer((short)0, (File)null, 
-                       new String[]{"-DTransaction=fr.dyade.aaa.util.ATransaction"});      
+      startAgentServer((short) 0, (File) null, new String[] { "-DNTNoLockFile=true",
+          "-DTransaction=fr.dyade.aaa.util.ATransaction" });
       
       ctx = new InitialContext();
 
@@ -258,8 +258,8 @@ public class Test1 extends TestCase {
         
       Thread.sleep(2000);
       
-      startAgentServer((short)0, (File)null, 
-                       new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});      
+      startAgentServer((short) 0, (File) null, new String[] { "-DNTNoLockFile=true",
+          "-DTransaction=fr.dyade.aaa.util.NTransaction" });
       
       ctx = new InitialContext();
 
@@ -275,6 +275,7 @@ public class Test1 extends TestCase {
 
       endTest();
     } catch (Exception exc2) {
+      crashAgentServer((short) 0);
       exc2.printStackTrace();
       error(exc2);
       endTest();
