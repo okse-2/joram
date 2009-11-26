@@ -23,7 +23,6 @@
 package joram.reconf;
 
 
-import java.io.File;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
@@ -50,7 +49,7 @@ public class ReconfTest0 extends ReconfTestBase {
   public void run() {
     try {
       String network = System.getProperty("Network", SimpleNetwork.class.getName());
-      startAgentServer((short)0, (File)null, new String[] {"-DNTNoLockFile=true"});
+      startAgentServer((short)0, new String[] {"-DNTNoLockFile=true"});
 
       AdminModule.connect("localhost", 2560, "root", "root", 60);
       User.create("anonymous", "anonymous", 0);
@@ -63,7 +62,7 @@ public class ReconfTest0 extends ReconfTestBase {
       
       AdminModule.addServer(1, "localhost", "D0", 17771, "s1");
       deployAgentServer((short) 1, "./s1");
-      startAgentServer((short) 1, null, new String[] { "-DNTNoLockFile=true",
+      startAgentServer((short) 1, new String[] { "-DNTNoLockFile=true",
           "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s1/a3servers.xml" });
 
       checkQueue((short) 1);
@@ -72,7 +71,7 @@ public class ReconfTest0 extends ReconfTestBase {
 
       AdminModule.addServer(2, "localhost", "D0", 17772, "s2");
       deployAgentServer((short) 2, "./s2");
-      startAgentServer((short) 2, null, new String[] { "-DNTNoLockFile=true",
+      startAgentServer((short) 2, new String[] { "-DNTNoLockFile=true",
           "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s2/a3servers.xml" });
 
       checkQueue((short) 2);
@@ -85,7 +84,7 @@ public class ReconfTest0 extends ReconfTestBase {
       
       crashAgentServer((short) 0);
       Thread.sleep(1000L);
-      startAgentServer((short) 0, null, new String[] { "-DNTNoLockFile=true" });
+      startAgentServer((short) 0, new String[] { "-DNTNoLockFile=true" });
       Thread.sleep(1000L);
       
       AdminModule.connect("localhost", 2560, "root", "root", 60);
@@ -98,7 +97,7 @@ public class ReconfTest0 extends ReconfTestBase {
       // Stops the server S1 then restart it
 
       AdminModule.stopServer(1);
-      startAgentServer((short) 1, null, new String[] { "-DNTNoLockFile=true",
+      startAgentServer((short) 1, new String[] { "-DNTNoLockFile=true",
           "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s1/a3servers.xml" });
 
       checkQueue((short) 1);
@@ -108,7 +107,7 @@ public class ReconfTest0 extends ReconfTestBase {
       
       crashAgentServer((short) 2);
       Thread.sleep(1000L);
-      startAgentServer((short) 2, null, new String[] { "-DNTNoLockFile=true",
+      startAgentServer((short) 2, new String[] { "-DNTNoLockFile=true",
           "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s2/a3servers.xml" });
 
       // Removes the servers S1 and S2, and the domain D0

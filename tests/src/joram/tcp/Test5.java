@@ -23,7 +23,6 @@
 
 package joram.tcp;
 
-import java.io.File;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
@@ -48,8 +47,7 @@ public class Test5 extends TestCase {
   public void run() {
     try {
       startAgentServer(
-        (short)0, (File)null, 
-        new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
+        (short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
       
       ConnectionFactory qcf =
         org.objectweb.joram.client.jms.tcp.TcpConnectionFactory.create(

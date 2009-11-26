@@ -24,7 +24,6 @@
 package jndi2.nocoupling;
 
 
-import java.io.File;
 import java.util.Hashtable;
 
 import javax.naming.InitialContext;
@@ -53,8 +52,7 @@ public class JndiTest2 extends TestCase {
   public void run() {
     try {
 	startAgentServer(
-			 (short)0, (File)null, 
-			 new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+			 (short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
      
 		
 	
@@ -78,8 +76,7 @@ public class JndiTest2 extends TestCase {
 	assertEquals(null,excp);
 
 	startAgentServer(
-			 (short)1, (File)null, 
-			 new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+			 (short)1, new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
      
 	
 	Hashtable env1 = new Hashtable();

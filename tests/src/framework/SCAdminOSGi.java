@@ -71,11 +71,11 @@ public class SCAdminOSGi implements SCAdminItf {
   }
 
   public void startAgentServer(short sid) throws Exception {
-    startAgentServer(sid, null, null);
+    startAgentServer(sid, null);
   }
 
-  public void startAgentServer(short sid, File dir, String[] jvmargs) throws Exception {
-    startAgentServer(sid, NO_CID_DEFINED, dir, jvmargs);
+  public void startAgentServer(short sid, String[] jvmargs) throws Exception {
+    startAgentServer(sid, NO_CID_DEFINED, jvmargs);
   }
 
   public void startAgentServer(short sid, short cid, String[] jvmargs) throws Exception {

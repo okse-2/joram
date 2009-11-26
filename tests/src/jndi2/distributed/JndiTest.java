@@ -51,14 +51,11 @@ public class JndiTest extends TestCase {
     public void run() {
 	try {
 	    startAgentServer(
-			     (short)0, (File)null, 
-			     new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+			     (short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
 	    startAgentServer(
-			     (short)1, (File)null, 
-			     new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+			     (short)1, new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
 	    startAgentServer(
-			     (short)2, (File)null, 
-			     new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+			     (short)2, new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
     
 	    Hashtable env0 = new Hashtable();
 	    env0.put(NAMING_FACTORY_PROP, NAMING_FACTORY);

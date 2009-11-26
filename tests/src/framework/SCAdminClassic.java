@@ -71,18 +71,14 @@ public class SCAdminClassic implements SCAdminItf {
   }
 
   public void startAgentServer(short sid) throws Exception {
-    startAgentServer(sid, null, null);
+    startAgentServer(sid, null);
   }
 
-  public void startAgentServer(short sid, File dir, String[] jvmargs) throws Exception {
-    startAgentServer(sid, NO_CID_DEFINED, dir, jvmargs);
+  public void startAgentServer(short sid, String[] jvmargs) throws Exception {
+    startAgentServer(sid, NO_CID_DEFINED, jvmargs);
   }
 
   public void startAgentServer(short sid, short cid, String[] jvmargs) throws Exception {
-    startAgentServer(sid, cid, null, jvmargs);
-  }
-
-  private void startAgentServer(short sid, short cid, File dir, String[] jvmargs) throws Exception {
     logmon.log(BasicLevel.DEBUG, "SCAdminClassic: run AgentServer#" + sid);
 
     Server server;
@@ -176,7 +172,7 @@ public class SCAdminClassic implements SCAdminItf {
       logmon.log(BasicLevel.DEBUG, "SCAdmin" + ": launches AgentServer#" + sid + " with: " + argv);
     }
 
-    Process p = Runtime.getRuntime().exec((String[]) argv.toArray(new String[argv.size()]), null, dir);
+    Process p = Runtime.getRuntime().exec((String[]) argv.toArray(new String[argv.size()]));
 
     p.getInputStream().close();
     p.getOutputStream().close();

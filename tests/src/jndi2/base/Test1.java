@@ -23,7 +23,6 @@
 
 package jndi2.base;
 
-import java.io.File;
 import java.util.Hashtable;
 
 import javax.naming.Context;
@@ -73,7 +72,7 @@ public class Test1 extends TestCase {
       properties.put("java.naming.factory.host", "localhost");
       properties.put("java.naming.factory.port", "16600");
     
-      startAgentServer((short) 0, (File) null, new String[] { "-DNTNoLockFile=true",
+      startAgentServer((short) 0, new String[] { "-DNTNoLockFile=true",
           "-DTransaction=fr.dyade.aaa.util.NTransaction" });
 
       Context ctx = new InitialContext();
@@ -192,7 +191,7 @@ public class Test1 extends TestCase {
         
       Thread.sleep(2000);
       
-      startAgentServer((short) 0, (File) null, new String[] { "-DNTNoLockFile=true",
+      startAgentServer((short) 0, new String[] { "-DNTNoLockFile=true",
           "-DTransaction=fr.dyade.aaa.util.ATransaction" });
       
       ctx = new InitialContext();
@@ -258,7 +257,7 @@ public class Test1 extends TestCase {
         
       Thread.sleep(2000);
       
-      startAgentServer((short) 0, (File) null, new String[] { "-DNTNoLockFile=true",
+      startAgentServer((short) 0, new String[] { "-DNTNoLockFile=true",
           "-DTransaction=fr.dyade.aaa.util.NTransaction" });
       
       ctx = new InitialContext();

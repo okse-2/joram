@@ -22,7 +22,6 @@
  */
 package joram.reconf;
 
-import java.io.File;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
@@ -43,8 +42,8 @@ public class ReconfTest3 extends ReconfTestBase {
 
   public void run() {
     try {
-      startAgentServer((short) 0, (File) null, new String[0]);
-      startAgentServer((short) 1, (File) null, new String[0]);
+      startAgentServer((short) 0, new String[0]);
+      startAgentServer((short) 1, new String[0]);
 
       Thread.sleep(1000L);
 
@@ -56,8 +55,7 @@ public class ReconfTest3 extends ReconfTestBase {
 
       AdminModule.addServer(2, "localhost", "D0", 17772, "s2");
       deployAgentServer((short) 2, "./s2");
-      startAgentServer((short) 2, null,
-          new String[] { "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s2/a3servers.xml" });
+      startAgentServer((short) 2, new String[] { "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s2/a3servers.xml" });
       
       checkQueue((short) 2);
       checkQueue((short) 1);
@@ -71,8 +69,7 @@ public class ReconfTest3 extends ReconfTestBase {
 
       AdminModule.addServer(3, "localhost", "D0", 17773, "./s3");
       deployAgentServer((short) 3, "s3");
-      startAgentServer((short) 3, null,
-          new String[] { "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s3/a3servers.xml" });
+      startAgentServer((short) 3, new String[] { "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s3/a3servers.xml" });
 
       checkQueue((short) 3);
       checkQueue((short) 1);

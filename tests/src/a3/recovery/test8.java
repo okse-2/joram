@@ -129,7 +129,7 @@ public class test8 extends TestCase {
         if (not instanceof StartNot) {
           String[] jvmargs = {"-DNTNoLockFile=true", "-Dcom.sun.management.jmxremote", "-DMXServer=com.scalagent.jmx.JMXServer"};
           System.out.println("start " + remote + " - " + bounce);
-          startAgentServer(remote, null, jvmargs);
+          startAgentServer(remote, jvmargs);
         } else if (not instanceof StopNot) {
           if (rand.nextBoolean()) {
             System.out.println("stop " + remote + " - " + bounce);

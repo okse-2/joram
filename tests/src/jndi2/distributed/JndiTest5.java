@@ -60,8 +60,7 @@ public class JndiTest5 extends TestCase {
   public void run() {
     try {
       startAgentServer(
-        (short)0, (File)null, 
-        new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+        (short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
     
       Hashtable env0 = new Hashtable();
       env0.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
@@ -78,12 +77,10 @@ public class JndiTest5 extends TestCase {
       Thread.sleep(4000);
 
       startAgentServer(
-        (short)1, (File)null, 
-        new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+        (short)1, new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
 
       startAgentServer(
-        (short)0, (File)null, 
-        new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+        (short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
 
       Thread.sleep(2000);
 
@@ -106,12 +103,10 @@ public class JndiTest5 extends TestCase {
       Thread.sleep(2000);
       
       startAgentServer(
-        (short)1, (File)null, 
-        new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+        (short)1, new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
 
       startAgentServer(
-        (short)0, (File)null, 
-        new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+        (short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
 
       Thread.sleep(2000);
 

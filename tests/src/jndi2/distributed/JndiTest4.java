@@ -23,7 +23,6 @@
 
 package jndi2.distributed;
 
-import java.io.File;
 import java.util.Hashtable;
 
 import javax.naming.InitialContext;
@@ -46,10 +45,8 @@ public class JndiTest4 extends TestCase {
 
   public void run() {
     try {
-      startAgentServer((short) 0, (File) null,
-          new String[] { "-DTransaction=fr.dyade.aaa.util.NTransaction" });
-      startAgentServer((short) 1, (File) null,
-          new String[] { "-DTransaction=fr.dyade.aaa.util.NTransaction" });
+      startAgentServer((short) 0, new String[] { "-DTransaction=fr.dyade.aaa.util.NTransaction" });
+      startAgentServer((short) 1, new String[] { "-DTransaction=fr.dyade.aaa.util.NTransaction" });
 
       Hashtable env0 = new Hashtable();
       env0.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
@@ -81,8 +78,7 @@ public class JndiTest4 extends TestCase {
 
       System.out.println("Restart servers 1");
 
-      startAgentServer((short) 1, (File) null,
-          new String[] { "-DTransaction=fr.dyade.aaa.util.NTransaction" });
+      startAgentServer((short) 1, new String[] { "-DTransaction=fr.dyade.aaa.util.NTransaction" });
 
       Thread.sleep(2000);
 
