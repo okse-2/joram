@@ -22,17 +22,11 @@
  */
 package joram.reconf;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
 import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.TextMessage;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.Server;
@@ -58,13 +52,13 @@ public class ReconfTest11 extends ReconfTestBase {
   public void run() {
     try {
       String network = System.getProperty("Network", SimpleNetwork.class.getName());
-      startAgentServer((short)0, (File)null, new String[] {"-DNTNoLockFile=true"});
+      startAgentServer((short) 0, null, new String[] { "-DNTNoLockFile=true" });
 
       Thread.sleep(1000L);
       
       ConnectionFactory cf0 = TcpConnectionFactory.create("localhost", 2560);
       ((TcpConnectionFactory) cf0).getParameters().connectingTimer = 20;
-      AdminModule.connect((ConnectionFactory) cf0, "root", "root" );
+      AdminModule.connect(cf0, "root", "root");
       
       User.create("anonymous", "anonymous", 0);
       
@@ -81,21 +75,23 @@ public class ReconfTest11 extends ReconfTestBase {
       System.out.println("trace1: " + AdminModule.getConfiguration());
       
       deployAgentServer((short) 1, "./s1");
-      startAgentServer((short) 1, new File("./s1"), new String[] {"-DNTNoLockFile=true"});
+      startAgentServer((short) 1, null, new String[] { "-DNTNoLockFile=true",
+          "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s1/a3servers.xml" });
 
       Queue q0 = checkQueue((short) 0);
       Queue q1 = checkQueue((short) 1);
 
       // Adds a server s2, deploy it and start it.
 
-      AdminModule.addServer(2, "localhost", "D0", 17772, "s1",
+      AdminModule.addServer(2, "localhost", "D0", 17772, "s2",
                             new String[]{"org.objectweb.joram.mom.proxies.tcp.TcpProxyService"},
                             new String[]{"2562"});
 
       System.out.println("trace2: " + AdminModule.getConfiguration());
       
       deployAgentServer((short) 2, "./s2");
-      startAgentServer((short) 2, new File("./s2"), new String[] {"-DNTNoLockFile=true"});
+      startAgentServer((short) 2, null, new String[] { "-DNTNoLockFile=true",
+          "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s2/a3servers.xml" });
       
       Queue q2 = checkQueue((short) 2);
 
@@ -116,7 +112,8 @@ public class ReconfTest11 extends ReconfTestBase {
       System.out.println("trace4: " + AdminModule.getConfiguration());
       
       deployAgentServer((short) 4, "./s4");
-      startAgentServer((short) 4, new File("./s4"), new String[] {"-DNTNoLockFile=true"});
+      startAgentServer((short) 4, null, new String[] { "-DNTNoLockFile=true",
+          "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s4/a3servers.xml" });
       
       Queue q4 = checkQueue((short) 4);
 
@@ -160,7 +157,7 @@ public class ReconfTest11 extends ReconfTestBase {
           AdminModule.disconnect();
       }
 
-      AdminModule.connect((ConnectionFactory) cf0, "root", "root" );
+      AdminModule.connect(cf0, "root", "root");
       
       // First stop the server because it must be reachable in order to be stopped.
       AdminModule.stopServer(1);
@@ -190,6 +187,9 @@ public class ReconfTest11 extends ReconfTestBase {
       error(exc);
     } finally {
       stopAgentServer((short) 0);
+      killAgentServer((short) 1);
+      killAgentServer((short) 2);
+      killAgentServer((short) 4);
       endTest();
     }
   }

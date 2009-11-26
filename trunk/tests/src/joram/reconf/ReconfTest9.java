@@ -65,7 +65,8 @@ public class ReconfTest9 extends ReconfTestBase {
       
       start = System.currentTimeMillis();
       for (int i=2; i<nbServers; i++) {
-        startAgentServer((short) i, new File("./s" + i), new String[0]);
+        startAgentServer((short) i, null, new String[] { "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s" + i
+            + "/a3servers.xml" });
       }
       end = System.currentTimeMillis();
       System.out.println("starts servers -> " + (end - start));
@@ -94,7 +95,8 @@ public class ReconfTest9 extends ReconfTestBase {
         deployAgentServer((short) i, "./s" + i);
         end = System.currentTimeMillis();
         
-        startAgentServer((short) i, new File("./s" + i), new String[0]);
+        startAgentServer((short) i, null, new String[] { "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s" + i
+            + "/a3servers.xml" });
         System.out.println("Adds server#" + i + "-> " + (end - start));
       }
       
@@ -128,6 +130,10 @@ public class ReconfTest9 extends ReconfTestBase {
     } finally {
       System.out.println("Stop server s0");
       stopAgentServer((short) 0);
+      killAgentServer((short) 1);
+      for (int i = 0; i < nbServers; i++) {
+        killAgentServer((short) i);
+      }
       endTest();
     }
   }
