@@ -22,6 +22,12 @@
      <ant dir="." antfile="build.xml" target="tests.ha"/>
      <ant dir="." antfile="build.xml" target="tests.perf"/>
    </target>
+  
+  <target name="tests.noperf.all.osgi">
+    <property name="SCAdminClass" value="framework.SCAdminOSGi"/>
+    <property name="isOSGi" value="true"/>
+	<antcall target="tests.noperf.all" />
+  </target>
     
   <target name="tests.noperf.all"
           description=" --> launch all no perf joram tests">
@@ -192,7 +198,9 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="client.rollback"/>
     <antcall target="client.nowait"/>
     <antcall target="client.cnxtime_1"/>
+    <antcall target="client.cnxtime_1.osgi"/>
     <antcall target="client.cnxtime_2"/>
+    <antcall target="client.cnxtime_2.osgi"/>
     <antcall target="client.noloss_1"/>
     <antcall target="client.noloss_2"/>
   </target>
@@ -215,6 +223,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="dursub.test2"/>
     <antcall target="dursub.test3"/>
     <antcall target="dursub.test4"/>
+    <antcall target="dursub.test4.osgi"/>
     <antcall target="dursub.unsub"/>
   </target>
 
@@ -426,6 +435,11 @@ description=" --> launch all exceptionlistener tests">
     <delete dir="${test.dir}"/>
     <mkdir dir="${test.dir}"/>
 
+    <copy file="config.properties" todir="${test.dir}"/>
+    <property name="bundle.dir" location="${ship.dir}/bundle" />
+    <replace file="${test.dir}/config.properties" token="@BUNDLE_DIR@" value="${bundle.dir}" />
+    <replace file="${test.dir}/config.properties" token="\" value="/" />
+    
     <copy file="${a3conf}" tofile="${test.dir}/a3servers.xml"/>
     <replace file="${test.dir}/a3servers.xml"
              token="@engine@" value="${engine}"/>
@@ -446,6 +460,13 @@ description=" --> launch all exceptionlistener tests">
     <available file="${jndiconf}" type="file"
                property="jndi.available"/>
     <antcall target="cpJndi" inheritAll="true"/>
+    
+    <jar jarfile="${obj.dir}/test-util-bundle.jar" manifest="${src.dir}/utils/osgi/manifest.mf">
+      <fileset dir="${obj.dir}">
+        <include name="framework/*.class"/>
+        <include name="utils/*.class"/>
+      </fileset>
+    </jar>
   </target>
 
   <target name="cpJoramAdmin" if="joramAdmin.available">
@@ -469,7 +490,7 @@ description=" --> launch all exceptionlistener tests">
     <!-- Launch test without initialization -->
     <java classname="${className}" failonerror="no" fork="yes" maxmemory="256m" dir="${test.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -Dframework.TestCase.TestId=${testid} -Dframework.TestCase.OutFile=${report.file} ${jvmargs}"/>
+      <jvmarg line="-DSCAdminClass=${SCAdminClass} -Dfelix.dir=${felix.dir} -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -Dframework.TestCase.TestId=${testid} -Dframework.TestCase.OutFile=${report.file} ${jvmargs}"/>
       <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
       <arg line="${arg}"/>
     </java>
@@ -1730,7 +1751,7 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 
-  <target name="client.cnxtime_1" depends="init.a3props,compile"
+  <target name="client.cnxtime_1" depends="init.a3props,compile" unless="isOSGi"
           description=" --> when kill client with connectingtimer, context is destroy after connectingtimer">
     <antcall target="init.test" inheritAll="true">
         <param name="a3conf" value="client/a3servers.xml"/>
@@ -1754,14 +1775,45 @@ description=" --> launch all exceptionlistener tests">
         <sleep seconds="10"/>
         <antcall target="test.start" inheritAll="true">
           <param name="className" value="joram.client.ClientTest16_2"/>
-          <param name="jvmargs" value=""/>
+          <param name="jvmargs" value="-Dosgi.shell.telnet.port=7890"/>
           <param name="args" value=""/>
         </antcall>
       </sequential>
     </parallel>
   </target>
 
-  <target name="client.cnxtime_2" depends="init.a3props,compile"
+  <target name="client.cnxtime_1.osgi" depends="init.a3props,compile" if="isOSGi"
+          description=" --> when kill client with connectingtimer, context is destroy after connectingtimer">
+    <antcall target="init.test" inheritAll="true">
+        <param name="a3conf" value="client/a3servers.xml"/>
+    </antcall>
+
+    <parallel>
+      <java classname="org.apache.felix.main.Main" failonerror="no" fork="yes" dir="${test.dir}">
+        <classpath path="${felix.class.path}"/>
+        <jvmarg line="-Dosgi.shell.telnet.port=16010 -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+        <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
+        <arg line="0 ./s0"/>
+      </java>
+
+      <sequential>
+        <sleep seconds="1"/>
+        <antcall target="test.start" inheritAll="true">
+          <param name="className" value="joram.client.ClientTest16"/>
+          <param name="jvmargs" value=""/>
+          <param name="args" value=""/>
+        </antcall>
+        <sleep seconds="10"/>
+        <antcall target="test.start" inheritAll="true">
+          <param name="className" value="joram.client.ClientTest16_2"/>
+          <param name="jvmargs" value="-Dosgi.shell.telnet.port=16010"/>
+          <param name="args" value=""/>
+        </antcall>
+      </sequential>
+    </parallel>
+  </target>
+  
+  <target name="client.cnxtime_2" depends="init.a3props,compile" unless="isOSGi"
           description=" --> when kill client with connectingtimer, context is not destroy before connectingtimer">
     <antcall target="init.test" inheritAll="true">
         <param name="a3conf" value="client/a3servers.xml"/>
@@ -1785,7 +1837,37 @@ description=" --> launch all exceptionlistener tests">
         <sleep seconds="2"/>
         <antcall target="test.start" inheritAll="true">
           <param name="className" value="joram.client.ClientTest16_2"/>
+          <param name="jvmargs" value="-Dosgi.shell.telnet.port=7890"/>
+          <param name="args" value=""/>
+        </antcall>
+      </sequential>
+    </parallel>
+  </target>
+
+  <target name="client.cnxtime_2.osgi" depends="init.a3props,compile" if="isOSGi"
+          description=" --> when kill client with connectingtimer, context is not destroy before connectingtimer">
+    <antcall target="init.test" inheritAll="true">
+        <param name="a3conf" value="client/a3servers.xml"/>
+    </antcall>
+
+    <parallel>
+      <java classname="org.apache.felix.main.Main" failonerror="no" fork="yes" dir="${test.dir}">
+        <classpath path="${felix.class.path}"/>
+        <jvmarg line="-Dosgi.shell.telnet.port=16010 -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+        <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
+      </java>
+
+      <sequential>
+        <sleep seconds="1"/>
+        <antcall target="test.start" inheritAll="true">
+          <param name="className" value="joram.client.ClientTest16"/>
           <param name="jvmargs" value=""/>
+          <param name="args" value=""/>
+        </antcall>
+        <sleep seconds="2"/>
+        <antcall target="test.start" inheritAll="true">
+          <param name="className" value="joram.client.ClientTest16_2"/>
+          <param name="jvmargs" value="-Dosgi.shell.telnet.port=16010"/>
           <param name="args" value=""/>
         </antcall>
       </sequential>
@@ -1923,7 +2005,7 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 
-  <target name="dursub.test4" depends="init.a3props,compile"
+  <target name="dursub.test4" depends="init.a3props,compile" unless="isOSGi"
           description=" --> test dursub when kill and restart a client">
     <antcall target="init.test" inheritAll="true">
         <param name="a3conf" value="dursub/a3servers1.xml"/>
@@ -1947,7 +2029,37 @@ description=" --> launch all exceptionlistener tests">
         <sleep seconds="5"/>
         <antcall target="test.start" inheritAll="true">
           <param name="className" value="joram.dursub.DurTest2_2"/>
+          <param name="jvmargs" value="-Dosgi.shell.telnet.port=7890"/>
+          <param name="args" value=""/>
+        </antcall>
+      </sequential>
+    </parallel>
+  </target>
+
+  <target name="dursub.test4.osgi" depends="init.a3props,compile" if="isOSGi"
+          description=" --> test dursub when kill and restart a client">
+    <antcall target="init.test" inheritAll="true">
+        <param name="a3conf" value="dursub/a3servers1.xml"/>
+    </antcall>
+
+    <parallel>
+      <java classname="org.apache.felix.main.Main" failonerror="no" fork="yes" dir="${test.dir}">
+        <classpath path="${felix.class.path}"/>
+        <jvmarg line="-Dosgi.shell.telnet.port=16010 -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+        <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
+      </java>
+
+      <sequential>
+        <sleep seconds="1"/>
+        <antcall target="test.start" inheritAll="true">
+          <param name="className" value="joram.dursub.DurTest2"/>
           <param name="jvmargs" value=""/>
+          <param name="args" value=""/>
+        </antcall>
+        <sleep seconds="5"/>
+        <antcall target="test.start" inheritAll="true">
+          <param name="className" value="joram.dursub.DurTest2_2"/>
+          <param name="jvmargs" value="-Dosgi.shell.telnet.port=16010"/>
           <param name="args" value=""/>
         </antcall>
       </sequential>
@@ -3072,11 +3184,11 @@ description=" --> launch all exceptionlistener tests">
 
   <target name="noreg.test10"
           description=" --> test selector with option : tcp or local">
-    <antcall target="test10a.noreg"/>
-    <antcall target="test10b.noreg"/>
+    <antcall target="noreg.test10a"/>
+    <antcall target="noreg.test10b"/>
   </target>
 
-  <target name="test10a.noreg" depends="init.a3props,compile">
+  <target name="noreg.test10a" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="joram.noreg.Test10"/>
@@ -3085,7 +3197,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jvmargs" value="-DBaseClass=joram.noreg.TcpBaseTest -DNbRound=10"/>
     </antcall>
   </target>
-  <target name="test10b.noreg" depends="init.a3props,compile">
+  <target name="noreg.test10b" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="className" value="joram.noreg.Test10"/>
@@ -3097,13 +3209,13 @@ description=" --> launch all exceptionlistener tests">
 
   <target name="noreg.test11"
           description=" --> check send message on delete topic thrown an exception if there are one server launch">
-    <antcall target="test11a.noreg"/>
-    <antcall target="test11b.noreg"/>
-    <antcall target="test11c.noreg"/>
+    <antcall target="noreg.test11a"/>
+    <antcall target="noreg.test11b"/>
+    <antcall target="noreg.test11c"/>
   </target>
 
 
-  <target name="test11a.noreg" depends="init.a3props,compile">
+  <target name="noreg.test11a" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test11"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
@@ -3112,7 +3224,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="testid" value="noreg.Test11-a"/>
     </antcall>
   </target>
-  <target name="test11b.noreg" depends="init.a3props,compile">
+  <target name="noreg.test11b" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test11"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
@@ -3121,7 +3233,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="testid" value="noreg.Test11-b"/>
     </antcall>
   </target>
-  <target name="test11c.noreg" depends="init.a3props,compile">
+  <target name="noreg.test11c" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test11"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
@@ -3133,13 +3245,13 @@ description=" --> launch all exceptionlistener tests">
 
   <target name="noreg.test12"
           description=" --> check send message on delete queue thrown an exception if there are one server launch">
-    <antcall target="test12a.noreg"/>
-    <antcall target="test12b.noreg"/>
-    <antcall target="test12c.noreg"/>
+    <antcall target="noreg.test12a"/>
+    <antcall target="noreg.test12b"/>
+    <antcall target="noreg.test12c"/>
   </target>
 
 
-  <target name="test12a.noreg" depends="init.a3props,compile">
+  <target name="noreg.test12a" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test12"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
@@ -3148,7 +3260,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="testid" value="noreg.Test12-a"/>
     </antcall>
   </target>
-  <target name="test12b.noreg" depends="init.a3props,compile">
+  <target name="noreg.test12b" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test12"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
@@ -3157,7 +3269,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="testid" value="noreg.Test12-b"/>
     </antcall>
   </target>
-  <target name="test12c.noreg" depends="init.a3props,compile">
+  <target name="noreg.test12c" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test12"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
@@ -3190,14 +3302,14 @@ description=" --> launch all exceptionlistener tests">
 
   <target name="noreg.test15"
           description=" --> test close  and start consumer cnx during producer send. option : queue or topic and  Tcp or local ">
-    <antcall target="test15-1.noreg"/>
-    <antcall target="test15-2.noreg"/>
-    <antcall target="test15-3.noreg"/>
-    <antcall target="test15-4.noreg"/>
+    <antcall target="noreg.test15-1"/>
+    <antcall target="noreg.test15-2"/>
+    <antcall target="noreg.test15-3"/>
+    <antcall target="noreg.test15-4"/>
   </target>
 
 
-  <target name="test15-1.noreg" depends="init.a3props,compile">
+  <target name="noreg.test15-1" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test15"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
@@ -3206,7 +3318,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Topic -DBaseClass=joram.noreg.TcpBaseTest"/>
     </antcall>
   </target>
-  <target name="test15-2.noreg" depends="init.a3props,compile">
+  <target name="noreg.test15-2" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test15"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
@@ -3215,7 +3327,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Queue -DBaseClass=joram.noreg.TcpBaseTest"/>
     </antcall>
   </target>
-  <target name="test15-3.noreg" depends="init.a3props,compile">
+  <target name="noreg.test15-3" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test15"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
@@ -3224,7 +3336,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Topic -DBaseClass=joram.noreg.ColocatedBaseTest"/>
     </antcall>
   </target>
-  <target name="test15-4.noreg" depends="init.a3props,compile">
+  <target name="noreg.test15-4" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test15"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
@@ -3236,13 +3348,13 @@ description=" --> launch all exceptionlistener tests">
 
   <target name="noreg.test16"
           description=" --> test close during receive and start consumer cnx during producer send. option : queue or topic and  Tcp or local ">
-    <antcall target="test16-1.noreg"/>
-    <antcall target="test16-2.noreg"/>
+    <antcall target="noreg.test16-1"/>
+    <antcall target="noreg.test16-2"/>
     <!-- antcall target="test16-3.noreg"/ -->
     <!-- antcall target="test16-4.noreg"/ -->
   </target>
 
-  <target name="test16-1.noreg" depends="init.a3props,compile">
+  <target name="noreg.test16-1" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test16"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
@@ -3252,7 +3364,7 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 	
-  <target name="test16-2.noreg" depends="init.a3props,compile">
+  <target name="noreg.test16-2" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test16"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
@@ -3262,7 +3374,7 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 	
-  <target name="test16-3.noreg" depends="init.a3props,compile">
+  <target name="noreg.test16-3" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test16"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
@@ -3272,7 +3384,7 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 	
-  <target name="test16-4.noreg" depends="init.a3props,compile">
+  <target name="noreg.test16-4" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test16"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
@@ -3284,13 +3396,13 @@ description=" --> launch all exceptionlistener tests">
 
   <target name="noreg.test17"
           description=" --> test close and start consumer cnx during producer send. option : queue or topic and  Tcp or local ">
-    <antcall target="test17-1.noreg"/>
-    <antcall target="test17-2.noreg"/>
-    <!-- antcall target="test17-3.noreg"/ -->
-    <!-- antcall target="test17-4.noreg"/ -->
+    <antcall target="noreg.test17-1"/>
+    <antcall target="noreg.test17-2"/>
+    <!-- antcall target="noreg.test17-3"/ -->
+    <!-- antcall target="noreg.test17-4"/ -->
   </target>
 
-  <target name="test17-1.noreg" depends="init.a3props,compile">
+  <target name="noreg.test17-1" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test17"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
@@ -3300,7 +3412,7 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 	
-  <target name="test17-2.noreg" depends="init.a3props,compile">
+  <target name="noreg.test17-2" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test17"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
@@ -3310,7 +3422,7 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 	
-  <target name="test17-3.noreg" depends="init.a3props,compile">
+  <target name="noreg.test17-3" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test17"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
@@ -3320,7 +3432,7 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 	
-  <target name="test17-4.noreg" depends="init.a3props,compile">
+  <target name="noreg.test17-4" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test17"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
@@ -3332,12 +3444,12 @@ description=" --> launch all exceptionlistener tests">
 
   <target name="noreg.test18"
           description=" --> test exception listener activation during close. option:  Tcp or local ">
-    <antcall target="test18-1.noreg"/>
-    <!-- antcall target="test18-2.noreg"/ -->
+    <antcall target="noreg.test18-1"/>
+    <!-- antcall target="noreg.test18-2"/ -->
   </target>
 
 
-  <target name="test18-1.noreg" depends="init.a3props,compile">
+  <target name="noreg.test18-1" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test18"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
@@ -3347,7 +3459,7 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 	
-  <target name="test18-2.noreg" depends="init.a3props,compile">
+  <target name="noreg.test18-2" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test18"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
@@ -3668,7 +3780,7 @@ description=" --> launch all exceptionlistener tests">
        <antcall target="test.run" inheritAll="true"/>
        
        <sequential>
-         <sleep seconds="8"/>
+         <sleep seconds="4"/>
          <java classname="${adminClassName}" failonerror="no" fork="yes" dir="${test.dir}">
            <classpath path="${project.class.path}"/>
            <jvmarg line="${jvmadminArgs}"/>
@@ -4150,7 +4262,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test with ssl conection">
     <java classname="joram.ssl.Test" failonerror="no" fork="yes" dir="${test.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dorg.objectweb.joram.keystore=${keystore} -Dorg.objectweb.joram.keystorepass=${keystore_pass} -Dframework.TestCase.OutFile=${report.file} "/>
+      <jvmarg line="-Dfelix.dir=${felix.dir} -Dorg.objectweb.joram.keystore=${keystore} -Dorg.objectweb.joram.keystorepass=${keystore_pass} -Dframework.TestCase.OutFile=${report.file} "/>
     </java>
   </target>
 
