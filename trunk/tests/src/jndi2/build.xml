@@ -14,6 +14,12 @@
       <include name="jndi2/**/*.java" />
     </patternset>
   </target>
+  
+  <target name="tests.all.osgi"
+          description=" --> launch all jndi2 tests">
+    <property name="SCAdminClass" value="framework.SCAdminOSGi"/>
+    <antcall target="tests.all"/>
+  </target>
 
   <target name="tests.all"
           description=" --> launch all jndi2 tests">
@@ -56,12 +62,18 @@
     <mkdir dir="${test.dir}" />
     <copy file="${a3conf}" tofile="${test.dir}/a3servers.xml" />
     <copy file="a3debug.cfg" tofile="${test.dir}/a3debug.cfg" />
+    
+    <copy file="config.properties" todir="${test.dir}"/>
+    <property name="bundle.dir" location="${ship.dir}/bundle" />
+    <replace file="${test.dir}/config.properties" token="@BUNDLE_DIR@" value="${bundle.dir}" />
+    <replace file="${test.dir}/config.properties" token="\" value="/" />
+    <replace file="${test.dir}/config.properties" token="@@@" value="\" />
   </target>
 
   <target name="client.start">
     <java classname="${className}" failonerror="no" fork="yes" dir="${test.dir}">
       <classpath path="${project.class.path}" />
-      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -Dframework.TestCase.TestId=0 -Dframework.TestCase.OutFile=${report.file} ${jvmargs}" />
+      <jvmarg line="-DSCAdminClass=${SCAdminClass} -Dfelix.dir=${felix.dir} -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -Dframework.TestCase.TestId=0 -Dframework.TestCase.OutFile=${report.file} ${jvmargs}" />
       <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
       <arg line="${arg}" />
     </java>
