@@ -29,14 +29,12 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
-
-
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 
 public class HATest3 extends HABaseTest {
   public static int msgPerRound = 1000;
@@ -78,7 +76,7 @@ public class HATest3 extends HABaseTest {
 
       AdminModule.connect(cf, "root", "root");
 
-      User user = User.create("anonymous", "anonymous", 0);
+      User.create("anonymous", "anonymous", 0);
 
       Destination dest = null;
       if (type.equals("queue")) {
@@ -127,7 +125,7 @@ public class HATest3 extends HABaseTest {
       // master and the sending phase ends.
       // The messages are partly received by colocated receiver of each master replicas (0 then 1),
       // the test verify that all sent messages are received.
-      new HATest.Killer(p0, 0, 3000L).start();
+      new ProcessKiller((short) 0, p0, 3000L).start();
       start = System.currentTimeMillis();
       for (int j=0; j<msgPerRound; j++) {
         if ((j%50) == 0) pw.println("Msg sent #" + j);
@@ -149,7 +147,7 @@ public class HATest3 extends HABaseTest {
       // master and the sending phase ends.
       // The messages are partly received by colocated receiver of each master replicas (1 then 2),
       // the test verify that all sent messages are received.
-      new HATest.Killer(p1, 1, 3000L).start();
+      new ProcessKiller((short) 1, p1, 3000L).start();
       start = System.currentTimeMillis();
       for (int j=0; j<msgPerRound; j++) {
         if ((j%50) == 0) pw.println("Msg sent #" + j);
@@ -171,7 +169,7 @@ public class HATest3 extends HABaseTest {
       // master and the sending phase ends.
       // The messages are partly received by colocated receiver of each master replicas (2 then 0),
       // the test verify that all sent messages are received.
-      new HATest.Killer(p2, 2, 3000L).start();
+      new ProcessKiller((short) 2, p2, 3000L).start();
       start = System.currentTimeMillis();
       for (int j=0; j<msgPerRound; j++) {
         if ((j%50) == 0) pw.println("Msg sent #" + j);
@@ -188,7 +186,7 @@ public class HATest3 extends HABaseTest {
 
       int i=0;
       for (; i < 3 * msgPerRound; ) {
-        msg = (TextMessage) consumer.receive(1000);
+        msg = (TextMessage) consumer.receive(10000);
         if (msg == null) break;
         if (msg.getText().equals("started")) continue;
         

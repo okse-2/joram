@@ -29,13 +29,12 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
-
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 
 /**
  * Test HA servers with colocated client either with a queue and a topic. The test
@@ -84,7 +83,7 @@ public class HATest2 extends HABaseTest {
 
       AdminModule.connect(cf, "root", "root");
 
-      User user = User.create("anonymous", "anonymous", 0);
+      User.create("anonymous", "anonymous", 0);
 
       Destination dest = null;
       if (type.equals("queue")) {
@@ -129,7 +128,7 @@ public class HATest2 extends HABaseTest {
       // master and the sending phase ends.
       // The messages are partly received by colocated receiver of each master replicas (0 then 1),
       // the test verify that all sent messages are received.
-      new Killer(p0, 0, pause * (MESSAGE_NUMBER / 2)).start();
+      new ProcessKiller((short) 0, p0, pause * (MESSAGE_NUMBER / 2)).start();
       for (int i = 0; i < MESSAGE_NUMBER; i++) {
         TextMessage msg = session.createTextMessage("message #" + i);
         msg.setIntProperty("index", i);
@@ -149,7 +148,7 @@ public class HATest2 extends HABaseTest {
       // master and the sending phase ends.
       // The messages are partly received by colocated receiver of each master replicas (1 then 2),
       // the test verify that all sent messages are received.
-      new Killer(p1, 1, pause * (MESSAGE_NUMBER / 2)).start();
+      new ProcessKiller((short) 1, p1, pause * (MESSAGE_NUMBER / 2)).start();
       for (int i = MESSAGE_NUMBER; i < MESSAGE_NUMBER * 2; i++) {
         TextMessage msg = session.createTextMessage("message #" + i);
         msg.setIntProperty("index", i);
@@ -169,7 +168,7 @@ public class HATest2 extends HABaseTest {
       // master and the sending phase ends.
       // The messages are partly received by colocated receiver of each master replicas (2 then 0),
       // the test verify that all sent messages are received.
-      new Killer(p2, 2, pause * (MESSAGE_NUMBER / 2)).start();
+      new ProcessKiller((short) 2, p2, pause * (MESSAGE_NUMBER / 2)).start();
       for (int i = MESSAGE_NUMBER * 2; i < MESSAGE_NUMBER * 3; i++) {
         TextMessage msg = session.createTextMessage("message #" + i);
         msg.setIntProperty("index", i);
@@ -180,7 +179,7 @@ public class HATest2 extends HABaseTest {
       
       int i=0;
       for (; i < 3 * MESSAGE_NUMBER; ) {
-        TextMessage msg = (TextMessage) consumer.receive(1000);
+        TextMessage msg = (TextMessage) consumer.receive(10000);
         if (msg == null) break;
         if (msg.getText().equals("started")) continue;
         

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,24 +22,20 @@
  */
 package joram.ha;
 
-import java.io.File;
-
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.TextMessage;
-import javax.jms.JMSException;
 
-import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
-import org.objectweb.joram.client.jms.Session;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.Session;
 import org.objectweb.joram.client.jms.Topic;
-
-
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 
 public class HATest5 extends HABaseTest {
   public static int nbRound = 100;
@@ -56,23 +52,22 @@ public class HATest5 extends HABaseTest {
   public static volatile int round = 0;
 
   public void run() {
-    Process p[] = new Process[3];
 
     try {
       // Starts the 3 replicas
       
       pw.println("Start the replica 0");
-      p[0] = startHAServer((short) 0, null, "0");
+      startHAServer((short) 0, (short) 0);
       
       Thread.sleep(2000);
 
       pw.println("Start the replica 1");
-      p[1] = startHAServer((short) 0, null, "1");
+      startHAServer((short) 0, (short) 1);
       
       Thread.sleep(2000);
 
       pw.println("Start the replica 2");
-      p[2] = startHAServer((short) 0, null, "2");
+      startHAServer((short) 0, (short) 2);
 
       Thread.sleep(1000);
 
@@ -88,7 +83,7 @@ public class HATest5 extends HABaseTest {
 
       AdminModule.connect(cf, "root", "root");
 
-      User user = User.create("anonymous", "anonymous", 0);
+      User.create("anonymous", "anonymous", 0);
 
       type = System.getProperty("name", type);
       Destination dest = null;
@@ -112,14 +107,14 @@ public class HATest5 extends HABaseTest {
 
         if (round < nbRound) {
           pw.println("Kill the replica " + i);
-          p[i].destroy();
+          killAgentServer((short) i);
 
           Thread.sleep(10 * pause);
         }
 
         if (round < nbRound) {
           pw.println("Start the replica " + i);
-          p[i] = startHAServer((short) 0, null, "" + i);
+          startHAServer((short) 0, (short) i);
         }
 
         i = ((i +1) %3);
@@ -130,9 +125,9 @@ public class HATest5 extends HABaseTest {
       exc.printStackTrace();
       error(exc);
     } finally {
-      if (p[0] != null) p[0].destroy();
-      if (p[1] != null) p[1].destroy();
-      if (p[2] != null) p[2].destroy();
+      killAgentServer((short) 0);
+      killAgentServer((short) 1);
+      killAgentServer((short) 2);
       endTest();
     }
     System.out.println("end");

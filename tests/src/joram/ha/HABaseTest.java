@@ -49,33 +49,42 @@ public class HABaseTest extends TestCase {
     }
   }
 
-  public static Process startHAServer(short sid,
-                                      File dir,
-                                      String rid) throws Exception {
+  public static void startHAServer(short sid, short rid) throws Exception {
     String[] jvmargs = new String[] {
       "-DnbClusterExpected=2",
       "-DTransaction=fr.dyade.aaa.util.NullTransaction"};
 
-    String[] args = new String[] { rid };
-
-    Process p =  getAdmin().execAgentServer(sid, dir,
-                                            jvmargs,
-                                            "fr.dyade.aaa.agent.AgentServer",
-                                            args);
-    getAdmin().closeServerStream(p);
-
-    return p;
+    startAgentServer(sid, rid, jvmargs);
   }
 
   public static class Killer extends Thread {
-    private Process process;
-    private int index;
+    private short index;
     private long pause;
 
-    Killer(Process process, int index, long pause) {
-      this.process = process;
+    Killer(short index, long pause) {
       this.index = index;
       this.pause = pause;
+    }
+
+    public void run() {
+      try {
+        Thread.sleep(pause);
+      } catch (InterruptedException exc) {
+      }
+      pw.println("Kill replica " + index);
+      TestCase.killAgentServer(index);
+    }
+  }
+
+  public static class ProcessKiller extends Thread {
+    private Process process;
+    private long pause;
+    private short index;
+
+    ProcessKiller(short index, Process process, long pause) {
+      this.process = process;
+      this.pause = pause;
+      this.index = index;
     }
 
     public void run() {

@@ -32,17 +32,16 @@ import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.TextMessage;
 
-import org.objectweb.joram.client.jms.Session;
-import org.objectweb.joram.client.jms.ha.local.HALocalConnectionFactory;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.Session;
 import org.objectweb.joram.client.jms.Topic;
-
-
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.ha.local.HALocalConnectionFactory;
 
 import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.agent.SCAdminHelper;
 import framework.TestCase;
 
 public class CollocatedClient extends TestCase {
@@ -58,11 +57,10 @@ public class CollocatedClient extends TestCase {
 
     String[] args = new String[] { rid };
 
-    Process p =  getAdmin().execAgentServer(sid, dir,
-                                            jvmargs,
-                                            "joram.ha.CollocatedClient",
-                                            args);
-    getAdmin().closeServerStream(p);
+    Process p = new SCAdminHelper().execAgentServer(sid, dir, jvmargs, "joram.ha.CollocatedClient", args);
+    p.getErrorStream().close();
+    p.getInputStream().close();
+    p.getOutputStream().close();
 
     return p;
   }

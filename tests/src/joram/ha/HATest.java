@@ -29,13 +29,12 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
-
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 
 /**
  * Test HA servers with external client either with a queue and a topic. The test
@@ -51,10 +50,6 @@ public class HATest extends HABaseTest {
     super();
   }
 
-  Process p0 = null;
-  Process p1 = null;
-  Process p2 = null;
-
   ConnectionFactory cf = null;
   
   public void run() {
@@ -62,17 +57,17 @@ public class HATest extends HABaseTest {
       // Starts the 3 replicas
       
       pw.println("Start the replica 0");
-      p0 = startHAServer((short) 0, null, "0");
+      startHAServer((short) 0, (short) 0);
 
       Thread.sleep(2000);
 
       pw.println("Start the replica 1");
-      p1 = startHAServer((short) 0, null, "1");
+      startHAServer((short) 0, (short) 1);
 
       Thread.sleep(2000);
 
       pw.println("Start the replica 2");
-      p2 = startHAServer((short) 0, null, "2");
+      startHAServer((short) 0, (short) 2);
 
       Thread.sleep(1000);
 
@@ -83,7 +78,7 @@ public class HATest extends HABaseTest {
 
       AdminModule.connect(cf, "root", "root");
 
-      User user = User.create("anonymous", "anonymous", 0);
+      User.create("anonymous", "anonymous", 0);
       
       Queue queue = Queue.create(0, "queue");
       queue.setFreeReading();
@@ -101,10 +96,9 @@ public class HATest extends HABaseTest {
       exc.printStackTrace(pw);
       error(exc);
     } finally {
-      if (p0 != null) p0.destroy();
-      if (p1 != null) p1.destroy();
-      if (p2 != null) p2.destroy();
-      
+      killAgentServer((short) 0);
+      killAgentServer((short) 1);
+      killAgentServer((short) 2);
       endTest();
     }
   }
@@ -123,7 +117,7 @@ public class HATest extends HABaseTest {
     // Sends messages and schedule the dead of the master replica (0) during the
     // sending (approximately at the middle). The 1st slave replica (1) becomes master
     // and the sending phase ends.
-    new Killer(p0, 0, pause * (MESSAGE_NUMBER / 2)).start();
+    new Killer((short) 0, pause * (MESSAGE_NUMBER / 2)).start();
     for (int i = 0; i < MESSAGE_NUMBER; i++) {
       TextMessage msg = session.createTextMessage();
       msg.setText("Test number1 " + i);
@@ -137,12 +131,12 @@ public class HATest extends HABaseTest {
 
     // Restarts the killed replica.
     pw.println("Restart the replica 0");
-    p0 = startHAServer((short) 0, null, "0");
+    startHAServer((short) 0, (short) 0);
 
     // Gets the sent messages and schedule the dead of the master replica (1) during the
     // receiving (approximately at the middle). The 1st slave replica (2) becomes master
     // and the receiving phase ends.
-    new Killer(p1, 1, pause * (MESSAGE_NUMBER / 2)).start();
+    new Killer((short) 1, pause * (MESSAGE_NUMBER / 2)).start();
     for (int i = 0; i < MESSAGE_NUMBER; i++) {
       TextMessage msg = (TextMessage) consumer.receive();
       assertTrue(msg.getText().equals("Test number1 " +i));
@@ -163,12 +157,12 @@ public class HATest extends HABaseTest {
 
     // Restarts the killed replica.
     pw.println("Start the replica 1");
-    p1 = startHAServer((short) 0, null, "1");
+    startHAServer((short) 0, (short) 1);
 
     // Gets the sent messages and schedule the dead of the master replica (2) during the
     // receiving (approximately at the middle). The 1st slave replica (0) becomes master
     // and the receiving phase ends.
-    new Killer(p2, 2, pause * (MESSAGE_NUMBER / 2)).start();
+    new Killer((short) 2, pause * (MESSAGE_NUMBER / 2)).start();
     for (int i = 0; i < MESSAGE_NUMBER; i++) {
       TextMessage msg = (TextMessage) consumer.receive();
       assertTrue(msg.getText().equals("Test number2 " +i));
@@ -179,7 +173,7 @@ public class HATest extends HABaseTest {
     
     // Restarts the killed replica.
     pw.println("Start the replica 2");
-    p1 = startHAServer((short) 0, null, "2");
+    startHAServer((short) 0, (short) 2);
 
     cnx.close();
   }
