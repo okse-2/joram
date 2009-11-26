@@ -73,6 +73,9 @@ public class Admin  {
       String autoReq = System.getProperty("automaticRequest", "false");
 	    prop.setProperty("automaticRequest", autoReq);
 
+      prop.setProperty("jndiFactory", "fr.dyade.aaa.jndi2.client.NamingContextFactory");
+      prop.setProperty("jndiUrl", "scn://localhost:16400");
+
 	    // Creating a Queue bridge on server 0:
 	    Queue joramQueue = Queue.create(0,
 					    "org.objectweb.joram.mom.dest.jmsbridge.JMSBridgeQueue",
@@ -87,6 +90,9 @@ public class Admin  {
 	    prop.setProperty("connectionFactoryName", "foreignCF");
 	    // Foreign Queue JNDI name: foreignDest
 	    prop.setProperty("destinationName", "foreignTopic");
+
+      prop.setProperty("jndiFactory", "fr.dyade.aaa.jndi2.client.NamingContextFactory");
+      prop.setProperty("jndiUrl", "scn://localhost:16400");
     
 	    // Creating a Topic bridge on server 0:
 	    Topic joramTopic = Topic.create(0,
@@ -106,7 +112,8 @@ public class Admin  {
 
 	    AdminModule.disconnect();
 	    System.out.println("Admin closed.");
-    }catch(Exception exc){
+    } catch (Throwable exc) {
+      exc.printStackTrace();
     }
   }
 }
