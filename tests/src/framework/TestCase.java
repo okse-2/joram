@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,8 +17,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): (ScalAgent D.T.)
- * Contributor(s): Badolle Fabien (ScalAgent D.T.)
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s):
  */
 
 package framework;
@@ -26,14 +26,13 @@ package framework;
 import java.io.File;
 
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.agent.SCAdminBase;
 
 /**
  * Framework for tests using A3 agent servers.
  */
 public class TestCase extends BaseTestCase {
 
-  static SCAdminBase admin = null;
+  static SCAdminItf admin = null;
 
   protected boolean running = false;
 
@@ -83,47 +82,53 @@ public class TestCase extends BaseTestCase {
   }
 
   public static void startAgentServer(short sid) throws Exception {
-    startAgentServer(sid, null);
-  }
-
-  public static void startAgentServer(short sid,
-                                      File dir) throws Exception {
     try {
-      getAdmin().startAgentServer(sid, dir);
+      getAdmin().startAgentServer(sid);
     } catch (IllegalStateException exc) {
       exception(exc);
       // The process is still alive, kill it!
       getAdmin().killAgentServer(sid);
-      getAdmin().joinAgentServer(sid);
-      getAdmin().startAgentServer(sid, dir);
+      getAdmin().startAgentServer(sid);
     }
   }
 
-  public static void startAgentServer(short sid,
-                                      File dir,
-                                      String[] jvmargs) throws Exception {
+  public static void startAgentServer(short sid, String[] jvmargs) throws Exception {
+    startAgentServer(sid, null, jvmargs);
+  }
+
+  public static void startAgentServer(short sid, File dir, String[] jvmargs) throws Exception {
     try {
       getAdmin().startAgentServer(sid, dir, jvmargs);
     } catch (IllegalStateException exc) {
       exception(exc);
       // The process is still alive, kill it!
       getAdmin().killAgentServer(sid);
-      getAdmin().joinAgentServer(sid);
       getAdmin().startAgentServer(sid, dir, jvmargs);
+    }
+  }
+
+  public static void startAgentServer(short sid, short cid, String[] jvmargs) throws Exception {
+    try {
+      getAdmin().startAgentServer(sid, cid, jvmargs);
+    } catch (IllegalStateException exc) {
+      exception(exc);
+      // The process is still alive, kill it!
+      getAdmin().killAgentServer(sid);
+      getAdmin().startAgentServer(sid, cid, jvmargs);
     }
   }
 
   public static void stopAgentServer(short sid) {
     try {
       getAdmin().stopAgentServer(sid);
-      getAdmin().joinAgentServer(sid);
     } catch (Exception exc) {
       exception(exc);
     }
   }
-  public static void stopAgentServerExt(short sid) {
+
+  public static void stopAgentServerExt(int telnetPort) {
     try {
-      getAdmin().stopAgentServer(sid);
+      getAdmin().stopAgentServerExt(telnetPort);
     } catch (Exception exc) {
       exception(exc);
     }
@@ -136,28 +141,8 @@ public class TestCase extends BaseTestCase {
     }
   }
 
-
-
   public static void crashAgentServer(short sid) {
-    try {
-      getAdmin().crashAgentServer(sid);
-      return;
-    } catch (Exception exc) {
-      exception(exc);
-    }
-    try {
-      getAdmin().killAgentServer(sid);
-    } catch (Exception exc) {
-      exception(exc);
-    }
-  }
-
-  public static void joinAgentServer(short sid) {
-    try {
-      getAdmin().joinAgentServer(sid);
-    } catch (Exception exc) {
-      exception(exc);
-    }
+    killAgentServer(sid);
   }
 
   public static void killAgentServer(short sid) {
@@ -168,18 +153,15 @@ public class TestCase extends BaseTestCase {
     }
   }
 
-  public static SCAdminBase getAdmin() throws Exception {
+  public static SCAdminItf getAdmin() throws Exception {
     if (admin == null) {
-      String cfgFile = System.getProperty(AgentServer.CFG_FILE_PROPERTY,
-                                          AgentServer.DEFAULT_CFG_FILE);
-      // Initializes the admin proxy.
-      admin = new SCAdminBase(cfgFile);
+      String scAdminClass = System.getProperty("SCAdminClass", SCAdminClassic.class.getName());
+      admin = (SCAdminItf) Class.forName(scAdminClass).newInstance();
     }
     return admin;
   }
 
   public static void main(String args[]) throws Exception {
-    TestCase test = new TestCase();
     assertFileIdentical(args[0], args[1]);
     endTest();
   }
