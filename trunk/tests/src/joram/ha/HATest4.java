@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,19 +24,18 @@ package joram.ha;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.TextMessage;
-import javax.jms.JMSException;
 
-import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
-import org.objectweb.joram.client.jms.Session;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.Session;
 import org.objectweb.joram.client.jms.Topic;
-
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 
 public class HATest4 extends HABaseTest {
   public static int nbRound = 100;
@@ -73,7 +72,7 @@ public class HATest4 extends HABaseTest {
       pw.println("Start the replica 2");
       p[2] = CollocatedClient.startHACollocatedClient((short) 0, null, "2", type);
 
-      Thread.sleep(1000);
+      Thread.sleep(2000);
 
       nbRound = Integer.getInteger("nbRound", nbRound).intValue();
       msgPerRound = Integer.getInteger("msgPerRound", msgPerRound).intValue();
@@ -87,7 +86,7 @@ public class HATest4 extends HABaseTest {
 
       AdminModule.connect(cf, "root", "root");
 
-      User user = User.create("anonymous", "anonymous", 0);
+      User.create("anonymous", "anonymous", 0);
 
       Destination dest = null;
       if (type.equals("queue")) {
