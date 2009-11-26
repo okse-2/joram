@@ -140,6 +140,12 @@
       <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
     </antcall>
   </target>
+  
+  <target name="tests.base.osgi"
+          description=" --> launch all jndi2 tests">
+    <property name="SCAdminClass" value="framework.SCAdminOSGi"/>
+    <antcall target="tests.base"/>
+  </target>
 
   <target name="tests.base">
     <ant dir="." antfile="build.xml" target="test1.base"/>
@@ -212,6 +218,12 @@
     <!-- Initialization of the run directory -->
     <delete dir="${test.dir}"/>
     <mkdir dir="${test.dir}"/>
+    
+    <copy file="config.properties" todir="${test.dir}"/>
+    <property name="bundle.dir" location="${ship.dir}/bundle" />
+    <replace file="${test.dir}/config.properties" token="@BUNDLE_DIR@" value="${bundle.dir}" />
+    <replace file="${test.dir}/config.properties" token="\" value="/" />
+    <replace file="${test.dir}/config.properties" token="@@@" value="\" />
 
     <copy file="${a3conf}" tofile="${test.dir}/a3servers.xml"/>
     <replace file="${test.dir}/a3servers.xml"
@@ -228,6 +240,13 @@
            	 token="@maxMessageInFlow@" value="${maxMessageInFlow}"/>
 
     <copy file="a3debug.cfg" tofile="${test.dir}/a3debug.cfg"/>
+    
+    <jar jarfile="${obj.dir}/test-bundle.jar" manifest="${src.dir}/a3/manifest.mf">
+      <fileset dir="${obj.dir}">
+        <include name="a3/**/*.class"/>
+        <include name="framework/*.class"/>
+      </fileset>
+    </jar>
   </target>
 
   <target name="init.a3props">
@@ -253,7 +272,7 @@
       <classpath path="${project.class.path}"/>
       <jvmarg value="-Dframework.TestCase.TestId=${testid}"/>
       <jvmarg value="-Dframework.TestCase.OutFile=${report.file}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer ${jvmargs}"/>
+      <jvmarg line="-DSCAdminClass=${SCAdminClass} -Dfelix.dir=${felix.dir} -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer ${jvmargs}"/>
       <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y ${jvmargs}" -->
       <arg line="0 ./s0"/>
     </java>
