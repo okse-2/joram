@@ -76,6 +76,9 @@ public class CrossXAAdmin {
     String autoReq = System.getProperty("automaticRequest", "false");
     prop.setProperty("automaticRequest", autoReq);
 
+    prop.setProperty("jndiFactory", "fr.dyade.aaa.jndi2.client.NamingContextFactory");
+    prop.setProperty("jndiUrl", "scn://localhost:16400");
+
     // Creating a Queue bridge on server 0:
     Queue joramQueue = Queue.create(0,
                                  "org.objectweb.joram.mom.dest.jmsbridge.JMSBridgeQueue",
@@ -91,6 +94,9 @@ public class CrossXAAdmin {
     // Foreign Queue JNDI name: foreignDest
     prop.setProperty("destinationName", "foreignQueue");
     
+    prop.setProperty("jndiFactory", "fr.dyade.aaa.jndi2.client.NamingContextFactory");
+    prop.setProperty("jndiUrl", "scn://localhost:16400");
+
     // Creating a Topic bridge on server 0:
     Topic joramTopic = Topic.create(0,
                                  "org.objectweb.joram.mom.dest.jmsbridge.JMSBridgeTopic",
