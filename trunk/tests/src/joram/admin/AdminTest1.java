@@ -23,7 +23,6 @@
 package joram.admin;
 
 
-import java.io.File;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -55,8 +54,7 @@ public class AdminTest1 extends TestCase {
 
   public void run() {
     try {
-      startAgentServer((short)0, (File)null, 
-                       new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
+      startAgentServer((short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
       
       Thread.sleep(4000);
       
@@ -67,8 +65,7 @@ public class AdminTest1 extends TestCase {
       
       Thread.sleep(4000);
       
-      startAgentServer((short)0, (File)null, 
-                       new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
+      startAgentServer((short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
       
       Thread.sleep(4000);
       

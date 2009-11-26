@@ -22,7 +22,6 @@
  */
 package jndi2.distributed;
 
-import java.io.File;
 import java.util.Hashtable;
 
 import javax.naming.InitialContext;
@@ -57,20 +56,17 @@ public class JndiTest6 extends TestCase {
     try {
       System.out.println("Start s0");
       startAgentServer(
-        (short)0, (File)null, 
-        new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction",
+        (short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction",
                      "-Dfr.dyade.aaa.jndi2.impl.LooseCoupling=true"});
       
       System.out.println("Start s1");
       startAgentServer(
-          (short)1, (File)null, 
-          new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction",
+          (short)1, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction",
                      "-Dfr.dyade.aaa.jndi2.impl.LooseCoupling=true"});
       
       System.out.println("Start s2");
       startAgentServer(
-          (short)2, (File)null, 
-          new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction",
+          (short)2, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction",
                      "-Dfr.dyade.aaa.jndi2.impl.LooseCoupling=true"});
         
       Thread.sleep(3000);
@@ -127,8 +123,7 @@ public class JndiTest6 extends TestCase {
       Thread.sleep(1000);      
       System.out.println("Start S1");
       startAgentServer(
-          (short)1, (File)null, 
-          new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction",
+          (short)1, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction",
                      "-Dfr.dyade.aaa.jndi2.impl.LooseCoupling=true"});
       Thread.sleep(3000);
       

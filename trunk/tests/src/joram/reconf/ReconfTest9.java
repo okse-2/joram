@@ -22,7 +22,6 @@
  */
 package joram.reconf;
 
-import java.io.File;
 
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
@@ -42,8 +41,8 @@ public class ReconfTest9 extends ReconfTestBase {
 
   public void run() {
     try {
-      startAgentServer((short) 0, (File) null, new String[0]);
-      startAgentServer((short) 1, (File) null, new String[0]);
+      startAgentServer((short) 0, new String[0]);
+      startAgentServer((short) 1, new String[0]);
 
       Thread.sleep(1000L);
 
@@ -65,7 +64,7 @@ public class ReconfTest9 extends ReconfTestBase {
       
       start = System.currentTimeMillis();
       for (int i=2; i<nbServers; i++) {
-        startAgentServer((short) i, null, new String[] { "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s" + i
+        startAgentServer((short) i, new String[] { "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s" + i
             + "/a3servers.xml" });
       }
       end = System.currentTimeMillis();
@@ -95,7 +94,7 @@ public class ReconfTest9 extends ReconfTestBase {
         deployAgentServer((short) i, "./s" + i);
         end = System.currentTimeMillis();
         
-        startAgentServer((short) i, null, new String[] { "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s" + i
+        startAgentServer((short) i, new String[] { "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s" + i
             + "/a3servers.xml" });
         System.out.println("Adds server#" + i + "-> " + (end - start));
       }

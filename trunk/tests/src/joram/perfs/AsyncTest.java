@@ -22,7 +22,6 @@
  */
 package joram.perfs;
 
-import java.io.File;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -60,11 +59,9 @@ public class AsyncTest extends TestCase {
   public void run() {
     try {
       writeIntoFile("==================== start test =====================");
-      startAgentServer((short) 0, (File) null,
-                       new String[] { "-DTransaction=fr.dyade.aaa.util.NullTransaction" });
+      startAgentServer((short) 0, new String[] { "-DTransaction=fr.dyade.aaa.util.NullTransaction" });
 
-      startAgentServer((short) 1, (File) null,
-                       new String[] { "-DTransaction=fr.dyade.aaa.util.NullTransaction" });
+      startAgentServer((short) 1, new String[] { "-DTransaction=fr.dyade.aaa.util.NullTransaction" });
       Thread.sleep(2000);
 
       cf = TcpConnectionFactory.create("localhost", 2560);

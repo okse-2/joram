@@ -61,18 +61,15 @@ public class JndiCrashTest extends TestCase {
       
       System.out.println("Start s0");
       startAgentServer(
-        (short)0, (File)null, 
-        new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+        (short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
       
       System.out.println("Start s1");
       startAgentServer(
-          (short)1, (File)null, 
-          new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+          (short)1, new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
       
       System.out.println("Start s2");
       startAgentServer(
-          (short)2, (File)null, 
-          new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+          (short)2, new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
         
       Thread.sleep(3000);
       
@@ -107,8 +104,7 @@ public class JndiCrashTest extends TestCase {
       deleteDirectory(s1);
       
       startAgentServer(
-          (short)1, (File)null, 
-          new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+          (short)1, new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
         
       Thread.sleep(4000);
       

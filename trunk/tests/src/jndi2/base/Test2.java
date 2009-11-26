@@ -22,7 +22,6 @@
  */
 package jndi2.base;
 
-import java.io.File;
 import java.util.Hashtable;
 
 import javax.naming.Context;
@@ -55,8 +54,7 @@ public class Test2 extends TestCase {
       
 	    Hashtable properties = System.getProperties();
       
-	    startAgentServer((short)0, (File)null, 
-			     new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+	    startAgentServer((short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
     
 	    properties.put("java.naming.factory.initial", "fr.dyade.aaa.jndi2.client.NamingContextFactory");
 	    properties.put("java.naming.factory.host", "localhost");

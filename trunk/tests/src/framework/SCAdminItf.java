@@ -22,7 +22,6 @@
  */
 package framework;
 
-import java.io.File;
 
 /**
  * Admin interface used to manage the start and the stop of non collocated
@@ -43,12 +42,10 @@ public interface SCAdminItf {
    * 
    * @param sid
    *          id of the server to start
-   * @param dir
-   *          directory where the launching must be done
    * @param jvmargs
    *          additional arguments given when launching the server
    */
-  public void startAgentServer(short sid, File dir, String[] jvmargs) throws Exception;
+  public void startAgentServer(short sid, String[] jvmargs) throws Exception;
 
   /**
    * Starts a new AgentServer.

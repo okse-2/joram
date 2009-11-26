@@ -93,17 +93,13 @@ public class TestCase extends BaseTestCase {
   }
 
   public static void startAgentServer(short sid, String[] jvmargs) throws Exception {
-    startAgentServer(sid, null, jvmargs);
-  }
-
-  public static void startAgentServer(short sid, File dir, String[] jvmargs) throws Exception {
     try {
-      getAdmin().startAgentServer(sid, dir, jvmargs);
+      getAdmin().startAgentServer(sid, jvmargs);
     } catch (IllegalStateException exc) {
       exception(exc);
       // The process is still alive, kill it!
       getAdmin().killAgentServer(sid);
-      getAdmin().startAgentServer(sid, dir, jvmargs);
+      getAdmin().startAgentServer(sid, jvmargs);
     }
   }
 

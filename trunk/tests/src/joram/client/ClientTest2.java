@@ -66,8 +66,7 @@ public class ClientTest2 extends TestCase {
   public void run() {
     try {
       startAgentServer(
-                       (short)0, (File)null, 
-                       new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
+                       (short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
 
       AdminModule.connect("localhost", 2560, "root", "root", 60);
 

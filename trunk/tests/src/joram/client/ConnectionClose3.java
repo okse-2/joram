@@ -121,8 +121,7 @@ public class ConnectionClose3 extends TestCase {
   private void startAgentServer() throws Exception {
       //System.out.println("Start agent server");
     startAgentServer(
-        (short)0, (File)null, 
-        new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
+        (short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NTransaction"});
   }
   
   private void connect(boolean heartBeat) throws Exception {
