@@ -87,7 +87,7 @@ public class ScalAgentServerImpl extends EObjectImpl implements ScalAgentServer 
    * @generated
    * @ordered
    */
-  protected static final JoramVersion VERSION_EDEFAULT = JoramVersion.JORAM_524;
+  protected static final JoramVersion VERSION_EDEFAULT = JoramVersion.JORAM_526;
 
   /**
    * The cached value of the '{@link #getVersion() <em>Version</em>}' attribute.
@@ -370,7 +370,7 @@ public class ScalAgentServerImpl extends EObjectImpl implements ScalAgentServer 
       case JoramPackage.SCAL_AGENT_SERVER__SERVICES:
         return getServices();
       case JoramPackage.SCAL_AGENT_SERVER__SID:
-        return new Short(getSid());
+        return getSid();
       case JoramPackage.SCAL_AGENT_SERVER__STORAGE_DIRECTORY:
         return getStorageDirectory();
     }
@@ -400,7 +400,7 @@ public class ScalAgentServerImpl extends EObjectImpl implements ScalAgentServer 
         getServices().addAll((Collection<? extends JoramService>)newValue);
         return;
       case JoramPackage.SCAL_AGENT_SERVER__SID:
-        setSid(((Short)newValue).shortValue());
+        setSid((Short)newValue);
         return;
       case JoramPackage.SCAL_AGENT_SERVER__STORAGE_DIRECTORY:
         setStorageDirectory((String)newValue);
