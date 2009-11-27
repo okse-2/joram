@@ -9,6 +9,8 @@
   <genPackages prefix="Joram" basePackage="org.ow2.joram.design.model" resource="XML"
       disposableProviderFactory="true" ecorePackage="joram.ecore#/">
     <genEnums typeSafeEnumCompatible="false" ecoreEnum="joram.ecore#//JoramVersion">
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//JoramVersion/JORAM_5_2_6"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//JoramVersion/JORAM_5_2_5"/>
       <genEnumLiterals ecoreEnumLiteral="joram.ecore#//JoramVersion/JORAM_5_2_4"/>
       <genEnumLiterals ecoreEnumLiteral="joram.ecore#//JoramVersion/JORAM_5_2_3"/>
     </genEnums>

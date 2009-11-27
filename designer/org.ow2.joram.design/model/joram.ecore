@@ -27,8 +27,10 @@
         eType="#//JMSObject" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EEnum" name="JoramVersion">
-    <eLiterals name="JORAM_5_2_4" value="1" literal="5.2.4"/>
-    <eLiterals name="JORAM_5_2_3" literal="5.2.3"/>
+    <eLiterals name="JORAM_5_2_6" value="526" literal="5.2.6"/>
+    <eLiterals name="JORAM_5_2_5" value="525" literal="5.2.5"/>
+    <eLiterals name="JORAM_5_2_4" value="524" literal="5.2.4"/>
+    <eLiterals name="JORAM_5_2_3" value="523" literal="5.2.3"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="JoramDomain" eSuperTypes="#//Domain">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
