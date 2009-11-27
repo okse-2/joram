@@ -2,7 +2,7 @@
 <gmfgen:GenEditorGenerator xmi:version="2.0"
     xmlns:xmi="http://www.omg.org/XMI"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:gmfgen="http://www.eclipse.org/gmf/2008/GenModel">
+    xmlns:gmfgen="http://www.eclipse.org/gmf/2009/GenModel">
   <audits>
     <categories
         id="joramcontainer"
@@ -87,12 +87,12 @@
       visualID="1000"
       editPartClassName="JoramDomainEditPart"
       itemSemanticEditPolicyClassName="JoramDomainItemSemanticEditPolicy"
-      notationViewFactoryClassName="JoramDomainViewFactory"
       canonicalEditPolicyClassName="JoramDomainCanonicalEditPolicy"
       iconProviderPriority="Low"
       validationProviderPriority="Low"
       validationEnabled="true"
-      validationDecorators="true">
+      validationDecorators="true"
+      liveValidationUIFeedback="true">
     <diagramRunTimeClass
         href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Diagram"/>
     <elementType
@@ -108,7 +108,6 @@
         visualID="3001"
         editPartClassName="AdminProxyEditPart"
         itemSemanticEditPolicyClassName="AdminProxyItemSemanticEditPolicy"
-        notationViewFactoryClassName="AdminProxyViewFactory"
         canonicalEditPolicyClassName="AdminProxyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="AdminProxyGraphicalNodeEditPolicy"
         createCommandClassName="AdminProxyCreateCommand"
@@ -122,9 +121,7 @@
           editHelperClassName="AdminProxyEditHelper"/>
       <viewmap
           xsi:type="gmfgen:FigureViewmap"
-          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel">
-        <requiredPluginIDs>org.eclipse.gmf.runtime.draw2d.ui</requiredPluginIDs>
-      </viewmap>
+          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
       <modelFacet>
         <metaClass
             href="joram.genmodel#//joram/AdminProxy"/>
@@ -135,9 +132,8 @@
       </modelFacet>
       <labelModelFacet
           xsi:type="gmfgen:FeatureLabelModelFacet"
-          viewPattern="%s"
-          editorPattern=""
-          viewMethod="PRINTF">
+          parser="//@labelParsers/@implementations.0"
+          editorPattern="">
         <metaFeatures
             href="joram.genmodel#//joram/AdminProxy/name"/>
       </labelModelFacet>
@@ -147,7 +143,6 @@
         visualID="3002"
         editPartClassName="ConnectionManagerEditPart"
         itemSemanticEditPolicyClassName="ConnectionManagerItemSemanticEditPolicy"
-        notationViewFactoryClassName="ConnectionManagerViewFactory"
         canonicalEditPolicyClassName="ConnectionManagerCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="ConnectionManagerGraphicalNodeEditPolicy"
         createCommandClassName="ConnectionManagerCreateCommand"
@@ -160,9 +155,7 @@
           editHelperClassName="ConnectionManagerEditHelper"/>
       <viewmap
           xsi:type="gmfgen:FigureViewmap"
-          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel">
-        <requiredPluginIDs>org.eclipse.gmf.runtime.draw2d.ui</requiredPluginIDs>
-      </viewmap>
+          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
       <modelFacet>
         <metaClass
             href="joram.genmodel#//joram/ConnectionManager"/>
@@ -173,6 +166,7 @@
       </modelFacet>
       <labelModelFacet
           xsi:type="gmfgen:FeatureLabelModelFacet"
+          parser="//@labelParsers/@implementations.0"
           viewPattern=""
           editorPattern="">
         <metaFeatures
@@ -184,7 +178,6 @@
         visualID="3003"
         editPartClassName="JNDIServerEditPart"
         itemSemanticEditPolicyClassName="JNDIServerItemSemanticEditPolicy"
-        notationViewFactoryClassName="JNDIServerViewFactory"
         canonicalEditPolicyClassName="JNDIServerCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="JNDIServerGraphicalNodeEditPolicy"
         createCommandClassName="JNDIServerCreateCommand"
@@ -197,9 +190,7 @@
           editHelperClassName="JNDIServerEditHelper"/>
       <viewmap
           xsi:type="gmfgen:FigureViewmap"
-          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel">
-        <requiredPluginIDs>org.eclipse.gmf.runtime.draw2d.ui</requiredPluginIDs>
-      </viewmap>
+          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
       <modelFacet>
         <metaClass
             href="joram.genmodel#//joram/JNDIServer"/>
@@ -210,6 +201,7 @@
       </modelFacet>
       <labelModelFacet
           xsi:type="gmfgen:FeatureLabelModelFacet"
+          parser="//@labelParsers/@implementations.0"
           viewPattern=""
           editPattern="">
         <metaFeatures
@@ -221,7 +213,6 @@
         visualID="3004"
         editPartClassName="TCPProxyServiceEditPart"
         itemSemanticEditPolicyClassName="TCPProxyServiceItemSemanticEditPolicy"
-        notationViewFactoryClassName="TCPProxyServiceViewFactory"
         canonicalEditPolicyClassName="TCPProxyServiceCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TCPProxyServiceGraphicalNodeEditPolicy"
         createCommandClassName="TCPProxyServiceCreateCommand"
@@ -234,9 +225,7 @@
           editHelperClassName="TCPProxyServiceEditHelper"/>
       <viewmap
           xsi:type="gmfgen:FigureViewmap"
-          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel">
-        <requiredPluginIDs>org.eclipse.gmf.runtime.draw2d.ui</requiredPluginIDs>
-      </viewmap>
+          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
       <modelFacet>
         <metaClass
             href="joram.genmodel#//joram/TCPProxyService"/>
@@ -247,6 +236,7 @@
       </modelFacet>
       <labelModelFacet
           xsi:type="gmfgen:FeatureLabelModelFacet"
+          parser="//@labelParsers/@implementations.0"
           editorPattern="">
         <metaFeatures
             href="joram.genmodel#//joram/TCPProxyService/name"/>
@@ -257,7 +247,6 @@
         visualID="3005"
         editPartClassName="TopicEditPart"
         itemSemanticEditPolicyClassName="TopicItemSemanticEditPolicy"
-        notationViewFactoryClassName="TopicViewFactory"
         canonicalEditPolicyClassName="TopicCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TopicGraphicalNodeEditPolicy"
         createCommandClassName="TopicCreateCommand"
@@ -270,9 +259,7 @@
           editHelperClassName="TopicEditHelper"/>
       <viewmap
           xsi:type="gmfgen:FigureViewmap"
-          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel">
-        <requiredPluginIDs>org.eclipse.gmf.runtime.draw2d.ui</requiredPluginIDs>
-      </viewmap>
+          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
       <modelFacet>
         <metaClass
             href="joram.genmodel#//joram/Topic"/>
@@ -283,6 +270,7 @@
       </modelFacet>
       <labelModelFacet
           xsi:type="gmfgen:FeatureLabelModelFacet"
+          parser="//@labelParsers/@implementations.0"
           viewPattern="Topic {0}"
           editorPattern="{0}"
           editPattern="{0}">
@@ -295,7 +283,6 @@
         visualID="3006"
         editPartClassName="QueueEditPart"
         itemSemanticEditPolicyClassName="QueueItemSemanticEditPolicy"
-        notationViewFactoryClassName="QueueViewFactory"
         canonicalEditPolicyClassName="QueueCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="QueueGraphicalNodeEditPolicy"
         createCommandClassName="QueueCreateCommand"
@@ -308,9 +295,7 @@
           editHelperClassName="QueueEditHelper"/>
       <viewmap
           xsi:type="gmfgen:FigureViewmap"
-          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel">
-        <requiredPluginIDs>org.eclipse.gmf.runtime.draw2d.ui</requiredPluginIDs>
-      </viewmap>
+          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
       <modelFacet>
         <metaClass
             href="joram.genmodel#//joram/Queue"/>
@@ -321,6 +306,7 @@
       </modelFacet>
       <labelModelFacet
           xsi:type="gmfgen:FeatureLabelModelFacet"
+          parser="//@labelParsers/@implementations.0"
           viewPattern="Queue {0}"
           editorPattern="{0}"
           editPattern="{0}">
@@ -333,7 +319,6 @@
         visualID="3007"
         editPartClassName="UserEditPart"
         itemSemanticEditPolicyClassName="UserItemSemanticEditPolicy"
-        notationViewFactoryClassName="UserViewFactory"
         canonicalEditPolicyClassName="UserCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="UserGraphicalNodeEditPolicy"
         createCommandClassName="UserCreateCommand"
@@ -346,9 +331,7 @@
           editHelperClassName="UserEditHelper"/>
       <viewmap
           xsi:type="gmfgen:FigureViewmap"
-          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel">
-        <requiredPluginIDs>org.eclipse.gmf.runtime.draw2d.ui</requiredPluginIDs>
-      </viewmap>
+          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
       <modelFacet>
         <metaClass
             href="joram.genmodel#//joram/User"/>
@@ -359,6 +342,7 @@
       </modelFacet>
       <labelModelFacet
           xsi:type="gmfgen:FeatureLabelModelFacet"
+          parser="//@labelParsers/@implementations.0"
           viewPattern="User {0}"
           editorPattern="{0}"
           editPattern="{0}">
@@ -371,7 +355,6 @@
         visualID="3008"
         editPartClassName="AdminProxy2EditPart"
         itemSemanticEditPolicyClassName="AdminProxy2ItemSemanticEditPolicy"
-        notationViewFactoryClassName="AdminProxy2ViewFactory"
         canonicalEditPolicyClassName="AdminProxy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="AdminProxy2GraphicalNodeEditPolicy"
         createCommandClassName="AdminProxy2CreateCommand"
@@ -385,9 +368,7 @@
           metamodelType="//@diagram/@childNodes.0/@elementType"/>
       <viewmap
           xsi:type="gmfgen:FigureViewmap"
-          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel">
-        <requiredPluginIDs>org.eclipse.gmf.runtime.draw2d.ui</requiredPluginIDs>
-      </viewmap>
+          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
       <modelFacet>
         <metaClass
             href="joram.genmodel#//joram/AdminProxy"/>
@@ -398,9 +379,9 @@
       </modelFacet>
       <labelModelFacet
           xsi:type="gmfgen:FeatureLabelModelFacet"
-          viewPattern="%s"
+          parser="//@labelParsers/@implementations.0"
           editorPattern=""
-          viewMethod="PRINTF">
+          editPattern="">
         <metaFeatures
             href="joram.genmodel#//joram/AdminProxy/name"/>
       </labelModelFacet>
@@ -410,7 +391,6 @@
         visualID="3009"
         editPartClassName="ConnectionManager2EditPart"
         itemSemanticEditPolicyClassName="ConnectionManager2ItemSemanticEditPolicy"
-        notationViewFactoryClassName="ConnectionManager2ViewFactory"
         canonicalEditPolicyClassName="ConnectionManager2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="ConnectionManager2GraphicalNodeEditPolicy"
         createCommandClassName="ConnectionManager2CreateCommand"
@@ -423,9 +403,7 @@
           metamodelType="//@diagram/@childNodes.1/@elementType"/>
       <viewmap
           xsi:type="gmfgen:FigureViewmap"
-          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel">
-        <requiredPluginIDs>org.eclipse.gmf.runtime.draw2d.ui</requiredPluginIDs>
-      </viewmap>
+          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
       <modelFacet>
         <metaClass
             href="joram.genmodel#//joram/ConnectionManager"/>
@@ -436,6 +414,7 @@
       </modelFacet>
       <labelModelFacet
           xsi:type="gmfgen:FeatureLabelModelFacet"
+          parser="//@labelParsers/@implementations.0"
           editorPattern="">
         <metaFeatures
             href="joram.genmodel#//joram/ConnectionManager/name"/>
@@ -446,7 +425,6 @@
         visualID="3010"
         editPartClassName="JNDIServer2EditPart"
         itemSemanticEditPolicyClassName="JNDIServer2ItemSemanticEditPolicy"
-        notationViewFactoryClassName="JNDIServer2ViewFactory"
         canonicalEditPolicyClassName="JNDIServer2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="JNDIServer2GraphicalNodeEditPolicy"
         createCommandClassName="JNDIServer2CreateCommand"
@@ -459,9 +437,7 @@
           metamodelType="//@diagram/@childNodes.2/@elementType"/>
       <viewmap
           xsi:type="gmfgen:FigureViewmap"
-          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel">
-        <requiredPluginIDs>org.eclipse.gmf.runtime.draw2d.ui</requiredPluginIDs>
-      </viewmap>
+          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
       <modelFacet>
         <metaClass
             href="joram.genmodel#//joram/JNDIServer"/>
@@ -472,6 +448,7 @@
       </modelFacet>
       <labelModelFacet
           xsi:type="gmfgen:FeatureLabelModelFacet"
+          parser="//@labelParsers/@implementations.0"
           viewPattern=""
           editPattern="">
         <metaFeatures
@@ -483,7 +460,6 @@
         visualID="3011"
         editPartClassName="TCPProxyService2EditPart"
         itemSemanticEditPolicyClassName="TCPProxyService2ItemSemanticEditPolicy"
-        notationViewFactoryClassName="TCPProxyService2ViewFactory"
         canonicalEditPolicyClassName="TCPProxyService2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TCPProxyService2GraphicalNodeEditPolicy"
         createCommandClassName="TCPProxyService2CreateCommand"
@@ -496,9 +472,7 @@
           metamodelType="//@diagram/@childNodes.3/@elementType"/>
       <viewmap
           xsi:type="gmfgen:FigureViewmap"
-          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel">
-        <requiredPluginIDs>org.eclipse.gmf.runtime.draw2d.ui</requiredPluginIDs>
-      </viewmap>
+          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
       <modelFacet>
         <metaClass
             href="joram.genmodel#//joram/TCPProxyService"/>
@@ -509,16 +483,16 @@
       </modelFacet>
       <labelModelFacet
           xsi:type="gmfgen:FeatureLabelModelFacet"
+          parser="//@labelParsers/@implementations.0"
           editorPattern="">
         <metaFeatures
             href="joram.genmodel#//joram/TCPProxyService/name"/>
       </labelModelFacet>
     </childNodes>
     <topLevelNodes
-        visualID="2004"
+        visualID="2001"
         editPartClassName="JORAMEditPart"
         itemSemanticEditPolicyClassName="JORAMItemSemanticEditPolicy"
-        notationViewFactoryClassName="JORAMViewFactory"
         canonicalEditPolicyClassName="JORAMCanonicalEditPolicy"
         compartments="//@diagram/@compartments.0 //@diagram/@compartments.1"
         graphicalNodeEditPolicyClassName="JORAMGraphicalNodeEditPolicy"
@@ -532,12 +506,11 @@
           xsi:type="gmfgen:InnerClassViewmap"
           layoutType="TOOLBAR_LAYOUT"
           className="JORAMFigure"
-          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class JORAMFigure extends org.eclipse.draw2d.RoundedRectangle {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureJORAMTitleLabel; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureJORAMIdLabel; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public JORAMFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(true);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_CENTER&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(2);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setCornerDimensions(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(8)&#xA;, getMapMode().DPtoLP(8)&#xA;));&#xA;this.setPreferredSize(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(150)&#xA;, getMapMode().DPtoLP(220)&#xA;));&#xA;this.setMinimumSize(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(130)&#xA;, getMapMode().DPtoLP(100)&#xA;));&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureJORAMTitleLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureJORAMTitleLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureJORAMTitleLabel);&#xA;&#xA;&#xA;&#xA;fFigureJORAMIdLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureJORAMIdLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureJORAMIdLabel);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureJORAMTitleLabel() {&#xA;&#x9;&#x9;return fFigureJORAMTitleLabel;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureJORAMIdLabel() {&#xA;&#x9;&#x9;return fFigureJORAMIdLabel;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;">
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class JORAMFigure extends org.eclipse.draw2d.RoundedRectangle {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureJORAMTitleLabel; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureJORAMIdLabel; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public JORAMFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(true);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_CENTER&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(2);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setCornerDimensions(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(8)&#xA;, getMapMode().DPtoLP(8)&#xA;));&#xA;this.setLineWidth(1);&#xA;this.setPreferredSize(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(150)&#xA;, getMapMode().DPtoLP(220)&#xA;));&#xA;this.setMinimumSize(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(130)&#xA;, getMapMode().DPtoLP(100)&#xA;));&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureJORAMTitleLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureJORAMTitleLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureJORAMTitleLabel);&#xA;&#xA;&#xA;&#xA;fFigureJORAMIdLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureJORAMIdLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureJORAMIdLabel);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureJORAMTitleLabel() {&#xA;&#x9;&#x9;return fFigureJORAMTitleLabel;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureJORAMIdLabel() {&#xA;&#x9;&#x9;return fFigureJORAMIdLabel;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;">
         <attributes
             xsi:type="gmfgen:DefaultSizeAttributes"
             width="150"
             height="220"/>
-        <requiredPluginIDs>org.eclipse.gmf.runtime.draw2d.ui</requiredPluginIDs>
       </viewmap>
       <modelFacet>
         <metaClass
@@ -621,10 +594,9 @@
         </modelElementInitializer>
       </modelFacet>
       <labels
-          visualID="5007"
+          visualID="5001"
           editPartClassName="JORAMNameVersionEditPart"
           itemSemanticEditPolicyClassName="JORAMNameVersionItemSemanticEditPolicy"
-          notationViewFactoryClassName="JORAMNameVersionViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -634,6 +606,7 @@
             figureQualifiedClassName="org.eclipse.draw2d.Label"/>
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
             viewPattern="{0} {1}"
             editorPattern=""
             editPattern="">
@@ -644,10 +617,9 @@
         </modelFacet>
       </labels>
       <labels
-          visualID="5008"
+          visualID="5002"
           editPartClassName="JORAMSidEditPart"
-          itemSemanticEditPolicyClassName="JORAMSidItemSemanticEditPolicy"
-          notationViewFactoryClassName="JORAMSidViewFactory">
+          itemSemanticEditPolicyClassName="JORAMSidItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -655,6 +627,7 @@
             figureQualifiedClassName="org.eclipse.draw2d.Label"/>
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
             viewPattern="server id: {0}"
             editorPattern="{0}"
             editPattern="{0}">
@@ -664,10 +637,9 @@
       </labels>
     </topLevelNodes>
     <topLevelNodes
-        visualID="2005"
+        visualID="2002"
         editPartClassName="ScalAgentServerEditPart"
         itemSemanticEditPolicyClassName="ScalAgentServerItemSemanticEditPolicy"
-        notationViewFactoryClassName="ScalAgentServerViewFactory"
         canonicalEditPolicyClassName="ScalAgentServerCanonicalEditPolicy"
         compartments="//@diagram/@compartments.2"
         graphicalNodeEditPolicyClassName="ScalAgentServerGraphicalNodeEditPolicy"
@@ -681,12 +653,11 @@
           xsi:type="gmfgen:InnerClassViewmap"
           layoutType="TOOLBAR_LAYOUT"
           className="JORAMFigure"
-          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class JORAMFigure extends org.eclipse.draw2d.RoundedRectangle {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureJORAMTitleLabel; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureJORAMIdLabel; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public JORAMFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(true);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_CENTER&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(2);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setCornerDimensions(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(8)&#xA;, getMapMode().DPtoLP(8)&#xA;));&#xA;this.setPreferredSize(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(150)&#xA;, getMapMode().DPtoLP(220)&#xA;));&#xA;this.setMinimumSize(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(130)&#xA;, getMapMode().DPtoLP(100)&#xA;));&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureJORAMTitleLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureJORAMTitleLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureJORAMTitleLabel);&#xA;&#xA;&#xA;&#xA;fFigureJORAMIdLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureJORAMIdLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureJORAMIdLabel);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureJORAMTitleLabel() {&#xA;&#x9;&#x9;return fFigureJORAMTitleLabel;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureJORAMIdLabel() {&#xA;&#x9;&#x9;return fFigureJORAMIdLabel;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;">
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class JORAMFigure extends org.eclipse.draw2d.RoundedRectangle {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureJORAMTitleLabel; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureJORAMIdLabel; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public JORAMFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(true);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_CENTER&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(2);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setCornerDimensions(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(8)&#xA;, getMapMode().DPtoLP(8)&#xA;));&#xA;this.setLineWidth(1);&#xA;this.setPreferredSize(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(150)&#xA;, getMapMode().DPtoLP(220)&#xA;));&#xA;this.setMinimumSize(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(130)&#xA;, getMapMode().DPtoLP(100)&#xA;));&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureJORAMTitleLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureJORAMTitleLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureJORAMTitleLabel);&#xA;&#xA;&#xA;&#xA;fFigureJORAMIdLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureJORAMIdLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureJORAMIdLabel);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureJORAMTitleLabel() {&#xA;&#x9;&#x9;return fFigureJORAMTitleLabel;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureJORAMIdLabel() {&#xA;&#x9;&#x9;return fFigureJORAMIdLabel;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;">
         <attributes
             xsi:type="gmfgen:DefaultSizeAttributes"
             width="150"
             height="220"/>
-        <requiredPluginIDs>org.eclipse.gmf.runtime.draw2d.ui</requiredPluginIDs>
       </viewmap>
       <modelFacet>
         <metaClass
@@ -697,10 +668,9 @@
             href="joram.genmodel#//joram/Domain/managedElements"/>
       </modelFacet>
       <labels
-          visualID="5009"
+          visualID="5003"
           editPartClassName="ScalAgentServerNameVersionEditPart"
           itemSemanticEditPolicyClassName="ScalAgentServerNameVersionItemSemanticEditPolicy"
-          notationViewFactoryClassName="ScalAgentServerNameVersionViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -710,6 +680,7 @@
             figureQualifiedClassName="org.eclipse.draw2d.Label"/>
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
             viewPattern="{0} {1}"
             editorPattern=""
             editPattern="">
@@ -720,10 +691,9 @@
         </modelFacet>
       </labels>
       <labels
-          visualID="5010"
+          visualID="5004"
           editPartClassName="ScalAgentServerSidEditPart"
-          itemSemanticEditPolicyClassName="ScalAgentServerSidItemSemanticEditPolicy"
-          notationViewFactoryClassName="ScalAgentServerSidViewFactory">
+          itemSemanticEditPolicyClassName="ScalAgentServerSidItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -731,6 +701,7 @@
             figureQualifiedClassName="org.eclipse.draw2d.Label"/>
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
             viewPattern="server id: {0}"
             editorPattern="{0}"
             editPattern="{0}">
@@ -740,10 +711,9 @@
       </labels>
     </topLevelNodes>
     <topLevelNodes
-        visualID="2006"
+        visualID="2003"
         editPartClassName="NetworkDomainEditPart"
         itemSemanticEditPolicyClassName="NetworkDomainItemSemanticEditPolicy"
-        notationViewFactoryClassName="NetworkDomainViewFactory"
         canonicalEditPolicyClassName="NetworkDomainCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="NetworkDomainGraphicalNodeEditPolicy"
         createCommandClassName="NetworkDomainCreateCommand">
@@ -755,9 +725,7 @@
       <viewmap
           xsi:type="gmfgen:InnerClassViewmap"
           className="DomainFigure"
-          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class DomainFigure extends org.eclipse.draw2d.RoundedRectangle {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDomainTitleLabel; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDomainNetworkLabel; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public DomainFigure() {&#xA;&#x9;&#x9;&#x9;&#x9;this.setCornerDimensions(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(8)&#xA;, getMapMode().DPtoLP(8)&#xA;));&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureDomainTitleLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDomainTitleLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureDomainTitleLabel);&#xA;&#xA;&#xA;&#xA;fFigureDomainNetworkLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDomainNetworkLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureDomainNetworkLabel);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDomainTitleLabel() {&#xA;&#x9;&#x9;return fFigureDomainTitleLabel;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDomainNetworkLabel() {&#xA;&#x9;&#x9;return fFigureDomainNetworkLabel;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;">
-        <requiredPluginIDs>org.eclipse.gmf.runtime.draw2d.ui</requiredPluginIDs>
-      </viewmap>
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class DomainFigure extends org.eclipse.draw2d.RoundedRectangle {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDomainTitleLabel; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureDomainNetworkLabel; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public DomainFigure() {&#xA;&#x9;&#x9;&#x9;&#x9;this.setCornerDimensions(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(8)&#xA;, getMapMode().DPtoLP(8)&#xA;));&#xA;this.setLineWidth(1);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureDomainTitleLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDomainTitleLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureDomainTitleLabel);&#xA;&#xA;&#xA;&#xA;fFigureDomainNetworkLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureDomainNetworkLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureDomainNetworkLabel);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDomainTitleLabel() {&#xA;&#x9;&#x9;return fFigureDomainTitleLabel;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureDomainNetworkLabel() {&#xA;&#x9;&#x9;return fFigureDomainNetworkLabel;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
       <modelFacet>
         <metaClass
             href="joram.genmodel#//joram/NetworkDomain"/>
@@ -767,10 +735,9 @@
             href="joram.genmodel#//joram/Domain/managedElements"/>
       </modelFacet>
       <labels
-          visualID="5011"
+          visualID="5005"
           editPartClassName="NetworkDomainNameEditPart"
           itemSemanticEditPolicyClassName="NetworkDomainNameItemSemanticEditPolicy"
-          notationViewFactoryClassName="NetworkDomainNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -779,6 +746,7 @@
             figureQualifiedClassName="org.eclipse.draw2d.Label"/>
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
             viewPattern="Domain {0}"
             editorPattern="{0}"
             editPattern="{0}">
@@ -787,10 +755,9 @@
         </modelFacet>
       </labels>
       <labels
-          visualID="5012"
+          visualID="5006"
           editPartClassName="NetworkDomainNetworkClassEditPart"
-          itemSemanticEditPolicyClassName="NetworkDomainNetworkClassItemSemanticEditPolicy"
-          notationViewFactoryClassName="NetworkDomainNetworkClassViewFactory">
+          itemSemanticEditPolicyClassName="NetworkDomainNetworkClassItemSemanticEditPolicy">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -798,6 +765,7 @@
             figureQualifiedClassName="org.eclipse.draw2d.Label"/>
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0"
             viewPattern=""
             editorPattern="">
           <metaFeatures
@@ -809,7 +777,6 @@
         visualID="4001"
         editPartClassName="NetworkPortEditPart"
         itemSemanticEditPolicyClassName="NetworkPortItemSemanticEditPolicy"
-        notationViewFactoryClassName="NetworkPortViewFactory"
         createCommandClassName="NetworkPortCreateCommand"
         reorientCommandClassName="NetworkPortReorientCommand">
       <diagramRunTimeClass
@@ -819,9 +786,7 @@
           editHelperClassName="NetworkPortEditHelper"/>
       <viewmap
           xsi:type="gmfgen:FigureViewmap"
-          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.PolylineConnectionEx">
-        <requiredPluginIDs>org.eclipse.gmf.runtime.draw2d.ui</requiredPluginIDs>
-      </viewmap>
+          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.PolylineConnectionEx"/>
       <modelFacet
           xsi:type="gmfgen:TypeLinkModelFacet">
         <metaClass
@@ -839,7 +804,6 @@
           visualID="6001"
           editPartClassName="NetworkPortPortEditPart"
           itemSemanticEditPolicyClassName="NetworkPortPortItemSemanticEditPolicy"
-          notationViewFactoryClassName="NetworkPortPortViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -849,25 +813,22 @@
           <attributes
               xsi:type="gmfgen:LabelOffsetAttributes"
               y="40"/>
-          <requiredPluginIDs>org.eclipse.gmf.runtime.draw2d.ui</requiredPluginIDs>
         </viewmap>
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
-            viewPattern="Port: %s"
-            editorPattern="%s"
-            editPattern=""
-            viewMethod="PRINTF"
-            editMethod="NATIVE">
+            parser="//@labelParsers/@implementations.0"
+            viewPattern="Port: {0}"
+            editorPattern="{0}"
+            editPattern="{0}">
           <metaFeatures
               href="joram.genmodel#//joram/NetworkPort/port"/>
         </modelFacet>
       </labels>
     </links>
     <compartments
-        visualID="7004"
+        visualID="7001"
         editPartClassName="JORAMServicesEditPart"
         itemSemanticEditPolicyClassName="JORAMServicesItemSemanticEditPolicy"
-        notationViewFactoryClassName="JORAMServicesViewFactory"
         canonicalEditPolicyClassName="JORAMServicesCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.0 //@diagram/@childNodes.1 //@diagram/@childNodes.2 //@diagram/@childNodes.3"
         title="services"
@@ -877,15 +838,12 @@
       <viewmap
           xsi:type="gmfgen:InnerClassViewmap"
           className="JORAMFigure"
-          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class JORAMFigure extends org.eclipse.draw2d.RoundedRectangle {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureJORAMTitleLabel; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureJORAMIdLabel; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public JORAMFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(true);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_CENTER&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(2);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setCornerDimensions(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(8)&#xA;, getMapMode().DPtoLP(8)&#xA;));&#xA;this.setPreferredSize(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(150)&#xA;, getMapMode().DPtoLP(220)&#xA;));&#xA;this.setMinimumSize(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(130)&#xA;, getMapMode().DPtoLP(100)&#xA;));&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureJORAMTitleLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureJORAMTitleLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureJORAMTitleLabel);&#xA;&#xA;&#xA;&#xA;fFigureJORAMIdLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureJORAMIdLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureJORAMIdLabel);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureJORAMTitleLabel() {&#xA;&#x9;&#x9;return fFigureJORAMTitleLabel;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureJORAMIdLabel() {&#xA;&#x9;&#x9;return fFigureJORAMIdLabel;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;">
-        <requiredPluginIDs>org.eclipse.gmf.runtime.draw2d.ui</requiredPluginIDs>
-      </viewmap>
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class JORAMFigure extends org.eclipse.draw2d.RoundedRectangle {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureJORAMTitleLabel; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureJORAMIdLabel; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public JORAMFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(true);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_CENTER&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(2);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setCornerDimensions(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(8)&#xA;, getMapMode().DPtoLP(8)&#xA;));&#xA;this.setLineWidth(1);&#xA;this.setPreferredSize(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(150)&#xA;, getMapMode().DPtoLP(220)&#xA;));&#xA;this.setMinimumSize(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(130)&#xA;, getMapMode().DPtoLP(100)&#xA;));&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureJORAMTitleLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureJORAMTitleLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureJORAMTitleLabel);&#xA;&#xA;&#xA;&#xA;fFigureJORAMIdLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureJORAMIdLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureJORAMIdLabel);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureJORAMTitleLabel() {&#xA;&#x9;&#x9;return fFigureJORAMTitleLabel;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureJORAMIdLabel() {&#xA;&#x9;&#x9;return fFigureJORAMIdLabel;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
     </compartments>
     <compartments
-        visualID="7005"
+        visualID="7002"
         editPartClassName="JORAMJMSEditPart"
         itemSemanticEditPolicyClassName="JORAMJMSItemSemanticEditPolicy"
-        notationViewFactoryClassName="JORAMJMSViewFactory"
         canonicalEditPolicyClassName="JORAMJMSCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.4 //@diagram/@childNodes.5 //@diagram/@childNodes.6"
         title="JMS"
@@ -895,15 +853,12 @@
       <viewmap
           xsi:type="gmfgen:InnerClassViewmap"
           className="JORAMFigure"
-          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class JORAMFigure extends org.eclipse.draw2d.RoundedRectangle {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureJORAMTitleLabel; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureJORAMIdLabel; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public JORAMFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(true);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_CENTER&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(2);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setCornerDimensions(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(8)&#xA;, getMapMode().DPtoLP(8)&#xA;));&#xA;this.setPreferredSize(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(150)&#xA;, getMapMode().DPtoLP(220)&#xA;));&#xA;this.setMinimumSize(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(130)&#xA;, getMapMode().DPtoLP(100)&#xA;));&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureJORAMTitleLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureJORAMTitleLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureJORAMTitleLabel);&#xA;&#xA;&#xA;&#xA;fFigureJORAMIdLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureJORAMIdLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureJORAMIdLabel);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureJORAMTitleLabel() {&#xA;&#x9;&#x9;return fFigureJORAMTitleLabel;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureJORAMIdLabel() {&#xA;&#x9;&#x9;return fFigureJORAMIdLabel;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;">
-        <requiredPluginIDs>org.eclipse.gmf.runtime.draw2d.ui</requiredPluginIDs>
-      </viewmap>
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class JORAMFigure extends org.eclipse.draw2d.RoundedRectangle {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureJORAMTitleLabel; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureJORAMIdLabel; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public JORAMFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(true);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_CENTER&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(2);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setCornerDimensions(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(8)&#xA;, getMapMode().DPtoLP(8)&#xA;));&#xA;this.setLineWidth(1);&#xA;this.setPreferredSize(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(150)&#xA;, getMapMode().DPtoLP(220)&#xA;));&#xA;this.setMinimumSize(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(130)&#xA;, getMapMode().DPtoLP(100)&#xA;));&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureJORAMTitleLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureJORAMTitleLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureJORAMTitleLabel);&#xA;&#xA;&#xA;&#xA;fFigureJORAMIdLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureJORAMIdLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureJORAMIdLabel);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureJORAMTitleLabel() {&#xA;&#x9;&#x9;return fFigureJORAMTitleLabel;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureJORAMIdLabel() {&#xA;&#x9;&#x9;return fFigureJORAMIdLabel;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
     </compartments>
     <compartments
-        visualID="7006"
+        visualID="7003"
         editPartClassName="ScalAgentServerServicesEditPart"
         itemSemanticEditPolicyClassName="ScalAgentServerServicesItemSemanticEditPolicy"
-        notationViewFactoryClassName="ScalAgentServerServicesViewFactory"
         canonicalEditPolicyClassName="ScalAgentServerServicesCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.7 //@diagram/@childNodes.8 //@diagram/@childNodes.9 //@diagram/@childNodes.10"
         title="services"
@@ -913,9 +868,7 @@
       <viewmap
           xsi:type="gmfgen:InnerClassViewmap"
           className="JORAMFigure"
-          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class JORAMFigure extends org.eclipse.draw2d.RoundedRectangle {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureJORAMTitleLabel; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureJORAMIdLabel; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public JORAMFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(true);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_CENTER&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(2);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setCornerDimensions(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(8)&#xA;, getMapMode().DPtoLP(8)&#xA;));&#xA;this.setPreferredSize(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(150)&#xA;, getMapMode().DPtoLP(220)&#xA;));&#xA;this.setMinimumSize(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(130)&#xA;, getMapMode().DPtoLP(100)&#xA;));&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureJORAMTitleLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureJORAMTitleLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureJORAMTitleLabel);&#xA;&#xA;&#xA;&#xA;fFigureJORAMIdLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureJORAMIdLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureJORAMIdLabel);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureJORAMTitleLabel() {&#xA;&#x9;&#x9;return fFigureJORAMTitleLabel;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureJORAMIdLabel() {&#xA;&#x9;&#x9;return fFigureJORAMIdLabel;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;">
-        <requiredPluginIDs>org.eclipse.gmf.runtime.draw2d.ui</requiredPluginIDs>
-      </viewmap>
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class JORAMFigure extends org.eclipse.draw2d.RoundedRectangle {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureJORAMTitleLabel; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureJORAMIdLabel; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public JORAMFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(true);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_CENTER&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(2);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setCornerDimensions(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(8)&#xA;, getMapMode().DPtoLP(8)&#xA;));&#xA;this.setLineWidth(1);&#xA;this.setPreferredSize(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(150)&#xA;, getMapMode().DPtoLP(220)&#xA;));&#xA;this.setMinimumSize(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(130)&#xA;, getMapMode().DPtoLP(100)&#xA;));&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureJORAMTitleLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureJORAMTitleLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureJORAMTitleLabel);&#xA;&#xA;&#xA;&#xA;fFigureJORAMIdLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureJORAMIdLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureJORAMIdLabel);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureJORAMTitleLabel() {&#xA;&#x9;&#x9;return fFigureJORAMTitleLabel;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureJORAMIdLabel() {&#xA;&#x9;&#x9;return fFigureJORAMIdLabel;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
     </compartments>
     <palette>
       <groups
@@ -1014,14 +967,12 @@
           iD="org.ow2.joram.design.diagram.rulersAndGrid"
           name="Rulers And Grid"
           kind="RulersAndGrid"/>
-      <children
-          xsi:type="gmfgen:GenStandardPreferencePage"
-          iD="org.ow2.joram.design.diagram.pathmaps"
-          name="Pathmaps"
-          kind="Pathmaps"/>
     </preferencePages>
   </diagram>
-  <plugin/>
+  <plugin>
+    <requiredPlugins>org.eclipse.draw2d</requiredPlugins>
+    <requiredPlugins>org.eclipse.gmf.runtime.draw2d.ui</requiredPlugins>
+  </plugin>
   <editor/>
   <navigator>
     <childReferences
@@ -1164,4 +1115,15 @@
           body="NetworkPort.allInstances()->forAll(p1 |  p1.server = self.server and p1 &lt;> self implies p1.port &lt;> self.port)"/>
     </providers>
   </expressionProviders>
+  <labelParsers
+      extensibleViaService="true">
+    <implementations
+        xsi:type="gmfgen:PredefinedParser"
+        uses="//@diagram/@childNodes.0/@labelModelFacet //@diagram/@childNodes.1/@labelModelFacet //@diagram/@childNodes.2/@labelModelFacet //@diagram/@childNodes.3/@labelModelFacet //@diagram/@childNodes.4/@labelModelFacet //@diagram/@childNodes.5/@labelModelFacet //@diagram/@childNodes.6/@labelModelFacet //@diagram/@topLevelNodes.0/@labels.0/@modelFacet //@diagram/@topLevelNodes.0/@labels.1/@modelFacet //@diagram/@childNodes.7/@labelModelFacet //@diagram/@childNodes.8/@labelModelFacet //@diagram/@childNodes.9/@labelModelFacet //@diagram/@childNodes.10/@labelModelFacet //@diagram/@topLevelNodes.1/@labels.0/@modelFacet //@diagram/@topLevelNodes.1/@labels.1/@modelFacet //@diagram/@topLevelNodes.2/@labels.0/@modelFacet //@diagram/@topLevelNodes.2/@labels.1/@modelFacet //@diagram/@links.0/@labels.0/@modelFacet"/>
+  </labelParsers>
+  <contextMenus
+      context="//@diagram">
+    <items
+        xsi:type="gmfgen:LoadResourceAction"/>
+  </contextMenus>
 </gmfgen:GenEditorGenerator>

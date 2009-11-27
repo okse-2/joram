@@ -136,9 +136,7 @@
           <labelMappings
               xsi:type="gmfmap:FeatureLabelMapping"
               readOnly="true"
-              viewPattern="%s"
-              editorPattern=""
-              viewMethod="PRINTF">
+              editorPattern="">
             <diagramLabel
                 href="joram.gmfgraph#GenericLabel"/>
             <features
@@ -347,9 +345,8 @@
           <labelMappings
               xsi:type="gmfmap:FeatureLabelMapping"
               readOnly="true"
-              viewPattern="%s"
               editorPattern=""
-              viewMethod="PRINTF">
+              editPattern="">
             <diagramLabel
                 href="joram.gmfgraph#GenericLabel"/>
             <features
@@ -473,11 +470,9 @@
         href="joram.ecore#//NetworkPort"/>
     <labelMappings
         xsi:type="gmfmap:FeatureLabelMapping"
-        viewPattern="Port: %s"
-        editorPattern="%s"
-        editPattern=""
-        viewMethod="PRINTF"
-        editMethod="NATIVE">
+        viewPattern="Port: {0}"
+        editorPattern="{0}"
+        editPattern="{0}">
       <diagramLabel
           href="joram.gmfgraph#GenericLabel"/>
       <features
