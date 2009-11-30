@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,14 +22,10 @@
  */
 package collector;
 
-import java.util.Enumeration;
-
-import javax.jms.BytesMessage;
+import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
-import javax.jms.ObjectMessage;
-import javax.jms.TextMessage;
 
 /**
  * Implements the <code>javax.jms.MessageListener</code> interface.
@@ -46,36 +42,37 @@ public class MsgListener implements MessageListener {
 
   public void onMessage(Message msg) {
     try {
-      if (msg instanceof TextMessage) {
-        if (ident == null)
-          System.out.println(((TextMessage) msg).getText());
-        else
-          System.out.println(ident + ": " + ((TextMessage) msg).getText());
-      } else if (msg instanceof BytesMessage) {
-        Enumeration e = msg.getPropertyNames();
-        while (e.hasMoreElements()) {
-          String key = (String) e.nextElement();
-          String value = msg.getStringProperty(key);
-          System.out.println(ident + ": " + key + " = " + value);
-        }
-        byte b;
-        try {
-          while (true) {
-            b = ((BytesMessage) msg).readByte();
-            System.out.print((char) b);
-          }
-        } catch (JMSException eof) {
-          System.out.println();
-        }
-        
-      } else if (msg instanceof ObjectMessage) {
-        if (ident == null)
-          System.out.println(((ObjectMessage) msg).getObject());
-        else
-          System.out.println(ident + ": " + ((ObjectMessage) msg).getObject());
-      }
+      Destination destination = msg.getJMSDestination();
+      Destination replyTo = msg.getJMSReplyTo();
+
+      System.out.println(ident + "from=" + destination + ",replyTo=" + replyTo);
+
+//      Enumeration e = msg.getPropertyNames();
+//      while (e.hasMoreElements()) {
+//        String key = (String) e.nextElement();
+//        String value = msg.getStringProperty(key);
+//        System.out.println(ident + ": " + key + " = " + value);
+//      }
+//
+//      if (msg instanceof TextMessage) {
+//        System.out.println(((TextMessage) msg).getText());
+//      } else if (msg instanceof BytesMessage) {
+//        byte b;
+//        try {
+//          while (true) {
+//            b = ((BytesMessage) msg).readByte();
+//            System.out.print((char) b);
+//          }
+//        } catch (JMSException eof) {
+//          System.out.println();
+//        }
+//      } else if (msg instanceof ObjectMessage) {
+//        System.out.println(((ObjectMessage) msg).getObject());
+//      }
     } catch (JMSException jE) {
       System.err.println("Exception in listener: " + jE);
+    } catch (Throwable t) {
+      t.printStackTrace();
     }
   }
 }
