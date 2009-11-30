@@ -44,6 +44,7 @@ public class DMQClient {
     Context ictx = new InitialContext();
     Queue queue1 = (Queue) ictx.lookup("queue1");
     Queue queue2 = (Queue) ictx.lookup("queue2");
+//    Queue queue3 = (Queue) ictx.lookup("queue3");
     ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cf");
     ictx.close();
 
@@ -51,8 +52,7 @@ public class DMQClient {
     Session prodSession = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
     Session consSession = cnx.createSession(true, 0);
     
-    MessageProducer producer1 = prodSession.createProducer(queue1);
-    MessageProducer producer2 = prodSession.createProducer(queue2);
+    MessageProducer producer = prodSession.createProducer(null);
     MessageConsumer consumer = consSession.createConsumer(queue1);
 
     cnx.start();
@@ -60,7 +60,7 @@ public class DMQClient {
     // Producing messages with a very short time to live: 20 ms.
     System.out.println("Sends Message1 with a very short time to live");
     TextMessage msg = prodSession.createTextMessage("Message1");
-    producer1.send(msg, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, 20);
+    producer.send(queue1, msg, DeliveryMode.NON_PERSISTENT, Message.DEFAULT_PRIORITY, 20);
     
     // Waiting for the message to be expired.
     System.out.println("Waits for the message to be expired");
@@ -72,7 +72,7 @@ public class DMQClient {
     // Producing "undeliverable" messages
     System.out.println("Send Message2");   
     msg = prodSession.createTextMessage("Message2");
-    producer1.send(msg);
+    producer.send(queue1, msg);
     
     msg = (TextMessage) consumer.receive();
     System.out.println("Receives: " + msg.getText() + " then deny it!");
@@ -86,10 +86,19 @@ public class DMQClient {
     System.out.println("Send Message3");   
     msg = prodSession.createTextMessage("Message3");
     try {
-      producer2.send(msg);
+      producer.send(queue2, msg);
     } catch (JMSException exc) {
       System.out.println(exc.getMessage());
     }
+    
+//    // Producing a message to a deleted destination
+//    System.out.println("Send Message4");   
+//    msg = prodSession.createTextMessage("Message4");
+//    try {
+//      producer.send(queue3, msg);
+//    } catch (JMSException exc) {
+//      System.out.println(exc.getMessage());
+//    }
 
     cnx.close();
   }

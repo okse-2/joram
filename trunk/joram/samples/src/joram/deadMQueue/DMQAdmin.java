@@ -40,13 +40,14 @@ public class DMQAdmin {
   public static void main(String[] args) throws Exception {
     System.out.println("DMQ administration...");
 
-    AdminModule.connect("root", "root", 60);
+    ConnectionFactory cf = TcpConnectionFactory.create("localhost", 16010);
+    
+    AdminModule.connect(cf, "root", "root");
 
     User.create("anonymous", "anonymous", 0);    
 
-    ConnectionFactory cf = TcpConnectionFactory.create("localhost", 16010);
 
-    DeadMQueue dmq = (DeadMQueue) DeadMQueue.create(0);
+    Queue dmq = Queue.create(0);
     dmq.setFreeReading();
     dmq.setFreeWriting();
     
@@ -58,16 +59,20 @@ public class DMQAdmin {
     queue1.setThreshold(2);
     
     Queue queue2 = Queue.create(0);
-
     queue2.setDMQ(dmq);
+
+//    Queue queue3 = Queue.create(0);
 
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     jndiCtx.bind("queue1", queue1);
     jndiCtx.bind("queue2", queue2);
+//    jndiCtx.bind("queue3", queue3);
     jndiCtx.bind("dmq", dmq);
     jndiCtx.bind("cf", cf);
     jndiCtx.close();
 
+//    queue3.delete();
+    
     AdminModule.disconnect();
     System.out.println("Admin closed.");
   }
