@@ -25,6 +25,7 @@ package collector;
 import java.util.Properties;
 
 import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
@@ -51,8 +52,8 @@ public class CollectorAdmin {
     prop.setProperty("collector.type", "" + Message.BYTES);
     prop.setProperty("collector.className", "com.scalagent.joram.mom.dest.collector.URLCollector");
     
-    Queue queue = Queue.create(0, "queue", "com.scalagent.joram.mom.dest.collector.CollectorQueue", prop);
-//    Topic topic = Topic.create(0, "topic", "com.scalagent.joram.mom.dest.collector.CollectorTopic", prop);
+    Queue queue = Queue.create(0, "queue", Queue.COLLECTOR_QUEUE, prop);
+//    Topic topic = Topic.create(0, "topic", Topic.COLLECTOR_TOPIC, prop);
     
     User.create("anonymous", "anonymous");
 
