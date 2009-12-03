@@ -103,14 +103,14 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * 
  * &lt;config&gt;
  *   &lt;domain name="D1"/&gt;
- *   &lt;domain name="D2" class="fr.dyade.aaa.agent.PoolCnxNetwork"/&gt;
+ *   &lt;domain name="D2" class="fr.dyade.aaa.agent.PoolNetwork"/&gt;
  *
- *   &lt;property name="D2.nbMaxCnx" value="1"\&gt;
+ *   &lt;property name="D2.nbMaxCnx" value="1"/&gt;
  *
  *   &lt;server id="0" name="S0" hostname="acores"&gt;
  *     &lt;network domain="D1" port="16300"/&gt;
- *     &lt;service class=\"fr.dyade.aaa.ns.NameService\" args=\"\"/&gt;
- *     &lt;property name="A3DEBUG_PROXY" value="true"\&gt;
+ *     &lt;service class="fr.dyade.aaa.agent.AdminProxy" args=""/&gt;
+ *     &lt;property name="A3DEBUG_PROXY" value="true"/&gt;
  *   &lt;/server&gt;
  *
  *   &lt;server id="2" name="S2" hostname="bermudes"&gt;
@@ -125,7 +125,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * </pre></blockquote>
  * <p>
  * This file described a 2 domains configuration D1 and D2, D1 with default
- * network protocol and D2 with the <code>PoolCnxNetwork</code> one, and 4
+ * network protocol and D2 with the <code>PoolNetwork</code> one, and 4
  * servers:
  * <ul>
  * <li>The first server (id 0 and name "S0") is hosted by acores, it is
