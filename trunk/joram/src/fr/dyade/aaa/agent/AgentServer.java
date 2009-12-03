@@ -109,7 +109,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  *
  *   &lt;server id="0" name="S0" hostname="acores"&gt;
  *     &lt;network domain="D1" port="16300"/&gt;
- *     &lt;service class="fr.dyade.aaa.agent.AdminProxy" args=""/&gt;
+ *     &lt;service class="fr.dyade.aaa.agent.AdminProxy" args="8090"/&gt;
  *     &lt;property name="A3DEBUG_PROXY" value="true"/&gt;
  *   &lt;/server&gt;
  *
