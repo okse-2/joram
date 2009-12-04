@@ -3,9 +3,10 @@
     xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="joram"
     nsURI="http:///joram.ow2.org/ecore/joram" nsPrefix="joram">
-  <eClassifiers xsi:type="ecore:EClass" name="Domain" abstract="true">
+  <eClassifiers xsi:type="ecore:EClass" name="Config">
     <eStructuralFeatures xsi:type="ecore:EReference" name="managedElements" upperBound="-1"
         eType="#//ManagedElement" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="Transaction" eType="#//Transaction"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ManagedElement" abstract="true" interface="true"/>
   <eClassifiers xsi:type="ecore:EClass" name="ScalAgentServer" eSuperTypes="#//ManagedElement">
@@ -18,9 +19,11 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="services" upperBound="-1"
         eType="#//JoramService" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="sid" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EShort"
-        defaultValueLiteral="0" iD="true"/>
+        defaultValueLiteral="0"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="StorageDirectory" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
         unsettable="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="network" upperBound="-1"
+        eType="#//NetworkPort" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="JORAM" eSuperTypes="#//ScalAgentServer">
     <eStructuralFeatures xsi:type="ecore:EReference" name="jmsObjects" upperBound="-1"
@@ -31,10 +34,6 @@
     <eLiterals name="JORAM_5_2_5" value="525" literal="5.2.5"/>
     <eLiterals name="JORAM_5_2_4" value="524" literal="5.2.4"/>
     <eLiterals name="JORAM_5_2_3" value="523" literal="5.2.3"/>
-  </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="JoramDomain" eSuperTypes="#//Domain">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
-        defaultValueLiteral="joram"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="JoramService" abstract="true"/>
   <eClassifiers xsi:type="ecore:EClass" name="AdminProxy" eSuperTypes="#//JoramService">
@@ -63,36 +62,63 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="port" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
         defaultValueLiteral="2560"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="CustomService" eSuperTypes="#//JoramService">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="className" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="args" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="NetworkDomain" eSuperTypes="#//ManagedElement">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
-        defaultValueLiteral="D0" iD="true"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="networkClass" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        defaultValueLiteral="D0"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="network" eType="#//Network"
         defaultValueLiteral="fr.dyade.aaa.agent.PoolNetwork"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="NetworkPort" eSuperTypes="#//ManagedElement">
+  <eClassifiers xsi:type="ecore:EClass" name="NetworkPort">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="port" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
         defaultValueLiteral="16100"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="server" eType="#//ScalAgentServer">
-      <eAnnotations source="http:///org/eclipse/emf/ecore/util/ExtendedMetaData">
-        <details key="kind" value="qsdfsdq"/>
-        <details key="namespace" value="##targetNamespace"/>
-      </eAnnotations>
-    </eStructuralFeatures>
     <eStructuralFeatures xsi:type="ecore:EReference" name="domain" eType="#//NetworkDomain"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="JMSObject" abstract="true"/>
-  <eClassifiers xsi:type="ecore:EClass" name="Queue" eSuperTypes="#//JMSObject">
+  <eClassifiers xsi:type="ecore:EClass" name="Destination" abstract="true" eSuperTypes="#//JMSObject">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="readers" upperBound="-1"
+        eType="#//User"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="writers" upperBound="-1"
+        eType="#//User"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="freeReader" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="freeWriter" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="jndiName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Queue" eSuperTypes="#//Destination">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
         defaultValueLiteral="queue"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="className" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        defaultValueLiteral="org.objectweb.joram.mom.dest.Queue"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="deadMessageQueue" eType="#//Queue"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Topic" eSuperTypes="#//JMSObject">
+  <eClassifiers xsi:type="ecore:EClass" name="Topic" eSuperTypes="#//Destination">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
         defaultValueLiteral="topic"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="className" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        defaultValueLiteral="org.objectweb.joram.mom.dest.Topic"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="User" eSuperTypes="#//JMSObject">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
-        defaultValueLiteral="anonymous"/>
+        defaultValueLiteral="anonymous" iD="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="password" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
         defaultValueLiteral="anonymous"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="Transaction">
+    <eLiterals name="NTransaction" literal="fr.dyade.aaa.util.NTransaction"/>
+    <eLiterals name="NGTransaction" value="1" literal="fr.dyade.aaa.util.NGTransaction"/>
+    <eLiterals name="JTransaction" value="2" literal="fr.dyade.aaa.util.JTransaction"/>
+    <eLiterals name="ATransaction" value="3" literal="fr.dyade.aaa.util.ATransaction"/>
+    <eLiterals name="NullTransaction" value="4" literal="fr.dyade.aaa.util.NullTransaction"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="Network">
+    <eLiterals name="PoolNetwork" literal="fr.dyade.aaa.agent.PoolNetwork"/>
+    <eLiterals name="SimpleNetwork" value="1" literal="fr.dyade.aaa.agent.SimpleNetwork"/>
+    <eLiterals name="NGNetwork" value="2" literal="fr.dyade.aaa.agent.NGNetwork"/>
+    <eLiterals name="HttpNetwork" value="3" literal="fr.dyade.aaa.agent.HttpNetwork"/>
+    <eLiterals name="HttpsNetwork" value="4" literal="fr.dyade.aaa.agent.HttpsNetwork"/>
+    <eLiterals name="SSLNetwork" value="5" literal="fr.dyade.aaa.agent.SSLNetwork"/>
   </eClassifiers>
 </ecore:EPackage>

@@ -7,7 +7,7 @@
     xmlns:gmftool="http://www.eclipse.org/gmf/2005/ToolDefinition">
   <nodes>
     <containmentFeature
-        href="joram.ecore#//Domain/managedElements"/>
+        href="joram.ecore#//Config/managedElements"/>
     <ownedChild>
       <domainMetaElement
           href="joram.ecore#//JORAM"/>
@@ -218,6 +218,28 @@
         </ownedChild>
       </children>
       <children
+          compartment="//@nodes.0/@ownedChild/@compartments.0">
+        <containmentFeature
+            href="joram.ecore#//ScalAgentServer/services"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//CustomService"/>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping"
+              editorPattern="">
+            <diagramLabel
+                href="joram.gmfgraph#GenericLabel"/>
+            <features
+                href="joram.ecore#//CustomService/className"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.0/@tools.7"/>
+          <diagramNode
+              href="joram.gmfgraph#GenericLabel"/>
+        </ownedChild>
+      </children>
+      <children
           compartment="//@nodes.0/@ownedChild/@compartments.1">
         <containmentFeature
             href="joram.ecore#//JORAM/jmsObjects"/>
@@ -236,7 +258,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.0/@tools.8"/>
+              href="joram.gmftool#//@palette/@tools.0/@tools.9"/>
           <diagramNode
               href="joram.gmfgraph#GenericLabel"/>
         </ownedChild>
@@ -260,7 +282,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.0/@tools.9"/>
+              href="joram.gmftool#//@palette/@tools.0/@tools.10"/>
           <diagramNode
               href="joram.gmfgraph#GenericLabel"/>
         </ownedChild>
@@ -284,18 +306,18 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.0/@tools.10"/>
+              href="joram.gmftool#//@palette/@tools.0/@tools.11"/>
           <diagramNode
               href="joram.gmfgraph#GenericLabel"/>
         </ownedChild>
       </children>
       <compartments
-          children="//@nodes.0/@ownedChild/@children.3 //@nodes.0/@ownedChild/@children.0 //@nodes.0/@ownedChild/@children.2 //@nodes.0/@ownedChild/@children.1">
+          children="//@nodes.0/@ownedChild/@children.3 //@nodes.0/@ownedChild/@children.0 //@nodes.0/@ownedChild/@children.2 //@nodes.0/@ownedChild/@children.1 //@nodes.0/@ownedChild/@children.4">
         <compartment
             href="joram.gmfgraph#services"/>
       </compartments>
       <compartments
-          children="//@nodes.0/@ownedChild/@children.4 //@nodes.0/@ownedChild/@children.5 //@nodes.0/@ownedChild/@children.6">
+          children="//@nodes.0/@ownedChild/@children.5 //@nodes.0/@ownedChild/@children.6 //@nodes.0/@ownedChild/@children.7">
         <compartment
             href="joram.gmfgraph#JMS"/>
       </compartments>
@@ -303,7 +325,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="joram.ecore#//Domain/managedElements"/>
+        href="joram.ecore#//Config/managedElements"/>
     <ownedChild>
       <domainMetaElement
           href="joram.ecore#//ScalAgentServer"/>
@@ -426,6 +448,27 @@
               href="joram.gmfgraph#GenericLabel"/>
         </ownedChild>
       </children>
+      <children>
+        <containmentFeature
+            href="joram.ecore#//ScalAgentServer/services"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//CustomService"/>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping"
+              editorPattern="">
+            <diagramLabel
+                href="joram.gmfgraph#GenericLabel"/>
+            <features
+                href="joram.ecore#//CustomService/className"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.0/@tools.7"/>
+          <diagramNode
+              href="joram.gmfgraph#GenericLabel"/>
+        </ownedChild>
+      </children>
       <compartments
           children="//@nodes.1/@ownedChild/@children.3 //@nodes.1/@ownedChild/@children.0 //@nodes.1/@ownedChild/@children.2 //@nodes.1/@ownedChild/@children.1">
         <compartment
@@ -435,7 +478,7 @@
   </nodes>
   <nodes>
     <containmentFeature
-        href="joram.ecore#//Domain/managedElements"/>
+        href="joram.ecore#//Config/managedElements"/>
     <ownedChild>
       <domainMetaElement
           href="joram.ecore#//NetworkDomain"/>
@@ -456,7 +499,7 @@
         <diagramLabel
             href="joram.gmfgraph#DomainNetworkLabel"/>
         <features
-            href="joram.ecore#//NetworkDomain/networkClass"/>
+            href="joram.ecore#//NetworkDomain/network"/>
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
@@ -479,18 +522,19 @@
           href="joram.ecore#//NetworkPort/port"/>
     </labelMappings>
     <containmentFeature
-        href="joram.ecore#//Domain/managedElements"/>
+        href="joram.ecore#//ScalAgentServer/network"/>
     <tool
         xsi:type="gmftool:CreationTool"
         href="joram.gmftool#//@palette/@tools.1/@tools.2"/>
     <diagramLink
         href="joram.gmfgraph#Domain2ServersConnection"/>
-    <sourceMetaFeature
-        xsi:type="ecore:EReference"
-        href="joram.ecore#//NetworkPort/server"/>
     <linkMetaFeature
         xsi:type="ecore:EReference"
         href="joram.ecore#//NetworkPort/domain"/>
+    <creationConstraints>
+      <targetEnd
+          body="oppositeEnd.network->select(n1 | n1.domain = self)->isEmpty()"/>
+    </creationConstraints>
   </links>
   <diagram>
     <diagramCanvas
@@ -498,7 +542,7 @@
     <domainModel
         href="joram.ecore#/"/>
     <domainMetaElement
-        href="joram.ecore#//JoramDomain"/>
+        href="joram.ecore#//Config"/>
     <palette
         href="joram.gmftool#//@palette"/>
   </diagram>
@@ -546,29 +590,16 @@
       </target>
     </audits>
     <audits
-        name="Double link check"
-        description="TODO"
-        id="linkcheck"
-        message="Can't link to the same domain with two different port.">
-      <rule
-          body="NetworkPort.allInstances()->forAll(p1 |  p1.server = self.server and p1.domain = self.domain implies p1 = self)"/>
-      <target
-          xsi:type="gmfmap:DomainElementTarget">
-        <element
-            href="joram.ecore#//NetworkPort"/>
-      </target>
-    </audits>
-    <audits
         name="Port used check"
         description="TODO"
         id="portcheck"
-        message="Port already used with another network">
+        message="Server is linked with two different domains using the same port.">
       <rule
-          body="NetworkPort.allInstances()->forAll(p1 |  p1.server = self.server and p1 &lt;> self implies p1.port &lt;> self.port)"/>
+          body="self.network->forAll(c1,c2 | c1 &lt;> c2 implies c1.port &lt;> c2.port)"/>
       <target
           xsi:type="gmfmap:DomainElementTarget">
         <element
-            href="joram.ecore#//NetworkPort"/>
+            href="joram.ecore#//ScalAgentServer"/>
       </target>
     </audits>
   </audits>

@@ -7,15 +7,31 @@
     copyrightFields="false" language="">
   <foreignModel>joram.ecore</foreignModel>
   <genPackages prefix="Joram" basePackage="org.ow2.joram.design.model" resource="XML"
-      disposableProviderFactory="true" ecorePackage="joram.ecore#/">
+      ecorePackage="joram.ecore#/">
     <genEnums typeSafeEnumCompatible="false" ecoreEnum="joram.ecore#//JoramVersion">
       <genEnumLiterals ecoreEnumLiteral="joram.ecore#//JoramVersion/JORAM_5_2_6"/>
       <genEnumLiterals ecoreEnumLiteral="joram.ecore#//JoramVersion/JORAM_5_2_5"/>
       <genEnumLiterals ecoreEnumLiteral="joram.ecore#//JoramVersion/JORAM_5_2_4"/>
       <genEnumLiterals ecoreEnumLiteral="joram.ecore#//JoramVersion/JORAM_5_2_3"/>
     </genEnums>
-    <genClasses image="false" ecoreClass="joram.ecore#//Domain">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//Domain/managedElements"/>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="joram.ecore#//Transaction">
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Transaction/NTransaction"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Transaction/NGTransaction"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Transaction/JTransaction"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Transaction/ATransaction"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Transaction/NullTransaction"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="joram.ecore#//Network">
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Network/PoolNetwork"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Network/SimpleNetwork"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Network/NGNetwork"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Network/HttpNetwork"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Network/HttpsNetwork"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Network/SSLNetwork"/>
+    </genEnums>
+    <genClasses ecoreClass="joram.ecore#//Config">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//Config/managedElements"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//Config/Transaction"/>
     </genClasses>
     <genClasses image="false" ecoreClass="joram.ecore#//ManagedElement"/>
     <genClasses ecoreClass="joram.ecore#//ScalAgentServer">
@@ -25,12 +41,10 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//ScalAgentServer/services"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//ScalAgentServer/sid"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//ScalAgentServer/StorageDirectory"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//ScalAgentServer/network"/>
     </genClasses>
     <genClasses ecoreClass="joram.ecore#//JORAM">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//JORAM/jmsObjects"/>
-    </genClasses>
-    <genClasses ecoreClass="joram.ecore#//JoramDomain">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//JoramDomain/name"/>
     </genClasses>
     <genClasses image="false" ecoreClass="joram.ecore#//JoramService"/>
     <genClasses ecoreClass="joram.ecore#//AdminProxy">
@@ -50,21 +64,34 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//TCPProxyService/name"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//TCPProxyService/port"/>
     </genClasses>
+    <genClasses ecoreClass="joram.ecore#//CustomService">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//CustomService/className"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//CustomService/args"/>
+    </genClasses>
     <genClasses ecoreClass="joram.ecore#//NetworkDomain">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//NetworkDomain/name"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//NetworkDomain/networkClass"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//NetworkDomain/network"/>
     </genClasses>
     <genClasses ecoreClass="joram.ecore#//NetworkPort">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//NetworkPort/port"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference joram.ecore#//NetworkPort/server"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference joram.ecore#//NetworkPort/domain"/>
     </genClasses>
     <genClasses image="false" ecoreClass="joram.ecore#//JMSObject"/>
+    <genClasses image="false" ecoreClass="joram.ecore#//Destination">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference joram.ecore#//Destination/readers"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference joram.ecore#//Destination/writers"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//Destination/freeReader"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//Destination/freeWriter"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//Destination/jndiName"/>
+    </genClasses>
     <genClasses ecoreClass="joram.ecore#//Queue">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//Queue/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//Queue/className"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference joram.ecore#//Queue/deadMessageQueue"/>
     </genClasses>
     <genClasses ecoreClass="joram.ecore#//Topic">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//Topic/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//Topic/className"/>
     </genClasses>
     <genClasses ecoreClass="joram.ecore#//User">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//User/name"/>

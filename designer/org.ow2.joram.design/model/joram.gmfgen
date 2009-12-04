@@ -9,12 +9,12 @@
         name="JORAM integrity"
         description="Checks integrity of the JORAM diagram."
         path="//@audits/@categories.0"
-        audits="//@audits/@rules.0 //@audits/@rules.1 //@audits/@rules.2 //@audits/@rules.3 //@audits/@rules.4"/>
+        audits="//@audits/@rules.0 //@audits/@rules.1 //@audits/@rules.2 //@audits/@rules.3"/>
     <rules
         name="JORAM unique server Id"
         description="Checks unicity of server id."
         id="uniqueIdRule"
-        rule="//@expressionProviders/@providers.0/@expressions.6"
+        rule="//@expressionProviders/@providers.0/@expressions.7"
         message="Server Id (sid) must be unique."
         category="//@audits/@categories.0">
       <target
@@ -28,7 +28,7 @@
         name="Domain unique name"
         description="Checks unicity of domain name."
         id="uniqueDomainRule"
-        rule="//@expressionProviders/@providers.0/@expressions.7"
+        rule="//@expressionProviders/@providers.0/@expressions.8"
         message="Domain name must be unique."
         category="//@audits/@categories.0">
       <target
@@ -42,7 +42,7 @@
         name="Domain name check"
         description="descr TODO"
         id="domainNameRule"
-        rule="//@expressionProviders/@providers.0/@expressions.8"
+        rule="//@expressionProviders/@providers.0/@expressions.9"
         message="Domain name can't be empty"
         category="//@audits/@categories.0">
       <target
@@ -53,35 +53,21 @@
       </target>
     </rules>
     <rules
-        name="Double link check"
-        description="TODO"
-        id="linkcheck"
-        rule="//@expressionProviders/@providers.0/@expressions.9"
-        message="Can't link to the same domain with two different port."
-        category="//@audits/@categories.0">
-      <target
-          xsi:type="gmfgen:GenDomainElementTarget"
-          contextSelector="//@audits/@clientContexts.0">
-        <element
-            href="joram.genmodel#//joram/NetworkPort"/>
-      </target>
-    </rules>
-    <rules
         name="Port used check"
         description="TODO"
         id="portcheck"
         rule="//@expressionProviders/@providers.0/@expressions.10"
-        message="Port already used with another network"
+        message="Server is linked with two different domains using the same port."
         category="//@audits/@categories.0">
       <target
           xsi:type="gmfgen:GenDomainElementTarget"
           contextSelector="//@audits/@clientContexts.0">
         <element
-            href="joram.genmodel#//joram/NetworkPort"/>
+            href="joram.genmodel#//joram/ScalAgentServer"/>
       </target>
     </rules>
     <clientContexts
-        ruleTargets="//@audits/@rules.0/@target //@audits/@rules.1/@target //@audits/@rules.2/@target //@audits/@rules.3/@target //@audits/@rules.4/@target"/>
+        ruleTargets="//@audits/@rules.0/@target //@audits/@rules.1/@target //@audits/@rules.2/@target //@audits/@rules.3/@target"/>
   </audits>
   <diagram
       visualID="1000"
@@ -102,12 +88,13 @@
         xsi:type="gmfgen:FigureViewmap"
         figureQualifiedClassName="org.eclipse.draw2d.FreeformLayer"/>
     <domainDiagramElement
-        href="joram.genmodel#//joram/JoramDomain"/>
+        href="joram.genmodel#//joram/Config"/>
     <childNodes
         xsi:type="gmfgen:GenChildLabelNode"
         visualID="3001"
         editPartClassName="AdminProxyEditPart"
         itemSemanticEditPolicyClassName="AdminProxyItemSemanticEditPolicy"
+        notationViewFactoryClassName="AdminProxyViewFactory"
         canonicalEditPolicyClassName="AdminProxyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="AdminProxyGraphicalNodeEditPolicy"
         createCommandClassName="AdminProxyCreateCommand"
@@ -143,6 +130,7 @@
         visualID="3002"
         editPartClassName="ConnectionManagerEditPart"
         itemSemanticEditPolicyClassName="ConnectionManagerItemSemanticEditPolicy"
+        notationViewFactoryClassName="ConnectionManagerViewFactory"
         canonicalEditPolicyClassName="ConnectionManagerCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="ConnectionManagerGraphicalNodeEditPolicy"
         createCommandClassName="ConnectionManagerCreateCommand"
@@ -178,6 +166,7 @@
         visualID="3003"
         editPartClassName="JNDIServerEditPart"
         itemSemanticEditPolicyClassName="JNDIServerItemSemanticEditPolicy"
+        notationViewFactoryClassName="JNDIServerViewFactory"
         canonicalEditPolicyClassName="JNDIServerCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="JNDIServerGraphicalNodeEditPolicy"
         createCommandClassName="JNDIServerCreateCommand"
@@ -213,6 +202,7 @@
         visualID="3004"
         editPartClassName="TCPProxyServiceEditPart"
         itemSemanticEditPolicyClassName="TCPProxyServiceItemSemanticEditPolicy"
+        notationViewFactoryClassName="TCPProxyServiceViewFactory"
         canonicalEditPolicyClassName="TCPProxyServiceCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TCPProxyServiceGraphicalNodeEditPolicy"
         createCommandClassName="TCPProxyServiceCreateCommand"
@@ -244,9 +234,45 @@
     </childNodes>
     <childNodes
         xsi:type="gmfgen:GenChildLabelNode"
+        visualID="3012"
+        editPartClassName="CustomServiceEditPart"
+        itemSemanticEditPolicyClassName="CustomServiceItemSemanticEditPolicy"
+        notationViewFactoryClassName="CustomServiceViewFactory"
+        canonicalEditPolicyClassName="CustomServiceCanonicalEditPolicy"
+        graphicalNodeEditPolicyClassName="CustomServiceGraphicalNodeEditPolicy"
+        createCommandClassName="CustomServiceCreateCommand"
+        containers="//@diagram/@compartments.0"
+        labelElementIcon="true">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <elementType
+          xsi:type="gmfgen:MetamodelType"
+          editHelperClassName="CustomServiceEditHelper"/>
+      <viewmap
+          xsi:type="gmfgen:FigureViewmap"
+          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+      <modelFacet>
+        <metaClass
+            href="joram.genmodel#//joram/CustomService"/>
+        <containmentMetaFeature
+            href="joram.genmodel#//joram/ScalAgentServer/services"/>
+        <childMetaFeature
+            href="joram.genmodel#//joram/ScalAgentServer/services"/>
+      </modelFacet>
+      <labelModelFacet
+          xsi:type="gmfgen:FeatureLabelModelFacet"
+          parser="//@labelParsers/@implementations.0"
+          editorPattern="">
+        <metaFeatures
+            href="joram.genmodel#//joram/CustomService/className"/>
+      </labelModelFacet>
+    </childNodes>
+    <childNodes
+        xsi:type="gmfgen:GenChildLabelNode"
         visualID="3005"
         editPartClassName="TopicEditPart"
         itemSemanticEditPolicyClassName="TopicItemSemanticEditPolicy"
+        notationViewFactoryClassName="TopicViewFactory"
         canonicalEditPolicyClassName="TopicCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TopicGraphicalNodeEditPolicy"
         createCommandClassName="TopicCreateCommand"
@@ -283,6 +309,7 @@
         visualID="3006"
         editPartClassName="QueueEditPart"
         itemSemanticEditPolicyClassName="QueueItemSemanticEditPolicy"
+        notationViewFactoryClassName="QueueViewFactory"
         canonicalEditPolicyClassName="QueueCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="QueueGraphicalNodeEditPolicy"
         createCommandClassName="QueueCreateCommand"
@@ -319,6 +346,7 @@
         visualID="3007"
         editPartClassName="UserEditPart"
         itemSemanticEditPolicyClassName="UserItemSemanticEditPolicy"
+        notationViewFactoryClassName="UserViewFactory"
         canonicalEditPolicyClassName="UserCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="UserGraphicalNodeEditPolicy"
         createCommandClassName="UserCreateCommand"
@@ -355,6 +383,7 @@
         visualID="3008"
         editPartClassName="AdminProxy2EditPart"
         itemSemanticEditPolicyClassName="AdminProxy2ItemSemanticEditPolicy"
+        notationViewFactoryClassName="AdminProxyViewFactory"
         canonicalEditPolicyClassName="AdminProxy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="AdminProxy2GraphicalNodeEditPolicy"
         createCommandClassName="AdminProxy2CreateCommand"
@@ -391,6 +420,7 @@
         visualID="3009"
         editPartClassName="ConnectionManager2EditPart"
         itemSemanticEditPolicyClassName="ConnectionManager2ItemSemanticEditPolicy"
+        notationViewFactoryClassName="ConnectionManagerViewFactory"
         canonicalEditPolicyClassName="ConnectionManager2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="ConnectionManager2GraphicalNodeEditPolicy"
         createCommandClassName="ConnectionManager2CreateCommand"
@@ -425,6 +455,7 @@
         visualID="3010"
         editPartClassName="JNDIServer2EditPart"
         itemSemanticEditPolicyClassName="JNDIServer2ItemSemanticEditPolicy"
+        notationViewFactoryClassName="JNDIServerViewFactory"
         canonicalEditPolicyClassName="JNDIServer2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="JNDIServer2GraphicalNodeEditPolicy"
         createCommandClassName="JNDIServer2CreateCommand"
@@ -460,6 +491,7 @@
         visualID="3011"
         editPartClassName="TCPProxyService2EditPart"
         itemSemanticEditPolicyClassName="TCPProxyService2ItemSemanticEditPolicy"
+        notationViewFactoryClassName="TCPProxyServiceViewFactory"
         canonicalEditPolicyClassName="TCPProxyService2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TCPProxyService2GraphicalNodeEditPolicy"
         createCommandClassName="TCPProxyService2CreateCommand"
@@ -489,10 +521,46 @@
             href="joram.genmodel#//joram/TCPProxyService/name"/>
       </labelModelFacet>
     </childNodes>
+    <childNodes
+        xsi:type="gmfgen:GenChildLabelNode"
+        visualID="3013"
+        editPartClassName="CustomService2EditPart"
+        itemSemanticEditPolicyClassName="CustomService2ItemSemanticEditPolicy"
+        notationViewFactoryClassName="CustomServiceViewFactory"
+        canonicalEditPolicyClassName="CustomService2CanonicalEditPolicy"
+        graphicalNodeEditPolicyClassName="CustomService2GraphicalNodeEditPolicy"
+        createCommandClassName="CustomService2CreateCommand"
+        containers="//@diagram/@topLevelNodes.1"
+        labelElementIcon="true">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <elementType
+          xsi:type="gmfgen:SpecializationType"
+          metamodelType="//@diagram/@childNodes.4/@elementType"/>
+      <viewmap
+          xsi:type="gmfgen:FigureViewmap"
+          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+      <modelFacet>
+        <metaClass
+            href="joram.genmodel#//joram/CustomService"/>
+        <containmentMetaFeature
+            href="joram.genmodel#//joram/ScalAgentServer/services"/>
+        <childMetaFeature
+            href="joram.genmodel#//joram/ScalAgentServer/services"/>
+      </modelFacet>
+      <labelModelFacet
+          xsi:type="gmfgen:FeatureLabelModelFacet"
+          parser="//@labelParsers/@implementations.0"
+          editorPattern="">
+        <metaFeatures
+            href="joram.genmodel#//joram/CustomService/className"/>
+      </labelModelFacet>
+    </childNodes>
     <topLevelNodes
-        visualID="2001"
+        visualID="2004"
         editPartClassName="JORAMEditPart"
         itemSemanticEditPolicyClassName="JORAMItemSemanticEditPolicy"
+        notationViewFactoryClassName="JORAMViewFactory"
         canonicalEditPolicyClassName="JORAMCanonicalEditPolicy"
         compartments="//@diagram/@compartments.0 //@diagram/@compartments.1"
         graphicalNodeEditPolicyClassName="JORAMGraphicalNodeEditPolicy"
@@ -516,9 +584,9 @@
         <metaClass
             href="joram.genmodel#//joram/JORAM"/>
         <containmentMetaFeature
-            href="joram.genmodel#//joram/Domain/managedElements"/>
+            href="joram.genmodel#//joram/Config/managedElements"/>
         <childMetaFeature
-            href="joram.genmodel#//joram/Domain/managedElements"/>
+            href="joram.genmodel#//joram/Config/managedElements"/>
         <modelElementInitializer
             xsi:type="gmfgen:GenFeatureSeqInitializer">
           <initializers
@@ -594,9 +662,10 @@
         </modelElementInitializer>
       </modelFacet>
       <labels
-          visualID="5001"
+          visualID="5007"
           editPartClassName="JORAMNameVersionEditPart"
           itemSemanticEditPolicyClassName="JORAMNameVersionItemSemanticEditPolicy"
+          notationViewFactoryClassName="JORAMNameVersionViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -617,9 +686,10 @@
         </modelFacet>
       </labels>
       <labels
-          visualID="5002"
+          visualID="5008"
           editPartClassName="JORAMSidEditPart"
-          itemSemanticEditPolicyClassName="JORAMSidItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="JORAMSidItemSemanticEditPolicy"
+          notationViewFactoryClassName="JORAMSidViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -637,10 +707,12 @@
       </labels>
     </topLevelNodes>
     <topLevelNodes
-        visualID="2002"
+        visualID="2005"
         editPartClassName="ScalAgentServerEditPart"
         itemSemanticEditPolicyClassName="ScalAgentServerItemSemanticEditPolicy"
+        notationViewFactoryClassName="ScalAgentServerViewFactory"
         canonicalEditPolicyClassName="ScalAgentServerCanonicalEditPolicy"
+        childNodes="//@diagram/@childNodes.12"
         compartments="//@diagram/@compartments.2"
         graphicalNodeEditPolicyClassName="ScalAgentServerGraphicalNodeEditPolicy"
         createCommandClassName="ScalAgentServerCreateCommand">
@@ -663,14 +735,15 @@
         <metaClass
             href="joram.genmodel#//joram/ScalAgentServer"/>
         <containmentMetaFeature
-            href="joram.genmodel#//joram/Domain/managedElements"/>
+            href="joram.genmodel#//joram/Config/managedElements"/>
         <childMetaFeature
-            href="joram.genmodel#//joram/Domain/managedElements"/>
+            href="joram.genmodel#//joram/Config/managedElements"/>
       </modelFacet>
       <labels
-          visualID="5003"
+          visualID="5009"
           editPartClassName="ScalAgentServerNameVersionEditPart"
           itemSemanticEditPolicyClassName="ScalAgentServerNameVersionItemSemanticEditPolicy"
+          notationViewFactoryClassName="ScalAgentServerNameVersionViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -691,9 +764,10 @@
         </modelFacet>
       </labels>
       <labels
-          visualID="5004"
+          visualID="5010"
           editPartClassName="ScalAgentServerSidEditPart"
-          itemSemanticEditPolicyClassName="ScalAgentServerSidItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="ScalAgentServerSidItemSemanticEditPolicy"
+          notationViewFactoryClassName="ScalAgentServerSidViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -711,9 +785,10 @@
       </labels>
     </topLevelNodes>
     <topLevelNodes
-        visualID="2003"
+        visualID="2006"
         editPartClassName="NetworkDomainEditPart"
         itemSemanticEditPolicyClassName="NetworkDomainItemSemanticEditPolicy"
+        notationViewFactoryClassName="NetworkDomainViewFactory"
         canonicalEditPolicyClassName="NetworkDomainCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="NetworkDomainGraphicalNodeEditPolicy"
         createCommandClassName="NetworkDomainCreateCommand">
@@ -730,14 +805,15 @@
         <metaClass
             href="joram.genmodel#//joram/NetworkDomain"/>
         <containmentMetaFeature
-            href="joram.genmodel#//joram/Domain/managedElements"/>
+            href="joram.genmodel#//joram/Config/managedElements"/>
         <childMetaFeature
-            href="joram.genmodel#//joram/Domain/managedElements"/>
+            href="joram.genmodel#//joram/Config/managedElements"/>
       </modelFacet>
       <labels
-          visualID="5005"
+          visualID="5011"
           editPartClassName="NetworkDomainNameEditPart"
           itemSemanticEditPolicyClassName="NetworkDomainNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="NetworkDomainNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -755,9 +831,10 @@
         </modelFacet>
       </labels>
       <labels
-          visualID="5006"
-          editPartClassName="NetworkDomainNetworkClassEditPart"
-          itemSemanticEditPolicyClassName="NetworkDomainNetworkClassItemSemanticEditPolicy">
+          visualID="5012"
+          editPartClassName="NetworkDomainNetworkEditPart"
+          itemSemanticEditPolicyClassName="NetworkDomainNetworkItemSemanticEditPolicy"
+          notationViewFactoryClassName="NetworkDomainNetworkViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -769,7 +846,7 @@
             viewPattern=""
             editorPattern="">
           <metaFeatures
-              href="joram.genmodel#//joram/NetworkDomain/networkClass"/>
+              href="joram.genmodel#//joram/NetworkDomain/network"/>
         </modelFacet>
       </labels>
     </topLevelNodes>
@@ -777,6 +854,7 @@
         visualID="4001"
         editPartClassName="NetworkPortEditPart"
         itemSemanticEditPolicyClassName="NetworkPortItemSemanticEditPolicy"
+        notationViewFactoryClassName="NetworkPortViewFactory"
         createCommandClassName="NetworkPortCreateCommand"
         reorientCommandClassName="NetworkPortReorientCommand">
       <diagramRunTimeClass
@@ -792,11 +870,9 @@
         <metaClass
             href="joram.genmodel#//joram/NetworkPort"/>
         <containmentMetaFeature
-            href="joram.genmodel#//joram/Domain/managedElements"/>
+            href="joram.genmodel#//joram/ScalAgentServer/network"/>
         <childMetaFeature
-            href="joram.genmodel#//joram/Domain/managedElements"/>
-        <sourceMetaFeature
-            href="joram.genmodel#//joram/NetworkPort/server"/>
+            href="joram.genmodel#//joram/ScalAgentServer/network"/>
         <targetMetaFeature
             href="joram.genmodel#//joram/NetworkPort/domain"/>
       </modelFacet>
@@ -804,6 +880,7 @@
           visualID="6001"
           editPartClassName="NetworkPortPortEditPart"
           itemSemanticEditPolicyClassName="NetworkPortPortItemSemanticEditPolicy"
+          notationViewFactoryClassName="NetworkPortPortViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -824,13 +901,16 @@
               href="joram.genmodel#//joram/NetworkPort/port"/>
         </modelFacet>
       </labels>
+      <creationConstraints
+          targetEnd="//@expressionProviders/@providers.0/@expressions.6"/>
     </links>
     <compartments
-        visualID="7001"
+        visualID="7004"
         editPartClassName="JORAMServicesEditPart"
         itemSemanticEditPolicyClassName="JORAMServicesItemSemanticEditPolicy"
+        notationViewFactoryClassName="JORAMServicesViewFactory"
         canonicalEditPolicyClassName="JORAMServicesCanonicalEditPolicy"
-        childNodes="//@diagram/@childNodes.0 //@diagram/@childNodes.1 //@diagram/@childNodes.2 //@diagram/@childNodes.3"
+        childNodes="//@diagram/@childNodes.0 //@diagram/@childNodes.1 //@diagram/@childNodes.2 //@diagram/@childNodes.3 //@diagram/@childNodes.4"
         title="services"
         node="//@diagram/@topLevelNodes.0">
       <diagramRunTimeClass
@@ -841,11 +921,12 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class JORAMFigure extends org.eclipse.draw2d.RoundedRectangle {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureJORAMTitleLabel; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureJORAMIdLabel; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public JORAMFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(true);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_CENTER&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(2);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setCornerDimensions(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(8)&#xA;, getMapMode().DPtoLP(8)&#xA;));&#xA;this.setLineWidth(1);&#xA;this.setPreferredSize(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(150)&#xA;, getMapMode().DPtoLP(220)&#xA;));&#xA;this.setMinimumSize(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(130)&#xA;, getMapMode().DPtoLP(100)&#xA;));&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureJORAMTitleLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureJORAMTitleLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureJORAMTitleLabel);&#xA;&#xA;&#xA;&#xA;fFigureJORAMIdLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureJORAMIdLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureJORAMIdLabel);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureJORAMTitleLabel() {&#xA;&#x9;&#x9;return fFigureJORAMTitleLabel;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureJORAMIdLabel() {&#xA;&#x9;&#x9;return fFigureJORAMIdLabel;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
     </compartments>
     <compartments
-        visualID="7002"
+        visualID="7005"
         editPartClassName="JORAMJMSEditPart"
         itemSemanticEditPolicyClassName="JORAMJMSItemSemanticEditPolicy"
+        notationViewFactoryClassName="JORAMJMSViewFactory"
         canonicalEditPolicyClassName="JORAMJMSCanonicalEditPolicy"
-        childNodes="//@diagram/@childNodes.4 //@diagram/@childNodes.5 //@diagram/@childNodes.6"
+        childNodes="//@diagram/@childNodes.5 //@diagram/@childNodes.6 //@diagram/@childNodes.7"
         title="JMS"
         node="//@diagram/@topLevelNodes.0">
       <diagramRunTimeClass
@@ -856,11 +937,12 @@
           classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class JORAMFigure extends org.eclipse.draw2d.RoundedRectangle {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureJORAMTitleLabel; &#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureJORAMIdLabel; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public JORAMFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.ToolbarLayout layoutThis = new org.eclipse.draw2d.ToolbarLayout();&#xA;&#x9;layoutThis.setStretchMinorAxis(true);&#xA;&#x9;layoutThis.setMinorAlignment(org.eclipse.draw2d.ToolbarLayout.ALIGN_CENTER&#xA;);&#xA;&#xA;&#x9;layoutThis.setSpacing(2);&#xA;&#x9;layoutThis.setVertical(true);&#xA;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setCornerDimensions(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(8)&#xA;, getMapMode().DPtoLP(8)&#xA;));&#xA;this.setLineWidth(1);&#xA;this.setPreferredSize(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(150)&#xA;, getMapMode().DPtoLP(220)&#xA;));&#xA;this.setMinimumSize(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(130)&#xA;, getMapMode().DPtoLP(100)&#xA;));&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureJORAMTitleLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureJORAMTitleLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureJORAMTitleLabel);&#xA;&#xA;&#xA;&#xA;fFigureJORAMIdLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureJORAMIdLabel.setText(&quot;&quot;);&#xA;&#xA;this.add(fFigureJORAMIdLabel);&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureJORAMTitleLabel() {&#xA;&#x9;&#x9;return fFigureJORAMTitleLabel;&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureJORAMIdLabel() {&#xA;&#x9;&#x9;return fFigureJORAMIdLabel;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;"/>
     </compartments>
     <compartments
-        visualID="7003"
+        visualID="7006"
         editPartClassName="ScalAgentServerServicesEditPart"
         itemSemanticEditPolicyClassName="ScalAgentServerServicesItemSemanticEditPolicy"
+        notationViewFactoryClassName="ScalAgentServerServicesViewFactory"
         canonicalEditPolicyClassName="ScalAgentServerServicesCanonicalEditPolicy"
-        childNodes="//@diagram/@childNodes.7 //@diagram/@childNodes.8 //@diagram/@childNodes.9 //@diagram/@childNodes.10"
+        childNodes="//@diagram/@childNodes.8 //@diagram/@childNodes.9 //@diagram/@childNodes.10 //@diagram/@childNodes.11"
         title="services"
         node="//@diagram/@topLevelNodes.1">
       <diagramRunTimeClass
@@ -891,39 +973,44 @@
             xsi:type="gmfgen:ToolEntry"
             title="TCPProxyService"
             description="Adds a new TCPProxyService on a JORAM server"
-            genNodes="//@diagram/@childNodes.3 //@diagram/@childNodes.10"/>
+            genNodes="//@diagram/@childNodes.3 //@diagram/@childNodes.11"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="AdminProxy"
             description="Adds a new AdminProxy service on a JORAM server"
-            genNodes="//@diagram/@childNodes.0 //@diagram/@childNodes.7"/>
+            genNodes="//@diagram/@childNodes.0 //@diagram/@childNodes.8"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="ConnectionManager"
             description="Adds a new ConnectionManager on a JORAM server"
-            genNodes="//@diagram/@childNodes.1 //@diagram/@childNodes.8"/>
+            genNodes="//@diagram/@childNodes.1 //@diagram/@childNodes.9"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="JNDIServer"
             description="Adds a new JNDIServer on a JORAM server"
-            genNodes="//@diagram/@childNodes.2 //@diagram/@childNodes.9"/>
+            genNodes="//@diagram/@childNodes.2 //@diagram/@childNodes.10"/>
+        <entries
+            xsi:type="gmfgen:ToolEntry"
+            title="Custom Service"
+            description="Adds a custom service on a JORAM server"
+            genNodes="//@diagram/@childNodes.4 //@diagram/@childNodes.12"/>
         <entries
             xsi:type="gmfgen:Separator"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="Topic"
             description="Creates a new topic on a JORAM server"
-            genNodes="//@diagram/@childNodes.4"/>
+            genNodes="//@diagram/@childNodes.5"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="Queue"
             description="Creates a new queue on a JORAM server"
-            genNodes="//@diagram/@childNodes.5"/>
+            genNodes="//@diagram/@childNodes.6"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
             title="User"
             description="Creates a new user on a JORAM server"
-            genNodes="//@diagram/@childNodes.6"/>
+            genNodes="//@diagram/@childNodes.7"/>
       </groups>
       <groups
           title="JORAM networks"
@@ -999,11 +1086,11 @@
         parent="//@diagram/@topLevelNodes.0"
         child="//@diagram/@childNodes.6"/>
     <childReferences
+        parent="//@diagram/@topLevelNodes.0"
+        child="//@diagram/@childNodes.7"/>
+    <childReferences
         parent="//@diagram"
         child="//@diagram/@topLevelNodes.0"/>
-    <childReferences
-        parent="//@diagram/@topLevelNodes.1"
-        child="//@diagram/@childNodes.7"/>
     <childReferences
         parent="//@diagram/@topLevelNodes.1"
         child="//@diagram/@childNodes.8"/>
@@ -1013,6 +1100,12 @@
     <childReferences
         parent="//@diagram/@topLevelNodes.1"
         child="//@diagram/@childNodes.10"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.1"
+        child="//@diagram/@childNodes.11"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.1"
+        child="//@diagram/@childNodes.12"/>
     <childReferences
         parent="//@diagram"
         child="//@diagram/@topLevelNodes.1"/>
@@ -1100,6 +1193,9 @@
           body="'anonymous'"/>
       <expressions
           xsi:type="gmfgen:GenConstraint"
+          body="oppositeEnd.network->select(n1 | n1.domain = self)->isEmpty()"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
           body="JORAM.allInstances()->forAll(j | j.sid = self.sid implies j = self)"/>
       <expressions
           xsi:type="gmfgen:GenConstraint"
@@ -1109,17 +1205,14 @@
           body="name.size() > 0"/>
       <expressions
           xsi:type="gmfgen:GenConstraint"
-          body="NetworkPort.allInstances()->forAll(p1 |  p1.server = self.server and p1.domain = self.domain implies p1 = self)"/>
-      <expressions
-          xsi:type="gmfgen:GenConstraint"
-          body="NetworkPort.allInstances()->forAll(p1 |  p1.server = self.server and p1 &lt;> self implies p1.port &lt;> self.port)"/>
+          body="self.network->forAll(c1,c2 | c1 &lt;> c2 implies c1.port &lt;> c2.port)"/>
     </providers>
   </expressionProviders>
   <labelParsers
       extensibleViaService="true">
     <implementations
         xsi:type="gmfgen:PredefinedParser"
-        uses="//@diagram/@childNodes.0/@labelModelFacet //@diagram/@childNodes.1/@labelModelFacet //@diagram/@childNodes.2/@labelModelFacet //@diagram/@childNodes.3/@labelModelFacet //@diagram/@childNodes.4/@labelModelFacet //@diagram/@childNodes.5/@labelModelFacet //@diagram/@childNodes.6/@labelModelFacet //@diagram/@topLevelNodes.0/@labels.0/@modelFacet //@diagram/@topLevelNodes.0/@labels.1/@modelFacet //@diagram/@childNodes.7/@labelModelFacet //@diagram/@childNodes.8/@labelModelFacet //@diagram/@childNodes.9/@labelModelFacet //@diagram/@childNodes.10/@labelModelFacet //@diagram/@topLevelNodes.1/@labels.0/@modelFacet //@diagram/@topLevelNodes.1/@labels.1/@modelFacet //@diagram/@topLevelNodes.2/@labels.0/@modelFacet //@diagram/@topLevelNodes.2/@labels.1/@modelFacet //@diagram/@links.0/@labels.0/@modelFacet"/>
+        uses="//@diagram/@childNodes.0/@labelModelFacet //@diagram/@childNodes.1/@labelModelFacet //@diagram/@childNodes.2/@labelModelFacet //@diagram/@childNodes.3/@labelModelFacet //@diagram/@childNodes.4/@labelModelFacet //@diagram/@childNodes.5/@labelModelFacet //@diagram/@childNodes.6/@labelModelFacet //@diagram/@childNodes.7/@labelModelFacet //@diagram/@topLevelNodes.0/@labels.0/@modelFacet //@diagram/@topLevelNodes.0/@labels.1/@modelFacet //@diagram/@childNodes.8/@labelModelFacet //@diagram/@childNodes.9/@labelModelFacet //@diagram/@childNodes.10/@labelModelFacet //@diagram/@childNodes.11/@labelModelFacet //@diagram/@childNodes.12/@labelModelFacet //@diagram/@topLevelNodes.1/@labels.0/@modelFacet //@diagram/@topLevelNodes.1/@labels.1/@modelFacet //@diagram/@topLevelNodes.2/@labels.0/@modelFacet //@diagram/@topLevelNodes.2/@labels.1/@modelFacet //@diagram/@links.0/@labels.0/@modelFacet"/>
   </labelParsers>
   <contextMenus
       context="//@diagram">

@@ -74,6 +74,15 @@
             xsi:type="gmftool:DefaultImage"/>
       </tools>
       <tools
+          xsi:type="gmftool:CreationTool"
+          title="Custom Service"
+          description="Adds a custom service on a JORAM server">
+        <smallIcon
+            xsi:type="gmftool:DefaultImage"/>
+        <largeIcon
+            xsi:type="gmftool:DefaultImage"/>
+      </tools>
+      <tools
           xsi:type="gmftool:PaletteSeparator"
           title="JMS objects">
         <smallIcon
