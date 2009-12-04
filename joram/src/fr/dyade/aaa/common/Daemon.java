@@ -253,9 +253,6 @@ public abstract class Daemon implements Runnable {
    * Forces the daemon to stop executing. This method notifies thread that
    * it should stop running, if the thread is waiting it is first interrupted
    * then the shutdown method is called to close all resources.
-   * <p>
-   * Be careful, if this method is called by the thread itself the code below
-   * cause a deadlock.
    */
   public synchronized void stop() {
     if (logmon.isLoggable(BasicLevel.DEBUG))
