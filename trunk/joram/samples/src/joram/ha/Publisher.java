@@ -22,11 +22,11 @@
  */
 package ha;
 
-import org.objectweb.joram.client.jms.admin.*;
-import org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory;
-import org.objectweb.joram.client.jms.ConnectionFactory;
+import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 import org.objectweb.joram.client.jms.Topic;
 import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
 import javax.jms.Session;
 import javax.jms.MessageProducer;
 import javax.jms.TextMessage;
@@ -37,19 +37,17 @@ public class Publisher {
     System.out.println();
     System.out.println("Publishes messages on topic...");
 
-    // use joram Admin insteadof Jndi.
-    javax.jms.TopicConnectionFactory tcf =
-      TopicHATcpConnectionFactory.create("hajoram://localhost:2560,localhost:2561,localhost:2562");
-    ((ConnectionFactory) tcf).getParameters().connectingTimer = 30;
+    ConnectionFactory cf = HATcpConnectionFactory.create("hajoram://localhost:2560,localhost:2561,localhost:2562");
+    ((HATcpConnectionFactory) cf).getParameters().connectingTimer = 30;
 
-    AdminModule.connect(tcf, "root", "root");
+    AdminModule.connect(cf, "root", "root");
 
     Topic topic = Topic.create(0,"topic");
 
     AdminModule.disconnect();
 
 
-    Connection cnx = tcf.createConnection("anonymous", "anonymous");
+    Connection cnx = cf.createConnection("anonymous", "anonymous");
     Session sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
     MessageProducer pub = sess.createProducer(topic);
 

@@ -25,12 +25,11 @@ package ha;
 import javax.jms.Connection;
 import javax.jms.MessageConsumer;
 import javax.jms.Session;
-import javax.jms.TopicConnectionFactory;
+import javax.jms.ConnectionFactory;
 
-import org.objectweb.joram.client.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.ha.tcp.TopicHATcpConnectionFactory;
+import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 
 public class Subscriber {
 
@@ -39,18 +38,16 @@ public class Subscriber {
     System.out.println();
     System.out.println("Subscribes and listens to topic...");
 
-    // use joram Admin instead of Jndi.
-    TopicConnectionFactory tcf =
-      TopicHATcpConnectionFactory.create("hajoram://localhost:2560,localhost:2561,localhost:2562");
-    ((ConnectionFactory)tcf).getParameters().connectingTimer = 30;
+    ConnectionFactory cf = HATcpConnectionFactory.create("hajoram://localhost:2560,localhost:2561,localhost:2562");
+    ((HATcpConnectionFactory)cf).getParameters().connectingTimer = 30;
     
-    AdminModule.connect(tcf, "root", "root");
+    AdminModule.connect(cf, "root", "root");
     
     Topic topic = Topic.create(0,"topic");
 
     AdminModule.disconnect();
 
-    Connection cnx = tcf.createConnection("anonymous", "anonymous");
+    Connection cnx = cf.createConnection("anonymous", "anonymous");
     Session sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
     MessageConsumer sub = sess.createConsumer(topic);
 
