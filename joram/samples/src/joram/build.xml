@@ -78,6 +78,9 @@
     <copy file="${conf.dir}/distributed_a3servers.xml"
           tofile="${run.dir}/a3servers.xml"
           overwrite="true"/>
+    <!-- copy file="${conf.dir}/monitoring.props"
+          tofile="${run.dir}/monitoring.props"
+          overwrite="true"/ -->
   </target>
 	
   <!-- Initializes the bridge configuration -->
@@ -106,17 +109,7 @@
           overwrite="true"/>
   </target>
 
-  <!-- Runs the Admin GUI -->
-  <target name="admin_gui" depends="init"
-    description="--> Starts an admin GUI client">
-    <java classname="org.objectweb.joram.client.tools.admin.AdminTool"
-          failonerror="no" fork="yes"
-          dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-
-  <!-- Runs the Admin Mbean adapter -->
+  <!-- Runs the Admin Mbean adapter for client JMX console -->
   <target name="admin_jmx" depends="init"
     description="--> Starts an admin MBean adapter client">
     <java classname="org.objectweb.joram.client.jms.admin.JoramAdminConnect"
@@ -1298,22 +1291,6 @@
     <java classname="monitoring.MonitoringAdmin"
       failonerror="no" fork="yes"
       dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-  
-  <!-- Runs the producer client -->
-  <target name="monitoring_producer" depends="init"
-    description="--> Starts a Producer client">
-    <java classname="monitoring.Producer" failonerror="no" fork="yes" dir="${run.dir}">
-      <classpath path="${project.class.path}"/>
-    </java>
-  </target>
-
-  <!-- Runs the consumer client -->
-  <target name="monitoring_consumer" depends="init"
-    description="--> Starts a Consumer client">
-    <java classname="monitoring.Consumer" failonerror="no" fork="yes" dir="${run.dir}">
       <classpath path="${project.class.path}"/>
     </java>
   </target>
