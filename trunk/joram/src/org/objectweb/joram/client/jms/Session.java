@@ -1663,8 +1663,8 @@ public class Session implements javax.jms.Session {
               for (Iterator it = inInterceptors.iterator(); it.hasNext();) {
                 MessageInterceptor interceptor = (MessageInterceptor) it.next();
                 if (logger.isLoggable(BasicLevel.DEBUG))
-                  logger.log(BasicLevel.DEBUG, "Intercepting the message after receiving by "
-                      + interceptor.getClass().getName());
+                  logger.log(BasicLevel.DEBUG,
+                             "Intercepting the message after receiving by " + interceptor.getClass().getName());
 
                 try {
                   interceptor.handle(msg, this);
