@@ -25,15 +25,12 @@ Contributor(s):
 
 <plugin>
 
-   <extension point="org.eclipse.team.core.fileTypes">
+   <extension point="org.eclipse.team.core.fileTypes" id="repo-ftype">
       <?gmfgen generated="true"?>
-      <fileTypes
-         type="text"
-         extension="joram_diagram">
-      </fileTypes>
+      <fileTypes type="text" extension="joram_diagram"/>
    </extension>
 
-   <extension point="org.eclipse.emf.ecore.extension_parser">
+   <extension point="org.eclipse.emf.ecore.extension_parser" id="resource-factory">
       <?gmfgen generated="true"?>
       <parser
          type="joram_diagram"
@@ -41,7 +38,7 @@ Contributor(s):
       </parser>
    </extension>
 
-   <extension point="org.eclipse.ui.editors">
+   <extension point="org.eclipse.ui.editors" id="gmf-editor">
       <?gmfgen generated="true"?>
       <editor
          id="org.ow2.joram.design.model.joram.diagram.part.JoramDiagramEditorID"
@@ -55,7 +52,7 @@ Contributor(s):
       </editor>
    </extension>
    
-   <extension point="org.eclipse.ui.contexts">
+   <extension point="org.eclipse.ui.contexts" id="ui-context">
       <?gmfgen generated="true"?>
       <context
          description="%context.description"
@@ -65,7 +62,7 @@ Contributor(s):
       </context>
    </extension>
 
-   <extension point="org.eclipse.ui.newWizards">
+   <extension point="org.eclipse.ui.newWizards" id="creation-wizard">
       <?gmfgen generated="true"?>
   	  <wizard
   	     name="%newWizardName"
@@ -77,23 +74,7 @@ Contributor(s):
       </wizard>
    </extension>
 
-   <extension point="org.eclipse.ui.popupMenus">
-      <?gmfgen generated="true"?>
-      <objectContribution
-            adaptable="false"
-            id="org.ow2.joram.design.diagram.LoadResource"
-            objectClass="org.ow2.joram.design.model.joram.diagram.edit.parts.JoramDomainEditPart">
-         <action
-               class="org.ow2.joram.design.model.joram.diagram.part.JoramLoadResourceAction"
-               enablesFor="1"
-               id="org.ow2.joram.design.diagram.LoadResourceAction"
-               label="%loadResourceActionLabel"
-               menubarPath="additions">
-         </action>
-      </objectContribution>           
-   </extension>
-
-   <extension point="org.eclipse.ui.popupMenus">
+   <extension point="org.eclipse.ui.popupMenus" id="init-diagram-action">
       <?gmfgen generated="true"?>
       <objectContribution
             id="org.ow2.joram.design.diagram.InitDiagram"
@@ -108,8 +89,9 @@ Contributor(s):
          </action>
       </objectContribution>
    </extension>
-	
-   <extension point="org.eclipse.gmf.runtime.common.ui.services.action.globalActionHandlerProviders">
+
+   	
+   <extension point="org.eclipse.gmf.runtime.common.ui.services.action.globalActionHandlerProviders" id="global-actions">
       <?gmfgen generated="true"?>
       <GlobalActionHandlerProvider
          class="org.eclipse.gmf.runtime.diagram.ui.providers.DiagramGlobalActionHandlerProvider"
@@ -149,20 +131,8 @@ Contributor(s):
    </extension>
 
 
-   <extension id="ValidationContributionItemProvider" name="Validation"
-      point="org.eclipse.gmf.runtime.common.ui.services.action.contributionItemProviders">
-      <?gmfgen generated="true"?>
-      <contributionItemProvider
-         class="org.ow2.joram.design.model.joram.diagram.providers.JoramValidationProvider">
-         <Priority name="Low"/>
-         <partContribution id="org.ow2.joram.design.model.joram.diagram.part.JoramDiagramEditorID">
-            <partMenuGroup menubarPath="/diagramMenu/" id="validationGroup"/>
-            <partAction id="validateAction" menubarPath="/diagramMenu/validationGroup"/>
-         </partContribution>
-      </contributionItemProvider>
-   </extension>
-
-   <extension point="org.eclipse.gmf.runtime.common.ui.services.markerNavigationProviders">
+   
+   <extension point="org.eclipse.gmf.runtime.common.ui.services.markerNavigationProviders" id="markers-navigation">
       <?gmfgen generated="true"?>
       <MarkerNavigationProvider class="org.ow2.joram.design.model.joram.diagram.providers.JoramMarkerNavigationProvider">
          <MarkerType name="org.ow2.joram.design.diagram.diagnostic"/>
@@ -177,60 +147,46 @@ Contributor(s):
       <persistent value="true"/>
    </extension>   
 
-   <extension id="validationDecoratorProvider" name="ValidationDecorations" point="org.eclipse.gmf.runtime.diagram.ui.decoratorProviders">
-      <?gmfgen generated="true"?>
-      <decoratorProvider class="org.ow2.joram.design.model.joram.diagram.providers.JoramValidationDecoratorProvider">
-         <Priority name="Lowest"/>
-         <object class="org.eclipse.gmf.runtime.diagram.ui.editparts.IPrimaryEditPart(org.eclipse.gmf.runtime.diagram.ui)" id="PRIMARY_VIEW"/>
-         <context decoratorTargets="PRIMARY_VIEW"/>
-      </decoratorProvider>
-   </extension>
-
-   <extension point="org.eclipse.core.runtime.preferences">
+   
+   <extension point="org.eclipse.core.runtime.preferences" id="prefs">
       <?gmfgen generated="true"?>
       <initializer class="org.ow2.joram.design.model.joram.diagram.preferences.DiagramPreferenceInitializer"/>
    </extension>
 
-   <extension point="org.eclipse.ui.preferencePages">
+   <extension point="org.eclipse.ui.preferencePages" id="prefpages">
       <?gmfgen generated="true"?>
       <page
             id="org.ow2.joram.design.diagram.general"
-            name="%preference.page.title.org.ow2.joram.design.diagram.general"
+            name="%prefpage.org.ow2.joram.design.diagram.general"
             class="org.ow2.joram.design.model.joram.diagram.preferences.DiagramGeneralPreferencePage">
       </page>
       <page
             id="org.ow2.joram.design.diagram.appearance"
-            name="%preference.page.title.org.ow2.joram.design.diagram.appearance"
+            name="%prefpage.org.ow2.joram.design.diagram.appearance"
             category="org.ow2.joram.design.diagram.general"
             class="org.ow2.joram.design.model.joram.diagram.preferences.DiagramAppearancePreferencePage">
       </page>
       <page
             id="org.ow2.joram.design.diagram.connections"
-            name="%preference.page.title.org.ow2.joram.design.diagram.connections"
+            name="%prefpage.org.ow2.joram.design.diagram.connections"
             category="org.ow2.joram.design.diagram.general"
             class="org.ow2.joram.design.model.joram.diagram.preferences.DiagramConnectionsPreferencePage">
       </page>
       <page
             id="org.ow2.joram.design.diagram.printing"
-            name="%preference.page.title.org.ow2.joram.design.diagram.printing"
+            name="%prefpage.org.ow2.joram.design.diagram.printing"
             category="org.ow2.joram.design.diagram.general"
             class="org.ow2.joram.design.model.joram.diagram.preferences.DiagramPrintingPreferencePage">
       </page>
       <page
             id="org.ow2.joram.design.diagram.rulersAndGrid"
-            name="%preference.page.title.org.ow2.joram.design.diagram.rulersAndGrid"
+            name="%prefpage.org.ow2.joram.design.diagram.rulersAndGrid"
             category="org.ow2.joram.design.diagram.general"
             class="org.ow2.joram.design.model.joram.diagram.preferences.DiagramRulersAndGridPreferencePage">
       </page>
-      <page
-            id="org.ow2.joram.design.diagram.pathmaps"
-            name="%preference.page.title.org.ow2.joram.design.diagram.pathmaps"
-            category="org.ow2.joram.design.diagram.general"
-            class="org.eclipse.gmf.runtime.emf.ui.preferences.PathmapsPreferencePage">
-      </page>
    </extension>
 
-   <extension point="org.eclipse.ui.views.properties.tabbed.propertyContributor">
+   <extension point="org.eclipse.ui.views.properties.tabbed.propertyContributor" id="prop-contrib">
       <?gmfgen generated="true"?>
       <propertyContributor
             contributorId="org.ow2.joram.design.diagram"
@@ -241,7 +197,7 @@ Contributor(s):
       </propertyContributor>
    </extension>
 
-   <extension point="org.eclipse.ui.views.properties.tabbed.propertyTabs">
+   <extension point="org.eclipse.ui.views.properties.tabbed.propertyTabs" id="proptabs">
       <?gmfgen generated="true"?>   
       <propertyTabs contributorId="org.ow2.joram.design.diagram">
          <propertyTab
@@ -259,7 +215,7 @@ Contributor(s):
       </propertyTabs>
    </extension>
 
-   <extension point="org.eclipse.ui.views.properties.tabbed.propertySections">
+   <extension point="org.eclipse.ui.views.properties.tabbed.propertySections" id="propsections">
       <?gmfgen generated="true"?>   
       <propertySections contributorId="org.ow2.joram.design.diagram">
          <propertySection id="property.section.ConnectorAppearancePropertySection" 
@@ -293,52 +249,73 @@ Contributor(s):
       </propertySections>
    </extension>
 
-   <extension point="org.eclipse.gmf.runtime.diagram.core.viewProviders">
+   <extension point="org.eclipse.gmf.runtime.diagram.core.viewProviders" id="view-provider">
       <?gmfgen generated="true"?>
       <viewProvider class="org.ow2.joram.design.model.joram.diagram.providers.JoramViewProvider">
          <Priority name="Lowest"/>
          <context viewClass="org.eclipse.gmf.runtime.notation.Diagram" semanticHints="Joram"/>
-         <context viewClass="org.eclipse.gmf.runtime.notation.Node" semanticHints=""/>
-         <context viewClass="org.eclipse.gmf.runtime.notation.Edge" semanticHints=""/>
+         <context viewClass="org.eclipse.gmf.runtime.notation.Node" semanticHints="2004,2005,2006,3001,3002,3003,3004,3012,3005,3006,3007,3008,3009,3010,3011,3013"/>
+         <context viewClass="org.eclipse.gmf.runtime.notation.Edge" semanticHints="4001"/>
       </viewProvider>
    </extension>
 
-   <extension point="org.eclipse.gmf.runtime.diagram.ui.editpartProviders">
+   <extension point="org.eclipse.gmf.runtime.diagram.ui.editpartProviders" id="ep-provider">
       <?gmfgen generated="true"?>
       <editpartProvider class="org.ow2.joram.design.model.joram.diagram.providers.JoramEditPartProvider">
          <Priority name="Lowest"/>
+         <object class="org.eclipse.gmf.runtime.notation.Diagram" id="generated-diagram">
+            <method name="getType()" value="Joram"/>
+         </object>
+         <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-nodes">
+            <method name="getType()" value="2004,2005,2006,3001,3002,3003,3004,3012,3005,3006,3007,3008,3009,3010,3011,3013"/>
+         </object>
+         <object class="org.eclipse.gmf.runtime.notation.Edge" id="generated-links">
+            <method name="getType()" value="4001"/>
+         </object>
+         <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-labels">
+            <method name="getType()" value="5007,5008,5009,5010,5011,5012"/>
+         </object>
+         <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-compartments">
+            <method name="getType()" value="7004,7005,7006"/>
+         </object>
+         <context views="generated-diagram,generated-nodes,generated-links,generated-labels,generated-compartments"/>
       </editpartProvider>
    </extension>
 
-   <extension point="org.eclipse.gmf.runtime.emf.ui.modelingAssistantProviders">
+   <extension point="org.eclipse.gmf.runtime.emf.ui.modelingAssistantProviders" id="modelassist-provider">
       <?gmfgen generated="true"?>
       <modelingAssistantProvider class="org.ow2.joram.design.model.joram.diagram.providers.JoramModelingAssistantProvider">
          <Priority name="Lowest"/>
+         <object class="org.ow2.joram.design.model.joram.diagram.edit.parts.JoramDomainEditPart" id="Config_1000"/>
+         <object class="org.ow2.joram.design.model.joram.diagram.edit.parts.JORAMEditPart" id="JORAM_2004"/>
+         <object class="org.ow2.joram.design.model.joram.diagram.edit.parts.ScalAgentServerEditPart" id="ScalAgentServer_2005"/>
+         <object class="org.ow2.joram.design.model.joram.diagram.edit.parts.NetworkDomainEditPart" id="NetworkDomain_2006"/>
+         <context elements="Config_1000,JORAM_2004,ScalAgentServer_2005,NetworkDomain_2006"/>
       </modelingAssistantProvider>
    </extension>
 
-   <extension point="org.eclipse.gmf.runtime.common.ui.services.iconProviders">
+   <extension point="org.eclipse.gmf.runtime.common.ui.services.iconProviders" id="icon-provider">
       <?gmfgen generated="true"?>
       <IconProvider class="org.ow2.joram.design.model.joram.diagram.providers.JoramIconProvider">
          <Priority name="Low"/>
       </IconProvider>
    </extension>
 
-   <extension point="org.eclipse.gmf.runtime.common.ui.services.parserProviders">
+   <extension point="org.eclipse.gmf.runtime.common.ui.services.parserProviders" id="parser-provider">
       <?gmfgen generated="true"?>
       <ParserProvider class="org.ow2.joram.design.model.joram.diagram.providers.JoramParserProvider">
          <Priority name="Lowest"/>
       </ParserProvider>
    </extension>
 
-   <extension point="org.eclipse.gmf.runtime.emf.type.core.elementTypes">
+   <extension point="org.eclipse.gmf.runtime.emf.type.core.elementTypes" id="element-types">
       <?gmfgen generated="true"?>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <metamodelType
-               id="org.ow2.joram.design.diagram.JoramDomain_1000"
-               name="%metatype.name.JoramDomain_1000"
+               id="org.ow2.joram.design.diagram.Config_1000"
+               name="%metatype.name.Config_1000"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
-               eclass="JoramDomain"
+               eclass="Config"
                edithelper="org.ow2.joram.design.model.joram.diagram.edit.helpers.JoramDomainEditHelper">
             <param name="semanticHint" value="1000"/>
          </metamodelType>
@@ -415,6 +392,16 @@ Contributor(s):
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <metamodelType
+               id="org.ow2.joram.design.diagram.CustomService_3012"
+               name="%metatype.name.CustomService_3012"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="CustomService"
+               edithelper="org.ow2.joram.design.model.joram.diagram.edit.helpers.CustomServiceEditHelper">
+            <param name="semanticHint" value="3012"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
+         <metamodelType
                id="org.ow2.joram.design.diagram.Topic_3005"
                name="%metatype.name.Topic_3005"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
@@ -480,6 +467,15 @@ Contributor(s):
          </specializationType>
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
+         <specializationType
+               id="org.ow2.joram.design.diagram.CustomService_3013"
+               name="%metatype.name.CustomService_3013"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.ow2.joram.design.diagram.CustomService_3012"/>
+            <param name="semanticHint" value="3013"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <metamodelType
                id="org.ow2.joram.design.diagram.NetworkPort_4001"
                name="%metatype.name.NetworkPort_4001"
@@ -491,7 +487,7 @@ Contributor(s):
       </metamodel>
    </extension>
 
-   <extension point="org.eclipse.gmf.runtime.emf.type.core.elementTypeBindings">
+   <extension point="org.eclipse.gmf.runtime.emf.type.core.elementTypeBindings" id="element-types-bindings">
       <?gmfgen generated="true"?>
       <clientContext id="org.ow2.joram.design.diagram.TypeContext">
          <enablement>
@@ -501,7 +497,7 @@ Contributor(s):
          </enablement>
       </clientContext> 
       <binding context="org.ow2.joram.design.diagram.TypeContext">
-         <elementType ref="org.ow2.joram.design.diagram.JoramDomain_1000"/>
+         <elementType ref="org.ow2.joram.design.diagram.Config_1000"/>
          <elementType ref="org.ow2.joram.design.diagram.JORAM_2004"/>
          <elementType ref="org.ow2.joram.design.diagram.ScalAgentServer_2005"/>
          <elementType ref="org.ow2.joram.design.diagram.NetworkDomain_2006"/>
@@ -509,6 +505,7 @@ Contributor(s):
          <elementType ref="org.ow2.joram.design.diagram.ConnectionManager_3002"/>
          <elementType ref="org.ow2.joram.design.diagram.JNDIServer_3003"/>
          <elementType ref="org.ow2.joram.design.diagram.TCPProxyService_3004"/>
+         <elementType ref="org.ow2.joram.design.diagram.CustomService_3012"/>
          <elementType ref="org.ow2.joram.design.diagram.Topic_3005"/>
          <elementType ref="org.ow2.joram.design.diagram.Queue_3006"/>
          <elementType ref="org.ow2.joram.design.diagram.User_3007"/>
@@ -516,11 +513,12 @@ Contributor(s):
          <elementType ref="org.ow2.joram.design.diagram.ConnectionManager_3009"/>
          <elementType ref="org.ow2.joram.design.diagram.JNDIServer_3010"/>
          <elementType ref="org.ow2.joram.design.diagram.TCPProxyService_3011"/>
+         <elementType ref="org.ow2.joram.design.diagram.CustomService_3013"/>
          <elementType ref="org.ow2.joram.design.diagram.NetworkPort_4001"/>
          <advice ref="org.eclipse.gmf.runtime.diagram.core.advice.notationDepdendents"/>
       </binding>
    </extension>
-	   <extension point="org.eclipse.core.expressions.propertyTesters">
+	   <extension point="org.eclipse.core.expressions.propertyTesters" id="navigator-proptest.isURIEditorInput">
       <?gmfgen generated="true"?>
        <propertyTester
            id="org.ow2.joram.design.diagram.URIEditorInputPropertyTester"
@@ -531,18 +529,8 @@ Contributor(s):
        </propertyTester>
    </extension>
 
-	   <extension point="org.eclipse.core.expressions.propertyTesters">
-      <?gmfgen generated="true"?>
-       <propertyTester
-           id="org.ow2.joram.design.diagram.DomainModelElementPropertyTester"
-           type="org.eclipse.emf.ecore.EObject"
-           namespace="org.ow2.joram.design.diagram"
-           properties="isDomainModelElement"
-           class="org.ow2.joram.design.model.joram.diagram.part.JoramDomainModelElementTester">
-       </propertyTester>
-   </extension>
-
-	   <extension point="org.eclipse.ui.navigator.viewer">
+	   
+	   <extension point="org.eclipse.ui.navigator.viewer" id="navigator-viewbinding">
       <?gmfgen generated="true"?>
       <viewerContentBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
          <includes>
@@ -558,7 +546,7 @@ Contributor(s):
       </viewerActionBinding>
    </extension>
 
-   <extension point="org.eclipse.ui.navigator.navigatorContent">
+   <extension point="org.eclipse.ui.navigator.navigatorContent" id="navigator-content">
       <?gmfgen generated="true"?>
       <navigatorContent
             id="org.ow2.joram.design.diagram.resourceContent" 
@@ -610,17 +598,11 @@ Contributor(s):
     	          <instanceof value="org.eclipse.core.resources.IFile"/>
         	      <test property="org.eclipse.core.resources.extension" value="joram"/>
                </and>
-               <and>
-                  <instanceof value="org.eclipse.emf.ecore.EObject"/>
-                  <test property="org.ow2.joram.design.diagram.isDomainModelElement"/>
-               </and>
+               <instanceof value="org.ow2.joram.design.model.joram.diagram.navigator.JoramDomainNavigatorItem"/>
             </or>
          </triggerPoints>
          <possibleChildren>
-            <and>
-       	       <instanceof value="org.eclipse.emf.ecore.EObject"/>
-       	       <test property="org.ow2.joram.design.diagram.isDomainModelElement"/>
-       	    </and>
+            <instanceof value="org.ow2.joram.design.model.joram.diagram.navigator.JoramDomainNavigatorItem"/>
          </possibleChildren>
       </navigatorContent>
       <actionProvider
@@ -634,7 +616,7 @@ Contributor(s):
       </actionProvider>
    </extension>
    
-	   <extension point="org.eclipse.ui.navigator.linkHelper">
+	   <extension point="org.eclipse.ui.navigator.linkHelper" id="navigator-linkhelper">
       <?gmfgen generated="true"?>
       <linkHelper
             id="org.ow2.joram.design.diagram.navigatorLinkHelper"
@@ -688,25 +670,15 @@ Contributor(s):
             <message><![CDATA[Domain name can't be empty]]></message>
             <target class="joram.NetworkDomain"/>
          </constraint>
-                  <constraint id="linkcheck"
-            lang="OCL"
-            name="Double link check"
-            mode="Batch"
-            severity="ERROR" statusCode="200">
-            <![CDATA[NetworkPort.allInstances()->forAll(p1 |  p1.server = self.server and p1.domain = self.domain implies p1 = self)]]>
-            <description><![CDATA[TODO]]></description>
-            <message><![CDATA[Can't link to the same domain with two different port.]]></message>
-            <target class="joram.NetworkPort"/>
-         </constraint>
                   <constraint id="portcheck"
             lang="OCL"
             name="Port used check"
             mode="Batch"
             severity="ERROR" statusCode="200">
-            <![CDATA[NetworkPort.allInstances()->forAll(p1 |  p1.server = self.server and p1 <> self implies p1.port <> self.port)]]>
+            <![CDATA[self.network->forAll(c1,c2 | c1 <> c2 implies c1.port <> c2.port)]]>
             <description><![CDATA[TODO]]></description>
-            <message><![CDATA[Port already used with another network]]></message>
-            <target class="joram.NetworkPort"/>
+            <message><![CDATA[Server is linked with two different domains using the same port.]]></message>
+            <target class="joram.ScalAgentServer"/>
          </constraint>
                   </constraints>
       </constraintProvider>
@@ -721,14 +693,13 @@ Contributor(s):
                   <constraint ref="org.ow2.joram.design.diagram.uniqueIdRule"/>
                   <constraint ref="org.ow2.joram.design.diagram.uniqueDomainRule"/>
                   <constraint ref="org.ow2.joram.design.diagram.domainNameRule"/>
-                  <constraint ref="org.ow2.joram.design.diagram.linkcheck"/>
                   <constraint ref="org.ow2.joram.design.diagram.portcheck"/>
                </binding>
 
    </extension>
 
 
-   <extension point="org.eclipse.ui.commands">
+   <extension point="org.eclipse.ui.commands" id="update-cmd">
       <?gmfgen generated="true"?>
       <command
          categoryId="org.eclipse.ui.category.edit"
@@ -738,7 +709,7 @@ Contributor(s):
          name="%update.diagram.name"/>
    </extension>
    
-   <extension point="org.eclipse.ui.bindings">
+   <extension point="org.eclipse.ui.bindings" id="update-cmd-binding">
       <?gmfgen generated="true"?>
       <key 
          commandId="org.ow2.joram.design.model.joram.diagram.updateDiagram"
@@ -746,4 +717,52 @@ Contributor(s):
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="F5"/>
    </extension>
+<extension point="org.eclipse.ui.menus" id="context-menus">
+      <?gmfgen generated="true"?>
+      <!-- menuContribution locationURI="menu:org.eclipse.ui.main.menu?after=">
+      </menuContribution>
+      <menuContribution locationURI="toolbar:org.eclipse.ui.main.toolbar?after=">
+      </menuContribution -->
+      <menuContribution locationURI="popup:org.eclipse.gmf.runtime.diagram.ui.DiagramEditorContextMenu">
+         <command commandId="org.ow2.joram.design.diagram.LoadResourceAction">
+            <visibleWhen>
+               <and>
+                  <with variable="activePartId"><equals value="org.ow2.joram.design.model.joram.diagram.part.JoramDiagramEditorID"/></with>
+                  <with variable="selection"><iterate ifEmpty="false"> 
+                     <instanceof value="org.ow2.joram.design.model.joram.diagram.edit.parts.JoramDomainEditPart"/>
+                  </iterate></with>
+               </and>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+   </extension>
+
+<extension point="org.eclipse.ui.commands" id="menu-commands">
+      <?gmfgen generated="true"?>
+      <category id="org.ow2.joram.design.model.joram.diagram.part.JoramDiagramEditorID" name="%cmdcategory.name" description="%cmdcategory.desc"/>
+      <command id="org.ow2.joram.design.diagram.LoadResourceAction"
+         name="Load Resource"
+         categoryId="org.ow2.joram.design.model.joram.diagram.part.JoramDiagramEditorID"
+         defaultHandler="org.ow2.joram.design.model.joram.diagram.part.LoadResourceAction"/>
+   </extension>
+
+<extension point="org.eclipse.ui.handlers" id="menu-handlers">
+      <?gmfgen generated="true"?>
+   </extension>
+<extension id="validationDecoratorProvider" name="ValidationDecorations" point="org.eclipse.gmf.runtime.diagram.ui.decoratorProviders">
+      <?gmfgen generated="true"?>
+      <decoratorProvider class="org.ow2.joram.design.model.joram.diagram.providers.JoramValidationDecoratorProvider">
+         <Priority name="Lowest"/>
+         <object class="org.eclipse.gmf.runtime.diagram.ui.editparts.IPrimaryEditPart(org.eclipse.gmf.runtime.diagram.ui)" id="PRIMARY_VIEW"/>
+         <context decoratorTargets="PRIMARY_VIEW"/>
+      </decoratorProvider>
+   </extension>
+
+<extension point="org.eclipse.emf.validation.ui.UIRegisteredClientContext">
+      <?gmfgen generated="true"?>
+      <clientContext id="org.ow2.joram.design.diagramDefaultCtx"/>
+   </extension>
+
+
+
 </plugin>

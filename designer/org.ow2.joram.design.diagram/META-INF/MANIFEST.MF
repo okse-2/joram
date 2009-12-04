@@ -7,7 +7,7 @@ Bundle-ClassPath: .
 Bundle-Activator: org.ow2.joram.design.model.joram.diagram.part.JoramDiagramEditorPlugin
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Export-Package: org.ow2.joram.design.model.joram.diagram.edit.parts, 
+Export-Package: org.ow2.joram.design.model.joram.diagram.edit.parts,
  org.ow2.joram.design.model.joram.diagram.part,
  org.ow2.joram.design.model.joram.diagram.providers
 Require-Bundle: org.eclipse.core.runtime,
@@ -36,5 +36,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ocl.ecore;visibility:=reexport,
  org.eclipse.emf.validation;visibility:=reexport,
  org.eclipse.gmf.runtime.draw2d.ui;visibility:=reexport,
- org.eclipse.gef;visibility:=reexport
+ org.eclipse.gef;visibility:=reexport,
+ org.eclipse.emf.validation.ocl;visibility:=reexport,
+ org.eclipse.draw2d;visibility:=reexport
 Eclipse-LazyStart: true
