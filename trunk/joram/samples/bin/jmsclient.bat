@@ -24,9 +24,11 @@ set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\ow_monolog.jar
 set CLASSPATH=%CLASSPATH%;%SAMPLE_CLASSES%
 set CLASSPATH=%CLASSPATH%;%RUN_DIR%
 
+set PATH=%JAVA_HOME%\bin;%PATH%
+
 echo == Launching the %1 client ==
 echo %CLASSPATH%
-start /D %RUN_DIR% /B %JAVA_HOME%\bin\java -classpath %CLASSPATH% %1
+start /D %RUN_DIR% /B java -classpath %CLASSPATH% %1
 goto end
 :nokHome
 echo The JORAM_HOME environment variable is not defined correctly
