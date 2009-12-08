@@ -27,6 +27,7 @@
     <property name="doc.dir" location="../javadoc"/>
     <property name="test.dir" location="../test/src"/>
     <property name="licenses.dir" location="../licenses"/>
+    <property name="conf.dir" location="../conf"/>
 
     <!-- Base classpath needed for execution -->
     <path id="base.class.path">
