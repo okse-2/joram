@@ -22,6 +22,7 @@
     <property name="src.dir" location="."/>
     <property name="obj.dir" location="../classes"/>
     <property name="lib.dir" location="../lib"/>
+    <property name="bundle.dir" location="../bundle"/>
     <property name="build.dir" location="../build"/>
     <property name="ship.dir" location="../ship"/>
     <property name="doc.dir" location="../javadoc"/>
@@ -35,6 +36,9 @@
       <fileset dir="${lib.dir}">
         <include name="**.jar"/>
         <exclude name="service.jar" unless="nt"/>
+      </fileset>
+      <fileset dir="${bundle.dir}">
+        <include name="**.jar"/>
       </fileset>
     </path>
 

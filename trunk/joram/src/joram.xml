@@ -279,10 +279,10 @@
     <mkdir dir="${ship.dir}"/>
     <mkdir dir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/activation.jar" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/JCup.jar" todir="${ship.dir}/lib"/>
+    <copy file="${bundle.dir}/JCup.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/jms.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/mail.jar" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/ow_monolog.jar" todir="${ship.dir}/lib"/>
+    <copy file="${bundle.dir}/ow_monolog.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/soap.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/soap.war" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/connector-1_5.jar" todir="${ship.dir}/lib"/>
@@ -350,7 +350,7 @@
         <include name="joram-shared.jar"/>
         <include name="META-INF/ra.xml"/>
       </fileset>
-      <fileset dir="${lib.dir}">
+      <fileset dir="${bundle.dir}">
         <include name="JCup.jar"/>
         <include name="ow_monolog.jar"/>
       </fileset>
@@ -382,7 +382,7 @@
         <include name="joram-config.jar"/>
         <include name="META-INF/ra.xml"/>
       </fileset>
-      <fileset dir="${lib.dir}">
+      <fileset dir="${bundle.dir}">
         <include name="JCup.jar"/>
         <include name="ow_monolog.jar"/>
       </fileset>
@@ -621,11 +621,11 @@
     <mkdir dir="${ship.dir}/bundle" />
     <mkdir dir="${ship.dir}/conf" />
     <mkdir dir="${ship.dir}/bin" />
-    <copy file="${lib.dir}/felix.jar" todir="${ship.dir}/bin"/>
-    <copy file="${lib.dir}/org.apache.felix.shell-1.4.1.jar" todir="${ship.dir}/bundle"/>
-    <copy file="${lib.dir}/org.apache.felix.shell.remote-1.0.4.jar" todir="${ship.dir}/bundle"/>
-    <copy file="${lib.dir}/ow_monolog.jar" todir="${ship.dir}/bundle"/>
-    <copy file="${lib.dir}/JCup.jar" todir="${ship.dir}/bundle"/>
+    <copy file="${bundle.dir}/felix.jar" todir="${ship.dir}/bin"/>
+    <copy file="${bundle.dir}/org.apache.felix.shell-1.4.1.jar" todir="${ship.dir}/bundle"/>
+    <copy file="${bundle.dir}/org.apache.felix.shell.remote-1.0.4.jar" todir="${ship.dir}/bundle"/>
+    <copy file="${bundle.dir}/ow_monolog.jar" todir="${ship.dir}/bundle"/>
+    <copy file="${bundle.dir}/JCup.jar" todir="${ship.dir}/bundle"/>
     <copy file="${conf.dir}/config.properties" todir="${ship.dir}/conf"/>
     <copy file="${build.dir}/joram-common-util-bundle.jar" todir="${ship.dir}/bundle"/>
     <copy file="${build.dir}/joram-rt-bundle.jar" todir="${ship.dir}/bundle"/>
