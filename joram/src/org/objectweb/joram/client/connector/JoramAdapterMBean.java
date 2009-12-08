@@ -23,7 +23,6 @@
 package org.objectweb.joram.client.connector;
 
 import java.net.ConnectException;
-import java.util.Properties;
 
 import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
@@ -225,7 +224,7 @@ public interface JoramAdapterMBean {
    * @exception ConnectException  If the connection is closed or broken.
    * @exception AdminException    Never thrown.
    * 
-   * @see #getDestinations(int)
+   * @see #getDestinations(short)
    */
   public String[] getDestinations() throws ConnectException, AdminException;
 
@@ -255,7 +254,7 @@ public interface JoramAdapterMBean {
    * @exception AdminException   If the creation fails.
    * @exception ConnectException if the connection is closed or broken
    * 
-   * @see #createQueue(int, String, String, Properties)
+   * @see #createQueue(short, String)
    */
   public String createQueue(String name) throws AdminException, ConnectException;
 
@@ -268,8 +267,6 @@ public interface JoramAdapterMBean {
    *
    * @exception AdminException   If the creation fails.
    * @exception ConnectException if the connection is closed or broken
-   * 
-   * @see #createQueue(int, String, String, Properties)
    */
   public String createQueue(short serverId, String name) throws AdminException, ConnectException;
 
@@ -283,7 +280,7 @@ public interface JoramAdapterMBean {
    * @exception AdminException   If the creation fails.
    * @exception ConnectException if the connection is closed or broken
    * 
-   * @see #createTopic(int, String, String, Properties)
+   * @see #createTopic(int, String)
    */
   public String createTopic(String name) throws AdminException, ConnectException;
 
@@ -296,8 +293,6 @@ public interface JoramAdapterMBean {
    *
    * @exception AdminException   If the creation fails.
    * @exception ConnectException if the connection is closed or broken
-   * 
-   * @see #createTopic(int, String, String, Properties)
    */
   public String createTopic(short serverId, String name) throws AdminException, ConnectException;
 
@@ -351,7 +346,7 @@ public interface JoramAdapterMBean {
    * @exception AdminException    If the creation fails.
    * @exception ConnectException  If the connection fails.
    * 
-   * @see #createUser(String, String, int, String)
+   * @see #createUser(String, String, short, String)
    */
   public String createUser(String name, String password) throws AdminException, ConnectException;
 
@@ -366,7 +361,7 @@ public interface JoramAdapterMBean {
    * @exception AdminException    If the creation fails.
    * @exception ConnectException  If the connection fails.
    * 
-   * @see #createUser(String, String, int, String)
+   * @see #createUser(String, String, short, String)
    */
   public String createUser(String name, String password,
                            String identityClass) throws AdminException, ConnectException;
@@ -382,7 +377,7 @@ public interface JoramAdapterMBean {
    * @exception AdminException    If the creation fails.
    * @exception ConnectException  If the connection fails.
    * 
-   * @see #createUser(String, String, int, String)
+   * @see #createUser(String, String, short, String)
    */
   public String createUser(String name, String password,
                            short serverId) throws AdminException, ConnectException;
@@ -471,14 +466,13 @@ public interface JoramAdapterMBean {
    * @throws ConnectException If the connection fails.
    */
   public Short[] getServersIds() throws ConnectException, AdminException;
+
   /**
    * Returns the list of the platform's servers' names.
    *
    * @return An array containing the list of server's names.
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
-   * 
-   * @see #getServers(String)
    */
   public String[] getServersNames() throws ConnectException, AdminException;
 
