@@ -80,7 +80,7 @@
     <!-- lib directory -->
     <mkdir dir="${ship.dir}/lib"/>
     <copy file="${build.dir}/a3server.jar" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/ow_monolog.jar"
+    <copy file="${bundle.dir}/ow_monolog.jar"
           todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/jgroups-all.jar"
           todir="${ship.dir}/lib"/>
