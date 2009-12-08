@@ -20,6 +20,7 @@
  */
 package fr.dyade.aaa.common;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Vector;
 
@@ -36,7 +37,7 @@ import java.util.Vector;
  * method. To be able to use the queue again, it must be re-started through
  * the <code>start()</code> method.
  */
-public class Queue {
+public class Queue implements Serializable {
 
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
