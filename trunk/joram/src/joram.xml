@@ -302,6 +302,7 @@
     <copy todir="${ship.dir}/licenses" flatten="yes">
       <fileset dir="${licenses.dir}">
         <include name="APACHE_LICENSE.TXT"/>
+        <include name="APACHE_LICENSE_V2.TXT"/>
         <include name="CUP_LICENSE.TXT"/>
         <include name="LGPL_HEADER.TXT"/>
         <include name="LGPL_LICENSE.TXT"/>
@@ -623,7 +624,9 @@
     <copy file="${lib.dir}/felix.jar" todir="${ship.dir}/bin"/>
     <copy file="${lib.dir}/org.apache.felix.shell-1.4.1.jar" todir="${ship.dir}/bundle"/>
     <copy file="${lib.dir}/org.apache.felix.shell.remote-1.0.4.jar" todir="${ship.dir}/bundle"/>
+    <copy file="${lib.dir}/ow_monolog.jar" todir="${ship.dir}/bundle"/>
     <copy file="${lib.dir}/JCup.jar" todir="${ship.dir}/bundle"/>
+    <copy file="${conf.dir}/config.properties" todir="${ship.dir}/conf"/>
     <copy file="${build.dir}/joram-common-util-bundle.jar" todir="${ship.dir}/bundle"/>
     <copy file="${build.dir}/joram-rt-bundle.jar" todir="${ship.dir}/bundle"/>
     <copy file="${build.dir}/joram-jndi-bundle.jar" todir="${ship.dir}/bundle"/>
