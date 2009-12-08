@@ -1248,7 +1248,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * @exception ConnectException  If the connection is closed or broken.
    * @exception AdminException    Never thrown.
    * 
-   * @see #getDestinations(int)
+   * @see #getDestinations(short)
    */
   public String[] getDestinations() throws ConnectException, AdminException {
     return getDestinations((short) AdminModule.getLocalServerId());
@@ -1286,7 +1286,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * @exception AdminException   If the creation fails.
    * @exception ConnectException if the connection is closed or broken
    * 
-   * @see #createQueue(int, String, String, Properties)
+   * @see #createQueue(short, String, String, Properties)
    */
   public String createQueue(String name) throws AdminException, ConnectException {
     return createQueue(serverId, name, Destination.QUEUE, null);
@@ -1302,7 +1302,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * @exception AdminException   If the creation fails.
    * @exception ConnectException if the connection is closed or broken
    * 
-   * @see #createQueue(int, String, String, Properties)
+   * @see #createQueue(short, String, String, Properties)
    */
   public String createQueue(short serverId, String name) throws AdminException, ConnectException {
     return createQueue(serverId, name, Destination.QUEUE, null);
@@ -1356,7 +1356,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * @exception AdminException   If the creation fails.
    * @exception ConnectException if the connection is closed or broken
    * 
-   * @see #createTopic(int, String, String, Properties)
+   * @see #createTopic(short, String, String, Properties)
    */
   public String createTopic(String name) throws AdminException, ConnectException {
     return createTopic(serverId, name, Destination.TOPIC, null);
@@ -1372,7 +1372,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * @exception AdminException   If the creation fails.
    * @exception ConnectException if the connection is closed or broken
    * 
-   * @see #createTopic(int, String, String, Properties)
+   * @see #createTopic(short, String, String, Properties)
    */
   public String createTopic(short serverId, String name) throws AdminException, ConnectException {
     return createTopic(serverId, name, Destination.TOPIC, null);
@@ -1447,7 +1447,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * @exception ConnectException  If the connection fails.
    * @exception AdminException    Never thrown.
    * 
-   * @see #getUsers(int)
+   * @see #getUsers(short)
    */
   public String[] getUsers() throws ConnectException, AdminException {
     return getUsers((short) AdminModule.getLocalServerId());
@@ -1487,7 +1487,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * @exception AdminException    If the creation fails.
    * @exception ConnectException  If the connection fails.
    * 
-   * @see #createUser(String, String, int, String)
+   * @see #createUser(String, String, short, String)
    */
   public String createUser(String name,
                            String password) throws AdminException, ConnectException {
@@ -1505,7 +1505,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * @exception AdminException    If the creation fails.
    * @exception ConnectException  If the connection fails.
    * 
-   * @see #createUser(String, String, int, String)
+   * @see #createUser(String, String, short, String)
    */
   public String createUser(String name,
                            String password,
@@ -1524,7 +1524,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * @exception AdminException    If the creation fails.
    * @exception ConnectException  If the connection fails.
    * 
-   * @see #createUser(String, String, int, String)
+   * @see #createUser(String, String, short, String)
    */
   public String createUser(String name,
                            String password,
@@ -1709,8 +1709,6 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * @return An array containing the list of server's names.
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  Never thrown.
-   * 
-   * @see #getServers(String)
    */
   public final String[] getServersNames() throws ConnectException, AdminException {
     // TODO (AF): next to 5.2, directly use  AdminModule.getServersIds()
