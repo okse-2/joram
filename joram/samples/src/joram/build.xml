@@ -218,8 +218,17 @@
 
   <!-- Runs the classic subscriber client -->
   <target name="subscriber" depends="init"
-    description="--> Starts a Subscriber client">
+    description="--> Starts a subscriber client">
     <java classname="classic.Subscriber" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the classic durable subscriber client -->
+  <target name="durable" depends="init"
+    description="--> Starts a durable subscriber client">
+    <java classname="classic.Durable" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
     </java>
