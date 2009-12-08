@@ -24,7 +24,6 @@ package org.objectweb.joram.client.jms.admin;
 
 import java.net.ConnectException;
 import java.util.Iterator;
-import java.util.Properties;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
@@ -180,8 +179,6 @@ public class JoramAdmin implements JoramAdminMBean {
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
-   * 
-   * @see #addServer(int, String, String, int, String, String[], String[])
    */
   public void addServer(int sid,
                         String host,
@@ -423,13 +420,9 @@ public class JoramAdmin implements JoramAdminMBean {
   }
   
   /**
-   * Returns the list of all destinations that exist on the local server.
-   * This method creates and registers MBeans for all the destinations of
-   * the selected servers.
+   * This method creates and registers MBeans for all the destinations on
+   * the local server.
    *
-   * @return  An array containing the object name of all destinations defined
-   *          on the given server or null if none exists.
-   * 
    * @exception ConnectException  If the connection is closed or broken.
    * @exception AdminException    Never thrown.
    * 
@@ -440,19 +433,15 @@ public class JoramAdmin implements JoramAdminMBean {
   }
 
   /**
-   * Returns the list of all destinations that exist on the given server.
    * This method creates and registers MBeans for all the destinations of
-   * the selected servers.
+   * the selected server.
    * <p>
    * The request fails if the target server does not belong to the platform.
    *
-   * @return  An array containing the object name of all destinations defined
-   *          on the given server or null if none exists.
-   * 
    * @exception ConnectException  If the connection is closed or broken.
    * @exception AdminException    Never thrown.
    * 
-   * @see #getDestinations(int)
+   * @see #getDestinations()
    */
   public void getDestinations(int serverId) throws ConnectException, AdminException {
     wrapDestinations(wrapper.getDestinations(serverId));
@@ -475,7 +464,7 @@ public class JoramAdmin implements JoramAdminMBean {
    * @exception AdminException   If the creation fails.
    * @exception ConnectException if the connection is closed or broken
    * 
-   * @see #createQueue(int, String, String, Properties)
+   * @see #createQueue(int, String)
    */
   public void createQueue(String name) throws AdminException, ConnectException {
     createQueue(wrapper.getLocalServerId(), name);
@@ -490,8 +479,6 @@ public class JoramAdmin implements JoramAdminMBean {
    *
    * @exception AdminException   If the creation fails.
    * @exception ConnectException if the connection is closed or broken
-   * 
-   * @see #createQueue(int, String, String, Properties)
    */
   public void createQueue(int serverId, String name) throws AdminException, ConnectException {
     wrapDestination(wrapper.createQueue(serverId, name));
@@ -506,7 +493,7 @@ public class JoramAdmin implements JoramAdminMBean {
    * @exception AdminException   If the creation fails.
    * @exception ConnectException if the connection is closed or broken
    * 
-   * @see #createTopic(int, String, String, Properties)
+   * @see #createTopic(int, String)
    */
   public void createTopic(String name) throws AdminException, ConnectException {
     createTopic(wrapper.getLocalServerId(), name); 
@@ -521,8 +508,6 @@ public class JoramAdmin implements JoramAdminMBean {
    *
    * @exception AdminException   If the creation fails.
    * @exception ConnectException if the connection is closed or broken
-   * 
-   * @see #createTopic(int, String, String, Properties)
    */
   public void createTopic(int serverId, String name) throws AdminException, ConnectException {
     wrapDestination(wrapper.createTopic(serverId, name));
@@ -536,12 +521,8 @@ public class JoramAdmin implements JoramAdminMBean {
   }
   
   /**
-   * Returns the list of all users that exist on the local server.
-   * This method creates and registers MBeans for all the users of
-   * the selected servers.
-   *
-   * @return  An array containing the object name of all users defined
-   *          on the given server or null if none exists.
+   * This method creates and registers MBeans for all the users on
+   * the local server.
    * 
    * @exception ConnectException  If the connection fails.
    * @exception AdminException    Never thrown.
@@ -553,15 +534,12 @@ public class JoramAdmin implements JoramAdminMBean {
   }
 
   /**
-   * Returns the list of all users that exist on a given server.
    * This method creates and registers MBeans for all the users of
-   * the selected servers.
+   * the selected server.
    * <p>
    * The request fails if the target server does not belong to the platform.
    * 
    * @param serverId  Unique identifier of the given server.
-   * @return  An array containing the object name of all users defined
-   *          on the given server or null if none exists.
    *
    * @exception ConnectException  If the connection fails.
    * @exception AdminException    If the request fails.
@@ -583,7 +561,6 @@ public class JoramAdmin implements JoramAdminMBean {
    *
    * @param name      The login name of the user.
    * @param password  The password of the user.
-   * @return The object name of created user.
    * 
    * @exception AdminException    If the creation fails.
    * @exception ConnectException  If the connection fails.
@@ -600,7 +577,6 @@ public class JoramAdmin implements JoramAdminMBean {
    * @param name          The login name of the user.
    * @param password      The password of the user.
    * @param identityClass The identity class used for authentication.
-   * @return The object name of created user.
    * 
    * @exception AdminException    If the creation fails.
    * @exception ConnectException  If the connection fails.
@@ -619,7 +595,6 @@ public class JoramAdmin implements JoramAdminMBean {
    * @param name      The login name of the user.
    * @param password  The password of the user.
    * @param serverId  The unique identifier of the Joram server.
-   * @return The object name of created user.
    * 
    * @exception AdminException    If the creation fails.
    * @exception ConnectException  If the connection fails.
@@ -639,7 +614,6 @@ public class JoramAdmin implements JoramAdminMBean {
    * @param password      The password of the user.
    * @param serverId      The unique identifier of the Joram server.
    * @param identityClass The identity class used for authentication.
-   * @return The object name of created user.
    * 
    * @exception AdminException    If the creation fails.
    * @exception ConnectException  If the connection fails.
