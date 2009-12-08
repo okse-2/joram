@@ -202,8 +202,7 @@ public class Scheduler implements Serializable {
         }
 
         // checks if event needs to be changed in the list
-        if (nextItem == null ||
-            ! item.date.after(nextItem.date)) {
+        if (nextItem == null || ! item.date.after(nextItem.date)) {
           continue checkLoop;
         }
 
