@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -220,9 +220,7 @@ public class LoadingFactor implements Serializable {
     else if (pendingMessages == 0 && pendingRequests != 0)
       currentROF = pendingRequests + 1;
     else
-      currentROF = 
-        new Float(pendingRequests).floatValue() /
-        new Float(pendingMessages).floatValue();
+      currentROF = (float) pendingRequests / (float) pendingMessages;
 
     rateOfFlow = (currentROF + rateOfFlow ) / 2;
 
