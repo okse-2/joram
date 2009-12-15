@@ -41,6 +41,6 @@ public class MonitoringElement implements Serializable {
     this.mbean = mbean;
     this.attributes = attributes.split(",");
     for (int i=0; i<this.attributes.length; i++)
-      this.attributes[i].trim();
+      this.attributes[i] = this.attributes[i].trim();
   }
 }
