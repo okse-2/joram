@@ -96,8 +96,7 @@ public class ConnectionRequest
       return false;
 
     ConnectionRequest other = (ConnectionRequest) o;
-    return this.getClass().getName().equals(o.getClass().getName())
-           && other.getUserName().equals(userName);
+    return this.getClass().equals(o.getClass()) && other.getUserName().equals(userName);
   }
 
   /** Returns a code based on the wrapped user identity. */
