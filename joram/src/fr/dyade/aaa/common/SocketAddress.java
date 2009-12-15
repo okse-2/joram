@@ -113,6 +113,15 @@ public class SocketAddress {
     return false;
   }
 
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((addr == null) ? 0 : addr.hashCode());
+    result = prime * result + ((hostname == null) ? 0 : hostname.hashCode());
+    result = prime * result + port;
+    return result;
+  }
+
   /**
    * Constructs a string representation of this InetSocketAddress.
    *
