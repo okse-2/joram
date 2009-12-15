@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,10 +18,12 @@
  */
 package fr.dyade.aaa.agent.conf;
 
-import java.io.*;
-import java.util.*;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
-import org.objectweb.util.monolog.api.*;
+import org.objectweb.util.monolog.api.BasicLevel;
 
 /**
  * The class <code>A3CMLDomain</code> describes an agent server domain.
@@ -146,6 +148,16 @@ public class A3CMLDomain implements Serializable {
       return true;
     }
     return false;
+  }
+
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + gateway;
+    result = prime * result + ((name == null) ? 0 : name.hashCode());
+    result = prime * result + ((network == null) ? 0 : network.hashCode());
+    result = prime * result + ((servers == null) ? 0 : servers.hashCode());
+    return result;
   }
 
 //   private void writeObject(java.io.ObjectOutputStream out)

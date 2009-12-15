@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
  */
 package fr.dyade.aaa.agent.conf;
 
-import java.io.*;
+import java.io.Serializable;
 
 /**
  * The class <code>A3CMLNetwork</code> describes a network component.
@@ -62,5 +62,13 @@ public class A3CMLNetwork implements Serializable {
         return true;
     }
     return false;
+  }
+
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((domain == null) ? 0 : domain.hashCode());
+    result = prime * result + port;
+    return result;
   }
 }

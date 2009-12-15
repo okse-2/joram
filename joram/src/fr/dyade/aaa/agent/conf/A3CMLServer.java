@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,8 +18,10 @@
  */
 package fr.dyade.aaa.agent.conf;
 
-import java.io.*;
-import java.util.*;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  * The class <code>Server</code> describes an agent server.
@@ -293,5 +295,23 @@ public class A3CMLServer implements Serializable {
         return true;
     }
     return false;
+  }
+
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((domain == null) ? 0 : domain.hashCode());
+    result = prime * result + gateway;
+    result = prime * result + ((hostname == null) ? 0 : hostname.hashCode());
+    result = prime * result + ((jvmArgs == null) ? 0 : jvmArgs.hashCode());
+    result = prime * result + ((name == null) ? 0 : name.hashCode());
+    result = prime * result + ((nat == null) ? 0 : nat.hashCode());
+    result = prime * result + ((networks == null) ? 0 : networks.hashCode());
+    result = prime * result + port;
+    result = prime * result + ((properties == null) ? 0 : properties.hashCode());
+    result = prime * result + ((services == null) ? 0 : services.hashCode());
+    result = prime * result + sid;
+    result = prime * result + (visited ? 1231 : 1237);
+    return result;
   }
 }

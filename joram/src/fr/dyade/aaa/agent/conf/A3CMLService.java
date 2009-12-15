@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -64,5 +64,13 @@ public class A3CMLService implements Serializable {
         return true;
     }
     return false;
+  }
+
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((args == null) ? 0 : args.hashCode());
+    result = prime * result + ((classname == null) ? 0 : classname.hashCode());
+    return result;
   }
 }
