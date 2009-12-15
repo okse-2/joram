@@ -503,7 +503,7 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
     boolean removed = false;
     if (pInterceptorClassName != null) {
       for(Iterator it=pInterceptors.iterator();it.hasNext();) {
-        if (pInterceptorClassName.equals(it.next().getClass())) {
+        if (pInterceptorClassName.equals(it.next().getClass().getName())) {
           removed=true;
           it.remove();
         }
