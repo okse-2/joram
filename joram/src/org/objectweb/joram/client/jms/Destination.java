@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -188,6 +188,10 @@ public abstract class Destination extends AdministeredObject implements javax.jm
       return false;
 
     return (getName().equals(((Destination) obj).getName()));
+  }
+
+  public int hashCode() {
+    return getName().hashCode();
   }
 
   /**
@@ -808,11 +812,12 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * @throws InvalidDestinationException If the specified destination is invalid.
    */
   public void setDMQ(Queue dmq) throws ConnectException, AdminException, InvalidDestinationException {
-    dmq.check();
-    if (dmq != null)
+    if (dmq != null) {
+      dmq.check();
       setDMQId(dmq.getName());
-    else
+    } else {
       setDMQId(null);
+    }
   }
 
   /**
