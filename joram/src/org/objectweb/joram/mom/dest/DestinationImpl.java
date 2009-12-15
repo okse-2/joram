@@ -512,8 +512,8 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       ObjectName mbeanName = new ObjectName(agent.getMBeanName());
 
       MBeanAttributeInfo[] attributes = MXWrapper.getAttributes(mbeanName);
-      stats = new Hashtable(attributes.length);
       if (attributes != null) {
+        stats = new Hashtable(attributes.length);
         for (int k=0; k<attributes.length; k++) {
           String name = attributes[k].getName();
           if (isValidJMXAttribute(name)) {
