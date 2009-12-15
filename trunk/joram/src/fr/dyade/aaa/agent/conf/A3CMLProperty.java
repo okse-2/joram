@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
  */
 package fr.dyade.aaa.agent.conf;
 
-import java.io.*;
+import java.io.Serializable;
 
 /**
  * The class <code>A3CMLProperty</code> describes a property.
@@ -64,5 +64,13 @@ public class A3CMLProperty implements Serializable {
         return true;
     }
     return false;
+  }
+
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((name == null) ? 0 : name.hashCode());
+    result = prime * result + ((value == null) ? 0 : value.hashCode());
+    return result;
   }
 }

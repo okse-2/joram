@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,8 +21,9 @@
  */
 package fr.dyade.aaa.agent.conf;
 
-import java.io.*;
-import java.util.*;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 public class A3CMLCluster implements Serializable {
   /** define serialVersionUID for interoperability */
@@ -252,5 +253,15 @@ public class A3CMLCluster implements Serializable {
         return true;
     }
     return false;
+  }
+
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((name == null) ? 0 : name.hashCode());
+    result = prime * result + ((properties == null) ? 0 : properties.hashCode());
+    result = prime * result + ((servers == null) ? 0 : servers.hashCode());
+    result = prime * result + sid;
+    return result;
   }
 }

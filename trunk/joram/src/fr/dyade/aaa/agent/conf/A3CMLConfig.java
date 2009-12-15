@@ -18,8 +18,6 @@
  */
 package fr.dyade.aaa.agent.conf;
 
-import java.io.ByteArrayInputStream;
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -40,7 +38,7 @@ public class A3CMLConfig implements Serializable {
 
   /** Hashtable of all domains */
   public Hashtable domains = null;
-  /** Hashtable of all servers (persitent and transient) */
+  /** Hashtable of all servers (persistent and transient) */
   public Hashtable servers = null;
   /** Hashtable of all global properties */
   public Hashtable properties = null;
@@ -1028,10 +1026,21 @@ public class A3CMLConfig implements Serializable {
 
       if (domains.equals(config.domains) &&
           servers.equals(config.servers) &&
-          properties.equals(config.properties))
+          properties.equals(config.properties) &&
+          clusters.equals(config.clusters))
         return true;
     }
     return false;
+  }
+  
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((domains == null) ? 0 : domains.hashCode());
+    result = prime * result + ((properties == null) ? 0 : properties.hashCode());
+    result = prime * result + ((servers == null) ? 0 : servers.hashCode());
+    result = prime * result + ((clusters == null) ? 0 : clusters.hashCode());
+    return result;
   }
 
   /**

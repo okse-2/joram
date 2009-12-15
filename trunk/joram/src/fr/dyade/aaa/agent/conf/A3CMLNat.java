@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
  */
 package fr.dyade.aaa.agent.conf;
 
-import java.io.*;
+import java.io.Serializable;
 
 /**
  * The class <code>A3CMLNat</code> describes a 
@@ -72,5 +72,14 @@ public class A3CMLNat implements Serializable {
         return true;
     }
     return false;
+  }
+
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((host == null) ? 0 : host.hashCode());
+    result = prime * result + port;
+    result = prime * result + sid;
+    return result;
   }
 }
