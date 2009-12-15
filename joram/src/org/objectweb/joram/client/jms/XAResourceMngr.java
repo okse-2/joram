@@ -28,19 +28,17 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import javax.jms.JMSException;
-
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
 import org.objectweb.joram.shared.client.ProducerMessages;
 import org.objectweb.joram.shared.client.SessAckRequest;
-import org.objectweb.joram.shared.client.XACnxPrepare;
 import org.objectweb.joram.shared.client.XACnxCommit;
+import org.objectweb.joram.shared.client.XACnxPrepare;
 import org.objectweb.joram.shared.client.XACnxRecoverReply;
 import org.objectweb.joram.shared.client.XACnxRecoverRequest;
 import org.objectweb.joram.shared.client.XACnxRollback;
-
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -436,6 +434,10 @@ public class XAResourceMngr {
                                  ", equals = " + cnx.equals(other.cnx));
     
     return cnx.equals(other.cnx);
+  }
+
+  public int hashCode() {
+    return cnx.hashCode();
   }
 }
 
