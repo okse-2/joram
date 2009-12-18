@@ -14,6 +14,11 @@
       <genEnumLiterals ecoreEnumLiteral="joram.ecore#//JoramVersion/JORAM_5_2_4"/>
       <genEnumLiterals ecoreEnumLiteral="joram.ecore#//JoramVersion/JORAM_5_2_3"/>
     </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="joram.ecore#//ConnectionFactoryClass">
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//ConnectionFactoryClass/TcpConnectionFactory"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//ConnectionFactoryClass/SoapConnectionFactory"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//ConnectionFactoryClass/HATcpConnectionFactory"/>
+    </genEnums>
     <genEnums typeSafeEnumCompatible="false" ecoreEnum="joram.ecore#//Transaction">
       <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Transaction/NTransaction"/>
       <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Transaction/NGTransaction"/>
@@ -30,10 +35,10 @@
       <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Network/SSLNetwork"/>
     </genEnums>
     <genClasses ecoreClass="joram.ecore#//Config">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//Config/managedElements"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//Config/Transaction"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//Config/servers"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//Config/domains"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//Config/properties"/>
     </genClasses>
-    <genClasses image="false" ecoreClass="joram.ecore#//ManagedElement"/>
     <genClasses ecoreClass="joram.ecore#//ScalAgentServer">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//ScalAgentServer/name"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//ScalAgentServer/version"/>
@@ -42,9 +47,11 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//ScalAgentServer/sid"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//ScalAgentServer/StorageDirectory"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//ScalAgentServer/network"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//ScalAgentServer/properties"/>
     </genClasses>
     <genClasses ecoreClass="joram.ecore#//JORAM">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//JORAM/jmsObjects"/>
+      <genFeatures createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference joram.ecore#//JORAM/initialContext"/>
     </genClasses>
     <genClasses image="false" ecoreClass="joram.ecore#//JoramService"/>
     <genClasses ecoreClass="joram.ecore#//AdminProxy">
@@ -60,6 +67,10 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//JNDIServer/name"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//JNDIServer/port"/>
     </genClasses>
+    <genClasses ecoreClass="joram.ecore#//DistributedJNDIServer">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//DistributedJNDIServer/name"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference joram.ecore#//DistributedJNDIServer/knownServers"/>
+    </genClasses>
     <genClasses ecoreClass="joram.ecore#//TCPProxyService">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//TCPProxyService/name"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//TCPProxyService/port"/>
@@ -71,6 +82,7 @@
     <genClasses ecoreClass="joram.ecore#//NetworkDomain">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//NetworkDomain/name"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//NetworkDomain/network"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//NetworkDomain/properties"/>
     </genClasses>
     <genClasses ecoreClass="joram.ecore#//NetworkPort">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//NetworkPort/port"/>
@@ -96,6 +108,51 @@
     <genClasses ecoreClass="joram.ecore#//User">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//User/name"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//User/password"/>
+    </genClasses>
+    <genClasses ecoreClass="joram.ecore#//ConnectionFactory">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//ConnectionFactory/className"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//ConnectionFactory/jndiName"/>
+    </genClasses>
+    <genClasses ecoreClass="joram.ecore#//InitialContext">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//InitialContext/initial"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//InitialContext/host"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//InitialContext/port"/>
+    </genClasses>
+    <genClasses ecoreClass="joram.ecore#//ConfigProperties">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//ConfigProperties/properties"/>
+    </genClasses>
+    <genClasses ecoreClass="joram.ecore#//Property"/>
+    <genClasses ecoreClass="joram.ecore#//CustomProperty">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//CustomProperty/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//CustomProperty/value"/>
+    </genClasses>
+    <genClasses ecoreClass="joram.ecore#//PoolNetworkProperties">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//PoolNetworkProperties/nbMaxCnx"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//PoolNetworkProperties/compressedFlows"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//PoolNetworkProperties/maxMessageInFlow"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//PoolNetworkProperties/IdleTimeout"/>
+    </genClasses>
+    <genClasses ecoreClass="joram.ecore#//HttpNetworkProperties">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//HttpNetworkProperties/activationPeriod"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//HttpNetworkProperties/nbDaemon"/>
+    </genClasses>
+    <genClasses ecoreClass="joram.ecore#//NetworkProperties">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//NetworkProperties/backlog"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//NetworkProperties/CnxRetry"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//NetworkProperties/TcpNoDelay"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//NetworkProperties/SoLinger"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//NetworkProperties/SoTimeout"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//NetworkProperties/ConnectTimeout"/>
+    </genClasses>
+    <genClasses ecoreClass="joram.ecore#//NTransactionProperties">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//NTransactionProperties/NTLogMemorySize"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//NTransactionProperties/NTLogFileSize"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//NTransactionProperties/NTNoLockFile"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//NTransactionProperties/NTLogThresholdOperation"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//NTransactionProperties/NTLogMemoryCapacity"/>
+    </genClasses>
+    <genClasses ecoreClass="joram.ecore#//TransactionProperty">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//TransactionProperty/transaction"/>
     </genClasses>
   </genPackages>
 </genmodel:GenModel>
