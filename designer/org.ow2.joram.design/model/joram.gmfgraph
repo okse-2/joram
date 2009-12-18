@@ -14,9 +14,7 @@
             vertical="true"
             matchMinorSize="true"
             forceSingleLine="true"
-            minorAlignment="CENTER"
-            majorSpacing="2"
-            minorSpacing="0"/>
+            minorAlignment="CENTER"/>
         <minimumSize
             dx="130"
             dy="100"/>
@@ -24,34 +22,66 @@
             dx="150"
             dy="220"/>
         <children
-            xsi:type="gmfgraph:Label"
-            name="JORAMTitleLabel"/>
-        <children
-            xsi:type="gmfgraph:Label"
-            name="JORAMIdLabel"
-            text=""/>
+            xsi:type="gmfgraph:Rectangle"
+            fill="false">
+          <layout
+              xsi:type="gmfgraph:GridLayout"/>
+          <children
+              xsi:type="gmfgraph:Label"
+              name="JORAMTitleLabel">
+            <layoutData
+                xsi:type="gmfgraph:GridLayoutData"
+                grabExcessHorizontalSpace="true"/>
+          </children>
+          <children
+              xsi:type="gmfgraph:Label"
+              name="JORAMIdLabel">
+            <layoutData
+                xsi:type="gmfgraph:GridLayoutData"
+                grabExcessHorizontalSpace="true"/>
+          </children>
+        </children>
       </actualFigure>
       <accessors
-          figure="//@figures.0/@descriptors.0/@actualFigure/@children.0"/>
+          figure="//@figures.0/@descriptors.0/@actualFigure/@children.0/@children.0"/>
       <accessors
-          figure="//@figures.0/@descriptors.0/@actualFigure/@children.1"/>
+          figure="//@figures.0/@descriptors.0/@actualFigure/@children.0/@children.1"/>
     </descriptors>
     <descriptors
         name="DomainFigure">
       <actualFigure
           xsi:type="gmfgraph:RoundedRectangle">
+        <layout
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"
+            matchMinorSize="true"
+            forceSingleLine="true"
+            minorAlignment="CENTER"/>
         <children
-            xsi:type="gmfgraph:Label"
-            name="DomainTitleLabel"
-            text=""/>
-        <children
-            xsi:type="gmfgraph:Label"
-            name="DomainNetworkLabel"/>
+            xsi:type="gmfgraph:Rectangle"
+            fill="false">
+          <layout
+              xsi:type="gmfgraph:GridLayout"/>
+          <children
+              xsi:type="gmfgraph:Label"
+              name="DomainTitleLabel">
+            <layoutData
+                xsi:type="gmfgraph:GridLayoutData"
+                grabExcessHorizontalSpace="true"/>
+          </children>
+          <children
+              xsi:type="gmfgraph:Label"
+              name="DomainNetworkLabel">
+            <layoutData
+                xsi:type="gmfgraph:GridLayoutData"
+                grabExcessHorizontalSpace="true"/>
+          </children>
+        </children>
       </actualFigure>
       <accessors
-          figure="//@figures.0/@descriptors.1/@actualFigure/@children.0"/>
+          figure="//@figures.0/@descriptors.1/@actualFigure/@children.0/@children.0"/>
       <accessors
-          figure="//@figures.0/@descriptors.1/@actualFigure/@children.1"/>
+          figure="//@figures.0/@descriptors.1/@actualFigure/@children.0/@children.1"/>
     </descriptors>
     <descriptors
         name="GenericLabelDescriptor">
@@ -65,7 +95,62 @@
           xsi:type="gmfgraph:PolylineConnection"
           name=""/>
     </descriptors>
+    <descriptors
+        name="CompartmentFigure">
+      <actualFigure
+          xsi:type="gmfgraph:Rectangle"
+          name="CompartmentShape"/>
+    </descriptors>
+    <descriptors
+        name="JMSObjectLabelFigure">
+      <actualFigure
+          xsi:type="gmfgraph:Label"
+          name="JMSObjectLabel"/>
+    </descriptors>
+    <descriptors
+        name="PoolPropertiesLabelFigure">
+      <actualFigure
+          xsi:type="gmfgraph:Label"
+          name="PoolPropertiesLabel"
+          text="PoolNetwork properties"/>
+    </descriptors>
+    <descriptors
+        name="ConfigPropertiesFigure">
+      <actualFigure
+          xsi:type="gmfgraph:Rectangle"
+          name="ConfigPropertiesShape">
+        <layout
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"
+            forceSingleLine="true"
+            minorAlignment="CENTER"/>
+      </actualFigure>
+    </descriptors>
+    <descriptors
+        name="NetworkPropertiesLabelFigure">
+      <actualFigure
+          xsi:type="gmfgraph:Label"
+          name="NetworkPropertiesLabel"
+          text="Network properties"/>
+    </descriptors>
+    <descriptors
+        name="HttpPropertiesLabelFigure">
+      <actualFigure
+          xsi:type="gmfgraph:Label"
+          name="HttpPropertiesLabel"
+          text="HttpNetwork properties"/>
+    </descriptors>
+    <descriptors
+        name="NTransactionPropertiesLabelFigure">
+      <actualFigure
+          xsi:type="gmfgraph:Label"
+          name="NTransactionPropertiesLabel"
+          text="NTransaction properties"/>
+    </descriptors>
   </figures>
+  <nodes
+      name="ConfigProperties"
+      figure="ConfigPropertiesFigure"/>
   <nodes
       name="JORAM"
       figure="JORAMFigure"/>
@@ -77,12 +162,31 @@
       figure="DomainServerLink"/>
   <compartments
       name="JMS"
-      figure="JORAMFigure"
+      figure="CompartmentFigure"
       collapsible="true"
       needsTitle="true"/>
   <compartments
-      name="services"
-      figure="JORAMFigure"
+      name="Services"
+      figure="CompartmentFigure"
+      collapsible="true"
+      needsTitle="true"/>
+  <compartments
+      name="Server Properties"
+      figure="CompartmentFigure"
+      collapsible="true"
+      needsTitle="true"/>
+  <compartments
+      name="Domain Properties"
+      figure="DomainFigure"
+      collapsible="true"
+      needsTitle="true"/>
+  <compartments
+      name="Global Properties"
+      figure="ConfigPropertiesFigure"
+      needsTitle="true"/>
+  <compartments
+      name="JNDI Access"
+      figure="CompartmentFigure"
       collapsible="true"
       needsTitle="true"/>
   <labels
@@ -90,16 +194,35 @@
       figure="GenericLabelDescriptor"/>
   <labels
       name="JORAMTitleLabel"
+      figure="JORAMFigure"
       accessor="//@figures.0/@descriptors.0/@accessors.0"/>
   <labels
       name="JORAMIdLabel"
+      figure="JORAMFigure"
       elementIcon="false"
       accessor="//@figures.0/@descriptors.0/@accessors.1"/>
   <labels
       name="DomainTitleLabel"
+      figure="DomainFigure"
       accessor="//@figures.0/@descriptors.1/@accessors.0"/>
   <labels
       name="DomainNetworkLabel"
+      figure="DomainFigure"
       elementIcon="false"
       accessor="//@figures.0/@descriptors.1/@accessors.1"/>
+  <labels
+      name="JMSObjectLabel"
+      figure="JMSObjectLabelFigure"/>
+  <labels
+      name="PoolPropertiesLabel"
+      figure="PoolPropertiesLabelFigure"/>
+  <labels
+      name="NetworkpropertiesLabel"
+      figure="NetworkPropertiesLabelFigure"/>
+  <labels
+      name="HttpPropertiesLabel"
+      figure="HttpPropertiesLabelFigure"/>
+  <labels
+      name="NTransactionPropertiesLabel"
+      figure="NTransactionPropertiesLabelFigure"/>
 </gmfgraph:Canvas>

@@ -7,7 +7,7 @@
     xmlns:gmftool="http://www.eclipse.org/gmf/2005/ToolDefinition">
   <nodes>
     <containmentFeature
-        href="joram.ecore#//Config/managedElements"/>
+        href="joram.ecore#//Config/servers"/>
     <ownedChild>
       <domainMetaElement
           href="joram.ecore#//JORAM"/>
@@ -201,6 +201,27 @@
             href="joram.ecore#//ScalAgentServer/services"/>
         <ownedChild>
           <domainMetaElement
+              href="joram.ecore#//DistributedJNDIServer"/>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping">
+            <diagramLabel
+                href="joram.gmfgraph#GenericLabel"/>
+            <features
+                href="joram.ecore#//DistributedJNDIServer/name"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.0/@tools.7"/>
+          <diagramNode
+              href="joram.gmfgraph#GenericLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.0/@ownedChild/@compartments.0">
+        <containmentFeature
+            href="joram.ecore#//ScalAgentServer/services"/>
+        <ownedChild>
+          <domainMetaElement
               href="joram.ecore#//TCPProxyService"/>
           <labelMappings
               xsi:type="gmfmap:FeatureLabelMapping"
@@ -234,13 +255,13 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.0/@tools.7"/>
+              href="joram.gmftool#//@palette/@tools.0/@tools.8"/>
           <diagramNode
               href="joram.gmfgraph#GenericLabel"/>
         </ownedChild>
       </children>
       <children
-          compartment="//@nodes.0/@ownedChild/@compartments.1">
+          compartment="//@nodes.0/@ownedChild/@compartments.2">
         <containmentFeature
             href="joram.ecore#//JORAM/jmsObjects"/>
         <ownedChild>
@@ -252,19 +273,19 @@
               editorPattern="{0}"
               editPattern="{0}">
             <diagramLabel
-                href="joram.gmfgraph#GenericLabel"/>
+                href="joram.gmfgraph#JMSObjectLabel"/>
             <features
                 href="joram.ecore#//Topic/name"/>
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.0/@tools.9"/>
+              href="joram.gmftool#//@palette/@tools.0/@tools.10"/>
           <diagramNode
-              href="joram.gmfgraph#GenericLabel"/>
+              href="joram.gmfgraph#JMSObjectLabel"/>
         </ownedChild>
       </children>
       <children
-          compartment="//@nodes.0/@ownedChild/@compartments.1">
+          compartment="//@nodes.0/@ownedChild/@compartments.2">
         <containmentFeature
             href="joram.ecore#//JORAM/jmsObjects"/>
         <ownedChild>
@@ -276,19 +297,19 @@
               editorPattern="{0}"
               editPattern="{0}">
             <diagramLabel
-                href="joram.gmfgraph#GenericLabel"/>
+                href="joram.gmfgraph#JMSObjectLabel"/>
             <features
                 href="joram.ecore#//Queue/name"/>
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.0/@tools.10"/>
+              href="joram.gmftool#//@palette/@tools.0/@tools.11"/>
           <diagramNode
-              href="joram.gmfgraph#GenericLabel"/>
+              href="joram.gmfgraph#JMSObjectLabel"/>
         </ownedChild>
       </children>
       <children
-          compartment="//@nodes.0/@ownedChild/@compartments.1">
+          compartment="//@nodes.0/@ownedChild/@compartments.2">
         <containmentFeature
             href="joram.ecore#//JORAM/jmsObjects"/>
         <ownedChild>
@@ -300,32 +321,198 @@
               editorPattern="{0}"
               editPattern="{0}">
             <diagramLabel
-                href="joram.gmfgraph#GenericLabel"/>
+                href="joram.gmfgraph#JMSObjectLabel"/>
             <features
                 href="joram.ecore#//User/name"/>
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.0/@tools.11"/>
+              href="joram.gmftool#//@palette/@tools.0/@tools.12"/>
+          <diagramNode
+              href="joram.gmfgraph#JMSObjectLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.0/@ownedChild/@compartments.2">
+        <containmentFeature
+            href="joram.ecore#//JORAM/jmsObjects"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//ConnectionFactory"/>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping">
+            <diagramLabel
+                href="joram.gmfgraph#GenericLabel"/>
+            <features
+                href="joram.ecore#//ConnectionFactory/jndiName"/>
+          </labelMappings>
+          <diagramNode
+              href="joram.gmfgraph#GenericLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.0/@ownedChild/@compartments.3">
+        <containmentFeature
+            href="joram.ecore#//ScalAgentServer/properties"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//CustomProperty"/>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping">
+            <diagramLabel
+                href="joram.gmfgraph#GenericLabel"/>
+            <features
+                href="joram.ecore#//CustomProperty/name"/>
+            <features
+                href="joram.ecore#//CustomProperty/value"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.2/@tools.1"/>
+          <diagramNode
+              href="joram.gmfgraph#GenericLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.0/@ownedChild/@compartments.3">
+        <containmentFeature
+            href="joram.ecore#//ScalAgentServer/properties"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//PoolNetworkProperties"/>
+          <labelMappings
+              readOnly="true">
+            <diagramLabel
+                href="joram.gmfgraph#PoolPropertiesLabel"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.2/@tools.2"/>
+          <diagramNode
+              href="joram.gmfgraph#PoolPropertiesLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.0/@ownedChild/@compartments.3">
+        <containmentFeature
+            href="joram.ecore#//ScalAgentServer/properties"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//NetworkProperties"/>
+          <labelMappings
+              readOnly="true">
+            <diagramLabel
+                href="joram.gmfgraph#NetworkpropertiesLabel"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.2/@tools.3"/>
+          <diagramNode
+              href="joram.gmfgraph#NetworkpropertiesLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.0/@ownedChild/@compartments.3">
+        <containmentFeature
+            href="joram.ecore#//ScalAgentServer/properties"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//HttpNetworkProperties"/>
+          <labelMappings
+              readOnly="true">
+            <diagramLabel
+                href="joram.gmfgraph#HttpPropertiesLabel"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.2/@tools.4"/>
+          <diagramNode
+              href="joram.gmfgraph#HttpPropertiesLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.0/@ownedChild/@compartments.3">
+        <containmentFeature
+            href="joram.ecore#//ScalAgentServer/properties"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//TransactionProperty"/>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping">
+            <diagramLabel
+                href="joram.gmfgraph#GenericLabel"/>
+            <features
+                href="joram.ecore#//TransactionProperty/transaction"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.2/@tools.5"/>
+          <diagramNode
+              href="joram.gmfgraph#GenericLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.0/@ownedChild/@compartments.3">
+        <containmentFeature
+            href="joram.ecore#//ScalAgentServer/properties"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//NTransactionProperties"/>
+          <labelMappings
+              readOnly="true">
+            <diagramLabel
+                href="joram.gmfgraph#NTransactionPropertiesLabel"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.2/@tools.6"/>
+          <diagramNode
+              href="joram.gmfgraph#NTransactionPropertiesLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.0/@ownedChild/@compartments.1">
+        <containmentFeature
+            href="joram.ecore#//JORAM/initialContext"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//InitialContext"/>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping">
+            <diagramLabel
+                href="joram.gmfgraph#GenericLabel"/>
+            <features
+                href="joram.ecore#//InitialContext/initial"/>
+          </labelMappings>
           <diagramNode
               href="joram.gmfgraph#GenericLabel"/>
         </ownedChild>
       </children>
       <compartments
-          children="//@nodes.0/@ownedChild/@children.3 //@nodes.0/@ownedChild/@children.0 //@nodes.0/@ownedChild/@children.2 //@nodes.0/@ownedChild/@children.1 //@nodes.0/@ownedChild/@children.4">
+          children="//@nodes.0/@ownedChild/@children.4 //@nodes.0/@ownedChild/@children.0 //@nodes.0/@ownedChild/@children.2 //@nodes.0/@ownedChild/@children.1 //@nodes.0/@ownedChild/@children.5 //@nodes.0/@ownedChild/@children.3">
         <compartment
-            href="joram.gmfgraph#services"/>
+            href="joram.gmfgraph#Services"/>
       </compartments>
       <compartments
-          children="//@nodes.0/@ownedChild/@children.5 //@nodes.0/@ownedChild/@children.6 //@nodes.0/@ownedChild/@children.7">
+          children="//@nodes.0/@ownedChild/@children.16">
+        <compartment
+            href="joram.gmfgraph#JNDI Access"/>
+      </compartments>
+      <compartments
+          children="//@nodes.0/@ownedChild/@children.6 //@nodes.0/@ownedChild/@children.7 //@nodes.0/@ownedChild/@children.8 //@nodes.0/@ownedChild/@children.9">
         <compartment
             href="joram.gmfgraph#JMS"/>
+      </compartments>
+      <compartments
+          children="//@nodes.0/@ownedChild/@children.10 //@nodes.0/@ownedChild/@children.11 //@nodes.0/@ownedChild/@children.12 //@nodes.0/@ownedChild/@children.13 //@nodes.0/@ownedChild/@children.15 //@nodes.0/@ownedChild/@children.14">
+        <compartment
+            href="joram.gmfgraph#Server Properties"/>
       </compartments>
     </ownedChild>
   </nodes>
   <nodes>
     <containmentFeature
-        href="joram.ecore#//Config/managedElements"/>
+        href="joram.ecore#//Config/servers"/>
     <ownedChild>
       <domainMetaElement
           href="joram.ecore#//ScalAgentServer"/>
@@ -432,6 +619,27 @@
             href="joram.ecore#//ScalAgentServer/services"/>
         <ownedChild>
           <domainMetaElement
+              href="joram.ecore#//DistributedJNDIServer"/>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping">
+            <diagramLabel
+                href="joram.gmfgraph#GenericLabel"/>
+            <features
+                href="joram.ecore#//DistributedJNDIServer/name"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.0/@tools.7"/>
+          <diagramNode
+              href="joram.gmfgraph#GenericLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.1/@ownedChild/@compartments.0">
+        <containmentFeature
+            href="joram.ecore#//ScalAgentServer/services"/>
+        <ownedChild>
+          <domainMetaElement
               href="joram.ecore#//TCPProxyService"/>
           <labelMappings
               xsi:type="gmfmap:FeatureLabelMapping"
@@ -464,21 +672,146 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.0/@tools.7"/>
+              href="joram.gmftool#//@palette/@tools.0/@tools.8"/>
           <diagramNode
               href="joram.gmfgraph#GenericLabel"/>
         </ownedChild>
       </children>
+      <children
+          compartment="//@nodes.1/@ownedChild/@compartments.1">
+        <containmentFeature
+            href="joram.ecore#//ScalAgentServer/properties"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//CustomProperty"/>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping">
+            <diagramLabel
+                href="joram.gmfgraph#GenericLabel"/>
+            <features
+                href="joram.ecore#//CustomProperty/name"/>
+            <features
+                href="joram.ecore#//CustomProperty/value"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.2/@tools.1"/>
+          <diagramNode
+              href="joram.gmfgraph#GenericLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.1/@ownedChild/@compartments.1">
+        <containmentFeature
+            href="joram.ecore#//ScalAgentServer/properties"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//PoolNetworkProperties"/>
+          <labelMappings
+              readOnly="true">
+            <diagramLabel
+                href="joram.gmfgraph#PoolPropertiesLabel"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.2/@tools.2"/>
+          <diagramNode
+              href="joram.gmfgraph#PoolPropertiesLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.1/@ownedChild/@compartments.1">
+        <containmentFeature
+            href="joram.ecore#//ScalAgentServer/properties"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//NetworkProperties"/>
+          <labelMappings
+              readOnly="true">
+            <diagramLabel
+                href="joram.gmfgraph#NetworkpropertiesLabel"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.2/@tools.3"/>
+          <diagramNode
+              href="joram.gmfgraph#NetworkpropertiesLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.1/@ownedChild/@compartments.1">
+        <containmentFeature
+            href="joram.ecore#//ScalAgentServer/properties"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//HttpNetworkProperties"/>
+          <labelMappings
+              readOnly="true">
+            <diagramLabel
+                href="joram.gmfgraph#HttpPropertiesLabel"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.2/@tools.4"/>
+          <diagramNode
+              href="joram.gmfgraph#HttpPropertiesLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.1/@ownedChild/@compartments.1">
+        <containmentFeature
+            href="joram.ecore#//ScalAgentServer/properties"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//TransactionProperty"/>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping">
+            <diagramLabel
+                href="joram.gmfgraph#GenericLabel"/>
+            <features
+                href="joram.ecore#//TransactionProperty/transaction"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.2/@tools.5"/>
+          <diagramNode
+              href="joram.gmfgraph#GenericLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.1/@ownedChild/@compartments.1">
+        <containmentFeature
+            href="joram.ecore#//ScalAgentServer/properties"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//NTransactionProperties"/>
+          <labelMappings
+              readOnly="true">
+            <diagramLabel
+                href="joram.gmfgraph#NTransactionPropertiesLabel"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.2/@tools.6"/>
+          <diagramNode
+              href="joram.gmfgraph#NTransactionPropertiesLabel"/>
+        </ownedChild>
+      </children>
       <compartments
-          children="//@nodes.1/@ownedChild/@children.3 //@nodes.1/@ownedChild/@children.0 //@nodes.1/@ownedChild/@children.2 //@nodes.1/@ownedChild/@children.1">
+          children="//@nodes.1/@ownedChild/@children.4 //@nodes.1/@ownedChild/@children.0 //@nodes.1/@ownedChild/@children.2 //@nodes.1/@ownedChild/@children.1 //@nodes.1/@ownedChild/@children.3">
         <compartment
-            href="joram.gmfgraph#services"/>
+            href="joram.gmfgraph#Services"/>
+      </compartments>
+      <compartments
+          children="//@nodes.1/@ownedChild/@children.6 //@nodes.1/@ownedChild/@children.7 //@nodes.1/@ownedChild/@children.8 //@nodes.1/@ownedChild/@children.9 //@nodes.1/@ownedChild/@children.11 //@nodes.1/@ownedChild/@children.10">
+        <compartment
+            href="joram.gmfgraph#Server Properties"/>
       </compartments>
     </ownedChild>
   </nodes>
   <nodes>
     <containmentFeature
-        href="joram.ecore#//Config/managedElements"/>
+        href="joram.ecore#//Config/domains"/>
     <ownedChild>
       <domainMetaElement
           href="joram.ecore#//NetworkDomain"/>
@@ -506,6 +839,269 @@
           href="joram.gmftool#//@palette/@tools.1/@tools.0"/>
       <diagramNode
           href="joram.gmfgraph#Domain"/>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.0">
+        <containmentFeature
+            href="joram.ecore#//NetworkDomain/properties"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//CustomProperty"/>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping">
+            <diagramLabel
+                href="joram.gmfgraph#GenericLabel"/>
+            <features
+                href="joram.ecore#//CustomProperty/name"/>
+            <features
+                href="joram.ecore#//CustomProperty/value"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.2/@tools.1"/>
+          <diagramNode
+              href="joram.gmfgraph#GenericLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.0">
+        <containmentFeature
+            href="joram.ecore#//NetworkDomain/properties"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//PoolNetworkProperties"/>
+          <labelMappings
+              readOnly="true">
+            <diagramLabel
+                href="joram.gmfgraph#PoolPropertiesLabel"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.2/@tools.2"/>
+          <diagramNode
+              href="joram.gmfgraph#PoolPropertiesLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.0">
+        <containmentFeature
+            href="joram.ecore#//NetworkDomain/properties"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//NetworkProperties"/>
+          <labelMappings
+              readOnly="true">
+            <diagramLabel
+                href="joram.gmfgraph#NetworkpropertiesLabel"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.2/@tools.3"/>
+          <diagramNode
+              href="joram.gmfgraph#NetworkpropertiesLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.0">
+        <containmentFeature
+            href="joram.ecore#//NetworkDomain/properties"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//HttpNetworkProperties"/>
+          <labelMappings
+              readOnly="true">
+            <diagramLabel
+                href="joram.gmfgraph#HttpPropertiesLabel"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.2/@tools.4"/>
+          <diagramNode
+              href="joram.gmfgraph#HttpPropertiesLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.0">
+        <containmentFeature
+            href="joram.ecore#//NetworkDomain/properties"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//TransactionProperty"/>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping">
+            <diagramLabel
+                href="joram.gmfgraph#GenericLabel"/>
+            <features
+                href="joram.ecore#//TransactionProperty/transaction"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.2/@tools.5"/>
+          <diagramNode
+              href="joram.gmfgraph#GenericLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.2/@ownedChild/@compartments.0">
+        <containmentFeature
+            href="joram.ecore#//NetworkDomain/properties"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//NTransactionProperties"/>
+          <labelMappings
+              readOnly="true">
+            <diagramLabel
+                href="joram.gmfgraph#NTransactionPropertiesLabel"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.2/@tools.6"/>
+          <diagramNode
+              href="joram.gmfgraph#NTransactionPropertiesLabel"/>
+        </ownedChild>
+      </children>
+      <compartments
+          children="//@nodes.2/@ownedChild/@children.0 //@nodes.2/@ownedChild/@children.1 //@nodes.2/@ownedChild/@children.3 //@nodes.2/@ownedChild/@children.2 //@nodes.2/@ownedChild/@children.5 //@nodes.2/@ownedChild/@children.4">
+        <compartment
+            href="joram.gmfgraph#Domain Properties"/>
+      </compartments>
+    </ownedChild>
+  </nodes>
+  <nodes>
+    <containmentFeature
+        href="joram.ecore#//Config/properties"/>
+    <ownedChild>
+      <domainMetaElement
+          href="joram.ecore#//ConfigProperties"/>
+      <tool
+          xsi:type="gmftool:CreationTool"
+          href="joram.gmftool#//@palette/@tools.2/@tools.0"/>
+      <diagramNode
+          href="joram.gmfgraph#ConfigProperties"/>
+      <children
+          compartment="//@nodes.3/@ownedChild/@compartments.0">
+        <containmentFeature
+            href="joram.ecore#//ConfigProperties/properties"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//CustomProperty"/>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping">
+            <diagramLabel
+                href="joram.gmfgraph#GenericLabel"/>
+            <features
+                href="joram.ecore#//CustomProperty/name"/>
+            <features
+                href="joram.ecore#//CustomProperty/value"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.2/@tools.1"/>
+          <diagramNode
+              href="joram.gmfgraph#GenericLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.3/@ownedChild/@compartments.0">
+        <containmentFeature
+            href="joram.ecore#//ConfigProperties/properties"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//PoolNetworkProperties"/>
+          <labelMappings
+              readOnly="true">
+            <diagramLabel
+                href="joram.gmfgraph#PoolPropertiesLabel"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.2/@tools.2"/>
+          <diagramNode
+              href="joram.gmfgraph#PoolPropertiesLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.3/@ownedChild/@compartments.0">
+        <containmentFeature
+            href="joram.ecore#//ConfigProperties/properties"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//NetworkProperties"/>
+          <labelMappings
+              readOnly="true">
+            <diagramLabel
+                href="joram.gmfgraph#NetworkpropertiesLabel"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.2/@tools.3"/>
+          <diagramNode
+              href="joram.gmfgraph#NetworkpropertiesLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.3/@ownedChild/@compartments.0">
+        <containmentFeature
+            href="joram.ecore#//ConfigProperties/properties"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//HttpNetworkProperties"/>
+          <labelMappings
+              readOnly="true">
+            <diagramLabel
+                href="joram.gmfgraph#HttpPropertiesLabel"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.2/@tools.4"/>
+          <diagramNode
+              href="joram.gmfgraph#HttpPropertiesLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.3/@ownedChild/@compartments.0">
+        <containmentFeature
+            href="joram.ecore#//ConfigProperties/properties"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//TransactionProperty"/>
+          <labelMappings
+              xsi:type="gmfmap:FeatureLabelMapping">
+            <diagramLabel
+                href="joram.gmfgraph#GenericLabel"/>
+            <features
+                href="joram.ecore#//TransactionProperty/transaction"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.2/@tools.5"/>
+          <diagramNode
+              href="joram.gmfgraph#GenericLabel"/>
+        </ownedChild>
+      </children>
+      <children
+          compartment="//@nodes.3/@ownedChild/@compartments.0">
+        <containmentFeature
+            href="joram.ecore#//ConfigProperties/properties"/>
+        <ownedChild>
+          <domainMetaElement
+              href="joram.ecore#//NTransactionProperties"/>
+          <labelMappings
+              readOnly="true">
+            <diagramLabel
+                href="joram.gmfgraph#NTransactionPropertiesLabel"/>
+          </labelMappings>
+          <tool
+              xsi:type="gmftool:CreationTool"
+              href="joram.gmftool#//@palette/@tools.2/@tools.6"/>
+          <diagramNode
+              href="joram.gmfgraph#NTransactionPropertiesLabel"/>
+        </ownedChild>
+      </children>
+      <compartments
+          children="//@nodes.3/@ownedChild/@children.1 //@nodes.3/@ownedChild/@children.0 //@nodes.3/@ownedChild/@children.3 //@nodes.3/@ownedChild/@children.2 //@nodes.3/@ownedChild/@children.5 //@nodes.3/@ownedChild/@children.4">
+        <compartment
+            href="joram.gmfgraph#Global Properties"/>
+      </compartments>
     </ownedChild>
   </nodes>
   <links>
@@ -556,11 +1152,11 @@
         id="uniqueIdRule"
         message="Server Id (sid) must be unique.">
       <rule
-          body="JORAM.allInstances()->forAll(j | j.sid = self.sid implies j = self)"/>
+          body="ScalAgentServer.allInstances()->forAll(j | j.sid = self.sid implies j = self)"/>
       <target
           xsi:type="gmfmap:DomainElementTarget">
         <element
-            href="joram.ecore#//JORAM"/>
+            href="joram.ecore#//ScalAgentServer"/>
       </target>
     </audits>
     <audits
@@ -595,7 +1191,7 @@
         id="portcheck"
         message="Server is linked with two different domains using the same port.">
       <rule
-          body="self.network->forAll(c1,c2 | c1 &lt;> c2 implies c1.port &lt;> c2.port)"/>
+          body="self.network->forAll(c1,c2 | c1.port = c2.port implies c1 = c2)"/>
       <target
           xsi:type="gmfmap:DomainElementTarget">
         <element
