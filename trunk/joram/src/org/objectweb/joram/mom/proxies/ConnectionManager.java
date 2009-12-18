@@ -258,7 +258,7 @@ public class ConnectionManager implements ConnectionManagerMBean {
     return activated;
   }
 
-  public static ConnectionManager getCurrentInstance() {
+  public synchronized static ConnectionManager getCurrentInstance() {
     if (currentInstance == null) {
       currentInstance = new ConnectionManager();
     }
