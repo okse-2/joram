@@ -383,7 +383,7 @@ public final class AgentServer {
   /**
    * Returns a shared timer provided by the agent server.
    */
-  public static final Timer getTimer() {
+  public static synchronized final Timer getTimer() {
     if (timer == null) {
       timer = new Timer();
     }

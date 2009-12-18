@@ -80,7 +80,7 @@ public class LocalConnections implements LocalConnectionsMBean {
     connections.remove(localRequestChannel);
   }
   
-  public static LocalConnections getCurrentInstance() {
+  public static synchronized LocalConnections getCurrentInstance() {
     if (currentInstance == null) {
       currentInstance = new LocalConnections();
       ConnectionManager.getCurrentInstance().addManager(currentInstance);
