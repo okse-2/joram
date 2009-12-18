@@ -194,7 +194,7 @@ public class ConversionHelper
   public static char toChar(Object value) throws MessageValueException
   {
     if (value == null)
-      return ((Character) null).charValue();
+      throw new NullPointerException();
     else if (value instanceof Character)
       return ((Character) value).charValue();
     else
