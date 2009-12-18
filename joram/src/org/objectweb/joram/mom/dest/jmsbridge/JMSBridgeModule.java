@@ -294,7 +294,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
         Xid xid = null;
         try {
           if (isXA) {
-            xid = new XidImpl(new byte[0], 1, new String(agentId.toString() + System.currentTimeMillis()).getBytes());
+            xid = new XidImpl(new byte[0], 1, (agentId.toString() + System.currentTimeMillis()).getBytes());
             if (logger.isLoggable(BasicLevel.DEBUG))
               logger.log(BasicLevel.DEBUG, "receiveNoWait: XA xid=" + xid);
 
@@ -512,7 +512,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
       synchronized (lock) {
         try {
           if (isXA) {
-            xid = new XidImpl(new byte[0], 1, new String(agentId.toString() + System.currentTimeMillis()).getBytes());
+            xid = new XidImpl(new byte[0], 1, (agentId.toString() + System.currentTimeMillis()).getBytes());
             if (logger.isLoggable(BasicLevel.DEBUG))
               logger.log(BasicLevel.DEBUG, "onMessage: xid=" + xid);
 
@@ -1067,7 +1067,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
       synchronized (lock) {
         try {
           if (isXA) {
-            xid = new XidImpl(new byte[0], 1, new String(agentId.toString() + System.currentTimeMillis()).getBytes());
+            xid = new XidImpl(new byte[0], 1, (agentId.toString() + System.currentTimeMillis()).getBytes());
             if (logger.isLoggable(BasicLevel.DEBUG))
               logger.log(BasicLevel.DEBUG, "run: xid=" + xid);
 
@@ -1180,7 +1180,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
         logger.log(BasicLevel.DEBUG, "run()");
 
       synchronized (lock) {
-        Xid xid = new XidImpl(new byte[0], 1, new String(agentId.toString() + System.currentTimeMillis()).getBytes());
+        Xid xid = new XidImpl(new byte[0], 1, (agentId.toString() + System.currentTimeMillis()).getBytes());
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, "run: xid = " + xid);
 
