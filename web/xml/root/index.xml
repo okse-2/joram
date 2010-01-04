@@ -11,7 +11,6 @@
   </properties>
 
   <body>
-
     <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
 
     <table border="0" width="100%">
@@ -51,7 +50,17 @@
     </s1>
    
     <s1 name="Latest News">
-       
+      <s2 name="January 4, 2010: Best wishes from the ScalAgent team.">
+      
+        <table border="0" width="100%">
+  	      <tr>
+	          <td align="center">
+	            <img src="images/JoramWish.jpg" alt="JORAM Logo" height="376" width="640" border="0" hspace="2"/>
+            </td>
+	        </tr>
+        </table>
+      </s2>
+            
       <s2 name="October 23, 2009: JORAM 5.2.6 is released">
       <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
       <p>It introduces some improvements and bug fixes, essentially:</p>
