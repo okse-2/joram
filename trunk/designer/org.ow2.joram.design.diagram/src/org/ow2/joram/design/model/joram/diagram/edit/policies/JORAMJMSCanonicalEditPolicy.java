@@ -12,7 +12,13 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.gmf.runtime.diagram.ui.editpolicies.CanonicalEditPolicy;
 import org.eclipse.gmf.runtime.notation.View;
 import org.ow2.joram.design.model.joram.JoramPackage;
+import org.ow2.joram.design.model.joram.diagram.edit.parts.CustomProperty2EditPart;
+import org.ow2.joram.design.model.joram.diagram.edit.parts.CustomPropertyEditPart;
+import org.ow2.joram.design.model.joram.diagram.edit.parts.CustomService2EditPart;
+import org.ow2.joram.design.model.joram.diagram.edit.parts.CustomServiceEditPart;
+import org.ow2.joram.design.model.joram.diagram.edit.parts.PoolNetworkPropertiesEditPart;
 import org.ow2.joram.design.model.joram.diagram.edit.parts.QueueEditPart;
+import org.ow2.joram.design.model.joram.diagram.edit.parts.TCPProxyService2EditPart;
 import org.ow2.joram.design.model.joram.diagram.edit.parts.TopicEditPart;
 import org.ow2.joram.design.model.joram.diagram.edit.parts.UserEditPart;
 import org.ow2.joram.design.model.joram.diagram.part.JoramDiagramUpdater;
@@ -46,8 +52,8 @@ public class JORAMJMSCanonicalEditPolicy extends CanonicalEditPolicy {
   protected List getSemanticChildrenList() {
     View viewObject = (View) getHost().getModel();
     List result = new LinkedList();
-    for (Iterator it = JoramDiagramUpdater.getJORAMJMS_7005SemanticChildren(viewObject).iterator(); it
-        .hasNext();) {
+    for (Iterator it = JoramDiagramUpdater.getJORAMServerProperties_7003SemanticChildren(viewObject)
+        .iterator(); it.hasNext();) {
       result.add(((JoramNodeDescriptor) it.next()).getModelElement());
     }
     return result;
@@ -59,9 +65,12 @@ public class JORAMJMSCanonicalEditPolicy extends CanonicalEditPolicy {
   protected boolean isOrphaned(Collection semanticChildren, final View view) {
     int visualID = JoramVisualIDRegistry.getVisualID(view);
     switch (visualID) {
-    case TopicEditPart.VISUAL_ID:
-    case QueueEditPart.VISUAL_ID:
-    case UserEditPart.VISUAL_ID:
+    case TCPProxyService2EditPart.VISUAL_ID:
+    case CustomServiceEditPart.VISUAL_ID:
+    case CustomService2EditPart.VISUAL_ID:
+    case CustomPropertyEditPart.VISUAL_ID:
+    case PoolNetworkPropertiesEditPart.VISUAL_ID:
+    case CustomProperty2EditPart.VISUAL_ID:
       if (!semanticChildren.contains(view.getElement())) {
         return true;
       }
@@ -82,7 +91,7 @@ public class JORAMJMSCanonicalEditPolicy extends CanonicalEditPolicy {
   protected Set getFeaturesToSynchronize() {
     if (myFeaturesToSynchronize == null) {
       myFeaturesToSynchronize = new HashSet();
-      myFeaturesToSynchronize.add(JoramPackage.eINSTANCE.getJORAM_JmsObjects());
+      myFeaturesToSynchronize.add(JoramPackage.eINSTANCE.getScalAgentServer_Properties());
     }
     return myFeaturesToSynchronize;
   }

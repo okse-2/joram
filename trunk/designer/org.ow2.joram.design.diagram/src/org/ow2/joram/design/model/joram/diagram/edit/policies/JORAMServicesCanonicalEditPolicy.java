@@ -16,7 +16,9 @@ import org.ow2.joram.design.model.joram.diagram.edit.parts.AdminProxyEditPart;
 import org.ow2.joram.design.model.joram.diagram.edit.parts.ConnectionManagerEditPart;
 import org.ow2.joram.design.model.joram.diagram.edit.parts.CustomServiceEditPart;
 import org.ow2.joram.design.model.joram.diagram.edit.parts.JNDIServerEditPart;
+import org.ow2.joram.design.model.joram.diagram.edit.parts.QueueEditPart;
 import org.ow2.joram.design.model.joram.diagram.edit.parts.TCPProxyServiceEditPart;
+import org.ow2.joram.design.model.joram.diagram.edit.parts.TopicEditPart;
 import org.ow2.joram.design.model.joram.diagram.part.JoramDiagramUpdater;
 import org.ow2.joram.design.model.joram.diagram.part.JoramNodeDescriptor;
 import org.ow2.joram.design.model.joram.diagram.part.JoramVisualIDRegistry;
@@ -48,7 +50,7 @@ public class JORAMServicesCanonicalEditPolicy extends CanonicalEditPolicy {
   protected List getSemanticChildrenList() {
     View viewObject = (View) getHost().getModel();
     List result = new LinkedList();
-    for (Iterator it = JoramDiagramUpdater.getJORAMServices_7004SemanticChildren(viewObject).iterator(); it
+    for (Iterator it = JoramDiagramUpdater.getJORAMServices_7001SemanticChildren(viewObject).iterator(); it
         .hasNext();) {
       result.add(((JoramNodeDescriptor) it.next()).getModelElement());
     }
@@ -65,7 +67,8 @@ public class JORAMServicesCanonicalEditPolicy extends CanonicalEditPolicy {
     case ConnectionManagerEditPart.VISUAL_ID:
     case JNDIServerEditPart.VISUAL_ID:
     case TCPProxyServiceEditPart.VISUAL_ID:
-    case CustomServiceEditPart.VISUAL_ID:
+    case TopicEditPart.VISUAL_ID:
+    case QueueEditPart.VISUAL_ID:
       if (!semanticChildren.contains(view.getElement())) {
         return true;
       }
