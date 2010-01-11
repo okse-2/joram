@@ -17,6 +17,8 @@
     <genEnums typeSafeEnumCompatible="false" ecoreEnum="joram.ecore#//ConnectionFactoryClass">
       <genEnumLiterals ecoreEnumLiteral="joram.ecore#//ConnectionFactoryClass/TcpConnectionFactory"/>
       <genEnumLiterals ecoreEnumLiteral="joram.ecore#//ConnectionFactoryClass/SoapConnectionFactory"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//ConnectionFactoryClass/LocalConnectionFactory"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//ConnectionFactoryClass/PooledConnectionFactory"/>
       <genEnumLiterals ecoreEnumLiteral="joram.ecore#//ConnectionFactoryClass/HATcpConnectionFactory"/>
     </genEnums>
     <genEnums typeSafeEnumCompatible="false" ecoreEnum="joram.ecore#//Transaction">
@@ -51,7 +53,6 @@
     </genClasses>
     <genClasses ecoreClass="joram.ecore#//JORAM">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//JORAM/jmsObjects"/>
-      <genFeatures createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference joram.ecore#//JORAM/initialContext"/>
     </genClasses>
     <genClasses image="false" ecoreClass="joram.ecore#//JoramService"/>
     <genClasses ecoreClass="joram.ecore#//AdminProxy">
@@ -69,6 +70,7 @@
     </genClasses>
     <genClasses ecoreClass="joram.ecore#//DistributedJNDIServer">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//DistributedJNDIServer/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//DistributedJNDIServer/port"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference joram.ecore#//DistributedJNDIServer/knownServers"/>
     </genClasses>
     <genClasses ecoreClass="joram.ecore#//TCPProxyService">
@@ -112,11 +114,6 @@
     <genClasses ecoreClass="joram.ecore#//ConnectionFactory">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//ConnectionFactory/className"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//ConnectionFactory/jndiName"/>
-    </genClasses>
-    <genClasses ecoreClass="joram.ecore#//InitialContext">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//InitialContext/initial"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//InitialContext/host"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//InitialContext/port"/>
     </genClasses>
     <genClasses ecoreClass="joram.ecore#//ConfigProperties">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//ConfigProperties/properties"/>
