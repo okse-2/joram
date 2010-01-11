@@ -261,7 +261,7 @@
         </ownedChild>
       </children>
       <children
-          compartment="//@nodes.0/@ownedChild/@compartments.2">
+          compartment="//@nodes.0/@ownedChild/@compartments.1">
         <containmentFeature
             href="joram.ecore#//JORAM/jmsObjects"/>
         <ownedChild>
@@ -285,7 +285,7 @@
         </ownedChild>
       </children>
       <children
-          compartment="//@nodes.0/@ownedChild/@compartments.2">
+          compartment="//@nodes.0/@ownedChild/@compartments.1">
         <containmentFeature
             href="joram.ecore#//JORAM/jmsObjects"/>
         <ownedChild>
@@ -309,7 +309,7 @@
         </ownedChild>
       </children>
       <children
-          compartment="//@nodes.0/@ownedChild/@compartments.2">
+          compartment="//@nodes.0/@ownedChild/@compartments.1">
         <containmentFeature
             href="joram.ecore#//JORAM/jmsObjects"/>
         <ownedChild>
@@ -333,7 +333,7 @@
         </ownedChild>
       </children>
       <children
-          compartment="//@nodes.0/@ownedChild/@compartments.2">
+          compartment="//@nodes.0/@ownedChild/@compartments.1">
         <containmentFeature
             href="joram.ecore#//JORAM/jmsObjects"/>
         <ownedChild>
@@ -351,7 +351,7 @@
         </ownedChild>
       </children>
       <children
-          compartment="//@nodes.0/@ownedChild/@compartments.3">
+          compartment="//@nodes.0/@ownedChild/@compartments.2">
         <containmentFeature
             href="joram.ecore#//ScalAgentServer/properties"/>
         <ownedChild>
@@ -374,7 +374,7 @@
         </ownedChild>
       </children>
       <children
-          compartment="//@nodes.0/@ownedChild/@compartments.3">
+          compartment="//@nodes.0/@ownedChild/@compartments.2">
         <containmentFeature
             href="joram.ecore#//ScalAgentServer/properties"/>
         <ownedChild>
@@ -393,7 +393,7 @@
         </ownedChild>
       </children>
       <children
-          compartment="//@nodes.0/@ownedChild/@compartments.3">
+          compartment="//@nodes.0/@ownedChild/@compartments.2">
         <containmentFeature
             href="joram.ecore#//ScalAgentServer/properties"/>
         <ownedChild>
@@ -412,7 +412,7 @@
         </ownedChild>
       </children>
       <children
-          compartment="//@nodes.0/@ownedChild/@compartments.3">
+          compartment="//@nodes.0/@ownedChild/@compartments.2">
         <containmentFeature
             href="joram.ecore#//ScalAgentServer/properties"/>
         <ownedChild>
@@ -431,7 +431,7 @@
         </ownedChild>
       </children>
       <children
-          compartment="//@nodes.0/@ownedChild/@compartments.3">
+          compartment="//@nodes.0/@ownedChild/@compartments.2">
         <containmentFeature
             href="joram.ecore#//ScalAgentServer/properties"/>
         <ownedChild>
@@ -452,7 +452,7 @@
         </ownedChild>
       </children>
       <children
-          compartment="//@nodes.0/@ownedChild/@compartments.3">
+          compartment="//@nodes.0/@ownedChild/@compartments.2">
         <containmentFeature
             href="joram.ecore#//ScalAgentServer/properties"/>
         <ownedChild>
@@ -470,33 +470,10 @@
               href="joram.gmfgraph#NTransactionPropertiesLabel"/>
         </ownedChild>
       </children>
-      <children
-          compartment="//@nodes.0/@ownedChild/@compartments.1">
-        <containmentFeature
-            href="joram.ecore#//JORAM/initialContext"/>
-        <ownedChild>
-          <domainMetaElement
-              href="joram.ecore#//InitialContext"/>
-          <labelMappings
-              xsi:type="gmfmap:FeatureLabelMapping">
-            <diagramLabel
-                href="joram.gmfgraph#GenericLabel"/>
-            <features
-                href="joram.ecore#//InitialContext/initial"/>
-          </labelMappings>
-          <diagramNode
-              href="joram.gmfgraph#GenericLabel"/>
-        </ownedChild>
-      </children>
       <compartments
           children="//@nodes.0/@ownedChild/@children.4 //@nodes.0/@ownedChild/@children.0 //@nodes.0/@ownedChild/@children.2 //@nodes.0/@ownedChild/@children.1 //@nodes.0/@ownedChild/@children.5 //@nodes.0/@ownedChild/@children.3">
         <compartment
             href="joram.gmfgraph#Services"/>
-      </compartments>
-      <compartments
-          children="//@nodes.0/@ownedChild/@children.16">
-        <compartment
-            href="joram.gmfgraph#JNDI Access"/>
       </compartments>
       <compartments
           children="//@nodes.0/@ownedChild/@children.6 //@nodes.0/@ownedChild/@children.7 //@nodes.0/@ownedChild/@children.8 //@nodes.0/@ownedChild/@children.9">
@@ -1192,6 +1169,19 @@
         message="Server is linked with two different domains using the same port.">
       <rule
           body="self.network->forAll(c1,c2 | c1.port = c2.port implies c1 = c2)"/>
+      <target
+          xsi:type="gmfmap:DomainElementTarget">
+        <element
+            href="joram.ecore#//ScalAgentServer"/>
+      </target>
+    </audits>
+    <audits
+        name="ConnectionManager presence check"
+        description="TODO"
+        id="connectionmanager.presence"
+        message="TCPProxyService can't work without a ConnectionManager service.">
+      <rule
+          body="services->select(f | f.oclIsKindOf(TCPProxyService))->notEmpty() implies services->select(f | f.oclIsKindOf(ConnectionManager))->notEmpty()"/>
       <target
           xsi:type="gmfmap:DomainElementTarget">
         <element
