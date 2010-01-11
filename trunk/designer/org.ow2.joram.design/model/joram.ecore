@@ -32,8 +32,6 @@
   <eClassifiers xsi:type="ecore:EClass" name="JORAM" eSuperTypes="#//ScalAgentServer">
     <eStructuralFeatures xsi:type="ecore:EReference" name="jmsObjects" upperBound="-1"
         eType="#//JMSObject" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="initialContext" eType="#//InitialContext"
-        containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EEnum" name="JoramVersion">
     <eLiterals name="JORAM_5_2_6" value="526" literal="5.2.6"/>
@@ -127,18 +125,12 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="jndiName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
         defaultValueLiteral="cf"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="InitialContext">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="initial" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
-        defaultValueLiteral="fr.dyade.aaa.jndi2.client.NamingContextFactory"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="host" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
-        defaultValueLiteral="localhost"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="port" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
-        defaultValueLiteral="16400"/>
-  </eClassifiers>
   <eClassifiers xsi:type="ecore:EEnum" name="ConnectionFactoryClass">
     <eLiterals name="TcpConnectionFactory" literal="org.objectweb.joram.client.jms.tcp.TcpConnectionFactory"/>
     <eLiterals name="SoapConnectionFactory" value="1" literal="org.objectweb.joram.client.jms.soap.SoapConnectionFactory"/>
-    <eLiterals name="HATcpConnectionFactory" value="2" literal="org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory"/>
+    <eLiterals name="LocalConnectionFactory" value="2" literal="org.objectweb.joram.client.jms.local.LocalConnectionFactory"/>
+    <eLiterals name="PooledConnectionFactory" value="3" literal="org.objectweb.joram.client.jms.pool.PooledConnectionFactory"/>
+    <eLiterals name="HATcpConnectionFactory" value="4" literal="org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EEnum" name="Transaction">
     <eLiterals name="NTransaction" literal="fr.dyade.aaa.util.NTransaction"/>
