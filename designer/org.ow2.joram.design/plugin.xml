@@ -46,10 +46,17 @@ Contributor(s):
             nameFilter="*.joram"
             objectClass="org.eclipse.core.resources.IFile">
          <action
-               class="org.ow2.joram.design.model.export.ExportAction"
+               class="org.ow2.joram.design.model.export.ExportA3ConfAction"
                enablesFor="1"
                id="org.ow2.joram.design.model.export.ExportAction"
                label="Generate a3servers.xml"
+               menubarPath="org.ow2.joram.design.model.export.menu1">
+         </action>
+         <action
+               class="org.ow2.joram.design.model.export.ExportAdminScriptsAction"
+               enablesFor="1"
+               id="org.ow2.joram.design.action1"
+               label="Generate admin script..."
                menubarPath="org.ow2.joram.design.model.export.menu1">
          </action>
       </objectContribution>
