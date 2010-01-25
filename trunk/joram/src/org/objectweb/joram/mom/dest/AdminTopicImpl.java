@@ -259,7 +259,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       throw new Exception("User [" + identity.getUserName() + "] does not exist");
     }
 
-    if (!identity.check(userIdentity)) {
+    if (!userIdentity.check(identity)) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "identity check failed.");
       throw new Exception("identity check failed.");
@@ -322,6 +322,9 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     try {
       //identity.validate();
 
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "AdminNotification:: store (in usersTable) this identity = " + identity);
+      
       usersTable.put(identity.getUserName(), identity);
       proxiesTable.put(identity.getUserName(), adminNot.getProxyId());
 
@@ -1213,7 +1216,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
         if (logger.isLoggable(BasicLevel.INFO))
           logger.log(BasicLevel.INFO, "User [" + name + "] already exists : " + userIdentity);
         try {
-          if (! identity.check(userIdentity)) {
+          if (! userIdentity.check(identity)) {
             throw new RequestException("User [" + name + "] already exists"
                                        + " but with a different password.");
           } 
@@ -1241,6 +1244,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
         try {
           proxy.deploy();
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "doProcess CreateUserRequest:: store (in usersTable) this identity = " + identity);
           usersTable.put(name, identity);
           proxiesTable.put(name, proxy.getId());
 
@@ -1301,6 +1306,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       if (usersTable.containsKey(name)) {
         usersTable.remove(name);
         proxiesTable.remove(name);
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "doProcess UpdateUser:: store (in usersTable) this identity = " + newIdentity);
         usersTable.put(newIdentity.getUserName(), newIdentity);
         proxiesTable.put(newIdentity.getUserName(), proxId);
       }
