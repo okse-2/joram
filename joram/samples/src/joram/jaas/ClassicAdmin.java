@@ -43,7 +43,12 @@ public class ClassicAdmin {
     System.out.println();
     System.out.println("Classic administration...");
 
-    AdminModule.connect("org.objectweb.joram.shared.security.jaas.JonasIdentity:root", "root", 60);
+    //AdminModule.connect("org.objectweb.joram.shared.security.jaas.JonasIdentity:root", "root", 60);
+    AdminModule.connect(
+        "localhost", 16010, 
+        "root", "root", 60, 
+        "org.objectweb.joram.client.jms.tcp.ReliableTcpClient", 
+        "org.objectweb.joram.shared.security.jaas.JonasIdentity");
 
     Queue queue = Queue.create("queue");
     Topic topic = Topic.create("topic");
