@@ -53,13 +53,6 @@ public class SimpleIdentity extends Identity {
     this.user = userName;
   }
   
-  /**
-   * @return password
-   */
-  public Object getCredential() {
-    return passwd;
-  }
-  
   /* (non-Javadoc)
    * @see org.objectweb.joram.shared.security.Identity#setIdentity(java.lang.String, java.lang.String)
    */
@@ -89,7 +82,7 @@ public class SimpleIdentity extends Identity {
                    "Invalid user [" + getUserName() + "] wait [" + identity.getUserName() + "]");
       throw new Exception("Invalid user [" + getUserName() + "] wait [" + identity.getUserName() + "]");
     }
-    if (! getCredential().equals(identity.getCredential())) {
+    if (! passwd.equals(((SimpleIdentity)identity).passwd)) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "Invalid credential for user [" + identity.getUserName() + "]");
       throw new Exception("Invalid credential for user [" + identity.getUserName() + "]");
