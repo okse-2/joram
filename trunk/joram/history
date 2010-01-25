@@ -1,4 +1,16 @@
 +==============================================================================
+| 2010/01/25 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+Update Joram security:
+- modify Identity.check method.
+- remove unused method getCredential, getSubject.
+- use common.Configuration instead System to get properties.
++==============================================================================
+| 2009/11/20 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ - Destination consideration of the update by JMX for the period.
+ - Properties implements Serializable
++==============================================================================
 | 2009/11/12 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
 All ScalAgent timer replaced by java timer.
