@@ -33,8 +33,6 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.security.InvalidKeyException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -66,6 +64,8 @@ import org.objectweb.jonas.security.auth.callback.NoInputCallbackHandler;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.BasicLevel;
+
+import fr.dyade.aaa.common.Configuration;
 
 /**
  * JAAS identity class used to authenticate through JOnAS.
@@ -113,8 +113,8 @@ public class JonasIdentity extends Identity {
 
     try {
       String jaasEntryName=null;
-      if (Boolean.getBoolean("joram.security.jaas.entryName")) {
-    	  jaasEntryName = System.getProperty("joram.security.jaas.entryName");
+      if (Configuration.getBoolean("joram.security.jaas.entryName")) {
+    	  jaasEntryName = Configuration.getProperty("joram.security.jaas.entryName");
       } else if (pJaasEntryName!=null) {
     	  jaasEntryName = pJaasEntryName;
       } else {
@@ -134,7 +134,7 @@ public class JonasIdentity extends Identity {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, 
             "JonasIdentity.setIdentity factory initial = " + 
-            System.getProperty(Context.INITIAL_CONTEXT_FACTORY)); 
+            Configuration.getProperty(Context.INITIAL_CONTEXT_FACTORY)); 
       loginContext.login();     
       subject = loginContext.getSubject();
       if (subject == null) {
@@ -162,21 +162,21 @@ public class JonasIdentity extends Identity {
     }
   }
 
-  /**
-   * Gets the subject of identity.
-   * 
-   * @return the subject of identity.
-   */
-  public Subject getSubject() {
-    return subject; 
-  }
+//  /**
+//   * Gets the subject of identity.
+//   * 
+//   * @return the subject of identity.
+//   */
+//  public Subject getSubject() {
+//    return subject; 
+//  }
 
-  /* (non-Javadoc)
-   * @see org.objectweb.joram.shared.security.Identity#getCredential()
-   */
-  public Object getCredential() {
-    return serializeSubject(subject);
-  }
+//  /* (non-Javadoc)
+//   * @see org.objectweb.joram.shared.security.Identity#getCredential()
+//   */
+//  public Object getCredential() {
+//    return serializeSubject(subject);
+//  }
 
   /* (non-Javadoc)
    * @see org.objectweb.joram.shared.security.Identity#getUserName()
@@ -237,7 +237,7 @@ public class JonasIdentity extends Identity {
   /**
    * @return
    */
-  private  byte[] getSignature() {
+  private  byte[] getSignature() { 
     // Retrieve signature (members of the Group.class)
     Set principals = subject.getPrincipals(Group.class);
     Iterator iterator = principals.iterator();
@@ -258,23 +258,22 @@ public class JonasIdentity extends Identity {
    */
   private synchronized void initPublicKey() throws Exception {
     // Keystore file
-    String keystoreFile = System.getProperty(KEYSTORE_FILE);
+    String keystoreFile = Configuration.getProperty(KEYSTORE_FILE);
     if (keystoreFile == null) {
       throw new IllegalStateException("The '" + KEYSTORE_FILE + "' attribute was not found but this attribute is mandatory");
     }
 
     // Keystore pass
-    String keystorePass = System.getProperty(KEYSTORE_PASS);
+    String keystorePass = Configuration.getProperty(KEYSTORE_PASS);
     if (keystorePass == null) {
       throw new IllegalStateException("The '" + KEYSTORE_PASS + "' attribute was not found but this attribute is mandatory");
     }
 
     // Alias
-    String alias = System.getProperty(KEYSTORE_ALIAS);
+    String alias = Configuration.getProperty(KEYSTORE_ALIAS);
     if (alias == null) {
       throw new IllegalStateException("The '" + KEYSTORE_ALIAS + "' attribute was not found but this attribute is mandatory");
     }
-
 
     // Check that the file exists
     File f = new File(keystoreFile);
@@ -325,11 +324,11 @@ public class JonasIdentity extends Identity {
     return publickey;
   }
 
-  private boolean validate() throws Exception {
+  private boolean validate(JonasIdentity identity) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "validate(" + subject + ')');
+      logger.log(BasicLevel.DEBUG, "validate(" + identity + ')');
 
-    if (Boolean.getBoolean(UNTESTED_SIGNATURE)) {
+    if (Configuration.getBoolean(UNTESTED_SIGNATURE)) {
       if (logger.isLoggable(BasicLevel.WARN)) {
         logger.log(BasicLevel.WARN, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         logger.log(BasicLevel.WARN, "!!!!!!!!!!!! untested signature.");
@@ -341,10 +340,10 @@ public class JonasIdentity extends Identity {
     // Get public key
     PublicKey publickey = getPublicKey();
 
-    return validate(publickey, subject);
+    return validate(publickey, identity);
   }
 
-  private boolean validate(PublicKey publickey, Subject subject) throws Exception {
+  private boolean validate(PublicKey publickey, JonasIdentity identity) throws Exception {
 
     // Build signature with data to validate (principal name + roles)
     Signature signature = null;
@@ -368,7 +367,7 @@ public class JonasIdentity extends Identity {
     String principal = null;
     try {
       //signature.update(principal.getBytes());
-      principal = getPrincipal();
+      principal = identity.getPrincipal();
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "validate principal = " + principal);
 
@@ -387,8 +386,8 @@ public class JonasIdentity extends Identity {
     }
 
     // Add roles
-    Object[] roles = getRoles();
-    if (!Boolean.getBoolean(UNSORT_ROLES)) {
+    Object[] roles = identity.getRoles();
+    if (!Configuration.getBoolean(UNSORT_ROLES)) {
       // Sort roles before adding it to the signature to preserve the order
       Arrays.sort(roles);
     }
@@ -405,7 +404,7 @@ public class JonasIdentity extends Identity {
     // Check signature
     boolean trusted = false;
     try {
-      trusted = signature.verify(getSignature());
+      trusted = signature.verify(identity.getSignature());
     } catch (SignatureException e) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "EXCEPTION:: validate", e);
@@ -437,44 +436,55 @@ public class JonasIdentity extends Identity {
       throw new Exception("check : JonasIdentity is not an instance of " + identity);
     }
 
-    return validate();
+    return validate((JonasIdentity) identity);
   }
 
-  /**
-   * remove unserialized object.
-   * @param subject
-   * @return
-   */
-  private Subject serializeSubject(final Subject subject) {
-    Subject subjectSer = null;
-    try {
-      PipedOutputStream pos = new PipedOutputStream();
-      PipedInputStream pis = new PipedInputStream(pos);
-      final ObjectOutputStream oos = new ObjectOutputStream(pos);
-      new Thread() {
-        public void run() {
-          try {
-            oos.writeObject(subject);
-            oos.flush();
-          } catch (IOException e) {
-            if (logger.isLoggable(BasicLevel.ERROR))
-              logger.log(BasicLevel.ERROR, "EXCEPTION:: serializeSubject Thread", e);
-          }
-        }
-      }.start();
-      ObjectInputStream ois = new ObjectInputStream(pis);
-      subjectSer = (Subject) ois.readObject();
-      oos.close();
-      ois.close();
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "serializeSubject subjectSer = " + subjectSer);
-    } catch (Exception e) {
-      if (logger.isLoggable(BasicLevel.ERROR))
-        logger.log(BasicLevel.ERROR, "EXCEPTION:: serializeSubject", e);
-    }
-    return subjectSer;
+//  /**
+//   * remove unserialized object.
+//   * @param subject
+//   * @return
+//   */
+//  private Subject serializeSubject(final Subject subject) {
+//    Subject subjectSer = null;
+//    try {
+//      PipedOutputStream pos = new PipedOutputStream();
+//      PipedInputStream pis = new PipedInputStream(pos);
+//      final ObjectOutputStream oos = new ObjectOutputStream(pos);
+//      new Thread() {
+//        public void run() {
+//          try {
+//            oos.writeObject(subject);
+//            oos.flush();
+//          } catch (IOException e) {
+//            if (logger.isLoggable(BasicLevel.ERROR))
+//              logger.log(BasicLevel.ERROR, "EXCEPTION:: serializeSubject Thread", e);
+//          }
+//        }
+//      }.start();
+//      ObjectInputStream ois = new ObjectInputStream(pis);
+//      subjectSer = (Subject) ois.readObject();
+//      oos.close();
+//      ois.close();
+//      if (logger.isLoggable(BasicLevel.DEBUG))
+//        logger.log(BasicLevel.DEBUG, "serializeSubject subjectSer = " + subjectSer);
+//    } catch (Exception e) {
+//      if (logger.isLoggable(BasicLevel.ERROR))
+//        logger.log(BasicLevel.ERROR, "EXCEPTION:: serializeSubject", e);
+//    }
+//    return subjectSer;
+//  }
+  
+  public String toString() {
+    StringBuffer buff = new StringBuffer();
+    buff.append("JonasIdentity (");
+    buff.append("principal=");
+    buff.append(principal);
+    buff.append(",subject=");
+    buff.append(subject);
+    buff.append(')');
+    return buff.toString();
   }
-
+  
   /* (non-Javadoc)
    * @see org.objectweb.joram.shared.stream.Streamable#readFrom(java.io.InputStream)
    */
@@ -501,17 +511,6 @@ public class JonasIdentity extends Identity {
         bais.close();
       } catch (IOException exc) {}
     }
-  }
-
-  public String toString() {
-    StringBuffer buff = new StringBuffer();
-    buff.append("JonasIdentity (");
-    buff.append("principal=");
-    buff.append(principal);
-    buff.append(",subject=");
-    buff.append(subject);
-    buff.append(')');
-    return buff.toString();
   }
 
   /* (non-Javadoc)
