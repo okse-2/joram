@@ -62,7 +62,7 @@ public abstract class Identity implements Externalizable, Streamable {
    * get password or subject in jaas mode.
    * @return password or subject.
    */
-  public abstract Object getCredential();
+//  public abstract Object getCredential();
    
   /**
    * set the identity.
@@ -74,8 +74,10 @@ public abstract class Identity implements Externalizable, Streamable {
   
   /**
    * check the identity.
+   * 
+   * @param identity the identity to check
    * @return true if ok
-   * @throws Exception
+   * @throws Exception the exception
    */
   public abstract boolean check(Identity identity) throws Exception;
   
