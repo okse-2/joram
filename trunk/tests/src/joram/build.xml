@@ -4274,6 +4274,8 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="jca.test1.1"/>
     <antcall target="jca.test1.2"/>
     <antcall target="jca.test1.3"/>
+    <antcall target="jca.test1.4"/>
+    <antcall target="jca.test1.5"/>
   </target>
 
   <target name="jca.test1.1" depends="init.a3props,compile"
