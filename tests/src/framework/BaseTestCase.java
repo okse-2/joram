@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 20010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,18 +27,23 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -47,22 +52,24 @@ import java.util.zip.GZIPInputStream;
 import org.objectweb.joram.client.jms.ConnectionMetaData;
 
 /**
- * Utilitary functions for all test cases.
+ * Utility functions for all test cases.
  */
 public class BaseTestCase {
   private static BaseTestCase current = null;
 
   protected String name;
   protected boolean summary = true;
-  protected Vector failures;
-  protected Vector errors;
-  protected Vector exceptions;
+  protected List failures;
+  protected List errors;
+  protected List exceptions;
   protected PrintWriter writer = null;
+  protected boolean saveErrors = true;
   
   public BaseTestCase() {
     String id = System.getProperty("framework.TestCase.TestId");
     summary = new Boolean(System.getProperty("framework.TestCase.Summary", "true")).booleanValue();
     String outfile = System.getProperty("framework.TestCase.OutFile");
+    saveErrors = new Boolean(System.getProperty("framework.TestCase.SaveFailedTests", "true")).booleanValue();
 
     try {
       writer = new PrintWriter(new FileWriter(outfile, true));
@@ -772,7 +779,7 @@ public class BaseTestCase {
       if (current.writer != null) {
         for (int i=0; i<current.failures.size(); i++) {
           current.writer.print("+" + i + ") ");
-          ((Throwable) current.failures.elementAt(i)).printStackTrace(current.writer);
+          ((Throwable) current.failures.get(i)).printStackTrace(current.writer);
         }
       }
     }
@@ -782,7 +789,7 @@ public class BaseTestCase {
       if (current.writer != null) {
         for (int i=0; i<current.errors.size(); i++) {
           current.writer.print("+" + i + ") ");
-          ((Throwable) current.errors.elementAt(i)).printStackTrace(current.writer);
+          ((Throwable) current.errors.get(i)).printStackTrace(current.writer);
         }
       }
     }
@@ -791,7 +798,21 @@ public class BaseTestCase {
       if (current.writer != null) {
         for (int i=0; i<current.exceptions.size(); i++) {
           current.writer.print("+" + i + ") ");
-          ((Throwable) current.exceptions.elementAt(i)).printStackTrace(current.writer);
+          ((Throwable) current.exceptions.get(i)).printStackTrace(current.writer);
+        }
+      }
+    }
+
+    if (current.saveErrors
+        && (current.failures != null || current.errors != null || current.exceptions != null)) {
+      DateFormat df = new SimpleDateFormat("yy-MM-dd-HH.mm.ss ");
+      File currentDir = new File(".");
+      File destDir = new File("../" + df.format(new Date()) + current.name);
+      try {
+        copyDirectory(currentDir, destDir);
+      } catch (IOException exc) {
+        if (current.writer != null) {
+          current.writer.print("Error while saving the run directory: " + exc.getMessage());
         }
       }
     }
@@ -802,6 +823,41 @@ public class BaseTestCase {
     }
 
     if (exit) System.exit(status);
+  }
+
+  public static void copyDirectory(File srcPath, File dstPath) throws IOException {
+    if (srcPath.isDirectory()) {
+      if (!dstPath.exists()) {
+        dstPath.mkdir();
+      }
+      String files[] = srcPath.list();
+      for (int i = 0; i < files.length; i++) {
+        copyDirectory(new File(srcPath, files[i]), new File(dstPath, files[i]));
+      }
+    } else {
+      if (!srcPath.exists()) {
+        throw new IOException("Source path doesn't exists.");
+      } else {
+        if (srcPath.getName().endsWith(".lck")) {
+          return;
+        }
+        try {
+        InputStream in = new FileInputStream(srcPath);
+        OutputStream out = new FileOutputStream(dstPath);
+
+        // Transfer bytes from in to out
+        byte[] buf = new byte[1024];
+        int len;
+        while ((len = in.read(buf)) > 0) {
+          out.write(buf, 0, len);
+        }
+        in.close();
+        out.close();
+        } catch (IOException exc) {
+          throw new IOException(srcPath.toString() + ": " + exc.getMessage());
+        }
+      }
+    }
   }
 
   public static void writeSysInfo() {
@@ -863,7 +919,6 @@ public class BaseTestCase {
   }
 
   public static void main(String args[]) throws Exception {
-    BaseTestCase test = new BaseTestCase();
     assertFileIdentical(args[0], args[1]);
     endTest();
   }
