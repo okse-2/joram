@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -79,10 +79,6 @@ public class SCAdminOSGi implements SCAdminItf {
   }
 
   public void startAgentServer(short sid, short cid, String[] jvmargs) throws Exception {
-    startAgentServer(sid, cid, null, jvmargs);
-  }
-
-  private void startAgentServer(short sid, short cid, File dir, String[] jvmargs) throws Exception {
     logmon.log(BasicLevel.DEBUG, "SCAdminOSGi: run AgentServer#" + sid);
 
     Server server;
@@ -155,7 +151,7 @@ public class SCAdminOSGi implements SCAdminItf {
       logmon.log(BasicLevel.DEBUG, "SCAdmin" + ": launches AgentServer#" + sid + " with: " + argv);
     }
 
-    Process p = Runtime.getRuntime().exec((String[]) argv.toArray(new String[argv.size()]), null, dir);
+    Process p = Runtime.getRuntime().exec((String[]) argv.toArray(new String[argv.size()]));
 
     p.getInputStream().close();
     p.getOutputStream().close();
