@@ -1373,7 +1373,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     /** Destination server id */
     private short sid;
     /**
-     * Boolean variable used to stop the daemon properly. The dameon tests
+     * Boolean variable used to stop the daemon properly. The daemon tests
      * this variable between each request, and stops if it is false.
      * @see start
      * @see stop
@@ -1709,17 +1709,12 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         testBootTS(sid, boot);
         AgentServer.getTransaction().commit(true);
 
-        try {
-          NetworkOutputStream nos = new NetworkOutputStream(sock.getOutputStream());
-          NetworkInputStream nis = new NetworkInputStream(sock.getInputStream());
-          this.nis = nis;
-          this.nos = nos;
+        nis = new NetworkInputStream(sock.getInputStream());
+        nos = new NetworkOutputStream(sock.getOutputStream());
 
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG, getName() + ", connection done");
-        } catch (Exception exc) {
-          throw exc;
-        }
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG, getName() + ", connection done");
+
       } catch (Exception exc) {
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG, getName() + ", connection aborted", exc);
@@ -1760,8 +1755,6 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
      * <a href="#localStart()">localStart</a>.
      *
      * @param sock	the connected socket
-     * @param ois	the input stream
-     * @param oos	the output stream
      *
      * @return	true if the connection is established, false otherwise.
      */
@@ -1790,14 +1783,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         testBootTS(sid, boot);
         AgentServer.getTransaction().commit(true);
 
-        try {
-          NetworkOutputStream nos = new NetworkOutputStream(sock.getOutputStream());
-          NetworkInputStream nis = new NetworkInputStream(sock.getInputStream());
-          this.nis = nis;
-          this.nos = nos;
-        } catch (Exception exc) {
-          throw exc;
-        }
+        nis = new NetworkInputStream(sock.getInputStream());
+        nos = new NetworkOutputStream(sock.getOutputStream());
         
         // Fixing sock attribute will prevent any future attempt 
         this.sock = sock;
@@ -1833,7 +1820,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 
       for (int i = activeSessions.size() - 1; i >= 0; i--) {
         NetSession session = (NetSession) activeSessions.get(i);
-        if (!session.running) {
+        if (session != null && !session.running) {
           activeSessions.remove(i);
         }
       }
@@ -1842,21 +1829,28 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         // Insert the current session in the active pool.
         activeSessions.add(this);
       } else {
-        // Search the last recently used session in the pool.
+        // Search the least recently used session in the pool.
         long min = Long.MAX_VALUE;
         int idx = -1;
-        for (int i = 0; i < activeSessions.size(); i++) {
-          NetSession session = (NetSession) activeSessions.get(i);
-          if (session.last < min) {
-            idx = i;
-            min = session.last;
+        NetSession oldestSession = null;
+        do {
+          synchronized (activeSessions) {
+            for (int i = 0; i < activeSessions.size(); i++) {
+              NetSession session = (NetSession) activeSessions.get(i);
+              if (session != null && session.last < min) {
+                idx = i;
+                min = session.last;
+                oldestSession = session;
+              }
+            }
+            activeSessions.set(idx, null);
           }
-        }
+        } while (oldestSession == null);
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG, getName() + ", Kill session " + activeSessions.get(idx)
               + ",  and insert new one.");
         // Kill chosen session and insert new one
-        ((NetSession) activeSessions.get(idx)).stop();
+        oldestSession.stop();
         activeSessions.set(idx, this);
       }
       
@@ -1886,7 +1880,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       // terminate.
       if (Thread.currentThread() == thread) return;
 
-      while ((thread != null) && thread.isAlive()) {
+      while (thread != null && thread.isAlive()) {
         if (canStop) {
           if (thread.isAlive()) thread.interrupt();
           shutdown();
