@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2002 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2002 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -60,12 +60,13 @@ public class Test1 extends TestCase {
   public static final String OA1_VAL = new String("OA1_VAL");
   public static final String OA2_VAL = new String("OA2_VAL");
   public static final String OB1_VAL = new String("OB1_VAL");
-
+  
   public static void main(String[] args) {
-    try {
-      Test1 test = null;
+    new Test1().run();
+  }
 
-      test = new Test1();
+  public void run() {
+    try {
 
       Hashtable properties = System.getProperties();
       properties.put("java.naming.factory.initial", "fr.dyade.aaa.jndi2.client.NamingContextFactory");
@@ -74,6 +75,8 @@ public class Test1 extends TestCase {
     
       startAgentServer((short) 0, new String[] { "-DNTNoLockFile=true",
           "-DTransaction=fr.dyade.aaa.util.NTransaction" });
+
+      Thread.sleep(1000);
 
       Context ctx = new InitialContext();
 
@@ -189,11 +192,13 @@ public class Test1 extends TestCase {
 
       crashAgentServer((short)0);
         
-      Thread.sleep(2000);
+      Thread.sleep(1000);
       
       startAgentServer((short) 0, new String[] { "-DNTNoLockFile=true",
           "-DTransaction=fr.dyade.aaa.util.ATransaction" });
       
+      Thread.sleep(1000);
+
       ctx = new InitialContext();
 
       // - Check the persistent storage
@@ -255,11 +260,13 @@ public class Test1 extends TestCase {
 
       crashAgentServer((short)0);
         
-      Thread.sleep(2000);
+      Thread.sleep(1000);
       
       startAgentServer((short) 0, new String[] { "-DNTNoLockFile=true",
           "-DTransaction=fr.dyade.aaa.util.NTransaction" });
       
+      Thread.sleep(1000);
+
       ctx = new InitialContext();
 
       // - Destroy idempotency
