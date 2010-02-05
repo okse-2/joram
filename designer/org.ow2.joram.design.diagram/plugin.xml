@@ -51,7 +51,7 @@ Contributor(s):
   	  <wizard
   	     name="%newWizardName"
   	     icon="icons/obj16/JoramDiagramFile.gif"
-  	     category="org.eclipse.ui.Examples"
+  	     category="org.ow2.joram.design"
   	     class="org.ow2.joram.design.model.joram.diagram.part.JoramCreationWizard"
   	     id="org.ow2.joram.design.model.joram.diagram.part.JoramCreationWizardID">
   	  	 <description>%newWizardDesc</description>  
@@ -461,7 +461,7 @@ Contributor(s):
       <viewProvider class="org.ow2.joram.design.model.joram.diagram.providers.JoramViewProvider">
          <Priority name="Lowest"/>
          <context viewClass="org.eclipse.gmf.runtime.notation.Diagram" semanticHints="Joram"/>
-         <context viewClass="org.eclipse.gmf.runtime.notation.Node" semanticHints="2001,2002,2003,2004,3001,3002,3003,3004,3005,3006,3007,3008,3009,3010,3011,3012,3013,3014,3015,3016,3018,3019,3020,3021,3022,3023,3024,3025,3026,3027,3028,3029,3030,3031,3032,3033,3034,3035,3036,3037,3038,3039,3040,3041"/>
+         <context viewClass="org.eclipse.gmf.runtime.notation.Node" semanticHints="2001,2002,2003,2004,3001,3002,3003,3004,3005,3006,3007,3008,3009,3010,3011,3012,3013,3014,3015,3016,3017,3018,3019,3020,3021,3022,3023,3024,3025,3026,3027,3028,3029,3030,3031,3032,3033,3034,3035,3036,3037,3038,3039,3040"/>
          <context viewClass="org.eclipse.gmf.runtime.notation.Edge" semanticHints="4001"/>
       </viewProvider>
    </extension>
@@ -474,7 +474,7 @@ Contributor(s):
             <method name="getType()" value="Joram"/>
          </object>
          <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-nodes">
-            <method name="getType()" value="2001,2002,2003,2004,3001,3002,3003,3004,3005,3006,3007,3008,3009,3010,3011,3012,3013,3014,3015,3016,3018,3019,3020,3021,3022,3023,3024,3025,3026,3027,3028,3029,3030,3031,3032,3033,3034,3035,3036,3037,3038,3039,3040,3041"/>
+            <method name="getType()" value="2001,2002,2003,2004,3001,3002,3003,3004,3005,3006,3007,3008,3009,3010,3011,3012,3013,3014,3015,3016,3017,3018,3019,3020,3021,3022,3023,3024,3025,3026,3027,3028,3029,3030,3031,3032,3033,3034,3035,3036,3037,3038,3039,3040"/>
          </object>
          <object class="org.eclipse.gmf.runtime.notation.Edge" id="generated-links">
             <method name="getType()" value="4001"/>
@@ -483,7 +483,7 @@ Contributor(s):
             <method name="getType()" value="5001,5002,5003,5004,5005,5006"/>
          </object>
          <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-compartments">
-            <method name="getType()" value="7001,7002,7003,7005,7006,7007,7008"/>
+            <method name="getType()" value="7001,7002,7003,7004,7005,7006,7007"/>
          </object>
          <context views="generated-diagram,generated-nodes,generated-links,generated-labels,generated-compartments"/>
       </editpartProvider>
@@ -604,7 +604,7 @@ Contributor(s):
                name="%metatype.name.DistributedJNDIServer_3004"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="DistributedJNDIServer"
-               edithelper="org.ow2.joram.design.model.joram.diagram.edit.helpers.TCPProxyServiceEditHelper">
+               edithelper="org.ow2.joram.design.model.joram.diagram.edit.helpers.DistributedJNDIServerEditHelper">
             <param name="semanticHint" value="3004"/>
          </metamodelType>
       </metamodel>
@@ -614,7 +614,7 @@ Contributor(s):
                name="%metatype.name.TCPProxyService_3005"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="TCPProxyService"
-               edithelper="org.ow2.joram.design.model.joram.diagram.edit.helpers.TopicEditHelper">
+               edithelper="org.ow2.joram.design.model.joram.diagram.edit.helpers.TCPProxyServiceEditHelper">
             <param name="semanticHint" value="3005"/>
          </metamodelType>
       </metamodel>
@@ -624,7 +624,7 @@ Contributor(s):
                name="%metatype.name.CustomService_3006"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="CustomService"
-               edithelper="org.ow2.joram.design.model.joram.diagram.edit.helpers.QueueEditHelper">
+               edithelper="org.ow2.joram.design.model.joram.diagram.edit.helpers.CustomServiceEditHelper">
             <param name="semanticHint" value="3006"/>
          </metamodelType>
       </metamodel>
@@ -634,7 +634,7 @@ Contributor(s):
                name="%metatype.name.Topic_3007"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Topic"
-               edithelper="org.ow2.joram.design.model.joram.diagram.edit.helpers.UserEditHelper">
+               edithelper="org.ow2.joram.design.model.joram.diagram.edit.helpers.TopicEditHelper">
             <param name="semanticHint" value="3007"/>
          </metamodelType>
       </metamodel>
@@ -644,7 +644,7 @@ Contributor(s):
                name="%metatype.name.Queue_3008"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="Queue"
-               edithelper="org.ow2.joram.design.model.joram.diagram.edit.helpers.Queue2EditHelper">
+               edithelper="org.ow2.joram.design.model.joram.diagram.edit.helpers.QueueEditHelper">
             <param name="semanticHint" value="3008"/>
          </metamodelType>
       </metamodel>
@@ -654,7 +654,7 @@ Contributor(s):
                name="%metatype.name.User_3009"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="User"
-               edithelper="org.ow2.joram.design.model.joram.diagram.edit.helpers.User2EditHelper">
+               edithelper="org.ow2.joram.design.model.joram.diagram.edit.helpers.UserEditHelper">
             <param name="semanticHint" value="3009"/>
          </metamodelType>
       </metamodel>
@@ -674,7 +674,7 @@ Contributor(s):
                name="%metatype.name.CustomProperty_3011"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="CustomProperty"
-               edithelper="org.ow2.joram.design.model.joram.diagram.edit.helpers.CustomProperty2EditHelper">
+               edithelper="org.ow2.joram.design.model.joram.diagram.edit.helpers.CustomPropertyEditHelper">
             <param name="semanticHint" value="3011"/>
          </metamodelType>
       </metamodel>
@@ -684,7 +684,7 @@ Contributor(s):
                name="%metatype.name.PoolNetworkProperties_3012"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="PoolNetworkProperties"
-               edithelper="org.ow2.joram.design.model.joram.diagram.edit.helpers.CustomServiceEditHelper">
+               edithelper="org.ow2.joram.design.model.joram.diagram.edit.helpers.PoolNetworkPropertiesEditHelper">
             <param name="semanticHint" value="3012"/>
          </metamodelType>
       </metamodel>
@@ -704,7 +704,7 @@ Contributor(s):
                name="%metatype.name.HttpNetworkProperties_3014"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="HttpNetworkProperties"
-               edithelper="org.ow2.joram.design.model.joram.diagram.edit.helpers.CustomPropertyEditHelper">
+               edithelper="org.ow2.joram.design.model.joram.diagram.edit.helpers.HttpNetworkPropertiesEditHelper">
             <param name="semanticHint" value="3014"/>
          </metamodelType>
       </metamodel>
@@ -714,7 +714,7 @@ Contributor(s):
                name="%metatype.name.TransactionProperty_3015"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
                eclass="TransactionProperty"
-               edithelper="org.ow2.joram.design.model.joram.diagram.edit.helpers.PoolNetworkPropertiesEditHelper">
+               edithelper="org.ow2.joram.design.model.joram.diagram.edit.helpers.TransactionPropertyEditHelper">
             <param name="semanticHint" value="3015"/>
          </metamodelType>
       </metamodel>
@@ -730,218 +730,218 @@ Contributor(s):
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <specializationType
-               id="org.ow2.joram.design.diagram.AdminProxy_3018"
-               name="%metatype.name.AdminProxy_3018"
+               id="org.ow2.joram.design.diagram.AdminProxy_3017"
+               name="%metatype.name.AdminProxy_3017"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
             <specializes id="org.ow2.joram.design.diagram.AdminProxy_3001"/>
+            <param name="semanticHint" value="3017"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
+         <specializationType
+               id="org.ow2.joram.design.diagram.ConnectionManager_3018"
+               name="%metatype.name.ConnectionManager_3018"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.ow2.joram.design.diagram.ConnectionManager_3002"/>
             <param name="semanticHint" value="3018"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <specializationType
-               id="org.ow2.joram.design.diagram.ConnectionManager_3019"
-               name="%metatype.name.ConnectionManager_3019"
+               id="org.ow2.joram.design.diagram.JNDIServer_3019"
+               name="%metatype.name.JNDIServer_3019"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.ow2.joram.design.diagram.ConnectionManager_3002"/>
+            <specializes id="org.ow2.joram.design.diagram.JNDIServer_3003"/>
             <param name="semanticHint" value="3019"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <specializationType
-               id="org.ow2.joram.design.diagram.JNDIServer_3020"
-               name="%metatype.name.JNDIServer_3020"
+               id="org.ow2.joram.design.diagram.DistributedJNDIServer_3020"
+               name="%metatype.name.DistributedJNDIServer_3020"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.ow2.joram.design.diagram.JNDIServer_3003"/>
+            <specializes id="org.ow2.joram.design.diagram.DistributedJNDIServer_3004"/>
             <param name="semanticHint" value="3020"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <specializationType
-               id="org.ow2.joram.design.diagram.DistributedJNDIServer_3021"
-               name="%metatype.name.DistributedJNDIServer_3021"
+               id="org.ow2.joram.design.diagram.TCPProxyService_3021"
+               name="%metatype.name.TCPProxyService_3021"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.ow2.joram.design.diagram.DistributedJNDIServer_3004"/>
+            <specializes id="org.ow2.joram.design.diagram.TCPProxyService_3005"/>
             <param name="semanticHint" value="3021"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <specializationType
-               id="org.ow2.joram.design.diagram.TCPProxyService_3022"
-               name="%metatype.name.TCPProxyService_3022"
+               id="org.ow2.joram.design.diagram.CustomService_3022"
+               name="%metatype.name.CustomService_3022"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.ow2.joram.design.diagram.TCPProxyService_3005"/>
+            <specializes id="org.ow2.joram.design.diagram.CustomService_3006"/>
             <param name="semanticHint" value="3022"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <specializationType
-               id="org.ow2.joram.design.diagram.CustomService_3023"
-               name="%metatype.name.CustomService_3023"
+               id="org.ow2.joram.design.diagram.CustomProperty_3023"
+               name="%metatype.name.CustomProperty_3023"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.ow2.joram.design.diagram.CustomService_3006"/>
+            <specializes id="org.ow2.joram.design.diagram.CustomProperty_3011"/>
             <param name="semanticHint" value="3023"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <specializationType
-               id="org.ow2.joram.design.diagram.CustomProperty_3024"
-               name="%metatype.name.CustomProperty_3024"
+               id="org.ow2.joram.design.diagram.PoolNetworkProperties_3024"
+               name="%metatype.name.PoolNetworkProperties_3024"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.ow2.joram.design.diagram.CustomProperty_3011"/>
+            <specializes id="org.ow2.joram.design.diagram.PoolNetworkProperties_3012"/>
             <param name="semanticHint" value="3024"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <specializationType
-               id="org.ow2.joram.design.diagram.PoolNetworkProperties_3025"
-               name="%metatype.name.PoolNetworkProperties_3025"
+               id="org.ow2.joram.design.diagram.NetworkProperties_3025"
+               name="%metatype.name.NetworkProperties_3025"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.ow2.joram.design.diagram.PoolNetworkProperties_3012"/>
+            <specializes id="org.ow2.joram.design.diagram.NetworkProperties_3013"/>
             <param name="semanticHint" value="3025"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <specializationType
-               id="org.ow2.joram.design.diagram.NetworkProperties_3026"
-               name="%metatype.name.NetworkProperties_3026"
+               id="org.ow2.joram.design.diagram.HttpNetworkProperties_3026"
+               name="%metatype.name.HttpNetworkProperties_3026"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.ow2.joram.design.diagram.NetworkProperties_3013"/>
+            <specializes id="org.ow2.joram.design.diagram.HttpNetworkProperties_3014"/>
             <param name="semanticHint" value="3026"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <specializationType
-               id="org.ow2.joram.design.diagram.HttpNetworkProperties_3027"
-               name="%metatype.name.HttpNetworkProperties_3027"
+               id="org.ow2.joram.design.diagram.TransactionProperty_3027"
+               name="%metatype.name.TransactionProperty_3027"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.ow2.joram.design.diagram.HttpNetworkProperties_3014"/>
+            <specializes id="org.ow2.joram.design.diagram.TransactionProperty_3015"/>
             <param name="semanticHint" value="3027"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <specializationType
-               id="org.ow2.joram.design.diagram.TransactionProperty_3028"
-               name="%metatype.name.TransactionProperty_3028"
+               id="org.ow2.joram.design.diagram.NTransactionProperties_3028"
+               name="%metatype.name.NTransactionProperties_3028"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.ow2.joram.design.diagram.TransactionProperty_3015"/>
+            <specializes id="org.ow2.joram.design.diagram.NTransactionProperties_3016"/>
             <param name="semanticHint" value="3028"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <specializationType
-               id="org.ow2.joram.design.diagram.NTransactionProperties_3029"
-               name="%metatype.name.NTransactionProperties_3029"
+               id="org.ow2.joram.design.diagram.CustomProperty_3029"
+               name="%metatype.name.CustomProperty_3029"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.ow2.joram.design.diagram.NTransactionProperties_3016"/>
+            <specializes id="org.ow2.joram.design.diagram.CustomProperty_3011"/>
             <param name="semanticHint" value="3029"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <specializationType
-               id="org.ow2.joram.design.diagram.CustomProperty_3030"
-               name="%metatype.name.CustomProperty_3030"
+               id="org.ow2.joram.design.diagram.PoolNetworkProperties_3030"
+               name="%metatype.name.PoolNetworkProperties_3030"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.ow2.joram.design.diagram.CustomProperty_3011"/>
+            <specializes id="org.ow2.joram.design.diagram.PoolNetworkProperties_3012"/>
             <param name="semanticHint" value="3030"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <specializationType
-               id="org.ow2.joram.design.diagram.PoolNetworkProperties_3031"
-               name="%metatype.name.PoolNetworkProperties_3031"
+               id="org.ow2.joram.design.diagram.NetworkProperties_3031"
+               name="%metatype.name.NetworkProperties_3031"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.ow2.joram.design.diagram.PoolNetworkProperties_3012"/>
+            <specializes id="org.ow2.joram.design.diagram.NetworkProperties_3013"/>
             <param name="semanticHint" value="3031"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <specializationType
-               id="org.ow2.joram.design.diagram.NetworkProperties_3032"
-               name="%metatype.name.NetworkProperties_3032"
+               id="org.ow2.joram.design.diagram.HttpNetworkProperties_3032"
+               name="%metatype.name.HttpNetworkProperties_3032"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.ow2.joram.design.diagram.NetworkProperties_3013"/>
+            <specializes id="org.ow2.joram.design.diagram.HttpNetworkProperties_3014"/>
             <param name="semanticHint" value="3032"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <specializationType
-               id="org.ow2.joram.design.diagram.HttpNetworkProperties_3033"
-               name="%metatype.name.HttpNetworkProperties_3033"
+               id="org.ow2.joram.design.diagram.TransactionProperty_3033"
+               name="%metatype.name.TransactionProperty_3033"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.ow2.joram.design.diagram.HttpNetworkProperties_3014"/>
+            <specializes id="org.ow2.joram.design.diagram.TransactionProperty_3015"/>
             <param name="semanticHint" value="3033"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <specializationType
-               id="org.ow2.joram.design.diagram.TransactionProperty_3034"
-               name="%metatype.name.TransactionProperty_3034"
+               id="org.ow2.joram.design.diagram.NTransactionProperties_3034"
+               name="%metatype.name.NTransactionProperties_3034"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.ow2.joram.design.diagram.TransactionProperty_3015"/>
+            <specializes id="org.ow2.joram.design.diagram.NTransactionProperties_3016"/>
             <param name="semanticHint" value="3034"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <specializationType
-               id="org.ow2.joram.design.diagram.NTransactionProperties_3035"
-               name="%metatype.name.NTransactionProperties_3035"
+               id="org.ow2.joram.design.diagram.CustomProperty_3035"
+               name="%metatype.name.CustomProperty_3035"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.ow2.joram.design.diagram.NTransactionProperties_3016"/>
+            <specializes id="org.ow2.joram.design.diagram.CustomProperty_3011"/>
             <param name="semanticHint" value="3035"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <specializationType
-               id="org.ow2.joram.design.diagram.CustomProperty_3036"
-               name="%metatype.name.CustomProperty_3036"
+               id="org.ow2.joram.design.diagram.PoolNetworkProperties_3036"
+               name="%metatype.name.PoolNetworkProperties_3036"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.ow2.joram.design.diagram.CustomProperty_3011"/>
+            <specializes id="org.ow2.joram.design.diagram.PoolNetworkProperties_3012"/>
             <param name="semanticHint" value="3036"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <specializationType
-               id="org.ow2.joram.design.diagram.PoolNetworkProperties_3037"
-               name="%metatype.name.PoolNetworkProperties_3037"
+               id="org.ow2.joram.design.diagram.NetworkProperties_3037"
+               name="%metatype.name.NetworkProperties_3037"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.ow2.joram.design.diagram.PoolNetworkProperties_3012"/>
+            <specializes id="org.ow2.joram.design.diagram.NetworkProperties_3013"/>
             <param name="semanticHint" value="3037"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <specializationType
-               id="org.ow2.joram.design.diagram.NetworkProperties_3038"
-               name="%metatype.name.NetworkProperties_3038"
+               id="org.ow2.joram.design.diagram.HttpNetworkProperties_3038"
+               name="%metatype.name.HttpNetworkProperties_3038"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.ow2.joram.design.diagram.NetworkProperties_3013"/>
+            <specializes id="org.ow2.joram.design.diagram.HttpNetworkProperties_3014"/>
             <param name="semanticHint" value="3038"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <specializationType
-               id="org.ow2.joram.design.diagram.HttpNetworkProperties_3039"
-               name="%metatype.name.HttpNetworkProperties_3039"
+               id="org.ow2.joram.design.diagram.TransactionProperty_3039"
+               name="%metatype.name.TransactionProperty_3039"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.ow2.joram.design.diagram.HttpNetworkProperties_3014"/>
+            <specializes id="org.ow2.joram.design.diagram.TransactionProperty_3015"/>
             <param name="semanticHint" value="3039"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
          <specializationType
-               id="org.ow2.joram.design.diagram.TransactionProperty_3040"
-               name="%metatype.name.TransactionProperty_3040"
-               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
-            <specializes id="org.ow2.joram.design.diagram.TransactionProperty_3015"/>
-            <param name="semanticHint" value="3040"/>
-         </specializationType>
-      </metamodel>
-      <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
-         <specializationType
-               id="org.ow2.joram.design.diagram.NTransactionProperties_3041"
-               name="%metatype.name.NTransactionProperties_3041"
+               id="org.ow2.joram.design.diagram.NTransactionProperties_3040"
+               name="%metatype.name.NTransactionProperties_3040"
                kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
             <specializes id="org.ow2.joram.design.diagram.NTransactionProperties_3016"/>
-            <param name="semanticHint" value="3041"/>
+            <param name="semanticHint" value="3040"/>
          </specializationType>
       </metamodel>
       <metamodel nsURI="http:///joram.ow2.org/ecore/joram">
@@ -987,30 +987,30 @@ Contributor(s):
          <elementType ref="org.ow2.joram.design.diagram.HttpNetworkProperties_3014"/>
          <elementType ref="org.ow2.joram.design.diagram.TransactionProperty_3015"/>
          <elementType ref="org.ow2.joram.design.diagram.NTransactionProperties_3016"/>
-         <elementType ref="org.ow2.joram.design.diagram.AdminProxy_3018"/>
-         <elementType ref="org.ow2.joram.design.diagram.ConnectionManager_3019"/>
-         <elementType ref="org.ow2.joram.design.diagram.JNDIServer_3020"/>
-         <elementType ref="org.ow2.joram.design.diagram.DistributedJNDIServer_3021"/>
-         <elementType ref="org.ow2.joram.design.diagram.TCPProxyService_3022"/>
-         <elementType ref="org.ow2.joram.design.diagram.CustomService_3023"/>
-         <elementType ref="org.ow2.joram.design.diagram.CustomProperty_3024"/>
-         <elementType ref="org.ow2.joram.design.diagram.PoolNetworkProperties_3025"/>
-         <elementType ref="org.ow2.joram.design.diagram.NetworkProperties_3026"/>
-         <elementType ref="org.ow2.joram.design.diagram.HttpNetworkProperties_3027"/>
-         <elementType ref="org.ow2.joram.design.diagram.TransactionProperty_3028"/>
-         <elementType ref="org.ow2.joram.design.diagram.NTransactionProperties_3029"/>
-         <elementType ref="org.ow2.joram.design.diagram.CustomProperty_3030"/>
-         <elementType ref="org.ow2.joram.design.diagram.PoolNetworkProperties_3031"/>
-         <elementType ref="org.ow2.joram.design.diagram.NetworkProperties_3032"/>
-         <elementType ref="org.ow2.joram.design.diagram.HttpNetworkProperties_3033"/>
-         <elementType ref="org.ow2.joram.design.diagram.TransactionProperty_3034"/>
-         <elementType ref="org.ow2.joram.design.diagram.NTransactionProperties_3035"/>
-         <elementType ref="org.ow2.joram.design.diagram.CustomProperty_3036"/>
-         <elementType ref="org.ow2.joram.design.diagram.PoolNetworkProperties_3037"/>
-         <elementType ref="org.ow2.joram.design.diagram.NetworkProperties_3038"/>
-         <elementType ref="org.ow2.joram.design.diagram.HttpNetworkProperties_3039"/>
-         <elementType ref="org.ow2.joram.design.diagram.TransactionProperty_3040"/>
-         <elementType ref="org.ow2.joram.design.diagram.NTransactionProperties_3041"/>
+         <elementType ref="org.ow2.joram.design.diagram.AdminProxy_3017"/>
+         <elementType ref="org.ow2.joram.design.diagram.ConnectionManager_3018"/>
+         <elementType ref="org.ow2.joram.design.diagram.JNDIServer_3019"/>
+         <elementType ref="org.ow2.joram.design.diagram.DistributedJNDIServer_3020"/>
+         <elementType ref="org.ow2.joram.design.diagram.TCPProxyService_3021"/>
+         <elementType ref="org.ow2.joram.design.diagram.CustomService_3022"/>
+         <elementType ref="org.ow2.joram.design.diagram.CustomProperty_3023"/>
+         <elementType ref="org.ow2.joram.design.diagram.PoolNetworkProperties_3024"/>
+         <elementType ref="org.ow2.joram.design.diagram.NetworkProperties_3025"/>
+         <elementType ref="org.ow2.joram.design.diagram.HttpNetworkProperties_3026"/>
+         <elementType ref="org.ow2.joram.design.diagram.TransactionProperty_3027"/>
+         <elementType ref="org.ow2.joram.design.diagram.NTransactionProperties_3028"/>
+         <elementType ref="org.ow2.joram.design.diagram.CustomProperty_3029"/>
+         <elementType ref="org.ow2.joram.design.diagram.PoolNetworkProperties_3030"/>
+         <elementType ref="org.ow2.joram.design.diagram.NetworkProperties_3031"/>
+         <elementType ref="org.ow2.joram.design.diagram.HttpNetworkProperties_3032"/>
+         <elementType ref="org.ow2.joram.design.diagram.TransactionProperty_3033"/>
+         <elementType ref="org.ow2.joram.design.diagram.NTransactionProperties_3034"/>
+         <elementType ref="org.ow2.joram.design.diagram.CustomProperty_3035"/>
+         <elementType ref="org.ow2.joram.design.diagram.PoolNetworkProperties_3036"/>
+         <elementType ref="org.ow2.joram.design.diagram.NetworkProperties_3037"/>
+         <elementType ref="org.ow2.joram.design.diagram.HttpNetworkProperties_3038"/>
+         <elementType ref="org.ow2.joram.design.diagram.TransactionProperty_3039"/>
+         <elementType ref="org.ow2.joram.design.diagram.NTransactionProperties_3040"/>
          <elementType ref="org.ow2.joram.design.diagram.NetworkPort_4001"/>
          <advice ref="org.eclipse.gmf.runtime.diagram.core.advice.notationDepdendents"/>
       </binding>
