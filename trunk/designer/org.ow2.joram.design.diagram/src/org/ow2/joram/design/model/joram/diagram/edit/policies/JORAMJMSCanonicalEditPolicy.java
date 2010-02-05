@@ -1,3 +1,25 @@
+/*
+ * Copyright (C) 2009 - 2010 ScalAgent Distributed Technologies
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
+ * 
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
+ * 
+ */
 package org.ow2.joram.design.model.joram.diagram.edit.policies;
 
 import java.util.Collection;
@@ -13,13 +35,7 @@ import org.eclipse.gmf.runtime.diagram.ui.editpolicies.CanonicalEditPolicy;
 import org.eclipse.gmf.runtime.notation.View;
 import org.ow2.joram.design.model.joram.JoramPackage;
 import org.ow2.joram.design.model.joram.diagram.edit.parts.ConnectionFactoryEditPart;
-import org.ow2.joram.design.model.joram.diagram.edit.parts.CustomProperty2EditPart;
-import org.ow2.joram.design.model.joram.diagram.edit.parts.CustomPropertyEditPart;
-import org.ow2.joram.design.model.joram.diagram.edit.parts.CustomService2EditPart;
-import org.ow2.joram.design.model.joram.diagram.edit.parts.CustomServiceEditPart;
-import org.ow2.joram.design.model.joram.diagram.edit.parts.PoolNetworkPropertiesEditPart;
 import org.ow2.joram.design.model.joram.diagram.edit.parts.QueueEditPart;
-import org.ow2.joram.design.model.joram.diagram.edit.parts.TCPProxyService2EditPart;
 import org.ow2.joram.design.model.joram.diagram.edit.parts.TopicEditPart;
 import org.ow2.joram.design.model.joram.diagram.edit.parts.UserEditPart;
 import org.ow2.joram.design.model.joram.diagram.part.JoramDiagramUpdater;
