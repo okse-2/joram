@@ -184,11 +184,6 @@
       name="Global Properties"
       figure="ConfigPropertiesFigure"
       needsTitle="true"/>
-  <compartments
-      name="JNDI Access"
-      figure="CompartmentFigure"
-      collapsible="true"
-      needsTitle="true"/>
   <labels
       name="GenericLabel"
       figure="GenericLabelDescriptor"/>
