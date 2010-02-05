@@ -2,7 +2,7 @@
 <?eclipse version="3.0"?>
 
 <!--
-Copyright (C) 2009 ScalAgent Distributed Technologies
+Copyright (C) 2009 - 2010 ScalAgent Distributed Technologies
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -27,13 +27,13 @@ Contributor(s):
 
    <extension point="org.eclipse.ui.newWizards">
       <category
-            id="org.eclipse.emf.ecore.Wizard.category.ID"
+            id="org.ow2.joram.design"
             name="%_UI_Wizard_category"/>
       <wizard
             id="org.ow2.joram.design.model.joram.presentation.JoramModelWizardID"
             name="%_UI_JoramModelWizard_label"
             class="org.ow2.joram.design.model.joram.presentation.JoramModelWizard"
-            category="org.eclipse.emf.ecore.Wizard.category.ID"
+            category="org.ow2.joram.design"
             icon="icons/full/obj16/JoramModelFile.gif">
          <description>%_UI_JoramModelWizard_description</description>
          <selection class="org.eclipse.core.resources.IResource"/>
