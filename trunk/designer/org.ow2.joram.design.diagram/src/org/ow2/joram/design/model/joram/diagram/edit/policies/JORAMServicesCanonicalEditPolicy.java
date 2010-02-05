@@ -15,6 +15,7 @@ import org.ow2.joram.design.model.joram.JoramPackage;
 import org.ow2.joram.design.model.joram.diagram.edit.parts.AdminProxyEditPart;
 import org.ow2.joram.design.model.joram.diagram.edit.parts.ConnectionManagerEditPart;
 import org.ow2.joram.design.model.joram.diagram.edit.parts.CustomServiceEditPart;
+import org.ow2.joram.design.model.joram.diagram.edit.parts.DistributedJNDIServerEditPart;
 import org.ow2.joram.design.model.joram.diagram.edit.parts.JNDIServerEditPart;
 import org.ow2.joram.design.model.joram.diagram.edit.parts.QueueEditPart;
 import org.ow2.joram.design.model.joram.diagram.edit.parts.TCPProxyServiceEditPart;
@@ -66,9 +67,9 @@ public class JORAMServicesCanonicalEditPolicy extends CanonicalEditPolicy {
     case AdminProxyEditPart.VISUAL_ID:
     case ConnectionManagerEditPart.VISUAL_ID:
     case JNDIServerEditPart.VISUAL_ID:
+    case DistributedJNDIServerEditPart.VISUAL_ID:
     case TCPProxyServiceEditPart.VISUAL_ID:
-    case TopicEditPart.VISUAL_ID:
-    case QueueEditPart.VISUAL_ID:
+    case CustomServiceEditPart.VISUAL_ID:
       if (!semanticChildren.contains(view.getElement())) {
         return true;
       }
