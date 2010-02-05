@@ -75,8 +75,8 @@
       </tools>
       <tools
           xsi:type="gmftool:CreationTool"
-          title="Distributed JNDI Server"
-          description="Adds a new ditributed JNDIServer on a JORAM server">
+          title="DistributedJNDIServer"
+          description="Adds a new distributed JNDIServer on a JORAM server">
         <smallIcon
             xsi:type="gmftool:DefaultImage"/>
         <largeIcon
