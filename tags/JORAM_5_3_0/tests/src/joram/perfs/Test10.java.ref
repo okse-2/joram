@@ -1,0 +1,141 @@
+/*
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2003 - 2004 ScalAgent Distributed Technologies
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
+ *
+ * Initial developer(s): Freyssinet Andre (ScalAgent D.T.)
+ * Contributor(s):
+ */
+package joram.perfs;
+
+import java.lang.reflect.Method;
+
+import javax.jms.*;
+
+import fr.dyade.aaa.agent.AgentServer;
+
+import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.Destination;
+
+/**
+ *
+ */
+public class Test10 extends BaseTest {
+  static int NbRound = 100;
+  static ConnectionFactory cf = null;
+
+  public static void main (String args[]) throws Exception {
+    startServer();
+
+    String baseclass = "joram.perfs.TcpBaseTest";
+    baseclass = System.getProperty("BaseClass", baseclass);
+
+    NbRound = Integer.getInteger("NbRound", NbRound).intValue();
+
+    AdminConnect(baseclass);
+
+    Destination dest = createDestination("org.objectweb.joram.client.jms.Topic");
+    dest.setFreeReading();
+    dest.setFreeWriting();
+
+    User user = User.create("anonymous", "anonymous", 0);
+
+    org.objectweb.joram.client.jms.admin.AdminModule.disconnect();
+
+    ConnectionFactory cf =  createConnectionFactory(baseclass);
+
+    Consumer10 c1 = new Consumer10(cf, dest, "");
+    c1.start();
+
+    Consumer10 c2 = new Consumer10(cf, dest,
+                                   "type=4 and hostname='192.168.11.117'");
+    c2.start();
+
+    Connection cnx = cf.createConnection();
+    ConnectionMetaData cnxmd = cnx.getMetaData();
+
+    System.out.println("====================================================");
+    System.out.println("Provider: " + cnxmd.getJMSProviderName() + cnxmd.getProviderVersion());
+    System.out.println("Transaction: " + System.getProperty("Transaction"));
+    System.out.println("Engine: " + System.getProperty("Engine"));
+    System.out.println("baseclass: " + baseclass);
+    System.out.println("NbRound=" + NbRound);
+    System.out.println("====================================================");
+
+    Session sess1 = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+    MessageProducer producer = sess1.createProducer(dest);
+    cnx.start();
+
+    int counter = 0;
+    for (int i=0; i<NbRound; i++) {
+      Message msg = sess1.createMessage();
+      if ((i%2) == 0) {
+        msg.setIntProperty("type", 4);
+        if ((i%4) == 0) {
+          msg.setStringProperty("hostname", "192.168.11.117");
+          counter += 1;
+        } else {
+          msg.setStringProperty("hostname", "192.168.1.1");
+        }
+      }
+      producer.send(msg);
+    }
+
+    Thread.sleep(1000L);
+    System.out.println("counters c1=" + c1.counter + ", c2=" + c2.counter);
+    if ((c1.counter == NbRound) &&
+        (c2.counter == counter))
+      System.out.println("Test OK");
+    else
+      System.out.println("Test FAILED");
+
+    System.exit(0);
+  }
+}
+
+class Consumer10 implements MessageListener {
+  Connection cnx;
+  Destination dest;
+  String selector;
+
+  Session sess;
+  MessageConsumer cons;
+
+  public Consumer10(ConnectionFactory cf, Destination dest, String selector) throws Exception {
+    this.cnx = cf.createConnection();
+    this.dest = dest;
+    this.selector = selector;
+
+    sess = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+    cons = sess.createConsumer(dest, selector);
+    cons.setMessageListener(this);
+  }
+
+  public void start() throws Exception {
+    cnx.start();
+  }
+
+  int counter = 0;
+
+  public synchronized void onMessage(Message msg) {
+    try {
+      counter += 1;
+    } catch (Throwable exc) {
+      exc.printStackTrace();
+    }
+  }
+}
