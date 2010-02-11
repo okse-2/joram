@@ -37,17 +37,17 @@
   <name>bundle JORAM :: Common util</name>
 
   <dependencies>
-  <dependency>
+    <dependency>
       <groupId>org.ow2.jonas.osgi</groupId>
       <artifactId>monolog</artifactId>
       <version>5.1.1</version>
-    </dependency>
+      </dependency>
 <!--    <dependency>-->
 <!--      <groupId>org.objectweb.monolog</groupId>-->
 <!--      <artifactId>monolog</artifactId>-->
 <!--      <version>${monolog.version}</version>-->
 <!--    </dependency>-->
-<!--    <dependency>-->
+    <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.main</artifactId>
       <version>${felix.version}</version>
