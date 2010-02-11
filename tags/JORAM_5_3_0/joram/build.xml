@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+
+<project name="joram" default="releases" basedir=".">
+  
+  <target name="clean">
+    <ant dir="src" antfile="joram.xml" target="clean"/>
+    <ant dir="src" antfile="joram.xml" target="clean.releases"/>
+  </target>
+    
+  <!-- JORAM releases target -->
+  <target name="releases"
+          description="--> Builds a Joram complete distribution.">
+    <ant dir="src" antfile="joram.xml" target="releases"/>
+    <property name="buildAdapters" value="false"/>
+    <antcall target="maven:deploy" inheritall="true"/>
+  </target>
+
+  <!-- JORAM snapshot releases target -->
+  <target name="snapshot"
+          description="--> Builds a Joram complete snapshot distribution.">
+    <ant dir="src" antfile="joram.xml" target="snapshot"/>
+    <property name="buildAdapters" value="false"/>
+    <antcall target="deploy_snapshot" inheritall="true"/>
+  </target>
+  
+  <!-- JORAM shipment target -->
+  <target name="ship"
+          description="--> Build jars needed to use Joram">
+    <ant dir="src" antfile="joram.xml" target="clean" />
+    <ant dir="src" antfile="joram.xml" target="ship" />
+  </target>
+
+  <target name="adapters" unless="buildAdapters">
+    <ant dir="src" antfile="joram.xml" target="clean" />
+    <ant dir="src" antfile="joram.xml" target="ship.adapters"/>
+  	<ant dir="src" antfile="joram.xml" target="ship.osgi"/>
+  </target>
+
+  <!-- =================================
+          target: deploy_snapshot
+         ================================= -->
+  <target name="deploy_snapshot"
+          depends="adapters"
+          description="--> Deploy JORAM SNAPSHOT on the OW2 repository">
+
+    <ant antfile="maven-build.xml" target="deploy_snapshot" />
+  </target>
+    
+  <!-- =================================
+          target: install_snapshot
+         ================================= -->
+  <target name="install_snapshot"
+          depends="adapters"
+          description="--> Install JORAM SNAPSHOT in the local artifact repository">
+
+    <ant antfile="maven-build.xml" target="install_snapshot" />
+  </target>
+  
+  <!-- =================================
+          target: maven:deploy
+         ================================= -->
+  <target name="maven:deploy"
+          depends="adapters"
+          description="--> Deploy JORAM on the OW2 Release repository">
+
+    <ant antfile="maven-build.xml" target="deploy" />
+  </target>
+
+  <!-- =================================
+          target: maven:install
+         ================================= -->
+  <target name="maven:install"
+          depends="adapters"
+          description="--> Install JORAM in the local artifact repository">
+
+    <ant antfile="maven-build.xml" target="install" />
+  </target>
+
+</project>
