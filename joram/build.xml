@@ -33,6 +33,7 @@
   <target name="adapters" unless="buildAdapters">
     <ant dir="src" antfile="joram.xml" target="clean" />
     <ant dir="src" antfile="joram.xml" target="ship.adapters"/>
+  	<ant dir="src" antfile="joram.xml" target="ship.osgi"/>
   </target>
 
   <!-- =================================
