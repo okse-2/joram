@@ -38,10 +38,15 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.objectweb.monolog</groupId>
+      <groupId>org.ow2.jonas.osgi</groupId>
       <artifactId>monolog</artifactId>
-      <version>${monolog.version}</version>
+      <version>5.1.1</version>
     </dependency>
+<!--    <dependency>-->
+<!--      <groupId>org.objectweb.monolog</groupId>-->
+<!--      <artifactId>monolog</artifactId>-->
+<!--      <version>${monolog.version}</version>-->
+<!--    </dependency>-->
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.main</artifactId>
