@@ -176,7 +176,7 @@ class TcpChannel : public Channel {
     in = new InputStream();
 
     // Joram magic number: should be defined in another way..
-    byte magic[] = {'J', 'O', 'R', 'A', 'M', 5, 2, 52};
+    byte magic[] = {'J', 'O', 'R', 'A', 'M', 5, 3, 53};
 
     // Writes the Joram magic number
     if (out->writeBuffer(magic, 8) ==-1) throw IOException();
