@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -149,10 +149,12 @@ import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.joram.shared.security.Identity;
+import org.objectweb.joram.shared.security.SimpleIdentity;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.ServerConfigHelper;
@@ -949,7 +951,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * requesting the creation of a destination.
    *
    * @exception UnknownServerException  If the target server does not exist.
-   * @exception RequestException  If the destination deployement fails.
+   * @exception RequestException  If the destination deployment fails.
    */
   private void doProcess(CreateDestinationRequest request,
                          AgentId replyTo,
@@ -980,6 +982,54 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       forward(AdminTopic.getDefault((short) request.getServerId()),
               new AdminRequestNot(replyTo, msgId, request));
     }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void createTopic(String name) {
+    createTopic(name, serverId);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void createQueue(String name) {
+    createQueue(name, serverId);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void createTopic(String name, int serverId) {
+    createTopic(name, Topic.class.getName(), serverId);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void createQueue(String name, int serverId) {
+    createQueue(name, Queue.class.getName(), serverId);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void createTopic(String name, String topicClassName, int serverId) {
+    CreateDestinationRequest request = new CreateDestinationRequest(serverId, name, topicClassName, null,
+        DestinationConstants.TOPIC_TYPE);
+    AdminRequestNot createNot = new AdminRequestNot(null, null, request);
+    Channel.sendTo(getId(), createNot);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void createQueue(String name, String queueClassName, int serverId) {
+    CreateDestinationRequest request = new CreateDestinationRequest(serverId, name, queueClassName, null,
+        DestinationConstants.QUEUE_TYPE);
+    AdminRequestNot createNot = new AdminRequestNot(null, null, request);
+    Channel.sendTo(getId(), createNot);
   }
 
   /**
@@ -1188,7 +1238,40 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       forward(AdminTopic.getDefault(topId.getTo()),
               new AdminRequestNot(replyTo, msgId, request));
     }
-                         }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void createUser(String user, String passwd) throws Exception {
+    createUser(user, passwd, serverId);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void createUser(String user, String passwd, int serverId) throws Exception {
+    createUser(user, passwd, serverId, SimpleIdentity.class.getName());
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public void createUser(String user, String passwd, int serverId, String identityClassName) throws Exception {
+    Identity identity = null;
+    try {
+      identity = (Identity) Class.forName(identityClassName).newInstance();
+      if (passwd != null)
+        identity.setIdentity(user, passwd);
+      else
+        identity.setUserName(user);
+    } catch (Exception e) {
+      throw new RequestException(e.getMessage());
+    }
+    CreateUserRequest request = new CreateUserRequest(identity, serverId);
+    AdminRequestNot createNot = new AdminRequestNot(null, null, request);
+    Channel.sendTo(getId(), createNot);
+  }
 
   /**
    * Processes a <code>CreateUserRequest</code> instance requesting the
@@ -1198,7 +1281,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * @exception RequestException  If the user already exists but with a
    *              different password, or if the proxy deployment failed.
    */
-  public void doProcess(CreateUserRequest request,
+  private void doProcess(CreateUserRequest request,
                         AgentId replyTo,
                         String msgId)
   throws UnknownServerException, RequestException {
@@ -2612,4 +2695,5 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   public static boolean isDestinationTableContain(String destName) {
     return ref.destinationsTable.containsKey(destName);
   }
+
 }
