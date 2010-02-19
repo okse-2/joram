@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -58,7 +58,7 @@ interface MessageQueue {
   public Message pop() throws EmptyQueueException;
 
   /**
-   * Atomicaly validates all messages pushed in queue during a reaction.
+   * Atomically validates all messages pushed in queue during a reaction.
    * It must only be used during a transaction.
    */
   public void validate();
