@@ -1267,7 +1267,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         }
       }
       
-      // Inserts all non acknowledged messages in msgTosent list so they can be
+      // Inserts all non acknowledged messages in msgTosend list so they can be
       // sent by the sender daemon.
       // TODO: We have also to keep and transmit the stamp of last received
       // message in order to avoid useless transmission from the remote server.
@@ -1372,20 +1372,24 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     
     /** Destination server id */
     private short sid;
+
     /**
      * Boolean variable used to stop the daemon properly. The daemon tests
      * this variable between each request, and stops if it is false.
      * @see start
      * @see stop
      */
+
     private volatile boolean running = false;
     /**
      * True if the sessions can be stopped, false otherwise. A session can
      * be stopped if it is waiting.
      */
     private boolean canStop = false;
+
     /** The thread. */
     private Thread thread = null;
+
     /** The session's name. */
     private String name = null;
 
@@ -1818,10 +1822,12 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       server.active = true;
       server.retry = 0;
 
-      for (int i = activeSessions.size() - 1; i >= 0; i--) {
-        NetSession session = (NetSession) activeSessions.get(i);
-        if (session != null && !session.running) {
-          activeSessions.remove(i);
+      synchronized (activeSessions) {
+        for (int i = activeSessions.size() - 1; i >= 0; i--) {
+          NetSession session = (NetSession) activeSessions.get(i);
+          if (!session.running) {
+            activeSessions.remove(i);
+          }
         }
       }
       
@@ -1833,25 +1839,24 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         long min = Long.MAX_VALUE;
         int idx = -1;
         NetSession oldestSession = null;
-        do {
-          synchronized (activeSessions) {
+        synchronized (activeSessions) {
+          do {
             for (int i = 0; i < activeSessions.size(); i++) {
               NetSession session = (NetSession) activeSessions.get(i);
-              if (session != null && session.last < min) {
+              if (session.last < min) {
                 idx = i;
                 min = session.last;
                 oldestSession = session;
               }
             }
-            activeSessions.set(idx, null);
-          }
-        } while (oldestSession == null);
-        if (logmon.isLoggable(BasicLevel.DEBUG))
-          logmon.log(BasicLevel.DEBUG, getName() + ", Kill session " + activeSessions.get(idx)
-              + ",  and insert new one.");
-        // Kill chosen session and insert new one
-        oldestSession.stop();
-        activeSessions.set(idx, this);
+          } while (oldestSession == null);
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG, getName() + ", Kill session " + oldestSession
+                + ",  and insert new one.");
+          // Kill chosen session and insert new one
+          oldestSession.stop();
+          activeSessions.set(idx, this);
+        }
       }
       
       last = System.currentTimeMillis();
@@ -1960,17 +1965,6 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
      * @throws Exception  
      */
     final private void removeExpired(Message msg) {
-      int stamp = msg.getStamp();
-      
-      try {
-        //  Suppress the acknowledged notification from waiting list,
-        // and deletes it.
-        sendList.removeMessage(stamp);
-      } catch (NoSuchElementException exc) {
-        if (logmon.isLoggable(BasicLevel.WARN))
-          logmon.log(BasicLevel.WARN,
-                   getName() + ", can't removes unknown expired msg#" + stamp);
-      }
       
       try {
         AgentServer.getTransaction().begin();
@@ -2000,8 +1994,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         AgentServer.getTransaction().commit(true);
       } catch (Exception exc) {
         if (logmon.isLoggable(BasicLevel.WARN))
-          logmon.log(BasicLevel.WARN,
-                     getName() + ", exception in removeExpired msg#" + stamp, exc);
+          logmon.log(BasicLevel.WARN, getName() + ", exception in removeExpired msg#" + msg.getStamp(), exc);
       }
     }
 
@@ -2050,12 +2043,11 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 
         if (msg.not != null) {
           nbMessageSent += 1;
-          sendList.addElement(msg);
-
           if ((msg.not.expiration > 0) && (msg.not.expiration < currentTimeMillis)) {
             removeExpired(msg);
             return;
           }
+          sendList.add(msg);
         } else {
           nbAckSent += 1;
         }
@@ -2091,13 +2083,12 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         if (msg.not != null) {
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG, getName() + ", move msg#" + msg.getStamp() + " to sendList");
-          
-          sendList.addElement(msg);
 
           if ((msg.not.expiration > 0) && (msg.not.expiration < currentTimeMillis)) {
             removeExpired(msg);
             return;
           }
+          sendList.add(msg);
         }
       }
     }
