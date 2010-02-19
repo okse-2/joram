@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,9 +21,12 @@
  */
 package fr.dyade.aaa.agent;
 
+import java.lang.ref.SoftReference;
+
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
+import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.EmptyQueueException;
 
 /**
@@ -129,7 +132,7 @@ final class MessageVector implements MessageQueue {
   }
 
   /**
-   * Atomicaly validates all messages pushed in queue during a reaction.
+   * Atomically validates all messages pushed in queue during a reaction.
    * It must only be used during a transaction.
    */
   public synchronized void validate() {
@@ -389,7 +392,6 @@ final class MessageVector implements MessageQueue {
       Message msg = ((MessageSoftRef) data[idx]).getMessage();
       if (msg == null) {
         msg = ((MessageSoftRef) data[idx]).loadMessage();
-        data[idx] = new MessageSoftRef(msg);
       }
       return msg;
     } else {
@@ -468,20 +470,28 @@ final class MessageVector implements MessageQueue {
     return strbuf.toString();
   }
   
-  final class MessageSoftRef extends java.lang.ref.SoftReference {
+  final class MessageSoftRef {
+
     /**
      *  Name for persistent message, used to retrieve garbaged message
      * from persistent storage.
      */
-    String name = null;
+    private String name = null;
+
     /**
      *  Reference for transient message, used to pin non persistent
      * in memory.
      */
-    Message ref = null;
-    
+    private Message ref = null;
+
+    /**
+     * The SoftReference to the message, which permits to the message to be
+     * garbaged in response to memory demand.
+     */
+    private SoftReference softRef = null;
+
     MessageSoftRef(Message msg) {
-      super(msg);
+      this.softRef = new SoftReference(msg);
       if (msg.isPersistent())
         name = msg.toStringId();
       else
@@ -495,23 +505,25 @@ final class MessageVector implements MessageQueue {
      * @return The message to which this reference refers.
      */
     public Message getMessage() {
-      return null != ref ? ref : (Message) this.get();
+      return null != ref ? ref : (Message) softRef.get();
     }
 
     /**
-     * Loads from disk this reference message's referent if the message
-     * has been swap out. It should be called only after a getMessage
-     * returning null.
-     *
+     * Loads from disk this reference message's referent if the message has been
+     * swapped out. It should be called only after a getMessage returning null.
+     * The SoftReference is renewed to avoid reloading the message from disk
+     * each time this method is called.
+     * 
      * @return The message to which this reference refers.
      */
     public Message loadMessage() throws TransactionError {
-      if (ref != null) return ref;
+      if (ref != null)
+        return ref;
 
       Message msg;
       try {
         msg = Message.load(name);
-
+        softRef = new SoftReference(msg);
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG, logmsg + "reload from disk " + msg);
       } catch (Exception exc) {
