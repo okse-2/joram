@@ -84,7 +84,7 @@
       </ul>
       <p>It is tagged in SVN (JORAM_5_3_0), the complete list of changes can be viewed either in
       <a href="dev/versions.html">code updates</a> or in
-      <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/trunk/joram/history">SVN history</a>.</p>
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
       </s2>
       
       <s2 name="January 25, 2010: joram-commits@ow2.org">
