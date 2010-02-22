@@ -107,7 +107,7 @@
       </ul>
       <p>It is tagged in SVN (JORAM_5_2_6), the complete list of changes can be viewed either in
       <a href="dev/versions.html">code updates</a> or in
-      <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/trunk/joram/history">SVN history</a>.</p>
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
       </s2>
       
 	    <s2 name="December 2nd and 3rd, 2009: JORAM Training Session, Grenoble, France">
@@ -139,7 +139,7 @@
       <p>This version is bundled in <a href="http://jonas.ow2.org/">Jonas</a> 4.10.5 and 5.1.0.</p>
       <p>It is tagged in SVN (JORAM_5_2_5), the complete list of changes can be viewed either in
       <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
-      <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/trunk/joram/history">SVN history</a>.</p>
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
       </s2>
 			
       <s2 name="January 18, 2006">
