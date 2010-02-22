@@ -11,6 +11,49 @@
   </properties>
 
   <body>
+    <s1 name="JORAM release 5.3.0 (February 22, 2010)">
+      <p>Joram is now designed with an OSGi<sup>TM</sup> based services architecture to provide a dynamically adaptable
+      messaging server:</p>
+      <ul>
+        <li>The Joram server can be launched as a set of OSGi bundles (it is always possible to launch the server as
+        a classic Java program).</li>
+        <li>Additional services can be started, stopped, reconfigured: Command line interface, Web console, etc.</li>
+      </ul>
+      <p>Joram 5.3.0 is available in the SVN repository with tag JORAM_5_3_0.</p>
+      <s2 name="New features and improvements">
+      <ul>
+        <li>Update Joram JAAS security:<ul>
+          <li>modify Identity.check method in order to check through the trusted class.</li>
+          <li>remove unused method getCredential, getSubject.</li>
+          <li>use common.Configuration class instead System one to get properties..</li>
+        </ul></li>
+        <li>Implements either implicit (periodic) or explicit behavior for monitoring queues and topics.
+        Factorizes common behavior in an helper class.</li>
+        <li>No longer use Joram's implementation of timer.</li>
+        <li>Administration and monitoring enhancements:<ul>
+          <li>The Destination.getStatistics method now returns all the convertible JMX attributes of this
+          destination (depending of the real type of the destination).</li>
+          <li>Destination consideration of the update by JMX for the period.</li>
+        </ul></li>
+      </ul>
+      </s2>
+
+      <s2 name="Bug fixes">
+      <ul>
+        <li>The destination identifier checking generates an exception with clustered destination.
+        No longer use directly agentId attribute.</li>
+        <li>Fix infinite recursion in GetProxyIdNot.toString(StringBuffer) method.</li>
+        <li>Fix a bug in PoolNetwork when using nbMaxCnx.</li>
+        <li>PoolNetwork: Fix a possible incomplete closure of PoolSender, and possible NPE.</li>
+        <li>ClusterQueue:<ul>
+          <li>Add a better ordering messages in cluster queue.</li>
+          <li>Bug fix in join cluster queue.</li>
+				  <li>Implements getType method in ClusterDestination allowing a correct value of destination type in
+				  message after sending.</li>
+        </ul></li>
+      </ul>
+      </s2>
+    </s1>
   
     <s1 name="JORAM release 5.2.6 (October 23, 2009)">
       <p>Joram 5.2.6 is available in the SVN repository with tag JORAM_5_2_6.</p>
@@ -23,14 +66,14 @@
           <li>Extended JMX monitoring for connections: show the number of connections
  					created since server start and show the number of failed connection creations.</li>
           <li>Adds a MonitoringTimerTask to the AgentServer class allowing the periodic
-					monitoring of the server's attributes</li>
+					monitoring of the server's attributes.</li>
           <li>Adds JMX control of monitored attributes in MonitoringTopic, allows to view,
 					add and remove attributes.</li>
 					<li>Removes JMXRIHttpService class, no longer used, depends of JMXRITools.jar.</li>
 					<li>Removes unused jars in ship/lib: jndi, jmxri, jmxtools.</li>
         </ul></li>
         <li>Optional verification of clock synchronization between client and server at connection
-				time. THis mechanism will be activated by default in 5.3 release.</li>
+				time. This mechanism will be activated by default in 5.3 release.</li>
 				<li>Update common.xml to compile Joram with JDK1.5.</li>
       </ul>
       </s2>

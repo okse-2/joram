@@ -12,6 +12,48 @@
 
   <body>
     <s1 name="JORAM History">
+      <s2 name="February 22, 2010: JORAM 5.3.0 is released">
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven
+      repository.</p>
+      <p>Joram is now designed with an OSGi<sup>TM</sup> based services architecture to provide a dynamically adaptable
+      messaging server:</p>
+      <ul>
+        <li>The Joram server can be launched as a set of OSGi bundles (it is always possible to launch the server as
+        a classic Java program).</li>
+        <li>Additional services can be started, stopped, reconfigured: Command line interface, Web console, etc.</li>
+      </ul>
+      <p>This release also introduces some improvements and bug fixes, essentially:</p>
+      <ul>
+        <li>Update Joram security JAAS implementation.</li>
+        <li>Implements either implicit (periodic) or explicit behavior for monitoring topics.</li>
+        <li>Implements monitoring queue.</li>
+			  <li>The Destination.getStatistics method now returns all the convertible JMX attributes of this destination.</li>
+        <li>Fix a possible incomplete closure of PoolSender, and possible NPE.</li>
+        <li>JMX monitoring extensions.</li>
+        <li>Fix potential issues using clustered destination.</li>
+        <li>No longer use Joram's implementation of timer.</li>
+      </ul>
+      <p>It is tagged in SVN (JORAM_5_3_0), the complete list of changes can be viewed either in
+      <a href="dev/versions.html">code updates</a> or in
+      <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/trunk/joram/history">SVN history</a>.</p>
+      </s2>
+      
+      <s2 name="February 12, 2010: Help Opensource, fill the quiz !">
+      <p>You use or have heard of JORAM, to better understand your needs we have ask Gtec company to conduct a study
+      on the main expectations of users of JORAM. This study is a very simple quiz which you are invited to meet (5 to
+      10 minutes) and which results will be considered collectively.</p>
+      <ul>
+        <li><a href="http://www.gtec-communication.fr/enquete/index.php?sid=55347&amp;lang=en">English quiz</a>.</li>
+        <li><a href="http://www.gtec-communication.fr/enquete/index.php?sid=55347&amp;lang=fr">French quiz</a>.</li>
+      </ul>
+      <p>Thank's for giving Joram a piece of your time.</p>
+      </s2>
+            
+      <s2 name="January 25, 2010: joram-commits@ow2.org">
+      <p>A new mailing-list is now available, it allows to follow all the modifications on the Joram's SVN.</p>
+      <p>You can subscribe at <a href="http://mail.ow2.org/wws/arc/joram-commits">joram-commits@ow2.org</a>.</p>
+      </s2>
+    
       <s2 name="October 23, 2009: JORAM 5.2.6 is released">
       <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
       <p>It introduces some improvements and bug fixes, essentially:</p>
