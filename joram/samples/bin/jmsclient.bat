@@ -19,7 +19,7 @@ REM  Building the Classpath
 set CLASSPATH=%JORAM_LIBS%\joram-client.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\joram-shared.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\JCup.jar
-set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\jms.jar
+set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\geronimo-jms_1.1_spec-1.1.1.jar
 set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\ow_monolog.jar
 set CLASSPATH=%CLASSPATH%;%SAMPLE_CLASSES%
 set CLASSPATH=%CLASSPATH%;%RUN_DIR%
