@@ -297,7 +297,6 @@
     <copy file="${build.dir}/joram-connector.jar" todir="${ship.dir}/lib"/>
     <copy file="${build.dir}/joram-config.jar" todir="${ship.dir}/lib"/>
     <copy file="${build.dir}/joram-raconfig.jar" todir="${ship.dir}/lib"/>
-    <!-- copy file="${build.dir}/joram-kclient.jar" todir="${ship.dir}/lib"/ -->
     <mkdir dir="${ship.dir}/licenses"/>
     <copy todir="${ship.dir}/licenses" flatten="yes">
       <fileset dir="${licenses.dir}">
@@ -421,8 +420,11 @@
   <target name="build.osgi" depends="build.joram"
           description="--> Builds Joram OSGI bundles.">
     <mkdir dir="${build.dir}"/>
-    
-    <jar jarfile="${build.dir}/joram-common-util-bundle.jar" manifest="${src.dir}/fr/dyade/aaa/common/osgi/manifest.mf">
+		<delete file="${build.dir}/joram-shared.jar"/>
+		<delete file="${build.dir}/joram-client.jar"/>
+	  <delete file="${build.dir}/joram-mom.jar"/>
+  	
+    <jar jarfile="${build.dir}/joram-common-util.jar" manifest="${src.dir}/fr/dyade/aaa/common/osgi/manifest.mf">
       <manifest>
         <attribute name="Specification-Title" value="JMS"/>
         <attribute name="Specification-Version" value="1.1"/>
@@ -443,7 +445,7 @@
       </fileset>
     </jar>
     
-    <jar jarfile="${build.dir}/joram-rt-bundle.jar" manifest="${src.dir}/fr/dyade/aaa/agent/osgi/manifest.mf">
+    <jar jarfile="${build.dir}/joram-rt.jar" manifest="${src.dir}/fr/dyade/aaa/agent/osgi/manifest.mf">
       <manifest>
         <attribute name="Specification-Title" value="JMS"/>
         <attribute name="Specification-Version" value="1.1"/>
@@ -466,7 +468,7 @@
       </fileset>
     </jar>
     
-    <jar jarfile="${build.dir}/joram-jndi-bundle.jar" manifest="${src.dir}/fr/dyade/aaa/jndi2/server/osgi/manifest.mf">
+    <jar jarfile="${build.dir}/joram-jndi.jar" manifest="${src.dir}/fr/dyade/aaa/jndi2/server/osgi/manifest.mf">
       <manifest>
         <attribute name="Specification-Title" value="JMS"/>
         <attribute name="Specification-Version" value="1.1"/>
@@ -488,7 +490,7 @@
       </fileset>
     </jar>
     
-    <jar jarfile="${build.dir}/joram-mom-bundle.jar" manifest="${src.dir}/org/objectweb/joram/mom/osgi/manifest.mf">
+    <jar jarfile="${build.dir}/joram-mom.jar" manifest="${src.dir}/org/objectweb/joram/mom/osgi/manifest.mf">
       <manifest>
         <attribute name="Specification-Title" value="JMS"/>
         <attribute name="Specification-Version" value="1.1"/>
@@ -510,7 +512,7 @@
       </fileset>
     </jar>
     
-    <jar jarfile="${build.dir}/joram-mail-bundle.jar" manifest="${src.dir}/com/scalagent/joram/mom/dest/mail/osgi/manifest.mf">
+    <jar jarfile="${build.dir}/joram-mail.jar" manifest="${src.dir}/com/scalagent/joram/mom/dest/mail/osgi/manifest.mf">
       <manifest>
         <attribute name="Specification-Title" value="JMS"/>
         <attribute name="Specification-Version" value="1.1"/>
@@ -532,7 +534,7 @@
       </fileset>
     </jar>
     
-    <jar jarfile="${build.dir}/joram-ftp-bundle.jar" manifest="${src.dir}/com/scalagent/joram/mom/dest/ftp/osgi/manifest.mf">
+    <jar jarfile="${build.dir}/joram-ftp.jar" manifest="${src.dir}/com/scalagent/joram/mom/dest/ftp/osgi/manifest.mf">
       <manifest>
         <attribute name="Specification-Title" value="JMS"/>
         <attribute name="Specification-Version" value="1.1"/>
@@ -553,7 +555,7 @@
       </fileset>
     </jar>
     
-    <jar jarfile="${build.dir}/joram-jmsbridge-bundle.jar" manifest="${src.dir}/org/objectweb/joram/mom/dest/jmsbridge/osgi/manifest.mf">
+    <jar jarfile="${build.dir}/joram-jmsbridge.jar" manifest="${src.dir}/org/objectweb/joram/mom/dest/jmsbridge/osgi/manifest.mf">
       <manifest>
         <attribute name="Specification-Title" value="JMS"/>
         <attribute name="Specification-Version" value="1.1"/>
@@ -571,7 +573,7 @@
       </fileset>
     </jar>
     
-    <jar jarfile="${build.dir}/joram-client-bundle.jar" manifest="${src.dir}/org/objectweb/joram/client/osgi/manifest.mf">
+    <jar jarfile="${build.dir}/joram-client.jar" manifest="${src.dir}/org/objectweb/joram/client/osgi/manifest.mf">
       <manifest>
         <attribute name="Specification-Title" value="JMS"/>
         <attribute name="Specification-Version" value="1.1"/>
@@ -594,7 +596,7 @@
       </fileset>
     </jar>
     
-    <jar jarfile="${build.dir}/joram-shared-bundle.jar" manifest="${src.dir}/org/objectweb/joram/shared/osgi/manifest.mf">
+    <jar jarfile="${build.dir}/joram-shared.jar" manifest="${src.dir}/org/objectweb/joram/shared/osgi/manifest.mf">
       <manifest>
         <attribute name="Specification-Title" value="JMS"/>
         <attribute name="Specification-Version" value="1.1"/>
@@ -616,28 +618,64 @@
     </jar>
   </target>
 
-  <target name="ship.osgi" depends="build.osgi" description="--> Creates a Joram OSGi shipment.">
-    <mkdir dir="${ship.dir}" />
-    <mkdir dir="${ship.dir}/bundle" />
-    <mkdir dir="${ship.dir}/conf" />
-    <mkdir dir="${ship.dir}/bin" />
+  <target name="ship.osgi" depends="build.osgi"
+  	description="--> Creates a Joram OSGi shipment.">
+    <mkdir dir="${ship.dir}"/>
+    <mkdir dir="${ship.dir}/lib"/>
+  	<mkdir dir="${ship.dir}/bundle"/>
+    <mkdir dir="${ship.dir}/conf"/>
+    <mkdir dir="${ship.dir}/bin"/>
+
+    <copy file="${lib.dir}/activation.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/mail.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/soap.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/soap.war" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/connector-1_5.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/jgroups-all.jar" todir="${ship.dir}/lib"/>
+    <copy file="${lib.dir}/commons-logging-api.jar" todir="${ship.dir}/lib"/>
+    <!-- copy file="${lib.dir}/kxml.jar" todir="${ship.dir}/lib"/ -->
+    <!-- copy file="${lib.dir}/hsqldb.jar" todir="${ship.dir}/lib"/ -->
+    <!-- copy file="${lib.dir}/derby.jar" todir="${ship.dir}/lib"/ -->
+    <copy file="${build.dir}/joram-connector.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-config.jar" todir="${ship.dir}/lib"/>
+    <copy file="${build.dir}/joram-raconfig.jar" todir="${ship.dir}/lib"/>
+  	
+  	<!-- Felix -->
     <copy file="${bundle.dir}/felix.jar" todir="${ship.dir}/bin"/>
     <copy file="${bundle.dir}/org.apache.felix.shell-1.4.1.jar" todir="${ship.dir}/bundle"/>
     <copy file="${bundle.dir}/org.apache.felix.shell.remote-1.0.4.jar" todir="${ship.dir}/bundle"/>
+  	
     <copy file="${bundle.dir}/ow_monolog.jar" todir="${ship.dir}/bundle"/>
     <copy file="${bundle.dir}/JCup.jar" todir="${ship.dir}/bundle"/>
-    <copy file="${conf.dir}/config.properties" todir="${ship.dir}/conf"/>
-    <copy file="${build.dir}/joram-common-util-bundle.jar" todir="${ship.dir}/bundle"/>
-    <copy file="${build.dir}/joram-rt-bundle.jar" todir="${ship.dir}/bundle"/>
-    <copy file="${build.dir}/joram-jndi-bundle.jar" todir="${ship.dir}/bundle"/>
-    <copy file="${build.dir}/joram-mom-bundle.jar" todir="${ship.dir}/bundle"/>
-    <copy file="${build.dir}/joram-mail-bundle.jar" todir="${ship.dir}/bundle"/>
-    <copy file="${build.dir}/joram-ftp-bundle.jar" todir="${ship.dir}/bundle"/>
-    <copy file="${build.dir}/joram-jmsbridge-bundle.jar" todir="${ship.dir}/bundle"/>
-    <copy file="${build.dir}/joram-shared-bundle.jar" todir="${ship.dir}/bundle"/>
+
+  	<copy file="${build.dir}/joram-common-util.jar" todir="${ship.dir}/bundle"/>
+    <copy file="${build.dir}/joram-shared.jar" todir="${ship.dir}/bundle"/>
+  	
+  	<!-- server part -->
+    <copy file="${build.dir}/joram-rt.jar" todir="${ship.dir}/bundle"/>
+    <copy file="${build.dir}/joram-jndi.jar" todir="${ship.dir}/bundle"/>
+    <copy file="${build.dir}/joram-mom.jar" todir="${ship.dir}/bundle"/>
+    <copy file="${build.dir}/joram-mail.jar" todir="${ship.dir}/bundle"/>
+    <copy file="${build.dir}/joram-ftp.jar" todir="${ship.dir}/bundle"/>
+    <copy file="${build.dir}/joram-jmsbridge.jar" todir="${ship.dir}/bundle"/>
     
     <!-- client part -->
-    <copy file="${build.dir}/joram-client-bundle.jar" todir="${ship.dir}/bundle"/>
+    <copy file="${bundle.dir}/geronimo-jms_1.1_spec-1.1.1.jar" todir="${ship.dir}/bundle"/>
+    <copy file="${build.dir}/joram-client.jar" todir="${ship.dir}/bundle"/>
+  	
+    <copy file="${conf.dir}/config.properties" todir="${ship.dir}/conf"/>
+  	
+    <mkdir dir="${ship.dir}/licenses"/>
+    <copy todir="${ship.dir}/licenses" flatten="yes">
+      <fileset dir="${licenses.dir}">
+        <include name="APACHE_LICENSE.TXT"/>
+        <include name="APACHE_LICENSE_V2.TXT"/>
+        <include name="CUP_LICENSE.TXT"/>
+        <include name="LGPL_HEADER.TXT"/>
+        <include name="LGPL_LICENSE.TXT"/>
+        <include name="NOTICE.TXT"/>
+      </fileset>
+    </copy>
   </target>
 
   
