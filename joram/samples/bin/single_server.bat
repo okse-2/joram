@@ -1,6 +1,6 @@
 @echo off
 REM Verify if JORAM_HOME is well defined
-if not exist "%JORAM_HOME%\samples\bin\admin.bat" goto nokHome
+if not exist "%JORAM_HOME%\samples\bin\clean.bat" goto nokHome
 REM Verify if JAVA_HOME is well defined
 if not exist "%JAVA_HOME%\bin\java.exe" goto nokJava
 

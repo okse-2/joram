@@ -14,7 +14,7 @@ if $cygwin; then
 fi
 
 # Verify if JORAM_HOME is well defined
-if [ ! -r "$JORAM_HOME"/samples/bin/admin.sh ]; then
+if [ ! -r "$JORAM_HOME"/samples/bin/clean.sh ]; then
   echo "The JORAM_HOME environment variable is not defined correctly"
   echo "This environment variable is needed to run this program"
   exit 1
@@ -50,7 +50,7 @@ CLASSPATH=$JORAM_LIBS/joram-client.jar
 CLASSPATH=$CLASSPATH:$JORAM_LIBS/joram-mom.jar
 CLASSPATH=$CLASSPATH:$JORAM_LIBS/joram-shared.jar
 CLASSPATH=$CLASSPATH:$JORAM_LIBS/JCup.jar
-CLASSPATH=$CLASSPATH:$JORAM_LIBS/jms.jar
+CLASSPATH=$CLASSPATH:$JORAM_LIBS/geronimo-jms_1.1_spec-1.1.1.jar
 CLASSPATH=$CLASSPATH:$JORAM_LIBS/ow_monolog.jar
 CLASSPATH=$CLASSPATH:$SAMPLE_CLASSES
 CLASSPATH=$CLASSPATH:$RUN_DIR
