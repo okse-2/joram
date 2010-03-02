@@ -280,7 +280,7 @@
     <mkdir dir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/activation.jar" todir="${ship.dir}/lib"/>
     <copy file="${bundle.dir}/JCup.jar" todir="${ship.dir}/lib"/>
-    <copy file="${lib.dir}/jms.jar" todir="${ship.dir}/lib"/>
+    <copy file="${bundle.dir}/geronimo-jms_1.1_spec-1.1.1.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/mail.jar" todir="${ship.dir}/lib"/>
     <copy file="${bundle.dir}/ow_monolog.jar" todir="${ship.dir}/lib"/>
     <copy file="${lib.dir}/soap.jar" todir="${ship.dir}/lib"/>
@@ -732,7 +732,7 @@
 
   <!-- RELEASES -->
   <target name="releases"
-          depends="clean,clean.releases,release.src,release.jar,release.doc"
+          depends="clean,clean.releases,release.src,release.jar,release.osgi,release.doc"
           description="--> Builds a Joram complete distribution.">
     <antcall target="ship.adapters" inheritAll="true"/>
     <copy file="${ship.dir}/lib/joram_ra.rar"
@@ -787,6 +787,32 @@
     <gzip src="${releases.dir}/joram-${version}.tar"
           zipfile="${releases.dir}/joram-${version}.tgz"/>
     <delete file="${releases.dir}/joram-${version}.tar"/>
+  </target>
+
+  <target name="release.osgi" depends="ship.osgi,javadoc"
+          description="--> Builds a Joram OSGi binary distribution.">
+    <mkdir dir="${releases.dir}"/>
+  	<delete file="${releases.dir}/joram-osgi-${version}.tar"/>
+    <tar tarfile="${releases.dir}/joram-osgi-${version}.tar" longfile="gnu">
+      <tarfileset dir="${doc.dir}" prefix="joram-${version}/doc"
+                  username="joram" group="joram">
+        <include name="**"/>
+      </tarfileset>
+      <tarfileset dir="${samples.dir}" prefix="joram-${version}/samples"
+                  username="joram" group="joram">
+        <include name="src/**"/>
+        <include name="config/**"/>
+        <include name="bin/**"/>
+      </tarfileset>
+      <tarfileset dir="${ship.dir}" prefix="joram-${version}/ship"
+                  username="joram" group="joram">
+        <include name="**"/>
+      </tarfileset>
+    </tar>
+    <delete file="${releases.dir}/joram-osgi-${version}.tgz"/>
+    <gzip src="${releases.dir}/joram-osgi-${version}.tar"
+          zipfile="${releases.dir}/joram-osgi-${version}.tgz"/>
+    <delete file="${releases.dir}/joram-osgi-${version}.tar"/>
   </target>
 
   <target name="release.src" depends="init.joram"
