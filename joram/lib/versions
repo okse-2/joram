@@ -2,7 +2,7 @@ JCup.jar                ?
 activation.jar          1.0.2
 connector-1_5.jar       1.5
 jgroups-all.jar         ?
-jms.jar                 1.1
+geronimo-jms_1.1_spec-1.1.1.jar			1.1.1
 kxml.jar                ?
 mail.jar                1.3
 ow_monolog.jar          2.1.1
