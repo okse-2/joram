@@ -67,8 +67,9 @@
           <li>Load balancing through clustered topics and queues</li>
           <li>Monitoring methods</li>
           <li>A bridge feature allowing to link JORAM to any JMS compliant messaging platform</li>
-          <li>Client libraries allowing J2ME applications to access the JORAM platform in a JMS 1.1 "way"</li>
-          <li>Client libraries allowing C or C++ applications to access the JORAM platform in a JMS 1.1 "way"</li>
+          <li>kJoram: a client libraries allowing J2ME applications to access the JORAM platform in a JMS 1.1 "way"</li>
+          <li>Xoram: a client libraries allowing C or C++ applications to access the JORAM platform in a JMS 1.1 "way"</li>
+          <li>An implementation of the current specification of AMQP</li>
           <li>High Availability provides the active replication of Joram servers and underlying agent servers,
           as well as replicated JORAM clients. It transparently handles network handover and server failover.
           This version currently relies on the use of  JGroups.</li>
