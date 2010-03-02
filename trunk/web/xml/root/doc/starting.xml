@@ -86,7 +86,7 @@
       </s2>
 
 	    <s2 name="Running the classic sample">
-	      <p>For example to launch the classic example.</p>
+	      <p>For example to launch the classic example (see also <a href="tutorials/classic/classic.htm">tutorial</a>).</p>
         <ul>
           <li>Launch the Joram server:
             <ul>
@@ -131,10 +131,10 @@
 	      <ul>
 	        <li>Dead message queues,</li>
 	        <li>Hierarchical topics,</li>
-	        <li>clustered queues and topics,</li>
+	        <li>clustered queues and topics (see <a href="tutorials/clusterq/clusterQ.htm">tutorial</a>),</li>
 	        <li>FtpQueue and mail destinations,</li>
 	        <li>Scheduler queues,</li>
-	        <li>Monitoring topics,</li>
+	        <li>Monitoring topics and topics (see <a href="tutorials/monitoring/monitoring.htm">tutorial</a>),</li>
 	        <li>Collector queues and topics,</li>
 	        <li>JMS Bridge destinations.</li>
 	      </ul>

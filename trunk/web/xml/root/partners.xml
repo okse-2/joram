@@ -20,13 +20,10 @@
         border="0" width="295" height="101"/></a>
       </td>
       <td align="left" valign="middle">
-      <p><a href="http://www.scalagent.com/">ScalAgent Distributed
-      Technologies</a> is a startup company spin-off from 
-      <a href="http://www.inria.fr/">INRIA</a> and
-      <a href="http://www.bull.com/">Bull</a>, which aims at developing and
-      market advanced mediation solutions for large-scale Internet business
-      infrastructure and applications. Scalagent is the main developer and
-      integrator for JORAM.</p>
+      <p><a href="http://www.scalagent.com/">ScalAgent Distributed Technologies</a> is a startup company spin-off
+      from <a href="http://www.inria.fr/">INRIA</a> and <a href="http://www.bull.com/">Bull</a>, which aims at
+      developing and market advanced mediation solutions for large-scale Internet business infrastructure and
+      applications. Scalagent is the main developer and integrator for JORAM.</p>
       </td>
     </tr>
     </table>
@@ -34,7 +31,9 @@
 
     <s1 name="Thanks">
       <s2 name="YourKit">
-        <p>Thanks to the people at <a href="http://www.yourkit.com/">YourKit</a> for providing us a free license for their <a href="http://www.yourkit.com/">Java profiler</a>. It will be very useful in optimizing future releases of Joram.</p>
+        <p>Thanks to the people at <a href="http://www.yourkit.com/">YourKit</a> for providing us a free license
+        for their <a href="http://www.yourkit.com/">Java profiler</a>. It will be very useful in optimizing future
+        releases of Joram.</p>
       </s2>
     </s1>
 	
@@ -42,14 +41,27 @@
     <table>
     <tr>
       <td align="center" valign="middle">
+      <a href="http://www.cnes.fr/">
+      <img src="images/partners/CNES2.png" alt="CNES logo" border="0" height="49" width="140"/></a>
+      </td>
+      <td>
+      <p>The french space agency (<a href="http://www.cnes.fr">CNES</a>) uses Joram as main transport for its
+      new generation of Space Monitoring and Control (SM&amp;C) middleware.</p>
+      </td>
+    </tr>
+
+    <tr>
+      <td align="center" valign="middle">
       <a href="http://www.rd.francetelecom.com/">
       <img src="images/partners/logo-ftrd.gif" alt="France Telecom RD logo" border="0" height="33" width="140"/></a>
       </td>
       <td>
-      <p><a href="http://www.rd.francetelecom.com">France Telecom R&amp;D</a> is the main sponsor of many advanced functions in Joram:</p>
+      <p><a href="http://www.rd.francetelecom.com">France Telecom R&amp;D</a> is the main sponsor of many advanced
+      functions in Joram:</p>
         <ul>
           <li>Clustering facilities,</li>
           <li>High Availability Joram Server,</li>
+          <li>JMS bridge,</li>
           <li>WebLogic resources adapter.</li>
         </ul>
       </td>
@@ -61,17 +73,8 @@
       <img src="images/partners/logobull.gif" alt="Bull logo" border="0" height="61" width="140"/></a>
       </td>
       <td>
-      <p><a href="http://www.bull.com">Bull</a> is the main sponsor of the JCA1.5 Resource Adapter included in Joram since version 4.1.</p>
-      </td>
-    </tr>
-       
-    <tr>
-      <td align="center" valign="middle">
-      <a href="http://www.cnes.fr/">
-      <img src="images/partners/CNES2.png" alt="CNES logo" border="0" height="49" width="140"/></a>
-      </td>
-      <td>
-      <p><a href="http://www.cnes.fr">CNES</a> .</p>
+      <p><a href="http://www.bull.com">Bull</a> is the main sponsor of the JCA1.5 Resource Adapter included in Joram
+      since version 4.1.</p>
       </td>
     </tr>
        
@@ -81,7 +84,14 @@
       <img src="images/partners/anr_logo.jpg" alt="ANR logo" border="0" height="60" width="140"/></a>
       </td>
       <td>
-      <p><a href="http://www.agence-nationale-recherche.fr">ANR</a> .</p>
+      <p>The French National Research Agency (<a href="http://www.agence-nationale-recherche.fr">ANR</a>) has supported
+      Joram through many research projects. Currently ScalAgent D.T. is partner of 2 projects extending Joram:</p>
+      <ul>
+      <li><a href="http://selfxl.gforge.inria.fr/dokuwiki/doku.php">SelfXL</a> about Self-management of compleX
+      and Large scale systems.</li>
+      <li><a href="http://itemis-anr.org/">ITEmIS</a> about definition of a new generation SOA enabling IT and Embedded
+      Integrated Systems.</li>
+      </ul>
       </td>
     </tr>
         
@@ -122,5 +132,4 @@
     </s1>
     
   </body>
-
 </document>
