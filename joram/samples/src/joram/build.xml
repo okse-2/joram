@@ -16,6 +16,9 @@
       <fileset dir="${lib.dir}">
          <include name="*.jar"/>
       </fileset>
+      <fileset dir="${bundle.dir}">
+         <include name="*.jar"/>
+      </fileset>
       <pathelement path="${obj.dir}/joram"/>
       <pathelement path="${run.dir}"/>
     </path>
@@ -76,8 +79,6 @@
           tofile="${run.dir}/a3servers.xml"
           overwrite="true"/>
     <copy file="${conf.dir}/config.properties" todir="${run.dir}"/>
-    <replace file="${run.dir}/config.properties" token="@BUNDLE_DIR@" value="${bundle.dir}" />
-    <replace file="${run.dir}/config.properties" token="\" value="/" />
   </target>
 
   <!-- Initializes the distributed configuration -->
