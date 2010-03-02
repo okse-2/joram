@@ -44,6 +44,11 @@
       <version>@VERSION@</version>
     </dependency>
     <dependency>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-jms_1.1_spec</artifactId>
+      <version>${geronimo-jms_1.1_spec.version}</version>
+    </dependency>
+    <dependency>
       <groupId>mx4j</groupId>
       <artifactId>mx4j-jmx</artifactId>
       <version>3.0.1</version>
