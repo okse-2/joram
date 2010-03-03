@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2009-2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -73,10 +73,9 @@ public class Activator implements BundleActivator {
     Activator.context = context;
     AgentServer.isOSGi = true;
 
-    short sid = Short.parseShort(System.getProperty(AGENT_SERVER_ID_PROPERTY, "0"));
-    String path = System.getProperty(AGENT_SERVER_STORAGE_PROPERTY, "s" + sid);
-    short cid = Short.parseShort(System.getProperty(AGENT_SERVER_CLUSTERID_PROPERTY,
-        String.valueOf(AgentServer.NULL_ID)));
+    short sid = getShortProperty(AGENT_SERVER_ID_PROPERTY, (short) 0);
+    String path = getProperty(AGENT_SERVER_STORAGE_PROPERTY, "s" + sid);
+    short cid = getShortProperty(AGENT_SERVER_CLUSTERID_PROPERTY, AgentServer.NULL_ID);
 
     Properties props = new Properties();
     props.put(Service.SERVICE_NAME_PROP, AdminProxy.class.getName());
@@ -96,6 +95,22 @@ public class Activator implements BundleActivator {
 
     adminproxyRegistration.unregister();
     Activator.context = null;
+  }
+
+  private short getShortProperty(String propName, short defaultValue) {
+    String propValue = context.getProperty(propName);
+    if (propValue != null) {
+      return Short.parseShort(propValue);
+    }
+    return defaultValue;
+  }
+
+  private String getProperty(String propName, String defaultValue) {
+    String propValue = context.getProperty(propName);
+    if (propValue != null) {
+      return propValue;
+    }
+    return defaultValue;
   }
 
 }
