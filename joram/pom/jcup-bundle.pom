@@ -51,7 +51,7 @@
     <artifactId>joram-parent</artifactId>
     <version>@VERSION@</version>
   </parent>
-  <artifactId>jcup-bundle</artifactId>
+  <artifactId>jcup</artifactId>
   <name>bundle for JCup: CUP PARSER GENERATOR</name>
 </project>
 

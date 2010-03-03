@@ -33,13 +33,13 @@
     <artifactId>joram-parent</artifactId>
     <version>@VERSION@</version>
   </parent>
-  <artifactId>joram-mail-bundle</artifactId>
+  <artifactId>joram-mail</artifactId>
   <name>bundle JORAM :: mail</name>
 
   <dependencies>
     <dependency>
       <groupId>org.objectweb.joram</groupId>
-      <artifactId>joram-mom-bundle</artifactId>
+      <artifactId>joram-mom</artifactId>
       <version>@VERSION@</version>
     </dependency>
   </dependencies>

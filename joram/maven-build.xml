@@ -76,12 +76,9 @@
     <!--                  JORAM POMs                    -->
     <!-- ================================================ -->
     <m2:pom id="parent.pom" file="${output.tmp.dir}/joram-parent.pom" />
-  	<m2:pom id="client.pom" file="${output.tmp.dir}/joram-client.pom" />
     <m2:pom id="connector.pom" file="${output.tmp.dir}/joram-connector.pom" />
-    <m2:pom id="mom.pom" file="${output.tmp.dir}/joram-mom.pom" />
     <m2:pom id="raconfig.pom" file="${output.tmp.dir}/joram-raconfig.pom" />
     <m2:pom id="config.pom" file="${output.tmp.dir}/joram-config.pom" />
-    <m2:pom id="shared.pom" file="${output.tmp.dir}/joram-shared.pom" />
     <m2:pom id="ra_for_jonas.pom" file="${output.tmp.dir}/joram_ra_for_jonas.pom" />
     <m2:pom id="ra_remote.pom" file="${output.tmp.dir}/joram_ra_remote.pom" />
     <m2:pom id="ra.pom" file="${output.tmp.dir}/joram_ra.pom" />
@@ -105,7 +102,7 @@
   <target name="install_snapshot"
   				description="--> Install SNAPSHOT artifacts">	
     <antcall target="install" inheritAll="true">
-      <param name="joram.version" value="${joram.major}.${joram.minor}-SNAPSHOT"/>
+      <param name="joram.version" value="${joram.major}.${joram.minor}.${joram.build}-SNAPSHOT"/>
     </antcall>
   </target>
     
@@ -122,16 +119,8 @@
       <m2:pom refid="parent.pom" />
     </m2:install>
 
-    <m2:install file="${output.dist.dir}/joram-client.jar">
-      <m2:pom refid="client.pom" />
-    </m2:install>
-
     <m2:install file="${output.dist.dir}/joram-connector.jar">
       <m2:pom refid="connector.pom" />
-    </m2:install>
-
-    <m2:install file="${output.dist.dir}/joram-mom.jar">
-      <m2:pom refid="mom.pom" />
     </m2:install>
 
     <m2:install file="${output.dist.dir}/joram-raconfig.jar">
@@ -140,10 +129,6 @@
 
     <m2:install file="${output.dist.dir}/joram-config.jar">
       <m2:pom refid="config.pom" />
-    </m2:install>
-
-    <m2:install file="${output.dist.dir}/joram-shared.jar">
-      <m2:pom refid="shared.pom" />
     </m2:install>
 
     <m2:install file="${output.dist.dir}/joram_for_jonas_ra.rar">
@@ -159,34 +144,34 @@
     </m2:install>
     
   	<!-- ******************* OSGi ********************** -->
-  	<m2:install file="${output.bundle.dist.dir}/joram-common-util-bundle.jar">
+  	<m2:install file="${output.bundle.dist.dir}/joram-common-util.jar">
   	  <m2:pom refid="common-util-bundle.pom" />
   	</m2:install>
-  	<m2:install file="${output.bundle.dist.dir}/joram-shared-bundle.jar">
+  	<m2:install file="${output.bundle.dist.dir}/joram-shared.jar">
   	  <m2:pom refid="shared-bundle.pom" />
   	</m2:install>
-  	<m2:install file="${output.bundle.dist.dir}/joram-client-bundle.jar">
+  	<m2:install file="${output.bundle.dist.dir}/joram-client.jar">
   	  <m2:pom refid="client-bundle.pom" />
   	</m2:install>
   	<!-- m2:install file="${output.bundle.dist.dir}/joram-connector-bundle.jar">
   	  <m2:pom refid="connector-bundle.pom" />
   	</m2:install -->
-  	<m2:install file="${output.bundle.dist.dir}/joram-mom-bundle.jar">
+  	<m2:install file="${output.bundle.dist.dir}/joram-mom.jar">
   	  <m2:pom refid="mom-bundle.pom" />
   	</m2:install>
-  	<m2:install file="${output.bundle.dist.dir}/joram-rt-bundle.jar">
+  	<m2:install file="${output.bundle.dist.dir}/joram-rt.jar">
   	  <m2:pom refid="rt-bundle.pom" />
   	</m2:install>
-  	<m2:install file="${output.bundle.dist.dir}/joram-jndi-bundle.jar">
+  	<m2:install file="${output.bundle.dist.dir}/joram-jndi.jar">
   	  <m2:pom refid="jndi-bundle.pom" />
   	</m2:install>
-  	<m2:install file="${output.bundle.dist.dir}/joram-ftp-bundle.jar">
+  	<m2:install file="${output.bundle.dist.dir}/joram-ftp.jar">
   	  <m2:pom refid="ftp-bundle.pom" />
   	</m2:install>
-  	<m2:install file="${output.bundle.dist.dir}/joram-mail-bundle.jar">
+  	<m2:install file="${output.bundle.dist.dir}/joram-mail.jar">
   	  <m2:pom refid="mail-bundle.pom" />
   	</m2:install>
-  	<m2:install file="${output.bundle.dist.dir}/joram-jmsbridge-bundle.jar">
+  	<m2:install file="${output.bundle.dist.dir}/joram-jmsbridge.jar">
   	  <m2:pom refid="jmsbridge-bundle.pom" />
   	</m2:install>
   	<m2:install file="${output.bundle.dist.dir}/JCup.jar">
@@ -216,7 +201,7 @@
   				description="--> Deploy SNAPSHOT artifacts">	
     <!-- Execute the internal target -->
     <antcall target="internal:deploy">
-      <param name="joram.version" value="${joram.major}.${joram.minor}-SNAPSHOT"/>
+      <param name="joram.version" value="${joram.major}.${joram.minor}.${joram.build}-SNAPSHOT"/>
       <param name="deploy.joram" value="true"/>
     </antcall>
   </target>
@@ -256,23 +241,14 @@
         <m2:pom refid="parent.pom" />
       </m2:deploy>
 
-      <maven-deploy pomRefId="client.pom"
-                    file="${output.dist.dir}/joram-client.jar" />
-
       <maven-deploy pomRefId="config.pom"
                     file="${output.dist.dir}/joram-config.jar" />
 
       <maven-deploy pomRefId="connector.pom"
                     file="${output.dist.dir}/joram-connector.jar" />
 
-      <maven-deploy pomRefId="mom.pom"
-                    file="${output.dist.dir}/joram-mom.jar" />
-
       <maven-deploy pomRefId="raconfig.pom"
                     file="${output.dist.dir}/joram-raconfig.jar" />
-
-      <maven-deploy pomRefId="shared.pom"
-                    file="${output.dist.dir}/joram-shared.jar" />
 
       <maven-deploy pomRefId="ra_for_jonas.pom"
                     file="${output.dist.dir}/joram_for_jonas_ra.rar" />
@@ -285,26 +261,26 @@
       
       <!-- ******************* OSGi ********************** -->
       <maven-deploy pomRefId="client-bundle.pom"
-    	                  file="${output.bundle.dist.dir}/joram-client-bundle.jar" />
+    	                  file="${output.bundle.dist.dir}/joram-client.jar" />
       <!-- maven-deploy pomRefId="connector-bundle.pom"
     	 	              file="${output.bundle.dist.dir}/joram-connector-bundle.jar" / -->
-    	<maven-deploy pomRefId="mom-bundle.pom"
-    	    	                  file="${output.bundle.dist.dir}/joram-mom-bundle.jar" />
-    	<maven-deploy pomRefId="common-util-bundle.pom"
-    	    	                  file="${output.bundle.dist.dir}/joram-common-util-bundle.jar" />
-    	<maven-deploy pomRefId="shared-bundle.pom"
-    	    	                  file="${output.bundle.dist.dir}/joram-shared-bundle.jar" />
-    		<maven-deploy pomRefId="rt-bundle.pom"
-    		    	                  file="${output.bundle.dist.dir}/joram-rt-bundle.jar" />
-    		<maven-deploy pomRefId="jndi-bundle.pom"
-    		    	                  file="${output.bundle.dist.dir}/joram-jndi-bundle.jar" />
-    		<maven-deploy pomRefId="ftp-bundle.pom"
-    		    	                  file="${output.bundle.dist.dir}/joram-ftp-bundle.jar" />
-    		<maven-deploy pomRefId="mail-bundle.pom"
-    		    	                  file="${output.bundle.dist.dir}/joram-mail-bundle.jar" />
-    		<maven-deploy pomRefId="jmsbridge-bundle.pom"
-    		    	                  file="${output.bundle.dist.dir}/joram-jmsbridge-bundle.jar" />
-    		<maven-deploy pomRefId="jcup-bundle.pom"
+      <maven-deploy pomRefId="mom-bundle.pom"
+    	    	                  file="${output.bundle.dist.dir}/joram-mom.jar" />
+      <maven-deploy pomRefId="common-util-bundle.pom"
+    	    	                  file="${output.bundle.dist.dir}/joram-common-util.jar" />
+      <maven-deploy pomRefId="shared-bundle.pom"
+    	    	                  file="${output.bundle.dist.dir}/joram-shared.jar" />
+      <maven-deploy pomRefId="rt-bundle.pom"
+    		    	                  file="${output.bundle.dist.dir}/joram-rt.jar" />
+      <maven-deploy pomRefId="jndi-bundle.pom"
+    		    	                  file="${output.bundle.dist.dir}/joram-jndi.jar" />
+      <maven-deploy pomRefId="ftp-bundle.pom"
+    		    	                  file="${output.bundle.dist.dir}/joram-ftp.jar" />
+      <maven-deploy pomRefId="mail-bundle.pom"
+    		    	                  file="${output.bundle.dist.dir}/joram-mail.jar" />
+      <maven-deploy pomRefId="jmsbridge-bundle.pom"
+    		    	                  file="${output.bundle.dist.dir}/joram-jmsbridge.jar" />
+      <maven-deploy pomRefId="jcup-bundle.pom"
     		    	                  file="${output.bundle.dist.dir}/JCup.jar" />
     </target>
 </project>

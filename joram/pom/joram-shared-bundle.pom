@@ -33,18 +33,18 @@
     <artifactId>joram-parent</artifactId>
     <version>@VERSION@</version>
   </parent>
-  <artifactId>joram-shared-bundle</artifactId>
+  <artifactId>joram-shared</artifactId>
   <name>bundle JORAM :: Shared</name>
 
   <dependencies>
     <dependency>
       <groupId>org.objectweb.joram</groupId>
-      <artifactId>jcup-bundle</artifactId>
+      <artifactId>jcup</artifactId>
       <version>@VERSION@</version>
     </dependency>
     <dependency>
       <groupId>org.objectweb.joram</groupId>
-      <artifactId>joram-common-util-bundle</artifactId>
+      <artifactId>joram-common-util</artifactId>
       <version>@VERSION@</version>
     </dependency>
   </dependencies>

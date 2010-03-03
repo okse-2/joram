@@ -33,7 +33,7 @@
     <artifactId>joram-parent</artifactId>
     <version>@VERSION@</version>
   </parent>
-  <artifactId>joram-common-util-bundle</artifactId>
+  <artifactId>joram-common-util</artifactId>
   <name>bundle JORAM :: Common util</name>
 
   <dependencies>
