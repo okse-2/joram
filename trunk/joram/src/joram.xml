@@ -643,6 +643,7 @@
   	<!-- Felix -->
     <copy file="${bundle.dir}/felix.jar" todir="${ship.dir}/bin"/>
     <copy file="${bundle.dir}/org.apache.felix.shell-1.4.1.jar" todir="${ship.dir}/bundle"/>
+    <copy file="${bundle.dir}/org.apache.felix.shell.tui-1.4.1.jar" todir="${ship.dir}/bundle"/>
     <copy file="${bundle.dir}/org.apache.felix.shell.remote-1.0.4.jar" todir="${ship.dir}/bundle"/>
   	
     <copy file="${bundle.dir}/ow_monolog.jar" todir="${ship.dir}/bundle"/>
@@ -726,7 +727,7 @@
   <!-- SNAPSHOT -->
   <target name="snapshot" depends="init">
     <!-- If version is not set, fix it -->
-    <property name="version" value="${joram.major}.${joram.minor}-SNAPSHOT"/>
+    <property name="version" value="${joram.major}.${joram.minor}.${joram.build}-SNAPSHOT"/>
 	  <antcall target="releases" inheritAll="true"/>
   </target>
 
