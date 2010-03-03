@@ -33,13 +33,13 @@
     <artifactId>joram-parent</artifactId>
     <version>@VERSION@</version>
   </parent>
-  <artifactId>joram-client-bundle</artifactId>
+  <artifactId>joram-client</artifactId>
   <name>bundle JORAM :: Client</name>
 
   <dependencies>
     <dependency>
       <groupId>org.objectweb.joram</groupId>
-      <artifactId>joram-shared-bundle</artifactId>
+      <artifactId>joram-shared</artifactId>
       <version>@VERSION@</version>
     </dependency>
     <dependency>
