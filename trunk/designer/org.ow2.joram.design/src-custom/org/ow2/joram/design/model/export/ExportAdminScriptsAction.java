@@ -308,8 +308,8 @@ public class ExportAdminScriptsAction implements IObjectActionDelegate {
       sb.append("  <InitialContext>\n");
       sb.append("    <property name='java.naming.factory.initial' value='fr.dyade.aaa.jndi2.client.NamingContextFactory'/>\n");
       sb.append("    <property name='java.naming.factory.host' value='"
-          + ((ScalAgentServer) jndi.eContainer()).getHostname() + "'\n");
-      sb.append("    <property name='java.naming.factory.port' value='" + jndiport + "'\n");
+          + ((ScalAgentServer) jndi.eContainer()).getHostname() + "'/>\n");
+      sb.append("    <property name='java.naming.factory.port' value='" + jndiport + "'/>\n");
       sb.append("  </InitialContext>\n");
       sb.append("\n");
     }
