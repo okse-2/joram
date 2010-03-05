@@ -50,6 +50,12 @@
     </s1>
    
     <s1 name="Latest News">
+      <s2 name="March 05, 2010: Tutorials about OSGi and architecture designer are available.">
+      <p>Two new tutorials are available describing new features available in Joram 5.3. The first one describes
+      briefly the capabilities of the OSGi implementation of the Joram server, the second one introduces the Joram's
+      architecture designer (see <a href="doc/tutorials.html">tutorials</a>).</p>
+      </s2>
+    
       <s2 name="February 22, 2010: Please help us to make Joram better ! Last week to reply to this short study.">
       <p>You use or have heard of JORAM, to better understand your needs we have ask Gtec company to conduct a study
       on the main expectations of users of JORAM. This study is a very simple quiz which you are invited to meet (5 to
@@ -131,15 +137,6 @@
       <p>If you need quickly a fix for a particular bug, you may be able to find a fixed Joram release here well
       before the fix makes it into the next release version. On the other hand, these snapshots might sometimes
       be unstable.</p>
-      </s2>
- 
-      <s2 name="September 21, 2009: JORAM 5.2.5 is released">
-      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
-      <p>It introduces some improvements and bug fixes.</p>
-      <p>This version is bundled in <a href="http://jonas.ow2.org/">Jonas</a> 4.10.5 and 5.1.0.</p>
-      <p>It is tagged in SVN (JORAM_5_2_5), the complete list of changes can be viewed either in
-      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
-      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
       </s2>
 			
       <s2 name="January 18, 2006">
