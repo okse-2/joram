@@ -50,6 +50,14 @@
     </s1>
    
     <s1 name="Latest News">
+      <s2 name="March 09, 2010: Joram successfully passes performance and scalability tests for SM&amp;C.">
+      <p>The CNES implementation of a new generation of Spacecraft Monitoring and Control system (CCSDS SM&amp;C stantard)
+      foresee to use Joram as underlying communication middleware. Performance and scalability tests have been conducted
+      successfully to validate this future usage of Joram.</p>
+      <p>Credits to HP &amp; <a href="http://www.oxalya.com">Oxalya</a> and their Minalogic partnership for their support
+      in granting access to the 'virtual nodes' cluster.</p>
+      </s2>
+
       <s2 name="March 05, 2010: Tutorials about OSGi and architecture designer are available.">
       <p>Two new tutorials are available describing new features available in Joram 5.3. The first one describes
       briefly the capabilities of the OSGi implementation of the Joram server, the second one introduces the Joram's
