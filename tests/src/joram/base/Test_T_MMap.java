@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2007 ScalAgent Distributed Technologies
+ * Copyright (C)  2007 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -89,8 +89,11 @@ public class Test_T_MMap extends TestCase implements javax.jms.MessageListener {
       msg.setChar("char", 'e');
       msg.setString("string", "it is a string");
 
-      producer.send(msg);
       setProducerMessage(msg);
+      producer.send(msg);
+
+      // Wait to receive the message.
+      Thread.sleep(1000);
 
       cnx.close();
     } catch (Throwable exc) {
@@ -119,19 +122,18 @@ public class Test_T_MMap extends TestCase implements javax.jms.MessageListener {
     topic.setFreeReading();
     topic.setFreeWriting();
 
-    javax.jms.ConnectionFactory cf = org.objectweb.joram.client.jms.tcp.TcpConnectionFactory.create(
-        "localhost", 2560);
+    ConnectionFactory cf = org.objectweb.joram.client.jms.tcp.TcpConnectionFactory.create("localhost", 2560);
 
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     jndiCtx.bind("cf", cf);
     jndiCtx.bind("topic", topic);
     jndiCtx.close();
 
-    org.objectweb.joram.client.jms.admin.AdminModule.disconnect();
+    AdminModule.disconnect();
   }
 
   public void onMessage(Message message) {
-    System.out.println("message receive");
+    System.out.println("message received");
     try {
       MapMessage msg = (MapMessage) message;
       MapMessage msgP = getProducerMessage();
@@ -154,7 +156,7 @@ public class Test_T_MMap extends TestCase implements javax.jms.MessageListener {
       assertEquals((byte) 15, rbyte);
 
     } catch (Throwable thr) {
-      addFailure(thr);
+      addError(thr);
     }
   }
 
