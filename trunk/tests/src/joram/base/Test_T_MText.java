@@ -134,7 +134,6 @@ public class Test_T_MText extends TestCase implements javax.jms.MessageListener 
     } catch (Throwable exc) {
       addError(exc);
     }
-    throw new NullPointerException();
   }
 
   public void setProducerMessage(TextMessage message) {
