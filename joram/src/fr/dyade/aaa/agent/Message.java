@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies 
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -266,7 +266,7 @@ final class Message implements Serializable {
   /**
    * Deletes the current object in persistent storage.
    */
-  void delete()  throws IOException {
+  void delete() {
     if (isPersistent()) {
       AgentServer.getTransaction().delete(toStringId());
       if ((not != null) && (not.detachable && ! not.detached)) {
