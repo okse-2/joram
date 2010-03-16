@@ -301,7 +301,7 @@ public class SCAdminOSGi implements SCAdminItf {
   private static final int MIN_PORT_NUMBER = 1025;
   private static final int MAX_PORT_NUMBER = 32760;
   private static final int PORT_CHECK_RANGE = 1000;
-  private static final int PORT_CHECK_START = 16000;
+  private static final int PORT_CHECK_START = 20000;
 
   public static int getFreePort() {
     Random random = new Random();
