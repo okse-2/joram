@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -599,12 +599,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
                 }
                 // Suppress the processed notification from message queue and deletes it.
                 // It can be done outside of a transaction and committed later (on next handle).
-                try {
-                  msgout.delete();
-                } catch (IOException exc) {
-                  logmon.log(BasicLevel.ERROR,
-                             this.getName() + ", cannot delete message", exc);
-                }
+                msgout.delete();
                 msgout.free();
               }
             } while (msgout != null);
