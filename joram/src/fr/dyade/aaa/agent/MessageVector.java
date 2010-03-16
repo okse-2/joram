@@ -21,8 +21,6 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.lang.ref.SoftReference;
-
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -107,7 +105,7 @@ final class MessageVector implements MessageQueue {
   public synchronized void push(Message item) {
     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, logmsg + "push(" + item + ")");
-    addMessage(item);
+    insertMessageAt(item, count);
   }
 
   /**
@@ -334,7 +332,7 @@ final class MessageVector implements MessageQueue {
    * @param item	the message to be pushed onto this queue.
    * @param index	where to insert the new message.
    */
-  void insertMessageAt(Message item, int index) {
+  private void insertMessageAt(Message item, int index) {
     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
                  logmsg + "insertMessageAt(" + item + ", " + index + ")");
@@ -365,25 +363,12 @@ final class MessageVector implements MessageQueue {
   }
 
   /**
-   * Adds the specified message to the end of internal <code>Vector</code>.
-   *
-   * @param   item   the message to be added onto this queue.
-   */
-  void addMessage(Message item) {
-    if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG,
-                 logmsg + "addMessage(" + item + ")");
-
-    insertMessageAt(item, count);
-  }
-
-  /**
    * Returns the message at the specified index.
    *
    * @param index	the index of the message.
    * @return     	The message at the top of this queue.
    */
-  Message getMessageAt(int index) {
+  private Message getMessageAt(int index) {
     if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, logmsg + "getMessageAt(" + index + ")");
 
@@ -404,7 +389,7 @@ final class MessageVector implements MessageQueue {
    *
    * @param index	the index of the message to remove.
    */
-  void removeMessageAt(int index) {
+  private void removeMessageAt(int index) {
     if (index == 0) {
       // It is the first element, just move the start of the list.
       data[first] = null; /* let gc do its work */
@@ -469,97 +454,5 @@ final class MessageVector implements MessageQueue {
     
     return strbuf.toString();
   }
-  
-  final class MessageSoftRef {
 
-    /**
-     *  Name for persistent message, used to retrieve garbaged message
-     * from persistent storage.
-     */
-    private String name = null;
-
-    /**
-     *  Reference for transient message, used to pin non persistent
-     * in memory.
-     */
-    private Message ref = null;
-
-    /**
-     * The SoftReference to the message, which permits to the message to be
-     * garbaged in response to memory demand.
-     */
-    private SoftReference softRef = null;
-
-    MessageSoftRef(Message msg) {
-      this.softRef = new SoftReference(msg);
-      if (msg.isPersistent())
-        name = msg.toStringId();
-      else
-        ref = msg;
-    }
-
-    /**
-     * Returns this reference message's referent. If the message has been
-     * swap out it returns null.
-     *
-     * @return The message to which this reference refers.
-     */
-    public Message getMessage() {
-      return null != ref ? ref : (Message) softRef.get();
-    }
-
-    /**
-     * Loads from disk this reference message's referent if the message has been
-     * swapped out. It should be called only after a getMessage returning null.
-     * The SoftReference is renewed to avoid reloading the message from disk
-     * each time this method is called.
-     * 
-     * @return The message to which this reference refers.
-     */
-    public Message loadMessage() throws TransactionError {
-      if (ref != null)
-        return ref;
-
-      Message msg;
-      try {
-        msg = Message.load(name);
-        softRef = new SoftReference(msg);
-        if (logmon.isLoggable(BasicLevel.DEBUG))
-          logmon.log(BasicLevel.DEBUG, logmsg + "reload from disk " + msg);
-      } catch (Exception exc) {
-        logmon.log(BasicLevel.ERROR,
-                   logmsg + "Can't load message " + name, exc);
-        throw new TransactionError(exc);
-      }
-      return msg;
-    }
-
-    /**
-     * Returns a string representation of this <code>MessageSoftRef</code>
-     * object.
-     *
-     * @return	A string representation of this object. 
-     */
-    public String toString() {
-      StringBuffer strbuf = new StringBuffer();
-      
-      strbuf.append('(').append(super.toString());
-      strbuf.append(",name=").append(name);
-      strbuf.append(",ref=").append(ref);
-      strbuf.append("))");
-      
-      return strbuf.toString();
-    }
-  }
-
-  final class TransactionError extends Error {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
-    TransactionError(Throwable cause) {
-      super(cause.getMessage());
-    }
-  }
 }
