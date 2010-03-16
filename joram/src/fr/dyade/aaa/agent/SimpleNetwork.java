@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -30,6 +30,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -43,8 +44,9 @@ import fr.dyade.aaa.common.Daemon;
  * a time.
  */
 public class SimpleNetwork extends StreamNetwork {
+
   /** FIFO list of all messages to be sent by the watch-dog thread. */
-  MessageVector sendList;
+  MessageSoftList sendList;
 
   private JGroups jgroups = null;
 
@@ -88,8 +90,7 @@ public class SimpleNetwork extends StreamNetwork {
     logmon.log(BasicLevel.DEBUG, getName() + ", starting");
     try {
       if (sendList == null)
-        sendList = new MessageVector(getName(),
-                                     AgentServer.getTransaction().isPersistent());
+        sendList = new MessageSoftList(getName(), AgentServer.getTransaction().isPersistent());
     
       if (netServerIn == null)
         netServerIn = new NetServerIn(getName(), logmon);
@@ -210,8 +211,10 @@ public class SimpleNetwork extends StreamNetwork {
           long currentTimeMillis = System.currentTimeMillis();
           ServerDesc server = null;
 
-          for (int i = 0; i < sendList.size(); i++) {
-            msg = sendList.getMessageAt(i);
+          Iterator iterator = sendList.toSendIterator();
+
+          while (iterator.hasNext()) {
+            msg = (Message) iterator.next();
             short msgto = msg.getDest();
 
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
@@ -242,7 +245,7 @@ public class SimpleNetwork extends StreamNetwork {
               }
 
               // Deletes the processed notification
-              sendList.removeMessageAt(i); i--;
+              iterator.remove();
     // AF: A reprendre.
 //               // send ack in JGroups to delete msg
 //               if (jgroups != null)
@@ -263,7 +266,7 @@ public class SimpleNetwork extends StreamNetwork {
               // notification to sender.
               AgentServer.getTransaction().begin();
               // Deletes the processed notification
-              sendList.removeMessageAt(i); i--;
+              iterator.remove();
     // AF: A reprendre.
 //              // send ack in JGroups to delete msg
 //               if (jgroups != null)
@@ -328,7 +331,7 @@ public class SimpleNetwork extends StreamNetwork {
 
               AgentServer.getTransaction().begin();
               //  Deletes the processed notification
-              sendList.removeMessageAt(i); i--;
+              iterator.remove();
     // AF: A reprendre.
 //               // send ack in JGroups to delete msg
 //               if (jgroups != null)
