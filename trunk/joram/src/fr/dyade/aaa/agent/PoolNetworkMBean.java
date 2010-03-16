@@ -40,33 +40,6 @@ public interface PoolNetworkMBean extends NetworkMBean {
    * @return	the number of active session.
    */
   public int getNbActiveSession();
-  
-  /**
-   * Returns the maximum number of free senders in the pool.
-   *
-   * @return  the number of free senders in the pool.
-   */
-  public int getNbMaxFreeSender();
-  
-  /**
-   * Returns the number of tries in {@link PoolSender#reset(short)} before
-   * returning.
-   * 
-   * @return the nbMaxResetTries
-   * 
-   * @see #nbMaxResetTries
-   */
-  public int getNbMaxResetTries();
-
-  /**
-   * Sets the number of tries in {@link PoolSender#reset(short)} before
-   * returning.
-   * 
-   * @param nbMaxResetTries the nbMaxResetTries to set
-   * 
-   * @see #nbMaxResetTries
-   */
-  public void setNbMaxResetTries(int nbMaxResetTries);
 
   /**
    * Gets the number of waiting messages to send for this session.
