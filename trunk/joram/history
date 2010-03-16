@@ -1,3 +1,18 @@
++==============================================================================
+| 2010/03/16 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Reworked PoolNetwork to have one Sender by NetSession. This leads to the
+suppression of nbMaxFreeSender and nbMaxResetTries properties and fixes various
+sync issues.
+ Furthermore, SoftReferences are used in the PoolNetwork to avoid memory errors
+when messages accumulate in the network.
++==============================================================================
+| 2010/03/03 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Following Joram OSGi properties can now be defined in config.properties file:
+- fr.dyade.aaa.agent.AgentServer.id
+- fr.dyade.aaa.agent.AgentServer.clusterid
+- fr.dyade.aaa.agent.AgentServer.storage
 ###############################################################################
 # 2010/02/11 | Joram 5.3.0 tag.
 ###############################################################################
