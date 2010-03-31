@@ -129,13 +129,43 @@
     </tools>
     <tools
         xsi:type="gmftool:ToolGroup"
-        title="JORAM networks"
+        title="Host"
         collapsible="true"
         stack="true">
       <tools
           xsi:type="gmftool:CreationTool"
-          title="Network domain"
-          description="Create a new NetworkDomain">
+          title="Host"
+          description="Create a new host for one (or more) Joram server.">
+        <smallIcon
+            xsi:type="gmftool:DefaultImage"/>
+        <largeIcon
+            xsi:type="gmftool:DefaultImage"/>
+      </tools>
+      <tools
+          xsi:type="gmftool:PaletteSeparator"/>
+      <tools
+          xsi:type="gmftool:CreationTool"
+          title="Server host"
+          description="Define where a server will be hosted.">
+        <smallIcon
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/OnHost.gif"
+            bundle="org.ow2.joram.design.edit"/>
+        <largeIcon
+            xsi:type="gmftool:BundleImage"
+            path="icons/full/obj16/OnHost.gif"
+            bundle="org.ow2.joram.design.edit"/>
+      </tools>
+    </tools>
+    <tools
+        xsi:type="gmftool:ToolGroup"
+        title="JORAM Domain"
+        collapsible="true"
+        stack="true">
+      <tools
+          xsi:type="gmftool:CreationTool"
+          title="Domain"
+          description="Create a new domain. This component permits multiple servers to communicate.">
         <smallIcon
             xsi:type="gmftool:DefaultImage"/>
         <largeIcon
@@ -146,8 +176,8 @@
           title="Links"/>
       <tools
           xsi:type="gmftool:CreationTool"
-          title="Add to network"
-          description="Add a JORAM server to a network">
+          title="Server domain."
+          description="Add a server to a domain. Every server linked with a common domain can communicate.">
         <smallIcon
             xsi:type="gmftool:DefaultImage"/>
         <largeIcon

@@ -9,10 +9,10 @@
         name="JORAM integrity"
         description="Checks integrity of the JORAM diagram."
         path="//@audits/@categories.0"
-        audits="//@audits/@rules.0 //@audits/@rules.1 //@audits/@rules.2 //@audits/@rules.3 //@audits/@rules.4"/>
+        audits="//@audits/@rules.0 //@audits/@rules.1 //@audits/@rules.2 //@audits/@rules.3 //@audits/@rules.4 //@audits/@rules.5"/>
     <rules
         name="JORAM unique server Id"
-        description="Checks unicity of server id."
+        description="Unicity of server id check."
         id="uniqueIdRule"
         rule="//@expressionProviders/@providers.0/@expressions.7"
         message="Server Id (sid) must be unique."
@@ -26,7 +26,7 @@
     </rules>
     <rules
         name="Domain unique name"
-        description="Checks unicity of domain name."
+        description="Unicity of domain name check."
         id="uniqueDomainRule"
         rule="//@expressionProviders/@providers.0/@expressions.8"
         message="Domain name must be unique."
@@ -40,21 +40,22 @@
     </rules>
     <rules
         name="Domain name check"
-        description="descr TODO"
+        description="Empty domain name check"
         id="domainNameRule"
         rule="//@expressionProviders/@providers.0/@expressions.9"
         message="Domain name can't be empty"
         category="//@audits/@categories.0">
       <target
-          xsi:type="gmfgen:GenDomainElementTarget"
-          contextSelector="//@audits/@clientContexts.0">
-        <element
-            href="joram.genmodel#//joram/NetworkDomain"/>
+          xsi:type="gmfgen:GenDomainAttributeTarget"
+          contextSelector="//@audits/@clientContexts.0"
+          nullAsError="true">
+        <attribute
+            href="joram.genmodel#//joram/NetworkDomain/name"/>
       </target>
     </rules>
     <rules
         name="Port used check"
-        description="TODO"
+        description="Available port check."
         id="portcheck"
         rule="//@expressionProviders/@providers.0/@expressions.10"
         message="Server is linked with two different domains using the same port."
@@ -68,7 +69,7 @@
     </rules>
     <rules
         name="ConnectionManager presence check"
-        description="TODO"
+        description="TCPProxyService with ConnectionManager check."
         id="connectionmanager.presence"
         rule="//@expressionProviders/@providers.0/@expressions.11"
         message="TCPProxyService can't work without a ConnectionManager service."
@@ -80,8 +81,23 @@
             href="joram.genmodel#//joram/ScalAgentServer"/>
       </target>
     </rules>
+    <rules
+        name="Joram release."
+        description="Joram release check."
+        id="joram_release"
+        rule="//@expressionProviders/@providers.1/@expressions.0"
+        message="Joram release location has not been defined in preferences. Deployment will not be available."
+        severity="WARNING"
+        category="//@audits/@categories.0">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="joram.genmodel#//joram/Config"/>
+      </target>
+    </rules>
     <clientContexts
-        ruleTargets="//@audits/@rules.0/@target //@audits/@rules.1/@target //@audits/@rules.2/@target //@audits/@rules.3/@target //@audits/@rules.4/@target"/>
+        ruleTargets="//@audits/@rules.0/@target //@audits/@rules.1/@target //@audits/@rules.2/@target //@audits/@rules.3/@target //@audits/@rules.4/@target //@audits/@rules.5/@target"/>
   </audits>
   <diagram
       visualID="1000"
@@ -108,6 +124,7 @@
         visualID="3001"
         editPartClassName="AdminProxyEditPart"
         itemSemanticEditPolicyClassName="AdminProxyItemSemanticEditPolicy"
+        notationViewFactoryClassName="AdminProxyViewFactory"
         canonicalEditPolicyClassName="AdminProxyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="AdminProxyGraphicalNodeEditPolicy"
         createCommandClassName="AdminProxyCreateCommand"
@@ -143,6 +160,7 @@
         visualID="3002"
         editPartClassName="ConnectionManagerEditPart"
         itemSemanticEditPolicyClassName="ConnectionManagerItemSemanticEditPolicy"
+        notationViewFactoryClassName="ConnectionManagerViewFactory"
         canonicalEditPolicyClassName="ConnectionManagerCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="ConnectionManagerGraphicalNodeEditPolicy"
         createCommandClassName="ConnectionManagerCreateCommand"
@@ -178,6 +196,7 @@
         visualID="3003"
         editPartClassName="JNDIServerEditPart"
         itemSemanticEditPolicyClassName="JNDIServerItemSemanticEditPolicy"
+        notationViewFactoryClassName="JNDIServerViewFactory"
         canonicalEditPolicyClassName="JNDIServerCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="JNDIServerGraphicalNodeEditPolicy"
         createCommandClassName="JNDIServerCreateCommand"
@@ -213,6 +232,7 @@
         visualID="3004"
         editPartClassName="DistributedJNDIServerEditPart"
         itemSemanticEditPolicyClassName="DistributedJNDIServerItemSemanticEditPolicy"
+        notationViewFactoryClassName="DistributedJNDIServerViewFactory"
         canonicalEditPolicyClassName="DistributedJNDIServerCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="DistributedJNDIServerGraphicalNodeEditPolicy"
         createCommandClassName="DistributedJNDIServerCreateCommand"
@@ -246,6 +266,7 @@
         visualID="3005"
         editPartClassName="TCPProxyServiceEditPart"
         itemSemanticEditPolicyClassName="TCPProxyServiceItemSemanticEditPolicy"
+        notationViewFactoryClassName="TCPProxyServiceViewFactory"
         canonicalEditPolicyClassName="TCPProxyServiceCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TCPProxyServiceGraphicalNodeEditPolicy"
         createCommandClassName="TCPProxyServiceCreateCommand"
@@ -280,6 +301,7 @@
         visualID="3006"
         editPartClassName="CustomServiceEditPart"
         itemSemanticEditPolicyClassName="CustomServiceItemSemanticEditPolicy"
+        notationViewFactoryClassName="CustomServiceViewFactory"
         canonicalEditPolicyClassName="CustomServiceCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="CustomServiceGraphicalNodeEditPolicy"
         createCommandClassName="CustomServiceCreateCommand"
@@ -314,6 +336,7 @@
         visualID="3007"
         editPartClassName="TopicEditPart"
         itemSemanticEditPolicyClassName="TopicItemSemanticEditPolicy"
+        notationViewFactoryClassName="TopicViewFactory"
         canonicalEditPolicyClassName="TopicCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TopicGraphicalNodeEditPolicy"
         createCommandClassName="TopicCreateCommand"
@@ -350,6 +373,7 @@
         visualID="3008"
         editPartClassName="QueueEditPart"
         itemSemanticEditPolicyClassName="QueueItemSemanticEditPolicy"
+        notationViewFactoryClassName="QueueViewFactory"
         canonicalEditPolicyClassName="QueueCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="QueueGraphicalNodeEditPolicy"
         createCommandClassName="QueueCreateCommand"
@@ -386,6 +410,7 @@
         visualID="3009"
         editPartClassName="UserEditPart"
         itemSemanticEditPolicyClassName="UserItemSemanticEditPolicy"
+        notationViewFactoryClassName="UserViewFactory"
         canonicalEditPolicyClassName="UserCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="UserGraphicalNodeEditPolicy"
         createCommandClassName="UserCreateCommand"
@@ -422,6 +447,7 @@
         visualID="3010"
         editPartClassName="ConnectionFactoryEditPart"
         itemSemanticEditPolicyClassName="ConnectionFactoryItemSemanticEditPolicy"
+        notationViewFactoryClassName="ConnectionFactoryViewFactory"
         canonicalEditPolicyClassName="ConnectionFactoryCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="ConnectionFactoryGraphicalNodeEditPolicy"
         createCommandClassName="ConnectionFactoryCreateCommand"
@@ -455,6 +481,7 @@
         visualID="3011"
         editPartClassName="CustomPropertyEditPart"
         itemSemanticEditPolicyClassName="CustomPropertyItemSemanticEditPolicy"
+        notationViewFactoryClassName="CustomPropertyViewFactory"
         canonicalEditPolicyClassName="CustomPropertyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="CustomPropertyGraphicalNodeEditPolicy"
         createCommandClassName="CustomPropertyCreateCommand"
@@ -490,6 +517,7 @@
         visualID="3012"
         editPartClassName="PoolNetworkPropertiesEditPart"
         itemSemanticEditPolicyClassName="PoolNetworkPropertiesItemSemanticEditPolicy"
+        notationViewFactoryClassName="PoolNetworkPropertiesViewFactory"
         canonicalEditPolicyClassName="PoolNetworkPropertiesCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="PoolNetworkPropertiesGraphicalNodeEditPolicy"
         createCommandClassName="PoolNetworkPropertiesCreateCommand"
@@ -521,6 +549,7 @@
         visualID="3013"
         editPartClassName="NetworkPropertiesEditPart"
         itemSemanticEditPolicyClassName="NetworkPropertiesItemSemanticEditPolicy"
+        notationViewFactoryClassName="NetworkPropertiesViewFactory"
         canonicalEditPolicyClassName="NetworkPropertiesCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="NetworkPropertiesGraphicalNodeEditPolicy"
         createCommandClassName="NetworkPropertiesCreateCommand"
@@ -552,6 +581,7 @@
         visualID="3014"
         editPartClassName="HttpNetworkPropertiesEditPart"
         itemSemanticEditPolicyClassName="HttpNetworkPropertiesItemSemanticEditPolicy"
+        notationViewFactoryClassName="HttpNetworkPropertiesViewFactory"
         canonicalEditPolicyClassName="HttpNetworkPropertiesCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="HttpNetworkPropertiesGraphicalNodeEditPolicy"
         createCommandClassName="HttpNetworkPropertiesCreateCommand"
@@ -583,6 +613,7 @@
         visualID="3015"
         editPartClassName="TransactionPropertyEditPart"
         itemSemanticEditPolicyClassName="TransactionPropertyItemSemanticEditPolicy"
+        notationViewFactoryClassName="TransactionPropertyViewFactory"
         canonicalEditPolicyClassName="TransactionPropertyCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TransactionPropertyGraphicalNodeEditPolicy"
         createCommandClassName="TransactionPropertyCreateCommand"
@@ -616,6 +647,7 @@
         visualID="3016"
         editPartClassName="NTransactionPropertiesEditPart"
         itemSemanticEditPolicyClassName="NTransactionPropertiesItemSemanticEditPolicy"
+        notationViewFactoryClassName="NTransactionPropertiesViewFactory"
         canonicalEditPolicyClassName="NTransactionPropertiesCanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="NTransactionPropertiesGraphicalNodeEditPolicy"
         createCommandClassName="NTransactionPropertiesCreateCommand"
@@ -647,6 +679,7 @@
         visualID="3017"
         editPartClassName="AdminProxy2EditPart"
         itemSemanticEditPolicyClassName="AdminProxy2ItemSemanticEditPolicy"
+        notationViewFactoryClassName="AdminProxyViewFactory"
         canonicalEditPolicyClassName="AdminProxy2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="AdminProxy2GraphicalNodeEditPolicy"
         createCommandClassName="AdminProxy2CreateCommand"
@@ -683,6 +716,7 @@
         visualID="3018"
         editPartClassName="ConnectionManager2EditPart"
         itemSemanticEditPolicyClassName="ConnectionManager2ItemSemanticEditPolicy"
+        notationViewFactoryClassName="ConnectionManagerViewFactory"
         canonicalEditPolicyClassName="ConnectionManager2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="ConnectionManager2GraphicalNodeEditPolicy"
         createCommandClassName="ConnectionManager2CreateCommand"
@@ -717,6 +751,7 @@
         visualID="3019"
         editPartClassName="JNDIServer2EditPart"
         itemSemanticEditPolicyClassName="JNDIServer2ItemSemanticEditPolicy"
+        notationViewFactoryClassName="JNDIServerViewFactory"
         canonicalEditPolicyClassName="JNDIServer2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="JNDIServer2GraphicalNodeEditPolicy"
         createCommandClassName="JNDIServer2CreateCommand"
@@ -752,6 +787,7 @@
         visualID="3020"
         editPartClassName="DistributedJNDIServer2EditPart"
         itemSemanticEditPolicyClassName="DistributedJNDIServer2ItemSemanticEditPolicy"
+        notationViewFactoryClassName="DistributedJNDIServerViewFactory"
         canonicalEditPolicyClassName="DistributedJNDIServer2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="DistributedJNDIServer2GraphicalNodeEditPolicy"
         createCommandClassName="DistributedJNDIServer2CreateCommand"
@@ -785,6 +821,7 @@
         visualID="3021"
         editPartClassName="TCPProxyService2EditPart"
         itemSemanticEditPolicyClassName="TCPProxyService2ItemSemanticEditPolicy"
+        notationViewFactoryClassName="TCPProxyServiceViewFactory"
         canonicalEditPolicyClassName="TCPProxyService2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TCPProxyService2GraphicalNodeEditPolicy"
         createCommandClassName="TCPProxyService2CreateCommand"
@@ -819,6 +856,7 @@
         visualID="3022"
         editPartClassName="CustomService2EditPart"
         itemSemanticEditPolicyClassName="CustomService2ItemSemanticEditPolicy"
+        notationViewFactoryClassName="CustomServiceViewFactory"
         canonicalEditPolicyClassName="CustomService2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="CustomService2GraphicalNodeEditPolicy"
         createCommandClassName="CustomService2CreateCommand"
@@ -853,6 +891,7 @@
         visualID="3023"
         editPartClassName="CustomProperty2EditPart"
         itemSemanticEditPolicyClassName="CustomProperty2ItemSemanticEditPolicy"
+        notationViewFactoryClassName="CustomPropertyViewFactory"
         canonicalEditPolicyClassName="CustomProperty2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="CustomProperty2GraphicalNodeEditPolicy"
         createCommandClassName="CustomProperty2CreateCommand"
@@ -888,6 +927,7 @@
         visualID="3024"
         editPartClassName="PoolNetworkProperties2EditPart"
         itemSemanticEditPolicyClassName="PoolNetworkProperties2ItemSemanticEditPolicy"
+        notationViewFactoryClassName="PoolNetworkPropertiesViewFactory"
         canonicalEditPolicyClassName="PoolNetworkProperties2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="PoolNetworkProperties2GraphicalNodeEditPolicy"
         createCommandClassName="PoolNetworkProperties2CreateCommand"
@@ -919,6 +959,7 @@
         visualID="3025"
         editPartClassName="NetworkProperties2EditPart"
         itemSemanticEditPolicyClassName="NetworkProperties2ItemSemanticEditPolicy"
+        notationViewFactoryClassName="NetworkPropertiesViewFactory"
         canonicalEditPolicyClassName="NetworkProperties2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="NetworkProperties2GraphicalNodeEditPolicy"
         createCommandClassName="NetworkProperties2CreateCommand"
@@ -950,6 +991,7 @@
         visualID="3026"
         editPartClassName="HttpNetworkProperties2EditPart"
         itemSemanticEditPolicyClassName="HttpNetworkProperties2ItemSemanticEditPolicy"
+        notationViewFactoryClassName="HttpNetworkPropertiesViewFactory"
         canonicalEditPolicyClassName="HttpNetworkProperties2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="HttpNetworkProperties2GraphicalNodeEditPolicy"
         createCommandClassName="HttpNetworkProperties2CreateCommand"
@@ -981,6 +1023,7 @@
         visualID="3027"
         editPartClassName="TransactionProperty2EditPart"
         itemSemanticEditPolicyClassName="TransactionProperty2ItemSemanticEditPolicy"
+        notationViewFactoryClassName="TransactionPropertyViewFactory"
         canonicalEditPolicyClassName="TransactionProperty2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TransactionProperty2GraphicalNodeEditPolicy"
         createCommandClassName="TransactionProperty2CreateCommand"
@@ -1014,6 +1057,7 @@
         visualID="3028"
         editPartClassName="NTransactionProperties2EditPart"
         itemSemanticEditPolicyClassName="NTransactionProperties2ItemSemanticEditPolicy"
+        notationViewFactoryClassName="NTransactionPropertiesViewFactory"
         canonicalEditPolicyClassName="NTransactionProperties2CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="NTransactionProperties2GraphicalNodeEditPolicy"
         createCommandClassName="NTransactionProperties2CreateCommand"
@@ -1045,6 +1089,7 @@
         visualID="3029"
         editPartClassName="CustomProperty3EditPart"
         itemSemanticEditPolicyClassName="CustomProperty3ItemSemanticEditPolicy"
+        notationViewFactoryClassName="CustomPropertyViewFactory"
         canonicalEditPolicyClassName="CustomProperty3CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="CustomProperty3GraphicalNodeEditPolicy"
         createCommandClassName="CustomProperty3CreateCommand"
@@ -1080,6 +1125,7 @@
         visualID="3030"
         editPartClassName="PoolNetworkProperties3EditPart"
         itemSemanticEditPolicyClassName="PoolNetworkProperties3ItemSemanticEditPolicy"
+        notationViewFactoryClassName="PoolNetworkPropertiesViewFactory"
         canonicalEditPolicyClassName="PoolNetworkProperties3CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="PoolNetworkProperties3GraphicalNodeEditPolicy"
         createCommandClassName="PoolNetworkProperties3CreateCommand"
@@ -1111,6 +1157,7 @@
         visualID="3031"
         editPartClassName="NetworkProperties3EditPart"
         itemSemanticEditPolicyClassName="NetworkProperties3ItemSemanticEditPolicy"
+        notationViewFactoryClassName="NetworkPropertiesViewFactory"
         canonicalEditPolicyClassName="NetworkProperties3CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="NetworkProperties3GraphicalNodeEditPolicy"
         createCommandClassName="NetworkProperties3CreateCommand"
@@ -1142,6 +1189,7 @@
         visualID="3032"
         editPartClassName="HttpNetworkProperties3EditPart"
         itemSemanticEditPolicyClassName="HttpNetworkProperties3ItemSemanticEditPolicy"
+        notationViewFactoryClassName="HttpNetworkPropertiesViewFactory"
         canonicalEditPolicyClassName="HttpNetworkProperties3CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="HttpNetworkProperties3GraphicalNodeEditPolicy"
         createCommandClassName="HttpNetworkProperties3CreateCommand"
@@ -1173,6 +1221,7 @@
         visualID="3033"
         editPartClassName="TransactionProperty3EditPart"
         itemSemanticEditPolicyClassName="TransactionProperty3ItemSemanticEditPolicy"
+        notationViewFactoryClassName="TransactionPropertyViewFactory"
         canonicalEditPolicyClassName="TransactionProperty3CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TransactionProperty3GraphicalNodeEditPolicy"
         createCommandClassName="TransactionProperty3CreateCommand"
@@ -1206,6 +1255,7 @@
         visualID="3034"
         editPartClassName="NTransactionProperties3EditPart"
         itemSemanticEditPolicyClassName="NTransactionProperties3ItemSemanticEditPolicy"
+        notationViewFactoryClassName="NTransactionPropertiesViewFactory"
         canonicalEditPolicyClassName="NTransactionProperties3CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="NTransactionProperties3GraphicalNodeEditPolicy"
         createCommandClassName="NTransactionProperties3CreateCommand"
@@ -1237,6 +1287,7 @@
         visualID="3035"
         editPartClassName="CustomProperty4EditPart"
         itemSemanticEditPolicyClassName="CustomProperty4ItemSemanticEditPolicy"
+        notationViewFactoryClassName="CustomPropertyViewFactory"
         canonicalEditPolicyClassName="CustomProperty4CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="CustomProperty4GraphicalNodeEditPolicy"
         createCommandClassName="CustomProperty4CreateCommand"
@@ -1272,6 +1323,7 @@
         visualID="3036"
         editPartClassName="PoolNetworkProperties4EditPart"
         itemSemanticEditPolicyClassName="PoolNetworkProperties4ItemSemanticEditPolicy"
+        notationViewFactoryClassName="PoolNetworkPropertiesViewFactory"
         canonicalEditPolicyClassName="PoolNetworkProperties4CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="PoolNetworkProperties4GraphicalNodeEditPolicy"
         createCommandClassName="PoolNetworkProperties4CreateCommand"
@@ -1303,6 +1355,7 @@
         visualID="3037"
         editPartClassName="NetworkProperties4EditPart"
         itemSemanticEditPolicyClassName="NetworkProperties4ItemSemanticEditPolicy"
+        notationViewFactoryClassName="NetworkPropertiesViewFactory"
         canonicalEditPolicyClassName="NetworkProperties4CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="NetworkProperties4GraphicalNodeEditPolicy"
         createCommandClassName="NetworkProperties4CreateCommand"
@@ -1334,6 +1387,7 @@
         visualID="3038"
         editPartClassName="HttpNetworkProperties4EditPart"
         itemSemanticEditPolicyClassName="HttpNetworkProperties4ItemSemanticEditPolicy"
+        notationViewFactoryClassName="HttpNetworkPropertiesViewFactory"
         canonicalEditPolicyClassName="HttpNetworkProperties4CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="HttpNetworkProperties4GraphicalNodeEditPolicy"
         createCommandClassName="HttpNetworkProperties4CreateCommand"
@@ -1365,6 +1419,7 @@
         visualID="3039"
         editPartClassName="TransactionProperty4EditPart"
         itemSemanticEditPolicyClassName="TransactionProperty4ItemSemanticEditPolicy"
+        notationViewFactoryClassName="TransactionPropertyViewFactory"
         canonicalEditPolicyClassName="TransactionProperty4CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="TransactionProperty4GraphicalNodeEditPolicy"
         createCommandClassName="TransactionProperty4CreateCommand"
@@ -1398,6 +1453,7 @@
         visualID="3040"
         editPartClassName="NTransactionProperties4EditPart"
         itemSemanticEditPolicyClassName="NTransactionProperties4ItemSemanticEditPolicy"
+        notationViewFactoryClassName="NTransactionPropertiesViewFactory"
         canonicalEditPolicyClassName="NTransactionProperties4CanonicalEditPolicy"
         graphicalNodeEditPolicyClassName="NTransactionProperties4GraphicalNodeEditPolicy"
         createCommandClassName="NTransactionProperties4CreateCommand"
@@ -1428,6 +1484,7 @@
         visualID="2001"
         editPartClassName="JORAMEditPart"
         itemSemanticEditPolicyClassName="JORAMItemSemanticEditPolicy"
+        notationViewFactoryClassName="JORAMViewFactory"
         canonicalEditPolicyClassName="JORAMCanonicalEditPolicy"
         compartments="//@diagram/@compartments.0 //@diagram/@compartments.1 //@diagram/@compartments.2"
         graphicalNodeEditPolicyClassName="JORAMGraphicalNodeEditPolicy"
@@ -1532,6 +1589,7 @@
           visualID="5001"
           editPartClassName="JORAMNameVersionEditPart"
           itemSemanticEditPolicyClassName="JORAMNameVersionItemSemanticEditPolicy"
+          notationViewFactoryClassName="JORAMNameVersionViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -1543,19 +1601,17 @@
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0"
-            viewPattern="{0} {1}"
             editorPattern=""
             editPattern="">
           <metaFeatures
               href="joram.genmodel#//joram/ScalAgentServer/name"/>
-          <metaFeatures
-              href="joram.genmodel#//joram/ScalAgentServer/version"/>
         </modelFacet>
       </labels>
       <labels
           visualID="5002"
           editPartClassName="JORAMSidEditPart"
-          itemSemanticEditPolicyClassName="JORAMSidItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="JORAMSidItemSemanticEditPolicy"
+          notationViewFactoryClassName="JORAMSidViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1577,6 +1633,7 @@
         visualID="2002"
         editPartClassName="ScalAgentServerEditPart"
         itemSemanticEditPolicyClassName="ScalAgentServerItemSemanticEditPolicy"
+        notationViewFactoryClassName="ScalAgentServerViewFactory"
         canonicalEditPolicyClassName="ScalAgentServerCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.21"
         compartments="//@diagram/@compartments.3 //@diagram/@compartments.4"
@@ -1609,6 +1666,7 @@
           visualID="5003"
           editPartClassName="ScalAgentServerNameVersionEditPart"
           itemSemanticEditPolicyClassName="ScalAgentServerNameVersionItemSemanticEditPolicy"
+          notationViewFactoryClassName="ScalAgentServerNameVersionViewFactory"
           readOnly="true"
           elementIcon="true">
         <diagramRunTimeClass
@@ -1620,19 +1678,17 @@
         <modelFacet
             xsi:type="gmfgen:FeatureLabelModelFacet"
             parser="//@labelParsers/@implementations.0"
-            viewPattern="{0} {1}"
             editorPattern=""
             editPattern="">
           <metaFeatures
               href="joram.genmodel#//joram/ScalAgentServer/name"/>
-          <metaFeatures
-              href="joram.genmodel#//joram/ScalAgentServer/version"/>
         </modelFacet>
       </labels>
       <labels
           visualID="5004"
           editPartClassName="ScalAgentServerSidEditPart"
-          itemSemanticEditPolicyClassName="ScalAgentServerSidItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="ScalAgentServerSidItemSemanticEditPolicy"
+          notationViewFactoryClassName="ScalAgentServerSidViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1654,6 +1710,7 @@
         visualID="2003"
         editPartClassName="NetworkDomainEditPart"
         itemSemanticEditPolicyClassName="NetworkDomainItemSemanticEditPolicy"
+        notationViewFactoryClassName="NetworkDomainViewFactory"
         canonicalEditPolicyClassName="NetworkDomainCanonicalEditPolicy"
         compartments="//@diagram/@compartments.5"
         graphicalNodeEditPolicyClassName="NetworkDomainGraphicalNodeEditPolicy"
@@ -1680,6 +1737,7 @@
           visualID="5005"
           editPartClassName="NetworkDomainNameEditPart"
           itemSemanticEditPolicyClassName="NetworkDomainNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="NetworkDomainNameViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1700,7 +1758,8 @@
       <labels
           visualID="5006"
           editPartClassName="NetworkDomainNetworkEditPart"
-          itemSemanticEditPolicyClassName="NetworkDomainNetworkItemSemanticEditPolicy">
+          itemSemanticEditPolicyClassName="NetworkDomainNetworkItemSemanticEditPolicy"
+          notationViewFactoryClassName="NetworkDomainNetworkViewFactory">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
         <viewmap
@@ -1721,6 +1780,7 @@
         visualID="2004"
         editPartClassName="ConfigPropertiesEditPart"
         itemSemanticEditPolicyClassName="ConfigPropertiesItemSemanticEditPolicy"
+        notationViewFactoryClassName="ConfigPropertiesViewFactory"
         canonicalEditPolicyClassName="ConfigPropertiesCanonicalEditPolicy"
         compartments="//@diagram/@compartments.6"
         graphicalNodeEditPolicyClassName="ConfigPropertiesGraphicalNodeEditPolicy"
@@ -1744,10 +1804,61 @@
             href="joram.genmodel#//joram/Config/properties"/>
       </modelFacet>
     </topLevelNodes>
+    <topLevelNodes
+        visualID="2005"
+        editPartClassName="HostEditPart"
+        itemSemanticEditPolicyClassName="HostItemSemanticEditPolicy"
+        notationViewFactoryClassName="HostViewFactory"
+        canonicalEditPolicyClassName="HostCanonicalEditPolicy"
+        graphicalNodeEditPolicyClassName="HostGraphicalNodeEditPolicy"
+        createCommandClassName="HostCreateCommand">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+      <elementType
+          xsi:type="gmfgen:MetamodelType"
+          editHelperClassName="HostEditHelper"/>
+      <viewmap
+          xsi:type="gmfgen:InnerClassViewmap"
+          className="HostFigure"
+          classBody="&#xA;/**&#xA; * @generated&#xA; */&#xA;public class HostFigure extends org.eclipse.draw2d.RoundedRectangle {&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel fFigureHostNameLabel; &#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public HostFigure() {&#xA;&#x9;&#x9;&#xA;&#x9;org.eclipse.draw2d.GridLayout layoutThis = new org.eclipse.draw2d.GridLayout();&#xA;&#x9;layoutThis.numColumns = 1;&#xA;&#x9;layoutThis.makeColumnsEqualWidth = true;&#xA;&#x9;this.setLayoutManager(layoutThis);&#xA;&#xA;&#x9;&#x9;this.setCornerDimensions(new org.eclipse.draw2d.geometry.Dimension(getMapMode().DPtoLP(8)&#xA;, getMapMode().DPtoLP(8)&#xA;));&#xA;this.setLineWidth(1);&#xA;&#x9;this.setBackgroundColor(THIS_BACK&#xA;);&#xA;&#x9;&#x9;createContents();&#xA;&#x9;}&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private void createContents(){&#xA;&#xA;&#xA;fFigureHostNameLabel = new org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel();&#xA;fFigureHostNameLabel.setText(&quot;&quot;);&#xA;&#xA;&#xA;org.eclipse.draw2d.GridData constraintFFigureHostNameLabel = new org.eclipse.draw2d.GridData();&#xA;constraintFFigureHostNameLabel.verticalAlignment = org.eclipse.draw2d.GridData.CENTER;&#xA;constraintFFigureHostNameLabel.horizontalAlignment = org.eclipse.draw2d.GridData.CENTER;&#xA;constraintFFigureHostNameLabel.horizontalIndent = 0;&#xA;constraintFFigureHostNameLabel.horizontalSpan = 1;&#xA;constraintFFigureHostNameLabel.verticalSpan = 1;&#xA;constraintFFigureHostNameLabel.grabExcessHorizontalSpace = true;&#xA;constraintFFigureHostNameLabel.grabExcessVerticalSpace = true;&#xA;this.add(fFigureHostNameLabel, constraintFFigureHostNameLabel);&#xA;&#xA;&#xA;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;private boolean myUseLocalCoordinates = false;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected boolean useLocalCoordinates() {&#xA;&#x9;&#x9;return myUseLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;protected void setUseLocalCoordinates(boolean useLocalCoordinates) {&#xA;&#x9;&#x9;myUseLocalCoordinates = useLocalCoordinates;&#xA;&#x9;}&#xA;&#xA;&#xA;&#xA;&#x9;/**&#xA;&#x9; * @generated&#xA;&#x9; */&#xA;&#x9;public org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel getFigureHostNameLabel() {&#xA;&#x9;&#x9;return fFigureHostNameLabel;&#xA;&#x9;}&#xA;&#xA;&#xA;}&#xA;&#xA;/**&#xA; * @generated&#xA; */&#xA;static final org.eclipse.swt.graphics.Color THIS_BACK = new org.eclipse.swt.graphics.Color(null, 230, 230, 230);&#xA;&#xA;">
+        <attributes
+            xsi:type="gmfgen:StyleAttributes"
+            fixedBackground="true"/>
+      </viewmap>
+      <modelFacet>
+        <metaClass
+            href="joram.genmodel#//joram/Host"/>
+        <containmentMetaFeature
+            href="joram.genmodel#//joram/Config/hosts"/>
+        <childMetaFeature
+            href="joram.genmodel#//joram/Config/hosts"/>
+      </modelFacet>
+      <labels
+          visualID="5007"
+          editPartClassName="HostHostNameEditPart"
+          itemSemanticEditPolicyClassName="HostHostNameItemSemanticEditPolicy"
+          notationViewFactoryClassName="HostHostNameViewFactory"
+          elementIcon="true">
+        <diagramRunTimeClass
+            href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
+        <viewmap
+            xsi:type="gmfgen:ParentAssignedViewmap"
+            getterName="getFigureHostNameLabel"
+            figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.WrappingLabel"/>
+        <modelFacet
+            xsi:type="gmfgen:FeatureLabelModelFacet"
+            parser="//@labelParsers/@implementations.0">
+          <metaFeatures
+              href="joram.genmodel#//joram/Host/hostName"/>
+        </modelFacet>
+      </labels>
+    </topLevelNodes>
     <links
         visualID="4001"
         editPartClassName="NetworkPortEditPart"
         itemSemanticEditPolicyClassName="NetworkPortItemSemanticEditPolicy"
+        notationViewFactoryClassName="NetworkPortViewFactory"
+        incomingCreationAllowed="true"
         createCommandClassName="NetworkPortCreateCommand"
         reorientCommandClassName="NetworkPortReorientCommand">
       <diagramRunTimeClass
@@ -1773,6 +1884,7 @@
           visualID="6001"
           editPartClassName="NetworkPortPortEditPart"
           itemSemanticEditPolicyClassName="NetworkPortPortItemSemanticEditPolicy"
+          notationViewFactoryClassName="NetworkPortPortViewFactory"
           elementIcon="true">
         <diagramRunTimeClass
             href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Node"/>
@@ -1796,10 +1908,32 @@
       <creationConstraints
           targetEnd="//@expressionProviders/@providers.0/@expressions.6"/>
     </links>
+    <links
+        visualID="4003"
+        editPartClassName="ScalAgentServerHostEditPart"
+        itemSemanticEditPolicyClassName="ScalAgentServerHostItemSemanticEditPolicy"
+        notationViewFactoryClassName="ScalAgentServerHostViewFactory"
+        incomingCreationAllowed="true"
+        createCommandClassName="ScalAgentServerHostCreateCommand"
+        reorientCommandClassName="ScalAgentServerHostReorientCommand">
+      <diagramRunTimeClass
+          href="../../../plugin/org.eclipse.gmf.runtime.notation/model/notation.genmodel#//notation/Edge"/>
+      <elementType
+          xsi:type="gmfgen:SpecializationType"/>
+      <viewmap
+          xsi:type="gmfgen:FigureViewmap"
+          figureQualifiedClassName="org.eclipse.gmf.runtime.draw2d.ui.figures.PolylineConnectionEx"/>
+      <modelFacet
+          xsi:type="gmfgen:FeatureLinkModelFacet">
+        <metaFeature
+            href="joram.genmodel#//joram/ScalAgentServer/host"/>
+      </modelFacet>
+    </links>
     <compartments
         visualID="7001"
         editPartClassName="JORAMServicesEditPart"
         itemSemanticEditPolicyClassName="JORAMServicesItemSemanticEditPolicy"
+        notationViewFactoryClassName="JORAMServicesViewFactory"
         canonicalEditPolicyClassName="JORAMServicesCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.0 //@diagram/@childNodes.1 //@diagram/@childNodes.2 //@diagram/@childNodes.3 //@diagram/@childNodes.4 //@diagram/@childNodes.5"
         title="Services"
@@ -1814,6 +1948,7 @@
         visualID="7002"
         editPartClassName="JORAMJMSEditPart"
         itemSemanticEditPolicyClassName="JORAMJMSItemSemanticEditPolicy"
+        notationViewFactoryClassName="JORAMJMSViewFactory"
         canonicalEditPolicyClassName="JORAMJMSCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.6 //@diagram/@childNodes.7 //@diagram/@childNodes.8 //@diagram/@childNodes.9"
         title="JMS"
@@ -1828,6 +1963,7 @@
         visualID="7003"
         editPartClassName="JORAMServerPropertiesEditPart"
         itemSemanticEditPolicyClassName="JORAMServerPropertiesItemSemanticEditPolicy"
+        notationViewFactoryClassName="JORAMServerPropertiesViewFactory"
         canonicalEditPolicyClassName="JORAMServerPropertiesCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.10 //@diagram/@childNodes.11 //@diagram/@childNodes.12 //@diagram/@childNodes.13 //@diagram/@childNodes.14 //@diagram/@childNodes.15"
         title="Server Properties"
@@ -1842,6 +1978,7 @@
         visualID="7004"
         editPartClassName="ScalAgentServerServicesEditPart"
         itemSemanticEditPolicyClassName="ScalAgentServerServicesItemSemanticEditPolicy"
+        notationViewFactoryClassName="ScalAgentServerServicesViewFactory"
         canonicalEditPolicyClassName="ScalAgentServerServicesCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.16 //@diagram/@childNodes.17 //@diagram/@childNodes.18 //@diagram/@childNodes.19 //@diagram/@childNodes.20"
         title="Services"
@@ -1856,6 +1993,7 @@
         visualID="7005"
         editPartClassName="ScalAgentServerServerPropertiesEditPart"
         itemSemanticEditPolicyClassName="ScalAgentServerServerPropertiesItemSemanticEditPolicy"
+        notationViewFactoryClassName="ScalAgentServerServerPropertiesViewFactory"
         canonicalEditPolicyClassName="ScalAgentServerServerPropertiesCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.22 //@diagram/@childNodes.23 //@diagram/@childNodes.24 //@diagram/@childNodes.25 //@diagram/@childNodes.26 //@diagram/@childNodes.27"
         title="Server Properties"
@@ -1870,6 +2008,7 @@
         visualID="7006"
         editPartClassName="NetworkDomainDomainPropertiesEditPart"
         itemSemanticEditPolicyClassName="NetworkDomainDomainPropertiesItemSemanticEditPolicy"
+        notationViewFactoryClassName="NetworkDomainDomainPropertiesViewFactory"
         canonicalEditPolicyClassName="NetworkDomainDomainPropertiesCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.28 //@diagram/@childNodes.29 //@diagram/@childNodes.30 //@diagram/@childNodes.31 //@diagram/@childNodes.32 //@diagram/@childNodes.33"
         title="Domain Properties"
@@ -1885,6 +2024,7 @@
         visualID="7007"
         editPartClassName="ConfigPropertiesGlobalPropertiesEditPart"
         itemSemanticEditPolicyClassName="ConfigPropertiesGlobalPropertiesItemSemanticEditPolicy"
+        notationViewFactoryClassName="ConfigPropertiesGlobalPropertiesViewFactory"
         canonicalEditPolicyClassName="ConfigPropertiesGlobalPropertiesCanonicalEditPolicy"
         childNodes="//@diagram/@childNodes.34 //@diagram/@childNodes.35 //@diagram/@childNodes.36 //@diagram/@childNodes.37 //@diagram/@childNodes.38 //@diagram/@childNodes.39"
         title="Global Properties"
@@ -1963,20 +2103,39 @@
             genNodes="//@diagram/@childNodes.8"/>
       </groups>
       <groups
-          title="JORAM networks"
+          title="Host"
           stack="true"
           collapse="true">
         <entries
             xsi:type="gmfgen:ToolEntry"
-            title="Network domain"
-            description="Create a new NetworkDomain"
+            title="Host"
+            description="Create a new host for one (or more) Joram server."
+            genNodes="//@diagram/@topLevelNodes.4"/>
+        <entries
+            xsi:type="gmfgen:Separator"/>
+        <entries
+            xsi:type="gmfgen:ToolEntry"
+            title="Server host"
+            description="Define where a server will be hosted."
+            largeIconPath="/org.ow2.joram.design.edit/icons/full/obj16/OnHost.gif"
+            smallIconPath="/org.ow2.joram.design.edit/icons/full/obj16/OnHost.gif"
+            genLinks="//@diagram/@links.1"/>
+      </groups>
+      <groups
+          title="JORAM Domain"
+          stack="true"
+          collapse="true">
+        <entries
+            xsi:type="gmfgen:ToolEntry"
+            title="Domain"
+            description="Create a new domain. This component permits multiple servers to communicate."
             genNodes="//@diagram/@topLevelNodes.2"/>
         <entries
             xsi:type="gmfgen:Separator"/>
         <entries
             xsi:type="gmfgen:ToolEntry"
-            title="Add to network"
-            description="Add a JORAM server to a network"
+            title="Server domain."
+            description="Add a server to a domain. Every server linked with a common domain can communicate."
             genLinks="//@diagram/@links.0"/>
       </groups>
       <groups
@@ -2188,6 +2347,9 @@
         child="//@diagram/@topLevelNodes.3"/>
     <childReferences
         parent="//@diagram"
+        child="//@diagram/@topLevelNodes.4"/>
+    <childReferences
+        parent="//@diagram"
         child="//@diagram/@links.0"
         groupName="links"
         groupIcon="icons/linksNavigatorGroup.gif"/>
@@ -2224,6 +2386,47 @@
     <childReferences
         parent="//@diagram/@topLevelNodes.1"
         child="//@diagram/@links.0"
+        referenceType="out_target"
+        groupName="outgoing links"
+        groupIcon="icons/outgoingLinksNavigatorGroup.gif"/>
+    <childReferences
+        parent="//@diagram"
+        child="//@diagram/@links.1"
+        groupName="links"
+        groupIcon="icons/linksNavigatorGroup.gif"/>
+    <childReferences
+        parent="//@diagram/@links.1"
+        child="//@diagram/@topLevelNodes.4"
+        referenceType="out_target"
+        groupName="target"
+        groupIcon="icons/linkTargetNavigatorGroup.gif"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.4"
+        child="//@diagram/@links.1"
+        referenceType="in_source"
+        groupName="incoming links"
+        groupIcon="icons/incomingLinksNavigatorGroup.gif"/>
+    <childReferences
+        parent="//@diagram/@links.1"
+        child="//@diagram/@topLevelNodes.0"
+        referenceType="in_source"
+        groupName="source"
+        groupIcon="icons/linkSourceNavigatorGroup.gif"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.0"
+        child="//@diagram/@links.1"
+        referenceType="out_target"
+        groupName="outgoing links"
+        groupIcon="icons/outgoingLinksNavigatorGroup.gif"/>
+    <childReferences
+        parent="//@diagram/@links.1"
+        child="//@diagram/@topLevelNodes.1"
+        referenceType="in_source"
+        groupName="source"
+        groupIcon="icons/linkSourceNavigatorGroup.gif"/>
+    <childReferences
+        parent="//@diagram/@topLevelNodes.1"
+        child="//@diagram/@links.1"
         referenceType="out_target"
         groupName="outgoing links"
         groupIcon="icons/outgoingLinksNavigatorGroup.gif"/>
@@ -2276,7 +2479,7 @@
           body="NetworkDomain.allInstances()->forAll(n | n.name = self.name implies n = self)"/>
       <expressions
           xsi:type="gmfgen:GenConstraint"
-          body="name.size() > 0"/>
+          body="size() > 0"/>
       <expressions
           xsi:type="gmfgen:GenConstraint"
           body="self.network->forAll(c1,c2 | c1.port = c2.port implies c1 = c2)"/>
@@ -2284,12 +2487,18 @@
           xsi:type="gmfgen:GenConstraint"
           body="services->select(f | f.oclIsKindOf(TCPProxyService))->notEmpty() implies services->select(f | f.oclIsKindOf(ConnectionManager))->notEmpty()"/>
     </providers>
+    <providers
+        xsi:type="gmfgen:GenJavaExpressionProvider">
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="checkJoram"/>
+    </providers>
   </expressionProviders>
   <labelParsers
       extensibleViaService="true">
     <implementations
         xsi:type="gmfgen:PredefinedParser"
-        uses="//@diagram/@childNodes.0/@labelModelFacet //@diagram/@childNodes.1/@labelModelFacet //@diagram/@childNodes.2/@labelModelFacet //@diagram/@childNodes.3/@labelModelFacet //@diagram/@childNodes.4/@labelModelFacet //@diagram/@childNodes.5/@labelModelFacet //@diagram/@childNodes.6/@labelModelFacet //@diagram/@childNodes.7/@labelModelFacet //@diagram/@childNodes.8/@labelModelFacet //@diagram/@childNodes.9/@labelModelFacet //@diagram/@childNodes.10/@labelModelFacet //@diagram/@childNodes.14/@labelModelFacet //@diagram/@topLevelNodes.0/@labels.0/@modelFacet //@diagram/@topLevelNodes.0/@labels.1/@modelFacet //@diagram/@childNodes.16/@labelModelFacet //@diagram/@childNodes.17/@labelModelFacet //@diagram/@childNodes.18/@labelModelFacet //@diagram/@childNodes.19/@labelModelFacet //@diagram/@childNodes.20/@labelModelFacet //@diagram/@childNodes.21/@labelModelFacet //@diagram/@childNodes.22/@labelModelFacet //@diagram/@childNodes.26/@labelModelFacet //@diagram/@topLevelNodes.1/@labels.0/@modelFacet //@diagram/@topLevelNodes.1/@labels.1/@modelFacet //@diagram/@childNodes.28/@labelModelFacet //@diagram/@childNodes.32/@labelModelFacet //@diagram/@topLevelNodes.2/@labels.0/@modelFacet //@diagram/@topLevelNodes.2/@labels.1/@modelFacet //@diagram/@childNodes.34/@labelModelFacet //@diagram/@childNodes.38/@labelModelFacet //@diagram/@links.0/@labels.0/@modelFacet"/>
+        uses="//@diagram/@childNodes.0/@labelModelFacet //@diagram/@childNodes.1/@labelModelFacet //@diagram/@childNodes.2/@labelModelFacet //@diagram/@childNodes.3/@labelModelFacet //@diagram/@childNodes.4/@labelModelFacet //@diagram/@childNodes.5/@labelModelFacet //@diagram/@childNodes.6/@labelModelFacet //@diagram/@childNodes.7/@labelModelFacet //@diagram/@childNodes.8/@labelModelFacet //@diagram/@childNodes.9/@labelModelFacet //@diagram/@childNodes.10/@labelModelFacet //@diagram/@childNodes.14/@labelModelFacet //@diagram/@topLevelNodes.0/@labels.0/@modelFacet //@diagram/@topLevelNodes.0/@labels.1/@modelFacet //@diagram/@childNodes.16/@labelModelFacet //@diagram/@childNodes.17/@labelModelFacet //@diagram/@childNodes.18/@labelModelFacet //@diagram/@childNodes.19/@labelModelFacet //@diagram/@childNodes.20/@labelModelFacet //@diagram/@childNodes.21/@labelModelFacet //@diagram/@childNodes.22/@labelModelFacet //@diagram/@childNodes.26/@labelModelFacet //@diagram/@topLevelNodes.1/@labels.0/@modelFacet //@diagram/@topLevelNodes.1/@labels.1/@modelFacet //@diagram/@childNodes.28/@labelModelFacet //@diagram/@childNodes.32/@labelModelFacet //@diagram/@topLevelNodes.2/@labels.0/@modelFacet //@diagram/@topLevelNodes.2/@labels.1/@modelFacet //@diagram/@childNodes.34/@labelModelFacet //@diagram/@childNodes.38/@labelModelFacet //@diagram/@topLevelNodes.4/@labels.0/@modelFacet //@diagram/@links.0/@labels.0/@modelFacet"/>
     <implementations
         xsi:type="gmfgen:ExternalParser"
         uses="//@diagram/@childNodes.11/@labelModelFacet //@diagram/@childNodes.12/@labelModelFacet //@diagram/@childNodes.13/@labelModelFacet //@diagram/@childNodes.15/@labelModelFacet //@diagram/@childNodes.23/@labelModelFacet //@diagram/@childNodes.24/@labelModelFacet //@diagram/@childNodes.25/@labelModelFacet //@diagram/@childNodes.27/@labelModelFacet //@diagram/@childNodes.29/@labelModelFacet //@diagram/@childNodes.30/@labelModelFacet //@diagram/@childNodes.31/@labelModelFacet //@diagram/@childNodes.33/@labelModelFacet //@diagram/@childNodes.35/@labelModelFacet //@diagram/@childNodes.36/@labelModelFacet //@diagram/@childNodes.37/@labelModelFacet //@diagram/@childNodes.39/@labelModelFacet"/>

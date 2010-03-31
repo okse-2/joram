@@ -147,6 +147,35 @@
           name="NTransactionPropertiesLabel"
           text="NTransaction properties"/>
     </descriptors>
+    <descriptors
+        name="HostFigure">
+      <actualFigure
+          xsi:type="gmfgraph:RoundedRectangle">
+        <layout
+            xsi:type="gmfgraph:GridLayout"/>
+        <backgroundColor
+            xsi:type="gmfgraph:RGBColor"
+            red="230"
+            green="230"
+            blue="230"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="HostNameLabel">
+          <layoutData
+              xsi:type="gmfgraph:GridLayoutData"
+              grabExcessHorizontalSpace="true"
+              grabExcessVerticalSpace="true"/>
+        </children>
+      </actualFigure>
+      <accessors
+          accessor="getFigureHostNameLabel"
+          figure="//@figures.0/@descriptors.11/@actualFigure/@children.0"/>
+    </descriptors>
+    <descriptors
+        name="ServerHostLink">
+      <actualFigure
+          xsi:type="gmfgraph:PolylineConnection"/>
+    </descriptors>
   </figures>
   <nodes
       name="ConfigProperties"
@@ -157,9 +186,15 @@
   <nodes
       name="Domain"
       figure="DomainFigure"/>
+  <nodes
+      name="Host"
+      figure="HostFigure"/>
   <connections
       name="Domain2ServersConnection"
       figure="DomainServerLink"/>
+  <connections
+      name="Server2HostConnection"
+      figure="ServerHostLink"/>
   <compartments
       name="JMS"
       figure="CompartmentFigure"
@@ -220,4 +255,8 @@
   <labels
       name="NTransactionPropertiesLabel"
       figure="NTransactionPropertiesLabelFigure"/>
+  <labels
+      name="HostNameLabel"
+      figure="HostFigure"
+      accessor="//@figures.0/@descriptors.11/@accessors.0"/>
 </gmfgraph:Canvas>
