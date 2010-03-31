@@ -101,15 +101,12 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
           readOnly="true"
-          viewPattern="{0} {1}"
           editorPattern=""
           editPattern="">
         <diagramLabel
             href="joram.gmfgraph#JORAMTitleLabel"/>
         <features
             href="joram.ecore#//ScalAgentServer/name"/>
-        <features
-            href="joram.ecore#//ScalAgentServer/version"/>
       </labelMappings>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
@@ -368,7 +365,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.2/@tools.1"/>
+              href="joram.gmftool#//@palette/@tools.3/@tools.1"/>
           <diagramNode
               href="joram.gmfgraph#GenericLabel"/>
         </ownedChild>
@@ -387,7 +384,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.2/@tools.2"/>
+              href="joram.gmftool#//@palette/@tools.3/@tools.2"/>
           <diagramNode
               href="joram.gmfgraph#PoolPropertiesLabel"/>
         </ownedChild>
@@ -406,7 +403,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.2/@tools.3"/>
+              href="joram.gmftool#//@palette/@tools.3/@tools.3"/>
           <diagramNode
               href="joram.gmfgraph#NetworkpropertiesLabel"/>
         </ownedChild>
@@ -425,7 +422,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.2/@tools.4"/>
+              href="joram.gmftool#//@palette/@tools.3/@tools.4"/>
           <diagramNode
               href="joram.gmfgraph#HttpPropertiesLabel"/>
         </ownedChild>
@@ -446,7 +443,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.2/@tools.5"/>
+              href="joram.gmftool#//@palette/@tools.3/@tools.5"/>
           <diagramNode
               href="joram.gmfgraph#GenericLabel"/>
         </ownedChild>
@@ -465,7 +462,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.2/@tools.6"/>
+              href="joram.gmftool#//@palette/@tools.3/@tools.6"/>
           <diagramNode
               href="joram.gmfgraph#NTransactionPropertiesLabel"/>
         </ownedChild>
@@ -496,15 +493,12 @@
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
           readOnly="true"
-          viewPattern="{0} {1}"
           editorPattern=""
           editPattern="">
         <diagramLabel
             href="joram.gmfgraph#JORAMTitleLabel"/>
         <features
             href="joram.ecore#//ScalAgentServer/name"/>
-        <features
-            href="joram.ecore#//ScalAgentServer/version"/>
       </labelMappings>
       <labelMappings
           xsi:type="gmfmap:FeatureLabelMapping"
@@ -672,7 +666,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.2/@tools.1"/>
+              href="joram.gmftool#//@palette/@tools.3/@tools.1"/>
           <diagramNode
               href="joram.gmfgraph#GenericLabel"/>
         </ownedChild>
@@ -691,7 +685,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.2/@tools.2"/>
+              href="joram.gmftool#//@palette/@tools.3/@tools.2"/>
           <diagramNode
               href="joram.gmfgraph#PoolPropertiesLabel"/>
         </ownedChild>
@@ -710,7 +704,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.2/@tools.3"/>
+              href="joram.gmftool#//@palette/@tools.3/@tools.3"/>
           <diagramNode
               href="joram.gmfgraph#NetworkpropertiesLabel"/>
         </ownedChild>
@@ -729,7 +723,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.2/@tools.4"/>
+              href="joram.gmftool#//@palette/@tools.3/@tools.4"/>
           <diagramNode
               href="joram.gmfgraph#HttpPropertiesLabel"/>
         </ownedChild>
@@ -750,7 +744,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.2/@tools.5"/>
+              href="joram.gmftool#//@palette/@tools.3/@tools.5"/>
           <diagramNode
               href="joram.gmfgraph#GenericLabel"/>
         </ownedChild>
@@ -769,7 +763,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.2/@tools.6"/>
+              href="joram.gmftool#//@palette/@tools.3/@tools.6"/>
           <diagramNode
               href="joram.gmfgraph#NTransactionPropertiesLabel"/>
         </ownedChild>
@@ -813,7 +807,7 @@
       </labelMappings>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="joram.gmftool#//@palette/@tools.1/@tools.0"/>
+          href="joram.gmftool#//@palette/@tools.2/@tools.0"/>
       <diagramNode
           href="joram.gmfgraph#Domain"/>
       <children
@@ -834,7 +828,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.2/@tools.1"/>
+              href="joram.gmftool#//@palette/@tools.3/@tools.1"/>
           <diagramNode
               href="joram.gmfgraph#GenericLabel"/>
         </ownedChild>
@@ -853,7 +847,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.2/@tools.2"/>
+              href="joram.gmftool#//@palette/@tools.3/@tools.2"/>
           <diagramNode
               href="joram.gmfgraph#PoolPropertiesLabel"/>
         </ownedChild>
@@ -872,7 +866,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.2/@tools.3"/>
+              href="joram.gmftool#//@palette/@tools.3/@tools.3"/>
           <diagramNode
               href="joram.gmfgraph#NetworkpropertiesLabel"/>
         </ownedChild>
@@ -891,7 +885,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.2/@tools.4"/>
+              href="joram.gmftool#//@palette/@tools.3/@tools.4"/>
           <diagramNode
               href="joram.gmfgraph#HttpPropertiesLabel"/>
         </ownedChild>
@@ -912,7 +906,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.2/@tools.5"/>
+              href="joram.gmftool#//@palette/@tools.3/@tools.5"/>
           <diagramNode
               href="joram.gmfgraph#GenericLabel"/>
         </ownedChild>
@@ -931,7 +925,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.2/@tools.6"/>
+              href="joram.gmftool#//@palette/@tools.3/@tools.6"/>
           <diagramNode
               href="joram.gmfgraph#NTransactionPropertiesLabel"/>
         </ownedChild>
@@ -951,7 +945,7 @@
           href="joram.ecore#//ConfigProperties"/>
       <tool
           xsi:type="gmftool:CreationTool"
-          href="joram.gmftool#//@palette/@tools.2/@tools.0"/>
+          href="joram.gmftool#//@palette/@tools.3/@tools.0"/>
       <diagramNode
           href="joram.gmfgraph#ConfigProperties"/>
       <children
@@ -972,7 +966,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.2/@tools.1"/>
+              href="joram.gmftool#//@palette/@tools.3/@tools.1"/>
           <diagramNode
               href="joram.gmfgraph#GenericLabel"/>
         </ownedChild>
@@ -991,7 +985,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.2/@tools.2"/>
+              href="joram.gmftool#//@palette/@tools.3/@tools.2"/>
           <diagramNode
               href="joram.gmfgraph#PoolPropertiesLabel"/>
         </ownedChild>
@@ -1010,7 +1004,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.2/@tools.3"/>
+              href="joram.gmftool#//@palette/@tools.3/@tools.3"/>
           <diagramNode
               href="joram.gmfgraph#NetworkpropertiesLabel"/>
         </ownedChild>
@@ -1029,7 +1023,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.2/@tools.4"/>
+              href="joram.gmftool#//@palette/@tools.3/@tools.4"/>
           <diagramNode
               href="joram.gmfgraph#HttpPropertiesLabel"/>
         </ownedChild>
@@ -1050,7 +1044,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.2/@tools.5"/>
+              href="joram.gmftool#//@palette/@tools.3/@tools.5"/>
           <diagramNode
               href="joram.gmfgraph#GenericLabel"/>
         </ownedChild>
@@ -1069,7 +1063,7 @@
           </labelMappings>
           <tool
               xsi:type="gmftool:CreationTool"
-              href="joram.gmftool#//@palette/@tools.2/@tools.6"/>
+              href="joram.gmftool#//@palette/@tools.3/@tools.6"/>
           <diagramNode
               href="joram.gmfgraph#NTransactionPropertiesLabel"/>
         </ownedChild>
@@ -1079,6 +1073,26 @@
         <compartment
             href="joram.gmfgraph#Global Properties"/>
       </compartments>
+    </ownedChild>
+  </nodes>
+  <nodes>
+    <containmentFeature
+        href="joram.ecore#//Config/hosts"/>
+    <ownedChild>
+      <domainMetaElement
+          href="joram.ecore#//Host"/>
+      <labelMappings
+          xsi:type="gmfmap:FeatureLabelMapping">
+        <diagramLabel
+            href="joram.gmfgraph#HostNameLabel"/>
+        <features
+            href="joram.ecore#//Host/hostName"/>
+      </labelMappings>
+      <tool
+          xsi:type="gmftool:CreationTool"
+          href="joram.gmftool#//@palette/@tools.1/@tools.0"/>
+      <diagramNode
+          href="joram.gmfgraph#Host"/>
     </ownedChild>
   </nodes>
   <links>
@@ -1098,7 +1112,7 @@
         href="joram.ecore#//ScalAgentServer/network"/>
     <tool
         xsi:type="gmftool:CreationTool"
-        href="joram.gmftool#//@palette/@tools.1/@tools.2"/>
+        href="joram.gmftool#//@palette/@tools.2/@tools.2"/>
     <diagramLink
         href="joram.gmfgraph#Domain2ServersConnection"/>
     <linkMetaFeature
@@ -1108,6 +1122,16 @@
       <targetEnd
           body="oppositeEnd.network->select(n1 | n1.domain = self)->isEmpty()"/>
     </creationConstraints>
+  </links>
+  <links>
+    <tool
+        xsi:type="gmftool:CreationTool"
+        href="joram.gmftool#//@palette/@tools.1/@tools.2"/>
+    <diagramLink
+        href="joram.gmfgraph#Server2HostConnection"/>
+    <linkMetaFeature
+        xsi:type="ecore:EReference"
+        href="joram.ecore#//ScalAgentServer/host"/>
   </links>
   <diagram>
     <diagramCanvas
@@ -1125,7 +1149,7 @@
       description="Checks integrity of the JORAM diagram.">
     <audits
         name="JORAM unique server Id"
-        description="Checks unicity of server id."
+        description="Unicity of server id check."
         id="uniqueIdRule"
         message="Server Id (sid) must be unique.">
       <rule
@@ -1138,7 +1162,7 @@
     </audits>
     <audits
         name="Domain unique name"
-        description="Checks unicity of domain name."
+        description="Unicity of domain name check."
         id="uniqueDomainRule"
         message="Domain name must be unique.">
       <rule
@@ -1151,20 +1175,21 @@
     </audits>
     <audits
         name="Domain name check"
-        description="descr TODO"
+        description="Empty domain name check"
         id="domainNameRule"
         message="Domain name can't be empty">
       <rule
-          body="name.size() > 0"/>
+          body="size() > 0"/>
       <target
-          xsi:type="gmfmap:DomainElementTarget">
-        <element
-            href="joram.ecore#//NetworkDomain"/>
+          xsi:type="gmfmap:DomainAttributeTarget"
+          nullAsError="true">
+        <attribute
+            href="joram.ecore#//NetworkDomain/name"/>
       </target>
     </audits>
     <audits
         name="Port used check"
-        description="TODO"
+        description="Available port check."
         id="portcheck"
         message="Server is linked with two different domains using the same port.">
       <rule
@@ -1177,7 +1202,7 @@
     </audits>
     <audits
         name="ConnectionManager presence check"
-        description="TODO"
+        description="TCPProxyService with ConnectionManager check."
         id="connectionmanager.presence"
         message="TCPProxyService can't work without a ConnectionManager service.">
       <rule

@@ -8,18 +8,51 @@
         eType="#//ScalAgentServer" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="domains" upperBound="-1"
         eType="#//NetworkDomain" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="hosts" upperBound="-1"
+        eType="#//Host" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="properties" eType="#//ConfigProperties"
         containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Host">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="hostName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        defaultValueLiteral="localhost"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="login" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="password" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="privateKeyPath" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="shell" eType="#//Shell"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="protocol" eType="#//Protocol"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="transfert" eType="#//Transfert"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="Shell">
+    <eLiterals name="SH"/>
+    <eLiterals name="CSH" value="1"/>
+    <eLiterals name="WinCommand" value="2"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="Protocol">
+    <eLiterals name="OpenSSH"/>
+    <eLiterals name="SSH" value="1"/>
+    <eLiterals name="JSSH" value="2"/>
+    <eLiterals name="ApacheTelnet" value="3"/>
+    <eLiterals name="JTelnet" value="4"/>
+    <eLiterals name="ExternalTelnet" value="5"/>
+    <eLiterals name="PLINK" value="6"/>
+    <eLiterals name="LOCAL_SH" value="7"/>
+    <eLiterals name="LOCAL_CSH" value="8"/>
+    <eLiterals name="LOCAL_WIN" value="9"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="Transfert">
+    <eLiterals name="JSCP"/>
+    <eLiterals name="SCP" value="1"/>
+    <eLiterals name="PSCP" value="2"/>
+    <eLiterals name="JSFTP" value="3"/>
+    <eLiterals name="Apache_FTP" value="4"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ScalAgentServer">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
         defaultValueLiteral="JORAM"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="version" lowerBound="1"
-        eType="#//JoramVersion"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="hostname" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
-        defaultValueLiteral="localhost"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="services" upperBound="-1"
         eType="#//JoramService" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="host" lowerBound="1" eType="#//Host"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="sid" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EShort"
         defaultValueLiteral="0"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="StorageDirectory" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"

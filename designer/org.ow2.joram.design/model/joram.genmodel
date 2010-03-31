@@ -8,6 +8,30 @@
   <foreignModel>joram.ecore</foreignModel>
   <genPackages prefix="Joram" basePackage="org.ow2.joram.design.model" resource="XML"
       ecorePackage="joram.ecore#/">
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="joram.ecore#//Shell">
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Shell/SH"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Shell/CSH"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Shell/WinCommand"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="joram.ecore#//Protocol">
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Protocol/OpenSSH"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Protocol/SSH"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Protocol/JSSH"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Protocol/ApacheTelnet"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Protocol/JTelnet"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Protocol/ExternalTelnet"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Protocol/PLINK"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Protocol/LOCAL_SH"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Protocol/LOCAL_CSH"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Protocol/LOCAL_WIN"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="joram.ecore#//Transfert">
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Transfert/JSCP"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Transfert/SCP"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Transfert/PSCP"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Transfert/JSFTP"/>
+      <genEnumLiterals ecoreEnumLiteral="joram.ecore#//Transfert/Apache_FTP"/>
+    </genEnums>
     <genEnums typeSafeEnumCompatible="false" ecoreEnum="joram.ecore#//JoramVersion">
       <genEnumLiterals ecoreEnumLiteral="joram.ecore#//JoramVersion/JORAM_5_3_0"/>
       <genEnumLiterals ecoreEnumLiteral="joram.ecore#//JoramVersion/JORAM_5_2_6"/>
@@ -40,13 +64,22 @@
     <genClasses ecoreClass="joram.ecore#//Config">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//Config/servers"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//Config/domains"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//Config/hosts"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//Config/properties"/>
+    </genClasses>
+    <genClasses ecoreClass="joram.ecore#//Host">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//Host/hostName"/>
+      <genFeatures createChild="false" propertyCategory="Deployment" ecoreFeature="ecore:EAttribute joram.ecore#//Host/login"/>
+      <genFeatures createChild="false" propertyCategory="Deployment" ecoreFeature="ecore:EAttribute joram.ecore#//Host/password"/>
+      <genFeatures createChild="false" propertyCategory="Deployment" ecoreFeature="ecore:EAttribute joram.ecore#//Host/privateKeyPath"/>
+      <genFeatures createChild="false" propertyCategory="Deployment" ecoreFeature="ecore:EAttribute joram.ecore#//Host/shell"/>
+      <genFeatures createChild="false" propertyCategory="Deployment" ecoreFeature="ecore:EAttribute joram.ecore#//Host/protocol"/>
+      <genFeatures createChild="false" propertyCategory="Deployment" ecoreFeature="ecore:EAttribute joram.ecore#//Host/transfert"/>
     </genClasses>
     <genClasses ecoreClass="joram.ecore#//ScalAgentServer">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//ScalAgentServer/name"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//ScalAgentServer/version"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//ScalAgentServer/hostname"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//ScalAgentServer/services"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference joram.ecore#//ScalAgentServer/host"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//ScalAgentServer/sid"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute joram.ecore#//ScalAgentServer/StorageDirectory"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference joram.ecore#//ScalAgentServer/network"/>
