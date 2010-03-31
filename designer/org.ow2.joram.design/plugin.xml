@@ -31,13 +31,6 @@ Contributor(s):
             genModel="model/joram.genmodel"/>
    </extension>
    
-   <extension
-         point="org.eclipse.emf.ecore.extension_parser">
-      <parser
-            class="org.ow2.joram.design.model.parser.JORAMXMLResourceFactoryImpl"
-            type="joram">
-      </parser>
-   </extension>
    
       <extension
          point="org.eclipse.ui.popupMenus">
@@ -45,19 +38,26 @@ Contributor(s):
             id="org.ow2.joram.design.diagram.export"
             nameFilter="*.joram"
             objectClass="org.eclipse.core.resources.IFile">
+         <menu
+               id="org.ow2.joram.design.menu"
+               label="Joram">
+            <separator
+                  name="export">
+            </separator>
+         </menu>
          <action
                class="org.ow2.joram.design.model.export.ExportA3ConfAction"
                enablesFor="1"
-               id="org.ow2.joram.design.model.export.ExportAction"
+               id="org.ow2.joram.design.model.export.ExportA3Action"
                label="Generate a3servers.xml"
-               menubarPath="org.ow2.joram.design.model.export.menu1">
+               menubarPath="org.ow2.joram.design.menu/export">
          </action>
          <action
                class="org.ow2.joram.design.model.export.ExportAdminScriptsAction"
                enablesFor="1"
-               id="org.ow2.joram.design.action1"
+               id="org.ow2.joram.design.model.export.ExportAdminAction"
                label="Generate admin script..."
-               menubarPath="org.ow2.joram.design.model.export.menu1">
+               menubarPath="org.ow2.joram.design.menu/export">
          </action>
       </objectContribution>
    </extension>
