@@ -62,18 +62,22 @@ import org.ow2.joram.design.model.joram.TransactionProperty;
 
 public class ExportA3ConfAction implements IObjectActionDelegate {
 
-  /**
-   * 
-   */
+  private static final String CONNECTION_MANAGER_CLASS = "org.objectweb.joram.mom.proxies.ConnectionManager";
+
+  private static final String ADMIN_PROXY_CLASS = "fr.dyade.aaa.agent.AdminProxy";
+
+  private static final String TCP_PROXY_CLASS = "org.objectweb.joram.mom.proxies.tcp.TcpProxyService";
+
+  private static final String JNDI_SERVER_CLASS = "fr.dyade.aaa.jndi2.server.JndiServer";
+
+  private static final String DISTRIBUTED_JNDI_SERVER_CLASS = "fr.dyade.aaa.jndi2.distributed.DistributedJndiServer";
+
   private ISelection selection;
 
-  /**
-   * 
-   */
   private Shell shell;
 
   /**
-   * Constructor for Action1.
+   * Constructor for ExportA3ConfAction.
    */
   public ExportA3ConfAction() {
     super();
@@ -132,26 +136,28 @@ public class ExportA3ConfAction implements IObjectActionDelegate {
             appendProperties(rootElement.getProperties().getProperties(), sb, null, "  ");
           }
 
-          EList<NetworkDomain> domains = rootElement.getDomains();
-          for (NetworkDomain domain : domains) {
+          for (NetworkDomain domain : rootElement.getDomains()) {
             sb.append('\n');
-            sb.append("  <domain name='" + domain.getName() + "' network='"
-                + domain.getNetwork().getLiteral() + "' />\n");
+            sb.append("  <domain name='" + domain.getName());
+            sb.append("' network='" + domain.getNetwork().getLiteral() + "' />\n");
             appendProperties(domain.getProperties(), sb, domain, "  ");
           }
 
-          EList<ScalAgentServer> servers = rootElement.getServers();
-          for (ScalAgentServer server : servers) {
+          for (ScalAgentServer server : rootElement.getServers()) {
+            if (server.getHost() == null) {
+              throw new Exception("Host not defined for server " + server.getSid());
+            }
             sb.append('\n');
-            sb.append("  <server id='" + server.getSid() + "' name='" + server.getName() + "' hostname='"
-                + server.getHostname() + "'>\n");
+            sb.append("  <server id='" + server.getSid());
+            sb.append("' name='" + server.getName());
+            sb.append("' hostname='" + server.getHost().getHostName() + "'>\n");
 
             appendServices(server.getServices(), sb);
 
             EList<NetworkPort> ports = server.getNetwork();
             for (NetworkPort port : ports) {
-              sb.append("    <network domain='" + port.getDomain().getName() + "' port='" + port.getPort()
-                  + "' />\n");
+              sb.append("    <network domain='" + port.getDomain().getName());
+              sb.append("' port='" + port.getPort() + "' />\n");
             }
 
             appendProperties(server.getProperties(), sb, null, "    ");
@@ -180,8 +186,6 @@ public class ExportA3ConfAction implements IObjectActionDelegate {
     String pre = (domain == null) ? (indent + "<property name='") : (indent + "<property name='" + domain.getName() + '.');
     String mid = "' value='";
     String suf = "' />\n";
-    if (indent.endsWith("    "))
-      System.out.println(properties.size());
     for (Property property : properties) {
       if (property instanceof PoolNetworkProperties) {
         PoolNetworkProperties props = (PoolNetworkProperties) property;
@@ -226,17 +230,17 @@ public class ExportA3ConfAction implements IObjectActionDelegate {
     for (JoramService service : services) {
       if (service instanceof ConnectionManager) {
         ConnectionManager cm = (ConnectionManager) service;
-        sb.append(pre + "org.objectweb.joram.mom.proxies.ConnectionManager" + mid + cm.getUser() + ' '
+        sb.append(pre + CONNECTION_MANAGER_CLASS + mid + cm.getUser() + ' '
             + cm.getPassword() + suf);
       } else if (service instanceof AdminProxy) {
         AdminProxy ap = (AdminProxy) service;
-        sb.append(pre + "fr.dyade.aaa.agent.AdminProxy" + mid + ap.getPort() + suf);
+        sb.append(pre + ADMIN_PROXY_CLASS + mid + ap.getPort() + suf);
       } else if (service instanceof TCPProxyService) {
         TCPProxyService tcpps = (TCPProxyService) service;
-        sb.append(pre + "org.objectweb.joram.mom.proxies.tcp.TcpProxyService" + mid + tcpps.getPort() + suf);
+        sb.append(pre + TCP_PROXY_CLASS + mid + tcpps.getPort() + suf);
       } else if (service instanceof JNDIServer) {
         JNDIServer jndi = (JNDIServer) service;
-        sb.append(pre + "fr.dyade.aaa.jndi2.server.JndiServer" + mid + jndi.getPort() + suf);
+        sb.append(pre + JNDI_SERVER_CLASS + mid + jndi.getPort() + suf);
       } else if (service instanceof CustomService) {
         CustomService cs = (CustomService) service;
         if (cs.getArgs() == null) {
@@ -246,7 +250,7 @@ public class ExportA3ConfAction implements IObjectActionDelegate {
         }
       } else if (service instanceof DistributedJNDIServer) {
         DistributedJNDIServer distjndi = (DistributedJNDIServer) service;
-        sb.append(pre + "fr.dyade.aaa.jndi2.distributed.DistributedJndiServer" + mid + distjndi.getPort());
+        sb.append(pre + DISTRIBUTED_JNDI_SERVER_CLASS + mid + distjndi.getPort());
         EList<ScalAgentServer> jndiServers = distjndi.getKnownServers();
         for (ScalAgentServer jndiServer : jndiServers) {
           sb.append(" " + jndiServer.getSid());

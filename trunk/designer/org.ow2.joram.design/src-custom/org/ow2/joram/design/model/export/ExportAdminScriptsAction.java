@@ -95,7 +95,7 @@ public class ExportAdminScriptsAction implements IObjectActionDelegate {
       public String getText(Object element) {
         TCPProxyService entry = (TCPProxyService) element;
         ScalAgentServer server = (ScalAgentServer) entry.eContainer();
-        return "Server " + server.getSid() + " (" + server.getHostname() + ':' + entry.getPort() + ')';
+        return "Server " + server.getSid() + " (" + server.getHost().getHostName() + ':' + entry.getPort() + ')';
       }
     });
     dlg.setTitle("Select entry point");
@@ -129,11 +129,11 @@ public class ExportAdminScriptsAction implements IObjectActionDelegate {
         if (element instanceof JNDIServer) {
           JNDIServer jndi = (JNDIServer) element;
           ScalAgentServer server = (ScalAgentServer) jndi.eContainer();
-          return "JNDI on server " + server.getSid() + " (" + server.getHostname() + ':' + jndi.getPort() + ')';
+          return "JNDI on server " + server.getSid() + " (" + server.getHost().getHostName() + ':' + jndi.getPort() + ')';
         } else if (element instanceof DistributedJNDIServer) {
           DistributedJNDIServer jndi = (DistributedJNDIServer) element;
           ScalAgentServer server = (ScalAgentServer) jndi.eContainer();
-          return "Distributed JNDI on server " + server.getSid() + " (" + server.getHostname() + ':' + jndi.getPort() + ')';
+          return "Distributed JNDI on server " + server.getSid() + " (" + server.getHost().getHostName() + ':' + jndi.getPort() + ')';
         } else {
           return element.toString();
         }
@@ -241,6 +241,13 @@ public class ExportAdminScriptsAction implements IObjectActionDelegate {
           final Resource resource = resourceSet.getResource(URI.createFileURI(joramModelFile.getLocationURI().getPath()), true);
           final Config rootElement = (Config) resource.getContents().get(0);
 
+          // Verify each server has a host.
+          for (ScalAgentServer server : rootElement.getServers()) {
+            if (server.getHost() == null) {
+              throw new Exception("Host not defined for server " + server.getSid());
+            }
+          }
+
           TCPProxyService entrypoint = selectEntryPoint(shell, rootElement);
           if (entrypoint == null) {
             return;
@@ -291,7 +298,7 @@ public class ExportAdminScriptsAction implements IObjectActionDelegate {
     sb.append("<JoramAdmin>");
     sb.append("\n");
     sb.append("  <AdminModule>\n");
-    sb.append("    <connect host='" + entryServer.getHostname() + "'\n");
+    sb.append("    <connect host='" + entryServer.getHost().getHostName() + "'\n");
     sb.append("             port='" + entrypoint.getPort() + "'\n");
     sb.append("             name='" + cm.getUser() + "'\n");
     sb.append("             password='" + cm.getPassword() + "'/>\n");
@@ -308,7 +315,7 @@ public class ExportAdminScriptsAction implements IObjectActionDelegate {
       sb.append("  <InitialContext>\n");
       sb.append("    <property name='java.naming.factory.initial' value='fr.dyade.aaa.jndi2.client.NamingContextFactory'/>\n");
       sb.append("    <property name='java.naming.factory.host' value='"
-          + ((ScalAgentServer) jndi.eContainer()).getHostname() + "'/>\n");
+          + ((ScalAgentServer) jndi.eContainer()).getHost().getHostName() + "'/>\n");
       sb.append("    <property name='java.naming.factory.port' value='" + jndiport + "'/>\n");
       sb.append("  </InitialContext>\n");
       sb.append("\n");
