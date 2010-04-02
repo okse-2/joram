@@ -34,6 +34,10 @@ public class Notification implements Serializable, Cloneable {
    * True if the notification is persistent, false otherwise. By default, this
    * field is set to true during object creation and disk loading. This field
    * is carry by network protocol.
+   * 
+   * There is no public setter for this attribute. According the fact that a
+   * notification class is or not persistent this attribute should be statically
+   * fixed in the subclass constructor.
    */
   protected transient boolean persistent = true;
 
