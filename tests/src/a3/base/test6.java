@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2001 ScalAgent Distributed Technologies
+ * Copyright (C)  2001 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,7 +24,7 @@
 
 package a3.base;
 
-import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.agent.AgentServer;
 import framework.TestCase;
 
 public class test6 extends TestCase {
@@ -46,7 +46,7 @@ public class test6 extends TestCase {
                                  excType + '(' + excMsg + ')'));
     } catch (Throwable exc) {
       assertEquals(excType, exc.getClass().getName());
-      assertEquals(excMsg, exc.getMessage());
+      assertTrue(exc.getMessage().startsWith(excMsg));
     }
     endTest();
   }
