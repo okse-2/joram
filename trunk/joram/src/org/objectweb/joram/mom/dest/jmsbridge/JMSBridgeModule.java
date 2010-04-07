@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -81,8 +81,6 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
   protected String destName;
   /** Connection factory object for connecting to the foreign JMS server. */
   protected ConnectionFactory cnxFact = null;
-  /** XA Connection factory object for connecting to the foreign JMS server. */
-  protected XAConnectionFactory xaCnxFact = null;
   /** Foreign JMS destination object. */
   protected Destination dest = null;
   /** User identification for connecting to the foreign JMS server. */
@@ -127,11 +125,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
    * without client request.
    */
   private boolean automaticRequest = false;
-  /** 
-   * depend of connection factory.
-   * if cnxFact is XA connection factory,
-   * isXA = true.
-   */
+  /** Indicates to use an XAConnection. Default is false. */
   private boolean isXA = false;
   /** producer XAResource */
   private XAResource producerRes = null;
@@ -173,6 +167,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
     selector = prop.getProperty("selector");
     automaticRequest = Boolean.valueOf(
           prop.getProperty("automaticRequest","false")).booleanValue();
+    isXA = Boolean.valueOf(prop.getProperty("useXAConnection", "false")).booleanValue();
   } 
 
 
@@ -213,9 +208,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
     
     // Administered objects have not been retrieved: launching the startup
     // daemon.
-    if ((!isXA && cnxFact == null) ||
-        (isXA && xaCnxFact == null) ||
-        dest == null) {
+    if (cnxFact == null || dest == null) {
       StartupDaemon startup = new StartupDaemon();
       startup.start();
     } else {
@@ -594,11 +587,11 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
       logger.log(BasicLevel.DEBUG, "doXAConnect()");
     
     if (userName != null && password != null) {
-      producerCnx = xaCnxFact.createXAConnection(userName, password);
-      consumerCnx = xaCnxFact.createXAConnection(userName, password);
+      producerCnx = ((XAConnectionFactory) cnxFact).createXAConnection(userName, password);
+      consumerCnx = ((XAConnectionFactory) cnxFact).createXAConnection(userName, password);
     } else {
-      producerCnx = xaCnxFact.createXAConnection();
-      consumerCnx = xaCnxFact.createXAConnection();
+      producerCnx = ((XAConnectionFactory) cnxFact).createXAConnection();
+      consumerCnx = ((XAConnectionFactory) cnxFact).createXAConnection();
     }
     producerCnx.setExceptionListener(this);
     consumerCnx.setExceptionListener(this);
@@ -744,7 +737,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
 
         // Administered objects still to be retrieved: getting them from
         // JNDI.
-        if ((!isXA && cnxFact == null) || (isXA && xaCnxFact == null) || dest == null) {
+        if (cnxFact == null || dest == null) {
 
           Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
 
@@ -756,17 +749,11 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
             env.put(javax.naming.Context.PROVIDER_URL, jndiUrl);
             jndiCtx = new javax.naming.InitialContext(env);
           }
-          Object factory = jndiCtx.lookup(cnxFactName);
-          if (factory instanceof XAConnectionFactory) {
-            isXA = true;
-            xaCnxFact = (XAConnectionFactory) factory;
-          } else {
-            cnxFact = (ConnectionFactory) factory;
-          }
+          cnxFact = (ConnectionFactory) jndiCtx.lookup(cnxFactName);
           dest = (Destination) jndiCtx.lookup(destName);
           
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "run: factory=" + factory + ", destination=" + dest);
+            logger.log(BasicLevel.DEBUG, "run: factory=" + cnxFact + ", destination=" + dest);
           
           if (dest instanceof Topic) {
             automaticRequest = false;
@@ -814,7 +801,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
         }
       } catch (javax.naming.NameNotFoundException exc) {
         usable = false;
-        if ((!isXA && cnxFact == null) || (isXA && xaCnxFact == null))
+        if (cnxFact == null)
           notUsableMessage = "Could not retrieve ConnectionFactory ["
                              + cnxFactName
                              + "] from JNDI: " + exc;
