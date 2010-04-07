@@ -29,7 +29,6 @@ import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
 
 
 /**
@@ -58,7 +57,7 @@ public class XABridgeAdmin {
     foreignTopic.setFreeWriting();
     System.out.println("foreign topic = " + foreignTopic);
     
-    javax.jms.XAConnectionFactory foreignCF = XATcpConnectionFactory.create("localhost", 16011);
+    javax.jms.XAConnectionFactory foreignCF = TcpConnectionFactory.create("localhost", 16011);
     
     // bind foreign destination and connectionFactory
     jndiCtx.rebind("foreignQueue", foreignQueue);
@@ -74,6 +73,8 @@ public class XABridgeAdmin {
     prop.setProperty("destinationName", "foreignQueue");
     // automaticRequest
     prop.setProperty("automaticRequest", "true");
+    // Enable XA with the following parameter
+    prop.setProperty("useXAConnection", "true");
 
     // Creating a Queue bridge on server 0:
     Queue joramQueue = Queue.create(0,
@@ -89,7 +90,9 @@ public class XABridgeAdmin {
     prop.setProperty("connectionFactoryName", "foreignCF");
     // Foreign Queue JNDI name: foreignDest
     prop.setProperty("destinationName", "foreignTopic");
-    
+    // Enable XA with the following parameter
+    prop.setProperty("useXAConnection", "true");
+
     // Creating a Topic bridge on server 0:
     Topic joramTopic = Topic.create(0,
                                  "org.objectweb.joram.mom.dest.jmsbridge.JMSBridgeTopic",
