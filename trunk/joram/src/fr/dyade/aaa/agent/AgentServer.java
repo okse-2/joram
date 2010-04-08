@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
@@ -903,7 +903,7 @@ public final class AgentServer {
     public static final int STOPPED = 0x6;
     public static final int RESETING = 0x7;
 
-    private int value = INSTALLED;
+    int value = INSTALLED;
 
     public static String[] info = {"installed",
                                    "initializing", "initialized",
@@ -912,7 +912,7 @@ public final class AgentServer {
                                    "reseting"};
   }
 
-  static Status status = new Status();
+  private static Status status = new Status();
 
   public static int getStatus() {
     return status.value;
@@ -1132,7 +1132,7 @@ public final class AgentServer {
             transaction.init(path);
           } catch (IOException exc) {
             logmon.log(BasicLevel.FATAL, getName() + ", can't start transaction manager", exc);
-            throw new Exception("Can't start transaction manager");
+            throw new Exception("Can't start transaction manager: " + exc.getMessage());
           }
         }
       }
@@ -1242,7 +1242,7 @@ public final class AgentServer {
         configure();
       } catch (Exception exc) {
         logmon.log(BasicLevel.FATAL, getName() + ", can't configure", exc);
-        throw new Exception("Can't configure server");
+        throw new Exception("Can't configure server: " + exc.getMessage());
       }
 
       try {
