@@ -128,9 +128,9 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
   /** Indicates to use an XAConnection. Default is false. */
   private boolean isXA = false;
   /** producer XAResource */
-  private XAResource producerRes = null;
+  private transient XAResource producerRes = null;
   /** consumer XAResource */
-  private XAResource consumerRes = null;
+  private transient XAResource consumerRes = null;
   /** serializable object for synchronization */
   private Object lock = new String();
 
