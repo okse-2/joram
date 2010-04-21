@@ -21,6 +21,7 @@
  * Initial developer(s): Frederic Maistre (Bull SA)
  * Contributor(s): ScalAgent Distributed Technologies
  *                 Benoit Pelletier (Bull SA)
+ *                 Florent Benoit (Bull SAS)
  */
 package org.objectweb.joram.client.connector;
 
