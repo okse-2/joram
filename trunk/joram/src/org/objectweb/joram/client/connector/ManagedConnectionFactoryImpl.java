@@ -25,6 +25,7 @@
 package org.objectweb.joram.client.connector;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -145,6 +146,16 @@ public class ManagedConnectionFactoryImpl
    * This is the local IP address port on which the TCP connection is activated
    */
   public int outLocalPort = 0;
+  
+  /**
+   * Comma separated list of IN interceptors.
+   */
+  private String inInterceptors = null;
+
+  /**
+   * Comma separated list of OUT interceptors.
+   */
+  private String outInterceptors = null;
 
   /**
    * Constructs a <code>ManagedConnectionFactoryImpl</code> instance.
@@ -206,6 +217,29 @@ public class ManagedConnectionFactoryImpl
       if (outLocalAddress != null) {
         fp.outLocalAddress = outLocalAddress;
       }
+      if (inInterceptors != null) {
+    	String[] interceptorArray = inInterceptors.split(",");
+    	if (interceptorArray != null) {
+    	  for (String interceptorClassName : interceptorArray) {
+            String interceptorName = interceptorClassName.trim();
+    		if (interceptorName.length() > 0) {
+    		  fp.addInInterceptor(interceptorName);
+    	    }
+          }
+        }
+      }
+      if (outInterceptors != null) {
+        String[] interceptorArray = outInterceptors.split(",");
+        if (interceptorArray != null) {
+          for (String interceptorClassName : interceptorArray) {
+            String interceptorName = interceptorClassName.trim();
+            if (interceptorName.length() > 0) {
+    		  fp.addOutInterceptor(interceptorName);
+    		}
+          }
+        }
+      }      
+      
     }
   }
 
@@ -648,5 +682,13 @@ public class ManagedConnectionFactoryImpl
 
   public void setOutLocalPort(Integer outLocalPort) {
     this.outLocalPort = outLocalPort.intValue();
+  }
+
+  public void setOutInterceptors(String outInterceptors) {
+    this.outInterceptors = outInterceptors;
+  }
+
+  public void setInInterceptors(String inInterceptors) {
+    this.inInterceptors = inInterceptors;
   }
 }

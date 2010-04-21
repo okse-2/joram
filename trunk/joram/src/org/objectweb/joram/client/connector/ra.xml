@@ -153,6 +153,16 @@
               <config-property-type>java.lang.Boolean</config-property-type>
               <config-property-value>true</config-property-value>
             </config-property>
+            <config-property>
+              <config-property-name>OutInterceptors</config-property-name>
+              <config-property-type>java.lang.String</config-property-type>
+              <config-property-value></config-property-value>
+            </config-property>
+            <config-property>
+              <config-property-name>InInterceptors</config-property-name>
+              <config-property-type>java.lang.String</config-property-type>
+              <config-property-value></config-property-value>
+            </config-property>
             <connectionfactory-interface>javax.jms.QueueConnectionFactory</connectionfactory-interface>
             <connectionfactory-impl-class>org.objectweb.joram.client.connector.OutboundQueueConnectionFactory</connectionfactory-impl-class>
             <connection-interface>javax.jms.QueueConnection</connection-interface>
@@ -180,6 +190,16 @@
               <config-property-type>java.lang.Boolean</config-property-type>
               <config-property-value>true</config-property-value>
             </config-property>
+            <config-property>
+              <config-property-name>OutInterceptors</config-property-name>
+              <config-property-type>java.lang.String</config-property-type>
+              <config-property-value></config-property-value>
+            </config-property>
+            <config-property>
+              <config-property-name>InInterceptors</config-property-name>
+              <config-property-type>java.lang.String</config-property-type>
+              <config-property-value></config-property-value>
+            </config-property>
             <connectionfactory-interface>javax.jms.TopicConnectionFactory</connectionfactory-interface>
             <connectionfactory-impl-class>org.objectweb.joram.client.connector.OutboundTopicConnectionFactory</connectionfactory-impl-class>
             <connection-interface>javax.jms.TopicConnection</connection-interface>
@@ -206,6 +226,16 @@
               <config-property-name>Collocated</config-property-name>
               <config-property-type>java.lang.Boolean</config-property-type>
               <config-property-value>true</config-property-value>
+            </config-property>
+            <config-property>
+              <config-property-name>OutInterceptors</config-property-name>
+              <config-property-type>java.lang.String</config-property-type>
+              <config-property-value></config-property-value>
+            </config-property>
+            <config-property>
+              <config-property-name>InInterceptors</config-property-name>
+              <config-property-type>java.lang.String</config-property-type>
+              <config-property-value></config-property-value>
             </config-property>
             <config-property>
               <config-property-name>outLocalAddress</config-property-name>
