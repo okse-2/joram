@@ -34,6 +34,7 @@ import org.osgi.framework.ServiceRegistration;
 
 import fr.dyade.aaa.agent.AdminProxy;
 import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.agent.SCServerMBean;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.Service;
 
@@ -51,19 +52,21 @@ public class Activator implements BundleActivator {
 
   private ServiceRegistration adminproxyRegistration;
 
+  /**
+   * Stops the whole framework if agent server was stopped an other way than
+   * stopping agent server bundle, for example using
+   * {@link SCServerMBean#stop()}. This is done to preserve the previous
+   * non-OSGi behavior.
+   */
   public static void stopFramework() {
-    Bundle[] bundles = Activator.context.getBundles();
-    for (int i = 0; i < bundles.length; i++) {
-      Bundle bundle = bundles[i];
-      if (bundle.getHeaders().get("Bundle-SymbolicName").equals("org.apache.felix.framework")) {
-        if (Activator.context.getBundle().getState() != Bundle.STOPPING) {
-          try {
-            bundle.stop();
-          } catch (BundleException exc) {
-            if (logmon.isLoggable(BasicLevel.ERROR))
-              logmon.log(BasicLevel.ERROR, "Error when stopping OSGi framework : ", exc);
-          }
-          return;
+    if (context.getBundle().getState() != Bundle.STOPPING) {
+      try {
+        // The system bundle is always assigned a bundle identifier of zero (0).
+        Bundle bundle = context.getBundle(0);
+        bundle.stop();
+      } catch (BundleException exc) {
+        if (logmon.isLoggable(BasicLevel.ERROR)) {
+          logmon.log(BasicLevel.ERROR, "Error when stopping OSGi framework : ", exc);
         }
       }
     }
