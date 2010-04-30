@@ -39,6 +39,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.ow2.joram.design.deploy.actions.wizard.DeployWizard;
 import org.ow2.joram.design.model.joram.Config;
 import org.ow2.joram.design.model.joram.JoramPackage;
+import org.ow2.joram.design.model.joram.ScalAgentServer;
 
 public class DeployAction implements IObjectActionDelegate {
 
@@ -83,6 +84,12 @@ public class DeployAction implements IObjectActionDelegate {
               .getPath()), true);
           final Config rootElement = (Config) resource.getContents().get(0);
           
+          for (ScalAgentServer server : rootElement.getServers()) {
+            if (server.getHost() == null) {
+              throw new Exception("Can't deploy when a server has no host defined.");
+            }
+          }
+
           WizardDialog wizard = new WizardDialog(shell, new DeployWizard(rootElement, tree));
           wizard.setHelpAvailable(false);
           wizard.setPageSize(300, 250);
@@ -91,7 +98,6 @@ public class DeployAction implements IObjectActionDelegate {
         } catch (Exception e) {
           MessageDialog.openError(shell, "Deploy Plug-in", "Deployment failed: "
               + e.getMessage());
-          e.printStackTrace();
         }
       }
     }
