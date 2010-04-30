@@ -2,26 +2,26 @@
 <?eclipse version="3.0"?>
 
 <!--
-Copyright (C) 2009 - 2010 ScalAgent Distributed Technologies
+ Copyright (C) 2009 - 2010 ScalAgent Distributed Technologies
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or any later version.
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or any later version.
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
-USA.
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ USA.
 
-Initial developer(s): ScalAgent Distributed Technologies
-Contributor(s): 
--->
+ Initial developer(s): ScalAgent Distributed Technologies
+ Contributor(s): 
+ -->
 
 <plugin>
 
@@ -321,7 +321,7 @@ Contributor(s):
             name="JORAM unique server Id"
             mode="Batch"
             severity="ERROR" statusCode="200">
-            <![CDATA[ScalAgentServer.allInstances()->forAll(j | j.sid = self.sid implies j = self)]]>
+            <![CDATA[ScalAgentServer.allInstances()->one(j | j.sid = self.sid)]]>
             <description><![CDATA[Unicity of server id check.]]></description>
             <message><![CDATA[Server Id (sid) must be unique.]]></message>
             <target class="joram.ScalAgentServer"/>
@@ -331,7 +331,7 @@ Contributor(s):
             name="Domain unique name"
             mode="Batch"
             severity="ERROR" statusCode="200">
-            <![CDATA[NetworkDomain.allInstances()->forAll(n | n.name = self.name implies n = self)]]>
+            <![CDATA[NetworkDomain.allInstances()->one(n | n.name = self.name)]]>
             <description><![CDATA[Unicity of domain name check.]]></description>
             <message><![CDATA[Domain name must be unique.]]></message>
             <target class="joram.NetworkDomain"/>
@@ -346,34 +346,64 @@ Contributor(s):
             <message><![CDATA[Domain name can't be empty]]></message>
             <target class="joram.NetworkDomain"/>
          </constraint>
-                  <constraint id="portcheck"
-            lang="OCL"
-            name="Port used check"
-            mode="Batch"
-            severity="ERROR" statusCode="200">
-            <![CDATA[self.network->forAll(c1,c2 | c1.port = c2.port implies c1 = c2)]]>
-            <description><![CDATA[Available port check.]]></description>
-            <message><![CDATA[Server is linked with two different domains using the same port.]]></message>
-            <target class="joram.ScalAgentServer"/>
-         </constraint>
                   <constraint id="connectionmanager.presence"
             lang="OCL"
             name="ConnectionManager presence check"
             mode="Batch"
             severity="ERROR" statusCode="200">
-            <![CDATA[services->select(f | f.oclIsKindOf(TCPProxyService))->notEmpty() implies services->select(f | f.oclIsKindOf(ConnectionManager))->notEmpty()]]>
+            <![CDATA[self.oclAsType(ecore::EObject).eContainer().oclAsType(ScalAgentServer).services->select(f | f.oclIsKindOf(ConnectionManager))->notEmpty()]]>
             <description><![CDATA[TCPProxyService with ConnectionManager check.]]></description>
             <message><![CDATA[TCPProxyService can't work without a ConnectionManager service.]]></message>
-            <target class="joram.ScalAgentServer"/>
+            <target class="joram.TCPProxyService"/>
          </constraint>
-                  <constraint id="joram_release"
+                  <constraint id="port_conflict"
+            lang="Java" class="org.ow2.joram.design.model.joram.diagram.providers.JoramValidationProvider$Adapter5"
+            name="Port availability."
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            
+            <description><![CDATA[Check port availability.]]></description>
+            <message><![CDATA[Host port conflict on port : {0}]]></message>
+            <target class="joram.Host"/>
+         </constraint>
+                  <constraint id="topic_availability"
             lang="Java" class="org.ow2.joram.design.model.joram.diagram.providers.JoramValidationProvider$Adapter6"
-            name="Joram release."
+            name="Topic class availability."
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            
+            <description><![CDATA[Check topic class availabitlity.]]></description>
+            <message><![CDATA[Unknown topic class: {0}. Check Joram extension file for known extensions.]]></message>
+            <target class="joram.Topic"/>
+         </constraint>
+                  <constraint id="queue_availability"
+            lang="Java" class="org.ow2.joram.design.model.joram.diagram.providers.JoramValidationProvider$Adapter7"
+            name="Queue class availability."
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            
+            <description><![CDATA[Check queue class availabitlity.]]></description>
+            <message><![CDATA[Unknown queue class: {0}. Check Joram extension file for known extensions.]]></message>
+            <target class="joram.Queue"/>
+         </constraint>
+                  <constraint id="service_availability"
+            lang="Java" class="org.ow2.joram.design.model.joram.diagram.providers.JoramValidationProvider$Adapter8"
+            name="Service class availability"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            
+            <description><![CDATA[Check custom service class availability.]]></description>
+            <message><![CDATA[Unknown service class: {0}. Check Joram extension file for known extensions.]]></message>
+            <target class="joram.CustomService"/>
+         </constraint>
+                  <constraint id="joram_extension_defined"
+            lang="Java" class="org.ow2.joram.design.model.joram.diagram.providers.JoramValidationProvider$Adapter9"
+            name="Joram extension file definition."
             mode="Batch"
             severity="WARNING" statusCode="200">
             
-            <description><![CDATA[Joram release check.]]></description>
-            <message><![CDATA[Joram release location has not been defined in preferences. Deployment will not be available.]]></message>
+            <description><![CDATA[Check if Joram extension file has been defined.]]></description>
+            <message><![CDATA[Joram extension file has not been defined under Window > Preferences > Joram Diagram. Queue, topic, and custom service class names will not be checked.]]></message>
             <target class="joram.Config"/>
          </constraint>
                   </constraints>
@@ -389,9 +419,12 @@ Contributor(s):
                   <constraint ref="org.ow2.joram.design.diagram.uniqueIdRule"/>
                   <constraint ref="org.ow2.joram.design.diagram.uniqueDomainRule"/>
                   <constraint ref="org.ow2.joram.design.diagram.domainNameRule"/>
-                  <constraint ref="org.ow2.joram.design.diagram.portcheck"/>
                   <constraint ref="org.ow2.joram.design.diagram.connectionmanager.presence"/>
-                  <constraint ref="org.ow2.joram.design.diagram.joram_release"/>
+                  <constraint ref="org.ow2.joram.design.diagram.port_conflict"/>
+                  <constraint ref="org.ow2.joram.design.diagram.topic_availability"/>
+                  <constraint ref="org.ow2.joram.design.diagram.queue_availability"/>
+                  <constraint ref="org.ow2.joram.design.diagram.service_availability"/>
+                  <constraint ref="org.ow2.joram.design.diagram.joram_extension_defined"/>
                </binding>
 
    </extension>
