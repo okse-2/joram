@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="lib/apollon-runtime-1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/asm-3.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/bsh-2.0b4.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commandline-1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-net-1.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/docbook-xsl-1.72.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/dtdparser-1.21.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/dumper-0.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/explorer-1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/explorer-reflector-plugin-1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/fdf-core-2.2-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/FDF-FDF-2.2-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/fdf-fraclet-plugins-2.2-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/fdf-fractal-adl-2.2-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/FDF-HTTP-2.2-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/FDF-JAVA-2.2-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/FDF-JORAM.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/fdf-launcher-2.2-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/fractal-api-2.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/fractal-explorer-1.1.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/fractal-rmi-0.3.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jdom-1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jgraph-5.8.3.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jonathan-3.0.10.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jsch-0.1.29.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jtelnet-1.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/julia-asm-2.5.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/julia-mixins-2.5.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/julia-runtime-2.5.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/log4j-1.2.13.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/monolog-2.1.8.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/oro-2.0.8.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ow-misc-1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ow-trace-1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/truezip-6.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/wsdl4j-1.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/xalan-2.7.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/xercesImpl-2.3.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/xml-apis-1.0.b2.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
