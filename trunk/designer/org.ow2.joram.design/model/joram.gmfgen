@@ -9,7 +9,7 @@
         name="JORAM integrity"
         description="Checks integrity of the JORAM diagram."
         path="//@audits/@categories.0"
-        audits="//@audits/@rules.0 //@audits/@rules.1 //@audits/@rules.2 //@audits/@rules.3 //@audits/@rules.4 //@audits/@rules.5"/>
+        audits="//@audits/@rules.0 //@audits/@rules.1 //@audits/@rules.2 //@audits/@rules.3 //@audits/@rules.4 //@audits/@rules.5 //@audits/@rules.6 //@audits/@rules.7 //@audits/@rules.8"/>
     <rules
         name="JORAM unique server Id"
         description="Unicity of server id check."
@@ -54,39 +54,83 @@
       </target>
     </rules>
     <rules
-        name="Port used check"
-        description="Available port check."
-        id="portcheck"
-        rule="//@expressionProviders/@providers.0/@expressions.10"
-        message="Server is linked with two different domains using the same port."
-        category="//@audits/@categories.0">
-      <target
-          xsi:type="gmfgen:GenDomainElementTarget"
-          contextSelector="//@audits/@clientContexts.0">
-        <element
-            href="joram.genmodel#//joram/ScalAgentServer"/>
-      </target>
-    </rules>
-    <rules
         name="ConnectionManager presence check"
         description="TCPProxyService with ConnectionManager check."
         id="connectionmanager.presence"
-        rule="//@expressionProviders/@providers.0/@expressions.11"
+        rule="//@expressionProviders/@providers.0/@expressions.10"
         message="TCPProxyService can't work without a ConnectionManager service."
         category="//@audits/@categories.0">
       <target
           xsi:type="gmfgen:GenDomainElementTarget"
           contextSelector="//@audits/@clientContexts.0">
         <element
-            href="joram.genmodel#//joram/ScalAgentServer"/>
+            href="joram.genmodel#//joram/TCPProxyService"/>
       </target>
     </rules>
     <rules
-        name="Joram release."
-        description="Joram release check."
-        id="joram_release"
+        name="Port availability."
+        description="Check port availability."
+        id="port_conflict"
         rule="//@expressionProviders/@providers.1/@expressions.0"
-        message="Joram release location has not been defined in preferences. Deployment will not be available."
+        message="Host port conflict on port : {0}"
+        category="//@audits/@categories.0">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="joram.genmodel#//joram/Host"/>
+      </target>
+    </rules>
+    <rules
+        name="Topic class availability."
+        description="Check topic class availabitlity."
+        id="topic_availability"
+        rule="//@expressionProviders/@providers.1/@expressions.1"
+        message="Unknown topic class: {0}. Check Joram extension file for known extensions."
+        category="//@audits/@categories.0">
+      <target
+          xsi:type="gmfgen:GenDomainAttributeTarget"
+          contextSelector="//@audits/@clientContexts.0"
+          nullAsError="true">
+        <attribute
+            href="joram.genmodel#//joram/Topic/className"/>
+      </target>
+    </rules>
+    <rules
+        name="Queue class availability."
+        description="Check queue class availabitlity."
+        id="queue_availability"
+        rule="//@expressionProviders/@providers.1/@expressions.2"
+        message="Unknown queue class: {0}. Check Joram extension file for known extensions."
+        category="//@audits/@categories.0">
+      <target
+          xsi:type="gmfgen:GenDomainAttributeTarget"
+          contextSelector="//@audits/@clientContexts.0"
+          nullAsError="true">
+        <attribute
+            href="joram.genmodel#//joram/Queue/className"/>
+      </target>
+    </rules>
+    <rules
+        name="Service class availability"
+        description="Check custom service class availability."
+        id="service_availability"
+        rule="//@expressionProviders/@providers.1/@expressions.3"
+        message="Unknown service class: {0}. Check Joram extension file for known extensions."
+        category="//@audits/@categories.0">
+      <target
+          xsi:type="gmfgen:GenDomainElementTarget"
+          contextSelector="//@audits/@clientContexts.0">
+        <element
+            href="joram.genmodel#//joram/CustomService"/>
+      </target>
+    </rules>
+    <rules
+        name="Joram extension file definition."
+        description="Check if Joram extension file has been defined."
+        id="joram_extension_defined"
+        rule="//@expressionProviders/@providers.1/@expressions.4"
+        message="Joram extension file has not been defined under Window > Preferences > Joram Diagram. Queue, topic, and custom service class names will not be checked."
         severity="WARNING"
         category="//@audits/@categories.0">
       <target
@@ -97,7 +141,7 @@
       </target>
     </rules>
     <clientContexts
-        ruleTargets="//@audits/@rules.0/@target //@audits/@rules.1/@target //@audits/@rules.2/@target //@audits/@rules.3/@target //@audits/@rules.4/@target //@audits/@rules.5/@target"/>
+        ruleTargets="//@audits/@rules.0/@target //@audits/@rules.1/@target //@audits/@rules.2/@target //@audits/@rules.3/@target //@audits/@rules.4/@target //@audits/@rules.5/@target //@audits/@rules.6/@target //@audits/@rules.7/@target //@audits/@rules.8/@target"/>
   </audits>
   <diagram
       visualID="1000"
@@ -2473,25 +2517,34 @@
           body="oppositeEnd.network->select(n1 | n1.domain = self)->isEmpty()"/>
       <expressions
           xsi:type="gmfgen:GenConstraint"
-          body="ScalAgentServer.allInstances()->forAll(j | j.sid = self.sid implies j = self)"/>
+          body="ScalAgentServer.allInstances()->one(j | j.sid = self.sid)"/>
       <expressions
           xsi:type="gmfgen:GenConstraint"
-          body="NetworkDomain.allInstances()->forAll(n | n.name = self.name implies n = self)"/>
+          body="NetworkDomain.allInstances()->one(n | n.name = self.name)"/>
       <expressions
           xsi:type="gmfgen:GenConstraint"
           body="size() > 0"/>
       <expressions
           xsi:type="gmfgen:GenConstraint"
-          body="self.network->forAll(c1,c2 | c1.port = c2.port implies c1 = c2)"/>
-      <expressions
-          xsi:type="gmfgen:GenConstraint"
-          body="services->select(f | f.oclIsKindOf(TCPProxyService))->notEmpty() implies services->select(f | f.oclIsKindOf(ConnectionManager))->notEmpty()"/>
+          body="self.oclAsType(ecore::EObject).eContainer().oclAsType(ScalAgentServer).services->select(f | f.oclIsKindOf(ConnectionManager))->notEmpty()"/>
     </providers>
     <providers
         xsi:type="gmfgen:GenJavaExpressionProvider">
       <expressions
           xsi:type="gmfgen:GenConstraint"
-          body="checkJoram"/>
+          body="empty"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="empty"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="empty"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="empty"/>
+      <expressions
+          xsi:type="gmfgen:GenConstraint"
+          body="empty"/>
     </providers>
   </expressionProviders>
   <labelParsers
