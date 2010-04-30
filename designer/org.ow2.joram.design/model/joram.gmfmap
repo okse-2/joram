@@ -1153,7 +1153,7 @@
         id="uniqueIdRule"
         message="Server Id (sid) must be unique.">
       <rule
-          body="ScalAgentServer.allInstances()->forAll(j | j.sid = self.sid implies j = self)"/>
+          body="ScalAgentServer.allInstances()->one(j | j.sid = self.sid)"/>
       <target
           xsi:type="gmfmap:DomainElementTarget">
         <element
@@ -1166,7 +1166,7 @@
         id="uniqueDomainRule"
         message="Domain name must be unique.">
       <rule
-          body="NetworkDomain.allInstances()->forAll(n | n.name = self.name implies n = self)"/>
+          body="NetworkDomain.allInstances()->one(n | n.name = self.name)"/>
       <target
           xsi:type="gmfmap:DomainElementTarget">
         <element
@@ -1188,29 +1188,89 @@
       </target>
     </audits>
     <audits
-        name="Port used check"
-        description="Available port check."
-        id="portcheck"
-        message="Server is linked with two different domains using the same port.">
-      <rule
-          body="self.network->forAll(c1,c2 | c1.port = c2.port implies c1 = c2)"/>
-      <target
-          xsi:type="gmfmap:DomainElementTarget">
-        <element
-            href="joram.ecore#//ScalAgentServer"/>
-      </target>
-    </audits>
-    <audits
         name="ConnectionManager presence check"
         description="TCPProxyService with ConnectionManager check."
         id="connectionmanager.presence"
         message="TCPProxyService can't work without a ConnectionManager service.">
       <rule
-          body="services->select(f | f.oclIsKindOf(TCPProxyService))->notEmpty() implies services->select(f | f.oclIsKindOf(ConnectionManager))->notEmpty()"/>
+          body="self.oclAsType(ecore::EObject).eContainer().oclAsType(ScalAgentServer).services->select(f | f.oclIsKindOf(ConnectionManager))->notEmpty()"/>
       <target
           xsi:type="gmfmap:DomainElementTarget">
         <element
-            href="joram.ecore#//ScalAgentServer"/>
+            href="joram.ecore#//TCPProxyService"/>
+      </target>
+    </audits>
+    <audits
+        name="Port availability."
+        description="Check port availability."
+        id="port_conflict"
+        message="Host port conflict on port : {0}">
+      <rule
+          body="empty"
+          language="java"/>
+      <target
+          xsi:type="gmfmap:DomainElementTarget">
+        <element
+            href="joram.ecore#//Host"/>
+      </target>
+    </audits>
+    <audits
+        name="Topic class availability."
+        description="Check topic class availabitlity."
+        id="topic_availability"
+        message="Unknown topic class: {0}. Check Joram extension file for known extensions.">
+      <rule
+          body="empty"
+          language="java"/>
+      <target
+          xsi:type="gmfmap:DomainAttributeTarget"
+          nullAsError="true">
+        <attribute
+            href="joram.ecore#//Topic/className"/>
+      </target>
+    </audits>
+    <audits
+        name="Queue class availability."
+        description="Check queue class availabitlity."
+        id="queue_availability"
+        message="Unknown queue class: {0}. Check Joram extension file for known extensions.">
+      <rule
+          body="empty"
+          language="java"/>
+      <target
+          xsi:type="gmfmap:DomainAttributeTarget"
+          nullAsError="true">
+        <attribute
+            href="joram.ecore#//Queue/className"/>
+      </target>
+    </audits>
+    <audits
+        name="Service class availability"
+        description="Check custom service class availability."
+        id="service_availability"
+        message="Unknown service class: {0}. Check Joram extension file for known extensions.">
+      <rule
+          body="empty"
+          language="java"/>
+      <target
+          xsi:type="gmfmap:DomainElementTarget">
+        <element
+            href="joram.ecore#//CustomService"/>
+      </target>
+    </audits>
+    <audits
+        name="Joram extension file definition."
+        description="Check if Joram extension file has been defined."
+        id="joram_extension_defined"
+        severity="WARNING"
+        message="Joram extension file has not been defined under Window > Preferences > Joram Diagram. Queue, topic, and custom service class names will not be checked.">
+      <rule
+          body="empty"
+          language="java"/>
+      <target
+          xsi:type="gmfmap:DomainElementTarget">
+        <element
+            href="joram.ecore#//Config"/>
       </target>
     </audits>
   </audits>
