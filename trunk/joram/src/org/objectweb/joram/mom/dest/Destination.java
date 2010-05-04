@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -57,7 +57,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
 /**
  * A <code>Destination</code> agent is an agent hosting a MOM destination,
  * for example a <tt>Queue</tt> or a <tt>Topic</tt>.
- * Its behaviour is provided by a <code>DestinationImpl</code> instance.
+ * Its behavior is provided by a <code>DestinationImpl</code> instance.
  *
  * @see AdminDestinationItf
  */
@@ -97,8 +97,6 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
   public final void init(AgentId adminId, Properties props) {
     destImpl = createsImpl(adminId, props);
     destImpl.setAgent(this);
-    if (destImpl.getPeriod() > -1)
-      task = new WakeUpTask(getId(), WakeUpNot.class, destImpl.getPeriod());
   }
 
   /**
@@ -136,6 +134,9 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
     destImpl.setAgent(this);
     destImpl.initialize(firstTime);
     
+    if (destImpl.getPeriod() > -1)
+      task = new WakeUpTask(getId(), WakeUpNot.class, destImpl.getPeriod());
+    
     try {
       MXWrapper.registerMBean(destImpl, getMBeanName());
     } catch (Exception exc) {
@@ -145,6 +146,8 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
 
   /** Finalizes the agent before it is garbaged. */
   public void agentFinalize(boolean lastTime) {
+    if (task != null)
+      task.cancel();
     try {
       MXWrapper.unregisterMBean(getMBeanName());
     } catch (Exception exc) {
