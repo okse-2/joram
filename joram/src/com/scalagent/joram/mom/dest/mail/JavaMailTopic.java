@@ -50,7 +50,9 @@ public class JavaMailTopic extends Topic {
   /**
    * Empty constructor for newInstance(). 
    */ 
-  public JavaMailTopic() {}
+  public JavaMailTopic() {
+    fixed = true;
+  }
 
   public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
     JavaMailTopicImpl topicImpl = new JavaMailTopicImpl(adminId, prop);

@@ -41,7 +41,9 @@ public class MonitoringTopic extends Topic {
   /**
    * Empty constructor for newInstance().
    */
-  public MonitoringTopic() {}
+  public MonitoringTopic() {
+    fixed = true;
+  }
   
   protected void agentInitialize(boolean firstTime) throws Exception {
     super.agentInitialize(firstTime);

@@ -49,7 +49,9 @@ public class CollectorQueue extends Queue {
   /**
    * Empty constructor for newInstance(). 
    */ 
-  public CollectorQueue() {}
+  public CollectorQueue() {
+    fixed = true;
+  }
 
   /**
    * Creates the <tt>CollectorQueueImpl</tt>.

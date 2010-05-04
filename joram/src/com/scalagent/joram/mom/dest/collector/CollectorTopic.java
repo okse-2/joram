@@ -49,7 +49,9 @@ public class CollectorTopic extends Topic {
   /**
    * Empty constructor for newInstance(). 
    */ 
-  public CollectorTopic() {}
+  public CollectorTopic() {
+    fixed = true;
+  }
 
   /**
    * Creates the <tt>CollectorTopicImpl</tt>.

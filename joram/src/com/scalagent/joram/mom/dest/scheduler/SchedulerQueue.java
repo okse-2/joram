@@ -48,7 +48,9 @@ public class SchedulerQueue extends Queue {
   /**
    * Empty constructor for newInstance(). 
    */ 
-  public SchedulerQueue() {}
+  public SchedulerQueue() {
+    fixed = true;
+  }
 
   /**
    * Creates the <tt>QueueImpl</tt>.
