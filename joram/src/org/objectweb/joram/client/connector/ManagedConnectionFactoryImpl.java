@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2006 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -26,7 +26,6 @@
 package org.objectweb.joram.client.connector;
 
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -52,7 +51,6 @@ import org.objectweb.joram.client.jms.ha.local.XAHALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
 import org.objectweb.joram.client.jms.local.XALocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
-import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.shared.security.SimpleIdentity;
 import org.objectweb.util.monolog.api.BasicLevel;
 
