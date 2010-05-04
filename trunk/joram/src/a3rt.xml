@@ -13,25 +13,24 @@
     <patternset id="specific.compile.sources">
       <include name="fr/dyade/aaa/agent/AgentServer.java"/>
       <include name="fr/dyade/aaa/agent/Engine.java"/>
-      <include name="fr/dyade/aaa/agent/GCEngine.java"/>
-      <include name="fr/dyade/aaa/agent/HAEngine.java"/>
+      <!-- include name="fr/dyade/aaa/agent/HAEngine.java"/ -->
       <include name="fr/dyade/aaa/agent/SimpleNetwork.java"/>
       <include name="fr/dyade/aaa/agent/PoolNetwork.java"/>
       <include name="fr/dyade/aaa/agent/SSLNetwork.java"/>
-      <include name="fr/dyade/aaa/agent/NGNetwork.java"/>
-      <include name="fr/dyade/aaa/agent/UDPNetwork.java"/>
+      <!-- include name="fr/dyade/aaa/agent/NGNetwork.java"/ -->
+      <!-- include name="fr/dyade/aaa/agent/UDPNetwork.java"/ -->
       <include name="fr/dyade/aaa/agent/HttpNetwork.java"/>
       <include name="fr/dyade/aaa/agent/HttpsNetwork.java"/>
-      <include name="fr/dyade/aaa/agent/SCServer.java"/>
-      <include name="fr/dyade/aaa/agent/SCAdminBase.java"/>
-      <include name="fr/dyade/aaa/agent/AgentAdmin.java"/>
+      <!-- include name="fr/dyade/aaa/agent/SCServer.java"/ -->
+      <!-- include name="fr/dyade/aaa/agent/SCAdminBase.java"/ -->
       <include name="fr/dyade/aaa/agent/UnknownDomainException.java"/>
       <include name="fr/dyade/aaa/agent/conf/A3CMLSaxWrapper.java"/>
       <include name="fr/dyade/aaa/agent/conf/A3CMLKXmlWrapper.java"/>
 
       <include name="fr/dyade/aaa/util/NullTransaction.java"/>
-      <include name="fr/dyade/aaa/util/JTransaction.java"/>
+      <!-- include name="fr/dyade/aaa/util/JTransaction.java"/ -->
       <include name="fr/dyade/aaa/util/NTransaction.java"/>
+      <include name="fr/dyade/aaa/util/NGTransaction.java"/>
       <include name="fr/dyade/aaa/util/FileRepository.java"/>
       <!-- include name="fr/dyade/aaa/util/DBRepository.java"/ -->
       <!-- include name="fr/dyade/aaa/util/MySQLDBTransaction.java"/ -->
@@ -42,18 +41,16 @@
       <include name="com/scalagent/jmx/*.java"/>
       <!-- End - Needed for JMX monitoring -->
 
-      <include name="fr/dyade/aaa/admin/**/*.java"/>
-
       <!-- Begin - Needed for JNDI -->
       <!-- include name="fr/dyade/aaa/jndi2/**/*.java"/ -->
       <!-- End - Needed for task JNDI -->
 
       <!-- Begin - Needed for task tests -->
-      <include name="com/scalagent/scheduler/**/*.java"/>
-      <include name="com/scalagent/task/**/*.java"/>
+      <!-- include name="com/scalagent/scheduler/**/*.java"/ -->
+      <!-- include name="com/scalagent/task/**/*.java"/ -->
       <!-- End - Needed for task tests -->
 
-      <include name="fr/dyade/aaa/util/Timer.java"/>
+      <!-- include name="fr/dyade/aaa/util/Timer.java"/ -->
     </patternset>
 
     <!-- Specific classpath needed for compilation -->
