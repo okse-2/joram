@@ -50,7 +50,9 @@ public class JavaMailQueue extends Queue {
   /**
    * Empty constructor for newInstance(). 
    */ 
-  public JavaMailQueue() {}
+  public JavaMailQueue() {
+    fixed = true;
+  }
 
   /**
    * Creates the <tt>JavaMailQueueImpl</tt>.

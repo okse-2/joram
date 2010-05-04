@@ -41,7 +41,9 @@ public class MonitoringQueue extends Queue {
   /**
    * Empty constructor for newInstance().
    */
-  public MonitoringQueue() {}
+  public MonitoringQueue() {
+    fixed = true;
+  }
   
   protected void agentInitialize(boolean firstTime) throws Exception {
     super.agentInitialize(firstTime);

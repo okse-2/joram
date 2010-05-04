@@ -54,7 +54,9 @@ public class FtpQueue extends Queue {
   /**
    * Empty constructor for newInstance(). 
    */ 
-  public FtpQueue() {}
+  public FtpQueue() {
+    fixed = true;
+  }
 
   /**
    * Creates the <tt>FtpQueueImpl</tt>.
