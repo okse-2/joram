@@ -646,11 +646,9 @@ public final class AdminModule {
     if (wrapper == null)
       throw new ConnectException("Administration connection is closed.");
     
+    boolean local = (serverId == getLocalServerId());
     wrapper.stopServer(serverId);
-    
-    if (serverId == getLocalServerId()) {
-      disconnect();
-    }
+    if (local) disconnect();
   }
 
   /**
