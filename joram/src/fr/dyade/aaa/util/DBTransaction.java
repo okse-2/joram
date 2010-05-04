@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -45,7 +45,11 @@ import fr.dyade.aaa.common.Pool;
 /**
  *  The DBTransaction class implements a transactionnal storage through
  * a JDBC interface. This class is designed to be specialized for different
- * database implementation. 
+ * database implementation.
+ * <p>
+ * Be Careful, the configuration properties don't work for the transaction component: 
+ * these properties are saved in the transaction repository so they can not be used to
+ * configure it.
  *
  * @see Transaction
  * @see MySQLDBTransaction
@@ -62,8 +66,8 @@ public abstract class DBTransaction extends AbstractTransaction implements DBTra
    *  This value can be adjusted for a particular server by setting
    * <code>DBLogThresholdOperation</code> specific property.
    * <p>
-   *  These property can be fixed either from <code>java</code> launching
-   * command, or in <code>a3servers.xml</code> configuration file.
+   *  This property can be fixed only from <code>java</code> launching
+   * command, or through System.property method.
    */
   static int LogThresholdOperation = 1000;
 

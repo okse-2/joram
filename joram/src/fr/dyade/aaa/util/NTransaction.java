@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -45,6 +45,10 @@ import fr.dyade.aaa.common.Pool;
  *  For efficiency it uses a file for its transaction journal, the final
  * storage is provided through the Repository interface on filesystem or
  * database.
+ * <p>
+ * Be Careful, the configuration properties don't work for the transaction component: 
+ * these properties are saved in the transaction repository so they can not be used to
+ * configure it.
  *
  * @see Transaction
  * @see Repository
@@ -61,8 +65,8 @@ public final class NTransaction extends AbstractTransaction implements NTransact
    *  This value can be adjusted for a particular server by setting
    * <code>NTLogMemoryCapacity</code> specific property.
    * <p>
-   *  These property can be fixed either from <code>java</code> launching
-   * command, or in <code>a3servers.xml</code> configuration file.
+   *  This property can be fixed only from <code>java</code> launching
+   * command, or through System.property method.
    */
   static int LogMemoryCapacity = 4096;
 
@@ -80,8 +84,8 @@ public final class NTransaction extends AbstractTransaction implements NTransact
    *  This value can be adjusted (Kb) for a particular server by setting
    * <code>NTLogMemorySize</code> specific property.
    * <p>
-   *  These property can be fixed either from <code>java</code> launching
-   * command, or in <code>a3servers.xml</code> configuration file.
+   *  This property can be fixed only from <code>java</code> launching
+   * command, or through System.property method.
    */
   static int MaxLogMemorySize = 2048 * Kb;
 
@@ -118,8 +122,8 @@ public final class NTransaction extends AbstractTransaction implements NTransact
    *  This value can be adjusted (Mb) for a particular server by setting
    * <code>NTLogFileSize</code> specific property.
    * <p>
-   *  These property can be fixed either from <code>java</code> launching
-   * command, or in <code>a3servers.xml</code> configuration file.
+   *  This property can be fixed only from <code>java</code> launching
+   * command, or through System.property method.
    */
   static int MaxLogFileSize = 16 * Mb;
 
@@ -155,8 +159,8 @@ public final class NTransaction extends AbstractTransaction implements NTransact
    *  This value can be adjusted for a particular server by setting
    * <code>NTLogThresholdOperation</code> specific property.
    * <p>
-   *  These property can be fixed either from <code>java</code> launching
-   * command, or in <code>a3servers.xml</code> configuration file.
+   *  This property can be fixed only from <code>java</code> launching
+   * command, or through System.property method.
    */
   static int LogThresholdOperation = 1000;
 
@@ -297,8 +301,8 @@ public final class NTransaction extends AbstractTransaction implements NTransact
    * <code>NTRepositoryImpl</code> specific property. By default its value
    * is "fr.dyade.aaa.util.FileRepository".
    * <p>
-   *  These property can be fixed either from <code>java</code> launching
-   * command, or in <code>a3servers.xml</code> configuration file.
+   *  This property can be fixed only from <code>java</code> launching
+   * command, or through System.property method.
    */
   String repositoryImpl = "fr.dyade.aaa.util.FileRepository";
 
