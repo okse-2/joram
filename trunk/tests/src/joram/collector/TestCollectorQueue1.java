@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C)  2008 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,7 +33,6 @@ import javax.jms.MessageListener;
 import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
-
 
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
@@ -74,7 +73,7 @@ public class TestCollectorQueue1 extends TestCase implements MessageListener {
       // the consumer records on the queue
       consumer.setMessageListener(this);
       
-      Thread.sleep(10000);
+      Thread.sleep(12000);
 
       assertTrue(nbReceived > 2);
       
@@ -97,7 +96,7 @@ public class TestCollectorQueue1 extends TestCase implements MessageListener {
     // connection 
     AdminModule.connect("localhost", 2560, "root", "root", 60);
     
-    url = "http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/trunk/joram/history";   
+    url = "http://www.gnu.org/licenses/lgpl.txt";
     Properties properties = new Properties();
     properties.setProperty("expiration", "0");
     properties.setProperty("persistent", "true");

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C)  2008 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -80,7 +80,7 @@ public class TestCollectorTopic2 extends TestCase implements MessageListener {
       
       assertTrue(nbReceived == 0);
 
-      url = "http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/trunk/joram/history";  
+      url = "http://www.gnu.org/licenses/lgpl.txt";
       Message msg = sessionp.createMessage();
       msg.setStringProperty("expiration", "0");
       msg.setStringProperty("persistent", "true");
@@ -90,7 +90,7 @@ public class TestCollectorTopic2 extends TestCase implements MessageListener {
       msg.setStringProperty("collector.className", "com.scalagent.joram.mom.dest.collector.URLCollector");
       producer.send(msg);
       
-      Thread.sleep(10000);
+      Thread.sleep(12000);
 
       assertTrue(nbReceived > 2);
       
