@@ -28,7 +28,7 @@
            reliableClass=""/>
     <halocal/>
     <soap host=""
-          port
+          port=""
           timeout=""/>
     <jndi name=""/>
   </ConnectionFactory>
