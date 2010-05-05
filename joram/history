@@ -1,4 +1,35 @@
 +==============================================================================
+| 2010/05/05 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Potential bug fix in heart-beat handling. Previously an exception in
+HeartBeatTask.start method caused an Engine stop.
+ Changes configuration properties naming for NGTransaction.
++==============================================================================
+| 2010/05/04 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Lock in memory some destinations using Timer.
++==============================================================================
+| 2010/05/04 | Nicolas Tachker - ScalAgent Distributed Technologies
++------------+-----------------------------------------------------------------
+ Bug fix about destination using Timer. The Timer tasks are now handled
+depending of the agent life-cycle, creation in agentInitialize and termination
+in agentFinalize.
++==============================================================================
+| 2010/05/04 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Potential bug fix avoiding deadlock in AdminModule.stopServer of local server.
++==============================================================================
+| 2010/04/21 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Consideration of interceptors for the managed connection factories.
++==============================================================================
+| 2010/04/08 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fixes in JMS bridge:
+ - XAResource variables are now transient.
+ - Now a configuration parameter is used to enable XAConnection instead of
+ checking ConnectionFactory interfaces.
++==============================================================================
 | 2010/03/16 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Reworked PoolNetwork to have one Sender by NetSession. This leads to the
@@ -27,23 +58,23 @@ when messages accumulate in the network.
 +==============================================================================
 | 2010/01/25 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
-Update Joram security:
-- modify Identity.check method.
-- remove unused method getCredential, getSubject.
-- use common.Configuration instead System to get properties.
+ Update Joram security:
+ - modify Identity.check method in order to check through the trusted class.
+ - remove unused method getCredential, getSubject.
+ - use common.Configuration class instead System one to get properties.
 +==============================================================================
 | 2009/11/20 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
- - Destination consideration of the update by JMX for the period.
- - Properties implements Serializable
+ Destination consideration of the update by JMX for the period.
+ Properties implements Serializable
 +==============================================================================
 | 2009/11/12 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
-All ScalAgent timer replaced by java timer.
-ClusterQueue :
-  Add a better ordering messages in cluster queue.
-  Bug fix in join cluster queue.
-PoolNetwork : 
+ All ScalAgent timer replaced by java timer.
+ ClusterQueue :
+ - Add a better ordering messages in cluster queue.
+ - Bug fix in join cluster queue.
+ PoolNetwork : 
   Fix a possible incomplete closure of PoolSender, and possible NPE.
 +==============================================================================
 | 2009/11/10 | Andre Freyssinet - ScalAgent Distributed Technologies 
@@ -59,7 +90,7 @@ helper class.
 +==============================================================================
 | 2009/10/30 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
-Fix a potential issue using clustered destination:
+ Fix a potential issue using clustered destination:
  - no longer access directly type attribute (now private attribute of the
  Destination class).
  - implements getType method in ClusterDestination allowing a correct value of
