@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
@@ -36,11 +36,11 @@ import java.util.Enumeration;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
-import fr.dyade.aaa.common.ServerSocketFactory;
-import fr.dyade.aaa.common.ServerSocketFactory13;
-import fr.dyade.aaa.common.SocketAddress;
-import fr.dyade.aaa.common.SocketFactory;
-import fr.dyade.aaa.common.SocketFactory13;
+import fr.dyade.aaa.common.net.ServerSocketFactory;
+import fr.dyade.aaa.common.net.ServerSocketFactory13;
+import fr.dyade.aaa.common.net.SocketAddress;
+import fr.dyade.aaa.common.net.SocketFactory;
+import fr.dyade.aaa.common.net.SocketFactory13;
 
 /**
  *  <code>StreamNetwork</code> is a base implementation of <code>Network</code>

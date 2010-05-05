@@ -49,7 +49,7 @@ import fr.dyade.aaa.agent.conf.A3CMLServer;
 import fr.dyade.aaa.agent.conf.A3CMLService;
 import fr.dyade.aaa.agent.osgi.Activator;
 import fr.dyade.aaa.common.Configuration;
-import fr.dyade.aaa.common.MonitoringTimerTask;
+import fr.dyade.aaa.common.monitoring.MonitoringTimerTask;
 import fr.dyade.aaa.util.Transaction;
 import fr.dyade.aaa.util.management.MXWrapper;
 
@@ -225,7 +225,7 @@ public final class AgentServer {
    *  This property can be fixed either from <code>java</code> launching command,
    * or in <code>a3servers.xml</code> configuration file.
    * 
-   * @see fr.dyade.aaa.common.MonitoringTimerTask
+   * @see fr.dyade.aaa.common.monitoring.MonitoringTimerTask
    */
   public final static String MONITORING_CONFIG_PATH_PROPERTY = "fr.dyade.aaa.agent.MONITORING_CONFIG_PATH";
   /**
@@ -234,7 +234,7 @@ public final class AgentServer {
    * <p>
    *  If the file does not exist the timer task is not launched.
    * 
-   * @see fr.dyade.aaa.common.MonitoringTimerTask
+   * @see fr.dyade.aaa.common.monitoring.MonitoringTimerTask
    */
   public final static String DEFAULT_MONITORING_CONFIG_PATH = "monitoring.props";
   
@@ -245,14 +245,14 @@ public final class AgentServer {
    *  This property can be fixed either from <code>java</code> launching command,
    * or in <code>a3servers.xml</code> configuration file.
    * 
-   * @see fr.dyade.aaa.common.MonitoringTimerTask
+   * @see fr.dyade.aaa.common.monitoring.MonitoringTimerTask
    */
   public final static String MONITORING_RESULT_PATH_PROPERTY = "fr.dyade.aaa.agent.MONITORING_RESULT_PATH";
   /**
    *  Default value for the pathname of the pathname of the results file for the
    * monitoring task in the server, value is <code>monitoringStats.csv</code>.
    * 
-   * @see fr.dyade.aaa.common.MonitoringTimerTask
+   * @see fr.dyade.aaa.common.monitoring.MonitoringTimerTask
    */
   public final static String DEFAULT_MONITORING_RESULT_PATH = "monitoringStats.csv";
   
@@ -263,14 +263,14 @@ public final class AgentServer {
    *  This property can be fixed either from <code>java</code> launching command,
    * or in <code>a3servers.xml</code> configuration file.
    * 
-   * @see fr.dyade.aaa.common.MonitoringTimerTask
+   * @see fr.dyade.aaa.common.monitoring.MonitoringTimerTask
    */
   public final static String MONITORING_CONFIG_PERIOD_PROPERTY = "fr.dyade.aaa.agent.MONITORING_CONFIG_PERIOD";
   /**
    *  Default value for the pathname of the scanning period for the  monitoring
    * task in the server, value is <code>5000L</code> (5 seconds).
    * 
-   * @see fr.dyade.aaa.common.MonitoringTimerTask
+   * @see fr.dyade.aaa.common.monitoring.MonitoringTimerTask
    */
   public final static long DEFAULT_MONITORING_CONFIG_PERIOD = 5000L;
 
