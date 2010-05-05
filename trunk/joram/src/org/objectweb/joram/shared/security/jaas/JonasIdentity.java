@@ -62,10 +62,10 @@ import org.objectweb.jonas.security.auth.JPrincipal;
 import org.objectweb.jonas.security.auth.JSigned;
 import org.objectweb.jonas.security.auth.callback.NoInputCallbackHandler;
 import org.objectweb.joram.shared.security.Identity;
-import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.common.Configuration;
+import fr.dyade.aaa.common.stream.StreamUtil;
 
 /**
  * JAAS identity class used to authenticate through JOnAS.

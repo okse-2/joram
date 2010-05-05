@@ -17,6 +17,7 @@ Export-Package: fr.dyade.aaa.jndi2.msg,
 Bundle-Description: Joram Agent Server
 Bundle-Vendor: Scalagent D.T.
 Import-Package: fr.dyade.aaa.common,
+ fr.dyade.aaa.common.stream,
  java_cup.runtime,
  javax.naming,
  javax.naming.spi,
