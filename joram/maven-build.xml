@@ -31,6 +31,7 @@
   <!-- directory definition -->
   <property name="builder.dir" value="${basedir}/pom" />
   <property name="builder.lib.dir" value="${basedir}/lib" />
+  <property name="releases.dir" value="${basedir}/releases" />
   <property name="output.dir" value="${basedir}/build" />
   <property name="src.dir" value="${basedir}/src" />
   <property name="output.tmp.dir" value="${output.dir}/tmp" />
@@ -131,15 +132,15 @@
       <m2:pom refid="config.pom" />
     </m2:install>
 
-    <m2:install file="${output.dist.dir}/joram_for_jonas_ra.rar">
+    <m2:install file="${releases.dir}/joram-jonasadapter-${joram.version}.rar">
       <m2:pom refid="ra_for_jonas.pom" />
     </m2:install>
 
-    <m2:install file="${output.dist.dir}/joram_ra.rar">
+    <m2:install file="${releases.dir}/joram-${joram.version}-RA.rar">
       <m2:pom refid="ra.pom" />
     </m2:install>
   
-    <m2:install file="${output.dist.dir}/joram_ra_remote.rar">
+    <m2:install file="${releases.dir}/joram-${joram.version}-remoteRA.rar">
       <m2:pom refid="ra_remote.pom" />
     </m2:install>
     
