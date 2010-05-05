@@ -9,6 +9,7 @@ Export-Package: a3.base,
  framework
 Import-Package: com.scalagent.jmx,
  fr.dyade.aaa.common,
+ fr.dyade.aaa.common.net,
  fr.dyade.aaa.util.management,
  org.objectweb.util.monolog,
  org.objectweb.util.monolog.api
