@@ -22,10 +22,12 @@
  */
 package org.objectweb.joram.mom.proxies;
 
+import java.io.Externalizable;
 import java.io.IOException;
+import java.io.ObjectInput;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -219,21 +221,22 @@ public final class UserAgent extends Agent implements BagSerializer, ProxyAgentI
     Integer objKey = new Integer(keyCounter);
     ConnectionContext ctx;
     if (not.getReliable()) {
-      ctx = new ReliableConnectionContext(
-                                          proxyImpl, keyCounter,
-                                          not.getHeartBeat());
+      ctx = new ReliableConnectionContext(proxyImpl, keyCounter, not.getHeartBeat());
       connections.put(objKey, ctx);
     } else {
-      ctx = new StandardConnectionContext(
-                                          proxyImpl, keyCounter);
+      ctx = new StandardConnectionContext(proxyImpl, keyCounter);
       connections.put(objKey, ctx);
     }
 
     if (not.getHeartBeat() > 0) {
-      HeartBeatTask heartBeatTask = new HeartBeatTask(2 * not.getHeartBeat(),
-                                                      objKey);
+      HeartBeatTask heartBeatTask = new HeartBeatTask(2 * not.getHeartBeat(), objKey);
       heartBeatTasks.put(objKey, heartBeatTask);
-      heartBeatTask.start();
+      try {
+        heartBeatTask.start();
+      } catch (IOException exc) {
+        // Cannot schedule task, removes it from the hashtable
+        heartBeatTasks.remove(objKey);
+      }
     }
 
     // Differs the reply because the connection key counter
@@ -429,25 +432,21 @@ public final class UserAgent extends Agent implements BagSerializer, ProxyAgentI
   }
 
   /**
-   * Timer task responsible for closing the connection if 
-   * it has not sent any requests for the duration 'timeout'.
+   * Timer task responsible for closing the connection if it has
+   * not sent any requests for the duration 'timeout'.
    */
-  class HeartBeatTask extends TimerTask implements Serializable {
+  class HeartBeatTask extends TimerTask implements Externalizable {
     /**
-     * 
+     * Maximum time between two requests on the connection (This value is
+     * normally the double of the hear-beat period).
      */
-    private static final long serialVersionUID = 1L;
+    private transient int timeout;
 
-    private int timeout;
+    private transient Integer key;
 
-    private Integer key;
-
-    private long lastRequestDate;
+    private transient long lastRequestDate;
     
-    private boolean schedule = false;
-
     HeartBeatTask(int timeout, Integer key) {
-      schedule = false;
       this.timeout = timeout;
       this.key = key;
     }
@@ -463,32 +462,45 @@ public final class UserAgent extends Agent implements BagSerializer, ProxyAgentI
         MomException exc = new MomException(MomExceptionReply.HBCloseConnection,
                                             "Connection " + getId() + ':' + key + " closed");
         ctx.pushError(exc);
-      } else {
-        if (!schedule)
-          start();
       }
     }
 
-    public void start() {
+    public void start() throws IOException {
+      lastRequestDate = System.currentTimeMillis();
       try {
-        if (!schedule) {
-          AgentServer.getTimer().schedule(this, timeout, timeout);
-          schedule = true;
-        }
+        AgentServer.getTimer().schedule(this, timeout, timeout);
       } catch (Exception exc) {
-        throw new Error(exc.toString());
+        if (logger.isLoggable(BasicLevel.WARN))
+          logger.log(BasicLevel.WARN,
+                     "HeartBeatTask: cannot schedule task " + key, exc);
+        throw new IOException(exc.getMessage());
       }
-    }
-
-    public void reStart() {
-      this.cancel();
-      HeartBeatTask hbt = new HeartBeatTask(timeout, key);
-      heartBeatTasks.put(key, hbt);
-      hbt.start();
     }
     
     public void touch() {
       lastRequestDate = System.currentTimeMillis();
+    }
+
+    // This code below is only needed by HA mechanism, do not use.
+
+    public HeartBeatTask() {}
+
+    /**
+     * @see java.io.Externalizable#readExternal(java.io.ObjectInput)
+     */
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+      timeout = in.readInt();
+      key = new Integer(in.readInt());
+    }
+
+    /**
+     * @see java.io.Externalizable#writeExternal(java.io.ObjectOutput)
+     */
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+      out.writeInt(timeout);
+      out.writeInt(key.intValue());
     }
   }
 
@@ -506,18 +518,15 @@ public final class UserAgent extends Agent implements BagSerializer, ProxyAgentI
     super.setSave();
   }
 
-  public void readBag(ObjectInputStream in) throws IOException,
-  ClassNotFoundException {
+  public void readBag(ObjectInputStream in) throws IOException, ClassNotFoundException {
     connections = (Hashtable) in.readObject();
     heartBeatTasks = (Hashtable) in.readObject();
 
-    if (heartBeatTasks != null) {
-      // Start the tasks
+    if ((heartBeatTasks != null) && (heartBeatTasks.size() > 0)) {
+      // Start all tasks
       Enumeration tasks = heartBeatTasks.elements();
-      while (tasks.hasMoreElements()) {
-        HeartBeatTask task = (HeartBeatTask) tasks.nextElement();
-        task.reStart();
-      }
+      while (tasks.hasMoreElements())
+        ((HeartBeatTask) tasks.nextElement()).start();
     }
 
     proxyImpl.readBag(in);
