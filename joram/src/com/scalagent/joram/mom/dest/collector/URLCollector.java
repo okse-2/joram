@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,8 +33,8 @@ import java.net.URLConnection;
 import org.objectweb.joram.shared.excepts.MessageValueException;
 import org.objectweb.joram.shared.messages.ConversionHelper;
 import org.objectweb.joram.shared.messages.Message;
-import org.objectweb.joram.shared.util.Properties;
 
+import fr.dyade.aaa.common.stream.Properties;
 
 /**
  * 
@@ -64,26 +64,25 @@ public class URLCollector implements Collector, Serializable {
     ByteArrayOutputStream baos = null;
     BufferedOutputStream bos = null;
     try {
-    URL url = new URL(spec);
+      URL url = new URL(spec);
 
-    URLConnection urlc = url.openConnection();
-    InputStream is = urlc.getInputStream();
-    
-    baos = new ByteArrayOutputStream();
-    bos = new BufferedOutputStream(baos);
-    
-    prop.put(FILE, url.getFile());
-    prop.put(PATH, url.getPath());
-    prop.put(HOST, url.getHost());
-    
-    
-    int c = is.read();
-    while (c != -1) {
-      bos.write(c);
-      c = is.read();
-    }
-    bos.flush();
-    return baos.toByteArray();
+      URLConnection urlc = url.openConnection();
+      InputStream is = urlc.getInputStream();
+
+      baos = new ByteArrayOutputStream();
+      bos = new BufferedOutputStream(baos);
+
+      prop.put(FILE, url.getFile());
+      prop.put(PATH, url.getPath());
+      prop.put(HOST, url.getHost());
+
+      int c = is.read();
+      while (c != -1) {
+        bos.write(c);
+        c = is.read();
+      }
+      bos.flush();
+      return baos.toByteArray();
     } finally {
       if (bos != null)
         bos.close();

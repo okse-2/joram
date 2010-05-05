@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -49,8 +49,7 @@ public class CollectorQueueImpl extends QueueImpl implements CollectorDestinatio
   public static Logger logger = Debug.getLogger(CollectorQueueImpl.class.getName());
   
   private Collector collector;
-  private long messageExpiration = 0;
-  private boolean messagePersistent = false;
+  
   private long count = 0;
   
   /** Tells if the messages produced are persistent. */
@@ -168,7 +167,7 @@ public class CollectorQueueImpl extends QueueImpl implements CollectorDestinatio
     collector.setProperties(properties);
   }
 
-  private Properties transform(org.objectweb.joram.shared.util.Properties properties) {
+  private Properties transform(fr.dyade.aaa.common.stream.Properties properties) {
     if (properties == null)
       return null;
     Properties prop = new Properties();
@@ -275,7 +274,7 @@ public class CollectorQueueImpl extends QueueImpl implements CollectorDestinatio
    * 
    * @see com.scalagent.joram.mom.dest.collector.CollectorDestination#sendMessage(int, byte[], java.util.Properties)
    */
-  public void sendMessage(int type, byte[] body, org.objectweb.joram.shared.util.Properties properties) {
+  public void sendMessage(int type, byte[] body, fr.dyade.aaa.common.stream.Properties properties) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "CollectorQueueImpl.sendMessage(" + type + ", " + body + ", " + properties + ')'); 
     
@@ -284,8 +283,8 @@ public class CollectorQueueImpl extends QueueImpl implements CollectorDestinatio
         type, 
         body, 
         properties, 
-        messageExpiration, 
-        messagePersistent,
+        expiration, 
+        isPersistent,
         "collectorQueue_" + count);
     // increment message counter
     count++;

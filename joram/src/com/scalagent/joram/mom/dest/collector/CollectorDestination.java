@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,7 @@
  */
 package com.scalagent.joram.mom.dest.collector;
 
-import org.objectweb.joram.shared.util.Properties;
+import fr.dyade.aaa.common.stream.Properties;
 
 /**
  * 
@@ -30,7 +30,6 @@ import org.objectweb.joram.shared.util.Properties;
 public interface CollectorDestination {
   
   public static final String DEFAULT_COLLECTOR = "com.scalagent.joram.mom.dest.collector.URLCollector";
-  public static final long DEFAULT_PERIODE = 600000L;
   public static final String CLASS_NAME = "collector.className";
   public static final String PERSISTENT_MSG = "persistent";
   public static final String EXPIRATION_MSG = "expiration";
