@@ -27,7 +27,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Vector;
 
-import org.objectweb.joram.shared.stream.StreamUtil;
+import fr.dyade.aaa.common.stream.StreamUtil;
 
 
 /**

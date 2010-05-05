@@ -28,7 +28,7 @@ import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import org.objectweb.joram.shared.stream.StreamUtil;
+import fr.dyade.aaa.common.stream.StreamUtil;
 
 /**
  * A <code>Monitor_GetStatRep</code> instance replies to a get stat,

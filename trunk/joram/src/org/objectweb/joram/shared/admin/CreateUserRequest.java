@@ -28,7 +28,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.objectweb.joram.shared.security.Identity;
-import org.objectweb.joram.shared.stream.StreamUtil;
+
+import fr.dyade.aaa.common.stream.StreamUtil;
 
 /**
  * A <code>CreateUserRequest</code> instance requests the creation of a JMS

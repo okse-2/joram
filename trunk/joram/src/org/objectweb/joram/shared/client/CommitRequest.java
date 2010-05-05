@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import org.objectweb.joram.shared.stream.StreamUtil;
+import fr.dyade.aaa.common.stream.StreamUtil;
 
 public final class CommitRequest extends AbstractJmsRequest {
   /** define serialVersionUID for interoperability */
