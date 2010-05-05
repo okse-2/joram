@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -45,18 +45,18 @@ import fr.dyade.aaa.common.Pool;
 
 /**
  *  The NGTransaction class implements a transactional storage.
- *  For efficiency it uses a file for its transaction journal, the final
- * storage is provided through the Repository interface on filesystem or
- * database.
- *
+ *  For efficiency it uses multiples files for its transaction journal, the final
+ * storage is provided through the Repository interface on filesystem or database.
+ * <p>
+ * Be Careful, the configuration properties don't work for the transaction component: 
+ * these properties are saved in the transaction repository so they can not be used to
+ * configure it.
+ * 
  * @see Transaction
  * @see Repository
  * @see FileRepository
  * @see DBRepository
  * @see MySqlDBRepository
- */
-/**
- *
  */
 public final class NGTransaction extends AbstractTransaction implements NGTransactionMBean {
   // Logging monitor
@@ -65,10 +65,10 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
   /**
    *  Global in memory log initial capacity, by default 4096.
    *  This value can be adjusted for a particular server by setting
-   * <code>NTLogMemoryCapacity</code> specific property.
+   * <code>Transaction.LogMemoryCapacity</code> specific property.
    * <p>
-   *  These property can be fixed either from <code>java</code> launching
-   * command, or in <code>a3servers.xml</code> configuration file.
+   *  This property can be fixed only from <code>java</code> launching
+   * command, or through System.property method.
    */
   static int LogMemoryCapacity = 4096;
 
@@ -91,12 +91,12 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
   }
   
   /**
-   *  Size of disk log in Mb, by default 16Mb.
+   *  Maximum size of disk log in Mb, by default 16Mb.
    *  This value can be adjusted (Mb) for a particular server by setting
-   * <code>NTLogFileSize</code> specific property.
+   * <code>Transaction.MaxLogFileSize</code> specific property.
    * <p>
-   *  These property can be fixed either from <code>java</code> launching
-   * command, or in <code>a3servers.xml</code> configuration file.
+   *  This property can be fixed only from <code>java</code> launching
+   * command, or through System.property method.
    */
   static int MaxLogFileSize = 16 * Mb;
 
@@ -119,13 +119,24 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
   }
 
   /**
-   * Returns the size of disk log in Kb.
+   * Returns the current size of disk log in Kb.
    *
    * @return The size of disk log in Kb.
    */
   public final int getLogFileSize() {
     return (logManager.getLogFileSize() /Kb);
   }
+  
+  /**
+   *  Maximum number of disk log used by the Transaction component, by
+   * default 4.
+   *  This value can be adjusted for a particular server by setting
+   * <code>Transaction.NbLogFile</code> specific property.
+   * <p>
+   *  This property can be fixed only from <code>java</code> launching
+   * command, or through System.property method.
+   */
+  static int nbLogFile = 4;
 
   /**
    * Returns the number of rolled log files.
@@ -133,16 +144,16 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
    * @return The number of rolled log files.
    */
   public final int getNbLogFiles() {
-    return logManager.nbLogFile;
+    return nbLogFile;
   }
 
   /**
    *  Number of pooled operation, by default 1000.
    *  This value can be adjusted for a particular server by setting
-   * <code>NTLogThresholdOperation</code> specific property.
+   * <code>Transaction.LogThresholdOperation</code> specific property.
    * <p>
-   *  These property can be fixed either from <code>java</code> launching
-   * command, or in <code>a3servers.xml</code> configuration file.
+   *  This property can be fixed only from <code>java</code> launching
+   * command, or through System.property method.
    */
   static int LogThresholdOperation = 1000;
 
@@ -203,11 +214,11 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
   /**
    *  The Repository classname implementation.
    *  This value can be set for a particular server by setting the
-   * <code>NTRepositoryImpl</code> specific property. By default its value
+   * <code>Transaction.RepositoryImpl</code> specific property. By default its value
    * is "fr.dyade.aaa.util.FileRepository".
    * <p>
-   *  These property can be fixed either from <code>java</code> launching
-   * command, or in <code>a3servers.xml</code> configuration file.
+   *  This property can be fixed only from <code>java</code> launching
+   * command, or through System.property method.
    */
   String repositoryImpl = "fr.dyade.aaa.util.FileRepository";
 
@@ -282,11 +293,12 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
     if (logmon.isLoggable(BasicLevel.INFO))
       logmon.log(BasicLevel.INFO, "NTransaction, init():");
 
-    LogMemoryCapacity = Configuration.getInteger("NTLogMemoryCapacity", LogMemoryCapacity).intValue();
-    MaxLogFileSize = Configuration.getInteger("NTLogFileSize", MaxLogFileSize / Mb).intValue() * Mb;
+    LogMemoryCapacity = Configuration.getInteger("Transaction.LogMemoryCapacity", LogMemoryCapacity).intValue();
+    MaxLogFileSize = Configuration.getInteger("Transaction.MaxLogFileSize", MaxLogFileSize / Mb).intValue() * Mb;
+    nbLogFile = Configuration.getInteger("Transaction.NbLogFile", nbLogFile).intValue();
 
-    LogThresholdOperation = Configuration.getInteger("NTLogThresholdOperation", LogThresholdOperation).intValue();
-    Operation.pool = new Pool("NGTransaction$Operation", LogThresholdOperation);
+    LogThresholdOperation = Configuration.getInteger("Transaction.LogThresholdOperation", LogThresholdOperation).intValue();
+    Operation.pool = new Pool("Transaction$Operation", LogThresholdOperation);
 
     dir = new File(path);
     if (!dir.exists()) dir.mkdir();
@@ -308,7 +320,7 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
     }
 
     try {
-      repositoryImpl = System.getProperty("NTRepositoryImpl", repositoryImpl);
+      repositoryImpl = Configuration.getProperty("Transaction.RepositoryImpl", repositoryImpl);
       repository = (Repository) Class.forName(repositoryImpl).newInstance();
       repository.init(dir);
     } catch (ClassNotFoundException exc) {
@@ -569,8 +581,6 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
      */
     Hashtable<Object, Operation> log = null;
     
-    int nbLogFile = 4;
-    
     int logidx;
     
     /** log file */
@@ -612,6 +622,12 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
      * Date of last garbage.
      */
     long lastGarbageTime = 0L;
+    
+    /** Coherence lock filename */
+    static private final String LockPathname = "lock";
+    
+    /** Coherence lock file */
+    private File lockFile = null;
 
     private Repository repository = null;
 
@@ -620,20 +636,18 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
     LogManager(File dir, Repository repository) throws IOException {
       super(4 * Kb);
       this.repository = repository;
-
-//      boolean nolock = Boolean.getBoolean("NTNoLockFile");
-//      if (! nolock) {
-//        lockFile = new File(dir, LockPathname);
-//        if (! lockFile.createNewFile()) {
-//          logmon.log(BasicLevel.FATAL,
-//                     "NTransaction.init(): " +
-//                     "Either the server is already running, " + 
-//                     "either you have to remove lock file: " +
-//                     lockFile.getAbsolutePath());
-//          throw new IOException("Transaction already running.");
-//        }
-//        lockFile.deleteOnExit();
-//      }
+      
+      boolean UseLockFile = Configuration.getBoolean("Transaction.UseLockFile");
+      if (UseLockFile) {
+        lockFile = new File(dir, LockPathname);
+        if (! lockFile.createNewFile()) {
+          logmon.log(BasicLevel.FATAL,
+                     "NTransaction.init(): Either the server is already running, " + 
+                     "either you have to remove lock file " + lockFile.getAbsolutePath());
+          throw new IOException("Transaction already running.");
+        }
+        lockFile.deleteOnExit();
+      }
       
       log = new Hashtable(LogMemoryCapacity);
       
@@ -1147,6 +1161,11 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
         exc.printStackTrace();
       }
       
+      if ((lockFile != null) && (! lockFile.delete())) {
+        logmon.log(BasicLevel.FATAL,
+                   "NTransaction.LogFile, can't delete lockfile: " + lockFile.getAbsolutePath());
+      }
+
       if (logmon.isLoggable(BasicLevel.DEBUG)) {
         for (int i=0; i<logFile.length; i++)
           if (logFile[i] != null)
