@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+
+<JoramAdmin>
+  
+  <AdminModule>
+    <connect host="localhost" port="2560" name="root" password="root"/>
+  </AdminModule>
+  
+  <InitialContext>
+    <property name="java.naming.factory.initial" value="fr.dyade.aaa.jndi2.client.NamingContextFactory"/>
+    <property name="java.naming.factory.host" value="localhost"/>
+    <property name="java.naming.factory.port" value="16400"/>
+  </InitialContext>
+  
+  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.TcpConnectionFactory">
+    <tcp host="localhost" port="2560"/>
+    <jndi name="cf"/>
+  </ConnectionFactory>
+ 
+  <User name="dmq" password="dmq" serverId="0"/>
+  
+  <DMQueue name="defaultdmq" serverId="0">
+    <reader user="dmq"/>
+    <writer user="dmq"/>
+    <jndi name="defaultdmq"/>
+  </DMQueue>
+
+  <DMQueue name="dmq" serverId="0">
+    <reader user="dmq"/>
+    <writer user="dmq"/>
+    <jndi name="dmq"/>
+  </DMQueue>
+
+  
+  <DMQueue name="dmq1" serverId="0">
+    <reader user="dmq"/>
+    <writer user="dmq"/>
+    <jndi name="dmq1"/>
+  </DMQueue>
+
+ <Server serverId="0" dmq="defaultdmq" threshold="10"/>
+  
+  <User name="anonymous" password="anonymous" serverId="0" dmq="dmq1" threshold="2"/>
+  
+  <Queue name="queue" dmq="dmq" threshold="2">
+    <freeReader/>
+    <freeWriter/>
+    <jndi name="queue"/>
+  </Queue>
+  
+  <Topic name="topic" dmq="dmq1">
+    <freeReader/>
+    <freeWriter/>
+    <jndi name="topic"/>
+  </Topic>
+  
+</JoramAdmin>
