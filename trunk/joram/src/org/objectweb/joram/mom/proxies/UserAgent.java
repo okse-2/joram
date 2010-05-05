@@ -488,7 +488,6 @@ public final class UserAgent extends Agent implements BagSerializer, ProxyAgentI
     /**
      * @see java.io.Externalizable#readExternal(java.io.ObjectInput)
      */
-    @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
       timeout = in.readInt();
       key = new Integer(in.readInt());
@@ -497,7 +496,6 @@ public final class UserAgent extends Agent implements BagSerializer, ProxyAgentI
     /**
      * @see java.io.Externalizable#writeExternal(java.io.ObjectOutput)
      */
-    @Override
     public void writeExternal(ObjectOutput out) throws IOException {
       out.writeInt(timeout);
       out.writeInt(key.intValue());
