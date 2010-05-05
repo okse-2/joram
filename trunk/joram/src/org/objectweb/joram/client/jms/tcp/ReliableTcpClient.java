@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -41,13 +41,13 @@ import org.objectweb.joram.client.jms.FactoryParameters;
 import org.objectweb.joram.shared.client.AbstractJmsMessage;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.shared.stream.MetaData;
-import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Configuration;
 import fr.dyade.aaa.common.Debug;
-import fr.dyade.aaa.common.SocketFactory;
+import fr.dyade.aaa.common.net.SocketFactory;
+import fr.dyade.aaa.common.stream.StreamUtil;
 
 public class ReliableTcpClient {
   public static Logger logger = Debug.getLogger(ReliableTcpClient.class.getName());

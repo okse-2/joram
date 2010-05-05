@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -34,8 +34,8 @@ import javax.naming.RefAddr;
 import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 
-import fr.dyade.aaa.common.SocketFactory;
-import fr.dyade.aaa.common.SocketFactory13;
+import fr.dyade.aaa.common.net.SocketFactory;
+import fr.dyade.aaa.common.net.SocketFactory13;
 
 /**
  * A <code>FactoryParameters</code> instance holds a

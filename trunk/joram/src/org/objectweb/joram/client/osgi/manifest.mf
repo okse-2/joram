@@ -8,6 +8,8 @@ Bundle-Activator: org.objectweb.joram.client.osgi.Activator
 Import-Package: com.scalagent.jmx,
  fr.dyade.aaa.agent;resolution:=optional,
  fr.dyade.aaa.common,
+ fr.dyade.aaa.common.net,
+ fr.dyade.aaa.common.stream,
  fr.dyade.aaa.jndi2.msg,
  fr.dyade.aaa.jndi2.soap,
  fr.dyade.aaa.util.management,

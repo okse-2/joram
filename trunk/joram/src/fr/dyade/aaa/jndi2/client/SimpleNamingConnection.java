@@ -31,8 +31,8 @@ import javax.naming.NamingException;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
-import fr.dyade.aaa.common.SocketFactory;
-import fr.dyade.aaa.common.SocketFactory13;
+import fr.dyade.aaa.common.net.SocketFactory;
+import fr.dyade.aaa.common.net.SocketFactory13;
 import fr.dyade.aaa.jndi2.msg.IOControl;
 import fr.dyade.aaa.jndi2.msg.JndiReply;
 import fr.dyade.aaa.jndi2.msg.JndiRequest;
