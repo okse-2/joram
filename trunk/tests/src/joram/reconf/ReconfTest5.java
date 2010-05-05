@@ -95,7 +95,7 @@ public class ReconfTest5 extends ReconfTestBase {
       // Stops the server S1 then restart it
       
       AdminModule.stopServer(1);
-      Thread.sleep(1000L);
+      Thread.sleep(2000L);
       startAgentServer((short) 1, new String[] { "-DNTNoLockFile=true",
           "-Dfr.dyade.aaa.agent.A3CONF_FILE=./s1/a3servers.xml" });
 
