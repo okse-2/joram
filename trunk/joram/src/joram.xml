@@ -83,10 +83,6 @@
       <!-- Begin - Needed for OSGI -->
       <include name="fr/dyade/aaa/common/osgi/Activator.java"/>
       <include name="fr/dyade/aaa/agent/osgi/Activator.java"/>
-      <include name="com/scalagent/joram/osgi/server/Activator.java"/>
-      <include name="com/scalagent/joram/osgi/client/Activator.java"/>
-      <!-- include name="com/scalagent/joram/osgi/test/Activator.java"/ -->
-      <!-- include name="com/scalagent/joram/osgi/test2/Activator.java"/ -->
       <!-- End - Needed for task OSGI -->
 
       <include name="fr/dyade/aaa/util/SocketFactory*.java"/>
@@ -156,8 +152,7 @@
         <include name="fr/dyade/aaa/jndi2/soap/SoapObjectItf.class"/>
         <include name="fr/dyade/aaa/util/*.class"/>
         <include name="fr/dyade/aaa/util/management/*.class"/>
-        <include name="fr/dyade/aaa/common/*.class"/>
-        <include name="fr/dyade/aaa/common/osgi/*.class"/>
+        <include name="fr/dyade/aaa/common/**/*.class"/>
         <include name="org/objectweb/joram/shared/**/*.class"/>
         <include name="com/scalagent/jmx/*.class"/>
       </fileset>
@@ -438,8 +433,7 @@
         <include name="NOTICE.TXT"/>
       </metainf>
       <fileset dir="${obj.dir}">
-        <include name="fr/dyade/aaa/common/*.class"/>
-        <include name="fr/dyade/aaa/common/osgi/*.class"/>
+        <include name="fr/dyade/aaa/common/**/*.class"/>
         <include name="fr/dyade/aaa/util/management/*.class"/>
         <include name="com/scalagent/jmx/*.class"/>
       </fileset>
