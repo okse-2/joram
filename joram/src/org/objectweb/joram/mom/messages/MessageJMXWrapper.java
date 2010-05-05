@@ -37,7 +37,7 @@ import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
 
-import org.objectweb.joram.shared.util.Properties;
+import fr.dyade.aaa.common.stream.Properties;
 
 public class MessageJMXWrapper {
   private final static String[] itemNames = { "order", "identifier", "priority", "timestamp", "expiration", "properties" };

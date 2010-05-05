@@ -30,12 +30,12 @@ import java.lang.ref.SoftReference;
 import java.util.Vector;
 
 import org.objectweb.joram.shared.excepts.MessageException;
-import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.stream.StreamUtil;
 import fr.dyade.aaa.util.Transaction;
 
 /** 
