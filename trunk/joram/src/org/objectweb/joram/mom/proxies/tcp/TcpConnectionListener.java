@@ -36,7 +36,6 @@ import org.objectweb.joram.mom.proxies.OpenConnectionNot;
 import org.objectweb.joram.mom.proxies.ReliableConnectionContext;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.shared.stream.MetaData;
-import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -44,6 +43,7 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.common.Configuration;
 import fr.dyade.aaa.common.Daemon;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.stream.StreamUtil;
 
 /**
  * Listens to the TCP connections from the JMS clients.
