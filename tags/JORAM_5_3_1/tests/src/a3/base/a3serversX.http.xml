@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+
+<config>
+  <domain name="D1" network="fr.dyade.aaa.agent.HttpNetwork"/>
+  <property name="D1.ActivationPeriod" value="1000"/>
+  <property name="D1.NbDaemon" value="2"/>
+  <property name="D1.SoTimeout" value="10000"/>
+
+  <server id="0" name="S0" hostname="aroe">
+    <network domain="D1" port="16300"/>
+    <service class="fr.dyade.aaa.agent.AdminProxy" args="8090"/>
+  </server>
+  <server id="1" name="S1" hostname="localhost">
+    <network domain="D1" port="0"/>
+    <service class="fr.dyade.aaa.agent.AdminProxy" args="8091"/>
+  </server>
+  <server id="2" name="S2" hostname="localhost">
+    <network domain="D1" port="0"/>
+    <service class="fr.dyade.aaa.agent.AdminProxy" args="8092"/>
+  </server>
+</config>
