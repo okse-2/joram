@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,7 +34,7 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
-import fr.dyade.aaa.common.SocketFactory;
+import fr.dyade.aaa.common.net.SocketFactory;
 
 /**
  * This class implements a SocketFactory. Sockets created by this factory are
