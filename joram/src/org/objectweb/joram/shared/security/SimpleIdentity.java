@@ -26,8 +26,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.BasicLevel;
+
+import fr.dyade.aaa.common.stream.StreamUtil;
 
 /**
  * Default identity class for authentication through user and password.

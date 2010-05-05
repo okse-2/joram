@@ -36,13 +36,13 @@ import java.util.Vector;
 
 import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.admin.AbstractAdminMessage;
-import org.objectweb.joram.shared.stream.StreamUtil;
-import org.objectweb.joram.shared.stream.Streamable;
-import org.objectweb.joram.shared.util.Properties;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.stream.Properties;
+import fr.dyade.aaa.common.stream.StreamUtil;
+import fr.dyade.aaa.common.stream.Streamable;
 
 /**
  * Implements the <code>Message</code> data structure.
