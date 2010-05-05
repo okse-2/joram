@@ -620,6 +620,7 @@
 
   <target name="ship.osgi" depends="build.osgi"
   	description="--> Creates a Joram OSGi shipment.">
+  	<delete dir="${ship.dir}" quiet="true"/>
     <mkdir dir="${ship.dir}"/>
     <mkdir dir="${ship.dir}/lib"/>
   	<mkdir dir="${ship.dir}/bundle"/>
