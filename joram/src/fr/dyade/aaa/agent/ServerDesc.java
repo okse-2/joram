@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
@@ -29,8 +29,8 @@ import java.net.InetAddress;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import fr.dyade.aaa.common.SocketAddress;
 import fr.dyade.aaa.common.Strings;
+import fr.dyade.aaa.common.net.SocketAddress;
 
 /**
  * Description of an agent server. It is used by <code>Channel</code> and
@@ -49,7 +49,7 @@ public final class ServerDesc implements Serializable {
   String name;
   /**
    * The IP address of the server.
-   * It contains hostname and port ({@link fr.dyade.aaa.common.SocketAddress
+   * It contains hostname and port ({@link fr.dyade.aaa.common.net.SocketAddress
    * <code>SocketAddress</code>}) of remote server. The communication port
    * is set only if the server is directly accessible from this node; in
    * this case it corresponds to the communication port of the server in the

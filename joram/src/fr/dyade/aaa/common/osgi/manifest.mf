@@ -4,6 +4,9 @@ Bundle-Name: JORAM :: Util
 Bundle-SymbolicName: fr.dyade.aaa.common
 Export-Package: com.scalagent.jmx,
  fr.dyade.aaa.common,
+ fr.dyade.aaa.common.monitoring,
+ fr.dyade.aaa.common.net,
+ fr.dyade.aaa.common.stream,
  fr.dyade.aaa.util.management
 Import-Package: javax.management;resolution:=optional,
  org.objectweb.util.monolog,
