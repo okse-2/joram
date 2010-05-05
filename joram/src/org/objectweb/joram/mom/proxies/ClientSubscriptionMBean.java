@@ -22,8 +22,6 @@
  */
 package org.objectweb.joram.mom.proxies;
 
-import java.util.Vector;
-
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
 
