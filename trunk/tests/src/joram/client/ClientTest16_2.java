@@ -22,7 +22,6 @@
  */
 package joram.client;
 
-
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
@@ -35,6 +34,9 @@ import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 import framework.TestCase;
 
+/**
+ * See ClientTest16.
+ */
 public class ClientTest16_2 extends TestCase {
 
   public static void main(String[] args) {
