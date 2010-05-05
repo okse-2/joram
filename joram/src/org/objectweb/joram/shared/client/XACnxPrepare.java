@@ -28,7 +28,7 @@ import java.io.OutputStream;
 import java.io.IOException;
 import java.util.Vector;
 
-import org.objectweb.joram.shared.stream.StreamUtil;
+import fr.dyade.aaa.common.stream.StreamUtil;
 
 /**
  * An <code>XACnxPrepare</code> instance is used by an

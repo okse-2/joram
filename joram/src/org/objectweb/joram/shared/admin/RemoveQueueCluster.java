@@ -28,7 +28,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.objectweb.joram.shared.admin.SpecialAdmin;
-import org.objectweb.joram.shared.stream.StreamUtil;
+
+import fr.dyade.aaa.common.stream.StreamUtil;
 
 public class RemoveQueueCluster extends SpecialAdmin {
   private static final long serialVersionUID = 1L;

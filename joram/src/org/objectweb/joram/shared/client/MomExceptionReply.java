@@ -26,8 +26,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 
-import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.joram.shared.excepts.MomException;
+
+import fr.dyade.aaa.common.stream.StreamUtil;
 
 /**
  * A <code>MomExceptionReply</code> instance is used by a JMS client proxy
