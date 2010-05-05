@@ -19,7 +19,7 @@
   <target name="tests.all"
            description=" --> launch all joram tests">
      <ant dir="." antfile="build.xml" target="tests.noperf.all"/>
-     <ant dir="." antfile="build.xml" target="tests.ha"/>
+     <!-- ant dir="." antfile="build.xml" target="tests.ha"/-->
      <ant dir="." antfile="build.xml" target="tests.perf"/>
    </target>
   
@@ -223,8 +223,9 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="dursub.test2"/>
     <antcall target="dursub.test3"/>
     <antcall target="dursub.test4"/>
-    <antcall target="dursub.test4.osgi"/>
-    <antcall target="dursub.unsub"/>
+    <antcall target="dursub.test5"/>
+    <antcall target="dursub.test6"/>
+    <antcall target="dursub.test6.osgi"/>
   </target>
 
   <target name="tests.tcp"
@@ -451,7 +452,6 @@ description=" --> launch all exceptionlistener tests">
              token="@multiCnxSync@" value="${multiCnx}"/>
 
     <copy file="a3debug.cfg" tofile="${test.dir}/a3debug.cfg"/>
-    <copy file="monitoring.props" tofile="${test.dir}/monitoring.props"/>
 
     <available file="${joramAdmin}" type="file" 
                property="joramAdmin.available"/>
@@ -460,6 +460,10 @@ description=" --> launch all exceptionlistener tests">
     <available file="${jndiconf}" type="file"
                property="jndi.available"/>
     <antcall target="cpJndi" inheritAll="true"/>
+
+    <available file="${monitoring.props}" type="file"
+               property="monitoring.available"/>
+    <antcall target="cpMonitoring" inheritAll="true"/>
     
     <jar jarfile="${obj.dir}/test-util-bundle.jar" manifest="${src.dir}/utils/osgi/manifest.mf">
       <fileset dir="${obj.dir}">
@@ -477,13 +481,17 @@ description=" --> launch all exceptionlistener tests">
     <copy file="${jndiconf}" tofile="${test.dir}/jndi.properties"/>
   </target>
 
+  <target name="cpMonitoring" if="monitoring.available">
+    <copy file="${monitoring.props}" tofile="${test.dir}/monitoring.props"/>
+  </target>
+
   <target name="init.a3props">
     <!-- Theses default properties can be overidden by param defines
       -  in specific target.
      -->
     <property name="engine" value="fr.dyade.aaa.agent.Engine"/>
     <property name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
-    <property name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+    <property name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
   </target>
 
   <target name="test.start">
@@ -1970,12 +1978,13 @@ description=" --> launch all exceptionlistener tests">
 
   <!-- end local test -->
 
-  <!-- durablesubsciber test -->
+  <!-- durable subsciber test -->
 
   <target name="dursub.test1" depends="init.a3props,compile"
           description=" --> test about creation of durable subscriber">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.dursub.Test1"/>
+      <param name="testid" value="dursub.test1"/>
       <param name="jndiconf" value="dursub/jndi.properties"/>
       <param name="a3conf" value="dursub/a3servers1.xml"/>
       <param name="jvmargs" value=""/>
@@ -1984,20 +1993,21 @@ description=" --> launch all exceptionlistener tests">
   </target>
 
   <target name="dursub.test2" depends="init.a3props,compile"
-          description=" --> test receive message, after kill and restart durablesubscriber">
+          description=" --> test unsubscribe.">
     <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.dursub.Dursub_1"/>
+      <param name="className" value="joram.dursub.Test2"/>
+      <param name="testid" value="dursub.test2"/>
       <param name="jndiconf" value="dursub/jndi.properties"/>
       <param name="a3conf" value="dursub/a3servers1.xml"/>
       <param name="jvmargs" value=""/>
-      <param name="args" value=""/>
     </antcall>
   </target>
 
   <target name="dursub.test3" depends="init.a3props,compile"
-          description=" --> Check that two durable subscriptions do not interfere when consuming their messages">
+          description=" --> Check basic behavior of durable subscription">
     <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.dursub.Dursub_2"/>
+      <param name="className" value="joram.dursub.Test3"/>
+      <param name="testid" value="dursub.test3"/>
       <param name="jndiconf" value="dursub/jndi.properties"/>
       <param name="a3conf" value="dursub/a3servers1.xml"/>
       <param name="jvmargs" value=""/>
@@ -2006,6 +2016,30 @@ description=" --> launch all exceptionlistener tests">
   </target>
 
   <target name="dursub.test4" depends="init.a3props,compile" unless="isOSGi"
+          description=" --> Check that two durable subscriptions do not interfere when consuming their messages">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.dursub.Test4"/>
+      <param name="testid" value="dursub.test4"/>
+      <param name="jndiconf" value="dursub/jndi.properties"/>
+      <param name="a3conf" value="dursub/a3servers1.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="dursub.test5" depends="init.a3props,compile"
+          description=" --> Check that two durable subscriptions do not interfere when consuming their messages">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.dursub.Test5"/>
+      <param name="testid" value="dursub.test5"/>
+      <param name="jndiconf" value="dursub/jndi.properties"/>
+      <param name="a3conf" value="dursub/a3servers1.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="dursub.test6" depends="init.a3props,compile"
           description=" --> test dursub when kill and restart a client">
     <antcall target="init.test" inheritAll="true">
         <param name="a3conf" value="dursub/a3servers1.xml"/>
@@ -2022,13 +2056,14 @@ description=" --> launch all exceptionlistener tests">
       <sequential>
         <sleep seconds="1"/>
         <antcall target="test.start" inheritAll="true">
-          <param name="className" value="joram.dursub.DurTest2"/>
+          <param name="className" value="joram.dursub.Test6"/>
+          <param name="testid" value="dursub.test6"/>
           <param name="jvmargs" value=""/>
           <param name="args" value=""/>
         </antcall>
-        <sleep seconds="5"/>
         <antcall target="test.start" inheritAll="true">
-          <param name="className" value="joram.dursub.DurTest2_2"/>
+          <param name="className" value="joram.dursub.Test6b"/>
+          <param name="testid" value="dursub.test6"/>
           <param name="jvmargs" value="-Dosgi.shell.telnet.port=7890"/>
           <param name="args" value=""/>
         </antcall>
@@ -2036,7 +2071,7 @@ description=" --> launch all exceptionlistener tests">
     </parallel>
   </target>
 
-  <target name="dursub.test4.osgi" depends="init.a3props,compile" if="isOSGi"
+  <target name="dursub.test6.osgi" depends="init.a3props,compile" if="isOSGi"
           description=" --> test dursub when kill and restart a client">
     <antcall target="init.test" inheritAll="true">
         <param name="a3conf" value="dursub/a3servers1.xml"/>
@@ -2052,28 +2087,19 @@ description=" --> launch all exceptionlistener tests">
       <sequential>
         <sleep seconds="1"/>
         <antcall target="test.start" inheritAll="true">
-          <param name="className" value="joram.dursub.DurTest2"/>
+          <param name="className" value="joram.dursub.Test6"/>
+          <param name="testid" value="dursub.test6"/>
           <param name="jvmargs" value=""/>
           <param name="args" value=""/>
         </antcall>
-        <sleep seconds="5"/>
         <antcall target="test.start" inheritAll="true">
-          <param name="className" value="joram.dursub.DurTest2_2"/>
-          <param name="jvmargs" value="-Dosgi.shell.telnet.port=16010"/>
+          <param name="className" value="joram.dursub.Test6b"/>
+          <param name="testid" value="dursub.test6"/>
+          <param name="jvmargs" value="-Dosgi.shell.telnet.port=7890"/>
           <param name="args" value=""/>
         </antcall>
       </sequential>
     </parallel>
-  </target>
-
-  <target name="dursub.unsub" depends="init.a3props,compile"
-          description=" --> test unsubscribe with a null subscription name">
-    <antcall target="test.run" inheritAll="true">
-      <param name="className" value="joram.dursub.Test2"/>
-      <param name="jndiconf" value="dursub/jndi.properties"/>
-      <param name="a3conf" value="dursub/a3servers1.xml"/>
-      <param name="jvmargs" value=""/>
-    </antcall>
   </target>
 
   <!-- end durablesubsciber test -->
@@ -2693,7 +2719,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="init.test6props">
     <property name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
     <property name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
-    <property name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+    <property name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
     <property name="engine" value="fr.dyade.aaa.agent.Engine"/>
     <property name="dupsOk" value="true"/>
     <property name="queueMessageReadMax" value="100"/>
@@ -2992,7 +3018,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test34"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
       <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DNbMsg=1000"/>
@@ -3000,7 +3026,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test34"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
       <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DNbMsg=10000"/>
@@ -3008,7 +3034,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test34"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
       <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef -DNbMsg=1000"/>
@@ -3016,7 +3042,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test34"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
       <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DNbMsg=1000"/>
@@ -3024,7 +3050,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test34"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
       <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DNbMsg=1000"/>
@@ -3032,7 +3058,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test34"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
       <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef -DNbMsg=1000"/>
@@ -3040,7 +3066,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test34"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
       <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef -DNbMsg=500"/>
@@ -3048,7 +3074,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test34"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
       <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=32 -DNTLogMemorySize=16384 -DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef -DNbMsg=800"/>
