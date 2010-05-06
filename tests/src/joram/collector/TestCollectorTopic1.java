@@ -75,7 +75,7 @@ public class TestCollectorTopic1 extends TestCase implements MessageListener {
       
       Thread.sleep(12000);
 
-      assertTrue(nbReceived > 2);
+      assertTrue(nbReceived >= 2);
       
       cnx.close();
     } catch (Throwable exc) {
