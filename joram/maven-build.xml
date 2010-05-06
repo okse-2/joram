@@ -252,13 +252,13 @@
                     file="${output.dist.dir}/joram-raconfig.jar" />
 
       <maven-deploy pomRefId="ra_for_jonas.pom"
-                    file="${output.dist.dir}/joram_for_jonas_ra.rar" />
+                    file="${releases.dir}/joram-jonasadapter-${joram.version}.rar" />
       
       <maven-deploy pomRefId="ra.pom"
-                          file="${output.dist.dir}/joram_ra.rar" />
+                          file="${releases.dir}/joram-${joram.version}-RA.rar" />
       
       <maven-deploy pomRefId="ra_remote.pom"
-                          file="${output.dist.dir}/joram_ra_remote.rar" />
+                          file="${releases.dir}/joram-${joram.version}-remoteRA.rar" />
       
       <!-- ******************* OSGi ********************** -->
       <maven-deploy pomRefId="client-bundle.pom"
