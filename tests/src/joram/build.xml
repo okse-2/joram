@@ -58,6 +58,8 @@
   
   <target name="custom.tests.bamboo"
           description=" --> custom selection of tests to run on bamboo">
+    <property name="SCAdminClass" value="framework.SCAdminOSGi"/>
+    <property name="isOSGi" value="true"/>
     <antcall target="tests.base"/>
     <antcall target="tests.recovery"/>
     <antcall target="tests.admin"/>
