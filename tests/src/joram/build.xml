@@ -55,6 +55,31 @@
     <antcall target="tests.monitoring"/>
     <antcall target="tests.collector"/>
   </target>
+  
+  <target name="custom.tests.bamboo"
+          description=" --> custom selection of tests to run on bamboo">
+    <antcall target="tests.base"/>
+    <antcall target="tests.recovery"/>
+    <antcall target="tests.admin"/>
+    <antcall target="tests.client"/>
+    <antcall target="tests.local"/>
+    <antcall target="tests.dursub"/>
+    <antcall target="tests.tcp"/>
+    <antcall target="tests.noreg"/>
+    <antcall target="tests.xa"/>
+    <antcall target="tests.bridge"/>
+    <antcall target="tests.schedqueue"/>
+    <antcall target="tests.clusterTopic"/>
+    <antcall target="tests.clusterQueue"/>
+    <antcall target="tests.hierarchical"/>
+    <antcall target="tests.ssl"/>
+    <antcall target="tests.jca"/>
+    <antcall target="tests.dmq"/>
+    <antcall target="tests.ttl"/>
+    <antcall target="tests.sub"/>
+    <antcall target="tests.monitoring"/>
+    <antcall target="tests.collector"/>
+  </target>
 
 	<target name="tests.base"
   				description=" --> launch all base tests">
@@ -1780,7 +1805,7 @@ description=" --> launch all exceptionlistener tests">
           <param name="jvmargs" value=""/>
           <param name="args" value=""/>
         </antcall>
-        <sleep seconds="10"/>
+        <sleep seconds="12"/>
         <antcall target="test.start" inheritAll="true">
           <param name="className" value="joram.client.ClientTest16_2"/>
           <param name="jvmargs" value="-Dosgi.shell.telnet.port=7890"/>
