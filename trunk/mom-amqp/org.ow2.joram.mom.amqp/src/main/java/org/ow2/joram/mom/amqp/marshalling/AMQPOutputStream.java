@@ -34,10 +34,10 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.stream.StreamUtil;
 
 public class AMQPOutputStream {
 

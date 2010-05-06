@@ -33,7 +33,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 import org.ow2.joram.mom.amqp.exceptions.AMQPException;
@@ -54,6 +53,7 @@ import org.ow2.joram.mom.amqp.structures.Returned;
 import fr.dyade.aaa.common.Daemon;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.Queue;
+import fr.dyade.aaa.common.stream.StreamUtil;
 
 /**
  * Listens to the TCP connections.
