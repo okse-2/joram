@@ -27,13 +27,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 import org.ow2.joram.mom.amqp.exceptions.ConnectionException;
 import org.ow2.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.stream.StreamUtil;
 
 public class MarshallingHeader {
   

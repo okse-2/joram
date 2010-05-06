@@ -31,11 +31,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.Logger;
 import org.ow2.joram.mom.amqp.exceptions.SyntaxErrorException;
 
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.stream.StreamUtil;
 
 public class AMQPInputStream {
 

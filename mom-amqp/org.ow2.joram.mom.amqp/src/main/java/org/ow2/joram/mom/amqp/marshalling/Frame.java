@@ -27,12 +27,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.objectweb.joram.shared.stream.StreamUtil;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 import org.ow2.joram.mom.amqp.exceptions.FrameErrorException;
 
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.common.stream.StreamUtil;
 
 /**
  * Represents an AMQP wire-protocol frame: 
