@@ -43,6 +43,14 @@
       the <strong>LGPL</strong> license since May 2000.<br></br>
       It provides a production ready distributed MOM already used within many critical operational applications.</p>
 
+      <p>Joram is now designed with an OSGi<sup>TM</sup> based services architecture to provide a dynamically adaptable
+      messaging server:</p>
+      <ul>
+        <li>The Joram server can be launched as a set of OSGi bundles (it is always possible to launch the server as
+        a classic Java program).</li>
+        <li>Additional services can be started, stopped, reconfigured: Command line interface, Web console, etc.</li>
+      </ul>
+
       <p>Stable versions of JORAM are JMS 1.1 certified. Moreover JORAM is used by JOnAS to undergo the J2EE 1.4 certification,
       and has passed all tests concerning JMS 1.1 certification in this J2EE TCK.<br></br>
       Professional Support is available from <a href="http://www.scalagent.com/pages/en/products/joram-support.htm">Scalagent D.T.</a>.</p>
@@ -50,6 +58,30 @@
     </s1>
    
     <s1 name="Latest News">
+      <s2 name="May 07, 2010: JORAM 5.3.1 maintenance release is available">
+      <p>This release introduces some improvements and bug fixes, essentially:</p>
+      <ul>
+        <li>A reworked PoolNetwork component with one Sender by NetSession. This optimizes
+        performances and fixes various synchronization issues. Furthermore, SoftReferences
+        are now used in the PoolNetwork to avoid memory errors when messages accumulate in
+        the network.</li>
+        <li>Interceptors can now be configured for managed connection factories.</li>
+        <li>Bug fixes in JMS bridge allowing anew the use of persistent server (a configuration
+        parameter is now required to enable XAConnection).</li>
+			  <li>Bug fix about destination using Timer. These destinations are now locked in memory
+        and the Timer tasks are handled depending of the agent life-cycle.</li>
+        <li>Potential bug fix in heart-beat handling. Previously an exception in HeartBeatTask.start
+        method caused an Engine stop.</li>
+        <li>Potential bug fix avoiding deadlock in AdminModule.stopServer of local server.</li>
+        <li>Changes configuration properties naming for NGTransaction.</li>
+      </ul>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven
+      repository.</p>
+      <p>It is tagged in SVN (JORAM_5_3_1), the complete list of changes can be viewed either in
+      <a href="dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
+      </s2>
+    
       <s2 name="March 09, 2010: Joram successfully passes performance and scalability tests for SM&amp;C.">
       <p>The CNES implementation of a new generation of Spacecraft Monitoring and Control system (CCSDS SM&amp;C stantard)
       foresee to use Joram as underlying communication middleware. Performance and scalability tests have been conducted
