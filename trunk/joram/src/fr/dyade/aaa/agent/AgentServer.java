@@ -49,6 +49,8 @@ import fr.dyade.aaa.agent.conf.A3CMLServer;
 import fr.dyade.aaa.agent.conf.A3CMLService;
 import fr.dyade.aaa.agent.osgi.Activator;
 import fr.dyade.aaa.common.Configuration;
+import fr.dyade.aaa.common.monitoring.FileMonitoringTimerTask;
+import fr.dyade.aaa.common.monitoring.LogMonitoringTimerTask;
 import fr.dyade.aaa.common.monitoring.MonitoringTimerTask;
 import fr.dyade.aaa.util.Transaction;
 import fr.dyade.aaa.util.management.MXWrapper;
@@ -217,62 +219,11 @@ public final class AgentServer {
    * value implies the use of the default SaxWrapper.
    */
   public final static String DEFAULT_A3CMLWRP = "fr.dyade.aaa.agent.conf.A3CMLSaxWrapper";
-  
-  /**
-   *  Name of property allowing to fix the pathname of a configuration file for a
-   * monitoring task in the server.
-   * <p>
-   *  This property can be fixed either from <code>java</code> launching command,
-   * or in <code>a3servers.xml</code> configuration file.
-   * 
-   * @see fr.dyade.aaa.common.monitoring.MonitoringTimerTask
-   */
-  public final static String MONITORING_CONFIG_PATH_PROPERTY = "fr.dyade.aaa.agent.MONITORING_CONFIG_PATH";
-  /**
-   *  Default value for the pathname of a configuration file for a monitoring
-   * task in the server, value is <code>monitoring.props</code>.
-   * <p>
-   *  If the file does not exist the timer task is not launched.
-   * 
-   * @see fr.dyade.aaa.common.monitoring.MonitoringTimerTask
-   */
-  public final static String DEFAULT_MONITORING_CONFIG_PATH = "monitoring.props";
-  
-  /**
-   *  Name of property allowing to fix the pathname of the results file for the
-   * monitoring task in the server.
-   * <p>
-   *  This property can be fixed either from <code>java</code> launching command,
-   * or in <code>a3servers.xml</code> configuration file.
-   * 
-   * @see fr.dyade.aaa.common.monitoring.MonitoringTimerTask
-   */
-  public final static String MONITORING_RESULT_PATH_PROPERTY = "fr.dyade.aaa.agent.MONITORING_RESULT_PATH";
-  /**
-   *  Default value for the pathname of the pathname of the results file for the
-   * monitoring task in the server, value is <code>monitoringStats.csv</code>.
-   * 
-   * @see fr.dyade.aaa.common.monitoring.MonitoringTimerTask
-   */
-  public final static String DEFAULT_MONITORING_RESULT_PATH = "monitoringStats.csv";
-  
-  /**
-   *  Name of property allowing to fix the scanning period for the monitoring
-   * task in the server.
-   * <p>
-   *  This property can be fixed either from <code>java</code> launching command,
-   * or in <code>a3servers.xml</code> configuration file.
-   * 
-   * @see fr.dyade.aaa.common.monitoring.MonitoringTimerTask
-   */
-  public final static String MONITORING_CONFIG_PERIOD_PROPERTY = "fr.dyade.aaa.agent.MONITORING_CONFIG_PERIOD";
-  /**
-   *  Default value for the pathname of the scanning period for the  monitoring
-   * task in the server, value is <code>5000L</code> (5 seconds).
-   * 
-   * @see fr.dyade.aaa.common.monitoring.MonitoringTimerTask
-   */
-  public final static long DEFAULT_MONITORING_CONFIG_PERIOD = 5000L;
+
+  /** Task for file monitoring if configured. */
+  private static MonitoringTimerTask fileMonitoringTimerTask = null;
+  /** Task for log monitoring if configured. */
+  private static MonitoringTimerTask logMonitoringTimerTask = null;
 
   public static boolean isOSGi = false;
 
@@ -389,8 +340,6 @@ public final class AgentServer {
     }
     return timer;
   }
-  
-  private static MonitoringTimerTask monitoringTimerTask = null;
   
   /** Static reference to the configuration. */
   private static A3CMLConfig a3config = null;
@@ -1476,31 +1425,75 @@ public final class AgentServer {
       status.value = Status.STARTED;
     }
     
-    String config = getProperty(MONITORING_CONFIG_PATH_PROPERTY, DEFAULT_MONITORING_CONFIG_PATH);
+    // TODO AF: This code should be removed, this work should be done through a
+    // service or a separate bundle.
+    String config = getProperty(FileMonitoringTimerTask.MONITORING_CONFIG_PATH_PROPERTY,
+                                FileMonitoringTimerTask.DEFAULT_MONITORING_CONFIG_PATH);
     try {
       // if "monitoring.props" file exists configure a MonitoringTimerTask.
       File file = new File(config);
       if (file.exists()) {
-        long period = getLong(MONITORING_CONFIG_PERIOD_PROPERTY, DEFAULT_MONITORING_CONFIG_PERIOD).longValue();
-        String results = getProperty(MONITORING_RESULT_PATH_PROPERTY, DEFAULT_MONITORING_RESULT_PATH);
+        long period = getLong(FileMonitoringTimerTask.MONITORING_CONFIG_PERIOD_PROPERTY,
+                              FileMonitoringTimerTask.DEFAULT_MONITORING_CONFIG_PERIOD).longValue();
+        String results = getProperty(FileMonitoringTimerTask.MONITORING_RESULT_PATH_PROPERTY,
+                                     FileMonitoringTimerTask.DEFAULT_MONITORING_RESULT_PATH);
         
         Properties monitoringProps = new Properties();
         monitoringProps.load(new FileInputStream(file));
-        monitoringTimerTask = new MonitoringTimerTask(new java.util.Timer(true), period, results, monitoringProps);
-
-        try {
-          MXWrapper.registerMBean(monitoringTimerTask,
-                                  "AgentServer", "server=" + getName() + ",cons=Monitoring");
-        } catch (Exception exc) {
-          if (logmon == null)
-            logmon = Debug.getLogger(AgentServer.class.getName());
-          logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
+        
+        fileMonitoringTimerTask = new FileMonitoringTimerTask(new java.util.Timer(true), period, monitoringProps, results);
+        if (fileMonitoringTimerTask != null) {
+          try {
+            MXWrapper.registerMBean(fileMonitoringTimerTask,
+                                    "AgentServer", "server=" + getName() + ",cons=FileMonitoring");
+          } catch (Exception exc) {
+            if (logmon == null)
+              logmon = Debug.getLogger(AgentServer.class.getName());
+            logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
+          }
         }
       }
     } catch (Exception exc) {
       logmon.log(BasicLevel.WARN, getName() + "Cannot read monitoring configuration file: " + config, exc);
     }
     
+    config = getProperty(LogMonitoringTimerTask.MONITORING_CONFIG_PATH_PROPERTY,
+                         LogMonitoringTimerTask.DEFAULT_MONITORING_CONFIG_PATH);
+    try {
+      // if "monitoring.props" file exists configure a MonitoringTimerTask.
+      File file = new File(config);
+      if (file.exists()) {
+        long period = getLong(LogMonitoringTimerTask.MONITORING_CONFIG_PERIOD_PROPERTY,
+                              LogMonitoringTimerTask.DEFAULT_MONITORING_CONFIG_PERIOD).longValue();        
+        String logname = getProperty(LogMonitoringTimerTask.MONITORING_RESULT_LOGGER_PROPERTY,
+                                     LogMonitoringTimerTask.DEFAULT_MONITORING_RESULT_LOGGER);
+        Logger logger = Debug.getLogger(logname);
+        int loglevel = getInteger(LogMonitoringTimerTask.MONITORING_RESULT_LEVEL_PROPERTY,
+                                  LogMonitoringTimerTask.DEFAULT_MONITORING_RESULT_LEVEL);
+        String logmsg = getProperty(LogMonitoringTimerTask.MONITORING_RESULT_MESSAGE_PROPERTY,
+                                    LogMonitoringTimerTask.DEFAULT_MONITORING_RESULT_MESSAGE);
+        
+        Properties monitoringProps = new Properties();
+        monitoringProps.load(new FileInputStream(file));
+        
+        logMonitoringTimerTask = new LogMonitoringTimerTask(new java.util.Timer(true), period, monitoringProps,
+                                                            logger, logmsg, loglevel);
+
+        if (logMonitoringTimerTask != null) {
+          try {
+            MXWrapper.registerMBean(logMonitoringTimerTask,
+                                    "AgentServer", "server=" + getName() + ",cons=LogMonitoring");
+          } catch (Exception exc) {
+            if (logmon == null)
+              logmon = Debug.getLogger(AgentServer.class.getName());
+            logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
+          }
+        }
+      }
+    } catch (Exception exc) {
+      logmon.log(BasicLevel.WARN, getName() + "Cannot read monitoring configuration file: " + config, exc);
+    }
+
     if (errBuf == null) return null;
     return errBuf.toString();
   }
@@ -1594,9 +1587,13 @@ public final class AgentServer {
     }
 
     try {
-      if (monitoringTimerTask != null)
-        monitoringTimerTask.cancel();
-      monitoringTimerTask = null;
+      if (fileMonitoringTimerTask != null)
+        fileMonitoringTimerTask.cancel();
+      fileMonitoringTimerTask = null;
+      
+      if (logMonitoringTimerTask != null)
+        logMonitoringTimerTask.cancel();
+      logMonitoringTimerTask = null;
       
       if (timer != null)
         timer.cancel();
