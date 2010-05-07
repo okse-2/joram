@@ -22,13 +22,12 @@
  */
 package fr.dyade.aaa.common.monitoring;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.Timer;
 
 import javax.management.MBeanAttributeInfo;
 import javax.management.MalformedObjectNameException;
@@ -42,52 +41,74 @@ import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  * The <code>MonitoringTimerTask</code> class allows to periodically watch JMX attributes
- * and store the corresponding values to a file in CSV format.
+ * and store the corresponding values to various support.
  */
-public class MonitoringTimerTask extends java.util.TimerTask implements MonitoringTimerTaskMBean {
+public abstract class MonitoringTimerTask extends java.util.TimerTask implements MonitoringTimerTaskMBean {
   /** Time between two monitoring events */
   protected long period;
   
   /**
-   * Returns the period value of this queue, -1 if not set.
+   * Returns the period value of this task, -1 if not set.
    * 
-   * @return the period value of this queue; -1 if not set.
+   * @return the period value of this task; -1 if not set.
    */
   public long getPeriod() {
     return period;
   }
 
   Properties attlist = null;
-
-  FileWriter writer;
   
   public static Logger logger = Debug.getLogger(MonitoringTimerTask.class.getName());
   
-  public MonitoringTimerTask(java.util.Timer timer, long period, String path, Properties attlist) {
+  /**
+   * Initializes the <code>eMonitoringTimerTask</code> component.
+   * 
+   * @param period  Period value of the resulting task
+   * @param attlist List of JMX attributes to periodically watch.
+   */
+  public MonitoringTimerTask(long period, Properties attlist) {
     this.period = period;
     this.attlist = attlist;
-    
-    try {
-      writer = new FileWriter(path, true);
-    } catch (IOException exc) {
-      logger.log(BasicLevel.ERROR,
-                 "MonitoringTimerTask.<init>, cannot open file \"" + path + "\"", exc);
-    }
-    
+  }
+  
+  /**
+   * Starts the resulting task.
+   * 
+   * @param timer Timer to use to schedule the resulting task.
+   */
+  protected final void start(Timer timer) {
     timer.scheduleAtFixedRate(this, period, period);
   }
+  
+  /**
+   * Initialize the record for the current collect time.
+   */
+  protected abstract void initializeRecords();
+  
+  /**
+   * Records information about the specified attribute.
+   * 
+   * @param mbean The name of the related mbean.
+   * @param att   The name of the related attribute.
+   * @param value The value of the related attribute.
+   */
+  protected abstract void addRecord(ObjectName mbean, String att, Object value);
+  
+  /**
+   * Finalize the record for the current time.
+   */
+  protected abstract void finalizeRecords();
   
 // Joram#0:type=User,*=NbMsgsDeliveredSinceCreation,NbMsgsSentToDMQSinceCreation,PendingMessageCount
 // Joram#0:type=Destination,*=NbMsgsDeliverSinceCreation,NbMsgsReceiveSinceCreation,NbMsgsSentToDMQSinceCreation
 
   /**
-   * When the task is waken up, collect the monitoring information required and
-   * saves it.
+   * When the task is waken up, collect the monitoring information required and saves it.
+   *
    * @see fr.dyade.aaa.common.TimerTask#run()
    */
   public void run() {
-    StringBuffer strbuf = new StringBuffer();
-    strbuf.append(System.currentTimeMillis()).append(';');
+    initializeRecords();
     
     Enumeration mbeans = attlist.keys();
     while (mbeans.hasMoreElements()) {
@@ -113,14 +134,12 @@ public class MonitoringTimerTask extends java.util.TimerTask implements Monitori
                 if (attributes != null) {
                   for (int i = 0; i < attributes.length; i++) {
                     String attname = attributes[i].getName();
-                    strbuf.append(mBean).append(':').append(attname).append(';');
                     try {
-                      strbuf.append(MXWrapper.getAttribute(mBean, attname));
+                      addRecord(mBean, attname, MXWrapper.getAttribute(mBean, attname));
                     } catch (Exception exc) {
                       logger.log(BasicLevel.ERROR,
                                  "MonitoringTimerTask.run, bad attribute : " + mBean + ":" + attname, exc);
                     }
-                    strbuf.append(';');
                   }
                 }
               } catch (Exception exc) {
@@ -129,26 +148,19 @@ public class MonitoringTimerTask extends java.util.TimerTask implements Monitori
             } else {
               // Get the specific attribute
               String attname = token.trim();
-              strbuf.append(mBean).append(':').append(attname).append(';');
               try {
-                strbuf.append(MXWrapper.getAttribute(mBean, attname));
+                addRecord(mBean, attname, MXWrapper.getAttribute(mBean, attname));
               } catch (Exception exc) {
                 logger.log(BasicLevel.ERROR,
                            "MonitoringTimerTask.run, bad attribute : " + mBean + ":" + attname, exc);
               }
-              strbuf.append(';');
             }
           }
         }
       }
     }
-    strbuf.append('\n');
     
-    try {
-      writer.write(strbuf.toString());
-      writer.flush();
-    } catch (IOException exc) {
-    }
+    finalizeRecords();
   }
 
   /**
