@@ -29,7 +29,6 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.TopicSubscriber;
 
-
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
@@ -50,6 +49,8 @@ public class Test5 extends TestCase {
   public void run() {
     try {
       startAgentServer((short)0);
+
+      Thread.sleep(2000L);
 
       ConnectionFactory cf = TcpConnectionFactory.create("localhost",2560 );
       
