@@ -11,6 +11,32 @@
   </properties>
 
   <body>
+    <s1 name="May 05, 2010: JORAM 5.3.1 maintenance release is available">
+      <p>Joram 5.3.1 is available in the SVN repository with tag JORAM_5_3_1.</p>
+      <s2 name="New features and improvements">
+      <ul>
+        <li>A reworked PoolNetwork component with one Sender by NetSession. This optimizes
+        performances and fixes various synchronization issues. Furthermore, SoftReferences
+        are now used in the PoolNetwork to avoid memory errors when messages accumulate in
+        the network.</li>
+        <li>Interceptors can now be configured for managed connection factories.</li>
+      </ul>
+      </s2>
+
+      <s2 name="Bug fixes">
+      <ul>
+        <li>Bug fixes in JMS bridge allowing anew the use of persistent server (a configuration
+        parameter is now required to enable XAConnection).</li>
+			  <li>Bug fix about destination using Timer. These destinations are now locked in memory
+        and the Timer tasks are handled depending of the agent life-cycle.</li>
+        <li>Potential bug fix in heart-beat handling. Previously an exception in HeartBeatTask.start
+        method caused an Engine stop.</li>
+        <li>Potential bug fix avoiding deadlock in AdminModule.stopServer of local server.</li>
+      </ul>
+      </s2>
+    </s1>
+  
+  
     <s1 name="JORAM release 5.3.0 (February 22, 2010)">
       <p>Joram is now designed with an OSGi<sup>TM</sup> based services architecture to provide a dynamically adaptable
       messaging server:</p>
