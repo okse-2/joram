@@ -58,7 +58,18 @@
     </s1>
    
     <s1 name="Latest News">
-      <s2 name="May 07, 2010: JORAM 5.3.1 maintenance release is available">
+      <s2 name="May 10, 2010: JORAM in OW2 Open Source Cloudware Initiative.">
+      <p>Last week, OW2 Consortium members Bull, Orange and INRIA had announced the OW2 Open Source Cloudware Initiative
+      at the Solutions Datacenter Management and Cloud Computing trade show in Paris. The bedrock of the OSC Initiative
+      includes the following open source OW2 projects: CLIF, Entropy, JASMINe, JOnAS, and <strong>JORAM</strong> to provide
+      the capability for on-demand JavaEE autonomic server provisioning according to demand fluctuations and ProActive for
+      complementary heterogeneous capacity management.</p>
+      <p>See the Cloudware Initiative Press Release in
+      <a href="http://www.ow2.org/xwiki/bin/download/Cloud/WebHome/OW2CloudInitiative%2DPR%2Dlong%2DenV3.6.pdf">English</a> and in
+      <a href="http://www.ow2.org/xwiki/bin/download/Cloud/WebHome/OW2CloudInitiative%2DPR%2Dlong%2Dfrv3.6.pdf">French</a></p>
+      </s2>
+
+      <s2 name="May 07, 2010: JORAM 5.3.1 maintenance release is available.">
       <p>This release introduces some improvements and bug fixes, essentially:</p>
       <ul>
         <li>A reworked PoolNetwork component with one Sender by NetSession. This optimizes

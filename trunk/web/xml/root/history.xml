@@ -12,6 +12,14 @@
 
   <body>
     <s1 name="JORAM History">
+      <s2 name="May 10, 2010: JORAM in OW2 Open Source Cloudware Initiative.">
+      <p>Last week, OW2 Consortium members Bull, Orange and INRIA had announced the OW2 Open Source Cloudware Initiative
+      at the Solutions Datacenter Management and Cloud Computing trade show in Paris. The bedrock of the OSC Initiative
+      includes the following open source OW2 projects: CLIF, Entropy, JASMINe, JOnAS, and <strong>JORAM</strong> to provide
+      the capability for on-demand JavaEE autonomic server provisioning according to demand fluctuations and ProActive for
+      complementary heterogeneous capacity management.</p>
+      </s2>
+    
       <s2 name="May 07, 2010: JORAM 5.3.1 maintenance release is available">
       <p>This release introduces some improvements and bug fixes, essentially:</p>
       <ul>
