@@ -43,6 +43,15 @@
     <antcall target="check.reports" />
   </target>
   
+  <target name="custom.tests.bamboo" description=" --> Custom set of tests for bamboo.">
+    <ant dir="a3" antfile="build.xml" target="clean" />
+    <ant dir="a3" antfile="build.xml" target="tests.base.osgi" />
+    <antcall target="tests.jndi.all" />
+    <antcall target="tests.jms.all" />
+    <ant dir="joram" antfile="build.xml" target="clean" />
+    <ant dir="joram" antfile="build.xml" target="custom.tests.bamboo" />
+  </target>
+  
   <target name="check.reports" description=" --> check reports (for bamboo)">
     <parallel>
       <ant dir="jndi2" antfile="build.xml" target="check.report.file" />
