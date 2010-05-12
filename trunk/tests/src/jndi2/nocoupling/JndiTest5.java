@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,23 +20,20 @@
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): Badolle Fabien (ScalAgent D.T.)
  */
- 
 package jndi2.nocoupling;
-
 
 import java.util.Hashtable;
 
 import javax.naming.InitialContext;
-import javax.naming.NameNotFoundException;
 
 import framework.TestCase;
 
-
 /**
  * Tests: Simple test with 2 servers
- *    - bind and createsubcontext
- *    - rebind, unbind, destroysubcontext
- *
+ * <ul>
+ * <li>bind and createsubcontext</li>
+ * <li>rebind, unbind, destroysubcontext</li>
+ *</ul>
  */
 public class JndiTest5 extends TestCase {
   public static String NAMING_FACTORY_PROP = "java.naming.factory.initial";
@@ -52,25 +49,25 @@ public class JndiTest5 extends TestCase {
   public void run() {
     try {
       System.out.println("Start s0");
-      startAgentServer(
-        (short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
-      
+      startAgentServer((short) 0, new String[] { "-DTransaction=fr.dyade.aaa.util.NullTransaction" });
+
       System.out.println("Start s1");
-      startAgentServer(
-        (short)1, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
-	
+      startAgentServer((short) 1, new String[] { "-DTransaction=fr.dyade.aaa.util.NullTransaction" });
+
+      Thread.sleep(2000);
+
       Hashtable env0 = new Hashtable();
       env0.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
       env0.put(NAMING_HOST_PROP, LOCALHOST);
       env0.put(NAMING_PORT_PROP, "16400");
       InitialContext ctx0 = new InitialContext(env0);
-	
+
       Hashtable env1 = new Hashtable();
       env1.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
       env1.put(NAMING_HOST_PROP, LOCALHOST);
       env1.put(NAMING_PORT_PROP, "16401");
       InitialContext ctx1 = new InitialContext(env1);
-      
+
       Hashtable env2 = new Hashtable();
       env2.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
       env2.put(NAMING_HOST_PROP, LOCALHOST);
@@ -88,19 +85,19 @@ public class JndiTest5 extends TestCase {
       ctx0.bind("/A", "A");
       ctx0.bind("/B", "B");
 
-      Thread.sleep(5000);      
+      Thread.sleep(5000);
 
       // Verify data on S1
       System.out.println("Verify on S1");
       assertEquals("A", ctx1.lookup("/A"));
       assertEquals("B", ctx1.lookup("/B"));
-	
+
       // Binds on S1
       System.out.println("Bind on S1");
       ctx1.bind("/C", "C");
       ctx1.bind("/D", "D");
 
-      Thread.sleep(5000);      
+      Thread.sleep(5000);
 
       // Verify data on S0
       System.out.println("Verify on S0");
@@ -108,8 +105,7 @@ public class JndiTest5 extends TestCase {
       assertEquals("D", ctx0.lookup("/D"));
 
       System.out.println("Start s2");
-      startAgentServer(
-          (short)2, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
+      startAgentServer((short) 2, new String[] { "-DTransaction=fr.dyade.aaa.util.NullTransaction" });
 
       Thread.sleep(5000);
 
@@ -119,14 +115,13 @@ public class JndiTest5 extends TestCase {
       assertEquals("B", ctx2.lookup("/B"));
       assertEquals("C", ctx2.lookup("/C"));
       assertEquals("D", ctx2.lookup("/D"));
-      
+
       // Stop server S1 then restart it (all datas are lost).
       System.out.println("Stop S1");
-      stopAgentServer((short)1);
-      Thread.sleep(1000);      
+      stopAgentServer((short) 1);
+      Thread.sleep(1000);
       System.out.println("Start S1");
-      startAgentServer(
-          (short)1, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
+      startAgentServer((short) 1, new String[] { "-DTransaction=fr.dyade.aaa.util.NullTransaction" });
       Thread.sleep(5000);
 
       // Binds on S1
@@ -147,14 +142,13 @@ public class JndiTest5 extends TestCase {
       System.out.println("Verify on S0");
       assertEquals("C1", ctx0.lookup("/C"));
       assertEquals("D1", ctx0.lookup("/D"));
-      
+
       // Start S3.
       System.out.println("Start S3");
-      startAgentServer(
-          (short)3, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
+      startAgentServer((short) 3, new String[] { "-DTransaction=fr.dyade.aaa.util.NullTransaction" });
       Thread.sleep(5000);
 
-       // Binds on S0 and S1
+      // Binds on S0 and S1
       System.out.println("Bind on S0 and S1");
       ctx0.bind("/E", "E");
       ctx1.bind("/F", "F");
@@ -169,19 +163,21 @@ public class JndiTest5 extends TestCase {
       assertEquals("D1", ctx3.lookup("/D"));
       assertEquals("E", ctx3.lookup("/E"));
       assertEquals("F", ctx3.lookup("/F"));
-    } catch (Exception exc) {   
-	exc.printStackTrace();
-	error(exc);      
+
+    } catch (Exception exc) {
+      exc.printStackTrace();
+      error(exc);
+
     } finally {
-	stopAgentServer((short)0);
-	stopAgentServer((short)1);
-	stopAgentServer((short)2);
-	stopAgentServer((short)3);
-	endTest();
+      stopAgentServer((short) 0);
+      stopAgentServer((short) 1);
+      stopAgentServer((short) 2);
+      stopAgentServer((short) 3);
+      endTest();
     }
   }
-    
-    public static void main(String args[]) {
-	new JndiTest5().run();
-    }
+
+  public static void main(String args[]) {
+    new JndiTest5().run();
+  }
 }
