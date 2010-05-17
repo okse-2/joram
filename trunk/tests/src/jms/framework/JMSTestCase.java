@@ -68,8 +68,10 @@ public abstract class JMSTestCase extends TestCase {
 
   public static void run(JMSTestCase testObj) {
     try {
-      //System.out.println("server start");
       startAgentServer((short) 0);
+
+      Thread.sleep(1000);
+
       testObj.clear();
       
       if (testObj != null) {
