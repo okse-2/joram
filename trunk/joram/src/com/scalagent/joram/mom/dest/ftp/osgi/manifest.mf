@@ -11,7 +11,6 @@ Import-Package: fr.dyade.aaa.agent,
  org.objectweb.joram.mom.util,
  org.objectweb.joram.shared,
  org.objectweb.joram.shared.messages,
- org.objectweb.joram.shared.util,
  org.objectweb.util.monolog,
  org.objectweb.util.monolog.api
 Bundle-Description: Joram Agent Server
