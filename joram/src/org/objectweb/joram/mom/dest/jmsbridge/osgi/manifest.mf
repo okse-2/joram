@@ -15,7 +15,6 @@ Import-Package: fr.dyade.aaa.agent,
  org.objectweb.joram.shared.excepts,
  org.objectweb.joram.shared.messages,
  org.objectweb.joram.shared.selectors,
- org.objectweb.joram.shared.util,
  org.objectweb.util.monolog,
  org.objectweb.util.monolog.api
 Export-Package: org.objectweb.joram.mom.dest.jmsbridge
