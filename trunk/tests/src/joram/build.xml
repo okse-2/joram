@@ -2041,7 +2041,7 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 
-  <target name="dursub.test4" depends="init.a3props,compile" unless="isOSGi"
+  <target name="dursub.test4" depends="init.a3props,compile"
           description=" --> Check that two durable subscriptions do not interfere when consuming their messages">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.dursub.Test4"/>
@@ -2065,7 +2065,7 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 
-  <target name="dursub.test6" depends="init.a3props,compile"
+  <target name="dursub.test6" depends="init.a3props,compile" unless="isOSGi"
           description=" --> test dursub when kill and restart a client">
     <antcall target="init.test" inheritAll="true">
         <param name="a3conf" value="dursub/a3servers1.xml"/>
@@ -2080,7 +2080,7 @@ description=" --> launch all exceptionlistener tests">
       </java>
 
       <sequential>
-        <sleep seconds="1"/>
+        <sleep seconds="2"/>
         <antcall target="test.start" inheritAll="true">
           <param name="className" value="joram.dursub.Test6"/>
           <param name="testid" value="dursub.test6"/>
@@ -2090,7 +2090,6 @@ description=" --> launch all exceptionlistener tests">
         <antcall target="test.start" inheritAll="true">
           <param name="className" value="joram.dursub.Test6b"/>
           <param name="testid" value="dursub.test6"/>
-          <param name="jvmargs" value="-Dosgi.shell.telnet.port=7890"/>
           <param name="args" value=""/>
         </antcall>
       </sequential>
@@ -2111,7 +2110,7 @@ description=" --> launch all exceptionlistener tests">
       </java>
 
       <sequential>
-        <sleep seconds="1"/>
+        <sleep seconds="2"/>
         <antcall target="test.start" inheritAll="true">
           <param name="className" value="joram.dursub.Test6"/>
           <param name="testid" value="dursub.test6"/>
