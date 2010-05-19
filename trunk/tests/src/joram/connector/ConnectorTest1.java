@@ -184,7 +184,7 @@ public class ConnectorTest1 extends TestCase {
         }
       }.start();
 
-      Thread.sleep(10000); // wait onMessage
+      Thread.sleep(20000); // wait onMessage
       assertTrue("counter1=" + counter1 + " should be 101", counter1 == 101);
       assertTrue("counter2=" + counter2 + " should be 101", counter2 == 101);
       assertTrue("counter3=" + counter3 + " should be 101", counter3 == 101 );
