@@ -58,6 +58,17 @@
     </s1>
    
     <s1 name="Latest News">
+      <s2 name="May 18, 2010: JORAM Architecture Designer plugin 1.0.0 is available">
+      <p>The first official release of Joram Architecture Designer plugin for Eclipse is available
+      for <a href="http://joram.ow2.org/download/index.html">download</a> (package JORAM_DESIGNER at
+      the end of the page). A brief PDF installation guide is available for download.</p>
+      <p>As described in the <a href="http://joram.ow2.org/doc/tutorials.html">tutorial</a> the designer
+      allows to graphically build a Joram distributed architecture. It produces <code>a3servers.xml</code>
+      and <code>joramAdmin.xml</code> configuration files. Now, it allows to automatically deploy the
+      designed configuration using <a href="http://fdf.gforge.inria.fr/">DeployWare</a>.</p>
+      <p>This release is tagged in SVN (JORAM_DESIGNER_1_0_0).</p>
+      </s2>
+
       <s2 name="May 10, 2010: JORAM in OW2 Open Source Cloudware Initiative.">
       <p>Last week, OW2 Consortium members Bull, Orange and INRIA had announced the OW2 Open Source Cloudware Initiative
       at the Solutions Datacenter Management and Cloud Computing trade show in Paris. The bedrock of the OSC Initiative
