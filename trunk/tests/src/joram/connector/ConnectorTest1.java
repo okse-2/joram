@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -184,7 +184,7 @@ public class ConnectorTest1 extends TestCase {
         }
       }.start();
 
-      Thread.sleep(20000); // wait onMessage
+      Thread.sleep(10000); // wait onMessage
       assertTrue("counter1=" + counter1 + " should be 101", counter1 == 101);
       assertTrue("counter2=" + counter2 + " should be 101", counter2 == 101);
       assertTrue("counter3=" + counter3 + " should be 101", counter3 == 101 );
@@ -204,7 +204,7 @@ public class ConnectorTest1 extends TestCase {
   private static int counter2 = 0;
   private static int counter3 = 0;
   
-  public static void countMessages(String text) {
+  public static synchronized void countMessages(String text) {
     if (text == null) return;
     
     if (text.startsWith("with queue")) {
