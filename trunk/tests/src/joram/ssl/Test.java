@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2007 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -36,9 +36,7 @@ import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory;
 
 import framework.TestCase;
 
@@ -56,6 +54,8 @@ public class Test extends TestCase {
       System.out.println("server start");
       startAgentServer((short) 0);
 
+      Thread.sleep(1000);
+
       admin();
       System.out.println("admin config ok");
 
@@ -72,7 +72,7 @@ public class Test extends TestCase {
       // create a producer and a consumer
       MessageProducer producer = sessionp.createProducer(queue);
       MessageConsumer consumer = sessionc.createConsumer(queue);
-      // create a text message send to the queue by the pruducer 
+      // create a text message send to the queue by the producer 
       TextMessage msg = sessionp.createTextMessage();
       msg.setText("message_type_text");
       producer.send(msg);
