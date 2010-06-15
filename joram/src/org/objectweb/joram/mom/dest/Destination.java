@@ -39,6 +39,7 @@ import org.objectweb.joram.mom.notifications.SetRightRequest;
 import org.objectweb.joram.mom.notifications.SpecialAdminRequest;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.shared.excepts.MomException;
+import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -94,7 +95,7 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
    * @param adminId  Identifier of the destination administrator.
    * @param props    The initial set of properties.
    */
-  public final void init(AgentId adminId, Properties props) {
+  public final void init(AgentId adminId, Properties props) throws RequestException {
     destImpl = createsImpl(adminId, props);
     destImpl.setAgent(this);
   }
@@ -104,8 +105,9 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
    *
    * @param adminId  Identifier of the topic administrator.
    * @param prop     The initial set of properties.
+   * @throws RequestException 
    */
-  public abstract DestinationImpl createsImpl(AgentId adminId, Properties prop);
+  public abstract DestinationImpl createsImpl(AgentId adminId, Properties prop) throws RequestException;
 
   /**
    * Returns the type of this destination: Queue or Topic.
@@ -212,10 +214,12 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
         }
       } else if (not instanceof WakeUpNot) {
         setNoSave();
-        if (task == null || ((WakeUpNot) not).update)
+        if (task == null || ((WakeUpNot) not).update) {
           setPeriod(destImpl.getPeriod());
-        if (destImpl.getPeriod() > 0)
+        }
+        if (destImpl.getPeriod() > 0) {
           destImpl.wakeUpNot((WakeUpNot) not);
+        }
       } else if (not instanceof DestinationAdminRequestNot)
         destImpl.destinationAdminRequestNot(from, (DestinationAdminRequestNot) not);
       else
@@ -232,7 +236,9 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
     }
   }
   
-  public void setPeriod(long period) {
+  private void setPeriod(long period) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ": setPeriod(" + period + ")." + " -> task " + task);
     if (task == null) {
       task = new WakeUpTask(getId(), WakeUpNot.class, period);
     } else {
