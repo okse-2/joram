@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,26 +22,29 @@
  */
 package org.objectweb.joram.mom.dest;
 
-import fr.dyade.aaa.agent.AgentId;
-
 import java.util.Properties;
 
+import org.objectweb.joram.shared.excepts.RequestException;
+
+import fr.dyade.aaa.agent.AgentId;
+
 /**
- * The <code>AdminDestinationItf</code> interface defines the method needed
- * by the administration topic for creating and initializing a destination
- * agent.
+ * The <code>AdminDestinationItf</code> interface defines the method needed by
+ * the administration topic to create and initialize a destination agent.
  * <p>
- * For being administerable by the administration topic a destination agent
- * must implement this interface.
- *
+ * To be administered by the administration topic, a destination agent must
+ * implement this interface.
+ * 
  * @see AdminTopicImpl
  */
 public interface AdminDestinationItf {
+
   /** 
    * Initializes the destination and sets the destination properties.
    *
    * @param adminId  	Identifier of the destination administrator.
    * @param prop  	the initial set of properties.
+   * @throws RequestException 
    */
-  public void init(AgentId adminId, Properties prop);
+  public void init(AgentId adminId, Properties prop) throws RequestException;
 }

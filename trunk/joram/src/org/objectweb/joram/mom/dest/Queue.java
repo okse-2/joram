@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -42,6 +42,7 @@ import org.objectweb.joram.mom.notifications.SetNbMaxMsgRequest;
 import org.objectweb.joram.mom.notifications.SetThreshRequest;
 import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.excepts.MomException;
+import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.AgentId;
@@ -74,22 +75,10 @@ public class Queue extends Destination implements BagSerializer {
    *
    * @param adminId  Identifier of the queue administrator.
    * @param prop     The initial set of properties.
+   * @throws RequestException 
    */
-  public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
+  public DestinationImpl createsImpl(AgentId adminId, Properties prop) throws RequestException {
     return new QueueImpl(adminId, prop);
-  }
-
-  /**
-   * Gives this agent an opportunity to initialize after having been deployed,
-   * and each time it is loaded into memory.
-   *
-   * @param firstTime		true when first called by the factory
-   *
-   * @exception Exception
-   *	unspecialized exception
-   */
-  protected void agentInitialize(boolean firstTime) throws Exception {
-    super.agentInitialize(firstTime);
   }
   
   /**

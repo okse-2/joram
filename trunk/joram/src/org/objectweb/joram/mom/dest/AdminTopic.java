@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -33,6 +33,7 @@ import org.objectweb.joram.mom.notifications.RegisterDestNot;
 import org.objectweb.joram.mom.notifications.RegisterTmpDestNot;
 import org.objectweb.joram.mom.notifications.RegisteredDestNot;
 import org.objectweb.joram.mom.proxies.AdminNotification;
+import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.AgentId;
@@ -52,7 +53,7 @@ public class AdminTopic extends Topic {
   /**
    * Constructs an <code>AdminTopic</code> agent. 
    */ 
-  public AdminTopic() {
+  public AdminTopic() throws RequestException {
     super("JoramAdminTopic", true, AgentId.JoramAdminStamp);
     init(null, null);
   }

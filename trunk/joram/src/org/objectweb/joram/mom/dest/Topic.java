@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -38,6 +38,7 @@ import org.objectweb.joram.mom.notifications.UnsetFatherRequest;
 import org.objectweb.joram.mom.notifications.UnsubscribeRequest;
 import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.excepts.MomException;
+import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.AgentId;
@@ -78,7 +79,7 @@ public class Topic extends Destination {
    * @param adminId  Identifier of the topic administrator.
    * @param prop     The initial set of properties.
    */
-  public DestinationImpl createsImpl(AgentId adminId, Properties prop) {
+  public DestinationImpl createsImpl(AgentId adminId, Properties prop) throws RequestException {
     return new TopicImpl(adminId, prop);
   }
   
