@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -24,7 +24,7 @@
 package org.objectweb.joram.mom.notifications;
 
 import java.util.Iterator;
-import java.util.Vector;
+import java.util.List;
 
 import org.objectweb.joram.shared.messages.Message;
 
@@ -39,15 +39,16 @@ public class TopicMsgsReply extends AbstractReply {
    * 
    */
   private static final long serialVersionUID = 1L;
+
   /** Vector of messages. */
-  private Vector messages;
+  private List messages;
 
   /**
    * Constructs a <code>TopicMsgsReply</code>.
    *
-   * @param messages  Vector of delivered messages.
+   * @param messages  List of delivered messages.
    */
-  public TopicMsgsReply(Vector messages) {
+  public TopicMsgsReply(List messages) {
     long newExpiration = -1L;
     int newPriority = 0;
     for (Iterator iterator = messages.iterator(); iterator.hasNext();) {
@@ -66,7 +67,7 @@ public class TopicMsgsReply extends AbstractReply {
 
 
   /** Returns the messages. */
-  public Vector getMessages() {
+  public List getMessages() {
     return messages;
   }
 

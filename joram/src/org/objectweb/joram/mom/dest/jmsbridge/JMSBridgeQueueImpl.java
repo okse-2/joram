@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -25,6 +25,7 @@ package org.objectweb.joram.mom.dest.jmsbridge;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -241,9 +242,8 @@ public class JMSBridgeQueueImpl extends QueueImpl {
 
     // Sending each message:
     Message message;
-    for (Enumeration msgs = not.getMessages().elements();
-    msgs.hasMoreElements();) {
-      message = new Message((org.objectweb.joram.shared.messages.Message) msgs.nextElement());
+    for (Iterator msgs = not.getMessages().iterator(); msgs.hasNext();) {
+      message = new Message((org.objectweb.joram.shared.messages.Message) msgs.next());
       message.order = arrivalsCounter++;
 
       outTable.put(message.getIdentifier(), message);

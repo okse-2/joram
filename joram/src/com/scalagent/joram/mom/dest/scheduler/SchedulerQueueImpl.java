@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,7 @@
 package com.scalagent.joram.mom.dest.scheduler;
 
 import java.util.Date;
-import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.Properties;
 
 import org.objectweb.joram.mom.dest.QueueImpl;
@@ -96,8 +96,8 @@ public class SchedulerQueueImpl extends QueueImpl {
 
     org.objectweb.joram.shared.messages.Message msg;
     long currentTimeMillis = System.currentTimeMillis();
-    for (Enumeration msgs = not.getMessages().elements(); msgs.hasMoreElements();) {
-      msg = (org.objectweb.joram.shared.messages.Message) msgs.nextElement();
+    for (Iterator msgs = not.getMessages().iterator(); msgs.hasNext();) {
+      msg = (org.objectweb.joram.shared.messages.Message) msgs.next();
       long scheduleDate = getScheduleDate(msg);
       // If there is no schedule date or if it is outdated  do nothing.
       if (scheduleDate < currentTimeMillis) return;

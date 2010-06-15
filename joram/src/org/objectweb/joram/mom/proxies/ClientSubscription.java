@@ -26,8 +26,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 import javax.management.openmbean.CompositeData;
@@ -476,15 +479,15 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    */
   // AF: TODO we should parse each message for each subscription
   // see ProxyImpl.doFwd
-  void browseNewMessages(Vector newMessages) {
+  void browseNewMessages(List newMessages) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, this + ".browseNewMessages(" + newMessages + ')');
     // Browsing the messages one by one.
     Message message;
     String msgId;
     DMQManager dmqManager = null;
-    for (Enumeration e = newMessages.elements(); e.hasMoreElements();) {
-      message = (Message) e.nextElement();
+    for (Iterator e = newMessages.iterator(); e.hasNext();) {
+      message = (Message) e.next();
       msgId = message.getIdentifier();
 
       // test nbMaxMsg
