@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -293,9 +293,8 @@ public class ClusterQueueImpl extends QueueImpl {
     
     Message msg;
     // Storing each received message:
-    for (Enumeration msgs = not.getMessages().elements();
-         msgs.hasMoreElements();) {
-      msg = new Message((org.objectweb.joram.shared.messages.Message) msgs.nextElement());
+    for (Iterator msgs = not.getMessages().iterator(); msgs.hasNext();) {
+      msg = new Message((org.objectweb.joram.shared.messages.Message) msgs.next());
       msg.order = arrivalsCounter++;
       storeMsgIdInTimeTable(msg.getIdentifier(),
                             new Long(date));
@@ -604,10 +603,9 @@ public class ClusterQueueImpl extends QueueImpl {
     ClientMessages cm = super.getClientMessages(nb, selector, remove);
     if (cm != null) {
       // set information in cluster
-      for (Enumeration e = cm.getMessages().elements();
-           e.hasMoreElements(); ) {
+      for (Iterator e = cm.getMessages().iterator(); e.hasNext();) {
         org.objectweb.joram.shared.messages.Message message = 
-          (org.objectweb.joram.shared.messages.Message) e.nextElement();
+          (org.objectweb.joram.shared.messages.Message) e.next();
         monitoringMsgSendToCluster(message.id);
       }
     }
