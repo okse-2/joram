@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,8 +23,6 @@ package org.objectweb.joram.mom.osgi;
 
 import java.util.Properties;
 
-import org.objectweb.joram.mom.dest.MonitoringQueue;
-import org.objectweb.joram.mom.dest.MonitoringTopic;
 import org.objectweb.joram.mom.proxies.ConnectionManager;
 import org.objectweb.joram.mom.proxies.tcp.SSLTcpProxyService;
 import org.objectweb.joram.mom.proxies.tcp.TcpProxyService;
@@ -42,10 +40,6 @@ public class Activator implements BundleActivator {
 
   private ServiceRegistration sslTcpProxyServiceRegistration;
 
-  private ServiceRegistration monitoringTopicRegistration;
-
-  private ServiceRegistration monitoringQueueRegistration;
-
   public void start(BundleContext context) throws Exception {
     Properties props = new Properties();
     props.put(Service.SERVICE_NAME_PROP, ConnectionManager.class.getName());
@@ -57,19 +51,12 @@ public class Activator implements BundleActivator {
     props.put(Service.SERVICE_NAME_PROP, SSLTcpProxyService.class.getName());
     sslTcpProxyServiceRegistration = context.registerService(Service.class.getName(), new Service(), props);
 
-    props.put(Service.SERVICE_NAME_PROP, MonitoringTopic.class.getName());
-    monitoringTopicRegistration = context.registerService(Service.class.getName(), new Service(), props);
-
-    props.put(Service.SERVICE_NAME_PROP, MonitoringQueue.class.getName());
-    monitoringQueueRegistration = context.registerService(Service.class.getName(), new Service(), props);
   }
 
   public void stop(BundleContext context) throws Exception {
     connectionManagerRegistration.unregister();
     tcpProxyServiceRegistration.unregister();
     sslTcpProxyServiceRegistration.unregister();
-    monitoringTopicRegistration.unregister();
-    monitoringQueueRegistration.unregister();
   }
 
 }
