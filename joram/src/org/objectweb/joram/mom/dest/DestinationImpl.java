@@ -107,6 +107,10 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
   	return (agent == null)?AgentId.nullId:agent.getId();
   }
 
+  public final String getName() {
+    return (agent == null)?null:agent.getName();
+  }
+  
   /** <code>true</code> if the READ access is granted to everybody. */
   protected boolean freeReading = false;
   /** <code>true</code> if the WRITE access is granted to everybody. */
