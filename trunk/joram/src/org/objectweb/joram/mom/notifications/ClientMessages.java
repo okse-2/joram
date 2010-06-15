@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,8 +23,9 @@
  */
 package org.objectweb.joram.mom.notifications;
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Vector;
+import java.util.List;
 
 import org.objectweb.joram.shared.messages.Message;
 
@@ -41,7 +42,7 @@ public class ClientMessages extends AbstractRequest {
   /** Message sent by the client. */
   private Message message = null;
   /** Messages sent by the client. */
-  private Vector messages = null;
+  private List messages = null;
   
   private boolean asyncSend;
 
@@ -76,7 +77,7 @@ public class ClientMessages extends AbstractRequest {
    * @param requestId  Request identifier.
    * @param messages  Vector of messages.
    */
-  public ClientMessages(int clientContext, int requestId, Vector messages) {
+  public ClientMessages(int clientContext, int requestId, List messages) {
     super(clientContext, requestId);
     if (messages.size() == 1) {
       this.message = (Message) messages.get(0);
@@ -114,7 +115,7 @@ public class ClientMessages extends AbstractRequest {
       this.setPriority(message.priority);
     } else {
       if (messages == null) {
-        messages = new Vector();
+        messages = new ArrayList();
         messages.add(this.message);
         message = null;
       }
@@ -138,9 +139,9 @@ public class ClientMessages extends AbstractRequest {
 
   
   /** Returns the messages. */
-  public Vector getMessages() {
+  public List getMessages() {
     if (messages == null) {
-      messages = new Vector();
+      messages = new ArrayList();
       if (message != null)
         messages.add(message);
     }
@@ -153,6 +154,18 @@ public class ClientMessages extends AbstractRequest {
   
   public final boolean getAsyncSend() {
     return asyncSend;
+  }
+
+  public int getMessageCount() {
+    if (messages == null) {
+      if (message == null) {
+        return 0;
+      } else {
+        return 1;
+      }
+    } else {
+      return messages.size();
+    }
   }
 
   /**

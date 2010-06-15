@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,6 +24,7 @@ package com.scalagent.joram.mom.dest.ftp;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Properties;
 
 import org.objectweb.joram.mom.dest.QueueImpl;
@@ -158,9 +159,8 @@ public class FtpQueueImpl extends QueueImpl {
   }
 
   public ClientMessages preProcess(AgentId from, ClientMessages not) {
-    for (Enumeration msgs = not.getMessages().elements();
-         msgs.hasMoreElements();) {
-      Message msg = (Message) msgs.nextElement();
+    for (Iterator msgs = not.getMessages().iterator(); msgs.hasNext();) {
+      Message msg = (Message) msgs.next();
       if (isFtpMsg(msg)) {
         doProcessFtp(not,msg);
         not.getMessages().remove(msg);

@@ -28,8 +28,11 @@ package org.objectweb.joram.mom.proxies;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 import org.objectweb.joram.mom.dest.AdminTopic;
@@ -122,9 +125,7 @@ import org.objectweb.joram.shared.excepts.StateException;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.agent.Agent;
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
@@ -1955,10 +1956,9 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
     // AF: TODO we should parse each message for each subscription
     // see ClientSubscription.browseNewMessages
-    Vector messages = new Vector();
-    for (Enumeration msgs = rep.getMessages().elements();
-         msgs.hasMoreElements();) {
-      Message message = new Message((org.objectweb.joram.shared.messages.Message) msgs.nextElement());
+    List messages = new ArrayList();
+    for (Iterator msgs = rep.getMessages().iterator(); msgs.hasNext();) {
+      Message message = new Message((org.objectweb.joram.shared.messages.Message) msgs.next());
       // Setting the arrival order of the messages
       message.order = arrivalsCounter++;
       messages.add(message);
@@ -1974,8 +1974,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     }
 
     // Save message if it is delivered to a durable subscription.
-    for (Enumeration msgs = messages.elements(); msgs.hasMoreElements();) { 
-      Message message = (Message) msgs.nextElement();
+    for (Iterator msgs = messages.iterator(); msgs.hasNext();) {
+      Message message = (Message) msgs.next();
       
       if (message.durableAcksCounter > 0) {
         if (logger.isLoggable(BasicLevel.DEBUG))
@@ -2143,9 +2143,9 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         // Sending the messages again if not coming from the default DMQ:
         if (QueueImpl.getDefaultDMQId() != null && !agId.equals(QueueImpl.getDefaultDMQId())) {
           DMQManager dmqManager = new DMQManager(dmqId, null);
-          Enumeration msgs = ((ClientMessages) req).getMessages().elements();
-          while (msgs.hasMoreElements()) {
-            org.objectweb.joram.shared.messages.Message msg = (org.objectweb.joram.shared.messages.Message) msgs.nextElement();
+          Iterator msgs = ((ClientMessages) req).getMessages().iterator();
+          while (msgs.hasNext()) {
+            org.objectweb.joram.shared.messages.Message msg = (org.objectweb.joram.shared.messages.Message) msgs.next();
             nbMsgsSentToDMQSinceCreation++;
             dmqManager.addDeadMessage(msg, MessageErrorConstants.DELETED_DEST);
           }
