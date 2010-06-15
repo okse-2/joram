@@ -22,6 +22,8 @@
  */
 package joram.collector;
 
+import java.util.Properties;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
@@ -33,10 +35,13 @@ import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
+import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+
+import com.scalagent.joram.mom.dest.collector.URLAcquisition;
 
 import framework.TestCase;
 
@@ -84,15 +89,14 @@ public class TestCollectorQueue2 extends TestCase implements MessageListener {
       Message msg = sessionp.createMessage();
       msg.setStringProperty("expiration", "0");
       msg.setStringProperty("persistent", "true");
-      msg.setStringProperty("period", "5000");
+      msg.setStringProperty("acquisition.period", "5000");
       msg.setStringProperty("collector.url", url);
       msg.setStringProperty("collector.type", "" + org.objectweb.joram.shared.messages.Message.BYTES);
-      msg.setStringProperty("collector.className", "com.scalagent.joram.mom.dest.collector.URLCollector");
       producer.send(msg);
       
       Thread.sleep(12000);
 
-      assertTrue(nbReceived > 2);
+      assertTrue(nbReceived >= 2);
       
       cnx.close();
     } catch (Throwable exc) {
@@ -112,7 +116,9 @@ public class TestCollectorQueue2 extends TestCase implements MessageListener {
     AdminModule.connect("localhost", 2560, "root", "root", 60);
     
     // create a queue
-    Queue queue = Queue.create(0, "CollectorQueue", Queue.COLLECTOR_QUEUE, null);
+    Properties props = new Properties();
+    props.put("acquisition.className", URLAcquisition.class.getName());
+    Queue queue = Queue.create(0, "CollectorQueue", Destination.ACQUISITION_QUEUE, props);
 
     // create a user
     User.create("anonymous", "anonymous");

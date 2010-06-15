@@ -34,10 +34,13 @@ import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
+import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+
+import com.scalagent.joram.mom.dest.collector.URLAcquisition;
 
 import framework.TestCase;
 
@@ -100,13 +103,13 @@ public class TestCollectorTopic1 extends TestCase implements MessageListener {
     Properties properties = new Properties();
     properties.setProperty("expiration", "0");
     properties.setProperty("persistent", "true");
-    properties.setProperty("period", "5000");
+    properties.setProperty("acquisition.period", "5000");
     properties.setProperty("collector.url", url);
     properties.setProperty("collector.type", "" + org.objectweb.joram.shared.messages.Message.BYTES);
-    properties.setProperty("collector.className", "com.scalagent.joram.mom.dest.collector.URLCollector");
+    properties.setProperty("acquisition.className", URLAcquisition.class.getName());
     
     // create a Topic   
-    Topic topic = Topic.create(0, "CollectorTopic", Topic.COLLECTOR_TOPIC, properties);
+    Topic topic = Topic.create(0, "CollectorTopic", Destination.ACQUISITION_TOPIC, properties);
 
     // create a user
     User.create("anonymous", "anonymous");

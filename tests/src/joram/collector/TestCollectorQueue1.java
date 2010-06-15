@@ -34,10 +34,13 @@ import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
+import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+
+import com.scalagent.joram.mom.dest.collector.URLAcquisition;
 
 import framework.TestCase;
 
@@ -75,7 +78,7 @@ public class TestCollectorQueue1 extends TestCase implements MessageListener {
       
       Thread.sleep(12000);
 
-      assertTrue(nbReceived > 2);
+      assertTrue(nbReceived >= 2);
       
       cnx.close();
     } catch (Throwable exc) {
@@ -87,7 +90,7 @@ public class TestCollectorQueue1 extends TestCase implements MessageListener {
     }
   }
 
-  String url = null;
+  String url = "http://www.gnu.org/licenses/lgpl.txt";
   
   /**
    * Admin : Create queue and a user anonymous use jndi
@@ -96,17 +99,16 @@ public class TestCollectorQueue1 extends TestCase implements MessageListener {
     // connection 
     AdminModule.connect("localhost", 2560, "root", "root", 60);
     
-    url = "http://www.gnu.org/licenses/lgpl.txt";
     Properties properties = new Properties();
     properties.setProperty("expiration", "0");
     properties.setProperty("persistent", "true");
-    properties.setProperty("period", "5000");
+    properties.setProperty("acquisition.period", "5000");
     properties.setProperty("collector.url", url);
     properties.setProperty("collector.type", "" + org.objectweb.joram.shared.messages.Message.BYTES);
-    properties.setProperty("collector.className", "com.scalagent.joram.mom.dest.collector.URLCollector");
+    properties.setProperty("acquisition.className", URLAcquisition.class.getName());
         
     // create a Queue   
-    Queue queue = Queue.create(0, "CollectorQueue", Queue.COLLECTOR_QUEUE, properties);
+    Queue queue = Queue.create(0, "CollectorQueue", Destination.ACQUISITION_QUEUE, properties);
 
     // create a user
     User.create("anonymous", "anonymous");
