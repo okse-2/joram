@@ -749,11 +749,11 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
     if (not == null) return;
 
-    Enumeration messages = not.getMessages().elements();
+    Iterator messages = not.getMessages().iterator();
 
-    while (messages.hasMoreElements()) {
+    while (messages.hasNext()) {
       nbMsgsReceiveSinceCreation = nbMsgsReceiveSinceCreation + 1;
-      msg = (Message) messages.nextElement();
+      msg = (Message) messages.next();
       msgId = msg.id;
       replyTo = AgentId.fromString(msg.replyToId);
       request = null;
