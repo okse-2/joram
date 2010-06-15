@@ -241,7 +241,7 @@ public class AcquisitionModule implements ReliableTransmitter {
 
     if (props.containsKey(PERIOD)) {
       try {
-        period = ConversionHelper.toLong(props.getProperty(PERIOD));
+        period = ConversionHelper.toLong(props.get(PERIOD));
       } catch (MessageValueException exc) {
         logger.log(BasicLevel.ERROR, "AcquisitionModule: can't parse defined period property.");
       }
@@ -257,7 +257,7 @@ public class AcquisitionModule implements ReliableTransmitter {
 
     if (props.containsKey(PERSISTENT_PROPERTY)) {
       try {
-        isPersistent = ConversionHelper.toBoolean(props.getProperty(PERSISTENT_PROPERTY));
+        isPersistent = ConversionHelper.toBoolean(props.get(PERSISTENT_PROPERTY));
       } catch (MessageValueException exc) {
         logger.log(BasicLevel.ERROR, "AcquisitionModule: can't parse defined message persistence property.");
       }
@@ -266,7 +266,7 @@ public class AcquisitionModule implements ReliableTransmitter {
 
     if (props.containsKey(PRIORITY_PROPERTY)) {
       try {
-        priority = ConversionHelper.toInt(props.getProperty(PRIORITY_PROPERTY));
+        priority = ConversionHelper.toInt(props.get(PRIORITY_PROPERTY));
       } catch (MessageValueException exc) {
         logger.log(BasicLevel.ERROR, "AcquisitionModule: can't parse defined message priority property.");
       }
@@ -275,7 +275,7 @@ public class AcquisitionModule implements ReliableTransmitter {
 
     if (props.containsKey(EXPIRATION_PROPERTY)) {
       try {
-        expiration = ConversionHelper.toLong(props.getProperty(EXPIRATION_PROPERTY));
+        expiration = ConversionHelper.toLong(props.get(EXPIRATION_PROPERTY));
       } catch (MessageValueException exc) {
         logger.log(BasicLevel.ERROR, "AcquisitionModule: can't parse defined message expiration property.");
       }
@@ -283,7 +283,7 @@ public class AcquisitionModule implements ReliableTransmitter {
     }
 
     if (props.containsKey(CLASS_NAME)
-        && !props.getProperty(CLASS_NAME).equals(acquisitionHandler.getClass().getName())) {
+        && !props.get(CLASS_NAME).equals(acquisitionHandler.getClass().getName())) {
       logger.log(BasicLevel.ERROR,
           "AcquisitionModule: Changing dynamically the acquisition class is not allowed.");
       props.remove(CLASS_NAME);
