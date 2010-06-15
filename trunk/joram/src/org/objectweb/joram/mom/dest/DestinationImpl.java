@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -551,8 +553,8 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     if (!isWriter(from)) {
       DMQManager dmqManager = new DMQManager(not.getDMQId(), dmqId, getId());
       Message msg;
-      for (Enumeration msgs = not.getMessages().elements(); msgs.hasMoreElements();) {
-        msg = (Message) msgs.nextElement();
+      for (Iterator msgs = not.getMessages().iterator(); msgs.hasNext();) {
+        msg = (Message) msgs.next();
         nbMsgsSentToDMQSinceCreation++;
         dmqManager.addDeadMessage(msg, MessageErrorConstants.NOT_WRITEABLE);
         handleDeniedMessage(msg.id, AgentId.fromString(msg.replyToId));
@@ -674,9 +676,9 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
         theCM.getRequestId()));
     while (en.hasMoreElements()) {
       ClientMessages cm = (ClientMessages) en.nextElement();
-      Vector msgs = cm.getMessages();
+      List msgs = cm.getMessages();
       for (int i = 0; i < msgs.size(); i++) {
-        theCM.addMessage((Message) msgs.elementAt(i));
+        theCM.addMessage((Message) msgs.get(i));
       }
       if (! cm.getAsyncSend()) {
         replies.addElement(new SendReplyNot(
@@ -860,6 +862,10 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     if (dmqId != null) 
       return dmqId.toString();
     return null;
+  }
+
+  public AgentId getDMQAgentId() {
+    return dmqId;
   }
 
   /**

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -927,9 +927,9 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     if (clientMsgs != null) {
       Message msg;
       // Storing each received message:
-      for (Enumeration msgs = clientMsgs.getMessages().elements(); msgs.hasMoreElements();) {
+      for (Iterator msgs = clientMsgs.getMessages().iterator(); msgs.hasNext();) {
 
-        msg = new Message((org.objectweb.joram.shared.messages.Message) msgs.nextElement());
+        msg = new Message((org.objectweb.joram.shared.messages.Message) msgs.next());
 
         msg.order = arrivalsCounter++;
         storeMessage(msg);
@@ -1451,13 +1451,13 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    */
   public void addClientMessages(ClientMessages clientMsgs) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "CollectorQueueImpl.storeClientMessage(" + clientMsgs + ')'); 
+      logger.log(BasicLevel.DEBUG, "QueueImpl.storeClientMessage(" + clientMsgs + ')');
     
     if (clientMsgs != null) {
       Message msg;
       // Storing each received message:
-      for (Enumeration msgs = clientMsgs.getMessages().elements(); msgs.hasMoreElements();) {
-        msg = new Message((org.objectweb.joram.shared.messages.Message) msgs.nextElement());
+      for (Iterator msgs = clientMsgs.getMessages().iterator(); msgs.hasNext();) {
+        msg = new Message((org.objectweb.joram.shared.messages.Message) msgs.next());
         msg.order = arrivalsCounter++;
         storeMessage(msg);
       }
@@ -1491,7 +1491,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
 
   protected void handleExpiredNot(AgentId from, ExpiredNot not) {
     Notification expiredNot = not.getExpiredNot();
-    Vector messages;
+    List messages;
     // ClientMessages and TopicMsgsReply are the notifications which can expire in the networks.
     // QueueMsgReply can't expire due to protocol limitations
     if (expiredNot instanceof ClientMessages) {

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -28,6 +28,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
@@ -792,11 +793,11 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    * to the valid subscribers.
    */
   protected void processMessages(ClientMessages not) {
-    Vector messages = not.getMessages();
+    List messages = not.getMessages();
     AgentId subscriber;
     boolean local;
     String selector;
-    Vector deliverables;
+    List deliverables;
     Message message;
 
     nbMsgsReceiveSinceCreation = nbMsgsReceiveSinceCreation + messages.size();
@@ -825,8 +826,8 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
         // A local sending already occurred: cloning the messages.
         else {
           deliverables = new Vector();
-          for (Enumeration msgs = messages.elements(); msgs.hasMoreElements();)
-            deliverables.add(((Message) msgs.nextElement()).clone());
+          for (Iterator msgs = messages.iterator(); msgs.hasNext();)
+            deliverables.add(((Message) msgs.next()).clone());
         }
       } else {
         // Current subscriber filters messages; sending the matching messages.
