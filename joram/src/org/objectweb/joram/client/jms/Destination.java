@@ -337,15 +337,11 @@ public abstract class Destination extends AdministeredObject implements javax.jm
   public static final String TOPIC = "org.objectweb.joram.mom.dest.Topic";
   public static final String DEAD_MQUEUE = "org.objectweb.joram.mom.dest.DeadMQueue";
   public static final String CLUSTER_QUEUE = "org.objectweb.joram.mom.dest.ClusterQueue";
-  public static final String BRIDGE_QUEUE = "org.objectweb.joram.mom.dest.BridgeQueue";
-  public static final String BRIDGE_TOPIC = "org.objectweb.joram.mom.dest.BridgeTopic";
-  public static final String MAIL_QUEUE = "com.scalagent.joram.mom.dest.mail.JavaMailQueue";
-  public static final String MAIL_TOPIC = "com.scalagent.joram.mom.dest.mail.JavaMailTopic";
   public static final String SCHEDULER_QUEUE = "com.scalagent.joram.mom.dest.scheduler.SchedulerQueue";
-  public static final String COLLECTOR_QUEUE = "com.scalagent.joram.mom.dest.collector.CollectorQueue";
-  public static final String COLLECTOR_TOPIC = "com.scalagent.joram.mom.dest.collector.CollectorTopic";
-  public static final String MONITORING_QUEUE = "org.objectweb.joram.mom.dest.MonitoringQueue";
-  public static final String MONITORING_TOPIC = "org.objectweb.joram.mom.dest.MonitoringTopic";
+  public static final String ACQUISITION_QUEUE = "org.objectweb.joram.mom.dest.AcquisitionQueue";
+  public static final String DISTRIBUTION_QUEUE = "org.objectweb.joram.mom.dest.DistributionQueue";
+  public static final String ACQUISITION_TOPIC = "org.objectweb.joram.mom.dest.AcquisitionTopic";
+  public static final String DISTRIBUTION_TOPIC = "org.objectweb.joram.mom.dest.DistributionTopic";
   
   /**
    * Administration method creating or retrieving a destination with a given name on a
