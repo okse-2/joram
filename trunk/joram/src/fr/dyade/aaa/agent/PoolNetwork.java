@@ -1010,9 +1010,9 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     MessageSoftList sendList;
 
     /**
-     *  Time in milliseconds of last use of this session, this attribute is set during
-     * connection, then updated at each sending or receiving. It is used to choose unused
-     * sessions.
+     * Time in milliseconds of last use of this session, this attribute is set
+     * during connection, then updated at each sending or receiving. It is used
+     * to chose unused sessions.
      */
     private long last = 0L;
 
@@ -1483,13 +1483,12 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         throw e;
       }
     }
-    
+
     /**
-     * Try to send the first message of the list to the corresponding remote server.
-     * Be careful, its method should not be synchronized (in that case, the overall
-     * synchronization of the connection -method start- can dead-lock).
-     * 
-     * @param msg The message to send.
+     * Try to send the first message of the list to the corresponding remote
+     * server. Be careful, this method should not be synchronized (in that case,
+     * the overall synchronization of the connection -method start- can
+     * dead-lock).
      */
     final void send() {
       if (sock != null) {
