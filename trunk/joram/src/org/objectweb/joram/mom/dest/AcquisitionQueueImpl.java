@@ -78,6 +78,10 @@ public class AcquisitionQueueImpl extends QueueImpl implements AcquisitionQueueI
     if (logger.isLoggable(BasicLevel.DEBUG)) {
       logger.log(BasicLevel.DEBUG, "AcquisitionQueueImpl.<init> prop = " + properties);
     }
+    if (properties == null) {
+      throw new RequestException("No property found: At least " + AcquisitionModule.CLASS_NAME
+          + " property must be defined on queue creation.");
+    }
     this.properties = properties;
 
     acquisitionClassName = properties.getProperty(AcquisitionModule.CLASS_NAME);

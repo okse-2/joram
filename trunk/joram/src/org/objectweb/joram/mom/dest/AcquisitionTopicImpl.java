@@ -78,6 +78,10 @@ public class AcquisitionTopicImpl extends TopicImpl implements AcquisitionTopicI
     if (logger.isLoggable(BasicLevel.DEBUG)) {
       logger.log(BasicLevel.DEBUG, "AcquisitionTopicImpl.<init> prop = " + properties);
     }
+    if (properties == null) {
+      throw new RequestException("No property found: At least " + AcquisitionModule.CLASS_NAME
+          + " property must be defined on topic creation.");
+    }
     this.properties = properties;
 
     acquisitionClassName = properties.getProperty(AcquisitionModule.CLASS_NAME);
