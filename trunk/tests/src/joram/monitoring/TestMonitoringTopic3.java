@@ -23,6 +23,7 @@
 package joram.monitoring;
 
 import java.util.Enumeration;
+import java.util.Properties;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -35,11 +36,12 @@ import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
-
+import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.mom.dest.MonitoringAcquisition;
 
 import framework.TestCase;
 
@@ -91,7 +93,7 @@ public class TestMonitoringTopic3 extends TestCase implements MessageListener {
       assertTrue(nbReceived == 1);
       
       msg = sessionp.createMessage();
-      msg.setLongProperty("period", 2000L);
+      msg.setLongProperty("acquisition.period", 2000L);
       msg.setStringProperty("AgentServer:server=AgentServer#0,cons=Transaction", "LogMemorySize,GarbageRatio");
       producer.send(msg);
       
@@ -119,7 +121,9 @@ public class TestMonitoringTopic3 extends TestCase implements MessageListener {
     // create a user
     User.create("anonymous", "anonymous");
     
-    Topic topic = Topic.create("JoramMonitoringTopic");
+    Properties properties = new Properties();
+    properties.put("acquisition.className", MonitoringAcquisition.class.getName());
+    Topic topic = Topic.create(0, "MonitoringTopic", Destination.ACQUISITION_TOPIC, properties);
     
     // set permissions
     topic.setFreeReading();

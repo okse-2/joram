@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,6 +23,7 @@
 package joram.monitoring;
 
 import java.util.Enumeration;
+import java.util.Properties;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -35,10 +36,12 @@ import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
+import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.mom.dest.MonitoringAcquisition;
 
 import framework.TestCase;
 
@@ -90,7 +93,7 @@ public class TestMonitoringQueue2 extends TestCase implements MessageListener {
       assertTrue(nbReceived == 1);
       
       msg = sessionp.createMessage();
-      msg.setLongProperty("period", 2000L);
+      msg.setLongProperty("acquisition.period", 2000L);
       msg.setStringProperty("AgentServer:server=AgentServer#0,cons=Transaction", "LogMemorySize,GarbageRatio");
       producer.send(msg);
       
@@ -116,7 +119,9 @@ public class TestMonitoringQueue2 extends TestCase implements MessageListener {
     AdminModule.connect("localhost", 2560, "root", "root", 60);
     
     // create a queue
-    Queue queue = Queue.create(0, "MonitoringQueue", Queue.MONITORING_QUEUE, null);
+    Properties properties = new Properties();
+    properties.put("acquisition.className", MonitoringAcquisition.class.getName());
+    Queue queue = Queue.create(0, "MonitoringQueue", Destination.ACQUISITION_QUEUE, properties);
 
     // create a user
     User.create("anonymous", "anonymous");
