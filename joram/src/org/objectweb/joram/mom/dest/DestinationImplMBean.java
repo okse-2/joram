@@ -27,6 +27,13 @@ public interface DestinationImplMBean {
    * Returns a string representation of this destination.
    */
   String toString();
+  
+  /**
+   * Returns the name of the destination.
+   *
+   * @return the name of the destination.
+   */
+  String getName();
 
   /**
    * Returns the unique identifier of the destination.
