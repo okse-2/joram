@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,11 +34,12 @@ import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
-
+import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.mom.dest.MonitoringAcquisition;
 
 import framework.TestCase;
 
@@ -74,7 +75,7 @@ public class TestMonitoringTopic1 extends TestCase implements MessageListener {
       // the consumer records on the topic
       consumer.setMessageListener(this);
       
-      Thread.sleep(10000);
+      Thread.sleep(12000);
 
       assertTrue(nbReceived > 2);
       
@@ -96,11 +97,12 @@ public class TestMonitoringTopic1 extends TestCase implements MessageListener {
     AdminModule.connect("localhost", 2560, "root", "root", 60);
     
     Properties properties = new Properties();
-    properties.put("period", "2000");
+    properties.put("acquisition.period", "2000");
     properties.put("Joram#0:name=JoramAdminTopic,*", "DestinationId");
+    properties.put("acquisition.className", MonitoringAcquisition.class.getName());
     
     // create a Topic   
-    Topic topic = Topic.create(0, "MonitoringTopic", Topic.MONITORING_TOPIC, properties);
+    Topic topic = Topic.create(0, "MonitoringTopic", Destination.ACQUISITION_TOPIC, properties);
 
     // create a user
     User.create("anonymous", "anonymous");
@@ -121,7 +123,7 @@ public class TestMonitoringTopic1 extends TestCase implements MessageListener {
 
   public void onMessage(Message message) {
     nbReceived++;
-//  System.out.println("\n --> Message received :" + message);
+    // System.out.println("\n --> Message received :" + message);
     try {
       String id = message.getStringProperty("Joram#0:type=Destination,name=JoramAdminTopic:DestinationId");
       assertTrue("#0.0.10".equals(id));

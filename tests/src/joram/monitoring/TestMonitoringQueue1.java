@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,7 @@
  */
 package joram.monitoring;
 
+import java.util.Enumeration;
 import java.util.Properties;
 
 import javax.jms.Connection;
@@ -34,11 +35,12 @@ import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
-
+import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.mom.dest.MonitoringAcquisition;
 
 import framework.TestCase;
 
@@ -96,11 +98,12 @@ public class TestMonitoringQueue1 extends TestCase implements MessageListener {
     AdminModule.connect("localhost", 2560, "root", "root", 60);
     
     Properties properties = new Properties();
-    properties.put("period", "2000");
-    properties.put("Joram#0:name=JoramAdminTopic,*", "DestinationId");
+    properties.put("acquisition.period", "2000");
+    properties.put("Joram#0:*", "DestinationId");
+    properties.put("acquisition.className", MonitoringAcquisition.class.getName());
     
     // create a Queue   
-    Queue queue = Queue.create(0, "MonitoringQueue", Queue.MONITORING_QUEUE, properties);
+    Queue queue = Queue.create(0, "MonitoringQueue", Destination.ACQUISITION_QUEUE, properties);
 
     // create a user
     User.create("anonymous", "anonymous");
@@ -121,8 +124,13 @@ public class TestMonitoringQueue1 extends TestCase implements MessageListener {
 
   public void onMessage(Message message) {
     nbReceived++;
-//  System.out.println("\n --> Message received :" + message);
+    System.out.println("\n --> Message received :" + message);
     try {
+      Enumeration enu = message.getPropertyNames();
+      while (enu.hasMoreElements()) {
+        String name = (String) enu.nextElement();
+        System.out.println(message.getStringProperty(name));
+      }
       String id = message.getStringProperty("Joram#0:type=Destination,name=JoramAdminTopic:DestinationId");
       assertTrue("#0.0.10".equals(id));
     } catch (JMSException exc) {
