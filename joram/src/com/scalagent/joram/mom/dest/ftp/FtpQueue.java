@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -44,12 +44,6 @@ public class FtpQueue extends Queue {
   private static final long serialVersionUID = 1L;
 
   public static Logger logger = Debug.getLogger(FtpQueue.class.getName());
-
-  public static final String FTP_QUEUE_TYPE = "queue.ftp";
-
-  public static String getDestinationType() {
-    return FTP_QUEUE_TYPE;
-  }
 
   /**
    * Empty constructor for newInstance(). 
