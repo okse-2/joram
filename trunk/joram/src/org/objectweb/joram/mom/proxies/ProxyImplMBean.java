@@ -25,7 +25,14 @@ package org.objectweb.joram.mom.proxies;
 
 public interface ProxyImplMBean {
   /**
-   * Returns  the period value of this queue, -1 if not set.
+   * Returns the name of this queue, or its id if not set.
+   *
+   * @return the name of this queue; its id if not set.
+   */
+  String getName();
+  
+  /**
+   * Returns the period value of this queue, -1 if not set.
    *
    * @return the period value of this queue; -1 if not set.
    */

@@ -257,7 +257,10 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       return "ProxyImpl:" + proxyAgent.getId();
   }
 
-
+  public String getName() {
+    return (proxyAgent == null)?null:proxyAgent.getName();
+  }
+  
   /**
    * (Re)initializes the proxy.
    *
