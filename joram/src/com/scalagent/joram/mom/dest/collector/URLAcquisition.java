@@ -26,10 +26,13 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.objectweb.joram.mom.dest.AcquisitionHandler;
+import org.objectweb.joram.mom.dest.ReliableTransmitter;
 import org.objectweb.joram.shared.excepts.MessageValueException;
 import org.objectweb.joram.shared.messages.ConversionHelper;
 import org.objectweb.joram.shared.messages.Message;
@@ -39,17 +42,14 @@ import fr.dyade.aaa.common.stream.Properties;
 /**
  * 
  */
-public class URLCollector implements Collector, Serializable {
+public class URLAcquisition implements AcquisitionHandler {
  
-  private static final long serialVersionUID = 1L;
-  
   public static final String FILE = "collector.file";
   public static final String PATH = "collector.path";
   public static final String HOST = "collector.host";
   public static final String URL = "collector.url";
   public static final String TYPE = "collector.type";
   
-  private CollectorDestination collectorDest;
   private String urlStr = null;
   private int type = Message.BYTES;
   
@@ -60,7 +60,7 @@ public class URLCollector implements Collector, Serializable {
    * @return the file in byte format.
    * @throws IOException
    */
-  private byte[] getResource(String spec, Properties prop) throws IOException {
+  private static byte[] getResource(String spec, Properties prop) throws IOException {
     ByteArrayOutputStream baos = null;
     BufferedOutputStream bos = null;
     try {
@@ -97,24 +97,39 @@ public class URLCollector implements Collector, Serializable {
    * 
    * @see com.scalagent.joram.mom.dest.collector.Collector#check()
    */
-  public void check() throws IOException {
+  public void retrieve(ReliableTransmitter transmitter) throws Exception {
+    if (urlStr == null) {
+      throw new Exception("Acquisition URL not defined.");
+    }
     Properties prop = new Properties();
     prop.put(URL, urlStr);
-    byte[] tab = getResource(urlStr, prop);
-    collectorDest.sendMessage(type, tab, prop);
-  }
 
-  public void setCollectorDestination(CollectorDestination collectorDest) {
-    this.collectorDest = collectorDest;
+    List list = new ArrayList(1);
+    Message msg = new Message();
+
+    msg.body = getResource(urlStr, prop);
+    msg.properties = prop;
+    msg.type = type;
+
+    list.add(msg);
+    transmitter.transmit(list, null);
   }
 
   public void setProperties(java.util.Properties properties) {
     urlStr = properties.getProperty(URL);
     try {
-      type = ConversionHelper.toByte(properties.getProperty(TYPE));
+      if (properties.containsKey(TYPE)) {
+        type = ConversionHelper.toByte(properties.getProperty(TYPE));
+      } else {
+        type = Message.BYTES;
+      }
     } catch (MessageValueException e) {
       type = Message.BYTES;
     }    
+  }
+
+  public void close() {
+    // Nothing to do
   }
 
 }
