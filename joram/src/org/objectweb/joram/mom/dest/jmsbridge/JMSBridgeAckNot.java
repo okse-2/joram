@@ -25,7 +25,7 @@ package org.objectweb.joram.mom.dest.jmsbridge;
 
 /**
  * A <code>BridgeAckNot</code> notification carries the identifier of a
- * message successfuly delivered by a JMS module to a foreign JMS server.
+ * message successfully delivered by a JMS module to a foreign JMS server.
  */
 public class JMSBridgeAckNot extends fr.dyade.aaa.agent.Notification {
   /**
@@ -33,7 +33,7 @@ public class JMSBridgeAckNot extends fr.dyade.aaa.agent.Notification {
    */
   private static final long serialVersionUID = 1L;
   /**
-   * Identifier of the message successfuly delivered to the foreign
+   * Identifier of the message successfully delivered to the foreign
    * JMS server.
    */
   private String id;
@@ -41,7 +41,7 @@ public class JMSBridgeAckNot extends fr.dyade.aaa.agent.Notification {
 
   /**
    * Constructs a <code>BridgeAckNot</code> wrapping the identifier of a
-   * message successfuly delivered to the foreign JMS server.
+   * message successfully delivered to the foreign JMS server.
    */
   public JMSBridgeAckNot(String id) {
     this.id = id;
@@ -49,7 +49,7 @@ public class JMSBridgeAckNot extends fr.dyade.aaa.agent.Notification {
 
 
   /**
-   * Returns the identifier of the message successfuly delivered to
+   * Returns the identifier of the message successfully delivered to
    * the foreign JMS server.
    */
   public String getIdentifier() {
