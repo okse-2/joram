@@ -776,14 +776,14 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
 
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG,
-                     "Messages " + "forwarded to fellow " + topicId.toString());
+                     "Messages forwarded to fellow " + topicId.toString());
       } 
     } else if (fatherId != null) {
       forward(fatherId, new TopicForwardNot(messages, true));
 
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG,
-                   "Messages " + "forwarded to father " + fatherId.toString());
+                   "Messages forwarded to father " + fatherId.toString());
     }
   }
 
