@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,8 +29,6 @@ import javax.jms.ConnectionFactory;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.admin.User;
-import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 /**
  * Creates 2 monitoring destinations: a queue and topic.
@@ -47,24 +45,22 @@ public class MonitoringAdmin {
     
     AdminModule.connect(cf, "root", "root");
     
-//    Queue queue = Queue.create("MonitoredQueue");
-//    queue.setFreeReading();
-//    queue.setFreeWriting();
-//    jndiCtx.bind("queue", queue);
-    
     Properties topicProps = new Properties();
-    topicProps.put("period", "5000");
+    topicProps.put("acquisition.className", "org.objectweb.joram.mom.dest.MonitoringAcquisition");
+    topicProps.put("acquisition.period", "5000");
     topicProps.put("Joram#0:type=Destination,name=queue",
                    "NbMsgsDeliverSinceCreation,NbMsgsReceiveSinceCreation,PendingMessageCount,NbMsgsSentToDMQSinceCreation");
     topicProps.put("Joram#0:type=Destination,name=topic",
                    "NbMsgsDeliverSinceCreation,NbMsgsReceiveSinceCreation,NbMsgsSentToDMQSinceCreation");
     
-    Topic mTopic = Topic.create(0, "MonitoringTopic", Topic.MONITORING_TOPIC, topicProps);
+    Topic mTopic = Topic.create(0, "MonitoringTopic", Topic.ACQUISITION_TOPIC, topicProps);
     mTopic.setFreeReading();
     mTopic.setFreeWriting();
     jndiCtx.bind("MonitoringTopic", mTopic);
     
-    Queue mQueue = Queue.create(0, "MonitoringQueue", Queue.MONITORING_QUEUE, null);
+    Properties queueProps = new Properties();
+    queueProps.put("acquisition.className", "org.objectweb.joram.mom.dest.MonitoringAcquisition");
+    Queue mQueue = Queue.create(0, "MonitoringQueue", Queue.ACQUISITION_QUEUE, queueProps);
     mQueue.setFreeReading();
     mQueue.setFreeWriting();
     jndiCtx.bind("MonitoringQueue", mQueue);
