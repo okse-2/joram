@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
+import org.objectweb.joram.shared.messages.ConversionHelper;
 import org.objectweb.joram.shared.messages.Message;
 
 public class MonitoringAcquisition implements AcquisitionHandler {
@@ -48,7 +49,7 @@ public class MonitoringAcquisition implements AcquisitionHandler {
       Enumeration e = properties.keys();
       while (e.hasMoreElements()) {
         String name = (String) e.nextElement();
-        String attributes = (String) properties.get(name);
+        String attributes = ConversionHelper.toString(properties.get(name));
         elements.add(new MonitoringElement(name, attributes));
       }
     }
