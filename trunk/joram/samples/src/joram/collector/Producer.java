@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,18 +22,25 @@
  */
 package collector;
 
-import javax.jms.*;
-import javax.naming.*;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.Message;
+import javax.jms.MessageProducer;
+import javax.jms.Queue;
+import javax.jms.Session;
+import javax.naming.Context;
+import javax.naming.InitialContext;
 
 /**
- * update properties on the collector queue and on the collector topic.
+ * Updates properties on the URL acquisition queue to change the acquisition
+ * period and URL.
  */
 public class Producer {
   static Context ictx = null;
 
   public static void main(String[] args) throws Exception {
     System.out.println();
-    System.out.println("update properties on the collector queue and on the collector topic...");
+    System.out.println("update properties on the collector queue...");
 
     ictx = new InitialContext();
     Queue queue = (Queue) ictx.lookup("queue");
@@ -46,10 +53,10 @@ public class Producer {
     MessageProducer producer = sess.createProducer(null);
 
     Message msg = sess.createMessage();
-    msg.setStringProperty("collector.expirationMessage", "0");
-    msg.setStringProperty("collector.persistentMessage", "true");
-    msg.setStringProperty("collector.period", "30000");
-    msg.setStringProperty("collector.url", "http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/trunk/joram/history");
+    msg.setStringProperty("expiration", "0");
+    msg.setStringProperty("persistent", "true");
+    msg.setStringProperty("acquisition.period", "30000");
+    msg.setStringProperty("collector.url", "http://www.gnu.org/licenses/lgpl-3.0.txt");
     msg.setStringProperty("collector.type", "5");
     producer.send(queue, msg);
 //    producer.send(topic, msg);
