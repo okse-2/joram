@@ -90,7 +90,7 @@ public class MailAcquisition implements AcquisitionHandler {
         }
       }
 
-      transmitter.transmit(list, Long.toString(msgs[msgs.length - 1].getReceivedDate().getTime()));
+      transmitter.transmit(list, null);
       closeFolder(toExpunge, expunge);
     }
   }
@@ -186,25 +186,28 @@ public class MailAcquisition implements AcquisitionHandler {
     }
 
     if (content instanceof Multipart) {
+      int i = 1;
+      while (i < ((Multipart) content).getCount()) {
+        messagePart = ((Multipart) content).getBodyPart(i);
 
-      messagePart = ((Multipart) content).getBodyPart(1);
-
-      if (logger.isLoggable(BasicLevel.DEBUG)) {
-        logger.log(BasicLevel.DEBUG, "--- " + this + " Multipart : part=" + messagePart);
-      }
-
-      contentType = messagePart.getContentType();
-
-      if (contentType.startsWith("text/plain") || contentType.startsWith("text/html")) {
-        InputStream is = messagePart.getInputStream();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-
-        String currentLine = reader.readLine();
-        while (currentLine != null) {
-          sb.append(currentLine);
-          sb.append('\n');
-          currentLine = reader.readLine();
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
+          logger.log(BasicLevel.DEBUG, "--- " + this + " Multipart : part=" + messagePart);
         }
+
+        contentType = messagePart.getContentType();
+
+        if (contentType.startsWith("text/plain") || contentType.startsWith("text/html")) {
+          InputStream is = messagePart.getInputStream();
+          BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+
+          String currentLine = reader.readLine();
+          while (currentLine != null) {
+            sb.append(currentLine);
+            sb.append('\n');
+            currentLine = reader.readLine();
+          }
+        }
+        i++;
       }
     }
 
