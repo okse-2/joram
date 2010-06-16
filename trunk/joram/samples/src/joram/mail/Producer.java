@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,8 +22,14 @@
  */
 package mail;
 
-import javax.jms.*;
-import javax.naming.*;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.MessageProducer;
+import javax.jms.Session;
+import javax.jms.TextMessage;
+import javax.jms.Topic;
+import javax.naming.Context;
+import javax.naming.InitialContext;
 
 /**
  * Produces messages on the queue and on the topic.
@@ -33,7 +39,7 @@ public class Producer {
 
   public static void main(String[] args) throws Exception {
     ictx = new InitialContext();
-    Topic topic = (Topic) ictx.lookup("mailTopic");
+    Topic topic = (Topic) ictx.lookup("sendMailTopic");
     ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cf");
     ictx.close();
 
@@ -45,10 +51,7 @@ public class Producer {
 
     for (int i=0; i<5; i++) {
       TextMessage msg = sess.createTextMessage();
-
-      msg.setBooleanProperty("showProperties", true);
-      msg.setStringProperty("property1", "valeur#" + i);
-      msg.setIntProperty("property2", i);
+      msg.setBooleanProperty("showProperties", false);
       msg.setText("Queue : Test number #" + i);
       producer.send(msg);
     }
