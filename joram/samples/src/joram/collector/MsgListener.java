@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,6 +21,8 @@
  * Contributor(s):
  */
 package collector;
+
+import java.util.Enumeration;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;
@@ -45,15 +47,17 @@ public class MsgListener implements MessageListener {
       Destination destination = msg.getJMSDestination();
       Destination replyTo = msg.getJMSReplyTo();
 
-      System.out.println(ident + "from=" + destination + ",replyTo=" + replyTo);
+      System.out.println();
+      System.out.println("URL collected:");
+      System.out.println(ident + ": from=" + destination + ",replyTo=" + replyTo);
 
-//      Enumeration e = msg.getPropertyNames();
-//      while (e.hasMoreElements()) {
-//        String key = (String) e.nextElement();
-//        String value = msg.getStringProperty(key);
-//        System.out.println(ident + ": " + key + " = " + value);
-//      }
-//
+      Enumeration e = msg.getPropertyNames();
+      while (e.hasMoreElements()) {
+        String key = (String) e.nextElement();
+        String value = msg.getStringProperty(key);
+        System.out.println(ident + ": " + key + " = " + value);
+      }
+
 //      if (msg instanceof TextMessage) {
 //        System.out.println(((TextMessage) msg).getText());
 //      } else if (msg instanceof BytesMessage) {

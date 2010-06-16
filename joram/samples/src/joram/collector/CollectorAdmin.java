@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,20 +25,20 @@ package collector;
 import java.util.Properties;
 
 import org.objectweb.joram.client.jms.Queue;
-import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.shared.messages.Message;
 
-
 /**
- * Administers an agent server for the classic samples.
+ * Administers an agent server for the URL acquisition samples.
  */
 public class CollectorAdmin {
   
   public static void main(String[] args) throws Exception {
-    String url = "http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/trunk/joram/history";   
+    // The collected URL
+    String url = "http://www.gnu.org/licenses/lgpl-2.1.txt";
+
     System.out.println();
     System.out.println("Collector administration...");
 
@@ -47,13 +47,13 @@ public class CollectorAdmin {
     Properties prop = new Properties();
     prop.setProperty("expiration", "0");
     prop.setProperty("persistent", "true");
-    prop.setProperty("period", "300000");
+    prop.setProperty("acquisition.period", "10000");
+    prop.setProperty("acquisition.className", "com.scalagent.joram.mom.dest.collector.URLAcquisition");
     prop.setProperty("collector.url", url);
     prop.setProperty("collector.type", "" + Message.BYTES);
-    prop.setProperty("collector.className", "com.scalagent.joram.mom.dest.collector.URLCollector");
     
-    Queue queue = Queue.create(0, "queue", Queue.COLLECTOR_QUEUE, prop);
-//    Topic topic = Topic.create(0, "topic", Topic.COLLECTOR_TOPIC, prop);
+    Queue queue = Queue.create(0, "queue", Queue.ACQUISITION_QUEUE, prop);
+//    Topic topic = Topic.create(0, "topic", Topic.ACQUISITION_TOPIC, prop);
     
     User.create("anonymous", "anonymous");
 

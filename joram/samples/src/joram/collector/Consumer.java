@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,8 +22,13 @@
  */
 package collector;
 
-import javax.jms.*;
-import javax.naming.*;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.MessageConsumer;
+import javax.jms.Queue;
+import javax.jms.Session;
+import javax.naming.Context;
+import javax.naming.InitialContext;
 
 /**
  * Consumes messages from the queue and from the topic.
@@ -33,7 +38,7 @@ public class Consumer {
 
   public static void main(String[] args) throws Exception {
     System.out.println();
-    System.out.println("Listens to the collector queue and to the collector topic...");
+    System.out.println("Listens to the collector queue...");
 
     ictx = new InitialContext();
     Queue queue = (Queue) ictx.lookup("queue");
