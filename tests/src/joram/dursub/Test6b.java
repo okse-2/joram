@@ -47,7 +47,7 @@ public class Test6b extends TestCase {
   public void run() {
     try {
       ConnectionFactory cf = TcpConnectionFactory.create("localhost",2560 );
-      
+      ((TcpConnectionFactory) cf).getParameters().connectingTimer = 10;
       AdminModule.connect(cf, "root", "root");
       Topic topic = Topic.create("topic");
       
