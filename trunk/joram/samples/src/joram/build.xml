@@ -1,16 +1,18 @@
-<project default="compile" basedir=".">
+<project default="compile" basedir="." xmlns:m2="urn:maven-artifact-ant">
 
   <!-- Initializes the environment paths and properties -->
   <target name="init">
     <!-- Initializes the directory structure properties -->
     <property name="src.dir" location="."/>
+    <property name="ship.dir" location="../../ship"/>
     <property name="obj.dir" location="../../classes"/>
-    <property name="lib.dir" location="../../../ship/lib"/>
+    <property name="lib.dir" location="${ship.dir}/lib"/>
     <property name="run.dir" location="../../run"/>
     <property name="conf.dir" location="../../config"/>
-    <property name="felix.dir" location="../../../ship/bin"/>
-    <property name="bundle.dir" location="../../../ship/bundle" />
-    <!-- Project classpath needed for execution -->
+    <property name="felix.dir" location="${ship.dir}/bin"/>
+    <property name="bundle.dir" location="${ship.dir}/bundle" />
+  	
+  	<!-- Project classpath needed for execution -->
     <path id="project.class.path">
       <pathelement path="${java.class.path}/"/>
       <fileset dir="${lib.dir}">
@@ -30,17 +32,18 @@
         <include name="*.jar"/>
       </fileset>
     </path>
-    <property name="felix.class.path" refid="felix.class.path"/>
+    <property name="felix.class.path" refid="felix.class.path"/>  	
   </target>
-
+	
   <!-- Cleans samples - deletes generated files -->
   <target name="clean" depends="init"
           description="--> Deletes generated files">
     <delete dir="${obj.dir}"/>
     <delete dir="${run.dir}"/>
+  	<delete dir="${ship.dir}"/>
   </target>
-
-  <!-- Prepares the compilation phase -->
+	
+	<!-- Prepares the compilation phase -->
   <target name="prepare" depends="init">
     <delete quiet="true" dir="${obj.dir}"/>
     <delete quiet="true" dir="${run.dir}"/>
