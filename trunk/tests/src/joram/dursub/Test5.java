@@ -53,7 +53,7 @@ public class Test5 extends TestCase {
       Thread.sleep(2000L);
 
       ConnectionFactory cf = TcpConnectionFactory.create("localhost",2560 );
-      
+      ((TcpConnectionFactory) cf).getParameters().connectingTimer = 10;
       AdminModule.connect(cf, "root", "root");
 
       User.create("anonymous", "anonymous", 0);

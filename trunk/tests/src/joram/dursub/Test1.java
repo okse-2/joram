@@ -56,6 +56,7 @@ public class Test1 extends framework.TestCase {
       Thread.sleep(1000L);
 
       ConnectionFactory cf =  TcpConnectionFactory.create("localhost", 2560);
+      ((TcpConnectionFactory) cf).getParameters().connectingTimer = 10;
       AdminModule.connect(cf, "root", "root");
 
       User.create("anonymous", "anonymous", 0);
