@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.objectweb.joram</groupId>
+  <artifactId>a3-rt</artifactId>
+  <packaging>bundle</packaging>
+  <name>JORAM :: a3 :: rt</name>
+  <description>Builds the Joram a3 rt project.</description>
+
+  <parent>
+    <groupId>org.objectweb.joram</groupId>
+    <artifactId>a3</artifactId>
+    <version>5.3.2.53-SNAPSHOT</version>
+  </parent>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Export-Package>fr.dyade.aaa.agent,fr.dyade.aaa.agent.conf,fr.dyade.aaa.util</Export-Package>
+            <Bundle-Activator>fr.dyade.aaa.agent.osgi.Activator</Bundle-Activator>
+            <Import-Package>com.scalagent.jmx,
+              fr.dyade.aaa.common,
+              fr.dyade.aaa.common.monitoring,
+              fr.dyade.aaa.common.net,
+              fr.dyade.aaa.util.management,
+              javax.xml.parsers,
+              org.objectweb.util.monolog,
+              org.objectweb.util.monolog.api,
+              org.osgi.framework,
+              org.osgi.util.tracker,
+              org.xml.sax,
+              org.xml.sax.helpers</Import-Package>
+              <DynamicImport-Package>*</DynamicImport-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.objectweb.joram</groupId>
+      <artifactId>a3-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>jgroups</groupId>
+      <artifactId>jgroups-all</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-dbcp</groupId>
+      <artifactId>commons-dbcp</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+    </dependency>
+  </dependencies>
+</project>
