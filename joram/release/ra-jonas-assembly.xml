@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly>
+  <id>joram-jonasadapter</id>
+  <includeBaseDirectory>false</includeBaseDirectory>
+
+  <formats>
+    <format>rar</format>
+  </formats>
+  
+<!--  <dependencySets> -->
+<!--  TODO -->
+<!--    <dependencySet>-->
+<!--      <outputDirectory>/</outputDirectory>-->
+<!--      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>-->
+<!--      <useStrictFiltering>true</useStrictFiltering>-->
+<!--      <includes>-->
+<!--        <include>org.objectweb.joram:joram-jca-config</include>-->
+<!--      </includes>-->
+<!--      <unpack>false</unpack>-->
+<!--    </dependencySet>-->
+<!--  </dependencySets>-->
+  <files>
+    <file>
+      <source>../joram/client/jca/src/main/resources/org/objectweb/joram/client/connector/jonas-ra.xml</source>
+      <outputDirectory>/META-INF</outputDirectory>
+      <destName>ra.xml</destName>
+      <fileMode>0644</fileMode>
+    </file>
+  </files>
+</assembly>
