@@ -25,7 +25,7 @@
   <!-- Initialize the directory structure properties -->
   <property name="src.dir" location=".."/>
   <property name="obj.dir" location="../../classes"/>
-  <!-- property name="ship.dir" location="../../joram/ship"/ -->
+  <property name="ship.dir" location="../../ship"/>
   <property name="lib.dir" location="${ship.dir}/lib"/>
   <property name="test.dir" location="../../run"/>
   <property name="testlib.dir" location="../../lib"/>
