@@ -43,16 +43,19 @@
     </s1>
 
     <s1 name="Other documentation">
-      <s2 name="JORAM show">
-      <p>The latest JORAM slides show, presented at the Objectweb conference
-      in Paris (20-21 November 2003), is available <a href="http://www.objectweb.org/phorum/download.php/36,68/031120-Joram-OWConf.pdf">here</a>.</p>
+      <s2 name="ICAR">
+      <p>ICAR is a series of summer schools on Middleware and Distributed Applications:</p>
+      <ul>
+      <li>The latest <a href="ICAR/ICAR06.pdf">JORAM slides show</a> presented at ICAR 2006 (Aug. 28-Sep. 1, 2006).</li>
+      <li>The <a href="ICAR/ICAR03.pdf">JORAM slides show</a> presented at ICAR 2003.</li>
+      <li>A <a href="ICAR/book-icar2006.pdf">book</a> based on the contents of the 2006 school is on line which includes a
+      <a href="ICAR/book-icar2006-joram.pdf">chapter</a> about Joram.</li>
+      </ul>
 			</s2>
 			
       <s2 name="ScalAgent Distributed Technologies">
-      <p><a href="http://www.scalagent.com">ScalAgent</a> is the provider
-         of the open-source platform on top of which JORAM's MOM is built,
-         and proposes complementary information and showcases involving
-         JORAM.</p>
+      <p><a href="http://www.scalagent.com">ScalAgent</a> is the provider of the open-source platform on top of which
+      JORAM's MOM is built, and proposes complementary information and showcases involving JORAM.</p>
       <p>White papers about JORAM are available, in
          <a href="http://www.scalagent.com/pages/fr/datasheet/040322-joram-whitepaper-fr.pdf">French</a> and in
          <a href="http://www.scalagent.com/pages/en/datasheet/040322-joram-whitepaper-en.pdf">English</a>.</p>

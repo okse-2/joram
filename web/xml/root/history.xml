@@ -111,6 +111,20 @@
       <p>You can subscribe at <a href="http://mail.ow2.org/wws/arc/joram-commits">joram-commits@ow2.org</a>.</p>
       </s2>
     
+	    <s2 name="December 2nd and 3rd, 2009: JORAM Training Session, Grenoble, France">
+	      <p>A two-day training session about JORAM is scheduled in Grenoble; it will be delivered in french language.</p>
+	      <p>The session is entitled "Design and Deploy a Distributed JORAM Messaging System".</p>
+	      <p>This training session is targeted at architects and system designers that intend to integrate  the JORAM component
+	      within a global distributed solution. It includes a significant part of  experimentations and case studies based on
+	      real-world application scenarios.</p>
+	      <p>The session is conducted by ScalAgent Distributed Technologies, the leading developer of the JORAM component. We
+	      offer to share our expertise through a training session aiming at providing the key knowledge to use and deploy a JORAM
+	      system that fits your own requirements. This two-day session details the design principles of JORAM and describes the
+	      best practices that will enable to take advantage of its advanced properties for complex networked environments.</p>
+	      <p>Detailed information about this training session is available online
+	      <a href="http://www.scalagent.com/pages/fr/datasheet/091202-JORAM-formation.pdf ">(PDF, in french only)</a></p>
+      </s2>
+    
       <s2 name="October 23, 2009: JORAM 5.2.6 is released">
       <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
       <p>It introduces some improvements and bug fixes, essentially:</p>
@@ -128,24 +142,10 @@
       <a href="dev/versions.html">code updates</a> or in
       <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
       </s2>
-    
-	    <s2 name="December 2nd and 3rd, 2009: JORAM Training Session, Grenoble, France">
-	      <p>A two-day training session about JORAM is scheduled in Grenoble; it will be delivered in french language.</p>
-	      <p>The session is entitled "Design and Deploy a Distributed JORAM Messaging System".</p>
-	      <p>This training session is targeted at architects and system designers that intend to integrate  the JORAM component
-	      within a global distributed solution. It includes a significant part of  experimentations and case studies based on
-	      real-world application scenarios.</p>
-	      <p>The session is conducted by ScalAgent Distributed Technologies, the leading developer of the JORAM component. We
-	      offer to share our expertise through a training session aiming at providing the key knowledge to use and deploy a JORAM
-	      system that fits your own requirements. This two-day session details the design principles of JORAM and describes the
-	      best practices that will enable to take advantage of its advanced properties for complex networked environments.</p>
-	      <p>Detailed information about this training session is available online
-	      <a href="http://www.scalagent.com/pages/fr/datasheet/091202-JORAM-formation.pdf ">(PDF, in french only)</a></p>
-      </s2>
        
       <s2 name="October 16, 2009: Joram Snapshot are now available">
       <p>The latest development snapshots are now available from
-      <a href="http://bamboo.ow2.org/download/JORAM-ANT/artifacts/latest/Releases">Continuous Integration Build Tool</a>.
+      <a href="http://bamboo.ow2.org/browse/JORAM-REL/latest/artifact/Releases/release/target">Continuous Integration Build Tool</a>.
       This will be built automatically from the current development code after each change in the SVN code base.</p>
       <p>If you need quickly a fix for a particular bug, you may be able to find a fixed Joram release here well
       before the fix makes it into the next release version. On the other hand, these snapshots might sometimes
@@ -211,25 +211,26 @@
      	fixes some bug and adds improvements and configuration tips.</p>
      	<p>It is tagged in SVN (JORAM_4_3_34), the complete list of changes can be viewed either in
      	<a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in 
-     	<a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/tags/JORAM_4_3_34/joram/history?rev=2398">SVN history</a>.</p>
+     	<a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
 </s2>
 
       <s2 name="April 22, 2008: JORAM 5.0.9 is released">
       <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
       <p>It is tagged in SVN (JORAM_5_0_9), the complete list of changes can be viewed either in
       <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
-      <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/tags/JORAM_5_0_9/joram/history?rev=2271">SVN history</a>.</p>
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
 </s2>
 
       <s2 name="April 10, 2008: JORAM is released on Ohloh">
-      <p>Joram has been added on <a href="http://www.ohloh.net/projects/4238">Ohloh</a> a funny website offering automated metrics on open source projects. If you are using Joram, please stack it.</p>
+      <p>Joram has been added on <a href="http://www.ohloh.net/projects/4238">Ohloh</a> a funny website offering automated metrics
+      on open source projects. If you are using Joram, please stack it.</p>
 </s2>
 
       <s2 name="February 12, 2008: JORAM 5.0.8 is released">
       <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
       <p>It is tagged in SVN (JORAM_5_0_8), the complete list of changes can be viewed either in
-      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or
-      in the history file in SVN: <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/trunk/joram">history</a>.</p>
+      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
 </s2>
 
       <s2 name="February 12, 2008: JORAM 4.3.32 is released">
@@ -237,25 +238,27 @@
       fixes some bug and adds improvements and configuration tips.</p>
       <p>This version is bundled in <a href="http://jonas.ow2.org/">Jonas 4.9</a>.</p>
       <p>It is tagged in SVN (JORAM_4_3_32), the complete list of changes can be viewed either in
-      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or
-      in <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/*checkout*/joram/tags/JORAM_4_3_32/joram/history?rev=2159">SVN history</a>.</p>
+      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
 </s2>
 
       <s2 name="December 19, 2007: JORAM 5.0.7 is released">
       <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
-      <p>It is tagged in SVN (JORAM_5_0_7), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or
-      in the history file in SVN: <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/trunk/joram">history</a>.</p>
+      <p>It is tagged in SVN (JORAM_5_0_7), the complete list of changes can be viewed either in
+      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
 </s2>
 
       <s2 name="September 25, 2007: JORAM 5.0.6 is released">
       <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven repository.</p>
-      <p>It is tagged in SVN (JORAM_5_0_6), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in the history file in SVN: <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/trunk/joram">history</a>.</p>
+      <p>It is tagged in SVN (JORAM_5_0_6), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or
+      in the history file in SVN: <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">history</a>.</p>
 </s2>
 
       <s2 name="September 25, 2007: JORAM 4.3.30 is released">
       <p>This version basically fixes some bug. It is tagged in SVN (JORAM_4_3_30), the complete list of changes can be viewed either in
-      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in the history file in SVN:
-      <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/branches/JORAM_4_3_BRANCH/joram">history</a>.</p>
+      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
 </s2>
 
       <s2 name="September 27th and 28th, 2007: JORAM Training Session, Grenoble, France">
@@ -268,115 +271,167 @@
       <s2 name="April 26, 2007: JORAM 4.3.28 is released">
       <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically fixes some bug.</p>
       <p>It is tagged in SVN (JORAM_4_3_28), the complete list of changes can be viewed either in
-      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in the history file in SVN:
-      <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/branches/JORAM_4_3_BRANCH/joram">history</a>.</p>
+      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
 </s2>
 
       <s2 name="March 27, 2007: JORAM 4.3.26 is released">
       <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it provides some improvements
       in the use of clustering destinations.</p>
       <p>It is tagged in SVN (JORAM_4_3_26), the complete list of changes can be viewed either in
-      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in the history file in SVN:
-      <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/branches/JORAM_4_3_BRANCH/joram">history</a>.</p>
+      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
 </s2>
 
       <s2 name="March 08, 2007: JORAM 4.3.25 is released">
-      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically fixes some bug and adds improvements and configuration tips. This version is bundled in <a href="http://jonas.ow2.org/">Jonas 4.8.5</a>.</p>
-      <p>It is tagged in SVN (JORAM_4_3_25), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in the history file in SVN: <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/trunk/joram">history</a>.</p>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically fixes some bug
+      and adds improvements and configuration tips. This version is bundled in <a href="http://jonas.ow2.org/">Jonas 4.8.5</a>.</p>
+      <p>It is tagged in SVN (JORAM_4_3_25), the complete list of changes can be viewed either in
+      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
 </s2>
 
       <s2 name="February 26, 2007: JORAM 4.3.22 is released">
-      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically fixes some bug and adds improvements and configuration tips. This version is bundled in <a href="http://jonas.ow2.org/">Jonas 4.8.4</a>.</p>
-      <p>It is tagged in SVN (JORAM_4_3_22), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in the history file in SVN: <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/trunk/joram">history</a>.</p>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically fixes some bug
+      and adds improvements and configuration tips. This version is bundled in <a href="http://jonas.ow2.org/">Jonas 4.8.4</a>.</p>
+      <p>It is tagged in SVN (JORAM_4_3_22), the complete list of changes can be viewed either in
+      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
 </s2>
 
       <s2 name="September 27th and 28th, 2006: JORAM Training Session, Paris, France">
-      <p>A two-day training session on JORAM is scheduled and will be delivered in french language. The session is entitled "Design and Deploy a Distributed JORAM Messaging System".</p>
-      <p>This training session is targeted at architects and system designers that intend to integrate  the JORAM component within a global distributed solution. It includes a significant part of  experimentations and case studies based on real-world application scenarios.</p>
-      <p>The session is conducted by ScalAgent Distributed Technologies, the leading developer of the JORAM component. We offer to share our expertise through a training session that provides the key knowledge to use and deploy a JORAM system that fits your requirements. This two-day session details the design principles of JORAM and describes the best practices to take advantage of its advanced properties in complex networked environments.</p>
-      <p>Detailed information about this training session is available online <a href="http://www.scalagent.com/pages/fr/datasheet/060927-JORAM-formation.pdf">(PDF, in french only)</a></p>
+      <p>A two-day training session on JORAM is scheduled and will be delivered in french language. The session is entitled
+      "Design and Deploy a Distributed JORAM Messaging System".</p>
+      <p>This training session is targeted at architects and system designers that intend to integrate  the JORAM component
+      within a global distributed solution. It includes a significant part of  experimentations and case studies based on
+      real-world application scenarios.</p>
+      <p>The session is conducted by ScalAgent Distributed Technologies, the leading developer of the JORAM component. 
+      We offer to share our expertise through a training session that provides the key knowledge to use and deploy a JORAM
+      system that fits your requirements. This two-day session details the design principles of JORAM and describes the best
+      practices to take advantage of its advanced properties in complex networked environments.</p>
+      <p>Detailed information about this training session is available online
+      <a href="http://www.scalagent.com/pages/fr/datasheet/060927-JORAM-formation.pdf">(PDF, in french only)</a></p>
 </s2>
 
       <s2 name="September 20, 2006: JORAM 4.3.21 is released">
-      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically fixes some bug and adds improvements and configuration tips. This version is bundled in last <a href="http://jonas.ow2.org/">Jonas 4.8</a> and <a href="http://petals.ow2.org/">Petals 1.0</a>.</p>
-      <p>It is tagged in SVN (JORAM_4_3_21), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in the history file in SVN: <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/trunk/joram">history</a>.</p>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically fixes some bug
+      and adds improvements and configuration tips. This version is bundled in last <a href="http://jonas.ow2.org/">Jonas 4.8</a> and
+      <a href="http://petals.ow2.org/">Petals 1.0</a>.</p>
+      <p>It is tagged in SVN (JORAM_4_3_21), the complete list of changes can be viewed either in
+      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
 </s2>
 
       <s2 name="August 04, 2006: JORAM 4.3.20 is released">
-      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically fixes some bug and adds improvements and configuration tips. This version is bundled in last <a href="http://jonas.ow2.org/">Jonas 4.8</a>.</p>
-      <p>It is tagged in SVN (JORAM_4_3_20), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in the history file in SVN: <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/trunk/joram">history</a>.</p>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically fixes some bug
+      and adds improvements and configuration tips. This version is bundled in last <a href="http://jonas.ow2.org/">Jonas 4.8</a>.</p>
+      <p>It is tagged in SVN (JORAM_4_3_20), the complete list of changes can be viewed either in
+      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
 </s2>
 
       <s2 name="July 11, 2006: JORAM 4.3.19 is released">
-      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically fixes some bug and adds improvements and configuration tips. This version is bundled in last <a href="http://jonas.ow2.org/">Jonas</a> release (4.7.5).</p>
-      <p>It is tagged in SVN (JORAM_4_3_19), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in the history file in SVN: <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/trunk/joram">history</a>.</p>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically fixes some bug
+      and adds improvements and configuration tips. This version is bundled in last <a href="http://jonas.ow2.org/">Jonas 4.7.5</a> release.</p>
+      <p>It is tagged in SVN (JORAM_4_3_19), the complete list of changes can be viewed either in
+      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
 </s2>
 
       <s2 name="June 14-15, 2006: JORAM Training Session, Paris, France">
-      <p>A two-day training session on JORAM is scheduled and will be delivered in french language. The session is entitled "Design and Deploy a Distributed JORAM Messaging System".</p>
-      <p>This training session is targeted at architects and system designers that intend to integrate  the JORAM component within a global distributed solution. It includes a significant part of  experimentations and case studies based on real-world application scenarios.</p>
-      <p>The session is conducted by ScalAgent Distributed Technologies, the leading developer of the JORAM component. We offer to share our expertise through a training session that provides the key knowledge to use and deploy a JORAM system that fits your requirements. This two-day session details the design principles of JORAM and describes the best practices to take advantage of its advanced properties in complex networked environments.</p>
-      <p>Detailed information about this training session is available online <a href="http://www.scalagent.com/pages/fr/datasheet/060614-JORAM-formation.pdf">(PDF, in french only)</a></p>
+      <p>A two-day training session on JORAM is scheduled and will be delivered in french language. The session is entitled
+      "Design and Deploy a Distributed JORAM Messaging System".</p>
+      <p>This training session is targeted at architects and system designers that intend to integrate  the JORAM component
+      within a global distributed solution. It includes a significant part of  experimentations and case studies based on
+      real-world application scenarios.</p>
+      <p>The session is conducted by ScalAgent Distributed Technologies, the leading developer of the JORAM component.
+      We offer to share our expertise through a training session that provides the key knowledge to use and deploy a JORAM
+      system that fits your requirements. This two-day session details the design principles of JORAM and describes the best
+      practices to take advantage of its advanced properties in complex networked environments.</p>
+      <p>Detailed information about this training session is available online
+      <a href="http://www.scalagent.com/pages/fr/datasheet/060614-JORAM-formation.pdf">(PDF, in french only)</a></p>
 </s2>
 
       <s2 name="May 31, 2006: JORAM 4.3.18 version is released">
-      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically fixes some bug and adds improvements and configuration tips.</p>
-      <p>It is tagged in SVN (JORAM_4_3_18), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in the history file in SVN: <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/trunk/joram">history</a>.</p>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically fixes some bug
+      and adds improvements and configuration tips.</p>
+      <p>It is tagged in SVN (JORAM_4_3_18), the complete list of changes can be viewed either in
+      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
 </s2>
 
       <s2 name="March 19, 2006: JORAM 4.3.14 version is released">
       <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically fixes some bug.</p>
-      <p>It is tagged in SVN (JORAM_4_3_14), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in the history file in SVN: <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/trunk/joram">history</a>.</p>
+      <p>It is tagged in SVN (JORAM_4_3_14), the complete list of changes can be viewed either in
+      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
 </s2>
 
       <s2 name="March 29-30, 2006: JORAM Training Session, Grenoble, France">
-      <p>A two-day training session on JORAM is scheduled and will be delivered in french language. The session is entitled "Design and Deploy a Distributed JORAM Messaging System".</p>
-      <p>This training session is targeted at architects and system designers that intend to integrate  the JORAM component within a global distributed solution. It includes a significant part of  experimentations and case studies based on real-world application scenarios.</p>
-      <p>The session is conducted by ScalAgent Distributed Technologies, the leading developer of the JORAM component. We offer to share our expertise through a training session that provides the key knowledge to use and deploy a JORAM system that fits your requirements. This two-day session details the design principles of JORAM and describes the best practices to take advantage of its advanced properties in complex networked environments.</p>
-      <p>Detailed information about this training session is available online <a href="http://www.scalagent.com/pages/fr/datasheet/060329-JORAM-formation.pdf">(PDF, in french only)</a></p>
+      <p>A two-day training session on JORAM is scheduled and will be delivered in french language. The session is entitled
+      "Design and Deploy a Distributed JORAM Messaging System".</p>
+      <p>This training session is targeted at architects and system designers that intend to integrate  the JORAM component
+      within a global distributed solution. It includes a significant part of  experimentations and case studies based on
+      real-world application scenarios.</p>
+      <p>The session is conducted by ScalAgent Distributed Technologies, the leading developer of the JORAM component.
+      We offer to share our expertise through a training session that provides the key knowledge to use and deploy a JORAM
+      system that fits your requirements. This two-day session details the design principles of JORAM and describes the best
+      practices to take advantage of its advanced properties in complex networked environments.</p>
+      <p>Detailed information about this training session is available online
+      <a href="http://www.scalagent.com/pages/fr/datasheet/060329-JORAM-formation.pdf">(PDF, in french only)</a></p>
 </s2>
 
       <s2 name="January 19, 2006: JORAM 4.3.12 version is released">
-      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>. It is tagged in SVN (JORAM_4_3_12), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in the history file in SVN: <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/trunk/joram">history</a>.</p>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>.
+      It is tagged in SVN (JORAM_4_3_12), the complete list of changes can be viewed either in
+      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
 </s2>
 
         <s2 name="January 18, 2006: ">
-        <p>JORAM is acknowledged as the best open source MOM implementation, according to <a href="http://jdj.sys-con.com/read/171303_3.htm">JDJ's readers</a>, challenging proprietary products from IBM, Sun and TIBCO.</p>
+        <p>JORAM is acknowledged as the best open source MOM implementation, according to
+        <a href="http://java.sys-con.com/node/171304">JDJ's readers</a>, challenging proprietary products from IBM, Sun and TIBCO.</p>
 </s2>
 
       <s2 name="November 3, 2005: JORAM 4.3.10 version is released">
-      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically includes XML scripting capabilities and some bug fixes.</p>
-      <p>It is tagged in SVN (JORAM_4_3_10), the complete list of changes can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in the history file in SVN: <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/trunk/joram">history</a>.</p>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically includes XML
+      scripting capabilities and some bug fixes.</p>
+      <p>It is tagged in SVN (JORAM_4_3_10), the complete list of changes can be viewed either in
+      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
 </s2>
 
       <s2 name="October 25, 2005: JORAM 4.3.9 version is released">
-      <p>The Joram 4.3.9 maintenance release is now available for download. This version is embedded in the last JOnAS build (4.6.1). It fixes an incorrect behavior of subscriptions with nolocal attribute. It is tagged in SVN: JORAM_4_3_9.</p>
+      <p>The Joram 4.3.9 maintenance release is now available for download. This version is embedded in the last JOnAS build (4.6.1).
+      It fixes an incorrect behavior of subscriptions with nolocal attribute. It is tagged in SVN: JORAM_4_3_9.</p>
 </s2>
 
       <s2 name="November 29-30, 2005: JORAM Training Session, Paris, France">
       <p>A two-day training session on JORAM is scheduled and will be delivered in french language.
-	The session is entitled "Design and Deploy a Distributed JORAM Messaging System".</p>
+			The session is entitled "Design and Deploy a Distributed JORAM Messaging System".</p>
       <p>This training session is targeted at architects and system designers that intend to integrate 
-	the JORAM component within a global distributed solution. It includes a significant part of 
-	experimentations and case studies based on real-world application scenarios.</p>
+			the JORAM component within a global distributed solution. It includes a significant part of 
+			experimentations and case studies based on real-world application scenarios.</p>
       <p>The session is conducted by ScalAgent Distributed Technologies, the leading developer 
-	of the JORAM component. We offer to share our expertise through a training session that provides
-	 the key knowledge to use and deploy a JORAM system that fits your requirements.
-	This two-day session details the design principles of JORAM and describes the best practices 
-	to take advantage of its advanced properties in complex networked environments.</p>
+			of the JORAM component. We offer to share our expertise through a training session that provides
+	 		the key knowledge to use and deploy a JORAM system that fits your requirements.
+			This two-day session details the design principles of JORAM and describes the best practices 
+			to take advantage of its advanced properties in complex networked environments.</p>
       <p>Detailed information about this training session is available online 
-	<a href="http://www.scalagent.com/pages/fr/datasheet/051129-JORAM-formation.pdf">(PDF, in french only)</a></p>
+			<a href="http://www.scalagent.com/pages/fr/datasheet/051129-JORAM-formation.pdf">(PDF, in french only)</a></p>
 </s2>
 
       <s2 name="October 21, 2005: JORAM 4.3.8 version is released">
       <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, it basically includes:</p>
-	<ul>
-	  <li>extended JMX management,</li>
-	  <li>performance improvements,</li>
-	  <li>and several bug fixes.</li>
-	</ul>
-      <p>It is tagged in SVN (JORAM_4_3_8) and will be embedded in the next
-        Jonas release. The complete list can be viewed either in <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in the history file in SVN: <a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram/trunk/joram">history</a>.</p>
+			<ul>
+	  		<li>extended JMX management,</li>
+	  		<li>performance improvements,</li>
+	  		<li>and several bug fixes.</li>
+			</ul>
+      <p>It is tagged in SVN (JORAM_4_3_8) and will be embedded in the next Jonas release.
+      The complete list can be viewed either in
+      <a href="http://joram.ow2.org/dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
 </s2>
 
       <s2 name="September 26th, 2005: JORAM Survey Synthesis">
@@ -414,22 +469,22 @@
       <s2 name="May 17, 2005: JORAM 4.3 version is released">
       <p>This version includes new features :</p>
       <ul>
-      <li>extended JMX management,</li>
-      <li>Performance improvements,</li>
-      <li>Handling of large message transmission (called swap out mode),</li>
-      <li>Complete SSL support with handling of encrypted client to server communications.</li>
+      	<li>extended JMX management,</li>
+      	<li>Performance improvements,</li>
+      	<li>Handling of large message transmission (called swap out mode),</li>
+      	<li>Complete SSL support with handling of encrypted client to server communications.</li>
       </ul>
 </s2>
 
      <s2 name="Joram is alive since May 2000..">
      <p>The complete history is available <a href="oldhistory.html">here</a>, in short:</p>
       <ul>
-      <li>26th May 2000 : JORAM first open source version available!</li>
-      <li>December 2000: JORAM is included in JOnAS.</li>
-      <li>March 2003: JORAM 3.4 is available.</li>
-      <li>February 2004: JORAM 4.0 is available.</li>
-      <li>September 2004: JORAM 4.1 is available</li>
-      <li>March 2005: JORAM 4.2 is available</li>
+      	<li>26th May 2000 : JORAM first open source version available!</li>
+     	 	<li>December 2000: JORAM is included in JOnAS.</li>
+      	<li>March 2003: JORAM 3.4 is available.</li>
+      	<li>February 2004: JORAM 4.0 is available.</li>
+      	<li>September 2004: JORAM 4.1 is available</li>
+      	<li>March 2005: JORAM 4.2 is available</li>
      </ul>
 </s2>
      
