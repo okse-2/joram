@@ -65,7 +65,7 @@ public class JndiTest5 extends TestCase {
       Hashtable env0 = new Hashtable();
       env0.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
       env0.put(NAMING_HOST_PROP, LOCALHOST);
-      env0.put(NAMING_PORT_PROP, "16400");
+      env0.put(NAMING_PORT_PROP, "16600");
       
       Thread.sleep(4000);
 
@@ -87,7 +87,7 @@ public class JndiTest5 extends TestCase {
       Hashtable env1 = new Hashtable();
       env1.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
       env1.put(NAMING_HOST_PROP, LOCALHOST);
-      env1.put(NAMING_PORT_PROP, "16401");
+      env1.put(NAMING_PORT_PROP, "16601");
 
       InitialContext ctx1 = new InitialContext(env1);
       ctx1.lookup("/A");
