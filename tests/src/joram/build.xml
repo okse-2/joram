@@ -526,7 +526,7 @@ description=" --> launch all exceptionlistener tests">
       <classpath path="${project.class.path}"/>
       <jvmarg line="-DSCAdminClass=${SCAdminClass} -Dfelix.dir=${felix.dir} -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -Dframework.TestCase.TestId=${testid} -Dframework.TestCase.OutFile=${report.file} ${jvmargs}"/>
       <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
-      <arg line="${arg}"/>
+      <arg line="${args}"/>
     </java>
   </target>
 
@@ -4726,6 +4726,103 @@ description=" --> launch all exceptionlistener tests">
       <param name="jvmargs" value=""/>
       <param name="args" value=""/>
     </antcall>
+  </target>
+
+  <target name="sw.test1" depends="init.a3props,compile"
+          description=" --> test SW scenario">
+    <antcall target="init.test" inheritAll="true">
+  	  <param name="jndiconf" value="distrib/jndi.properties"/>
+    	<param name="a3conf" value="sw/a3servers.xml"/>
+    </antcall>
+
+  	<parallel>
+  		
+	    <antcall target="test.start" inheritAll="true">
+  	    <param name="className" value="joram.sw.SWClient"/>
+	      <param name="jvmargs" value=""/>
+  	    <param name="args" value="0 2000"/>
+    	</antcall>
+  		
+	    <antcall target="test.start" inheritAll="true">
+  	    <param name="className" value="joram.sw.SWClient"/>
+	      <param name="jvmargs" value=""/>
+  	    <param name="args" value="1 2000"/>
+    	</antcall>
+  		
+	    <antcall target="test.start" inheritAll="true">
+  	    <param name="className" value="joram.sw.SWClient"/>
+	      <param name="jvmargs" value=""/>
+  	    <param name="args" value="2 2000"/>
+    	</antcall>
+  		
+	    <antcall target="test.start" inheritAll="true">
+  	    <param name="className" value="joram.sw.SWClient"/>
+	      <param name="jvmargs" value=""/>
+  	    <param name="args" value="3 2000"/>
+    	</antcall>
+  		
+	    <antcall target="test.start" inheritAll="true">
+  	    <param name="className" value="joram.sw.SWClient"/>
+	      <param name="jvmargs" value=""/>
+  	    <param name="args" value="4 2000"/>
+    	</antcall>
+  		
+  	</parallel>
+  </target>
+
+  <target name="sw.test1-0" depends="init.a3props,compile"
+          description=" --> test SW scenario server#0">
+    <antcall target="test.run" inheritAll="true">
+  	  <param name="jndiconf" value="distrib/jndi.properties"/>
+    	<param name="a3conf" value="sw/a3servers1.xml"/>
+  	  <param name="className" value="joram.sw.SWClient"/>
+	    <param name="jvmargs" value=""/>
+      <param name="args" value="0"/>
+  	</antcall>
+  </target>
+
+  <target name="sw.test1-1" depends="init.a3props,compile"
+          description=" --> test SW scenario server#1">
+    <antcall target="test.run" inheritAll="true">
+  	  <param name="jndiconf" value="distrib/jndi.properties"/>
+    	<param name="a3conf" value="sw/a3servers1.xml"/>
+  	  <param name="className" value="joram.sw.SWClient"/>
+	    <param name="jvmargs" value=""/>
+      <param name="args" value="1"/>
+  	</antcall>
+  </target>
+
+  <target name="sw.test1-2" depends="init.a3props,compile"
+          description=" --> test SW scenario server#2">
+    <antcall target="test.run" inheritAll="true">
+  	  <param name="jndiconf" value="distrib/jndi.properties"/>
+    	<param name="a3conf" value="sw/a3servers1.xml"/>
+  	  <param name="className" value="joram.sw.SWClient"/>
+	    <param name="jvmargs" value=""/>
+      <param name="args" value="2"/>
+  	</antcall>
+  </target>
+
+  <target name="sw.test1-3" depends="init.a3props,compile"
+          description=" --> test SW scenario server#3">
+    <antcall target="test.run" inheritAll="true">
+  	  <param name="jndiconf" value="distrib/jndi.properties"/>
+    	<param name="a3conf" value="sw/a3servers1.xml"/>
+  	  <param name="className" value="joram.sw.SWClient"/>
+	    <param name="jvmargs" value=""/>
+      <param name="args" value="3"/>
+  	</antcall>
+  </target>
+
+  <target name="sw.test1-4" depends="init.a3props,compile"
+          description=" --> test SW scenario server#4">
+    <antcall target="test.run" inheritAll="true">
+  	  <param name="jndiconf" value="distrib/jndi.properties"/>
+    	<param name="a3conf" value="sw/a3servers1.xml"/>
+  	  <param name="className" value="joram.sw.SWClient"/>
+	    <param name="jvmargs" value=""/>
+      <param name="args" value="4"/>
+  	</antcall>
   </target>
 
 </project>
