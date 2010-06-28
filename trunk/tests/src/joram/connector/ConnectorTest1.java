@@ -211,12 +211,9 @@ public class ConnectorTest1 extends TestCase {
   private static int counter2 = 0;
   private static int counter3 = 0;
   
-<<<<<<< .mine
   public static synchronized void countMessages(String text, int idx) {
     assertTrue("content is null", (text != null));
-=======
-  public static synchronized void countMessages(String text) {
->>>>>>> .r3945
+
     if (text == null) return;
     
     if (text.startsWith("with queue")) {
