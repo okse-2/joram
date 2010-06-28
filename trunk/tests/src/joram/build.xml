@@ -60,6 +60,7 @@
           description=" --> custom selection of tests to run on bamboo">
     <property name="SCAdminClass" value="framework.SCAdminOSGi"/>
     <property name="isOSGi" value="true"/>
+  	<property name="JVM_OPT" value="-XX:+UnlockDiagnosticVMOptions -XX:+UnsyncloadClass"/>
     <antcall target="tests.base"/>
     <antcall target="tests.recovery"/>
     <antcall target="tests.admin"/>
@@ -524,7 +525,7 @@ description=" --> launch all exceptionlistener tests">
     <!-- Launch test without initialization -->
     <java classname="${className}" failonerror="no" fork="yes" maxmemory="256m" dir="${test.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-DSCAdminClass=${SCAdminClass} -Dfelix.dir=${felix.dir} -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -Dframework.TestCase.TestId=${testid} -Dframework.TestCase.OutFile=${report.file} ${jvmargs}"/>
+      <jvmarg line="${JVM_OPT} -DSCAdminClass=${SCAdminClass} -Dfelix.dir=${felix.dir} -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -Dframework.TestCase.TestId=${testid} -Dframework.TestCase.OutFile=${report.file} ${jvmargs}"/>
       <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
       <arg line="${args}"/>
     </java>
