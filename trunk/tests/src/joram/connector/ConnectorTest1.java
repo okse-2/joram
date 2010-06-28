@@ -22,6 +22,7 @@
  */
 package joram.connector;
 
+import javax.jms.JMSException;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
@@ -134,12 +135,15 @@ public class ConnectorTest1 extends TestCase {
       ja.endpointActivation(mep3 , spec3);  // listener on other queue
 
       msg = os.createTextMessage("with queue");
+      msg.setIntProperty("idx", 0);
       prod.send(msg);
       
       msg = os.createTextMessage("with topic");
+      msg.setIntProperty("idx", 0);
       prod2.send(msg);
 
       msg = os.createTextMessage("with anotherQueue");
+      msg.setIntProperty("idx", 0);
       prod3.send(msg);
 
       Thread.sleep(5000);  // wait onMessage
@@ -152,8 +156,9 @@ public class ConnectorTest1 extends TestCase {
           int i = 0;
           try {
             Thread.sleep(50);
-            while(i!=100){
+            while(i<100){
               TextMessage msg = os.createTextMessage("with queue " + i++);
+              msg.setIntProperty("idx", i);
               prod.send(msg);
             }
           } catch (Exception exc) {}
@@ -164,8 +169,9 @@ public class ConnectorTest1 extends TestCase {
         public void run() {
           int i = 0;
           try {
-            while(i!=100){
+            while(i<100){
               TextMessage msg = os.createTextMessage("with topic " + i++);
+              msg.setIntProperty("idx", i);
               prod2.send(msg);
             }
           } catch (Exception exc) {}
@@ -176,8 +182,9 @@ public class ConnectorTest1 extends TestCase {
         public void run() {
           int i = 0;
           try {
-            while(i!=100){
+            while(i<100){
               TextMessage msg = os.createTextMessage("with anotherQueue " + i++);
+              msg.setIntProperty("idx", i);
               prod3.send(msg);
             }
           } catch (Exception exc) {}
@@ -187,7 +194,7 @@ public class ConnectorTest1 extends TestCase {
       Thread.sleep(10000); // wait onMessage
       assertTrue("counter1=" + counter1 + " should be 101", counter1 == 101);
       assertTrue("counter2=" + counter2 + " should be 101", counter2 == 101);
-      assertTrue("counter3=" + counter3 + " should be 101", counter3 == 101 );
+      assertTrue("counter3=" + counter3 + " should be 101", counter3 == 101);
       
       ja.stop();
     } catch(Throwable exc) {
@@ -204,15 +211,25 @@ public class ConnectorTest1 extends TestCase {
   private static int counter2 = 0;
   private static int counter3 = 0;
   
+<<<<<<< .mine
+  public static synchronized void countMessages(String text, int idx) {
+    assertTrue("content is null", (text != null));
+=======
   public static synchronized void countMessages(String text) {
+>>>>>>> .r3945
     if (text == null) return;
     
     if (text.startsWith("with queue")) {
+      assertTrue("queue: " + idx + " should be " + counter1, (idx == counter1));
       counter1 += 1;
     } else if (text.startsWith("with topic")) {
+      assertTrue("topic: " + idx + " should be " + counter2, (idx == counter2));
       counter2 += 1;
     } else if (text.startsWith("with anotherQueue")) {
+      assertTrue("anotherQueue: " + idx + " should be " + counter3, (idx == counter3));
       counter3 += 1;
+    } else {
+      
     }
   }
 }
