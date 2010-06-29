@@ -6,7 +6,6 @@
 	<classpathentry kind="src" output="jndi/server/target/classes" path="jndi/server/src/main/java"/>
 	<classpathentry kind="src" output="jndi/client/target/classes" path="jndi/client/src/main/java"/>
 	<classpathentry kind="src" output="joram/shared/target/classes" path="joram/shared/src/main/java"/>
-	<classpathentry kind="src" output="joram/mom/target/classes" path="joram/mom/src/main/java"/>
 	<classpathentry kind="src" output="joram/mom/core/target/classes" path="joram/mom/core/src/main/java"/>
 	<classpathentry kind="src" output="joram/client/jms/target/classes" path="joram/client/jms/src/main/java"/>
 	<classpathentry kind="src" output="joram/client/jca/target/classes" path="joram/client/jca/src/main/java"/>
