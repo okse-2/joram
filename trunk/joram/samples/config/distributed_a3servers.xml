@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <config>
-  <domain name="D1"/>
+  <domain name="D1" network="fr.dyade.aaa.agent.PoolNetwork"/>
 
   <property name="Transaction" value="fr.dyade.aaa.util.NTransaction"/>
 
