@@ -50,7 +50,6 @@
     <dependency>
       <groupId>org.objectweb.joram</groupId>
       <artifactId>jftp</artifactId>
-      <version>1.52</version>
       <type>jar</type>
     </dependency>
   </dependencies>  
