@@ -143,6 +143,8 @@ public class SCAdminOSGi implements SCAdminItf {
     if (cid != NO_CID_DEFINED)
       argv.add("-D" + Activator.AGENT_SERVER_CLUSTERID_PROPERTY + "=" + cid);
     argv.add("-D" + Activator.AGENT_SERVER_STORAGE_PROPERTY + "=s" + sid);
+    argv.add("-XX:+UnlockDiagnosticVMOptions");
+    argv.add("-XX:+UnsyncloadClass");
 
     // Main class
     argv.add("org.apache.felix.main.Main");
