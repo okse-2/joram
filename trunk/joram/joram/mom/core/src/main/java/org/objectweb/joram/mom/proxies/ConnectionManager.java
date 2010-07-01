@@ -40,7 +40,6 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.common.Debug;
-import fr.dyade.aaa.common.LoadClassLock;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
@@ -195,10 +194,8 @@ public class ConnectionManager implements ConnectionManagerMBean {
       String identityClassName) throws Exception {
     Identity identity = null;
     try {
-    	synchronized (LoadClassLock.lock) {
-    		Class clazz = Class.forName(identityClassName);
-    		identity = (Identity) clazz.newInstance();
-    	}
+    	Class clazz = Class.forName(identityClassName);
+    	identity = (Identity) clazz.newInstance();
     	if (adminPassword != null)
         identity.setIdentity(adminName, adminPassword);
       else
