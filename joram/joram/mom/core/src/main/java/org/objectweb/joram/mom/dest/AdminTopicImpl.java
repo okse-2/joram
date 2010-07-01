@@ -165,7 +165,6 @@ import fr.dyade.aaa.agent.conf.A3CMLConfig;
 import fr.dyade.aaa.agent.conf.A3CMLDomain;
 import fr.dyade.aaa.agent.conf.A3CMLNetwork;
 import fr.dyade.aaa.agent.conf.A3CMLServer;
-import fr.dyade.aaa.common.LoadClassLock;
 
 /**
  * The <code>AdminTopicImpl</code> class implements the admin topic behavior,
@@ -1069,9 +1068,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       // Instantiating the destination class.
       Destination dest = null;
       try {
-        synchronized (LoadClassLock.lock) {
-          dest = (Destination) Class.forName(className).newInstance();
-        }
+      	dest = (Destination) Class.forName(className).newInstance();
         dest.setName(destName);
         ((AdminDestinationItf) dest).init(adminId, properties);
       } catch (Exception exc) {
