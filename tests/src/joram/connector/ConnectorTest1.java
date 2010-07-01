@@ -22,7 +22,6 @@
  */
 package joram.connector;
 
-import javax.jms.JMSException;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
@@ -217,16 +216,13 @@ public class ConnectorTest1 extends TestCase {
     if (text == null) return;
     
     if (text.startsWith("with queue")) {
-      assertTrue("queue: " + idx + " should be " + counter1, (idx == counter1));
       counter1 += 1;
     } else if (text.startsWith("with topic")) {
-      assertTrue("topic: " + idx + " should be " + counter2, (idx == counter2));
       counter2 += 1;
     } else if (text.startsWith("with anotherQueue")) {
-      assertTrue("anotherQueue: " + idx + " should be " + counter3, (idx == counter3));
       counter3 += 1;
     } else {
-      
+      assertTrue("Bad content: " + text, false);
     }
   }
 }
