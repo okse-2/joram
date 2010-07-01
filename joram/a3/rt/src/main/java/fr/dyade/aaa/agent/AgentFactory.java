@@ -26,8 +26,6 @@ import java.io.ObjectInputStream;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
-import fr.dyade.aaa.common.LoadClassLock;
-
 /**
  * <code>Agent</code> used to allow remote agent creation. Every agent
  * server hosts a factory agent, they all use a predefined stamp identifier
@@ -97,10 +95,7 @@ final class AgentFactory extends Agent {
         // Restore the new agent state.
         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(cnot.agentState, 0,
             cnot.agentState.length));
-        Agent ag;
-        synchronized (LoadClassLock.lock) {
-          ag = (Agent) ois.readObject();
-        }
+        Agent ag = (Agent) ois.readObject();
         try {
           ois.close();
         } catch (IOException exc) {}

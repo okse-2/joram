@@ -33,7 +33,6 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.osgi.JoramServiceTracker;
-import fr.dyade.aaa.common.LoadClassLock;
 import fr.dyade.aaa.common.Strings;
 
 /**
@@ -152,9 +151,7 @@ public class ServiceManager implements Serializable {
     Object args[] = new Object[] { desc.getArguments(), new Boolean(!desc.isInitialized()) };
     
     Class service = null;
-    synchronized (LoadClassLock.lock) {
-      service = Class.forName(desc.getClassName());
-    }
+    service = Class.forName(desc.getClassName());
     Method init = service.getMethod("init", ptypes);
 
     init.invoke(null, args);
@@ -216,10 +213,7 @@ public class ServiceManager implements Serializable {
     // DF: idempotency (could be done in AgentAdmin)
     if (! desc.running) return;
 //       throw new Exception("Service already stopped");
-    Class service;
-    synchronized (LoadClassLock.lock) {
-      service = Class.forName(desc.getClassName());
-    }
+    Class service = Class.forName(desc.getClassName());
     Method stop = service.getMethod("stopService", new Class[0]);
     stop.invoke(null, (Object[]) null);
     desc.running = false;
