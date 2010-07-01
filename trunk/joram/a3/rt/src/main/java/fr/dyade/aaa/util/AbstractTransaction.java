@@ -27,8 +27,6 @@ import java.io.ObjectStreamConstants;
 import java.io.Serializable;
 import java.util.Hashtable;
 
-import fr.dyade.aaa.common.LoadClassLock;
-
 /**
  *  The AbstractTransaction class implements the common part of the Transaction
  * Transaction interface. A transaction implementation only needs to define several
@@ -313,9 +311,7 @@ public abstract class AbstractTransaction implements Transaction {
       ByteArrayInputStream bis = new ByteArrayInputStream(buf);
       ObjectInputStream ois = new ObjectInputStream(bis);
       try {
-        synchronized (LoadClassLock.lock) {
-          return ois.readObject();
-        }
+      	return ois.readObject();
       } finally {
         ois.close();
         bis.close();
