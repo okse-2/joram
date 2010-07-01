@@ -29,7 +29,6 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.BinaryDump;
-import fr.dyade.aaa.common.LoadClassLock;
 
 /**
  * Class used to receive messages through a stream.
@@ -250,11 +249,8 @@ public abstract class MessageInputStream extends InputStream {
       
       if (getLogger().isLoggable(BasicLevel.DEBUG))
         getLogger().log(BasicLevel.DEBUG, "readMessage - 2");
-      
 
-      synchronized (LoadClassLock.lock) {
-        msg.not = (Notification) ois.readObject();
-      }
+      msg.not = (Notification) ois.readObject();
       
       if (getLogger().isLoggable(BasicLevel.DEBUG))
         getLogger().log(BasicLevel.DEBUG, "readMessage - 3");
