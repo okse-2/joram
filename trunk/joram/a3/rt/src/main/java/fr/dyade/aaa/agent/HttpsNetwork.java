@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -205,18 +205,15 @@ public final class HttpsNetwork extends HttpNetwork {
   private void doTunnelHandshake(Socket tunnel, InetAddress host, int port)
     throws IOException {
     OutputStream out = tunnel.getOutputStream();
-    String msg = "CONNECT " + host.getHostName() + ":" + port + " HTTP/1.0\n"
-      + "User-Agent: "
-      + sun.net.www.protocol.http.HttpURLConnection.userAgent
-      + "\r\n\r\n";
+    String msg = "CONNECT " + host.getHostName() + ":" + port + " HTTP/1.0\r\n\r\n";
+    
     byte b[];
     try {
       // We really do want ASCII7 -- the http protocol doesn't change
       // with locale.
       b = msg.getBytes("ASCII7");
     } catch (UnsupportedEncodingException ignored) {
-      // If ASCII7 isn't there, something serious is wrong, but
-      // Paranoia Is Good (tm)
+      // If ASCII7 isn't there, something serious is wrong
       b = msg.getBytes();
     }
     out.write(b);
