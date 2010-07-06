@@ -1440,7 +1440,7 @@ public final class AgentServer {
         Properties monitoringProps = new Properties();
         monitoringProps.load(new FileInputStream(file));
         
-        fileMonitoringTimerTask = new FileMonitoringTimerTask(new java.util.Timer(true), period, monitoringProps, results);
+        fileMonitoringTimerTask = new FileMonitoringTimerTask(getTimer(), period, monitoringProps, results);
         if (fileMonitoringTimerTask != null) {
           try {
             MXWrapper.registerMBean(fileMonitoringTimerTask,
@@ -1475,7 +1475,7 @@ public final class AgentServer {
         Properties monitoringProps = new Properties();
         monitoringProps.load(new FileInputStream(file));
         
-        logMonitoringTimerTask = new LogMonitoringTimerTask(new java.util.Timer(true), period, monitoringProps,
+        logMonitoringTimerTask = new LogMonitoringTimerTask(getTimer(), period, monitoringProps,
                                                             logger, logmsg, loglevel);
 
         if (logMonitoringTimerTask != null) {
@@ -1492,7 +1492,7 @@ public final class AgentServer {
     } catch (Exception exc) {
       logmon.log(BasicLevel.WARN, getName() + "Cannot read monitoring configuration file: " + config, exc);
     }
-
+    
     if (errBuf == null) return null;
     return errBuf.toString();
   }
