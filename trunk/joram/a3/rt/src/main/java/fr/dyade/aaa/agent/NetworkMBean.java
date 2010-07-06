@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -132,9 +132,41 @@ public interface NetworkMBean {
   public void setWDRetryPeriod3(long WDRetryPeriod3);
 
   /**
-   * Gets the number of waiting messages in this engine.
+   * Gets the number of waiting messages in this network.
    *
-   *  return	the number of waiting messages.
+   * @return	the number of waiting messages.
    */
   public int getNbWaitingMessages();
+
+  /**
+   * Returns the number of messages sent since last reboot.
+   * 
+   * @return  the number of messages sent since last reboot.
+   */
+  public int getNbMessageSent();
+
+  /**
+   * Returns the number of messages received since last reboot.
+   * 
+   * @return  the number of messages received since last reboot.
+   */
+  public int getNbMessageReceived();
+
+  /**
+   * Returns the load averages for the last minute.
+   * @return the load averages for the last minute.
+   */
+  public float getAverageLoad1();
+
+  /**
+   * Returns the load averages for the past 5 minutes.
+   * @return the load averages for the past 5 minutes.
+   */
+  public float getAverageLoad5();
+  
+  /**
+   * Returns the load averages for the past 15 minutes.
+   * @return the load averages for the past 15 minutes.
+   */
+  public float getAverageLoad15();
 }

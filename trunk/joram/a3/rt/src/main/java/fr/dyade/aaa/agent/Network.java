@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -24,11 +24,13 @@
 package fr.dyade.aaa.agent;
 
 import java.io.IOException;
+import java.util.Timer;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Arrays;
+import fr.dyade.aaa.common.AverageLoadTask;
 import fr.dyade.aaa.common.Strings;
 
 /**
@@ -234,10 +236,32 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
   /**
    * Gets the number of waiting messages in this engine.
    *
-   *  return	the number of waiting messages.
+   * @return	the number of waiting messages.
    */
   public int getNbWaitingMessages() {
     return qout.size();
+  }
+
+  protected int nbMessageOut = 0;
+  
+  /**
+   * Returns the number of messages sent since last reboot.
+   * 
+   * @return  the number of messages sent since last reboot.
+   */
+  public int getNbMessageSent() {
+    return nbMessageOut - getNbWaitingMessages();
+  }
+
+  protected int nbMessageIn = 0;
+  
+  /**
+   * Returns the number of messages received since last reboot.
+   * 
+   * @return  the number of messages received since last reboot.
+   */
+  public int getNbMessageReceived() {
+    return nbMessageIn;
   }
 
   protected Logger logmon = null;
@@ -328,7 +352,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
    * @param msg		the message
    */
   public void insert(Message msg) {
-    qout.insert(msg);
+    qout.insert(msg); nbMessageOut += 1;
   }
 
   /**
@@ -444,6 +468,8 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     setProperties();
 
     restore();
+    
+    averageLoadTask = new NetworkAverageLoadTask(AgentServer.getTimer());
   }
 
   /**
@@ -638,7 +664,7 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     // Saves the message.
     msg.save();
     // Push it in "ready to deliver" queue.
-    qout.push(msg);
+    qout.push(msg);  nbMessageOut += 1;
   }
 
   /**
@@ -791,14 +817,11 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     int todo = testRecvUpdate(source, msg.getStamp());
 
     if (todo == DELIVER) {
-      // Deliver the message then try to deliver alls waiting message.
-      // Allocate a local time to the message to order it in
-      // local queue, and save it.
-      Channel.post(msg);
+      // Deliver the message and save it.
+      Channel.post(msg); nbMessageIn += 1;
 
       if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG,
-                   getName() + ", deliver msg#" + msg.getStamp());
+        logmon.log(BasicLevel.DEBUG, getName() + ", deliver msg#" + msg.getStamp());
 
       Channel.save();
       AgentServer.getTransaction().commit(false);
@@ -848,5 +871,47 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
 
   public final int getPort() {
     return port;
+  }
+  
+  NetworkAverageLoadTask averageLoadTask = null;
+  
+  /**
+   * Returns the load averages for the last minute.
+   * @return the load averages for the last minute.
+   */
+  public float getAverageLoad1() {
+    return averageLoadTask.getAverageLoad1();
+  }
+
+  /**
+   * Returns the load averages for the past 5 minutes.
+   * @return the load averages for the past 5 minutes.
+   */
+  public float getAverageLoad5() {
+    return averageLoadTask.getAverageLoad5();
+  }
+  
+  /**
+   * Returns the load averages for the past 15 minutes.
+   * @return the load averages for the past 15 minutes.
+   */
+  public float getAverageLoad15() {
+    return averageLoadTask.getAverageLoad15();
+  }
+  
+  class NetworkAverageLoadTask extends AverageLoadTask {
+    public NetworkAverageLoadTask(Timer timer) {
+      start(timer);
+    }
+    
+    /**
+     * Returns the number of waiting messages in the enfgine.
+     * 
+     * @see fr.dyade.aaa.common.AverageLoadTask#countActiveTasks()
+     */
+    @Override
+    protected long countActiveTasks() {
+      return getNbWaitingMessages();
+    }
   }
 }

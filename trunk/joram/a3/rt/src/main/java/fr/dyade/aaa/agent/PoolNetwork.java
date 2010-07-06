@@ -576,7 +576,20 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
   final int getNbBufferingMessageToSent(short sid) {
     return sessions[index(sid)].getNbBufferingMessageToSent();
   }
-  
+
+  /**
+   * Gets the number of waiting messages in this engine.
+   *
+   * @return  the number of waiting messages.
+   */
+  public int getNbWaitingMessages() {
+    int waitingMessages = 0;
+    for (int i=0; i<sessions.length; i++)
+      if (servers[i] != AgentServer.getServerId())
+        waitingMessages += sessions[i].getNbBufferingMessageToSent();
+    return waitingMessages;
+  }
+
   /**
    * Returns a string representation of this consumer, including the
    * daemon's name and status.
