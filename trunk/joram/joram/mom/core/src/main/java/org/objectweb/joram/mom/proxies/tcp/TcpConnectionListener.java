@@ -204,10 +204,14 @@ public class TcpConnectionListener extends Daemon {
               + magic[6] + '/' + magic[7]);
         }
       }
-      if (magic[7] != MetaData.joramMagic[7] && magic[7] > 0) {
-      	logger.log(BasicLevel.ERROR, "Bad protocol version number");
-        protocolErrorCount++;
-        throw new IllegalAccessException("Bad protocol version number");
+      if (magic[7] != MetaData.joramMagic[7]) {
+        if (magic[7] > 0 && MetaData.joramMagic[7] > 0) {
+          logger.log(BasicLevel.ERROR, "Bad protocol version number " + magic[7] + " != " + MetaData.joramMagic[7]);
+          protocolErrorCount++;
+          throw new IllegalAccessException("Bad protocol version number " + magic[7] + " != " + MetaData.joramMagic[7]);
+        } else {
+          logger.log(BasicLevel.WARN, "Wildcard protocol version number: from stream = " + magic[7] + ", from MetaData = " + MetaData.joramMagic[7]);
+        }
       }
       
       if (verifyClockSynchro) {
