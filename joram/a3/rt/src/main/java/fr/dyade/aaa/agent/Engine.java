@@ -23,11 +23,13 @@ package fr.dyade.aaa.agent;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Timer;
 import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
+import fr.dyade.aaa.common.AverageLoadTask;
 import fr.dyade.aaa.common.Queue;
 
 class EngineThread extends Thread {
@@ -398,6 +400,9 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
       logmon.log(BasicLevel.ERROR, getName() + ", can't initialize", exc);
       throw exc;
     }
+    
+    averageLoadTask = new EngineAverageLoadTask(AgentServer.getTimer());
+
     logmon.log(BasicLevel.DEBUG, getName() + ", initialized");
   }
 
@@ -525,9 +530,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
-                 getName() + ", garbage: " + agents.size() +
-                 '/' + NbMaxAgents + '+' + fixedAgentIdList.size() +
-                 ' ' + now);
+                 getName() + ", garbage: " + agents.size() + '/' + NbMaxAgents + '+' + fixedAgentIdList.size() + ' ' + now);
     long deadline = now - NbMaxAgents;
     Agent[] ag = new Agent[agents.size()];
     int i = 0;
@@ -646,8 +649,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    * @exception Exception
    *	when executing class specific initialization
    */
-  final Agent load(AgentId id)
-  throws IOException, ClassNotFoundException, Exception {
+  final Agent load(AgentId id) throws IOException, ClassNotFoundException, Exception {
     now += 1;
 
     Agent ag = (Agent) agents.get(id);
@@ -1068,6 +1070,48 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     // The transaction has committed, then validate all messages.
     Channel.validate();
     AgentServer.getTransaction().release();
+  }
+  
+  EngineAverageLoadTask averageLoadTask = null;
+  
+  /**
+   * Returns the load averages for the last minute.
+   * @return the load averages for the last minute.
+   */
+  public float getAverageLoad1() {
+    return averageLoadTask.getAverageLoad1();
+  }
+
+  /**
+   * Returns the load averages for the past 5 minutes.
+   * @return the load averages for the past 5 minutes.
+   */
+  public float getAverageLoad5() {
+    return averageLoadTask.getAverageLoad5();
+  }
+  
+  /**
+   * Returns the load averages for the past 15 minutes.
+   * @return the load averages for the past 15 minutes.
+   */
+  public float getAverageLoad15() {
+    return averageLoadTask.getAverageLoad15();
+  }
+
+  class EngineAverageLoadTask extends AverageLoadTask {
+    public EngineAverageLoadTask(Timer timer) {
+      start(timer);
+    }
+    
+    /**
+     * Returns the number of waiting messages in the enfgine.
+     * 
+     * @see fr.dyade.aaa.common.AverageLoadTask#countActiveTasks()
+     */
+    @Override
+    protected long countActiveTasks() {
+      return AgentServer.engine.getNbWaitingMessages();
+    }
   }
 
   /**
