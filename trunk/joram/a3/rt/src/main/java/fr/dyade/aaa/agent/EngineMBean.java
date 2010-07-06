@@ -85,7 +85,25 @@ public interface EngineMBean {
   public void setNbMaxAgents(int NbMaxAgents);
 
   public String dumpAgent(String id) throws Exception;
+  
+  /**
+   * Returns the load averages for the last minute.
+   * @return the load averages for the last minute.
+   */
+  public float getAverageLoad1();
 
+  /**
+   * Returns the load averages for the past 5 minutes.
+   * @return the load averages for the past 5 minutes.
+   */
+  public float getAverageLoad5();
+  
+  /**
+   * Returns the load averages for the past 15 minutes.
+   * @return the load averages for the past 15 minutes.
+   */
+  public float getAverageLoad15();
+  
   /**
    * Returns a string representation of this engine. 
    *
