@@ -2120,7 +2120,7 @@ description=" --> launch all exceptionlistener tests">
         <antcall target="test.start" inheritAll="true">
           <param name="className" value="joram.dursub.Test6b"/>
           <param name="testid" value="dursub.test6"/>
-          <param name="jvmargs" value="-Dosgi.shell.telnet.port=7890"/>
+          <param name="jvmargs" value="-Dosgi.shell.telnet.port=16010"/>
           <param name="args" value=""/>
         </antcall>
       </sequential>
