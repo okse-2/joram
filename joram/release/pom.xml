@@ -211,6 +211,12 @@
     </dependency>
     <dependency>
       <groupId>org.objectweb.joram</groupId>
+      <artifactId>a3-osgi</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>jndi-shared</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
