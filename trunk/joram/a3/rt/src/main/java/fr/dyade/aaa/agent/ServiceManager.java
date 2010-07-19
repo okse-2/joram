@@ -32,7 +32,6 @@ import java.util.NoSuchElementException;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.agent.osgi.JoramServiceTracker;
 import fr.dyade.aaa.common.Strings;
 
 /**
@@ -127,21 +126,6 @@ public class ServiceManager implements Serializable {
    * @param desc	service descriptor.
    */
   public static void start(ServiceDesc desc) throws Exception {
-    if (!AgentServer.isOSGi) {
-      doStart(desc);
-    } else {
-      // In OSGi context, start a service tracker to start the service
-      // when it becomes available.
-      JoramServiceTracker tracker = new JoramServiceTracker(desc);
-
-      manager.trackers.put(desc.scname, null);
-      if (xlogmon.isLoggable(BasicLevel.DEBUG))
-        xlogmon.log(BasicLevel.DEBUG, "Tracker for " + desc.scname + " created.");
-      tracker.open();
-    }
-  }
-
-  public static void doStart(ServiceDesc desc) throws Exception {
     if (xlogmon.isLoggable(BasicLevel.DEBUG))
       xlogmon.log(BasicLevel.DEBUG, getName() + " start service: " + desc);
 
@@ -200,16 +184,6 @@ public class ServiceManager implements Serializable {
    * @param desc	service descriptor.
    */
   public static void stop(ServiceDesc desc) throws Exception {
-
-    if (AgentServer.isOSGi) {
-      JoramServiceTracker tracker = (JoramServiceTracker) manager.trackers.remove(desc.scname);
-      if (tracker != null) {
-        tracker.close();
-        if (xlogmon.isLoggable(BasicLevel.DEBUG))
-          xlogmon.log(BasicLevel.DEBUG, "tracker for " + desc.scname + " stopped.");
-      }
-    }
-
     // DF: idempotency (could be done in AgentAdmin)
     if (! desc.running) return;
 //       throw new Exception("Service already stopped");
