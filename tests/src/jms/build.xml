@@ -42,7 +42,7 @@
   </target>
   
   <target name="jms.test.osgi"
-          description=" --> launch all jndi2 tests">
+          description=" --> launch all jms tests">
     <property name="SCAdminClass" value="framework.SCAdminOSGi"/>
     <antcall target="jms.test"/>
   </target>
