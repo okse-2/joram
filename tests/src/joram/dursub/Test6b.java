@@ -45,7 +45,13 @@ public class Test6b extends TestCase {
   }
 
   public void run() {
+  	int telnetPort = -1;
     try {
+      try {
+        telnetPort = Integer.getInteger("osgi.shell.telnet.port").intValue();
+      } catch (NullPointerException npe) {
+        error(new Exception("A telnet port must be specified to use stopAgentServerExt"));
+      }
       ConnectionFactory cf = TcpConnectionFactory.create("localhost",2560 );
       ((TcpConnectionFactory) cf).getParameters().connectingTimer = 10;
       AdminModule.connect(cf, "root", "root");
@@ -72,6 +78,9 @@ public class Test6b extends TestCase {
       exc.printStackTrace();
       error(exc);
     } finally {
+    	if (telnetPort != -1) {
+        stopAgentServerExt(telnetPort);
+      }
       endTest();     
     }
   }
