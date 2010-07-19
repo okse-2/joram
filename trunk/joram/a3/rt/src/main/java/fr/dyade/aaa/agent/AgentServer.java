@@ -47,7 +47,6 @@ import fr.dyade.aaa.agent.conf.A3CMLNetwork;
 import fr.dyade.aaa.agent.conf.A3CMLProperty;
 import fr.dyade.aaa.agent.conf.A3CMLServer;
 import fr.dyade.aaa.agent.conf.A3CMLService;
-import fr.dyade.aaa.agent.osgi.Activator;
 import fr.dyade.aaa.common.Configuration;
 import fr.dyade.aaa.common.monitoring.FileMonitoringTimerTask;
 import fr.dyade.aaa.common.monitoring.LogMonitoringTimerTask;
@@ -224,8 +223,6 @@ public final class AgentServer {
   private static MonitoringTimerTask fileMonitoringTimerTask = null;
   /** Task for log monitoring if configured. */
   private static MonitoringTimerTask logMonitoringTimerTask = null;
-
-  public static boolean isOSGi = false;
 
   static ThreadGroup tgroup = null;
 
@@ -1649,10 +1646,6 @@ public final class AgentServer {
 
       Runtime.getRuntime().gc();
       System.runFinalization();
-
-      if (isOSGi) {
-        Activator.stopFramework();
-      }
 
       logmon.log(BasicLevel.WARN, getName() + ", stopped at " + new Date());
     } catch (Throwable t) {
