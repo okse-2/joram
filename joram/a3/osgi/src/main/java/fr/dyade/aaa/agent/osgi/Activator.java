@@ -74,7 +74,7 @@ public class Activator implements BundleActivator {
 
   public void start(BundleContext context) throws Exception {
     Activator.context = context;
-    AgentServer.isOSGi = true;
+    //AgentServer.isOSGi = true;
 
     short sid = getShortProperty(AGENT_SERVER_ID_PROPERTY, (short) 0);
     String path = getProperty(AGENT_SERVER_STORAGE_PROPERTY, "s" + sid);
