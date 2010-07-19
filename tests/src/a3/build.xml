@@ -142,7 +142,7 @@
   </target>
   
   <target name="tests.base.osgi"
-          description=" --> launch all jndi2 tests">
+          description=" --> launch all a3 tests">
     <property name="SCAdminClass" value="framework.SCAdminOSGi"/>
     <antcall target="tests.base"/>
   </target>
