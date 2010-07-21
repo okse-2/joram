@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,6 +20,8 @@ package fr.dyade.aaa.util.management;
 
 import java.util.Set;
 
+import javax.management.Attribute;
+import javax.management.AttributeList;
 import javax.management.MBeanAttributeInfo;
 import javax.management.ObjectName;
 
@@ -30,8 +32,11 @@ public interface MXServer {
   
   public Object getAttribute(ObjectName objectName, String attribute) throws Exception;
   
+  public void setAttribute(ObjectName name, Attribute attribute) throws Exception;
+  
   public MBeanAttributeInfo[] getAttributes(ObjectName objectName) throws Exception;
   
-  public Set queryNames(ObjectName objectName);
+  public AttributeList setAttributes(ObjectName name, AttributeList attributes) throws Exception;
   
+  public Set queryNames(ObjectName objectName);
 }
