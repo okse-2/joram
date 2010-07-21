@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,6 +28,8 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
+import javax.management.Attribute;
+import javax.management.AttributeList;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanAttributeInfo;
@@ -156,6 +158,11 @@ public class JMXServer implements MXServer {
     }
   }
   
+  public void setAttribute(ObjectName name, Attribute attribute) throws Exception {
+  	if (mxserver != null)
+  		mxserver.setAttribute(name, attribute);
+  }
+  
   public Object getAttribute(ObjectName objectName, String attribute) throws Exception {
     if (mxserver == null) {
       return null;
@@ -168,6 +175,13 @@ public class JMXServer implements MXServer {
       return null;
     }
     return mxserver.getMBeanInfo(objectName).getAttributes();
+  }
+  
+  public AttributeList setAttributes(ObjectName name, AttributeList attributes) throws Exception {
+  	if (mxserver == null) {
+  		return null;
+  	}
+  	return mxserver.setAttributes(name, attributes);
   }
   
   public Set queryNames(ObjectName objectName) {
