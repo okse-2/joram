@@ -21,7 +21,10 @@ import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.Wind
 import com.scalagent.appli.client.Application;
 import com.scalagent.appli.client.presenter.SubscriptionListPresenter;
 import com.scalagent.appli.client.widget.handler.queue.RefreshAllClickHandler;
+import com.scalagent.appli.client.widget.handler.subscription.NewSubscriptionClickHandler;
+import com.scalagent.appli.client.widget.handler.subscription.SubscriptionDeleteClickHandler;
 import com.scalagent.appli.client.widget.handler.subscription.SubscriptionDetailsClickHandler;
+import com.scalagent.appli.client.widget.handler.subscription.SubscriptionEditClickHandler;
 import com.scalagent.appli.client.widget.record.QueueListRecord;
 import com.scalagent.appli.client.widget.record.SubscriptionListRecord;
 import com.scalagent.appli.shared.SubscriptionWTO;
@@ -33,12 +36,20 @@ import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.types.VisibilityMode;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.IButton;
+import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.Window;
+import com.smartgwt.client.widgets.events.ClickEvent;
+import com.smartgwt.client.widgets.events.ClickHandler;
+import com.smartgwt.client.widgets.events.CloseClickHandler;
+import com.smartgwt.client.widgets.events.CloseClientEvent;
 import com.smartgwt.client.widgets.events.DrawEvent;
 import com.smartgwt.client.widgets.events.DrawHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
+import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
+import com.smartgwt.client.widgets.form.validator.MaskValidator;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
@@ -66,6 +77,7 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
 	SectionStackSection buttonSection;
 	HLayout hl;
 	IButton refreshButton;
+	IButton newSubButton;
 
 	SectionStackSection listStackSection;
 	ListGrid subList;
@@ -81,6 +93,8 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
 	CheckboxItem showDeliveredBox;
 	CheckboxItem showSentDMQBox;
 	CheckboxItem showPendingBox;
+
+	Window winModal = new Window();  
 
 
 	HashMap<String, String> etat = new HashMap<String, String>();
@@ -111,11 +125,23 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
 		refreshButton.setPrompt(Application.messages.queueWidget_buttonRefresh_prompt());
 		refreshButton.addClickHandler(new RefreshAllClickHandler(presenter)); 
 
+		newSubButton = new IButton(); 
+		newSubButton.setMargin(0);
+		newSubButton.setAutoFit(true);
+		newSubButton.setIcon("new.png");  
+		newSubButton.setTitle(Application.messages.subscriptionWidget_buttonNewSubscription_title());
+		newSubButton.setPrompt(Application.messages.subscriptionWidget_buttonNewSubscription_prompt());
+		newSubButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) { drawForm(null); }  
+		}); 		
 
 		hl = new HLayout();
 		hl.setHeight(22);
 		hl.setPadding(5);
+		hl.setMembersMargin(5);
 		hl.addMember(refreshButton);
+		hl.addMember(newSubButton);
+
 
 		buttonSection = new SectionStackSection(Application.messages.subscriptionWidget_actionsSection_title());
 		buttonSection.setExpanded(true);
@@ -143,7 +169,34 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
 
 					return buttonBrowse;
 
-				} else {  
+				} else if (fieldName.equals("deleteField")) {
+
+					IButton buttonDelete = new IButton();  
+					buttonDelete.setAutoFit(true);
+					buttonDelete.setHeight(20); 
+					buttonDelete.setIconSize(13);
+					buttonDelete.setIcon("remove.png");  
+					buttonDelete.setTitle(Application.messages.subscriptionWidget_buttonDelete_title());
+					buttonDelete.setPrompt(Application.messages.queueWidget_buttonDelete_prompt());
+					buttonDelete.addClickHandler(new SubscriptionDeleteClickHandler(presenter, (SubscriptionListRecord) record));
+
+					return buttonDelete;
+
+				} else if (fieldName.equals("editField")) {
+
+					IButton buttonEdit = new IButton();  
+					buttonEdit.setAutoFit(true);
+					buttonEdit.setHeight(20); 
+					buttonEdit.setIconSize(13);
+					buttonEdit.setIcon("pencil.png");  
+					buttonEdit.setTitle(Application.messages.subscriptionWidget_buttonEdit_title());
+					buttonEdit.setPrompt(Application.messages.subscriptionWidget_buttonEdit_prompt());
+					buttonEdit.addClickHandler(new ClickHandler() {
+						public void onClick(ClickEvent event) { drawForm((SubscriptionListRecord) record); }  
+					}); 		
+					return buttonEdit;
+
+				}else {  
 					return null;                     
 				}  	   
 			}	
@@ -160,6 +213,10 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
 		ListGridField pendingCountFieldL = new ListGridField(SubscriptionListRecord.ATTRIBUTE_PENDINGMESSAGECOUNT, Application.messages.subscriptionWidget_pendingFieldL_title());		
 		ListGridField browseField = new ListGridField("browseField", Application.messages.queueWidget_browseFieldL_title(), 110);
 		browseField.setAlign(Alignment.CENTER);  
+		ListGridField editField = new ListGridField("editField", Application.messages.subscriptionWidget_editFieldL_title(), 110);
+		editField.setAlign(Alignment.CENTER);  
+		ListGridField deleteField = new ListGridField("deleteField", Application.messages.subscriptionWidget_deleteFieldL_title(), 110);
+		deleteField.setAlign(Alignment.CENTER);  
 
 		subList.setFields(
 				nameFieldL, 
@@ -167,7 +224,9 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
 				nbMsgsDeliveredSinceCreationFieldL, 
 				nbMsgsSentToDMQSinceCreationFieldL, 
 				pendingCountFieldL,
-				browseField);
+				browseField,
+				editField,
+				deleteField);
 
 		subList.addRecordClickHandler(new RecordClickHandler() {
 
@@ -407,5 +466,142 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
 		}
 	}
 
+	private void drawForm(SubscriptionListRecord slr) {
+
+		winModal = new Window(); 
+		winModal.setHeight(350);
+		winModal.setWidth(400);
+		if(slr == null) winModal.setTitle(Application.messages.subscriptionWidget_winModal_title());  
+		else winModal.setTitle("Subscription \""+slr.getAttributeAsString(SubscriptionListRecord.ATTRIBUTE_NAME)+"\"");  
+		winModal.setShowMinimizeButton(false);  
+		winModal.setIsModal(true);  
+		winModal.setShowModalMask(true);  
+		winModal.centerInPage();  
+		winModal.addCloseClickHandler(new CloseClickHandler() {  
+			public void onCloseClick(CloseClientEvent event) {  
+				winModal.destroy();  
+			}  
+		});  
+
+		Label formTitle = new Label();
+		if(slr == null) formTitle.setContents(Application.messages.subscriptionWidget_formTitle_title());  
+		else formTitle.setContents("Edit \""+slr.getAttributeAsString(SubscriptionListRecord.ATTRIBUTE_NAME)+"\"");  
+		formTitle.setWidth100();
+		formTitle.setAutoHeight();
+		formTitle.setMargin(5);
+		formTitle.setStyleName("title2");
+		formTitle.setLayoutAlign(VerticalAlignment.TOP);  
+		formTitle.setLayoutAlign(Alignment.CENTER);
+
+		final DynamicForm form = new DynamicForm();  
+		form.setWidth100();  
+		form.setPadding(5);  
+		form.setMargin(10);  
+		form.setLayoutAlign(VerticalAlignment.TOP);  
+		form.setLayoutAlign(Alignment.CENTER);
+
+		MaskValidator integerValidator = new MaskValidator();  
+		integerValidator.setMask("^-?[0-9]*$");  
+
+		TextItem nameItem = new TextItem();  
+		nameItem.setTitle(Application.messages.subscriptionWidget_nameItem_title()); 
+		nameItem.setName("nameItem");
+		nameItem.setRequired(true);
+
+		TextItem nbMaxMsgItem = new TextItem();
+		nbMaxMsgItem.setTitle(Application.messages.subscriptionWidget_nbMaxMsgsItem_title());
+		nbMaxMsgItem.setName("nbMaxMsgItem");
+		nbMaxMsgItem.setRequired(true);
+		nbMaxMsgItem.setValidators(integerValidator);  
+
+		TextItem contextIdItem = new TextItem();
+		contextIdItem.setTitle(Application.messages.subscriptionWidget_contextIdItem_title());
+		contextIdItem.setName("contextIdItem");
+		contextIdItem.setRequired(true);
+		contextIdItem.setValidators(integerValidator);  
+
+		TextItem selectorItem = new TextItem();
+		selectorItem.setTitle(Application.messages.subscriptionWidget_selectorItem_title());
+		selectorItem.setName("selectorItem");
+		selectorItem.setRequired(true);
+
+		TextItem subRequestIdItem = new TextItem();
+		subRequestIdItem.setTitle(Application.messages.subscriptionWidget_subRequestIdItem_title());
+		subRequestIdItem.setName("subRequestIdItem");
+		subRequestIdItem.setRequired(true);
+		subRequestIdItem.setValidators(integerValidator);  
+
+		CheckboxItem activeItem = new CheckboxItem();  
+		activeItem.setTitle(Application.messages.subscriptionWidget_activeItem_title());
+		activeItem.setName("activeItem");
+
+		CheckboxItem durableItem = new CheckboxItem();  
+		durableItem.setTitle(Application.messages.subscriptionWidget_durableItem_title());
+		durableItem.setName("durableItem");
+
+		if(slr != null) {
+			nameItem.setValue(slr.getAttributeAsString(SubscriptionListRecord.ATTRIBUTE_NAME));
+			nameItem.setDisabled(true);
+			nbMaxMsgItem.setValue(slr.getAttributeAsString(SubscriptionListRecord.ATTRIBUTE_NBMAXMSG));
+			contextIdItem.setValue(slr.getAttributeAsString(SubscriptionListRecord.ATTRIBUTE_CONTEXTID));
+			selectorItem.setValue(slr.getAttributeAsString(SubscriptionListRecord.ATTRIBUTE_SELECTOR));
+			subRequestIdItem.setValue(slr.getAttributeAsString(SubscriptionListRecord.ATTRIBUTE_SUBREQUESTID));
+			activeItem.setValue(slr.getAttributeAsBoolean(SubscriptionListRecord.ATTRIBUTE_ACTIVE));
+			durableItem.setValue(slr.getAttributeAsBoolean(SubscriptionListRecord.ATTRIBUTE_DURABLE));
+		}
+
+		form.setFields(nameItem, 
+				nbMaxMsgItem,
+				contextIdItem,
+				selectorItem,
+				subRequestIdItem,
+				activeItem,
+				durableItem);
+
+		IButton validateButton = new IButton();  
+		if(slr == null) {
+			validateButton.setTitle(Application.messages.subscriptionWidget_validateButton_titleCreate());
+			validateButton.setIcon("add.png");
+			validateButton.addClickHandler(new NewSubscriptionClickHandler(presenter, form));
+		}
+		else {
+			validateButton.setTitle(Application.messages.subscriptionWidget_validateButton_titleEdit());  
+			validateButton.setIcon("accept.png");
+			validateButton.addClickHandler(new SubscriptionEditClickHandler(presenter, form));
+		}
+		validateButton.setAutoFit(true);
+		validateButton.setLayoutAlign(VerticalAlignment.TOP);  
+		validateButton.setLayoutAlign(Alignment.CENTER);
+
+		IButton cancelButton = new IButton();  
+		cancelButton.setTitle(Application.messages.subscriptionWidget_cancelButton_title());
+		cancelButton.setIcon("cancel.png");
+		cancelButton.setAutoFit(true);
+		cancelButton.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				destroyForm();
+			}
+		});
+		cancelButton.setLayoutAlign(VerticalAlignment.TOP);  
+		cancelButton.setLayoutAlign(Alignment.CENTER);
+
+		HLayout hl = new HLayout();
+		hl.setWidth100();
+		hl.setAlign(Alignment.CENTER);
+		hl.setAlign(VerticalAlignment.CENTER);
+		hl.setMembersMargin(5);
+		hl.addMember(validateButton);
+		hl.addMember(cancelButton);
+
+		winModal.addItem(formTitle);  
+		winModal.addItem(form);  
+		winModal.addItem(hl); 
+		winModal.show();
+	}
+
+	public void destroyForm() {
+		winModal.destroy();
+	}
 
 }

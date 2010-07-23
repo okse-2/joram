@@ -124,7 +124,6 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 
 	}
 
-
 	@SuppressWarnings("unchecked")
 	public List<MessageWTO> getMessages(HttpSession session, String queueName) throws Exception {
 
@@ -247,6 +246,38 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 
 	}
 
+	
+	/** QUEUES **/
+	
+	public boolean createNewQueue(QueueWTO queue) {
+		if (!isConnected) { return false; }
+		synchWithJORAM(true);
+		
+		// TODO JORAM : creer une queue
+		System.out.println("!!! TODO JORAM : Creation de queue : "+queue);
+
+		return true;
+	}
+	
+	public boolean editQueue(QueueWTO queue) {
+		if (!isConnected) { return false; }
+		synchWithJORAM(true);
+		
+		// TODO JORAM : editer une queue
+		System.out.println("!!! TODO JORAM : Edition de queue : "+queue);
+
+		return true;
+	}
+	
+	public boolean deleteQueue(String queueName) {
+		if (!isConnected) { return false; }
+
+		// TODO JORAM : supprimer une queue
+		System.out.println("!!! TODO JORAM : Suppression de la queue : "+queueName);
+
+		return true;
+	}
+
 	public boolean cleanWaitingRequest(String queueName) {
 		if (!isConnected) { return false; }
 
@@ -265,41 +296,135 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 		return true;
 	}
 
-	public boolean deleteQueue(String queueName) {
+	
+	/** USERS **/
+	
+	public boolean createNewUser(UserWTO user) {
 		if (!isConnected) { return false; }
-
-		// Map<String, DestinationImplMBean> mapTmp = simulator.getListener().getDestinations();
-		// (FakeQueue) mapTmp.get(queueName)).deleteQueue();
-
-		// TODO JORAM : supprimer la queue
-		System.out.println("!!! TODO JORAM : Suppression de la queue : "+queueName);
+		synchWithJORAM(true);
+		
+		// TODO JORAM : creer un user
+		System.out.println("!!! TODO JORAM : Creation d'un user : "+user);
 
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
+	public boolean editUser(UserWTO user) {
+		if (!isConnected) { return false; }
+		synchWithJORAM(true);
+		
+		// TODO JORAM : editer un user
+		System.out.println("!!! TODO JORAM : Edition de user : "+user);
+
+		return true;
+	}
+
+	public boolean deleteUser(String userName) {
+		if (!isConnected) { return false; }
+		synchWithJORAM(true);
+		
+		// TODO JORAM : supprimer un user
+		System.out.println("!!! TODO JORAM : Suppression de user : "+userName);
+		
+		return true;
+	}
+	
+	
+	/** MESSAGES **/
+	
+	public boolean createNewMessage(MessageWTO message, String queueName) {
+		if (!isConnected) { return false; }
+		synchWithJORAM(true);
+		
+		// TODO JORAM : creer un message
+		System.out.println("!!! TODO JORAM : Creation du message : "+message.getIdS()+" dans "+queueName);
+		
+		return true;
+	}
+
+	public boolean editMessage(MessageWTO message, String queueName) {
+		if (!isConnected) { return false; }
+		synchWithJORAM(true);
+		
+		// TODO JORAM : editer un message
+		System.out.println("!!! TODO JORAM : Edition du message : "+message.getIdS()+" dans "+queueName);
+		
+		return true;
+	}
+
 	public boolean deleteMessage(String messageName, String queueName) {
 		if (!isConnected) { return false; }
-
 		synchWithJORAM(true);
-
-		QueueImplMBean queue = (QueueImplMBean) mapDestinations.get(queueName);
-
-		//		if(queue == null) {
-		//			throw new NotFoundException("Queue not found");
-		//		}
-
+		
+		// TODO JORAM : supprimer un message
 		System.out.println("!!! TODO JORAM : Suppression du message : "+queueName+"/"+messageName);
+		
+		return true;
+	}
+	
 
-		List<MessageView> listMessage = queue.getMessagesView();
+	/** TOPICS **/
+	
+	public boolean createNewTopic(TopicWTO topic) {
+		if (!isConnected) { return false; }
+		synchWithJORAM(true);
+		
+		// TODO JORAM : creer un topic
+		System.out.println("!!! TODO JORAM : Creation du topic : "+topic.getName());
+		
+		return true;
+	}
 
-		for(MessageView msg : listMessage) {
-			if(msg.getId().equals(messageName)) {
-				System.out.println("!!! DELETED");
-			}
-		}
+	public boolean editTopic(TopicWTO topic) {
+		if (!isConnected) { return false; }
+		synchWithJORAM(true);
+		
+		// TODO JORAM : editer un topic
+		System.out.println("!!! TODO JORAM : Edition du topic : "+topic.getName());
+		
+		return true;
+	}
 
+	public boolean deleteTopic(String topicName) {
+		if (!isConnected) { return false; }
+		synchWithJORAM(true);
+		
+		// TODO JORAM : supprimer un topic
+		System.out.println("!!! TODO JORAM : Suppression du topic : "+topicName);
+		
+		return true;
+	}
+	
+	
+	/** SUBSCRIPTIONS **/
 
+	public boolean createNewSubscription(SubscriptionWTO sub) {
+		if (!isConnected) { return false; }
+		synchWithJORAM(true);
+		
+		// TODO JORAM : creer une subscription
+		System.out.println("!!! TODO JORAM : Creation de la subscription : "+sub.getName());
+		
+		return true;
+	}
+
+	public boolean editSubscription(SubscriptionWTO sub) {
+		if (!isConnected) { return false; }
+		synchWithJORAM(true);
+		
+		// TODO JORAM : editer une subscription
+		System.out.println("!!! TODO JORAM : Edition de la subscription : "+sub.getName());
+		
+		return true;
+	}
+
+	public boolean deleteSubscription(String subName) {
+		if (!isConnected) { return false; }
+		synchWithJORAM(true);
+		
+		// TODO JORAM : supprimer une subscription
+		System.out.println("!!! TODO JORAM : Suppression de la subscription : "+subName);
+		
 		return true;
 	}
 }

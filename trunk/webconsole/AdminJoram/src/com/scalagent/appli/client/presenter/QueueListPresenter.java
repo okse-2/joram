@@ -17,6 +17,12 @@ import com.scalagent.appli.client.command.queue.ClearWaitingRequestResponse;
 import com.scalagent.appli.client.command.queue.DeleteQueueAction;
 import com.scalagent.appli.client.command.queue.DeleteQueueHandler;
 import com.scalagent.appli.client.command.queue.DeleteQueueResponse;
+import com.scalagent.appli.client.command.queue.SendEditedQueueAction;
+import com.scalagent.appli.client.command.queue.SendEditedQueueHandler;
+import com.scalagent.appli.client.command.queue.SendEditedQueueResponse;
+import com.scalagent.appli.client.command.queue.SendNewQueueAction;
+import com.scalagent.appli.client.command.queue.SendNewQueueHandler;
+import com.scalagent.appli.client.command.queue.SendNewQueueResponse;
 import com.scalagent.appli.client.event.UpdateCompleteHandler;
 import com.scalagent.appli.client.event.queue.DeletedQueueHandler;
 import com.scalagent.appli.client.event.queue.NewQueueHandler;
@@ -77,21 +83,6 @@ UpdateCompleteHandler
 		getWidget().updateQueue(queue);	
 	}
 
-	public void deleteQueue(QueueWTO queue) {
-		service.execute(new DeleteQueueAction(queue.getName()), new DeleteQueueHandler(eventBus) {
-			@Override
-			public void onSuccess(DeleteQueueResponse response) {
-				if (response.isSuccess()) {
-					fireRefreshAll();
-				} else {
-					SC.warn(response.getMessage());
-					fireRefreshAll();	
-				}
-			}
-		});
-
-	}
-
 	public void clearPendingMessage(QueueWTO queue) {
 		service.execute(new ClearPendingMessageAction(queue.getName()), new ClearPendingMessageHandler(eventBus) {
 			@Override
@@ -139,6 +130,53 @@ UpdateCompleteHandler
 
 	public SortedMap<Date, int[]> getQueueHistory(String name) {
 		return cache.getSpecificHistory(name);
+	}
+
+	public void createNewQueue(QueueWTO newQueue) {
+		service.execute(new SendNewQueueAction(newQueue), new SendNewQueueHandler(eventBus) {
+			@Override
+			public void onSuccess(SendNewQueueResponse response) {
+				if (response.isSuccess()) {
+					SC.say(response.getMessage());
+					widget.destroyForm();
+					fireRefreshAll();
+				} else {
+					SC.warn(response.getMessage());
+					fireRefreshAll();
+				}
+			}
+		});
+	}
+	
+	public void editQueue(QueueWTO queue) {
+		service.execute(new SendEditedQueueAction(queue), new SendEditedQueueHandler(eventBus) {
+			@Override
+			public void onSuccess(SendEditedQueueResponse response) {
+				if (response.isSuccess()) {
+					SC.say(response.getMessage());
+					widget.destroyForm();
+					fireRefreshAll();
+				} else {
+					SC.warn(response.getMessage());
+					fireRefreshAll();
+				}
+			}
+		});
+	}
+	
+	public void deleteQueue(QueueWTO queue) {
+		service.execute(new DeleteQueueAction(queue.getName()), new DeleteQueueHandler(eventBus) {
+			@Override
+			public void onSuccess(DeleteQueueResponse response) {
+				if (response.isSuccess()) {
+					SC.say(response.getMessage());
+					fireRefreshAll();
+				} else {
+					SC.warn(response.getMessage());
+					fireRefreshAll();	
+				}
+			}
+		});
 	}
 
 }

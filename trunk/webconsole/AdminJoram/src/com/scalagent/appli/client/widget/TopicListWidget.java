@@ -16,6 +16,9 @@ import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.Wind
 import com.scalagent.appli.client.Application;
 import com.scalagent.appli.client.presenter.TopicListPresenter;
 import com.scalagent.appli.client.widget.handler.queue.RefreshAllClickHandler;
+import com.scalagent.appli.client.widget.handler.topic.NewTopicClickHandler;
+import com.scalagent.appli.client.widget.handler.topic.TopicDeleteClickHandler;
+import com.scalagent.appli.client.widget.handler.topic.TopicEditClickHandler;
 import com.scalagent.appli.client.widget.record.QueueListRecord;
 import com.scalagent.appli.client.widget.record.TopicListRecord;
 import com.scalagent.appli.shared.TopicWTO;
@@ -25,13 +28,22 @@ import com.smartgwt.client.data.RecordList;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.types.VisibilityMode;
+import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.IButton;
+import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.Window;
+import com.smartgwt.client.widgets.events.ClickEvent;
+import com.smartgwt.client.widgets.events.ClickHandler;
+import com.smartgwt.client.widgets.events.CloseClickHandler;
+import com.smartgwt.client.widgets.events.CloseClientEvent;
 import com.smartgwt.client.widgets.events.DrawEvent;
 import com.smartgwt.client.widgets.events.DrawHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
+import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
+import com.smartgwt.client.widgets.form.validator.MaskValidator;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
@@ -58,6 +70,7 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
 	SectionStackSection buttonSection;
 	HLayout hl;
 	IButton refreshButton;
+	IButton newTopicButton;
 
 	SectionStackSection listStackSection;
 	ListGrid topicList;
@@ -71,6 +84,8 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
 	CheckboxItem showRecievedBox;
 	CheckboxItem showDeliveredBox;
 	CheckboxItem showSentDMQBox;
+	
+	Window winModal = new Window(); 
 
 	public TopicListWidget(TopicListPresenter topicPresenter) {
 		super(topicPresenter);
@@ -100,11 +115,22 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
 		refreshButton.setPrompt(Application.messages.queueWidget_buttonRefresh_prompt());
 		refreshButton.addClickHandler(new RefreshAllClickHandler(presenter)); 
 
+		newTopicButton = new IButton(); 
+		newTopicButton.setMargin(0);
+		newTopicButton.setAutoFit(true);
+		newTopicButton.setIcon("new.png");  
+		newTopicButton.setTitle(Application.messages.topicWidget_buttonNewTopic_title());
+		newTopicButton.setPrompt(Application.messages.topicWidget_buttonNewTopic_prompt());
+		newTopicButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) { drawForm(null); }  
+		}); 		
 
 		hl = new HLayout();
 		hl.setHeight(22);
 		hl.setPadding(5);
+		hl.setMembersMargin(5);
 		hl.addMember(refreshButton);
+		hl.addMember(newTopicButton);
 
 		buttonSection = new SectionStackSection(Application.messages.topicWidget_buttonSection_title());
 		buttonSection.setExpanded(true);
@@ -112,32 +138,47 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
 
 
 
-//		topicList = new ListGrid() {
-//
-//			@Override  
-//			protected Canvas createRecordComponent(final ListGridRecord record, Integer colNum) {  
-//
-//				String fieldName = this.getFieldName(colNum);  
-//
-//				if (fieldName.equals("browseField")) { 
-//
-//					IButton buttonBrowse = new IButton();  
-//					buttonBrowse.setAutoFit(true);
-//					buttonBrowse.setHeight(20);
-//					buttonBrowse.setIconSize(13);
-//					buttonBrowse.setIcon("view_right_p.png"); 
-//					buttonBrowse.setTitle(Application.messages.queueWidget_buttonBrowse_title());
-//					buttonBrowse.setPrompt(Application.messages.queueWidget_buttonBrowse_prompt());
-//					buttonBrowse.addClickHandler(new TopicDetailsClickHandler(presenter, (TopicListRecord) record));
-//
-//					return buttonBrowse;
-//
-//				} else {  
-//					return null;                     
-//				}  	   
-//			}	
-//		};
-		topicList = new ListGrid();
+		topicList = new ListGrid() {
+
+			@Override  
+			protected Canvas createRecordComponent(final ListGridRecord record, Integer colNum) {  
+
+				String fieldName = this.getFieldName(colNum);  
+
+				if (fieldName.equals("deleteField")) {
+
+					IButton buttonDelete = new IButton();  
+					buttonDelete.setAutoFit(true);
+					buttonDelete.setHeight(20); 
+					buttonDelete.setIconSize(13);
+					buttonDelete.setIcon("remove.png");  
+					buttonDelete.setTitle(Application.messages.topicWidget_buttonDelete_title());
+					buttonDelete.setPrompt(Application.messages.topicWidget_buttonDelete_prompt());
+					buttonDelete.addClickHandler(new TopicDeleteClickHandler(presenter, (TopicListRecord) record));
+
+					return buttonDelete;
+
+				} else if (fieldName.equals("editField")) {
+
+					IButton buttonEdit = new IButton();  
+					buttonEdit.setAutoFit(true);
+					buttonEdit.setHeight(20); 
+					buttonEdit.setIconSize(13);
+					buttonEdit.setIcon("pencil.png");  
+					buttonEdit.setTitle(Application.messages.topicWidget_buttonEdit_title());
+					buttonEdit.setPrompt(Application.messages.topicWidget_buttonEdit_prompt());
+					buttonEdit.addClickHandler(new ClickHandler() {
+						public void onClick(ClickEvent event) { drawForm((TopicListRecord) record); }  
+					}); 		
+					return buttonEdit;
+
+				} else {  
+					return null;                     
+				}  	    	   
+			}	
+		};
+		
+		
 		topicList.setRecordComponentPoolingMode("viewport");
 		topicList.setShowGridSummary(true);   
 		topicList.setAlternateRecordStyles(true);
@@ -154,9 +195,10 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
 		ListGridField nbMsgsSentToDMQSinceCreationFieldL = new ListGridField(TopicListRecord.ATTRIBUTE_NBMSGSSENTTODMQSINCECREATION, Application.messages.topicWidget_nbMsgsSentSinceCreationFieldL_title());
 		ListGridField freeReadingFieldL = new ListGridField(TopicListRecord.ATTRIBUTE_FREEREADING, Application.messages.topicWidget_freeReadingFieldL_title());   
 		ListGridField freeWritingFieldL = new ListGridField(TopicListRecord.ATTRIBUTE_FREEWRITING, Application.messages.topicWidget_freeWritingFieldL_title());   
-//		ListGridField browseField = new ListGridField("browseField", Application.messages.queueWidget_browseFieldL_title(), 110);
-
-//		browseField.setAlign(Alignment.CENTER);  
+		ListGridField deleteFieldL = new ListGridField("deleteField", Application.messages.topicWidget_deleteFieldL_title(), 110);
+		deleteFieldL.setAlign(Alignment.CENTER);  
+		ListGridField editFieldL = new ListGridField("editField", Application.messages.topicWidget_editFieldL_title(), 110);
+		editFieldL.setAlign(Alignment.CENTER);  
 		freeReadingFieldL.setValueMap(etat);
 		freeWritingFieldL.setValueMap(etat);
 
@@ -165,8 +207,9 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
 				nbMsgsReceiveSinceCreationFieldL,
 				nbMsgsSentToDMQSinceCreationFieldL,
 				freeReadingFieldL,
-				freeWritingFieldL/*,
-				browseField*/);
+				freeWritingFieldL,
+				editFieldL,
+				deleteFieldL);
 
 		topicList.addRecordClickHandler(new RecordClickHandler() {
 			public void onRecordClick(RecordClickEvent event) {
@@ -432,5 +475,135 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
 			showDeliveredBox.enable();
 			showSentDMQBox.enable();
 		}
+	}
+	
+	private void drawForm(TopicListRecord tlr) {
+
+		winModal = new Window(); 
+		winModal.setHeight(350);
+		winModal.setWidth(400);
+		if(tlr == null) winModal.setTitle(Application.messages.topicWidget_winModal_title());  
+		else winModal.setTitle("Topic \""+tlr.getAttributeAsString(TopicListRecord.ATTRIBUTE_NAME)+"\"");  
+		winModal.setShowMinimizeButton(false);  
+		winModal.setIsModal(true);  
+		winModal.setShowModalMask(true);  
+		winModal.centerInPage();  
+		winModal.addCloseClickHandler(new CloseClickHandler() {  
+			public void onCloseClick(CloseClientEvent event) {  
+				winModal.destroy();  
+			}  
+		});  
+
+
+		Label formTitle = new Label();
+		if(tlr == null) formTitle.setContents(Application.messages.topicWidget_formTitle_title());  
+		else formTitle.setContents("Edit \""+tlr.getAttributeAsString(TopicListRecord.ATTRIBUTE_NAME)+"\"");  
+		formTitle.setWidth100();
+		formTitle.setAutoHeight();
+		formTitle.setMargin(5);
+		formTitle.setStyleName("title2");
+		formTitle.setLayoutAlign(VerticalAlignment.TOP);  
+		formTitle.setLayoutAlign(Alignment.CENTER);
+
+		final DynamicForm form = new DynamicForm();  
+		form.setWidth100();  
+		form.setPadding(5);  
+		form.setMargin(10);  
+		form.setLayoutAlign(VerticalAlignment.TOP);  
+		form.setLayoutAlign(Alignment.CENTER);
+
+		MaskValidator integerValidator = new MaskValidator();  
+		integerValidator.setMask("^-?[0-9]*$");  
+		
+		TextItem nameItem = new TextItem();  
+		nameItem.setTitle(Application.messages.topicWidget_nameItem_title()); 
+		nameItem.setName("nameItem");
+		nameItem.setRequired(true);
+
+		TextItem DMQItem = new TextItem();  
+		DMQItem.setTitle(Application.messages.topicWidget_DMQItem_title()); 
+		DMQItem.setName("DMQItem");
+		DMQItem.setRequired(true);
+
+		TextItem destinationItem = new TextItem();  
+		destinationItem.setTitle(Application.messages.topicWidget_destinationItem_title());
+		destinationItem.setName("destinationItem");
+		destinationItem.setRequired(true);
+
+		TextItem periodItem = new TextItem();  
+		periodItem.setTitle(Application.messages.topicWidget_periodItem_title());
+		periodItem.setName("periodItem");
+		periodItem.setRequired(true);
+		periodItem.setValidators(integerValidator); 
+
+		CheckboxItem freeReadingItem = new CheckboxItem();  
+		freeReadingItem.setTitle(Application.messages.topicWidget_freeReadingItem_title());
+		freeReadingItem.setName("freeReadingItem");
+
+		CheckboxItem freeWritingItem = new CheckboxItem();  
+		freeWritingItem.setTitle(Application.messages.topicWidget_freeWritingItem_title());
+		freeWritingItem.setName("freeWritingItem");
+
+		if(tlr != null) {
+			nameItem.setValue(tlr.getAttributeAsString(TopicListRecord.ATTRIBUTE_NAME));
+			nameItem.setDisabled(true);
+			DMQItem.setValue(tlr.getAttributeAsString(TopicListRecord.ATTRIBUTE_DMQID));
+			destinationItem.setValue(tlr.getAttributeAsString(TopicListRecord.ATTRIBUTE_DESTINATIONID));
+			periodItem.setValue(tlr.getAttributeAsString(TopicListRecord.ATTRIBUTE_PERIOD));
+			freeReadingItem.setValue(tlr.getAttributeAsBoolean(TopicListRecord.ATTRIBUTE_FREEREADING));
+			freeWritingItem.setValue(tlr.getAttributeAsBoolean(TopicListRecord.ATTRIBUTE_FREEWRITING));
+		}
+
+		form.setFields(nameItem, 
+				DMQItem, 
+				destinationItem, 
+				periodItem, 
+				freeReadingItem, 
+				freeWritingItem);
+
+		IButton validateButton = new IButton();  
+		if(tlr == null) {
+			validateButton.setTitle(Application.messages.topicWidget_validateButton_titleCreate());
+			validateButton.setIcon("add.png");
+			validateButton.addClickHandler(new NewTopicClickHandler(presenter, form));
+		}
+		else {
+			validateButton.setTitle(Application.messages.topicWidget_validateButton_titleEdit());  
+			validateButton.setIcon("accept.png");
+			validateButton.addClickHandler(new TopicEditClickHandler(presenter, form));
+		}
+		validateButton.setAutoFit(true);
+		validateButton.setLayoutAlign(VerticalAlignment.TOP);  
+		validateButton.setLayoutAlign(Alignment.CENTER);
+
+		IButton cancelButton = new IButton();  
+		cancelButton.setTitle(Application.messages.topicWidget_cancelButton_title());
+		cancelButton.setIcon("cancel.png");
+		cancelButton.setAutoFit(true);
+		cancelButton.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				destroyForm();
+			}
+		});
+		cancelButton.setLayoutAlign(VerticalAlignment.TOP);  
+		cancelButton.setLayoutAlign(Alignment.CENTER);
+
+		HLayout hl = new HLayout();
+		hl.setWidth100();
+		hl.setAlign(Alignment.CENTER);
+		hl.setAlign(VerticalAlignment.CENTER);
+		hl.setMembersMargin(5);
+		hl.addMember(validateButton);
+		hl.addMember(cancelButton);
+
+		winModal.addItem(formTitle);  
+		winModal.addItem(form);  
+		winModal.addItem(hl); 
+		winModal.show();
+	}
+
+	public void destroyForm() {
+		winModal.destroy();
 	}
 }
