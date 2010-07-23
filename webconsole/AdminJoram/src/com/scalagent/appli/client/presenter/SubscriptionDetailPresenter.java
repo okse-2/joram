@@ -6,6 +6,7 @@
 package com.scalagent.appli.client.presenter;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.SortedMap;
 
 import com.google.gwt.event.shared.HandlerManager;
@@ -14,6 +15,12 @@ import com.scalagent.appli.client.RPCServiceCacheClient;
 import com.scalagent.appli.client.command.message.DeleteMessageAction;
 import com.scalagent.appli.client.command.message.DeleteMessageHandler;
 import com.scalagent.appli.client.command.message.DeleteMessageResponse;
+import com.scalagent.appli.client.command.message.SendEditedMessageAction;
+import com.scalagent.appli.client.command.message.SendEditedMessageHandler;
+import com.scalagent.appli.client.command.message.SendEditedMessageResponse;
+import com.scalagent.appli.client.command.message.SendNewMessageAction;
+import com.scalagent.appli.client.command.message.SendNewMessageHandler;
+import com.scalagent.appli.client.command.message.SendNewMessageResponse;
 import com.scalagent.appli.client.event.UpdateCompleteHandler;
 import com.scalagent.appli.client.event.message.DeletedMessageHandler;
 import com.scalagent.appli.client.event.message.NewMessageHandler;
@@ -21,6 +28,7 @@ import com.scalagent.appli.client.event.message.UpdatedMessageHandler;
 import com.scalagent.appli.client.widget.SubscriptionDetailWidget;
 import com.scalagent.appli.client.widget.record.MessageListRecord;
 import com.scalagent.appli.shared.MessageWTO;
+import com.scalagent.appli.shared.QueueWTO;
 import com.scalagent.appli.shared.SubscriptionWTO;
 import com.scalagent.engine.client.presenter.BasePresenter;
 import com.smartgwt.client.util.SC;
@@ -36,9 +44,6 @@ NewMessageHandler,
 DeletedMessageHandler,
 UpdatedMessageHandler,
 UpdateCompleteHandler
-//QueueNotFoundHandler,
-//DeletedQueueHandler,
-//UpdatedQueueHandler
 {
 	private SubscriptionWTO sub;
 
@@ -67,7 +72,7 @@ UpdateCompleteHandler
 		//		cache.retrieveMessage(getQueue());
 		cache.retrieveQueue(true);
 	}
-	
+
 	@Override
 	public void onNewMessage(MessageWTO message, String subName) {
 		if(sub.getName().equals(subName))
@@ -95,17 +100,17 @@ UpdateCompleteHandler
 		}
 	}
 
-//	@Override
-//	public void onQueueNotFound(String queueName) {
-//		System.out.println("!!! QUEUE NOT FOUND : "+queueName);
-//		disableButtonRefresh(queueName);
-//	}
+	//	@Override
+	//	public void onQueueNotFound(String queueName) {
+	//		System.out.println("!!! QUEUE NOT FOUND : "+queueName);
+	//		disableButtonRefresh(queueName);
+	//	}
 
-//	@Override
-//	public void onQueueDeleted(QueueWTO queue) {
-//		System.out.println("!!! QUEUE DELETED : "+queue.getName());
-//		disableButtonRefresh(queue.getName());
-//	}
+	//	@Override
+	//	public void onQueueDeleted(QueueWTO queue) {
+	//		System.out.println("!!! QUEUE DELETED : "+queue.getName());
+	//		disableButtonRefresh(queue.getName());
+	//	}
 
 	public void disableButtonRefresh(String queueName) {
 		if(sub.getName().equals(queueName)) {
@@ -115,14 +120,14 @@ UpdateCompleteHandler
 		}
 	}
 
-//	@Override
-//	public void onQueueUpdated(QueueWTO queue) {
-//		if(this.queue.getName().equals(queue.getName())) {
-//			this.queue = queue;
-//			widget.updateQueue();
-//		}
-//
-//	}
+	//	@Override
+	//	public void onQueueUpdated(QueueWTO queue) {
+	//		if(this.queue.getName().equals(queue.getName())) {
+	//			this.queue = queue;
+	//			widget.updateQueue();
+	//		}
+	//
+	//	}
 
 	public void deleteMessage(MessageWTO message, SubscriptionWTO sub) {
 		service.execute(new DeleteMessageAction(message.getIdS(), sub.getName()), new DeleteMessageHandler(eventBus) {
@@ -145,5 +150,59 @@ UpdateCompleteHandler
 
 	public void stopChart() {
 		widget.stopChart();
+	}
+
+	public Map<String, QueueWTO> getQueues() {
+		return cache.getQueues();
+	}
+	
+	public Map<String, SubscriptionWTO> getSubscriptions() {
+		return cache.getSubscriptions();
+	}
+
+		public void createNewMessage(MessageWTO message, String queueName) {
+		service.execute(new SendNewMessageAction(message, queueName), new SendNewMessageHandler(eventBus) {
+			@Override
+			public void onSuccess(SendNewMessageResponse response) {
+				if (response.isSuccess()) {
+					SC.say(response.getMessage());
+					widget.destroyForm();
+					fireRefreshAll();
+				} else {
+					SC.warn(response.getMessage());
+					fireRefreshAll();
+				}
+			}
+		});
+	}
+	
+	public void editMessage(MessageWTO message, String queueName) {
+		service.execute(new SendEditedMessageAction(message, queueName), new SendEditedMessageHandler(eventBus) {
+			@Override
+			public void onSuccess(SendEditedMessageResponse response) {
+				if (response.isSuccess()) {
+					SC.say(response.getMessage());
+					widget.destroyForm();
+					fireRefreshAll();
+				} else {
+					SC.warn(response.getMessage());
+					fireRefreshAll();
+				}
+			}
+		});
+	}
+	
+	public void deleteMessage(MessageWTO message, QueueWTO queue) {
+		service.execute(new DeleteMessageAction(message.getIdS(), queue.getName()), new DeleteMessageHandler(eventBus) {
+			@Override
+			public void onSuccess(DeleteMessageResponse response) {
+				if (response.isSuccess()) {
+					fireRefreshAll();
+				} else {
+					SC.warn(response.getMessage());
+					fireRefreshAll();	
+				}
+			}
+		});
 	}
 }

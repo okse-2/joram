@@ -154,11 +154,6 @@ public class MainWidget extends BaseWidget<MainPresenter> {
 		Tab tabConnections = new Tab(Application.messages.mainWidget_tabConnections_title());
 		tabConnections.setPane(new Label("Connexions...")); 
 		tabConnections.setIcon("connect.png");
-		
-		Tab tabErrors = new Tab(Application.messages.mainWidget_tabErrors_title());
-		tabErrors.setPane(new Label("Errors...")); 
-		tabErrors.setIcon("exclamation.png");
-		tabErrors.setDisabled(true);
 
 		topTabSet.addTab(tabInfo);  
 		topTabSet.addTab(tabTopics);  
@@ -166,7 +161,6 @@ public class MainWidget extends BaseWidget<MainPresenter> {
 		topTabSet.addTab(tabSubscriptions);  
 		topTabSet.addTab(tabUsers);  
 		topTabSet.addTab(tabConnections);  
-		topTabSet.addTab(tabErrors);  
 
 		topTabSet.addCloseClickHandler(new CloseClickHandler() {
 

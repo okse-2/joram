@@ -21,7 +21,10 @@ import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.Wind
 import com.scalagent.appli.client.Application;
 import com.scalagent.appli.client.presenter.UserListPresenter;
 import com.scalagent.appli.client.widget.handler.queue.RefreshAllClickHandler;
+import com.scalagent.appli.client.widget.handler.user.NewUserClickHandler;
+import com.scalagent.appli.client.widget.handler.user.UserDeleteClickHandler;
 import com.scalagent.appli.client.widget.handler.user.UserDetailsClickHandler;
+import com.scalagent.appli.client.widget.handler.user.UserEditClickHandler;
 import com.scalagent.appli.client.widget.record.QueueListRecord;
 import com.scalagent.appli.client.widget.record.UserListRecord;
 import com.scalagent.appli.shared.UserWTO;
@@ -33,12 +36,20 @@ import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.types.VisibilityMode;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.IButton;
+import com.smartgwt.client.widgets.Label;
+import com.smartgwt.client.widgets.Window;
+import com.smartgwt.client.widgets.events.ClickEvent;
+import com.smartgwt.client.widgets.events.ClickHandler;
+import com.smartgwt.client.widgets.events.CloseClickHandler;
+import com.smartgwt.client.widgets.events.CloseClientEvent;
 import com.smartgwt.client.widgets.events.DrawEvent;
 import com.smartgwt.client.widgets.events.DrawHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
+import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
+import com.smartgwt.client.widgets.form.validator.MaskValidator;
 import com.smartgwt.client.widgets.grid.ListGrid;
 import com.smartgwt.client.widgets.grid.ListGridField;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
@@ -66,6 +77,7 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
 	SectionStackSection buttonSection;
 	HLayout hl;
 	IButton refreshButton;
+	IButton newUserButton;
 
 	SectionStackSection listStackSection;
 	ListGrid userList;
@@ -79,6 +91,10 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
 	DynamicForm columnForm;
 	CheckboxItem showSentDMQBox;
 	CheckboxItem showSubCountBox;
+	
+
+	Window winModal = new Window();  
+
 
 	HashMap<String, String> etat=new HashMap<String, String>();
 
@@ -114,10 +130,23 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
 		refreshButton.setPrompt(Application.messages.queueWidget_buttonRefresh_prompt());
 		refreshButton.addClickHandler(new RefreshAllClickHandler(presenter)); 
 
+		newUserButton = new IButton(); 
+		newUserButton.setMargin(0);
+		newUserButton.setAutoFit(true);
+		newUserButton.setIcon("new.png");  
+		newUserButton.setTitle(Application.messages.userWidget_buttonNewUser_title());
+		newUserButton.setPrompt(Application.messages.userWidget_buttonNewUser_prompt());
+		newUserButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) { drawForm(null); }  
+		}); 	
+		
+		
 		hl = new HLayout();
 		hl.setHeight(22);
 		hl.setPadding(5);
+		hl.setMembersMargin(5);
 		hl.addMember(refreshButton);
+		hl.addMember(newUserButton);
 
 		buttonSection = new SectionStackSection(Application.messages.userWidget_actionsSection_title());
 		buttonSection.setExpanded(true);
@@ -143,7 +172,34 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
 
 					return buttonBrowse;
 
-				}  else {  
+				} else if (fieldName.equals("deleteField")) {
+
+					IButton buttonDelete = new IButton();  
+					buttonDelete.setAutoFit(true);
+					buttonDelete.setHeight(20); 
+					buttonDelete.setIconSize(13);
+					buttonDelete.setIcon("remove.png");  
+					buttonDelete.setTitle(Application.messages.queueWidget_buttonDelete_title());
+					buttonDelete.setPrompt(Application.messages.queueWidget_buttonDelete_prompt());
+					buttonDelete.addClickHandler(new UserDeleteClickHandler(presenter, (UserListRecord) record));
+
+					return buttonDelete;
+
+				} else if (fieldName.equals("editField")) {
+
+					IButton buttonEdit = new IButton();  
+					buttonEdit.setAutoFit(true);
+					buttonEdit.setHeight(20); 
+					buttonEdit.setIconSize(13);
+					buttonEdit.setIcon("pencil.png");  
+					buttonEdit.setTitle(Application.messages.queueWidget_buttonEdit_title());
+					buttonEdit.setPrompt(Application.messages.queueWidget_buttonEdit_prompt());
+					buttonEdit.addClickHandler(new ClickHandler() {
+						public void onClick(ClickEvent event) { drawForm((UserListRecord) record); }  
+					}); 		
+					return buttonEdit;
+
+				} else {  
 					return null;                     
 				}  	   
 			}	
@@ -159,13 +215,20 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
 		ListGridField nbMsgsSentToDMQSinceCreationFieldL = new ListGridField(UserListRecord.ATTRIBUTE_NBMSGSSENTTODMQSINCECREATION, Application.messages.userWidget_msgsSentFieldL_title());
 		ListGridField subscriptionNamesFieldL = new ListGridField(UserListRecord.ATTRIBUTE_SUBSCRIPTIONNAMES, Application.messages.userWidget_subscriptionFieldL_title());		
 		ListGridField browseFieldL = new ListGridField("browse", "Browse");
+		browseFieldL.setAlign(Alignment.CENTER);  
+		ListGridField deleteFieldL = new ListGridField("deleteField", "Delete");
+		deleteFieldL.setAlign(Alignment.CENTER);  
+		ListGridField editFieldL = new ListGridField("editField", "Edit");
+		editFieldL.setAlign(Alignment.CENTER);  
 
 		userList.setFields(
 				nameFieldL, 
 				periodFieldL, 
 				nbMsgsSentToDMQSinceCreationFieldL, 
 				subscriptionNamesFieldL,
-				browseFieldL);
+				browseFieldL,
+				editFieldL,
+				deleteFieldL);
 
 		userList.addRecordClickHandler(new RecordClickHandler() {
 
@@ -191,7 +254,7 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
 
 		chartWidth = (com.google.gwt.user.client.Window.getClientWidth()/2)-45;
 		chart = new AnnotatedTimeLine(createTable(), createOptions(true), ""+chartWidth, "200");
-		
+
 		columnForm = new DynamicForm();
 		columnForm.setNumCols(4);
 
@@ -205,7 +268,7 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
 				redrawChart(false);
 			}
 		});
-		
+
 		showSubCountBox = new CheckboxItem();  
 		showSubCountBox.setTitle(Application.messages.common_subscription());
 		showSubCountBox.setValue(true);
@@ -220,7 +283,7 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
 
 		columnForm.setFields(showSentDMQBox, showSubCountBox);
 
-		
+
 		userChart = new VLayout();
 		userChart.setMargin(2);
 		userChart.setPadding(5);
@@ -238,7 +301,7 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
 				redrawChart = true;
 			}
 		});
-		
+
 		userView = new HLayout();
 		userView.setMargin(5);
 		userView.setPadding(5);
@@ -355,7 +418,7 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
 
 		return data;
 	}
-	
+
 
 	public void redrawChart(boolean reuseChart) {
 		if(redrawChart) {
@@ -375,5 +438,110 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
 			showSubCountBox.enable();
 		}
 	}
+	
+	private void drawForm(UserListRecord ulr) {
 
+		winModal = new Window(); 
+		winModal.setHeight(200);
+		winModal.setWidth(400);
+		if(ulr == null) winModal.setTitle(Application.messages.userWidget_winModal_title());  
+		else winModal.setTitle("User \""+ulr.getAttributeAsString(UserListRecord.ATTRIBUTE_NAME)+"\"");  
+		winModal.setShowMinimizeButton(false);  
+		winModal.setIsModal(true);  
+		winModal.setShowModalMask(true);  
+		winModal.centerInPage();  
+		winModal.addCloseClickHandler(new CloseClickHandler() {  
+			public void onCloseClick(CloseClientEvent event) {  
+				winModal.destroy();  
+			}  
+		});  
+
+
+		Label formTitle = new Label();
+		if(ulr == null) formTitle.setContents(Application.messages.userWidget_formTitle_title());  
+		else formTitle.setContents("Edit \""+ulr.getAttributeAsString(UserListRecord.ATTRIBUTE_NAME)+"\"");  
+		formTitle.setWidth100();
+		formTitle.setAutoHeight();
+		formTitle.setMargin(5);
+		formTitle.setStyleName("title2");
+		formTitle.setLayoutAlign(VerticalAlignment.TOP);  
+		formTitle.setLayoutAlign(Alignment.CENTER);
+
+		final DynamicForm form = new DynamicForm();  
+		form.setWidth100();  
+		form.setPadding(5);  
+		form.setMargin(10);  
+		form.setLayoutAlign(VerticalAlignment.TOP);  
+		form.setLayoutAlign(Alignment.CENTER);
+
+		MaskValidator integerValidator = new MaskValidator();  
+		integerValidator.setMask("^-?[0-9]*$");  
+
+		TextItem nameItem = new TextItem();  
+		nameItem.setTitle(Application.messages.userWidget_nameItem_title()); 
+		nameItem.setName("nameItem");
+		nameItem.setRequired(true);
+
+		TextItem periodItem = new TextItem();  
+		periodItem.setTitle(Application.messages.userWidget_periodItem_title());
+		periodItem.setName("periodItem");
+		periodItem.setRequired(true);
+		periodItem.setValidators(integerValidator); 
+
+
+		if(ulr != null) {
+			nameItem.setValue(ulr.getAttributeAsString(UserListRecord.ATTRIBUTE_NAME));
+			nameItem.setDisabled(true);
+			periodItem.setValue(ulr.getAttributeAsString(UserListRecord.ATTRIBUTE_PERIOD));
+		}
+
+
+
+		form.setFields(nameItem, periodItem);
+
+		IButton validateButton = new IButton();  
+		if(ulr == null) {
+			validateButton.setTitle(Application.messages.userWidget_validateButton_titleCreate());
+			validateButton.setIcon("add.png");
+			validateButton.addClickHandler(new NewUserClickHandler(presenter, form));
+		}
+		else {
+			validateButton.setTitle(Application.messages.userWidget_validateButton_titleEdit());  
+			validateButton.setIcon("accept.png");
+			validateButton.addClickHandler(new UserEditClickHandler(presenter, form));
+		}
+		validateButton.setAutoFit(true);
+		validateButton.setLayoutAlign(VerticalAlignment.TOP);
+		validateButton.setLayoutAlign(Alignment.CENTER);
+
+		IButton cancelButton = new IButton();
+		cancelButton.setTitle(Application.messages.userWidget_cancelButton_title());
+		cancelButton.setIcon("cancel.png");
+		cancelButton.setAutoFit(true);
+		cancelButton.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				destroyForm();
+			}
+		});
+		cancelButton.setLayoutAlign(VerticalAlignment.TOP);  
+		cancelButton.setLayoutAlign(Alignment.CENTER);
+
+		HLayout hl = new HLayout();
+		hl.setWidth100();
+		hl.setAlign(Alignment.CENTER);
+		hl.setAlign(VerticalAlignment.CENTER);
+		hl.setMembersMargin(5);
+		hl.addMember(validateButton);
+		hl.addMember(cancelButton);
+
+		winModal.addItem(formTitle);  
+		winModal.addItem(form);  
+		winModal.addItem(hl); 
+		winModal.show();
+	}
+
+	public void destroyForm() {
+		winModal.destroy();
+	}
 }

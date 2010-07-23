@@ -9,7 +9,6 @@ package com.scalagent.appli.server.command.queue;
 import com.scalagent.appli.client.command.queue.DeleteQueueAction;
 import com.scalagent.appli.client.command.queue.DeleteQueueResponse;
 import com.scalagent.appli.server.RPCServiceCache;
-import com.scalagent.engine.server.BaseRPCService;
 import com.scalagent.engine.server.command.ActionImpl;
 
 
@@ -22,8 +21,11 @@ public class DeleteQueueActionImpl extends ActionImpl<DeleteQueueResponse, Delet
 
 		String info = "";
 
-		if (!result) {
-			info = BaseRPCService.getString("Error while deleting Queue: \""+deleteQueueAction.getQueueName()+"\" not found.");
+		if (result) {
+			info = "The Queue \""+deleteQueueAction.getQueueName()+"\" has been deleted.";
+		}
+		else {
+			info = "Error while deleting Queue: \""+deleteQueueAction.getQueueName()+"\" not found.";
 		}
 
 		return new DeleteQueueResponse(result, info);
