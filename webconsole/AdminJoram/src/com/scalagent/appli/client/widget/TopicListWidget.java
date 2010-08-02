@@ -1,3 +1,7 @@
+/**
+ * (c)2010 Scalagent Distributed Technologies
+ */
+
 package com.scalagent.appli.client.widget;
 
 import java.util.Date;
@@ -56,6 +60,9 @@ import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.viewer.DetailViewer;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 
+/**
+ * @author Yohann CINTRE
+ */
 public class TopicListWidget extends BaseWidget<TopicListPresenter> {
 
 	int chartWidth;
@@ -418,7 +425,6 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
 
 		return options;
 	}
-
 
 	private AbstractDataTable createTable() {
 		DataTable data = DataTable.create();

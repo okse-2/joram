@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.widget.handler.message;
@@ -13,8 +12,10 @@ import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 
+/**
+ * @author Yohann CINTRE
+ */
 public class MessageDeleteClickHandler implements ClickHandler {
-
 
 	private QueueDetailPresenter queueDetailPresenter;
 	private MessageListRecord record;
@@ -25,7 +26,6 @@ public class MessageDeleteClickHandler implements ClickHandler {
 		this.queueDetailPresenter = queueDetailPresenter;
 		this.record = record;
 	}
-
 
 	@Override
 	public void onClick(ClickEvent event) {

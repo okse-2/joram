@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.server.command.queue;
@@ -10,6 +9,9 @@ import com.scalagent.appli.client.command.queue.SendEditedQueueResponse;
 import com.scalagent.appli.server.RPCServiceCache;
 import com.scalagent.engine.server.command.ActionImpl;
 
+/**
+ * @author Yohann CINTRE
+ */
 public class SendEditedQueueActionImpl extends ActionImpl<SendEditedQueueResponse, SendEditedQueueAction, RPCServiceCache>{
 
 	@Override

@@ -1,17 +1,17 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.server.command.topic;
-
 
 import com.scalagent.appli.client.command.topic.DeleteTopicAction;
 import com.scalagent.appli.client.command.topic.DeleteTopicResponse;
 import com.scalagent.appli.server.RPCServiceCache;
 import com.scalagent.engine.server.command.ActionImpl;
 
-
+/**
+ * @author Yohann CINTRE
+ */
 public class DeleteTopicActionImpl extends ActionImpl<DeleteTopicResponse, DeleteTopicAction, RPCServiceCache>{
 
 

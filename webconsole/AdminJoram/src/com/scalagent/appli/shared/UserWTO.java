@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.shared;
@@ -9,8 +8,10 @@ import java.util.Arrays;
 
 import com.scalagent.engine.shared.BaseWTO;
 
+/**
+ * @author Yohann CINTRE
+ */
 public class UserWTO extends BaseWTO {
-
 
 	private String name;
 	private long period;
@@ -36,7 +37,6 @@ public class UserWTO extends BaseWTO {
 		this.nbMsgsSentToDMQSinceCreation = nbMsgsSentToDMQSinceCreation;
 		this.subscriptionNames = subscriptionNames;
 	}
-
 
 
 	public String toStringFullContent() {

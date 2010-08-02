@@ -1,12 +1,14 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
-package com.scalagent.appli.client.event;
+package com.scalagent.appli.client.event.session;
 
 import com.google.gwt.event.shared.GwtEvent;
 
+/**
+ * @author Yohann CINTRE
+ */
 public class LoginValidEvent extends GwtEvent<LoginValidHandler> {
 
 	public static Type<LoginValidHandler> TYPE = new Type<LoginValidHandler>();

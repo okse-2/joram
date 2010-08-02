@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.command.subscription;
@@ -9,7 +8,11 @@ import com.scalagent.appli.server.command.subscription.DeleteSubscriptionActionI
 import com.scalagent.engine.client.command.Action;
 import com.scalagent.engine.client.command.CalledMethod;
 
-
+/**
+ * This action delete a subscription on the server.
+ * 
+ * @author Yohann CINTRE
+ */
 @CalledMethod(value=DeleteSubscriptionActionImpl.class)
 public class DeleteSubscriptionAction implements Action<DeleteSubscriptionResponse> {
 	

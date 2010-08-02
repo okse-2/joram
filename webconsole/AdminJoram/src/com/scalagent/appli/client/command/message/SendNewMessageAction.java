@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.command.message;
@@ -12,7 +11,9 @@ import com.scalagent.engine.client.command.CalledMethod;
 
 
 /**
- * This action asks for devices list from the server.
+ * This action send a new message to the server.
+ * 
+ * @author Yohann CINTRE
  */
 @CalledMethod(value=SendNewMessageActionImpl.class)
 public class SendNewMessageAction implements Action<SendNewMessageResponse> {

@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.event.message;
@@ -8,7 +7,9 @@ package com.scalagent.appli.client.event.message;
 import com.google.gwt.event.shared.GwtEvent;
 import com.scalagent.appli.shared.MessageWTO;
 
-
+/**
+ * @author Yohann CINTRE
+ */
 public class DeletedMessageEvent extends GwtEvent<DeletedMessageHandler> {
 
 	public static Type<DeletedMessageHandler> TYPE = new Type<DeletedMessageHandler>();

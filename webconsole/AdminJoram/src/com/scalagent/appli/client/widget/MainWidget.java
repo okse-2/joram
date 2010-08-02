@@ -1,10 +1,8 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.widget;
-
 
 import com.google.gwt.user.client.ui.Widget;
 import com.scalagent.appli.client.Application;
@@ -23,7 +21,9 @@ import com.smartgwt.client.widgets.tab.TabSet;
 import com.smartgwt.client.widgets.tab.events.CloseClickHandler;
 import com.smartgwt.client.widgets.tab.events.TabCloseClickEvent;
 
-
+/**
+ * @author Yohann CINTRE
+ */
 public class MainWidget extends BaseWidget<MainPresenter> {
 
 	private LoginWidget loginWidget;

@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.shared;
@@ -10,6 +9,9 @@ import java.util.Date;
 
 import com.scalagent.engine.shared.BaseWTO;
 
+/**
+ * @author Yohann CINTRE
+ */
 public class TopicWTO extends BaseWTO {
 	
 	private String name;

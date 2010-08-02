@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.event.subscription;
@@ -9,7 +8,9 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.scalagent.appli.shared.SubscriptionWTO;
 
 
-
+/**
+ * @author Yohann CINTRE
+ */
 public class DeletedSubscriptionEvent extends GwtEvent<DeletedSubscriptionHandler> {
 
 	public static Type<DeletedSubscriptionHandler> TYPE = new Type<DeletedSubscriptionHandler>();

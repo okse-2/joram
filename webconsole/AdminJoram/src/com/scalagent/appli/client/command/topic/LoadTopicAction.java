@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 
@@ -11,7 +10,9 @@ import com.scalagent.engine.client.command.Action;
 import com.scalagent.engine.client.command.CalledMethod;
 
 /**
- * This action load the list of devices from the server
+ * This action load the list of topics from the server
+ * 
+ * @author Yohann CINTRE
  */
 @CalledMethod(value=LoadTopicActionImpl.class)
 public class LoadTopicAction implements Action<LoadTopicResponse>{

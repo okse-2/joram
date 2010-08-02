@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.command.subscription;
@@ -10,9 +9,10 @@ import com.scalagent.appli.shared.SubscriptionWTO;
 import com.scalagent.engine.client.command.Action;
 import com.scalagent.engine.client.command.CalledMethod;
 
-
 /**
- * This action asks for devices list from the server.
+ * This action send a new subscription to the server.
+ * 
+ * @author Yohann CINTRE
  */
 @CalledMethod(value=SendNewSubscriptionActionImpl.class)
 public class SendNewSubscriptionAction implements Action<SendNewSubscriptionResponse> {

@@ -1,14 +1,14 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
-package com.scalagent.appli.client.event;
+package com.scalagent.appli.client.event.common;
 
 import com.google.gwt.event.shared.GwtEvent;
 
-
-
+/**
+ * @author Yohann CINTRE
+ */
 public class UpdateCompleteEvent extends GwtEvent<UpdateCompleteHandler> {
 
 	public static Type<UpdateCompleteHandler> TYPE = new Type<UpdateCompleteHandler>();

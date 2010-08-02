@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.widget.record;
@@ -10,7 +9,9 @@ import java.util.Date;
 import com.scalagent.appli.shared.TopicWTO;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
 
-
+/**
+ * @author Yohann CINTRE
+ */
 public class TopicListRecord extends ListGridRecord {
 
 	public static String ATTRIBUTE_NAME = "name";

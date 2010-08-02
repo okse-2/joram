@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.widget.handler.user;
@@ -10,6 +9,9 @@ import com.scalagent.appli.client.widget.record.UserListRecord;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 
+/**
+ * @author Yohann CINTRE
+ */
 public class UserDetailsClickHandler implements ClickHandler {
 
 

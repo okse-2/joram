@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.event.topic;
@@ -8,7 +7,9 @@ package com.scalagent.appli.client.event.topic;
 import com.google.gwt.event.shared.GwtEvent;
 import com.scalagent.appli.shared.TopicWTO;
 
-
+/**
+ * @author Yohann CINTRE
+ */
 public class UpdatedTopicEvent extends GwtEvent<UpdatedTopicHandler> {
 
 	public static Type<UpdatedTopicHandler> TYPE = new Type<UpdatedTopicHandler>();

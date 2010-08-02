@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.command.session;
@@ -11,7 +10,9 @@ import com.scalagent.engine.client.command.CalledMethod;
 
 
 /**
- * This action asks for devices list from the server.
+ * This action send login information the server.
+ * 
+ * @author Yohann CINTRE
  */
 @CalledMethod(value=LoginActionImpl.class)
 public class LoginAction implements Action<LoginResponse> {

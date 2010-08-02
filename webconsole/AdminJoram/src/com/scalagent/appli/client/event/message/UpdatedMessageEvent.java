@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.event.message;
@@ -8,6 +7,9 @@ package com.scalagent.appli.client.event.message;
 import com.google.gwt.event.shared.GwtEvent;
 import com.scalagent.appli.shared.MessageWTO;
 
+/**
+ * @author Yohann CINTRE
+ */
 public class UpdatedMessageEvent extends GwtEvent<UpdatedMessageHandler> {
 
 	public static Type<UpdatedMessageHandler> TYPE = new Type<UpdatedMessageHandler>();

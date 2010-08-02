@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client;
@@ -10,25 +9,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.Vector;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Timer;
+import com.scalagent.appli.client.command.info.LoadServerInfoAction;
+import com.scalagent.appli.client.command.info.LoadServerInfoResponse;
+import com.scalagent.appli.client.command.info.LoadServerInfoHandler;
 import com.scalagent.appli.client.command.message.LoadMessageAction;
 import com.scalagent.appli.client.command.message.LoadMessageHandler;
 import com.scalagent.appli.client.command.message.LoadMessageResponse;
 import com.scalagent.appli.client.command.queue.LoadQueueAction;
 import com.scalagent.appli.client.command.queue.LoadQueueResponse;
-import com.scalagent.appli.client.command.queue.LoadQueueResponseHandler;
+import com.scalagent.appli.client.command.queue.LoadQueueHandler;
 import com.scalagent.appli.client.command.subscription.LoadSubscriptionAction;
 import com.scalagent.appli.client.command.subscription.LoadSubscriptionResponse;
-import com.scalagent.appli.client.command.subscription.LoadSubscriptionResponseHandler;
+import com.scalagent.appli.client.command.subscription.LoadSubscriptionHandler;
 import com.scalagent.appli.client.command.topic.LoadTopicAction;
 import com.scalagent.appli.client.command.topic.LoadTopicResponse;
-import com.scalagent.appli.client.command.topic.LoadTopicResponseHandler;
+import com.scalagent.appli.client.command.topic.LoadTopicHandler;
 import com.scalagent.appli.client.command.user.LoadUserAction;
 import com.scalagent.appli.client.command.user.LoadUserResponse;
-import com.scalagent.appli.client.command.user.LoadUserResponseHandler;
-import com.scalagent.appli.client.event.UpdateCompleteEvent;
+import com.scalagent.appli.client.command.user.LoadUserHandler;
+import com.scalagent.appli.client.event.common.UpdateCompleteEvent;
 import com.scalagent.appli.client.event.message.DeletedMessageEvent;
 import com.scalagent.appli.client.event.message.NewMessageEvent;
 import com.scalagent.appli.client.event.message.QueueNotFoundEvent;
@@ -60,10 +63,13 @@ import com.scalagent.engine.shared.BaseWTO;
  * with its stored data and fires corresponding events on the EventBus.
  * 
  * It handles:
- *    - devices
- *    - ECWSpecifications
- *    - test results
+ *    - queues
+ *    - topics
+ *    - users
+ *    - subscriptions
+ *    - messages
  *    
+ *    @author Yohann CINTRE
  */
 public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 
@@ -73,9 +79,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 	public static final int USER = 3;
 	public static final int SUB = 4;
 	public static final int GLOBAL = 5;
-	public static final int ENGINE = 6;
-	public static final int NETWORK = 7;
-
+	public static final int SERVER = 6;
 
 
 	/** Devices available in the cache */
@@ -92,9 +96,8 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 	private SortedMap<Date, Integer> subsHistory = new TreeMap<Date, Integer>();
 
 	private SortedMap<String, SortedMap<Date, int[]>> globalHistory = new TreeMap<String, SortedMap<Date, int[]>>();
-	
-	private SortedMap<Date, float[]> engineHistory = new TreeMap<Date, float[]>();
-	private SortedMap<Date, float[]> networkHistory = new TreeMap<Date, float[]>();
+
+	private SortedMap<Date, float[]> serverHistory = new TreeMap<Date, float[]>();
 
 	private RPCServiceAsync RPCService;
 	private HandlerManager eventBus;
@@ -103,17 +106,15 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 	private boolean queueRequest = true;
 	private boolean userRequest = true;
 	private boolean subRequest = true;
+	private boolean servRequest = true;
 
 	public RPCServiceCacheClient(RPCServiceAsync RPCService, HandlerManager eventBus, int updatePeriod) {
-
-		System.out.println("### appli.client.RPCServiceCacheClient loaded : création du cache client");
 
 		this.RPCService = RPCService;
 		this.eventBus = eventBus;
 
 		// start the timer, to update periodically the cache
 		if (updatePeriod != -1) {
-			System.out.println("### appli.client.RPCServiceCacheClient.RPCServiceCacheClient timer du cache client : "+updatePeriod);
 			Timer timer = new RPCServiceCacheTimer(this);
 			timer.scheduleRepeating(updatePeriod);
 		}
@@ -131,8 +132,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 	public SortedMap<Date, Integer> getUsersHistory() { return usersHistory; }
 	public SortedMap<Date, Integer> getSubsHistory() { return subsHistory; }
 	public SortedMap<Date, int[]> getSpecificHistory(String name) { return globalHistory.get(name); }
-	public SortedMap<Date, float[]> getEngineHistory() { return engineHistory; }
-	public SortedMap<Date, float[]> getNetworkHistory() { return networkHistory; }
+	public SortedMap<Date, float[]> getServerHistory() { return serverHistory; }
 
 
 	@SuppressWarnings("deprecation")
@@ -152,28 +152,22 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 				topicsHistory.put(nowSec, new Integer((int)value[0]));
 			}
 			break;
-			
+
 		case USER:
 			if(!usersHistory.containsKey(nowSec)) {
 				usersHistory.put(nowSec, new Integer((int)value[0]));
 			}
 			break;
-			
+
 		case SUB:
 			if(!subsHistory.containsKey(nowSec)) {
 				subsHistory.put(nowSec, new Integer((int)value[0]));
 			}
 			break;
-			
-		case ENGINE:
-			if(!engineHistory.containsKey(nowSec)) {
-				engineHistory.put(nowSec, value);
-			}
-			break;
-			
-		case NETWORK:
-			if(!networkHistory.containsKey(nowSec)) {
-				networkHistory.put(nowSec, value);
+
+		case SERVER:
+			if(!serverHistory.containsKey(nowSec)) {
+				serverHistory.put(nowSec, value);
 			}
 			break;
 
@@ -184,7 +178,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 
 	@SuppressWarnings("deprecation")
 	public void addToSpecificHistory(String name, int... value) {
-		
+
 		Date nowMilli = new Date();
 		Date nowSec = new Date(nowMilli.getYear(), nowMilli.getMonth(), nowMilli.getDay(), nowMilli.getHours(), nowMilli.getMinutes(), nowMilli.getSeconds());
 
@@ -198,10 +192,9 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 			mapDate.put(nowSec, value);
 		}
 	}
-	
+
 	public void setPeriod(int updatePeriod) {
 		if (updatePeriod != -1) {
-			System.out.println("### appli.client.RPCServiceCacheClient.setPeriod timer du cache client : "+updatePeriod);
 			Timer timer = new RPCServiceCacheTimer(this);
 			timer.scheduleRepeating(updatePeriod);
 		}
@@ -209,7 +202,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 
 
 	/**
-	 * Called periodically by the TestRPCServiceCacheTimer
+	 * Called periodically by the RPCServiceCacheTimer
 	 * in order to update data.
 	 * Depending on the type of objects:
 	 *   - events are fired on the event bus,
@@ -220,7 +213,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 		if (topicRequest) {
 			topicRequest = false;
 			LoadTopicAction action = new LoadTopicAction((topics.isEmpty()), forceUpdate);
-			RPCService.execute(action, new LoadTopicResponseHandler(eventBus) {
+			RPCService.execute(action, new LoadTopicHandler(eventBus) {
 				@Override
 				public void onSuccess(LoadTopicResponse response) {
 					if(response != null) {
@@ -237,7 +230,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 		if (queueRequest) {
 			queueRequest = false;
 			LoadQueueAction action = new LoadQueueAction((queues.isEmpty()), forceUpdate);
-			RPCService.execute(action, new LoadQueueResponseHandler(eventBus) {
+			RPCService.execute(action, new LoadQueueHandler(eventBus) {
 				@Override
 				public void onSuccess(LoadQueueResponse response) {
 					if(response != null) {
@@ -264,7 +257,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 			}
 		});	
 	}
-	
+
 	public void retrieveMessageSub(SubscriptionWTO sub) {
 		RPCService.execute(new LoadMessageAction(sub.getName()), new LoadMessageHandler(eventBus) {
 			@Override
@@ -284,7 +277,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 		if (userRequest) {
 			userRequest = false;
 			LoadUserAction action = new LoadUserAction((users.isEmpty()), forceUpdate);
-			RPCService.execute(action, new LoadUserResponseHandler(eventBus) {
+			RPCService.execute(action, new LoadUserHandler(eventBus) {
 				@Override
 				public void onSuccess(LoadUserResponse response) {
 					if(response != null) {
@@ -301,7 +294,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 		if (subRequest) {
 			subRequest = false;
 			LoadSubscriptionAction action = new LoadSubscriptionAction((subs.isEmpty()), forceUpdate);
-			RPCService.execute(action, new LoadSubscriptionResponseHandler(eventBus) {
+			RPCService.execute(action, new LoadSubscriptionHandler(eventBus) {
 				@Override
 				public void onSuccess(LoadSubscriptionResponse response) {
 					if(response != null) {
@@ -314,6 +307,22 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 		}
 	}
 
+	public void retrieveServerInfo(boolean forceUpdate) {
+		if (servRequest) {
+			servRequest = false;
+			LoadServerInfoAction action = new LoadServerInfoAction(forceUpdate);
+			RPCService.execute(action, new LoadServerInfoHandler(eventBus) {
+				@Override
+				public void onSuccess(LoadServerInfoResponse response) {
+					if(response != null) {
+						processInfos(response.getInfos());
+						servRequest = true;
+					}
+					eventBus.fireEvent(new UpdateCompleteEvent("sub"));
+				}
+			});
+		}
+	}
 
 	/**
 	 * Using dbChangeStatus attribute, update the list of cached devices.
@@ -393,10 +402,10 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 		if(newMessages!=null) {
 
 			for (int i=0;i<newMessages.size();i++) {
-				
+
 				MessageWTO message = newMessages.get(i);
 				boolean processed = false;
-				
+
 				queues.get(queueName).addMessageToList(message.getIdS());
 
 				// new queue
@@ -488,4 +497,19 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 		}
 	}
 
+	private void processInfos(Vector<Float> infos) {
+		
+		if(infos!=null) {
+			
+			Float[] arr1 = new Float[infos.size()];
+			infos.toArray(arr1);
+			
+			float[] arr2 = new float[infos.size()];
+			for(int i=0; i<arr1.length; i++) {
+				arr2[i] = arr1[i];
+			}
+			
+			addToHistory(SERVER, arr2);
+		}
+	}
 }

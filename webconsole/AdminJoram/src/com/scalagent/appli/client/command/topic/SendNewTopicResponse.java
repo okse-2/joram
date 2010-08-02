@@ -1,12 +1,16 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.command.topic;
 
 import com.scalagent.engine.client.command.Response;
 
+/**
+ * Response to the action SendNewTopicAction.
+ * 
+ * @author Yohann CINTRE
+ */
 public class SendNewTopicResponse implements Response {
 
 	private boolean success;

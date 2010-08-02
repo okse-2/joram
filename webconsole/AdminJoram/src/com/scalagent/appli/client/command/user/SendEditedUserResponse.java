@@ -1,12 +1,16 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.command.user;
 
 import com.scalagent.engine.client.command.Response;
 
+/**
+ * Response to the action SendEditedUserAction.
+ * 
+ * @author Yohann CINTRE
+ */
 public class SendEditedUserResponse implements Response {
 
 	private boolean success;

@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.presenter;
@@ -12,7 +11,7 @@ import java.util.SortedMap;
 import com.google.gwt.event.shared.HandlerManager;
 import com.scalagent.appli.client.RPCServiceAsync;
 import com.scalagent.appli.client.RPCServiceCacheClient;
-import com.scalagent.appli.client.event.UpdateCompleteHandler;
+import com.scalagent.appli.client.event.common.UpdateCompleteHandler;
 import com.scalagent.appli.client.widget.ServerWidget;
 import com.scalagent.appli.shared.QueueWTO;
 import com.scalagent.appli.shared.SubscriptionWTO;
@@ -21,71 +20,71 @@ import com.scalagent.appli.shared.UserWTO;
 import com.scalagent.engine.client.presenter.BasePresenter;
 
 /**
- * This class is the presenter associated to the list of devices.
- * Its widget is DevicesWidget.
+ * This class is the presenter associated to the server information.
+ * Its widget is ServerWidget.
  * 
- * @author Florian Gimbert
+ * @author Yohann CINTRE
  */
 public class ServerPresenter extends BasePresenter<ServerWidget, RPCServiceAsync, RPCServiceCacheClient> 
 implements
 UpdateCompleteHandler
 {
-
 	public ServerPresenter(RPCServiceAsync serviceRPC, HandlerManager eventBus,RPCServiceCacheClient cache) {
-
 		super(serviceRPC, cache, eventBus);
-
-		System.out.println("### appli.client.presenter.QueueDetailsPresenter loaded ");
 		this.eventBus = eventBus;
-
 		widget = new ServerWidget(this);
-
 	}
 
-
+	/**
+	 * This method is called by the ServerWidget when the updating the chart.
+	 * @result A map containing the history of the number of queues.
+	 */
 	public SortedMap<Date,Integer> getQueuesHistory() {
 		return cache.getQueuesHistory();
 	}
-
+	
+	/**
+	 * This method is called by the ServerWidget when the updating the chart.
+	 * @result A map containing the history of the number of topics.
+	 */
 	public SortedMap<Date,Integer> getTopicsHistory() {
 		return cache.getTopicsHistory();
 	}
 
+	/**
+	 * This method is called by the ServerWidget when the updating the chart.
+	 * @result A map containing the history of the number of users.
+	 */
 	public SortedMap<Date,Integer> getUsersHistory() {
 		return cache.getUsersHistory();
 	}
-
+	
+	/**
+	 * This method is called by the ServerWidget when the updating the chart.
+	 * @result A map containing the history of the number of subscriptions.
+	 */
 	public SortedMap<Date,Integer> getSubsHistory() {
 		return cache.getSubsHistory();
 	}
-
-	public SortedMap<Date, float[]> getEngineHistory() {
-		return cache.getEngineHistory();
+	
+	/**
+	 * This method is called by the ServerWidget when the updating the chart.
+	 * @result A map containing the history of the average load of the engine and the networks.
+	 */
+	public SortedMap<Date, float[]> getServerHistory() {
+		return cache.getServerHistory();
 	}
 
-	public SortedMap<Date, float[]> getNetworkHistory() {
-		return cache.getNetworkHistory();
-	}
-
-
-	@Override
+	/**
+	 * This method is called by the EventBus when the update is done.
+	 * The histories are updated 
+	 */
 	public void onUpdateComplete(String info) {
-
-		int lower = 0;
-		int higher = 2;
-		float e1 = (float)(Math.random() * (higher-lower)) + lower;
-		float e2 = (float)(Math.random() * (higher-lower)) + lower;
-		float e3 = (float)(Math.random() * (higher-lower)) + lower;
-		float n1 = (float)(Math.random() * (higher-lower)) + lower;
-		float n2 = (float)(Math.random() * (higher-lower)) + lower;
-		float n3 = (float)(Math.random() * (higher-lower)) + lower;
-
 		cache.addToHistory(RPCServiceCacheClient.QUEUE, cache.getQueues().size());
 		cache.addToHistory(RPCServiceCacheClient.SUB, cache.getSubscriptions().size());
 		cache.addToHistory(RPCServiceCacheClient.TOPIC, cache.getTopics().size());
 		cache.addToHistory(RPCServiceCacheClient.USER, cache.getUsers().size());
-		cache.addToHistory(RPCServiceCacheClient.ENGINE, e1, e2, e3);
-		cache.addToHistory(RPCServiceCacheClient.NETWORK, n1, n2, n3);
+
 
 		HashMap<String, QueueWTO> queues = cache.getQueues();
 		for(String key : queues.keySet()) {
@@ -123,6 +122,23 @@ UpdateCompleteHandler
 					(int) sub.getNbMsgsSentToDMQSinceCreation());
 		}
 
+		
+		SortedMap<Date, float[]> h = cache.getServerHistory();
+		if(h.size() != 0)
+			widget.initCharts(h.get(h.firstKey()).length);
 	}
-
+	
+	
+	/**
+	 * This method is called by the the ServerWidget when the user click 
+	 * on the "Refresh" button.
+	 * The queues list, topic list, user list, subscription list and server information are updated. 
+	 */	
+	public void refreshAll() {
+		cache.retrieveQueue(true);
+		cache.retrieveTopic(true);
+		cache.retrieveUser(true);
+		cache.retrieveSubscription(true);
+		cache.retrieveServerInfo(true);
+	}
 }

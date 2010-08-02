@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.command.session;
@@ -9,7 +8,9 @@ import com.scalagent.engine.client.command.Response;
 
 
 /**
- * Response to the action GetDevicesAction.
+ * Response to the action LoginAction.
+ * 
+ * @author Yohann CINTRE
  */
 public class LoginResponse implements Response {
 
