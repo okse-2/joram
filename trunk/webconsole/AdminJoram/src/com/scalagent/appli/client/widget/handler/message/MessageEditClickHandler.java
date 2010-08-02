@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.widget.handler.message;
@@ -13,8 +12,10 @@ import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
 
+/**
+ * @author Yohann CINTRE
+ */
 public class MessageEditClickHandler implements ClickHandler {
-
 
 	private QueueDetailPresenter qPresenter;
 	private SubscriptionDetailPresenter sPresenter;

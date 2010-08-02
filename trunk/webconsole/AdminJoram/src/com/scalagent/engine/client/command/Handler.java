@@ -9,7 +9,7 @@ public class Handler<R extends Response> implements AsyncCallback<R> {
 
 	private HandlerManager eventBus;
 	
-	//public Handler() {}
+//	public Handler() {}
 	
 	public Handler(HandlerManager eventBus) {
 		this.eventBus = eventBus;

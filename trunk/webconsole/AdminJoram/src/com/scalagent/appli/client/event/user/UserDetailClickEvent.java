@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.event.user;
@@ -8,6 +7,9 @@ package com.scalagent.appli.client.event.user;
 import com.google.gwt.event.shared.GwtEvent;
 import com.scalagent.appli.shared.UserWTO;
 
+/**
+ * @author Yohann CINTRE
+ */
 public class UserDetailClickEvent extends GwtEvent<UserDetailClickHandler> {
 
 	public static Type<UserDetailClickHandler> TYPE = new Type<UserDetailClickHandler>();

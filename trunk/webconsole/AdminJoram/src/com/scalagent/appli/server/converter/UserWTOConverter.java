@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 
@@ -12,12 +11,16 @@ import org.objectweb.joram.mom.proxies.ProxyImplMBean;
 
 import com.scalagent.appli.shared.UserWTO;
 
-
+/**
+ * @author Yohann CINTRE
+ */
 public class UserWTOConverter {
 
 	/**
-	 * @param device
-	 * @return a DeviceWTO object created from the DeviceDTO object
+	 * 
+	 * @param key The ID of the user
+	 * @param user A ProxyImplMBean containing the user info
+	 * @return A UserWTO object created from the ProxyImplMBean object
 	 */
 	public static UserWTO getUserWTO(String key, ProxyImplMBean user) {
 		UserWTO result = new UserWTO(key, user.getPeriod(), user.getNbMsgsSentToDMQSinceCreation(), user.getSubscriptionNames());
@@ -25,8 +28,8 @@ public class UserWTOConverter {
 	}
 
 	/**
-	 * @param devices Array of DeviceDTO
-	 * @return An Array of DeviceWTO
+	 * @param map Map of ProxyImplMBean
+	 * @return An Array of UserWTO
 	 */
 	public static UserWTO[] getUserWTOArray(Map<String, ProxyImplMBean> map) {
 

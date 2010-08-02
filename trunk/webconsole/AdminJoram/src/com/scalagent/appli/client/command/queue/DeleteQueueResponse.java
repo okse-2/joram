@@ -1,13 +1,16 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.command.queue;
 
 import com.scalagent.engine.client.command.Response;
 
-
+/**
+ * Response to the action DeleteQueueAction.
+ * 
+ * @author Yohann CINTRE
+ */
 public class DeleteQueueResponse implements Response {
 
 	private boolean success;

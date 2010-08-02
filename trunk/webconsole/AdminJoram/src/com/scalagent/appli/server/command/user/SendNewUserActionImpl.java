@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.server.command.user;
@@ -10,6 +9,9 @@ import com.scalagent.appli.client.command.user.SendNewUserResponse;
 import com.scalagent.appli.server.RPCServiceCache;
 import com.scalagent.engine.server.command.ActionImpl;
 
+/**
+ * @author Yohann CINTRE
+ */
 public class SendNewUserActionImpl extends ActionImpl<SendNewUserResponse, SendNewUserAction, RPCServiceCache>{
 
 	@Override

@@ -30,11 +30,9 @@ public class BaseRPCServiceTimer extends Thread {
 	
 	@Override
 	public void run() {
-		System.out.println("### engine.server.BaseRPCServiceTimer run : démarrage vérification des sessions");
 
 
 		while (!canStop) {
-			System.out.println("### engine.server.BaseRPCServiceTimer run : vérificatinon des sessions");
 			
 			// checks sessions
 
@@ -47,7 +45,6 @@ public class BaseRPCServiceTimer extends Thread {
 				Long currentTimestamp = new Long(System.currentTimeMillis());
 
 				// check timestamp
-				System.out.println("!!! engine.server.BaseRPCServiceTimer run : suppression de "+key+" dans "+(invalidateSessionDelay-(currentTimestamp - sessionTimestamp))+" ms");
 				if ((currentTimestamp - sessionTimestamp) > invalidateSessionDelay) {
 					
 					// and remove it from the sessions hashmap

@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.command.queue;
@@ -11,8 +10,9 @@ import com.scalagent.engine.client.command.CalledMethod;
 
 
 /**
- * This action asks for devices list from the server.
- * @author Florian Gimbert
+ * This action asks server to clean the waiting requests for the specified queue.
+ * 
+ * @author Yohann CINTRE
  */
 @CalledMethod(value=ClearWaitingRequestActionImpl.class)
 public class ClearWaitingRequestAction implements Action<ClearWaitingRequestResponse> {

@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.widget;
@@ -62,7 +61,9 @@ import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.viewer.DetailViewer;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 
-
+/**
+ * @author Yohann CINTRE
+ */
 public class UserListWidget extends BaseWidget<UserListPresenter> {
 
 	int chartWidth;
@@ -370,7 +371,6 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
 		userList.removeData(toRemove);
 		userList.markForRedraw();
 	}
-
 
 	private Options createOptions(boolean reuseChart) {
 		Options options = Options.create();

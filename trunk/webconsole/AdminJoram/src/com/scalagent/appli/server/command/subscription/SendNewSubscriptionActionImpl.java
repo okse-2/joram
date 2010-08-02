@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.server.command.subscription;
@@ -10,6 +9,9 @@ import com.scalagent.appli.client.command.subscription.SendNewSubscriptionRespon
 import com.scalagent.appli.server.RPCServiceCache;
 import com.scalagent.engine.server.command.ActionImpl;
 
+/**
+ * @author Yohann CINTRE
+ */
 public class SendNewSubscriptionActionImpl extends ActionImpl<SendNewSubscriptionResponse, SendNewSubscriptionAction, RPCServiceCache>{
 
 	@Override

@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.server;
@@ -10,6 +9,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import javax.servlet.http.HttpSession;
 
@@ -18,7 +18,7 @@ import org.objectweb.joram.mom.dest.QueueImplMBean;
 import org.objectweb.joram.mom.messages.MessageView;
 import org.objectweb.joram.mom.proxies.ClientSubscriptionMBean;
 import org.objectweb.joram.mom.proxies.ProxyImplMBean;
-import org.ow2.joram.admin.LaunchInterface;
+import org.ow2.joram.admin.JORAMInterface;
 
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.scalagent.appli.server.converter.MessageWTOConverter;
@@ -38,26 +38,26 @@ import com.scalagent.engine.server.BaseRPCServiceCache;
  * server, compares it with stored data (in session) and send diff to the
  * client.
  * 
- * It handles: - devices - ECWSpecifications - test results
- * 
- * @author Florian Gimbert
+ * It handles:
+ *    - queues
+ *    - topics
+ *    - users
+ *    - subscriptions
+ *    - messages
+ *    
+ *    @author Yohann CINTRE
  */
+
 public class RPCServiceCache extends BaseRPCServiceCache {
 
-	public static boolean isConnected = false;
-	public static LaunchInterface JORAMInterface;
+	private static boolean isConnected = false;
+	private static JORAMInterface JORAMInterface;
 
-	public static final String SESSION_TOPICS = "topicsList";
-	public static final String SESSION_QUEUES = "queuesList";
-	public static final String SESSION_MESSAGES = "messagesList";
+	private static final String SESSION_TOPICS = "topicsList";
+	private static final String SESSION_QUEUES = "queuesList";
+	private static final String SESSION_MESSAGES = "messagesList";
 	private static final String SESSION_USERS = "usersList";
 	private static final String SESSION_SUBSCRIPTION = "subscriptionList";
-
-	/**
-	 * These attributes are used to store and retrieve information in the
-	 * session.
-	 */
-	public static final String SESSION_USER_LOGIN = "userLogin";
 
 
 	private Map<String, DestinationImplMBean> mapDestinations;
@@ -121,7 +121,6 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 		session.setAttribute(RPCServiceCache.SESSION_QUEUES, sessionQueues);
 
 		return toReturn;
-
 	}
 
 	@SuppressWarnings("unchecked")
@@ -217,11 +216,32 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 
 		return toReturn;
 	}
+	
+	public Vector<Float> getInfos(boolean isforceUpdate) {
+		
+		synchWithJORAM(isforceUpdate);
+		
+		int lower = 0;
+		int higher = 2;
+		float e1 = (float)(Math.random() * (higher-lower)) + lower;
+		float n1 = (float)(Math.random() * (higher-lower)) + lower;
+		float n2 = (float)(Math.random() * (higher-lower)) + lower;
+		float n3 = (float)(Math.random() * (higher-lower)) + lower;
+		float n4 = (float)(Math.random() * (higher-lower)) + lower;
+		
+		Vector<Float> vInfos = new Vector<Float>();
+		vInfos.add(e1);
+		vInfos.add(n1);
+		vInfos.add(n2);
+		vInfos.add(n3);
+		vInfos.add(n4);
+		return vInfos;
+	}
 
 	public boolean connectJORAM(String login, String password) {
 		try {
 			if (!isConnected) {
-				JORAMInterface = new LaunchInterface(login, password);
+				JORAMInterface = new JORAMInterface(login, password);
 				isConnected = true;
 			}
 			return true;
@@ -427,4 +447,5 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 		
 		return true;
 	}
+
 }

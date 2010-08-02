@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.widget;
@@ -64,6 +63,9 @@ import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.viewer.DetailViewer;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 
+/**
+ * @author Yohann CINTRE
+ */
 public class SubscriptionDetailWidget extends BaseWidget<SubscriptionDetailPresenter> {
 
 	boolean redrawChart = false;
@@ -366,7 +368,6 @@ public class SubscriptionDetailWidget extends BaseWidget<SubscriptionDetailPrese
 
 		messageList.setData(messageListRecord);
 	}
-
 
 	public void updateMessage(MessageWTO message) {
 		MessageListRecord messageListRecords = (MessageListRecord)messageList.getRecordList().find(MessageListRecord.ATTRIBUTE_IDS, message.getIdS());

@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.server.command.queue;
@@ -12,7 +11,9 @@ import com.scalagent.appli.server.RPCServiceCache;
 import com.scalagent.engine.server.BaseRPCService;
 import com.scalagent.engine.server.command.ActionImpl;
 
-
+/**
+ * @author Yohann CINTRE
+ */
 public class ClearPendingMessageActionImpl extends ActionImpl<ClearPendingMessageResponse, ClearPendingMessageAction, RPCServiceCache>{
 
 

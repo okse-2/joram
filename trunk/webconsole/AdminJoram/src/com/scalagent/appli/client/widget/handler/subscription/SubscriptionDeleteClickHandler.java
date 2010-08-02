@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.widget.handler.subscription;
@@ -14,13 +13,14 @@ import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 
+/**
+ * @author Yohann CINTRE
+ */
 public class SubscriptionDeleteClickHandler implements ClickHandler {
-
 
 	private SubscriptionListPresenter sPresenter;
 	private UserDetailPresenter uPresenter;
 	private SubscriptionListRecord record;
-	
 	
 	public SubscriptionDeleteClickHandler(SubscriptionListPresenter sPresenter, SubscriptionListRecord record) {
 		super();
@@ -34,8 +34,6 @@ public class SubscriptionDeleteClickHandler implements ClickHandler {
 		this.record = record;
 	}
 	
-
-	
 	public void onClick(ClickEvent event) {
 		SC.confirm(Application.messages.subscriptionWidget_confirmDelete(), new BooleanCallback() {
 			@Override
@@ -47,9 +45,4 @@ public class SubscriptionDeleteClickHandler implements ClickHandler {
 			}
 		});
 	}	
-
-	
-	
-
-
 }

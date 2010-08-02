@@ -1,14 +1,15 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.shared;
 
 import com.scalagent.engine.shared.BaseWTO;
 
+/**
+ * @author Yohann CINTRE
+ */
 public class SubscriptionWTO extends BaseWTO {
-
 
 	private String name;
 	private boolean active;

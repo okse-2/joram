@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.widget.handler;
@@ -10,6 +9,9 @@ import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.form.fields.events.ClickEvent;
 import com.smartgwt.client.widgets.form.fields.events.ClickHandler;
 
+/**
+ * @author Yohann CINTRE
+ */
 public class LoginClickHandler implements ClickHandler {
 
 

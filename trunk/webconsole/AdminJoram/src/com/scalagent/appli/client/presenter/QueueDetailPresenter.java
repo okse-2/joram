@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.presenter;
@@ -24,7 +23,7 @@ import com.scalagent.appli.client.command.message.SendEditedMessageResponse;
 import com.scalagent.appli.client.command.message.SendNewMessageAction;
 import com.scalagent.appli.client.command.message.SendNewMessageHandler;
 import com.scalagent.appli.client.command.message.SendNewMessageResponse;
-import com.scalagent.appli.client.event.UpdateCompleteHandler;
+import com.scalagent.appli.client.event.common.UpdateCompleteHandler;
 import com.scalagent.appli.client.event.message.DeletedMessageHandler;
 import com.scalagent.appli.client.event.message.NewMessageHandler;
 import com.scalagent.appli.client.event.message.QueueNotFoundHandler;
@@ -40,10 +39,10 @@ import com.scalagent.engine.client.presenter.BasePresenter;
 import com.smartgwt.client.util.SC;
 
 /**
- * This class is the presenter associated to the list of devices.
- * Its widget is DevicesWidget.
+ * This class is the presenter associated to the details about a queue.
+ * Its widget is QueueDetailWidget.
  * 
- * @author Florian Gimbert
+ * @author Yohann CINTRE
  */
 public class QueueDetailPresenter extends BasePresenter<QueueDetailWidget, RPCServiceAsync, RPCServiceCacheClient> 
 implements 
@@ -61,48 +60,61 @@ UpdatedQueueHandler
 
 		super(serviceRPC, cache, eventBus);
 
-		System.out.println("### appli.client.presenter.QueueDetailsPresenter loaded ");
 		this.eventBus = eventBus;
 		this.queue = queue;
 
 		widget = new QueueDetailWidget(this);
-		retrieveMessage(queue);
+		cache.retrieveMessageQueue(queue);
 
 	}
 
+	/**
+	 * @return The queue displayed
+	 */
 	public QueueWTO getQueue() { return queue; }
 
-
-	public void retrieveMessage(QueueWTO queue) {
-		cache.retrieveMessageQueue(queue);
-	}
-
+	/**
+	 * This method is called by the the QueueDetailWidget when the user click 
+	 * on the "Refresh" button.
+	 * The "Refresh" button is disabled, the queues list and messages for the displayed queue are updated. 
+	 */	
 	public void fireRefreshAll() {
 		widget.getRefreshButton().disable();
 		cache.retrieveQueue(true);
 		cache.retrieveMessageQueue(getQueue());
 	}
 
-	@Override
+	/**
+	 * This method is called by the EventBus when a new message has been created on the server.
+	 * The widget is called to add it to the list if the message belong to the displayed queue
+	 */
 	public void onNewMessage(MessageWTO message, String queueName) {
 		if(queue.getName().equals(queueName))
 			getWidget().addMessage(new MessageListRecord(message));
 	}
 
-	@Override
+	/**
+	 * This method is called by the EventBus when a message has been deleted on the server.
+	 * The widget is called to remove it from the list if the message belong to the displayed queue
+	 */
 	public void onMessageDeleted(MessageWTO message, String queueName) {
 		if(queue.getName().equals(queueName))
-
 			widget.removeMessage(new MessageListRecord(message));
 	}
 
-	@Override
+	/**
+	 * This method is called by the EventBus when a message has been updated on the server.
+	 * The widget is called to update it if the message belong to the displayed queue.
+	 */
 	public void onMessageUpdated(MessageWTO message, String queueName) {
 		if(queue.getName().equals(queueName))
 			widget.updateMessage(message);
 	}
 
-	@Override
+	/**
+	 * This method is called by the EventBus when the update is done.
+	 * The refresh button is re-enabled and the chart redrawn
+	 */
 	public void onUpdateComplete(String info) {
 		if(queue.getName().equals(info)) {
 			widget.getRefreshButton().enable();
@@ -110,19 +122,25 @@ UpdatedQueueHandler
 		}
 	}
 
-	@Override
+	/**
+	 * This method is called by the EventBus when the queue no longer exist on the server.
+	 * The refresh button is disabled.
+	 */
 	public void onQueueNotFound(String queueName) {
-		System.out.println("!!! QUEUE NOT FOUND : "+queueName);
 		disableButtonRefresh(queueName);
 	}
 
-
-	@Override
+	/**
+	 * This method is called by the EventBus when a queue has been deleted on the server.
+	 * The refresh button is disabled.
+	 */
 	public void onQueueDeleted(QueueWTO queue) {
-		System.out.println("!!! QUEUE DELETED : "+queue.getName());
 		disableButtonRefresh(queue.getName());
 	}
 
+	/**
+	 * This method disable the refresh button on the widget 
+	 */
 	public void disableButtonRefresh(String queueName) {
 		if(queue.getName().equals(queueName)) {
 			widget.getRefreshButton().disable();
@@ -131,7 +149,10 @@ UpdatedQueueHandler
 		}
 	}
 
-	@Override
+	/**
+	 * This method is called by the EventBus when a queue has been updated on the server.
+	 * The widget is called to update it if the queue is currently displayed.
+	 */
 	public void onQueueUpdated(QueueWTO queue) {
 		if(this.queue.getName().equals(queue.getName())) {
 			this.queue = queue;
@@ -140,14 +161,26 @@ UpdatedQueueHandler
 
 	}
 
+	/**
+	 * This method is called by the QueueDetailWidget when the updating the chart.
+	 * @result A map containing the history of the current queue
+	 */
 	public SortedMap<Date, int[]> getQueueHistory() {
 		return cache.getSpecificHistory(queue.getName());
 	}
 
+	/**
+	 * This method is called by the MainPresenter when the user close a tab.
+	 * The widget is called to stop updating the non-displayed chart to avoid an exception.
+	 */
 	public void stopChart() {
 		widget.stopChart();
 	}
 
+	/**
+	 * This method is called by the QueueDetailWidget when the widget is initialized.
+	 * It retrieve the messages for the current queue add them to the message list of the widget.
+	 */
 	public void initList() {
 		Vector<String> vMessagesC = queue.getMessagesList();
 		ArrayList<MessageWTO> listMessages = new ArrayList<MessageWTO>();
@@ -157,6 +190,10 @@ UpdatedQueueHandler
 		widget.setData(listMessages);
 	}
 	
+	/**
+	 * This method is called by the QueueDetailWidget when the user submit the new message form.
+	 * The form information are sent to the server.
+	 */
 	public void createNewMessage(MessageWTO message, String queueName) {
 		service.execute(new SendNewMessageAction(message, queueName), new SendNewMessageHandler(eventBus) {
 			@Override
@@ -173,6 +210,10 @@ UpdatedQueueHandler
 		});
 	}
 	
+	/**
+	 * This method is called by the QueueDetailWidget when the user submit the edited message form.
+	 * The form information are sent to the server.
+	 */
 	public void editMessage(MessageWTO message, String queueName) {
 		service.execute(new SendEditedMessageAction(message, queueName), new SendEditedMessageHandler(eventBus) {
 			@Override
@@ -189,6 +230,10 @@ UpdatedQueueHandler
 		});
 	}
 	
+	/**
+	 * This method is called by the QueueDetailWidget when the user click the "delete" button of a message.
+	 * The message ID and the queue name are sent to the server which delete the message.
+	 */
 	public void deleteMessage(MessageWTO message, QueueWTO queue) {
 		service.execute(new DeleteMessageAction(message.getIdS(), queue.getName()), new DeleteMessageHandler(eventBus) {
 			@Override
@@ -203,10 +248,18 @@ UpdatedQueueHandler
 		});
 	}
 
+	/**
+	 * This method is called by the QueueDetailWidget when updating the chart.
+	 * @return A map of the queues in the client side cache.
+	 */
 	public Map<String, QueueWTO> getQueues() {
 		return cache.getQueues();
 	}
 	
+	/**
+	 * This method is called by the QueueDetailWidget when updating the chart.
+	 * @return A map of the subscriptions in the client side cache.
+	 */
 	public Map<String, SubscriptionWTO> getSubscriptions() {
 		return cache.getSubscriptions();
 	}

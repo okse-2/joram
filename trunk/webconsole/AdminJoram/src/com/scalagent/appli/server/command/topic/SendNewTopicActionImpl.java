@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.server.command.topic;
@@ -10,6 +9,9 @@ import com.scalagent.appli.client.command.topic.SendNewTopicResponse;
 import com.scalagent.appli.server.RPCServiceCache;
 import com.scalagent.engine.server.command.ActionImpl;
 
+/**
+ * @author Yohann CINTRE
+ */
 public class SendNewTopicActionImpl extends ActionImpl<SendNewTopicResponse, SendNewTopicAction, RPCServiceCache>{
 
 	@Override

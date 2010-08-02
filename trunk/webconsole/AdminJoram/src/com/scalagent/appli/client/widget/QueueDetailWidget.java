@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.widget;
@@ -65,6 +64,9 @@ import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.viewer.DetailViewer;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 
+/**
+ * @author Yohann CINTRE
+ */
 public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
 
 	boolean redrawChart = false;

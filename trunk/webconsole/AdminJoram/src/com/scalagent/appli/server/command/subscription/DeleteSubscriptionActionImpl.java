@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.server.command.subscription;
@@ -11,9 +10,10 @@ import com.scalagent.appli.client.command.subscription.DeleteSubscriptionRespons
 import com.scalagent.appli.server.RPCServiceCache;
 import com.scalagent.engine.server.command.ActionImpl;
 
-
+/**
+ * @author Yohann CINTRE
+ */
 public class DeleteSubscriptionActionImpl extends ActionImpl<DeleteSubscriptionResponse, DeleteSubscriptionAction, RPCServiceCache>{
-
 
 	@Override
 	public DeleteSubscriptionResponse execute(RPCServiceCache cache, DeleteSubscriptionAction action) {

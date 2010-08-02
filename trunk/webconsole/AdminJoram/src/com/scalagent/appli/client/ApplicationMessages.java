@@ -1,11 +1,12 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client;
 
-
+/**
+ * @author Yohann CINTRE
+ */
 public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages {
 
 	/** TOPIC WIDGET **/	

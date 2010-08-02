@@ -1,12 +1,16 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.command.subscription;
 
 import com.scalagent.engine.client.command.Response;
 
+/**
+ * Response to the action SendEditedSubscriptionAction.
+ * 
+ * @author Yohann CINTRE
+ */
 public class SendEditedSubscriptionResponse implements Response {
 
 	private boolean success;

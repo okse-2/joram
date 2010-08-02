@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.widget;
@@ -61,6 +60,9 @@ import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.viewer.DetailViewer;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 
+/**
+ * @author Yohann CINTRE
+ */
 public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
 
 	boolean redrawChart = false;
@@ -411,8 +413,6 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
 		}
 	}
 
-
-
 	public void updateUser() {
 		userDetail.setData(new Record[] {new UserListRecord(presenter.getUser())});
 	}
@@ -435,7 +435,6 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
 			refreshButton.enable();
 	}
 
-
 	private Options createOptions(boolean reuseChart) {
 		Options options = Options.create();
 		options.setDisplayAnnotations(false);
@@ -450,7 +449,6 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
 
 		return options;
 	}
-
 
 	private AbstractDataTable createUserTable() {
 		DataTable data = DataTable.create();

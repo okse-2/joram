@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.command.message;
@@ -12,6 +11,7 @@ import com.scalagent.engine.client.command.CalledMethod;
 
 /**
  * This action asks for Message list from the server.
+ * 
  * @author Yohann CINTRE
  */
 @CalledMethod(value=LoadMessageActionImpl.class)

@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 
@@ -14,11 +13,8 @@ import com.scalagent.appli.server.RPCServiceCache;
 import com.scalagent.appli.shared.TopicWTO;
 import com.scalagent.engine.server.command.ActionImpl;
 
-
-
 /**
- *
- * @author sgonzalez
+ * @author Yohann CINTRE
  */
 public class LoadTopicActionImpl 
 extends ActionImpl<LoadTopicResponse, LoadTopicAction, RPCServiceCache> {
@@ -28,9 +24,6 @@ extends ActionImpl<LoadTopicResponse, LoadTopicAction, RPCServiceCache> {
   public LoadTopicResponse execute(RPCServiceCache cache, LoadTopicAction action) {
 	  
 	  List<TopicWTO> topics = cache.getTopics(this.getHttpSession(), action.isRetrieveAll(), action.isforceUpdate());
-	  System.out.println("### engine.server.command.topic.LoadTopicActionImpl.execute : "+topics.size()+" topics recupérés sur le serveur");
 	  return new LoadTopicResponse(topics);
   }
-
-  
 }

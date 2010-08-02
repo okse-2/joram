@@ -103,7 +103,6 @@ public abstract class BaseRPCService extends RemoteServiceServlet {
 	 */
 	public synchronized void setSession(String sessionId, long timestamp) {
 		
-		System.out.println("### engine.server.BaseRPCService.setSession : "+ sessionId + " at " + timestamp);	
 		sessions.put(sessionId, new Long(timestamp));
 		
 	}
@@ -131,18 +130,15 @@ public abstract class BaseRPCService extends RemoteServiceServlet {
 	 */
 	public synchronized void removeSession(String sessionId) {
 		
-		System.out.println("!!! engine.server.BaseRPCService.removeSession : " + sessionId);	
 		sessions.remove(sessionId);
 	}
 	
 	@SuppressWarnings("unused") 
 	protected void onInvalidSession(String sessionId, Long timestamp) {
-//		TODO : session invalide ?
 	}
 	
 	@SuppressWarnings("unchecked")
 	protected HashMap<String, Long> getSessionsInformation() {
-		System.out.println("### engine.server.BaseRPCService.getSessionsInformation : " + sessions.clone().toString());	
 		return (HashMap<String, Long>) sessions.clone();
 
 	}

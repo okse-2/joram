@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.command.topic;
@@ -12,7 +11,9 @@ import com.scalagent.engine.client.command.CalledMethod;
 
 
 /**
- * This action asks for devices list from the server.
+ * This action send a updated topic to the server.
+ * 
+ * @author Yohann CINTRE
  */
 @CalledMethod(value=SendEditedTopicActionImpl.class)
 public class SendEditedTopicAction implements Action<SendEditedTopicResponse> {

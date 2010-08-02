@@ -1,6 +1,5 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
- * @author Yohann CINTRE
  */
 
 
@@ -13,6 +12,8 @@ import com.scalagent.engine.client.command.Response;
 
 /**
  * Response to the action LoadDevicesAction
+ * 
+ * @author Yohann CINTRE
  */
 public class LoadUserResponse implements Response{
  
