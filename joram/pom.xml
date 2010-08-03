@@ -6,7 +6,7 @@
   <artifactId>parent</artifactId>
   <packaging>pom</packaging>
   <!-- version : major.minor.build.protocol -->
-  <version>5.3.3.53-SNAPSHOT</version>
+  <version>5.4.0.54-SNAPSHOT</version>
   <name>JORAM</name>
   <url>http://maven.apache.org</url>
   <description>Builds the Joram project.</description>
@@ -25,6 +25,7 @@
     <module>conf</module>
     <module>assembly</module>
     <module>samples</module>
+<!--    <module>release</module>-->
   </modules>
 
   <repositories>
@@ -85,6 +86,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.7</version>
         <configuration>
           <show>private</show>
           <nohelp>true</nohelp>
@@ -229,6 +231,53 @@
       <groupId>org.ow2.jonas.osgi</groupId>
       <artifactId>monolog</artifactId>
     </dependency>
+    <!--  to comment -->
+    <dependency>
+      <groupId>commons-dbcp</groupId>
+      <artifactId>commons-dbcp</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.mail</groupId>
+      <artifactId>mail</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.activation</groupId>
+      <artifactId>activation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.objectweb.joram</groupId>
+      <artifactId>jcup</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>jgroups</groupId>
+      <artifactId>jgroups-all</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2</groupId>
+      <artifactId>ow2</artifactId>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-jms_1.1_spec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.spec.ee</groupId>
+      <artifactId>ow2-connector-1.5-spec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>soap</groupId>
+      <artifactId>soap</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.objectweb.joram</groupId>
+      <artifactId>jftp</artifactId>
+    </dependency>
+    <!--  to comment -->
   </dependencies>
 
 </project>
