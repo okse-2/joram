@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,6 +26,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+
+import fr.dyade.aaa.common.Configuration;
 
 /**
  *  This class allows to use a filesystem directory as repository with the
@@ -37,6 +40,7 @@ import java.io.IOException;
 final class FileRepository implements Repository {
   File dir = null;
 
+  /** The number of save operation to repository. */
   private int nbsaved = 0;
 
   /**
@@ -48,6 +52,7 @@ final class FileRepository implements Repository {
     return nbsaved;
   }
 
+  /** The number of delete operation on repository. */
   private int nbdeleted = 0;
 
   /**
@@ -59,6 +64,7 @@ final class FileRepository implements Repository {
     return nbdeleted;
   }
 
+  /** The number of useless delete operation on repository. */
   private int baddeleted = 0;
 
   /**
@@ -70,6 +76,7 @@ final class FileRepository implements Repository {
     return baddeleted;
   }
 
+  /** The number of load operation from repository. */
   private int nbloaded = 0;
 
   /**
@@ -81,8 +88,17 @@ final class FileRepository implements Repository {
     return nbloaded;
   }
 
-  FileRepository() {
-  }
+  /**
+   *  Boolean value to force the use of FileOutputStream rather than
+   * RandomAccessFile. By default this value is false, it can be set to 
+   * true using the FileRepository.useRandomAccessFile java property.
+   * <p>
+   *  This property can be fixed only from <code>java</code> launching
+   * command, or through System.property method.
+   */
+  private boolean useFileOutputStream;
+
+  FileRepository() {}
 
   /**
    * Initializes the repository.
@@ -90,6 +106,7 @@ final class FileRepository implements Repository {
    */
   public void init(File dir)  throws IOException {
     this.dir = dir;
+    useFileOutputStream = Configuration.getBoolean("FileRepository.useRandomAccessFile");
   }
 
   /**
@@ -116,10 +133,16 @@ final class FileRepository implements Repository {
       file = new File(parentDir, name);
     }
 
-    FileOutputStream fos = new FileOutputStream(file);
-    fos.write(content);
-    fos.getFD().sync();
-    fos.close();
+    if (useFileOutputStream ) {
+      FileOutputStream fos = new FileOutputStream(file);
+      fos.write(content);
+      fos.getFD().sync();
+      fos.close();
+    } else {
+      RandomAccessFile raf = new RandomAccessFile(file, "rwd");
+      raf.write(content);
+      raf.close();                    
+    }
 
     nbsaved += 1;
   }
