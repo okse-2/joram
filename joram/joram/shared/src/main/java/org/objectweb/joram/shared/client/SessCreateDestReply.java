@@ -33,7 +33,7 @@ import fr.dyade.aaa.common.stream.StreamUtil;
  * A <code>SessCreateTDReply</code> is used by a JMS proxy for replying
  * to a <code>SessCreate&lt;TQ/TT&gt;Request</code>.
  */
-public final class SessCreateTDReply extends AbstractJmsReply {
+public final class SessCreateDestReply extends AbstractJmsReply {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
@@ -51,7 +51,7 @@ public final class SessCreateTDReply extends AbstractJmsReply {
   }
 
   protected int getClassId() {
-    return SESS_CREATE_TDREPLY;
+    return SESS_CREATE_DEST_REPLY;
   }
 
   /**
@@ -60,7 +60,7 @@ public final class SessCreateTDReply extends AbstractJmsReply {
    * @param request  The replied request.
    * @param agentId  String identifier of the destination agent.
    */
-  public SessCreateTDReply(AbstractJmsRequest request, String agentId) {
+  public SessCreateDestReply(AbstractJmsRequest request, String agentId) {
     super(request.getRequestId());
     this.agentId = agentId;
   }
@@ -68,7 +68,7 @@ public final class SessCreateTDReply extends AbstractJmsReply {
   /**
    * Constructs a <code>SessCreateTDReply</code> instance.
    */
-  public SessCreateTDReply() {}
+  public SessCreateDestReply() {}
 
   /* ***** ***** ***** ***** *****
    * Streamable interface

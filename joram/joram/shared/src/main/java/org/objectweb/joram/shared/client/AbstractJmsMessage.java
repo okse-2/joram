@@ -79,9 +79,9 @@ public abstract class AbstractJmsMessage implements Externalizable, Streamable {
   protected final static int PING_REQUEST = 25;
   protected final static int QBROWSE_REPLY = 26;
   protected final static int QBROWSE_REQUEST = 27;
-  protected final static int SESS_CREATE_TDREPLY = 28;
-  protected final static int SESS_CREATE_TQREQUEST = 29;
-  protected final static int SESS_CREATE_TTREQUEST = 30;
+  protected final static int SESS_CREATE_DEST_REPLY = 28;
+  protected final static int SESS_CREATE_DEST_REQUEST = 29;
+  protected final static int XXX_SESS_CREATE_TTREQUEST = 30;
   protected final static int TEMP_DEST_DELETE_REQUEST = 31;
   protected final static int XA_CNX_COMMIT = 32;
   protected final static int XA_CNX_PREPARE = 33;
@@ -92,44 +92,44 @@ public abstract class AbstractJmsMessage implements Externalizable, Streamable {
   protected int classid;
 
   protected static final String[] classnames = {
-    "org.objectweb.joram.shared.client.CnxConnectRequest",
-    "org.objectweb.joram.shared.client.CnxConnectReply",
-    "org.objectweb.joram.shared.client.CnxStartRequest",
-    "org.objectweb.joram.shared.client.CnxStopRequest",
-    "org.objectweb.joram.shared.client.CnxCloseRequest",
-    "org.objectweb.joram.shared.client.CnxCloseReply",
-    "org.objectweb.joram.shared.client.ProducerMessages",
-    "org.objectweb.joram.shared.client.ConsumerReceiveRequest",
-    "org.objectweb.joram.shared.client.ConsumerMessages",
-    "org.objectweb.joram.shared.client.ConsumerSubRequest",
-    "org.objectweb.joram.shared.client.ConsumerUnsubRequest",
-    "org.objectweb.joram.shared.client.ConsumerAckRequest",
-    "org.objectweb.joram.shared.client.ConsumerDenyRequest",
-    "org.objectweb.joram.shared.client.SessAckRequest",
-    "org.objectweb.joram.shared.client.SessDenyRequest",
-    "org.objectweb.joram.shared.client.MomExceptionReply",
-    "org.objectweb.joram.shared.client.ServerReply",
+    CnxConnectRequest.class.getName(),
+    CnxConnectReply.class.getName(),
+    CnxStartRequest.class.getName(),
+    CnxStopRequest.class.getName(),
+    CnxCloseRequest.class.getName(),
+    CnxCloseReply.class.getName(),
+    ProducerMessages.class.getName(),
+    ConsumerReceiveRequest.class.getName(),
+    ConsumerMessages.class.getName(),
+    ConsumerSubRequest.class.getName(),
+    ConsumerUnsubRequest.class.getName(),
+    ConsumerAckRequest.class.getName(),
+    ConsumerDenyRequest.class.getName(),
+    SessAckRequest.class.getName(),
+    SessDenyRequest.class.getName(),
+    MomExceptionReply.class.getName(),
+    ServerReply.class.getName(),
 
-    "org.objectweb.joram.shared.client.ActivateConsumerRequest",
-    "org.objectweb.joram.shared.client.CommitRequest",
-    "org.objectweb.joram.shared.client.ConsumerCloseSubRequest",
-    "org.objectweb.joram.shared.client.ConsumerSetListRequest",
-    "org.objectweb.joram.shared.client.ConsumerUnsetListRequest",
-    "org.objectweb.joram.shared.client.GetAdminTopicReply",
-    "org.objectweb.joram.shared.client.GetAdminTopicRequest",
-    "org.objectweb.joram.shared.client.JmsRequestGroup",
-    "org.objectweb.joram.shared.client.PingRequest",
-    "org.objectweb.joram.shared.client.QBrowseReply",
-    "org.objectweb.joram.shared.client.QBrowseRequest",
-    "org.objectweb.joram.shared.client.SessCreateTDReply",
-    "org.objectweb.joram.shared.client.SessCreateTQRequest",
-    "org.objectweb.joram.shared.client.SessCreateTTRequest",
-    "org.objectweb.joram.shared.client.TempDestDeleteRequest",
-    "org.objectweb.joram.shared.client.XACnxCommit",
-    "org.objectweb.joram.shared.client.XACnxPrepare",
-    "org.objectweb.joram.shared.client.XACnxRecoverReply",
-    "org.objectweb.joram.shared.client.XACnxRecoverRequest",
-    "org.objectweb.joram.shared.client.XACnxRollback"
+    ActivateConsumerRequest.class.getName(),
+    CommitRequest.class.getName(),
+    ConsumerCloseSubRequest.class.getName(),
+    ConsumerSetListRequest.class.getName(),
+    ConsumerUnsetListRequest.class.getName(),
+    GetAdminTopicReply.class.getName(),
+    GetAdminTopicRequest.class.getName(),
+    JmsRequestGroup.class.getName(),
+    PingRequest.class.getName(),
+    QBrowseReply.class.getName(),
+    QBrowseRequest.class.getName(),
+    SessCreateDestReply.class.getName(),
+    SessCreateDestRequest.class.getName(),
+    null,
+    TempDestDeleteRequest.class.getName(),
+    XACnxCommit.class.getName(),
+    XACnxPrepare.class.getName(),
+    XACnxRecoverReply.class.getName(),
+    XACnxRecoverRequest.class.getName(),
+    XACnxRollback.class.getName()
   };
 
   protected abstract int getClassId();
