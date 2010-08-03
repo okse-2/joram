@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: JORAM :: Admin MBean Tracker
+Bundle-SymbolicName: org.ow2.joram.admin
+Export-Package: org.ow2.joram.admin;uses:="org.objectweb.joram.mom.dest,org.osgi.util.tracker,org.osgi.framework"
+Import-Package: org.osgi.framework,
+ org.osgi.util.tracker,
+ org.objectweb.joram.mom.dest
+Bundle-Description: Joram Admin MBean Tracker
+Bundle-Vendor: Scalagent D.T.
+Bundle-Activator: org.ow2.joram.admin.AdminActivator
