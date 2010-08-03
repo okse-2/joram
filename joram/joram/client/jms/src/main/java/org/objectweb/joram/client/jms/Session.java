@@ -40,6 +40,7 @@ import javax.jms.TransactionRolledBackException;
 
 import org.objectweb.joram.client.jms.connection.RequestMultiplexer;
 import org.objectweb.joram.client.jms.connection.Requestor;
+import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.CommitRequest;
@@ -52,9 +53,8 @@ import org.objectweb.joram.shared.client.GetAdminTopicReply;
 import org.objectweb.joram.shared.client.GetAdminTopicRequest;
 import org.objectweb.joram.shared.client.ProducerMessages;
 import org.objectweb.joram.shared.client.SessAckRequest;
-import org.objectweb.joram.shared.client.SessCreateTDReply;
-import org.objectweb.joram.shared.client.SessCreateTQRequest;
-import org.objectweb.joram.shared.client.SessCreateTTRequest;
+import org.objectweb.joram.shared.client.SessCreateDestRequest;
+import org.objectweb.joram.shared.client.SessCreateDestReply;
 import org.objectweb.joram.shared.client.SessDenyRequest;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -361,8 +361,7 @@ public class Session implements javax.jms.Session {
   /**
    *  Maximum number of messages that can be read at once from a queue.
    * <p>
-   *  This attribute is inherited from Connection at initialization,
-   * default value is 1.
+   *  This attribute is inherited from Connection at initialization.
    *
    * @see FactoryParameters#queueMessageReadMax
    */
@@ -404,8 +403,7 @@ public class Session implements javax.jms.Session {
    *  Maximum number of acknowledgements that can be buffered when using
    * Session.DUPS_OK_ACKNOWLEDGE mode.
    * <p>
-   *  This attribute is inherited from Connection at initialization,
-   *  default value is 0.
+   *  This attribute is inherited from Connection at initialization.
    * 
    * @see FactoryParameters#topicAckBufferMax
    */
@@ -415,12 +413,12 @@ public class Session implements javax.jms.Session {
    *  Get the maximum number of acknowledgements that can be buffered when
    * using Session.DUPS_OK_ACKNOWLEDGE mode for this session.
    * <p>
-   *  This attribute is inherited from Connection at initialization,
-   *  default value is 0.
+   *  This attribute is inherited from Connection at initialization.
    *
    * @return The Maximum number of acknowledgements that can be buffered when
    *         using Session.DUPS_OK_ACKNOWLEDGE mode.
    *
+   * @see FactoryParameters#topicAckBufferMax
    * @see #topicAckBufferMax
    */
   public final int getTopicAckBufferMax() {
@@ -431,13 +429,13 @@ public class Session implements javax.jms.Session {
    * Set the maximum number of acknowledgements that can be buffered when
    * using Session.DUPS_OK_ACKNOWLEDGE mode for this session.
    * <p>
-   *  This attribute is inherited from Connection at initialization,
-   *  default value is 0.
+   *  This attribute is inherited from Connection at initialization.
    *
    * @param topicAckBufferMax The Maximum number of acknowledgements that
    *			      can be buffered in Session.DUPS_OK_ACKNOWLEDGE
    *			      mode.
    *
+   * @see FactoryParameters#topicAckBufferMax
    * @see #topicAckBufferMax
    */
   public void setTopicAckBufferMax(int topicAckBufferMax) {
@@ -1044,29 +1042,62 @@ public class Session implements javax.jms.Session {
   }
 
   /**
+   * This method allows to create or retrieve a Queue with the given name
+   * on the local server. First a destination with the specified name is searched
+   * on the server, if it does not exist it is created. In any case a queue
+   * identity with its provider-specific address is returned.
+   * <p>
+   * If the given name is a provider-specific name (#x.y.z unique identifier)
+   * a queue identity is returned with the specified identifier.
+   * <p>
    * API method.
-   *
-   * @exception IllegalStateException  If the session is closed.
-   */
-  public synchronized javax.jms.Queue createQueue(String queueName) throws JMSException {
-    checkClosed();
-    checkThreadOfControl();
-    
-    return new Queue(queueName);
-  }
-
-  /**
-   * API method.
+   * <p>
+   * Clients that depend on this ability are not portable. Normally the physical
+   * creation of destination is an administrative task and is not to be initiated
+   * by the JMS API.
    *
    * @exception IllegalStateException  If the session is closed.
    * @exception JMSException  If the topic creation failed.
    */
-  public synchronized javax.jms.Topic createTopic(String topicName) throws JMSException {
+  public synchronized javax.jms.Queue createQueue(String name) throws JMSException {
+    checkClosed();
+    checkThreadOfControl();
+    
+    try {
+      Destination.checkId(name);
+    } catch (InvalidDestinationException exc) {
+      String id = createDestination(DestinationConstants.getQueueType(), name);
+      Queue queue = new Queue(id);
+      queue.adminName = name;
+      return queue;
+    }
+    return new Queue(name);
+  }
+
+  /**
+   * This method allows to create or retrieve a Topic with the given name
+   * on the local server. First a destination with the specified name is searched
+   * on the server, if it does not exist it is created. In any case a topic
+   * identity with its provider-specific address is returned.
+   * <p>
+   * If the given name is a provider-specific name (#x.y.z unique identifier)
+   * a topic identity is returned with the specified identifier.
+   * <p>
+   * API method.
+   * <p>
+   * Clients that depend on this ability are not portable. Normally the physical
+   * creation of destination is an administrative task and is not to be initiated
+   * by the JMS API.
+   *
+   * @exception IllegalStateException  If the session is closed.
+   * @exception JMSException  If the topic creation failed.
+   */
+  public synchronized javax.jms.Topic createTopic(String name) throws JMSException {
     checkClosed();
     checkThreadOfControl();
 
     // Checks if the topic to retrieve is the administration topic:
-    if (topicName.equals("#AdminTopic")) {
+    if (name.equals("#AdminTopic")) {
       try {
         GetAdminTopicReply reply = (GetAdminTopicReply) requestor.request(new GetAdminTopicRequest());
         if (reply.getId() != null)
@@ -1079,9 +1110,33 @@ public class Session implements javax.jms.Session {
         throw new JMSException("AdminTopic could not be retrieved: " + exc);
       }
     }
-    return new Topic(topicName);
+
+    try {
+      Destination.checkId(name);
+    } catch (InvalidDestinationException exc) {
+      String id = createDestination(DestinationConstants.getTopicType(), name);
+      Topic topic = new Topic(id);
+      topic.adminName = name;
+      return topic;
+    }
+    return new Topic(name);
   }
 
+  /**
+   * Create a destination with the given name and type.
+   * If a destination of a corresponding name and type exists it is returned.
+   * 
+   * @param type  the type of the destination to create.
+   * @param name  the name of the destination to create.
+   * @return  the unique identifier of the created destination.
+   * 
+   * @throws JMSException
+   */
+  private String createDestination(byte type, String name) throws JMSException {
+    SessCreateDestReply reply = (SessCreateDestReply) requestor.request(new SessCreateDestRequest(type, name));
+    return reply.getAgentId();
+  }
+  
   /**
    * API method.
    *
@@ -1093,7 +1148,7 @@ public class Session implements javax.jms.Session {
     checkClosed();
     checkThreadOfControl();
 
-    SessCreateTDReply reply = (SessCreateTDReply) requestor.request(new SessCreateTQRequest());
+    SessCreateDestReply reply = (SessCreateDestReply) requestor.request(new SessCreateDestRequest(DestinationConstants.getTemporaryQueueType()));
     String tempDest = reply.getAgentId();
     return new TemporaryQueue(tempDest, cnx);
   }
@@ -1109,7 +1164,7 @@ public class Session implements javax.jms.Session {
     checkClosed();
     checkThreadOfControl();
 
-    SessCreateTDReply reply = (SessCreateTDReply) requestor.request(new SessCreateTTRequest());
+    SessCreateDestReply reply = (SessCreateDestReply) requestor.request(new SessCreateDestRequest(DestinationConstants.getTemporaryTopicType()));
     String tempDest = reply.getAgentId();
     return new TemporaryTopic(tempDest, cnx);
   }
