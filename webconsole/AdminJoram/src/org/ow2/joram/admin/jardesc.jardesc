@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="WINDOWS-1252" standalone="no"?>
+<jardesc>
+    <jar path="Joram/ship/bundle/joram-admin-bundle.jar"/>
+    <options buildIfNeeded="true" compress="true" descriptionLocation="/Joram/src/org/ow2/joram/admin/jardesc.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+    <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
+    <selectedProjects/>
+    <manifest generateManifest="false" manifestLocation="/Joram/src/org/ow2/joram/admin/manifest.mf" manifestVersion="1.0" reuseManifest="false" saveManifest="true" usesManifest="true">
+        <sealing sealJar="false">
+            <packagesToSeal/>
+            <packagesToUnSeal/>
+        </sealing>
+    </manifest>
+    <selectedElements exportClassFiles="true" exportJavaFiles="true" exportOutputFolder="false">
+        <javaElement handleIdentifier="=Joram/src&lt;org.ow2.joram.admin{AdminActivator.java"/>
+        <javaElement handleIdentifier="=Joram/src&lt;org.ow2.joram.admin{Main.java"/>
+        <javaElement handleIdentifier="=Joram/src&lt;org.ow2.joram.admin{SysoListener.java"/>
+        <javaElement handleIdentifier="=Joram/src&lt;org.ow2.joram.admin{JoramAdminSimulator.java"/>
+        <javaElement handleIdentifier="=Joram/src&lt;org.ow2.joram.admin{JoramAdmin.java"/>
+        <javaElement handleIdentifier="=Joram/src&lt;org.ow2.joram.admin{DestinationListener.java"/>
+        <javaElement handleIdentifier="=Joram/src&lt;org.ow2.joram.admin{JoramAdminOSGi.java"/>
+    </selectedElements>
+</jardesc>
