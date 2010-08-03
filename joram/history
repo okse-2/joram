@@ -1,3 +1,14 @@
++==============================================================================
+| 2010/08/03 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Transaction: Adds FileRepository.useRandomAccessFile property allowing the
+optional  use of RandomAccessFile or FileOutputStream. This option offers better
+performance with some filesystems.
+ Potential bug fix in AgentId.equals with null.
+ Adds statistics about messages waiting in MessageConsumer components.
+ Allows to create or retrieve destinations through Session.create[Queue|Topic].
+ Numerous changes in administration, reducing the number of message types and
+avoiding useless indirection in request and reply.
 ###############################################################################
 # 2010/05/05 | Joram 5.3.2 tag.
 ###############################################################################
