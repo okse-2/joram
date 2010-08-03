@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -159,11 +159,9 @@ public final class UserAgent extends Agent implements BagSerializer, ProxyAgentI
    */
   public void react(AgentId from, Notification not) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "UserAgent.react(" + from + ',' + not + ')');
+      logger.log(BasicLevel.DEBUG, "UserAgent.react(" + from + ',' + not + ')');
 
-    // set agent no save:
-    // the default behavior is transient
+    // set agent no save: the default behavior is transient
     setNoSave();
 
     if (not instanceof OpenConnectionNot) {
@@ -195,8 +193,6 @@ public final class UserAgent extends Agent implements BagSerializer, ProxyAgentI
       if (cleaningTask == null) {
         cleaningTask = new WakeUpTask(getId(), WakeUpNot.class, proxyImpl.getPeriod());
       }
-
-
     } else {
       try {
         proxyImpl.react(from, not);
@@ -459,9 +455,12 @@ public final class UserAgent extends Agent implements BagSerializer, ProxyAgentI
         ConnectionContext ctx = (ConnectionContext) connections.remove(key);
         heartBeatTasks.remove(key);
         proxyImpl.reactToClientRequest(key.intValue(), new CnxCloseRequest());
-        MomException exc = new MomException(MomExceptionReply.HBCloseConnection,
-                                            "Connection " + getId() + ':' + key + " closed");
-        ctx.pushError(exc);
+        
+        if (ctx != null) {
+          MomException exc = new MomException(MomExceptionReply.HBCloseConnection,
+                                              "Connection " + getId() + ':' + key + " closed");
+          ctx.pushError(exc);
+        }
       }
     }
 

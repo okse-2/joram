@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 2003 - 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
@@ -36,41 +36,42 @@ import java.util.List;
 import java.util.Vector;
 
 import org.objectweb.joram.mom.dest.AdminTopic;
+import org.objectweb.joram.mom.dest.AdminTopicImpl;
+import org.objectweb.joram.mom.dest.Destination;
 import org.objectweb.joram.mom.dest.Queue;
 import org.objectweb.joram.mom.dest.QueueImpl;
 import org.objectweb.joram.mom.dest.Topic;
+import org.objectweb.joram.mom.dest.AdminTopicImpl.DestinationDesc;
 import org.objectweb.joram.mom.messages.Message;
 import org.objectweb.joram.mom.notifications.AbortReceiveRequest;
-import org.objectweb.joram.mom.notifications.AbstractReply;
-import org.objectweb.joram.mom.notifications.AbstractRequest;
+import org.objectweb.joram.mom.notifications.AbstractReplyNot;
+import org.objectweb.joram.mom.notifications.AbstractRequestNot;
 import org.objectweb.joram.mom.notifications.AcknowledgeRequest;
-import org.objectweb.joram.mom.notifications.AdminReply;
+import org.objectweb.joram.mom.notifications.AdminReplyNot;
 import org.objectweb.joram.mom.notifications.BrowseReply;
 import org.objectweb.joram.mom.notifications.BrowseRequest;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.DenyRequest;
 import org.objectweb.joram.mom.notifications.ExceptionReply;
-import org.objectweb.joram.mom.notifications.Monit_GetDMQSettings;
-import org.objectweb.joram.mom.notifications.Monit_GetDMQSettingsRep;
-import org.objectweb.joram.mom.notifications.Monit_GetNbMaxMsg;
-import org.objectweb.joram.mom.notifications.Monit_GetNbMaxMsgRep;
+import org.objectweb.joram.mom.notifications.FwdAdminRequestNot;
 import org.objectweb.joram.mom.notifications.QueueMsgReply;
 import org.objectweb.joram.mom.notifications.ReceiveRequest;
-import org.objectweb.joram.mom.notifications.RegisterTmpDestNot;
-import org.objectweb.joram.mom.notifications.SetDMQRequest;
-import org.objectweb.joram.mom.notifications.SetNbMaxMsgRequest;
-import org.objectweb.joram.mom.notifications.SetRightRequest;
-import org.objectweb.joram.mom.notifications.SetThreshRequest;
 import org.objectweb.joram.mom.notifications.SubscribeReply;
 import org.objectweb.joram.mom.notifications.SubscribeRequest;
 import org.objectweb.joram.mom.notifications.TopicMsgsReply;
 import org.objectweb.joram.mom.notifications.UnsubscribeRequest;
-import org.objectweb.joram.mom.notifications.UserAdminRequestNot;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.mom.util.DMQManager;
+import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.MessageErrorConstants;
+import org.objectweb.joram.shared.admin.AdminReply;
+import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.admin.ClearSubscription;
 import org.objectweb.joram.shared.admin.DeleteSubscriptionMessage;
+import org.objectweb.joram.shared.admin.GetDMQSettingsReply;
+import org.objectweb.joram.shared.admin.GetDMQSettingsRequest;
+import org.objectweb.joram.shared.admin.GetNbMaxMsgRequest;
+import org.objectweb.joram.shared.admin.GetNumberReply;
 import org.objectweb.joram.shared.admin.GetSubscription;
 import org.objectweb.joram.shared.admin.GetSubscriptionMessage;
 import org.objectweb.joram.shared.admin.GetSubscriptionMessageIds;
@@ -79,6 +80,9 @@ import org.objectweb.joram.shared.admin.GetSubscriptionMessageRep;
 import org.objectweb.joram.shared.admin.GetSubscriptionRep;
 import org.objectweb.joram.shared.admin.GetSubscriptions;
 import org.objectweb.joram.shared.admin.GetSubscriptionsRep;
+import org.objectweb.joram.shared.admin.SetDMQRequest;
+import org.objectweb.joram.shared.admin.SetNbMaxMsgRequest;
+import org.objectweb.joram.shared.admin.SetThresholdRequest;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.ActivateConsumerRequest;
@@ -107,9 +111,8 @@ import org.objectweb.joram.shared.client.QBrowseReply;
 import org.objectweb.joram.shared.client.QBrowseRequest;
 import org.objectweb.joram.shared.client.ServerReply;
 import org.objectweb.joram.shared.client.SessAckRequest;
-import org.objectweb.joram.shared.client.SessCreateTDReply;
-import org.objectweb.joram.shared.client.SessCreateTQRequest;
-import org.objectweb.joram.shared.client.SessCreateTTRequest;
+import org.objectweb.joram.shared.client.SessCreateDestReply;
+import org.objectweb.joram.shared.client.SessCreateDestRequest;
 import org.objectweb.joram.shared.client.SessDenyRequest;
 import org.objectweb.joram.shared.client.TempDestDeleteRequest;
 import org.objectweb.joram.shared.client.XACnxCommit;
@@ -139,7 +142,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * basically forwarding client requests to MOM destinations and MOM
  * destinations replies to clients.
  */ 
-public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
+public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
@@ -179,11 +182,68 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * not set.
    */
   private AgentId dmqId = null;
+  
   /**
-   * Threshold value, 0 or negative for no threshold, <code>null</code> for
-   * value not set.
+   * Returns the default DMQ for subscription of this user.
+   * @return  the default DMQ for subscription of this user.
    */
-  private Integer threshold = null; 
+  public String getDMQId() {
+    if (dmqId != null) return dmqId.toString();
+    return null;
+  }
+  
+  /**
+   *  Threshold above which messages are considered as undeliverable because
+   * constantly denied.
+   *  This value is used as default value at subscription creation.
+   *  0 stands for no threshold, -1 for value not set (use server' default value).
+   */
+  private int threshold = -1; 
+
+  /**
+   * Returns the default threshold for the subscription of this user.
+   * 0 stands for no threshold, -1 for value not set.
+   *
+   * @return the maximum number of message if set; -1 otherwise.
+   */
+  public int getThreshold() {
+    return threshold;
+  }
+
+  /**
+   * Sets the default threshold for the subscription of this user.
+   * 0 stands for no threshold, -1 for value not set.
+   *  
+   * @param threshold the threshold to set.
+   */
+  public void setThreshold(int threshold) {
+    this.threshold = threshold;
+  }
+
+  /**
+   *  Maximum number of Message store in subscriptions (-1 set no limit).
+   *  This value is used as default value at subscription creation.
+   */
+  protected int nbMaxMsg = -1;
+
+  /**
+   * Returns the default maximum number of message for the subscription of this user.
+   * If the limit is unset the method returns -1.
+   *
+   * @return the maximum number of message if set; -1 otherwise.
+   */
+  public int getNbMaxMsg() {
+    return nbMaxMsg;
+  }
+
+  /**
+   * Sets the maximum number of message for the subscription of this user.
+   *
+   * @param nbMaxMsg the maximum number of message (-1 set no limit).
+   */
+  public void setNbMaxMsg(int nbMaxMsg) {
+    this.nbMaxMsg = nbMaxMsg;
+  }
 
   /**
    * Table of the proxy's <code>ClientContext</code> instances.
@@ -593,36 +653,36 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * @exception UnknownNotificationException
    *              If the notification is not expected.
    */ 
-  public void react(AgentId from, Notification not)
-              throws UnknownNotificationException
-  {
+  public void react(AgentId from, Notification not) throws UnknownNotificationException {
     // Administration and monitoring requests:
-    if (not instanceof SetDMQRequest)
-      doReact(from, (SetDMQRequest) not);
-    else if (not instanceof SetThreshRequest)
-      doReact(from, (SetThreshRequest) not);
-    else if (not instanceof SetNbMaxMsgRequest)
-      doReact(from, (SetNbMaxMsgRequest) not);
-    else if (not instanceof Monit_GetNbMaxMsg)
-      doReact(from, (Monit_GetNbMaxMsg) not);
-    else if (not instanceof Monit_GetDMQSettings)
-      doReact(from, (Monit_GetDMQSettings) not);
+//    if (not instanceof SetDMQRequest)
+//      doReact(from, (SetDMQRequest) not);
+//    else 
+//    if (not instanceof SetThresholdRequestNot)
+//      doReact(from, (SetThresholdRequestNot) not);
+//    else
+//      if (not instanceof SetNbMaxMsgRequest)
+//      doReact(from, (SetNbMaxMsgRequest) not);
+//    else if (not instanceof GetNbMaxMsgRequestNot)
+//      doReact(from, (GetNbMaxMsgRequestNot) not);
+//    else if (not instanceof GetDMQSettingsRequestNot)
+//      doReact(from, (GetDMQSettingsRequestNot) not);
+//    else
     // Synchronization notification:
-    else if (not instanceof SyncReply)
+    if (not instanceof SyncReply)
       doReact((SyncReply) not);
     // Notifications sent by a destination:
-    else if (not instanceof AbstractReply) 
-      doFwd(from, (AbstractReply) not);
-    else if (not instanceof AdminReply)
-      doReact((AdminReply) not);
+    else if (not instanceof AbstractReplyNot) 
+      doFwd(from, (AbstractReplyNot) not);
+    else if (not instanceof AdminReplyNot)
+      doReact((AdminReplyNot) not);
     // Platform notifications:
     else if (not instanceof UnknownAgent)
       doReact((UnknownAgent) not);
-    else if (not instanceof UserAdminRequestNot)
-      doReact((UserAdminRequestNot) not);
+    else if (not instanceof FwdAdminRequestNot)
+      doReact((FwdAdminRequestNot) not);
     else
-      throw new UnknownNotificationException("Unexpected notification: " 
-                                             + not.getClass().getName());
+      throw new UnknownNotificationException("Unexpected notification: " + not.getClass().getName());
   }
 
   
@@ -672,10 +732,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         doReact((CnxStartRequest) request);
       else if (request instanceof CnxStopRequest)
         doReact((CnxStopRequest) request);
-      else if (request instanceof SessCreateTQRequest)
-        doReact((SessCreateTQRequest) request);
-      else if (request instanceof SessCreateTTRequest)
-        doReact((SessCreateTTRequest) request);
+      else if (request instanceof SessCreateDestRequest)
+        doReact((SessCreateDestRequest) request);
       else if (request instanceof ConsumerSubRequest)
         doReact((ConsumerSubRequest) request);
       else if (request instanceof ConsumerUnsubRequest)
@@ -805,46 +863,16 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
   }
 
   /**
-   * Method implementing the JMS proxy reaction to a
-   * <code>SessCreateTQRequest</code> requesting the creation of a temporary
-   * queue.
+   * Method implementing the JMS proxy reaction to a <code>SessCreateDestRequest</code>
+   * requesting the creation of a destination.
+   * 
+   * 
    * <p>
    * Creates the queue, sends it a <code>SetRightRequest</code> for granting
    * WRITE access to all, and wraps a <code>SessCreateTDReply</code> in a
    * <code>SyncReply</code> notification it sends to itself. This latest
    * action's purpose is to preserve causality.
    *
-   * @exception RequestException  If the queue could not be deployed.
-   */
-  private void doReact(SessCreateTQRequest req) throws RequestException {
-    try {
-      Queue queue = new Queue();
-      queue.init(proxyAgent.getId(), null);
-      AgentId qId = queue.getId();
-
-      queue.deploy();
-
-      // Setting free WRITE right on the queue:
-      proxyAgent.sendNot(qId, new SetRightRequest(null, null, 2));
-
-      activeCtx.addTemporaryDestination(qId);
-
-      SessCreateTDReply reply = new SessCreateTDReply(req, qId.toString());
-      proxyAgent.sendNot(proxyAgent.getId(),
-                         new SyncReply(activeCtxId, reply));
-
-      proxyAgent.sendNot(AdminTopic.getDefault(),
-                         new RegisterTmpDestNot(qId, false, true));
-
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "Temporary queue " + qId + " created.");
-    }
-    catch (java.io.IOException iE) {
-      throw new RequestException("Could not create temporary queue: " + iE);
-    } 
-  }
-
-  /**
    * Method implementing the JMS proxy reaction to a
    * <code>SessCreateTTRequest</code> requesting the creation of a temporary
    * topic.
@@ -854,35 +882,53 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * <code>SyncReply</code> notification it sends to itself. This latest
    * action's purpose is to preserve causality.
    *
-   * @exception RequestException  If the topic could not be deployed.
+   * @exception RequestException  If the destination could not be deployed.
    */
-  private void doReact(SessCreateTTRequest req) throws RequestException {
-    Topic topic = new Topic();
-    topic.init(proxyAgent.getId(), null);
-    AgentId tId = topic.getId();
+  private void doReact(SessCreateDestRequest req) throws RequestException {
+    AgentId destId = null;
 
-    try {
-      topic.deploy();
+    // Verify if the destination exists
+    DestinationDesc desc = AdminTopicImpl.lookupDest(req.getName(), req.getType());
+    if (desc == null) {
+      Destination dest = null;
+      if (DestinationConstants.isQueue(req.getType())) {
+        // Create a local queue.
+        dest = new Queue();
+      } else if (DestinationConstants.isTopic(req.getType())) {
+        // Create a local topic.
+        dest = new Topic();
+      } else {
+        throw new RequestException("Could not create destination, unknown type:" + req.getType());
+      }
+      dest.setName(req.getName());
+      dest.init(proxyAgent.getId(), null);
+      dest.setFreeWriting(true); // Setting free WRITE right on the destination
+      if (! DestinationConstants.isTemporary(req.getType()))
+        dest.setFreeReading(true); // Setting free READ right on the destination
+      destId = dest.getId();
+      try {
+        dest.deploy();
+      } catch (IOException exc) {
+        throw new RequestException("Could not create destination:" + exc.getMessage());
+      }
+      // Registers the newly created destination
+      AdminTopicImpl.registerDest(destId,
+                                  (req.getName() == null)?destId.toString():req.getName(),
+                                                         req.getType());
 
-      // Setting free WRITE right on the topic:
-      proxyAgent.sendNot(tId, new SetRightRequest(null, null, 2));
-
-      activeCtx.addTemporaryDestination(tId);
-
-      SessCreateTDReply reply = new SessCreateTDReply(req, tId.toString());
-      proxyAgent.sendNot(proxyAgent.getId(),
-                         new SyncReply(activeCtxId, reply));
-
-      proxyAgent.sendNot(AdminTopic.getDefault(),
-                         new RegisterTmpDestNot(tId, true, true));
+      if (DestinationConstants.isTemporary(req.getType())) {
+        // Registers the temporary destination in order to clean it at the end of the connection
+        activeCtx.addTemporaryDestination(destId);
+      }
 
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "Temporary topic" + tId + " created.");
-    } catch (java.io.IOException iE) {
-      topic = null;
-      throw new RequestException("Could not deploy temporary topic "
-                                 + tId + ": " + iE);
-    } 
+        logger.log(BasicLevel.DEBUG, "ProxyImpl, new destination created: " + destId);
+    } else {
+      destId = desc.getId();
+    }
+
+    SessCreateDestReply reply = new SessCreateDestReply(req, destId.toString());
+    proxyAgent.sendNot(proxyAgent.getId(), new SyncReply(activeCtxId, reply));
   }
 
   /**
@@ -931,6 +977,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
                                     req.getNoLocal(),
                                     dmqId,
                                     threshold,
+                                    nbMaxMsg,
                                     messagesTable);
       cSub.setProxyAgent(proxyAgent);
      
@@ -1333,8 +1380,9 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
   private void deleteTemporaryDestination(AgentId destId) {
     proxyAgent.sendNot(destId, new DeleteNot());
-    proxyAgent.sendNot(AdminTopic.getDefault(),
-                       new RegisterTmpDestNot(destId, false, false));
+//    proxyAgent.sendNot(AdminTopic.getDefault(),
+//                       new RegisterTmpDestNot(destId, false, false));
+    AdminTopicImpl.unregisterDest(destId.toString());
   }
 
   /**
@@ -1486,103 +1534,85 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     doReply(new XACnxRecoverReply(req, bqs, fis, gtis));
   }
 
-  /**
-   * Method implementing the reaction to a <code>SetDMQRequest</code>
-   * instance setting the dead message queue identifier for this proxy
-   * and its subscriptions.
-   */
-  private void doReact(AgentId from, SetDMQRequest not) {
-    // state change, so save.
-    proxyAgent.setSave();
-    
-    dmqId = not.getDmqId();
+//  /**
+//   * Method implementing the reaction to a <code>SetDMQRequest</code>
+//   * instance setting the dead message queue identifier for this proxy
+//   * and its subscriptions.
+//   */
+//  private void doReact(AgentId from, SetDMQRequest not) {
+//    // state change, so save.
+//    proxyAgent.setSave();
+//    
+//    dmqId = not.getDmqId();
+//
+//    for (Enumeration keys = subsTable.keys(); keys.hasMoreElements();) 
+//      ((ClientSubscription) subsTable.get(keys.nextElement())).setDMQId(dmqId);
+//
+//    proxyAgent.sendNot(from, new AdminReplyNot(not, true, "DMQ set: " + dmqId));
+//  }
 
-    for (Enumeration keys = subsTable.keys(); keys.hasMoreElements();) 
-      ((ClientSubscription) subsTable.get(keys.nextElement())).setDMQId(dmqId);
+//  /**
+//   * Method implementing the reaction to a <code>SetThreshRequest</code>
+//   * instance setting the threshold value for this proxy and its
+//   * subscriptions.
+//   */
+//  private void doReact(AgentId from, SetThresholdRequestNot not) {
+//    // state change, so save.
+//    proxyAgent.setSave();
+//    
+//    threshold = not.getThreshold();
+//
+//    for (Enumeration keys = subsTable.keys(); keys.hasMoreElements();) 
+//      ((ClientSubscription)
+//         subsTable.get(keys.nextElement())).setThreshold(not.getThreshold());
+//
+//    proxyAgent.sendNot(from,
+//                       new AdminReplyNot(not,
+//                                      true,
+//                                      "Threshold set: " + threshold));
+//  }
 
-    proxyAgent.sendNot(from, new AdminReply(not, true, "DMQ set: " + dmqId));
-  }
+//  /**
+//   * Method implementing the reaction to a <code>SetNbMaxMsgRequest</code>
+//   * instance setting the NbMaxMsg value for the subscription.
+//   */
+//  protected void doReact(AgentId from, SetNbMaxMsgRequest not) { XXX
+//    int nbMaxMsg = not.getNbMaxMsg();
+//    String subName = not.getSubName();
+//
+//    ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
+//    if (sub != null) {
+//      sub.setNbMaxMsg(nbMaxMsg);
+//      proxyAgent.sendNot(from,
+//                         new AdminReplyNot(not,
+//                                        true,
+//                                        "NbMaxMsg set: " + nbMaxMsg + " on " + subName));
+//    } else {
+//      proxyAgent.sendNot(from,
+//                         new AdminReplyNot(not,
+//                                        false,
+//                                        "NbMaxMsg not set: " + nbMaxMsg + " on " + subName));
+//    }
+//  }
 
-  /**
-   * Method implementing the reaction to a <code>SetThreshRequest</code>
-   * instance setting the threshold value for this proxy and its
-   * subscriptions.
-   */
-  private void doReact(AgentId from, SetThreshRequest not) {
-    // state change, so save.
-    proxyAgent.setSave();
-    
-    threshold = not.getThreshold();
-
-    for (Enumeration keys = subsTable.keys(); keys.hasMoreElements();) 
-      ((ClientSubscription)
-         subsTable.get(keys.nextElement())).setThreshold(not.getThreshold());
-
-    proxyAgent.sendNot(from,
-                       new AdminReply(not,
-                                      true,
-                                      "Threshold set: " + threshold));
-  }
-
-  /**
-   * Method implementing the reaction to a <code>SetNbMaxMsgRequest</code>
-   * instance setting the NbMaxMsg value for the subscription.
-   */
-  protected void doReact(AgentId from, SetNbMaxMsgRequest not) {
-    int nbMaxMsg = not.getNbMaxMsg();
-    String subName = not.getSubName();
-
-    ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
-    if (sub != null) {
-      sub.setNbMaxMsg(nbMaxMsg);
-      proxyAgent.sendNot(from,
-                         new AdminReply(not,
-                                        true,
-                                        "NbMaxMsg set: " + nbMaxMsg + " on " + subName));
-    } else {
-      proxyAgent.sendNot(from,
-                         new AdminReply(not,
-                                        false,
-                                        "NbMaxMsg not set: " + nbMaxMsg + " on " + subName));
-    }
-  }
-
-  /**
-   * Method implementing the reaction to a
-   * <code>Monit_GetNbMaxMsg</code> notification requesting the
-   * number max of messages in the subscription.
-   *
-   * @exception AccessException  If the requester is not the administrator.
-   */
-  protected void doReact(AgentId from, Monit_GetNbMaxMsg not) {
-    int nbMaxMsg = -1;
-    String subName = not.getSubName();
-    ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
-    if (sub != null)
-      nbMaxMsg = sub.getNbMaxMsg();
-
-    Channel.sendTo(from, new Monit_GetNbMaxMsgRep(not,nbMaxMsg));
-  }
-
-  /**
-   * Method implementing the reaction to a <code>Monit_GetDMQSettings</code>
-   * instance requesting the DMQ settings of this proxy.
-   */
-  private void doReact(AgentId from, Monit_GetDMQSettings not)
-  {
-    String id = null;
-    if (dmqId != null)
-      id = dmqId.toString();
-    proxyAgent.sendNot(from, new Monit_GetDMQSettingsRep(not, id, threshold));
-  }
+//  /**
+//   * Method implementing the reaction to a <code>Monit_GetDMQSettings</code>
+//   * instance requesting the DMQ settings of this proxy.
+//   */
+//  private void doReact(AgentId from, GetDMQSettingsRequestNot not)
+//  {
+//    String id = null;
+//    if (dmqId != null)
+//      id = dmqId.toString();
+//    proxyAgent.sendNot(from, new GetDMQSettingsReplyNot(not, id, threshold));
+//  }
 
   /**
    * Method implementing the JMS proxy reaction to a
    * <code>SyncReply</code> notification sent by itself, wrapping a reply
    * to be sent to a client.
    */
-  private void doReact(SyncReply not)
-  {
+  private void doReact(SyncReply not) {
     doReply(not.key, not.reply);
   }
 
@@ -1791,11 +1821,10 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * <li><code>ExceptionReply</code></li>
    * </ul>
    */
-  private void doFwd(AgentId from, AbstractReply rep) {
+  private void doFwd(AgentId from, AbstractReplyNot rep) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
-                 "--- " + this + " got " + rep.getClass().getName() +
-                 " with id: " + rep.getCorrelationId() + " from: " + from);
+                 "--- " + this + " got " + rep.getClass().getName() + " with id: " + rep.getCorrelationId() + " from: " + from);
 
     if (rep instanceof QueueMsgReply)
       doFwd(from, (QueueMsgReply) rep);
@@ -2072,7 +2101,7 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * An <code>AdminReply</code> acknowledges the setting of a temporary
    * destination; nothing needs to be done.
    */
-  private void doReact(AdminReply reply) {}
+  private void doReact(AdminReplyNot reply) {}
 
   /**
    * Method implementing the JMS proxy reaction to an <code>UnknownAgent</code>
@@ -2129,8 +2158,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       return;
     }
 
-    if (not instanceof AbstractRequest) {
-      AbstractRequest req = (AbstractRequest) not;
+    if (not instanceof AbstractRequestNot) {
+      AbstractRequestNot req = (AbstractRequestNot) not;
 
       // If the wrapped request is messages sending,forwarding them to the DMQ:
       if (req instanceof ClientMessages) {
@@ -2188,44 +2217,95 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       }
       if (logger.isLoggable(BasicLevel.INFO))
         logger.log(BasicLevel.INFO,
-                   "Connection " + req.getClientContext() +
-                   " notified of the deletion of destination " + agId);
+                   "Connection " + req.getClientContext() + " notified of the deletion of destination " + agId);
     }
   }
 
-  private void doReact(UserAdminRequestNot not) {
-    org.objectweb.joram.shared.admin.AdminRequest adminRequest = 
-      not.getRequest();
+  private void doReact(FwdAdminRequestNot not) {
+    AdminRequest adminRequest = not.getRequest();
+    
     if (adminRequest instanceof GetSubscriptions) {
-      doReact((GetSubscriptions)adminRequest,
-              not.getReplyTo(),
-              not.getRequestMsgId(),
-              not.getReplyMsgId());
+      doReact((GetSubscriptions) adminRequest, not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
     } else if (adminRequest instanceof GetSubscriptionMessageIds) {
-      doReact((GetSubscriptionMessageIds)adminRequest,
-              not.getReplyTo(),
-              not.getRequestMsgId(),
-              not.getReplyMsgId());
+      doReact((GetSubscriptionMessageIds) adminRequest, not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
     } else if (adminRequest instanceof GetSubscriptionMessage) {
-      doReact((GetSubscriptionMessage)adminRequest,
-              not.getReplyTo(),
-              not.getRequestMsgId(),
-              not.getReplyMsgId());
+      doReact((GetSubscriptionMessage) adminRequest, not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
     } else if (adminRequest instanceof DeleteSubscriptionMessage) {
-      doReact((DeleteSubscriptionMessage)adminRequest,
-              not.getReplyTo(),
-              not.getRequestMsgId(),
-              not.getReplyMsgId());
+      doReact((DeleteSubscriptionMessage) adminRequest, not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
     } else if (adminRequest instanceof GetSubscription) {
-      doReact((GetSubscription)adminRequest,
-              not.getReplyTo(),
-              not.getRequestMsgId(),
-              not.getReplyMsgId());
+      doReact((GetSubscription) adminRequest, not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
     } else if (adminRequest instanceof ClearSubscription) {
-      doReact((ClearSubscription)adminRequest,
-              not.getReplyTo(),
-              not.getRequestMsgId(),
-              not.getReplyMsgId());
+      doReact((ClearSubscription) adminRequest, not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
+    } else if (adminRequest instanceof GetNbMaxMsgRequest) {
+      GetNbMaxMsgRequest request = (GetNbMaxMsgRequest) adminRequest;
+      int nbMaxMsg = -1;
+      ClientSubscription sub = (ClientSubscription) subsTable.get(request.getSubName());
+      if (sub != null)
+        nbMaxMsg = sub.getNbMaxMsg();
+
+      replyToTopic(new GetNumberReply(nbMaxMsg),
+                   not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
+    } else if (adminRequest instanceof GetDMQSettingsRequest) {
+      replyToTopic(new GetDMQSettingsReply((dmqId != null)?dmqId.toString():null, threshold),
+                   not.getReplyTo(),
+                   not.getRequestMsgId(),
+                   not.getReplyMsgId());
+    } else if (adminRequest instanceof SetDMQRequest) {
+      proxyAgent.setSave();
+      
+      if (((SetDMQRequest)adminRequest).getDmqId() != null)
+        dmqId = AgentId.fromString(((SetDMQRequest)adminRequest).getDmqId());
+      else
+        dmqId = null;
+
+      for (Enumeration keys = subsTable.keys(); keys.hasMoreElements();) 
+        ((ClientSubscription) subsTable.get(keys.nextElement())).setDMQId(dmqId);
+
+      replyToTopic(new AdminReply(true, null),
+                   not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
+    } else if (adminRequest instanceof SetThresholdRequest) {
+      proxyAgent.setSave(); // state change, so save.
+      threshold = ((SetThresholdRequest) adminRequest).getThreshold();
+      for (Enumeration keys = subsTable.keys(); keys.hasMoreElements();) 
+        ((ClientSubscription) subsTable.get(keys.nextElement())).setThreshold(threshold);
+
+      replyToTopic(new AdminReply(true, null),
+                   not.getReplyTo(),
+                   not.getRequestMsgId(),
+                   not.getReplyMsgId());
+    } else if (adminRequest instanceof SetNbMaxMsgRequest) {
+      proxyAgent.setSave(); // state change, so save.
+      int nbMaxMsg = ((SetNbMaxMsgRequest) adminRequest).getNbMaxMsg();
+      
+      AdminReply reply = null;
+      String subName = ((SetNbMaxMsgRequest) adminRequest).getSubName();
+      if (subName == null) {
+        // Set the default subscription of this user
+        this.nbMaxMsg = nbMaxMsg;
+        reply =new AdminReply(true, null);
+      } else {
+        // Set the given subscription
+        ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
+        if (sub != null) {
+          sub.setNbMaxMsg(nbMaxMsg);
+          reply = new AdminReply(true, null);
+        } else {
+          reply = new AdminReply(AdminReply.NAME_UNKNOWN, "Subscription unknow: " + subName);
+        }
+      }
+
+      replyToTopic(reply,
+                   not.getReplyTo(),
+                   not.getRequestMsgId(),
+                   not.getReplyMsgId());
+    } else {
+      logger.log(BasicLevel.ERROR,
+                 "Unknown administration request for proxy " + proxyAgent.getId());
+      replyToTopic(new AdminReply(AdminReply.UNKNOWN_REQUEST, null),
+                   not.getReplyTo(),
+                   not.getRequestMsgId(),
+                   not.getReplyMsgId());
+      
     }
   }
 
@@ -2286,11 +2366,8 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
           cs.getMessageIds());
       replyToTopic(reply, replyTo, requestMsgId, replyMsgId);
     } else {
-      replyToTopic(
-        new org.objectweb.joram.shared.admin.AdminReply(
-          false, "Subscription not found: " + 
-          request.getSubscriptionName()), 
-        replyTo, requestMsgId, replyMsgId);
+      replyToTopic(new AdminReply(false, "Subscription not found: " + request.getSubscriptionName()), 
+                   replyTo, requestMsgId, replyMsgId);
     }
   }
 
@@ -2304,18 +2381,13 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       cs = (ClientSubscription)subsTable.get(subName);
     }
     if (cs != null) {
-      GetSubscriptionRep reply = 
-        new GetSubscriptionRep(
-          cs.getTopicId().toString(),
-          cs.getPendingMessageCount(),
-          cs.getDurable());
+      GetSubscriptionRep reply = new GetSubscriptionRep(cs.getTopicId().toString(),
+                                                        cs.getPendingMessageCount(),
+                                                        cs.getDurable());
       replyToTopic(reply, replyTo, requestMsgId, replyMsgId);
     } else {
-      replyToTopic(
-        new org.objectweb.joram.shared.admin.AdminReply(
-          false, "Subscription not found: " + 
-          request.getSubscriptionName()), 
-        replyTo, requestMsgId, replyMsgId);
+      replyToTopic(new org.objectweb.joram.shared.admin.AdminReply(false, "Subscription not found: " + request.getSubscriptionName()), 
+                   replyTo, requestMsgId, replyMsgId);
     }
   }
 
@@ -2344,18 +2416,12 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         }
         replyToTopic(reply, replyTo, requestMsgId, replyMsgId);
       } else {
-        replyToTopic(
-          new org.objectweb.joram.shared.admin.AdminReply(
-            false, "Message not found: " + 
-            request.getMessageId()), 
-          replyTo, requestMsgId, replyMsgId);
+        replyToTopic(new AdminReply(false, "Message not found: " + request.getMessageId()), 
+                     replyTo, requestMsgId, replyMsgId);
       }
     } else {
-      replyToTopic(
-        new org.objectweb.joram.shared.admin.AdminReply(
-          false, "Subscription not found: " + 
-          subName),
-        replyTo, requestMsgId, replyMsgId);
+      replyToTopic(new AdminReply(false, "Subscription not found: " + subName),
+                   replyTo, requestMsgId, replyMsgId);
     }
   }
 
@@ -2370,16 +2436,11 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     }
     if (cs != null) {
       cs.deleteMessage(request.getMessageId());
-      replyToTopic(
-        new org.objectweb.joram.shared.admin.AdminReply(
-          true, null),
-        replyTo, requestMsgId, replyMsgId);
+      replyToTopic(new AdminReply(true, null),
+                   replyTo, requestMsgId, replyMsgId);   
     } else {
-      replyToTopic(
-        new org.objectweb.joram.shared.admin.AdminReply(
-          false, "Subscription not found: " + 
-          request.getSubscriptionName()),
-        replyTo, requestMsgId, replyMsgId);
+        replyToTopic(new AdminReply(false, "Subscription not found: " + request.getSubscriptionName()),
+                     replyTo, requestMsgId, replyMsgId);
     }
   }
 
@@ -2410,20 +2471,15 @@ public class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     }
     if (cs != null) {
       cs.clear();
-      replyToTopic(
-        new org.objectweb.joram.shared.admin.AdminReply(
-          true, null),
-        replyTo, requestMsgId, replyMsgId);
+      replyToTopic(new AdminReply(true, null),
+                   replyTo, requestMsgId, replyMsgId);
     } else {
-      replyToTopic(
-        new org.objectweb.joram.shared.admin.AdminReply(
-          false, "Subscription not found: " + 
-          request.getSubscriptionName()),
-        replyTo, requestMsgId, replyMsgId);
+      replyToTopic(new AdminReply(false, "Subscription not found: " + request.getSubscriptionName()),
+                   replyTo, requestMsgId, replyMsgId);
     }
   }
 
-  private void replyToTopic(org.objectweb.joram.shared.admin.AdminReply reply,
+  private void replyToTopic(AdminReply reply,
                             AgentId replyTo,
                             String requestMsgId,
                             String replyMsgId) {

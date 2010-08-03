@@ -29,9 +29,4 @@ package org.objectweb.joram.shared.admin;
  * <code>org.objectweb.joram.mom.dest.AdminTopic</code> topic for requesting an
  * admin operation.
  */
-public abstract class AdminRequest extends AbstractAdminMessage {
-  
-  protected int getClassId() {
-    return ADMIN_REQUEST;
-  }
-}
+public abstract class AdminRequest extends AbstractAdminMessage {}

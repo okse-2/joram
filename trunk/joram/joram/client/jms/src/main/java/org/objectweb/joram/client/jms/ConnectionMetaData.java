@@ -42,11 +42,11 @@ public final class ConnectionMetaData implements javax.jms.ConnectionMetaData {
   /** JMS provider name: Joram */
   public final static String providerName = "Joram";
   /** Joram's major version number, currently ${major.filter.value} */
-  public static int providerMajorVersion = 0;//major
+  public final static int providerMajorVersion;
   /** Joram's minor version number, currently ${minor.filter.value} */
-  public static int providerMinorVersion = 0;//minor
+  public final static int providerMinorVersion;
   /** Joram's implementation version, currently ${build.filter.value}. */
-  public static String providerVersion = "x.x.x"; // version
+  public final static String providerVersion;
   /** Enumeration of the Joram's JMSX property names */
   private final static Vector jmsxProperties = new Vector();
   
@@ -54,21 +54,23 @@ public final class ConnectionMetaData implements javax.jms.ConnectionMetaData {
     jmsxProperties.add("JMSXDeliveryCount");
     jmsxProperties.add("JMSXGroupID");
     jmsxProperties.add("JMSXGroupSeq");
-    getVersion();
-  }
 
-  private static void getVersion() {
-  	// Read version from the package
-  	Package pkg = ConnectionMetaData.class.getPackage();
-  	if (pkg != null) {
-  		String implVersion = pkg.getImplementationVersion();
-  		if (implVersion != null) {
-  			providerVersion = implVersion;
-  			StringTokenizer st = new StringTokenizer(implVersion, ".");
-  			providerMajorVersion = Integer.parseInt((String) st.nextElement());
-  			providerMinorVersion = Integer.parseInt((String) st.nextElement());
-  		}
-  	}
+    // Read version from the package
+    Package pkg = ConnectionMetaData.class.getPackage();
+    String implVersion = null;
+    if (pkg != null)
+      implVersion = pkg.getImplementationVersion();
+
+    if (implVersion != null) {
+      providerVersion = implVersion;
+      StringTokenizer st = new StringTokenizer(implVersion, ".");
+      providerMajorVersion = Integer.parseInt((String) st.nextElement());
+      providerMinorVersion = Integer.parseInt((String) st.nextElement());
+    } else {
+      providerVersion = "x.x.x";
+      providerMajorVersion = 0;
+      providerMinorVersion = 0;
+    }
   }
 
   /**

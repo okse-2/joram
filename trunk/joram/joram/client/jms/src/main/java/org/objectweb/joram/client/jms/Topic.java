@@ -35,16 +35,14 @@ import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.shared.admin.GetSubscriberIds;
 import org.objectweb.joram.shared.admin.GetSubscriberIdsRep;
-import org.objectweb.joram.shared.admin.Monitor_GetCluster;
-import org.objectweb.joram.shared.admin.Monitor_GetClusterRep;
-import org.objectweb.joram.shared.admin.Monitor_GetFather;
-import org.objectweb.joram.shared.admin.Monitor_GetFatherRep;
-import org.objectweb.joram.shared.admin.Monitor_GetNumberRep;
-import org.objectweb.joram.shared.admin.Monitor_GetSubscriptions;
+import org.objectweb.joram.shared.admin.GetClusterRequest;
+import org.objectweb.joram.shared.admin.GetClusterReply;
+import org.objectweb.joram.shared.admin.GetFatherRequest;
+import org.objectweb.joram.shared.admin.GetFatherReply;
+import org.objectweb.joram.shared.admin.GetNumberReply;
+import org.objectweb.joram.shared.admin.GetSubscriptionsRequest;
 import org.objectweb.joram.shared.admin.SetCluster;
 import org.objectweb.joram.shared.admin.SetFather;
-import org.objectweb.joram.shared.admin.UnsetCluster;
-import org.objectweb.joram.shared.admin.UnsetFather;
 
 /**
  *  Implements the <code>javax.jms.Topic</code> interface and provides
@@ -253,8 +251,8 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * @exception AdminException  If the request fails.
    */
   public Topic getHierarchicalFather() throws ConnectException, AdminException {
-    Monitor_GetFather request = new Monitor_GetFather(agentId);
-    Monitor_GetFatherRep reply = (Monitor_GetFatherRep) doRequest(request);
+    GetFatherRequest request = new GetFatherRequest(agentId);
+    GetFatherReply reply = (GetFatherReply) doRequest(request);
 
     if (reply.getFatherId() == null)
       return null;
@@ -272,8 +270,8 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * @exception AdminException  If the request fails.
    */
   public List getClusterFellows() throws ConnectException, AdminException {
-    Monitor_GetCluster request = new Monitor_GetCluster(agentId);
-    Monitor_GetClusterRep reply = (Monitor_GetClusterRep) doRequest(request);
+    GetClusterRequest request = new GetClusterRequest(agentId);
+    GetClusterReply reply = (GetClusterReply) doRequest(request);
 
     Vector topics = reply.getTopics();
     Vector list = new Vector();
@@ -293,8 +291,8 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * @exception AdminException  If the request fails.
    */
   public int getSubscriptions() throws ConnectException, AdminException {
-    Monitor_GetSubscriptions request = new Monitor_GetSubscriptions(agentId);
-    Monitor_GetNumberRep reply = (Monitor_GetNumberRep) doRequest(request);
+    GetSubscriptionsRequest request = new GetSubscriptionsRequest(agentId);
+    GetNumberReply reply = (GetNumberReply) doRequest(request);
     return reply.getNumber();
   }
 
@@ -331,7 +329,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * @exception AdminException  If the request fails.
    */
   public void removeFromCluster() throws ConnectException, AdminException {
-    doRequest(new UnsetCluster(agentId));
+    doRequest(new SetCluster(agentId, null));
   }
 
   /**
@@ -363,6 +361,6 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * @exception AdminException  If the request fails.
    */
   public void unsetParent() throws ConnectException, AdminException {
-    doRequest(new UnsetFather(agentId));
+    doRequest(new SetFather(null, agentId));
   }
 }

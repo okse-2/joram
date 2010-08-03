@@ -23,7 +23,7 @@
  */
 package org.objectweb.joram.mom.notifications;
 
-public class AbortReceiveRequest extends AbstractRequest {
+public class AbortReceiveRequest extends AbstractRequestNot {
 
   /**
    * 

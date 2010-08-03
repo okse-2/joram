@@ -95,22 +95,22 @@ public abstract class AbstractAdminMessage implements Externalizable, Streamable
   protected final static int MONITOR_GET_DESTINATIONS_REP = 42;
   protected final static int MONITOR_GET_FATHER = 43;
   protected final static int MONITOR_GET_FATHER_REP = 44;
-  protected final static int MONITOR_GET_FREE_ACCESS = 45;
-  protected final static int MONITOR_GET_FREE_ACCESS_REP = 46;
+  protected final static int GET_RIGHTS_REQUEST = 45;
+  protected final static int GET_RIGHTS_REPLY = 46;
   protected final static int MONITOR_GET_NB_MAX_MSG = 47;
-  protected final static int MONITOR_GET_NB_MAX_MSG_REP = 48;
+  protected final static int XXX_MONITOR_GET_NB_MAX_MSG_REP = 48;
   protected final static int MONITOR_GET_NUMBER_REP = 49;
   protected final static int MONITOR_GET_PENDING_MESSAGES = 50;
   protected final static int MONITOR_GET_PENDING_REQUESTS = 51;
-  protected final static int MONITOR_GET_READERS = 52;
+  protected final static int XXX_MONITOR_GET_READERS = 52;
   protected final static int MONITOR_GET_SERVERS_IDS = 53;
   protected final static int MONITOR_GET_SERVERS_IDS_REP = 54;
   protected final static int MONITOR_GET_STAT = 55;
   protected final static int MONITOR_GET_STAT_REP = 56;
   protected final static int MONITOR_GET_SUBSCRIPTIONS = 57;
-  protected final static int MONITOR_GET_USERS = 58;
-  protected final static int MONITOR_GET_USERS_REP = 59;
-  protected final static int MONITOR_GET_WRITERS = 60;
+  protected final static int GET_USERS_REQUEST = 58;
+  protected final static int GET_USERS_REPLY = 59;
+  protected final static int XXX_MONITOR_GET_WRITERS = 60;
   protected final static int MONITOR_REPLY = 61;
   protected final static int MONITOR_REQUEST = 62;
   protected final static int QUEUE_ADMIN_REQUEST = 63;
@@ -119,29 +119,29 @@ public abstract class AbstractAdminMessage implements Externalizable, Streamable
   protected final static int REMOVE_SERVER_REQUEST = 66;
   protected final static int REMOVE_SERVICE_REQUEST = 67;
   protected final static int SET_CLUSTER = 68;
-  protected final static int SET_DEFAULT_DMQ = 69;
-  protected final static int SET_DEFAULT_THRESHOLD = 70;
-  protected final static int SET_DESTINATION_DMQ = 71;
+  protected final static int XXX_SET_DEFAULT_DMQ = 69;
+  protected final static int SET_THRESHOLD = 70;
+  protected final static int SET_DMQ = 71;
   protected final static int SET_FATHER = 72;
   protected final static int SET_NB_MAX_MSG = 73;
-  protected final static int SET_QUEUE_THRESHOLD = 74;
+  protected final static int XXX_SET_QUEUE_THRESHOLD = 74;
   protected final static int SET_READER = 75;
   protected final static int SET_RIGHT = 76;
-  protected final static int SET_USER_DMQ = 77;
-  protected final static int SET_USER_THRESHOLD = 78;
+  protected final static int XXX_SET_USER_DMQ = 77;
+  protected final static int XXX_SET_USER_THRESHOLD = 78;
   protected final static int SET_WRITER = 79;
   protected final static int SPECIAL_ADMIN = 80;
   protected final static int STOP_SERVER_REQUEST = 81;
   protected final static int SUBSCRIPTION_ADMIN_REQUEST = 82;
-  protected final static int UNSET_CLUSTER = 83;
-  protected final static int UNSET_DEFAULT_DMQ = 84;
-  protected final static int UNSET_DEFAULT_THRESHOLD = 85;
-  protected final static int UNSET_DESTINATION_DMQ = 86;
-  protected final static int UNSET_FATHER = 87;
-  protected final static int UNSET_QUEUE_THRESHOLD = 88;
+  protected final static int XXX_UNSET_CLUSTER = 83;
+  protected final static int XXX_UNSET_DEFAULT_DMQ = 84;
+  protected final static int XXX_UNSET_DEFAULT_THRESHOLD = 85;
+  protected final static int XXX_UNSET_DESTINATION_DMQ = 86;
+  protected final static int XXX_UNSET_FATHER = 87;
+  protected final static int XXX_UNSET_QUEUE_THRESHOLD = 88;
   protected final static int UNSET_READER = 89;
-  protected final static int UNSET_USER_DMQ = 90;
-  protected final static int UNSET_USER_THRESHOLD = 91;
+  protected final static int XXX_UNSET_USER_DMQ = 90;
+  protected final static int XXX_UNSET_USER_THRESHOLD = 91;
   protected final static int UNSET_WRITER = 92;
   protected final static int UPDATE_USER = 93;
   protected final static int USER_ADMIN_REQUEST = 94;
@@ -149,104 +149,102 @@ public abstract class AbstractAdminMessage implements Externalizable, Streamable
   protected int classid;
 
   protected static final String[] classnames = {
-    "org.objectweb.joram.shared.admin.AbstractAdminMessage",
-    "org.objectweb.joram.shared.admin.AddDomainRequest",
-    "org.objectweb.joram.shared.admin.AddQueueCluster",
-    "org.objectweb.joram.shared.admin.AddServerRequest",
-    "org.objectweb.joram.shared.admin.AddServiceRequest",
-    "org.objectweb.joram.shared.admin.AdminReply",
-    "org.objectweb.joram.shared.admin.AdminRequest",
-    "org.objectweb.joram.shared.admin.ClearQueue",
-    "org.objectweb.joram.shared.admin.ClearSubscription",
-    "org.objectweb.joram.shared.admin.CreateDestinationReply",
-    "org.objectweb.joram.shared.admin.CreateDestinationRequest",
-    "org.objectweb.joram.shared.admin.CreateUserReply",
-    "org.objectweb.joram.shared.admin.CreateUserRequest",
-    "org.objectweb.joram.shared.admin.DeleteDestination",
-    "org.objectweb.joram.shared.admin.DeleteQueueMessage",
-    "org.objectweb.joram.shared.admin.DeleteSubscriptionMessage",
-    "org.objectweb.joram.shared.admin.DeleteUser",
-    "org.objectweb.joram.shared.admin.GetConfigRequest",
-    "org.objectweb.joram.shared.admin.GetDomainNames",
-    "org.objectweb.joram.shared.admin.GetDomainNamesRep",
-    "org.objectweb.joram.shared.admin.GetLocalServer",
-    "org.objectweb.joram.shared.admin.GetLocalServerRep",
-    "org.objectweb.joram.shared.admin.GetQueueMessage",
-    "org.objectweb.joram.shared.admin.GetQueueMessageIds",
-    "org.objectweb.joram.shared.admin.GetQueueMessageIdsRep",
-    "org.objectweb.joram.shared.admin.GetQueueMessageRep",
-    "org.objectweb.joram.shared.admin.GetSubscriberIds",
-    "org.objectweb.joram.shared.admin.GetSubscriberIdsRep",
-    "org.objectweb.joram.shared.admin.GetSubscription",
-    "org.objectweb.joram.shared.admin.GetSubscriptionMessage",
-    "org.objectweb.joram.shared.admin.GetSubscriptionMessageIds",
-    "org.objectweb.joram.shared.admin.GetSubscriptionMessageIdsRep",
-    "org.objectweb.joram.shared.admin.GetSubscriptionMessageRep",
-    "org.objectweb.joram.shared.admin.GetSubscriptionRep",
-    "org.objectweb.joram.shared.admin.GetSubscriptions",
-    "org.objectweb.joram.shared.admin.GetSubscriptionsRep",
-    "org.objectweb.joram.shared.admin.ListClusterQueue",
-    "org.objectweb.joram.shared.admin.Monitor_GetCluster",
-    "org.objectweb.joram.shared.admin.Monitor_GetClusterRep",
-    "org.objectweb.joram.shared.admin.Monitor_GetDMQSettings",
-    "org.objectweb.joram.shared.admin.Monitor_GetDMQSettingsRep",
-    "org.objectweb.joram.shared.admin.Monitor_GetDestinations",
-    "org.objectweb.joram.shared.admin.Monitor_GetDestinationsRep",
-    "org.objectweb.joram.shared.admin.Monitor_GetFather",
-    "org.objectweb.joram.shared.admin.Monitor_GetFatherRep",
-    "org.objectweb.joram.shared.admin.Monitor_GetFreeAccess",
-    "org.objectweb.joram.shared.admin.Monitor_GetFreeAccessRep",
-    "org.objectweb.joram.shared.admin.Monitor_GetNbMaxMsg",
-    "org.objectweb.joram.shared.admin.Monitor_GetNbMaxMsgRep",
-    "org.objectweb.joram.shared.admin.Monitor_GetNumberRep",
-    "org.objectweb.joram.shared.admin.Monitor_GetPendingMessages",
-    "org.objectweb.joram.shared.admin.Monitor_GetPendingRequests",
-    "org.objectweb.joram.shared.admin.Monitor_GetReaders",
-    "org.objectweb.joram.shared.admin.Monitor_GetServersIds",
-    "org.objectweb.joram.shared.admin.Monitor_GetServersIdsRep",
-    "org.objectweb.joram.shared.admin.Monitor_GetStat",
-    "org.objectweb.joram.shared.admin.Monitor_GetStatRep",
-    "org.objectweb.joram.shared.admin.Monitor_GetSubscriptions",
-    "org.objectweb.joram.shared.admin.Monitor_GetUsers",
-    "org.objectweb.joram.shared.admin.Monitor_GetUsersRep",
-    "org.objectweb.joram.shared.admin.Monitor_GetWriters",
-    "org.objectweb.joram.shared.admin.Monitor_Reply",
-    "org.objectweb.joram.shared.admin.Monitor_Request",
-    "org.objectweb.joram.shared.admin.QueueAdminRequest",
-    "org.objectweb.joram.shared.admin.RemoveDomainRequest",
-    "org.objectweb.joram.shared.admin.RemoveQueueCluster",
-    "org.objectweb.joram.shared.admin.RemoveServerRequest",
-    "org.objectweb.joram.shared.admin.RemoveServiceRequest",
-    "org.objectweb.joram.shared.admin.SetCluster",
-    "org.objectweb.joram.shared.admin.SetDefaultDMQ",
-    "org.objectweb.joram.shared.admin.SetDefaultThreshold",
-    "org.objectweb.joram.shared.admin.SetDestinationDMQ",
-    "org.objectweb.joram.shared.admin.SetFather",
-    "org.objectweb.joram.shared.admin.SetNbMaxMsg",
-    "org.objectweb.joram.shared.admin.SetQueueThreshold",
-    "org.objectweb.joram.shared.admin.SetReader",
-    "org.objectweb.joram.shared.admin.SetRight",
-    "org.objectweb.joram.shared.admin.SetUserDMQ",
-    "org.objectweb.joram.shared.admin.SetUserThreshold",
-    "org.objectweb.joram.shared.admin.SetWriter",
-    "org.objectweb.joram.shared.admin.SpecialAdmin",
-    "org.objectweb.joram.shared.admin.StopServerRequest",
-    "org.objectweb.joram.shared.admin.SubscriptionAdminRequest",
-    "org.objectweb.joram.shared.admin.UnsetCluster",
-    "org.objectweb.joram.shared.admin.UnsetDefaultDMQ",
-    "org.objectweb.joram.shared.admin.UnsetDefaultThreshold",
-    "org.objectweb.joram.shared.admin.UnsetDestinationDMQ",
-    "org.objectweb.joram.shared.admin.UnsetFather",
-    "org.objectweb.joram.shared.admin.UnsetQueueThreshold",
-    "org.objectweb.joram.shared.admin.UnsetReader",
-    "org.objectweb.joram.shared.admin.UnsetUserDMQ",
-    "org.objectweb.joram.shared.admin.UnsetUserThreshold",
-    "org.objectweb.joram.shared.admin.UnsetWriter",
-    "org.objectweb.joram.shared.admin.UpdateUser",
-    "org.objectweb.joram.shared.admin.UserAdminRequest"
+    AbstractAdminMessage.class.getName(),
+    AddDomainRequest.class.getName(),
+    AddQueueCluster.class.getName(),
+    AddServerRequest.class.getName(),
+    AddServiceRequest.class.getName(),
+    AdminReply.class.getName(),
+    AdminRequest.class.getName(),
+    ClearQueue.class.getName(),
+    ClearSubscription.class.getName(),
+    CreateDestinationReply.class.getName(),
+    CreateDestinationRequest.class.getName(),
+    CreateUserReply.class.getName(),
+    CreateUserRequest.class.getName(),
+    DeleteDestination.class.getName(),
+    DeleteQueueMessage.class.getName(),
+    DeleteSubscriptionMessage.class.getName(),
+    DeleteUser.class.getName(),
+    GetConfigRequest.class.getName(),
+    GetDomainNames.class.getName(),
+    GetDomainNamesRep.class.getName(),
+    GetLocalServer.class.getName(),
+    GetLocalServerRep.class.getName(),
+    GetQueueMessage.class.getName(),
+    GetQueueMessageIds.class.getName(),
+    GetQueueMessageIdsRep.class.getName(),
+    GetQueueMessageRep.class.getName(),
+    GetSubscriberIds.class.getName(),
+    GetSubscriberIdsRep.class.getName(),
+    GetSubscription.class.getName(),
+    GetSubscriptionMessage.class.getName(),
+    GetSubscriptionMessageIds.class.getName(),
+    GetSubscriptionMessageIdsRep.class.getName(),
+    GetSubscriptionMessageRep.class.getName(),
+    GetSubscriptionRep.class.getName(),
+    GetSubscriptions.class.getName(),
+    GetSubscriptionsRep.class.getName(),
+    ListClusterQueue.class.getName(),
+    GetClusterRequest.class.getName(),
+    GetClusterReply.class.getName(),
+    GetDMQSettingsRequest.class.getName(),
+    GetDMQSettingsReply.class.getName(),
+    GetDestinationsRequest.class.getName(),
+    GetDestinationsReply.class.getName(),
+    GetFatherRequest.class.getName(),
+    GetFatherReply.class.getName(),
+    GetRightsRequest.class.getName(),
+    GetRightsReply.class.getName(),
+    GetNbMaxMsgRequest.class.getName(),
+    null,
+    GetNumberReply.class.getName(),
+    GetPendingMessages.class.getName(),
+    GetPendingRequests.class.getName(),
+    null,
+    GetServersIdsRequest.class.getName(),
+    GetServersIdsReply.class.getName(),
+    GetStatsRequest.class.getName(),
+    GetStatsReply.class.getName(),
+    GetSubscriptionsRequest.class.getName(),
+    GetUsersRequest.class.getName(),
+    GetUsersReply.class.getName(),
+    null,
+    null,
+    null,
+    QueueAdminRequest.class.getName(),
+    RemoveDomainRequest.class.getName(),
+    RemoveQueueCluster.class.getName(),
+    RemoveServerRequest.class.getName(),
+    RemoveServiceRequest.class.getName(),
+    SetCluster.class.getName(),
+    null,
+    SetThresholdRequest.class.getName(),
+    SetDMQRequest.class.getName(),
+    SetFather.class.getName(),
+    SetNbMaxMsgRequest.class.getName(),
+    null,
+    SetReader.class.getName(),
+    SetRight.class.getName(),
+    null,
+    null,
+    SetWriter.class.getName(),
+    SpecialAdmin.class.getName(),
+    StopServerRequest.class.getName(),
+    SubscriptionAdminRequest.class.getName(),
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    UnsetReader.class.getName(),
+    null,
+    null,
+    UnsetWriter.class.getName(),
+    UpdateUser.class.getName(),
+    UserAdminRequest.class.getName(),
   };
-
-  
   
   protected abstract int getClassId();
 

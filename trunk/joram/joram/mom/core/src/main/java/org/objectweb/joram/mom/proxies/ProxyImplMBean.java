@@ -66,4 +66,41 @@ public interface ProxyImplMBean {
    * @return the number of erroneous messages forwarded to the DMQ.
    */
   long getNbMsgsSentToDMQSinceCreation();
+  
+  /**
+   * Returns the default DMQ for subscription of this user.
+   * @return  the default DMQ for subscription of this user.
+   */
+  String getDMQId();
+
+  /**
+   * Returns the default threshold for the subscription of this user.
+   * 0 stands for no threshold, -1 for value not set.
+   *
+   * @return the maximum number of message if set; -1 otherwise.
+   */
+  int getThreshold();
+
+  /**
+   * Sets the default threshold for the subscription of this user.
+   * 0 stands for no threshold, -1 for value not set.
+   *  
+   * @param threshold the threshold to set.
+   */
+  void setThreshold(int threshold);
+
+  /**
+   * Returns the default maximum number of message for the subscription of this user.
+   * If the limit is unset the method returns -1.
+   *
+   * @return the maximum number of message if set; -1 otherwise.
+   */
+  int getNbMaxMsg();
+
+  /**
+   * Sets the maximum number of message for the subscription of this user.
+   *
+   * @param nbMaxMsg the maximum number of message (-1 set no limit).
+   */
+  void setNbMaxMsg(int nbMaxMsg);
 }

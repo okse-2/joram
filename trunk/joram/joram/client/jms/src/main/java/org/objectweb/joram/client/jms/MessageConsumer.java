@@ -282,22 +282,15 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
         sess.removeMessageListener(mcl, true);
         mcl = null;
       } else throw new IllegalStateException(
-        "Message listener not null");
+      "Message listener not null");
     } else {
       if (messageListener != null) {
-        mcl = sess.addMessageListener(
-          new SingleSessionConsumer(
-            queueMode,
-            durableSubscriber,
-            selector,
-            targetName,
-            sess,
-            messageListener,
-            sess.getQueueMessageReadMax(),
-            sess.getTopicActivationThreshold(),
-            sess.getTopicPassivationThreshold(),
-            sess.getTopicAckBufferMax(),
-            sess.getRequestMultiplexer()));
+        mcl = sess.addMessageListener(new SingleSessionConsumer(queueMode,
+                                                                durableSubscriber,
+                                                                selector,
+                                                                targetName,
+                                                                sess,
+                                                                messageListener));
       }
       // else idempotent
     }

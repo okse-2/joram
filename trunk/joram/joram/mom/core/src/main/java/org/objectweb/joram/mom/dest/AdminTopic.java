@@ -25,13 +25,10 @@ package org.objectweb.joram.mom.dest;
 
 import java.util.Properties;
 
-import org.objectweb.joram.mom.dest.AdminTopicImpl.AdminRequestNot;
-import org.objectweb.joram.mom.notifications.AdminReply;
+import org.objectweb.joram.mom.notifications.AdminReplyNot;
+import org.objectweb.joram.mom.notifications.FwdAdminRequestNot;
 import org.objectweb.joram.mom.notifications.GetProxyIdListNot;
 import org.objectweb.joram.mom.notifications.GetProxyIdNot;
-import org.objectweb.joram.mom.notifications.RegisterDestNot;
-import org.objectweb.joram.mom.notifications.RegisterTmpDestNot;
-import org.objectweb.joram.mom.notifications.RegisteredDestNot;
 import org.objectweb.joram.mom.proxies.AdminNotification;
 import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -81,12 +78,23 @@ public class AdminTopic extends Topic {
    * Gets the identifier of the default administration topic on the
    * current server.
    */
-  public static AgentId getDefault() {
+  public final static AgentId getDefault() {
     if (adminId == null)
       adminId = new AgentId(AgentServer.getServerId(),
                             AgentServer.getServerId(),
                             AgentId.JoramAdminStamp);
     return adminId;
+  }
+  
+  /**
+   * Returns true if the given AgentId is the unique identifier of an AdminTopic agent.
+   * 
+   * @param id  the AgentId to verify.
+   * @return    true if the given AgentId is the unique identifier of an AdminTopic agent.
+   */
+  public final static boolean isAdminTopicId(AgentId id) {
+    if (id == null) return false;
+    return id.getStamp() == AgentId.JoramAdminStamp;
   }
   
   /**
@@ -104,20 +112,14 @@ public class AdminTopic extends Topic {
 
     if (not instanceof AdminNotification)
       ((AdminTopicImpl)destImpl).AdminNotification(from, (AdminNotification) not);
-    else if (not instanceof AdminRequestNot)
-      ((AdminTopicImpl)destImpl).AdminRequestNot(from, (AdminRequestNot) not);
-    else if (not instanceof org.objectweb.joram.mom.notifications.AdminReply)
-      ((AdminTopicImpl)destImpl).AdminReply(from, (AdminReply) not);
+    else if (not instanceof FwdAdminRequestNot)
+      ((AdminTopicImpl)destImpl).AdminRequestNot(from, (FwdAdminRequestNot) not);
+    else if (not instanceof AdminReplyNot)
+      ((AdminTopicImpl)destImpl).AdminReply(from, (AdminReplyNot) not);
     else if (not instanceof GetProxyIdNot)
       ((AdminTopicImpl)destImpl).GetProxyIdNot((GetProxyIdNot)not);
     else if (not instanceof GetProxyIdListNot)
       ((AdminTopicImpl)destImpl).GetProxyIdListNot((GetProxyIdListNot)not);
-    else if (not instanceof RegisterTmpDestNot)
-      ((AdminTopicImpl)destImpl).RegisterTmpDestNot((RegisterTmpDestNot)not);
-    else if (not instanceof RegisterDestNot)
-      ((AdminTopicImpl)destImpl).RegisterDestNot((RegisterDestNot)not);
-    else if (not instanceof RegisteredDestNot)
-      ((AdminTopicImpl)destImpl).RegisteredDestNot(from, (RegisteredDestNot)not);
     else
       super.react(from, not);
   }

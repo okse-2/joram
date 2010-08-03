@@ -24,8 +24,17 @@ package org.objectweb.joram.mom.dest;
 
 public interface TopicImplMBean extends DestinationImplMBean {
   /**
-   * Returns the list of unique identifiers of all subscribers. Each user
-   * appears once even if there is multiples subscriptions, the different
+   * Returns the number of subscribers.
+   * Each user appears once even if there is multiples subscriptions, the different
+   * subscriptions can be enumerate through the proxy MBean.
+   * 
+   * @return the number of subscribers.
+   */
+  int getNumberOfSubscribers();
+  
+  /**
+   * Returns the list of unique identifiers of all subscribers.
+   * Each user appears once even if there is multiples subscriptions, the different
    * subscriptions can be enumerate through the proxy MBean.
    *
    * @return the list of unique identifiers of all subscribers.

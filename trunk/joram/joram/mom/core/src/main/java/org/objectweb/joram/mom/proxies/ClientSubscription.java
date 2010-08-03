@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -76,10 +75,11 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    */
   private AgentId dmqId;
   /**
-   * Threshold value, 0 or negative for no threshold, <code>null</code> for
-   * value not set.
+   * Threshold above which messages are considered as undeliverable because
+   * constantly denied.
+   * 0 stands for no threshold, -1 for value not set (use servers' default value).
    */
-  private Integer threshold;
+  private int threshold = -1;
 
   /** Max number of Message stored in the queue (-1 no limit). */
   protected int nbMaxMsg = -1;
@@ -157,7 +157,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
                      String selector,
                      boolean noLocal,
                      AgentId dmqId,
-                     Integer threshold,
+                     int threshold,
+                     int nbMaxMsg,
                      Hashtable messagesTable) {
     this.proxyId = proxyId;
     this.contextId = contextId;
@@ -169,6 +170,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     this.noLocal = noLocal;
     this.dmqId = dmqId;
     this.threshold = threshold;
+    this.nbMaxMsg = nbMaxMsg;
     this.messagesTable = messagesTable;
 
     messageIds = new Vector();
@@ -467,7 +469,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   }
 
   /** Sets the subscription's threshold value. */
-  void setThreshold(Integer threshold) {
+  void setThreshold(int threshold) {
     this.threshold = threshold;
     save();
   }
@@ -491,10 +493,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
       msgId = message.getIdentifier();
 
       // test nbMaxMsg
-      if (nbMaxMsg > -1 && nbMaxMsg <= messageIds.size()) {
-        if (dmqManager == null) {
+      if (nbMaxMsg > 0 && nbMaxMsg <= messageIds.size()) {
+        if (dmqManager == null)
           dmqManager = new DMQManager(dmqId, null);
-        }
         nbMsgsSentToDMQSinceCreation++;
         dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.QUEUE_FULL);
         continue;
@@ -855,17 +856,19 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
       removeMessage((String) allMessageIds.nextElement());
     }
   }
-
   
   /**
-   * Returns <code>true</code> if a given value matches the threshold value
-   * for this user.
+   * Returns <code>true</code> if a given message is considered as  undeliverable,
+   * because its delivery count matches the subscription's threshold, if any, or the
+   * server's default threshold value (if any).
    */
   private boolean isUndeliverable(int deliveryAttempts) {
-    if (threshold != null)
-      return (deliveryAttempts >= threshold.intValue());
-    else if (QueueImpl.getDefaultThreshold() != null)
-      return (deliveryAttempts >= QueueImpl.getDefaultThreshold().intValue());
+    if (threshold == 0) return false;
+    
+    if (threshold > 0)
+      return (deliveryAttempts >= threshold);
+    else if (QueueImpl.getDefaultThreshold() > 0)
+      return (deliveryAttempts >= QueueImpl.getDefaultThreshold());
     return false;
   }
   

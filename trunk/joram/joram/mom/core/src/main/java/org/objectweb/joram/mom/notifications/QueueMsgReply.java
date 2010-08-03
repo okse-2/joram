@@ -31,7 +31,7 @@ import java.util.*;
  * A <code>QueueMsgReply</code> instance is used by a queue for replying to a
  * <code>ReceiveRequest</code> by sending a message to a client.
  */
-public class QueueMsgReply extends AbstractReply {
+public class QueueMsgReply extends AbstractReplyNot {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   

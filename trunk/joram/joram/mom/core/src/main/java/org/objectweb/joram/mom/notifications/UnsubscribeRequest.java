@@ -27,7 +27,7 @@ package org.objectweb.joram.mom.notifications;
  * An <code>UnsubscribeRequest</code> instance is used by a client agent
  * for unsubscribing to a topic.
  */
-public class UnsubscribeRequest extends AbstractRequest
+public class UnsubscribeRequest extends AbstractRequestNot
 {
   /**
    * 
