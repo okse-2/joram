@@ -330,6 +330,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="noreg.test51"/>
     <antcall target="noreg.test56"/>
     <antcall target="noreg.test58"/>
+    <antcall target="noreg.test59"/>
   </target>
 
   <target name="tests.xa"
@@ -680,6 +681,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
+	
   <target name="base.test_T_MByte" depends="init.a3props,compile"
           description=" --> test if the byte message receive is the same that the message sent, with topic">
     <antcall target="test.run" inheritAll="true">
@@ -692,6 +694,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
+	
   <target name="base.test_Q_MMap" depends="init.a3props,compile"
           description=" --> test if the Map message receive is the same that the message sent, with queue">
     <antcall target="test.run" inheritAll="true">
@@ -704,6 +707,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
+	
   <target name="base.test_T_MMap" depends="init.a3props,compile"
           description=" --> test if the Map message receive is the same that the message sent, with topic">
     <antcall target="test.run" inheritAll="true">
@@ -716,6 +720,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
+	
   <target name="base.test_Q_MStream" depends="init.a3props,compile"
           description=" --> test if the Stream message receive is the same that the message sent, with queue">
     <antcall target="test.run" inheritAll="true">
@@ -728,6 +733,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
+	
   <target name="base.test_T_MStream" depends="init.a3props,compile"
           description=" --> test if the Stream message receive is the same that the message sent, with topic">
     <antcall target="test.run" inheritAll="true">
@@ -740,6 +746,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
+	
   <target name="base.test_property_Q" depends="init.a3props,compile"
           description=" --> test if the message properties are transmit with a queue">
     <antcall target="test.run" inheritAll="true">
@@ -752,6 +759,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
+	
   <target name="base.test_property_T" depends="init.a3props,compile"
           description=" --> test if the message properties are transmit with a topic">
     <antcall target="test.run" inheritAll="true">
@@ -764,6 +772,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
+	
   <target name="base.test_Selector_Q" depends="init.a3props,compile"
           description=" --> test the message selector with a queue">
     <antcall target="test.run" inheritAll="true">
@@ -776,6 +785,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
+	
   <target name="base.test_Selector_T" depends="init.a3props,compile"
           description=" --> test the message selector with a topic">
     <antcall target="test.run" inheritAll="true">
@@ -788,6 +798,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
+	
   <target name="base.test_Temp_Q" depends="init.a3props,compile"
           description=" --> test the functioning of Temporary Queue">
     <antcall target="test.run" inheritAll="true">
@@ -800,6 +811,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
+	
   <target name="base.test_Temp_T" depends="init.a3props,compile"
           description=" --> test the functioning of Temporary Topic">
     <antcall target="test.run" inheritAll="true">
@@ -812,6 +824,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
+	
   <target name="base.test_Temp_T2" depends="init.a3props,compile"
           description=" --> tests delete temporay topic when connection close">
     <antcall target="test.run" inheritAll="true">
@@ -824,6 +837,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
+	
   <target name="base.test_Brows_Q" depends="init.a3props,compile"
           description=" --> test the functioning of browser with Queue">
     <antcall target="test.run" inheritAll="true">
@@ -876,6 +890,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
+	
   <target name="base.test_CAck1_Q" depends="init.a3props,compile"
           description=" --> test client_acknowledgement with one message and  with a queue">
     <antcall target="test.run" inheritAll="true">
@@ -888,6 +903,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
+	
   <target name="base.test_CAck1_T" depends="init.a3props,compile"
           description=" --> test client_acknowledgement with one message and  with a topic">
     <antcall target="test.run" inheritAll="true">
@@ -900,6 +916,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
+	
   <target name="base.test_CAck2_Q" depends="init.a3props,compile"
           description=" --> test client_acknowledgement with three messages, one acknowledgement and  with a queue.">
     <antcall target="test.run" inheritAll="true">
@@ -912,6 +929,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
+	
   <target name="base.test_CAck2_T" depends="init.a3props,compile"
           description=" --> test client_acknowledgement with three messages, one acknowledgement and with a topic">
     <antcall target="test.run" inheritAll="true">
@@ -924,6 +942,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
+	
   <target name="base.test_CAck3_Q" depends="init.a3props,compile"
           description=" --> test client_acknowledgement. The message is redelivred when a session is close not a consumer">
     <antcall target="test.run" inheritAll="true">
@@ -1001,6 +1020,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="args" value=""/>
     </antcall>
   </target>
+	
   <target name="base.test_ExcpList_T" depends="init.a3props,compile"
           description=" --> test ExceptionListener with a topic.">
     <antcall target="test.run" inheritAll="true">
@@ -1441,7 +1461,7 @@ description=" --> launch all exceptionlistener tests">
 
   <!-- test admin -->
 
-  <target name="tests.admin" depends="admin.test1"/>
+  <target name="tests.admin" depends="admin.test1,admin.test2,admin.test3,admin.test4,admin.test5"/>
 
   <target name="admin.test1" depends="init.a3props,compile"
           description=" --> test admin configuration">
@@ -1450,6 +1470,54 @@ description=" --> launch all exceptionlistener tests">
       <param name="testid" value="admin.test1"/>
       <param name="jndiconf" value="admin/jndi.properties"/>
       <param name="a3conf" value="admin/a3servers1.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="admin.test2" depends="init.a3props,compile"
+          description=" --> test admin configuration">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.admin.AdminTest2"/>
+      <param name="testid" value="admin.test2"/>
+      <param name="jndiconf" value="admin/jndi.properties"/>
+      <param name="a3conf" value="admin/a3servers2.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="admin.test3" depends="init.a3props,compile"
+          description=" --> test admin configuration">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.admin.AdminTest3"/>
+      <param name="testid" value="admin.test3"/>
+      <param name="jndiconf" value="admin/jndi.properties"/>
+      <param name="a3conf" value="admin/a3servers2.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="admin.test4" depends="init.a3props,compile"
+          description=" --> test admin configuration">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.admin.AdminTest4"/>
+      <param name="testid" value="admin.test4"/>
+      <param name="jndiconf" value="admin/jndi.properties"/>
+      <param name="a3conf" value="admin/a3servers2.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+
+  <target name="admin.test5" depends="init.a3props,compile"
+          description=" --> test admin configuration">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.admin.AdminTest5"/>
+      <param name="testid" value="admin.test5"/>
+      <param name="jndiconf" value="admin/jndi.properties"/>
+      <param name="a3conf" value="admin/a3servers2.xml"/>
       <param name="jvmargs" value=""/>
       <param name="args" value=""/>
     </antcall>
@@ -2726,14 +2794,14 @@ description=" --> launch all exceptionlistener tests">
       <!-- param name="engine" value="fr.dyade.aaa.agent.GCEngine"/ -->
       <!-- param name="BaseClass" value="joram.perfs.TcpBaseTest"/ -->
       <param name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
-      <param name="dupsOk" value="true"/>
-      <param name="queueMessageReadMax" value="100"/>
+      <param name="dupsOk" value="false"/>
+      <param name="queueMessageReadMax" value="1"/>
       <param name="topicAckBufferMax" value="50"/>
-      <param name="implicitAck" value="true"/>
+      <param name="implicitAck" value="false"/>
       <param name="MsgTransient" value="false"/>
       <param name="SubDurable" value="false"/>
-      <param name="Transacted" value="false"/>
-      <param name="NbRound" value="1000"/>
+      <param name="Transacted" value="true"/>
+      <param name="NbRound" value="10"/>
       <param name="NbMsgPerRound" value="10000"/>
       <param name="NbProdCons" value="1"/>
       <param name="MsgSize" value="50"/>
@@ -3748,6 +3816,17 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.noreg.Test58"/>
       <param name="testid" value="noreg.test58"/>
+      <param name="jndiconf" value="noreg/jndi.properties"/>
+      <param name="a3conf" value="noreg/a3servers1.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
+
+  <target name="noreg.test59" depends="init.a3props,compile"
+          description=" --> test the receipt of message through multiples subscription">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.noreg.Test59"/>
+      <param name="testid" value="noreg.test59"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="jvmargs" value=""/>
