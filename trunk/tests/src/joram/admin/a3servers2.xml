@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<config>
+  <property name="Engine" value="@engine@"/>
+  <property name="Transaction" value="@transaction@"/>
+
+  <domain name="D0" network="@network@"/>
+
+  <server id="0" name="s0" hostname="localhost">
+     <network domain="D0" port="27300"/>
+     <service class="fr.dyade.aaa.agent.AdminProxy" args="7890"/>
+     <service class="org.objectweb.joram.mom.proxies.ConnectionManager" args="root root"/>
+     <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" args="2560"/>
+     <service class="fr.dyade.aaa.jndi2.server.JndiServer" args="16400"/>
+  </server>
+
+  <server id="1" name="s1" hostname="localhost">
+     <network domain="D0" port="27301"/>
+     <service class="fr.dyade.aaa.agent.AdminProxy" args="7891"/>
+     <service class="org.objectweb.joram.mom.proxies.ConnectionManager" args="root root"/>
+     <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" args="2561"/>
+  </server>
+ </config>
+				  
+				  
