@@ -1,8 +1,0 @@
-main WARNING 2010-07-19 16:37:03,230, AgentServer#0, init()
-main WARNING 2010-07-19 16:37:03,230, Trying to find [a3cmlconfig] using sun.misc.Launcher$AppClassLoader@7d772e class loader.
-main WARNING 2010-07-19 16:37:03,230, Trying to find serialized config using ClassLoader.getSystemResource().
-main WARNING 2010-07-19 16:37:03,230, Unable to find configuration file: a3cmlconfig
-main WARNING 2010-07-19 16:37:03,246, AgentServer#0, serialized a3cmlconfig not found
-main WARNING 2010-07-19 16:37:03,402, AgentServer#0, initialized at Mon Jul 19 16:37:03 CEST 2010
-main WARNING 2010-07-19 16:37:03,402, AgentServer#0, start()
-main WARNING 2010-07-19 16:37:03,574, AgentServer#0, started at Mon Jul 19 16:37:03 CEST 2010
