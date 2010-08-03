@@ -25,7 +25,6 @@ package org.objectweb.joram.client.jms;
 import javax.jms.JMSException;
 import javax.jms.MessageListener;
 
-import org.objectweb.joram.client.jms.connection.RequestMultiplexer;
 import org.objectweb.joram.shared.client.ConsumerMessages;
 
 /**
@@ -38,23 +37,19 @@ public class SingleSessionConsumer extends MessageConsumerListener {
   /**
    * 
    */
-  SingleSessionConsumer(
-      boolean queueMode,
-      boolean durable,
-      String selector,
-      String targetName,
-      Session session,
-      MessageListener listener,
-      int queueMessageReadMax, 
-      int topicActivationThreshold, 
-      int topicPassivationThreshold, 
-      int topicAckBufferMax, 
-      RequestMultiplexer reqMultiplexer) {
+  SingleSessionConsumer(boolean queueMode,
+                        boolean durable,
+                        String selector,
+                        String targetName,
+                        Session session,
+                        MessageListener listener) {
     super(queueMode, durable, selector, targetName,
-        listener, queueMessageReadMax,
-        topicActivationThreshold, 
-        topicPassivationThreshold, topicAckBufferMax,
-        reqMultiplexer);
+          listener,
+          session.getQueueMessageReadMax(),
+          session.getTopicActivationThreshold(),
+          session.getTopicPassivationThreshold(),
+          session.getTopicAckBufferMax(),
+          session.getRequestMultiplexer());
     sess = session;
   }
   
