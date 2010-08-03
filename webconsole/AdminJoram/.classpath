@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" output="test-classes" path="test"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/ee.foundation.jar"/>
+	<classpathentry kind="lib" path="lib/framework.jar"/>
+	<classpathentry kind="lib" path="war/lib/a3-common.jar"/>
+	<classpathentry kind="lib" path="war/lib/a3-rt.jar"/>
+	<classpathentry kind="lib" path="war/lib/jndi-server.jar"/>
+	<classpathentry kind="lib" path="war/lib/jndi-shared.jar"/>
+	<classpathentry kind="lib" path="war/lib/joram-mom-core.jar"/>
+	<classpathentry kind="lib" path="war/lib/joram-shared.jar"/>
+	<classpathentry kind="lib" path="war/lib/monolog.jar"/>
+	<classpathentry kind="lib" path="war/lib/gwt-dev.jar"/>
+	<classpathentry kind="lib" path="war/lib/gwt-user.jar"/>
+	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER/GWT"/>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse 3.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/lib/shared/appengine-local-runtime-shared.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Program%20Files/eclipse%203.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/docs/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse 3.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/lib/shared/geronimo-el_1.0_spec-1.0.1.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Program%20Files/eclipse%203.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/docs/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse 3.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/lib/shared/geronimo-jsp_2.1_spec-1.0.1.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Program%20Files/eclipse%203.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/docs/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse 3.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/lib/shared/geronimo-servlet_2.5_spec-1.2.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Program%20Files/eclipse%203.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/docs/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse 3.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/lib/shared/jsp/repackaged-appengine-ant-1.6.5.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Program%20Files/eclipse%203.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/docs/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse 3.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/lib/shared/jsp/repackaged-appengine-ant-launcher-1.6.5.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Program%20Files/eclipse%203.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/docs/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse 3.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/lib/shared/jsp/repackaged-appengine-commons-el-1.0.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Program%20Files/eclipse%203.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/docs/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse 3.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/lib/shared/jsp/repackaged-appengine-commons-logging-1.1.1.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Program%20Files/eclipse%203.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/docs/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse 3.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/lib/shared/jsp/repackaged-appengine-jasper-compiler-5.0.28.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Program%20Files/eclipse%203.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/docs/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse 3.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/lib/shared/jsp/repackaged-appengine-jasper-runtime-5.0.28.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Program%20Files/eclipse%203.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/docs/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse 3.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/lib/user/appengine-api-1.0-sdk-1.3.4.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Program%20Files/eclipse%203.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/docs/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse 3.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/lib/user/appengine-api-labs-1.3.4.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Program%20Files/eclipse%203.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/docs/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse 3.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/lib/user/appengine-jsr107cache-1.3.4.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Program%20Files/eclipse%203.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/docs/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse 3.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/lib/user/jsr107cache-1.1.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Program%20Files/eclipse%203.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/docs/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse 3.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/lib/user/orm/datanucleus-appengine-1.0.7.final.jar" sourcepath="C:/Program Files/eclipse 3.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/src/orm/datanucleus-appengine-1.0.7.final-src.zip">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Program%20Files/eclipse%203.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/docs/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse 3.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/lib/user/orm/datanucleus-core-1.1.5.jar" sourcepath="C:/Program Files/eclipse 3.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/src/orm/datanucleus-core-1.1.5-src.zip">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Program%20Files/eclipse%203.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/docs/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse 3.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/lib/user/orm/datanucleus-jpa-1.1.5.jar" sourcepath="C:/Program Files/eclipse 3.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/src/orm/datanucleus-jpa-1.1.5-src.zip">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Program%20Files/eclipse%203.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/docs/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse 3.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/lib/user/orm/geronimo-jpa_3.0_spec-1.1.1.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Program%20Files/eclipse%203.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/docs/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse 3.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/lib/user/orm/geronimo-jta_1.1_spec-1.1.1.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Program%20Files/eclipse%203.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/docs/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse 3.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/lib/user/orm/jdo2-api-2.3-eb.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Program%20Files/eclipse%203.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/docs/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Program Files/eclipse 3.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/lib/appengine-tools-api.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Program%20Files/eclipse%203.5/plugins/com.google.appengine.eclipse.sdkbundle.1.3.4_1.3.4.v201005212032/appengine-java-sdk-1.3.4/docs/javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/gwt-visualization.jar"/>
+	<classpathentry kind="lib" path="lib/smartgwt-skins.jar"/>
+	<classpathentry kind="lib" path="lib/smartgwt.jar"/>
+	<classpathentry kind="lib" path="/samples/ship/bundle/geronimo-jms_1.1_spec.jar"/>
+	<classpathentry kind="lib" path="/samples/ship/bundle/jndi-client.jar"/>
+	<classpathentry kind="lib" path="/samples/ship/bundle/jndi-server.jar"/>
+	<classpathentry kind="lib" path="/samples/ship/bundle/jndi-shared.jar"/>
+	<classpathentry kind="lib" path="/samples/ship/bundle/joram-client-jms.jar"/>
+	<classpathentry kind="lib" path="/samples/ship/bundle/joram-mom-core.jar"/>
+	<classpathentry kind="lib" path="/samples/ship/bundle/joram-mom-extensions-collector.jar"/>
+	<classpathentry kind="lib" path="/samples/ship/bundle/joram-mom-extensions-ftp.jar"/>
+	<classpathentry kind="lib" path="/samples/ship/bundle/joram-mom-extensions-jmsbridge.jar"/>
+	<classpathentry kind="lib" path="/samples/ship/bundle/joram-mom-extensions-mail.jar"/>
+	<classpathentry kind="lib" path="/samples/ship/bundle/joram-mom-extensions-scheduler.jar"/>
+	<classpathentry kind="lib" path="/samples/ship/bundle/joram-shared.jar"/>
+	<classpathentry kind="lib" path="/samples/ship/bundle/monolog.jar"/>
+	<classpathentry kind="lib" path="/samples/ship/bundle/org.apache.felix.shell.jar"/>
+	<classpathentry kind="lib" path="/samples/ship/bundle/org.apache.felix.shell.remote.jar"/>
+	<classpathentry kind="lib" path="/samples/ship/bundle/org.apache.felix.shell.tui.jar"/>
+	<classpathentry kind="lib" path="/samples/ship/lib/activation.jar"/>
+	<classpathentry kind="lib" path="/samples/ship/lib/jgroups-all.jar"/>
+	<classpathentry kind="lib" path="/samples/ship/lib/joram-client-jca.jar"/>
+	<classpathentry kind="lib" path="/samples/ship/lib/mail.jar"/>
+	<classpathentry kind="lib" path="/samples/ship/lib/monolog.jar"/>
+	<classpathentry kind="lib" path="/samples/ship/lib/ow2-connector-1.5-spec.jar"/>
+	<classpathentry kind="lib" path="/samples/ship/lib/soap.jar"/>
+	<classpathentry kind="output" path="war/WEB-INF/classes"/>
+</classpath>
