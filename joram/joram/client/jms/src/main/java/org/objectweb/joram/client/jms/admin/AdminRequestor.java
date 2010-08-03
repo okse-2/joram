@@ -201,7 +201,7 @@ public final class AdminRequestor {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "AdminRequestor.request(" + request + ") -> " + reply);
 
-    throwException(reply);
+    if (reply != null) throwException(reply);
     return reply;
   }
   
