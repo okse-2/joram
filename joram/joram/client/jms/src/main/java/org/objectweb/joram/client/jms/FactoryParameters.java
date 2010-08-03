@@ -155,9 +155,9 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
    *  The maximum number of acknowledgements that can be buffered in
    * Session.DUPS_OK_ACKNOWLEDGE mode when listening to a topic.
    * <p>
-   *  Default is 0.
+   *  Default value is 10.
    */
-  public int topicAckBufferMax = 0;
+  public int topicAckBufferMax = 10;
 
   /**
    * Determines whether client threads which are using the same connection
