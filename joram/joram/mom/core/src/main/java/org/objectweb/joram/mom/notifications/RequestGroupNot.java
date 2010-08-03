@@ -31,12 +31,10 @@ import java.util.Vector;
 /**
  *
  */
-public class RequestGroupNot extends AbstractRequest {
-
-  /**
-   * 
-   */
+public class RequestGroupNot extends AbstractRequestNot {
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+  
   private Vector clientMessages;
   
   public RequestGroupNot() {

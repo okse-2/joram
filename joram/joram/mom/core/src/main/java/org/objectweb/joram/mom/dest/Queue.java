@@ -29,17 +29,12 @@ import java.io.ObjectOutputStream;
 import java.util.Properties;
 
 import org.objectweb.joram.mom.notifications.AbortReceiveRequest;
-import org.objectweb.joram.mom.notifications.AbstractRequest;
+import org.objectweb.joram.mom.notifications.AbstractRequestNot;
 import org.objectweb.joram.mom.notifications.AcknowledgeRequest;
 import org.objectweb.joram.mom.notifications.BrowseRequest;
 import org.objectweb.joram.mom.notifications.DenyRequest;
 import org.objectweb.joram.mom.notifications.ExceptionReply;
-import org.objectweb.joram.mom.notifications.Monit_GetNbMaxMsg;
-import org.objectweb.joram.mom.notifications.Monit_GetPendingMessages;
-import org.objectweb.joram.mom.notifications.Monit_GetPendingRequests;
 import org.objectweb.joram.mom.notifications.ReceiveRequest;
-import org.objectweb.joram.mom.notifications.SetNbMaxMsgRequest;
-import org.objectweb.joram.mom.notifications.SetThreshRequest;
 import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.joram.shared.excepts.RequestException;
@@ -90,17 +85,19 @@ public class Queue extends Destination implements BagSerializer {
       logger.log(BasicLevel.DEBUG, "Queue.react(" + from + ',' + not + ')');
 
     try {     
-      if (not instanceof SetThreshRequest)
-        ((QueueImpl)destImpl).setThreshRequest(from, (SetThreshRequest) not);
-      else if (not instanceof SetNbMaxMsgRequest)
-        ((QueueImpl)destImpl).setNbMaxMsgRequest(from, (SetNbMaxMsgRequest) not);
-      else if (not instanceof Monit_GetPendingMessages)
-        ((QueueImpl)destImpl).monitGetPendingMessages(from, (Monit_GetPendingMessages) not);
-      else if (not instanceof Monit_GetPendingRequests)
-        ((QueueImpl)destImpl).monitGetPendingRequests(from, (Monit_GetPendingRequests) not);
-      else if (not instanceof Monit_GetNbMaxMsg)
-        ((QueueImpl)destImpl).monitGetNbMaxMsg(from, (Monit_GetNbMaxMsg) not);
-      else if (not instanceof ReceiveRequest)
+//      if (not instanceof SetThresholdRequestNot)
+//        ((QueueImpl)destImpl).setThresholdRequest(from, (SetThresholdRequestNot) not);
+//      else
+//      if (not instanceof SetNbMaxMsgRequest)
+//        ((QueueImpl)destImpl).setNbMaxMsgRequest(from, (SetNbMaxMsgRequest) not);
+//      else if (not instanceof GetPendingMessagesNot)
+//        ((QueueImpl)destImpl).getPendingMessages(from, (GetPendingMessagesNot) not);
+//      else if (not instanceof GetPendingRequestsNot)
+//        ((QueueImpl)destImpl).getPendingRequests(from, (GetPendingRequestsNot) not);
+//      else if (not instanceof GetNbMaxMsgRequestNot)
+//        ((QueueImpl)destImpl).getNbMaxMsg(from, (GetNbMaxMsgRequestNot) not);
+//    else
+      if (not instanceof ReceiveRequest)
         ((QueueImpl)destImpl).receiveRequest(from, (ReceiveRequest) not);
       else if (not instanceof BrowseRequest)
         ((QueueImpl)destImpl).browseRequest(from, (BrowseRequest) not);
@@ -112,8 +109,8 @@ public class Queue extends Destination implements BagSerializer {
         ((QueueImpl)destImpl).abortReceiveRequest(from, (AbortReceiveRequest) not);
       else if (not instanceof ExpiredNot)
         ((QueueImpl) destImpl).handleExpiredNot(from, (ExpiredNot) not);
-//      else if (not instanceof DestinationAdminRequestNot)
-//        ((QueueImpl)destImpl).destinationAdminRequestNot(from, (DestinationAdminRequestNot) not);
+//      else if (not instanceof FwdAdminRequestNot)
+//        ((QueueImpl)destImpl).handleAdminRequestNot(from, (FwdAdminRequestNot) not);
       else
         super.react(from, not);
 
@@ -122,8 +119,8 @@ public class Queue extends Destination implements BagSerializer {
       if (logger.isLoggable(BasicLevel.WARN))
         logger.log(BasicLevel.WARN, exc);
 
-      if (not instanceof AbstractRequest) {
-        AbstractRequest req = (AbstractRequest) not;
+      if (not instanceof AbstractRequestNot) {
+        AbstractRequestNot req = (AbstractRequestNot) not;
         Channel.sendTo(from, new ExceptionReply(req, exc));
       }
     }

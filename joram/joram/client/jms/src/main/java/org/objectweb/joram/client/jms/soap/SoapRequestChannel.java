@@ -66,9 +66,8 @@ import org.objectweb.joram.shared.client.GetAdminTopicRequest;
 import org.objectweb.joram.shared.client.QBrowseRequest;
 import org.objectweb.joram.shared.client.ServerReply;
 import org.objectweb.joram.shared.client.SessAckRequest;
-import org.objectweb.joram.shared.client.SessCreateTDReply;
-import org.objectweb.joram.shared.client.SessCreateTQRequest;
-import org.objectweb.joram.shared.client.SessCreateTTRequest;
+import org.objectweb.joram.shared.client.SessCreateDestReply;
+import org.objectweb.joram.shared.client.SessCreateDestRequest;
 import org.objectweb.joram.shared.client.SessDenyRequest;
 import org.objectweb.joram.shared.client.TempDestDeleteRequest;
 import org.objectweb.joram.shared.security.Identity;
@@ -182,11 +181,8 @@ public class SoapRequestChannel implements RequestChannel {
                         new QName("urn:ProxyService", "SessDenyRequest"),
                                   SessDenyRequest.class, beanSer, beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
-                        new QName("urn:ProxyService", "SessCreateTQRequest"),
-                                  SessCreateTQRequest.class, beanSer, beanSer);
-    mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
-                        new QName("urn:ProxyService", "SessCreateTTRequest"),
-                                  SessCreateTTRequest.class, beanSer, beanSer);
+                        new QName("urn:ProxyService", "SessCreateDestRequest"),
+                                  SessCreateDestRequest.class, beanSer, beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
                         new QName("urn:ProxyService", "TempDestDeleteRequest"),
                                   TempDestDeleteRequest.class, beanSer,
@@ -214,7 +210,7 @@ public class SoapRequestChannel implements RequestChannel {
                                   ServerReply.class, beanSer, beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
                         new QName("urn:ProxyService", "SessCreateTDReply"),
-                                  SessCreateTDReply.class, beanSer, beanSer);
+                                  SessCreateDestReply.class, beanSer, beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
                         new QName("urn:ProxyService", "CnxCloseReply"),
                                   CnxCloseReply.class, beanSer, beanSer);

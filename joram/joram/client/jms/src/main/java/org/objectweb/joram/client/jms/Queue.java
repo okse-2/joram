@@ -41,17 +41,15 @@ import org.objectweb.joram.shared.admin.GetQueueMessageIds;
 import org.objectweb.joram.shared.admin.GetQueueMessageIdsRep;
 import org.objectweb.joram.shared.admin.GetQueueMessageRep;
 import org.objectweb.joram.shared.admin.ListClusterQueue;
-import org.objectweb.joram.shared.admin.Monitor_GetDMQSettings;
-import org.objectweb.joram.shared.admin.Monitor_GetDMQSettingsRep;
-import org.objectweb.joram.shared.admin.Monitor_GetNbMaxMsg;
-import org.objectweb.joram.shared.admin.Monitor_GetNbMaxMsgRep;
-import org.objectweb.joram.shared.admin.Monitor_GetNumberRep;
-import org.objectweb.joram.shared.admin.Monitor_GetPendingMessages;
-import org.objectweb.joram.shared.admin.Monitor_GetPendingRequests;
+import org.objectweb.joram.shared.admin.GetDMQSettingsRequest;
+import org.objectweb.joram.shared.admin.GetDMQSettingsReply;
+import org.objectweb.joram.shared.admin.GetNbMaxMsgRequest;
+import org.objectweb.joram.shared.admin.GetNumberReply;
+import org.objectweb.joram.shared.admin.GetPendingMessages;
+import org.objectweb.joram.shared.admin.GetPendingRequests;
 import org.objectweb.joram.shared.admin.RemoveQueueCluster;
-import org.objectweb.joram.shared.admin.SetNbMaxMsg;
-import org.objectweb.joram.shared.admin.SetQueueThreshold;
-import org.objectweb.joram.shared.admin.UnsetQueueThreshold;
+import org.objectweb.joram.shared.admin.SetNbMaxMsgRequest;
+import org.objectweb.joram.shared.admin.SetThresholdRequest;
 
 /**
  *  Implements the <code>javax.jms.Queue</code> interface and provides
@@ -266,10 +264,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * @exception AdminException  If the request fails.
    */
   public void setThreshold(int threshold) throws ConnectException, AdminException {
-    if (threshold == -1)
-      doRequest(new UnsetQueueThreshold(agentId));
-    else
-      doRequest(new SetQueueThreshold(agentId, threshold));
+    doRequest(new SetThresholdRequest(agentId, threshold));
   } 
 
   /** 
@@ -281,14 +276,10 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * @exception AdminException  If the request fails.
    */
   public int getThreshold() throws ConnectException, AdminException {
-    Monitor_GetDMQSettings request = new Monitor_GetDMQSettings(agentId);
-    Monitor_GetDMQSettingsRep reply;
-    reply = (Monitor_GetDMQSettingsRep) doRequest(request);
+    GetDMQSettingsRequest request = new GetDMQSettingsRequest(agentId);
+    GetDMQSettingsReply reply = (GetDMQSettingsReply) doRequest(request);
     
-    if (reply.getThreshold() == null)
-      return -1;
-    else
-      return reply.getThreshold().intValue();
+    return reply.getThreshold();
   }
 
   /**
@@ -302,7 +293,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * @exception AdminException  If the request fails.
    */
   public void setNbMaxMsg(int nbMaxMsg) throws ConnectException, AdminException {
-    doRequest(new SetNbMaxMsg(agentId, nbMaxMsg));
+    doRequest(new SetNbMaxMsgRequest(agentId, nbMaxMsg));
   } 
 
   /** 
@@ -314,10 +305,9 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * @exception AdminException  If the request fails.
    */
   public int getNbMaxMsg()  throws ConnectException, AdminException {
-    Monitor_GetNbMaxMsg request = new Monitor_GetNbMaxMsg(agentId);
-    Monitor_GetNbMaxMsgRep reply;
-    reply = (Monitor_GetNbMaxMsgRep) doRequest(request);
-    return reply.getNbMaxMsg();
+    GetNbMaxMsgRequest request = new GetNbMaxMsgRequest(agentId);
+    GetNumberReply reply = (GetNumberReply) doRequest(request);
+    return reply.getNumber();
   }
    
   /**
@@ -329,9 +319,9 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * @exception AdminException  If the request fails.
    */
   public int getPendingMessages() throws ConnectException, AdminException {
-    Monitor_GetPendingMessages request = new Monitor_GetPendingMessages(agentId);
-    Monitor_GetNumberRep reply;
-    reply = (Monitor_GetNumberRep) doRequest(request);
+    GetPendingMessages request = new GetPendingMessages(agentId);
+    GetNumberReply reply;
+    reply = (GetNumberReply) doRequest(request);
 
     return reply.getNumber();
   }
@@ -345,8 +335,8 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * @exception AdminException  If the request fails.
    */
   public int getPendingRequests() throws ConnectException, AdminException {
-    Monitor_GetPendingRequests request = new Monitor_GetPendingRequests(agentId);
-    Monitor_GetNumberRep reply = (Monitor_GetNumberRep) doRequest(request);
+    GetPendingRequests request = new GetPendingRequests(agentId);
+    GetNumberReply reply = (GetNumberReply) doRequest(request);
 
     return reply.getNumber();
   }

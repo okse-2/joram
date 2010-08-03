@@ -25,16 +25,9 @@ package org.objectweb.joram.mom.dest;
 
 import java.util.Properties;
 
-import org.objectweb.joram.mom.notifications.AbstractRequest;
-import org.objectweb.joram.mom.notifications.ClusterRequest;
+import org.objectweb.joram.mom.notifications.AbstractRequestNot;
 import org.objectweb.joram.mom.notifications.ExceptionReply;
-import org.objectweb.joram.mom.notifications.Monit_GetCluster;
-import org.objectweb.joram.mom.notifications.Monit_GetFather;
-import org.objectweb.joram.mom.notifications.Monit_GetSubscriptions;
-import org.objectweb.joram.mom.notifications.SetFatherRequest;
 import org.objectweb.joram.mom.notifications.SubscribeRequest;
-import org.objectweb.joram.mom.notifications.UnclusterRequest;
-import org.objectweb.joram.mom.notifications.UnsetFatherRequest;
 import org.objectweb.joram.mom.notifications.UnsubscribeRequest;
 import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.excepts.MomException;
@@ -47,7 +40,7 @@ import fr.dyade.aaa.agent.Notification;
 
 /**
  * A <code>Topic</code> agent is an agent hosting a MOM topic, and which
- * behaviour is provided by a <code>TopicImpl</code> instance.
+ * behavior is provided by a <code>TopicImpl</code> instance.
  *
  * @see TopicImpl
  */
@@ -90,39 +83,40 @@ public class Topic extends Destination {
   public void react(AgentId from, Notification not) throws Exception {
     ((TopicImpl)destImpl).setAlreadySentLocally(false);
     int reqId = -1;
-    if (not instanceof AbstractRequest)
-      reqId = ((AbstractRequest) not).getRequestId();
+    if (not instanceof AbstractRequestNot)
+      reqId = ((AbstractRequestNot) not).getRequestId();
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
                  "--- " + this + ": got " + not.getClass().getName()+ " with id: " + reqId + " from: " + from.toString());
     try {
-      if (not instanceof ClusterRequest)
-        ((TopicImpl)destImpl).clusterRequest(from, (ClusterRequest) not);
-      else if (not instanceof ClusterTest)
+//      if (not instanceof ClusterRequest)
+//        ((TopicImpl)destImpl).clusterRequest(from, (ClusterRequest) not);
+//      else
+      if (not instanceof ClusterTest)
         ((TopicImpl)destImpl).clusterTest(from, (ClusterTest) not);
       else if (not instanceof ClusterAck)
         ((TopicImpl)destImpl).clusterAck(from, (ClusterAck) not);
       else if (not instanceof ClusterNot)
         ((TopicImpl)destImpl).clusterNot(from, (ClusterNot) not);
-      else if (not instanceof UnclusterRequest)
-        ((TopicImpl)destImpl).unclusterRequest(from, (UnclusterRequest) not);
-      else if (not instanceof UnclusterNot)
-        ((TopicImpl)destImpl).unclusterNot(from, (UnclusterNot) not);
-      else if (not instanceof SetFatherRequest)
-        ((TopicImpl)destImpl).setFatherRequest(from, (SetFatherRequest) not);
-      else if (not instanceof FatherTest)
-        ((TopicImpl)destImpl).fatherTest(from, (FatherTest) not);
-      else if (not instanceof FatherAck)
-        ((TopicImpl)destImpl).fatherAck(from, (FatherAck) not);
-      else if (not instanceof UnsetFatherRequest)
-        ((TopicImpl)destImpl).unsetFatherRequest(from, (UnsetFatherRequest) not);
-      else if (not instanceof Monit_GetSubscriptions)
-        ((TopicImpl)destImpl).monitGetSubscriptions(from, (Monit_GetSubscriptions) not);
-      else if (not instanceof Monit_GetFather)
-        ((TopicImpl)destImpl).monitGetFather(from, (Monit_GetFather) not);
-      else if (not instanceof Monit_GetCluster)
-        ((TopicImpl)destImpl).monitGetCluster(from, (Monit_GetCluster) not);
+//      else if (not instanceof UnclusterRequest)
+//        ((TopicImpl)destImpl).unclusterRequest(from, (UnclusterRequest) not);
+//      else if (not instanceof UnclusterNot)
+//        ((TopicImpl)destImpl).unclusterNot(from, (UnclusterNot) not);
+//      else if (not instanceof SetFatherRequest)
+//        ((TopicImpl)destImpl).setFatherRequest(from, (SetFatherRequest) not);
+//      else if (not instanceof FatherTest)
+//        ((TopicImpl)destImpl).fatherTest(from, (FatherTest) not);
+//      else if (not instanceof FatherAck)
+//        ((TopicImpl)destImpl).fatherAck(from, (FatherAck) not);
+//      else if (not instanceof UnsetFatherRequest)
+//        ((TopicImpl)destImpl).unsetFatherRequest(from, (UnsetFatherRequest) not);
+//      else if (not instanceof GetSubscriptionsNot)
+//        ((TopicImpl)destImpl).monitGetSubscriptions(from, (GetSubscriptionsNot) not);
+//      else if (not instanceof GetFatherRequestNot)
+//        ((TopicImpl)destImpl).monitGetFather(from, (GetFatherRequestNot) not);
+//      else if (not instanceof GetClusterRequestNot)
+//        ((TopicImpl)destImpl).monitGetCluster(from, (GetClusterRequestNot) not);
       else if (not instanceof SubscribeRequest)
         ((TopicImpl)destImpl).subscribeRequest(from, (SubscribeRequest) not);
       else if (not instanceof UnsubscribeRequest)
@@ -138,7 +132,7 @@ public class Topic extends Destination {
       if (logger.isLoggable(BasicLevel.WARN))
         logger.log(BasicLevel.WARN, exc);
 
-      AbstractRequest req = (AbstractRequest) not;
+      AbstractRequestNot req = (AbstractRequestNot) not;
       Channel.sendTo(from, new ExceptionReply(req, exc));
     }
   }

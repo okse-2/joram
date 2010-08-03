@@ -31,12 +31,10 @@ import fr.dyade.aaa.agent.Notification;
  * to another topic for notifying it of a topic joining the cluster they
  * are part of.
  */
-class ClusterNot extends Notification
-{
-  /**
-   * 
-   */
+class ClusterNot extends Notification {
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+  
   /** The identifier of the topic to add to the cluster. */
   AgentId topicId;
 
@@ -45,8 +43,7 @@ class ClusterNot extends Notification
    *
    * @param topicId  The identifier of the topic to add to the cluster.
    */
-  ClusterNot(AgentId topicId)
-  {
+  ClusterNot(AgentId topicId) {
     this.topicId = topicId;
   }
 }

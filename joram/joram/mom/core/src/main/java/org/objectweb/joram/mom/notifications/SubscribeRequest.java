@@ -28,7 +28,7 @@ package org.objectweb.joram.mom.notifications;
  * A <code>SubscribeRequest</code> instance is used by a client agent
  * for subscribing to a topic.
  */
-public class SubscribeRequest extends AbstractRequest
+public class SubscribeRequest extends AbstractRequestNot
 {
   /**
    * 
