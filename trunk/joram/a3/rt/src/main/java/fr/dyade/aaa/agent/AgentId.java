@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -290,15 +290,14 @@ public final class AgentId implements Serializable {
   /**
    * Statically initializes <code>AgentId</code> class.
    */
-  static void init()
-    throws IOException, ClassNotFoundException {
+  static void init() throws IOException, ClassNotFoundException {
     // Initialize well known ids
     localId = new AgentId(AgentServer.getServerId(),
-			  AgentServer.getServerId(),
-			  NullIdStamp);
+                          AgentServer.getServerId(),
+                          NullIdStamp);
     factoryId = new AgentId(AgentServer.getServerId(),
-			    AgentServer.getServerId(),
-			    FactoryIdStamp);
+                            AgentServer.getServerId(),
+                            FactoryIdStamp);
     // Initialize stamp values
     AgentIdStamp.init();
   }
@@ -457,11 +456,12 @@ public final class AgentId implements Serializable {
    * @return	 <code>true</code> if this object is the same as the obj
    *		 argument; <code>false</code> otherwise.
    */
-   public boolean equals(Object obj) {
+  public boolean equals(Object obj) {
+    if (obj == null) return false;
     if ((obj instanceof AgentId) &&
-	(((AgentId) obj).from == from) &&
-	(((AgentId) obj).to == to) &&
-	(((AgentId) obj).stamp == stamp)) {
+        (((AgentId) obj).from == from) &&
+        (((AgentId) obj).to == to) &&
+        (((AgentId) obj).stamp == stamp)) {
       return true;
     } else {
       return false;
