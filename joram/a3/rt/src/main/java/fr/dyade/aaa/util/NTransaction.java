@@ -617,7 +617,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
       throw new IllegalStateException("Can not commit.");
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "NTransaction, commit");
+      logmon.log(BasicLevel.DEBUG, "NTransaction, commit(" + release + ')');
     
     Hashtable log = ((Context) perThreadContext.get()).log;
     if (! log.isEmpty()) {
