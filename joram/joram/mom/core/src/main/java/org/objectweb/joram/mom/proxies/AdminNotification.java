@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -30,12 +30,13 @@ import fr.dyade.aaa.agent.Notification;
 
 
 /**
- * An <code>AdminNotification</code> is sent by an administrator's proxy for
- * registering to the local administration topic.
+ * An <code>AdminNotification</code> is sent during initialization by an
+ * administrator's proxy for registering to the local administration topic.
  */
 public class AdminNotification extends Notification {
 
   private static final long serialVersionUID = 1L;
+  
   /** The proxy's <code>AgentId</code> identifier. */
   private AgentId proxyId;
   /** The administrator's Identity. */
