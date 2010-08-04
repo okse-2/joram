@@ -86,7 +86,6 @@ public class Test59 extends TestCase {
       
       connection.close();
 
-      stopAgentServer((short)0);
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);
