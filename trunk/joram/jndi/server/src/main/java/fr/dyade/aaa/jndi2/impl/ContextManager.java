@@ -133,9 +133,8 @@ public class ContextManager
       }
       put(name, nc);
       return nc;
-    } else {
-      return null;
     }
+    return null;
   }
   
   public NamingContext getNamingContext(CompositeName name) 

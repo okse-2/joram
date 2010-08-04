@@ -40,11 +40,9 @@ public class ObjectFactory implements javax.naming.spi.ObjectFactory {
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         ObjectInputStream ois = new ObjectInputStream(bais);
         return ois.readObject();
-      } else {
-        throw new Exception("Binary address expected");
       }
-    } else {
-      throw new Exception("Reference expected");
+      throw new Exception("Binary address expected");
     }
+    throw new Exception("Reference expected");
   }
 }
