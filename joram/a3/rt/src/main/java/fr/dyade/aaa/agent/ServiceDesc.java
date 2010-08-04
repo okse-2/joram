@@ -58,8 +58,7 @@ public final class ServiceDesc implements Serializable {
     this.running = false;
   }
 
-  private void writeObject(java.io.ObjectOutputStream out)
-    throws IOException {
+  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
     out.writeUTF(scname);
     if (args != null)
       out.writeUTF(args);
@@ -68,8 +67,10 @@ public final class ServiceDesc implements Serializable {
     out.writeBoolean(initialized);
   }
 
-  private void readObject(java.io.ObjectInputStream in)
-    throws IOException, ClassNotFoundException {
+  /**
+   * @throws ClassNotFoundException  
+   */
+  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
     scname = in.readUTF();
     args = in.readUTF();
     if (args.length() == 0)

@@ -22,8 +22,6 @@
  */
 package fr.dyade.aaa.agent;
 
-import java.io.IOException;
-
 /**
  * Message used by the master component to braodcast the ack of a sending
  * message (so each slave can remove the message from sending queue).
@@ -46,7 +44,7 @@ public class JGroupsAckMsg implements java.io.Serializable {
   /**
    * Deletes the current object in persistent storage.
    */
-  void delete()  throws IOException {
+  void delete() {
     if (isPersistent) {
       AgentServer.getTransaction().delete(name);
     }

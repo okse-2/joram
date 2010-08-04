@@ -35,11 +35,9 @@ public class OperationKey {
    * @return A new key for the specified object.
    */
   static Object newKey(String dirName, String name) {
-    if (dirName == null) {
-      return name;
-    } else {
-      return new OperationKey(dirName, name);
-    }
+    if (dirName == null) return name;
+
+    return new OperationKey(dirName, name);
   }
 
   private String dirName;

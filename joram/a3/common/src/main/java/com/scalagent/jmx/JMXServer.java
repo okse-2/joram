@@ -85,13 +85,12 @@ public class JMXServer implements MXServer {
       ServiceRegistration registration = (ServiceRegistration) registeredServices.get(objName);
       registration.setProperties(registrationProperties);
       return;
-    } else {
-      Set serviceNames = new HashSet();
-      computeOSGiServiceNames(obj.getClass(), obj, serviceNames);
-      ServiceRegistration registration = Activator.context.registerService((String[]) serviceNames
-          .toArray(new String[serviceNames.size()]), obj, registrationProperties);
-      registeredServices.put(objName, registration);
     }
+    
+    Set serviceNames = new HashSet();
+    computeOSGiServiceNames(obj.getClass(), obj, serviceNames);
+    ServiceRegistration registration = Activator.context.registerService((String[]) serviceNames.toArray(new String[serviceNames.size()]), obj, registrationProperties);
+    registeredServices.put(objName, registration);
   }
 
   private void computeOSGiServiceNames(Class beanClass, Object bean, Set registered) {

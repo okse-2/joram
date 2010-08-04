@@ -90,8 +90,7 @@ public final class StreamUtil {
   public static boolean readBooleanFrom(InputStream is) throws IOException {
     if (is.read() == TRUE)
       return true;
-    else
-      return false;
+    return false;
   }
 
   /**
@@ -512,15 +511,13 @@ public final class StreamUtil {
    */
   public static Vector readVectorOfStringFrom(InputStream is) throws IOException {
     int size = readIntFrom(is);
-    if (size == -1) {
-      return null;
-    } else {
-      Vector v = new Vector(size);
-      for (int i=0; i<size; i++) {
-        v.addElement(readStringFrom(is));
-      }
-      return v;
+    if (size == -1) return null;
+
+    Vector v = new Vector(size);
+    for (int i=0; i<size; i++) {
+      v.addElement(readStringFrom(is));
     }
+    return v;
   }
   
   /**

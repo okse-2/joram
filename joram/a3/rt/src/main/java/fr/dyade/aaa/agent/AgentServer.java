@@ -325,8 +325,7 @@ public final class AgentServer {
   static Enumeration getConsumers() {
     if (consumers == null)
       return null;
-    else
-      return consumers.elements();
+    return consumers.elements();
   }
 
   static MessageConsumer getConsumer(String domain) throws Exception {
@@ -1489,7 +1488,7 @@ public final class AgentServer {
                                      LogMonitoringTimerTask.DEFAULT_MONITORING_RESULT_LOGGER);
         Logger logger = Debug.getLogger(logname);
         int loglevel = getInteger(LogMonitoringTimerTask.MONITORING_RESULT_LEVEL_PROPERTY,
-                                  LogMonitoringTimerTask.DEFAULT_MONITORING_RESULT_LEVEL);
+                                  LogMonitoringTimerTask.DEFAULT_MONITORING_RESULT_LEVEL).intValue();
         String logmsg = getProperty(LogMonitoringTimerTask.MONITORING_RESULT_MESSAGE_PROPERTY,
                                     LogMonitoringTimerTask.DEFAULT_MONITORING_RESULT_MESSAGE);
         

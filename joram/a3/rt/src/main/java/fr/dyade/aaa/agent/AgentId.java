@@ -91,8 +91,7 @@ final class AgentIdStamp implements Serializable {
    *
    * @param out the underlying output stream.
    */
-  private void writeObject(java.io.ObjectOutputStream out)
-       throws IOException {
+  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
     out.writeInt(local);
     out.writeInt(remote);
   }
@@ -102,9 +101,9 @@ final class AgentIdStamp implements Serializable {
    * and restoring the classes fields.
    *
    * @param in	the underlying input stream.
+   * @throws ClassNotFoundException 
    */
-  private void readObject(java.io.ObjectInputStream in)
-      throws IOException, ClassNotFoundException {
+  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
     local = in.readInt();
     remote = in.readInt();
   }
@@ -182,8 +181,7 @@ public final class AgentId implements Serializable {
    *
    * @param out the underlying output stream.
    */
-  private void writeObject(java.io.ObjectOutputStream out)
-      throws IOException {
+  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
     out.writeShort(from);
     out.writeShort(to);
     out.writeInt(stamp);
@@ -194,9 +192,9 @@ public final class AgentId implements Serializable {
    * and restoring the classes fields.
    *
    * @param in	the underlying input stream.
+   * @throws ClassNotFoundException 
    */
-  private void readObject(java.io.ObjectInputStream in)
-      throws IOException, ClassNotFoundException {
+  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
     from = in.readShort();
     to = in.readShort();
     stamp = in.readInt();
@@ -463,8 +461,7 @@ public final class AgentId implements Serializable {
         (((AgentId) obj).to == to) &&
         (((AgentId) obj).stamp == stamp)) {
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
 }
