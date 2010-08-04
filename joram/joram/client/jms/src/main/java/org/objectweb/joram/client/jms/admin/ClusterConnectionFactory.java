@@ -91,7 +91,7 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
   /**
    * Chooses a connection factory from the cluster definition.
    */
-  protected ConnectionFactory getConnectionFactory() throws JMSException {
+  protected ConnectionFactory getConnectionFactory() {
     if ((cluster != null) && ! cluster.isEmpty()) {
       ConnectionFactory cf = null;
       String location = System.getProperty("location");

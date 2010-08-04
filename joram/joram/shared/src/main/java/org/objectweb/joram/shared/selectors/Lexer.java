@@ -955,10 +955,8 @@ class Lexer implements java_cup.runtime.Scanner {
             yy_atEOF = true;
             yy_do_eof();
               { return new java_cup.runtime.Symbol(sym.EOF); }
-          } 
-          else {
-            yy_ScanError(YY_NO_MATCH);
           }
+        yy_ScanError(YY_NO_MATCH);
       }
     }
   }

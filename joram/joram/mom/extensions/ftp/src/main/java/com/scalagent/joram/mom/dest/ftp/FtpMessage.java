@@ -104,7 +104,6 @@ public class FtpMessage {
   public String toString() {
     if (sharedMsg != null)
       return sharedMsg.toString();
-    else 
-      return null;
+    return null;
   }
 }

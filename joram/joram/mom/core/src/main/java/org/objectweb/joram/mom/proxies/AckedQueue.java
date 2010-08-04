@@ -24,7 +24,6 @@ package org.objectweb.joram.mom.proxies;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
-import org.objectweb.joram.mom.dest.Destination;
 
 import fr.dyade.aaa.common.Debug;
 
@@ -76,17 +75,16 @@ public class AckedQueue implements java.io.Serializable {
       while (list.size() > 0) {
         ProxyMessage m = 
           (ProxyMessage)list.elementAt(0);
-        if (ackId < m.getId()) {          
-          return;
-        } else {
-          // acked
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "AckedQueue acked " + m.getId());
-          list.removeElementAt(0);
-          if (current > 0) {
-            current--;
-          }
+        if (ackId < m.getId())  return;
+
+        // acked
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "AckedQueue acked " + m.getId());
+        list.removeElementAt(0);
+        if (current > 0) {
+          current--;
         }
+
       }
     }
   }

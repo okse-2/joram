@@ -146,9 +146,8 @@ public class DistributionModule implements Serializable {
 
     if (keep) {
       return cm;
-    } else {
-      return null;
     }
+    return null;
   }
 
   public void close() {

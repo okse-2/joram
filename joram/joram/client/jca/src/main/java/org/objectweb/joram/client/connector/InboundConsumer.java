@@ -190,26 +190,21 @@ class InboundConsumer implements javax.jms.ServerSessionPool
             if (serverSessions < maxWorks) {
               // Allocates a new ServerSession
               return newSession();
-            } else {
-              // Wait for a free ServerSession
-              if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-                AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                              "ServerSessionPool waits for "
-                                              + "a free ServerSession.");
-              pool.wait();
-              return (ServerSession) pool.remove(0);
             }
-          } else {
-            // Allocates a new ServerSession
-            return newSession();
+            // Wait for a free ServerSession
+            if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+              AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
+              "ServerSessionPool waits for a free ServerSession.");
+            pool.wait();
+            return (ServerSession) pool.remove(0);
           }
-        } else {
-          return (ServerSession) pool.remove(0);
+          // Allocates a new ServerSession
+          return newSession();
         }
+        return (ServerSession) pool.remove(0);
       }
     } catch (Exception exc) {
-      throw new JMSException("Error while getting server session from pool: "
-                             + exc);
+      throw new JMSException("Error while getting server session from pool: " + exc);
     }
   }
 

@@ -575,9 +575,7 @@ class CUP$Checker$actions {
 
       if (e instanceof String || e instanceof Boolean)
         throw new SelectorException("Numeric type expected" + " after '+'");
-
-      else
-        RESULT = new Double(0);
+      RESULT = new Double(0);
 
       CUP$Checker$result = new java_cup.runtime.Symbol(4/* expr */,
           ((java_cup.runtime.Symbol) CUP$Checker$stack.elementAt(CUP$Checker$top - 1)).left,

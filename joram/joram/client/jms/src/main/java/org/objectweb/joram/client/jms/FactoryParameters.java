@@ -532,9 +532,8 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
         if (it.hasNext()) cns.append(INTERCEPTOR_CLASS_NAME_SEPARATOR);
       }
       return cns.toString();
-    } else {
-      return null;
     }
+    return null;
   } 
   
   private void setListInInterceptorClassName(String pListInterceptorClassName){

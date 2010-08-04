@@ -75,7 +75,7 @@ public class SoapServiceStarter {
 
     System.out.println("Starting the " + serverName + " embedded server.");
 
-    org.apache.soap.rpc.Response resp = call.invoke(url,"");
+    call.invoke(url,"");
 
     System.out.println("Server " + serverId + " started.");
   }

@@ -1321,7 +1321,7 @@ public final class AdminModule {
     return localPort;
   }
 
-  public static void abortRequest() throws JMSException, ConnectException {
+  public static void abortRequest() throws ConnectException {
     if (wrapper == null)
       throw new ConnectException("Administrator not connected.");
 

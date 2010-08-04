@@ -111,11 +111,11 @@ public class AdminTopic extends Topic {
     setSave();
 
     if (not instanceof AdminNotification)
-      ((AdminTopicImpl)destImpl).AdminNotification(from, (AdminNotification) not);
+      ((AdminTopicImpl)destImpl).AdminNotification((AdminNotification) not);
     else if (not instanceof FwdAdminRequestNot)
       ((AdminTopicImpl)destImpl).AdminRequestNot(from, (FwdAdminRequestNot) not);
     else if (not instanceof AdminReplyNot)
-      ((AdminTopicImpl)destImpl).AdminReply(from, (AdminReplyNot) not);
+      ((AdminTopicImpl)destImpl).AdminReply((AdminReplyNot) not);
     else if (not instanceof GetProxyIdNot)
       ((AdminTopicImpl)destImpl).GetProxyIdNot((GetProxyIdNot)not);
     else if (not instanceof GetProxyIdListNot)

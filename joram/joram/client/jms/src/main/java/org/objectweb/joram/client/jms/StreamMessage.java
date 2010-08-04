@@ -217,8 +217,9 @@ public final class StreamMessage extends Message implements javax.jms.StreamMess
       if (value == null) {
         outputStream.writeInt(-1);
         return;
-      } else
-        outputStream.writeInt(length);
+      }
+      
+      outputStream.writeInt(length);
       outputStream.write(value, offset, length);
     } catch (IOException ioE) {
       JMSException jE = new JMSException("Error while writing the value.");

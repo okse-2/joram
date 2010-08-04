@@ -311,10 +311,8 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * Returns a string representation of this user's proxy.
    */
   public String toString() {
-    if (proxyAgent == null)
-      return "ProxyImpl:";
-    else
-      return "ProxyImpl:" + proxyAgent.getId();
+    if (proxyAgent == null) return "ProxyImpl:";
+    return "ProxyImpl:" + proxyAgent.getId();
   }
 
   public String getName() {
@@ -323,6 +321,8 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
   
   /**
    * (Re)initializes the proxy.
+   * 
+   * @param firstTime 
    *
    * @exception Exception  If the proxy state could not be fully retrieved,
    *              leading to an inconsistent state.

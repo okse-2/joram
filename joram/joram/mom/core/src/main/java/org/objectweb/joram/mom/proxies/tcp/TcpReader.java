@@ -23,8 +23,6 @@
  */
 package org.objectweb.joram.mom.proxies.tcp;
 
-import java.io.IOException;
-
 import org.objectweb.joram.mom.proxies.CloseConnectionNot;
 import org.objectweb.joram.mom.proxies.ConnectionManager;
 import org.objectweb.joram.mom.proxies.ProxyMessage;
@@ -63,7 +61,7 @@ public class TcpReader extends Daemon {
   public TcpReader(IOControl ioctrl,
                    AgentId proxyId,
                    TcpConnection tcpConnection,
-                   boolean closeConnection) throws IOException {
+                   boolean closeConnection) {
     super("tcpReader");
     this.ioctrl = ioctrl;
     this.proxyId = proxyId;

@@ -69,19 +69,13 @@ public final class CommitRequest extends AbstractJmsRequest {
   }
   
   public Enumeration getProducerMessages() {
-    if (producerMessages != null) {
-      return producerMessages.elements();
-    } else {
-      return null;
-    }
+    if (producerMessages == null) return null;
+    return producerMessages.elements();
   }
   
   public Enumeration getAckRequests() {
-    if (ackRequests != null) {
-      return ackRequests.elements();
-    } else {
-      return null;
-    }
+    if (ackRequests == null) return null;
+    return ackRequests.elements();
   }
   
   public void setAsyncSend(boolean b) {

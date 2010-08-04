@@ -270,8 +270,9 @@ public final class Message implements Serializable {
    *
    * @param name  The property name.
    * @param value  The property value.
-   *
-   * @exception IllegalArgumentException  If the key name is illegal (null or empty string).
+   * 
+   * @throws MessageException          Specified by the JMS API.
+   * @throws IllegalArgumentException  If the key name is illegal (null or empty string).
    */
   public void setObjectProperty(String name, Object value) throws MessageException {
     msg.setProperty(name, value);
@@ -469,6 +470,9 @@ public final class Message implements Serializable {
     StreamUtil.writeTo(msg.body, out);
   }
 
+  /**
+   * @throws ClassNotFoundException  
+   */
   private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
     order = in.readLong();
     soft = in.readBoolean();

@@ -672,11 +672,10 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       return true;
 
     Integer clientRight = (Integer) clients.get(client);
-    if (clientRight == null)
-      return false;
-    else
-      return ((clientRight.intValue() == READ) ||
-              (clientRight.intValue() == READWRITE));
+    if (clientRight == null) return false;
+    
+    return ((clientRight.intValue() == READ) ||
+            (clientRight.intValue() == READWRITE));
   }
 
   /**
@@ -689,11 +688,10 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       return true;
 
     Integer clientRight = (Integer) clients.get(client);
-    if (clientRight == null)
-      return false;
-    else
-      return ((clientRight.intValue() == WRITE) ||
-              (clientRight.intValue() == READWRITE));
+    if (clientRight == null) return false;
+    
+    return ((clientRight.intValue() == WRITE) ||
+            (clientRight.intValue() == READWRITE));
   }
 
   /**
@@ -882,7 +880,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     Message message = new Message();
     message.correlationId = requestMsgId;
     message.timestamp = System.currentTimeMillis();
-    message.setDestination(replyTo.toString(), message.TOPIC_TYPE);
+    message.setDestination(replyTo.toString(), Message.TOPIC_TYPE);
     message.id = replyMsgId;
     try {
       message.setAdminMessage(reply);

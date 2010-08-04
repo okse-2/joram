@@ -106,8 +106,7 @@ public class SoapRequestChannel implements RequestChannel {
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not reachable.
    */
-  public SoapRequestChannel(FactoryParameters params, 
-                            Identity identity) throws JMSException {
+  public SoapRequestChannel(FactoryParameters params, Identity identity) {
     factParams = params;
     this.identity = identity;
   }
@@ -369,19 +368,10 @@ public class SoapRequestChannel implements RequestChannel {
           nextSleep = nextSleep * 2;
           continue;
         }
-        // If timer is over, throwing an IllegalStateException:
-        else {
-          long attemptsT = (System.currentTimeMillis() - startTime) / 1000;
-          throw new IllegalStateException("Could not open the connection"
-                                          + " with server on host "
-                                          + factParams.getHost()
-                                          + " and port "
-                                          + factParams.getPort()
-                                          + " after " + attemptsC
-                                          + " attempts during "
-                                          + attemptsT + " secs: "
-                                          + error);
-        }
+        
+        long attemptsT = (System.currentTimeMillis() - startTime) / 1000;
+        throw new IllegalStateException("Could not open the connection with server " + factParams.getHost() + '/' + factParams.getPort() +
+                                        " after " + attemptsC + " attempts during " + attemptsT + "s: " + error);
       }
     }
   }

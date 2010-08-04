@@ -363,11 +363,9 @@ public class MessageConsumer implements javax.jms.MessageConsumer {
    */
   public javax.jms.Message receiveNoWait() throws JMSException {
     checkClosed();
-    if (sess.getConnection().isStopped()) {
-      return null;
-    } else {
-      return sess.receive(-1, 0, this, targetName, selector, queueMode);
-    }
+    if (sess.getConnection().isStopped()) return null;
+
+    return sess.receive(-1, 0, this, targetName, selector, queueMode);
   }
 
   /**

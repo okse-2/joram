@@ -158,14 +158,10 @@ public class ClientMessages extends AbstractRequestNot {
 
   public int getMessageCount() {
     if (messages == null) {
-      if (message == null) {
-        return 0;
-      } else {
-        return 1;
-      }
-    } else {
-      return messages.size();
+      if (message == null) return 0;
+      return 1;
     }
+    return messages.size();
   }
 
   /**
