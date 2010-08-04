@@ -142,9 +142,8 @@ public class IOControl {
             }
           }
           return new ProxyMessage(messageId, ackId, obj);
-        } else {
-          logger.log(BasicLevel.DEBUG, "IOControl.receive: already received message: " + messageId + " -> " + obj);
         }
+        logger.log(BasicLevel.DEBUG, "IOControl.receive: already received message: " + messageId + " -> " + obj);
       }
     } catch (IOException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))

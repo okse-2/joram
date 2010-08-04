@@ -168,14 +168,13 @@ public final class AdminRequestor {
       String correlationId = requestMsg.getJMSMessageID();
       while (true) {
         replyMsg = consumer.receive(requestTimeout);
-        if (replyMsg == null) {
+        if (replyMsg == null)
           throw new JMSException("Interrupted request");
-        } else {
-          if (correlationId.equals(replyMsg.getJMSCorrelationID())) break;
 
-          if (logger.isLoggable(BasicLevel.WARN))
-            logger.log(BasicLevel.WARN, "AdminRequestor.request() bad correlation identifier.");
-        }
+        if (correlationId.equals(replyMsg.getJMSCorrelationID())) break;
+
+        if (logger.isLoggable(BasicLevel.WARN))
+          logger.log(BasicLevel.WARN, "AdminRequestor.request() bad correlation identifier.");
       }
     } catch (JMSException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG))

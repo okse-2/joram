@@ -1102,8 +1102,8 @@ public class Session implements javax.jms.Session {
         GetAdminTopicReply reply = (GetAdminTopicReply) requestor.request(new GetAdminTopicRequest());
         if (reply.getId() != null)
           return new Topic(reply.getId());
-        else
-          throw new JMSException("AdminTopic could not be retrieved.");
+        
+        throw new JMSException("AdminTopic could not be retrieved.");
       } catch (JMSException exc) {
         throw exc;
       } catch (Exception exc) {
@@ -1730,12 +1730,12 @@ public class Session implements javax.jms.Session {
               }
             }
             return msg;
-          } else {
-            return null;
           }
-        } else {
+          
           return null;
         }
+        
+        return null;
       }
     } finally {
       postReceive();

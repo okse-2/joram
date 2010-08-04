@@ -23,8 +23,6 @@ package org.objectweb.joram.client.jms.ha.local;
 
 import java.util.Timer;
 
-import javax.jms.JMSException;
-
 import org.objectweb.joram.client.jms.connection.RequestChannel;
 import org.objectweb.joram.client.jms.local.LocalRequestChannel;
 import org.objectweb.joram.mom.dest.AdminTopic;
@@ -99,10 +97,10 @@ public class HALocalRequestChannel implements RequestChannel {
 
   private LocalRequestChannel localRequestChannel;
 
-  public HALocalRequestChannel(Identity identity) throws JMSException {
+  public HALocalRequestChannel(Identity identity) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "HALocalConnection.<init>(" + identity + ')');
+      logger.log(BasicLevel.DEBUG, "HALocalConnection.<init>(" + identity + ')');
+    
     waitForStart();
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, " -> create the local connection");

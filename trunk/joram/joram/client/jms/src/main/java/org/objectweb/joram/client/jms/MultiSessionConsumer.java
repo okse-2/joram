@@ -149,21 +149,18 @@ public class MultiSessionConsumer extends MessageConsumerListener
           "MultiSessionConsumer -> connection consumer closed");
   }
   
-  public void onMessage(
-      Message msg, MessageListener listener, int ackMode)
-      throws JMSException {
+  public void onMessage(Message msg, MessageListener listener, int ackMode) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "MultiSessionConsumer.onMessage(" + msg + ')');
     try {
       synchronized (this) {
-        if (getStatus() == Status.CLOSE) {
+        if (getStatus() == Status.CLOSE)
           throw new javax.jms.IllegalStateException("Message listener closed");
-        } else {
-          if (nbActivatedListeners == 0) {
-            setStatus(Status.ON_MSG);
-          }
-          nbActivatedListeners++;
+
+        if (nbActivatedListeners == 0) {
+          setStatus(Status.ON_MSG);
         }
+        nbActivatedListeners++;
       }
       activateListener(msg, listener, ackMode);
     } finally {

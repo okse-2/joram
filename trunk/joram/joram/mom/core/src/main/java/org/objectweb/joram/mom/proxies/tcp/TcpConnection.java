@@ -20,7 +20,6 @@
  */
 package org.objectweb.joram.mom.proxies.tcp;
 
-import java.io.IOException;
 import java.util.Date;
 
 import org.objectweb.joram.mom.proxies.ReliableConnectionContext;
@@ -85,7 +84,7 @@ public class TcpConnection implements TcpConnectionMBean {
                        ReliableConnectionContext ctx,
                        AgentId proxyId,
                        TcpProxyService proxyService,
-                       Identity identity) throws IOException {
+                       Identity identity) {
     this.creationDate = new Date();
     this.ioctrl = ioctrl;
     this.proxyId = proxyId;

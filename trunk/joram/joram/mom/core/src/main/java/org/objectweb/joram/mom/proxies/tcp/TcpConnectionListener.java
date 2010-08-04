@@ -197,21 +197,22 @@ public class TcpConnectionListener extends Daemon {
       byte[] magic = StreamUtil.readByteArrayFrom(is, 8);
       for (int i=0; i<5; i++) {
         if (magic[i] != MetaData.joramMagic[i] && magic[i] > 0) {
-        	logger.log(BasicLevel.ERROR, "Bad magic number:" + new String(magic, 0, 5) + magic[5] + '.'
-              + magic[6] + '/' + magic[7]);
+          String errorMsg = "Bad magic number:" + new String(magic, 0, 5) + magic[5] + '.' + magic[6] + '/' + magic[7];
+        	logger.log(BasicLevel.ERROR, errorMsg);
           protocolErrorCount++;
-          throw new IllegalAccessException("Bad magic number:" + new String(magic, 0, 5) + magic[5] + '.'
-              + magic[6] + '/' + magic[7]);
+          throw new IllegalAccessException(errorMsg);
         }
       }
       if (magic[7] != MetaData.joramMagic[7]) {
         if (magic[7] > 0 && MetaData.joramMagic[7] > 0) {
-          logger.log(BasicLevel.ERROR, "Bad protocol version number " + magic[7] + " != " + MetaData.joramMagic[7]);
+          String errorMsg = "Bad protocol version number " + magic[7] + " != " + MetaData.joramMagic[7];
+          logger.log(BasicLevel.ERROR, errorMsg);
           protocolErrorCount++;
-          throw new IllegalAccessException("Bad protocol version number " + magic[7] + " != " + MetaData.joramMagic[7]);
-        } else {
-          logger.log(BasicLevel.WARN, "Wildcard protocol version number: from stream = " + magic[7] + ", from MetaData = " + MetaData.joramMagic[7]);
+          throw new IllegalAccessException(errorMsg);
         }
+        
+        logger.log(BasicLevel.WARN,
+                   "Wildcard protocol version number: from stream = " + magic[7] + ", from MetaData = " + MetaData.joramMagic[7]);
       }
       
       if (verifyClockSynchro) {

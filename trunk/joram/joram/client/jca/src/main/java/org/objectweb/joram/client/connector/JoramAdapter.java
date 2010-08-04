@@ -1621,11 +1621,8 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
     try {
       if (name.startsWith(PREFIX_NAME))
         return name.substring(PREFIX_NAME.length());
-      else
-        return name;
-    } catch (Exception e) {
-      return name;
-    }
+    } catch (Exception e) {}
+    return name;
   }
 
   /** Binds an object to the JNDI context. */

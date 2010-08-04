@@ -821,11 +821,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
           // Message may be null if it is not valid anymore
           if (currentMessage != null) {
             currentO = currentMessage.order;
-            if (currentO > message.order) {
-              break insertLoop;
-            } else {
-              i++;
-            }
+            if (currentO > message.order) break insertLoop;
+            i++;
           } else {
             // Remove the invalid message
             messageIds.removeElementAt(i);
@@ -891,9 +888,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
         logger.log(BasicLevel.DEBUG, " -> message not found");
       
       return null;
-    } else {
-      return (Message) messagesTable.get(msgId);
     }
+    return (Message) messagesTable.get(msgId);
   }
   
   /**
@@ -982,8 +978,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     if (durable) proxy.setSave();
   }
 
-  public void readBag(ObjectInputStream in) 
-    throws IOException, ClassNotFoundException {
+  public void readBag(ObjectInputStream in) throws IOException, ClassNotFoundException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "ClientSubscription[" + proxyId + "].readbag()");
 

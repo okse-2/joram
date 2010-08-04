@@ -58,10 +58,8 @@ public final class ConsumerMessages extends AbstractJmsReply {
   }
 
   public int getMessageCount() {
-    if (messages == null)
-      return 0;
-    else
-      return messages.size();
+    if (messages == null) return 0;
+    return messages.size();
   }
 
   /** Name of the subscription or the queue the messages come from. */

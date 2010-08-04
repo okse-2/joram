@@ -135,12 +135,9 @@ public class Requestor implements ReplyListener, ErrorListener {
       logger.log(BasicLevel.DEBUG, "Requestor.request(" + request + ',' + timeout + ')');
 
     if (status != Status.INIT) {
-      if (status == Status.CLOSE) {
-        // throw new javax.jms.IllegalStateException("Closed requestor");
-        return null;
-      } else {
-        throw new javax.jms.IllegalStateException("Requestor already used");
-      }
+      if (status == Status.CLOSE) return null;
+
+      throw new javax.jms.IllegalStateException("Requestor already used");
     }
     mtpx.sendRequest(request, this);
     setStatus(Status.RUN);
@@ -195,16 +192,15 @@ public class Requestor implements ReplyListener, ErrorListener {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Requestor.replyReceived(" + reply + ')');
 
-    if (status == Status.RUN &&
-        reply.getCorrelationId() == requestId) {      
+    if (status == Status.RUN && reply.getCorrelationId() == requestId) {      
       this.reply = reply;
       setStatus(Status.DONE);
       notify();
       return true;
-    } else {
-      // The request has been aborted.
-      throw new AbortedRequestException();
     }
+    
+    // The request has been aborted.
+    throw new AbortedRequestException();
   }
 
   public synchronized void errorReceived(int replyId, JMSException exc) {

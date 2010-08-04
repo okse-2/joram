@@ -754,22 +754,12 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
 
     // Deleted topic was requested to join the cluster: notifying the
     // requester:
-    String info = null;
     if (not instanceof ClusterTest) {
       ClusterTest cT = (ClusterTest) not;
       replyToTopic(new AdminReply(AdminReply.BAD_CLUSTER_REQUEST, "Joining topic doesn't exist"),
                    cT.getReplyTo(), cT.getRequestMsgId(), cT.getReplyMsgId());
-
-      //    } else if (not instanceof FatherTest) {
-//      // Deleted topic was requested as a father: notifying the requester:
-//      FatherTest fT = (FatherTest) not;
-//      info = strbuf.append("Topic [").append(agId)
-//      .append("] can't join hierarchy as it does not exist").toString();
-//      strbuf.setLength(0);
-//      forward(fT.requester, new AdminReplyNot(fT.request, false, info));
     } else {
-      // state change, so save.
-      setSave();
+      setSave(); // state change, so save.
       // Removing the deleted client's subscriptions, if any.
       subscribers.remove(agId);
       selectors.remove(agId);

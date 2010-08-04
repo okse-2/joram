@@ -256,8 +256,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
 
     if (reply.getFatherId() == null)
       return null;
-    else
-      return new Topic(reply.getFatherId());
+    return new Topic(reply.getFatherId());
   }
 
   /**
