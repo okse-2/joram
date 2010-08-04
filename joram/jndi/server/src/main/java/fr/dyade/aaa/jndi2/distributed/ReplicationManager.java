@@ -175,7 +175,7 @@ public class ReplicationManager
       for (int i = 0; i < serverIds.length; i++) {        
         AgentId aid = DistributedJndiServer.getDefault(serverIds[i]);
         servers.addElement(aid);
-	sendTo(aid, new InitJndiServerNot(null, null, true));
+        sendTo(aid, new InitJndiServerNot(null, null, true));
       }
       saveServers();
     }
@@ -625,12 +625,11 @@ public class ReplicationManager
         resolvedName.equals(reqCtx.getResolvedName())) {
       // The resolved context has already been updated.
       return new JndiError(mre.getNameNotFoundException());
-    } else {
-      reqCtx.setResolvedName(resolvedName);
-      synchronizeRequest(
-        (AgentId)mre.getOwnerId(), reqCtx);
-      return null;
     }
+    
+    reqCtx.setResolvedName(resolvedName);
+    synchronizeRequest((AgentId)mre.getOwnerId(), reqCtx);
+    return null;
   }
 
   private void synchronizeRequest(AgentId owner, 
@@ -656,8 +655,7 @@ public class ReplicationManager
   }
 
   void doReact(AgentId from, SyncReplyNot not) {
-    RequestContextList ctxList = 
-      (RequestContextList)syncRequestContextLists.get(from);
+    RequestContextList ctxList = (RequestContextList)syncRequestContextLists.get(from);
     RequestContext ctx = ctxList.get();
     ctxList.pop();
     if (ctxList.getSize() == 0) {
@@ -756,11 +754,8 @@ public class ReplicationManager
     }
 
     RequestContext get() {
-      if( list.size() > 0) {
-        return (RequestContext)list.elementAt(0);
-      } else {
-        return null;
-      }
+      if( list.size() > 0) return (RequestContext)list.elementAt(0);
+      return null;
     }
 
     void pop() {

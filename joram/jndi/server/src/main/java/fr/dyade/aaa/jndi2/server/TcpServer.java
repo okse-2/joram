@@ -122,9 +122,9 @@ public class TcpServer {
               } catch (InterruptedException ie) {
               }
               continue loop;
-            } else {
-              break loop;
             }
+            
+            break loop;
           } finally {
             canStop = false;
           }

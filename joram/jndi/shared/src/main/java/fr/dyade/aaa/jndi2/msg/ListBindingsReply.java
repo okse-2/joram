@@ -92,9 +92,8 @@ public class ListBindingsReply extends JndiReply {
     public Object nextElement() {
       if (index < bindings.length) {
         return bindings[index++];
-      } else {
-        throw new java.util.NoSuchElementException();
       }
+      throw new java.util.NoSuchElementException();
     }
   }
 }

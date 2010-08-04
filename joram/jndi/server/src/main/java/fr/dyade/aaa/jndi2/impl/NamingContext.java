@@ -168,9 +168,8 @@ public class NamingContext implements NamingContextMBean, Serializable, Cloneabl
     if (obj instanceof Reference) {
       Reference ref = (Reference)obj;
       return ref.getClassName();
-    } else {
-      return obj.getClass().getName();
     }
+    return obj.getClass().getName();
   }
 
   public Object clone() {
