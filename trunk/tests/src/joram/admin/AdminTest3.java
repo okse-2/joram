@@ -62,13 +62,12 @@ public class AdminTest3 extends TestCase {
       adminAndTest(0, cf);
       adminAndTest(1, cf);
       
-      stopAgentServer((short)1);
-      stopAgentServer((short)0);
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);
     } finally {
-      stopAgentServer((short)0);
+      stopAgentServer((short) 1);
+      stopAgentServer((short) 0);
       endTest();     
     }
   }
