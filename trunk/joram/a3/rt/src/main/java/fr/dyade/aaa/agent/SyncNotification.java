@@ -54,15 +54,17 @@ public class SyncNotification extends Notification {
   }
 
   public Object getValue(int index) {
-    if (ctx != null) {
+    if (ctx != null)
       return ctx.getValue(index);
-    } else return null;
+
+    return null;
   }
 
   public final Exception getException() {
-    if (ctx != null) {
+    if (ctx != null)
       return ctx.getException();
-    } else return null;
+
+    return null;
   }
 
   static class Result {
@@ -84,11 +86,9 @@ public class SyncNotification extends Notification {
       throws InterruptedException, Exception {
       Channel.sendTo(to, syncRequest);
       wait();
-      if (res.exc != null) {
-        throw res.exc;
-      } else {
-        return res.values;
-      }
+      if (res.exc != null) throw res.exc;
+
+      return res.values;
     }
 
     public synchronized void Throw(Exception exc) {
@@ -102,9 +102,10 @@ public class SyncNotification extends Notification {
     }
 
     public Object getValue(int index) {
-      if (res.values != null) {
+      if (res.values != null)
         return res.values[index];
-      } else return null;
+
+      return null;
     }
 
     public final Exception getException() {

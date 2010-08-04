@@ -291,19 +291,17 @@ public class MessageSoftList {
   public Iterator toSendIterator() {
     if (persistent) {
       return new MessageSoftIterator(msgToSendlist.iterator());
-    } else {
-      return msgToSendlist.iterator();
     }
+    return msgToSendlist.iterator();
   }
 
   public synchronized String toString() {
     if (persistent) {
       return "ack#" + (ack == null ? "undef" : String.valueOf(ack.stamp)) + " + "
           + Arrays.toString(msgSentlist.toArray()) + Arrays.toString(msgToSendlist.toArray());
-    } else {
-      return "ack#" + (ack == null ? "undef" : String.valueOf(ack.stamp)) + " + [size=" + msgSentlist.size()
-          + "][size=" + msgToSendlist.size() + "]";
     }
+    return "ack#" + (ack == null ? "undef" : String.valueOf(ack.stamp)) + " + [size=" + msgSentlist.size()
+        + "][size=" + msgToSendlist.size() + "]";
   }
 
   /**

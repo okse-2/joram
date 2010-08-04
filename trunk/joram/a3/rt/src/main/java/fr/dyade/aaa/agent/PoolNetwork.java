@@ -1679,7 +1679,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
      */
     final class NetworkInputStream extends BufferedMessageInputStream {
       
-      NetworkInputStream(InputStream is) throws IOException {
+      NetworkInputStream(InputStream is) {
         super();
         this.in = is;
         this.compressedFlows = getCompressedFlows();

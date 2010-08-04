@@ -140,23 +140,23 @@ public class NGNetwork extends StreamNetwork {
     return handlers[index(sid)];
   }
 
-//   /**
-//    *  Adds a message in "ready to deliver" list. This method allocates a
-//    * new time stamp to the message ; be Careful, changing the stamp imply
-//    * the filename change too.
-//    */
-//   public void post(Message msg) throws Exception {
-//     short to = AgentServer.getServerDesc(msg.to.to).gateway;
-//     // Allocates a new timestamp. Be careful, if the message needs to be
-//     // routed we have to use the next destination in timestamp generation.
-//     msg.source = AgentServer.getServerId();
-//     msg.dest = to;
-//     msg.stamp = getSendUpdate(to);
-//     // Saves the message.
-//     msg.save();
-//     // Push it in "ready to deliver" queue.
-//     getHandler(to).send(msg);
-//   }
+  //   /**
+  //    *  Adds a message in "ready to deliver" list. This method allocates a
+  //    * new time stamp to the message ; be Careful, changing the stamp imply
+  //    * the filename change too.
+  //    */
+  //   public void post(Message msg) throws Exception {
+  //     short to = AgentServer.getServerDesc(msg.to.to).gateway;
+  //     // Allocates a new timestamp. Be careful, if the message needs to be
+  //     // routed we have to use the next destination in timestamp generation.
+  //     msg.source = AgentServer.getServerId();
+  //     msg.dest = to;
+  //     msg.stamp = getSendUpdate(to);
+  //     // Saves the message.
+  //     msg.save();
+  //     // Push it in "ready to deliver" queue.
+  //     getHandler(to).send(msg);
+  //   }
 
   /**
    * Wakes up the watch-dog thread.
@@ -231,13 +231,13 @@ public class NGNetwork extends StreamNetwork {
       logmon.log(BasicLevel.DEBUG, getName() + " bufsize: " + 
                  channel.socket().getReceiveBufferSize() + ", " +
                  channel.socket().getSendBufferSize());
-    
+
     ByteBuffer buf = ByteBuffer.allocate(6);
     channel.read(buf);
     buf.flip();
     short sid = buf.getShort();
     int boot = buf.getInt();
-      
+
     CnxHandler cnx = getHandler(sid);
     if (cnx.remoteStart(channel, boot)) cnx.startEnd();
   }
@@ -255,7 +255,7 @@ public class NGNetwork extends StreamNetwork {
 
     public void run() {
       Message msg = null;
-      
+
       try {
         while (running) {
           canStop = true;
@@ -292,20 +292,20 @@ public class NGNetwork extends StreamNetwork {
       // Overload logmon definition in Daemon
       this.logmon = logmon;
 
-//       // Create a blocking server socket channel on port
-//       listen = ServerSocketChannel.open();
-//       listen.configureBlocking(false);
-//       listen.socket().bind(new InetSocketAddress(port));
+      //       // Create a blocking server socket channel on port
+      //       listen = ServerSocketChannel.open();
+      //       listen.configureBlocking(false);
+      //       listen.socket().bind(new InetSocketAddress(port));
 
-//       // Register channels with selector
-//       listen.register(selector, SelectionKey.OP_ACCEPT);
+      //       // Register channels with selector
+      //       listen.register(selector, SelectionKey.OP_ACCEPT);
     }
 
     protected void close() {
-//       try {
-// 	listen.close();
-//       } catch (Exception exc) {}
-//       listen = null;
+      //       try {
+      // 	listen.close();
+      //       } catch (Exception exc) {}
+      //       listen = null;
     }
 
     protected void shutdown() {
@@ -318,112 +318,112 @@ public class NGNetwork extends StreamNetwork {
 
       try {
 
-      while (running) {
+        while (running) {
 
-        // This call blocks until there is activity on one of the  
-        // registered channels. This is the key method in non-blocking I/O.
-        canStop = true;
-        try {
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG, getName() + ", on select");
-          nbop = selector.select(WDActivationPeriod);
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG, getName() + ", on select:" + nbop);
-        } catch (IOException exc) {
-        }
-
-        for (int idx=0; idx<handlers.length; idx++) {
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG, getName() + ", " + handlers[idx]);
-
-          if ((handlers[idx] != null) &&
-              (handlers[idx].sendlist.size() > 0) &&
-              (handlers[idx].channel == null)) {
-            try {
-              handlers[idx].start();
-            } catch (IOException exc) {
-              this.logmon.log(BasicLevel.WARN,
-                              this.getName() + ", can't start cnx#" + idx,
-                              exc);
-            }
-          }
-        }
-
-        if (nbop == 0) continue;
-        canStop = false;
-
-        // Get list of selection keys with pending events, then process
-        // each key
-        Set keys = selector.selectedKeys();
-        for(Iterator it = keys.iterator(); it.hasNext(); ) {
-          if (! running) break;
-
-          // Get the selection key
-          SelectionKey key = (SelectionKey) it.next();
-          // Remove it from the list to indicate that it is being processed
-          it.remove();
-
-          if (logmon.isLoggable(BasicLevel.DEBUG))
-            logmon.log(BasicLevel.DEBUG,
-                       getName() + "(1): " + key + " -> " + key.interestOps());
-
-          logmon.log(BasicLevel.DEBUG,
-                     getName() + ":" +
-                     key.isValid() +
-                     key.isAcceptable() +
-                     key.isReadable() +
-                     key.isWritable());
+          // This call blocks until there is activity on one of the  
+          // registered channels. This is the key method in non-blocking I/O.
+          canStop = true;
           try {
-            // Check if it's a connection request
-            if (key.isAcceptable()) {
-              if (logmon.isLoggable(BasicLevel.DEBUG))
-                logmon.log(BasicLevel.DEBUG, getName() + " acceptable");
+            if (logmon.isLoggable(BasicLevel.DEBUG))
+              logmon.log(BasicLevel.DEBUG, getName() + ", on select");
+            nbop = selector.select(WDActivationPeriod);
+            if (logmon.isLoggable(BasicLevel.DEBUG))
+              logmon.log(BasicLevel.DEBUG, getName() + ", on select:" + nbop);
+          } catch (IOException exc) {
+          }
 
-              // Get channel with connection request (useless ?)
-              ServerSocketChannel server = (ServerSocketChannel) key.channel();
-              
-              // Accept the connection request.
-              SocketChannel channel = server.accept();
+          for (int idx=0; idx<handlers.length; idx++) {
+            if (logmon.isLoggable(BasicLevel.DEBUG))
+              logmon.log(BasicLevel.DEBUG, getName() + ", " + handlers[idx]);
 
-              // Register the channel with selector, listening for all events
-              cnxStart(channel);
-            } else {
-              cnx = (CnxHandler) key.attachment();
-              
-              if (logmon.isLoggable(BasicLevel.DEBUG))
-                logmon.log(BasicLevel.DEBUG,
-                           getName() + ": " + key + " -> " + cnx);
-              // Since the ready operations are cumulative,
-              // need to check readiness for each operation
-              if (key.isValid() && key.isReadable()) {
-                if (logmon.isLoggable(BasicLevel.DEBUG))
-                  logmon.log(BasicLevel.DEBUG, getName() + " readable");
-                cnx.read();
-              }
-              if (key.isValid() && key.isWritable()) {
-                if (logmon.isLoggable(BasicLevel.DEBUG))
-                  logmon.log(BasicLevel.DEBUG, getName() + " writable");
-                cnx.write();
-              } else  if (cnx.sendlist.size() > 0) {
-                logmon.log(BasicLevel.FATAL, getName() + " force");
-                key.interestOps(key.channel().validOps());
+            if ((handlers[idx] != null) &&
+                (handlers[idx].sendlist.size() > 0) &&
+                (handlers[idx].channel == null)) {
+              try {
+                handlers[idx].start();
+              } catch (IOException exc) {
+                this.logmon.log(BasicLevel.WARN,
+                                this.getName() + ", can't start cnx#" + idx,
+                                exc);
               }
             }
-            if (logmon.isLoggable(BasicLevel.DEBUG))
-              logmon.log(BasicLevel.DEBUG, getName() + "(2): " +
-                         key + " -> " + key.interestOps());
+          }
 
-          } catch (Exception exc) {
-            logmon.log(BasicLevel.ERROR, getName(), exc);
-            // Handle error with channel and unregister
+          if (nbop == 0) continue;
+          canStop = false;
+
+          // Get list of selection keys with pending events, then process
+          // each key
+          Set keys = selector.selectedKeys();
+          for(Iterator it = keys.iterator(); it.hasNext(); ) {
+            if (! running) break;
+
+            // Get the selection key
+            SelectionKey key = (SelectionKey) it.next();
+            // Remove it from the list to indicate that it is being processed
+            it.remove();
+
+            if (logmon.isLoggable(BasicLevel.DEBUG))
+              logmon.log(BasicLevel.DEBUG,
+                         getName() + "(1): " + key + " -> " + key.interestOps());
+
+            logmon.log(BasicLevel.DEBUG,
+                       getName() + ":" +
+                       key.isValid() +
+                       key.isAcceptable() +
+                       key.isReadable() +
+                       key.isWritable());
             try {
-              cnx.close();
-            } catch (IOException exc2) {
-              logmon.log(BasicLevel.ERROR, getName(), exc2);
+              // Check if it's a connection request
+              if (key.isAcceptable()) {
+                if (logmon.isLoggable(BasicLevel.DEBUG))
+                  logmon.log(BasicLevel.DEBUG, getName() + " acceptable");
+
+                // Get channel with connection request (useless ?)
+                ServerSocketChannel server = (ServerSocketChannel) key.channel();
+
+                // Accept the connection request.
+                SocketChannel channel = server.accept();
+
+                // Register the channel with selector, listening for all events
+                cnxStart(channel);
+              } else {
+                cnx = (CnxHandler) key.attachment();
+
+                if (logmon.isLoggable(BasicLevel.DEBUG))
+                  logmon.log(BasicLevel.DEBUG,
+                             getName() + ": " + key + " -> " + cnx);
+                // Since the ready operations are cumulative,
+                // need to check readiness for each operation
+                if (key.isValid() && key.isReadable()) {
+                  if (logmon.isLoggable(BasicLevel.DEBUG))
+                    logmon.log(BasicLevel.DEBUG, getName() + " readable");
+                  cnx.read();
+                }
+                if (key.isValid() && key.isWritable()) {
+                  if (logmon.isLoggable(BasicLevel.DEBUG))
+                    logmon.log(BasicLevel.DEBUG, getName() + " writable");
+                  cnx.write();
+                } else  if (cnx.sendlist.size() > 0) {
+                  logmon.log(BasicLevel.FATAL, getName() + " force");
+                  key.interestOps(key.channel().validOps());
+                }
+              }
+              if (logmon.isLoggable(BasicLevel.DEBUG))
+                logmon.log(BasicLevel.DEBUG, getName() + "(2): " +
+                           key + " -> " + key.interestOps());
+
+            } catch (Exception exc) {
+              logmon.log(BasicLevel.ERROR, getName(), exc);
+              // Handle error with channel and unregister
+              try {
+                cnx.close();
+              } catch (IOException exc2) {
+                logmon.log(BasicLevel.ERROR, getName(), exc2);
+              }
             }
           }
         }
-      }
       } catch (Throwable exc) {
         logmon.log(BasicLevel.FATAL, getName(), exc);
       }
@@ -466,7 +466,7 @@ public class NGNetwork extends StreamNetwork {
     CnxHandler(String name, short sid) throws IOException {
       this.sid = sid;
       this.name = name + ".cnxHandler#" + sid;
-      
+
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, getName() + ", created");
 
@@ -502,16 +502,16 @@ public class NGNetwork extends StreamNetwork {
         return;
 
       if (((server.retry < WDNbRetryLevel1) && 
-	   ((server.last + WDRetryPeriod1) < currentTimeMillis)) ||
-	  ((server.retry < WDNbRetryLevel2) &&
-	   ((server.last + WDRetryPeriod2) < currentTimeMillis)) ||
-	  ((server.last + WDRetryPeriod3) < currentTimeMillis)) {
-	if (localStart()) {
-	  startEnd();
-	} else {
-	  server.last = currentTimeMillis;
-	  server.retry += 1;
-	}
+          ((server.last + WDRetryPeriod1) < currentTimeMillis)) ||
+          ((server.retry < WDNbRetryLevel2) &&
+              ((server.last + WDRetryPeriod2) < currentTimeMillis)) ||
+              ((server.last + WDRetryPeriod3) < currentTimeMillis)) {
+        if (localStart()) {
+          startEnd();
+        } else {
+          server.last = currentTimeMillis;
+          server.retry += 1;
+        }
       }
     }
 
@@ -537,17 +537,17 @@ public class NGNetwork extends StreamNetwork {
      */
     boolean localStart() {
       synchronized (this) {
-	if ((this.channel != null) || this.local) {
-	  //  The connection is already established, or a "local" connection
-	  // is in progress (remoteStart method is synchronized).
-	  //  In all cases refuses the connection request.
+        if ((this.channel != null) || this.local) {
+          //  The connection is already established, or a "local" connection
+          // is in progress (remoteStart method is synchronized).
+          //  In all cases refuses the connection request.
           if (logmon.isLoggable(BasicLevel.WARN))
             logmon.log(BasicLevel.WARN, getName() + ", connection refused");
-	  return false;
-	}
+          return false;
+        }
 
-	// Set the local attribute in order to block all others local attempts.
-	this.local = true;
+        // Set the local attribute in order to block all others local attempts.
+        this.local = true;
       }
 
       SocketChannel channel = null;
@@ -573,7 +573,7 @@ public class NGNetwork extends StreamNetwork {
         buf.flip();
         channel.write(buf);
 
-//         ByteBuffer buf = ByteBuffer.allocate(6);
+        //         ByteBuffer buf = ByteBuffer.allocate(6);
         buf.flip();
         if (channel.read(buf) > 0) {
           // Reads the message length
@@ -590,14 +590,14 @@ public class NGNetwork extends StreamNetwork {
         if (logmon.isLoggable(BasicLevel.WARN))
           logmon.log(BasicLevel.WARN,
                      getName() + ", connection refused.", exc);
-	// TODO: Try it later, may be a a connection is in progress...
-	try {
-	  channel.close();
-	} catch (Exception exc2) {}
+        // TODO: Try it later, may be a a connection is in progress...
+        try {
+          channel.close();
+        } catch (Exception exc2) {}
 
-	// Reset the local attribute to allow future attempts.
+        // Reset the local attribute to allow future attempts.
         this.local = false;
-	return false;
+        return false;
       }
 
       // Normally, only one thread can reach this code (*1), so we don't have
@@ -626,18 +626,18 @@ public class NGNetwork extends StreamNetwork {
      */
     synchronized boolean remoteStart(SocketChannel channel, int boot) {
       try {
-	if ((this.channel != null) ||
-	    (this.local && server.sid > AgentServer.getServerId())) {
-	  //  The connection is already established, or
-	  // a "local" connection is in progress from this server with a
-	  // greater priority.
-	  //  In all cases, stops this "remote" attempt.
-	  //  If the "local" attempt has a lower priority, it will fail
-	  // due to a remote reject.
-	  throw new ConnectException("Already connected");
+        if ((this.channel != null) ||
+            (this.local && server.sid > AgentServer.getServerId())) {
+          //  The connection is already established, or
+          // a "local" connection is in progress from this server with a
+          // greater priority.
+          //  In all cases, stops this "remote" attempt.
+          //  If the "local" attempt has a lower priority, it will fail
+          // due to a remote reject.
+          throw new ConnectException("Already connected");
         }
 
-	// Accept this connection.
+        // Accept this connection.
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,
                      getName() + ", writeBoot: " + getBootTS());
@@ -651,19 +651,19 @@ public class NGNetwork extends StreamNetwork {
         testBootTS(sid, boot);
         AgentServer.getTransaction().commit(true);
 
-	// Fixing sock attribute will prevent any future attempt 
-	this.channel = channel;
-	return true;
+        // Fixing sock attribute will prevent any future attempt 
+        this.channel = channel;
+        return true;
       } catch (Exception exc) {
-	// May be a a connection is in progress, try it later...
+        // May be a a connection is in progress, try it later...
         if (logmon.isLoggable(BasicLevel.WARN))
           logmon.log(BasicLevel.WARN,
-                         getName() + ", connection refused", exc);
+                     getName() + ", connection refused", exc);
 
-	// Close the connection (# NACK).
-	try {
-	  channel.close();
-	} catch (Exception exc2) {}
+        // Close the connection (# NACK).
+        try {
+          channel.close();
+        } catch (Exception exc2) {}
       }
       return false;
     }
@@ -677,12 +677,12 @@ public class NGNetwork extends StreamNetwork {
       server.active = true;
       server.retry = 0;
 
-//       mos = new MessageOutputStream();
+      //       mos = new MessageOutputStream();
       nbwrite = 0;
-//       bufin = ByteBuffer.allocateDirect(SO_BUFSIZE);
+      //       bufin = ByteBuffer.allocateDirect(SO_BUFSIZE);
       bufin.clear();
-//       mis = new MessageInputStream();
-      
+      //       mis = new MessageInputStream();
+
       // The returned channel is in blocking mode.
       channel.configureBlocking(false);
       // Register channels with selector
@@ -690,7 +690,7 @@ public class NGNetwork extends StreamNetwork {
 
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG,
-                         getName() + ", connection started");
+                   getName() + ", connection started");
 
       sendlist.reset();
     }
@@ -698,7 +698,7 @@ public class NGNetwork extends StreamNetwork {
     synchronized void send(Message msg) throws IOException {
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG,
-                         getName() + ", send message: " + msg);
+                   getName() + ", send message: " + msg);
 
       // Adds it to the list of message to be sent, it will be removed
       // after its ack receipt.
@@ -709,13 +709,13 @@ public class NGNetwork extends StreamNetwork {
         // for reading, subscribe this channel for write operation will permit
         // to transmit the new added message.
 
-	// Be careful, as this change is only take in account for the next
-	// select operation, we have to use wakeup on selector
+        // Be careful, as this change is only take in account for the next
+        // select operation, we have to use wakeup on selector
 
         SelectionKey key = channel.keyFor(selector);
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG,
-                         getName() + ", send message, key=" + key);
+                     getName() + ", send message, key=" + key);
         if (key != null)
           key.interestOps(channel.validOps());
       }
@@ -797,7 +797,7 @@ public class NGNetwork extends StreamNetwork {
         buf[1] = (byte) (count >>>  16);
         buf[2] = (byte) (count >>>  8);
         buf[3] = (byte) (count >>>  0);
-        
+
         logmon.log(BasicLevel.DEBUG, getName() + ", writes " + count);
 
         nbwrite = count;
@@ -806,9 +806,9 @@ public class NGNetwork extends StreamNetwork {
       }
     }
 
-//     void write(Message msg) throws IOException {
-//       mos.writeMessage(msg);
-//     }
+    //     void write(Message msg) throws IOException {
+    //       mos.writeMessage(msg);
+    //     }
 
     /**
      * Method called each time the channel is Writable
@@ -826,14 +826,14 @@ public class NGNetwork extends StreamNetwork {
         if (nbwrite == 0) {
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG, getName() + " write-3");
-//           if (bufout != null) {
-//             // end of message sending, if it is an acknowledge remove it
-//             // from sendlist else wait for ack.
-//             if (sendlist.currentMessage().not == null) {
-//               logmon.log(BasicLevel.DEBUG, getName() + " remove ack sent");
-//               sendlist.removeCurrent();
-//             }
-//           }
+          //           if (bufout != null) {
+          //             // end of message sending, if it is an acknowledge remove it
+          //             // from sendlist else wait for ack.
+          //             if (sendlist.currentMessage().not == null) {
+          //               logmon.log(BasicLevel.DEBUG, getName() + " remove ack sent");
+          //               sendlist.removeCurrent();
+          //             }
+          //           }
           Message msg = sendlist.nextMessage();
           if (msg == null) {
             bufout = null;
@@ -869,32 +869,32 @@ public class NGNetwork extends StreamNetwork {
       if (bytes < 0) {
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG, getName() + " cnx remotely closed");
-	close();
-	return;
+        close();
+        return;
       }
 
       bufin.flip();
       while (bytes > 0) {
-//         logmon.log(BasicLevel.FATAL,
-//                    "mis.getBuffer()=" + mis.getBuffer().length);
-//         logmon.log(BasicLevel.FATAL,
-//                    "mis.getCount()=" + mis.getCount());
-//         logmon.log(BasicLevel.FATAL,
-//                    "mis.length=" + mis.length);
-//         logmon.log(BasicLevel.FATAL,
-//                    "bytes=" + bytes);
-        
-	if (mis.length ==  -1) {
-//	if (mis.msg ==  null) {
+        //         logmon.log(BasicLevel.FATAL,
+        //                    "mis.getBuffer()=" + mis.getBuffer().length);
+        //         logmon.log(BasicLevel.FATAL,
+        //                    "mis.getCount()=" + mis.getCount());
+        //         logmon.log(BasicLevel.FATAL,
+        //                    "mis.length=" + mis.length);
+        //         logmon.log(BasicLevel.FATAL,
+        //                    "bytes=" + bytes);
+
+        if (mis.length ==  -1) {
+          //	if (mis.msg ==  null) {
           // Reads the message header.
-	  if ((mis.getCount() + bytes) < 28) {
+          if ((mis.getCount() + bytes) < 28) {
             bufin.get(mis.getBuffer(), mis.getCount(), bytes);
-	    mis.setCount(mis.getCount() + bytes);
-	    bytes = 0;
-	  } else {
-	    bufin.get(mis.getBuffer(), mis.getCount(), 28-mis.getCount());
-	    bytes -= 28-mis.getCount();
-	    mis.setCount(28);
+            mis.setCount(mis.getCount() + bytes);
+            bytes = 0;
+          } else {
+            bufin.get(mis.getBuffer(), mis.getCount(), 28-mis.getCount());
+            bytes -= 28-mis.getCount();
+            mis.setCount(28);
 
             Message msg = mis.readHeader();
 
@@ -902,7 +902,7 @@ public class NGNetwork extends StreamNetwork {
               if (logmon.isLoggable(BasicLevel.DEBUG))
                 logmon.log(BasicLevel.DEBUG,
                            getName() + ", ack received #" + msg.stamp);
-//            logmon.log(BasicLevel.FATAL, msg.toString());
+              //            logmon.log(BasicLevel.FATAL, msg.toString());
               doAck(msg.stamp);
               msg.free();
 
@@ -912,31 +912,31 @@ public class NGNetwork extends StreamNetwork {
               mis.setCount(0);
             }
 
-//             // Reads the message length
-// 	  try {
-// 	    for (; nbread <28; nbread++) {
-//               bufin.get(mis.buf, nbread, 28-nbread);
-// 	      bytes -= 1;
-// 	    }
-//             if (logmon.isLoggable(BasicLevel.DEBUG))
-//               logmon.log(BasicLevel.DEBUG, getName() + " get length: " + length);
-// 	    // Allocates byte array for message storage
-// 	    array = new byte[length];
-// 	    nbread = 0;
-// 	  } catch (BufferUnderflowException exc) {
-// 	    break;
- 	  }
-	} else {
+            //             // Reads the message length
+            // 	  try {
+            // 	    for (; nbread <28; nbread++) {
+            //               bufin.get(mis.buf, nbread, 28-nbread);
+            // 	      bytes -= 1;
+            // 	    }
+            //             if (logmon.isLoggable(BasicLevel.DEBUG))
+            //               logmon.log(BasicLevel.DEBUG, getName() + " get length: " + length);
+            // 	    // Allocates byte array for message storage
+            // 	    array = new byte[length];
+            // 	    nbread = 0;
+            // 	  } catch (BufferUnderflowException exc) {
+            // 	    break;
+          }
+        } else {
           // The message header is read, reads the notification if any.
-	  if ((mis.getCount() + bytes) < (mis.length-28)) {
-	    bufin.get(mis.getBuffer(), mis.getCount(), bytes);
-	    mis.setCount(mis.getCount() + bytes);
-	    bytes = 0;
-	  } else {
-	    bufin.get(mis.getBuffer(), mis.getCount(), mis.length-28-mis.getCount());
-	    bytes -= mis.length-28-mis.getCount();
-	    mis.setCount(mis.length-28);
-            
+          if ((mis.getCount() + bytes) < (mis.length-28)) {
+            bufin.get(mis.getBuffer(), mis.getCount(), bytes);
+            mis.setCount(mis.getCount() + bytes);
+            bytes = 0;
+          } else {
+            bufin.get(mis.getBuffer(), mis.getCount(), mis.length-28-mis.getCount());
+            bytes -= mis.length-28-mis.getCount();
+            mis.setCount(mis.length-28);
+
             Message msg = mis.readMessage();
 
             //  Keep message stamp in order to acknowledge it (be careful,
@@ -945,16 +945,16 @@ public class NGNetwork extends StreamNetwork {
             if (logmon.isLoggable(BasicLevel.DEBUG))
               logmon.log(BasicLevel.DEBUG,
                          getName() + ", message received #" + stamp);
-//          logmon.log(BasicLevel.FATAL, msg.toString());
+            //          logmon.log(BasicLevel.FATAL, msg.toString());
             deliver(msg);
             ack(stamp);
-              
-	    // Reset data structures for next messages
-	    mis.length = -1;
+
+            // Reset data structures for next messages
+            mis.length = -1;
             mis.msg = null;
-	    mis.setCount(0);
-	  }
-	}
+            mis.setCount(0);
+          }
+        }
       }
       bufin.clear();
     }
@@ -992,32 +992,32 @@ public class NGNetwork extends StreamNetwork {
       Message readHeader() throws Exception {
         // Reads boot timestamp of source server
         length = ((buf[0] & 0xFF) << 24) + ((buf[1] & 0xFF) << 16) +
-          ((buf[2] & 0xFF) <<  8) + ((buf[3] & 0xFF) <<  0);
+        ((buf[2] & 0xFF) <<  8) + ((buf[3] & 0xFF) <<  0);
 
         msg = Message.alloc();
         // Reads sender's AgentId
         msg.from = new AgentId(
-          (short) (((buf[4] & 0xFF) <<  8) + (buf[5] & 0xFF)),
-          (short) (((buf[6] & 0xFF) <<  8) + (buf[7] & 0xFF)),
-          ((buf[8] & 0xFF) << 24) + ((buf[9] & 0xFF) << 16) +
-          ((buf[10] & 0xFF) <<  8) + ((buf[11] & 0xFF) <<  0));
+                               (short) (((buf[4] & 0xFF) <<  8) + (buf[5] & 0xFF)),
+                               (short) (((buf[6] & 0xFF) <<  8) + (buf[7] & 0xFF)),
+                               ((buf[8] & 0xFF) << 24) + ((buf[9] & 0xFF) << 16) +
+                               ((buf[10] & 0xFF) <<  8) + ((buf[11] & 0xFF) <<  0));
         // Reads adressee's AgentId
         msg.to = new AgentId(
-          (short) (((buf[12] & 0xFF) <<  8) + (buf[13] & 0xFF)),
-          (short) (((buf[14] & 0xFF) <<  8) + (buf[15] & 0xFF)),
-          ((buf[16] & 0xFF) << 24) + ((buf[17] & 0xFF) << 16) +
-          ((buf[18] & 0xFF) <<  8) + ((buf[19] & 0xFF) <<  0));
+                             (short) (((buf[12] & 0xFF) <<  8) + (buf[13] & 0xFF)),
+                             (short) (((buf[14] & 0xFF) <<  8) + (buf[15] & 0xFF)),
+                             ((buf[16] & 0xFF) << 24) + ((buf[17] & 0xFF) << 16) +
+                             ((buf[18] & 0xFF) <<  8) + ((buf[19] & 0xFF) <<  0));
         // Reads source server id of message
         msg.source = (short) (((buf[20] & 0xFF) <<  8) +
-                              ((buf[21] & 0xFF) <<  0));
+            ((buf[21] & 0xFF) <<  0));
         // Reads destination server id of message
         msg.dest = (short) (((buf[22] & 0xFF) <<  8) +
-                            ((buf[23] & 0xFF) <<  0));
+            ((buf[23] & 0xFF) <<  0));
         // Reads stamp of message
         msg.stamp = ((buf[24] & 0xFF) << 24) +
-          ((buf[25] & 0xFF) << 16) +
-          ((buf[26] & 0xFF) <<  8) +
-          ((buf[27] & 0xFF) <<  0);
+        ((buf[25] & 0xFF) << 16) +
+        ((buf[26] & 0xFF) <<  8) +
+        ((buf[27] & 0xFF) <<  0);
 
         if ((length -28) > buf.length)
           buf = new byte[length -28];
@@ -1078,8 +1078,8 @@ public class NGNetwork extends StreamNetwork {
 
     final private void ack(int stamp) throws Exception {
       if (logmon.isLoggable(BasicLevel.DEBUG))
-          logmon.log(BasicLevel.DEBUG,
-                     getName() + ", set ack msg#" + stamp);
+        logmon.log(BasicLevel.DEBUG,
+                   getName() + ", set ack msg#" + stamp);
 
       Message ack = Message.alloc(AgentId.localId,
                                   AgentId.localId(server.sid),
@@ -1093,7 +1093,7 @@ public class NGNetwork extends StreamNetwork {
 
     void close() throws IOException {
       if (logmon.isLoggable(BasicLevel.DEBUG))
-          logmon.log(BasicLevel.DEBUG, getName() + ", close");
+        logmon.log(BasicLevel.DEBUG, getName() + ", close");
       try {
         channel.keyFor(selector).cancel();
       } catch (Exception exc) {}
@@ -1144,7 +1144,7 @@ public class NGNetwork extends StreamNetwork {
      * capacity increment. 
      */
     public MessageVector() {
-	this.elementData = new Message[20];
+      this.elementData = new Message[20];
     }
 
     public synchronized Message nextMessage() {
@@ -1152,8 +1152,7 @@ public class NGNetwork extends StreamNetwork {
 
       if ((current +1) < elementCount)
         return elementData[++current];
-      else
-        return null;
+      return null;
     }
 
     /**
@@ -1193,7 +1192,7 @@ public class NGNetwork extends StreamNetwork {
       if (elementCount > (current +1)) {
         System.arraycopy(elementData, current +1,
                          elementData, current, elementCount - current -1);
-        
+
       }
       elementData[elementCount-1] = null; /* to let gc do its work */
       elementCount--;
@@ -1216,14 +1215,14 @@ public class NGNetwork extends StreamNetwork {
 
         if ((msg.not != null) && (msg.getStamp() == stamp)) {
           if (elementCount > (index +1)) {
-	    System.arraycopy(elementData, index +1,
+            System.arraycopy(elementData, index +1,
                              elementData, index, elementCount - index - 1);
           }
           elementData[elementCount-1] = null; /* to let gc do its work */
           elementCount--;
           // AF: To verify !!
           if (index <=current) current--;
-        
+
           return msg;
         }
       }

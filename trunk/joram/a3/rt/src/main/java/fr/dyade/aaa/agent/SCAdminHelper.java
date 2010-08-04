@@ -267,11 +267,9 @@ public class SCAdminHelper {
                 "SCAdmin: join AgentServer#" + sid + " [" + p + ']');
 
     // TODO: put it in previous method and set a Timer.
-    if (p != null) {
-      return p.waitFor();
-    } else {
-      throw new UnknownServerException();
-    }
+    if (p != null) return p.waitFor();
+
+    throw new UnknownServerException();
   }
 
   /**
@@ -284,15 +282,14 @@ public class SCAdminHelper {
    * @exception UnknownServerException
    *			if the agent server is unknown.
    */
-  public int exitValue(short sid) 
-    throws IllegalThreadStateException, UnknownServerException {
+  public int exitValue(short sid) throws IllegalThreadStateException, UnknownServerException {
     Process p = (Process)ASP.get(new Short(sid));
     if (p != null) {
       int res = p.exitValue();
       return res;
-    } else {
-      throw new UnknownServerException();
     }
+    
+    throw new UnknownServerException();
   }
 
   /**

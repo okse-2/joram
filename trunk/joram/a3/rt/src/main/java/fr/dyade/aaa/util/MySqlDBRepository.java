@@ -256,22 +256,21 @@ final class MySqlDBRepository implements Repository {
 
       return result;
     } catch (SQLException sqle) {
-      if (sqle instanceof com.mysql.jdbc.CommunicationsException && !reconnectLoop)
-      {
+      if (sqle instanceof com.mysql.jdbc.CommunicationsException && !reconnectLoop) {
           logger.log(BasicLevel.WARN, "Database reconnection problem at list, Reconnecting");
           reconnection();
           reconnectLoop = true;
           String[] result = list(prefix);
           reconnectLoop = false;
           return result;
-      } else {
-          if (reconnectLoop)
-              logger.log(BasicLevel.WARN, "Database reconnection problem at list");
-
-          logger.log(BasicLevel.WARN, "list, problem list " + prefix);
-          sqle.printStackTrace();
-          throw new IOException(sqle.getMessage());
       }
+      
+      if (reconnectLoop)
+          logger.log(BasicLevel.WARN, "Database reconnection problem at list");
+
+      logger.log(BasicLevel.WARN, "list, problem list " + prefix);
+      sqle.printStackTrace();
+      throw new IOException(sqle.getMessage());
     } catch (Exception e) {
         logger.log(BasicLevel.WARN, "list, problem list " + prefix + " in e with " + e.getMessage());
         e.printStackTrace();
@@ -354,6 +353,7 @@ final class MySqlDBRepository implements Repository {
    * Loads the object.
    *
    * @return The loaded object or null if it does not exist.
+   * @throws ClassNotFoundException 
    */
   public Object loadobj(String dirName, String name) throws IOException, ClassNotFoundException {
     if (logger.isLoggable(BasicLevel.DEBUG))
@@ -427,14 +427,14 @@ final class MySqlDBRepository implements Repository {
           byte[] content = load(dirName, name);
           reconnectLoop = false;
           return content;
-      } else {
-          if (reconnectLoop)
-              logger.log(BasicLevel.WARN, "Database reconnection problem at load");
-
-          logger.log(BasicLevel.WARN, "load, problem load " + name);
-          sqle.printStackTrace();
-          throw new IOException(sqle.getMessage());
       }
+      
+      if (reconnectLoop)
+          logger.log(BasicLevel.WARN, "Database reconnection problem at load");
+
+      logger.log(BasicLevel.WARN, "load, problem load " + name);
+      sqle.printStackTrace();
+      throw new IOException(sqle.getMessage());
     } catch (Exception e) {
        String exceptionString = e.toString();
        if (exceptionString.indexOf("KNOWN PROBLEM") == -1)

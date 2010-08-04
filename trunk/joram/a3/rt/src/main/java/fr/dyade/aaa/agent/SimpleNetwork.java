@@ -123,10 +123,9 @@ public class SimpleNetwork extends StreamNetwork {
    */
   public boolean isRunning() {
     if ((netServerIn != null) && netServerIn.isRunning() &&
-	(netServerOut != null) && netServerOut.isRunning())
+        (netServerOut != null) && netServerOut.isRunning())
       return true;
-    else
-      return false;
+    return false;
   }
 
   /**
@@ -332,7 +331,7 @@ public class SimpleNetwork extends StreamNetwork {
               AgentServer.getTransaction().begin();
               //  Deletes the processed notification
               iterator.remove();
-    // AF: A reprendre.
+// AF (TODO): To remove ?
 //               // send ack in JGroups to delete msg
 //               if (jgroups != null)
 //                 jgroups.send(new JGroupsAckMsg(msg));

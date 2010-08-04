@@ -379,9 +379,9 @@ final class MessageVector implements MessageQueue {
         msg = ((MessageSoftRef) data[idx]).loadMessage();
       }
       return msg;
-    } else {
-      return (Message) data[idx];
     }
+    
+    return (Message) data[idx];
   }
 
   /**

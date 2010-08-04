@@ -394,7 +394,7 @@ public final class ATransaction extends AbstractTransaction implements ATransact
     logFD.sync();
   }
 
-  public final synchronized void rollback() throws IOException {
+  public final synchronized void rollback() {
     if (phase != RUN)
       throw new IllegalStateException("Can not rollback.");
 

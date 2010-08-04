@@ -100,9 +100,7 @@ final class JGroups
     channel = new JChannel(props);
     channel.connect(channelName);
     
-    new PullPushAdapter(channel, 
-                        (MessageListener) this, 
-                        (MembershipListener) this);
+    new PullPushAdapter(channel, this, this);
     myAddr = channel.getLocalAddress();
   }
 

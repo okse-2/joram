@@ -901,7 +901,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
       count = newcount;
     }
 
-    void writeInt(int v) throws IOException {
+    void writeInt(int v) {
       int newcount = count +4;
       if (newcount > buf.length) {
         byte newbuf[] = new byte[buf.length << 1];
