@@ -102,6 +102,10 @@ public class AcquisitionQueueImpl extends QueueImpl implements AcquisitionQueueI
   }
 
   /**
+   * Incoming JMS messages are used for configuration, they are processed by the
+   * acquisition module and a null ClientMessages is always returned to the base
+   * implementation.
+   * 
    * @see AcquisitionModule#processMessages(ClientMessages)
    * @see DestinationImpl#preProcess(AgentId, ClientMessages)
    */
@@ -113,6 +117,13 @@ public class AcquisitionQueueImpl extends QueueImpl implements AcquisitionQueueI
     return null;
   }
 
+  /**
+   * This method process messages from the acquisition module.
+   * The method addClientMessages of base implementation is used to handle
+   * incoming messages.
+   * 
+   * @param not
+   */
   public void acquisitionNot(AcquisitionNot not) {
     if (logger.isLoggable(BasicLevel.DEBUG)) {
       logger.log(BasicLevel.DEBUG, "acquisitionNot(" + not + ")");
