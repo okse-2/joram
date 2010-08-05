@@ -372,98 +372,6 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
       dmqManager.sendToDMQ();
   }
 
-//  /**
-//   * Method implementing the reaction to a <code>SetThreshRequest</code>
-//   * instance setting the threshold value for this queue.
-//   *
-//   * @exception AccessException  If the requester is not the administrator.
-//   */
-//  public void setThresholdRequest(AgentId from, SetThresholdRequestNot req) throws AccessException {
-//    if (! isAdministrator(from))
-//      throw new AccessException("ADMIN right not granted");
-//
-//    // state change, so save.
-//    setSave();
-//    threshold = req.getThreshold();
-//
-//    strbuf.append("Threshold value set to ").append(threshold).append(" for Queue").append(getId());
-//    forward(from, new AdminReplyNot(req, true, strbuf.toString()));
-//    strbuf.setLength(0);
-//  }
-
-//  /**
-//   * Method implementing the reaction to a <code>SetNbMaxMsgRequest</code>
-//   * instance setting the NbMaxMsg value for this queue.
-//   *
-//   * @exception AccessException  If the requester is not the administrator.
-//   */
-//  public void setNbMaxMsgRequest(AgentId from, SetNbMaxMsgRequest req) throws AccessException {
-//    if (! isAdministrator(from))
-//      throw new AccessException("ADMIN right not granted");
-//
-//    nbMaxMsg = req.getNbMaxMsg();
-//
-//    strbuf.append("Request [").append(req.getClass().getName()).append("], sent to Queue [").append(getId());
-//    strbuf.append("], successful [true]: nbMaxMsg [").append(nbMaxMsg).append("] set").toString();
-//    String info = strbuf.toString();
-//    strbuf.setLength(0);
-//    
-//    forward(from, new AdminReplyNot(req, true, info));
-//
-//    if (logger.isLoggable(BasicLevel.DEBUG))
-//      logger.log(BasicLevel.DEBUG, info);
-//  }
-
-//  /**
-//   * Method implementing the reaction to a
-//   * <code>Monit_GetPendingMessages</code> notification requesting the
-//   * number of pending messages.
-//   *
-//   * @exception AccessException  If the requester is not the administrator.
-//   */
-//  public void getPendingMessages(AgentId from, GetPendingMessagesNot not) throws AccessException {
-//    if (! isAdministrator(from))
-//      throw new AccessException("ADMIN right not granted");
-//
-//    // Cleaning of the possibly expired messages.
-//    DMQManager dmqManager = cleanPendingMessage(System.currentTimeMillis());
-//    // Sending the dead messages to the DMQ, if needed:
-//    if (dmqManager != null)
-//      dmqManager.sendToDMQ();
-//
-//    forward(from, new GetNumberReplyNot(not, messages.size()));
-//  }
-//
-//  /**
-//   * Method implementing the reaction to a
-//   * <code>Monit_GetPendingRequests</code> notification requesting the
-//   * number of pending requests.
-//   *
-//   * @exception AccessException  If the requester is not the administrator.
-//   */
-//  public void getPendingRequests(AgentId from, GetPendingRequestsNot not) throws AccessException {
-//    if (! isAdministrator(from))
-//      throw new AccessException("ADMIN right not granted");
-//
-//    // Cleaning of the possibly expired requests.
-//    cleanWaitingRequest(System.currentTimeMillis());
-//    forward(from, new GetNumberReplyNot(not, getWaitingRequestCount()));
-//  }
-
-//  /**
-//   * Method implementing the reaction to a
-//   * <code>Monit_GetNbMaxMsg</code> notification requesting the
-//   * number max of messages in this queue.
-//   *
-//   * @exception AccessException  If the requester is not the administrator.
-//   */
-//  public void getNbMaxMsg(AgentId from, GetNbMaxMsgRequestNot not) throws AccessException {
-//    if (! isAdministrator(from))
-//      throw new AccessException("ADMIN right not granted");
-//    
-//    forward(from, new GetNumberReplyNot(not, nbMaxMsg));
-//  }
-
   /**
    * This method allows to exclude some JMX attribute of getJMXStatistics method.
    * It excludes.
@@ -574,7 +482,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    * Method implementing the reaction to an <code>AcknowledgeRequest</code>
    * instance, requesting messages to be acknowledged.
    */
-  public void acknowledgeRequest(AgentId from, AcknowledgeRequest not) {
+  public void acknowledgeRequest(AcknowledgeRequest not) {
     for (Enumeration ids = not.getIds(); ids.hasMoreElements();) {
       String msgId = (String) ids.nextElement();
       acknowledge(msgId);
@@ -740,8 +648,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     AdminRequest adminRequest = not.getRequest();
     
     if (adminRequest instanceof GetQueueMessageIds) {
-      getQueueMessageIds((GetQueueMessageIds)adminRequest,
-                         not.getReplyTo(),
+      getQueueMessageIds(not.getReplyTo(),
                          not.getRequestMsgId(),
                          not.getReplyMsgId());
     } else if (adminRequest instanceof GetQueueMessage) {
@@ -755,8 +662,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
                          not.getRequestMsgId(),
                          not.getReplyMsgId());
     } else if (adminRequest instanceof ClearQueue) {
-      clearQueue((ClearQueue)adminRequest,
-                 not.getReplyTo(),
+      clearQueue(not.getReplyTo(),
                  not.getRequestMsgId(),
                  not.getReplyMsgId());
     } else if (adminRequest instanceof GetNbMaxMsgRequest) {
@@ -807,8 +713,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     }
   }
 
-  private void getQueueMessageIds(GetQueueMessageIds request,
-                                  AgentId replyTo,
+  private void getQueueMessageIds(AgentId replyTo,
                                   String requestMsgId,
                                   String replyMsgId) {
     String[] res = new String[messages.size()];
@@ -865,8 +770,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
                  replyTo, requestMsgId, replyMsgId);
   }
 
-  private void clearQueue(ClearQueue request,
-                          AgentId replyTo,
+  private void clearQueue(AgentId replyTo,
                           String requestMsgId,
                           String replyMsgId) {
     if (messages.size() > 0) {
@@ -1292,25 +1196,25 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    * @param remove  if true delete message
    * @return mom message
    */
-  protected Message getQueueMessage(String msgId, boolean remove) {   
+  protected Message getQueueMessage(String msgId, boolean remove) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "QueueImpl.getMessage(" + msgId + ',' + remove + ')');
 
     Message message =  getMomMessage(msgId);
     if (checkDelivery(message.getHeaderMessage())) {
-      message.incDeliveryCount();
-      nbMsgsDeliverSinceCreation++;
+    message.incDeliveryCount();
+    nbMsgsDeliverSinceCreation++;
 
       // use in sub class see ClusterQueueImpl
       messageDelivered(message.getIdentifier());
 
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "Message " + msgId);
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Message " + msgId);
 
-      if (remove) {
-        messages.remove(message);
-        message.delete();
-      } 
+    if (remove) {
+      messages.remove(message);
+      message.delete();
+    }
     }
     return message;
   }

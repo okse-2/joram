@@ -116,8 +116,19 @@ import fr.dyade.aaa.agent.conf.A3CMLNetwork;
 import fr.dyade.aaa.agent.conf.A3CMLServer;
 
 /**
- * The <code>AdminTopicImpl</code> class implements the admin topic behavior,
+ *  The <code>AdminTopicImpl</code> class implements the administration topic behavior,
  * basically processing administration requests.
+ * <p>
+ *  It receives administration requests from the client encapsulated in JMS messages:<ul>
+ * <li>If the request concerns an user or a destination it forwards the request to the
+ * target. This target directly replies (*) to the client sending a JMS message to the
+ * replyTo destination specified in the original JMS message.</li>
+ * <li>If the request can be processed by the administration topic, either the request
+ * concerns the local server and it is processed, or it is forwarded to the administration
+ * topic of the target server.</li>
+ * </ul>
+ * (*) Currently the getRights reply is handled differently as it needs the transformation of
+ * the user list. This behavior should disappear with the role based mechanism.
  */
 public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBean {
   /** define serialVersionUID for interoperability */
@@ -262,9 +273,10 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   }
 
   /**
-   * Method implementing the reaction to a
-   * <code>org.objectweb.joram.mom.proxies.AdminNotification</code>
-   * notification notifying of the creation of an admin proxy.
+   * Method implementing the reaction to a <code>AdminNotification</code>
+   * notification notifying of the creation of an administrator proxy.
+   * 
+   * @param adminNot  the <code>AdminNotification</code> notification.
    */
   public void AdminNotification(AdminNotification adminNot) {
     Identity identity = adminNot.getIdentity();
@@ -288,15 +300,6 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "Exception:: ", e);
     }
-  }
-
-  /**
-   * Method implementing the reaction to a <code>AdminRequest</code>
-   * notification notifying of the creation of an admin proxy.
-   */
-  public void AdminRequestNot(AgentId from, FwdAdminRequestNot adminNot) {
-    // AF: verify that from is an AdminTopic
-    processAdminRequests(adminNot.getReplyTo(), adminNot.getRequestMsgId(), adminNot.getRequest(), from);
   }
 
   /**
@@ -325,8 +328,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
 
   public void GetProxyIdNot(GetProxyIdNot not) {
     try {
-      AgentId proxyId = getProxyId(not.getIdentity(), 
-                                   not.getInAddr());
+      AgentId proxyId = getProxyId(not.getIdentity(), not.getInAddr());
       not.Return(proxyId);
     } catch (Exception exc) {
       not.Throw(exc);
@@ -369,28 +371,6 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     return reply;
   }
 
-//  /**
-//   * Overrides this <code>DestinationImpl</code> method; AdminTopics do not
-//   * accept <code>SetRightRequest</code> notifications.
-//   *
-//   * @exception  AccessException  Not thrown.
-//   */ 
-//  public void setRight(AgentId from, SetRightRequest request) throws AccessException {
-//    if (logger.isLoggable(BasicLevel.WARN))
-//      logger.log(BasicLevel.WARN, "Unexpected request: " + request);
-//  }
-
-//  /**
-//   * Overrides this <code>DestinationImpl</code> method; AdminTopics do not
-//   * accept <code>SetDMQRequest</code> notifications.
-//   *
-//   * @exception  AccessException  Not thrown.
-//   */ 
-//  public void setDMQRequest(AgentId from, SetDMQRequest request) throws AccessException {
-//    if (logger.isLoggable(BasicLevel.WARN))
-//      logger.log(BasicLevel.WARN, "Unexpected request: " + request);
-//  }
-
   public void requestGroupNot(AgentId from, RequestGroupNot not) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
@@ -404,15 +384,6 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       }
     }
   }
-
-//  public SetRightRequest preProcess(SetRightRequest req) {
-//    // nothing to do
-//    return req;
-//  }
-//  
-//  public void postProcess(SetRightRequest req) {
-//    // nothing to do
-//  }
 
   /**
    * Overrides this <code>DestinationImpl</code> method;
@@ -441,22 +412,14 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    *  - AdminTopics do not accept to join a hierarchy.
    * ***** ***** ***** ***** ***** */
 
-//  /**
-//   * Overrides this <code>TopicImpl</code> method; AdminTopics do not
-//   * accept <code>ClusterRequest</code> notifications.
-//   *
-//   * @exception  AccessException  Not thrown.
-//   */ 
-//  public void clusterRequest(AgentId from, ClusterRequest request) throws AccessException {
-//    if (logger.isLoggable(BasicLevel.WARN))
-//      logger.log(BasicLevel.WARN, "Unexpected request: " + request);
-//  }
-
   /**
    * Overrides this <code>TopicImpl</code> method; AdminTopics do not
    * accept to join clusters other than their admin topics cluster.
    */ 
   public void clusterTest(AgentId from, ClusterTest request) {
+    if (logger.isLoggable(BasicLevel.WARN))
+      logger.log(BasicLevel.WARN, "Unexpected notification: " + request);
+    
     forward(from, new ClusterAck(false, "Joining topic is an admin topic",
                                  request.getReplyTo(), request.getRequestMsgId(), request.getReplyMsgId()));
   }
@@ -480,63 +443,13 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
       logger.log(BasicLevel.WARN, "Unexpected notification: " + not);
   }
 
-//  /**
-//   * Overrides this <code>TopicImpl</code> method; AdminTopics do not
-//   * accept <code>UnclusterRequest</code> notifications.
-//   *
-//   * @exception AccessException  Not thrown.
-//   */ 
-//  public void unclusterRequest(AgentId from, UnclusterRequest request) throws MomException {
-//    if (logger.isLoggable(BasicLevel.WARN))
-//      logger.log(BasicLevel.WARN, "Unexpected request: " + request);
-//  }
-
-//  /**
-//   * Overrides this <code>TopicImpl</code> method; AdminTopics do not
-//   * accept <code>SetFatherRequest</code> notifications.
-//   *
-//   * @exception  AccessException  Not thrown.
-//   */ 
-//  public void setFatherRequest(AgentId from, SetFatherRequest request) throws MomException {
-//    if (logger.isLoggable(BasicLevel.WARN))
-//      logger.log(BasicLevel.WARN, "Unexpected request: " + request);
-//  }
-
-//  /**
-//   * Overrides this <code>TopicImpl</code> method; AdminTopics do not
-//   * accept to join a hierarchy.
-//   */ 
-//  public void fatherTest(AgentId from, FatherTest not) {
-//    forward(from, new FatherAck(not, false,
-//                                "Topic [" + getId() + "] can't accept topic [" + from + "] as a son as it is an AdminTopic"));
-//  }
-//
-//  /**
-//   * Overrides this <code>TopicImpl</code> method; a <code>FatherAck</code>
-//   * acknowledges the process of creating a hierarchy of topics.
-//   */ 
-//  public void fatherAck(AgentId from, FatherAck ack) {
-//    if (logger.isLoggable(BasicLevel.WARN))
-//      logger.log(BasicLevel.WARN, "Unexpected notification: " + ack);
-//  }
-
-//  /**
-//   * Overrides this <code>TopicImpl</code> method; AdminTopics do not
-//   * accept <code>UnsetFatherRequest</code> notifications.
-//   *
-//   * @exception  AccessException  Not thrown.
-//   */ 
-//  public void unsetFatherRequest(AgentId from, UnsetFatherRequest request) throws MomException {
-//    if (logger.isLoggable(BasicLevel.WARN))
-//      logger.log(BasicLevel.WARN, "Unexpected request: " + request);
-//  }
-
   /**
    * Overrides this <code>TopicImpl</code> method; the forwarded messages
    * contain admin requests and will be processed.
    */
   public void topicForwardNot(AgentId from, TopicForwardNot not) {
-    processAdminRequests(not.messages);
+    if (logger.isLoggable(BasicLevel.WARN))
+      logger.log(BasicLevel.WARN, "Unexpected notification: " + not);
   }
 
   /* ***** ***** ***** ***** *****
@@ -582,44 +495,25 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * distributing them to the appropriate reactions.
    */ 
   private void processAdminRequests(ClientMessages not) {
-    Message msg;
-    String msgId = null;
-    AgentId replyTo = null;
-    String info = null;
-    AdminRequest request = null;
-
     if (not == null) return;
 
     Iterator messages = not.getMessages().iterator();
 
     while (messages.hasNext()) {
-      nbMsgsReceiveSinceCreation = nbMsgsReceiveSinceCreation + 1;
-      msg = (Message) messages.next();
-      msgId = msg.id;
-      replyTo = AgentId.fromString(msg.replyToId);
-      request = null;
+      Message msg = (Message) messages.next();
+      nbMsgsReceiveSinceCreation += 1;
 
-      try {
-        request = (AdminRequest) msg.getAdminMessage();
+      String msgId = msg.id;
+      AgentId replyTo = AgentId.fromString(msg.replyToId);
+      AdminRequest request = (AdminRequest) msg.getAdminMessage();
 
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "--- " + this + ": got " + request);
-      } catch (ClassCastException exc) {
-        logger.log(BasicLevel.ERROR, "--- " + this + ": got bad AdminRequest");
-        if (request == null) {
-          info = strbuf.append("Unexpected request to AdminTopic on server [")
-          .append(serverId).append("]: ").append(exc.getMessage()).toString();
-          strbuf.setLength(0);
-        } else {
-          info = strbuf.append("Request [").append(request.getClass().getName())
-          .append("], sent to AdminTopic on server [").append(serverId)
-          .append("], successful [false]: ")
-          .append(exc.getMessage()).toString();
-          strbuf.setLength(0);
-        }
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "--- " + this + ": got " + request);
 
-        distributeReply(replyTo, msgId, new AdminReply(false, info));
-      } catch (Exception exc) {}
+      if (request == null) {
+        logger.log(BasicLevel.ERROR, "--- " + this + ": got bad AdminRequest.");
+        distributeReply(replyTo, msgId, new AdminReply(false, "Unexpected request to AdminTopic"));
+      }
 
       processAdminRequests(replyTo, msgId, request, null);
     }
@@ -629,10 +523,10 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * Method getting the administration requests from messages, and
    * distributing them to the appropriate reactions.
    */ 
-  private void processAdminRequests(AgentId replyTo,
-                                    String msgId,
-                                    AdminRequest request,
-                                    AgentId from) {
+  void processAdminRequests(AgentId replyTo,
+                            String msgId,
+                            AdminRequest request,
+                            AgentId from) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, this + ".processAdminRequests(" + msgId + ',' + request + ')');
     
@@ -650,12 +544,8 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
         doProcess((DeleteDestination) request, replyTo, msgId);
       else if (request instanceof SetCluster)
         doProcess((SetCluster) request, replyTo, msgId);
-//      else if (request instanceof UnsetCluster)
-//        doProcess((UnsetCluster) request, replyTo, msgId);
       else if (request instanceof SetFather)
         doProcess((SetFather) request, replyTo, msgId);
-//      else if (request instanceof UnsetFather)
-//        doProcess((UnsetFather) request, replyTo, msgId);
       else if (request instanceof CreateUserRequest)
         doProcess((CreateUserRequest) request, replyTo, msgId);
       else if (request instanceof UpdateUser)
@@ -993,13 +883,13 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
         .append("] has been retrieved").toString();
         strbuf.setLength(0);
       } else {
-        //        try {
-        //          if (! identity.validate()) {
-        //            throw new RequestException("User [" + name + "] security validate failed.");
-        //          }
-        //        } catch (Exception e) {
-        //          throw new RequestException(e.getMessage());
-        //        }
+//        try {
+//          if (! identity.validate()) {
+//            throw new RequestException("User [" + name + "] security validate failed.");
+//          }
+//        } catch (Exception e) {
+//          throw new RequestException(e.getMessage());
+//        }
 
         UserAgent proxy = new UserAgent();
         proxy.setName(name);
@@ -1190,50 +1080,24 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
                          String msgId) throws UnknownServerException {
     AgentId destId = AgentId.fromString(request.getDestId());
 
-    // TBD AF
-//    if (checkServerId(destId.getTo())) {
-//      // If this server is the target server, process the request.
-//      Integer threshold = null;
-//      if (request.getThreshold() > 0)
-//        threshold = new Integer(request.getThreshold());
-//      
-//      if (destId.isNullId()) {
-//        // Set the default Threshold for local server
-//        QueueImpl.defaultThreshold = threshold;
-//
-//        strbuf.append("Default threshold [").append(request.getThreshold()).append("] has been set on server [").append(serverId);
-//        distributeReply(replyTo, msgId, new AdminReply(true, strbuf.toString())); 
-//        strbuf.setLength(0);
-//      } else {
-//        // The destination or user is local, process it.
-//        forward(destId, new SetThresholdRequestNot(msgId, threshold));
-//        if (replyTo != null) requestsTable.put(msgId, replyTo);
-//      }
-//    } else {
-//      // Forward the request to the right AdminTopic agent.
-//      forward(AdminTopic.getDefault(destId.getTo()), new AdminRequestNot(replyTo, msgId, request));
-//    }
+    if (destId.isNullId()) {
+      // Set the default Threshold
+      if (checkServerId(destId.getTo())) {
+        // Set the default Threshold for local server
+        QueueImpl.defaultThreshold = 0;
+        if (request.getThreshold() > 0)
+          QueueImpl.defaultThreshold = request.getThreshold();
 
-      if (destId.isNullId()) {
-        // Set the default Threshold
-        if (checkServerId(destId.getTo())) {
-          // Set the default Threshold for local server
-          QueueImpl.defaultThreshold = 0;
-          if (request.getThreshold() > 0)
-            QueueImpl.defaultThreshold = request.getThreshold();
-
-          distributeReply(replyTo, msgId, new AdminReply(true, null));
-        } else {
-          // Forward the request to the right AdminTopic agent.
-          forward(AdminTopic.getDefault(destId.getTo()),
-                  new FwdAdminRequestNot(request, replyTo, msgId));
-        }
+        distributeReply(replyTo, msgId, new AdminReply(true, null));
       } else {
-        // Forward the request to the target.
-        forward(destId, new FwdAdminRequestNot(request, replyTo, msgId, createMessageId()));
-//        forward(destId, new SetThresholdRequestNot(msgId, threshold));
-//        if (replyTo != null) requestsTable.put(msgId, replyTo);
+        // Forward the request to the right AdminTopic agent.
+        forward(AdminTopic.getDefault(destId.getTo()),
+                new FwdAdminRequestNot(request, replyTo, msgId));
       }
+    } else {
+      // Forward the request to the target.
+      forward(destId, new FwdAdminRequestNot(request, replyTo, msgId, createMessageId()));
+    }
   }
 
   /**
@@ -1404,7 +1268,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     // Be careful, this request must be sent to the AdminTopic of the server where
     // the destination is, because the information about users is handled locally.
     // It the reply is handled by this AdminTopic it is bad !!
-    // This issue should disapear with roles based security.
+    // This issue should disappear with roles based security.
    if (checkServerId(destId.getTo())) {
       // The destination is local, process the request.
       forward(destId, new GetRightsRequestNot(msgId));
@@ -1865,7 +1729,7 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
   private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
     // Saves DMQ defaults.
     out.writeObject(QueueImpl.defaultDMQId);
-    out.write(QueueImpl.defaultThreshold);
+    out.writeInt(QueueImpl.defaultThreshold);
 
     out.defaultWriteObject();
   }
