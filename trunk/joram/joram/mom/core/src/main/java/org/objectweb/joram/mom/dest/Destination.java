@@ -185,17 +185,8 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
     setNoSave();
     
     try {
-//      if (not instanceof SetRightRequest)
-//        destImpl.setRight(from, (SetRightRequest) not);
-//      else 
       if (not instanceof GetRightsRequestNot)
         destImpl.getRights(from, (GetRightsRequestNot) not);
-//      else if (not instanceof SetDMQRequest)
-//        destImpl.setDMQRequest(from, (SetDMQRequest) not);
-//      else if (not instanceof GetDMQSettingsRequestNot)
-//        destImpl.getDMQSettings(from, (GetDMQSettingsRequestNot) not);
-//      else if (not instanceof GetStatsNot)
-//        destImpl.monitGetStat(from, (GetStatsNot) not);
       else if (not instanceof SpecialAdminRequest)
         destImpl.specialAdminRequest(from, (SpecialAdminRequest) not);
       else if (not instanceof ClientMessages)

@@ -90,41 +90,18 @@ public class Topic extends Destination {
       logger.log(BasicLevel.DEBUG,
                  "--- " + this + ": got " + not.getClass().getName()+ " with id: " + reqId + " from: " + from.toString());
     try {
-//      if (not instanceof ClusterRequest)
-//        ((TopicImpl)destImpl).clusterRequest(from, (ClusterRequest) not);
-//      else
       if (not instanceof ClusterTest)
         ((TopicImpl)destImpl).clusterTest(from, (ClusterTest) not);
       else if (not instanceof ClusterAck)
         ((TopicImpl)destImpl).clusterAck(from, (ClusterAck) not);
       else if (not instanceof ClusterNot)
         ((TopicImpl)destImpl).clusterNot(from, (ClusterNot) not);
-//      else if (not instanceof UnclusterRequest)
-//        ((TopicImpl)destImpl).unclusterRequest(from, (UnclusterRequest) not);
-//      else if (not instanceof UnclusterNot)
-//        ((TopicImpl)destImpl).unclusterNot(from, (UnclusterNot) not);
-//      else if (not instanceof SetFatherRequest)
-//        ((TopicImpl)destImpl).setFatherRequest(from, (SetFatherRequest) not);
-//      else if (not instanceof FatherTest)
-//        ((TopicImpl)destImpl).fatherTest(from, (FatherTest) not);
-//      else if (not instanceof FatherAck)
-//        ((TopicImpl)destImpl).fatherAck(from, (FatherAck) not);
-//      else if (not instanceof UnsetFatherRequest)
-//        ((TopicImpl)destImpl).unsetFatherRequest(from, (UnsetFatherRequest) not);
-//      else if (not instanceof GetSubscriptionsNot)
-//        ((TopicImpl)destImpl).monitGetSubscriptions(from, (GetSubscriptionsNot) not);
-//      else if (not instanceof GetFatherRequestNot)
-//        ((TopicImpl)destImpl).monitGetFather(from, (GetFatherRequestNot) not);
-//      else if (not instanceof GetClusterRequestNot)
-//        ((TopicImpl)destImpl).monitGetCluster(from, (GetClusterRequestNot) not);
       else if (not instanceof SubscribeRequest)
         ((TopicImpl)destImpl).subscribeRequest(from, (SubscribeRequest) not);
       else if (not instanceof UnsubscribeRequest)
-        ((TopicImpl)destImpl).unsubscribeRequest(from, (UnsubscribeRequest) not);
+        ((TopicImpl)destImpl).unsubscribeRequest(from);
       else if (not instanceof TopicForwardNot)
-        ((TopicImpl)destImpl).topicForwardNot(from, (TopicForwardNot) not);
-//      else if (not instanceof DestinationAdminRequestNot)
-//        ((TopicImpl)destImpl).destinationAdminRequestNot(from, (DestinationAdminRequestNot) not);
+        ((TopicImpl)destImpl).topicForwardNot((TopicForwardNot) not);
       else
         super.react(from, not);
     } catch (MomException exc) {
