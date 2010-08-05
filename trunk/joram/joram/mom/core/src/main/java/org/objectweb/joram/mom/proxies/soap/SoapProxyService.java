@@ -95,9 +95,8 @@ public class SoapProxyService {
     Identity identity = (Identity) Identity.soapDecode(identityMap);
     
     GetProxyIdNot gpin = new GetProxyIdNot(identity, null);
-    AgentId proxyId;
     gpin.invoke(AdminTopic.getDefault());
-    proxyId = gpin.getProxyId();
+    AgentId proxyId = gpin.getProxyId();
     
     OpenConnectionNot ocn = new OpenConnectionNot(false, heartBeat);	
     ocn.invoke(proxyId);
