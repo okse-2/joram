@@ -39,7 +39,6 @@ import org.objectweb.joram.mom.notifications.FwdAdminRequestNot;
 import org.objectweb.joram.mom.notifications.SubscribeReply;
 import org.objectweb.joram.mom.notifications.SubscribeRequest;
 import org.objectweb.joram.mom.notifications.TopicMsgsReply;
-import org.objectweb.joram.mom.notifications.UnsubscribeRequest;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.shared.admin.AdminReply;
 import org.objectweb.joram.shared.admin.AdminRequest;
@@ -125,49 +124,6 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
   public void wakeUpNot(WakeUpNot not) {
     // nothing to do
   }
-  
-//  /**
-//   * Method implementing the reaction to a <code>ClusterRequest</code>
-//   * instance requesting to add a topic to the cluster, or to set a
-//   * cluster with a given topic.
-//   *
-//   * @exception AccessException  If the requester is not an administrator.
-//   */
-//  public void clusterRequest(AgentId from, ClusterRequest req) throws AccessException {
-//    if (! isAdministrator(from))
-//      throw new AccessException("ADMIN right not granted");
-//
-//    String info = null;
-//    if (fatherId != null) {
-//      info = strbuf.append("Request [").append(req.getClass().getName())
-//      .append("], sent to Topic [").append(getId())
-//      .append("], successful [false]: topic part of a hierarchy").toString();
-//      strbuf.setLength(0);
-//      forward(from, new AdminReplyNot(req, false, info));
-//      return;
-//    }
-//
-//    AgentId newFriendId = req.getTopicId();
-//
-//    if (friends == null) {
-//      // state change, so save.
-//      setSave();
-//      friends = new HashSet();
-//    }
-//
-//    if (getId().equals(newFriendId)) {
-//      info = strbuf.append("Request [").append(req.getClass().getName())
-//      .append("], sent to Topic [").append(getId())
-//      .append("], successful [false]: joining topic already")
-//      .append(" part of cluster").toString();
-//      strbuf.setLength(0);
-//      forward(from, new AdminReplyNot(req, false, info));
-//      return;
-//    }
-//
-//    ClusterTest not = new ClusterTest(req, from, friends);
-//    forward(newFriendId, not);
-//  }
 
   /**
    * Method implementing the reaction to a <code>ClusterTest</code>
@@ -277,237 +233,18 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     }
   }
 
-//  /**
-//   * Method implementing the reaction to an <code>UnclusterRequest</code>
-//   * instance requesting this topic to leave the cluster it is part of.
-//   *
-//   * @exception AccessException  If the requester is not an administrator.
-//   */
-//  public void unclusterRequest(AgentId from, UnclusterRequest request) throws MomException {
-//    if (! isAdministrator(from))
-//      throw new AccessException("ADMIN right not granted");
-//
-//    if (friends == null || friends.isEmpty()) {
-//      String info = strbuf.append("Request [")
-//      .append(request.getClass().getName())
-//      .append("], sent to Topic [").append(getId())
-//      .append("], successful [false]: topic not part of a cluster")
-//      .toString();
-//      strbuf.setLength(0);
-//      forward(from, new AdminReplyNot(request, false, info));
-//      return;
-//    }
-//
-//    UnclusterNot not = new UnclusterNot();
-//    // Notifying each fellow of the leave.
-//    Iterator iterator = friends.iterator();
-//    while (iterator.hasNext()) {
-//      forward((AgentId) iterator.next(), not);
-//    }
-//    friends = null;
-//    // state change, so save.
-//    setSave();
-//
-//    String info = strbuf.append("Request [")
-//    .append(request.getClass().getName())
-//    .append("], sent to Topic [").append(getId())
-//    .append("], successful [true]: topic left the cluster").toString();
-//    strbuf.setLength(0);
-//    forward(from, new AdminReplyNot(request, true, info));
-//
-//    if (logger.isLoggable(BasicLevel.DEBUG))
-//      logger.log(BasicLevel.DEBUG, info);
-//  }
-
-//  /**
-//   * Method implementing the reaction to an <code>UnclusterNot</code>
-//   * notification sent by a topic leaving the cluster.
-//   */
-//  public void unclusterNot(AgentId from, UnclusterNot not) {
-//    // state change, so save.
-//    setSave();
-//    friends.remove(from);
-//
-//    if (friends.isEmpty()) friends = null;
-//
-//    if (logger.isLoggable(BasicLevel.DEBUG))
-//      logger.log(BasicLevel.DEBUG,
-//                 "Topic "  + from.toString() + " removed from" + " cluster.");
-//  }
-
-//  /**
-//   * Method implementing the reaction to a <code>SetFatherRequest</code>
-//   * instance notifying this topic it is part of a hierarchy as a son.
-//   *
-//   * @exception AccessException  If the requester is not an administrator.
-//   */
-//  public void setFatherRequest(AgentId from, SetFatherRequest request) throws MomException {
-//    if (! isAdministrator(from))
-//      throw new AccessException("ADMIN right not granted");
-//
-//    if ((fatherId != null) && ! fatherId.equals(request.getFatherId())) {
-//      strbuf.append("Request [").append(request.getClass().getName())
-//      .append("], sent to Topic [").append(getId())
-//      .append("], successful [false]: topic already part of a hierarchy");
-//      forward(from, new AdminReplyNot(request, false, strbuf.toString()));
-//      strbuf.setLength(0);
-//      return;
-//    }
-//
-//    if (friends != null) {
-//      strbuf.append("Request [").append(request.getClass().getName())
-//      .append("], sent to Topic [").append(getId())
-//      .append("], successful [false]: topic already part of a cluster");
-//      forward(from, new AdminReplyNot(request, false, strbuf.toString()));
-//      strbuf.setLength(0);
-//      return;
-//    }
-//
-//    forward(request.getFatherId(), new FatherTest(request, from));
-//  }
-
-//  /**
-//   * Method reacting to a <code>FatherTest</code> notification checking if it
-//   * can be a father to a topic.
-//   */ 
-//  public void fatherTest(AgentId from, FatherTest not) {
-//    if (friends != null && ! friends.isEmpty()) {
-//      strbuf.append("Topic [").append(getId())
-//      .append("] can't accept topic [").append(from)
-//      .append("] as a son as it is part of a cluster");
-//      forward(from, new FatherAck(not, false, strbuf.toString()));
-//      strbuf.setLength(0);
-//    } else {
-//      strbuf.append("Topic [").append(getId())
-//      .append("] accepts topic [").append(from).append("] as a son");
-//      forward(from, new FatherAck(not, true, strbuf.toString()));
-//      strbuf.setLength(0);
-//    }
-//  }
-
-//  /**
-//   * Method reacting to a <code>FatherAck</code> notification coming from
-//   * the topic this topic requested as a father.
-//   */ 
-//  public void fatherAck(AgentId from, FatherAck not) {
-//    // The topic does not accept to join the hierarchy: doing nothing.
-//    if (! not.ok) {
-//      forward(not.requester, new AdminReplyNot(not.request, false, not.info));
-//      return;
-//    }
-//
-//    // state change, so save.
-//    setSave();
-//    // The topic accepts to be a father: setting it.
-//    fatherId = from;
-//
-//    String info = strbuf.append("Request [")
-//    .append(not.request.getClass().getName())
-//    .append("], sent to Topic [").append(getId())
-//    .append("], successful [true]: topic [")
-//    .append(from).append("] set as father").toString();
-//    strbuf.setLength(0);
-//    forward(not.requester, new AdminReplyNot(not.request, true, info));
-//
-//    if (logger.isLoggable(BasicLevel.DEBUG))
-//      logger.log(BasicLevel.DEBUG, info);
-//  }
-
-//  /**
-//   * Method implementing the reaction to an <code>UnsetFatherRequest</code>
-//   * instance notifying this topic to leave its father.
-//   *
-//   * @exception AccessException  If the requester is not an administrator.
-//   */
-//  public void unsetFatherRequest(AgentId from, UnsetFatherRequest request) throws MomException {
-//    if (! isAdministrator(from))
-//      throw new AccessException("ADMIN right not granted");
-//
-//    String info = null;
-//    if (fatherId == null) {
-//      info = strbuf.append("Request [").append(request.getClass().getName())
-//      .append("], sent to Topic [").append(getId())
-//      .append("], successful [false]: topic is not a son").toString();
-//      strbuf.setLength(0);
-//      forward(from, new AdminReplyNot(request, false, info));
-//      return;
-//    }
-//
-//    // state change, so save.
-//    setSave();
-//    fatherId = null;
-//
-//    info = strbuf.append("Request [").append(request.getClass().getName())
-//    .append("], sent to Topic [").append(getId())
-//    .append("], successful [true]: father unset").toString();
-//    strbuf.setLength(0);
-//    forward(from, new AdminReplyNot(request, true, info));
-//
-//    if (logger.isLoggable(BasicLevel.DEBUG))
-//      logger.log(BasicLevel.DEBUG, info);
-//  }
-
-//  /**
-//   * Method implementing the reaction to a
-//   * <code>Monit_GetSubscriptions</code> notification requesting the
-//   * number of subscriptions.
-//   *
-//   * @exception AccessException  If the requester is not the administrator.
-//   */
-//  public void GetSubscriptions(AgentId from, GetSubscriptionsNot not) throws AccessException {
-//    if (! isAdministrator(from))
-//      throw new AccessException("ADMIN right not granted");
-//
-//    forward(from, new GetNumberReplyNot(not, subscribers.size()));
-//  }
-
-//  /**
-//   * Method implementing the reaction to a <code>Monit_GetFather</code>
-//   * notification requesting the identifier of the hierarchical father.
-//   *
-//   * @exception AccessException  If the requester is not the administrator.
-//   */
-//  public void monitGetFather(AgentId from, GetFatherRequestNot not) throws AccessException {
-//    if (! isAdministrator(from))
-//      throw new AccessException("ADMIN right not granted");
-//
-//    String id = null;
-//    if (fatherId != null)
-//      id = fatherId.toString();
-//
-//    forward(from, new GetFatherReplyNot(not, id));
-//  }
-
-//  /**
-//   * Method implementing the reaction to a <code>Monit_GetCluster</code>
-//   * notification requesting the identifiers of the cluster's topics.
-//   *
-//   * @exception AccessException  If the requester is not the administrator.
-//   */
-//  public void monitGetCluster(AgentId from, GetClusterRequestNot not) throws AccessException {
-//    if (! isAdministrator(from))
-//      throw new AccessException("ADMIN right not granted");
-//
-//    Vector cluster = null;
-//    if (friends != null) {
-//      cluster = new Vector();
-//      Iterator iterator = friends.iterator();
-//      while (iterator.hasNext()) {
-//        cluster.add(iterator.next().toString());
-//      }
-//      cluster.add(getId().toString());
-//    }
-//
-//    forward(from, new GetClusterReplyNot(not, cluster));
-//  }
-
-  public void preSubscribe(SubscribeRequest not) {
-    // do nothing
-  }
-
-  public void postSubscribe(SubscribeRequest not) {
-    // do nothing
-  }
+  /**
+   * This method is currently needed by the JMSBridge.
+   * AF(TODO): Remove it.
+   * @deprecated
+   */
+  public void preSubscribe() {}
+  /**
+   * This method is currently needed by the JMSBridge.
+   * AF(TODO): Remove it.
+   * @deprecated
+   */
+  public void postSubscribe() {}
 
   /**
    * Method implementing the reaction to a <code>SubscribeRequest</code>
@@ -519,17 +256,14 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     if (! isReader(from))
       throw new AccessException("READ right not granted");
 
-    preSubscribe(not);
+    preSubscribe();
 
+    setSave(); // state change, so save.
+    
     // Adding new subscriber.
     if (! subscribers.contains(from)) {
-      // state change, so save.
-      setSave();
       subscribers.add(from);
     }
-
-    // state change, so save.
-    setSave();
 
     // The requester might either be a new subscriber, or an existing one;
     // setting the selector, possibly by removing or modifying an already set
@@ -542,39 +276,41 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     if (!not.isAsyncSub())
       forward(from, new SubscribeReply(not));
 
-    postSubscribe(not);
+    postSubscribe();
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
                  "Client " + from + " set as a subscriber with selector " + not.getSelector());
   }
 
-  public void preUnsubscribe(UnsubscribeRequest not) {
-    // do nothing
-  }
-
-  public void postUnsubscribe(UnsubscribeRequest not) {
-    // do nothing
-  }
+  /**
+   * This method is currently needed by the JMSBridge.
+   * AF(TODO): Remove it.
+   * @deprecated
+   */
+  public void preUnsubscribe() {}
+  /**
+   * This method is currently needed by the JMSBridge.
+   * AF(TODO): Remove it.
+   * @deprecated
+   */
+  public void postUnsubscribe() {}
 
   /**
    * Method implementing the reaction to an <code>UnsubscribeRequest</code>
    * instance, requesting to remove a subscriber.
    */
-  public void unsubscribeRequest(AgentId from, UnsubscribeRequest not) {
+  public void unsubscribeRequest(AgentId from) {
+    preUnsubscribe();
 
-    preUnsubscribe(not);
-
-    // state change, so save.
-    setSave();
+    setSave(); // state change, so save.
     subscribers.remove(from);
     selectors.remove(from);
 
-    postUnsubscribe(not);
+    postUnsubscribe();
 
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 "Client " + from + " removed from the subscribers.");
+      logger.log(BasicLevel.DEBUG,  "Client " + from + " removed from the subscribers.");
   } 
 
   /**
@@ -582,7 +318,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
    * instance, carrying messages forwarded by a cluster fellow or a
    * hierarchical son.
    */
-  public void topicForwardNot(AgentId from, TopicForwardNot not) { 
+  public void topicForwardNot(TopicForwardNot not) { 
     // If the forward comes from a son, forwarding it to the father, if any.
     if (not.toFather && fatherId != null) {
       forward(fatherId, not);
@@ -912,6 +648,7 @@ public class TopicImpl extends DestinationImpl implements TopicImplMBean {
     }
   }
 
+  // AF (TODO): This method seems to be useless, verify and delete it.
   public void setAlreadySentLocally(boolean alreadySentLocally) {
     this.alreadySentLocally = alreadySentLocally;
   }

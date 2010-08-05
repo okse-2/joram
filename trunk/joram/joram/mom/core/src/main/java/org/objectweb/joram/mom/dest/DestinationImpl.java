@@ -211,7 +211,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
   }
 
   /** Returns <code>true</code> if the destination might be deleted. */
-  public boolean canBeDeleted() {
+  public final boolean canBeDeleted() {
     return deletable;
   }
 
@@ -335,36 +335,6 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
         throw new RequestException("Invalid right value: " + right);
     }
   }
-    
-//  /**
-//   * Method implementing the reaction to a <code>SetDMQRequest</code>
-//   * notification setting the dead message queue identifier for this
-//   * destination.
-//   *
-//   * @exception AccessException  If the requester is not the administrator.
-//   */
-//  public void setDMQRequest(AgentId from, SetDMQRequest not) throws AccessException { XXX
-//    if (! isAdministrator(from))
-//      throw new AccessException("ADMIN right not granted");
-//
-//    // state change, so save.
-//    setSave();
-//
-//    dmqId = not.getDmqId();
-//    
-//    String info = strbuf.append("Request [")
-//      .append(not.getClass().getName())
-//      .append("], sent to Destination [")
-//      .append(getId())
-//      .append("], successful [true]: dmq [")
-//      .append(dmqId)
-//      .append("] set").toString();
-//    strbuf.setLength(0);
-//    forward(from, new AdminReplyNot(not, true, info));
-//    
-//    if (logger.isLoggable(BasicLevel.DEBUG))
-//      logger.log(BasicLevel.DEBUG, info);
-//  }
 
   /**
    * Method implementing the reaction to a <code>GetRightsRequest</code>
@@ -429,24 +399,6 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
 
     return userid + _rights[right.intValue() -1];
   }
-
-//   public void setRight(String userid, String right) {
-//     AgentId key = AgentId.fromString(userid);
-
-//     // To be continued
-//   }
-
-//  /**
-//   * Method implementing the reaction to a <code>Monit_GetStat</code>
-//   * notification requesting to get statistic of this destination.
-//   *
-//   * @exception AccessException  If the requester is not the administrator.
-//   */
-//  public final void monitGetStat(AgentId from, GetStatsNot not) throws AccessException {
-//    if (! isAdministrator(from))
-//      throw new AccessException("ADMIN right not granted");
-//    forward(from, new GetStatReplyNot(not, getJMXStatistics()));
-//  }
 
   /**
    * This method allows to exclude some JMX attribute of getJMXStatistics method.
@@ -594,7 +546,6 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    * <p>
    */
   public void specialAdminRequest(AgentId from, SpecialAdminRequest not) {
-    String info;
     Object obj = null;
 
     setSave(); // state change, so save.
@@ -606,26 +557,18 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
                      "Unauthorized SpecialAdminRequest request from " + from);
         throw new RequestException("ADMIN right not granted");
       }
+      
       obj = specialAdminProcess(not);
-      info = strbuf.append("Request [")
-        .append(not.getClass().getName())
-        .append("], sent to Destination [")
-        .append(getId())
-        .append("], successful [true] ").toString();
-      strbuf.setLength(0);
-      forward(from, new AdminReplyNot(not, true, info, obj)); 
+      strbuf.append("Request [").append(not.getClass().getName()).append("], sent to Destination [").append(getId()).append("], successful [true] ").toString();
+      forward(from, new AdminReplyNot(not, true, strbuf.toString(), obj)); 
     } catch (RequestException exc) {
-      info = strbuf.append("Request [")
-        .append(not.getClass().getName())
-        .append("], sent to Destination [")
-        .append(getId())
-        .append("], successful [false]: ")
-        .append(exc.getMessage()).toString();
+      strbuf.append("Request [").append(not.getClass().getName()).append("], sent to Destination [").append(getId()).append("], successful [false]: ").append(exc.getMessage());
+      forward(from, new AdminReplyNot(not, false, strbuf.toString(), obj));
+    } finally {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, strbuf.toString());
       strbuf.setLength(0);
-      forward(from, new AdminReplyNot(not, false, info, obj));
     }
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, info);
   }
   
   public void requestGroupNot(AgentId from, RequestGroupNot not) {
@@ -707,20 +650,32 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
   abstract protected void doUnknownAgent(UnknownAgent not);
   abstract protected void doDeleteNot(DeleteNot not);
   
-//  public SetRightRequest preProcess(SetRightRequest req) {
-//    // nothing to do
-//    return req;
-//  }
-//  
-//  public void postProcess(SetRightRequest req) {
-//    // nothing to do
-//  }
+  // AF (TODO): We have to define an interface that allow subclass to declare
+  // a processing through delegation.
   
+  /**
+   * This method is needed to add processing before the standard handling. It
+   * is used in subclass of <code>QueueImpl</code> and <code>TopicImpl</code>.
+   * The incoming messages can be modified or deleted during the processing.
+   * 
+   * @param from  The sender of the message
+   * @param msgs  The incoming messages.
+   * @return      The incoming messages after processing.
+   */
   public ClientMessages preProcess(AgentId from, ClientMessages msgs) {
     // nothing to do.
     return msgs;
   }
   
+  /**
+   * This method is needed to add processing after the standard handling. It
+   * is used in subclass of <code>QueueImpl</code> and <code>TopicImpl</code>.
+   * The incoming messages can be modified or deleted during the processing.
+   * 
+   * @param from  The sender of the message
+   * @param msgs  The incoming messages.
+   * @return      The incoming messages after processing.
+   */
   public void postProcess(ClientMessages msgs) {
     // nothing to do.
   }
