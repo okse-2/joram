@@ -79,8 +79,7 @@ public class HALocalRequestChannel implements RequestChannel {
         try {
           gpin.invoke(AdminTopic.getDefault());
           proxyIds = gpin.getIds();
-          ResetCollocatedConnectionsNot rccn = 
-            new ResetCollocatedConnectionsNot();
+          ResetCollocatedConnectionsNot rccn = new ResetCollocatedConnectionsNot();
           for (int i = 0; i < proxyIds.length; i++) {
             Channel.sendTo(proxyIds[i], rccn);
           }

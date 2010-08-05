@@ -171,8 +171,7 @@ public class JMSBridgeQueueImpl extends QueueImpl {
    *
    * @exception AccessException  If the sender is not a reader.
    */
-  public void receiveRequest(AgentId from, ReceiveRequest not)
-  throws AccessException {
+  public void receiveRequest(AgentId from, ReceiveRequest not) throws AccessException {
     // If client is not a reader, sending an exception.
     if (! isReader(from))
       throw new AccessException("READ right not granted");
