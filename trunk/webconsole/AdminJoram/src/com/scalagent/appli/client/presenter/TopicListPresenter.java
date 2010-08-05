@@ -96,16 +96,6 @@ UpdateCompleteHandler
 	}
 
 	/**
-	 * This method is called by the TopicListWidget when the user click on "browse" button of a topic.
-	 * An event is fired to the EventBus.
-	 */
-	public void fireQueueDetailsClick(TopicWTO topic) {
-		System.out.println("!!! TopicDetail : "+topic.getName());
-		// TODO : topic detail!
-
-	}
-
-	/**
 	 * This method is called by the TopicListWidget when the updating the chart.
 	 * @result A map containing the history of the current topic
 	 */
