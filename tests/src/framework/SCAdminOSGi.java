@@ -239,7 +239,7 @@ public class SCAdminOSGi implements SCAdminItf {
 
     private InputStreamReader reader;
 
-    protected TelnetReaderDaemon(InputStream stream) throws IOException {
+    protected TelnetReaderDaemon(InputStream stream) {
       super("TelnetReaderDaemon");
       this.reader = new InputStreamReader(stream);
     }
@@ -267,17 +267,15 @@ public class SCAdminOSGi implements SCAdminItf {
             return;
           }
           canStop = false;
-          if (character == -1) {
-            break;
-          } else {
-            if (character == '\n') {
-              if (logmon.isLoggable(BasicLevel.DEBUG)) {
-                logmon.log(BasicLevel.DEBUG, "TelnetReaderDaemon read: " + sb);
-              }
-              sb.setLength(0);
-            } else {
-              sb.append((char) character);
+          if (character == -1) break;
+          
+          if (character == '\n') {
+            if (logmon.isLoggable(BasicLevel.DEBUG)) {
+              logmon.log(BasicLevel.DEBUG, "TelnetReaderDaemon read: " + sb);
             }
+            sb.setLength(0);
+          } else {
+            sb.append((char) character);
           }
         }
       } finally {
