@@ -85,32 +85,18 @@ public class Queue extends Destination implements BagSerializer {
       logger.log(BasicLevel.DEBUG, "Queue.react(" + from + ',' + not + ')');
 
     try {     
-//      if (not instanceof SetThresholdRequestNot)
-//        ((QueueImpl)destImpl).setThresholdRequest(from, (SetThresholdRequestNot) not);
-//      else
-//      if (not instanceof SetNbMaxMsgRequest)
-//        ((QueueImpl)destImpl).setNbMaxMsgRequest(from, (SetNbMaxMsgRequest) not);
-//      else if (not instanceof GetPendingMessagesNot)
-//        ((QueueImpl)destImpl).getPendingMessages(from, (GetPendingMessagesNot) not);
-//      else if (not instanceof GetPendingRequestsNot)
-//        ((QueueImpl)destImpl).getPendingRequests(from, (GetPendingRequestsNot) not);
-//      else if (not instanceof GetNbMaxMsgRequestNot)
-//        ((QueueImpl)destImpl).getNbMaxMsg(from, (GetNbMaxMsgRequestNot) not);
-//    else
       if (not instanceof ReceiveRequest)
         ((QueueImpl)destImpl).receiveRequest(from, (ReceiveRequest) not);
       else if (not instanceof BrowseRequest)
         ((QueueImpl)destImpl).browseRequest(from, (BrowseRequest) not);
       else if (not instanceof AcknowledgeRequest)
-        ((QueueImpl)destImpl).acknowledgeRequest(from, (AcknowledgeRequest) not);
+        ((QueueImpl)destImpl).acknowledgeRequest((AcknowledgeRequest) not);
       else if (not instanceof DenyRequest)
         ((QueueImpl)destImpl).denyRequest(from, (DenyRequest) not);
       else if (not instanceof AbortReceiveRequest)
         ((QueueImpl)destImpl).abortReceiveRequest(from, (AbortReceiveRequest) not);
       else if (not instanceof ExpiredNot)
         ((QueueImpl) destImpl).handleExpiredNot(from, (ExpiredNot) not);
-//      else if (not instanceof FwdAdminRequestNot)
-//        ((QueueImpl)destImpl).handleAdminRequestNot(from, (FwdAdminRequestNot) not);
       else
         super.react(from, not);
 

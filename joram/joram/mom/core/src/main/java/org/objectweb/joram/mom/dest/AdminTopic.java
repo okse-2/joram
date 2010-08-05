@@ -39,7 +39,7 @@ import fr.dyade.aaa.agent.Notification;
 
 /**
  * An <code>AdminTopic</code> agent is a MOM administration service, which
- * behaviour is provided by an <code>AdminTopicImpl</code> instance.
+ * Behavior is provided by an <code>AdminTopicImpl</code> instance.
  *
  * @see AdminTopicImpl
  */
@@ -103,24 +103,40 @@ public class AdminTopic extends Topic {
    */
   public void react(AgentId from, Notification not) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "--- " + this
-                                   + ": got " + not
-                                   + " from: " + from.toString());
+      logger.log(BasicLevel.DEBUG,
+                 "--- " + this + ": got " + not + " from: " + from.toString());
 
     // state change, so save.
     setSave();
 
-    if (not instanceof AdminNotification)
+    if (not instanceof AdminNotification) {
+      // This notification is used at boot by an administrator proxy to declare
+      // its identification.
       ((AdminTopicImpl)destImpl).AdminNotification((AdminNotification) not);
-    else if (not instanceof FwdAdminRequestNot)
-      ((AdminTopicImpl)destImpl).AdminRequestNot(from, (FwdAdminRequestNot) not);
-    else if (not instanceof AdminReplyNot)
+    } else if (not instanceof FwdAdminRequestNot) {
+      // This notification contains forwarded administration request from remote
+      // AdminTopic. This code overloads the normal behavior in Destination.
+
+      // AF (TODO): May be we should verify that from is an AdminTopic but in the
+      // AgentServer sandbox only an AdminTopic can generate such a notification.
+      ((AdminTopicImpl)destImpl).processAdminRequests(((FwdAdminRequestNot) not).getReplyTo(),
+                                                      ((FwdAdminRequestNot) not).getRequestMsgId(),
+                                                      ((FwdAdminRequestNot) not).getRequest(),
+                                                      from);
+    } else if (not instanceof AdminReplyNot) {
+      // Now most of the replies are sent directly to the waiting destination. Only
+      // the GetRightsReplyNot requires a processing, in future it will be removed.
       ((AdminTopicImpl)destImpl).AdminReply((AdminReplyNot) not);
-    else if (not instanceof GetProxyIdNot)
+    } else if (not instanceof GetProxyIdNot) {
+      // This notification (SyncNotification) is used during connection to get the
+      // AgentId of the user's proxy.
       ((AdminTopicImpl)destImpl).GetProxyIdNot((GetProxyIdNot)not);
-    else if (not instanceof GetProxyIdListNot)
+    } else if (not instanceof GetProxyIdListNot) {
+      // This notification is needed by the HA mode.
+      // AF (TODO): remove it.
       ((AdminTopicImpl)destImpl).GetProxyIdListNot((GetProxyIdListNot)not);
-    else
+    } else {
       super.react(from, not);
+    }
   }
 }
