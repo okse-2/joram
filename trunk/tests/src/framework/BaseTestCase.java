@@ -332,7 +332,7 @@ public class BaseTestCase {
       boolean ok=true;
       for(int j=0; j< size && ok==true;j++)
 	  if(tab1[j]!=tab2[j]){
-	      failNotEquals(null,tab1[j],tab2[j]);
+	      failNotEquals(null, tab1[j], tab2[j]);
 	      ok=false;
 	  }
   } 
@@ -507,10 +507,9 @@ public class BaseTestCase {
           if (line1.equals(line2)) {
             h.put(new Long(l2), pfile);
             break;
-          } else {
-            l2 = pfile.longValue();
-            continue;
           }
+          l2 = pfile.longValue();
+          continue;
         }
       }
       return true;
@@ -835,13 +834,12 @@ public class BaseTestCase {
         copyDirectory(new File(srcPath, files[i]), new File(dstPath, files[i]));
       }
     } else {
-      if (!srcPath.exists()) {
+      if (!srcPath.exists())
         throw new IOException("Source path doesn't exists.");
-      } else {
-        if (srcPath.getName().endsWith(".lck")) {
-          return;
-        }
-        try {
+
+      if (srcPath.getName().endsWith(".lck")) return;
+
+      try {
         InputStream in = new FileInputStream(srcPath);
         OutputStream out = new FileOutputStream(dstPath);
 
@@ -853,9 +851,8 @@ public class BaseTestCase {
         }
         in.close();
         out.close();
-        } catch (IOException exc) {
-          throw new IOException(srcPath.toString() + ": " + exc.getMessage());
-        }
+      } catch (IOException exc) {
+        throw new IOException(srcPath.toString() + ": " + exc.getMessage());
       }
     }
   }
