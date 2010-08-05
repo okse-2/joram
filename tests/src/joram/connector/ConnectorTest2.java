@@ -48,7 +48,7 @@ public class ConnectorTest2 extends TestCase {
   public void run(){
     try{      
       JoramAdapter ja= new JoramAdapter() ;
-      ja.setCollocatedServer(true);
+      ja.setCollocatedServer(Boolean.TRUE);
       ja.start(new ResourceBootstrapContext(new JWorkManager(1, 5, 5000)));
       
       Thread.sleep(5000);
