@@ -1668,7 +1668,10 @@ public final class AgentServer {
       // Wait for the transaction manager stop
 
       Runtime.getRuntime().gc();
-      System.runFinalization();
+      
+      // AF: This call seems to cause deadlock with JOnAS and it is no longer needed so
+      // we will remove it.
+      // System.runFinalization();
 
       logmon.log(BasicLevel.WARN, getName() + ", stopped at " + new Date());
     } catch (Throwable t) {
