@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -112,22 +112,4 @@ public interface MessageConsumer {
    * 		otherwise.
    */
   boolean isRunning();
-  
-  /**
-   * Returns the load averages for the last minute.
-   * @return the load averages for the last minute.
-   */
-  public float getAverageLoad1();
-
-  /**
-   * Returns the load averages for the past 5 minutes.
-   * @return the load averages for the past 5 minutes.
-   */
-  public float getAverageLoad5();
-  
-  /**
-   * Returns the load averages for the past 15 minutes.
-   * @return the load averages for the past 15 minutes.
-   */
-  public float getAverageLoad15();
 }

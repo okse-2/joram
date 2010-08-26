@@ -1,7 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,12 +24,18 @@ package org.objectweb.joram.mom.dest;
 
 import java.util.Properties;
 
-import org.objectweb.joram.mom.notifications.AbstractRequestNot;
+import org.objectweb.joram.mom.notifications.AbstractRequest;
 import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.mom.notifications.DestinationAdminRequestNot;
 import org.objectweb.joram.mom.notifications.ExceptionReply;
-import org.objectweb.joram.mom.notifications.FwdAdminRequestNot;
-import org.objectweb.joram.mom.notifications.GetRightsRequestNot;
+import org.objectweb.joram.mom.notifications.Monit_FreeAccess;
+import org.objectweb.joram.mom.notifications.Monit_GetDMQSettings;
+import org.objectweb.joram.mom.notifications.Monit_GetReaders;
+import org.objectweb.joram.mom.notifications.Monit_GetStat;
+import org.objectweb.joram.mom.notifications.Monit_GetWriters;
 import org.objectweb.joram.mom.notifications.RequestGroupNot;
+import org.objectweb.joram.mom.notifications.SetDMQRequest;
+import org.objectweb.joram.mom.notifications.SetRightRequest;
 import org.objectweb.joram.mom.notifications.SpecialAdminRequest;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.shared.excepts.MomException;
@@ -67,14 +72,6 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
    */
   protected DestinationImpl destImpl;
 
-  public void setFreeReading(boolean freeReading) {
-    destImpl.freeReading = freeReading;
-  }
-  
-  public void setFreeWriting(boolean freeWriting) {
-    destImpl.freeWriting = freeWriting;
-  }
-  
   protected transient WakeUpTask task;
   
   /**
@@ -185,8 +182,20 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
     setNoSave();
     
     try {
-      if (not instanceof GetRightsRequestNot)
-        destImpl.getRights(from, (GetRightsRequestNot) not);
+      if (not instanceof SetRightRequest)
+        destImpl.setRightRequest(from, (SetRightRequest) not);
+      else if (not instanceof SetDMQRequest)
+        destImpl.setDMQRequest(from, (SetDMQRequest) not);
+      else if (not instanceof Monit_GetReaders)
+        destImpl.monitGetReaders(from, (Monit_GetReaders) not);
+      else if (not instanceof Monit_GetWriters)
+        destImpl.monitGetWriters(from, (Monit_GetWriters) not);
+      else if (not instanceof Monit_FreeAccess)
+        destImpl.monitFreeAccess(from, (Monit_FreeAccess) not);
+      else if (not instanceof Monit_GetDMQSettings)
+        destImpl.monitGetDMQSettings(from, (Monit_GetDMQSettings) not);
+      else if (not instanceof Monit_GetStat)
+        destImpl.monitGetStat(from, (Monit_GetStat) not);
       else if (not instanceof SpecialAdminRequest)
         destImpl.specialAdminRequest(from, (SpecialAdminRequest) not);
       else if (not instanceof ClientMessages)
@@ -211,8 +220,8 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
         if (destImpl.getPeriod() > 0) {
           destImpl.wakeUpNot((WakeUpNot) not);
         }
-      } else if (not instanceof FwdAdminRequestNot)
-        destImpl.handleAdminRequestNot(from, (FwdAdminRequestNot) not);
+      } else if (not instanceof DestinationAdminRequestNot)
+        destImpl.destinationAdminRequestNot(from, (DestinationAdminRequestNot) not);
       else
         throw new UnknownNotificationException(not.getClass().getName());
     } catch (MomException exc) {
@@ -220,7 +229,7 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
       if (logger.isLoggable(BasicLevel.WARN))
         logger.log(BasicLevel.WARN, this + ".react()", exc);
 
-      AbstractRequestNot req = (AbstractRequestNot) not;
+      AbstractRequest req = (AbstractRequest) not;
       Channel.sendTo(from, new ExceptionReply(req, exc));
     } catch (UnknownNotificationException exc) {
       super.react(from, not);

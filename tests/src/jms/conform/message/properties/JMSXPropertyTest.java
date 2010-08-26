@@ -39,7 +39,7 @@ import jms.framework.TestConfig;
 
 /**
  * Test the JMSX defined properties. <br />
- * See JMS Specification, 3.5.9 JMS Defined Properties
+ * See JMS Specification, §3.5.9 JMS Defined Properties
  */
 public class JMSXPropertyTest extends PTPTestCase {
 

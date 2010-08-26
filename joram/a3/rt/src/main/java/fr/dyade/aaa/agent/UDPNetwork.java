@@ -77,9 +77,9 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
     if ((netServerIn != null) && netServerIn.isRunning() && (netServerOut != null)
         && netServerOut.isRunning() && watchDog != null && watchDog.isRunning()) {
       return true;
+    } else {
+      return false;
     }
-    
-    return false;
   }
 
   public void init(String name, int port, short[] servers) throws Exception {

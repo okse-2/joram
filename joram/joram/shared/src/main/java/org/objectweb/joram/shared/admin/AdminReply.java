@@ -49,12 +49,6 @@ public class AdminReply extends AbstractAdminMessage {
 
   public final static int PERMISSION_DENIED = 4;
   
-  public final static int UNKNOWN_REQUEST = 5;
-  
-  public final static int NAME_UNKNOWN = 6;
-  
-  public final static int BAD_CLUSTER_REQUEST = 7;
-  
   /** <code>true</code> if this reply replies to a successful request. */
   private boolean success = false;
 
@@ -74,8 +68,9 @@ public class AdminReply extends AbstractAdminMessage {
    *          request.
    * @param info  Information to carry.
    */
-  public AdminReply(boolean success, String info) {
-    this(success, info, null);
+  public AdminReply(boolean success, 
+                    String info) {
+    this(success, -1, info, null);
   }
 
   /**
@@ -86,14 +81,14 @@ public class AdminReply extends AbstractAdminMessage {
    * @param info  Information to carry.
    * @param replyObj Object to carry.
    */
-  public AdminReply(boolean success,  String info, Object replyObj) {
-    this.success = success;
-    this.info = info;
-    this.replyObj = replyObj;
+  public AdminReply(boolean success, 
+                    String info,
+                    Object replyObj) {
+    this(success, -1, info, replyObj);
   }
 
   /**
-   * Constructs an <code>AdminReply</code> instance for simple error cases.
+   * Constructs an <code>AdminReply</code> instance.
    *
    * @param success  <code>true</code> if this reply replies to a successful
    *          request.
@@ -101,11 +96,14 @@ public class AdminReply extends AbstractAdminMessage {
    * @param info  Information to carry.
    * @param replyObj Object to carry.
    */
-  public AdminReply(int errorCode, String info) {
-    this.success = false;
+  public AdminReply(boolean success, 
+                    int errorCode,
+                    String info,
+                    Object replyObj) {
+    this.success = success;
     this.errorCode = errorCode;
     this.info = info;
-    this.replyObj = null;
+    this.replyObj = replyObj;
   }
 
   public AdminReply() { }
@@ -161,4 +159,5 @@ public class AdminReply extends AbstractAdminMessage {
     replyObj = StreamUtil.readObjectFrom(is);
     errorCode = StreamUtil.readIntFrom(is);
   }
+
 }

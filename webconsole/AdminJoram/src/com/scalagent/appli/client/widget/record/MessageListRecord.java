@@ -1,5 +1,6 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
+ * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.widget.record;
@@ -9,9 +10,7 @@ import java.util.Map;
 import com.scalagent.appli.shared.MessageWTO;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
 
-/**
- * @author Yohann CINTRE
- */
+
 @SuppressWarnings("unchecked")
 public class MessageListRecord extends ListGridRecord {
 

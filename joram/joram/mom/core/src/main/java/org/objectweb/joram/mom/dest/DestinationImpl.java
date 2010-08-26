@@ -35,28 +35,27 @@ import java.util.Vector;
 import javax.management.MBeanAttributeInfo;
 import javax.management.ObjectName;
 
-import org.objectweb.joram.mom.notifications.AdminReplyNot;
+import org.objectweb.joram.mom.notifications.AdminReply;
 import org.objectweb.joram.mom.notifications.ClientMessages;
-import org.objectweb.joram.mom.notifications.FwdAdminRequestNot;
-import org.objectweb.joram.mom.notifications.GetRightsReplyNot;
-import org.objectweb.joram.mom.notifications.GetRightsRequestNot;
+import org.objectweb.joram.mom.notifications.DestinationAdminRequestNot;
+import org.objectweb.joram.mom.notifications.Monit_FreeAccess;
+import org.objectweb.joram.mom.notifications.Monit_FreeAccessRep;
+import org.objectweb.joram.mom.notifications.Monit_GetDMQSettings;
+import org.objectweb.joram.mom.notifications.Monit_GetDMQSettingsRep;
+import org.objectweb.joram.mom.notifications.Monit_GetReaders;
+import org.objectweb.joram.mom.notifications.Monit_GetStat;
+import org.objectweb.joram.mom.notifications.Monit_GetStatRep;
+import org.objectweb.joram.mom.notifications.Monit_GetUsersRep;
+import org.objectweb.joram.mom.notifications.Monit_GetWriters;
 import org.objectweb.joram.mom.notifications.RequestGroupNot;
+import org.objectweb.joram.mom.notifications.SetDMQRequest;
+import org.objectweb.joram.mom.notifications.SetRightRequest;
 import org.objectweb.joram.mom.notifications.SpecialAdminRequest;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.mom.proxies.SendRepliesNot;
 import org.objectweb.joram.mom.proxies.SendReplyNot;
 import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.MessageErrorConstants;
-import org.objectweb.joram.shared.admin.AdminReply;
-import org.objectweb.joram.shared.admin.AdminRequest;
-import org.objectweb.joram.shared.admin.GetStatsReply;
-import org.objectweb.joram.shared.admin.GetStatsRequest;
-import org.objectweb.joram.shared.admin.SetDMQRequest;
-import org.objectweb.joram.shared.admin.SetReader;
-import org.objectweb.joram.shared.admin.SetRight;
-import org.objectweb.joram.shared.admin.SetWriter;
-import org.objectweb.joram.shared.admin.UnsetReader;
-import org.objectweb.joram.shared.admin.UnsetWriter;
 import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.joram.shared.excepts.MessageValueException;
 import org.objectweb.joram.shared.excepts.RequestException;
@@ -93,10 +92,8 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
   
   /**
    * Identifier of the destination's administrator.
-   * In any case the administration topics are authorized to handle the
+   * In any case the local administration topic is authorized to handle the
    * destination, this mechanism allows an other agent to get the same rights.
-   * In particular it is needed to allow user's proxy to handle temporary
-   * destinations.
    */
   private AgentId adminId;
 
@@ -211,7 +208,7 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
   }
 
   /** Returns <code>true</code> if the destination might be deleted. */
-  public final boolean canBeDeleted() {
+  public boolean canBeDeleted() {
     return deletable;
   }
 
@@ -246,49 +243,42 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    * Method implementing the reaction to a <code>SetRightRequest</code>
    * notification requesting rights to be set for a user.
    *
-   * @param not The notification describing the security modifications.
+   * @exception AccessException  If the requester is not the administrator.
    */
-  public void setRight(SetRight request,
-                       AgentId replyTo,
-                       String requestMsgId,
-                       String replyMsgId) {
-    AgentId user = null;
-    if (request.getUserProxId() != null)
-      user = AgentId.fromString(request.getUserProxId());
+  public void setRightRequest(AgentId from, SetRightRequest not) throws AccessException {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
 
-    int right = 0;
-    if (request instanceof SetReader)
-      right = READ;
-    else if (request instanceof SetWriter)
-      right = WRITE;
-    else if (request instanceof UnsetReader)
-      right = - READ;
-    else if (request instanceof UnsetWriter)
-      right = - WRITE;
+    AgentId user = not.getClient();
+    int right = not.getRight();
+    String info;
 
     try {
-      processSetRight(user, right);
-      doRightRequest(user, right);
-
-      replyToTopic(new AdminReply(true, null), replyTo, requestMsgId, replyMsgId);
-    } catch (RequestException exc) {
-      strbuf.append("Request [").append(request.getClass().getName());
-      strbuf.append("], sent to Destination [").append(getId());
-      strbuf.append("], successful [false]: ").append(exc.getMessage());
-      replyToTopic(new AdminReply(false, strbuf.toString()), replyTo, requestMsgId, replyMsgId);
-      logger.log(BasicLevel.ERROR, strbuf.toString());
+      processSetRight(user,right);
+      doRightRequest(not);
+      info = strbuf.append("Request [")
+        .append(not.getClass().getName())
+        .append("], sent to Destination [")
+        .append(getId())
+        .append("], successful [true]: user [")
+        .append(user)
+        .append("] set with right [" + right +"]").toString();
       strbuf.setLength(0);
+      forward(from, new AdminReply(not, true, info)); 
+    } catch (RequestException exc) {
+      info = strbuf.append("Request [")
+        .append(not.getClass().getName())
+        .append("], sent to Destination [")
+        .append(getId())
+        .append("], successful [false]: ")
+        .append(exc.getMessage()).toString();
+      strbuf.setLength(0);
+      forward(from, new AdminReply(not, false, info));
     }
+
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, info);
   }
- 
-  /**
-   * This method is needed for right revocation.
-   * It allows to remove request or subscription from users no longer authorized.
-   * 
-   * @param user  The user about right modification.
-   * @param right The right modification.
-   */
-  abstract protected void doRightRequest(AgentId user, int right);
 
   /** set user right. */
   protected void processSetRight(AgentId user, int right) 
@@ -335,31 +325,82 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
         throw new RequestException("Invalid right value: " + right);
     }
   }
-
+    
   /**
-   * Method implementing the reaction to a <code>GetRightsRequest</code>
-   * notification requesting the rights about this destination.
+   * Method implementing the reaction to a <code>SetDMQRequest</code>
+   * notification setting the dead message queue identifier for this
+   * destination.
    *
    * @exception AccessException  If the requester is not the administrator.
    */
-  public void getRights(AgentId from, GetRightsRequestNot not) throws AccessException {
+  public void setDMQRequest(AgentId from, SetDMQRequest not) throws AccessException {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    // state change, so save.
+    setSave();
+
+    dmqId = not.getDmqId();
+    
+    String info = strbuf.append("Request [")
+      .append(not.getClass().getName())
+      .append("], sent to Destination [")
+      .append(getId())
+      .append("], successful [true]: dmq [")
+      .append(dmqId)
+      .append("] set").toString();
+    strbuf.setLength(0);
+    forward(from, new AdminReply(not, true, info));
+    
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, info);
+  }
+
+  /**
+   * Method implementing the reaction to a <code>Monit_GetReaders</code>
+   * notification requesting the identifiers of the destination's readers.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  public void monitGetReaders(AgentId from, Monit_GetReaders not) throws AccessException {
     if (! isAdministrator(from))
       throw new AccessException("ADMIN right not granted");
 
     AgentId key;
     int right;
     Vector readers = new Vector();
+    for (Enumeration keys = clients.keys(); keys.hasMoreElements();) {
+      key = (AgentId) keys.nextElement();
+      right = ((Integer) clients.get(key)).intValue();
+
+      if (right == READ || right == READWRITE)
+        readers.add(key);
+    }
+    forward(from, new Monit_GetUsersRep(not, readers));
+  }
+
+  /**
+   * Method implementing the reaction to a <code>Monit_GetWriters</code>
+   * notification requesting the identifiers of the destination's writers.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  public void monitGetWriters(AgentId from, Monit_GetWriters not) throws AccessException {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    AgentId key;
+    int right;
     Vector writers = new Vector();
     for (Enumeration keys = clients.keys(); keys.hasMoreElements();) {
       key = (AgentId) keys.nextElement();
       right = ((Integer) clients.get(key)).intValue();
 
-      if (right == READ || right == READWRITE) readers.add(key);
-      if (right == WRITE || right == READWRITE) writers.add(key);
+      if (right == WRITE || right == READWRITE)
+        writers.add(key);
     }
-    forward(from, new GetRightsReplyNot(not, freeReading, freeWriting, readers, writers));
+    forward(from, new Monit_GetUsersRep(not, writers));
   }
-
 
   public static String[] _rights = {":R;", ";W;", ":RW;"};
 
@@ -398,6 +439,54 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     if (right == null) return userid + ":unknown;";
 
     return userid + _rights[right.intValue() -1];
+  }
+
+//   public void setRight(String userid, String right) {
+//     AgentId key = AgentId.fromString(userid);
+
+//     // To be continued
+//   }
+
+  /**
+   * Method implementing the reaction to a <code>Monit_FreeAccess</code>
+   * notification requesting the free access status of this destination.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  public void monitFreeAccess(AgentId from, Monit_FreeAccess not) throws AccessException {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    forward(from, new Monit_FreeAccessRep(not, freeReading, freeWriting));
+  }
+
+  /**
+   * Method implementing the reaction to a <code>Monit_GetDMQSettings</code>
+   * notification requesting the destination's DMQ settings.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  public void monitGetDMQSettings(AgentId from, Monit_GetDMQSettings not) throws AccessException {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    String id = null;
+    if (dmqId != null)
+      id = dmqId.toString();
+
+    forward(from, new Monit_GetDMQSettingsRep(not, id, null));
+  }
+
+  /**
+   * Method implementing the reaction to a <code>Monit_GetStat</code>
+   * notification requesting to get statistic of this destination.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  public final void monitGetStat(AgentId from, Monit_GetStat not) throws AccessException {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+    forward(from, new Monit_GetStatRep(not, getJMXStatistics()));
   }
 
   /**
@@ -535,7 +624,8 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
                    "Unauthorized deletion request from " + from);
     } else {
       doDeleteNot(not);
-      setSave(); // state change, so save.
+      // state change, so save.
+      setSave();
       deletable = true;
     }
   }
@@ -546,9 +636,11 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    * <p>
    */
   public void specialAdminRequest(AgentId from, SpecialAdminRequest not) {
+    String info;
     Object obj = null;
 
-    setSave(); // state change, so save.
+    // state change, so save.
+    setSave();
 
     try {
       if (!isAdministrator(from)) {
@@ -557,18 +649,26 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
                      "Unauthorized SpecialAdminRequest request from " + from);
         throw new RequestException("ADMIN right not granted");
       }
-      
       obj = specialAdminProcess(not);
-      strbuf.append("Request [").append(not.getClass().getName()).append("], sent to Destination [").append(getId()).append("], successful [true] ").toString();
-      forward(from, new AdminReplyNot(not, true, strbuf.toString(), obj)); 
-    } catch (RequestException exc) {
-      strbuf.append("Request [").append(not.getClass().getName()).append("], sent to Destination [").append(getId()).append("], successful [false]: ").append(exc.getMessage());
-      forward(from, new AdminReplyNot(not, false, strbuf.toString(), obj));
-    } finally {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, strbuf.toString());
+      info = strbuf.append("Request [")
+        .append(not.getClass().getName())
+        .append("], sent to Destination [")
+        .append(getId())
+        .append("], successful [true] ").toString();
       strbuf.setLength(0);
+      forward(from, new AdminReply(not, true, info, obj)); 
+    } catch (RequestException exc) {
+      info = strbuf.append("Request [")
+        .append(not.getClass().getName())
+        .append("], sent to Destination [")
+        .append(getId())
+        .append("], successful [false]: ")
+        .append(exc.getMessage()).toString();
+      strbuf.setLength(0);
+      forward(from, new AdminReply(not, false, info, obj));
     }
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, info);
   }
   
   public void requestGroupNot(AgentId from, RequestGroupNot not) {
@@ -601,7 +701,8 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     }
   }
   
-  protected Object specialAdminProcess(SpecialAdminRequest not) throws RequestException {
+  protected Object specialAdminProcess(SpecialAdminRequest not) 
+    throws RequestException {
     return null;
   }
 
@@ -615,10 +716,11 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       return true;
 
     Integer clientRight = (Integer) clients.get(client);
-    if (clientRight == null) return false;
-    
-    return ((clientRight.intValue() == READ) ||
-            (clientRight.intValue() == READWRITE));
+    if (clientRight == null)
+      return false;
+    else
+      return ((clientRight.intValue() == READ) ||
+              (clientRight.intValue() == READWRITE));
   }
 
   /**
@@ -631,10 +733,11 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
       return true;
 
     Integer clientRight = (Integer) clients.get(client);
-    if (clientRight == null) return false;
-    
-    return ((clientRight.intValue() == WRITE) ||
-            (clientRight.intValue() == READWRITE));
+    if (clientRight == null)
+      return false;
+    else
+      return ((clientRight.intValue() == WRITE) ||
+              (clientRight.intValue() == READWRITE));
   }
 
   /**
@@ -643,39 +746,28 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
    * @param client  AgentId of the client requesting an admin permission.
    */
   protected boolean isAdministrator(AgentId client) {
-    return AdminTopic.isAdminTopicId(client) || client.equals(adminId);
+    return client.equals(adminId) || client.equals(AdminTopic.getDefault());
   }
 
+  abstract protected void doRightRequest(SetRightRequest not);
   abstract protected void doClientMessages(AgentId from, ClientMessages not);
   abstract protected void doUnknownAgent(UnknownAgent not);
   abstract protected void doDeleteNot(DeleteNot not);
   
-  // AF (TODO): We have to define an interface that allow subclass to declare
-  // a processing through delegation.
+  public SetRightRequest preProcess(SetRightRequest req) {
+    // nothing to do
+    return req;
+  }
   
-  /**
-   * This method is needed to add processing before the standard handling. It
-   * is used in subclass of <code>QueueImpl</code> and <code>TopicImpl</code>.
-   * The incoming messages can be modified or deleted during the processing.
-   * 
-   * @param from  The sender of the message
-   * @param msgs  The incoming messages.
-   * @return      The incoming messages after processing.
-   */
+  public void postProcess(SetRightRequest req) {
+    // nothing to do
+  }
+  
   public ClientMessages preProcess(AgentId from, ClientMessages msgs) {
     // nothing to do.
     return msgs;
   }
   
-  /**
-   * This method is needed to add processing after the standard handling. It
-   * is used in subclass of <code>QueueImpl</code> and <code>TopicImpl</code>.
-   * The incoming messages can be modified or deleted during the processing.
-   * 
-   * @param from  The sender of the message
-   * @param msgs  The incoming messages.
-   * @return      The incoming messages after processing.
-   */
   public void postProcess(ClientMessages msgs) {
     // nothing to do.
   }
@@ -828,14 +920,14 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     return nbMsgsSentToDMQSinceCreation;
   }
 
-  protected void replyToTopic(AdminReply reply,
+  protected void replyToTopic(org.objectweb.joram.shared.admin.AdminReply reply,
                               AgentId replyTo,
                               String requestMsgId,
                               String replyMsgId) {
     Message message = new Message();
     message.correlationId = requestMsgId;
     message.timestamp = System.currentTimeMillis();
-    message.setDestination(replyTo.toString(), Message.TOPIC_TYPE);
+    message.setDestination(replyTo.toString(), message.TOPIC_TYPE);
     message.id = replyMsgId;
     try {
       message.setAdminMessage(reply);
@@ -852,39 +944,6 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
     Channel.sendTo(to, not);
   }
   
-  /**
-   * 
-   * @param from
-   * @param not
-   */
-  public void handleAdminRequestNot(AgentId from, FwdAdminRequestNot not) {
-    AdminRequest adminRequest = not.getRequest();
-
-    if (adminRequest instanceof SetRight) {
-      setRight((SetRight) adminRequest,
-               not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
-    } else if (adminRequest instanceof GetStatsRequest) {
-      replyToTopic(new GetStatsReply(getJMXStatistics()),
-                   not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
-    } else if (adminRequest instanceof SetDMQRequest) {
-      // state change, so save.
-      setSave();
-
-      if (((SetDMQRequest)adminRequest).getDmqId() != null)
-        dmqId = AgentId.fromString(((SetDMQRequest)adminRequest).getDmqId());
-      else
-        dmqId = null;
-
-      replyToTopic(new AdminReply(true, null),
-                   not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
-    } else {
-      logger.log(BasicLevel.ERROR,
-                 "Unknown administration request for destination " + agent.getId());
-      replyToTopic(new AdminReply(AdminReply.UNKNOWN_REQUEST, null),
-                   not.getReplyTo(),
-                   not.getRequestMsgId(),
-                   not.getReplyMsgId());
-      
-    }
-  }
+  public abstract void destinationAdminRequestNot(AgentId from, DestinationAdminRequestNot not);
+  
 }

@@ -1,8 +1,10 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
+ * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.widget;
+
 
 import com.scalagent.appli.client.Application;
 import com.google.gwt.user.client.ui.Widget;
@@ -17,14 +19,13 @@ import com.smartgwt.client.widgets.form.fields.PasswordItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.layout.HLayout;
 
-/**
- * @author Yohann CINTRE
- */
 public class LoginWidget extends BaseWidget<LoginPresenter> {
+
 
 	public LoginWidget(LoginPresenter loginPresenter) {
 		super(loginPresenter);
 	}
+
 
 	@Override
 	public Widget asWidget() {

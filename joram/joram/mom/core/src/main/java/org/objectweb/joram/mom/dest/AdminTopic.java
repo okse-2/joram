@@ -25,10 +25,13 @@ package org.objectweb.joram.mom.dest;
 
 import java.util.Properties;
 
-import org.objectweb.joram.mom.notifications.AdminReplyNot;
-import org.objectweb.joram.mom.notifications.FwdAdminRequestNot;
+import org.objectweb.joram.mom.dest.AdminTopicImpl.AdminRequestNot;
+import org.objectweb.joram.mom.notifications.AdminReply;
 import org.objectweb.joram.mom.notifications.GetProxyIdListNot;
 import org.objectweb.joram.mom.notifications.GetProxyIdNot;
+import org.objectweb.joram.mom.notifications.RegisterDestNot;
+import org.objectweb.joram.mom.notifications.RegisterTmpDestNot;
+import org.objectweb.joram.mom.notifications.RegisteredDestNot;
 import org.objectweb.joram.mom.proxies.AdminNotification;
 import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -39,7 +42,7 @@ import fr.dyade.aaa.agent.Notification;
 
 /**
  * An <code>AdminTopic</code> agent is a MOM administration service, which
- * Behavior is provided by an <code>AdminTopicImpl</code> instance.
+ * behaviour is provided by an <code>AdminTopicImpl</code> instance.
  *
  * @see AdminTopicImpl
  */
@@ -78,7 +81,7 @@ public class AdminTopic extends Topic {
    * Gets the identifier of the default administration topic on the
    * current server.
    */
-  public final static AgentId getDefault() {
+  public static AgentId getDefault() {
     if (adminId == null)
       adminId = new AgentId(AgentServer.getServerId(),
                             AgentServer.getServerId(),
@@ -87,56 +90,35 @@ public class AdminTopic extends Topic {
   }
   
   /**
-   * Returns true if the given AgentId is the unique identifier of an AdminTopic agent.
-   * 
-   * @param id  the AgentId to verify.
-   * @return    true if the given AgentId is the unique identifier of an AdminTopic agent.
-   */
-  public final static boolean isAdminTopicId(AgentId id) {
-    if (id == null) return false;
-    return id.getStamp() == AgentId.JoramAdminStamp;
-  }
-  
-  /**
    * Distributes the received notifications to the appropriate reactions.
    * @throws Exception 
    */
   public void react(AgentId from, Notification not) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "--- " + this + ": got " + not + " from: " + from.toString());
+      logger.log(BasicLevel.DEBUG, "--- " + this
+                                   + ": got " + not
+                                   + " from: " + from.toString());
 
     // state change, so save.
     setSave();
 
-    if (not instanceof AdminNotification) {
-      // This notification is used at boot by an administrator proxy to declare
-      // its identification.
-      ((AdminTopicImpl)destImpl).AdminNotification((AdminNotification) not);
-    } else if (not instanceof FwdAdminRequestNot) {
-      // This notification contains forwarded administration request from remote
-      // AdminTopic. This code overloads the normal behavior in Destination.
-
-      // AF (TODO): May be we should verify that from is an AdminTopic but in the
-      // AgentServer sandbox only an AdminTopic can generate such a notification.
-      ((AdminTopicImpl)destImpl).processAdminRequests(((FwdAdminRequestNot) not).getReplyTo(),
-                                                      ((FwdAdminRequestNot) not).getRequestMsgId(),
-                                                      ((FwdAdminRequestNot) not).getRequest(),
-                                                      from);
-    } else if (not instanceof AdminReplyNot) {
-      // Now most of the replies are sent directly to the waiting destination. Only
-      // the GetRightsReplyNot requires a processing, in future it will be removed.
-      ((AdminTopicImpl)destImpl).AdminReply((AdminReplyNot) not);
-    } else if (not instanceof GetProxyIdNot) {
-      // This notification (SyncNotification) is used during connection to get the
-      // AgentId of the user's proxy.
+    if (not instanceof AdminNotification)
+      ((AdminTopicImpl)destImpl).AdminNotification(from, (AdminNotification) not);
+    else if (not instanceof AdminRequestNot)
+      ((AdminTopicImpl)destImpl).AdminRequestNot(from, (AdminRequestNot) not);
+    else if (not instanceof org.objectweb.joram.mom.notifications.AdminReply)
+      ((AdminTopicImpl)destImpl).AdminReply(from, (AdminReply) not);
+    else if (not instanceof GetProxyIdNot)
       ((AdminTopicImpl)destImpl).GetProxyIdNot((GetProxyIdNot)not);
-    } else if (not instanceof GetProxyIdListNot) {
-      // This notification is needed by the HA mode.
-      // AF (TODO): remove it.
+    else if (not instanceof GetProxyIdListNot)
       ((AdminTopicImpl)destImpl).GetProxyIdListNot((GetProxyIdListNot)not);
-    } else {
+    else if (not instanceof RegisterTmpDestNot)
+      ((AdminTopicImpl)destImpl).RegisterTmpDestNot((RegisterTmpDestNot)not);
+    else if (not instanceof RegisterDestNot)
+      ((AdminTopicImpl)destImpl).RegisterDestNot((RegisterDestNot)not);
+    else if (not instanceof RegisteredDestNot)
+      ((AdminTopicImpl)destImpl).RegisteredDestNot(from, (RegisteredDestNot)not);
+    else
       super.react(from, not);
-    }
   }
 }

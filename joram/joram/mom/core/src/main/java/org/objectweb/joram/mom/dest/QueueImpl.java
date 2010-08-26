@@ -41,34 +41,35 @@ import org.objectweb.joram.mom.messages.Message;
 import org.objectweb.joram.mom.messages.MessageJMXWrapper;
 import org.objectweb.joram.mom.notifications.AbortReceiveRequest;
 import org.objectweb.joram.mom.notifications.AcknowledgeRequest;
+import org.objectweb.joram.mom.notifications.AdminReply;
 import org.objectweb.joram.mom.notifications.BrowseReply;
 import org.objectweb.joram.mom.notifications.BrowseRequest;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.DenyRequest;
+import org.objectweb.joram.mom.notifications.DestinationAdminRequestNot;
 import org.objectweb.joram.mom.notifications.ExceptionReply;
-import org.objectweb.joram.mom.notifications.FwdAdminRequestNot;
+import org.objectweb.joram.mom.notifications.Monit_GetDMQSettings;
+import org.objectweb.joram.mom.notifications.Monit_GetDMQSettingsRep;
+import org.objectweb.joram.mom.notifications.Monit_GetNbMaxMsg;
+import org.objectweb.joram.mom.notifications.Monit_GetNbMaxMsgRep;
+import org.objectweb.joram.mom.notifications.Monit_GetNumberRep;
+import org.objectweb.joram.mom.notifications.Monit_GetPendingMessages;
+import org.objectweb.joram.mom.notifications.Monit_GetPendingRequests;
 import org.objectweb.joram.mom.notifications.QueueMsgReply;
 import org.objectweb.joram.mom.notifications.ReceiveRequest;
+import org.objectweb.joram.mom.notifications.SetNbMaxMsgRequest;
+import org.objectweb.joram.mom.notifications.SetRightRequest;
+import org.objectweb.joram.mom.notifications.SetThreshRequest;
 import org.objectweb.joram.mom.notifications.TopicMsgsReply;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.MessageErrorConstants;
-import org.objectweb.joram.shared.admin.AdminReply;
-import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.admin.ClearQueue;
 import org.objectweb.joram.shared.admin.DeleteQueueMessage;
-import org.objectweb.joram.shared.admin.GetDMQSettingsReply;
-import org.objectweb.joram.shared.admin.GetDMQSettingsRequest;
-import org.objectweb.joram.shared.admin.GetNbMaxMsgRequest;
-import org.objectweb.joram.shared.admin.GetNumberReply;
-import org.objectweb.joram.shared.admin.GetPendingMessages;
-import org.objectweb.joram.shared.admin.GetPendingRequests;
 import org.objectweb.joram.shared.admin.GetQueueMessage;
 import org.objectweb.joram.shared.admin.GetQueueMessageIds;
 import org.objectweb.joram.shared.admin.GetQueueMessageIdsRep;
 import org.objectweb.joram.shared.admin.GetQueueMessageRep;
-import org.objectweb.joram.shared.admin.SetNbMaxMsgRequest;
-import org.objectweb.joram.shared.admin.SetThresholdRequest;
 import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.joram.shared.excepts.DestinationException;
 import org.objectweb.joram.shared.selectors.Selector;
@@ -97,12 +98,13 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
 
   /**
    * Threshold above which messages are considered as undeliverable because
-   * constantly denied; 0 stands for no threshold, -1 for value not set.
+   * constantly denied; 0 stands for no threshold, <code>null</code> for value
+   * not set.
    */
-  private int threshold = -1;
+  private Integer threshold = null;
 
   /** Static value holding the default threshold for a server. */
-  static int defaultThreshold = -1;
+  static Integer defaultThreshold = null;
 
   /**
    * Returns  the threshold value of this queue, -1 if not set.
@@ -110,7 +112,20 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    * @return the threshold value of this queue; -1 if not set.
    */
   public int getThreshold() {
-    return threshold;
+    if (threshold == null)
+      return -1;
+    else
+      return threshold.intValue();
+  }
+
+  /** Static method returning the default threshold. */
+  public static Integer getDefaultThreshold() {
+    return defaultThreshold;
+  }
+
+  /** Static method returning the default DMQ identifier. */
+  public static AgentId getDefaultDMQId() {
+    return defaultDMQId;
   }
 
   /**
@@ -119,17 +134,10 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    * @param threshold The threshold value to be set (-1 for unsetting previous value).
    */
   public void setThreshold(int threshold) {
-    this.threshold = threshold;
-  }
-
-  /** Static method returning the default threshold. */
-  public static int getDefaultThreshold() {
-    return defaultThreshold;
-  }
-
-  /** Static method returning the default DMQ identifier. */
-  public static AgentId getDefaultDMQId() {
-    return defaultDMQId;
+    if (threshold < 0)
+      this.threshold = null;
+    else
+      this.threshold = new Integer(threshold);
   }
 
   /** <code>true</code> if all the stored messages have the same priority. */
@@ -181,7 +189,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    *
    * @return The number of waiting requests.
    */
-  public final int getWaitingRequestCount() {
+  public int getWaitingRequestCount() {
     if (requests != null) { 
       cleanWaitingRequest(System.currentTimeMillis());
       return requests.size();
@@ -243,14 +251,14 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    *
    * @return The number of pending messages.
    */
-  public final int getPendingMessageCount() {
+  public int getPendingMessageCount() {
     if (messages != null) {
       return messages.size();
     }
     return 0;
   }
 
-  /** Table holding the delivered messages before acknowledgment. */
+  /** Table holding the delivered messages before acknowledgement. */
   protected transient Hashtable deliveredMsgs;
 
   /**
@@ -258,15 +266,11 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    *
    * @return The number of messages delivered.
    */
-  public final int getDeliveredMessageCount() {
+  public int getDeliveredMessageCount() {
     if (deliveredMsgs != null) {
       return deliveredMsgs.size();
     }
     return 0;
-  }
-
-  public final long getNbMsgsReceiveSinceCreation() {
-    return nbMsgsSentToDMQSinceCreation + nbMsgsDeliverSinceCreation + getPendingMessageCount();
   }
 
   /** nb Max of Message store in queue (-1 no limit). */
@@ -279,7 +283,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    * @return the maximum number of message for subscription if set;
    *	     -1 otherwise.
    */
-  public final int getNbMaxMsg() {
+  public int getNbMaxMsg() {
     return nbMaxMsg;
   }
 
@@ -370,6 +374,119 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     // If needed, sending the dead messages to the DMQ:
     if (dmqManager != null)
       dmqManager.sendToDMQ();
+  }
+
+  /**
+   * Method implementing the reaction to a <code>SetThreshRequest</code>
+   * instance setting the threshold value for this queue.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  public void setThreshRequest(AgentId from, SetThreshRequest req) throws AccessException {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    // state change, so save.
+    setSave();
+
+    threshold = req.getThreshold();
+
+    strbuf.append("Request [").append(req.getClass().getName()).append("], sent to Queue [").append(getId());
+    strbuf.append("], successful [true]: threshold [").append(threshold).append("] set");
+    String info = strbuf.toString();
+    strbuf.setLength(0);
+    
+    forward(from, new AdminReply(req, true, info));
+
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, info);
+  }
+
+  /**
+   * Method implementing the reaction to a <code>SetNbMaxMsgRequest</code>
+   * instance setting the NbMaxMsg value for this queue.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  public void setNbMaxMsgRequest(AgentId from, SetNbMaxMsgRequest req) throws AccessException {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    nbMaxMsg = req.getNbMaxMsg();
+
+    strbuf.append("Request [").append(req.getClass().getName()).append("], sent to Queue [").append(getId());
+    strbuf.append("], successful [true]: nbMaxMsg [").append(nbMaxMsg).append("] set").toString();
+    String info = strbuf.toString();
+    strbuf.setLength(0);
+    
+    forward(from, new AdminReply(req, true, info));
+
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, info);
+  }
+
+  /**
+   * Overrides this <code>DestinationImpl</code> method for sending back
+   * the threshold along with the DMQ id.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  public void monitGetDMQSettings(AgentId from, Monit_GetDMQSettings not) throws AccessException {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    String id = null;
+    if (dmqId != null)
+      id = dmqId.toString();
+    forward(from, new Monit_GetDMQSettingsRep(not, id, threshold));
+  }
+
+  /**
+   * Method implementing the reaction to a
+   * <code>Monit_GetPendingMessages</code> notification requesting the
+   * number of pending messages.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  public void monitGetPendingMessages(AgentId from, Monit_GetPendingMessages not) throws AccessException {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    // Cleaning the possibly expired messages.
+    DMQManager dmqManager = cleanPendingMessage(System.currentTimeMillis());
+    // Sending the dead messages to the DMQ, if needed:
+    if (dmqManager != null)
+      dmqManager.sendToDMQ();
+
+    forward(from, new Monit_GetNumberRep(not, messages.size()));
+  }
+
+  /**
+   * Method implementing the reaction to a
+   * <code>Monit_GetPendingRequests</code> notification requesting the
+   * number of pending requests.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  public void monitGetPendingRequests(AgentId from, Monit_GetPendingRequests not) throws AccessException {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+
+    forward(from, new Monit_GetNumberRep(not, getWaitingRequestCount()));
+  }
+
+  /**
+   * Method implementing the reaction to a
+   * <code>Monit_GetNbMaxMsg</code> notification requesting the
+   * number max of messages in this queue.
+   *
+   * @exception AccessException  If the requester is not the administrator.
+   */
+  public void monitGetNbMaxMsg(AgentId from, Monit_GetNbMaxMsg not) throws AccessException {
+    if (! isAdministrator(from))
+      throw new AccessException("ADMIN right not granted");
+    
+    forward(from, new Monit_GetNbMaxMsgRep(not,nbMaxMsg));
   }
 
   /**
@@ -482,7 +599,7 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    * Method implementing the reaction to an <code>AcknowledgeRequest</code>
    * instance, requesting messages to be acknowledged.
    */
-  public void acknowledgeRequest(AcknowledgeRequest not) {
+  public void acknowledgeRequest(AgentId from, AcknowledgeRequest not) {
     for (Enumeration ids = not.getIds(); ids.hasMoreElements();) {
       String msgId = (String) ids.nextElement();
       acknowledge(msgId);
@@ -641,14 +758,12 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     }
   }
 
-  /**
-   * @see org.objectweb.joram.mom.dest.DestinationImpl#handleAdminRequestNot(fr.dyade.aaa.agent.AgentId, org.objectweb.joram.mom.notifications.FwdAdminRequestNot)
-   */
-  public void handleAdminRequestNot(AgentId from, FwdAdminRequestNot not) {
-    AdminRequest adminRequest = not.getRequest();
-    
+  public void destinationAdminRequestNot(AgentId from, DestinationAdminRequestNot not) {
+    org.objectweb.joram.shared.admin.AdminRequest adminRequest = 
+      not.getRequest();
     if (adminRequest instanceof GetQueueMessageIds) {
-      getQueueMessageIds(not.getReplyTo(),
+      getQueueMessageIds((GetQueueMessageIds)adminRequest,
+                         not.getReplyTo(),
                          not.getRequestMsgId(),
                          not.getReplyMsgId());
     } else if (adminRequest instanceof GetQueueMessage) {
@@ -662,58 +777,15 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
                          not.getRequestMsgId(),
                          not.getReplyMsgId());
     } else if (adminRequest instanceof ClearQueue) {
-      clearQueue(not.getReplyTo(),
+      clearQueue((ClearQueue)adminRequest,
+                 not.getReplyTo(),
                  not.getRequestMsgId(),
                  not.getReplyMsgId());
-    } else if (adminRequest instanceof GetNbMaxMsgRequest) {
-      replyToTopic(new GetNumberReply(getNbMaxMsg()),
-                   not.getReplyTo(),
-                   not.getRequestMsgId(),
-                   not.getReplyMsgId());
-    } else if (adminRequest instanceof GetPendingMessages) {
-      // Cleaning of the possibly expired messages.
-      DMQManager dmqManager = cleanPendingMessage(System.currentTimeMillis());
-      // Sending the dead messages to the DMQ, if needed:
-      if (dmqManager != null) dmqManager.sendToDMQ();
-      
-      replyToTopic(new GetNumberReply(getPendingMessageCount()),
-                   not.getReplyTo(),
-                   not.getRequestMsgId(),
-                   not.getReplyMsgId());
-    } else if (adminRequest instanceof GetPendingRequests) {
-      // Cleaning of the possibly expired requests.
-      cleanWaitingRequest(System.currentTimeMillis());
-      replyToTopic(new GetNumberReply(getWaitingRequestCount()),
-                   not.getReplyTo(),
-                   not.getRequestMsgId(),
-                   not.getReplyMsgId());
-    } else if (adminRequest instanceof GetDMQSettingsRequest) {
-      replyToTopic(new GetDMQSettingsReply((dmqId != null)?dmqId.toString():null, threshold),
-                   not.getReplyTo(),
-                   not.getRequestMsgId(),
-                   not.getReplyMsgId());
-    } else if (adminRequest instanceof SetThresholdRequest) {
-      setSave(); // state change, so save.
-      threshold = ((SetThresholdRequest) adminRequest).getThreshold();
-      
-      replyToTopic(new AdminReply(true, null),
-                   not.getReplyTo(),
-                   not.getRequestMsgId(),
-                   not.getReplyMsgId());
-    } else if (adminRequest instanceof SetNbMaxMsgRequest) {
-      setSave(); // state change, so save.
-      nbMaxMsg = ((SetNbMaxMsgRequest) adminRequest).getNbMaxMsg();
-
-      replyToTopic(new AdminReply(true, null),
-                   not.getReplyTo(),
-                   not.getRequestMsgId(),
-                   not.getReplyMsgId());
-    } else {
-      super.handleAdminRequestNot(from, not);
     }
   }
 
-  private void getQueueMessageIds(AgentId replyTo,
+  private void getQueueMessageIds(GetQueueMessageIds request,
+                                  AgentId replyTo,
                                   String requestMsgId,
                                   String replyMsgId) {
     String[] res = new String[messages.size()];
@@ -770,7 +842,8 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
                  replyTo, requestMsgId, replyMsgId);
   }
 
-  private void clearQueue(AgentId replyTo,
+  private void clearQueue(ClearQueue request,
+                          AgentId replyTo,
                           String requestMsgId,
                           String replyMsgId) {
     if (messages.size() > 0) {
@@ -794,36 +867,51 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    * When a reader is removed, and receive requests of this reader are still
    * on the queue, they are replied to by an <code>ExceptionReply</code>.
    */
-  protected void doRightRequest(AgentId user, int right) {
+  protected void doRightRequest(SetRightRequest not) {
     // If the request does not unset a reader, doing nothing.
-    if (right != -READ) return;
+    if (not.getRight() != -READ)
+      return;
 
-    ReceiveRequest request;
+    SetRightRequest rightRequest = preProcess(not);
+    if (rightRequest != null) {
+      AgentId user = rightRequest.getClient();
 
-    if (user == null) {
-      // Free reading right has been removed, reject the non readers requests.
-      for (int i = 0; i < requests.size(); i++) {
-        request = (ReceiveRequest) requests.get(i);
-        if (! isReader(request.requester)) {
-          forward(request.requester,
-                  new ExceptionReply(request, new AccessException("Free READ access removed")));
-          setSave(); // state change, so save.
-          requests.remove(i);
-          i--;
+      ReceiveRequest request;
+      AccessException exc;
+      ExceptionReply reply;
+
+      // Free reading right has been removed; replying to the non readers
+      // requests.
+      if (user == null) {
+        for (int i = 0; i < requests.size(); i++) {
+          request = (ReceiveRequest) requests.get(i);
+          if (! isReader(request.requester)) {
+            exc = new AccessException("Free READ access removed");
+            reply = new ExceptionReply(request, exc);
+            forward(request.requester, reply);
+            // state change, so save.
+            setSave();
+            requests.remove(i);
+            i--;
+          }
+        }
+      } else {
+        // Reading right of a given user has been removed; replying to its
+        // requests.
+        for (int i = 0; i < requests.size(); i++) {
+          request = (ReceiveRequest) requests.get(i);
+          if (user.equals(request.requester)) {
+            exc = new AccessException("READ right removed");
+            reply = new ExceptionReply(request, exc);
+            forward(request.requester, reply);
+            // state change, so save.
+            setSave();
+            requests.remove(i);
+            i--;
+          }
         }
       }
-    } else {
-      // Reading right of a given user has been removed; replying to its requests.
-      for (int i = 0; i < requests.size(); i++) {
-        request = (ReceiveRequest) requests.get(i);
-        if (user.equals(request.requester)) {
-          forward(request.requester,
-                  new ExceptionReply(request, new AccessException("READ right removed")));
-          setSave(); // state change, so save.
-          requests.remove(i);
-          i--;
-        }
-      }
+      postProcess(rightRequest);
     }
   }
 
@@ -1196,25 +1284,25 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
    * @param remove  if true delete message
    * @return mom message
    */
-  protected Message getQueueMessage(String msgId, boolean remove) {
+  protected Message getQueueMessage(String msgId, boolean remove) {   
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "QueueImpl.getMessage(" + msgId + ',' + remove + ')');
 
     Message message =  getMomMessage(msgId);
     if (checkDelivery(message.getHeaderMessage())) {
-    message.incDeliveryCount();
-    nbMsgsDeliverSinceCreation++;
+      message.incDeliveryCount();
+      nbMsgsDeliverSinceCreation++;
 
       // use in sub class see ClusterQueueImpl
       messageDelivered(message.getIdentifier());
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Message " + msgId);
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "Message " + msgId);
 
-    if (remove) {
-      messages.remove(message);
-      message.delete();
-    }
+      if (remove) {
+        messages.remove(message);
+        message.delete();
+      } 
     }
     return message;
   }
@@ -1344,19 +1432,18 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
   protected void messageRemoved(String msgId) {}
 
   /**
-   * Returns <code>true</code> if a given message is considered as  undeliverable,
-   * because its delivery count matches the queue's threshold, if any, or the
-   * server's default threshold value (if any).
+   * Returns <code>true</code> if a given message is considered as 
+   * undeliverable, because its delivery count matches the queue's 
+   * threshold, if any, or the server's default threshold value (if any).
    */
   protected boolean isUndeliverable(Message message) {
-    if (threshold == 0) return false;
-    if (threshold > 0)
-      return (message.getDeliveryCount() >= threshold);
-    else if (QueueImpl.getDefaultThreshold() > 0)
-      return (message.getDeliveryCount() >= QueueImpl.getDefaultThreshold());
+    if (threshold != null)
+      return (message.getDeliveryCount() >= threshold.intValue());
+    else if (QueueImpl.defaultThreshold != null)
+      return (message.getDeliveryCount() >= QueueImpl.defaultThreshold.intValue());
     return false;
   }
-
+  
   /**
    * Adds the client messages in the queue.
    * 
@@ -1396,6 +1483,10 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     out.writeBoolean(receiving);
     out.writeObject(messages);
     out.writeObject(deliveredMsgs);
+  }
+
+  public long getNbMsgsReceiveSinceCreation() {
+    return nbMsgsSentToDMQSinceCreation + nbMsgsDeliverSinceCreation + getPendingMessageCount();
   }
 
   protected void handleExpiredNot(AgentId from, ExpiredNot not) {

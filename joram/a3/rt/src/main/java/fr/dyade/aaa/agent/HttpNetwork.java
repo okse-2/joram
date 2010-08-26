@@ -435,7 +435,7 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
       line = readLine(is, buf);
       if ((line != null) && line.startsWith("Content-Length: ")) {
         // get content length
-        length = Integer.parseInt(line.substring(16));
+	length = Integer.parseInt(line.substring(16));
         if (logmon.isLoggable(BasicLevel.DEBUG))
           logmon.log(BasicLevel.DEBUG, name + ", length:" + length);
       }

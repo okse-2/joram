@@ -25,6 +25,8 @@ package org.objectweb.joram.mom.dest;
 
 import java.util.Set;
 
+import org.objectweb.joram.mom.notifications.ClusterRequest;
+
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Notification;
 
@@ -32,60 +34,29 @@ import fr.dyade.aaa.agent.Notification;
  * A <code>ClusterTest</code> instance is a notification sent by a topic 
  * to another topic for checking if it might be part of a cluster.
  */
-class ClusterTest extends Notification {
-  /** define serialVersionUID for interoperability */
+class ClusterTest extends Notification
+{
+  /**
+   * 
+   */
   private static final long serialVersionUID = 1L;
-
+  /** The original client request. */
+  ClusterRequest request;
+  /** The original requester. */
+  AgentId requester;
+  
   /** Set containing AgentId of topics already in the cluster */
   Set friends;
-  /** The JMS destination to send the reply */
-  private AgentId replyTo = null;
-  /** The JMS message id. of the request needed for the reply */
-  private String requestMsgId;
-  /** The generated JMS message id. for the reply */
-  private String replyMsgId;
 
   /**
    * Constructs a <code>ClusterTest</code> instance.
    *
-   * @param requester     The original requester.
-   * @param friends       The current members of the cluster.
-   * @param replyTo       The JMS destination to send the reply.
-   * @param requestMsgId  The JMS message id. of the request needed for the reply.
-   * @param replyMsgId    The generated JMS message id. for the reply.
+   * @param request  The original client request.
+   * @param requester  The original requester.
    */
-  ClusterTest(Set friends,
-              AgentId replyTo, String requestMsgId, String replyMsgId) {
+  ClusterTest(ClusterRequest request, AgentId requester, Set friends) {
+    this.request = request;
+    this.requester = requester;
     this.friends = friends;
-    this.replyTo = replyTo;
-    this.requestMsgId = requestMsgId;
-    this.replyMsgId = replyMsgId;
-  }
-
-  /**
-   * Returns the JMS destination to send the reply.
-   * 
-   * @return  The JMS destination to send the reply.
-   */
-  public AgentId getReplyTo() {
-    return replyTo;
-  }
-
-  /**
-   * Returns the JMS message id. of the request needed for the reply.
-   * 
-   * @return  The JMS message id. of the request needed for the reply.
-   */
-  public String getRequestMsgId() {
-    return requestMsgId;
-  }
-
-  /**
-   * Returns the generated JMS message id. for the reply.
-   * 
-   * @return  The generated JMS message id. for the reply.
-   */
-  public String getReplyMsgId() {
-    return replyMsgId;
   }
 }

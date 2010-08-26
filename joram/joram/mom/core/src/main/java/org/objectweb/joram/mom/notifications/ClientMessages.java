@@ -35,7 +35,7 @@ import fr.dyade.aaa.agent.AgentId;
  * A <code>ClientMessages</code> instance is used by a client agent for
  * sending one or many messages to a destination.
  */
-public class ClientMessages extends AbstractRequestNot {
+public class ClientMessages extends AbstractRequest {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   
@@ -158,10 +158,14 @@ public class ClientMessages extends AbstractRequestNot {
 
   public int getMessageCount() {
     if (messages == null) {
-      if (message == null) return 0;
-      return 1;
+      if (message == null) {
+        return 0;
+      } else {
+        return 1;
+      }
+    } else {
+      return messages.size();
     }
-    return messages.size();
   }
 
   /**

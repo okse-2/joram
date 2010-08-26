@@ -145,15 +145,18 @@ public class Strings {
    * @param output	a byte buffer to print the object into
    * @param str		the string to print
    */
-  public static final void toByteArray(ByteArrayOutputStream output, String str) {
-    if (str == null) return;
+  public static final void toByteArray(ByteArrayOutputStream output,
+                                       String str) {
+    if (str == null) {
+      return;
+    }
 
     output.write(34);	// '"'
 
     int max = str.length();
     for (int i = 0; i < max; i ++) {
       // gets the numeric value of the unicode character
-      int b = str.charAt(i);
+      int b = (int) str.charAt(i);
       if ((b >= 32) && (b <= 126)) {
         // ASCII printable character, includes '"' and '\\'
         switch (b) {

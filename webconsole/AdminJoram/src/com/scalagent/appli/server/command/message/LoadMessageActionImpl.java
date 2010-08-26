@@ -1,8 +1,10 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
+ * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.server.command.message;
+
 
 import java.util.List;
 
@@ -13,9 +15,7 @@ import com.scalagent.appli.server.RPCServiceCache;
 import com.scalagent.appli.shared.MessageWTO;
 import com.scalagent.engine.server.command.ActionImpl;
 
-/**
- * @author Yohann CINTRE
- */
+
 public class LoadMessageActionImpl 
 extends ActionImpl<LoadMessageResponse, LoadMessageAction, RPCServiceCache>{
 
@@ -27,8 +27,10 @@ extends ActionImpl<LoadMessageResponse, LoadMessageAction, RPCServiceCache>{
 		try {
 			messages = cache.getMessages(this.getHttpSession(), action.getQueueName());
 		} catch (NotFoundException e) {
+			System.out.println("### engine.server.command.queue.LoadMessageActionImpl.execute : aucun messages recupérés sur le serveur (queue not found)");
 			return new LoadMessageResponse(null, action.getQueueName(), false);
 		}
+		System.out.println("### engine.server.command.queue.LoadMessageActionImpl.execute : "+messages.size()+" messages recupérés sur le serveur");
 		return new LoadMessageResponse(messages, action.getQueueName(), true);
 	}
 

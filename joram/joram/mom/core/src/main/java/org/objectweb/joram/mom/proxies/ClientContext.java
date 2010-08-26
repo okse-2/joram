@@ -232,14 +232,16 @@ class ClientContext implements java.io.Serializable {
     if (commitTable == null) return 0;
     Integer ctxKey = new Integer(requestId);
     MultiReplyContext ctx = (MultiReplyContext)commitTable.get(ctxKey);
-    if (ctx == null) return 0;
-
-    ctx.counter--;
-    if (ctx.counter == 0) {
-      commitTable.remove(ctxKey);
-      proxy.setSave();
+    if (ctx == null) {
+      return 0;
+    } else {
+      ctx.counter--;
+      if (ctx.counter == 0) {
+        commitTable.remove(ctxKey);
+        proxy.setSave();
+      }
+      return ctx.counter;
     }
-    return ctx.counter;
   }
   
   static class MultiReplyContext {

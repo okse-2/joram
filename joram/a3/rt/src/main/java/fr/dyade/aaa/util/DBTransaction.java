@@ -217,8 +217,11 @@ public abstract class DBTransaction extends AbstractTransaction implements DBTra
   }
 
   final String fname(String dirName, String name) {
-    if (dirName == null) return name;
-    return new StringBuffer(dirName).append('/').append(name).toString();
+    if (dirName == null) {
+      return name;
+    } else {
+      return new StringBuffer(dirName).append('/').append(name).toString();
+    }
   }
 
   protected final void saveInLog(byte[] buf,

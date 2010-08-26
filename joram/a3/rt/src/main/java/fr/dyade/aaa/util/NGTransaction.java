@@ -949,7 +949,7 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
 
     public byte[] getFromLog(String dirName, String name) throws IOException {
       // First searches in the logs a new value for the object.
-      Operation op = log.get(OperationKey.newKey(dirName, name));
+      Operation op = (Operation) log.get(OperationKey.newKey(dirName, name));
       if (op != null) {
         if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
           // reads the value from the log file
@@ -1029,7 +1029,7 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
           if (j<list1.length) {
             // The file is already in the directory list, it must be count
             // at most once.
-            if ((log.get(list2[i])).type == Operation.DELETE) {
+            if (((Operation) log.get(list2[i])).type == Operation.DELETE) {
               // The file is deleted in transaction log.
               list1[j] = null;
               nb -= 1;
@@ -1197,7 +1197,7 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
       count = newcount;
     }
 
-    void writeInt(int v) {
+    void writeInt(int v) throws IOException {
       int newcount = count +4;
       if (newcount > buf.length) {
         byte newbuf[] = new byte[buf.length << 1];

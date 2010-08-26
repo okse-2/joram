@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,12 +20,13 @@
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
+
 package org.objectweb.joram.shared;
 
 /**
  * Defines constants needed to distinguish Queue and Topic. 
  */
-public final class DestinationConstants {
+public class DestinationConstants {
   /** the destination is a Topic */
   public final static byte TOPIC_TYPE = 0x01;
   /** the destination is a Queue */
@@ -38,59 +39,5 @@ public final class DestinationConstants {
   
   public final static boolean compatible(byte type1, byte type2) {
     return (type1 & DESTINATION_TYPE) == (type2 & DESTINATION_TYPE);
-  }
-  
-  public final static boolean isQueue(byte type) {
-    return ((type & QUEUE_TYPE) != 0);
-  }
-  
-  public final static boolean isTopic(byte type) {
-    return ((type & TOPIC_TYPE) != 0);
-  }
-  
-  public final static boolean isTemporary(byte type) {
-    return ((type & TEMPORARY) != 0);
-  }
-  
-  public final static byte getQueueType() {
-    return QUEUE_TYPE;
-  }
-  
-  public final static byte getTopicType() {
-    return TOPIC_TYPE;
-  }
-
-  public final static byte getTemporaryQueueType() {
-    return (QUEUE_TYPE | TEMPORARY);
-  }
-
-  public final static byte getTemporaryTopicType() {
-    return (TOPIC_TYPE | TEMPORARY);
-  }
-
-  /**
-   * Check the specified destination identifier.
-   * 
-   * @exception Exception if an invalid destination identifier is specified.
-   */
-  public static final void checkId(String id) throws Exception {
-    if (id == null)
-      throw new Exception("Undefined (null) destination identifier.");
-    
-    if (id.matches("#\\d+\\.\\d+\\.\\d+")) return;
-    
-    throw new Exception("Bad destination identifier:" + id);
-  }
-
-  public static final String getNullId(int serverId) {
-    StringBuilder strbuf = new StringBuilder(10);
-    strbuf.append("#").append(serverId).append('.').append(serverId).append(".0");
-    return strbuf.toString();
-  }
-
-  public static final String getAdminTopicId(int serverId) {
-    StringBuilder strbuf = new StringBuilder(10);
-    strbuf.append("#").append(serverId).append('.').append(serverId).append('.').append(".10");
-    return strbuf.toString();
   }
 }

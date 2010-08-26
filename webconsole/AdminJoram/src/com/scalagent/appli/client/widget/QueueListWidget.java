@@ -1,5 +1,6 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
+ * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.widget;
@@ -21,10 +22,8 @@ import com.scalagent.appli.client.Application;
 import com.scalagent.appli.client.presenter.QueueListPresenter;
 import com.scalagent.appli.client.widget.handler.queue.ClearPendingMessageClickHandler;
 import com.scalagent.appli.client.widget.handler.queue.ClearWaintingRequestClickHandler;
-import com.scalagent.appli.client.widget.handler.queue.NewQueueClickHandler;
 import com.scalagent.appli.client.widget.handler.queue.QueueDeleteClickHandler;
 import com.scalagent.appli.client.widget.handler.queue.QueueDetailsClickHandler;
-import com.scalagent.appli.client.widget.handler.queue.QueueEditClickHandler;
 import com.scalagent.appli.client.widget.handler.queue.RefreshAllClickHandler;
 import com.scalagent.appli.client.widget.record.QueueListRecord;
 import com.scalagent.appli.shared.QueueWTO;
@@ -68,9 +67,7 @@ import com.smartgwt.client.widgets.layout.VLayout;
 import com.smartgwt.client.widgets.viewer.DetailViewer;
 import com.smartgwt.client.widgets.viewer.DetailViewerField;
 
-/**
- * @author Yohann CINTRE
- */
+
 public class QueueListWidget extends BaseWidget<QueueListPresenter> {
 
 	int chartWidth;
@@ -105,8 +102,6 @@ public class QueueListWidget extends BaseWidget<QueueListPresenter> {
 	CheckboxItem showSentDMQBox;
 	CheckboxItem showPendingBox;
 
-	Window winModal = new Window();  
-
 	HashMap<String, String> etat=new HashMap<String, String>();
 
 	public QueueListWidget(QueueListPresenter queuePresenter) {
@@ -119,6 +114,8 @@ public class QueueListWidget extends BaseWidget<QueueListPresenter> {
 	public IButton getRefreshButton() {
 		return refreshButton;
 	}
+
+
 
 	@Override
 	public Widget asWidget() {
@@ -140,10 +137,117 @@ public class QueueListWidget extends BaseWidget<QueueListPresenter> {
 		newQueueButton.setMargin(0);
 		newQueueButton.setAutoFit(true);
 		newQueueButton.setIcon("new.png");  
-		newQueueButton.setTitle(Application.messages.queueWidget_buttonNewQueue_title());
-		newQueueButton.setPrompt(Application.messages.queueWidget_buttonNewQueue_prompt());
+		newQueueButton.setTitle("New Queue");
+		newQueueButton.setPrompt(Application.messages.queueWidget_buttonRefresh_prompt());
 		newQueueButton.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) { drawForm(null); }  
+
+
+			@Override
+			public void onClick(ClickEvent event) {  
+				final Window winModal = new Window();  
+				winModal.setWidth(360);  
+				winModal.setHeight(400);  
+				winModal.setTitle("New Queue");  
+				winModal.setShowMinimizeButton(false);  
+				winModal.setIsModal(true);  
+				winModal.setShowModalMask(true);  
+				winModal.centerInPage();  
+				winModal.addCloseClickHandler(new CloseClickHandler() {  
+					public void onCloseClick(CloseClientEvent event) {  
+						winModal.destroy();  
+					}  
+				});  
+
+				final DynamicForm form = new DynamicForm();  
+				form.setWidth100();  
+				form.setPadding(5);  
+				form.setLayoutAlign(VerticalAlignment.BOTTOM);  
+
+				IntegerRangeValidator integerRangeValidator = new IntegerRangeValidator(); 
+				integerRangeValidator.setMin(0);
+				integerRangeValidator.setMax(10);
+
+				MaskValidator integerValidator = new MaskValidator();  
+				integerValidator.setMask("^[0-9]*$");  
+
+				TextItem nameItem = new TextItem();  
+				nameItem.setTitle("Name"); 
+				nameItem.setName("nameItem");
+				nameItem.setRequired(true);
+
+				TextItem DMQItem = new TextItem();  
+				DMQItem.setTitle("DMQ Id"); 
+				DMQItem.setName("DMQItem");
+				DMQItem.setRequired(true);
+
+				TextItem destinationItem = new TextItem();  
+				destinationItem.setTitle("Destination Id");
+				destinationItem.setName("destinationItem");
+				destinationItem.setRequired(true);
+
+				TextItem periodItem = new TextItem();  
+				periodItem.setTitle("Period");
+				periodItem.setName("periodItem");
+				periodItem.setRequired(true);
+				periodItem.setValidators(integerRangeValidator, integerValidator); 
+
+				CheckboxItem freeReadingItem = new CheckboxItem();  
+				freeReadingItem.setTitle("Free Reading");
+				freeReadingItem.setName("freeReadingItem");
+
+				CheckboxItem freeWritingItem = new CheckboxItem();  
+				freeWritingItem.setTitle("Free Writing");
+				freeWritingItem.setName("freeWritingItem");
+
+
+				TextItem thresholdItem = new TextItem();  
+				thresholdItem.setTitle("Threshold");
+				thresholdItem.setName("thresholdItem");
+				thresholdItem.setRequired(true);
+				thresholdItem.setValidators(integerRangeValidator, integerValidator);  
+
+				TextItem nbMaxMsgItem = new TextItem();
+				nbMaxMsgItem.setTitle("Nb Max Msgs");
+				nbMaxMsgItem.setName("nbMaxMsgItem");
+				nbMaxMsgItem.setRequired(true);
+				nbMaxMsgItem.setValidators(integerRangeValidator, integerValidator);  
+
+				form.setFields(nameItem, 
+						DMQItem, 
+						destinationItem, 
+						periodItem, 
+						freeReadingItem, 
+						freeWritingItem,
+						thresholdItem,
+						nbMaxMsgItem);
+
+
+				IButton validateButton = new IButton();  
+				validateButton.setTitle("Validate");  
+				validateButton.addClickHandler(new ClickHandler() {  
+					public void onClick(ClickEvent event) {  
+						try {
+							if(form.validate())
+							{
+								int max = Integer.parseInt((String)(form.getValue("maxmsg")));
+								System.out.println("max:"+max);
+							}  
+							else {
+								System.out.println("error! validation");
+							}
+
+						} catch (Exception e) {
+							System.out.println("error! integer");
+						}
+
+					}
+				});  
+				form.setShowEdges(true);
+
+				winModal.addItem(form);  
+				winModal.addItem(validateButton); 
+				winModal.show();
+			}  
 		}); 		
 
 		hl = new HLayout();
@@ -213,20 +317,6 @@ public class QueueListWidget extends BaseWidget<QueueListPresenter> {
 
 					return buttonDelete;
 
-				} else if (fieldName.equals("editField")) {
-
-					IButton buttonEdit = new IButton();  
-					buttonEdit.setAutoFit(true);
-					buttonEdit.setHeight(20); 
-					buttonEdit.setIconSize(13);
-					buttonEdit.setIcon("pencil.png");  
-					buttonEdit.setTitle(Application.messages.queueWidget_buttonEdit_title());
-					buttonEdit.setPrompt(Application.messages.queueWidget_buttonEdit_prompt());
-					buttonEdit.addClickHandler(new ClickHandler() {
-						public void onClick(ClickEvent event) { drawForm((QueueListRecord) record); }  
-					}); 		
-					return buttonEdit;
-
 				} else {  
 					return null;                     
 				}  	   
@@ -253,8 +343,6 @@ public class QueueListWidget extends BaseWidget<QueueListPresenter> {
 		actionField.setAlign(Alignment.CENTER);  
 		ListGridField deleteField = new ListGridField("deleteField", Application.messages.queueWidget_deleteFieldL_title(), 114);
 		deleteField.setAlign(Alignment.CENTER);  
-		ListGridField editField = new ListGridField("editField", Application.messages.queueWidget_editFieldL_title(), 60);
-		editField.setAlign(Alignment.CENTER);  
 
 		queueList.setFields(
 				nameFieldL, 
@@ -265,7 +353,6 @@ public class QueueListWidget extends BaseWidget<QueueListPresenter> {
 				pendingMessageCountFieldL,
 				browseField, 
 				actionField, 
-				editField,
 				deleteField);
 		queueList.addRecordClickHandler(new RecordClickHandler() {
 			public void onRecordClick(RecordClickEvent event) {
@@ -293,6 +380,7 @@ public class QueueListWidget extends BaseWidget<QueueListPresenter> {
 		DetailViewerField nbMaxMessFieldD= new DetailViewerField(QueueListRecord.ATTRIBUTE_NBMAXMSG, Application.messages.queueWidget_nbMaxMessFieldD_title());
 		freeReadingFieldD.setValueMap(etat);
 		freeWritingFieldD.setValueMap(etat);
+
 
 		queueDetailLeft = new DetailViewer();
 		queueDetailLeft.setMargin(2);
@@ -559,156 +647,5 @@ public class QueueListWidget extends BaseWidget<QueueListPresenter> {
 			showSentDMQBox.enable();
 			showPendingBox.enable();
 		}
-	}
-
-	private void drawForm(QueueListRecord qlr) {
-
-		winModal = new Window(); 
-		winModal.setHeight(350);
-		winModal.setWidth(400);
-		if(qlr == null) winModal.setTitle(Application.messages.queueWidget_winModal_title());  
-		else winModal.setTitle("Queue \""+qlr.getAttributeAsString(QueueListRecord.ATTRIBUTE_NAME)+"\"");  
-		winModal.setShowMinimizeButton(false);  
-		winModal.setIsModal(true);  
-		winModal.setShowModalMask(true);  
-		winModal.centerInPage();  
-		winModal.addCloseClickHandler(new CloseClickHandler() {  
-			public void onCloseClick(CloseClientEvent event) {  
-				winModal.destroy();  
-			}  
-		});  
-
-
-		Label formTitle = new Label();
-		if(qlr == null) formTitle.setContents(Application.messages.queueWidget_formTitle_title());  
-		else formTitle.setContents("Edit \""+qlr.getAttributeAsString(QueueListRecord.ATTRIBUTE_NAME)+"\"");  
-		formTitle.setWidth100();
-		formTitle.setAutoHeight();
-		formTitle.setMargin(5);
-		formTitle.setStyleName("title2");
-		formTitle.setLayoutAlign(VerticalAlignment.TOP);  
-		formTitle.setLayoutAlign(Alignment.CENTER);
-
-		final DynamicForm form = new DynamicForm();  
-		form.setWidth100();  
-		form.setPadding(5);  
-		form.setMargin(10);  
-		form.setLayoutAlign(VerticalAlignment.TOP);  
-		form.setLayoutAlign(Alignment.CENTER);
-
-		IntegerRangeValidator integerRangeValidator = new IntegerRangeValidator(); 
-
-		MaskValidator integerValidator = new MaskValidator();  
-		integerValidator.setMask("^-?[0-9]*$");  
-
-		TextItem nameItem = new TextItem();  
-		nameItem.setTitle(Application.messages.queueWidget_nameItem_title()); 
-		nameItem.setName("nameItem");
-		nameItem.setRequired(true);
-
-		TextItem DMQItem = new TextItem();  
-		DMQItem.setTitle(Application.messages.queueWidget_DMQItem_title()); 
-		DMQItem.setName("DMQItem");
-		DMQItem.setRequired(true);
-
-		TextItem destinationItem = new TextItem();  
-		destinationItem.setTitle(Application.messages.queueWidget_destinationItem_title());
-		destinationItem.setName("destinationItem");
-		destinationItem.setRequired(true);
-
-		TextItem periodItem = new TextItem();  
-		periodItem.setTitle(Application.messages.queueWidget_periodItem_title());
-		periodItem.setName("periodItem");
-		periodItem.setRequired(true);
-		periodItem.setValidators(integerRangeValidator, integerValidator); 
-
-		TextItem thresholdItem = new TextItem();  
-		thresholdItem.setTitle(Application.messages.queueWidget_thresholdItem_title());
-		thresholdItem.setName("thresholdItem");
-		thresholdItem.setRequired(true);
-		thresholdItem.setValidators(integerRangeValidator, integerValidator);  
-
-		TextItem nbMaxMsgItem = new TextItem();
-		nbMaxMsgItem.setTitle(Application.messages.queueWidget_nbMaxMsgsItem_title());
-		nbMaxMsgItem.setName("nbMaxMsgItem");
-		nbMaxMsgItem.setRequired(true);
-		nbMaxMsgItem.setValidators(integerRangeValidator, integerValidator);  
-
-		CheckboxItem freeReadingItem = new CheckboxItem();  
-		freeReadingItem.setTitle(Application.messages.queueWidget_freeReadingItem_title());
-		freeReadingItem.setName("freeReadingItem");
-
-		CheckboxItem freeWritingItem = new CheckboxItem();  
-		freeWritingItem.setTitle(Application.messages.queueWidget_freeWritingItem_title());
-		freeWritingItem.setName("freeWritingItem");
-
-
-		if(qlr != null) {
-			nameItem.setValue(qlr.getAttributeAsString(QueueListRecord.ATTRIBUTE_NAME));
-			nameItem.setDisabled(true);
-			DMQItem.setValue(qlr.getAttributeAsString(QueueListRecord.ATTRIBUTE_DMQID));
-			destinationItem.setValue(qlr.getAttributeAsString(QueueListRecord.ATTRIBUTE_DESTINATIONID));
-			periodItem.setValue(qlr.getAttributeAsString(QueueListRecord.ATTRIBUTE_PERIOD));
-			thresholdItem.setValue(qlr.getAttributeAsString(QueueListRecord.ATTRIBUTE_THRESHOLD));
-			nbMaxMsgItem.setValue(qlr.getAttributeAsString(QueueListRecord.ATTRIBUTE_NBMAXMSG));
-			freeReadingItem.setValue(qlr.getAttributeAsBoolean(QueueListRecord.ATTRIBUTE_FREEREADING));
-			freeWritingItem.setValue(qlr.getAttributeAsBoolean(QueueListRecord.ATTRIBUTE_FREEWRITING));
-		}
-
-
-
-		form.setFields(nameItem, 
-				DMQItem, 
-				destinationItem, 
-				periodItem, 
-				thresholdItem,
-				nbMaxMsgItem,
-				freeReadingItem, 
-				freeWritingItem);
-
-		IButton validateButton = new IButton();  
-		if(qlr == null) {
-			validateButton.setTitle(Application.messages.queueWidget_validateButton_titleCreate());
-			validateButton.setIcon("add.png");
-			validateButton.addClickHandler(new NewQueueClickHandler(presenter, form));
-		}
-		else {
-			validateButton.setTitle(Application.messages.queueWidget_validateButton_titleEdit());  
-			validateButton.setIcon("accept.png");
-			validateButton.addClickHandler(new QueueEditClickHandler(presenter, form));
-		}
-		validateButton.setAutoFit(true);
-		validateButton.setLayoutAlign(VerticalAlignment.TOP);  
-		validateButton.setLayoutAlign(Alignment.CENTER);
-
-		IButton cancelButton = new IButton();  
-		cancelButton.setTitle(Application.messages.queueWidget_cancelButton_title());
-		cancelButton.setIcon("cancel.png");
-		cancelButton.setAutoFit(true);
-		cancelButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				destroyForm();
-			}
-		});
-		cancelButton.setLayoutAlign(VerticalAlignment.TOP);  
-		cancelButton.setLayoutAlign(Alignment.CENTER);
-
-		HLayout hl = new HLayout();
-		hl.setWidth100();
-		hl.setAlign(Alignment.CENTER);
-		hl.setAlign(VerticalAlignment.CENTER);
-		hl.setMembersMargin(5);
-		hl.addMember(validateButton);
-		hl.addMember(cancelButton);
-
-		winModal.addItem(formTitle);  
-		winModal.addItem(form);  
-		winModal.addItem(hl); 
-		winModal.show();
-	}
-
-	public void destroyForm() {
-		winModal.destroy();
 	}
 }

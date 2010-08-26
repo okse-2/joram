@@ -1,5 +1,6 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
+ * @author Yohann CINTRE
  */
 
 
@@ -11,9 +12,7 @@ import com.scalagent.appli.shared.QueueWTO;
 import com.scalagent.engine.client.command.Response;
 
 /**
- * Response to the action LoadQueueAction
- * 
- * @author Yohann CINTRE
+ * Response to the action LoadDevicesAction
  */
 public class LoadQueueResponse implements Response{
  

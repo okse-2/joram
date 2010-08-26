@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -91,7 +91,8 @@ final class AgentIdStamp implements Serializable {
    *
    * @param out the underlying output stream.
    */
-  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+  private void writeObject(java.io.ObjectOutputStream out)
+       throws IOException {
     out.writeInt(local);
     out.writeInt(remote);
   }
@@ -101,9 +102,9 @@ final class AgentIdStamp implements Serializable {
    * and restoring the classes fields.
    *
    * @param in	the underlying input stream.
-   * @throws ClassNotFoundException 
    */
-  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+  private void readObject(java.io.ObjectInputStream in)
+      throws IOException, ClassNotFoundException {
     local = in.readInt();
     remote = in.readInt();
   }
@@ -181,7 +182,8 @@ public final class AgentId implements Serializable {
    *
    * @param out the underlying output stream.
    */
-  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+  private void writeObject(java.io.ObjectOutputStream out)
+      throws IOException {
     out.writeShort(from);
     out.writeShort(to);
     out.writeInt(stamp);
@@ -192,9 +194,9 @@ public final class AgentId implements Serializable {
    * and restoring the classes fields.
    *
    * @param in	the underlying input stream.
-   * @throws ClassNotFoundException 
    */
-  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+  private void readObject(java.io.ObjectInputStream in)
+      throws IOException, ClassNotFoundException {
     from = in.readShort();
     to = in.readShort();
     stamp = in.readInt();
@@ -288,14 +290,15 @@ public final class AgentId implements Serializable {
   /**
    * Statically initializes <code>AgentId</code> class.
    */
-  static void init() throws IOException, ClassNotFoundException {
+  static void init()
+    throws IOException, ClassNotFoundException {
     // Initialize well known ids
     localId = new AgentId(AgentServer.getServerId(),
-                          AgentServer.getServerId(),
-                          NullIdStamp);
+			  AgentServer.getServerId(),
+			  NullIdStamp);
     factoryId = new AgentId(AgentServer.getServerId(),
-                            AgentServer.getServerId(),
-                            FactoryIdStamp);
+			    AgentServer.getServerId(),
+			    FactoryIdStamp);
     // Initialize stamp values
     AgentIdStamp.init();
   }
@@ -454,14 +457,14 @@ public final class AgentId implements Serializable {
    * @return	 <code>true</code> if this object is the same as the obj
    *		 argument; <code>false</code> otherwise.
    */
-  public boolean equals(Object obj) {
-    if (obj == null) return false;
+   public boolean equals(Object obj) {
     if ((obj instanceof AgentId) &&
-        (((AgentId) obj).from == from) &&
-        (((AgentId) obj).to == to) &&
-        (((AgentId) obj).stamp == stamp)) {
+	(((AgentId) obj).from == from) &&
+	(((AgentId) obj).to == to) &&
+	(((AgentId) obj).stamp == stamp)) {
       return true;
+    } else {
+      return false;
     }
-    return false;
   }
 }

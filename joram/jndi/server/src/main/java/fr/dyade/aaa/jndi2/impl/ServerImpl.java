@@ -142,8 +142,8 @@ public class ServerImpl {
     // it is already a context.
     if (path.size() == 0) throw new NameAlreadyBoundException();
 
-    path = (CompositeName) path.clone();
-    String lastName = (String) path.remove(path.size() - 1);
+    path = (CompositeName)path.clone();
+    String lastName = (String)path.remove(path.size() - 1);
     NamingContext nc = contextManager.getNamingContext(path);
 
     bind(nc, lastName, obj, serverId);
@@ -160,8 +160,11 @@ public class ServerImpl {
                    Object ownerId) throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
-                       "ServerImpl.bind(" + nc + ',' + lastName + ',' + obj + ',' + ownerId + ')');
-    
+                       "ServerImpl.bind(" + 
+                       nc + ',' +
+                       lastName + ',' + 
+                       obj + ',' + 
+                       ownerId + ')');
     if (! nc.getOwnerId().equals(ownerId) && (!looseCoupling) ) {
       throw new NotOwnerException(
         nc.getOwnerId());
@@ -169,9 +172,10 @@ public class ServerImpl {
 
     Record r = nc.getRecord(lastName);
     if (r != null) throw new NameAlreadyBoundException();
-    
-    nc.addRecord(new ObjectRecord(lastName, obj));
-    contextManager.storeNamingContext(nc);
+    else {
+      nc.addRecord(new ObjectRecord(lastName, obj));
+      contextManager.storeNamingContext(nc);      
+    }
   }
 
   /**
@@ -232,15 +236,16 @@ public class ServerImpl {
     Record r = nc.getRecord(lastName);
     if (r != null) {
       if (r instanceof ContextRecord) {
-        // DF: seems not consistent to delete recursively the whole context
-        // (empty or not) as the reverse operation is not possible (create a
-        // context with a name already bound), so prefer to raise an error.
-        // DF (TODO): Have to check the specification.
+        // DF: seems not consistent to delete recursively the whole
+        // context (empty or not) as the reverse operation is not possible
+        // (create a context with a name already bound). 
+        // So prefer to raise an error.
+        // Have to check the spec.
         throw new NamingException("Cannot rebind a context");
+      } else {
+        ObjectRecord or = (ObjectRecord)r;
+        or.setObject(obj);
       }
-      
-      ObjectRecord or = (ObjectRecord)r;
-      or.setObject(obj);
     } else {
       nc.addRecord(new ObjectRecord(lastName, obj));
     }
@@ -341,16 +346,17 @@ public class ServerImpl {
     }
     Record r = nc.getRecord(lastName);
     if (r != null) { 
-      if (r instanceof ContextRecord)
+      if (r instanceof ContextRecord) {
         throw new NamingException("Cannot unbind a context");
-
-      nc.removeRecord(lastName);
-      contextManager.storeNamingContext(nc);        
-      return true;
+      } else {
+        nc.removeRecord(lastName);
+        contextManager.storeNamingContext(nc);        
+        return true;
+      }
+    } else {
+      // else do nothing (idempotency)
+      return false;
     }
-    
-    // else do nothing (idempotency)
-    return false;
   }
 
   public NameClassPair[] list(CompositeName path) throws NamingException {
@@ -543,13 +549,13 @@ public class ServerImpl {
         parentNc.removeRecord(lastName);
         contextManager.storeNamingContext(parentNc);        
         return true;
+      } else {
+        throw new NotContextException();
       }
-      
-      throw new NotContextException();
+    } else {
+      // else do nothing (idempotency)
+      return false;
     }
-    
-    // else do nothing (idempotency)
-    return false;
   }
 
   /**

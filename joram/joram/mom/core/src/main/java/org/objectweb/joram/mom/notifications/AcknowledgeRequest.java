@@ -30,7 +30,7 @@ import java.util.Vector;
  * An <code>AcknowledgeRequest</code> instance is used by a client agent
  * for acknowledging one or many messages on a queue.
  */
-public class AcknowledgeRequest extends AbstractRequestNot
+public class AcknowledgeRequest extends AbstractRequest
 {
   /**
    * 

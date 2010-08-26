@@ -66,24 +66,29 @@ public class TcpConnectionListener extends Daemon {
   private int timeout;
 
   /**
-   *  Name of the property allowing to change the threshold of warning for the
-   * verification of the synchronization between the client and server clock.
-   *  A warning is generated if there is more than this value in milliseconds
-   * between the two clocks.
+   *  Name of the boolean property allowing the verification of the synchronization
+   * between the client and server clock. When true a warning is generated if there
+   * is more than one second between the two clocks. This property allows the protocol
+   * compatibility in 5.2 versions, this verification will be enabled by default in 5.3
+   * version.
    * <p>
-   *  By default the value is 1000 milliseconds. 
+   *  This property can be fixed either from <code>java</code> launching command, or
+   * in <code>a3servers.xml</code> configuration file. By default the value is false. 
    */
-  public static final String CLOCK_SYNCHRO_THRESHOLD = "org.objectweb.joram.TcpConnection.ClockSynchro.Threshold";
+  public static final String VERIFY_CLOCK_SYNCHRO = 
+    "org.objectweb.joram.TcpConnection.verifyClockSynchro";
 
   /**
-   *  Value of the threshold of warning for the verification of the synchronization
-   * between the client and server clock.
-   *  A warning is generated if there is more than this value in milliseconds between
-   * the two clocks.
+   *  Boolean value allowing the verification of the synchronization between the
+   * client and server clock. When true a warning is generated if there is more
+   * than one second between the two clocks. This property allows the protocol
+   * compatibility in 5.2 versions, this verification will be enabled by default
+   * in 5.3 version.
    * <p>
-   *  By default the value is 1000 milliseconds. 
+   *  This property can be fixed either from <code>java</code> launching command, or
+   * in <code>a3servers.xml</code> configuration file. By default the value is false.
    */
-  private long clockSynchroThreshold = 1000L;
+  private final boolean verifyClockSynchro;
 
   /**
    * Number of times this connection listener has encountered an erroneous
@@ -112,7 +117,7 @@ public class TcpConnectionListener extends Daemon {
     super("TcpConnectionListener");
     this.proxyService = proxyService;
     this.timeout = timeout;
-    this.clockSynchroThreshold = Configuration.getLong(CLOCK_SYNCHRO_THRESHOLD, clockSynchroThreshold).longValue();
+    this.verifyClockSynchro = Configuration.getBoolean(VERIFY_CLOCK_SYNCHRO);
   }
 
   public void run() {
@@ -192,29 +197,30 @@ public class TcpConnectionListener extends Daemon {
       byte[] magic = StreamUtil.readByteArrayFrom(is, 8);
       for (int i=0; i<5; i++) {
         if (magic[i] != MetaData.joramMagic[i] && magic[i] > 0) {
-          String errorMsg = "Bad magic number:" + new String(magic, 0, 5) + magic[5] + '.' + magic[6] + '/' + magic[7];
-        	logger.log(BasicLevel.ERROR, errorMsg);
+        	logger.log(BasicLevel.ERROR, "Bad magic number:" + new String(magic, 0, 5) + magic[5] + '.'
+              + magic[6] + '/' + magic[7]);
           protocolErrorCount++;
-          throw new IllegalAccessException(errorMsg);
+          throw new IllegalAccessException("Bad magic number:" + new String(magic, 0, 5) + magic[5] + '.'
+              + magic[6] + '/' + magic[7]);
         }
       }
       if (magic[7] != MetaData.joramMagic[7]) {
         if (magic[7] > 0 && MetaData.joramMagic[7] > 0) {
-          String errorMsg = "Bad protocol version number " + magic[7] + " != " + MetaData.joramMagic[7];
-          logger.log(BasicLevel.ERROR, errorMsg);
+          logger.log(BasicLevel.ERROR, "Bad protocol version number " + magic[7] + " != " + MetaData.joramMagic[7]);
           protocolErrorCount++;
-          throw new IllegalAccessException(errorMsg);
+          throw new IllegalAccessException("Bad protocol version number " + magic[7] + " != " + MetaData.joramMagic[7]);
+        } else {
+          logger.log(BasicLevel.WARN, "Wildcard protocol version number: from stream = " + magic[7] + ", from MetaData = " + MetaData.joramMagic[7]);
         }
-        
-        logger.log(BasicLevel.WARN,
-                   "Wildcard protocol version number: from stream = " + magic[7] + ", from MetaData = " + MetaData.joramMagic[7]);
       }
-
-      long dt = Math.abs(StreamUtil.readLongFrom(is) - System.currentTimeMillis());
-      if (dt > clockSynchroThreshold)
-        logger.log(BasicLevel.WARN, " -> bad clock synchronization between client and server: " + dt);
-      StreamUtil.writeTo(dt, nos);
-
+      
+      if (verifyClockSynchro) {
+        long dt = Math.abs(StreamUtil.readLongFrom(is) - System.currentTimeMillis());
+        if (dt > 1000)
+          logger.log(BasicLevel.WARN, " -> clock synchronization between client and server: " + dt);
+        StreamUtil.writeTo(dt, nos);
+      }
+      
       Identity identity = Identity.read(is);
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> read identity = " + identity);

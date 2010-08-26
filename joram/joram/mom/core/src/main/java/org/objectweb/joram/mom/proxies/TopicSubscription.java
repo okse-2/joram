@@ -52,7 +52,8 @@ class TopicSubscription {
    * @param selector  Selector.
    */
   void putSubscription(String name, String selector) {
-    if (selector == null) selector = "";
+    if (selector == null)
+      selector = "";
     subs.put(name, selector);
   }
 

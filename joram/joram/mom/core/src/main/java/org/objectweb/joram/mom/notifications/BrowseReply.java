@@ -31,7 +31,7 @@ import java.util.Vector;
  * A <code>BrowseReply</code> instance is used by a queue for replying
  * to a client <code>BrowseRequest</code> by sending a vector of its messages.
  */
-public class BrowseReply extends AbstractReplyNot {
+public class BrowseReply extends AbstractReply {
   /**
    * 
    */

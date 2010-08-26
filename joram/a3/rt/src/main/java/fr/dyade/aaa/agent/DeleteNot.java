@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -24,10 +24,13 @@
 package fr.dyade.aaa.agent;
 
 /**
- * This notification is used to ask an agent destruction
+ * This notification is used to ask aaa agent destruction
  */
 public class DeleteNot extends Notification {
-  /** define serialVersionUID for interoperability */
+
+  /**
+   * 
+   */
   private static final long serialVersionUID = 1L;
   /**
    * the agent identified by 'reply' will receive a DeleteAck

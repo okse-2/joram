@@ -68,8 +68,9 @@ public class ListReply extends JndiReply {
     public Object nextElement() {
       if (index < pairs.length) {
         return pairs[index++];
+      } else {
+        throw new java.util.NoSuchElementException();
       }
-      throw new java.util.NoSuchElementException();
     }
   }
 }

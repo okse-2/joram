@@ -30,13 +30,14 @@ import javax.jms.Message;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
+import jms.conform.connection.ConnectionTest;
 import jms.framework.PTPTestCase;
 import jms.framework.TestConfig;
 
 
 /**
  * Test sessions <br />
- * See JMS specifications, 4.4 Session
+ * See JMS specifications, §4.4 Session
  */
 public class SessionTest extends PTPTestCase {
 
@@ -196,13 +197,13 @@ public class SessionTest extends PTPTestCase {
       Message m = receiver.receive(TestConfig.TIMEOUT);
       receiverSession.close();
       m.acknowledge();
-      fail("4.4.1 Invoking the acknowledge method of a received message from a closed "
+      fail("§4.4.1 Invoking the acknowledge method of a received message from a closed "
           + " session must throw an [javax.jms.]IllegalStateException.\n");
     } catch (javax.jms.IllegalStateException e) {
     } catch (JMSException e) {
       fail("Should raise a javax.jms.IllegalStateException, not a " + e);
     } catch (java.lang.IllegalStateException e) {
-      fail("4.4.1 Invoking the acknowledge method of a received message from a closed "
+      fail("§4.4.1 Invoking the acknowledge method of a received message from a closed "
           + "session must throw an [javax.jms.]IllegalStateException, "
           + "[not a java.lang.IllegalStateException]");
     }
@@ -223,7 +224,7 @@ public class SessionTest extends PTPTestCase {
       receiverSession.close();
       assertEquals("testUseMessage", m.getText());
     } catch (Exception e) {
-      fail("4.4.1 It is valid to continue to use message objects created or received via "
+      fail("§4.4.1 It is valid to continue to use message objects created or received via "
           + "the [closed] session.\n");
     }
   }
@@ -236,7 +237,7 @@ public class SessionTest extends PTPTestCase {
     try {
       senderSession.close();
       senderSession.createMessage();
-      fail("4.4.1 An attempt to use [a closed session] must throw a [javax.jms.]IllegalStateException.\n");
+      fail("§4.4.1 An attempt to use [a closed session] must throw a [javax.jms.]IllegalStateException.\n");
     } catch (javax.jms.IllegalStateException e) {
     } catch (JMSException e) {
       fail("Should raise a javax.jms.IllegalStateException, not a " + e);
@@ -257,7 +258,7 @@ public class SessionTest extends PTPTestCase {
       // we close it a second time
       senderSession.close();
     } catch (Exception e) {
-      fail("4.4.1 Closing a closed session must NOT throw an exception.\n");
+      fail("§4.4.1 Closing a closed session must NOT throw an exception.\n");
     }
   }
 

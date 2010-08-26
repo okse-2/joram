@@ -617,7 +617,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
       throw new IllegalStateException("Can not commit.");
 
     if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, "NTransaction, commit(" + release + ')');
+      logmon.log(BasicLevel.DEBUG, "NTransaction, commit");
     
     Hashtable log = ((Context) perThreadContext.get()).log;
     if (! log.isEmpty()) {
@@ -901,7 +901,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
       count = newcount;
     }
 
-    void writeInt(int v) {
+    void writeInt(int v) throws IOException {
       int newcount = count +4;
       if (newcount > buf.length) {
         byte newbuf[] = new byte[buf.length << 1];

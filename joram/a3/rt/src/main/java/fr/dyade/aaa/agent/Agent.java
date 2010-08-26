@@ -160,10 +160,11 @@ public abstract class Agent implements AgentMBean, Serializable {
    * @return this <code>Agent</code>'s name.
    */
   public String getName() {
-    if ((name == null) || (name.length() == 0))
+    if ((name == null) || (name.length() == 0)) {
       return id.toString();
-
-    return name;
+    } else {
+      return name;
+    }
   }
 
   /**
@@ -210,9 +211,6 @@ public abstract class Agent implements AgentMBean, Serializable {
     out.writeBoolean(fixed);
   }
 
-  /**
-   * @throws ClassNotFoundException  
-   */
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
     name = in.readUTF();
     if (name.length() == 0)

@@ -1,5 +1,6 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
+ * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.shared;
@@ -7,10 +8,6 @@ package com.scalagent.appli.shared;
 import java.util.Map;
 
 import com.scalagent.engine.shared.BaseWTO;
-
-/**
- * @author Yohann CINTRE
- */
 @SuppressWarnings("unchecked")
 public class MessageWTO extends BaseWTO {
 

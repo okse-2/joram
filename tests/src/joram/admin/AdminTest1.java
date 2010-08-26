@@ -22,6 +22,8 @@
  */
 package joram.admin;
 
+
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.MessageConsumer;
@@ -33,10 +35,12 @@ import javax.jms.TextMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
+
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.client.jms.admin.DeadMQueue;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
@@ -51,19 +55,23 @@ public class AdminTest1 extends TestCase {
   public void run() {
     try {
       startAgentServer((short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
+      
       Thread.sleep(4000);
       
       System.out.println("Standard admin");
       doTest(false);
       
       stopAgentServer((short)0);
+      
       Thread.sleep(4000);
       
       startAgentServer((short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
+      
       Thread.sleep(4000);
       
       System.out.println("Multithread admin");
       doTest(true);
+      
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);
@@ -81,7 +89,7 @@ public class AdminTest1 extends TestCase {
     ((TcpConnectionFactory) cf).getParameters().multiThreadSync = multiThreadSync;
 
     AdminModule.connect(cf, "root", "root");
-    
+
     User user = User.create("anonymous", "anonymous", 0);
 
     // Create a queue
@@ -102,7 +110,7 @@ public class AdminTest1 extends TestCase {
     Topic topic2 = Topic.create(0, "topic");
     assertTrue("Bad topic", topic.equals(topic2));
 
-    Queue deadMQueue = Queue.create(0, "dmq");
+    DeadMQueue deadMQueue = (DeadMQueue) DeadMQueue.create(0,"dmq");
 
     ((TcpConnectionFactory) cf).getParameters().multiThreadSync = multiThreadSync;
 
@@ -119,11 +127,14 @@ public class AdminTest1 extends TestCase {
     // Don't need to create a temporary topic
     // there is already one
     //session.createTemporaryTopic();
+
     TemporaryQueue tmpQueue = session.createTemporaryQueue();
 
     connection.start();
 
     Destination[] destinations = AdminModule.getDestinations(0);
+
+    System.out.println("destinations=" + destinations);
 
     assertTrue("Wrong destinations count (" + destinations.length + ')', destinations.length == 5);
 
@@ -170,7 +181,7 @@ public class AdminTest1 extends TestCase {
     topic = (org.objectweb.joram.client.jms.Topic)ctx.lookup("topic");
     tmpQueue = (TemporaryQueue)ctx.lookup("tmpQueue");
     tmpTopic = (TemporaryTopic)ctx.lookup("tmpTopic");
-    deadMQueue = (Queue)ctx.lookup("deadMQueue");
+    deadMQueue = (DeadMQueue)ctx.lookup("deadMQueue");
 
     MessageConsumer consumer = session.createConsumer(queue);
     MessageProducer producer = session.createProducer(queue);

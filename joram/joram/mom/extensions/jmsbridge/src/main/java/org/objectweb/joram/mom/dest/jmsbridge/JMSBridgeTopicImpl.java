@@ -166,7 +166,8 @@ public class JMSBridgeTopicImpl extends TopicImpl {
    *
    * @exception AccessException  If the sender is not a READER.
    */
-  public void postSubscribe() {
+  public void postSubscribe(SubscribeRequest not) {
+
     // First subscription: setting a listener on the foreign JMS consumer.
     try {
       if (subscribers.size() == 1) 
@@ -186,9 +187,9 @@ public class JMSBridgeTopicImpl extends TopicImpl {
    * JMS consumer.
    *
    */
-  public void preUnsubscribe() {
+  public void preUnsubscribe(UnsubscribeRequest not) {
     // Last subscription: removing the JMS listener.
-    if (subscribers.size() == 1)
+    if (subscribers.isEmpty())
       jmsModule.unsetMessageListener();
   } 
 
@@ -239,7 +240,8 @@ public class JMSBridgeTopicImpl extends TopicImpl {
    * to the cluster fellows if any, and to the foreign JMS destination.
    */
   public ClientMessages preProcess(AgentId from, ClientMessages not) {
-    if (getId().equals(from)) return not;
+    if (getId().equals(from))
+      return not;
 
     // Forwarding the messages to the father or the cluster fellows, if any:
     forwardMessages(not);

@@ -1,5 +1,6 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
+ * (c)2010 Tagsys-RFID 
  */
 package com.scalagent.appli.client.command.subscription;
 
@@ -8,9 +9,7 @@ import com.scalagent.engine.client.command.Action;
 import com.scalagent.engine.client.command.CalledMethod;
 
 /**
- * This action load the list of subscriptions from the server
- * 
- * @author Yohann CINTRE
+ * This action load the list of devices from the server
  */
 @CalledMethod(value=LoadSubscriptionActionImpl.class)
 public class LoadSubscriptionAction implements Action<LoadSubscriptionResponse>{

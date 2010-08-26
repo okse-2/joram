@@ -219,16 +219,16 @@ public class ReliableTcpConnection {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
                  "ReliableTcpConnection.ackPendingMessages(" + ackId + ')');
-    
     synchronized (pendingMessages) {
       while (pendingMessages.size() > 0) {
-        TcpMessage pendingMsg = (TcpMessage)pendingMessages.elementAt(0);
+        TcpMessage pendingMsg = 
+          (TcpMessage)pendingMessages.elementAt(0);
         if (ackId < pendingMsg.id) {
           // It's an old acknowledge
           break;
+        } else {
+          pendingMessages.removeElementAt(0);
         }
-        
-        pendingMessages.removeElementAt(0);
       }
     }
   }

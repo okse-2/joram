@@ -1,5 +1,6 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
+ * @author Yohann CINTRE
  */
 
 
@@ -10,9 +11,7 @@ import com.scalagent.engine.client.command.Action;
 import com.scalagent.engine.client.command.CalledMethod;
 
 /**
- * This action load the list of queue from the server
- * 
- * @author Yohann CINTRE
+ * This action load the list of devices from the server
  */
 @CalledMethod(value=LoadQueueActionImpl.class)
 public class LoadQueueAction implements Action<LoadQueueResponse>{

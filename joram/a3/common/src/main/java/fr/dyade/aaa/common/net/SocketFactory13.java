@@ -62,11 +62,12 @@ public class SocketFactory13 extends SocketFactory {
    */
   public Socket createSocket(InetAddress addr, int port,
                              int timeout) throws IOException {
-    if (timeout == 0)
+    if (timeout == 0) {
       return new Socket(addr, port);
-
-    // AF (TODO): To be provided
-    throw new UnsupportedOperationException();
+    } else {
+      // To pe provided
+      throw new UnsupportedOperationException();
+    }
   }
 
   /**
@@ -90,10 +91,11 @@ public class SocketFactory13 extends SocketFactory {
   public Socket createSocket(InetAddress addr, int port,
                              InetAddress localAddr, int localPort,
                              int timeout) throws IOException {
-    if (timeout == 0)
+    if (timeout == 0) {
       return new Socket(addr, port, localAddr, localPort);
-
-    // AF (TODO): To be provided
-    throw new UnsupportedOperationException();
+    } else {
+      // To pe provided
+      throw new UnsupportedOperationException();
+    }
   }
 }

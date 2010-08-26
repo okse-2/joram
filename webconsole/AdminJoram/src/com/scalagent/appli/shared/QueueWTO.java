@@ -1,5 +1,6 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
+ * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.shared;
@@ -10,9 +11,6 @@ import java.util.Vector;
 
 import com.scalagent.engine.shared.BaseWTO;
 
-/**
- * @author Yohann CINTRE
- */
 public class QueueWTO extends BaseWTO {
 	
 	private String name;

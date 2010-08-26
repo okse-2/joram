@@ -26,7 +26,7 @@ package org.objectweb.joram.mom.notifications;
 import fr.dyade.aaa.agent.*;
 
 /**
- * Transient notification needed by the HA mode.
+ * Transient notification
  */
 public class GetProxyIdListNot extends SyncNotification {
   /** define serialVersionUID for interoperability */

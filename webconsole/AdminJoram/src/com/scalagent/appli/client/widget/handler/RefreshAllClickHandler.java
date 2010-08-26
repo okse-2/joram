@@ -1,5 +1,6 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
+ * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.widget.handler;
@@ -13,9 +14,6 @@ import com.scalagent.appli.client.presenter.UserListPresenter;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 
-/**
- * @author Yohann CINTRE
- */
 public class RefreshAllClickHandler implements ClickHandler {
 
 

@@ -66,8 +66,9 @@ import org.objectweb.joram.shared.client.GetAdminTopicRequest;
 import org.objectweb.joram.shared.client.QBrowseRequest;
 import org.objectweb.joram.shared.client.ServerReply;
 import org.objectweb.joram.shared.client.SessAckRequest;
-import org.objectweb.joram.shared.client.SessCreateDestReply;
-import org.objectweb.joram.shared.client.SessCreateDestRequest;
+import org.objectweb.joram.shared.client.SessCreateTDReply;
+import org.objectweb.joram.shared.client.SessCreateTQRequest;
+import org.objectweb.joram.shared.client.SessCreateTTRequest;
 import org.objectweb.joram.shared.client.SessDenyRequest;
 import org.objectweb.joram.shared.client.TempDestDeleteRequest;
 import org.objectweb.joram.shared.security.Identity;
@@ -106,7 +107,8 @@ public class SoapRequestChannel implements RequestChannel {
    * @exception JMSSecurityException  If the user identification is incorrect.
    * @exception IllegalStateException  If the server is not reachable.
    */
-  public SoapRequestChannel(FactoryParameters params, Identity identity) {
+  public SoapRequestChannel(FactoryParameters params, 
+                            Identity identity) throws JMSException {
     factParams = params;
     this.identity = identity;
   }
@@ -180,8 +182,11 @@ public class SoapRequestChannel implements RequestChannel {
                         new QName("urn:ProxyService", "SessDenyRequest"),
                                   SessDenyRequest.class, beanSer, beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
-                        new QName("urn:ProxyService", "SessCreateDestRequest"),
-                                  SessCreateDestRequest.class, beanSer, beanSer);
+                        new QName("urn:ProxyService", "SessCreateTQRequest"),
+                                  SessCreateTQRequest.class, beanSer, beanSer);
+    mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
+                        new QName("urn:ProxyService", "SessCreateTTRequest"),
+                                  SessCreateTTRequest.class, beanSer, beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
                         new QName("urn:ProxyService", "TempDestDeleteRequest"),
                                   TempDestDeleteRequest.class, beanSer,
@@ -209,7 +214,7 @@ public class SoapRequestChannel implements RequestChannel {
                                   ServerReply.class, beanSer, beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
                         new QName("urn:ProxyService", "SessCreateTDReply"),
-                                  SessCreateDestReply.class, beanSer, beanSer);
+                                  SessCreateTDReply.class, beanSer, beanSer);
     mappingReg.mapTypes(Constants.NS_URI_SOAP_ENC,
                         new QName("urn:ProxyService", "CnxCloseReply"),
                                   CnxCloseReply.class, beanSer, beanSer);
@@ -368,10 +373,19 @@ public class SoapRequestChannel implements RequestChannel {
           nextSleep = nextSleep * 2;
           continue;
         }
-        
-        long attemptsT = (System.currentTimeMillis() - startTime) / 1000;
-        throw new IllegalStateException("Could not open the connection with server " + factParams.getHost() + '/' + factParams.getPort() +
-                                        " after " + attemptsC + " attempts during " + attemptsT + "s: " + error);
+        // If timer is over, throwing an IllegalStateException:
+        else {
+          long attemptsT = (System.currentTimeMillis() - startTime) / 1000;
+          throw new IllegalStateException("Could not open the connection"
+                                          + " with server on host "
+                                          + factParams.getHost()
+                                          + " and port "
+                                          + factParams.getPort()
+                                          + " after " + attemptsC
+                                          + " attempts during "
+                                          + attemptsT + " secs: "
+                                          + error);
+        }
       }
     }
   }

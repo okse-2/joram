@@ -373,9 +373,11 @@ public class Properties implements Serializable, Cloneable {
 
 
   private Enumeration getEnumeration(int type) {
-    if (count == 0)  return emptyEnumerator;
-
-    return new Enumerator(type, false);
+    if (count == 0) {
+      return emptyEnumerator;
+    } else {
+      return new Enumerator(type, false);
+    }
   }
 
   // Comparison and hashing
@@ -732,9 +734,6 @@ public class Properties implements Serializable, Cloneable {
     writeTo(out);
   }
 
-  /**
-   * @throws ClassNotFoundException  
-   */
   private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
     readFrom(in);
   }

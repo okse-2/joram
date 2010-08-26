@@ -1,5 +1,6 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
+ * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.server;
@@ -9,7 +10,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import javax.servlet.http.HttpSession;
 
@@ -18,7 +18,7 @@ import org.objectweb.joram.mom.dest.QueueImplMBean;
 import org.objectweb.joram.mom.messages.MessageView;
 import org.objectweb.joram.mom.proxies.ClientSubscriptionMBean;
 import org.objectweb.joram.mom.proxies.ProxyImplMBean;
-import org.ow2.joram.admin.JORAMInterface;
+import org.ow2.joram.admin.LaunchInterface;
 
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.scalagent.appli.server.converter.MessageWTOConverter;
@@ -38,26 +38,26 @@ import com.scalagent.engine.server.BaseRPCServiceCache;
  * server, compares it with stored data (in session) and send diff to the
  * client.
  * 
- * It handles:
- *    - queues
- *    - topics
- *    - users
- *    - subscriptions
- *    - messages
- *    
- *    @author Yohann CINTRE
+ * It handles: - devices - ECWSpecifications - test results
+ * 
+ * @author Florian Gimbert
  */
-
 public class RPCServiceCache extends BaseRPCServiceCache {
 
-	private static boolean isConnected = false;
-	private static JORAMInterface JORAMInterface;
+	public static boolean isConnected = false;
+	public static LaunchInterface JORAMInterface;
 
-	private static final String SESSION_TOPICS = "topicsList";
-	private static final String SESSION_QUEUES = "queuesList";
-	private static final String SESSION_MESSAGES = "messagesList";
+	public static final String SESSION_TOPICS = "topicsList";
+	public static final String SESSION_QUEUES = "queuesList";
+	public static final String SESSION_MESSAGES = "messagesList";
 	private static final String SESSION_USERS = "usersList";
 	private static final String SESSION_SUBSCRIPTION = "subscriptionList";
+
+	/**
+	 * These attributes are used to store and retrieve information in the
+	 * session.
+	 */
+	public static final String SESSION_USER_LOGIN = "userLogin";
 
 
 	private Map<String, DestinationImplMBean> mapDestinations;
@@ -121,7 +121,9 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 		session.setAttribute(RPCServiceCache.SESSION_QUEUES, sessionQueues);
 
 		return toReturn;
+
 	}
+
 
 	@SuppressWarnings("unchecked")
 	public List<MessageWTO> getMessages(HttpSession session, String queueName) throws Exception {
@@ -216,32 +218,11 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 
 		return toReturn;
 	}
-	
-	public Vector<Float> getInfos(boolean isforceUpdate) {
-		
-		synchWithJORAM(isforceUpdate);
-		
-		int lower = 0;
-		int higher = 2;
-		float e1 = (float)(Math.random() * (higher-lower)) + lower;
-		float n1 = (float)(Math.random() * (higher-lower)) + lower;
-		float n2 = (float)(Math.random() * (higher-lower)) + lower;
-		float n3 = (float)(Math.random() * (higher-lower)) + lower;
-		float n4 = (float)(Math.random() * (higher-lower)) + lower;
-		
-		Vector<Float> vInfos = new Vector<Float>();
-		vInfos.add(e1);
-		vInfos.add(n1);
-		vInfos.add(n2);
-		vInfos.add(n3);
-		vInfos.add(n4);
-		return vInfos;
-	}
 
 	public boolean connectJORAM(String login, String password) {
 		try {
 			if (!isConnected) {
-				JORAMInterface = new JORAMInterface(login, password);
+				JORAMInterface = new LaunchInterface(login, password);
 				isConnected = true;
 			}
 			return true;
@@ -266,129 +247,59 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 
 	}
 
-	
-	/** QUEUES **/
-	
-	public boolean createNewQueue(QueueWTO queue) {
-		if (!isConnected) { return false; }
-		return JORAMInterface.createNewQueue(queue.getName(), queue.getDMQId(), queue.getDestinationId(), queue.getPeriod(), queue.getThreshold(), queue.getNbMaxMsg(), queue.isFreeReading(), queue.isFreeWriting());
-	}
-	
-	public boolean editQueue(QueueWTO queue) {
-		if (!isConnected) { return false; }
-		return JORAMInterface.editQueue(queue.getName(), queue.getDMQId(), queue.getDestinationId(), queue.getPeriod(), queue.getThreshold(), queue.getNbMaxMsg(), queue.isFreeReading(), queue.isFreeWriting());
-	}
-	
-	public boolean deleteQueue(String queueName) {
-		if (!isConnected) { return false; }
-		return JORAMInterface.deleteQueue(queueName);
-	}
-
 	public boolean cleanWaitingRequest(String queueName) {
 		if (!isConnected) { return false; }
-		return JORAMInterface.cleanWaitingRequest(queueName);
+
+		Map<String, DestinationImplMBean> mapTmp = JORAMInterface.getListener().getDestinations();
+		((QueueImplMBean) mapTmp.get(queueName)).cleanWaitingRequest();
+
+		return true;
 	}
 
 	public boolean cleanPendingMessage(String queueName) {
 		if (!isConnected) { return false; }
-		return JORAMInterface.cleanPendingMessage(queueName);
+
+		Map<String, DestinationImplMBean> mapTmp = JORAMInterface.getListener().getDestinations();
+		((QueueImplMBean) mapTmp.get(queueName)).cleanPendingMessage();
+
+		return true;
 	}
 
-	
-	/** USERS **/
-	
-	public boolean createNewUser(UserWTO user) {
+	public boolean deleteQueue(String queueName) {
 		if (!isConnected) { return false; }
-		return JORAMInterface.createNewUser(user.getName(), user.getPeriod());
+
+		// Map<String, DestinationImplMBean> mapTmp = simulator.getListener().getDestinations();
+		// (FakeQueue) mapTmp.get(queueName)).deleteQueue();
+
+		// TODO JORAM : supprimer la queue
+		System.out.println("!!! TODO JORAM : Suppression de la queue : "+queueName);
+
+		return true;
 	}
 
-	public boolean editUser(UserWTO user) {
-		if (!isConnected) { return false; }
-		return JORAMInterface.editUser(user.getName(), user.getPeriod());
-	}
-
-	public boolean deleteUser(String userName) {
-		if (!isConnected) { return false; }
-		return JORAMInterface.deleteUser(userName);
-	}
-	
-	
-	/** MESSAGES **/
-	
-	public boolean createNewMessage(MessageWTO message, String queueName) {
-		if (!isConnected) { return false; }
-		return JORAMInterface.createNewMessage(queueName, 
-				message.getId(), 
-				message.getExpiration(),
-				message.getTimestamp(),
-				message.getPriority(),
-				message.getText(),
-				message.getType());
-	}
-
-	public boolean editMessage(MessageWTO message, String queueName) {
-		if (!isConnected) { return false; }
-		return JORAMInterface.editMessage(queueName, 
-				message.getId(), 
-				message.getExpiration(),
-				message.getTimestamp(),
-				message.getPriority(),
-				message.getText(),
-				message.getType());
-	}
-
+	@SuppressWarnings("unchecked")
 	public boolean deleteMessage(String messageName, String queueName) {
 		if (!isConnected) { return false; }
-		return JORAMInterface.deleteMessage(messageName, queueName);
-	}
-	
 
-	/** TOPICS **/
-	
-	public boolean createNewTopic(TopicWTO topic) {
-		if (!isConnected) { return false; }
-		return JORAMInterface.createNewTopic(
-				topic.getName(), 
-				topic.getDMQId(),
-				topic.getDestinationId(),
-				topic.getPeriod(),
-				topic.isFreeReading(),
-				topic.isFreeWriting());
-	}
-
-	public boolean editTopic(TopicWTO topic) {
-		if (!isConnected) { return false; }
-		return JORAMInterface.editTopic(
-				topic.getName(), 
-				topic.getDMQId(),
-				topic.getDestinationId(),
-				topic.getPeriod(),
-				topic.isFreeReading(),
-				topic.isFreeWriting());
-	}
-
-	public boolean deleteTopic(String topicName) {
-		if (!isConnected) { return false; }
-		return JORAMInterface.deleteTopic(topicName);
-	}
-	
-	
-	/** SUBSCRIPTIONS **/
-
-	public boolean createNewSubscription(SubscriptionWTO sub) {
-		if (!isConnected) { return false; }
-		return JORAMInterface.createNewSubscription(sub.getName(), sub.getNbMaxMsg(), sub.getContextId(), sub.getSelector(), sub.getSubRequestId(), sub.isActive(), sub.isDurable());
-	}
-
-	public boolean editSubscription(SubscriptionWTO sub) {
-		if (!isConnected) { return false; }
 		synchWithJORAM(true);
-		return JORAMInterface.editSubscription(sub.getName(), sub.getNbMaxMsg(), sub.getContextId(), sub.getSelector(), sub.getSubRequestId(), sub.isActive(), sub.isDurable());
-	}
 
-	public boolean deleteSubscription(String subName) {
-		if (!isConnected) { return false; }
-		return JORAMInterface.deleteSubscription(subName);
-	}
+		QueueImplMBean queue = (QueueImplMBean) mapDestinations.get(queueName);
 
+		//		if(queue == null) {
+		//			throw new NotFoundException("Queue not found");
+		//		}
+
+		System.out.println("!!! TODO JORAM : Suppression du message : "+queueName+"/"+messageName);
+
+		List<MessageView> listMessage = queue.getMessagesView();
+
+		for(MessageView msg : listMessage) {
+			if(msg.getId().equals(messageName)) {
+				System.out.println("!!! DELETED");
+			}
+		}
+
+
+		return true;
+	}
 }

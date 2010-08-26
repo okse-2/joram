@@ -134,8 +134,8 @@ public class RoleMultiple implements Serializable {
       output.append("(");
       output.append(list.size());
       for (int i = 0; i < list.size(); i ++) {
-        output.append(",");
-        output.append(list.elementAt(i));
+	output.append(",");
+	output.append((AgentId) list.elementAt(i));
       }
       output.append(")");
     }

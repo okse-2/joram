@@ -43,7 +43,6 @@ import org.objectweb.joram.shared.admin.CreateUserReply;
 import org.objectweb.joram.shared.admin.CreateUserRequest;
 import org.objectweb.joram.shared.admin.DeleteSubscriptionMessage;
 import org.objectweb.joram.shared.admin.DeleteUser;
-import org.objectweb.joram.shared.admin.GetNumberReply;
 import org.objectweb.joram.shared.admin.GetSubscription;
 import org.objectweb.joram.shared.admin.GetSubscriptionMessage;
 import org.objectweb.joram.shared.admin.GetSubscriptionMessageIds;
@@ -52,12 +51,13 @@ import org.objectweb.joram.shared.admin.GetSubscriptionMessageRep;
 import org.objectweb.joram.shared.admin.GetSubscriptionRep;
 import org.objectweb.joram.shared.admin.GetSubscriptions;
 import org.objectweb.joram.shared.admin.GetSubscriptionsRep;
-import org.objectweb.joram.shared.admin.GetDMQSettingsRequest;
-import org.objectweb.joram.shared.admin.GetDMQSettingsReply;
-import org.objectweb.joram.shared.admin.GetNbMaxMsgRequest;
-import org.objectweb.joram.shared.admin.SetDMQRequest;
-import org.objectweb.joram.shared.admin.SetNbMaxMsgRequest;
-import org.objectweb.joram.shared.admin.SetThresholdRequest;
+import org.objectweb.joram.shared.admin.Monitor_GetDMQSettings;
+import org.objectweb.joram.shared.admin.Monitor_GetDMQSettingsRep;
+import org.objectweb.joram.shared.admin.Monitor_GetNbMaxMsg;
+import org.objectweb.joram.shared.admin.Monitor_GetNbMaxMsgRep;
+import org.objectweb.joram.shared.admin.SetNbMaxMsg;
+import org.objectweb.joram.shared.admin.SetUserDMQ;
+import org.objectweb.joram.shared.admin.SetUserThreshold;
 import org.objectweb.joram.shared.admin.UpdateUser;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.shared.security.SimpleIdentity;
@@ -115,11 +115,7 @@ public class User extends AdministeredObject implements UserMBean {
 
     User other = (User) o;
 
-    return other.proxyId.equals(proxyId);
-  }
-
-  public int hashCode() {
-    return getName().hashCode();
+    return other.proxyId ==proxyId;
   }
 
   /**
@@ -373,7 +369,7 @@ public class User extends AdministeredObject implements UserMBean {
    * @exception AdminException  If the request fails.
    */
   public void setDMQId(String dmqId) throws ConnectException, AdminException {
-    doRequest(new SetDMQRequest(proxyId, dmqId));
+    doRequest(new SetUserDMQ(proxyId, dmqId));
   }
 
   /**
@@ -388,43 +384,47 @@ public class User extends AdministeredObject implements UserMBean {
    * @exception AdminException  If the request fails.
    */
   public void setThreshold(int threshold) throws ConnectException, AdminException {
-    doRequest(new SetThresholdRequest(proxyId, threshold));
+    doRequest(new SetUserThreshold(proxyId, threshold));
   }
-  
-  /**
-   * Monitoring method returning the dead message queue of this user,
-   * null if not set.
+
+  /** 
+   * Returns the dead message queue for this user, null if not set.
    * <p>
    * The request fails if the user is deleted server side.
    *
-   * @exception ConnectException  If the administration connection is closed or broken.
+   * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
-  public Queue getDMQ() throws ConnectException, AdminException {
-    String dmqId = getDMQId();
-    Queue dmq = null;
-    if (dmqId != null) {
-      dmq = new Queue(dmqId);
-      if (wrapper != null)
-        dmq.setWrapper(wrapper);
-    }
+  public DeadMQueue getDMQ() throws ConnectException, AdminException {
+    Monitor_GetDMQSettings request;
+    request = new Monitor_GetDMQSettings(proxyId);
+    Monitor_GetDMQSettingsRep reply;
+    reply = (Monitor_GetDMQSettingsRep) doRequest(request);
+
+    if (reply.getDMQName() == null)
+      return null;
+
+    DeadMQueue dmq = new DeadMQueue(reply.getDMQName());
+    if (wrapper != null)
+      dmq.setWrapper(wrapper);
+
     return dmq;
   }
 
-  /**
-   * Monitoring method returning the dead message queue id of this user,
-   * null if not set.
+  /** 
+   * Returns the dead message queue Id for this user, null if not set.
    * <p>
-   * The request fails if the destination is deleted server side.
+   * The request fails if the user is deleted server side.
    *
-   * @exception ConnectException  If the administration connection is closed or broken.
+   * @exception ConnectException  If the connection fails.
    * @exception AdminException  If the request fails.
    */
   public String getDMQId() throws ConnectException, AdminException {
-    GetDMQSettingsRequest request = new GetDMQSettingsRequest(proxyId);
-    GetDMQSettingsReply reply = (GetDMQSettingsReply) doRequest(request);
-
-    return reply.getDMQName();
+    DeadMQueue dmq = getDMQ();  
+    if (dmq == null)
+      return null;
+    else
+      return dmq.getName();
   }
 
   /** 
@@ -436,10 +436,13 @@ public class User extends AdministeredObject implements UserMBean {
    * @exception AdminException  If the request fails.
    */
   public int getThreshold() throws ConnectException, AdminException {
-    GetDMQSettingsRequest request = new GetDMQSettingsRequest(proxyId);
-    GetDMQSettingsReply reply = (GetDMQSettingsReply) doRequest(request);
+    Monitor_GetDMQSettings request = new Monitor_GetDMQSettings(proxyId);
+    Monitor_GetDMQSettingsRep reply = (Monitor_GetDMQSettingsRep) doRequest(request);
 
-      return reply.getThreshold();
+    if (reply.getThreshold() == null)
+      return -1;
+    else
+      return reply.getThreshold().intValue();
   }
 
   /**
@@ -455,7 +458,7 @@ public class User extends AdministeredObject implements UserMBean {
    */
   public void setNbMaxMsg(String subName, int nbMaxMsg) throws ConnectException, AdminException {
     //  TODO: Subscription sub = getSubscription(subName);
-    doRequest(new SetNbMaxMsgRequest(proxyId, nbMaxMsg, subName));
+    doRequest(new SetNbMaxMsg(proxyId, nbMaxMsg, subName));
   } 
 
   /** 
@@ -470,9 +473,9 @@ public class User extends AdministeredObject implements UserMBean {
    */
   public int getNbMaxMsg(String subName) throws ConnectException, AdminException {
     //  TODO: Subscription sub = getSubscription(subName);
-    GetNbMaxMsgRequest request = new GetNbMaxMsgRequest(proxyId, subName);
-    GetNumberReply reply = (GetNumberReply) doRequest(request);
-    return reply.getNumber();
+    Monitor_GetNbMaxMsg request = new Monitor_GetNbMaxMsg(proxyId, subName);
+    Monitor_GetNbMaxMsgRep reply = (Monitor_GetNbMaxMsgRep) doRequest(request);
+    return reply.getNbMaxMsg();
   }
 
   /**

@@ -1,5 +1,6 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
+ * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.command.message;
@@ -10,9 +11,8 @@ import com.scalagent.engine.client.command.CalledMethod;
 
 
 /**
- * This action delete the message from a queue on the server.
- * 
- * @author Yohann CINTRE
+ * This action asks for devices list from the server.
+ * @author Florian Gimbert
  */
 @CalledMethod(value=DeleteMessageActionImpl.class)
 public class DeleteMessageAction implements Action<DeleteMessageResponse> {

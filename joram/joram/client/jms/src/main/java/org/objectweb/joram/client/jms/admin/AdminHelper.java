@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 2004 France Telecom R&D
  *
@@ -30,6 +30,7 @@ import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.shared.admin.*;
 
 import java.net.ConnectException;
+
 
 /**
  * The <code>AdminHelper</code> class is a utility class providing methods
@@ -71,7 +72,7 @@ public class AdminHelper {
    * @deprecated
    */
   public static void unsetClusterLink(Topic topic) throws ConnectException, AdminException {
-    AdminModule.doRequest(new SetCluster(topic.getName(), null));
+    AdminModule.doRequest(new UnsetCluster(topic.getName()));
   }
 
   /**
@@ -105,7 +106,7 @@ public class AdminHelper {
    * @deprecated
    */
   public static void unsetHierarchicalLink(Topic topic) throws ConnectException, AdminException {
-    AdminModule.doRequest(new SetFather(null, topic.getName()));
+    AdminModule.doRequest(new UnsetFather(topic.getName()));
   }
 
   /**

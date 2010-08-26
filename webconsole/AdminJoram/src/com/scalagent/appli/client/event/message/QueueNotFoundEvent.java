@@ -1,14 +1,14 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
+ * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.event.message;
 
 import com.google.gwt.event.shared.GwtEvent;
 
-/**
- * @author Yohann CINTRE
- */
+
+
 public class QueueNotFoundEvent extends GwtEvent<QueueNotFoundHandler> {
 
 	private String queueName;

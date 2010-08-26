@@ -153,9 +153,10 @@ public class HANamingConnection implements NamingConnection {
     throw exc2;
   }
 
-  private void close() {
+  private void close() throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, "HANamingConnection.close()");
+      Trace.logger.log(BasicLevel.DEBUG, 
+                       "HANamingConnection.close()");
     ioCtrl.close();
   }
 

@@ -23,6 +23,8 @@
  */
 package org.objectweb.joram.mom.proxies.tcp;
 
+import java.io.IOException;
+
 import org.objectweb.joram.mom.proxies.AckedQueue;
 import org.objectweb.joram.mom.proxies.ProxyMessage;
 import org.objectweb.joram.shared.client.MomExceptionReply;
@@ -55,7 +57,8 @@ public class TcpWriter extends Daemon {
    */
   public TcpWriter(IOControl ioctrl,
                    AckedQueue replyQueue,
-                   TcpConnection tcpConnection) {
+                   TcpConnection tcpConnection) 
+  throws IOException {
     super("tcpWriter");
     this.ioctrl = ioctrl;
     this.replyQueue = replyQueue;

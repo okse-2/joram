@@ -325,11 +325,13 @@ public class RAConfig {
           // search fileName in jar file.
           InputStream reader = zipFile.getInputStream(currEntry);
           res = extractFromJAR(fileName,reader);
-          if (res == null) continue;
-          
-          // the fileName found in jar file.
-          reader.close();
-          break;
+          if (res == null)
+            continue;
+          else {
+            // the fileName found in jar file.
+            reader.close();
+            break;
+          }
         }
       }
       // extract the fileName from InputStream

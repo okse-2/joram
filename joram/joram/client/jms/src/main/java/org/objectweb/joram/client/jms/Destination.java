@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -50,15 +50,19 @@ import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.admin.CreateDestinationReply;
 import org.objectweb.joram.shared.admin.CreateDestinationRequest;
 import org.objectweb.joram.shared.admin.DeleteDestination;
-import org.objectweb.joram.shared.admin.GetDMQSettingsRequest;
-import org.objectweb.joram.shared.admin.GetDMQSettingsReply;
-import org.objectweb.joram.shared.admin.GetRightsReply;
-import org.objectweb.joram.shared.admin.GetRightsRequest;
-import org.objectweb.joram.shared.admin.GetStatsRequest;
-import org.objectweb.joram.shared.admin.GetStatsReply;
-import org.objectweb.joram.shared.admin.SetDMQRequest;
+import org.objectweb.joram.shared.admin.Monitor_GetDMQSettings;
+import org.objectweb.joram.shared.admin.Monitor_GetDMQSettingsRep;
+import org.objectweb.joram.shared.admin.Monitor_GetFreeAccess;
+import org.objectweb.joram.shared.admin.Monitor_GetFreeAccessRep;
+import org.objectweb.joram.shared.admin.Monitor_GetReaders;
+import org.objectweb.joram.shared.admin.Monitor_GetStat;
+import org.objectweb.joram.shared.admin.Monitor_GetStatRep;
+import org.objectweb.joram.shared.admin.Monitor_GetUsersRep;
+import org.objectweb.joram.shared.admin.Monitor_GetWriters;
+import org.objectweb.joram.shared.admin.SetDestinationDMQ;
 import org.objectweb.joram.shared.admin.SetReader;
 import org.objectweb.joram.shared.admin.SetWriter;
+import org.objectweb.joram.shared.admin.UnsetDestinationDMQ;
 import org.objectweb.joram.shared.admin.UnsetReader;
 import org.objectweb.joram.shared.admin.UnsetWriter;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -95,25 +99,26 @@ public abstract class Destination extends AdministeredObject implements javax.jm
   }
 
   /**
-   * Check the specified destination identifier.
-   * 
-   * @exception Exception if an invalid destination identifier is specified.
-   */
-  public static final void checkId(String id) throws InvalidDestinationException {
-    try {
-      DestinationConstants.checkId(id);
-    } catch (Exception exc) {
-      throw new InvalidDestinationException(exc.getMessage());
-    }
-  }
-  
-  /**
    * Check the destination identifier.
    * 
    * @exception InvalidDestinationException if the destination identifier is invalid.
    */
   public void check() throws InvalidDestinationException {
     checkId(getName());
+  }
+  
+  /**
+   * Check the specified destination identifier.
+   * 
+   * @exception InvalidDestinationException if an invalid destination identifier is specified.
+   */
+  public static void checkId(String id)  throws InvalidDestinationException {
+    if (id == null)
+      throw new InvalidDestinationException("Undefined (null) destination identifier.");
+    
+    if (id.matches("#\\d+\\.\\d+\\.\\d+")) return;
+    
+    throw new InvalidDestinationException("Bad destination identifier:" + id);
   }
 
   /**
@@ -610,17 +615,15 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * @exception AdminException  If the request fails.
    */
   public List getReaders() throws ConnectException, AdminException {
-    GetRightsRequest request = new GetRightsRequest(getName());
-    GetRightsReply reply = (GetRightsReply) doRequest(request);
+    Monitor_GetReaders request = new Monitor_GetReaders(getName());
+    Monitor_GetUsersRep reply = (Monitor_GetUsersRep) doRequest(request);
 
     Vector list = new Vector();
-    Hashtable users = reply.getReaders();
-    if (users != null) {
-      String name;
-      for (Enumeration names = users.keys(); names.hasMoreElements();) {
-        name = (String) names.nextElement();
-        list.add(new User(name, (String) users.get(name)));
-      }
+    Hashtable users = reply.getUsers();
+    String name;
+    for (Enumeration names = users.keys(); names.hasMoreElements();) {
+      name = (String) names.nextElement();
+      list.add(new User(name, (String) users.get(name)));
     }
     return list;
   }
@@ -638,15 +641,13 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * @see org.objectweb.joram.client.jms.DestinationMBean#getReaderList()
    */
   public List getReaderList() throws ConnectException, AdminException {
-    GetRightsRequest request = new GetRightsRequest(getName());
-    GetRightsReply reply = (GetRightsReply) doRequest(request);
+    Monitor_GetReaders request = new Monitor_GetReaders(getName());
+    Monitor_GetUsersRep reply = (Monitor_GetUsersRep) doRequest(request);
 
     Vector list = new Vector();
-    Hashtable users = reply.getReaders();
-    if (users != null) {
-      for (Enumeration names = users.keys(); names.hasMoreElements();) {
-        list.add(names.nextElement());
-      }
+    Hashtable users = reply.getUsers();
+    for (Enumeration names = users.keys(); names.hasMoreElements();) {
+      list.add(names.nextElement());
     }
     return list;
   }
@@ -662,17 +663,15 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * @exception AdminException  If the request fails.
    */
   public List getWriters() throws ConnectException, AdminException {
-    GetRightsRequest request = new GetRightsRequest(getName());
-    GetRightsReply reply = (GetRightsReply) doRequest(request);
+    Monitor_GetWriters request = new Monitor_GetWriters(getName());
+    Monitor_GetUsersRep reply = (Monitor_GetUsersRep) doRequest(request);
 
     Vector list = new Vector();
-    Hashtable users = reply.getWriters();
-    if (users != null) {
-      String name;
-      for (Enumeration names = users.keys(); names.hasMoreElements();) {
-        name = (String) names.nextElement();
-        list.add(new User(name, (String) users.get(name)));
-      }
+    Hashtable users = reply.getUsers();
+    String name;
+    for (Enumeration names = users.keys(); names.hasMoreElements();) {
+      name = (String) names.nextElement();
+      list.add(new User(name, (String) users.get(name)));
     }
     return list;
   }
@@ -690,15 +689,13 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * @see org.objectweb.joram.client.jms.DestinationMBean#getWriterList()
    */
   public List getWriterList() throws ConnectException, AdminException {
-    GetRightsRequest request = new GetRightsRequest(getName());
-    GetRightsReply reply = (GetRightsReply) doRequest(request);
+    Monitor_GetWriters request = new Monitor_GetWriters(getName());
+    Monitor_GetUsersRep reply = (Monitor_GetUsersRep) doRequest(request);
 
     Vector list = new Vector();
-    Hashtable users = reply.getWriters();
-    if (users != null) {
-      for (Enumeration names = users.keys(); names.hasMoreElements();) {
-        list.add(names.nextElement());
-      }
+    Hashtable users = reply.getUsers();
+    for (Enumeration names = users.keys(); names.hasMoreElements();) {
+      list.add(names.nextElement());
     }
     return list;
   }
@@ -713,10 +710,11 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * @exception AdminException  If the request fails.
    */
   public boolean isFreelyReadable() throws ConnectException, AdminException {
-    GetRightsRequest request = new GetRightsRequest(getName());
-    GetRightsReply reply = (GetRightsReply) doRequest(request);
+    Monitor_GetFreeAccess request = new Monitor_GetFreeAccess(getName());
+    Monitor_GetFreeAccessRep reply;
+    reply = (Monitor_GetFreeAccessRep) doRequest(request);
 
-    return reply.isFreeReading();
+    return reply.getFreeReading();
   }
 
   /**
@@ -748,10 +746,11 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * @exception AdminException  If the request fails.
    */
   public boolean isFreelyWriteable() throws ConnectException, AdminException {
-    GetRightsRequest request = new GetRightsRequest(getName());
-    GetRightsReply reply = (GetRightsReply) doRequest(request);
+    Monitor_GetFreeAccess request = new Monitor_GetFreeAccess(getName());
+    Monitor_GetFreeAccessRep reply;
+    reply = (Monitor_GetFreeAccessRep) doRequest(request);
 
-    return reply.isFreeWriting();
+    return reply.getFreeWriting();
   }
 
   /**
@@ -783,30 +782,14 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * @exception AdminException  If the request fails.
    */
   public Queue getDMQ() throws ConnectException, AdminException {
-    String dmqId = getDMQId();
-    Queue dmq = null;
-    if (dmqId != null) {
-      dmq = new Queue(dmqId);
-      if (wrapper != null)
-        dmq.setWrapper(wrapper);
+    Monitor_GetDMQSettings request = new Monitor_GetDMQSettings(getName());
+    Monitor_GetDMQSettingsRep reply = (Monitor_GetDMQSettingsRep) doRequest(request);
+
+    if (reply.getDMQName() == null) {
+      return null;
+    } else {
+      return new Queue(reply.getDMQName());
     }
-    return dmq;
-  }
-
-  /**
-   * Monitoring method returning the dead message queue id of this destination,
-   * null if not set.
-   * <p>
-   * The request fails if the destination is deleted server side.
-   *
-   * @exception ConnectException  If the administration connection is closed or broken.
-   * @exception AdminException  If the request fails.
-   */
-  public String getDMQId() throws ConnectException, AdminException {
-    GetDMQSettingsRequest request = new GetDMQSettingsRequest(getName());
-    GetDMQSettingsReply reply = (GetDMQSettingsReply) doRequest(request);
-
-    return reply.getDMQName();
   }
 
   /**
@@ -826,10 +809,28 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    */
   public void setDMQ(Queue dmq) throws ConnectException, AdminException, InvalidDestinationException {
     if (dmq != null) {
+      dmq.check();
       setDMQId(dmq.getName());
     } else {
       setDMQId(null);
     }
+  }
+
+  /**
+   * Monitoring method returning the dead message queue id of this destination,
+   * null if not set.
+   * <p>
+   * The request fails if the destination is deleted server side.
+   *
+   * @exception ConnectException  If the administration connection is closed or broken.
+   * @exception AdminException  If the request fails.
+   */
+  public String getDMQId() throws ConnectException, AdminException {
+    Queue dmq = getDMQ();
+    if (dmq != null)
+      return dmq.getName();
+    else
+      return null;
   }
 
   /**
@@ -848,8 +849,11 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * @throws InvalidDestinationException If the specified destination is invalid.
    */
   public void setDMQId(String dmqId) throws ConnectException, AdminException, InvalidDestinationException {
-    if (dmqId != null) checkId(dmqId);
-    doRequest(new SetDMQRequest(getName(), dmqId));
+    checkId(dmqId);
+    if (dmqId == null)
+      doRequest(new UnsetDestinationDMQ(getName()));
+    else
+      doRequest(new SetDestinationDMQ(getName(), dmqId));
   }
 
   public static Destination newInstance(String id,
@@ -899,8 +903,8 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * @see org.objectweb.joram.client.jms.DestinationMBean#getStatistics()
    */
   public Hashtable getStatistics() throws ConnectException, AdminException {
-    GetStatsRequest request = new GetStatsRequest(getName());
-    GetStatsReply reply = (GetStatsReply) doRequest(request);
+    Monitor_GetStat request = new Monitor_GetStat(getName());
+    Monitor_GetStatRep reply = (Monitor_GetStatRep) doRequest(request);
     return  reply.getStats();
   }
 

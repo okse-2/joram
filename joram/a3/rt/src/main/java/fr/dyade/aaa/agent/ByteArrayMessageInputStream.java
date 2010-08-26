@@ -107,7 +107,8 @@ public abstract class ByteArrayMessageInputStream extends MessageInputStream {
     if (pos + len > count)
       len = count - pos;
 
-    if (len <= 0) return 0;
+    if (len <= 0)
+      return 0;
 
     System.arraycopy(buf, pos, b, off, len);
     pos += len;

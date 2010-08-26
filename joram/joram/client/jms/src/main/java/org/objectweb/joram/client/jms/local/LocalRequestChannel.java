@@ -60,10 +60,10 @@ public class LocalRequestChannel implements RequestChannel, LocalRequestChannelM
 
   private long receivedCount;
 
-  public LocalRequestChannel(Identity identity) {
+  public LocalRequestChannel(Identity identity) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "LocalConnection.<init>(" + identity + ')');
-    
+      logger.log(BasicLevel.DEBUG,
+                 "LocalConnection.<init>(" + identity + ')');
     this.identity = identity;
   }
 

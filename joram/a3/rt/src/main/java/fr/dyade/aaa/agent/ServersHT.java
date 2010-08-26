@@ -193,7 +193,7 @@ public class ServersHT {
    * @return  a string representation of this hashtable.
    */
   public synchronized String toString() {
-//    int max = size() - 1;
+    int max = size() - 1;
     StringBuffer buf = new StringBuffer();
 
     buf.append("(").append(super.toString());

@@ -39,7 +39,7 @@ import jms.framework.PTPTestCase;
 
 /**
  * Test the <code>javax.jms.Message</code> properties. <br />
- * See JMS Specification, 3.5 Message Properties (p.32-37)
+ * See JMS Specification, §3.5 Message Properties (p.32-37)
  */
 public class MessagePropertyTest extends PTPTestCase {
 
@@ -54,7 +54,7 @@ public class MessagePropertyTest extends PTPTestCase {
     try {
       Message message = senderSession.createMessage();
       message.setObjectProperty("prop", new Vector());
-      fail("3.5.5 An attempt to use any other class [than Boolean, Byte,...,String] must throw "
+      fail("§3.5.5 An attempt to use any other class [than Boolean, Byte,...,String] must throw "
           + "a JMS MessageFormatException.\n");
     } catch (MessageFormatException e) {
     } catch (JMSException e) {
@@ -87,7 +87,7 @@ public class MessagePropertyTest extends PTPTestCase {
     try {
       Message message = senderSession.createMessage();
       assertEquals(
-          "3.5.5 A null value is returned [by the getObjectProperty method] if a property by the specified "
+          "§3.5.5 A null value is returned [by the getObjectProperty method] if a property by the specified "
               + "name does not exits.\n", null, message
               .getObjectProperty("prop"));
     } catch (JMSException e) {
@@ -104,7 +104,7 @@ public class MessagePropertyTest extends PTPTestCase {
     try {
       Message message = senderSession.createMessage();
       assertEquals(
-          "3.5.5 A null value is returned [by the getStringProperty method] if a property by the specified "
+          "§3.5.5 A null value is returned [by the getStringProperty method] if a property by the specified "
               + "name does not exits.\n", null, message
               .getStringProperty("prop"));
     } catch (JMSException e) {
@@ -226,7 +226,7 @@ public class MessagePropertyTest extends PTPTestCase {
       message.setJMSCorrelationID("foo");
       Enumeration e = message.getPropertyNames();
       assertTrue(
-          "3.5.6 The getPropertyNames method does not return the names of "
+          "§3.5.6 The getPropertyNames method does not return the names of "
               + "the JMS standard header field [e.g. JMSCorrelationID].\n", !e
               .hasMoreElements());
     } catch (JMSException e) {
@@ -264,7 +264,7 @@ public class MessagePropertyTest extends PTPTestCase {
       message.setText("foo");
       message.clearProperties();
       assertEquals(
-          "3.5.7 Clearing a message's  property entries does not clear the value of its body.\n",
+          "§3.5.7 Clearing a message's  property entries does not clear the value of its body.\n",
           "foo", message.getText());
     } catch (JMSException e) {
       fail(e);
@@ -281,7 +281,7 @@ public class MessagePropertyTest extends PTPTestCase {
       message.setStringProperty("prop", "foo");
       message.clearProperties();
       assertEquals(
-          "3.5.7 A message's properties are deleted by the clearProperties method.\n",
+          "§3.5.7 A message's properties are deleted by the clearProperties method.\n",
           null, message.getStringProperty("prop"));
     } catch (JMSException e) {
       fail(e);

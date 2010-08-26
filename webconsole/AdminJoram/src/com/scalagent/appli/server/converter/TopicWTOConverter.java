@@ -1,6 +1,8 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
+ * @author Yohann CINTRE
  */
+
 
 package com.scalagent.appli.server.converter;
 
@@ -12,27 +14,13 @@ import org.objectweb.joram.mom.dest.TopicImplMBean;
 
 import com.scalagent.appli.shared.TopicWTO;
 
-/**
- * @author Yohann CINTRE
- */
+
 public class TopicWTOConverter {
 	
-
 	/**
-	 * 
-	 * @param key
-	 *            The ID of the queue
-	 * @param queue
-	 *            A DestinationImplMBean containing the queue info
-	 * @return A QueueWTO object created from the DestinationImplMBean object
-	 */
-	
-	/**
-	 * 
-	 * @param key The ID of the topic
-	 * @param topic A DestinationImplMBean containing the topic info
-	 * @return A TopicWTO object created from the DestinationImplMBean object
-	 */
+ 	* @param device
+ 	* @return a DeviceWTO object created from the DeviceDTO object
+ 	*/
 	public static TopicWTO getDeviceWTO(String key, DestinationImplMBean topic){
 		TopicWTO result = new TopicWTO(key, new Date(topic.getCreationTimeInMillis()), ((TopicImplMBean)topic).getSubscriberIds(), topic.getDMQId(),
 			  topic.getDestinationId(), topic.getNbMsgsDeliverSinceCreation(), topic.getNbMsgsReceiveSinceCreation(),
@@ -41,10 +29,12 @@ public class TopicWTOConverter {
 		return result;
 	}
   
-	/**
-	 * @param map Map of DestinationImplMBean
-	 * @return An Array of TopicWTO
-	 */
+ 
+
+  /**
+   * @param devices Array of DeviceDTO
+   * @return An Array of DeviceWTO
+   */
   	public static TopicWTO[] getTopicWTOArray(Map<String, DestinationImplMBean> map) {
     
   		

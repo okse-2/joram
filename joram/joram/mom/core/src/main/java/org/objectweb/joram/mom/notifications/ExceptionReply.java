@@ -29,7 +29,7 @@ import org.objectweb.joram.shared.excepts.MomException;
  * An <code>ExceptionReply</code> instance is used by a destination for
  * notifying a client of an exception thrown when processing a request.
  */
-public class ExceptionReply extends AbstractReplyNot
+public class ExceptionReply extends AbstractReply
 {
   /**
    * 
@@ -47,7 +47,7 @@ public class ExceptionReply extends AbstractReplyNot
    * @param request  The request that caused the exception.
    * @param except  The exception to send back to the client.
    */
-  public ExceptionReply(AbstractRequestNot request, MomException except)
+  public ExceptionReply(AbstractRequest request, MomException except)
   {
     super(request.getClientContext(), request.getRequestId());
     this.except = except;

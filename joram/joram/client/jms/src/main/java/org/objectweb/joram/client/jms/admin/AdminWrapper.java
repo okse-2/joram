@@ -22,6 +22,7 @@
  */
 package org.objectweb.joram.client.jms.admin;
 
+
 import java.net.ConnectException;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -33,7 +34,6 @@ import javax.jms.JMSException;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
-import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.admin.AddDomainRequest;
 import org.objectweb.joram.shared.admin.AddServerRequest;
 import org.objectweb.joram.shared.admin.AdminReply;
@@ -47,20 +47,18 @@ import org.objectweb.joram.shared.admin.GetDomainNames;
 import org.objectweb.joram.shared.admin.GetDomainNamesRep;
 import org.objectweb.joram.shared.admin.GetLocalServer;
 import org.objectweb.joram.shared.admin.GetLocalServerRep;
-import org.objectweb.joram.shared.admin.GetDMQSettingsRequest;
-import org.objectweb.joram.shared.admin.GetDMQSettingsReply;
-import org.objectweb.joram.shared.admin.GetDestinationsRequest;
-import org.objectweb.joram.shared.admin.GetDestinationsReply;
-import org.objectweb.joram.shared.admin.GetServersIdsRequest;
-import org.objectweb.joram.shared.admin.GetServersIdsReply;
-import org.objectweb.joram.shared.admin.GetStatsRequest;
-import org.objectweb.joram.shared.admin.GetStatsReply;
-import org.objectweb.joram.shared.admin.GetUsersReply;
-import org.objectweb.joram.shared.admin.GetUsersRequest;
+import org.objectweb.joram.shared.admin.Monitor_GetDMQSettings;
+import org.objectweb.joram.shared.admin.Monitor_GetDMQSettingsRep;
+import org.objectweb.joram.shared.admin.Monitor_GetDestinations;
+import org.objectweb.joram.shared.admin.Monitor_GetDestinationsRep;
+import org.objectweb.joram.shared.admin.Monitor_GetServersIds;
+import org.objectweb.joram.shared.admin.Monitor_GetServersIdsRep;
+import org.objectweb.joram.shared.admin.Monitor_GetUsers;
+import org.objectweb.joram.shared.admin.Monitor_GetUsersRep;
 import org.objectweb.joram.shared.admin.RemoveDomainRequest;
 import org.objectweb.joram.shared.admin.RemoveServerRequest;
-import org.objectweb.joram.shared.admin.SetDMQRequest;
-import org.objectweb.joram.shared.admin.SetThresholdRequest;
+import org.objectweb.joram.shared.admin.SetDefaultDMQ;
+import org.objectweb.joram.shared.admin.SetDefaultThreshold;
 import org.objectweb.joram.shared.admin.StopServerRequest;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.shared.security.SimpleIdentity;
@@ -77,7 +75,7 @@ import fr.dyade.aaa.common.Debug;
 public class AdminWrapper {
   /** The description of the server the module is connected to. */
   private Server server = null;
-  
+
   /** The requestor for sending the synchronous requests. */
   private AdminRequestor requestor;
   
@@ -300,38 +298,6 @@ public class AdminWrapper {
   }
 
   /**
-   * Returns statistics for the local server.
-   *
-   * @return  statistics for the local server.
-   *          
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
-   * 
-   * @see #getStatistics(int)
-   */
-  public final Hashtable getStatistics() throws ConnectException, AdminException {
-    return getStatistics(getLocalServerId());
-  }
-
-  /**
-   * Returns statistics for the the specified server.
-   * <p>
-   * The request fails if the target server does not belong to the platform.
-   *
-   * @param serverId Unique identifier of the server.
-   * @return  the statistics for the the specified server.
-   * 
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  If the request fails.
-   */
-  public final Hashtable getStatistics(int serverId) throws ConnectException, AdminException {
-    GetStatsRequest request = new GetStatsRequest(DestinationConstants.getNullId(serverId));
-    GetStatsReply reply = (GetStatsReply) doRequest(request);
-    return  reply.getStats();
-  }
-
-  
-  /**
    * Returns the unique identifier of the default dead message queue for the local
    * server, null if not set.
    *
@@ -348,7 +314,7 @@ public class AdminWrapper {
   }
 
   /**
-   * Returns the unique identifier of the default dead message queue for a given
+   * Returns the unique identifier of the default dead message queue for the local
    * server, null if not set.
    * <p>
    * The request fails if the target server does not belong to the platform.
@@ -361,8 +327,9 @@ public class AdminWrapper {
    * @exception AdminException  If the request fails.
    */
   public final String getDefaultDMQId(int serverId) throws ConnectException, AdminException {
-    GetDMQSettingsRequest request = new GetDMQSettingsRequest(DestinationConstants.getNullId(serverId));
-    GetDMQSettingsReply reply = (GetDMQSettingsReply) doRequest(request);
+    Monitor_GetDMQSettings request = new Monitor_GetDMQSettings(serverId);
+    Monitor_GetDMQSettingsRep reply;
+    reply = (Monitor_GetDMQSettingsRep) doRequest(request);
 
     if (reply.getDMQName() == null) return null;
 
@@ -397,7 +364,7 @@ public class AdminWrapper {
    * @exception AdminException  If the request fails.
    */
   public final void setDefaultDMQId(int serverId, String dmqId) throws ConnectException, AdminException {
-    doRequest(new SetDMQRequest(DestinationConstants.getNullId(serverId), dmqId));
+    doRequest(new SetDefaultDMQ(serverId, dmqId));
   }
 
   /**
@@ -461,7 +428,7 @@ public class AdminWrapper {
    * @exception AdminException  If the request fails.
    */
   public final void setDefaultDMQ(int serverId, Queue dmq) throws ConnectException, AdminException {
-    doRequest(new SetDMQRequest(DestinationConstants.getNullId(serverId), (dmq==null)?null:dmq.getName()));
+    doRequest(new SetDefaultDMQ(serverId, (dmq==null)?null:dmq.getName()));
   }
 
   /**
@@ -489,10 +456,14 @@ public class AdminWrapper {
    * @exception AdminException  If the request fails.
    */
   public final int getDefaultThreshold(int serverId) throws ConnectException, AdminException {
-    GetDMQSettingsRequest request = new GetDMQSettingsRequest(DestinationConstants.getNullId(serverId));
-    GetDMQSettingsReply reply = (GetDMQSettingsReply) doRequest(request);
+    Monitor_GetDMQSettings request = new Monitor_GetDMQSettings(serverId);
+    Monitor_GetDMQSettingsRep reply;
+    reply = (Monitor_GetDMQSettingsRep) doRequest(request);
 
-    return reply.getThreshold();
+    // TODO (AF): Changes threshold type to int.
+    if (reply.getThreshold() == null) return -1;
+
+    return reply.getThreshold().intValue();
   }
 
   /**
@@ -523,7 +494,7 @@ public class AdminWrapper {
    * @exception AdminException  If the request fails.
    */
   public final void setDefaultThreshold(int serverId, int threshold) throws ConnectException, AdminException {
-    doRequest(new SetThresholdRequest(DestinationConstants.getNullId(serverId), threshold));
+    doRequest(new SetDefaultThreshold(serverId, threshold));
   }
 
   /**
@@ -549,8 +520,8 @@ public class AdminWrapper {
    * @exception AdminException  Never thrown.
    */
   public final int[] getServersIds(String domain) throws ConnectException, AdminException {
-    GetServersIdsRequest request = new GetServersIdsRequest(getLocalServerId(), domain);
-    GetServersIdsReply reply = (GetServersIdsReply) doRequest(request);
+    Monitor_GetServersIds request = new Monitor_GetServersIds(getLocalServerId(), domain);
+    Monitor_GetServersIdsRep reply = (Monitor_GetServersIdsRep) doRequest(request);
 
     return reply.getIds();
   }
@@ -578,8 +549,8 @@ public class AdminWrapper {
    * @exception AdminException  Never thrown.
    */
   public final String[] getServersNames(String domain) throws ConnectException, AdminException {
-    GetServersIdsRequest request = new GetServersIdsRequest(getLocalServerId(), domain);
-    GetServersIdsReply reply = (GetServersIdsReply) doRequest(request);
+    Monitor_GetServersIds request = new Monitor_GetServersIds(getLocalServerId(), domain);
+    Monitor_GetServersIdsRep reply = (Monitor_GetServersIdsRep) doRequest(request);
 
     return reply.getNames();
   }
@@ -608,8 +579,8 @@ public class AdminWrapper {
    * @exception AdminException  Never thrown.
    */
   public final Server[] getServers(String domain) throws ConnectException, AdminException {
-    GetServersIdsRequest request = new GetServersIdsRequest(getLocalServerId(), domain);
-    GetServersIdsReply reply = (GetServersIdsReply) doRequest(request);
+    Monitor_GetServersIds request = new Monitor_GetServersIds(getLocalServerId(), domain);
+    Monitor_GetServersIdsRep reply = (Monitor_GetServersIdsRep) doRequest(request);
 
     int[] serverIds = reply.getIds();
     String[] serverNames = reply.getNames();
@@ -665,8 +636,8 @@ public class AdminWrapper {
   public final Destination[] getDestinations(int serverId) throws ConnectException, AdminException {
     Destination[] dest = null;
 
-    GetDestinationsRequest request = new GetDestinationsRequest(serverId);
-    GetDestinationsReply reply = (GetDestinationsReply) doRequest(request);
+    Monitor_GetDestinations request = new Monitor_GetDestinations(serverId);
+    Monitor_GetDestinationsRep reply = (Monitor_GetDestinationsRep) doRequest(request);
 
     String[] ids = reply.getIds();
     if ((ids != null) && (ids.length > 0)) {
@@ -868,10 +839,9 @@ public class AdminWrapper {
   public final User[] getUsers(int serverId) throws ConnectException, AdminException {
     User[] list = null;
 
-    // TODO (AF): Changes the GetUsersReply class to return 2 arrays.
-    // TODO (AF): Same work with GetRightsReply !
-    GetUsersRequest request = new GetUsersRequest(serverId);
-    GetUsersReply reply = (GetUsersReply) doRequest(request);
+    // TODO (AF): Changes the Monitor_GetUsersRep class to return 2 arrays.
+    Monitor_GetUsers request = new Monitor_GetUsers(serverId);
+    Monitor_GetUsersRep reply = (Monitor_GetUsersRep) doRequest(request);
 
     Hashtable users = reply.getUsers();
     list = new User[users.size()];

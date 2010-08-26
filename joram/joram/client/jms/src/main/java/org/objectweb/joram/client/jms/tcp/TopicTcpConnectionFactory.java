@@ -79,9 +79,8 @@ public class TopicTcpConnectionFactory extends TopicConnectionFactory {
   /**
    * Admin method creating a <code>javax.jms.TopicConnectionFactory</code> 
    * instance for creating TCP connections with the default server.
-   * 
-   * @throws java.net.ConnectException If the admin connection is closed or broken.
-   * 
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
    * @see #getDefaultServerHost()
    * @see #getDefaultServerPort()
    */ 

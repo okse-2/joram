@@ -3,6 +3,9 @@ package com.scalagent.engine.server;
 
 import javax.servlet.http.HttpSession;
 
+
+
+import com.scalagent.appli.server.RPCServiceCache;
 import com.scalagent.engine.client.command.Action;
 import com.scalagent.engine.client.command.CalledMethod;
 import com.scalagent.engine.client.command.Response;
@@ -16,8 +19,11 @@ public class BaseRPCServiceImpl extends BaseRPCService {
 	
 	public BaseRPCServiceImpl() {
 		
+		System.out.println("### engine.server.BaseRPCServiceImpl loaded : création du service RPC");
+		
 		BaseRPCServiceTimer timer = new BaseRPCServiceTimer(this, 30000, 100000);	
 		timer.start();
+		
 	}
 	
 	/**
@@ -33,9 +39,11 @@ public class BaseRPCServiceImpl extends BaseRPCService {
 	public synchronized <R extends Response> R execute(Action<R> action) {
 
 		try {
+			System.out.println("### engine.server.BaseRPCServiceImpl.execute : "+action.toString());
 
 			this.getThreadLocalResponse().setCharacterEncoding("utf-8");
 			HttpSession session = this.getThreadLocalRequest().getSession();
+			session.setAttribute(RPCServiceCache.SESSION_USER_LOGIN, this.getThreadLocalRequest().getRemoteUser());
 
 			
 			CalledMethod annotation = action.getClass().getAnnotation(CalledMethod.class);
@@ -44,6 +52,7 @@ public class BaseRPCServiceImpl extends BaseRPCService {
 				Class toCall = annotation.value();
 				ActionImpl procedure = (ActionImpl)toCall.newInstance();
 				try {
+					
 					updateSessionInformation(session.getId(), System.currentTimeMillis());
 					procedure.setHttpSession(session);
 					procedure.setRPCService(this);

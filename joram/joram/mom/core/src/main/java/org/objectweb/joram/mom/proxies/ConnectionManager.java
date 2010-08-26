@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
- * Copyright (C) 2004 France-Telecom R&D
+ * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - France-Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -161,11 +161,13 @@ public class ConnectionManager implements ConnectionManagerMBean {
         UserAgent userAgent = new UserAgent(AgentId.JoramAdminPxStamp);
         userAgent.deploy();
 
-        Identity identity = createIdentity(Identity.getRootName(initialAdminName), 
-                                           initialAdminPass, 
-                                           Identity.getRootIdentityClass(initialAdminName));
+        Identity identity = 
+          createIdentity(Identity.getRootName(initialAdminName), 
+              initialAdminPass, 
+              Identity.getRootIdentityClass(initialAdminName));
+        AdminNotification adminNot =
+          new AdminNotification(userAgent.getId(), identity);
 
-        AdminNotification adminNot = new AdminNotification(userAgent.getId(), identity);
         Channel.sendTo(adminTopic.getId(), adminNot);
       }
       
@@ -186,9 +188,10 @@ public class ConnectionManager implements ConnectionManagerMBean {
    * @return identity  admin Identity.
    * @throws Exception
    */
-  private static Identity createIdentity(String adminName, 
-                                         String adminPassword, 
-                                         String identityClassName) throws Exception {
+  private static Identity createIdentity(
+      String adminName, 
+      String adminPassword, 
+      String identityClassName) throws Exception {
     Identity identity = null;
     try {
     	Class clazz = Class.forName(identityClassName);

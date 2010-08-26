@@ -80,9 +80,8 @@ public class XATcpConnectionFactory extends org.objectweb.joram.client.jms.XACon
   /**
    * Admin method creating a <code>javax.jms.XAConnectionFactory</code> 
    * instance for creating TCP connections with the default server.
-   * 
-   * @throws java.net.ConnectException If the admin connection is closed or broken.
-   * 
+   *
+   * @exception ConnectException  If the admin connection is closed or broken.
    * @see #getDefaultServerHost()
    * @see #getDefaultServerPort()
    */ 

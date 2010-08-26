@@ -72,10 +72,17 @@ public abstract class BaseWTO implements IsSerializable {
 		return o1.equals(o2);
 	}
 
+
+	/**
+	 * @return
+	 */
 	public String getId() {
 		return id;
 	}
 
+	/**
+	 * @param deviceId
+	 */
 	public void setId(String id) {
 		this.id = id;
 	}

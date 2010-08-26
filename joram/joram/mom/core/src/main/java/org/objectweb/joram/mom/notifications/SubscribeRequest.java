@@ -23,14 +23,17 @@
  */
 package org.objectweb.joram.mom.notifications;
 
+
 /**
  * A <code>SubscribeRequest</code> instance is used by a client agent
  * for subscribing to a topic.
  */
-public class SubscribeRequest extends AbstractRequestNot {
-  /** */
+public class SubscribeRequest extends AbstractRequest
+{
+  /**
+   * 
+   */
   private static final long serialVersionUID = 1L;
-  
   /**
    * Selector for filtering messages, null or empty string for no selection.
    */
@@ -38,6 +41,7 @@ public class SubscribeRequest extends AbstractRequestNot {
   
   /** asynchronous subscription request. */
   private boolean asyncSub = false;
+
 
   /**
    * Constructs a <code>SubscribeRequest</code> instance. 
@@ -48,7 +52,8 @@ public class SubscribeRequest extends AbstractRequestNot {
    *          empty string for no selection.
    * @param asyncSub true if asynchronous subscription.
    */
-  public SubscribeRequest(int clientContext, int requestId, String selector, boolean asyncSub) {
+  public SubscribeRequest(int clientContext, int requestId, String selector, boolean asyncSub)
+  {
     super(clientContext, requestId);
     this.selector = selector;
     this.asyncSub = asyncSub;
@@ -63,7 +68,8 @@ public class SubscribeRequest extends AbstractRequestNot {
   }
 
   /** Returns the selector. */
-  public String getSelector() {
+  public String getSelector()
+  {
     return selector;
   }
 } 

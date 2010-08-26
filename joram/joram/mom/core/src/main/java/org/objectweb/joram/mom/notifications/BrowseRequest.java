@@ -28,7 +28,7 @@ package org.objectweb.joram.mom.notifications;
  * requesting a "view" of the messages on a queue, without actually consuming
  * them.
  */
-public class BrowseRequest extends AbstractRequestNot
+public class BrowseRequest extends AbstractRequest
 {
   /**
    * 

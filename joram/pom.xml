@@ -6,7 +6,7 @@
   <artifactId>parent</artifactId>
   <packaging>pom</packaging>
   <!-- version : major.minor.build.protocol -->
-  <version>5.4.0.54-SNAPSHOT</version>
+  <version>5.3.3.53-SNAPSHOT</version>
   <name>JORAM</name>
   <url>http://maven.apache.org</url>
   <description>Builds the Joram project.</description>
@@ -25,7 +25,6 @@
     <module>conf</module>
     <module>assembly</module>
     <module>samples</module>
-<!--    <module>release</module>-->
   </modules>
 
   <repositories>

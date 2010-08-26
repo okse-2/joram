@@ -1,6 +1,8 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
+ * @author Yohann CINTRE
  */
+
 
 package com.scalagent.appli.server.converter;
 
@@ -10,40 +12,42 @@ import org.objectweb.joram.mom.messages.MessageView;
 
 import com.scalagent.appli.shared.MessageWTO;
 
-/**
- * @author Yohann CINTRE
- */
+
 public class MessageWTOConverter {
 
 	/**
-	 * 
-	 * @param msg
-	 *            a MessageView containing the message info
-	 * @return a MessageWTO object created from the MessageView object
+	 * @param device
+	 * @return a DeviceWTO object created from the DeviceDTO object
 	 */
-	public static MessageWTO getMessageWTO(MessageView msg) {
+//	public static MessageWTO getMessageWTO(Message msg){	
+	public static MessageWTO getMessageWTO(MessageView msg){	
 
-		MessageWTO result = new MessageWTO(msg.getId(), msg.getExpiration(),
-				msg.getTimestamp(), msg.getDeliveryCount(), msg.getPriority(),
-				msg.getText(), msg.getType(), msg.getProperties());
+		MessageWTO result = new MessageWTO(
+				msg.getId(),
+				msg.getExpiration(), 
+				msg.getTimestamp(), 
+				msg.getDeliveryCount(), 
+				msg.getPriority(), 
+				msg.getText(), 
+				msg.getType(),
+				msg.getProperties());
 
 		return result;
 	}
 
+
 	/**
-	 * 
-	 * @param msgs
-	 *            a List of MessageView
-	 * @return an array of MessageWTO
+	 * @param devices Array of DeviceDTO
+	 * @return An Array of DeviceWTO
 	 */
 	public static MessageWTO[] getMessageWTOArray(List<MessageView> msgs) {
-
+		
 		try {
 			MessageWTO[] newMessagesWTO = new MessageWTO[msgs.size()];
 
-			int i = 0;
-			for (MessageView itemMsg : msgs) {
-				newMessagesWTO[i] = MessageWTOConverter.getMessageWTO(itemMsg);
+			int i=0;
+			for(MessageView itemMsg:msgs) {
+				newMessagesWTO[i]= MessageWTOConverter.getMessageWTO(itemMsg);
 				i++;
 			}
 			return newMessagesWTO;

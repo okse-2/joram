@@ -31,7 +31,8 @@ import org.objectweb.joram.shared.messages.Message;
  * The <code>Interpreter</code> class is used for interpreting selector
  * queries.
  */
-class Interpreter {
+class Interpreter
+{
   /**
    * Calls the appropriate method for interpreting a field name according to
    * the syntax type.
@@ -43,20 +44,24 @@ class Interpreter {
    * @param message  Message in which retrieving the field.
    * @param syntaxType  Type of the syntax; ex: "JMS".
    */
-  static Object interpret(String name, Message message, String syntaxType) {
+  static Object interpret(String name, Message message, String syntaxType)
+  {
     if (syntaxType.equals("JMS"))
       return jmsInterpret(name, message);
-    return null;
+    else
+      return null;
   }
 
   /** Gets the String value of the given object. */
-  public static String wrapToString(Object value) {
+  public static String wrapToString(Object value)
+  {
     if (value == null)
       return null;
 
     if (value instanceof byte[])
       return new String((byte[]) value);
-    return value.toString();
+    else
+      return value.toString();
   }
 
   /**
@@ -65,7 +70,8 @@ class Interpreter {
    * @param name  Name of a field to retrieve.
    * @param message  Message in which retrieving the field.
    */
-  private static Object jmsInterpret(String name, Message message) {
+  private static Object jmsInterpret(String name, Message message)
+  {
     Object value = null;
 
     // Checking JMS header fields names:

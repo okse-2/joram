@@ -365,30 +365,31 @@ abstract class MessageConsumerListener implements ReplyListener {
         BasicLevel.DEBUG, "MessageConsumerListener.replyReceived(" + 
         reply + ')');
     
-    if (status == Status.CLOSE)
+    if (status == Status.CLOSE) {
       throw new AbortedRequestException();
-
-    if (queueMode) {
-      // 1- Change the status before pushing the  messages into the session queue.
-      setReceiveStatus(ReceiveStatus.CONSUMING_REPLY);
+    } else {
+      if (queueMode) {
+        // 1- Change the status before pushing the 
+        // messages into the session queue.
+        setReceiveStatus(ReceiveStatus.CONSUMING_REPLY);
+      }
+      try {
+        ConsumerMessages cm = (ConsumerMessages)reply;
+        // 2- increment messageCount (synchronized)
+        messageCount += cm.getMessageCount();
+        
+        pushMessages(cm);
+      } catch (StoppedQueueException exc) {
+        throw new AbortedRequestException();
+      } catch (JMSException exc) {
+        throw new AbortedRequestException();
+      }
+      if (queueMode) {
+        return true;
+      } else {
+        return false;
+      }
     }
-    
-    try {
-      ConsumerMessages cm = (ConsumerMessages)reply;
-      // 2- increment messageCount (synchronized)
-      messageCount += cm.getMessageCount();
-      
-      pushMessages(cm);
-    } catch (StoppedQueueException exc) {
-      throw new AbortedRequestException();
-    } catch (JMSException exc) {
-      throw new AbortedRequestException();
-    }
-    
-    if (queueMode) {
-      return true;
-    }
-    return false;
   }
   
   /**

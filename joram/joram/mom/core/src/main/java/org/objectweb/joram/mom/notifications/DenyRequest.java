@@ -30,7 +30,7 @@ import java.util.Vector;
  * A <code>DenyRequest</code> instance is used by a client agent
  * for denying one or many messages on a queue.
  */
-public class DenyRequest extends AbstractRequestNot {
+public class DenyRequest extends AbstractRequest {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   

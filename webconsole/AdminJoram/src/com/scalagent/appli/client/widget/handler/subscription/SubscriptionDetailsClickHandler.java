@@ -1,5 +1,6 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
+ * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.widget.handler.subscription;
@@ -9,9 +10,6 @@ import com.scalagent.appli.client.widget.record.SubscriptionListRecord;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 
-/**
- * @author Yohann CINTRE
- */
 public class SubscriptionDetailsClickHandler implements ClickHandler {
 
 
@@ -27,6 +25,6 @@ public class SubscriptionDetailsClickHandler implements ClickHandler {
 	
 	@Override
 	public void onClick(ClickEvent event) {
-		subscriptionPresenter.fireSubscriptionDetailsClick(record.getSubscription());
+		subscriptionPresenter.fireQueueDetailsClick(record.getSubscription());
 	}
 }

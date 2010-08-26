@@ -34,7 +34,7 @@ import fr.dyade.aaa.agent.AgentId;
  * A <code>TopicMsgsReply</code> instance is used by a topic for sending
  * messages to an agent client which subscribed to it.
  */
-public class TopicMsgsReply extends AbstractReplyNot {
+public class TopicMsgsReply extends AbstractReply {
   /**
    * 
    */

@@ -124,13 +124,15 @@ public final class XACnxRecoverReply extends AbstractJmsReply {
 
   private static Vector readVectorOfByteArrayFrom(InputStream is) throws IOException {
     int size = StreamUtil.readIntFrom(is);
-    if (size == -1) return null;
-
-    Vector v = new Vector(size);
-    for (int i=0; i<size; i++) {
-      v.addElement(StreamUtil.readByteArrayFrom(is));
+    if (size == -1) {
+      return null;
+    } else {
+      Vector v = new Vector(size);
+      for (int i=0; i<size; i++) {
+        v.addElement(StreamUtil.readByteArrayFrom(is));
+      }
+      return v;
     }
-    return v;
   }
 
   /**

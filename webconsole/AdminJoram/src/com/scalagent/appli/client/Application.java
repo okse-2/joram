@@ -1,5 +1,6 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
+ * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client;
@@ -8,12 +9,12 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine;
-import com.scalagent.appli.client.event.common.UpdateCompleteEvent;
+import com.scalagent.appli.client.event.LoginValidEvent;
+import com.scalagent.appli.client.event.UpdateCompleteEvent;
 import com.scalagent.appli.client.event.queue.DeletedQueueEvent;
 import com.scalagent.appli.client.event.queue.NewQueueEvent;
 import com.scalagent.appli.client.event.queue.QueueDetailClickEvent;
 import com.scalagent.appli.client.event.queue.UpdatedQueueEvent;
-import com.scalagent.appli.client.event.session.LoginValidEvent;
 import com.scalagent.appli.client.event.subscription.DeletedSubscriptionEvent;
 import com.scalagent.appli.client.event.subscription.NewSubscriptionEvent;
 import com.scalagent.appli.client.event.subscription.SubscriptionDetailClickEvent;
@@ -36,9 +37,7 @@ import com.scalagent.appli.client.widget.MainWidget;
 import com.scalagent.engine.client.BaseEntryPoint;
 import com.smartgwt.client.widgets.Canvas;
 
-/**
- * @author Yohann CINTRE
- */
+
 public class Application implements BaseEntryPoint {
 
 	public static final ApplicationMessages messages = (ApplicationMessages) GWT
@@ -47,6 +46,8 @@ public class Application implements BaseEntryPoint {
 	private RPCServiceAsync serviceAsync;
 	private RPCServiceCacheClient serviceCache;
 	private HandlerManager eventBus;
+//	private final int UPDATEDELAY = 3000;
+	// TODO : updatedelay en dur quelque part
 
 	/**
 	 * This is the entry point method.
@@ -55,6 +56,9 @@ public class Application implements BaseEntryPoint {
 
 		Runnable onLoadCallback = new Runnable() {
 			public void run() {
+
+				System.out.println("############################################################");
+				System.out.println("### appli.client.Application loaded : démarrage application");
 
 				serviceAsync = GWT.create(RPCService.class);
 
@@ -103,8 +107,13 @@ public class Application implements BaseEntryPoint {
 				Canvas mainCanvas = (Canvas)mWidget.asWidget();
 
 				mainCanvas.draw();
+
+
+
 			}
 		};
+
+//		VisualizationUtils.loadVisualizationApi(onLoadCallback, LineChart.PACKAGE);
 		VisualizationUtils.loadVisualizationApi(onLoadCallback, AnnotatedTimeLine.PACKAGE);
 	}
 }

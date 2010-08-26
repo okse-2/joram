@@ -56,14 +56,13 @@ public class AgentException extends Exception {
     return cause;
   }
 
-  private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+  private void writeObject(java.io.ObjectOutputStream out)
+    throws java.io.IOException {
     out.writeObject(cause);
   }
 
-  /**
-   * @throws ClassNotFoundException  
-   */
-  private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
+  private void readObject(java.io.ObjectInputStream in)
+    throws java.io.IOException, ClassNotFoundException {
     try {
       this.cause = (Throwable)in.readObject();
     } catch (ClassNotFoundException exc) {

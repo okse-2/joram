@@ -23,6 +23,8 @@ package org.objectweb.joram.client.jms.ha.local;
 
 import java.util.Timer;
 
+import javax.jms.JMSException;
+
 import org.objectweb.joram.client.jms.connection.RequestChannel;
 import org.objectweb.joram.client.jms.local.LocalRequestChannel;
 import org.objectweb.joram.mom.dest.AdminTopic;
@@ -79,7 +81,8 @@ public class HALocalRequestChannel implements RequestChannel {
         try {
           gpin.invoke(AdminTopic.getDefault());
           proxyIds = gpin.getIds();
-          ResetCollocatedConnectionsNot rccn = new ResetCollocatedConnectionsNot();
+          ResetCollocatedConnectionsNot rccn = 
+            new ResetCollocatedConnectionsNot();
           for (int i = 0; i < proxyIds.length; i++) {
             Channel.sendTo(proxyIds[i], rccn);
           }
@@ -96,10 +99,10 @@ public class HALocalRequestChannel implements RequestChannel {
 
   private LocalRequestChannel localRequestChannel;
 
-  public HALocalRequestChannel(Identity identity) {
+  public HALocalRequestChannel(Identity identity) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "HALocalConnection.<init>(" + identity + ')');
-    
+      logger.log(BasicLevel.DEBUG,
+                 "HALocalConnection.<init>(" + identity + ')');
     waitForStart();
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, " -> create the local connection");

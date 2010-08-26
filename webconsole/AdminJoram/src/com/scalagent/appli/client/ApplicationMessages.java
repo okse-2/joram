@@ -1,12 +1,11 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
+ * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client;
 
-/**
- * @author Yohann CINTRE
- */
+
 public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages {
 
 	/** TOPIC WIDGET **/	
@@ -264,207 +263,9 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
 	@Key("topicWidget.viewSectionSection.title")
 	String topicWidget_viewSectionSection_title();
 
-	/**
-	 * Translated "New Topic".
-	 * 
-	 * @return translated "New Topic"
-	 */
-	@DefaultMessage("New Topic")
-	@Key("topicWidget.buttonNewTopic.title")
-	String topicWidget_buttonNewTopic_title();
-	
-	/**
-	 * Translated "Click to create a new topic".
-	 * 
-	 * @return translated "Click to create a new topic"
-	 */
-	@DefaultMessage("Click to create a new topic")
-	@Key("topicWidget.buttonNewTopic.prompt")
-	String topicWidget_buttonNewTopic_prompt();
 
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	/**
-	 * Translated "New Topic".
-	 * 
-	 * @return translated "New Topic"
-	 */
-	@DefaultMessage("New Topic")
-	@Key("topicWidget.winModal.title")
-	String topicWidget_winModal_title(); 
-	
-	/**
-	 * Translated "Create a new Topic".
-	 * 
-	 * @return translated "Create a new Topic"
-	 */
-	@DefaultMessage("Create a new Topic")
-	@Key("topicWidget.formTitle.title")
-	String topicWidget_formTitle_title(); 
-	
-	/**
-	 * Translated "Name".
-	 * 
-	 * @return translated "Name"
-	 */
-	@DefaultMessage("Name")
-	@Key("topicWidget.nameItem.title")
-	String topicWidget_nameItem_title(); 
-	
-	/**
-	 * Translated "DMQ Id".
-	 * 
-	 * @return translated "DMQ Id"
-	 */
-	@DefaultMessage("DMQ Id")
-	@Key("topicWidget.DMQItem.title")
-	String topicWidget_DMQItem_title();
-	
-	/**
-	 * Translated "Destination Id".
-	 * 
-	 * @return translated "Destination Id"
-	 */
-	@DefaultMessage("Destination Id")
-	@Key("topicWidget.destinationItem.title")
-	String topicWidget_destinationItem_title(); 
-	
-	/**
-	 * Translated "Period".
-	 * 
-	 * @return translated "Period"
-	 */
-	@DefaultMessage("Period")
-	@Key("topicWidget.periodItem.title")
-	String topicWidget_periodItem_title(); 
-	
-	/**
-	 * Translated "Free Reading".
-	 * 
-	 * @return translated "Free Reading"
-	 */
-	@DefaultMessage("Free Reading")
-	@Key("topicWidget.freeReadingItem.title")
-	String topicWidget_freeReadingItem_title(); 
-	
-	/**
-	 * Translated "Free Writing".
-	 * 
-	 * @return translated "Free Writing"
-	 */
-	@DefaultMessage("Free Writing")
-	@Key("topicWidget.freeWritingItem.title")
-	String topicWidget_freeWritingItem_title(); 
-	
-	/**
-	 * Translated "Create Topic".
-	 * 
-	 * @return translated "Create Topic"
-	 */
-	@DefaultMessage("Create Topic")
-	@Key("topicWidget.validateButton.titleCreate")
-	String topicWidget_validateButton_titleCreate(); 
-	
-	/**
-	 * Translated "Update Topic".
-	 * 
-	 * @return translated "Update Topic"
-	 */
-	@DefaultMessage("Update Topic")
-	@Key("topicWidget.validateButton.titleEdit")
-	String topicWidget_validateButton_titleEdit(); 
-	
-	/**
-	 * Translated "Cancel".
-	 * 
-	 * @return translated "Cancel"
-	 */
-	@DefaultMessage("Cancel")
-	@Key("topicWidget.cancelButton.title")
-	String topicWidget_cancelButton_title(); 
-	
-	/**
-	 * Translated "Delete".
-	 * 
-	 * @return translated "Delete"
-	 */
-	@DefaultMessage("Delete Topic")
-	@Key("topicWidget.buttonDelete.title")
-	String topicWidget_buttonDelete_title();
-	
-	/**
-	 * Translated "Edit".
-	 * 
-	 * @return translated "Edit"
-	 */
-	@DefaultMessage("Edit")
-	@Key("topicWidget.buttonEdit.title")
-	String topicWidget_buttonEdit_title();
 
-	/**
-	 * Translated "Click to delete the topic on JORAM".
-	 * 
-	 * @return translated "Click to delete the topic on JORAM"
-	 */
-	@DefaultMessage("Click to delete the topic on JORAM")
-	@Key("topicWidget.buttonDelete.prompt")
-	String topicWidget_buttonDelete_prompt();
-	
-	/**
-	 * Translated "Click to edit the topic.
-	 * 
-	 * @return translated "Click to edit the topic"
-	 */
-	@DefaultMessage("Click to edit the queue")
-	@Key("topicWidget.buttonEdit.prompt")
-	String topicWidget_buttonEdit_prompt();
-
-	/**
-	 * Translated "Delete".
-	 * 
-	 * @return translated "Delete"
-	 */
-	@DefaultMessage("Delete")
-	@Key("topicWidget.deleteFieldL.title")
-	String topicWidget_deleteFieldL_title(); 
-	
-	/**
-	 * Translated "Edit".
-	 * 
-	 * @return translated "Edit"
-	 */
-	@DefaultMessage("Edit")
-	@Key("topicWidget.editFieldL.title")
-	String topicWidget_editFieldL_title(); 
-	
-	/**
-	 * Translated "Do you really want to delete this topic?".
-	 * 
-	 * @return translated "Do you really want to delete this topic?"
-	 */
-	@Key("topicWidget.confirmDelete")
-	@DefaultMessage("Do you really want to delete this topic?")
-	String topicWidget_confirmDelete(); 
-	
-	
-	
-	
 	/** QUEUE WIDGET **/
 
 	/**
@@ -485,24 +286,6 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
 	@Key("queueWidget.buttonRefresh.prompt")
 	String queueWidget_buttonRefresh_prompt();
 
-	/**
-	 * Translated "New Queue".
-	 * 
-	 * @return translated "New Queue"
-	 */
-	@DefaultMessage("New Queue")
-	@Key("queueWidget.buttonNewQueue.title")
-	String queueWidget_buttonNewQueue_title();
-	
-	/**
-	 * Translated "Click to create a new queue".
-	 * 
-	 * @return translated "Click to create a new queue"
-	 */
-	@DefaultMessage("Click to create a new queue")
-	@Key("queueWidget.buttonNewQueue.prompt")
-	String queueWidget_buttonNewQueue_prompt();
-	
 	/**
 	 * Translated "Actions".
 	 * 
@@ -567,22 +350,13 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
 	String queueWidget_buttonClearMessage_prompt();
 
 	/**
-	 * Translated "Delete".
+	 * Translated "Delete Queue".
 	 * 
-	 * @return translated "Delete"
+	 * @return translated "Delete Queue"
 	 */
-	@DefaultMessage("Delete")
+	@DefaultMessage("Delete Queue")
 	@Key("queueWidget.buttonDelete.title")
 	String queueWidget_buttonDelete_title();
-	
-	/**
-	 * Translated "Edit".
-	 * 
-	 * @return translated "Edit"
-	 */
-	@DefaultMessage("Edit")
-	@Key("queueWidget.buttonEdit.title")
-	String queueWidget_buttonEdit_title();
 
 	/**
 	 * Translated "Click to delete the queue on JORAM".
@@ -592,15 +366,6 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
 	@DefaultMessage("Click to delete the queue on JORAM")
 	@Key("queueWidget.buttonDelete.prompt")
 	String queueWidget_buttonDelete_prompt();
-	
-	/**
-	 * Translated "Click to edit the queue.
-	 * 
-	 * @return translated "Click to edit the queue"
-	 */
-	@DefaultMessage("Click to edit the queue")
-	@Key("queueWidget.buttonEdit.prompt")
-	String queueWidget_buttonEdit_prompt();
 
 	/**
 	 * Translated "Queue".
@@ -899,7 +664,7 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
 	@Key("queueWidget.browseFieldL.title")
 	String queueWidget_browseFieldL_title(); 
 
-	/**
+	/*
 	 * Translated "Action".
 	 * 
 	 * @return translated "Action"
@@ -916,15 +681,6 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
 	@DefaultMessage("Delete")
 	@Key("queueWidget.deleteFieldL.title")
 	String queueWidget_deleteFieldL_title(); 
-	
-	/**
-	 * Translated "Edit".
-	 * 
-	 * @return translated "Edit"
-	 */
-	@DefaultMessage("Edit")
-	@Key("queueWidget.editFieldL.title")
-	String queueWidget_editFieldL_title(); 
 
 	/**
 	 * Translated "Do you really want to delete this queue?".
@@ -971,123 +727,6 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
 	@Key("queueWidget.labelClearPendingMessages.tooltip")
 	String queueWidget_labelClearPendingMessages_tooltip(); 
 	
-	/**
-	 * Translated "New Queue".
-	 * 
-	 * @return translated "New Queue"
-	 */
-	@DefaultMessage("New Queue")
-	@Key("queueWidget.winModal.title")
-	String queueWidget_winModal_title(); 
-	
-	/**
-	 * Translated "Create a new Queue".
-	 * 
-	 * @return translated "Create a new Queue"
-	 */
-	@DefaultMessage("Create a new Queue")
-	@Key("queueWidget.formTitle.title")
-	String queueWidget_formTitle_title(); 
-	
-	/**
-	 * Translated "Name".
-	 * 
-	 * @return translated "Name"
-	 */
-	@DefaultMessage("Name")
-	@Key("queueWidget.nameItem.title")
-	String queueWidget_nameItem_title(); 
-	
-	/**
-	 * Translated "DMQ Id".
-	 * 
-	 * @return translated "DMQ Id"
-	 */
-	@DefaultMessage("DMQ Id")
-	@Key("queueWidget.DMQItem.title")
-	String queueWidget_DMQItem_title();
-	
-	/**
-	 * Translated "Destination Id".
-	 * 
-	 * @return translated "Destination Id"
-	 */
-	@DefaultMessage("Destination Id")
-	@Key("queueWidget.destinationItem.title")
-	String queueWidget_destinationItem_title(); 
-	
-	/**
-	 * Translated "Period".
-	 * 
-	 * @return translated "Period"
-	 */
-	@DefaultMessage("Period")
-	@Key("queueWidget.periodItem.title")
-	String queueWidget_periodItem_title(); 
-	
-	/**
-	 * Translated "Threshold".
-	 * 
-	 * @return translated "Threshold"
-	 */
-	@DefaultMessage("Threshold")
-	@Key("queueWidget.thresholdItem.title")
-	String queueWidget_thresholdItem_title(); 
-	
-	/**
-	 * Translated "Nb Max Msgs".
-	 * 
-	 * @return translated "Nb Max Msgs"
-	 */
-	@DefaultMessage("Nb Max Msgs")
-	@Key("queueWidget.nbMaxMsgsItem.title")
-	String queueWidget_nbMaxMsgsItem_title(); 
-	
-	/**
-	 * Translated "Free Reading".
-	 * 
-	 * @return translated "Free Reading"
-	 */
-	@DefaultMessage("Free Reading")
-	@Key("queueWidget.freeReadingItem.title")
-	String queueWidget_freeReadingItem_title(); 
-	
-	/**
-	 * Translated "Free Writing".
-	 * 
-	 * @return translated "Free Writing"
-	 */
-	@DefaultMessage("Free Writing")
-	@Key("queueWidget.freeWritingItem.title")
-	String queueWidget_freeWritingItem_title(); 
-	
-	/**
-	 * Translated "Create Queue".
-	 * 
-	 * @return translated "Create Queue"
-	 */
-	@DefaultMessage("Create Queue")
-	@Key("queueWidget.validateButton.titleCreate")
-	String queueWidget_validateButton_titleCreate(); 
-	
-	/**
-	 * Translated "Update Queue".
-	 * 
-	 * @return translated "Update Queue"
-	 */
-	@DefaultMessage("Update Queue")
-	@Key("queueWidget.validateButton.titleEdit")
-	String queueWidget_validateButton_titleEdit(); 
-	
-	/**
-	 * Translated "Cancel".
-	 * 
-	 * @return translated "Cancel"
-	 */
-	@DefaultMessage("Cancel")
-	@Key("queueWidget.cancelButton.title")
-	String queueWidget_cancelButton_title(); 
-	
 
 	
 	
@@ -1102,11 +741,11 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
 	@Key("queueDetailWidget.confirmDelete")
 	String queueDetailWidget_confirmDelete(); 
 
-	/** Translated "Delete".
+	/** Translated "Delete Message".
 	 * 
-	 * @return translated "Delete"
+	 * @return translated "Delete Message"
 	 */
-	@DefaultMessage("Delete")
+	@DefaultMessage("Delete Message")
 	@Key("queueDetailWidget.buttonDelete.title")
 	String queueDetailWidget_buttonDelete_title();
 
@@ -1174,14 +813,6 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
 	@DefaultMessage("Delete")
 	@Key("queueDetailWidget.deleteFieldL.title")
 	String queueDetailWidget_deleteFieldL_title(); 
-	
-	/** Translated "Edit".
-	 * 
-	 * @return translated "Edit"
-	 */
-	@DefaultMessage("Edit")
-	@Key("queueDetailWidget.editFieldL.title")
-	String queueDetailWidget_editFieldL_title(); 
 
 	/** Translated "Id".
 	 * 
@@ -1316,140 +947,7 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
 	@Key("queueDetailWidget.messageDetail.emptyMessage")
 	String queueDetailWidget_messageDetail_emptyMessage();
 	
-	/**
-	 * Translated "Edit".
-	 * 
-	 * @return translated "Edit"
-	 */
-	@DefaultMessage("Edit")
-	@Key("queueDetailWidget.buttonEdit.title")
-	String queueDetailWidget_buttonEdit_title();
-	
-	/**
-	 * Translated "Click to edit the queue.
-	 * 
-	 * @return translated "Click to edit the queue"
-	 */
-	@DefaultMessage("Click to edit the message")
-	@Key("queueDetailWidget.buttonEdit.prompt")
-	String queueDetailWidget_buttonEdit_prompt();
-	
-	/**
-	 * Translated "New Message".
-	 * 
-	 * @return translated "New Message"
-	 */
-	@DefaultMessage("New Message")
-	@Key("queueDetailWidget.winModal.title")
-	String queueDetailWidget_winModal_title(); 
-	
-	/**
-	 * Translated "Create a new Message".
-	 * 
-	 * @return translated "Create a new Message"
-	 */
-	@DefaultMessage("Create a new Queue")
-	@Key("queueDetailWidget.formTitle.title")
-	String queueDetailWidget_formTitle_title(); 
-	
-	/**
-	 * Translated "Queue".
-	 * 
-	 * @return translated "Queue"
-	 */
-	@DefaultMessage("Queue")
-	@Key("queueDetailWidget.queueNameItem.title")
-	String queueDetailWidget_queueNameItem_title(); 
-	
-	/**
-	 * Translated "Id".
-	 * 
-	 * @return translated "Id"
-	 */
-	@DefaultMessage("Id")
-	@Key("queueDetailWidget.idItem.title")
-	String queueDetailWidget_idItem_title(); 
-	
-	/**
-	 * Translated "Expiration".
-	 * 
-	 * @return translated "Expiration"
-	 */
-	@DefaultMessage("Expiration")
-	@Key("queueDetailWidget.expirationItem.title")
-	String queueDetailWidget_expirationItem_title(); 
-	
-	/**
-	 * Translated "Timestamp".
-	 * 
-	 * @return translated "Timestamp"
-	 */
-	@DefaultMessage("Timestamp")
-	@Key("queueDetailWidget.timestampItem.title")
-	String queueDetailWidget_timestampItem_title(); 
-	
-	/**
-	 * Translated "Priority".
-	 * 
-	 * @return translated "Priority"
-	 */
-	@DefaultMessage("Priority")
-	@Key("queueDetailWidget.priorityItem.title")
-	String queueDetailWidget_priorityItem_title(); 
-	
-	/**
-	 * Translated "Text".
-	 * 
-	 * @return translated "Text"
-	 */
-	@DefaultMessage("Text")
-	@Key("queueDetailWidget.textItem.title")
-	String queueDetailWidget_textItem_title(); 
-	
-	/**
-	 * Translated "Type".
-	 * 
-	 * @return translated "Type"
-	 */
-	@DefaultMessage("Type")
-	@Key("queueDetailWidget.typeItem.title")
-	String queueDetailWidget_typeItem_title(); 
-	
-	/**
-	 * Translated "New Message".
-	 * 
-	 * @return translated "New Message"
-	 */
-	@DefaultMessage("New Message")
-	@Key("queueDetailWidget.buttonNewMessage.title")
-	String queueDetailWidget_buttonNewMessage_title();
-	
-	/**
-	 * Translated "Click to create a new message".
-	 * 
-	 * @return translated "Click to create a new message"
-	 */
-	@DefaultMessage("Click to create a new message")
-	@Key("queueDetailWidget.buttonNewMessage.prompt")
-	String queueDetailWidget_buttonNewMessage_prompt();
-	
-	/**
-	 * Translated "Update Message".
-	 * 
-	 * @return translated "Update Message"
-	 */
-	@DefaultMessage("Update Message")
-	@Key("queueDetailWidget.validateButton.titleEdit")
-	String queueDetailWidget_validateButton_titleEdit(); 
-	
-	/**
-	 * Translated "Create Message".
-	 * 
-	 * @return translated "Create Message"
-	 */
-	@DefaultMessage("Create Message")
-	@Key("queueDetailWidget.validateButton.titleCreate")
-	String queueDetailWidget_validateButton_titleCreate(); 
+
 
 	/** MAIN WIDGET **/
 
@@ -1601,96 +1099,6 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
 	@DefaultMessage("Select a user to view more details")
 	@Key("userWidget.userDetail.emptyMessage")
 	String userWidget_userDetail_emptyMessage();	
-	
-	/**
-	 * Translated "New User".
-	 * 
-	 * @return translated "New User"
-	 */
-	@DefaultMessage("New User")
-	@Key("userWidget.winModal.title")
-	String userWidget_winModal_title(); 
-	
-	/**
-	 * Translated "Create a new User".
-	 * 
-	 * @return translated "Create a new User"
-	 */
-	@DefaultMessage("Create a new User")
-	@Key("userWidget.formTitle.title")
-	String userWidget_formTitle_title(); 
-	
-	/**
-	 * Translated "Name".
-	 * 
-	 * @return translated "Name"
-	 */
-	@DefaultMessage("Name")
-	@Key("userWidget.nameItem.title")
-	String userWidget_nameItem_title(); 
-	
-	/**
-	 * Translated "Period".
-	 * 
-	 * @return translated "Period"
-	 */
-	@DefaultMessage("Period")
-	@Key("userWidget.periodItem.title")
-	String userWidget_periodItem_title(); 
-		
-	/**
-	 * Translated "Create User".
-	 * 
-	 * @return translated "Create User"
-	 */
-	@DefaultMessage("Create User")
-	@Key("userWidget.validateButton.titleCreate")
-	String userWidget_validateButton_titleCreate(); 
-	
-	/**
-	 * Translated "Update User".
-	 * 
-	 * @return translated "Update User"
-	 */
-	@DefaultMessage("Update User")
-	@Key("userWidget.validateButton.titleEdit")
-	String userWidget_validateButton_titleEdit(); 
-	
-	/**
-	 * Translated "Cancel".
-	 * 
-	 * @return translated "Cancel"
-	 */
-	@DefaultMessage("Cancel")
-	@Key("userWidget.cancelButton.title")
-	String userWidget_cancelButton_title(); 
-	
-	/**
-	 * Translated "New User".
-	 * 
-	 * @return translated "New User"
-	 */
-	@DefaultMessage("New User")
-	@Key("userWidget.buttonNewUser.title")
-	String userWidget_buttonNewUser_title();
-	
-	/**
-	 * Translated "Click to create a new user".
-	 * 
-	 * @return translated "Click to create a new user"
-	 */
-	@DefaultMessage("Click to create a new user")
-	@Key("userWidget.buttonNewUser.prompt")
-	String userWidget_buttonNewUser_prompt();
-
-	/**
-	 * Translated "Do you really want to delete this user?".
-	 * 
-	 * @return translated "Do you really want to delete this user?"
-	 */
-	@DefaultMessage("Do you really want to delete this user?")
-	@Key("userWidget.confirmDelete")
-	String userWidget_confirmDelete(); 
 	
 	
 	
@@ -1881,195 +1289,6 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
 	@DefaultMessage("Select a subscription to view more details")
 	@Key("subscriptionWidget.subscriptionDetail.emptyMessage")
 	String subscriptionWidget_subscriptionDetail_emptyMessage();
-	
-	/**
-	 * Translated "New Subscription".
-	 * 
-	 * @return translated "New Subscription"
-	 */
-	@DefaultMessage("New Subscription")
-	@Key("subscriptionWidget.winModal.title")
-	String subscriptionWidget_winModal_title(); 
-	
-	/**
-	 * Translated "Create a new Subscription".
-	 * 
-	 * @return translated "Create a new Subscription"
-	 */
-	@DefaultMessage("Create a new Subscription")
-	@Key("subscriptionWidget.formTitle.title")
-	String subscriptionWidget_formTitle_title(); 
-	
-	/**
-	 * Translated "Name".
-	 * 
-	 * @return translated "Name"
-	 */
-	@DefaultMessage("Name")
-	@Key("subscriptionWidget.nameItem.title")
-	String subscriptionWidget_nameItem_title(); 
-	
-	/**
-	 * Translated "Nb Max Msgs".
-	 * 
-	 * @return translated "Nb Max Msgs"
-	 */
-	@DefaultMessage("Nb Max Msgs")
-	@Key("subscriptionWidget.nbMaxMsgsItem.title")
-	String subscriptionWidget_nbMaxMsgsItem_title(); 
-	
-	/**
-	 * Translated "Context Id".
-	 * 
-	 * @return translated "Context Id"
-	 */
-	@DefaultMessage("Context Id")
-	@Key("subscriptionWidget.contextIdItem.title")
-	String subscriptionWidget_contextIdItem_title(); 
-	
-	/**
-	 * Translated "Selector".
-	 * 
-	 * @return translated "Selector"
-	 */
-	@DefaultMessage("Selector")
-	@Key("subscriptionWidget.selectorItem.title")
-	String subscriptionWidget_selectorItem_title(); 
-	
-	/**
-	 * Translated "SubRequest Id".
-	 * 
-	 * @return translated "SubRequest Id"
-	 */
-	@DefaultMessage("SubRequest Id")
-	@Key("subscriptionWidget.subRequestIdItem.title")
-	String subscriptionWidget_subRequestIdItem_title(); 
-	
-	/**
-	 * Translated "Active".
-	 * 
-	 * @return translated "Active"
-	 */
-	@DefaultMessage("Active")
-	@Key("subscriptionWidget.activeItem.title")
-	String subscriptionWidget_activeItem_title(); 
-	
-	/**
-	 * Translated "Durable".
-	 * 
-	 * @return translated "Durable"
-	 */
-	@DefaultMessage("Durable")
-	@Key("subscriptionWidget.durableItem.title")
-	String subscriptionWidget_durableItem_title(); 
-	
-	/**
-	 * Translated "Create Subscription".
-	 * 
-	 * @return translated "Create Subscription"
-	 */
-	@DefaultMessage("Create Subscription")
-	@Key("subscriptionWidget.validateButton.titleCreate")
-	String subscriptionWidget_validateButton_titleCreate(); 
-	
-	/**
-	 * Translated "Update Subscription".
-	 * 
-	 * @return translated "Update Subscription"
-	 */
-	@DefaultMessage("Update Subscription")
-	@Key("subscriptionWidget.validateButton.titleEdit")
-	String subscriptionWidget_validateButton_titleEdit(); 
-	
-	/**
-	 * Translated "Cancel".
-	 * 
-	 * @return translated "Cancel"
-	 */
-	@DefaultMessage("Cancel")
-	@Key("subscriptionWidget.cancelButton.title")
-	String subscriptionWidget_cancelButton_title(); 
-	
-	/**
-	 * Translated "Do you really want to delete this subscription?".
-	 * 
-	 * @return translated "Do you really want to delete this subscription?"
-	 */
-	@DefaultMessage("Do you really want to delete this subscription?")
-	@Key("subscriptionWidget.confirmDelete")
-	String subscriptionWidget_confirmDelete(); 
-	
-	/**
-//	 * Translated "New Subscription".
-	 * 
-	 * @return translated "New Subscription"
-	 */
-	@DefaultMessage("New Subscription")
-	@Key("subscriptionWidget.buttonNewSubscription.title")
-	String subscriptionWidget_buttonNewSubscription_title();
-	
-	/**
-	 * Translated "Click to create a new subscription".
-	 * 
-	 * @return translated "Click to create a new subscription"
-	 */
-	@DefaultMessage("Click to create a new subscription")
-	@Key("subscriptionWidget.buttonNewSubscription.prompt")
-	String subscriptionWidget_buttonNewSubscription_prompt();
-	
-	/**
-	 * Translated "Delete".
-	 * 
-	 * @return translated "Delete"
-	 */
-	@DefaultMessage("Delete")
-	@Key("subscriptionWidget.buttonDelete.title")
-	String subscriptionWidget_buttonDelete_title();
-	
-	/**
-	 * Translated "Click to delete the subscription on JORAM".
-	 * 
-	 * @return translated "Click to delete the subscription on JORAM"
-	 */
-	@DefaultMessage("Click to subscription the queue on JORAM")
-	@Key("subscriptionWidget.buttonDelete.prompt")
-	String subscriptionWidget_buttonDelete_prompt();
-
-	/**
-	 * Translated "Edit".
-	 * 
-	 * @return translated "Edit"
-	 */
-	@DefaultMessage("Edit")
-	@Key("subscriptionWidget.buttonEdit.title")
-	String subscriptionWidget_buttonEdit_title();
-	
-	/**
-	 * Translated "Click to edit the subscription.
-	 * 
-	 * @return translated "Click to edit the subscription"
-	 */
-	@DefaultMessage("Click to edit the subscription")
-	@Key("subscriptionWidget.buttonEdit.prompt")
-	String subscriptionWidget_buttonEdit_prompt();
-
-	/**
-	 * Translated "Delete".
-	 * 
-	 * @return translated "Delete"
-	 */
-	@DefaultMessage("Delete")
-	@Key("subscriptionWidget.deleteFieldL.title")
-	String subscriptionWidget_deleteFieldL_title(); 
-
-	/**
-	 * Translated "Edit".
-	 * 
-	 * @return translated "Edit"
-	 */
-	@DefaultMessage("Edit")
-	@Key("subscriptionWidget.editFieldL.title")
-	String subscriptionWidget_editFieldL_title(); 
 	
 	
 	

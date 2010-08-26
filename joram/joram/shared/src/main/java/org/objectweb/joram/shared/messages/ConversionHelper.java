@@ -37,7 +37,8 @@ public class ConversionHelper
    * @exception MessageValueException  If the given object can't be converted
    *              into a boolean value.
    */
-  public static boolean toBoolean(Object value) throws MessageValueException {
+  public static boolean toBoolean(Object value) throws MessageValueException
+  {
     if (value == null)
       return Boolean.valueOf(null).booleanValue();
 
@@ -56,7 +57,8 @@ public class ConversionHelper
    * @exception MessageValueException  If the given object can't be converted
    *              into a byte value.
    */ 
-  public static byte toByte(Object value) throws MessageValueException {
+  public static byte toByte(Object value) throws MessageValueException
+  {
     if (value == null)
       return Byte.valueOf(null).byteValue();
 
@@ -75,7 +77,8 @@ public class ConversionHelper
    * @exception MessageValueException  If the given object can't be converted
    *              into a short value.
    */ 
-  public static short toShort(Object value) throws MessageValueException {
+  public static short toShort(Object value) throws MessageValueException
+  {
     if (value == null)
       return Short.valueOf(null).shortValue();
 
@@ -94,7 +97,8 @@ public class ConversionHelper
    * @exception MessageValueException  If the given object can't be converted
    *              into an int value.
    */ 
-  public static int toInt(Object value) throws MessageValueException {
+  public static int toInt(Object value) throws MessageValueException
+  {
     if (value == null)
       return Integer.valueOf(null).intValue();
 
@@ -114,7 +118,8 @@ public class ConversionHelper
    * @exception MessageValueException  If the given object can't be converted
    *              into a long value.
    */ 
-  public static long toLong(Object value) throws MessageValueException {
+  public static long toLong(Object value) throws MessageValueException
+  {
     if (value == null)
       return Long.valueOf(null).longValue();
 
@@ -134,7 +139,8 @@ public class ConversionHelper
    * @exception MessageValueException  If the given object can't be converted
    *              into a float value.
    */
-  public static float toFloat(Object value) throws MessageValueException {
+  public static float toFloat(Object value) throws MessageValueException
+  {
     if (value == null)
       return Float.valueOf(null).floatValue();
 
@@ -153,7 +159,8 @@ public class ConversionHelper
    * @exception MessageValueException  If the given object can't be converted
    *              into a double value.
    */ 
-  public static double toDouble(Object value) throws MessageValueException {
+  public static double toDouble(Object value) throws MessageValueException
+  {
     if (value == null)
       return Double.valueOf(null).doubleValue();
 
@@ -167,13 +174,15 @@ public class ConversionHelper
   }
 
   /** Gets the String value of the given object. */
-  public static String toString(Object value) {
+  public static String toString(Object value)
+  {
     if (value == null)
       return null;
 
     if (value instanceof byte[])
       return new String((byte[]) value);
-    return value.toString();
+    else
+      return value.toString();
   }
 
   /**
@@ -182,7 +191,8 @@ public class ConversionHelper
    * @exception MessageValueException  If the given object can't be converted
    *              into a char value.
    */
-  public static char toChar(Object value) throws MessageValueException {
+  public static char toChar(Object value) throws MessageValueException
+  {
     if (value == null)
       throw new NullPointerException();
     else if (value instanceof Character)
@@ -198,7 +208,8 @@ public class ConversionHelper
    * @exception MessageValueException  If the given object can't be converted
    *              into a bytes array.
    */
-  public static byte[] toBytes(Object value) throws MessageValueException {
+  public static byte[] toBytes(Object value) throws MessageValueException
+  {
     if (value == null)
       return (byte[]) value;
     else if (value instanceof byte[])

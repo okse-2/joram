@@ -23,13 +23,13 @@
  */
 package org.objectweb.joram.mom.notifications;
 
-import fr.dyade.aaa.agent.Notification;
-
 /**
  * The <code>AbstractNotification</code> class is the superclass of the
  * notifications exchanged by a client agent and a MOM destination agent.
  */
-public abstract class AbstractNotification extends Notification {
+public abstract class AbstractNotification
+                      extends fr.dyade.aaa.agent.Notification
+{
   /**
    * The <code>clientContext</code> field allows a client to identify a context
    * within which a notification is exchanged with a destination.
@@ -38,23 +38,27 @@ public abstract class AbstractNotification extends Notification {
    */
   private int clientContext = -1;
 
+
   /**
    * Constructs an <code>AbstractNotification</code>.
    *
    * @param clientContext  Identifies a client context.
    */
-  public AbstractNotification(int clientContext) {
+  public AbstractNotification(int clientContext)
+  {
     this.clientContext = clientContext;
   }
 
   /**
    * Constructs an <code>AbstractNotification</code>.
    */
-  public AbstractNotification() {}
+  public AbstractNotification()
+  {}
 
 
   /** Returns the client context identifier. */
-  public int getClientContext() {
+  public int getClientContext()
+  {
     return clientContext;
   }
 

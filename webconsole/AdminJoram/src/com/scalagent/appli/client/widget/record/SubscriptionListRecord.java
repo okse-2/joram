@@ -1,5 +1,6 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
+ * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.widget.record;
@@ -7,9 +8,7 @@ package com.scalagent.appli.client.widget.record;
 import com.scalagent.appli.shared.SubscriptionWTO;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
 
-/**
- * @author Yohann CINTRE
- */
+
 public class SubscriptionListRecord extends ListGridRecord {
 
 	public static String ATTRIBUTE_NAME = "name";

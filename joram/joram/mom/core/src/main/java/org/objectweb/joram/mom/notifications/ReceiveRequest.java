@@ -27,7 +27,7 @@ package org.objectweb.joram.mom.notifications;
  * A <code>ReceiveRequest</code> instance is used by a client agent for 
  * requesting a message on a queue.
  */
-public class ReceiveRequest extends AbstractRequestNot {
+public class ReceiveRequest extends AbstractRequest {
   /**
    * 
    */

@@ -27,7 +27,7 @@ package org.objectweb.joram.mom.notifications;
  * A <code>SubscribeReply</code> instance is used by a topic agent
  * for acknowledging a <code>SubscribeRequest</code> notification.
  */
-public class SubscribeReply extends AbstractReplyNot
+public class SubscribeReply extends AbstractReply
 {
   /**
    * 

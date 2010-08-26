@@ -95,8 +95,9 @@ public class SoapProxyService {
     Identity identity = (Identity) Identity.soapDecode(identityMap);
     
     GetProxyIdNot gpin = new GetProxyIdNot(identity, null);
+    AgentId proxyId;
     gpin.invoke(AdminTopic.getDefault());
-    AgentId proxyId = gpin.getProxyId();
+    proxyId = gpin.getProxyId();
     
     OpenConnectionNot ocn = new OpenConnectionNot(false, heartBeat);	
     ocn.invoke(proxyId);
@@ -130,10 +131,11 @@ public class SoapProxyService {
                  "--- " + this + " forwards request " + request + " with id " + request.getRequestId());
 
     ProxyConnectionContext ctx = (ProxyConnectionContext) connections.get(new ConnectionKey(name, cnxId));
-    if (ctx == null)
+    if (ctx == null) {
       throw new StateException("Connection " + name + ':' + cnxId + " closed.");
-
-    ConnectionManager.sendToProxy(ctx.proxyId, cnxId, request, request);
+    } else {
+      ConnectionManager.sendToProxy(ctx.proxyId, cnxId, request, request);
+    }
   }
 
   /**
@@ -148,21 +150,22 @@ public class SoapProxyService {
   public java.util.Hashtable getReply(String name, int cnxId) throws Exception {
     ConnectionKey ckey = new ConnectionKey(name, cnxId);
     ProxyConnectionContext ctx = (ProxyConnectionContext) connections.get(ckey);
-    if (ctx == null)
+    if (ctx == null) {
       throw new StateException("Connection " + name + ':' + cnxId + " closed.");
-
-    Object obj = ctx.replyQueue.get();
-    if (obj instanceof Exception) {
-      connections.remove(ckey);
-      throw (Exception)obj;
+    } else {
+      Object obj = ctx.replyQueue.get();
+      if (obj instanceof Exception) {
+        connections.remove(ckey);
+        throw (Exception)obj;
+      } else {
+        AbstractJmsReply reply = (AbstractJmsReply) obj;
+        ctx.replyQueue.pop();
+        if (reply instanceof CnxCloseReply) {
+          connections.remove(ckey);
+        }
+        return reply.soapCode();
+      }
     }
-    
-    AbstractJmsReply reply = (AbstractJmsReply) obj;
-    ctx.replyQueue.pop();
-    if (reply instanceof CnxCloseReply)
-      connections.remove(ckey);
-
-    return reply.soapCode();
   }
 
   static class ConnectionKey {

@@ -56,9 +56,11 @@ public class NamingContextImpl implements Context {
 
   private CompositeName contextPath;
 
-  public NamingContextImpl(NamingConnection connection, CompositeName contextPath) { 
+  public NamingContextImpl(NamingConnection connection,
+                           CompositeName contextPath) throws NamingException { 
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, "NamingContextImpl.<init>(" + connection + ',' + contextPath + ')');
+      Trace.logger.log(BasicLevel.DEBUG, "NamingContextImpl.<init>(" + 
+                       connection + ',' + contextPath + ')');
     this.connection = connection;
     this.contextPath = contextPath;
   }
@@ -172,8 +174,9 @@ public class NamingContextImpl implements Context {
       NamingException exc = ((JndiError)reply).getException();
       exc.fillInStackTrace();
       throw exc;
+    } else {
+      return ((ListReply)reply).getEnumeration();
     }
-    return ((ListReply)reply).getEnumeration();
   }
 
   public NamingEnumeration listBindings(Name name) throws NamingException {
@@ -182,30 +185,31 @@ public class NamingContextImpl implements Context {
 
   public NamingEnumeration listBindings(String name) throws NamingException {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, "NamingContextImpl.listBindings(" + name + ')');
-    
+      Trace.logger.log(BasicLevel.DEBUG, "NamingContextImpl.listBindings(" + 
+                       name + ')');
     CompositeName queryPath = merge(contextPath, name);
-    JndiReply reply = connection.invoke(new ListBindingsRequest(queryPath));
+    JndiReply reply = connection.invoke(
+      new ListBindingsRequest(queryPath));
     if (reply instanceof JndiError) {
       NamingException exc = ((JndiError)reply).getException();
       exc.fillInStackTrace();
       throw exc;
-    }
-    
-    ListBindingsReply lbr = (ListBindingsReply)reply;
+    } else {
+      ListBindingsReply lbr = (ListBindingsReply)reply;
 
-    // 1- resolve contexts
-    Binding[] bindings = lbr.getContexts();
-    for (int i = 0; i < bindings.length; i++) {
-      CompositeName subCtxPath = (CompositeName)queryPath.clone();
-      subCtxPath.add(bindings[i].getName());
-      bindings[i].setObject(new NamingContextImpl(
-        connection.cloneConnection(), subCtxPath));
-    }
+      // 1- resolve contexts
+      Binding[] bindings = lbr.getContexts();
+      for (int i = 0; i < bindings.length; i++) {
+        CompositeName subCtxPath = (CompositeName)queryPath.clone();
+        subCtxPath.add(bindings[i].getName());
+        bindings[i].setObject(new NamingContextImpl(
+          connection.cloneConnection(), subCtxPath));
+      }
 
-    // 2- resolve references
-    lbr.resolveReferences();
-    return lbr.getEnumeration();
+      // 2- resolve references
+      lbr.resolveReferences();
+      return lbr.getEnumeration();
+    }
   }
 
   public Context createSubcontext(Name name) throws NamingException {
@@ -223,8 +227,10 @@ public class NamingContextImpl implements Context {
       NamingException exc = ((JndiError)reply).getException();
       exc.fillInStackTrace();
       throw exc;
+    } else {
+      return new NamingContextImpl(
+        connection.cloneConnection(), path);
     }
-    return new NamingContextImpl(connection.cloneConnection(), path);
   }
 
   public void destroySubcontext(Name name) throws NamingException {
@@ -251,50 +257,36 @@ public class NamingContextImpl implements Context {
     return contextPath.toString();
   }
 
-  /**
-   * @param propName 
-   * @param propVal  
-   */
   public Object addToEnvironment(Name propName, Object propVal) throws NamingException {
     throw(new NamingException("Not yet available"));
   }
-  
   public Object addToEnvironment(String propName, Object propVal) throws NamingException {
     throw(new NamingException("Not yet available"));
   }
-  
   public Name composeName(Name name, Name prefix) throws NamingException {
     throw(new NamingException("Not yet available"));
   }
-  
   public String composeName(String name, String prefix) throws NamingException {
     throw(new NamingException("Not yet available"));
   }
-  
   public NameParser getNameParser(Name name) throws NamingException {
     throw(new NamingException("Not yet available"));
   }
-  
   public NameParser getNameParser(String name) throws NamingException {
     throw(new NamingException("Not yet available"));
   }
-  
   public Object lookupLink(Name name) throws NamingException {
     throw(new NamingException("Not yet available"));
   }
-  
   public Object lookupLink(String name) throws NamingException {
     throw(new NamingException("Not yet available"));
   }
-  
   public Object removeFromEnvironment(String propName) throws NamingException {
     throw(new NamingException("Not yet available"));
   }
-  
   public void rename(Name oldName, Name newName) throws NamingException {
     throw(new NamingException("Not yet available"));
   }
-  
   public void rename(String oldName, String newName) throws NamingException {
     throw(new NamingException("Not yet available"));
   }

@@ -1,47 +1,6 @@
 ###############################################################################
-# 2010/08/26 | Joram 5.4.0 tag.
+# 2010/05/05 | Joram 5.3.2 tag.
 ###############################################################################
-+==============================================================================
-| 2010/08/25 | Andre Freyssinet - ScalAgent Distributed Technologies 
-+------------+-----------------------------------------------------------------
- The call to System.runFinalization in AgentServer.stop method seems to cause
-deadlock with JOnAS. Normally this call is no longer needed so we remove it.
-+==============================================================================
-| 2010/08/05 | Andre Freyssinet - ScalAgent Distributed Technologies 
-+------------+-----------------------------------------------------------------
- Fixes minor issues and removes unused code.
- Javadoc enhancements.
-+==============================================================================
-| 2010/08/03 | Andre Freyssinet - ScalAgent Distributed Technologies 
-+------------+-----------------------------------------------------------------
- Transaction: Adds FileRepository.useRandomAccessFile property allowing the
-optional  use of RandomAccessFile or FileOutputStream. This option offers better
-performance with some filesystems.
- Potential bug fix in AgentId.equals with null.
- Adds statistics about messages waiting in MessageConsumer components.
- Allows to create or retrieve destinations through Session.create[Queue|Topic].
- Numerous changes in administration, reducing the number of message types and
-avoiding useless indirection in request and reply.
-+==============================================================================
-| 2010/07/19 | Nicolas Tachker - ScalAgent Distributed Technologies 
-+------------+-----------------------------------------------------------------
- OSGi enhancements.
-###############################################################################
-# 2010/07/13 | Joram 5.3.2 tag.
-###############################################################################
-+==============================================================================
-| 2010/06/15 | Guillaume Surrel - ScalAgent Distributed Technologies 
-+------------+-----------------------------------------------------------------
- Design of an extension framework for JMS destinations. In a first time it
-defines 2 destination for acquisition (create JMS message from external data)
-and distribution (create external data from JMS message) and simple interface
-to implement for acquisition and distribution modules.
- Implementation of modules are provided to replace Collector, Mail, Monitoring
-and JMS bridge destinations.
-+==============================================================================
-| 2010/06/15 | Guillaume Surrel - ScalAgent Distributed Technologies 
-+------------+-----------------------------------------------------------------
- First release of Jorams' configuration designer.
 +==============================================================================
 | 2010/06/22 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------

@@ -246,30 +246,6 @@ public final class AgentServer {
     return engine;
   }
 
-  /**
-   * Returns the load averages for the last minute.
-   * @return the load averages for the last minute.
-   */
-  public static float getEngineAverageLoad1() {
-    return getEngine().getAverageLoad1();
-  }
-
-  /**
-   * Returns the load averages for the past 5 minutes.
-   * @return the load averages for the past 5 minutes.
-   */
-  public static float getEngineAverageLoad5() {
-    return getEngine().getAverageLoad5();
-  }
-  
-  /**
-   * Returns the load averages for the past 15 minutes.
-   * @return the load averages for the past 15 minutes.
-   */
-  public static float getEngineAverageLoad15() {
-    return getEngine().getAverageLoad15();
-  }
-  
   /** Static reference to the transactional monitor. */
   static Transaction transaction = null;
 
@@ -325,16 +301,17 @@ public final class AgentServer {
   static Enumeration getConsumers() {
     if (consumers == null)
       return null;
-    return consumers.elements();
+    else
+      return consumers.elements();
   }
 
-  static MessageConsumer getConsumer(String domain) throws Exception {
+  public static MessageConsumer getConsumer(String domain) throws Exception {
     if (! consumers.containsKey(domain))
       throw new Exception("Unknown consumer for domain " + domain);
     return (MessageConsumer) consumers.get(domain);
   }
 
-  static void removeConsumer(String domain) {
+  public static void removeConsumer(String domain) {
     MessageConsumer cons = (MessageConsumer) consumers.remove(domain);
     if (cons != null) {
       cons.stop();
@@ -1488,7 +1465,7 @@ public final class AgentServer {
                                      LogMonitoringTimerTask.DEFAULT_MONITORING_RESULT_LOGGER);
         Logger logger = Debug.getLogger(logname);
         int loglevel = getInteger(LogMonitoringTimerTask.MONITORING_RESULT_LEVEL_PROPERTY,
-                                  LogMonitoringTimerTask.DEFAULT_MONITORING_RESULT_LEVEL).intValue();
+                                  LogMonitoringTimerTask.DEFAULT_MONITORING_RESULT_LEVEL);
         String logmsg = getProperty(LogMonitoringTimerTask.MONITORING_RESULT_MESSAGE_PROPERTY,
                                     LogMonitoringTimerTask.DEFAULT_MONITORING_RESULT_MESSAGE);
         
@@ -1668,10 +1645,7 @@ public final class AgentServer {
       // Wait for the transaction manager stop
 
       Runtime.getRuntime().gc();
-      
-      // AF: This call seems to cause deadlock with JOnAS and it is no longer needed so
-      // we will remove it.
-      // System.runFinalization();
+      System.runFinalization();
 
       logmon.log(BasicLevel.WARN, getName() + ", stopped at " + new Date());
     } catch (Throwable t) {

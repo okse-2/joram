@@ -263,8 +263,9 @@ public final class Message implements Cloneable, Serializable, Streamable {
   public String getText() {
     if (body == null) {
       return null;
+    } else {
+      return new String(body);
     }
-    return new String(body);
   }
 
   /**
@@ -545,21 +546,21 @@ public final class Message implements Cloneable, Serializable, Streamable {
    */
   public static Vector readVectorFrom(InputStream is) throws IOException {
     int size = StreamUtil.readIntFrom(is);
-    
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "readVectorFrom: " + size);
-    
-    if (size == -1) return null;
-
-    Vector messages = new Vector(size);
-    for (int i=0; i<size; i++) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "readVectorFrom: msg#" + i);
-      Message msg = new Message();
-      msg.readFrom(is);
-      messages.addElement(msg);
+    if (size == -1) {
+      return null;
+    } else {
+      Vector messages = new Vector(size);
+      for (int i=0; i<size; i++) {
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "readVectorFrom: msg#" + i);
+        Message msg = new Message();
+        msg.readFrom(is);
+        messages.addElement(msg);
+      }
+      return messages;
     }
-    return messages;
   }
 
 //   /** ***** ***** ***** ***** ***** ***** ***** *****
@@ -582,9 +583,6 @@ public final class Message implements Cloneable, Serializable, Streamable {
     writeTo(out);
   }
 
-  /**
-   * @throws ClassNotFoundException  
-   */
   private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
     readFrom(in);
   }

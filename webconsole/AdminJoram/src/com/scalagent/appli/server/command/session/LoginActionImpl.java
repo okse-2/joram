@@ -1,8 +1,10 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
+ * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.server.command.session;
+
 
 import com.scalagent.appli.client.command.session.LoginAction;
 import com.scalagent.appli.client.command.session.LoginResponse;
@@ -10,9 +12,7 @@ import com.scalagent.appli.server.RPCServiceCache;
 import com.scalagent.engine.server.BaseRPCService;
 import com.scalagent.engine.server.command.ActionImpl;
 
-/**
- * @author Yohann CINTRE
- */
+
 public class LoginActionImpl extends ActionImpl<LoginResponse, LoginAction, RPCServiceCache>{
 
 

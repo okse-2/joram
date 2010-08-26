@@ -366,7 +366,8 @@ public class Message implements javax.jms.Message {
   public final int getJMSDeliveryMode() throws JMSException {
     if (momMsg.persistent) 
       return javax.jms.DeliveryMode.PERSISTENT;
-    return javax.jms.DeliveryMode.NON_PERSISTENT;
+    else
+      return javax.jms.DeliveryMode.NON_PERSISTENT;
   }
 
   /**
@@ -804,9 +805,11 @@ public class Message implements javax.jms.Message {
     if (name.startsWith("JMSX")) {
       if (name.equals("JMSXDeliveryCount"))
         return new Integer(momMsg.deliveryCount);
-      return momMsg.getOptionalHeader(name);
+      else
+        return momMsg.getOptionalHeader(name);
+    } else {
+      return momMsg.getProperty(name);
     }
-    return momMsg.getProperty(name);
   }
 
   /**
@@ -877,8 +880,8 @@ public class Message implements javax.jms.Message {
   /**
    * Method preparing the message for sending; resets header values, and
    * serializes the body (done in subclasses).
-
-   * @throws JMSException 
+   *
+   * @exception MessageFormatException  If an error occurs while serializing.
    */
   protected void prepare() throws JMSException {
     momMsg.redelivered = false;

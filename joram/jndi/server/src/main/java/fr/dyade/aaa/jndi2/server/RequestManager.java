@@ -119,7 +119,7 @@ public class RequestManager implements LifeCycleListener, Serializable {
       if (request instanceof JndiReadRequest) {
         // 1- Dispatch the read requests
         return invokeReadRequest(reqCtx);
-      } else if (request instanceof JndiAdminRequest) {
+      } if (request instanceof JndiAdminRequest) {
         return invokeAdminRequest(reqCtx);
       } else {
         // 2- Dispatch the write requests
@@ -151,9 +151,10 @@ public class RequestManager implements LifeCycleListener, Serializable {
       if (obj != null) {
         ObjectRecord or = (ObjectRecord)obj;
         return new LookupReply(or.getObject());
+      } else {
+        // This is a context record
+        return new JndiReply();
       }
-      // This is a context record
-      return new JndiReply();
     } else if (request instanceof ListBindingsRequest) {
       Object obj = listBindings((ListBindingsRequest)request);
       return new ListBindingsReply((Binding[])obj);
@@ -174,7 +175,7 @@ public class RequestManager implements LifeCycleListener, Serializable {
                        "RequestManager.invokeWriteRequest(" + reqCtx + ',' + ')');
     try {
       JndiRequest request = reqCtx.getRequest();
-
+      JndiReply reply;
       if (request instanceof BindRequest) {
         bind((BindRequest)request);        
         return new JndiReply();
@@ -182,13 +183,16 @@ public class RequestManager implements LifeCycleListener, Serializable {
         unbind((UnbindRequest)request);
         return new JndiReply();
       } else if (request instanceof CreateSubcontextRequest) {
-        createSubcontext((CreateSubcontextRequest)request);
+        createSubcontext(
+          (CreateSubcontextRequest)request);
         return new JndiReply();
       } else if (request instanceof DestroySubcontextRequest) {
-        destroySubcontext((DestroySubcontextRequest)request);
+        destroySubcontext(
+          (DestroySubcontextRequest)request);
         return new JndiReply();
       } else {
-        return new JndiError(new NamingException("Unknown operation"));
+        return new JndiError(
+          new NamingException("Unknown operation"));
       }
     } catch (NotOwnerException noexc) {
       if (Trace.logger.isLoggable(BasicLevel.DEBUG))
@@ -199,15 +203,17 @@ public class RequestManager implements LifeCycleListener, Serializable {
     }
   }
 
-  protected JndiReply invokeAdminRequest(RequestContext reqCtx) throws NamingException {
+  protected JndiReply invokeAdminRequest(
+    RequestContext reqCtx)
+    throws NamingException {
     JndiRequest request = reqCtx.getRequest();
-    
     if (request instanceof ChangeOwnerRequest) {
       changeOwner((ChangeOwnerRequest)request);
       return new JndiReply();
+    } else {
+      return new JndiError(
+        new NamingException("Unknown admin operation"));
     }
-    
-    return new JndiError(new NamingException("Unknown admin operation"));
   }
 
   private void bind(BindRequest request) throws NamingException {

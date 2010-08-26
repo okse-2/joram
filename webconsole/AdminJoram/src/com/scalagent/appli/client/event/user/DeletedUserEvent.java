@@ -1,5 +1,6 @@
 /**
  * (c)2010 Scalagent Distributed Technologies
+ * @author Yohann CINTRE
  */
 
 package com.scalagent.appli.client.event.user;
@@ -7,9 +8,8 @@ package com.scalagent.appli.client.event.user;
 import com.google.gwt.event.shared.GwtEvent;
 import com.scalagent.appli.shared.UserWTO;
 
-/**
- * @author Yohann CINTRE
- */
+
+
 public class DeletedUserEvent extends GwtEvent<DeletedUserHandler> {
 
 	public static Type<DeletedUserHandler> TYPE = new Type<DeletedUserHandler>();

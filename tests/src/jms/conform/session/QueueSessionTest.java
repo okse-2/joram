@@ -40,7 +40,7 @@ import jms.framework.TestConfig;
 
 /**
  * Test queue sessions <br />
- * See JMS specifications, 4.4 Session
+ * See JMS specifications, §4.4 Session
  */
 public class QueueSessionTest extends PTPTestCase {
 

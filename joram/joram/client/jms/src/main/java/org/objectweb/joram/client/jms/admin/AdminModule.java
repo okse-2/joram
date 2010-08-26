@@ -34,7 +34,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
@@ -793,38 +792,6 @@ public final class AdminModule {
   }
 
   /**
-   * Returns statistics for the local server.
-   *
-   * @return  statistics for the local server.
-   *          
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  Never thrown.
-   * 
-   * @see #getStatistics(int)
-   */
-  public static Hashtable getStatistics() throws ConnectException, AdminException {
-    return getStatistics(getLocalServerId());
-  }
-
-  /**
-   * Returns statistics for the the specified server.
-   * <p>
-   * The request fails if the target server does not belong to the platform.
-   *
-   * @param serverId Unique identifier of the server.
-   * @return  the statistics for the the specified server.
-   * 
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  If the request fails.
-   */
-  public static Hashtable getStatistics(int serverId) throws ConnectException, AdminException {
-    if (wrapper == null)
-      throw new ConnectException("Administrator not connected.");
-
-    return wrapper.getStatistics(serverId);
-  }
-  
-  /**
    * Returns the default dead message queue for the local server, null if not
    * set.
    *
@@ -1321,7 +1288,7 @@ public final class AdminModule {
     return localPort;
   }
 
-  public static void abortRequest() throws ConnectException {
+  public static void abortRequest() throws JMSException, ConnectException {
     if (wrapper == null)
       throw new ConnectException("Administrator not connected.");
 

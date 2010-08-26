@@ -55,8 +55,9 @@ public class NamingContextId implements java.io.Serializable {
       NamingContextId ncid = (NamingContextId)obj;
       if (ncid.localId != localId) return false;
       return ncid.factoryId.equals(factoryId);
+    } else {
+      return false;
     }
-    return false;
   }
 
   public String toString() {
