@@ -84,31 +84,27 @@ public class ReliableTcpClient {
   private Timer timer;
 
   /**
-   *  Name of the boolean property allowing the verification of the synchronization
-   * between the client and server clock. When true a warning is generated if there
-   * is more than one second between the two clocks. This property allows the protocol
-   * compatibility in 5.2 versions, this verification will be enabled by default in 5.3
-   * version.
+   *  Name of the property allowing to change the threshold of warning for the
+   * verification of the synchronization between the client and server clock.
+   *  A warning is generated if there is more than this value in milliseconds
+   * between the two clocks.
    * <p>
-   *  This property can be fixed either from <code>java</code> launching command, or
-   * in <code>a3servers.xml</code> configuration file. By default the value is false. 
+   *  By default the value is 1000 milliseconds. 
    */
-  public static final String VERIFY_CLOCK_SYNCHRO = "org.objectweb.joram.TcpConnection.verifyClockSynchro";
+  public static final String CLOCK_SYNCHRO_THRESHOLD = "org.objectweb.joram.TcpConnection.ClockSynchro.Threshold";
 
   /**
-   *  Boolean value allowing the verification of the synchronization between the
-   * client and server clock. When true a warning is generated if there is more
-   * than one second between the two clocks. This property allows the protocol
-   * compatibility in 5.2 versions, this verification will be enabled by default
-   * in 5.3 version.
+   *  Value of the threshold of warning for the verification of the synchronization
+   * between the client and server clock.
+   *  A warning is generated if there is more than this value in milliseconds between
+   * the two clocks.
    * <p>
-   *  This property can be fixed either from <code>java</code> launching command, or
-   * in <code>a3servers.xml</code> configuration file. By default the value is false.
+   *  By default the value is 1000 milliseconds. 
    */
-  private final boolean verifyClockSynchro;
+  private long clockSynchroThreshold = 1000L;
 
   public ReliableTcpClient() {
-    this.verifyClockSynchro = Configuration.getBoolean("VERIFY_CLOCK_SYNCHRO");
+    this.clockSynchroThreshold = Configuration.getLong(CLOCK_SYNCHRO_THRESHOLD, clockSynchroThreshold).longValue();
   }
 
   public void setTimer(Timer timer2) {
@@ -280,10 +276,8 @@ public class ReliableTcpClient {
 
     // Writes the Joram magic number
     baos.write(MetaData.joramMagic);
-    if (verifyClockSynchro) {
-      // Writes the current date
-      StreamUtil.writeTo(System.currentTimeMillis(), baos);
-    }
+    // Writes the current date
+    StreamUtil.writeTo(System.currentTimeMillis(), baos);
 
     // Writes the user identity
     if (logger.isLoggable(BasicLevel.DEBUG))
@@ -302,12 +296,10 @@ public class ReliableTcpClient {
       os.flush();
 
       int len = StreamUtil.readIntFrom(is);
-      if (verifyClockSynchro) {
-        long dt = StreamUtil.readLongFrom(is);
-        if (dt > 1000)
-          logger.log(BasicLevel.WARN, " -> clock synchronization between client and server: " + dt);
-      }
-      
+      long dt = StreamUtil.readLongFrom(is);
+      if (dt > clockSynchroThreshold)
+        logger.log(BasicLevel.WARN, " -> bad clock synchronization between client and server: " + dt);
+
       int res = StreamUtil.readIntFrom(is);
       if (res > 0) {
         String info = StreamUtil.readStringFrom(is);
