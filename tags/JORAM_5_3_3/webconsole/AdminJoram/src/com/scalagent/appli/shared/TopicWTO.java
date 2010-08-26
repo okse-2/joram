@@ -1,0 +1,166 @@
+/**
+ * (c)2010 Scalagent Distributed Technologies
+ * @author Yohann CINTRE
+ */
+
+package com.scalagent.appli.shared;
+
+import java.util.Arrays;
+import java.util.Date;
+
+import com.scalagent.engine.shared.BaseWTO;
+
+public class TopicWTO extends BaseWTO {
+	
+	private String name;
+	private Date creationDate = new Date();
+    private String[] subscriberIds;
+    private String DMQId;
+    private String destinationId;
+    private long nbMsgsDeliverSinceCreation;
+    private long nbMsgsReceiveSinceCreation;
+    private long nbMsgsSentToDMQSinceCreation;
+    private long period;
+    private String[] rights;
+    private boolean freeReading;
+    private boolean freeWriting;
+    
+    
+    public String getName() { return name; }
+    public Date getCreationDate() { return creationDate; }
+    public String getCreationDateinString() { return creationDate.toString(); }
+    public long getCreationTimeInMillis() { return creationDate.getTime(); }
+    public String[] getSubscriberIds() { return subscriberIds; }
+    public String getDMQId() { return DMQId; }
+    public String getDestinationId() { return destinationId; }
+    public long getNbMsgsDeliverSinceCreation() { return nbMsgsDeliverSinceCreation; }
+    public long getNbMsgsReceiveSinceCreation() { return nbMsgsReceiveSinceCreation; }
+    public long getNbMsgsSentToDMQSinceCreation() { return nbMsgsSentToDMQSinceCreation; }
+    public long getPeriod() { return period; }
+    public String[] getRights() { return rights; }
+    public boolean isFreeReading() { return freeReading; }
+    public boolean isFreeWriting() { return freeWriting; }
+    
+    public void setName(String name) { this.name = name; }
+    public void setCreationDate(Date date) { this.creationDate = date; }
+    public void setSubscriberIds(String[] subscriberIds) { this.subscriberIds = subscriberIds; }
+    public void setDMQId(String DMQId) { this.DMQId = DMQId; }
+    public void setDestinationId(String destinationId) { this.destinationId = destinationId; }
+    public void setNbMsgsDeliverSinceCreation(long nbMsgsDeliverSinceCreation) { this.nbMsgsDeliverSinceCreation = nbMsgsDeliverSinceCreation; }
+    public void setNbMsgsReceiveSinceCreation(long nbMsgsReceiveSinceCreation) { this.nbMsgsReceiveSinceCreation = nbMsgsReceiveSinceCreation; }
+    public void setNbMsgsSentToDMQSinceCreation(long nbMsgsSentToDMQSinceCreation) { this.nbMsgsSentToDMQSinceCreation = nbMsgsSentToDMQSinceCreation; }
+    public void setPeriod(long period) { this.period = period; }
+    public void setRights(String[] rights) { this.rights = rights; }
+    public void setFreeReading(boolean freeReading) { this.freeReading = freeReading; }
+    public void setFreeWriting(boolean freeWriting) { this.freeWriting = freeWriting; }
+
+    
+    public TopicWTO(String name, Date creationDate, String[] subscriberIds, String DMQId, 
+    		String destinationId, long nbMsgsDeliverSinceCreation, long nbMsgsReceiveSinceCreation, 
+    		long nbMsgsSentToDMQSinceCreation, long period, String[] rights, 
+    		boolean freeReading, boolean freeWriting) {
+
+    	this.id=name;
+    	this.name=name;
+    	this.creationDate=creationDate;
+    	this.subscriberIds=subscriberIds;
+    	this.DMQId=DMQId;
+    	this.destinationId=destinationId;
+    	this.nbMsgsDeliverSinceCreation=nbMsgsDeliverSinceCreation;
+    	this.nbMsgsReceiveSinceCreation=nbMsgsReceiveSinceCreation;
+    	this.nbMsgsSentToDMQSinceCreation=nbMsgsSentToDMQSinceCreation;
+    	this.period=period;
+    	this.rights=rights;
+    	this.freeReading=freeReading;
+    	this.freeWriting=freeWriting;
+    }
+  
+    public TopicWTO() {}
+    
+	@Override
+	public String toString(){
+	    return 
+	    "[name="+name
+	    +", creationDate="+creationDate
+	    +" ]";
+    }
+    
+    public String toStringFullContent(){
+	    return 
+	    "[name="+name
+	    +", creationDate="+creationDate
+	    +", subscriberIds="+subscriberIds
+	    +", DMQId="+DMQId
+	    +", nbMsgsDeliverSinceCreation="+nbMsgsDeliverSinceCreation
+	    +", nbMsgsReceiveSinceCreation="+nbMsgsReceiveSinceCreation
+	    +", nbMsgsSentToDMQSinceCreation="+nbMsgsSentToDMQSinceCreation
+	    +", period="+period
+	    +", rights="+rights
+	    +", freeReading="+freeReading
+	    +", freeWriting="+freeWriting
+	    +" ]";   
+    }
+    
+    @Override
+	public boolean equals(Object anObj){
+    	if(anObj==null)
+    		return false;
+    	if(anObj==this)
+    		return true;
+    	if(!(anObj instanceof TopicWTO))
+    		return false;
+    	TopicWTO obj = (TopicWTO)anObj;
+    	if(obj.id==this.id)
+    		return true;
+    	return false;
+    }
+    
+  
+    @Override
+	public TopicWTO clone() {
+  	
+    	TopicWTO topic = new TopicWTO();
+  	
+    	topic.setName(this.getName());
+    	topic.setCreationDate(this.getCreationDate());
+    	topic.setSubscriberIds(this.getSubscriberIds());
+    	topic.setDMQId(this.getDMQId());
+    	topic.setDestinationId(this.getDestinationId());
+    	topic.setNbMsgsDeliverSinceCreation(this.getNbMsgsDeliverSinceCreation());
+    	topic.setNbMsgsReceiveSinceCreation(this.getNbMsgsReceiveSinceCreation());
+    	topic.setNbMsgsSentToDMQSinceCreation(this.getNbMsgsSentToDMQSinceCreation());
+    	topic.setPeriod(this.getPeriod());
+    	topic.setRights(this.getRights());
+    	topic.setFreeReading(this.isFreeReading());
+    	topic.setFreeWriting(this.isFreeWriting());
+  	
+	     return topic;
+  	}
+    
+    @Override
+	public boolean equalsContent(Object anObj) {
+		
+		if(!equals(anObj))
+			return false;
+		
+		TopicWTO obj = (TopicWTO)anObj;
+
+		boolean eq =  
+		equalsWithNull(this.id, obj.id)
+		&& equalsWithNull(this.name, obj.name)
+		&& equalsWithNull(this.creationDate, obj.creationDate)
+		&& equalsWithNull(Arrays.asList(this.subscriberIds), Arrays.asList(obj.subscriberIds))
+		&& equalsWithNull(this.DMQId, obj.DMQId)
+		&& equalsWithNull(this.destinationId, obj.destinationId)
+		&& equalsWithNull(this.nbMsgsDeliverSinceCreation, obj.nbMsgsDeliverSinceCreation)
+		&& equalsWithNull(this.nbMsgsReceiveSinceCreation, obj.nbMsgsReceiveSinceCreation)
+		&& equalsWithNull(this.nbMsgsSentToDMQSinceCreation, obj.nbMsgsSentToDMQSinceCreation)
+		&& equalsWithNull(this.period, obj.period)
+		&& equalsWithNull(Arrays.asList(this.rights), Arrays.asList(obj.rights))
+		&& equalsWithNull(this.freeReading, obj.freeReading)
+		&& equalsWithNull(this.freeWriting, obj.freeWriting);
+	
+		return eq;
+
+    }
+}

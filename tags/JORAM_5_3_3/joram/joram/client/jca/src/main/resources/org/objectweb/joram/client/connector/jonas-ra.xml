@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ Copyright (C) 2004 - Bull SA
+
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or any later version.
+
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ USA.
+-->
+
+<jonas-connector xmlns="http://www.objectweb.org/jonas/ns"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.objectweb.org/jonas/ns
+ http://www.objectweb.org/jonas/ns/jonas-connector_4_4.xsd" >
+  <rarlink></rarlink>
+  <log-enabled>false</log-enabled>
+  <log-topic></log-topic>
+  <pool-params>
+    <pool-init>0</pool-init>
+    <pool-min>0</pool-min>
+    <pool-max>100</pool-max>
+    <pool-max-age>0</pool-max-age>
+    <pstmt-max>0</pstmt-max>
+    <pool-max-opentime>0</pool-max-opentime>
+    <pool-max-waiters>0</pool-max-waiters>
+    <pool-max-waittime>0</pool-max-waittime>
+    <pool-sampling-period>30</pool-sampling-period>
+  </pool-params>
+  <jonas-config-property>
+    <jonas-config-property-name>dsClass</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>URL</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>user</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>password</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>loginTimeout</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>isolationLevel</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>mapperName</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>logTopic</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>CollocatedServer</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>PlatformConfigDir</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>PersistentPlatform</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>ServerId</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>ServerName</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>AdminFile</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>HostName</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>ServerPort</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>ConnectingTimer</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>CnxPendingTimer</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>TxPendingTimer</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-config-property>
+    <jonas-config-property-name>DeleteDurableSubscription</jonas-config-property-name>
+    <jonas-config-property-value></jonas-config-property-value>
+  </jonas-config-property>
+  <jonas-connection-definition>
+    <description>org.objectweb.joram.client.connector.ManagedQueueConnectionFactoryImpl</description>
+    <jndi-name>QCF</jndi-name>
+    <jonas-config-property>
+      <jonas-config-property-name>UserName</jonas-config-property-name>
+      <jonas-config-property-value></jonas-config-property-value>
+    </jonas-config-property>
+    <jonas-config-property>
+      <jonas-config-property-name>Password</jonas-config-property-name>
+      <jonas-config-property-value></jonas-config-property-value>
+    </jonas-config-property>
+    <jonas-config-property>
+      <jonas-config-property-name>Collocated</jonas-config-property-name>
+      <jonas-config-property-value></jonas-config-property-value>
+    </jonas-config-property>
+  </jonas-connection-definition>
+  <jonas-connection-definition>
+    <description>org.objectweb.joram.client.connector.ManagedTopicConnectionFactoryImpl</description>
+    <jndi-name>TCF</jndi-name>
+    <jonas-config-property>
+      <jonas-config-property-name>UserName</jonas-config-property-name>
+      <jonas-config-property-value></jonas-config-property-value>
+    </jonas-config-property>
+    <jonas-config-property>
+      <jonas-config-property-name>Password</jonas-config-property-name>
+      <jonas-config-property-value></jonas-config-property-value>
+    </jonas-config-property>
+    <jonas-config-property>
+      <jonas-config-property-name>Collocated</jonas-config-property-name>
+      <jonas-config-property-value></jonas-config-property-value>
+    </jonas-config-property>
+  </jonas-connection-definition>
+  <jonas-connection-definition>
+    <description>org.objectweb.joram.client.connector.ManagedConnectionFactoryImpl</description>
+    <jndi-name>CF</jndi-name>
+    <jonas-config-property>
+      <jonas-config-property-name>UserName</jonas-config-property-name>
+      <jonas-config-property-value></jonas-config-property-value>
+    </jonas-config-property>
+    <jonas-config-property>
+      <jonas-config-property-name>Password</jonas-config-property-name>
+      <jonas-config-property-value></jonas-config-property-value>
+    </jonas-config-property>
+    <jonas-config-property>
+      <jonas-config-property-name>Collocated</jonas-config-property-name>
+      <jonas-config-property-value></jonas-config-property-value>
+    </jonas-config-property>
+  </jonas-connection-definition>
+  <jonas-activationspec>
+    <description>javax.jms.MessageListener</description>
+    <jndi-name>joramActivationSpec</jndi-name>
+  </jonas-activationspec>
+</jonas-connector>
+
