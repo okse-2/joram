@@ -1,11 +1,16 @@
 ###############################################################################
-# 2010/08/26 | Joram 5.3.3 tag.
+# 2010/08/26 | Joram 5.4.0 tag.
 ###############################################################################
 +==============================================================================
 | 2010/08/25 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  The call to System.runFinalization in AgentServer.stop method seems to cause
 deadlock with JOnAS. Normally this call is no longer needed so we remove it.
++==============================================================================
+| 2010/08/05 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fixes minor issues and removes unused code.
+ Javadoc enhancements.
 +==============================================================================
 | 2010/08/03 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
@@ -17,6 +22,10 @@ performance with some filesystems.
  Allows to create or retrieve destinations through Session.create[Queue|Topic].
  Numerous changes in administration, reducing the number of message types and
 avoiding useless indirection in request and reply.
++==============================================================================
+| 2010/07/19 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ OSGi enhancements.
 ###############################################################################
 # 2010/07/13 | Joram 5.3.2 tag.
 ###############################################################################
