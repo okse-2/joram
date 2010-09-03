@@ -25,9 +25,73 @@
     <module>conf</module>
     <module>assembly</module>
     <module>samples</module>
-<!--    <module>release</module>-->
   </modules>
 
+  <profiles>
+    <!-- Profile release -->
+    <profile>
+      <id>release</id>
+      <modules>
+        <module>release</module>
+      </modules>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <!-- <version>2.1.2</version> -->
+            <executions>
+              <execution>
+                <id>bind-sources</id>
+                <goals>
+                  <goal>jar</goal>
+                  <!-- <goal>jar-no-fork</goal> -->
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <!-- Profile javadoc -->
+    <profile>
+      <id>doc</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <configuration>
+              <show>private</show>
+              <nohelp>true</nohelp>
+            </configuration>
+            <executions>
+              <execution>
+                <id>javadoc</id>
+                <phase>install</phase>
+                <goals>
+                  <goal>aggregate</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+      <reporting>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <configuration>
+              <!-- <stylesheetfile>${basedir}/src/main/javadoc/stylesheet.css</stylesheetfile> -->
+              <show>private</show>
+            </configuration>
+          </plugin>
+        </plugins>
+      </reporting>
+    </profile>
+  </profiles>
+  
   <repositories>
     <repository>
       <id>ow2</id>
@@ -71,45 +135,11 @@
           <target>1.5</target>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>bind-sources</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <configuration>
-          <show>private</show>
-          <nohelp>true</nohelp>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
   
-  <reporting>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <configuration>
-<!--          <stylesheetfile>${basedir}/src/main/javadoc/stylesheet.css</stylesheetfile>-->
-          <show>private</show>
-        </configuration>
-      </plugin>
-    </plugins>
-  </reporting>
-  
-
-  <!--  dependencies versions -->
   <properties>
+    <!--  dependencies versions -->
     <ow2.version>1.1</ow2.version>
     <mail.version>1.4.1</mail.version>
     <monolog.version>5.1.1</monolog.version>
@@ -128,6 +158,8 @@
     <felix.shell.version>1.4.1</felix.shell.version>
     <felix.remote.version>1.0.4</felix.remote.version>
     <felix.tui.version>1.4.1</felix.tui.version>
+    <!-- to prevent [WARNING] Using platform encoding -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <organization>
