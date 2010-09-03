@@ -24,7 +24,7 @@
           <!-- ============= joram-osgi =====================-->
           <execution>
             <id>joram-osgi</id>
-            <phase>process-resources</phase>
+            <phase>install</phase>
             <goals>
               <goal>single</goal>
             </goals>
