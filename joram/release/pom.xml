@@ -24,9 +24,9 @@
           <!-- ============= joram-osgi =====================-->
           <execution>
             <id>joram-osgi</id>
-            <phase>process-resources</phase>
+            <phase>install</phase>
             <goals>
-              <goal>single</goal>
+            	<goal>single</goal>
             </goals>
             <configuration>
               <descriptors>
@@ -39,7 +39,7 @@
           <!-- ============= ra =====================-->
           <execution>
             <id>joram-ra</id>
-            <phase>process-resources</phase>
+            <phase>install</phase>
             <goals>
               <goal>single</goal>
             </goals>
@@ -64,7 +64,7 @@
           <!-- ============= ra-remote =====================-->
           <execution>
             <id>joram-ra-remote</id>
-            <phase>process-resources</phase>
+            <phase>install</phase>
             <goals>
               <goal>single</goal>
             </goals>
@@ -89,7 +89,7 @@
           <!-- ============= ra-jonas =====================-->
           <execution>
             <id>joram-ra-jonas</id>
-            <phase>process-resources</phase>
+            <phase>install</phase>
             <goals>
               <goal>single</goal>
             </goals>
@@ -114,7 +114,7 @@
           <!-- ============= src =====================-->
           <execution>
             <id>joram-src</id>
-            <phase>process-resources</phase>
+            <phase>install</phase>
             <goals>
               <goal>single</goal>
             </goals>
@@ -129,7 +129,7 @@
           <!-- ============= bin =====================-->
           <execution>
             <id>joram-bin</id>
-            <phase>process-resources</phase>
+            <phase>install</phase>
             <goals>
               <goal>single</goal>
             </goals>
@@ -144,9 +144,9 @@
           <!-- ============= raconfig =====================-->
           <execution>
             <id>joram-raconfig</id>
-            <phase>process-resources</phase>
+            <phase>install</phase>
             <goals>
-              <goal>single</goal>
+            	<goal>single</goal>
             </goals>
             <configuration>
               <descriptors>
