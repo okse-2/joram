@@ -48,13 +48,13 @@
       <p>The latest development snapshots are available from
       <a href="http://bamboo.ow2.org/browse/JORAM-ANT/latest/artifact/Releases/release/target">Continuous Integration Build Tool</a>:</p>
       <ul>
-      <li>joram-release-5.3.2.53-SNAPSHOT-osgi.zip</li>
-      <li>joram-release-5.3.2.53-SNAPSHOT-src.zip </li>
-      <li>joram-release-5.3.2.53-SNAPSHOT-samples.zip</li>
-      <li>joram-release-5.3.2.53-SNAPSHOT-joram-jonasadapter.rar</li>
-      <li>joram-release-5.3.2.53-SNAPSHOT-ra-remote.rar</li>
-      <li>joram-release-5.3.2.53-SNAPSHOT-ra.rar</li>
-      <li>joram-release-5.3.2.53-SNAPSHOT-raconfig.zip</li>
+      <li>joram-release-5.4.0.54-SNAPSHOT-osgi.zip</li>
+      <li>joram-release-5.4.0.54-SNAPSHOT-src.zip </li>
+      <li>joram-release-5.4.0.54-SNAPSHOT-samples.zip</li>
+      <li>joram-release-5.4.0.54-SNAPSHOT-joram-jonasadapter.rar</li>
+      <li>joram-release-5.4.0.54-SNAPSHOT-ra-remote.rar</li>
+      <li>joram-release-5.4.0.54-SNAPSHOT-ra.rar</li>
+      <li>joram-release-5.4.0.54-SNAPSHOT-raconfig.zip</li>
       </ul>
       <p>This will be built automatically from the current development code after each change in the SVN code base.</p>
       <p>If you need quickly a fix for a particular bug, you may be able to find a fixed Joram release here well
@@ -82,29 +82,32 @@
 	      <li><a href="http://forge.objectweb.org/svnsnapshots/joram-xoram-svn-latest.tar.gz">Xoram</a>.</li>
 	      <li><a href="http://forge.objectweb.org/svnsnapshots/joram-tests-svn-latest.tar.gz">Tests</a>.</li>
 	    </ul>
+	    <p>You can find the corresponding JavaDoc
+	    <a href="http://bamboo.ow2.org/browse/JORAM-ANT/latest/artifact/JavaDoc/target/site/apidocs/index.html">here</a>.</p>
       </s2>
 
       <s2 name="Maven access">
       <p>Joram libraries are available on the <a href="http://repo1.maven.org/maven2/org/objectweb/joram">maven repository</a>
       <strong>http://repo1.maven.org/maven2/org/objectweb/joram</strong>, GroupId is org.objectweb.joram</p>
       
-      <p>Main artifactIds are:</p>
+      <p>Since Joram 5.3.2 main artifactIds are:</p>
 	    <ul>
-	      <li>joram-client</li>
-	      <li>joram-mom</li>
-	      <li>joram-jndi</li>
+	      <li>a3-common and a3-rt for the asynchronous middleware,</li>
+	      <li>joram-client-jms, joram-shared and joram-mom-core for JMS client and server implementation,</li>
+	      <li>jndi-client, jndi-shared and jndi-server for the JNDI implementation.</li>
 	    </ul>
 	    <p>Other important artifacts are:</p>
 	    <ul>
 	    	<li>For specialized destinations:<ul>
-	      	<li>joram-ftp</li>
-	      	<li>joram-jmsbridge</li>
-	      	<li>joram-mail</li>
+	      	<li>joram-mom-extensions-collector,</li>
+	        <li>joram-mom-extensions-ftp,</li>
+	        <li>joram-mom-extensions-jmsbridge,</li>
+	        <li>joram-mom-extensions-mail,</li>
+	        <li>joram-mom-extensions-scheduler</li>
 	      </ul></li>
 	    	<li>For JCA adapter:<ul>
-	      	<li>joram_ra</li>
-	      	<li>joram_ra_for_jonas</li>
-	      	<li>joram_ra_remote</li>
+	      	<li>joram-client-jca, or</li>
+	      	<li>joram-security-jonas.</li>
 	      </ul></li>
 	    </ul>
       
