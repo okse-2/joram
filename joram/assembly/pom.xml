@@ -20,11 +20,10 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
-        
           <!-- ============= joram-osgi =====================-->
           <execution>
             <id>joram-osgi</id>
-            <phase>install</phase>
+            <phase>package</phase>
             <goals>
               <goal>single</goal>
             </goals>
