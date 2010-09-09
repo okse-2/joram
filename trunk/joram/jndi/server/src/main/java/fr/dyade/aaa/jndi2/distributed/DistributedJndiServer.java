@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): David Feliot
+ * Initial developer(s): ScalAgent Distributed Technologies
  */
 package fr.dyade.aaa.jndi2.distributed;
 
@@ -48,8 +48,7 @@ public class DistributedJndiServer {
 
   public static void init(String args, boolean firstTime) throws Exception {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, "DistributedJndiServer.init(" + 
-                       args + ',' + firstTime + ')');
+      Trace.logger.log(BasicLevel.DEBUG, "DistributedJndiServer.init(" + args + ',' + firstTime + ')');
     StringTokenizer st = new StringTokenizer(args);
     String portS = st.nextToken();
     int port = Integer.parseInt(portS);
@@ -71,23 +70,14 @@ public class DistributedJndiServer {
     // if the socket can't be created (even if firstTime is false).
     ServerSocket serverSocket = new ServerSocket(port);
 
-    int poolSize = AgentServer.getInteger(
-      JndiServer.POOL_SIZE_PROP, 
-      JndiServer.DEFAULT_POOL_SIZE).intValue();
+    int poolSize = AgentServer.getInteger(JndiServer.POOL_SIZE_PROP, JndiServer.DEFAULT_POOL_SIZE).intValue();
 
-    int timeout = AgentServer.getInteger(
-      JndiServer.SO_TIMEOUT_PROP,
-      JndiServer.DEFAULT_SO_TIMEOUT).intValue();
+    int timeout = AgentServer.getInteger(JndiServer.SO_TIMEOUT_PROP, JndiServer.DEFAULT_SO_TIMEOUT).intValue();
 
-    tcpServer = new TcpServer(
-      serverSocket,
-      poolSize, 
-      timeout,
-      getDefault());
+    tcpServer = new TcpServer(serverSocket, poolSize, timeout, getDefault());
 
     if (firstTime) {
-      ReplicationManager manager = 
-        new ReplicationManager(serverIds);
+      ReplicationManager manager = new ReplicationManager(serverIds);
       AgentEntryPoint agentEP = new AgentEntryPoint();    
       agentEP.setRequestManager(manager);
       TcpEntryPoint tcpEP = new TcpEntryPoint();

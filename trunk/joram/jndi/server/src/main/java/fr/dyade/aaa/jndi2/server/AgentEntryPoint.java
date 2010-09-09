@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): David Feliot
+ * Initial developer(s): ScalAgent Distributed Technologies
  */
 package fr.dyade.aaa.jndi2.server;
 
@@ -30,11 +30,9 @@ import fr.dyade.aaa.jndi2.msg.JndiReply;
 import fr.dyade.aaa.jndi2.msg.JndiRequest;
 
 public class AgentEntryPoint implements EntryPoint {
-
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+  
   private RequestManager manager;
 
   public void setRequestManager(RequestManager manager) {
@@ -57,14 +55,12 @@ public class AgentEntryPoint implements EntryPoint {
   private void doReact(AgentId from, JndiScriptRequestNot not) throws Exception {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
-                       "AgentEntryPoint[" + manager.getId() + 
-                       "].doReact(" + from +
-                       ",(JndiScriptRequestNot)" + not + ')');
+                       "AgentEntryPoint[" + manager.getId() + "].doReact(" + from + ",(JndiScriptRequestNot)" + not + ')');
+    
     JndiRequest[] requests = not.getRequests();
     JndiReply[] replies = new JndiReply[requests.length];
     for (int i = 0; i < requests.length; i++) {
-      AgentRequestContext reqCtx = new AgentRequestContext(
-        requests[i], from, not.reply());
+      AgentRequestContext reqCtx = new AgentRequestContext(requests[i], from, not.reply());
       replies[i] = manager.invoke(reqCtx);
     }
     if (not.reply()) {

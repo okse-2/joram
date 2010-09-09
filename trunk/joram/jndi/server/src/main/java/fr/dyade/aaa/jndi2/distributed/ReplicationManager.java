@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): David Feliot
+ * Initial developer(s): ScalAgent Distributed Technologies
  */
 package fr.dyade.aaa.jndi2.distributed;
 
@@ -60,66 +60,55 @@ import fr.dyade.aaa.jndi2.server.RequestContext;
 import fr.dyade.aaa.jndi2.server.RequestManager;
 import fr.dyade.aaa.jndi2.server.Trace;
 
-public class ReplicationManager 
-    extends RequestManager implements UpdateListener {
-
-  /**
-   * 
-   */
+public class ReplicationManager extends RequestManager implements UpdateListener {
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+  
   public final static String INIT_REQUEST_TABLE = "initRequestTable";
   public final static String SYNC_REQUEST_TABLE = "syncRequestTable";
   public final static String WRITE_REQUEST_TABLE = "writeRequestTable";
   public final static String SERVER_LIST = "serverList";
 
   /**
-   * Identifier of the server that owns
-   * the root naming context.
+   * Identifier of the server that owns the root naming context.
    */
   private AgentId rootOwnerId;
 
   /**
-   * List of the initially known
-   * servers.
+   * List of the initially known servers.
    */
   private short[] serverIds;
 
   /**
-   * List of the JNDI servers discovered by
-   * this server. These servers first receive
-   * an initialization notification that contain
-   * the naming data owned by this server. Then they
-   * receive the update notifications about
-   * the contexts owned by this server.
+   * List of the JNDI servers discovered by this server.
+   * These servers first receive an initialization notification that contain the naming
+   * data owned by this server. Then they receive the update notifications about the contexts
+   * owned by this server.
    */
   private transient Vector servers;
 
   /**
-   * Table that contains the write requests
-   * forwarded to the owner.
+   * Table that contains the write requests forwarded to the owner.
    * key = owner identifier (AgentId)
    * value = requests list (RequestContextList)
    */
   private transient Hashtable writeRequestContextLists;
 
   /**
-   * Table that contains the requests (read or write)
-   * waiting for the initialization of the context.
+   * Table that contains the requests (read or write) waiting for the initialization of the context.
    * key = id of the missing context
    * value = requests list (RequestContextList)
    */
   private transient Hashtable initRequestContextLists;
 
   /**
-   * Table that contains the requests (read or write)
-   * waiting for the synchronization of the context.
+   * Table that contains the requests (read or write) waiting for the synchronization of the context.
    * key = owner identifier (AgentId)
    * value = requests list (RequestContextList)
    */
   private transient Hashtable syncRequestContextLists;
 
-
-    private boolean looseCoupling;
+  private boolean looseCoupling;
 
 
   public ReplicationManager(short[] serverIds) {
@@ -135,41 +124,32 @@ public class ReplicationManager
 
   public void agentInitialize(boolean firstTime) throws Exception {
     if (firstTime) {
-	looseCoupling = AgentServer.getBoolean(fr.dyade.aaa.jndi2.impl.ServerImpl.LOOSE_COUPLING);
-	if (serverIds.length > 0 && (!looseCoupling)) {
-	    rootOwnerId = 
-		DistributedJndiServer.getDefault(serverIds[0]);
-	} else {
-	    rootOwnerId = getId();
-	}
+      looseCoupling = AgentServer.getBoolean(fr.dyade.aaa.jndi2.impl.ServerImpl.LOOSE_COUPLING);
+      if (serverIds.length > 0 && (!looseCoupling)) {
+        rootOwnerId = DistributedJndiServer.getDefault(serverIds[0]);
+      } else {
+        rootOwnerId = getId();
+      }
     }
-   
+
     super.agentInitialize(firstTime);
 
-    writeRequestContextLists = 
-      (Hashtable)AgentServer.getTransaction().load(
-        WRITE_REQUEST_TABLE);
+    writeRequestContextLists = (Hashtable) AgentServer.getTransaction().load(WRITE_REQUEST_TABLE);
     if (writeRequestContextLists == null) {
       writeRequestContextLists = new Hashtable();
     }
 
-    initRequestContextLists = 
-      (Hashtable)AgentServer.getTransaction().load(
-        INIT_REQUEST_TABLE);
+    initRequestContextLists = (Hashtable) AgentServer.getTransaction().load(INIT_REQUEST_TABLE);
     if (initRequestContextLists == null) {
       initRequestContextLists = new Hashtable();
     }
 
-    syncRequestContextLists =
-      (Hashtable)AgentServer.getTransaction().load(
-        SYNC_REQUEST_TABLE);
+    syncRequestContextLists = (Hashtable) AgentServer.getTransaction().load(SYNC_REQUEST_TABLE);
     if (syncRequestContextLists == null) {
       syncRequestContextLists = new Hashtable();
     }
 
-    servers = 
-      (Vector)AgentServer.getTransaction().load(
-        SERVER_LIST);
+    servers = (Vector)AgentServer.getTransaction().load(SERVER_LIST);
     if (servers == null) {
       servers = new Vector();      
       for (int i = 0; i < serverIds.length; i++) {        
@@ -203,8 +183,8 @@ public class ReplicationManager
         onUpdateEvent(from, (CreateSubcontextEvent)updateEvent);
       } else if (updateEvent instanceof DestroySubcontextEvent) {
         onUpdateEvent(from, (DestroySubcontextEvent)updateEvent);
-       } else if (updateEvent instanceof ChangeOwnerEvent) {
-         onUpdateEvent(from, (ChangeOwnerEvent)updateEvent);
+      } else if (updateEvent instanceof ChangeOwnerEvent) {
+        onUpdateEvent(from, (ChangeOwnerEvent)updateEvent);
       }
     } catch (NotOwnerException exc) {       
       // This may happen after a change owner event
@@ -212,146 +192,146 @@ public class ReplicationManager
                        "Distributed jndi update warn:",
                        exc);
     } catch (NamingException exc) { 
-	if(!looseCoupling){
-	    Trace.logger.log(BasicLevel.ERROR, 
-			     "Distributed jndi update error:",
-			     exc);
-	    throw new Error(exc.toString());
-	}
+      if(!looseCoupling){
+        Trace.logger.log(BasicLevel.ERROR, 
+                         "Distributed jndi update error:",
+                         exc);
+        throw new Error(exc.toString());
+      }
     }
   }  
 
   private void onUpdateEvent(AgentId from, BindEvent evt) 
-    throws NamingException {
-      if(!looseCoupling){
-	  getServerImpl().bind(
-			       getServerImpl().getNamingContext(
-								evt.getUpdatedContextId()),
-			       evt.getName(), 
-			       evt.getObject(),
-			       from);
-      }else{
-	  NamingContext  nc= getServerImpl().getNamingContext(evt.getPath());
-	  getServerImpl().bind(
-			       nc,
-			       evt.getName(), 
-			       evt.getObject(),
-			       from);
-      }
-      
+  throws NamingException {
+    if(!looseCoupling){
+      getServerImpl().bind(
+                           getServerImpl().getNamingContext(
+                                                            evt.getUpdatedContextId()),
+                                                            evt.getName(), 
+                                                            evt.getObject(),
+                                                            from);
+    }else{
+      NamingContext  nc= getServerImpl().getNamingContext(evt.getPath());
+      getServerImpl().bind(
+                           nc,
+                           evt.getName(), 
+                           evt.getObject(),
+                           from);
+    }
+
   }
 
   private void onUpdateEvent(AgentId from, RebindEvent evt) 
-    throws NamingException {
-      if(!looseCoupling){
-	  getServerImpl().rebind(
-				 getServerImpl().getNamingContext(
-				    evt.getUpdatedContextId()),
-				 evt.getName(), 
-				 evt.getObject(),
-				 from);
-      }else{
-	  NamingContext  nc= getServerImpl().getNamingContext(evt.getPath());
-	  getServerImpl().rebind(
-				 nc,
-				 evt.getName(), 
-				 evt.getObject(),
-				 from);
-      }
+  throws NamingException {
+    if(!looseCoupling){
+      getServerImpl().rebind(
+                             getServerImpl().getNamingContext(
+                                                              evt.getUpdatedContextId()),
+                                                              evt.getName(), 
+                                                              evt.getObject(),
+                                                              from);
+    }else{
+      NamingContext  nc= getServerImpl().getNamingContext(evt.getPath());
+      getServerImpl().rebind(
+                             nc,
+                             evt.getName(), 
+                             evt.getObject(),
+                             from);
+    }
   }
-    
+
   private void onUpdateEvent(AgentId from, UnbindEvent evt) 
-    throws NamingException {
-      if(!looseCoupling){
-	  getServerImpl().unbind(
-				 getServerImpl().getNamingContext(
-				    evt.getUpdatedContextId()),
-				 evt.getName(),
-				 from);
-      }else{
-	  NamingContext  nc= getServerImpl().getNamingContext(evt.getPath());
-	  getServerImpl().unbind(
-				 nc,
-				 evt.getName(),
-				 from);
-      }
+  throws NamingException {
+    if(!looseCoupling){
+      getServerImpl().unbind(
+                             getServerImpl().getNamingContext(
+                                                              evt.getUpdatedContextId()),
+                                                              evt.getName(),
+                                                              from);
+    }else{
+      NamingContext  nc= getServerImpl().getNamingContext(evt.getPath());
+      getServerImpl().unbind(
+                             nc,
+                             evt.getName(),
+                             from);
+    }
   }
 
   private void onUpdateEvent(AgentId from, CreateSubcontextEvent evt) 
-    throws NamingException {
-      if(!looseCoupling){
-	  getServerImpl().createSubcontext(
-		  getServerImpl().getNamingContext(	
-						   evt.getUpdatedContextId()),
-		  evt.getName(),
-		  evt.getPath(),
-		  evt.getContextId(),
-		  evt.getOwnerId(),
-		  from);
-      }else{
-	  CompositeName parentPath = (CompositeName) evt.getPath().clone();    
-	  parentPath.remove(parentPath.size() - 1);
-	  NamingContext  nc= getServerImpl().getNamingContext(parentPath);
-	  getServerImpl().createSubcontext(nc,
-					   evt.getName(),
-					   evt.getPath(),
-					   evt.getContextId(),
-					   getId(),
-					   from);
-      }
+  throws NamingException {
+    if(!looseCoupling){
+      getServerImpl().createSubcontext(
+                                       getServerImpl().getNamingContext(	
+                                                                        evt.getUpdatedContextId()),
+                                                                        evt.getName(),
+                                                                        evt.getPath(),
+                                                                        evt.getContextId(),
+                                                                        evt.getOwnerId(),
+                                                                        from);
+    }else{
+      CompositeName parentPath = (CompositeName) evt.getPath().clone();    
+      parentPath.remove(parentPath.size() - 1);
+      NamingContext  nc= getServerImpl().getNamingContext(parentPath);
+      getServerImpl().createSubcontext(nc,
+                                       evt.getName(),
+                                       evt.getPath(),
+                                       evt.getContextId(),
+                                       getId(),
+                                       from);
+    }
   }
 
   private void onUpdateEvent(AgentId from, DestroySubcontextEvent evt) 
-    throws NamingException {
-      if(!looseCoupling){
-	  getServerImpl().destroySubcontext(
-			   getServerImpl().getNamingContext(
-					      evt.getUpdatedContextId()),
-			   evt.getName(), 
-			   evt.getPath(),
-			   from);
-      }else{
-	  CompositeName parentPath = (CompositeName) evt.getPath().clone();    
-	  parentPath.remove(parentPath.size() - 1);
-	  NamingContext  nc= getServerImpl().getNamingContext(parentPath);
-	  getServerImpl().destroySubcontext(
-					    nc,
-					    evt.getName(), 
-					    evt.getPath(),
-					    from);
-	 
-      }
+  throws NamingException {
+    if(!looseCoupling){
+      getServerImpl().destroySubcontext(
+                                        getServerImpl().getNamingContext(
+                                                                         evt.getUpdatedContextId()),
+                                                                         evt.getName(), 
+                                                                         evt.getPath(),
+                                                                         from);
+    }else{
+      CompositeName parentPath = (CompositeName) evt.getPath().clone();    
+      parentPath.remove(parentPath.size() - 1);
+      NamingContext  nc= getServerImpl().getNamingContext(parentPath);
+      getServerImpl().destroySubcontext(
+                                        nc,
+                                        evt.getName(), 
+                                        evt.getPath(),
+                                        from);
+
+    }
   }
 
-   private void onUpdateEvent(AgentId from, ChangeOwnerEvent evt) 
-     throws NamingException {
-     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-       Trace.logger.log(BasicLevel.DEBUG, 
-                        "ReplicationManager.onUpdateEvent(" +
-                        from + ',' + evt + ')');
-     
-     NamingContextInfo[] contexts = evt.getNamingContexts();
-     for (int i = 0; i < contexts.length; i++) {
-       NamingContext nc = getServerImpl().getNamingContext(
-         contexts[i].getNamingContext().getId());
-       
-       if (nc == null) {
-         // The InitJndiServerNot sent by 
-         // the server that created this context may not
-         // have been received.
-         getServerImpl().addNamingContext(contexts[i]);
-         // TODO : NTA uncomment and implement retryRequestsWaitingForMissingContext
-//         retryRequestsWaitingForMissingContext(
-//           contexts[i].getNamingContext().getId());
-       } else {
-         nc.setOwnerId(contexts[i].getNamingContext().getOwnerId());
-         getServerImpl().resetNamingContext(
-           contexts[i].getNamingContext());
-         // DF: must retry the sync and write
-         // requests to the new owner.
-       }
-     }
-   }  
+  private void onUpdateEvent(AgentId from, ChangeOwnerEvent evt) 
+  throws NamingException {
+    if (Trace.logger.isLoggable(BasicLevel.DEBUG))
+      Trace.logger.log(BasicLevel.DEBUG, 
+                       "ReplicationManager.onUpdateEvent(" +
+                       from + ',' + evt + ')');
+
+    NamingContextInfo[] contexts = evt.getNamingContexts();
+    for (int i = 0; i < contexts.length; i++) {
+      NamingContext nc = getServerImpl().getNamingContext(
+                                                          contexts[i].getNamingContext().getId());
+
+      if (nc == null) {
+        // The InitJndiServerNot sent by 
+        // the server that created this context may not
+        // have been received.
+        getServerImpl().addNamingContext(contexts[i]);
+        // TODO : NTA uncomment and implement retryRequestsWaitingForMissingContext
+        //         retryRequestsWaitingForMissingContext(
+        //           contexts[i].getNamingContext().getId());
+      } else {
+        nc.setOwnerId(contexts[i].getNamingContext().getOwnerId());
+        getServerImpl().resetNamingContext(
+                                           contexts[i].getNamingContext());
+        // DF: must retry the sync and write
+        // requests to the new owner.
+      }
+    }
+  }  
 
   /**
    * Overrides the <code>JndiServer</code> behavior.
@@ -369,13 +349,13 @@ public class ReplicationManager
       CreateSubcontextRequest csr = 
         (CreateSubcontextRequest)request;
       request = new CreateRemoteSubcontextRequest(
-        csr.getName(), 
-        getId());
+                                                  csr.getName(), 
+                                                  getId());
     }
 
     sendTo(owner,
            new JndiScriptRequestNot(
-             new JndiRequest[]{request}, true));
+                                    new JndiRequest[]{request}, true));
     RequestContextList list = 
       (RequestContextList)writeRequestContextLists.get(owner);
     if (list == null) {
@@ -388,15 +368,15 @@ public class ReplicationManager
   }
 
   void doReact(AgentId from, JndiScriptReplyNot not) 
-    throws Exception {
+  throws Exception {
     onReply(from, not.getReplies()[0]);
   }
 
   void doReact(AgentId from, JndiReplyNot not) 
-    throws Exception {
+  throws Exception {
     onReply(from, not.getReply());
   }
-  
+
   /**
    * Reacts to the reply of a JNDI server that has been called
    * as it is the owner of a naming context.
@@ -425,15 +405,15 @@ public class ReplicationManager
   }
 
   void doReact(AgentId from, 
-      InitJndiServerNot not) throws Exception {
+               InitJndiServerNot not) throws Exception {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
-          "ReplicationManager.doReact(" +
-          from + ',' + not + ')');
-   
+                       "ReplicationManager.doReact(" +
+                       from + ',' + not + ')');
+
     if (servers == null)
       return;
-    
+
     AgentId[] jndiServerIds = not.getJndiServerIds();
     Vector initServers = new Vector();
     if (jndiServerIds != null) {
@@ -453,7 +433,7 @@ public class ReplicationManager
 
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(BasicLevel.DEBUG, 
-          " -> initServers = " + initServers);
+                       " -> initServers = " + initServers);
 
     if (initServers.size() > 0) {
       AgentId[] localJndiServerIds = new AgentId[servers.size()];
@@ -467,9 +447,9 @@ public class ReplicationManager
         /** Modif */
         if (!(rootOwnerId.equals(initServers.elementAt(i))))
           sendTo(newServerId, new InitJndiServerNot(
-              localJndiServerIds, 
-              localContexts,
-              (!from.equals(newServerId))));
+                                                    localJndiServerIds, 
+                                                    localContexts,
+                                                    (!from.equals(newServerId))));
         if (servers.indexOf(newServerId) < 0) {
           servers.addElement(newServerId);
         }
@@ -490,7 +470,7 @@ public class ReplicationManager
       for (int i = 0; i < contexts.length; i++) {
         if(!looseCoupling) {
           NamingContext nc = getServerImpl().getNamingContext(
-              contexts[i].getNamingContext().getId());
+                                                              contexts[i].getNamingContext().getId());
           if (nc == null) {
             getServerImpl().addNamingContext(contexts[i]);
             newNames.addElement(contexts[i].getCompositeName());
@@ -598,7 +578,7 @@ public class ReplicationManager
                        mce + ',' + reqCtx + ')');
     RequestContextList ctxList = 
       (RequestContextList)initRequestContextLists.get(
-        mce.getName());
+                                                      mce.getName());
     if (ctxList == null) {
       ctxList = new RequestContextList();
       if (Trace.logger.isLoggable(BasicLevel.DEBUG))
@@ -606,7 +586,7 @@ public class ReplicationManager
                          " -> add a waiting request context: " + 
                          mce.getName());
       initRequestContextLists.put(
-        mce.getName(), ctxList);
+                                  mce.getName(), ctxList);
     }
     ctxList.put(reqCtx);
     saveInitRequestTable();
@@ -626,7 +606,7 @@ public class ReplicationManager
       // The resolved context has already been updated.
       return new JndiError(mre.getNameNotFoundException());
     }
-    
+
     reqCtx.setResolvedName(resolvedName);
     synchronizeRequest((AgentId)mre.getOwnerId(), reqCtx);
     return null;
@@ -636,9 +616,9 @@ public class ReplicationManager
                                   RequestContext reqCtx) {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(
-        BasicLevel.DEBUG, 
-        "ReplicationManager.synchronizeRequest(" +
-        owner + ',' + reqCtx + ')');
+                       BasicLevel.DEBUG, 
+                       "ReplicationManager.synchronizeRequest(" +
+                       owner + ',' + reqCtx + ')');
     sendTo(owner, new SyncRequestNot());
     RequestContextList list = 
       (RequestContextList)syncRequestContextLists.get(owner);
@@ -678,7 +658,7 @@ public class ReplicationManager
   }
 
   protected void createSubcontext(CreateSubcontextRequest request) 
-    throws NamingException {
+  throws NamingException {
     if (request instanceof CreateRemoteSubcontextRequest) {
       createRemoteSubcontext((CreateRemoteSubcontextRequest)request);
     } else {
@@ -687,13 +667,13 @@ public class ReplicationManager
   }
 
   private void createRemoteSubcontext(CreateRemoteSubcontextRequest request)
-    throws NamingException {
+  throws NamingException {
     getServerImpl().createSubcontext(
-      request.getName(), request.getOwnerId());
+                                     request.getName(), request.getOwnerId());
   }
 
   protected void changeOwner(ChangeOwnerRequest request)
-    throws NamingException {
+  throws NamingException {
     super.changeOwner(request);
 
     writeRequestContextLists.remove(request.getOwnerId());
@@ -705,7 +685,7 @@ public class ReplicationManager
   private void saveInitRequestTable() {
     try {
       AgentServer.getTransaction().save(
-        initRequestContextLists, INIT_REQUEST_TABLE);
+                                        initRequestContextLists, INIT_REQUEST_TABLE);
     } catch (IOException exc) {
       throw new Error(exc.toString());
     }
@@ -714,7 +694,7 @@ public class ReplicationManager
   private void saveWriteRequestTable() {
     try {
       AgentServer.getTransaction().save(
-        writeRequestContextLists, WRITE_REQUEST_TABLE);
+                                        writeRequestContextLists, WRITE_REQUEST_TABLE);
     } catch (IOException exc) {
       throw new Error(exc.toString());
     }
@@ -723,7 +703,7 @@ public class ReplicationManager
   private void saveSyncRequestTable() {
     try {
       AgentServer.getTransaction().save(
-        syncRequestContextLists, SYNC_REQUEST_TABLE);
+                                        syncRequestContextLists, SYNC_REQUEST_TABLE);
     } catch (IOException exc) {
       throw new Error(exc.toString());
     }
@@ -737,8 +717,7 @@ public class ReplicationManager
     }
   }
 
-  static class RequestContextList 
-      implements java.io.Serializable {
+  static class RequestContextList implements java.io.Serializable {
     /**
      * 
      */
@@ -770,7 +749,7 @@ public class ReplicationManager
 
     public String toString() {
       return '(' + super.toString() + 
-        ",list=" + list + ')';
+      ",list=" + list + ')';
     }
   }
 }
