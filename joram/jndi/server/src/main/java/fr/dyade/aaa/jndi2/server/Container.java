@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): David Feliot
+ * Initial developer(s): ScalAgent Distributed Technologies
  */
 package fr.dyade.aaa.jndi2.server;
 
@@ -35,10 +35,7 @@ import fr.dyade.aaa.agent.BagSerializer;
 import fr.dyade.aaa.agent.Notification;
 
 public class Container extends Agent implements BagSerializer {
-
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   private Vector entryPoints;
@@ -52,7 +49,7 @@ public class Container extends Agent implements BagSerializer {
    * a reserved identifier on each agent server.
    */
   public Container() {
-    super("", true, AgentId.LocalJndiServiceStamp);
+    super("JNDIServer", true, AgentId.LocalJndiServiceStamp);
     entryPoints = new Vector(2);
   }
 
@@ -70,8 +67,7 @@ public class Container extends Agent implements BagSerializer {
 
   public void react(AgentId from, Notification not) throws Exception {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, "\n\nJndiServer[" + getId() +
-                       "].react(" + from + ',' + not + ')');
+      Trace.logger.log(BasicLevel.DEBUG, "\n\nJndiServer[" + getId() + "].react(" + from + ',' + not + ')');
     setNoSave();
     for (int i = 0; i < entryPoints.size(); i++) {
       EntryPoint entryPoint = 
@@ -85,8 +81,7 @@ public class Container extends Agent implements BagSerializer {
 
   public void agentInitialize(boolean firstTime) throws Exception {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
-      Trace.logger.log(BasicLevel.DEBUG, "\n\nJndiServer[" + getId() + 
-                       "].agentInitialize(" + firstTime + ')');
+      Trace.logger.log(BasicLevel.DEBUG, "\n\nJndiServer[" + getId() + "].agentInitialize(" + firstTime + ')');
     lifeCycleListener.agentInitialize(firstTime);
   }
   
@@ -98,14 +93,12 @@ public class Container extends Agent implements BagSerializer {
     sendTo(to, not);
   }
   
-  public void writeBag(ObjectOutputStream out)
-    throws IOException {
+  public void writeBag(ObjectOutputStream out) throws IOException {
     if (bagSerializer != null)
       bagSerializer.writeBag(out);
   }
 
-  public void readBag(ObjectInputStream in) 
-    throws IOException, ClassNotFoundException {
+  public void readBag(ObjectInputStream in) throws IOException, ClassNotFoundException {
     if (bagSerializer != null)
       bagSerializer.readBag(in);
   }

@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,18 +19,16 @@
  * USA.
  *
  * Initial developer(s): Sofiane Chibani
- * Contributor(s): David Feliot, Nicolas Tachker
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package fr.dyade.aaa.jndi2.msg;
 
 import javax.naming.*;
 
 public class JndiRequest implements java.io.Serializable {
-
-  /**
-   * 
-   */
+  /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
+  
   private CompositeName name;
 
   public JndiRequest(CompositeName name) {
@@ -42,9 +40,7 @@ public class JndiRequest implements java.io.Serializable {
   }
 
   public String toString() {
-    return '(' + super.toString() +
-      ",name=" + name + ')';
+    return '(' + super.toString() + ",name=" + name + ')';
   }
-
 } 
 

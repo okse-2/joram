@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2003 ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * USA.
  *
  * Initial developer(s): Sofiane Chibani
- * Contributor(s): David Feliot, Nicolas Tachker
+ * Contributor(s): ScalAgent Distributed Technologies
  */
 package fr.dyade.aaa.jndi2.server;
 
@@ -31,17 +31,35 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
 
 /**
- * Class of a JNDI centralized server. This is an
- * agent that may be accessed either by TCP connections
- * or agent notifications.
+ *  Class of a JNDI centralized server. This agent may be accessed either by
+ * TCP connections or agent notifications.
  */
 public class JndiServer {
+  /**
+   *  This property allows to Enable/disable SO_TIMEOUT with the specified timeout
+   * in milliseconds, default value is 10.000L (10 second).
+   * <p>
+   *  This property can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
+   */
   public static final String SO_TIMEOUT_PROP = "fr.dyade.aaa.jndi2.server.soTimeout";
 
+  /**
+   * Default value for SO_TIMEOUT property.
+   */
   public static final int DEFAULT_SO_TIMEOUT = 10000;
 
+  /**
+   *  This property allows to set the number of listening thread, default value is 3.
+   * <p>
+   *  This property can be fixed either from <code>java</code> launching
+   * command, or in <code>a3servers.xml</code> configuration file.
+   */
   public static final String POOL_SIZE_PROP = "fr.dyade.aaa.jndi2.server.poolSize";
 
+  /**
+   * Default value for POOL_SIZE property.
+   */
   public static final int DEFAULT_POOL_SIZE = 3;
   
   private static TcpServer tcpServer;
@@ -61,9 +79,7 @@ public class JndiServer {
 
     int timeout = AgentServer.getInteger(SO_TIMEOUT_PROP, DEFAULT_SO_TIMEOUT).intValue();
 
-    tcpServer = new TcpServer(serverSocket,
-                              poolSize, timeout,
-                              getDefault());
+    tcpServer = new TcpServer(serverSocket, poolSize, timeout, getDefault());
 
     if (firstTime) {
       RequestManager manager = new RequestManager();
