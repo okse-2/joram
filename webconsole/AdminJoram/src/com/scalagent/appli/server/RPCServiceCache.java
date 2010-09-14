@@ -4,23 +4,26 @@
 
 package com.scalagent.appli.server;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import javax.servlet.http.HttpSession;
 
 import org.objectweb.joram.mom.dest.DestinationImplMBean;
 import org.objectweb.joram.mom.dest.QueueImplMBean;
+import org.objectweb.joram.mom.dest.TopicImplMBean;
 import org.objectweb.joram.mom.messages.MessageView;
 import org.objectweb.joram.mom.proxies.ClientSubscriptionMBean;
 import org.objectweb.joram.mom.proxies.ProxyImplMBean;
-import org.ow2.joram.admin.JORAMInterface;
+import org.ow2.joram.admin.Activator;
+import org.ow2.joram.admin.AdminListener;
+import org.ow2.joram.admin.JoramAdmin;
+import org.ow2.joram.admin.JoramAdminOSGi;
 
-import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.scalagent.appli.server.converter.MessageWTOConverter;
 import com.scalagent.appli.server.converter.QueueWTOConverter;
 import com.scalagent.appli.server.converter.SubscriptionWTOConverter;
@@ -51,7 +54,8 @@ import com.scalagent.engine.server.BaseRPCServiceCache;
 public class RPCServiceCache extends BaseRPCServiceCache {
 
 	private static boolean isConnected = false;
-	private static JORAMInterface JORAMInterface;
+	private static JoramAdmin joramAdmin;
+	private LiveListener listener = new LiveListener();
 
 	private static final String SESSION_TOPICS = "topicsList";
 	private static final String SESSION_QUEUES = "queuesList";
@@ -131,7 +135,7 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 		QueueImplMBean queue = (QueueImplMBean) mapDestinations.get(queueName);
 
 		if(queue == null) {
-			throw new NotFoundException("Queue not found");
+			throw new Exception("Queue not found");
 		}
 
 		//		List<Message> listMessage = queue.getMessagesView();
@@ -217,7 +221,7 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 		return toReturn;
 	}
 	
-	public Vector<Float> getInfos(boolean isforceUpdate) {
+	public float[] getInfos(boolean isforceUpdate) {
 		
 		synchWithJORAM(isforceUpdate);
 		
@@ -229,25 +233,22 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 		float n3 = (float)(Math.random() * (higher-lower)) + lower;
 		float n4 = (float)(Math.random() * (higher-lower)) + lower;
 		
-		Vector<Float> vInfos = new Vector<Float>();
-		vInfos.add(e1);
-		vInfos.add(n1);
-		vInfos.add(n2);
-		vInfos.add(n3);
-		vInfos.add(n4);
+		float[] vInfos = new float[5];
+		vInfos[0] = e1;
+		vInfos[1] = n1;
+		vInfos[2] = n2;
+		vInfos[3] = n3;
+		vInfos[4] = n4;
 		return vInfos;
 	}
 
 	public boolean connectJORAM(String login, String password) {
-		try {
-			if (!isConnected) {
-				JORAMInterface = new JORAMInterface(login, password);
-				isConnected = true;
-			}
-			return true;
-		} catch (Exception e) {
-			return false;
-		}
+        joramAdmin = new JoramAdminOSGi(Activator.getContext());
+	    boolean connected = joramAdmin.connect(login, password);
+	    if (connected) {
+	      joramAdmin.start(listener);
+	    }
+	    return connected;
 	}
 
 	public void synchWithJORAM(boolean forceUpdate) {
@@ -258,9 +259,9 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 
 		if (now.after(lastupdatePlus5) || mapDestinations == null || forceUpdate) {
 
-			mapDestinations = JORAMInterface.getListener().getDestinations();
-			mapUsers = JORAMInterface.getListener().getUsers();
-			listSubscriptions = JORAMInterface.getListener().getSubscription();
+			mapDestinations = listener.getDestinations();
+			mapUsers = listener.getUsers();
+			listSubscriptions = listener.getSubscription();
 			lastupdate = new GregorianCalendar();
 		}
 
@@ -271,27 +272,27 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 	
 	public boolean createNewQueue(QueueWTO queue) {
 		if (!isConnected) { return false; }
-		return JORAMInterface.createNewQueue(queue.getName(), queue.getDMQId(), queue.getDestinationId(), queue.getPeriod(), queue.getThreshold(), queue.getNbMaxMsg(), queue.isFreeReading(), queue.isFreeWriting());
+		return joramAdmin.createNewQueue(queue.getName(), queue.getDMQId(), queue.getDestinationId(), queue.getPeriod(), queue.getThreshold(), queue.getNbMaxMsg(), queue.isFreeReading(), queue.isFreeWriting());
 	}
 	
 	public boolean editQueue(QueueWTO queue) {
 		if (!isConnected) { return false; }
-		return JORAMInterface.editQueue(queue.getName(), queue.getDMQId(), queue.getDestinationId(), queue.getPeriod(), queue.getThreshold(), queue.getNbMaxMsg(), queue.isFreeReading(), queue.isFreeWriting());
+		return joramAdmin.editQueue(queue.getName(), queue.getDMQId(), queue.getDestinationId(), queue.getPeriod(), queue.getThreshold(), queue.getNbMaxMsg(), queue.isFreeReading(), queue.isFreeWriting());
 	}
 	
 	public boolean deleteQueue(String queueName) {
 		if (!isConnected) { return false; }
-		return JORAMInterface.deleteQueue(queueName);
+		return joramAdmin.deleteQueue(queueName);
 	}
 
 	public boolean cleanWaitingRequest(String queueName) {
 		if (!isConnected) { return false; }
-		return JORAMInterface.cleanWaitingRequest(queueName);
+		return joramAdmin.cleanWaitingRequest(queueName);
 	}
 
 	public boolean cleanPendingMessage(String queueName) {
 		if (!isConnected) { return false; }
-		return JORAMInterface.cleanPendingMessage(queueName);
+		return joramAdmin.cleanPendingMessage(queueName);
 	}
 
 	
@@ -299,17 +300,17 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 	
 	public boolean createNewUser(UserWTO user) {
 		if (!isConnected) { return false; }
-		return JORAMInterface.createNewUser(user.getName(), user.getPeriod());
+		return joramAdmin.createNewUser(user.getName(), user.getPeriod());
 	}
 
 	public boolean editUser(UserWTO user) {
 		if (!isConnected) { return false; }
-		return JORAMInterface.editUser(user.getName(), user.getPeriod());
+		return joramAdmin.editUser(user.getName(), user.getPeriod());
 	}
 
 	public boolean deleteUser(String userName) {
 		if (!isConnected) { return false; }
-		return JORAMInterface.deleteUser(userName);
+		return joramAdmin.deleteUser(userName);
 	}
 	
 	
@@ -317,7 +318,7 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 	
 	public boolean createNewMessage(MessageWTO message, String queueName) {
 		if (!isConnected) { return false; }
-		return JORAMInterface.createNewMessage(queueName, 
+		return joramAdmin.createNewMessage(queueName, 
 				message.getId(), 
 				message.getExpiration(),
 				message.getTimestamp(),
@@ -328,7 +329,7 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 
 	public boolean editMessage(MessageWTO message, String queueName) {
 		if (!isConnected) { return false; }
-		return JORAMInterface.editMessage(queueName, 
+		return joramAdmin.editMessage(queueName, 
 				message.getId(), 
 				message.getExpiration(),
 				message.getTimestamp(),
@@ -339,7 +340,7 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 
 	public boolean deleteMessage(String messageName, String queueName) {
 		if (!isConnected) { return false; }
-		return JORAMInterface.deleteMessage(messageName, queueName);
+		return joramAdmin.deleteMessage(messageName, queueName);
 	}
 	
 
@@ -347,7 +348,7 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 	
 	public boolean createNewTopic(TopicWTO topic) {
 		if (!isConnected) { return false; }
-		return JORAMInterface.createNewTopic(
+		return joramAdmin.createNewTopic(
 				topic.getName(), 
 				topic.getDMQId(),
 				topic.getDestinationId(),
@@ -358,7 +359,7 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 
 	public boolean editTopic(TopicWTO topic) {
 		if (!isConnected) { return false; }
-		return JORAMInterface.editTopic(
+		return joramAdmin.editTopic(
 				topic.getName(), 
 				topic.getDMQId(),
 				topic.getDestinationId(),
@@ -369,7 +370,7 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 
 	public boolean deleteTopic(String topicName) {
 		if (!isConnected) { return false; }
-		return JORAMInterface.deleteTopic(topicName);
+		return joramAdmin.deleteTopic(topicName);
 	}
 	
 	
@@ -377,18 +378,70 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 
 	public boolean createNewSubscription(SubscriptionWTO sub) {
 		if (!isConnected) { return false; }
-		return JORAMInterface.createNewSubscription(sub.getName(), sub.getNbMaxMsg(), sub.getContextId(), sub.getSelector(), sub.getSubRequestId(), sub.isActive(), sub.isDurable());
+		return joramAdmin.createNewSubscription(sub.getName(), sub.getNbMaxMsg(), sub.getContextId(), sub.getSelector(), sub.getSubRequestId(), sub.isActive(), sub.isDurable());
 	}
 
 	public boolean editSubscription(SubscriptionWTO sub) {
 		if (!isConnected) { return false; }
 		synchWithJORAM(true);
-		return JORAMInterface.editSubscription(sub.getName(), sub.getNbMaxMsg(), sub.getContextId(), sub.getSelector(), sub.getSubRequestId(), sub.isActive(), sub.isDurable());
+		return joramAdmin.editSubscription(sub.getName(), sub.getNbMaxMsg(), sub.getContextId(), sub.getSelector(), sub.getSubRequestId(), sub.isActive(), sub.isDurable());
 	}
 
 	public boolean deleteSubscription(String subName) {
 		if (!isConnected) { return false; }
-		return JORAMInterface.deleteSubscription(subName);
+		return joramAdmin.deleteSubscription(subName);
 	}
+
+  static class LiveListener implements AdminListener {
+
+    private Map<String, DestinationImplMBean> destinations = new HashMap<String, DestinationImplMBean>();
+    private Map<String, ProxyImplMBean> users = new HashMap<String, ProxyImplMBean>();
+    private List<ClientSubscriptionMBean> subscriptions = new ArrayList<ClientSubscriptionMBean>();
+
+    public void onQueueAdded(String queueName, QueueImplMBean queue) {
+      destinations.put(queueName, queue);
+    }
+
+    public void onQueueRemoved(String queueName, QueueImplMBean queue) {
+      destinations.remove(queueName);
+    }
+
+    public void onTopicAdded(String topicName, TopicImplMBean topic) {
+      destinations.put(topicName, topic);
+    }
+
+    public void onTopicRemoved(String topicName, TopicImplMBean topic) {
+      destinations.remove(topicName);
+    }
+
+    public void onSubscriptionAdded(String userName, ClientSubscriptionMBean subscription) {
+      subscriptions.add(subscription);
+    }
+
+    public void onSubscriptionRemoved(String userName, ClientSubscriptionMBean subscription) {
+      subscriptions.remove(subscription);
+    }
+
+    public void onUserAdded(String userName, ProxyImplMBean user) {
+      users.put(userName, user);
+    }
+
+    public void onUserRemoved(String userName, ProxyImplMBean user) {
+      users.remove(userName);
+    }
+
+    public Map<String, DestinationImplMBean> getDestinations() {
+      return destinations;
+    }
+
+    public Map<String, ProxyImplMBean> getUsers() {
+      return users;
+    }
+
+    public List<ClientSubscriptionMBean> getSubscription() {
+      return subscriptions;
+    }
+
+  }
 
 }

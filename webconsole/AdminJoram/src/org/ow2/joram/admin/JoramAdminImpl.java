@@ -11,7 +11,6 @@ import org.objectweb.joram.mom.dest.TopicImpl;
 import org.objectweb.joram.mom.proxies.ClientSubscriptionMBean;
 import org.objectweb.joram.mom.proxies.ProxyImplMBean;
 
-import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 public class JoramAdminImpl implements JoramAdmin {
@@ -21,7 +20,7 @@ public class JoramAdminImpl implements JoramAdmin {
 
   ObjectName ConnectionON, UserON, DestinationON;
 
-  DestinationListener adminListener;
+  AdminListener adminListener;
 
   public boolean connect(String login, String password) {
     return login.equals(password);
@@ -31,7 +30,7 @@ public class JoramAdminImpl implements JoramAdmin {
 
   }
 
-  public void start(DestinationListener adminListener) {
+  public void start(AdminListener adminListener) {
 
     this.adminListener = adminListener;
 
@@ -43,6 +42,9 @@ public class JoramAdminImpl implements JoramAdmin {
       UserON = new ObjectName("Joram#0:type=User,*");
       DestinationON = new ObjectName("Joram#0:type=Destination,*");
 
+      System.setProperty("com.sun.management.jmxremote", "true");
+      System.setProperty("MXServer", "com.scalagent.jmx.JMXServer");
+
       MXWrapper.init();
       try {
         MXWrapper.addNotificationListener(new ObjectName("JMImplementation:type=MBeanServerDelegate"),
@@ -53,10 +55,6 @@ public class JoramAdminImpl implements JoramAdmin {
         System.exit(-1);
       }
 
-      AgentServer.init((short) 0, "./s0", null);
-      AgentServer.start();
-
-      Thread.sleep(1000L);
     } catch (Exception exc) {
       System.out.println("FATAL: Error launching JORAM server.");
       exc.printStackTrace();
@@ -65,7 +63,6 @@ public class JoramAdminImpl implements JoramAdmin {
   }
 
   public void stop() {
-    AgentServer.stop();
   }
 
   class MyNotificationListener implements NotificationListener {
@@ -127,6 +124,99 @@ public class JoramAdminImpl implements JoramAdmin {
     public boolean isNotificationEnabled(Notification notification) {
       return true;
     }
+  }
+
+  public boolean createNewMessage(String queueName, String id, long expiration, long timestamp, int priority,
+      String text, int type) {
+    // TODO Auto-generated method stub
+    return true;
+  }
+
+  public boolean editMessage(String queueName, String id, long expiration, long timestamp, int priority,
+      String text, int type) {
+    // TODO Auto-generated method stub
+    return true;
+  }
+
+  public boolean deleteMessage(String messageName, String queueName) {
+    // TODO Auto-generated method stub
+    return true;
+  }
+
+  public boolean createNewTopic(String name, String DMQ, String destination, long period,
+      boolean freeReading, boolean freeWriting) {
+    // TODO Auto-generated method stub
+    return true;
+  }
+
+  public boolean editTopic(String name, String DMQ, String destination, long period, boolean freeReading,
+      boolean freeWriting) {
+    // TODO Auto-generated method stub
+    return true;
+  }
+
+  public boolean deleteTopic(String topicName) {
+    // TODO Auto-generated method stub
+    return true;
+  }
+
+  public boolean createNewUser(String name, long period) {
+    // TODO Auto-generated method stub
+    return true;
+  }
+
+  public boolean editUser(String name, long period) {
+    // TODO Auto-generated method stub
+    return true;
+  }
+
+  public boolean deleteUser(String userName) {
+    // TODO Auto-generated method stub
+    return true;
+  }
+
+  public boolean createNewQueue(String name, String DMQ, String destination, long period, int threshold,
+      int nbMaxMsg, boolean freeReading, boolean freeWriting) {
+    // TODO Auto-generated method stub
+    return true;
+  }
+
+  public boolean editQueue(String name, String DMQ, String destination, long period, int threshold,
+      int nbMaxMsg, boolean freeReading, boolean freeWriting) {
+    // TODO Auto-generated method stub
+    return true;
+  }
+
+  public boolean deleteQueue(String queueName) {
+    // TODO Auto-generated method stub
+    return true;
+  }
+
+  public boolean cleanWaitingRequest(String queueName) {
+    // TODO Auto-generated method stub
+    return true;
+  }
+
+  public boolean cleanPendingMessage(String queueName) {
+    // TODO Auto-generated method stub
+    return true;
+  }
+
+  public boolean createNewSubscription(String name, int nbMaxMsg, int context, String selector,
+      int subRequest, boolean active, boolean durable) {
+    // TODO Auto-generated method stub
+    return true;
+  }
+
+  public boolean editSubscription(String name, int nbMaxMsg, int context, String selector, int subRequest,
+      boolean active, boolean durable) {
+    // TODO Auto-generated method stub
+    return true;
+  }
+
+  public boolean deleteSubscription(String subscriptionName) {
+    // TODO Auto-generated method stub
+    return true;
   }
 
 }

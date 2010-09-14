@@ -5,7 +5,7 @@ import org.objectweb.joram.mom.dest.TopicImplMBean;
 import org.objectweb.joram.mom.proxies.ClientSubscriptionMBean;
 import org.objectweb.joram.mom.proxies.ProxyImplMBean;
 
-public interface DestinationListener {
+public interface AdminListener {
 
   public void onQueueAdded(String queueName, QueueImplMBean queue);
 
