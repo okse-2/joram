@@ -5,8 +5,6 @@
 
 package com.scalagent.appli.client.command.info;
 
-import java.util.Vector;
-
 import com.scalagent.engine.client.command.Response;
 
 /**
@@ -16,15 +14,15 @@ import com.scalagent.engine.client.command.Response;
  */
 public class LoadServerInfoResponse implements Response{
 
-	private Vector<Float> infos;
+    private float[] infos;
 
 	public LoadServerInfoResponse(){}
 
-	public LoadServerInfoResponse(Vector<Float> infos) {
+    public LoadServerInfoResponse(float[] infos) {
 		this.infos = infos;
 	}
 
-	public Vector<Float> getInfos() {
+    public float[] getInfos() {
 		return infos;
 	}
 
