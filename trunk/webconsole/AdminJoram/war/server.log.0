@@ -1,9 +1,0 @@
-SEVERE Engine#0 2010-07-13 14:19:29,656, ProxyImpl:#0.0.1028 - error during request: (org.objectweb.joram.shared.client.ConsumerSubRequest@d2c946,requestId=1,target=#0.0.1027)
-org.objectweb.joram.shared.excepts.StateException: The durable subscription durable has already been activated.
-	at org.objectweb.joram.mom.proxies.ProxyImpl.doReact(ProxyImpl.java:954)
-	at org.objectweb.joram.mom.proxies.ProxyImpl.doReact(ProxyImpl.java:680)
-	at org.objectweb.joram.mom.proxies.ProxyImpl.reactToClientRequest(ProxyImpl.java:423)
-	at org.objectweb.joram.mom.proxies.UserAgent.doReact(UserAgent.java:283)
-	at org.objectweb.joram.mom.proxies.UserAgent.react(UserAgent.java:180)
-	at fr.dyade.aaa.agent.Engine.run(Engine.java:969)
-	at java.lang.Thread.run(Unknown Source)
