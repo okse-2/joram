@@ -73,7 +73,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
 
 	int chartWidth;
 
-	boolean showRecieved = true;
+	boolean showReceived = true;
 	boolean showDelivered = true;
 	boolean showSentDMQ = true;
 	boolean showPending = true;
@@ -101,7 +101,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
 
 	AnnotatedTimeLine chart;
 	DynamicForm columnForm;
-	CheckboxItem showRecievedBox;
+	CheckboxItem showReceivedBox;
 	CheckboxItem showDeliveredBox;
 	CheckboxItem showSentDMQBox;
 	CheckboxItem showPendingBox;
@@ -161,7 +161,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
 		DetailViewerField DMQIdFieldD = new DetailViewerField(QueueListRecord.ATTRIBUTE_DMQID, Application.messages.queueWidget_DMQIdFieldD_title());
 		DetailViewerField destinationIdFieldD = new DetailViewerField(QueueListRecord.ATTRIBUTE_DESTINATIONID, Application.messages.queueWidget_destinationIdFieldD_title());
 		DetailViewerField nbMsgsDeliverSinceCreationFieldD = new DetailViewerField(QueueListRecord.ATTRIBUTE_NBMSGSDELIVERSINCECREATION, Application.messages.queueWidget_nbMsgsDeliverSinceCreationFieldD_title());
-		DetailViewerField nbMsgsReceiveSinceCreationFieldD = new DetailViewerField(QueueListRecord.ATTRIBUTE_NBMSGSRECEIVESINCECREATION, Application.messages.queueWidget_nbMsgsRecieveSinceCreationFieldD_title());
+		DetailViewerField nbMsgsReceiveSinceCreationFieldD = new DetailViewerField(QueueListRecord.ATTRIBUTE_NBMSGSRECEIVESINCECREATION, Application.messages.queueWidget_nbMsgsReceiveSinceCreationFieldD_title());
 		DetailViewerField nbMsgsSentToDMQSinceCreationFieldD = new DetailViewerField(QueueListRecord.ATTRIBUTE_NBMSGSSENTTODMQSINCECREATION, Application.messages.queueWidget_nbMsgsSentToDMQSinceCreationFieldD_title());
 		DetailViewerField periodFieldD = new DetailViewerField(QueueListRecord.ATTRIBUTE_PERIOD, Application.messages.queueWidget_periodFieldD_title());
 		DetailViewerField rightsFieldD = new DetailViewerField(QueueListRecord.ATTRIBUTE_RIGHTS, Application.messages.queueWidget_RightsFieldD_title());
@@ -201,12 +201,12 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
 		columnForm = new DynamicForm();
 		columnForm.setNumCols(8);
 
-		showRecievedBox = new CheckboxItem();  
-		showRecievedBox.setTitle(Application.messages.common_recieved());
-		showRecievedBox.setValue(true);
-		showRecievedBox.addChangedHandler(new ChangedHandler() {
+		showReceivedBox = new CheckboxItem();  
+		showReceivedBox.setTitle(Application.messages.common_received());
+		showReceivedBox.setValue(true);
+		showReceivedBox.addChangedHandler(new ChangedHandler() {
 			public void onChanged(ChangedEvent event) {
-				showRecieved = showRecievedBox.getValueAsBoolean();
+				showReceived = showReceivedBox.getValueAsBoolean();
 				enableDisableCheckbox();
 				redrawChart(false);
 			}
@@ -247,7 +247,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
 		});
 
 
-		columnForm.setFields(showRecievedBox, showDeliveredBox, showSentDMQBox, showPendingBox);
+		columnForm.setFields(showReceivedBox, showDeliveredBox, showSentDMQBox, showPendingBox);
 
 
 		queueChart = new VLayout();
@@ -488,7 +488,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
 
 
 		data.addColumn(ColumnType.DATETIME, Application.messages.common_time());
-		if(showRecieved)	data.addColumn(ColumnType.NUMBER, Application.messages.common_recieved()); 
+		if(showReceived)	data.addColumn(ColumnType.NUMBER, Application.messages.common_received()); 
 		if(showDelivered)	data.addColumn(ColumnType.NUMBER, Application.messages.common_delivered()); 
 		if(showSentDMQ)	data.addColumn(ColumnType.NUMBER, Application.messages.common_sentDMQ()); 
 		if(showPending)	data.addColumn(ColumnType.NUMBER, Application.messages.common_pending()); 
@@ -502,7 +502,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
 				if(d!=null) {
 					int j=1;
 					data.setValue(i, 0, d);
-					if(showRecieved) { data.setValue(i, j, history.get(d)[0]); j++; }
+					if(showReceived) { data.setValue(i, j, history.get(d)[0]); j++; }
 					if(showDelivered){ data.setValue(i, j, history.get(d)[1]); j++; }
 					if(showSentDMQ) { data.setValue(i, j, history.get(d)[2]); j++; }
 					if(showPending) { data.setValue(i, j, history.get(d)[3]); j++; }
@@ -521,19 +521,19 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
 
 	private void enableDisableCheckbox() {
 		if(!showDelivered && !showSentDMQ && !showPending) {
-			showRecievedBox.disable();
+			showReceivedBox.disable();
 		}
-		else if(!showRecieved && !showSentDMQ && !showPending) {
+		else if(!showReceived && !showSentDMQ && !showPending) {
 			showDeliveredBox.disable();
 		}
-		else if(!showRecieved && !showDelivered && !showPending){
+		else if(!showReceived && !showDelivered && !showPending){
 			showSentDMQBox.disable();
 		}
-		else if(!showRecieved && !showDelivered && !showSentDMQ) {
+		else if(!showReceived && !showDelivered && !showSentDMQ) {
 			showPendingBox.disable();
 		}
 		else {
-			showRecievedBox.enable();
+			showReceivedBox.enable();
 			showDeliveredBox.enable();
 			showSentDMQBox.enable();
 			showPendingBox.enable();
