@@ -497,19 +497,9 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 		}
 	}
 
-	private void processInfos(Vector<Float> infos) {
-		
+	private void processInfos(float[] infos) {
 		if(infos!=null) {
-			
-			Float[] arr1 = new Float[infos.size()];
-			infos.toArray(arr1);
-			
-			float[] arr2 = new float[infos.size()];
-			for(int i=0; i<arr1.length; i++) {
-				arr2[i] = arr1[i];
-			}
-			
-			addToHistory(SERVER, arr2);
+			addToHistory(SERVER, infos);
 		}
 	}
 }
