@@ -4,10 +4,273 @@ public interface JoramAdmin {
 
 	public boolean connect(String login, String password);
 
-	public void start(DestinationListener listener);
+	public void start(AdminListener listener);
 
 	public void stop();
 
 	public void disconnect();
+
+  /**
+   * Create a message on a queue in JORAM
+   * 
+   * @param queueName
+   *          Name of the queue containing the message
+   * @param id
+   *          Id of the message
+   * @param expiration
+   *          Expiration date of the message
+   * @param timestamp
+   *          Timestamp of the message
+   * @param priority
+   *          Priority of the message
+   * @param text
+   *          Text of the message
+   * @param type
+   *          Type of the message
+   * @return Create successful
+   */
+  public boolean createNewMessage(String queueName, String id, long expiration, long timestamp, int priority,
+      String text, int type);
+
+  /**
+   * Edit a message on a queue in JORAM
+   * 
+   * @param queueName
+   *          Name of the queue containing the message
+   * @param id
+   *          Id of the message
+   * @param expiration
+   *          Expiration date of the message
+   * @param timestamp
+   *          Timestamp of the message
+   * @param priority
+   *          Priority of the message
+   * @param text
+   *          Text of the message
+   * @param type
+   *          Type of the message
+   * @return Edit successful
+   */
+  public boolean editMessage(String queueName, String id, long expiration, long timestamp, int priority,
+      String text, int type);
+
+  /**
+   * Delete a message in JORAM
+   * 
+   * @param messageName
+   *          Name of the message to delete
+   * @param queueName
+   *          Name of the queue containing the message
+   * @return suppression Delete Successful
+   */
+  public boolean deleteMessage(String messageName, String queueName);
+
+  /**
+   * Create a topic on JORAM
+   * 
+   * @param name
+   *          Name of the topic
+   * @param DMQ
+   *          DMQ Id of the topic
+   * @param destination
+   *          Destination of the topic
+   * @param period
+   *          Period of the topic
+   * @param freeReading
+   *          FreeReading of the topic
+   * @param freeWriting
+   *          FreeWriting of the topic
+   * @return Create successful
+   */
+  public boolean createNewTopic(String name, String DMQ, String destination, long period,
+      boolean freeReading, boolean freeWriting);
+
+  /**
+   * Edit a topic on JORAM
+   * 
+   * @param name
+   *          Name of the topic
+   * @param DMQ
+   *          DMQ Id of the topic
+   * @param destination
+   *          Destination of the topic
+   * @param period
+   *          Period of the topic
+   * @param freeReading
+   *          FreeReading of the topic
+   * @param freeWriting
+   *          FreeWriting of the topic
+   * @return Create successful
+   */
+  public boolean editTopic(String name, String DMQ, String destination, long period, boolean freeReading,
+      boolean freeWriting);
+
+  /**
+   * Delete a topic in JORAM
+   * 
+   * @param topicName
+   *          Name of the topic to delete
+   * @return Delete successful
+   */
+  public boolean deleteTopic(String topicName);
+
+  /**
+   * Create a user on JORAM
+   * 
+   * @param name
+   *          Name of the user
+   * @param period
+   *          Period of the user
+   * @return Create successful
+   */
+  public boolean createNewUser(String name, long period);
+
+  /**
+   * Edit a user on JORAM
+   * 
+   * @param name
+   *          Name of the user
+   * @param period
+   *          Period of the user
+   * @return Edit successful
+   */
+  public boolean editUser(String name, long period);
+
+  /**
+   * Delete a user on JORAM
+   * 
+   * @param userName
+   *          Name of the user to delete
+   * @return Delete successful
+   */
+  public boolean deleteUser(String userName);
+
+  /**
+   * Create a queue on JORAM
+   * 
+   * @param name
+   *          Name of the queue
+   * @param DMQ
+   *          DMQ Id of the queue
+   * @param destination
+   *          Destination Id of the queue
+   * @param period
+   *          Period of the queue
+   * @param threshold
+   *          Threshold of the queue
+   * @param nbMaxMsg
+   *          Maximum messages of the queue
+   * @param freeReading
+   *          Is the queue FreeReading
+   * @param freeWriting
+   *          Is the queue FreeWriting
+   * @return Create successful
+   */
+  public boolean createNewQueue(String name, String DMQ, String destination, long period, int threshold,
+      int nbMaxMsg, boolean freeReading, boolean freeWriting);
+
+  /**
+   * Edit a queue on JORAM
+   * 
+   * @param name
+   *          Name of the queue
+   * @param DMQ
+   *          DMQ Id of the queue
+   * @param destination
+   *          Destination Id of the queue
+   * @param period
+   *          Period of the queue
+   * @param threshold
+   *          Threshold of the queue
+   * @param nbMaxMsg
+   *          Maximum messages of the queue
+   * @param freeReading
+   *          Is the queue FreeReading
+   * @param freeWriting
+   *          Is the queue FreeWriting
+   * @return Edit successful
+   */
+  public boolean editQueue(String name, String DMQ, String destination, long period, int threshold,
+      int nbMaxMsg, boolean freeReading, boolean freeWriting);
+
+  /**
+   * Delete a Queue on JORAM
+   * 
+   * @param queueName
+   *          Name of the topic to delete
+   * @return Delete successful
+   */
+  public boolean deleteQueue(String queueName);
+
+  /**
+   * Clear the waiting requests for a queue on JORAM
+   * 
+   * @param queueName
+   *          Name of the queue
+   * @return Clear successful
+   */
+  public boolean cleanWaitingRequest(String queueName);
+
+  /**
+   * Clear the pending messages for a queue on JORAM
+   * 
+   * @param queueName
+   *          Name of the queue
+   * @return Clear successful
+   */
+  public boolean cleanPendingMessage(String queueName);
+
+  /**
+   * Create a subscription on JORAM
+   * 
+   * @param name
+   *          Name of the subscription
+   * @param nbMaxMsg
+   *          Maximum messages on the subscription
+   * @param context
+   *          Context Id of the subscription
+   * @param selector
+   *          Selector of the subscription
+   * @param subRequest
+   *          SubRequest of the subscription
+   * @param active
+   *          Is the subscription active
+   * @param durable
+   *          Is the subscription durable
+   * @return Create successful
+   */
+  public boolean createNewSubscription(String name, int nbMaxMsg, int context, String selector,
+      int subRequest, boolean active, boolean durable);
+
+  /**
+   * Edit a subscription on JORAM
+   * 
+   * @param name
+   *          Name of the subscription
+   * @param nbMaxMsg
+   *          Maximum messages on the subscription
+   * @param context
+   *          Context Id of the subscription
+   * @param selector
+   *          Selector of the subscription
+   * @param subRequest
+   *          SubRequest of the subscription
+   * @param active
+   *          Is the subscription active
+   * @param durable
+   *          Is the subscription durable
+   * @return Edit successful
+   */
+  public boolean editSubscription(String name, int nbMaxMsg, int context, String selector, int subRequest,
+      boolean active, boolean durable);
+
+  /**
+   * Delete a Queue in JORAM
+   * 
+   * @param subscriptionName
+   *          Name of the subscription to delete
+   * @return Delete successful
+   */
+  public boolean deleteSubscription(String subscriptionName);
 
 }
