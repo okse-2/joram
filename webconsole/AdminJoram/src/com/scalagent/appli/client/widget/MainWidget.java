@@ -152,7 +152,7 @@ public class MainWidget extends BaseWidget<MainPresenter> {
 		tabUsers.setIcon("users.png");
 
 		Tab tabConnections = new Tab(Application.messages.mainWidget_tabConnections_title());
-		tabConnections.setPane(new Label("Connexions...")); 
+		tabConnections.setPane(new Label("Connections... (To be done)")); 
 		tabConnections.setIcon("connect.png");
 
 		topTabSet.addTab(tabInfo);  
