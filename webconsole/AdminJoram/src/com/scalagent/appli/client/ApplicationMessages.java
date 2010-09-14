@@ -84,13 +84,13 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
 	String topicWidget_nbMsgsDeliverSinceCreationFieldL_title();
 
 	/**
-	 * Translated "Msgs Recieved".
+	 * Translated "Msgs Received".
 	 * 
-	 * @return translated "Msgs Recieved"
+	 * @return translated "Msgs Received"
 	 */
-	@DefaultMessage("Msgs Recieved")
-	@Key("topicWidget.nbMsgsRecieveSinceCreationFieldL.title")
-	String topicWidget_nbMsgsRecievesSinceCreationFieldL_title();
+	@DefaultMessage("Msgs Received")
+	@Key("topicWidget.nbMsgsReceiveSinceCreationFieldL.title")
+	String topicWidget_nbMsgsReceivesSinceCreationFieldL_title();
 
 	/**
 	 * Translated "Msgs Sent".
@@ -193,13 +193,13 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
 	String topicWidget_nbMsgsDeliverSinceCreationFieldD_title();
 
 	/**
-	 * Translated "Msgs Recieved".
+	 * Translated "Msgs Received".
 	 * 
-	 * @return translated "Msgs Recieved"
+	 * @return translated "Msgs Received"
 	 */
-	@DefaultMessage("Msgs Recieved")
-	@Key("topicWidget.nbMsgsRecieveSinceCreationFieldD.title")
-	String topicWidget_nbMsgsRecievesSinceCreationFieldD_title();
+	@DefaultMessage("Msgs Received")
+	@Key("topicWidget.nbMsgsReceiveSinceCreationFieldD.title")
+	String topicWidget_nbMsgsReceivesSinceCreationFieldD_title();
 
 	/**
 	 * Translated "Msgs Sent".
@@ -720,13 +720,13 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
 	String queueWidget_nbMsgsDeliverSinceCreationFieldD_title(); 
 
 	/**
-	 * Translated "Msgs Recieved".
+	 * Translated "Msgs Received".
 	 * 
-	 * @return translated "Msgs Recieved"
+	 * @return translated "Msgs Received"
 	 */
-	@DefaultMessage("Msgs Recieved")
-	@Key("queueWidget.nbMsgsRecieveSinceCreationFieldD.title")
-	String queueWidget_nbMsgsRecieveSinceCreationFieldD_title();  
+	@DefaultMessage("Msgs Received")
+	@Key("queueWidget.nbMsgsReceiveSinceCreationFieldD.title")
+	String queueWidget_nbMsgsReceiveSinceCreationFieldD_title();  
 
 	/**
 	 * Translated "Msgs Sent".
@@ -837,13 +837,13 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
 	String queueWidget_viewSection_title(); 
 
 	/**
-	 * Translated "Msgs Recieved".
+	 * Translated "Msgs Received".
 	 * 
-	 * @return translated "Msgs Recieved"
+	 * @return translated "Msgs Received"
 	 */
-	@DefaultMessage("Msgs Recieved")
-	@Key("queueWidget.nbMsgsRecieveSinceCreationFieldL.title")
-	String queueWidget_nbMsgsRecieveSinceCreationFieldL_title(); 
+	@DefaultMessage("Msgs Received")
+	@Key("queueWidget.nbMsgsReceiveSinceCreationFieldL.title")
+	String queueWidget_nbMsgsReceiveSinceCreationFieldL_title(); 
 
 	/**
 	 * Translated "Message".
@@ -2261,13 +2261,13 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
 	String common_delivered();
 	
 	/**
-	 * Translated "Recieved".
+	 * Translated "Received".
 	 * 
-	 * @return translated "Recieved"
+	 * @return translated "Received"
 	 */
-	@DefaultMessage("Recieved")
-	@Key("common_recieved")
-	String common_recieved();
+	@DefaultMessage("Received")
+	@Key("common_received")
+	String common_received();
 	
 	/**
 	 * Translated "Sent DMQ".

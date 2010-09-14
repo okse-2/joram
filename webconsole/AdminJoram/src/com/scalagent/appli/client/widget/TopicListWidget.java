@@ -68,7 +68,7 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
 	int chartWidth;
 	boolean redrawChart = false;
 
-	boolean showRecieved = true;
+	boolean showReceived = true;
 	boolean showDelivered = true;
 	boolean showSentDMQ = true;
 
@@ -88,7 +88,7 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
 	VLayout topicChart;
 	AnnotatedTimeLine chart;	
 	DynamicForm columnForm;
-	CheckboxItem showRecievedBox;
+	CheckboxItem showReceivedBox;
 	CheckboxItem showDeliveredBox;
 	CheckboxItem showSentDMQBox;
 	
@@ -198,7 +198,7 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
 
 		ListGridField nameFieldL = new ListGridField(TopicListRecord.ATTRIBUTE_NAME, Application.messages.topicWidget_nameFieldL_title());		
 		ListGridField nbMsgsDeliverSinceCreationFieldL = new ListGridField(TopicListRecord.ATTRIBUTE_NBMSGSDELIVERSINCECREATION, Application.messages.topicWidget_nbMsgsDeliverSinceCreationFieldL_title());
-		ListGridField nbMsgsReceiveSinceCreationFieldL = new ListGridField(TopicListRecord.ATTRIBUTE_NBMSGSRECEIVESINCECREATION, Application.messages.topicWidget_nbMsgsRecievesSinceCreationFieldD_title());
+		ListGridField nbMsgsReceiveSinceCreationFieldL = new ListGridField(TopicListRecord.ATTRIBUTE_NBMSGSRECEIVESINCECREATION, Application.messages.topicWidget_nbMsgsReceivesSinceCreationFieldD_title());
 		ListGridField nbMsgsSentToDMQSinceCreationFieldL = new ListGridField(TopicListRecord.ATTRIBUTE_NBMSGSSENTTODMQSINCECREATION, Application.messages.topicWidget_nbMsgsSentSinceCreationFieldL_title());
 		ListGridField freeReadingFieldL = new ListGridField(TopicListRecord.ATTRIBUTE_FREEREADING, Application.messages.topicWidget_freeReadingFieldL_title());   
 		ListGridField freeWritingFieldL = new ListGridField(TopicListRecord.ATTRIBUTE_FREEWRITING, Application.messages.topicWidget_freeWritingFieldL_title());   
@@ -237,7 +237,7 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
 		DetailViewerField DMQIdFieldD = new DetailViewerField(TopicListRecord.ATTRIBUTE_DMQID, Application.messages.topicWidget_DMQIdFieldD_title());
 		DetailViewerField destinationIdFieldD = new DetailViewerField(TopicListRecord.ATTRIBUTE_DESTINATIONID, Application.messages.topicWidget_destinationIdFieldD_title());
 		DetailViewerField nbMsgsDeliverSinceCreationFieldD = new DetailViewerField(TopicListRecord.ATTRIBUTE_NBMSGSDELIVERSINCECREATION, Application.messages.topicWidget_nbMsgsDeliverSinceCreationFieldD_title());
-		DetailViewerField nbMsgsReceiveSinceCreationFieldD = new DetailViewerField(TopicListRecord.ATTRIBUTE_NBMSGSRECEIVESINCECREATION, Application.messages.topicWidget_nbMsgsRecievesSinceCreationFieldD_title());
+		DetailViewerField nbMsgsReceiveSinceCreationFieldD = new DetailViewerField(TopicListRecord.ATTRIBUTE_NBMSGSRECEIVESINCECREATION, Application.messages.topicWidget_nbMsgsReceivesSinceCreationFieldD_title());
 		DetailViewerField nbMsgsSentToDMQSinceCreationFieldD = new DetailViewerField(TopicListRecord.ATTRIBUTE_NBMSGSSENTTODMQSINCECREATION, Application.messages.topicWidget_nbMsgsSentSinceCreationFieldD_title());
 		DetailViewerField periodFieldD = new DetailViewerField(TopicListRecord.ATTRIBUTE_PERIOD, Application.messages.topicWidget_periodFieldD_title());
 		DetailViewerField rightsFieldD = new DetailViewerField(TopicListRecord.ATTRIBUTE_RIGHTS, Application.messages.topicWidget_rightsFieldD_title());
@@ -266,12 +266,12 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
 		columnForm = new DynamicForm();
 		columnForm.setNumCols(6);
 
-		showRecievedBox = new CheckboxItem();  
-		showRecievedBox.setTitle(Application.messages.common_recieved());
-		showRecievedBox.setValue(true);
-		showRecievedBox.addChangedHandler(new ChangedHandler() {
+		showReceivedBox = new CheckboxItem();  
+		showReceivedBox.setTitle(Application.messages.common_received());
+		showReceivedBox.setValue(true);
+		showReceivedBox.addChangedHandler(new ChangedHandler() {
 			public void onChanged(ChangedEvent event) {
-				showRecieved = showRecievedBox.getValueAsBoolean();
+				showReceived = showReceivedBox.getValueAsBoolean();
 				enableDisableCheckbox();
 				redrawChart(false);
 			}
@@ -302,7 +302,7 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
 
 
 
-		columnForm.setFields(showRecievedBox, showDeliveredBox, showSentDMQBox);
+		columnForm.setFields(showReceivedBox, showDeliveredBox, showSentDMQBox);
 
 		topicChart = new VLayout();
 		topicChart.setMargin(2);
@@ -430,7 +430,7 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
 		DataTable data = DataTable.create();
 
 		data.addColumn(ColumnType.DATETIME, Application.messages.common_time());
-		if(showRecieved) data.addColumn(ColumnType.NUMBER, Application.messages.common_recieved()); 
+		if(showReceived) data.addColumn(ColumnType.NUMBER, Application.messages.common_received()); 
 		if(showDelivered) data.addColumn(ColumnType.NUMBER, Application.messages.common_delivered()); 
 		if(showSentDMQ)	data.addColumn(ColumnType.NUMBER, Application.messages.common_sentDMQ()); 
 
@@ -447,7 +447,7 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
 					if(d!=null) {
 						int j=1;
 						data.setValue(i, 0, d);
-						if(showRecieved) { data.setValue(i, j, history.get(d)[0]); j++; }
+						if(showReceived) { data.setValue(i, j, history.get(d)[0]); j++; }
 						if(showDelivered){ data.setValue(i, j, history.get(d)[1]); j++; }
 						if(showSentDMQ) { data.setValue(i, j, history.get(d)[2]); j++; }
 						i++;
@@ -468,16 +468,16 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
 
 	private void enableDisableCheckbox() {
 		if(!showDelivered && !showSentDMQ) {
-			showRecievedBox.disable();
+			showReceivedBox.disable();
 		}
-		else if(!showRecieved && !showSentDMQ) {
+		else if(!showReceived && !showSentDMQ) {
 			showDeliveredBox.disable();
 		}
-		else if(!showRecieved && !showDelivered){
+		else if(!showReceived && !showDelivered){
 			showSentDMQBox.disable();
 		}
 		else {
-			showRecievedBox.enable();
+			showReceivedBox.enable();
 			showDeliveredBox.enable();
 			showSentDMQBox.enable();
 		}
