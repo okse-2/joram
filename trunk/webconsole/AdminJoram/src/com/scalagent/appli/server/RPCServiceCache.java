@@ -53,23 +53,21 @@ import com.scalagent.engine.server.BaseRPCServiceCache;
 
 public class RPCServiceCache extends BaseRPCServiceCache {
 
-	private static boolean isConnected = false;
-	private static JoramAdmin joramAdmin;
+    private static final String SESSION_TOPICS = "topicsList";
+    private static final String SESSION_QUEUES = "queuesList";
+    private static final String SESSION_MESSAGES = "messagesList";
+    private static final String SESSION_USERS = "usersList";
+    private static final String SESSION_SUBSCRIPTION = "subscriptionList";
+
+	private boolean isConnected = false;
+	private JoramAdmin joramAdmin;
 	private LiveListener listener = new LiveListener();
-
-	private static final String SESSION_TOPICS = "topicsList";
-	private static final String SESSION_QUEUES = "queuesList";
-	private static final String SESSION_MESSAGES = "messagesList";
-	private static final String SESSION_USERS = "usersList";
-	private static final String SESSION_SUBSCRIPTION = "subscriptionList";
-
 
 	private Map<String, DestinationImplMBean> mapDestinations;
 	private Map<String, ProxyImplMBean> mapUsers;
 	private List<ClientSubscriptionMBean> listSubscriptions;
 
-
-	GregorianCalendar lastupdate = new GregorianCalendar(1970, 1, 1);
+	private GregorianCalendar lastupdate = new GregorianCalendar(1970, 1, 1);
 
 	@SuppressWarnings("unchecked")
 	public List<TopicWTO> getTopics(HttpSession session, boolean retrieveAll, boolean forceUpdate) {
@@ -244,11 +242,11 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 
 	public boolean connectJORAM(String login, String password) {
         joramAdmin = new JoramAdminOSGi(Activator.getContext());
-	    boolean connected = joramAdmin.connect(login, password);
-	    if (connected) {
+	    isConnected = joramAdmin.connect(login, password);
+	    if (isConnected) {
 	      joramAdmin.start(listener);
 	    }
-	    return connected;
+	    return isConnected;
 	}
 
 	public void synchWithJORAM(boolean forceUpdate) {
