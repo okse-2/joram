@@ -71,7 +71,6 @@ public class RefreshAllClickHandler implements ClickHandler {
 		if(queuePresenter!=null) queuePresenter.fireRefreshAll();
 		if(queueDetailPresenter!=null) queueDetailPresenter.fireRefreshAll();
 		if(topicPresenter!=null) topicPresenter.fireRefreshAll();
-		if(queueDetailPresenter!=null) queueDetailPresenter.fireRefreshAll();
 		if(userPresenter!=null) userPresenter.fireRefreshAll();
 		if(userDetailPresenter!=null) userDetailPresenter.fireRefreshAll();
 		if(subscriptionPresenter!=null) subscriptionPresenter.fireRefreshAll();
