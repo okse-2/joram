@@ -9,28 +9,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.Vector;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Timer;
 import com.scalagent.appli.client.command.info.LoadServerInfoAction;
-import com.scalagent.appli.client.command.info.LoadServerInfoResponse;
 import com.scalagent.appli.client.command.info.LoadServerInfoHandler;
+import com.scalagent.appli.client.command.info.LoadServerInfoResponse;
 import com.scalagent.appli.client.command.message.LoadMessageAction;
 import com.scalagent.appli.client.command.message.LoadMessageHandler;
 import com.scalagent.appli.client.command.message.LoadMessageResponse;
 import com.scalagent.appli.client.command.queue.LoadQueueAction;
-import com.scalagent.appli.client.command.queue.LoadQueueResponse;
 import com.scalagent.appli.client.command.queue.LoadQueueHandler;
+import com.scalagent.appli.client.command.queue.LoadQueueResponse;
 import com.scalagent.appli.client.command.subscription.LoadSubscriptionAction;
-import com.scalagent.appli.client.command.subscription.LoadSubscriptionResponse;
 import com.scalagent.appli.client.command.subscription.LoadSubscriptionHandler;
+import com.scalagent.appli.client.command.subscription.LoadSubscriptionResponse;
 import com.scalagent.appli.client.command.topic.LoadTopicAction;
-import com.scalagent.appli.client.command.topic.LoadTopicResponse;
 import com.scalagent.appli.client.command.topic.LoadTopicHandler;
+import com.scalagent.appli.client.command.topic.LoadTopicResponse;
 import com.scalagent.appli.client.command.user.LoadUserAction;
-import com.scalagent.appli.client.command.user.LoadUserResponse;
 import com.scalagent.appli.client.command.user.LoadUserHandler;
+import com.scalagent.appli.client.command.user.LoadUserResponse;
 import com.scalagent.appli.client.event.common.UpdateCompleteEvent;
 import com.scalagent.appli.client.event.message.DeletedMessageEvent;
 import com.scalagent.appli.client.event.message.NewMessageEvent;
@@ -196,6 +195,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 	public void setPeriod(int updatePeriod) {
 		if (updatePeriod != -1) {
 			Timer timer = new RPCServiceCacheTimer(this);
+			timer.run();
 			timer.scheduleRepeating(updatePeriod);
 		}
 	}
@@ -229,7 +229,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 	public void retrieveQueue(boolean forceUpdate) {
 		if (queueRequest) {
 			queueRequest = false;
-			LoadQueueAction action = new LoadQueueAction((queues.isEmpty()), forceUpdate);
+			LoadQueueAction action = new LoadQueueAction(queues.isEmpty(), forceUpdate);
 			RPCService.execute(action, new LoadQueueHandler(eventBus) {
 				@Override
 				public void onSuccess(LoadQueueResponse response) {
