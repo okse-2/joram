@@ -4,7 +4,7 @@
   <target name="init">
     <!-- Initializes the directory structure properties -->
     <property name="src.dir" location="."/>
-    <property name="ship.dir" location="../../ship"/>
+    <property name="ship.dir" location="../../../ship"/>
     <property name="obj.dir" location="../../classes"/>
     <property name="lib.dir" location="${ship.dir}/lib"/>
     <property name="run.dir" location="../../run"/>

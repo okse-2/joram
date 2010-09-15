@@ -25,7 +25,7 @@
   <dependencySets> 
     <!-- ship/bundle -->
     <dependencySet>
-      <outputDirectory>/samples/ship/bundle</outputDirectory>
+      <outputDirectory>/ship/bundle</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -35,7 +35,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/bundle</outputDirectory>
+      <outputDirectory>/ship/bundle</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -44,7 +44,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/bundle</outputDirectory>
+      <outputDirectory>/ship/bundle</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -53,7 +53,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/bundle</outputDirectory>
+      <outputDirectory>/ship/bundle</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -62,7 +62,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/bundle</outputDirectory>
+      <outputDirectory>/ship/bundle</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -71,7 +71,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/bundle</outputDirectory>
+      <outputDirectory>/ship/bundle</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -80,7 +80,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/bundle</outputDirectory>
+      <outputDirectory>/ship/bundle</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -89,7 +89,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/bundle</outputDirectory>
+      <outputDirectory>/ship/bundle</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -98,7 +98,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/bundle</outputDirectory>
+      <outputDirectory>/ship/bundle</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -107,7 +107,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/bundle</outputDirectory>
+      <outputDirectory>/ship/bundle</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -116,7 +116,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/bundle</outputDirectory>
+      <outputDirectory>/ship/bundle</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -125,7 +125,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/bundle</outputDirectory>
+      <outputDirectory>/ship/bundle</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping> <!-- ow_monolog.jar -->
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -134,7 +134,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/bundle</outputDirectory>
+      <outputDirectory>/ship/bundle</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -143,7 +143,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/bundle</outputDirectory>
+      <outputDirectory>/ship/bundle</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -152,7 +152,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/bundle</outputDirectory>
+      <outputDirectory>/ship/bundle</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -161,7 +161,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/bundle</outputDirectory>
+      <outputDirectory>/ship/bundle</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -170,7 +170,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/bundle</outputDirectory>
+      <outputDirectory>/ship/bundle</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -179,7 +179,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/bundle</outputDirectory>
+      <outputDirectory>/ship/bundle</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -188,7 +188,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/bundle</outputDirectory>
+      <outputDirectory>/ship/bundle</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -198,7 +198,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/bundle</outputDirectory>
+      <outputDirectory>/ship/bundle</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -209,7 +209,7 @@
     
     <!-- ship/lib -->
     <dependencySet>
-      <outputDirectory>/samples/ship/lib</outputDirectory>
+      <outputDirectory>/ship/lib</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -218,7 +218,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/lib</outputDirectory>
+      <outputDirectory>/ship/lib</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -227,7 +227,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/lib</outputDirectory>
+      <outputDirectory>/ship/lib</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -236,7 +236,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/lib</outputDirectory>
+      <outputDirectory>/ship/lib</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -245,7 +245,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/lib</outputDirectory>
+      <outputDirectory>/ship/lib</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -254,7 +254,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/lib</outputDirectory>
+      <outputDirectory>/ship/lib</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -263,7 +263,7 @@
       <unpack>false</unpack>
     </dependencySet>
     <dependencySet>
-      <outputDirectory>/samples/ship/lib</outputDirectory>
+      <outputDirectory>/ship/lib</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -274,7 +274,7 @@
     
     <!-- ship/bin -->
     <dependencySet>
-      <outputDirectory>/samples/ship/bin</outputDirectory>
+      <outputDirectory>/ship/bin</outputDirectory>
       <outputFileNameMapping>felix.jar</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -285,7 +285,7 @@
     
     <!-- ship/conf -->
     <dependencySet>
-      <outputDirectory>/samples/ship/conf</outputDirectory>
+      <outputDirectory>/ship/conf</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
@@ -296,7 +296,7 @@
     
     <!-- ship/licenses -->
     <dependencySet>
-      <outputDirectory>/samples/ship/licenses</outputDirectory>
+      <outputDirectory>/ship/licenses</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>

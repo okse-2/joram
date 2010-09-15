@@ -14,8 +14,22 @@
 		<version>5.4.0.54-SNAPSHOT</version>
 	</parent>
 
-   <build>
+  <build>
     <plugins>
+      <!-- clean -->
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>../ship</directory>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+      
+      <!-- ship -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -39,6 +53,7 @@
               <outputDirectory>.</outputDirectory>
               <overWriteReleases>false</overWriteReleases>
               <overWriteSnapshots>true</overWriteSnapshots>
+              <outputDirectory>..</outputDirectory>
             </configuration>
           </execution>
         </executions>
