@@ -11,12 +11,17 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-public class JoramAdminOSGi extends ServiceTracker implements JoramAdmin {
+public class JoramAdminOSGi implements JoramAdmin, ServiceTrackerCustomizer {
 
   private static Filter filter;
 
   private AdminListener listener;
+
+  private ServiceTracker serviceTracker;
+
+  private BundleContext context;
 
   static {
     try {
@@ -31,7 +36,7 @@ public class JoramAdminOSGi extends ServiceTracker implements JoramAdmin {
   }
 
   public JoramAdminOSGi(BundleContext context) {
-    super(context, filter, null);
+    this.context = context;
   }
 
   public boolean connect(String login, String password) {
@@ -40,11 +45,12 @@ public class JoramAdminOSGi extends ServiceTracker implements JoramAdmin {
 
   public void start(AdminListener listener) {
     this.listener = listener;
-    open();
+    serviceTracker = new ServiceTracker(context, filter, this);
+    serviceTracker.open();
   }
 
   public void stop() {
-    close();
+    serviceTracker.close();
   }
 
   public void disconnect() {
@@ -82,7 +88,9 @@ public class JoramAdminOSGi extends ServiceTracker implements JoramAdmin {
       String subName = (String) reference.getProperty("name");
       listener.onSubscriptionRemoved(subName, (ClientSubscriptionMBean) service);
     }
-    super.removedService(reference, service);
+  }
+
+  public void modifiedService(ServiceReference arg0, Object arg1) {
   }
 
   public boolean createNewMessage(String queueName, String id, long expiration, long timestamp, int priority,
