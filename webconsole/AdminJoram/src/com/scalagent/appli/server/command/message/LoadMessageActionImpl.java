@@ -6,7 +6,6 @@ package com.scalagent.appli.server.command.message;
 
 import java.util.List;
 
-import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.scalagent.appli.client.command.message.LoadMessageAction;
 import com.scalagent.appli.client.command.message.LoadMessageResponse;
 import com.scalagent.appli.server.RPCServiceCache;
@@ -26,7 +25,7 @@ extends ActionImpl<LoadMessageResponse, LoadMessageAction, RPCServiceCache>{
 		List<MessageWTO> messages;
 		try {
 			messages = cache.getMessages(this.getHttpSession(), action.getQueueName());
-		} catch (NotFoundException e) {
+		} catch (Exception e) {
 			return new LoadMessageResponse(null, action.getQueueName(), false);
 		}
 		return new LoadMessageResponse(messages, action.getQueueName(), true);
