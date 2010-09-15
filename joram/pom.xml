@@ -50,9 +50,19 @@
               </execution>
             </executions>
           </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-release-plugin</artifactId>
+            <configuration>
+              <tagBase>svn+ssh://svn.forge.objectweb.org/svnroot/joram/tags</tagBase>
+              <autoVersionSubmodules>true</autoVersionSubmodules>
+              <addSchema>false</addSchema>
+            </configuration>
+          </plugin>
         </plugins>
       </build>
     </profile>
+    
     <!-- Profile javadoc -->
     <profile>
       <id>doc</id>
@@ -77,6 +87,7 @@
           </plugin>
         </plugins>
       </build>
+      <!-- reporting -->
       <reporting>
         <plugins>
           <plugin>
@@ -91,6 +102,12 @@
       </reporting>
     </profile>
   </profiles>
+  
+  <!-- Source code management -->
+  <scm>
+    <connection>scm:svn:svn://svn.forge.objectweb.org/svnroot/joram/trunk/joram</connection>
+    <developerConnection>scm:svn:svn+ssh://svn.forge.objectweb.org/svnroot/joram/trunk/joram</developerConnection>
+  </scm>
   
   <repositories>
     <repository>
@@ -253,14 +270,17 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.ow2.jonas.osgi</groupId>
       <artifactId>monolog</artifactId>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 
