@@ -1246,6 +1246,10 @@ public class QueueImpl extends DestinationImpl implements QueueImplMBean {
     return MessageJMXWrapper.createTabularDataSupport(messages);
   }
 
+  public List getMessagesView() {
+    return messages;
+  }
+
   /**
    * Actually tries to answer the pending "receive" requests.
    * <p>
