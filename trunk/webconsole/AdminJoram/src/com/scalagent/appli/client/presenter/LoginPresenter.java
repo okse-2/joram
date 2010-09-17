@@ -1,7 +1,25 @@
-/**
- * (c)2010 Scalagent Distributed Technologies
+/*
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2010 ScalAgent Distributed Technologies
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
+ *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
-
 package com.scalagent.appli.client.presenter;
 
 import com.google.gwt.event.shared.HandlerManager;
@@ -21,31 +39,28 @@ import com.smartgwt.client.util.SC;
  * 
  * @author Yohann CINTRE
  */
-public class LoginPresenter extends BasePresenter<LoginWidget, RPCServiceAsync, RPCServiceCacheClient>
-{
-	public LoginPresenter(RPCServiceAsync testService, 
-			HandlerManager eventBus,
-			RPCServiceCacheClient cache) {
-		super(testService, cache, eventBus);
-		this.widget = new LoginWidget(this);
-	}
+public class LoginPresenter extends BasePresenter<LoginWidget, RPCServiceAsync, RPCServiceCacheClient> {
+  public LoginPresenter(RPCServiceAsync testService, HandlerManager eventBus, RPCServiceCacheClient cache) {
+    super(testService, cache, eventBus);
+    this.widget = new LoginWidget(this);
+  }
 
-	/**
-	 * This method is called by the LoginClickHandler when a new the user click on the
-	 * login button on the LoginWidget
-	 * It send the login information to the server and wait for the response
-	 * 
-	 */	
-	public void sendLogin(String login, String password) {
-		service.execute(new LoginAction(login, password), new LoginHandler(eventBus) {
-			@Override
-			public void onSuccess(LoginResponse response) {
-				if (response.isSuccess()) {
-					eventBus.fireEvent(new LoginValidEvent());
-				} else {
-					SC.warn(response.getMessage());
-				}
-			}
-		});
-	}
+  /**
+   * This method is called by the LoginClickHandler when a new the user click on
+   * the
+   * login button on the LoginWidget
+   * It send the login information to the server and wait for the response
+   */
+  public void sendLogin(String login, String password) {
+    service.execute(new LoginAction(login, password), new LoginHandler(eventBus) {
+      @Override
+      public void onSuccess(LoginResponse response) {
+        if (response.isSuccess()) {
+          eventBus.fireEvent(new LoginValidEvent());
+        } else {
+          SC.warn(response.getMessage());
+        }
+      }
+    });
+  }
 }

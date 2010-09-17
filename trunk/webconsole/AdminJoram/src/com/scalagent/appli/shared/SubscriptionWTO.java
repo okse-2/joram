@@ -1,7 +1,25 @@
-/**
- * (c)2010 Scalagent Distributed Technologies
+/*
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2010 ScalAgent Distributed Technologies
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
+ *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
-
 package com.scalagent.appli.shared;
 
 import com.scalagent.engine.shared.BaseWTO;
@@ -11,155 +29,200 @@ import com.scalagent.engine.shared.BaseWTO;
  */
 public class SubscriptionWTO extends BaseWTO {
 
-	private String name;
-	private boolean active;
-	private boolean durable;
-	private int nbMaxMsg;
-	private int contextId;
-	private int nbMsgsDeliveredSinceCreation;
-	private int nbMsgsSentToDMQSinceCreation;
-	private int pendingMessageCount;
-	private String selector;
-	private int subRequestId;
+  private String name;
+  private boolean active;
+  private boolean durable;
+  private int nbMaxMsg;
+  private int contextId;
+  private int nbMsgsDeliveredSinceCreation;
+  private int nbMsgsSentToDMQSinceCreation;
+  private int pendingMessageCount;
+  private String selector;
+  private int subRequestId;
 
-	public String getName() { return name; }
-	public boolean isActive() { return active; }
-	public boolean isDurable() { return durable; }
-	public int getNbMaxMsg() { return nbMaxMsg; }
-	public int getContextId() { return contextId; }
-	public int getNbMsgsDeliveredSinceCreation() { return nbMsgsDeliveredSinceCreation; }
-	public int getNbMsgsSentToDMQSinceCreation() { return nbMsgsSentToDMQSinceCreation; }
-	public int getPendingMessageCount() { return pendingMessageCount; }
-	public String getSelector() { return selector; }
-	public int getSubRequestId() { return subRequestId; }
+  public String getName() {
+    return name;
+  }
 
-	public void setName(String name) { this.name = name; }
-	public void setActive(boolean active) { this.active = active; }
-	public void setDurable(boolean durable) { this.durable = durable; }
-	public void setNbMaxMsg(int nbMaxMsg) { this.nbMaxMsg = nbMaxMsg; }
-	public void setContextId(int contextId) { this.contextId = contextId; }
-	public void setNbMsgsDeliveredSinceCreation(int nbMsgsDeliveredSinceCreation) { this.nbMsgsDeliveredSinceCreation = nbMsgsDeliveredSinceCreation; }
-	public void setNbMsgsSentToDMQSinceCreation(int nbMsgsSentToDMQSinceCreation) { this.nbMsgsSentToDMQSinceCreation = nbMsgsSentToDMQSinceCreation; }
-	public void setPendingMessageCount(int pendingMessageCount) { this.pendingMessageCount = pendingMessageCount;  }
-	public void setSelector(String selector) { this.selector = selector; }
-	public void setSubRequestId(int subRequestId) { this.subRequestId = subRequestId; }
+  public boolean isActive() {
+    return active;
+  }
 
-	public SubscriptionWTO() {}
-	public SubscriptionWTO(String name, boolean active, boolean durable,
-			int nbMaxMsg, int contextId,
-			int nbMsgsDeliveredSinceCreation, int nbMsgsSentToDMQSinceCreation,
-			int pendingMessageCount, String selector, int subRequestId) {
-		super();
-		this.id = name;
-		this.name = name;
-		this.active = active;
-		this.durable = durable;
-		this.nbMaxMsg = nbMaxMsg;
-		this.contextId = contextId;
-		this.nbMsgsDeliveredSinceCreation = nbMsgsDeliveredSinceCreation;
-		this.nbMsgsSentToDMQSinceCreation = nbMsgsSentToDMQSinceCreation;
-		this.pendingMessageCount = pendingMessageCount;
-		this.selector = selector;
-		this.subRequestId = subRequestId;
-	
-	}
+  public boolean isDurable() {
+    return durable;
+  }
 
-	@Override
-	public String toString() {
-		return "SubscriptionWTO [name=" + name + ", nbMaxMsg=" + nbMaxMsg
-		+ ", nbMsgsDeliveredSinceCreation="+ nbMsgsDeliveredSinceCreation + "]";
-	}
-	public String toStringFullContent() {
-		return "SubscriptionWTO [active=" + active + ", contextId=" + contextId
-		+ ", durable=" + durable
-		+ ", name=" + name + ", nbMaxMsg=" + nbMaxMsg
-		+ ", nbMsgsDeliveredSinceCreation="
-		+ nbMsgsDeliveredSinceCreation
-		+ ", nbMsgsSentToDMQSinceCreation="
-		+ nbMsgsSentToDMQSinceCreation + ", pendingMessageCount="
-		+ pendingMessageCount + ", selector=" + selector
-		+ ", subRequestId=" + subRequestId + "]";
-	}
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (active ? 1231 : 1237);
-		result = prime * result + contextId;
-		result = prime * result + (durable ? 1231 : 1237);
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + nbMaxMsg;
-		result = prime * result + nbMsgsDeliveredSinceCreation;
-		result = prime * result + nbMsgsSentToDMQSinceCreation;
-		result = prime * result + pendingMessageCount;
-		result = prime * result
-		+ ((selector == null) ? 0 : selector.hashCode());
-		result = prime * result + subRequestId;
-		return result;
-	}
+  public int getNbMaxMsg() {
+    return nbMaxMsg;
+  }
 
-	@Override
-	public boolean equals(Object anObj){
-		if(anObj==null)
-			return false;
-		if(anObj==this)
-			return true;
-		if(!(anObj instanceof SubscriptionWTO))
-			return false;
-		SubscriptionWTO obj = (SubscriptionWTO)anObj;
-		if(obj.id.equals(this.id))
-			return true;
-		return false;
-	}
+  public int getContextId() {
+    return contextId;
+  }
 
-	@Override
-	public SubscriptionWTO clone() {
+  public int getNbMsgsDeliveredSinceCreation() {
+    return nbMsgsDeliveredSinceCreation;
+  }
 
-		SubscriptionWTO sub = new SubscriptionWTO();
+  public int getNbMsgsSentToDMQSinceCreation() {
+    return nbMsgsSentToDMQSinceCreation;
+  }
 
-		sub.name = name;
-		sub.active = active;
-		sub.durable = durable;
-		sub.nbMaxMsg = nbMaxMsg;
-		sub.contextId = contextId;
-		sub.nbMsgsDeliveredSinceCreation = nbMsgsDeliveredSinceCreation;
-		sub.nbMsgsSentToDMQSinceCreation = nbMsgsSentToDMQSinceCreation;
-		sub.pendingMessageCount = pendingMessageCount;
-		sub.selector = selector;
-		sub.subRequestId = subRequestId;
+  public int getPendingMessageCount() {
+    return pendingMessageCount;
+  }
 
-		return sub;
-	}
+  public String getSelector() {
+    return selector;
+  }
 
-	@Override
-	public boolean equalsContent(Object anObj) {
+  public int getSubRequestId() {
+    return subRequestId;
+  }
 
-		if(!equals(anObj))
-			return false;
+  public void setName(String name) {
+    this.name = name;
+  }
 
-		SubscriptionWTO obj = (SubscriptionWTO)anObj;
+  public void setActive(boolean active) {
+    this.active = active;
+  }
 
+  public void setDurable(boolean durable) {
+    this.durable = durable;
+  }
 
+  public void setNbMaxMsg(int nbMaxMsg) {
+    this.nbMaxMsg = nbMaxMsg;
+  }
 
+  public void setContextId(int contextId) {
+    this.contextId = contextId;
+  }
 
+  public void setNbMsgsDeliveredSinceCreation(int nbMsgsDeliveredSinceCreation) {
+    this.nbMsgsDeliveredSinceCreation = nbMsgsDeliveredSinceCreation;
+  }
 
-		boolean eq =  
-			equalsWithNull(this.id, obj.id)
-			&& equalsWithNull(this.name, obj.name)
-			&& equalsWithNull(this.active, obj.active)
-			&& equalsWithNull(this.durable, obj.durable)
-			&& equalsWithNull(this.nbMaxMsg, obj.nbMaxMsg)
-			&& equalsWithNull(this.contextId, obj.contextId)
-			&& equalsWithNull(this.nbMsgsDeliveredSinceCreation, obj.nbMsgsDeliveredSinceCreation)
-			&& equalsWithNull(this.nbMsgsSentToDMQSinceCreation, obj.nbMsgsSentToDMQSinceCreation)
-			&& equalsWithNull(this.pendingMessageCount, obj.pendingMessageCount)
-			&& equalsWithNull(this.selector, obj.selector)
-			&& equalsWithNull(this.subRequestId, obj.subRequestId);
+  public void setNbMsgsSentToDMQSinceCreation(int nbMsgsSentToDMQSinceCreation) {
+    this.nbMsgsSentToDMQSinceCreation = nbMsgsSentToDMQSinceCreation;
+  }
 
-		return eq;
+  public void setPendingMessageCount(int pendingMessageCount) {
+    this.pendingMessageCount = pendingMessageCount;
+  }
 
-	}
+  public void setSelector(String selector) {
+    this.selector = selector;
+  }
 
+  public void setSubRequestId(int subRequestId) {
+    this.subRequestId = subRequestId;
+  }
 
+  public SubscriptionWTO() {
+  }
+
+  public SubscriptionWTO(String name, boolean active, boolean durable, int nbMaxMsg, int contextId,
+      int nbMsgsDeliveredSinceCreation, int nbMsgsSentToDMQSinceCreation, int pendingMessageCount,
+      String selector, int subRequestId) {
+    super();
+    this.id = name;
+    this.name = name;
+    this.active = active;
+    this.durable = durable;
+    this.nbMaxMsg = nbMaxMsg;
+    this.contextId = contextId;
+    this.nbMsgsDeliveredSinceCreation = nbMsgsDeliveredSinceCreation;
+    this.nbMsgsSentToDMQSinceCreation = nbMsgsSentToDMQSinceCreation;
+    this.pendingMessageCount = pendingMessageCount;
+    this.selector = selector;
+    this.subRequestId = subRequestId;
+
+  }
+
+  @Override
+  public String toString() {
+    return "SubscriptionWTO [name=" + name + ", nbMaxMsg=" + nbMaxMsg + ", nbMsgsDeliveredSinceCreation="
+        + nbMsgsDeliveredSinceCreation + "]";
+  }
+
+  public String toStringFullContent() {
+    return "SubscriptionWTO [active=" + active + ", contextId=" + contextId + ", durable=" + durable
+        + ", name=" + name + ", nbMaxMsg=" + nbMaxMsg + ", nbMsgsDeliveredSinceCreation="
+        + nbMsgsDeliveredSinceCreation + ", nbMsgsSentToDMQSinceCreation=" + nbMsgsSentToDMQSinceCreation
+        + ", pendingMessageCount=" + pendingMessageCount + ", selector=" + selector + ", subRequestId="
+        + subRequestId + "]";
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + (active ? 1231 : 1237);
+    result = prime * result + contextId;
+    result = prime * result + (durable ? 1231 : 1237);
+    result = prime * result + ((name == null) ? 0 : name.hashCode());
+    result = prime * result + nbMaxMsg;
+    result = prime * result + nbMsgsDeliveredSinceCreation;
+    result = prime * result + nbMsgsSentToDMQSinceCreation;
+    result = prime * result + pendingMessageCount;
+    result = prime * result + ((selector == null) ? 0 : selector.hashCode());
+    result = prime * result + subRequestId;
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object anObj) {
+    if (anObj == null)
+      return false;
+    if (anObj == this)
+      return true;
+    if (!(anObj instanceof SubscriptionWTO))
+      return false;
+    SubscriptionWTO obj = (SubscriptionWTO) anObj;
+    if (obj.id.equals(this.id))
+      return true;
+    return false;
+  }
+
+  @Override
+  public SubscriptionWTO clone() {
+
+    SubscriptionWTO sub = new SubscriptionWTO();
+
+    sub.name = name;
+    sub.active = active;
+    sub.durable = durable;
+    sub.nbMaxMsg = nbMaxMsg;
+    sub.contextId = contextId;
+    sub.nbMsgsDeliveredSinceCreation = nbMsgsDeliveredSinceCreation;
+    sub.nbMsgsSentToDMQSinceCreation = nbMsgsSentToDMQSinceCreation;
+    sub.pendingMessageCount = pendingMessageCount;
+    sub.selector = selector;
+    sub.subRequestId = subRequestId;
+
+    return sub;
+  }
+
+  @Override
+  public boolean equalsContent(Object anObj) {
+
+    if (!equals(anObj))
+      return false;
+
+    SubscriptionWTO obj = (SubscriptionWTO) anObj;
+
+    boolean eq = equalsWithNull(this.id, obj.id) && equalsWithNull(this.name, obj.name)
+        && equalsWithNull(this.active, obj.active) && equalsWithNull(this.durable, obj.durable)
+        && equalsWithNull(this.nbMaxMsg, obj.nbMaxMsg) && equalsWithNull(this.contextId, obj.contextId)
+        && equalsWithNull(this.nbMsgsDeliveredSinceCreation, obj.nbMsgsDeliveredSinceCreation)
+        && equalsWithNull(this.nbMsgsSentToDMQSinceCreation, obj.nbMsgsSentToDMQSinceCreation)
+        && equalsWithNull(this.pendingMessageCount, obj.pendingMessageCount)
+        && equalsWithNull(this.selector, obj.selector) && equalsWithNull(this.subRequestId, obj.subRequestId);
+
+    return eq;
+
+  }
 
 }

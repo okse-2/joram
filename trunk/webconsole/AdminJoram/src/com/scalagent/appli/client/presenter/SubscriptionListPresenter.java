@@ -1,7 +1,25 @@
-/**
- * (c)2010 Scalagent Distributed Technologies
+/*
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2010 ScalAgent Distributed Technologies
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
+ *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
-
 package com.scalagent.appli.client.presenter;
 
 import java.util.Date;
@@ -36,138 +54,144 @@ import com.smartgwt.client.util.SC;
  * 
  * @author Yohann CINTRE
  */
-public class SubscriptionListPresenter extends BasePresenter<SubscriptionListWidget, RPCServiceAsync, RPCServiceCacheClient> 
-implements 
-NewSubscriptionHandler,
-DeletedSubscriptionHandler,
-UpdatedSubscriptionHandler,
-UpdateCompleteHandler
-{
-	public SubscriptionListPresenter(RPCServiceAsync testService, HandlerManager eventBus, RPCServiceCacheClient cache) {
-		super(testService, cache, eventBus);
-		this.eventBus = eventBus;
-		widget = new SubscriptionListWidget(this);
-	}
+public class SubscriptionListPresenter extends
+    BasePresenter<SubscriptionListWidget, RPCServiceAsync, RPCServiceCacheClient> implements
+    NewSubscriptionHandler, DeletedSubscriptionHandler, UpdatedSubscriptionHandler, UpdateCompleteHandler {
+  public SubscriptionListPresenter(RPCServiceAsync testService, HandlerManager eventBus,
+      RPCServiceCacheClient cache) {
+    super(testService, cache, eventBus);
+    this.eventBus = eventBus;
+    widget = new SubscriptionListWidget(this);
+  }
 
-	/**
-	 * This method is called by the the SubscrtiptionListWidget when the user click 
-	 * on the "Refresh" button.
-	 * The "Refresh" button is disabled, the subscription list is updated. 
-	 */	
-	public void fireRefreshAll() {
-		widget.getRefreshButton().disable();
-		cache.retrieveSubscription(true);
-	}
+  /**
+   * This method is called by the the SubscrtiptionListWidget when the user
+   * click
+   * on the "Refresh" button.
+   * The "Refresh" button is disabled, the subscription list is updated.
+   */
+  public void fireRefreshAll() {
+    widget.getRefreshButton().disable();
+    cache.retrieveSubscription(true);
+  }
 
-	/**
-	 * This method is called by the EventBus when the update is done.
-	 * The refresh button is re-enabled and the chart redrawn
-	 */
-	@Override
-	public void onUpdateComplete(String info) {
-		if(info.equals("sub")) {
-			widget.getRefreshButton().enable();
-			widget.redrawChart(true);
-		}
-	}
+  /**
+   * This method is called by the EventBus when the update is done.
+   * The refresh button is re-enabled and the chart redrawn
+   */
+  @Override
+  public void onUpdateComplete(String info) {
+    if (info.equals("sub")) {
+      widget.getRefreshButton().enable();
+      widget.redrawChart(true);
+    }
+  }
 
-	/**
-	 * This method is called by the EventBus when a new subscription has been created on the server.
-	 * The widget is called to add it to the list.
-	 */ 
-	public void onNewSubscription(SubscriptionWTO sub) {
-		widget.addSubscription(new SubscriptionListRecord(sub));
-	}
+  /**
+   * This method is called by the EventBus when a new subscription has been
+   * created on the server.
+   * The widget is called to add it to the list.
+   */
+  public void onNewSubscription(SubscriptionWTO sub) {
+    widget.addSubscription(new SubscriptionListRecord(sub));
+  }
 
-	/**
-	 * This method is called by the EventBus when a subscription has been deleted on the server.
-	 * The widget is called to remove it from the list.
-	 */
-	public void onSubscriptionDeleted(SubscriptionWTO sub) {
-		widget.removeSubscription(new SubscriptionListRecord(sub));
-	}
+  /**
+   * This method is called by the EventBus when a subscription has been deleted
+   * on the server.
+   * The widget is called to remove it from the list.
+   */
+  public void onSubscriptionDeleted(SubscriptionWTO sub) {
+    widget.removeSubscription(new SubscriptionListRecord(sub));
+  }
 
-	/**
-	 * This method is called by the EventBus when a subscription has been updated on the server.
-	 * The widget is called to update the subscription list.
-	 */
-	public void onSubscriptionUpdated(SubscriptionWTO sub) {
-		widget.updateUser(sub);	
-	}
+  /**
+   * This method is called by the EventBus when a subscription has been updated
+   * on the server.
+   * The widget is called to update the subscription list.
+   */
+  public void onSubscriptionUpdated(SubscriptionWTO sub) {
+    widget.updateUser(sub);
+  }
 
-	/**
-	 * This method is called by the SubscriptionListWidget when the updating the chart.
-	 * @result A map containing the history of the current subscription
-	 */
-	public SortedMap<Date, int[]> getSubHistory(String name) {
-		return cache.getSpecificHistory(name);
-	}
+  /**
+   * This method is called by the SubscriptionListWidget when the updating the
+   * chart.
+   * 
+   * @result A map containing the history of the current subscription
+   */
+  public SortedMap<Date, int[]> getSubHistory(String name) {
+    return cache.getSpecificHistory(name);
+  }
 
-	
-	/**
-	 * This method is called by the SubscriptionListWidget when the user click on "browse" button of a subscription.
-	 * An event is fired to the EventBus.
-	 */
-	public void fireSubscriptionDetailsClick(SubscriptionWTO subscription) {
-		eventBus.fireEvent(new SubscriptionDetailClickEvent(subscription));
-	}
+  /**
+   * This method is called by the SubscriptionListWidget when the user click on
+   * "browse" button of a subscription.
+   * An event is fired to the EventBus.
+   */
+  public void fireSubscriptionDetailsClick(SubscriptionWTO subscription) {
+    eventBus.fireEvent(new SubscriptionDetailClickEvent(subscription));
+  }
 
-	/**
-	 * This method is called by the SubscriptionListWidget when the user submit the new subscription form.
-	 * The form information are sent to the server.
-	 */
-	public void createNewSubscription(SubscriptionWTO newSub) {
-		service.execute(new SendNewSubscriptionAction(newSub), new SendNewSubscriptionHandler(eventBus) {
-			@Override
-			public void onSuccess(SendNewSubscriptionResponse response) {
-				if (response.isSuccess()) {
-					SC.say(response.getMessage());
-					widget.destroyForm();
-					fireRefreshAll();
-				} else {
-					SC.warn(response.getMessage());
-					fireRefreshAll();
-				}
-			}
-		});
-	}
+  /**
+   * This method is called by the SubscriptionListWidget when the user submit
+   * the new subscription form.
+   * The form information are sent to the server.
+   */
+  public void createNewSubscription(SubscriptionWTO newSub) {
+    service.execute(new SendNewSubscriptionAction(newSub), new SendNewSubscriptionHandler(eventBus) {
+      @Override
+      public void onSuccess(SendNewSubscriptionResponse response) {
+        if (response.isSuccess()) {
+          SC.say(response.getMessage());
+          widget.destroyForm();
+          fireRefreshAll();
+        } else {
+          SC.warn(response.getMessage());
+          fireRefreshAll();
+        }
+      }
+    });
+  }
 
-	/**
-	 * This method is called by the SubscriptionListWidget when the user submit the edited subscription form.
-	 * The form information are sent to the server.
-	 */
-	public void editSubscription(SubscriptionWTO sub) {
-		service.execute(new SendEditedSubscriptionAction(sub), new SendEditedSubscriptionHandler(eventBus) {
-			@Override
-			public void onSuccess(SendEditedSubscriptionResponse response) {
-				if (response.isSuccess()) {
-					SC.say(response.getMessage());
-					widget.destroyForm();
-					fireRefreshAll();
-				} else {
-					SC.warn(response.getMessage());
-					fireRefreshAll();
-				}
-			}
-		});
-	}
+  /**
+   * This method is called by the SubscriptionListWidget when the user submit
+   * the edited subscription form.
+   * The form information are sent to the server.
+   */
+  public void editSubscription(SubscriptionWTO sub) {
+    service.execute(new SendEditedSubscriptionAction(sub), new SendEditedSubscriptionHandler(eventBus) {
+      @Override
+      public void onSuccess(SendEditedSubscriptionResponse response) {
+        if (response.isSuccess()) {
+          SC.say(response.getMessage());
+          widget.destroyForm();
+          fireRefreshAll();
+        } else {
+          SC.warn(response.getMessage());
+          fireRefreshAll();
+        }
+      }
+    });
+  }
 
-	/**
-	 * This method is called by the SubscriptionListWidget when the user click the "delete" button of a subscription.
-	 * The subscription name is sent to the server which delete the subscription.
-	 */
-	public void deleteSubscription(SubscriptionWTO sub) {
-		service.execute(new DeleteSubscriptionAction(sub.getName()), new DeleteSubscriptionHandler(eventBus) {
-			@Override
-			public void onSuccess(DeleteSubscriptionResponse response) {
-				if (response.isSuccess()) {
-					SC.say(response.getMessage());
-					fireRefreshAll();
-				} else {
-					SC.warn(response.getMessage());
-					fireRefreshAll();	
-				}
-			}
-		});
-	}
+  /**
+   * This method is called by the SubscriptionListWidget when the user click the
+   * "delete" button of a subscription.
+   * The subscription name is sent to the server which delete the subscription.
+   */
+  public void deleteSubscription(SubscriptionWTO sub) {
+    service.execute(new DeleteSubscriptionAction(sub.getName()), new DeleteSubscriptionHandler(eventBus) {
+      @Override
+      public void onSuccess(DeleteSubscriptionResponse response) {
+        if (response.isSuccess()) {
+          SC.say(response.getMessage());
+          fireRefreshAll();
+        } else {
+          SC.warn(response.getMessage());
+          fireRefreshAll();
+        }
+      }
+    });
+  }
 }
