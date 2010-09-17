@@ -27,6 +27,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.ref.SoftReference;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
 import org.objectweb.joram.shared.excepts.MessageException;
@@ -45,7 +47,7 @@ import fr.dyade.aaa.util.Transaction;
  * A message content is always wrapped as a bytes array, it is characterized
  * by properties and "header" fields.
  */
-public final class Message implements Serializable {
+public final class Message implements Serializable, MessageView {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 2L;
 
@@ -483,5 +485,26 @@ public final class Message implements Serializable {
     msg = new org.objectweb.joram.shared.messages.Message();
     msg.readHeaderFrom(in);
     msg.body = StreamUtil.readByteArrayFrom(in);
+  }
+
+  public String getId() {
+    return msg.id;
+  }
+
+  public String getText() {
+    return msg.getText();
+  }
+
+  public boolean isRedelivered() {
+    return msg.redelivered;
+  }
+
+  public Map getProperties() {
+    Map props = new HashMap();
+    if (msg.properties == null) {
+      return null;
+    }
+    msg.properties.copyInto(props);
+    return props;
   }
 }

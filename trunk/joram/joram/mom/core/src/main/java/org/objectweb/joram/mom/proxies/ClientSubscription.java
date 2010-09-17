@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -919,6 +920,14 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     return MessageJMXWrapper.createTabularDataSupport(messagesTable, messageIds);
   }
 
+  public List getMessagesView() {
+    List messages = new ArrayList();
+    for (int i = 0; i < messageIds.size(); i++) {
+      messages.add(messagesTable.get(messageIds.elementAt(i)));
+    }
+    return messages;
+  }
+
   public void deleteMessage(String msgId) {
     messageIds.remove(msgId);
     Message message = removeMessage(msgId);
@@ -1010,4 +1019,5 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   void cleanMessageIds() {
     messageIds.retainAll(messagesTable.keySet());
   }
+
 }

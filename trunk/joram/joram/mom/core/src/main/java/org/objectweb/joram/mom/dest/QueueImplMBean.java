@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,6 +21,8 @@
  * Contributor(s): 
  */
 package org.objectweb.joram.mom.dest;
+
+import java.util.List;
 
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
@@ -107,5 +109,13 @@ public interface QueueImplMBean extends DestinationImplMBean {
    * @see org.objectweb.joram.mom.messages.MessageJMXWrapper
    */
   public TabularData getMessages() throws Exception;
+
+  /**
+   * Returns the description of all pending messages.
+   * 
+   * @return the description of the message.
+   */
+  public List getMessagesView();
+
 //  public CompositeData[] getMessages() throws Exception;
 }

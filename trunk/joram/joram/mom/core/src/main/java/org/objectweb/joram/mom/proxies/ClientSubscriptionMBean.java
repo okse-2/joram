@@ -22,6 +22,8 @@
  */
 package org.objectweb.joram.mom.proxies;
 
+import java.util.List;
+
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
 
@@ -141,5 +143,12 @@ public interface ClientSubscriptionMBean {
    * @see org.objectweb.joram.mom.messages.MessageJMXWrapper
    */
   public TabularData getMessages() throws Exception;
+
+  /**
+   * Returns the description of all pending messages.
+   * 
+   * @return the description of the message.
+   */
+  public List getMessagesView();
 //  public CompositeData[] getMessages() throws Exception;
 }
