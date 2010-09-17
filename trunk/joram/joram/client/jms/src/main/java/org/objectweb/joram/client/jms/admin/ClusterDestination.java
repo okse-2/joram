@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2007 France Telecom R&D
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -151,28 +151,28 @@ public class ClusterDestination extends Destination {
   public void setReader(User user) throws ConnectException, AdminException {
     for (Enumeration dests = cluster.elements(); dests.hasMoreElements();) {
       Destination dest = (Destination) dests.nextElement(); 
-      AdminModule.doRequest(new SetReader(user.getProxyId(), dest.getName()));
+      getWrapper().doRequest(new SetReader(user.getProxyId(), dest.getName()));
     }
   }
 
   public void setWriter(User user) throws ConnectException, AdminException {
     for (Enumeration dests = cluster.elements(); dests.hasMoreElements();) {
       Destination dest = (Destination) dests.nextElement(); 
-      AdminModule.doRequest(new SetWriter(user.getProxyId(), dest.getName()));
+      getWrapper().doRequest(new SetWriter(user.getProxyId(), dest.getName()));
     }
   }
   
   public void setFreeReading() throws ConnectException, AdminException {
     for (Enumeration dests = cluster.elements(); dests.hasMoreElements();) {
       Destination dest = (Destination) dests.nextElement(); 
-      AdminModule.doRequest(new SetReader(null, dest.getName()));
+      getWrapper().doRequest(new SetReader(null, dest.getName()));
     }
   }
 
   public void setFreeWriting() throws ConnectException, AdminException {
     for (Enumeration dests = cluster.elements(); dests.hasMoreElements();) {
       Destination dest = (Destination) dests.nextElement(); 
-      AdminModule.doRequest(new SetWriter(null, dest.getName()));
+      getWrapper().doRequest(new SetWriter(null, dest.getName()));
     }
   }
   
