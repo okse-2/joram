@@ -1,7 +1,25 @@
-/**
- * (c)2010 Scalagent Distributed Technologies
+/*
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2010 ScalAgent Distributed Technologies
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
+ *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
-
 package com.scalagent.appli.shared;
 
 import java.util.Map;
@@ -14,123 +32,166 @@ import com.scalagent.engine.shared.BaseWTO;
 @SuppressWarnings("unchecked")
 public class MessageWTO extends BaseWTO {
 
-	private String idS;
-	private long expiration;
-	private long timestamp;
-	private int deliveryCount;
-	private int priority;
-	private String text;
-	private int type;
-	
-	private Map properties;
+  private String idS;
+  private long expiration;
+  private long timestamp;
+  private int deliveryCount;
+  private int priority;
+  private String text;
+  private int type;
 
-	public String getIdS() { return idS;	}
-	public long getExpiration() { return expiration; }
-	public long getTimestamp() { return timestamp; }
-	public int getDeliveryCount() { return deliveryCount; }
-	public int getPriority() { return priority; }
-	public String getText() { return text; }
-	public int getType() { return type; }
-	public Map getProperties() { return properties; }
+  private Map properties;
 
-	public void setStringIdS(String idS) { this.idS = idS; }
-	public void setExpiration(long expiration) { this.expiration = expiration; }
-	public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
-	public void setDeliveryCount(int deliveryCount) { this.deliveryCount = deliveryCount; }
-	public void setPriority(int priority) { this.priority = priority; }
-	public void setText(String text) { this.text = text; }
-	public void setType(int type) { this.type = type; }
-	public void setProperties(Map properties) { this.properties = properties; }
+  public String getIdS() {
+    return idS;
+  }
 
-	public MessageWTO() {}
-	public MessageWTO(String idS, long expiration, long timestamp,
-			int deliveryCount, int priority, String text, int type, Map properties) {
-		super();
-		this.id = idS;
-		this.idS = idS;
-		this.expiration = expiration;
-		this.timestamp = timestamp;
-		this.deliveryCount = deliveryCount;
-		this.priority = priority;
-		this.text = text;
-		this.type = type;
-		this.properties = properties;
-	}
+  public long getExpiration() {
+    return expiration;
+  }
 
-	public String toStringFullContent() {
-		return "MessageWTO [deliveryCount=" + deliveryCount + ", expiration="
-		+ expiration + ", id=" + id
-		+ ", priority=" + priority + ", text=" + text
-		+ ", timestamp=" + timestamp + ", type=" + type
-		+ ",properties=" + properties + "]";
-	}
+  public long getTimestamp() {
+    return timestamp;
+  }
 
-	@Override
-	public String toString() {
-		return "MessageWTO [id=" + id + ", text=" + text + ", status="+getDbChangeStatus()+"]";
-	}
+  public int getDeliveryCount() {
+    return deliveryCount;
+  }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + deliveryCount;
-		result = prime * result + (int) (expiration ^ (expiration >>> 32));
-		result = prime * result + ((idS == null) ? 0 : idS.hashCode());
-		result = prime * result + priority;
-		result = prime * result + ((text == null) ? 0 : text.hashCode());
-		result = prime * result + (int) (timestamp ^ (timestamp >>> 32));
-		result = prime * result + type;
-		return result;
-	}
+  public int getPriority() {
+    return priority;
+  }
 
-	@Override
-	public boolean equals(Object anObj){
-    	if(anObj==null)
-    		return false;
-    	if(anObj==this)
-    		return true;
-    	if(!(anObj instanceof MessageWTO))
-    		return false;
-    	MessageWTO obj = (MessageWTO)anObj;
-    	if(obj.id.equals(this.id))
-    		return true;
-    	return false;
-    }
+  public String getText() {
+    return text;
+  }
 
-	@Override
-	public MessageWTO clone() {
+  public int getType() {
+    return type;
+  }
 
-		MessageWTO msg = new MessageWTO();
+  public Map getProperties() {
+    return properties;
+  }
 
-		msg.id = id;
-		msg.expiration = expiration;
-		msg.timestamp = timestamp;
-		msg.deliveryCount = deliveryCount;
-		msg.priority = priority;
-		msg.text = text;
-		msg.properties = properties;
+  public void setStringIdS(String idS) {
+    this.idS = idS;
+  }
 
-		return msg;
-	}
+  public void setExpiration(long expiration) {
+    this.expiration = expiration;
+  }
 
-	@Override
-	public boolean equalsContent(Object anObj) {
+  public void setTimestamp(long timestamp) {
+    this.timestamp = timestamp;
+  }
 
-		if(!equals(anObj))
-			return false;
+  public void setDeliveryCount(int deliveryCount) {
+    this.deliveryCount = deliveryCount;
+  }
 
-		MessageWTO obj = (MessageWTO)anObj;
+  public void setPriority(int priority) {
+    this.priority = priority;
+  }
 
-		boolean eq =  
-			equalsWithNull(this.id, obj.id)
-			&& equalsWithNull(this.expiration, obj.expiration)
-			&& equalsWithNull(this.timestamp, obj.timestamp)
-			&& equalsWithNull(this.deliveryCount, obj.deliveryCount)
-			&& equalsWithNull(this.priority, obj.priority)
-			&& equalsWithNull(this.priority, obj.priority)
-			&& equalsWithNull(this.properties, obj.properties);
-		return eq;
+  public void setText(String text) {
+    this.text = text;
+  }
 
-	}
+  public void setType(int type) {
+    this.type = type;
+  }
+
+  public void setProperties(Map properties) {
+    this.properties = properties;
+  }
+
+  public MessageWTO() {
+  }
+
+  public MessageWTO(String idS, long expiration, long timestamp, int deliveryCount, int priority,
+      String text, int type, Map properties) {
+    super();
+    this.id = idS;
+    this.idS = idS;
+    this.expiration = expiration;
+    this.timestamp = timestamp;
+    this.deliveryCount = deliveryCount;
+    this.priority = priority;
+    this.text = text;
+    this.type = type;
+    this.properties = properties;
+  }
+
+  public String toStringFullContent() {
+    return "MessageWTO [deliveryCount=" + deliveryCount + ", expiration=" + expiration + ", id=" + id
+        + ", priority=" + priority + ", text=" + text + ", timestamp=" + timestamp + ", type=" + type
+        + ",properties=" + properties + "]";
+  }
+
+  @Override
+  public String toString() {
+    return "MessageWTO [id=" + id + ", text=" + text + ", status=" + getDbChangeStatus() + "]";
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + deliveryCount;
+    result = prime * result + (int) (expiration ^ (expiration >>> 32));
+    result = prime * result + ((idS == null) ? 0 : idS.hashCode());
+    result = prime * result + priority;
+    result = prime * result + ((text == null) ? 0 : text.hashCode());
+    result = prime * result + (int) (timestamp ^ (timestamp >>> 32));
+    result = prime * result + type;
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object anObj) {
+    if (anObj == null)
+      return false;
+    if (anObj == this)
+      return true;
+    if (!(anObj instanceof MessageWTO))
+      return false;
+    MessageWTO obj = (MessageWTO) anObj;
+    if (obj.id.equals(this.id))
+      return true;
+    return false;
+  }
+
+  @Override
+  public MessageWTO clone() {
+
+    MessageWTO msg = new MessageWTO();
+
+    msg.id = id;
+    msg.expiration = expiration;
+    msg.timestamp = timestamp;
+    msg.deliveryCount = deliveryCount;
+    msg.priority = priority;
+    msg.text = text;
+    msg.properties = properties;
+
+    return msg;
+  }
+
+  @Override
+  public boolean equalsContent(Object anObj) {
+
+    if (!equals(anObj))
+      return false;
+
+    MessageWTO obj = (MessageWTO) anObj;
+
+    boolean eq = equalsWithNull(this.id, obj.id) && equalsWithNull(this.expiration, obj.expiration)
+        && equalsWithNull(this.timestamp, obj.timestamp)
+        && equalsWithNull(this.deliveryCount, obj.deliveryCount)
+        && equalsWithNull(this.priority, obj.priority) && equalsWithNull(this.priority, obj.priority)
+        && equalsWithNull(this.properties, obj.properties);
+    return eq;
+
+  }
 }

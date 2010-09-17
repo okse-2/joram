@@ -1,7 +1,25 @@
-/**
- * (c)2010 Scalagent Distributed Technologies
+/*
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2010 ScalAgent Distributed Technologies
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
+ *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
-
 package com.scalagent.appli.client.presenter;
 
 import java.util.HashMap;
@@ -41,177 +59,173 @@ import com.smartgwt.client.widgets.tab.Tab;
  * @author Yohann CINTRE
  */
 public class MainPresenter extends BasePresenter<MainWidget, RPCServiceAsync, RPCServiceCacheClient>
-implements 
-QueueDetailClickHandler,
-UserDetailClickHandler,
-SubscriptionDetailClickHandler,
-LoginValidHandler
-{
+    implements QueueDetailClickHandler, UserDetailClickHandler, SubscriptionDetailClickHandler,
+    LoginValidHandler {
 
-	private HashMap<String, Tab> openedTabList = new HashMap<String, Tab>();
-	private HashMap<String, QueueDetailPresenter> openedQueueList = new HashMap<String, QueueDetailPresenter>();
-	private HashMap<String, UserDetailPresenter> openedUserList = new HashMap<String, UserDetailPresenter>();
-	private HashMap<String, SubscriptionDetailPresenter> openedSubList = new HashMap<String, SubscriptionDetailPresenter>();
+  private HashMap<String, Tab> openedTabList = new HashMap<String, Tab>();
+  private HashMap<String, QueueDetailPresenter> openedQueueList = new HashMap<String, QueueDetailPresenter>();
+  private HashMap<String, UserDetailPresenter> openedUserList = new HashMap<String, UserDetailPresenter>();
+  private HashMap<String, SubscriptionDetailPresenter> openedSubList = new HashMap<String, SubscriptionDetailPresenter>();
 
-	public MainPresenter(RPCServiceAsync testService, 
-			RPCServiceCacheClient cache, 
-			HandlerManager eventBus, 
-			LoginPresenter loginPresenter,
-			ServerPresenter serverPresenter,
-			TopicListPresenter topicPresenter, 
-			QueueListPresenter queuePresenter, 
-			UserListPresenter userPresenter,
-			SubscriptionListPresenter subscriptionPresenter) {
+  public MainPresenter(RPCServiceAsync testService, RPCServiceCacheClient cache, HandlerManager eventBus,
+      LoginPresenter loginPresenter, ServerPresenter serverPresenter, TopicListPresenter topicPresenter,
+      QueueListPresenter queuePresenter, UserListPresenter userPresenter,
+      SubscriptionListPresenter subscriptionPresenter) {
 
-		super(testService, cache, eventBus);
-		this.widget = new MainWidget(this, loginPresenter.getWidget(), 
-				serverPresenter.getWidget(),
-				topicPresenter.getWidget(), 
-				queuePresenter.getWidget(), 
-				userPresenter.getWidget(), 
-				subscriptionPresenter.getWidget());
-	}
+    super(testService, cache, eventBus);
+    this.widget = new MainWidget(this, loginPresenter.getWidget(), serverPresenter.getWidget(),
+        topicPresenter.getWidget(), queuePresenter.getWidget(), userPresenter.getWidget(),
+        subscriptionPresenter.getWidget());
+  }
 
-	/**
-	 * This method is called by the the QueueDetailClickHandler when the user click 
-	 * on the "Browse" button on the QueueListWidget.
-	 * If a tab for this queue is already open the tab get the focus, 
-	 * otherwise a new tab for the queue is created, added to list and tabset ant hen get the focus.
-	 */	
-	public void onQueueDetailsClick(QueueWTO queue) {
+  /**
+   * This method is called by the the QueueDetailClickHandler when the user
+   * click
+   * on the "Browse" button on the QueueListWidget.
+   * If a tab for this queue is already open the tab get the focus,
+   * otherwise a new tab for the queue is created, added to list and tabset ant
+   * hen get the focus.
+   */
+  public void onQueueDetailsClick(QueueWTO queue) {
 
-		if (!openedTabList.containsKey(queue.getName())) {
+    if (!openedTabList.containsKey(queue.getName())) {
 
-			Tab tabQueue = new Tab(queue.getName()); 
+      Tab tabQueue = new Tab(queue.getName());
 
-			QueueDetailPresenter queueDetailsPresenter = new QueueDetailPresenter(service, eventBus, cache, queue);
+      QueueDetailPresenter queueDetailsPresenter = new QueueDetailPresenter(service, eventBus, cache, queue);
 
-			eventBus.addHandler(NewMessageEvent.TYPE, queueDetailsPresenter);
-			eventBus.addHandler(DeletedMessageEvent.TYPE, queueDetailsPresenter);
-			eventBus.addHandler(UpdatedMessageEvent.TYPE, queueDetailsPresenter);
-			eventBus.addHandler(UpdateCompleteEvent.TYPE, queueDetailsPresenter);
-			eventBus.addHandler(QueueNotFoundEvent.TYPE, queueDetailsPresenter);
-			eventBus.addHandler(DeletedQueueEvent.TYPE, queueDetailsPresenter);
-			eventBus.addHandler(UpdatedQueueEvent.TYPE, queueDetailsPresenter);
+      eventBus.addHandler(NewMessageEvent.TYPE, queueDetailsPresenter);
+      eventBus.addHandler(DeletedMessageEvent.TYPE, queueDetailsPresenter);
+      eventBus.addHandler(UpdatedMessageEvent.TYPE, queueDetailsPresenter);
+      eventBus.addHandler(UpdateCompleteEvent.TYPE, queueDetailsPresenter);
+      eventBus.addHandler(QueueNotFoundEvent.TYPE, queueDetailsPresenter);
+      eventBus.addHandler(DeletedQueueEvent.TYPE, queueDetailsPresenter);
+      eventBus.addHandler(UpdatedQueueEvent.TYPE, queueDetailsPresenter);
 
-			Canvas canvas = new Canvas();
-			Widget wpie = queueDetailsPresenter.getWidget().asWidget();
+      Canvas canvas = new Canvas();
+      Widget wpie = queueDetailsPresenter.getWidget().asWidget();
 
-			canvas.addChild(wpie);
+      canvas.addChild(wpie);
 
-			tabQueue.setPane(canvas);
-			tabQueue.setCanClose(true);
+      tabQueue.setPane(canvas);
+      tabQueue.setCanClose(true);
 
-			widget.addTab(tabQueue);
-			openedTabList.put(queue.getName(), tabQueue);
-			openedQueueList.put(queue.getName(), queueDetailsPresenter);
-		}
-		widget.showTab(openedTabList.get(queue.getName()));
-	}
+      widget.addTab(tabQueue);
+      openedTabList.put(queue.getName(), tabQueue);
+      openedQueueList.put(queue.getName(), queueDetailsPresenter);
+    }
+    widget.showTab(openedTabList.get(queue.getName()));
+  }
 
-	/**
-	 * This method is called by the the UserDetailClickHandler when the user click 
-	 * on the "Browse" button on the UserListWidget.
-	 * If a tab for this subscription is already open the tab get the focus, 
-	 * otherwise a new tab for the user is created, added to list and tabset ant hen get the focus.
-	 */	
-	public void onUserDetailsClick(UserWTO user) {
+  /**
+   * This method is called by the the UserDetailClickHandler when the user click
+   * on the "Browse" button on the UserListWidget.
+   * If a tab for this subscription is already open the tab get the focus,
+   * otherwise a new tab for the user is created, added to list and tabset ant
+   * hen get the focus.
+   */
+  public void onUserDetailsClick(UserWTO user) {
 
-		if (!openedTabList.containsKey(user.getName())) {
+    if (!openedTabList.containsKey(user.getName())) {
 
-			Tab tabUser = new Tab(user.getName()); 
+      Tab tabUser = new Tab(user.getName());
 
+      UserDetailPresenter userDetailsPresenter = new UserDetailPresenter(service, eventBus, cache, user);
 
-			UserDetailPresenter userDetailsPresenter = new UserDetailPresenter(service, eventBus, cache, user);
+      eventBus.addHandler(NewSubscriptionEvent.TYPE, userDetailsPresenter);
+      eventBus.addHandler(DeletedSubscriptionEvent.TYPE, userDetailsPresenter);
+      eventBus.addHandler(UpdatedSubscriptionEvent.TYPE, userDetailsPresenter);
+      eventBus.addHandler(UpdateCompleteEvent.TYPE, userDetailsPresenter);
+      eventBus.addHandler(DeletedUserEvent.TYPE, userDetailsPresenter);
+      eventBus.addHandler(UpdatedUserEvent.TYPE, userDetailsPresenter);
 
+      Canvas canvas = new Canvas();
+      Widget wpie = userDetailsPresenter.getWidget().asWidget();
+      canvas.addChild(wpie);
 
-			eventBus.addHandler(NewSubscriptionEvent.TYPE, userDetailsPresenter);
-			eventBus.addHandler(DeletedSubscriptionEvent.TYPE, userDetailsPresenter);
-			eventBus.addHandler(UpdatedSubscriptionEvent.TYPE, userDetailsPresenter);
-			eventBus.addHandler(UpdateCompleteEvent.TYPE, userDetailsPresenter);
-			eventBus.addHandler(DeletedUserEvent.TYPE, userDetailsPresenter);
-			eventBus.addHandler(UpdatedUserEvent.TYPE, userDetailsPresenter);
+      tabUser.setPane(canvas);
+      tabUser.setCanClose(true);
 
-			Canvas canvas = new Canvas();
-			Widget wpie = userDetailsPresenter.getWidget().asWidget();
-			canvas.addChild(wpie);
+      widget.addTab(tabUser);
+      openedTabList.put(user.getName(), tabUser);
+      openedUserList.put(user.getName(), userDetailsPresenter);
+    }
+    widget.showTab(openedTabList.get(user.getName()));
+  }
 
-			tabUser.setPane(canvas);
-			tabUser.setCanClose(true);
+  /**
+   * This method is called by the the SubscriptionDetailClickHandler when the
+   * user click
+   * on the "Browse" button on the SubscriptionListWidget.
+   * If a tab for this subscription is already open the tab get the focus,
+   * otherwise a new tab for the subscription is created, added to list and
+   * tabset ant hen get the focus.
+   */
+  @Override
+  public void onSubDetailsClick(SubscriptionWTO sub) {
 
-			widget.addTab(tabUser);
-			openedTabList.put(user.getName(), tabUser);
-			openedUserList.put(user.getName(), userDetailsPresenter);
-		}
-		widget.showTab(openedTabList.get(user.getName()));
-	}
+    if (!openedTabList.containsKey(sub.getName())) {
 
-	/**
-	 * This method is called by the the SubscriptionDetailClickHandler when the user click 
-	 * on the "Browse" button on the SubscriptionListWidget.
-	 * If a tab for this subscription is already open the tab get the focus, 
-	 * otherwise a new tab for the subscription is created, added to list and tabset ant hen get the focus.
-	 */	
-	@Override
-	public void onSubDetailsClick(SubscriptionWTO sub) {
+      Tab tabSub = new Tab(sub.getName());
 
-		if (!openedTabList.containsKey(sub.getName())) {
+      SubscriptionDetailPresenter subDetailsPresenter = new SubscriptionDetailPresenter(service, eventBus,
+          cache, sub);
 
-			Tab tabSub = new Tab(sub.getName()); 
+      eventBus.addHandler(NewMessageEvent.TYPE, subDetailsPresenter);
+      eventBus.addHandler(DeletedMessageEvent.TYPE, subDetailsPresenter);
+      eventBus.addHandler(UpdatedMessageEvent.TYPE, subDetailsPresenter);
+      eventBus.addHandler(UpdateCompleteEvent.TYPE, subDetailsPresenter);
 
-			SubscriptionDetailPresenter subDetailsPresenter = new SubscriptionDetailPresenter(service, eventBus, cache, sub);
+      Canvas canvas = new Canvas();
+      Widget wpie = subDetailsPresenter.getWidget().asWidget();
+      canvas.addChild(wpie);
 
-			eventBus.addHandler(NewMessageEvent.TYPE, subDetailsPresenter);
-			eventBus.addHandler(DeletedMessageEvent.TYPE, subDetailsPresenter);
-			eventBus.addHandler(UpdatedMessageEvent.TYPE, subDetailsPresenter);
-			eventBus.addHandler(UpdateCompleteEvent.TYPE, subDetailsPresenter);
+      tabSub.setPane(canvas);
+      tabSub.setCanClose(true);
 
-			Canvas canvas = new Canvas();
-			Widget wpie = subDetailsPresenter.getWidget().asWidget();
-			canvas.addChild(wpie);
+      widget.addTab(tabSub);
+      openedTabList.put(sub.getName(), tabSub);
+      openedSubList.put(sub.getName(), subDetailsPresenter);
+    }
+    widget.showTab(openedTabList.get(sub.getName()));
 
-			tabSub.setPane(canvas);
-			tabSub.setCanClose(true);
+  }
 
-			widget.addTab(tabSub);
-			openedTabList.put(sub.getName(), tabSub);
-			openedSubList.put(sub.getName(), subDetailsPresenter);
-		}
-		widget.showTab(openedTabList.get(sub.getName()));
+  /**
+   * This method is called by the the MainWidget when the user close a tab.
+   * The tab is removed from list and tabset.
+   */
+  public void onTabCloseClick(Tab tab) {
 
-	}
+    if (openedQueueList.keySet().contains(tab.getTitle()))
+      openedQueueList.get(tab.getTitle()).stopChart();
+    if (openedUserList.keySet().contains(tab.getTitle()))
+      openedUserList.get(tab.getTitle()).stopChart();
+    openedTabList.remove(tab.getTitle());
+  }
 
-	/**
-	 * This method is called by the the MainWidget when the user close a tab.
-	 * The tab is removed from list and tabset.
-	 */	
-	public void onTabCloseClick(Tab tab) {
+  /**
+   * This method is called by the the LoginValidHandler when the user
+   * successfully log in.
+   * The cache is started, the login widget is hidden and the admin panel
+   * displayed
+   */
+  public void onLoginValid() {
+    // the session has been correctly set up.
+    // then, the cache can be started.
+    cache.setPeriod(20000);
 
-		if(openedQueueList.keySet().contains(tab.getTitle())) openedQueueList.get(tab.getTitle()).stopChart();
-		if(openedUserList.keySet().contains(tab.getTitle())) openedUserList.get(tab.getTitle()).stopChart();
-		openedTabList.remove(tab.getTitle());
-	}
+    widget.hideLogin();
+    widget.createAdminPanel();
+    widget.showAdminPanel();
+  }
 
-	/**
-	 * This method is called by the the LoginValidHandler when the user successfully log in.
-	 * The cache is started, the login widget is hidden and the admin panel displayed
-	 */	
-	public void onLoginValid() {
-		// the session has been correctly set up.
-		// then, the cache can be started.
-		cache.setPeriod(20000);
-
-		widget.hideLogin();
-		widget.createAdminPanel();
-		widget.showAdminPanel();
-	}
-
-	/**
-	 * This method is called when an error occured with the user session.
-	 * The login widget is displayed and the admin panel hidden
-	 */	
-	public void onSessionError() {
-		widget.showLogin();
-		widget.hideAdminPanel();
-	}
+  /**
+   * This method is called when an error occured with the user session.
+   * The login widget is displayed and the admin panel hidden
+   */
+  public void onSessionError() {
+    widget.showLogin();
+    widget.hideAdminPanel();
+  }
 }

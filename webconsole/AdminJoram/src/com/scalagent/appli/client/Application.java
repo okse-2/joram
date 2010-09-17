@@ -1,7 +1,25 @@
-/**
- * (c)2010 Scalagent Distributed Technologies
+/*
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2010 ScalAgent Distributed Technologies
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
+ *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
-
 package com.scalagent.appli.client;
 
 import com.google.gwt.core.client.GWT;
@@ -41,70 +59,70 @@ import com.smartgwt.client.widgets.Canvas;
  */
 public class Application implements BaseEntryPoint {
 
-	public static final ApplicationMessages messages = (ApplicationMessages) GWT
-	.create(ApplicationMessages.class);
+  public static final ApplicationMessages messages = (ApplicationMessages) GWT
+      .create(ApplicationMessages.class);
 
-	private RPCServiceAsync serviceAsync;
-	private RPCServiceCacheClient serviceCache;
-	private HandlerManager eventBus;
+  private RPCServiceAsync serviceAsync;
+  private RPCServiceCacheClient serviceCache;
+  private HandlerManager eventBus;
 
-	/**
-	 * This is the entry point method.
-	 */
-	public void onModuleLoad() {
+  /**
+   * This is the entry point method.
+   */
+  public void onModuleLoad() {
 
-		Runnable onLoadCallback = new Runnable() {
-			public void run() {
+    Runnable onLoadCallback = new Runnable() {
+      public void run() {
 
-				serviceAsync = GWT.create(RPCService.class);
+        serviceAsync = GWT.create(RPCService.class);
 
-				eventBus = new HandlerManager(null);
-				serviceCache = new RPCServiceCacheClient(serviceAsync, eventBus, -1);
+        eventBus = new HandlerManager(null);
+        serviceCache = new RPCServiceCacheClient(serviceAsync, eventBus, -1);
 
-				ServerPresenter serverPresenter = new ServerPresenter(serviceAsync, eventBus, serviceCache);
-				LoginPresenter loginPresenter = new LoginPresenter(serviceAsync, eventBus, serviceCache);
-				TopicListPresenter topicPresenter = new TopicListPresenter(serviceAsync, eventBus, serviceCache);
-				QueueListPresenter queuePresenter = new QueueListPresenter(serviceAsync, eventBus, serviceCache);
-				UserListPresenter userPresenter = new UserListPresenter(serviceAsync, eventBus, serviceCache);
-				SubscriptionListPresenter subscriptionPresenter = new SubscriptionListPresenter(serviceAsync, eventBus, serviceCache);
+        ServerPresenter serverPresenter = new ServerPresenter(serviceAsync, eventBus, serviceCache);
+        LoginPresenter loginPresenter = new LoginPresenter(serviceAsync, eventBus, serviceCache);
+        TopicListPresenter topicPresenter = new TopicListPresenter(serviceAsync, eventBus, serviceCache);
+        QueueListPresenter queuePresenter = new QueueListPresenter(serviceAsync, eventBus, serviceCache);
+        UserListPresenter userPresenter = new UserListPresenter(serviceAsync, eventBus, serviceCache);
+        SubscriptionListPresenter subscriptionPresenter = new SubscriptionListPresenter(serviceAsync,
+            eventBus, serviceCache);
 
+        MainPresenter mainPresenter = new MainPresenter(serviceAsync, serviceCache, eventBus, loginPresenter,
+            serverPresenter, topicPresenter, queuePresenter, userPresenter, subscriptionPresenter);
 
-				MainPresenter mainPresenter = new MainPresenter(serviceAsync, serviceCache, eventBus, loginPresenter, serverPresenter, topicPresenter, queuePresenter, userPresenter, subscriptionPresenter);
+        eventBus.addHandler(QueueDetailClickEvent.TYPE, mainPresenter);
+        eventBus.addHandler(UserDetailClickEvent.TYPE, mainPresenter);
+        eventBus.addHandler(SubscriptionDetailClickEvent.TYPE, mainPresenter);
+        eventBus.addHandler(LoginValidEvent.TYPE, mainPresenter);
 
-				eventBus.addHandler(QueueDetailClickEvent.TYPE, mainPresenter);
-				eventBus.addHandler(UserDetailClickEvent.TYPE, mainPresenter);
-				eventBus.addHandler(SubscriptionDetailClickEvent.TYPE, mainPresenter);
-				eventBus.addHandler(LoginValidEvent.TYPE, mainPresenter);
+        eventBus.addHandler(UpdateCompleteEvent.TYPE, serverPresenter);
 
-				eventBus.addHandler(UpdateCompleteEvent.TYPE, serverPresenter);
+        eventBus.addHandler(NewTopicEvent.TYPE, topicPresenter);
+        eventBus.addHandler(DeletedTopicEvent.TYPE, topicPresenter);
+        eventBus.addHandler(UpdatedTopicEvent.TYPE, topicPresenter);
+        eventBus.addHandler(UpdateCompleteEvent.TYPE, topicPresenter);
 
-				eventBus.addHandler(NewTopicEvent.TYPE, topicPresenter);
-				eventBus.addHandler(DeletedTopicEvent.TYPE, topicPresenter);
-				eventBus.addHandler(UpdatedTopicEvent.TYPE, topicPresenter);
-				eventBus.addHandler(UpdateCompleteEvent.TYPE, topicPresenter);
+        eventBus.addHandler(NewQueueEvent.TYPE, queuePresenter);
+        eventBus.addHandler(DeletedQueueEvent.TYPE, queuePresenter);
+        eventBus.addHandler(UpdatedQueueEvent.TYPE, queuePresenter);
+        eventBus.addHandler(UpdateCompleteEvent.TYPE, queuePresenter);
 
-				eventBus.addHandler(NewQueueEvent.TYPE, queuePresenter);
-				eventBus.addHandler(DeletedQueueEvent.TYPE, queuePresenter);
-				eventBus.addHandler(UpdatedQueueEvent.TYPE, queuePresenter);
-				eventBus.addHandler(UpdateCompleteEvent.TYPE, queuePresenter);
+        eventBus.addHandler(NewUserEvent.TYPE, userPresenter);
+        eventBus.addHandler(DeletedUserEvent.TYPE, userPresenter);
+        eventBus.addHandler(UpdatedUserEvent.TYPE, userPresenter);
+        eventBus.addHandler(UpdateCompleteEvent.TYPE, userPresenter);
 
-				eventBus.addHandler(NewUserEvent.TYPE, userPresenter);
-				eventBus.addHandler(DeletedUserEvent.TYPE, userPresenter);
-				eventBus.addHandler(UpdatedUserEvent.TYPE, userPresenter);
-				eventBus.addHandler(UpdateCompleteEvent.TYPE, userPresenter);
+        eventBus.addHandler(NewSubscriptionEvent.TYPE, subscriptionPresenter);
+        eventBus.addHandler(DeletedSubscriptionEvent.TYPE, subscriptionPresenter);
+        eventBus.addHandler(UpdatedSubscriptionEvent.TYPE, subscriptionPresenter);
+        eventBus.addHandler(UpdateCompleteEvent.TYPE, subscriptionPresenter);
 
-				eventBus.addHandler(NewSubscriptionEvent.TYPE, subscriptionPresenter);
-				eventBus.addHandler(DeletedSubscriptionEvent.TYPE, subscriptionPresenter);
-				eventBus.addHandler(UpdatedSubscriptionEvent.TYPE, subscriptionPresenter);
-				eventBus.addHandler(UpdateCompleteEvent.TYPE, subscriptionPresenter);
+        MainWidget mWidget = mainPresenter.getWidget();
+        Canvas mainCanvas = (Canvas) mWidget.asWidget();
 
-
-				MainWidget mWidget = mainPresenter.getWidget();			
-				Canvas mainCanvas = (Canvas)mWidget.asWidget();
-
-				mainCanvas.draw();
-			}
-		};
-		VisualizationUtils.loadVisualizationApi(onLoadCallback, AnnotatedTimeLine.PACKAGE);
-	}
+        mainCanvas.draw();
+      }
+    };
+    VisualizationUtils.loadVisualizationApi(onLoadCallback, AnnotatedTimeLine.PACKAGE);
+  }
 }
