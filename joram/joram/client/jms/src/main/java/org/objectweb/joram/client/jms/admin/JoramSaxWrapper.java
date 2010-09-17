@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -1036,6 +1036,7 @@ public class JoramSaxWrapper extends DefaultHandler {
           Map.Entry entries[] = new Map.Entry [cluster.size()];
           cluster.entrySet().toArray(entries);
           ClusterQueue clusterQueue = new ClusterQueue();
+          clusterQueue.setWrapper(getWrapper());
 
           Queue root = null;
           for (int i=0; i<entries.length; i++) {
@@ -1058,6 +1059,7 @@ public class JoramSaxWrapper extends DefaultHandler {
           Map.Entry entries[] = new Map.Entry [cluster.size()];
           cluster.entrySet().toArray(entries);
           ClusterTopic clusterTopic = new ClusterTopic();
+          clusterTopic.setWrapper(getWrapper());
 
           Topic root = null;
           for (int i=0; i<entries.length; i++) {
