@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -24,6 +24,8 @@
  *                 ScalAgent Distributed Technologies
  */
 package chat;
+
+import javax.jms.ConnectionFactory;
 
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
@@ -49,8 +51,7 @@ public class ChatAdmin {
     AdminModule.connect("root", "root", 60);
 
     // Creating the JMS administered objects:        
-    javax.jms.ConnectionFactory connFactory =
-      TcpConnectionFactory.create("localhost", 16010);
+    ConnectionFactory connFactory = TcpConnectionFactory.create("localhost", 16010);
 
     Topic topic = Topic.create(0);
 
