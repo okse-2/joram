@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -108,7 +108,6 @@ public class DMQManager {
   public void addDeadMessage(Message mess, short reason) {
 
     if (destDmqId != null) {
-
       String ERROR_COUNT = "JMS_JORAM_ERRORCOUNT";
       Integer errorCount = (Integer) mess.getProperty(ERROR_COUNT);
       if (errorCount == null) {
@@ -119,7 +118,7 @@ public class DMQManager {
       String causePropertyName = "JMS_JORAM_ERRORCAUSE_" + errorCount;
       String codePropertyName = "JMS_JORAM_ERRORCODE_" + errorCount;
       mess.setProperty(ERROR_COUNT, errorCount);
-      
+
       switch (reason) {
       case MessageErrorConstants.EXPIRED:
         mess.setProperty(causePropertyName, "Expired at " + new Date(mess.expiration));
@@ -160,8 +159,7 @@ public class DMQManager {
       deadMessages.addMessage(mess);
     }
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this.getClass().getName() + ", addDeadMessage for dmq: " + destDmqId
-          + ". Msg: " + mess);
+      logger.log(BasicLevel.DEBUG, this.getClass().getName() + ", addDeadMessage for dmq: " + destDmqId + ". Msg: " + mess);
   }
 
   /**
