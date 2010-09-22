@@ -55,7 +55,6 @@
     <dependency>
     	<groupId>org.codehaus.stomp</groupId>
     	<artifactId>stompconnect</artifactId>
-    	<version>1.0</version>
     </dependency>
   </dependencies>
   <modules>
