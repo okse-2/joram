@@ -181,6 +181,18 @@
       <useProjectArtifact>false</useProjectArtifact>
       <unpack>false</unpack>
     </dependencySet>
+    
+    <dependencySet>
+      <outputDirectory>/ship/bundle</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
+        <include>org.objectweb.joram:joram-tools-jasp</include>
+      </includes>
+      <useProjectArtifact>false</useProjectArtifact>
+      <unpack>false</unpack>
+    </dependencySet>
+    
     <dependencySet>
       <outputDirectory>/ship/bundle</outputDirectory>
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
