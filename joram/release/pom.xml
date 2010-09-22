@@ -270,6 +270,12 @@
       <type>jar</type>
     </dependency>
     <dependency>
+      <groupId>org.objectweb.joram</groupId>
+      <artifactId>joram-tools-jasp</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.shell</artifactId>
       <version>${felix.shell.version}</version>
