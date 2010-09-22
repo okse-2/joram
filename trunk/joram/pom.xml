@@ -177,6 +177,7 @@
     <felix.tui.version>1.4.1</felix.tui.version>
     <!-- to prevent [WARNING] Using platform encoding -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <stomp.version>1.0</stomp.version>
   </properties>
 
   <organization>
@@ -261,6 +262,12 @@
         <groupId>org.objectweb.joram</groupId>
         <artifactId>jftp</artifactId>
         <version>${jftp.version}</version>
+        <type>jar</type>
+      </dependency>
+      <dependency>
+        <groupId>org.codehaus.stomp</groupId>
+        <artifactId>stompconnect</artifactId>
+        <version>${stomp.version}</version>
         <type>jar</type>
       </dependency>
     </dependencies>
