@@ -23,6 +23,8 @@
         example shows the use of clustered queues either for load-balancing or availability.</li>
         <li><a href="tutorials/monitoring/monitoring.htm">Monitoring destination</a> sample: this
         example shows the use of monitoring queue and topic.</li>
+        <li><a href="tutorials/stomp/stomp.htm">JASP: Joram Access using STOMP Protocol</a> sample: this
+        sample shows the configuration of the Joram's STOMP bridge.</li>
       </ul>
 			</s2>
 			
