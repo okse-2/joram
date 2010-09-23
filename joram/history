@@ -2,6 +2,21 @@
 # 2010/08/26 | Joram 5.4.0 tag.
 ###############################################################################
 +==============================================================================
+| 2010/09/23 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Use of OSGi based Joram server in the samples.
+ Bug fix in FTP collector.
++==============================================================================
+| 2010/09/20 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Add STOMP proxy allowing Joram access through STOMP protocol.
++==============================================================================
+| 2010/09/17 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix a bug in administration of cluster destination through XML scripts (the
+administration wrapper was not set so at creation so there is an error during
+next operations).
++==============================================================================
 | 2010/08/25 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  The call to System.runFinalization in AgentServer.stop method seems to cause
@@ -22,6 +37,9 @@ performance with some filesystems.
  Allows to create or retrieve destinations through Session.create[Queue|Topic].
  Numerous changes in administration, reducing the number of message types and
 avoiding useless indirection in request and reply.
+###############################################################################
+# 2010/07/21 | Joram 5.3.3 tag.
+###############################################################################
 +==============================================================================
 | 2010/07/19 | Nicolas Tachker - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
