@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
 package com.scalagent.joram.mom.dest.ftp;
@@ -29,14 +29,11 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
-public class TransferImplRef 
-  implements TransferItf {
+public class TransferImplRef implements TransferItf {
 
   public String getFile(String protocol,
-                        String host,
-                        int port,
-                        String user,
-                        String pass,
+                        String host, int port,
+                        String user, String pass,
                         String remotePath, 
                         String localPath, 
                         String remoteFileName,
@@ -46,32 +43,25 @@ public class TransferImplRef
     
     StringBuffer sb = new StringBuffer();
     
-    sb.append("ftp://");
-    sb.append(user);
-    sb.append(":");
-    sb.append(pass);
-    sb.append("@");
-    sb.append(host);
+    sb.append("ftp://").append(user).append(':').append(pass).append('@').append(host);
     if (port > -1) {
-      sb.append(":");
-      sb.append(port);
+      sb.append(":").append(port);
     }
-    sb.append("/");
-    if (remotePath != null)
-      sb.append(remotePath + "/");
+    sb.append('/');
+    if (remotePath != null) {
+      sb.append(remotePath).append('/');
+    }
     sb.append(remoteFileName);
-    sb.append(";type=");
-    sb.append(type);
+    sb.append(";type=").append(type);
 
     URL url = new URL(sb.toString());
 
     URLConnection urlc = url.openConnection();
     InputStream is = urlc.getInputStream();
     
-    File file = new File(localPath,localFileName);
+    File file = new File(localPath, localFileName);
     
-    BufferedOutputStream bos = new BufferedOutputStream(
-      new FileOutputStream(file));
+    BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
     
     int c = is.read();
     while (c != -1) {

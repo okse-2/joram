@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Nicolas Tachker (ScalAgent)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
 package com.scalagent.joram.mom.dest.ftp;
@@ -30,8 +30,7 @@ import net.sf.jftp.net.ConnectionHandler;
 import net.sf.jftp.net.ConnectionListener;
 import net.sf.jftp.net.FtpConnection;
 
-public class TransferImplJftp 
-  implements TransferItf, ConnectionListener {
+public class TransferImplJftp implements TransferItf, ConnectionListener {
 
   private boolean established = false;
 
@@ -40,10 +39,8 @@ public class TransferImplJftp
   private ConnectionHandler handler = new ConnectionHandler();
 
   public String getFile(String protocol,
-                        String host,
-                        int port,
-                        String user,
-                        String pass,
+                        String host, int port,
+                        String user, String pass,
                         String remotePath, 
                         String localPath, 
                         String remoteFileName,
@@ -99,7 +96,6 @@ public class TransferImplJftp
     
     return file.getAbsolutePath();
   }
-
 
   //------ needed by ConnectionListener interface ------
   

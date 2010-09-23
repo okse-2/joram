@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -150,34 +150,14 @@ public class FtpThread extends Thread {
                                      crc);
       
       file = file.replace('\\','/');
-      if (!file.startsWith("/"))
-        file = "/" + file;
+      if (!file.startsWith("/")) file = "/" + file;
       
-      URI uri = new URI("file",null,file,null,null);
+      URI uri = new URI("file", null, file, null, null);
       uri = uri.normalize();
 
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "--- doFtp : uri = " + uri);
       
-//          StringBuffer sb = new StringBuffer();
-//          sb.append(protocol + "://");
-//          sb.append(user);
-//          sb.append(":");
-//          sb.append("****");//pass);
-//          sb.append("@");
-//          sb.append(InetAddress.getLocalHost().getHostName());
-//          if (port > -1) {
-//            sb.append(":");
-//            sb.append(port);
-//          }
-//          sb.append("/");
-//          if (path != null)
-//            sb.append(path + "/");
-//          sb.append(fileName);
-//          sb.append(";type=");
-//          sb.append(type);
- 
-
       FtpMessage clone = (FtpMessage) msg.clone();
       clone.clearProperties();
       for (Enumeration e = msg.getPropertyNames(); e.hasMoreElements(); ) {
@@ -191,6 +171,9 @@ public class FtpThread extends Thread {
                                         clone.getSharedMessage()));
       
     } catch (Exception exc) {
+      if (logger.isLoggable(BasicLevel.ERROR))
+        logger.log(BasicLevel.ERROR, "--- doFtp", exc);
+
       DMQManager dmqManager = new DMQManager(dmqId, destId);
       dmqManager.addDeadMessage(msg.getSharedMessage(), MessageErrorConstants.UNEXPECTED_ERROR);
       dmqManager.sendToDMQ();

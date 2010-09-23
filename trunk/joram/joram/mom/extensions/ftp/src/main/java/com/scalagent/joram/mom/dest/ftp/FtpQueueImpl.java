@@ -159,13 +159,22 @@ public class FtpQueueImpl extends QueueImpl {
   }
 
   public ClientMessages preProcess(AgentId from, ClientMessages not) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "--- " + this + " preProcess : not.getMessages = " + not.getMessages().size());
+
     for (Iterator msgs = not.getMessages().iterator(); msgs.hasNext();) {
       Message msg = (Message) msgs.next();
       if (isFtpMsg(msg)) {
-        doProcessFtp(not,msg);
-        not.getMessages().remove(msg);
+        doProcessFtp(not, msg);
+        msgs.remove();
       }
     }
+
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "--- " + this + " preProcess : not.getMessages = " + not.getMessages().size());
+
     if (not.getMessages().size() > 0) {
       return not;
     }
@@ -198,6 +207,10 @@ public class FtpQueueImpl extends QueueImpl {
 
       FtpMessage ftpMsg = new FtpMessage(msg);
       transferTable.put(ftpMsg.getIdentifier(),ftpMsg);
+      
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "--- " + this + " doProcessFtp: launch FtpThread (" + transferTable.size() + ')');
+    
       FtpThread t = new FtpThread(transfer,
                                   (FtpMessage) ftpMsg.clone(),
                                   getId(),
@@ -211,7 +224,7 @@ public class FtpQueueImpl extends QueueImpl {
     } else {
       DMQManager dmqManager = new DMQManager(not.getDMQId(), dmqId, getId());
       nbMsgsSentToDMQSinceCreation++;
-      dmqManager.addDeadMessage(msg, MessageErrorConstants.NOT_WRITEABLE);
+      dmqManager.addDeadMessage(msg, MessageErrorConstants.UNEXPECTED_ERROR);
       dmqManager.sendToDMQ();
     }
   }
