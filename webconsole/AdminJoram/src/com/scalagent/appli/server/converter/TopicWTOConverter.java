@@ -25,7 +25,6 @@ package com.scalagent.appli.server.converter;
 import java.util.Date;
 import java.util.Map;
 
-import org.objectweb.joram.mom.dest.DestinationImplMBean;
 import org.objectweb.joram.mom.dest.TopicImplMBean;
 
 import com.scalagent.appli.shared.TopicWTO;
@@ -48,12 +47,11 @@ public class TopicWTOConverter {
    * @param topic A DestinationImplMBean containing the topic info
    * @return A TopicWTO object created from the DestinationImplMBean object
    */
-  public static TopicWTO getDeviceWTO(String key, DestinationImplMBean topic) {
-    TopicWTO result = new TopicWTO(key, new Date(topic.getCreationTimeInMillis()),
-        ((TopicImplMBean) topic).getSubscriberIds(), topic.getDMQId(), topic.getDestinationId(),
-        topic.getNbMsgsDeliverSinceCreation(), topic.getNbMsgsReceiveSinceCreation(),
-        topic.getNbMsgsSentToDMQSinceCreation(), topic.getPeriod(), topic.getRights(), topic.isFreeReading(),
-        topic.isFreeWriting());
+  public static TopicWTO getDeviceWTO(String key, TopicImplMBean topic) {
+    TopicWTO result = new TopicWTO(key, new Date(topic.getCreationTimeInMillis()), topic.getSubscriberIds(),
+        topic.getDMQId(), topic.getDestinationId(), topic.getNbMsgsDeliverSinceCreation(),
+        topic.getNbMsgsReceiveSinceCreation(), topic.getNbMsgsSentToDMQSinceCreation(), topic.getPeriod(),
+        topic.getRights(), topic.isFreeReading(), topic.isFreeWriting());
     return result;
   }
 
@@ -61,25 +59,14 @@ public class TopicWTOConverter {
    * @param map Map of DestinationImplMBean
    * @return An Array of TopicWTO
    */
-  public static TopicWTO[] getTopicWTOArray(Map<String, DestinationImplMBean> map) {
+  public static TopicWTO[] getTopicWTOArray(Map<String, TopicImplMBean> map) {
 
-    int nbTopic = 0;
-    for (String mapKey : map.keySet()) {
-
-      if (map.get(mapKey) instanceof TopicImplMBean) {
-        nbTopic++;
-      }
-    }
-
-    TopicWTO[] newTopicsWTO = new TopicWTO[nbTopic];
+    TopicWTO[] newTopicsWTO = new TopicWTO[map.size()];
 
     int i = 0;
     for (String mapKey : map.keySet()) {
-
-      if (map.get(mapKey) instanceof TopicImplMBean) {
-        newTopicsWTO[i] = TopicWTOConverter.getDeviceWTO(mapKey, map.get(mapKey));
-        i++;
-      }
+      newTopicsWTO[i] = TopicWTOConverter.getDeviceWTO(mapKey, map.get(mapKey));
+      i++;
     }
 
     return newTopicsWTO;
