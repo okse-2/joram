@@ -158,7 +158,7 @@ public class ConnectionManager implements ConnectionManagerMBean {
       }
 
       if (initialAdminName != null) {
-        UserAgent userAgent = new UserAgent(AgentId.JoramAdminPxStamp);
+        UserAgent userAgent = new UserAgent(initialAdminName, AgentId.JoramAdminPxStamp);
         userAgent.deploy();
 
         Identity identity = createIdentity(Identity.getRootName(initialAdminName), 
