@@ -31,8 +31,8 @@ import java.util.SortedMap;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.AbstractDataTable;
-import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
+import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.AnnotatedLegendPosition;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.Options;
@@ -102,6 +102,7 @@ public class SubscriptionDetailWidget extends BaseWidget<SubscriptionDetailPrese
   IButton refreshButton;
   IButton newQueueButton;
   HLayout hl2;
+
   DetailViewer subDetailLeft = new DetailViewer();
   DetailViewer subDetailRight = new DetailViewer();;
 
@@ -390,6 +391,8 @@ public class SubscriptionDetailWidget extends BaseWidget<SubscriptionDetailPrese
     subDetailStack.addSection(viewSection);
     subDetailStack.setCanResizeSections(true);
 
+    presenter.initList();
+
     return subDetailStack;
 
   }
@@ -406,10 +409,10 @@ public class SubscriptionDetailWidget extends BaseWidget<SubscriptionDetailPrese
 
   public void updateMessage(MessageWTO message) {
     MessageListRecord messageListRecords = (MessageListRecord) messageList.getRecordList().find(
-        MessageListRecord.ATTRIBUTE_IDS, message.getIdS());
+        MessageListRecord.ATTRIBUTE_IDS, message.getId());
     if (messageListRecords != null) {
 
-      messageListRecords.setIdS(message.getIdS());
+      messageListRecords.setIdS(message.getId());
       messageListRecords.setExpiration(message.getExpiration());
       messageListRecords.setTimestamp(message.getTimestamp());
       messageListRecords.setDeliveryCount(message.getDeliveryCount());
