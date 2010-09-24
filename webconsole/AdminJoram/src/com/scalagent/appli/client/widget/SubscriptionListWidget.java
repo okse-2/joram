@@ -29,8 +29,8 @@ import java.util.SortedMap;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.AbstractDataTable;
-import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
+import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.AnnotatedLegendPosition;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.Options;
@@ -95,7 +95,7 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
   SectionStackSection buttonSection;
   HLayout hl;
   IButton refreshButton;
-  IButton newSubButton;
+//  IButton newSubButton;
 
   SectionStackSection listStackSection;
   ListGrid subList;
@@ -142,24 +142,24 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
     refreshButton.setPrompt(Application.messages.queueWidget_buttonRefresh_prompt());
     refreshButton.addClickHandler(new RefreshAllClickHandler(presenter));
 
-    newSubButton = new IButton();
-    newSubButton.setMargin(0);
-    newSubButton.setAutoFit(true);
-    newSubButton.setIcon("new.png");
-    newSubButton.setTitle(Application.messages.subscriptionWidget_buttonNewSubscription_title());
-    newSubButton.setPrompt(Application.messages.subscriptionWidget_buttonNewSubscription_prompt());
-    newSubButton.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        drawForm(null);
-      }
-    });
+//    newSubButton = new IButton();
+//    newSubButton.setMargin(0);
+//    newSubButton.setAutoFit(true);
+//    newSubButton.setIcon("new.png");
+//    newSubButton.setTitle(Application.messages.subscriptionWidget_buttonNewSubscription_title());
+//    newSubButton.setPrompt(Application.messages.subscriptionWidget_buttonNewSubscription_prompt());
+//    newSubButton.addClickHandler(new ClickHandler() {
+//      public void onClick(ClickEvent event) {
+//        drawForm(null);
+//      }
+//    });
 
     hl = new HLayout();
     hl.setHeight(22);
     hl.setPadding(5);
     hl.setMembersMargin(5);
     hl.addMember(refreshButton);
-    hl.addMember(newSubButton);
+//    hl.addMember(newSubButton);
 
     buttonSection = new SectionStackSection(Application.messages.subscriptionWidget_actionsSection_title());
     buttonSection.setExpanded(true);
@@ -454,12 +454,12 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
     DataTable data = DataTable.create();
 
     data.addColumn(ColumnType.DATETIME, Application.messages.common_time());
+    if (showPending)
+      data.addColumn(ColumnType.NUMBER, Application.messages.common_pending());
     if (showDelivered)
       data.addColumn(ColumnType.NUMBER, Application.messages.common_delivered());
     if (showSentDMQ)
       data.addColumn(ColumnType.NUMBER, Application.messages.common_sentDMQ());
-    if (showPending)
-      data.addColumn(ColumnType.NUMBER, Application.messages.common_pending());
 
     Record selectedRecord = subList.getSelectedRecord();
     if (selectedRecord != null) {
@@ -473,15 +473,15 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
           if (d != null) {
             int j = 1;
             data.setValue(i, 0, d);
-            if (showDelivered) {
+            if (showPending) {
               data.setValue(i, j, history.get(d)[0]);
               j++;
             }
-            if (showSentDMQ) {
+            if (showDelivered) {
               data.setValue(i, j, history.get(d)[1]);
               j++;
             }
-            if (showPending) {
+            if (showSentDMQ) {
               data.setValue(i, j, history.get(d)[2]);
               j++;
             }
