@@ -34,17 +34,23 @@ import com.scalagent.engine.client.command.CalledMethod;
 @CalledMethod(value = LoadMessageActionImpl.class)
 public class LoadMessageAction implements Action<LoadMessageResponse> {
 
-  private String queueName;
+  private String name;
+  private boolean isQueue;
 
   public LoadMessageAction() {
   }
 
-  public LoadMessageAction(String queueName) {
-    this.queueName = queueName;
+  public LoadMessageAction(String queueName, boolean isQueue) {
+    this.name = queueName;
+    this.isQueue = isQueue;
   }
 
-  public String getQueueName() {
-    return queueName;
+  public String getName() {
+    return name;
+  }
+
+  public boolean isQueue() {
+    return isQueue;
   }
 
 }
