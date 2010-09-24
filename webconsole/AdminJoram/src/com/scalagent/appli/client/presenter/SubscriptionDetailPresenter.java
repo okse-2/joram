@@ -22,7 +22,9 @@
  */
 package com.scalagent.appli.client.presenter;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 
@@ -59,6 +61,7 @@ import com.smartgwt.client.util.SC;
 public class SubscriptionDetailPresenter extends
     BasePresenter<SubscriptionDetailWidget, RPCServiceAsync, RPCServiceCacheClient> implements
     NewMessageHandler, DeletedMessageHandler, UpdatedMessageHandler, UpdateCompleteHandler {
+
   private SubscriptionWTO sub;
 
   public SubscriptionDetailPresenter(RPCServiceAsync serviceRPC, HandlerManager eventBus,
@@ -120,7 +123,6 @@ public class SubscriptionDetailPresenter extends
    */
   public void onMessageDeleted(MessageWTO message, String subName) {
     if (sub.getName().equals(subName))
-
       widget.removeMessage(new MessageListRecord(message));
   }
 
@@ -140,6 +142,7 @@ public class SubscriptionDetailPresenter extends
    * The refresh button is re-enabled and the chart redrawn
    */
   public void onUpdateComplete(String info) {
+    //SC.say("Update complete of " + info + " subName: " + sub.getName());
     if (sub.getName().equals(info)) {
       widget.getRefreshButton().enable();
       widget.redrawChart(true);
@@ -153,7 +156,7 @@ public class SubscriptionDetailPresenter extends
     if (sub.getName().equals(queueName)) {
       widget.getRefreshButton().disable();
       widget.getRefreshButton().setIcon("remove.png");
-      widget.getRefreshButton().setTooltip("This queue no longer exists on JORAM");
+      widget.getRefreshButton().setTooltip("This subscription no longer exists on JORAM");
     }
   }
 
@@ -164,7 +167,7 @@ public class SubscriptionDetailPresenter extends
    * message.
    */
   public void deleteMessage(MessageWTO message, SubscriptionWTO sub) {
-    service.execute(new DeleteMessageAction(message.getIdS(), sub.getName()), new DeleteMessageHandler(
+    service.execute(new DeleteMessageAction(message.getId(), sub.getName()), new DeleteMessageHandler(
         eventBus) {
       @Override
       public void onSuccess(DeleteMessageResponse response) {
@@ -197,14 +200,13 @@ public class SubscriptionDetailPresenter extends
     widget.stopChart();
   }
 
-  /**
-   * This method is called by the SubscriptionDetailWidget when updating the
-   * chart.
-   * 
-   * @return A map of the subscriptions in the client side cache.
-   */
-  public Map<String, SubscriptionWTO> getSubscriptions() {
-    return cache.getSubscriptions();
+  public void initList() {
+    List<String> vMessagesC = sub.getMessagesList();
+    ArrayList<MessageWTO> listMessages = new ArrayList<MessageWTO>();
+    for (String idMessage : vMessagesC) {
+      listMessages.add(cache.getMessages().get(idMessage));
+    }
+    widget.setData(listMessages);
   }
 
   /**
@@ -256,7 +258,7 @@ public class SubscriptionDetailPresenter extends
    * message.
    */
   public void deleteMessage(MessageWTO message, QueueWTO queue) {
-    service.execute(new DeleteMessageAction(message.getIdS(), queue.getName()), new DeleteMessageHandler(
+    service.execute(new DeleteMessageAction(message.getId(), queue.getName()), new DeleteMessageHandler(
         eventBus) {
       @Override
       public void onSuccess(DeleteMessageResponse response) {
@@ -268,5 +270,15 @@ public class SubscriptionDetailPresenter extends
         }
       }
     });
+  }
+  
+  /**
+   * This method is called by the SubscriptionDetailWidget when updating the
+   * chart.
+   * 
+   * @return A map of the subscriptions in the client side cache.
+   */
+  public Map<String, SubscriptionWTO> getSubscriptions() {
+    return cache.getSubscriptions();
   }
 }
