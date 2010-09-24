@@ -227,7 +227,7 @@ public abstract class Destination extends Agent implements AdminDestinationItf {
     }
   }
   
-  public void setPeriod(long period) {
+  private void setPeriod(long period) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, this + ": setPeriod(" + period + ")." + " -> task " + task);
     if (task == null) {
