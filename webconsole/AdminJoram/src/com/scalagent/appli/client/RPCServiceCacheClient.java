@@ -186,11 +186,9 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
     return serverHistory;
   }
 
-  @SuppressWarnings("deprecation")
   public void addToHistory(int type, float... value) {
-    Date nowMilli = new Date();
-    Date nowSec = new Date(nowMilli.getYear(), nowMilli.getMonth(), nowMilli.getDay(), nowMilli.getHours(),
-        nowMilli.getMinutes(), nowMilli.getSeconds());
+
+    Date nowSec = new Date(System.currentTimeMillis() / 1000 * 1000);
 
     switch (type) {
     case QUEUE:
@@ -228,12 +226,8 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
     }
   }
 
-  @SuppressWarnings("deprecation")
   public void addToSpecificHistory(String name, int... value) {
-
-    Date nowMilli = new Date();
-    Date nowSec = new Date(nowMilli.getYear(), nowMilli.getMonth(), nowMilli.getDay(), nowMilli.getHours(),
-        nowMilli.getMinutes(), nowMilli.getSeconds());
+    Date nowSec = new Date(System.currentTimeMillis() / 1000 * 1000);
 
     if (!globalHistory.containsKey(name)) {
       globalHistory.put(name, new TreeMap<Date, int[]>());
@@ -297,7 +291,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
   }
 
   public void retrieveMessageQueue(QueueWTO queue) {
-    RPCService.execute(new LoadMessageAction(queue.getName()), new LoadMessageHandler(eventBus) {
+    RPCService.execute(new LoadMessageAction(queue.getName(), true), new LoadMessageHandler(eventBus) {
       @Override
       public void onSuccess(LoadMessageResponse response) {
         if (response.isSuccess()) {
@@ -311,11 +305,11 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
   }
 
   public void retrieveMessageSub(SubscriptionWTO sub) {
-    RPCService.execute(new LoadMessageAction(sub.getName()), new LoadMessageHandler(eventBus) {
+    RPCService.execute(new LoadMessageAction(sub.getName(), false), new LoadMessageHandler(eventBus) {
       @Override
       public void onSuccess(LoadMessageResponse response) {
         if (response.isSuccess()) {
-          processMessages(response.getMessages(), response.getQueueName());
+          processSubMessages(response.getMessages(), response.getQueueName());
           eventBus.fireEvent(new UpdateCompleteEvent(response.getQueueName()));
         } else {
           eventBus.fireEvent(new QueueNotFoundEvent(response.getQueueName()));
@@ -388,27 +382,26 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
       for (int i = 0; i < newTopics.size(); i++) {
 
         TopicWTO topic = newTopics.get(i);
-        boolean processed = false;
 
         // new device
         if (topic.getDbChangeStatus() == BaseWTO.NEW) {
           topics.put(topic.getId(), topic);
           eventBus.fireEvent(new NewTopicEvent(topic));
-          processed = true;
+          continue;
         }
 
         // updated device
-        if ((!processed) && (topic.getDbChangeStatus() == BaseWTO.UPDATED)) {
+        if (topic.getDbChangeStatus() == BaseWTO.UPDATED) {
           topics.put(topic.getId(), topic);
           eventBus.fireEvent(new UpdatedTopicEvent(topic));
-          processed = true;
+          continue;
         }
 
         // deleted device
-        if ((!processed) && (topic.getDbChangeStatus() == BaseWTO.DELETED)) {
+        if (topic.getDbChangeStatus() == BaseWTO.DELETED) {
           topics.remove(topic.getId());
           eventBus.fireEvent(new DeletedTopicEvent(topic));
-          processed = true;
+          continue;
         }
       }
     }
@@ -421,27 +414,26 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
       for (int i = 0; i < newQueues.size(); i++) {
 
         QueueWTO queue = newQueues.get(i);
-        boolean processed = false;
 
         // new queue
         if (queue.getDbChangeStatus() == BaseWTO.NEW) {
           queues.put(queue.getId(), queue);
           eventBus.fireEvent(new NewQueueEvent(queue));
-          processed = true;
+          continue;
         }
 
         // updated queue
-        if ((!processed) && (queue.getDbChangeStatus() == BaseWTO.UPDATED)) {
+        if (queue.getDbChangeStatus() == BaseWTO.UPDATED) {
           queues.put(queue.getId(), queue);
           eventBus.fireEvent(new UpdatedQueueEvent(queue));
-          processed = true;
+          continue;
         }
 
         // deleted device
-        if ((!processed) && (queue.getDbChangeStatus() == BaseWTO.DELETED)) {
+        if (queue.getDbChangeStatus() == BaseWTO.DELETED) {
           queues.remove(queue.getId());
           eventBus.fireEvent(new DeletedQueueEvent(queue));
-          processed = true;
+          continue;
         }
       }
     }
@@ -454,29 +446,62 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
       for (int i = 0; i < newMessages.size(); i++) {
 
         MessageWTO message = newMessages.get(i);
-        boolean processed = false;
 
-        queues.get(queueName).addMessageToList(message.getIdS());
+        queues.get(queueName).addMessageToList(message.getId());
 
         // new queue
         if (message.getDbChangeStatus() == BaseWTO.NEW) {
           messages.put(message.getId(), message);
           eventBus.fireEvent(new NewMessageEvent(message, queueName));
-          processed = true;
+          continue;
         }
 
         // updated queue
-        if ((!processed) && (message.getDbChangeStatus() == BaseWTO.UPDATED)) {
+        if (message.getDbChangeStatus() == BaseWTO.UPDATED) {
           messages.put(message.getId(), message);
           eventBus.fireEvent(new UpdatedMessageEvent(message, queueName));
-          processed = true;
+          continue;
         }
 
         // deleted device
-        if ((!processed) && (message.getDbChangeStatus() == BaseWTO.DELETED)) {
+        if (message.getDbChangeStatus() == BaseWTO.DELETED) {
           messages.remove(message.getId());
           eventBus.fireEvent(new DeletedMessageEvent(message, queueName));
-          processed = true;
+          continue;
+        }
+      }
+    }
+  }
+
+  private void processSubMessages(List<MessageWTO> newMessages, String subName) {
+
+    if (newMessages != null) {
+
+      for (int i = 0; i < newMessages.size(); i++) {
+
+        MessageWTO message = newMessages.get(i);
+
+        subs.get(subName).addMessageToList(message.getId());
+
+        // new sub
+        if (message.getDbChangeStatus() == BaseWTO.NEW) {
+          messages.put(message.getId(), message);
+          eventBus.fireEvent(new NewMessageEvent(message, subName));
+          continue;
+        }
+
+        // updated sub
+        if (message.getDbChangeStatus() == BaseWTO.UPDATED) {
+          messages.put(message.getId(), message);
+          eventBus.fireEvent(new UpdatedMessageEvent(message, subName));
+          continue;
+        }
+
+        // deleted sub
+        if (message.getDbChangeStatus() == BaseWTO.DELETED) {
+          messages.remove(message.getId());
+          eventBus.fireEvent(new DeletedMessageEvent(message, subName));
+          continue;
         }
       }
     }
@@ -489,24 +514,23 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
       for (int i = 0; i < newUsers.size(); i++) {
 
         UserWTO user = newUsers.get(i);
-        boolean processed = false;
 
         // new user
         if (user.getDbChangeStatus() == BaseWTO.NEW) {
           users.put(user.getId(), user);
           eventBus.fireEvent(new NewUserEvent(user));
-          processed = true;
+          continue;
         }
 
         // updated user
-        if ((!processed) && (user.getDbChangeStatus() == BaseWTO.UPDATED)) {
+        if (user.getDbChangeStatus() == BaseWTO.UPDATED) {
           users.put(user.getId(), user);
           eventBus.fireEvent(new UpdatedUserEvent(user));
-          processed = true;
+          continue;
         }
 
         // deleted user
-        if ((!processed) && (user.getDbChangeStatus() == BaseWTO.DELETED)) {
+        if (user.getDbChangeStatus() == BaseWTO.DELETED) {
           users.remove(user.getId());
           eventBus.fireEvent(new DeletedUserEvent(user));
         }
@@ -521,27 +545,26 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
       for (int i = 0; i < newSubs.size(); i++) {
 
         SubscriptionWTO sub = newSubs.get(i);
-        boolean processed = false;
 
         // new user
         if (sub.getDbChangeStatus() == BaseWTO.NEW) {
           subs.put(sub.getId(), sub);
           eventBus.fireEvent(new NewSubscriptionEvent(sub));
-          processed = true;
+          continue;
         }
 
         // updated user
-        if ((!processed) && (sub.getDbChangeStatus() == BaseWTO.UPDATED)) {
+        if (sub.getDbChangeStatus() == BaseWTO.UPDATED) {
           subs.put(sub.getId(), sub);
           eventBus.fireEvent(new UpdatedSubscriptionEvent(sub));
-          processed = true;
+          continue;
         }
 
         // deleted user
-        if ((!processed) && (sub.getDbChangeStatus() == BaseWTO.DELETED)) {
+        if (sub.getDbChangeStatus() == BaseWTO.DELETED) {
           subs.remove(sub.getId());
           eventBus.fireEvent(new DeletedSubscriptionEvent(sub));
-          processed = true;
+          continue;
         }
       }
     }
