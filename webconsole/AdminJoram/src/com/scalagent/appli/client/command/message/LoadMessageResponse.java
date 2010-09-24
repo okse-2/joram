@@ -41,7 +41,7 @@ public class LoadMessageResponse implements Response {
   public LoadMessageResponse() {
   }
 
-  public LoadMessageResponse(List<MessageWTO> messages, String queueName, Boolean success) {
+  public LoadMessageResponse(List<MessageWTO> messages, String queueName, boolean success) {
     this.messages = messages;
     this.queueName = queueName;
     this.success = success;
