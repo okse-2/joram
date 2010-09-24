@@ -39,7 +39,7 @@ public class UserWTOConverter {
    * @return A UserWTO object created from the ProxyImplMBean object
    */
   public static UserWTO getUserWTO(String key, ProxyImplMBean user) {
-    UserWTO result = new UserWTO(key, user.getPeriod(), user.getNbMsgsSentToDMQSinceCreation(),
+    UserWTO result = new UserWTO(key, null, user.getPeriod(), user.getNbMsgsSentToDMQSinceCreation(),
         user.getSubscriptionNames());
     return result;
   }
