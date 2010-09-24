@@ -23,15 +23,13 @@
 package com.scalagent.appli.server;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
-import org.objectweb.joram.mom.dest.DestinationImplMBean;
 import org.objectweb.joram.mom.dest.QueueImplMBean;
 import org.objectweb.joram.mom.dest.TopicImplMBean;
 import org.objectweb.joram.mom.messages.MessageView;
@@ -73,6 +71,7 @@ public class RPCServiceCache extends BaseRPCServiceCache {
   private static final String SESSION_TOPICS = "topicsList";
   private static final String SESSION_QUEUES = "queuesList";
   private static final String SESSION_MESSAGES = "messagesList";
+  private static final String SUBSCRIPTION_MESSAGES = "subMessagesList";
   private static final String SESSION_USERS = "usersList";
   private static final String SESSION_SUBSCRIPTION = "subscriptionList";
 
@@ -80,18 +79,19 @@ public class RPCServiceCache extends BaseRPCServiceCache {
   private JoramAdmin joramAdmin;
   private LiveListener listener = new LiveListener();
 
-  private Map<String, DestinationImplMBean> mapDestinations;
+  private Map<String, QueueImplMBean> mapQueues;
+  private Map<String, TopicImplMBean> mapTopics;
   private Map<String, ProxyImplMBean> mapUsers;
   private List<ClientSubscriptionMBean> listSubscriptions;
 
-  private GregorianCalendar lastupdate = new GregorianCalendar(1970, 1, 1);
+  private long lastupdate = 0;
 
   @SuppressWarnings("unchecked")
   public List<TopicWTO> getTopics(HttpSession session, boolean retrieveAll, boolean forceUpdate) {
 
     synchWithJORAM(forceUpdate);
 
-    TopicWTO[] newTopics = TopicWTOConverter.getTopicWTOArray(mapDestinations);
+    TopicWTO[] newTopics = TopicWTOConverter.getTopicWTOArray(mapTopics);
 
     // retrieve previous devices list from session
     HashMap<String, TopicWTO> sessionTopics = (HashMap<String, TopicWTO>) session
@@ -120,7 +120,7 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 
     synchWithJORAM(forceUpdate);
 
-    QueueWTO[] newQueues = QueueWTOConverter.getQueueWTOArray(mapDestinations);
+    QueueWTO[] newQueues = QueueWTOConverter.getQueueWTOArray(mapQueues);
 
     // retrieve previous devices list from session
     HashMap<String, QueueWTO> sessionQueues = (HashMap<String, QueueWTO>) session
@@ -144,23 +144,22 @@ public class RPCServiceCache extends BaseRPCServiceCache {
   }
 
   @SuppressWarnings("unchecked")
-  public List<MessageWTO> getMessages(HttpSession session, String queueName) throws Exception {
+  public List<MessageWTO> getMessages(HttpSession session, String queueName)
+      throws Exception {
 
     synchWithJORAM(true);
 
-    QueueImplMBean queue = (QueueImplMBean) mapDestinations.get(queueName);
+    QueueImplMBean queue = mapQueues.get(queueName);
 
     if (queue == null) {
       throw new Exception("Queue not found");
     }
-
-    //		List<Message> listMessage = queue.getMessagesView();
+    
     List<MessageView> listMessage = queue.getMessagesView();
 
     MessageWTO[] newMessages = MessageWTOConverter.getMessageWTOArray(listMessage);
 
     // retrieve previous devices list from session
-
     HashMap<String, HashMap<String, MessageWTO>> sessionMessagesAll = (HashMap<String, HashMap<String, MessageWTO>>) session
         .getAttribute(RPCServiceCache.SESSION_MESSAGES);
     if (sessionMessagesAll == null) {
@@ -177,6 +176,49 @@ public class RPCServiceCache extends BaseRPCServiceCache {
     // save devices in session
     sessionMessagesAll.put(queueName, sessionMessagesQueue);
     session.setAttribute(RPCServiceCache.SESSION_MESSAGES, sessionMessagesAll);
+
+    return toReturn;
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<MessageWTO> getSubMessages(HttpSession session, String subName) throws Exception {
+
+    synchWithJORAM(true);
+
+    ClientSubscriptionMBean sub = null;
+    for (Iterator<ClientSubscriptionMBean> subs = listSubscriptions.iterator(); subs.hasNext();) {
+      ClientSubscriptionMBean subsc = subs.next();
+      if (subsc.getName().equals(subName)) {
+        sub = subsc;
+        break;
+      }
+    }
+
+    if (sub == null) {
+      throw new Exception("Subscription not found");
+    }
+
+    List<MessageView> listMessage = sub.getMessagesView();
+
+    MessageWTO[] newMessages = MessageWTOConverter.getMessageWTOArray(listMessage);
+
+    // retrieve previous devices list from session
+    HashMap<String, HashMap<String, MessageWTO>> sessionMessagesAll = (HashMap<String, HashMap<String, MessageWTO>>) session
+        .getAttribute(RPCServiceCache.SUBSCRIPTION_MESSAGES);
+    if (sessionMessagesAll == null) {
+      sessionMessagesAll = new HashMap<String, HashMap<String, MessageWTO>>();
+    }
+
+    HashMap<String, MessageWTO> sessionMessagesSub = sessionMessagesAll.get(subName);
+    if (sessionMessagesSub == null) {
+      sessionMessagesSub = new HashMap<String, MessageWTO>();
+    }
+
+    List<MessageWTO> toReturn = null;
+    toReturn = compareEntities(newMessages, sessionMessagesSub);
+    // save devices in session
+    sessionMessagesAll.put(subName, sessionMessagesSub);
+    session.setAttribute(RPCServiceCache.SUBSCRIPTION_MESSAGES, sessionMessagesAll);
 
     return toReturn;
   }
@@ -238,24 +280,13 @@ public class RPCServiceCache extends BaseRPCServiceCache {
   }
 
   public float[] getInfos(boolean isforceUpdate) {
+    if (!isConnected) {
+      return new float[1];
+    }
 
     synchWithJORAM(isforceUpdate);
+    return joramAdmin.getInfos();
 
-    int lower = 0;
-    int higher = 2;
-    float e1 = (float) (Math.random() * (higher - lower)) + lower;
-    float n1 = (float) (Math.random() * (higher - lower)) + lower;
-    float n2 = (float) (Math.random() * (higher - lower)) + lower;
-    float n3 = (float) (Math.random() * (higher - lower)) + lower;
-    float n4 = (float) (Math.random() * (higher - lower)) + lower;
-
-    float[] vInfos = new float[5];
-    vInfos[0] = e1;
-    vInfos[1] = n1;
-    vInfos[2] = n2;
-    vInfos[3] = n3;
-    vInfos[4] = n4;
-    return vInfos;
   }
 
   public boolean connectJORAM(String login, String password) {
@@ -269,16 +300,16 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 
   public void synchWithJORAM(boolean forceUpdate) {
 
-    GregorianCalendar now = new GregorianCalendar();
-    GregorianCalendar lastupdatePlus5 = (GregorianCalendar) lastupdate.clone();
-    lastupdatePlus5.add(Calendar.SECOND, 9);
+    long now = System.currentTimeMillis();
+    long lastupdatePlus5 = lastupdate + 5000;
 
-    if (now.after(lastupdatePlus5) || mapDestinations == null || forceUpdate) {
+    if (now > lastupdatePlus5 || mapQueues == null || forceUpdate) {
 
-      mapDestinations = listener.getDestinations();
+      mapQueues = listener.getQueues();
+      mapTopics = listener.getTopics();
       mapUsers = listener.getUsers();
       listSubscriptions = listener.getSubscription();
-      lastupdate = new GregorianCalendar();
+      lastupdate = now;
     }
 
   }
@@ -298,7 +329,7 @@ public class RPCServiceCache extends BaseRPCServiceCache {
     if (!isConnected) {
       return false;
     }
-    return joramAdmin.editQueue(queue.getName(), queue.getDMQId(), queue.getDestinationId(),
+    return joramAdmin.editQueue(mapQueues.get(queue.getName()), queue.getDMQId(), queue.getDestinationId(),
         queue.getPeriod(), queue.getThreshold(), queue.getNbMaxMsg(), queue.isFreeReading(),
         queue.isFreeWriting());
   }
@@ -307,21 +338,21 @@ public class RPCServiceCache extends BaseRPCServiceCache {
     if (!isConnected) {
       return false;
     }
-    return joramAdmin.deleteQueue(queueName);
+    return joramAdmin.deleteQueue(mapQueues.get(queueName));
   }
 
   public boolean cleanWaitingRequest(String queueName) {
     if (!isConnected) {
       return false;
     }
-    return joramAdmin.cleanWaitingRequest(queueName);
+    return joramAdmin.cleanWaitingRequest(mapQueues.get(queueName));
   }
 
   public boolean cleanPendingMessage(String queueName) {
     if (!isConnected) {
       return false;
     }
-    return joramAdmin.cleanPendingMessage(queueName);
+    return joramAdmin.cleanPendingMessage(mapQueues.get(queueName));
   }
 
   /** USERS **/
@@ -330,21 +361,21 @@ public class RPCServiceCache extends BaseRPCServiceCache {
     if (!isConnected) {
       return false;
     }
-    return joramAdmin.createNewUser(user.getName(), user.getPeriod());
+    return joramAdmin.createNewUser(user.getName(), user.getPassword(), user.getPeriod());
   }
 
   public boolean editUser(UserWTO user) {
     if (!isConnected) {
       return false;
     }
-    return joramAdmin.editUser(user.getName(), user.getPeriod());
+    return joramAdmin.editUser(mapUsers.get(user.getName()), user.getPassword(), user.getPeriod());
   }
 
   public boolean deleteUser(String userName) {
     if (!isConnected) {
       return false;
     }
-    return joramAdmin.deleteUser(userName);
+    return joramAdmin.deleteUser(mapUsers.get(userName));
   }
 
   /** MESSAGES **/
@@ -386,7 +417,7 @@ public class RPCServiceCache extends BaseRPCServiceCache {
     if (!isConnected) {
       return false;
     }
-    return joramAdmin.editTopic(topic.getName(), topic.getDMQId(), topic.getDestinationId(),
+    return joramAdmin.editTopic(mapTopics.get(topic.getName()), topic.getDMQId(), topic.getDestinationId(),
         topic.getPeriod(), topic.isFreeReading(), topic.isFreeWriting());
   }
 
@@ -394,7 +425,7 @@ public class RPCServiceCache extends BaseRPCServiceCache {
     if (!isConnected) {
       return false;
     }
-    return joramAdmin.deleteTopic(topicName);
+    return joramAdmin.deleteTopic(mapTopics.get(topicName));
   }
 
   /** SUBSCRIPTIONS **/
@@ -425,24 +456,25 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 
   static class LiveListener implements AdminListener {
 
-    private Map<String, DestinationImplMBean> destinations = new HashMap<String, DestinationImplMBean>();
+    private Map<String, QueueImplMBean> queues = new HashMap<String, QueueImplMBean>();
+    private Map<String, TopicImplMBean> topics = new HashMap<String, TopicImplMBean>();
     private Map<String, ProxyImplMBean> users = new HashMap<String, ProxyImplMBean>();
     private List<ClientSubscriptionMBean> subscriptions = new ArrayList<ClientSubscriptionMBean>();
 
     public void onQueueAdded(String queueName, QueueImplMBean queue) {
-      destinations.put(queueName, queue);
+      queues.put(queueName, queue);
     }
 
     public void onQueueRemoved(String queueName, QueueImplMBean queue) {
-      destinations.remove(queueName);
+      queues.remove(queueName);
     }
 
     public void onTopicAdded(String topicName, TopicImplMBean topic) {
-      destinations.put(topicName, topic);
+      topics.put(topicName, topic);
     }
 
     public void onTopicRemoved(String topicName, TopicImplMBean topic) {
-      destinations.remove(topicName);
+      topics.remove(topicName);
     }
 
     public void onSubscriptionAdded(String userName, ClientSubscriptionMBean subscription) {
@@ -461,8 +493,12 @@ public class RPCServiceCache extends BaseRPCServiceCache {
       users.remove(userName);
     }
 
-    public Map<String, DestinationImplMBean> getDestinations() {
-      return destinations;
+    public Map<String, QueueImplMBean> getQueues() {
+      return queues;
+    }
+
+    public Map<String, TopicImplMBean> getTopics() {
+      return topics;
     }
 
     public Map<String, ProxyImplMBean> getUsers() {
