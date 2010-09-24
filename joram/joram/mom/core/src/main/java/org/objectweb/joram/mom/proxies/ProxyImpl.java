@@ -33,15 +33,17 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
 
 import org.objectweb.joram.mom.dest.AdminTopic;
 import org.objectweb.joram.mom.dest.AdminTopicImpl;
+import org.objectweb.joram.mom.dest.AdminTopicImpl.DestinationDesc;
 import org.objectweb.joram.mom.dest.Destination;
 import org.objectweb.joram.mom.dest.Queue;
 import org.objectweb.joram.mom.dest.QueueImpl;
 import org.objectweb.joram.mom.dest.Topic;
-import org.objectweb.joram.mom.dest.AdminTopicImpl.DestinationDesc;
 import org.objectweb.joram.mom.messages.Message;
 import org.objectweb.joram.mom.notifications.AbortReceiveRequest;
 import org.objectweb.joram.mom.notifications.AbstractReplyNot;
@@ -68,6 +70,7 @@ import org.objectweb.joram.shared.admin.AdminReply;
 import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.admin.ClearSubscription;
 import org.objectweb.joram.shared.admin.DeleteSubscriptionMessage;
+import org.objectweb.joram.shared.admin.DeleteUser;
 import org.objectweb.joram.shared.admin.GetDMQSettingsReply;
 import org.objectweb.joram.shared.admin.GetDMQSettingsRequest;
 import org.objectweb.joram.shared.admin.GetNbMaxMsgRequest;
@@ -143,6 +146,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * destinations replies to clients.
  */ 
 public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
+
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
@@ -170,11 +174,13 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    *               value.
    */
   public void setPeriod(long period) {
-    if ((this.period == -1L) && (period != -1L)) {
-      // Schedule the CleaningTask.
-      Channel.sendTo(proxyAgent.getId(), new WakeUpNot());
+    if (this.period != period) {
+      // Schedule the task.
+      WakeUpNot not = new WakeUpNot();
+      not.update = true;
+      Channel.sendTo(proxyAgent.getId(), not);
+      this.period = period;
     }
-    this.period = period;
   }
 
   /**
@@ -251,21 +257,23 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * <b>Key:</b> context identifier<br>
    * <b>Value:</b> context
    */
-  private Hashtable contexts;
+  private Map contexts;
+
   /**
    * Table holding the <code>ClientSubscription</code> instances.
    * <p>
    * <b>Key:</b> subscription name<br>
    * <b>Value:</b> client subscription
    */
-  private Hashtable subsTable;
+
+  private Map subsTable;
   /**
    * Table holding the recovered transactions branches.
    * <p>
    * <b>Key:</b> transaction identifier<br>
    * <b>Value:</b> <code>XACnxPrepare</code> instance
    */
-  private Hashtable recoveredTransactions;
+  private Map recoveredTransactions;
 
   /** Counter of message arrivals from topics. */ 
   private long arrivalsCounter = 0; 
@@ -278,14 +286,14 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * <b>Key:</b> topic identifier<br>
    * <b>Value:</b> topic subscription
    */
-  private transient Hashtable topicsTable;
+  private transient Map topicsTable;
   /**
    * Table holding the subscriptions' messages.
    * <p>
    * <b>Key:</b> message identifier<br>
    * <b>Value:</b> message
    */
-  private transient Hashtable messagesTable;
+  private transient Map messagesTable;
 
   /** 
    * Identifier of the active context. 
@@ -293,6 +301,7 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * context.
    */
   private transient int activeCtxId;
+
   /** Reference to the active <code>ClientContext</code> instance. */
   private transient ClientContext activeCtx;  
 
@@ -341,30 +350,29 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     // Browsing the pre-crash contexts:
     ClientContext activeCtx;
     AgentId destId;
-    for (Enumeration ctxIds = contexts.keys(); ctxIds.hasMoreElements();) {
-      activeCtx = (ClientContext) contexts.remove(ctxIds.nextElement());
+    for (Iterator ctxs = contexts.values().iterator(); ctxs.hasNext();) {
+      activeCtx = (ClientContext) ctxs.next();
+      ctxs.remove();
 
       // Denying the non acknowledged messages:
-      for (Enumeration queueIds = activeCtx.getDeliveringQueues();
-           queueIds.hasMoreElements();) {
-        destId = (AgentId) queueIds.nextElement();
+      for (Iterator queueIds = activeCtx.getDeliveringQueues(); queueIds.hasNext();) {
+        destId = (AgentId) queueIds.next();
         proxyAgent.sendNot(destId, new DenyRequest(activeCtx.getId()));
 
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG,
-                     "Denies messages on queue " + destId.toString());
+          logger.log(BasicLevel.DEBUG, "Denies messages on queue " + destId.toString());
       }
 
       // Saving the prepared transactions.
-      Enumeration xids = activeCtx.getTxIds();
+      Iterator xids = activeCtx.getTxIds();
       Xid xid;
       XACnxPrepare recoveredPrepare;
       XACnxPrepare prepare;
-      while (xids.hasMoreElements()) {
+      while (xids.hasNext()) {
         if (recoveredTransactions == null)
           recoveredTransactions = new Hashtable();
 
-        xid = (Xid) xids.nextElement();
+        xid = (Xid) xids.next();
 
         recoveredPrepare = (XACnxPrepare) recoveredTransactions.get(xid);
         prepare = activeCtx.getTxPrepare(xid);
@@ -378,19 +386,17 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       }
 
       // Deleting the temporary destinations:
-      for (Enumeration tempDests = activeCtx.getTempDestinations();
-           tempDests.hasMoreElements();) {
-        destId = (AgentId) tempDests.nextElement();
+      for (Iterator tempDests = activeCtx.getTempDestinations(); tempDests.hasNext();) {
+        destId = (AgentId) tempDests.next();
         deleteTemporaryDestination(destId);
   
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG,
-                     "Deletes temporary destination " + destId.toString());
+          logger.log(BasicLevel.DEBUG, "Deletes temporary destination " + destId.toString());
       }
     }
 
     // Retrieving the subscriptions' messages.
-    Vector messages = Message.loadAll(getMsgTxname());
+    List messages = Message.loadAll(getMsgTxname());
 
     if (subsTable.isEmpty()) {
       // it is possible because we always save MessageSoftRef
@@ -399,22 +405,21 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     }
     
     // Browsing the pre-crash subscriptions:
-    String subName;
+    Map.Entry subEntry;
     ClientSubscription cSub;
-    Vector topics = new Vector();
+    List topics = new ArrayList();
     TopicSubscription tSub;
-    for (Enumeration subNames = subsTable.keys();
-         subNames.hasMoreElements();) {
-      subName = (String) subNames.nextElement();
-      cSub = (ClientSubscription) subsTable.get(subName);
+    for (Iterator subs = subsTable.entrySet().iterator(); subs.hasNext();) {
+      subEntry = (Map.Entry) subs.next();
+      cSub = (ClientSubscription) subEntry.getValue();
       destId = cSub.getTopicId();
       if (! topics.contains(destId))
         topics.add(destId);
       // Deleting the non durable subscriptions.
       if (!cSub.getDurable()) {
-        subsTable.remove(subName);
+        subs.remove();
         try {
-          MXWrapper.unregisterMBean(getMBeanName(subName));
+          MXWrapper.unregisterMBean(getMBeanName((String) subEntry.getKey()));
         } catch (Exception e1) {
           if (logger.isLoggable(BasicLevel.WARN))
             logger.log(BasicLevel.WARN, "  - Problem when unregistering ClientSubscriptionMbean", e1);
@@ -423,11 +428,9 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       // Reinitializing the durable ones.
       else {
         cSub.setProxyAgent(proxyAgent);
-        cSub.reinitialize(messagesTable, 
-                          messages,
-                          true);
+        cSub.reinitialize(messagesTable, messages, true);
         try {
-          MXWrapper.registerMBean(cSub, getMBeanName(subName));
+          MXWrapper.registerMBean(cSub, getMBeanName((String) subEntry.getKey()));
         } catch (Exception e1) {
           if (logger.isLoggable(BasicLevel.WARN))
             logger.log(BasicLevel.WARN, "  - Could not register ClientSubscriptionMbean", e1);
@@ -437,19 +440,17 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
           tSub = new TopicSubscription();
           topicsTable.put(destId, tSub);
         }
-        tSub.putSubscription(subName, cSub.getSelector());
+        tSub.putSubscription((String) subEntry.getKey(), cSub.getSelector());
       }
     }
     // Browsing the topics and updating their subscriptions.
-    for (Enumeration topicIds = topics.elements();
-         topicIds.hasMoreElements();)
-      updateSubscriptionToTopic((AgentId) topicIds.nextElement(), -1, -1);
+    for (Iterator topicIds = topics.iterator(); topicIds.hasNext();)
+      updateSubscriptionToTopic((AgentId) topicIds.next(), -1, -1);
   }
 
   private void setActiveCtxId(int activeCtxId) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 "ProxyImpl.setActiveCtxId(" + activeCtxId + ')');
+      logger.log(BasicLevel.DEBUG, "ProxyImpl.setActiveCtxId(" + activeCtxId + ')');
     this.activeCtxId = activeCtxId;
   }
 
@@ -465,9 +466,8 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
   public void reactToClientRequest(int key, AbstractJmsRequest request) {
     try {
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,
-                   "--- " + this + " got " + request.getClass().getName() +
-                   " with id: " + request.getRequestId() + " through activeCtx: " + key);      
+        logger.log(BasicLevel.DEBUG, "--- " + this + " got " + request.getClass().getName() + " with id: "
+            + request.getRequestId() + " through activeCtx: " + key);
 
       if (request instanceof ProducerMessages)
         reactToClientRequest(key, (ProducerMessages) request);
@@ -502,8 +502,7 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    */
   private void reactToClientRequest(int key, ProducerMessages req) throws RequestException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "ProxyImpl.reactToClientRequest(" +  key + ',' + req + ')');
+      logger.log(BasicLevel.DEBUG, "ProxyImpl.reactToClientRequest(" + key + ',' + req + ')');
 
     AgentId destId = AgentId.fromString(req.getTarget());
     if (destId == null)
@@ -511,7 +510,7 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
     ClientMessages not = new ClientMessages(key, req.getRequestId(), req.getMessages());
     setDmq(not);
-    
+
     if (destId.getTo() == proxyAgent.getId().getTo()) {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> local sending");
@@ -523,14 +522,13 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> remote sending");
       if (!req.getAsyncSend()) {
-        proxyAgent.sendNot(proxyAgent.getId(),
-                           new SendReplyNot(key, req.getRequestId()));
+        proxyAgent.sendNot(proxyAgent.getId(), new SendReplyNot(key, req.getRequestId()));
       }
     }
-    
+
     proxyAgent.sendNot(destId, not);
   }
-  
+
   private void setDmq(ClientMessages not) {
     //  Setting the producer's DMQ identifier field: 
     if (dmqId != null) {
@@ -549,9 +547,8 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    */
   private void reactToClientRequest(int key, ConsumerReceiveRequest req) throws RequestException {    
     if (req.getQueueMode()) {
-      ReceiveRequest not = new ReceiveRequest(key, req.getRequestId(),
-                                              req.getSelector(), req.getTimeToLive(), req.getReceiveAck(),
-                                              null, 1);
+      ReceiveRequest not = new ReceiveRequest(key, req.getRequestId(), req.getSelector(),
+          req.getTimeToLive(), req.getReceiveAck(), null, 1);
       AgentId destId = AgentId.fromString(req.getTarget());
       if (destId == null)
         throw new RequestException("Request to an undefined destination (null).");
@@ -771,14 +768,12 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       else if (request instanceof CommitRequest)
         doReact(key, (CommitRequest)request);
     } catch (MomException mE) {
-      logger.log(BasicLevel.ERROR,
-                 this + " - error during request: " + request, mE);
+      logger.log(BasicLevel.ERROR, this + " - error during request: " + request, mE);
 
       // Sending the exception to the client:
       doReply(new MomExceptionReply(request.getRequestId(), mE));
     } catch (Exception exc) {
-      logger.log(BasicLevel.FATAL,
-                 this + " - unexpected error during request: " + request, exc);
+      logger.log(BasicLevel.FATAL, this + " - unexpected error during request: " + request, exc);
 
       // Sending the exception to the client:
       doReply(new MomExceptionReply(request.getRequestId(), new MomException(exc.getMessage())));
@@ -794,15 +789,11 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * 
    * @exception AccessException  If the requester is not an administrator.
    */
-  private void doReact(int key, GetAdminTopicRequest req)
-               throws AccessException
-  {
+  private void doReact(int key, GetAdminTopicRequest req) throws AccessException {
 //     if (! admin)
 //       throw new AccessException("Request forbidden to a non administrator.");
 
-    doReply(
-      key,
-      new GetAdminTopicReply(req, AdminTopic.getDefault().toString()));
+    doReply(key, new GetAdminTopicReply(req, AdminTopic.getDefault().toString()));
   }
 
   /**
@@ -816,8 +807,7 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    *              context, if the local administration topic reference
    *              is not available.
    */
-  private void doReact(int key, CnxConnectRequest req)
-    throws DestinationException {
+  private void doReact(int key, CnxConnectRequest req) throws DestinationException {
     // state change, so save.
     proxyAgent.setSave();
 
@@ -843,9 +833,8 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     activeCtx.setActivated(true);
 
     // Delivering the pending deliveries, if any:
-    for (Enumeration deliveries = activeCtx.getPendingDeliveries();
-         deliveries.hasMoreElements();)
-      doReply((AbstractJmsReply) deliveries.nextElement());
+    for (Iterator deliveries = activeCtx.getPendingDeliveries(); deliveries.hasNext();)
+      doReply((AbstractJmsReply) deliveries.next());
 
     // Clearing the pending deliveries.
     activeCtx.clearPendingDeliveries();
@@ -912,9 +901,8 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         throw new RequestException("Could not create destination:" + exc.getMessage());
       }
       // Registers the newly created destination
-      AdminTopicImpl.registerDest(destId,
-                                  (req.getName() == null)?destId.toString():req.getName(),
-                                                         req.getType());
+      AdminTopicImpl.registerDest(destId, (req.getName() == null) ? destId.toString() : req.getName(),
+          req.getType());
 
       if (DestinationConstants.isTemporary(req.getType())) {
         // Registers the temporary destination in order to clean it at the end of the connection
@@ -992,14 +980,12 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
           logger.log(BasicLevel.WARN, "  - Could not register ClientSubscriptionMbean", e);
       }
       tSub.putSubscription(subName, req.getSelector());
-      sent =
-        updateSubscriptionToTopic(topicId, activeCtxId, req.getRequestId(), req.isAsyncSubscription());
-    }  else { // Existing durable subscription...
+      sent = updateSubscriptionToTopic(topicId, activeCtxId, req.getRequestId(), req.isAsyncSubscription());
+    } else { // Existing durable subscription...
       cSub = (ClientSubscription) subsTable.get(subName);
 
       if (cSub.getActive())
-        throw new StateException("The durable subscription " + subName +
-                                 " has already been activated.");
+        throw new StateException("The durable subscription " + subName + " has already been activated.");
 
       // Updated topic: updating the subscription to the previous topic.
       boolean updatedTopic = ! topicId.equals(cSub.getTopicId());
@@ -1022,32 +1008,23 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         updatedSelector = ! req.getSelector().equals(cSub.getSelector());
 
       // Reactivating the subscription.
-      cSub.reactivate(activeCtxId,
-                      req.getRequestId(),
-                      topicId,
-                      req.getSelector(),
-                      req.getNoLocal());
+      cSub.reactivate(activeCtxId, req.getRequestId(), topicId, req.getSelector(), req.getNoLocal());
 
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,
-                   "Subscription " + subName + " reactivated.");
+        logger.log(BasicLevel.DEBUG, "Subscription " + subName + " reactivated.");
 
       // Updated subscription: updating subscription to topic.  
       if (updatedTopic || updatedSelector) {
         tSub.putSubscription(subName, req.getSelector());
-        sent = updateSubscriptionToTopic(topicId,
-                                         activeCtxId,
-                                         req.getRequestId(),
-                                         req.isAsyncSubscription());
+        sent = updateSubscriptionToTopic(topicId, activeCtxId, req.getRequestId(), req.isAsyncSubscription());
       }
     }
     // Activating the subscription.
     activeCtx.addSubName(subName);
 
     // Acknowledging the request, if needed.
-    if (! sent)
-      proxyAgent.sendNot(proxyAgent.getId(),
-                         new SyncReply(activeCtxId, new ServerReply(req)));
+    if (!sent)
+      proxyAgent.sendNot(proxyAgent.getId(), new SyncReply(activeCtxId, new ServerReply(req)));
   }
 
   /**
@@ -1059,8 +1036,7 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    *
    * @exception DestinationException  If the subscription does not exist.
    */
-  private void doReact(ConsumerSetListRequest req) throws DestinationException
-  {
+  private void doReact(ConsumerSetListRequest req) throws DestinationException {
     // Getting the subscription:
     String subName = req.getTarget();
     ClientSubscription sub = null;
@@ -1088,17 +1064,13 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    *
    * @exception DestinationException  If the subscription does not exist.
    */
-  private void doReact(ConsumerUnsetListRequest req) 
-    throws DestinationException {
+  private void doReact(ConsumerUnsetListRequest req) throws DestinationException {
     // If the listener was listening to a queue, cancelling any pending reply:
     if (req.getQueueMode()) {
       activeCtx.cancelReceive(req.getCancelledRequestId());
       AgentId to = AgentId.fromString(req.getTarget());
-      proxyAgent.sendNot(
-        to,
-        new AbortReceiveRequest(activeCtx.getId(), 
-                                req.getRequestId(),
-                                req.getCancelledRequestId()));
+      proxyAgent.sendNot(to,
+          new AbortReceiveRequest(activeCtx.getId(), req.getRequestId(), req.getCancelledRequestId()));
     }
   }
 
@@ -1109,8 +1081,7 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    *
    * @exception DestinationException  If the subscription does not exist. 
    */
-  private void doReact(ConsumerCloseSubRequest req) throws DestinationException
-  {
+  private void doReact(ConsumerCloseSubRequest req) throws DestinationException {
     // Getting the subscription:
     String subName = req.getTarget();
     ClientSubscription sub = null;
@@ -1167,8 +1138,7 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     }
 
     // Acknowledging the request:
-    proxyAgent.sendNot(proxyAgent.getId(),
-                       new SyncReply(activeCtxId, new ServerReply(req)));
+    proxyAgent.sendNot(proxyAgent.getId(), new SyncReply(activeCtxId, new ServerReply(req)));
   }
 
   /**
@@ -1180,11 +1150,10 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    *
    * @exception DestinationException  If the subscription does not exist. 
    */
-  private void doReact(ConsumerReceiveRequest req) 
-    throws DestinationException {
+  private void doReact(ConsumerReceiveRequest req) throws DestinationException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "ProxyImpl.doReact(" + req + ')');
-    
+
     String subName = req.getTarget();
     ClientSubscription sub = null;
     if (subName != null)
@@ -1227,29 +1196,24 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * <code>SessAckRequest</code> acknowledging messages either on a queue
    * or on a subscription.
    */
-  private void doReact(SessAckRequest req) 
-  {
+  private void doReact(SessAckRequest req) {
     if (req.getQueueMode()) {
       AgentId qId = AgentId.fromString(req.getTarget());
       Vector ids = req.getIds();
-      
-      AcknowledgeRequest not =
-        new AcknowledgeRequest(activeCtxId,
-                               req.getRequestId(),
-                               ids);
+
+      AcknowledgeRequest not = new AcknowledgeRequest(activeCtxId, req.getRequestId(), ids);
       if (qId.getTo() == proxyAgent.getId().getTo()) {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> local acking");
         not.setPersistent(false);
       }
-      
+
       proxyAgent.sendNot(qId, not);
-    }
-    else {
+    } else {
       String subName = req.getTarget();
       ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
       if (sub != null)
-        sub.acknowledge(req.getIds().elements());
+        sub.acknowledge(req.getIds().iterator());
     }
   }
 
@@ -1262,22 +1226,19 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     if (req.getQueueMode()) {
       AgentId qId = AgentId.fromString(req.getTarget());
       Vector ids = req.getIds();
-      proxyAgent.sendNot(qId,
-                         new DenyRequest(activeCtxId, req.getRequestId(), ids));
+      proxyAgent.sendNot(qId, new DenyRequest(activeCtxId, req.getRequestId(), ids));
 
       // Acknowledging the request unless forbidden:
-      if (! req.getDoNotAck())
-        proxyAgent.sendNot(proxyAgent.getId(),
-                           new SyncReply(activeCtxId, new ServerReply(req)));
-    }
-    else {
+      if (!req.getDoNotAck())
+        proxyAgent.sendNot(proxyAgent.getId(), new SyncReply(activeCtxId, new ServerReply(req)));
+    } else {
       String subName = req.getTarget();
       ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
 
-      if (sub == null) 
+      if (sub == null)
         return;
 
-      sub.deny(req.getIds().elements());
+      sub.deny(req.getIds().iterator());
 
       // Launching a delivery sequence:
       ConsumerMessages consM = sub.deliver();
@@ -1294,13 +1255,10 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * <code>ConsumerAckRequest</code> acknowledging a message either on a queue
    * or on a subscription.
    */
-  private void doReact(ConsumerAckRequest req)
-  {
+  private void doReact(ConsumerAckRequest req) {
     if (req.getQueueMode()) {
       AgentId qId = AgentId.fromString(req.getTarget());
-      AcknowledgeRequest not = new AcknowledgeRequest(activeCtxId,
-                                                      req.getRequestId(),
-                                                      req.getIds());
+      AcknowledgeRequest not = new AcknowledgeRequest(activeCtxId, req.getRequestId(), req.getIds());
       if (qId.getTo() == proxyAgent.getId().getTo()) {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> local acking");
@@ -1313,7 +1271,7 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       String subName = req.getTarget();
       ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
       if (sub != null) {
-        sub.acknowledge(req.getIds().elements());
+        sub.acknowledge(req.getIds().iterator());
       }
     }
   }
@@ -1329,23 +1287,21 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     if (req.getQueueMode()) {
       AgentId qId = AgentId.fromString(req.getTarget());
       String id = req.getId();
-      proxyAgent.sendNot(qId,
-                         new DenyRequest(activeCtxId, req.getRequestId(), id));
+      proxyAgent.sendNot(qId, new DenyRequest(activeCtxId, req.getRequestId(), id));
 
       // Acknowledging the request, unless forbidden:
-      if (! req.getDoNotAck())
-        proxyAgent.sendNot(proxyAgent.getId(),
-                           new SyncReply(activeCtxId, new ServerReply(req)));
+      if (!req.getDoNotAck())
+        proxyAgent.sendNot(proxyAgent.getId(), new SyncReply(activeCtxId, new ServerReply(req)));
     } else {
       String subName = req.getTarget();
       ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
 
-      if (sub == null) 
+      if (sub == null)
         return;
 
       Vector ids = new Vector();
       ids.add(req.getId());
-      sub.deny(ids.elements());
+      sub.deny(ids.iterator());
 
       // Launching a delivery sequence:
       ConsumerMessages consM = sub.deliver();
@@ -1374,8 +1330,7 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     deleteTemporaryDestination(tempId);
 
     // Acknowledging the request:
-    proxyAgent.sendNot(proxyAgent.getId(),
-                       new SyncReply(activeCtxId, new ServerReply(req)));
+    proxyAgent.sendNot(proxyAgent.getId(), new SyncReply(activeCtxId, new ServerReply(req)));
   }
 
   private void deleteTemporaryDestination(AgentId destId) {
@@ -1426,15 +1381,13 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 
     ProducerMessages pM;
     ClientMessages not;
-    while (! sendings.isEmpty()) {
+    while (!sendings.isEmpty()) {
       pM = (ProducerMessages) sendings.remove(0);
-      not = new ClientMessages(activeCtxId,
-                               pM.getRequestId(),
-                               pM.getMessages());
+      not = new ClientMessages(activeCtxId, pM.getRequestId(), pM.getMessages());
       proxyAgent.sendNot(AgentId.fromString(pM.getTarget()), not);
     }
 
-    while (! acks.isEmpty())
+    while (!acks.isEmpty())
       doReact((SessAckRequest) acks.remove(0));
 
     doReply(new ServerReply(req));
@@ -1455,8 +1408,7 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       queueName = (String) queues.nextElement();
       qId = AgentId.fromString(queueName);
       ids = req.getQueueIds(queueName);
-      proxyAgent.sendNot(qId,
-                         new DenyRequest(activeCtxId, req.getRequestId(), ids));
+      proxyAgent.sendNot(qId, new DenyRequest(activeCtxId, req.getRequestId(), ids));
     }
 
     String subName;
@@ -1466,7 +1418,7 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       subName = (String) subs.nextElement();
       sub = (ClientSubscription) subsTable.get(subName);
       if (sub != null) {
-        sub.deny(req.getSubIds(subName).elements());
+        sub.deny(req.getSubIds(subName).iterator());
 
         consM = sub.deliver();
         if (consM != null && activeCtx.getActivated())
@@ -1491,8 +1443,7 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       }
     }
 
-    proxyAgent.sendNot(proxyAgent.getId(),
-                       new SyncReply(activeCtxId, new ServerReply(req)));
+    proxyAgent.sendNot(proxyAgent.getId(), new SyncReply(activeCtxId, new ServerReply(req)));
   }
 
   /**
@@ -1514,16 +1465,17 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     Vector fis = new Vector();
     Vector gtis = new Vector();
     if (recoveredTransactions != null) {
-      Enumeration keys = recoveredTransactions.keys();
+      Iterator txs = recoveredTransactions.entrySet().iterator();
       Xid xid;
-      while (keys.hasMoreElements()) {
-        xid = (Xid) keys.nextElement();
+      while (txs.hasNext()) {
+        Map.Entry txEntry = (Map.Entry) txs.next();
+        xid = (Xid) txEntry.getKey();
         bqs.add(xid.bq);
         fis.add(new Integer(xid.fi));
         gtis.add(xid.gti);
         try {
-          activeCtx.registerTxPrepare(xid,
-                                      (XACnxPrepare) recoveredTransactions.remove(xid));
+          txs.remove();
+          activeCtx.registerTxPrepare(xid, (XACnxPrepare) txEntry.getValue());
         }
         catch (Exception exc) {
           throw new StateException("Recovered transaction branch has already been prepared by the RM.");
@@ -1630,11 +1582,11 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     // Denying the non acknowledged messages:
     AgentId id;
     boolean prepared = false;
-    for (Enumeration ids = activeCtx.getDeliveringQueues(); ids.hasMoreElements();) {
-      id = (AgentId) ids.nextElement();
+    for (Iterator ids = activeCtx.getDeliveringQueues(); ids.hasNext();) {
+      id = (AgentId) ids.next();
 
-      for (Enumeration xids = activeCtx.getTxIds(); xids.hasMoreElements();) {
-        Xid xid = (Xid) xids.nextElement(); 
+      for (Iterator xids = activeCtx.getTxIds(); xids.hasNext();) {
+        Xid xid = (Xid) xids.next();
         if (activeCtx.isPrepared(xid)) {
           prepared = true;
           break;
@@ -1648,25 +1600,23 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     // Removing or deactivating the subscriptions:
     String subName = null;
     ClientSubscription sub;
-    Vector topics = new Vector();
-    for (Enumeration subs = activeCtx.getActiveSubs(); subs.hasMoreElements();) {
-      subName = (String) subs.nextElement();
+    List topics = new Vector();
+    for (Iterator subs = activeCtx.getActiveSubs(); subs.hasNext();) {
+      subName = (String) subs.next();
       sub = (ClientSubscription) subsTable.get(subName);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "Deactivate subscription "
-            + subName + ", topic id = " + sub.getTopicId());
+        logger.log(BasicLevel.DEBUG,
+            "Deactivate subscription " + subName + ", topic id = " + sub.getTopicId());
 
       if (sub.getDurable()) {
         sub.deactivate();
 
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "Durable subscription"
-              + subName + " de-activated.");
+          logger.log(BasicLevel.DEBUG, "Durable subscription" + subName + " de-activated.");
       } else {
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, " -> topicsTable = "
-              + topicsTable);
+          logger.log(BasicLevel.DEBUG, " -> topicsTable = " + topicsTable);
 
         sub.delete();
         subsTable.remove(subName);
@@ -1684,37 +1634,34 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
           topics.add(sub.getTopicId());
 
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "Temporary subscription"
-              + subName + " deleted.");
+          logger.log(BasicLevel.DEBUG, "Temporary subscription" + subName + " deleted.");
       }
     }
     // Browsing the topics which at least have one subscription removed.
-    for (Enumeration topicIds = topics.elements(); topicIds.hasMoreElements();)
-      updateSubscriptionToTopic((AgentId) topicIds.nextElement(), -1, -1);
+    for (Iterator topicIds = topics.iterator(); topicIds.hasNext();)
+      updateSubscriptionToTopic((AgentId) topicIds.next(), -1, -1);
 
     // Deleting the temporary destinations:
     AgentId destId;
-    for (Enumeration dests = activeCtx.getTempDestinations(); dests
-        .hasMoreElements();) {
-      destId = (AgentId) dests.nextElement();
+    for (Iterator dests = activeCtx.getTempDestinations(); dests.hasNext();) {
+      destId = (AgentId) dests.next();
       activeCtx.removeTemporaryDestination(destId);
       deleteTemporaryDestination(destId);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "Deletes temporary"
-            + " destination " + destId.toString());
+        logger.log(BasicLevel.DEBUG, "Deletes temporary" + " destination " + destId.toString());
     }
 
     // Saving the prepared transactions.
-    Enumeration xids = activeCtx.getTxIds();
+    Iterator xids = activeCtx.getTxIds();
     Xid xid;
     XACnxPrepare recoveredPrepare;
     XACnxPrepare prepare;
-    while (xids.hasMoreElements()) {
+    while (xids.hasNext()) {
       if (recoveredTransactions == null)
         recoveredTransactions = new Hashtable();
 
-      xid = (Xid) xids.nextElement();
+      xid = (Xid) xids.next();
 
       recoveredPrepare = (XACnxPrepare) recoveredTransactions.get(xid);
       prepare = activeCtx.getTxPrepare(xid);
@@ -1788,7 +1735,7 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
           String subName = sar.getTarget();
           ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
           if (sub != null) {
-            sub.acknowledge(sar.getIds().elements());
+            sub.acknowledge(sar.getIds().iterator());
             proxyAgent.setSave();
           }
         }
@@ -1824,7 +1771,8 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
   private void doFwd(AgentId from, AbstractReplyNot rep) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,
-                 "--- " + this + " got " + rep.getClass().getName() + " with id: " + rep.getCorrelationId() + " from: " + from);
+          "--- " + this + " got " + rep.getClass().getName() + " with id: " + rep.getCorrelationId()
+              + " from: " + from);
 
     if (rep instanceof QueueMsgReply)
       doFwd(from, (QueueMsgReply) rep);
@@ -1842,7 +1790,6 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     }
   }
 
-
   /**
    * Actually forwards a <code>QueueMsgReply</code> coming from a destination
    * as a <code>ConsumerMessages</code> destinated to the requesting client.
@@ -1852,9 +1799,8 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    */
   private void doFwd(AgentId from, QueueMsgReply rep) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "ProxyImpl.doFwd(" + from + ',' + rep + ')');
-    
+      logger.log(BasicLevel.DEBUG, "ProxyImpl.doFwd(" + from + ',' + rep + ')');
+
     try {
       // Updating the active context:
       setCtx(rep.getClientContext());
@@ -1863,20 +1809,18 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       // the message.
       if (rep.getCorrelationId() == activeCtx.getCancelledReceive()) {
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG,
-            " -> cancelled receive: id=" + activeCtx.getCancelledReceive());
+          logger.log(BasicLevel.DEBUG, " -> cancelled receive: id=" + activeCtx.getCancelledReceive());
 
         if (rep.getSize() > 0) {
           Vector msgList = rep.getMessages();
           for (int i = 0; i < msgList.size(); i++) {
             Message msg = new Message((org.objectweb.joram.shared.messages.Message) msgList.elementAt(i));
             String msgId = msg.getIdentifier();
-            
+
             if (logger.isLoggable(BasicLevel.INFO))
               logger.log(BasicLevel.INFO, " -> denying message: " + msgId);
-            
-            proxyAgent.sendNot(from,
-                               new DenyRequest(0, rep.getCorrelationId(), msgId));
+
+            proxyAgent.sendNot(from, new DenyRequest(0, rep.getCorrelationId(), msgId));
           }
         }
       } else {
@@ -1888,18 +1832,10 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         // Building the reply and storing the wrapped message id for later
         // denying in the case of a failure:
         if (rep.getSize() > 0) {
-          jRep = new ConsumerMessages(
-            rep.getCorrelationId(),
-            rep.getMessages(),
-            from.toString(),
-            true);
+          jRep = new ConsumerMessages(rep.getCorrelationId(), rep.getMessages(), from.toString(), true);
           activeCtx.addDeliveringQueue(from);
         } else {
-          jRep = new ConsumerMessages(
-              rep.getCorrelationId(),
-              (Vector)null,
-              from.toString(),
-              true);
+          jRep = new ConsumerMessages(rep.getCorrelationId(), (Vector) null, from.toString(), true);
         }
 
         // If the context is started, delivering the message, or buffering it:
@@ -1920,12 +1856,11 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         for (int i = 0; i < msgList.size(); i++) {
           Message msg = new Message((org.objectweb.joram.shared.messages.Message) msgList.elementAt(i));
           String msgId = msg.getIdentifier();
-          
+
           if (logger.isLoggable(BasicLevel.INFO))
-            logger.log(BasicLevel.INFO,  "Denying message: " + msgId);
-          
-          proxyAgent.sendNot(from,
-                             new DenyRequest(0, rep.getCorrelationId(), msgId));
+            logger.log(BasicLevel.INFO, "Denying message: " + msgId);
+
+          proxyAgent.sendNot(from, new DenyRequest(0, rep.getCorrelationId(), msgId));
         }
       }
     }
@@ -1996,8 +1931,8 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       messages.add(message);
     }
 
-    for (Enumeration names = tSub.getNames(); names.hasMoreElements();) {
-      subName = (String) names.nextElement();
+    for (Iterator names = tSub.getNames(); names.hasNext();) {
+      subName = (String) names.next();
       sub = (ClientSubscription) subsTable.get(subName);
       if (sub == null) continue;
 
@@ -2008,7 +1943,7 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     // Save message if it is delivered to a durable subscription.
     for (Iterator msgs = messages.iterator(); msgs.hasNext();) {
       Message message = (Message) msgs.next();
-      
+
       if (message.durableAcksCounter > 0) {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> save message " + message);
@@ -2020,8 +1955,8 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       }
     } 
 
-    for (Enumeration names = tSub.getNames(); names.hasMoreElements();) {
-      subName = (String) names.nextElement();
+    for (Iterator names = tSub.getNames(); names.hasNext();) {
+      subName = (String) names.next();
       sub = (ClientSubscription) subsTable.get(subName);
       if (sub == null) continue;
 
@@ -2054,8 +1989,7 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    */
   private void doReact(AgentId from, ExceptionReply rep) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "ProxyImpl.doReact(" + from + ',' + rep + ')');
+      logger.log(BasicLevel.DEBUG, "ProxyImpl.doReact(" + from + ',' + rep + ')');
     MomException exc = rep.getException();
 
     // The exception comes from a topic refusing the access: deleting the subs.
@@ -2066,8 +2000,8 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       if (tSub != null) {
         String name;
         ClientSubscription sub;
-        for (Enumeration e = tSub.getNames(); e.hasMoreElements();) { 
-          name = (String) e.nextElement();
+        for (Iterator e = tSub.getNames(); e.hasNext();) {
+          name = (String) e.next();
           sub = (ClientSubscription) subsTable.remove(name);
           try {
             MXWrapper.unregisterMBean(getMBeanName(name));
@@ -2124,22 +2058,19 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     AgentId agId = uA.agent;
 
     if (logger.isLoggable(BasicLevel.INFO))
-      logger.log(BasicLevel.INFO,
-                 "--- " + this + " notified of invalid destination: " + agId.toString());
-    
+      logger.log(BasicLevel.INFO, "--- " + this + " notified of invalid destination: " + agId.toString());
+
     // The deleted destination is a topic: deleting its subscriptions.
     if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,
-                   " -> topicsTable.remove(" + agId + ')');
+      logger.log(BasicLevel.DEBUG, " -> topicsTable.remove(" + agId + ')');
     TopicSubscription tSub = (TopicSubscription) topicsTable.remove(agId);
     if (tSub != null) {
       String name;
       ClientSubscription sub;
       DestinationException exc;
-      exc = new DestinationException("Destination " + agId +
-                                     " does not exist.");
-      for (Enumeration e = tSub.getNames(); e.hasMoreElements();) { 
-        name = (String) e.nextElement();
+      exc = new DestinationException("Destination " + agId + " does not exist.");
+      for (Iterator e = tSub.getNames(); e.hasNext();) {
+        name = (String) e.next();
         sub = (ClientSubscription) subsTable.remove(name);
         try {
           MXWrapper.unregisterMBean(getMBeanName(name));
@@ -2169,8 +2100,8 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
           // state change, so save.
           proxyAgent.setSave();
           dmqId = null;
-          for (Enumeration keys = subsTable.keys(); keys.hasMoreElements();)
-            ((ClientSubscription) subsTable.get(keys.nextElement())).setDMQId(null);
+          for (Iterator subs = subsTable.values().iterator(); subs.hasNext();)
+            ((ClientSubscription) subs.next()).setDMQId(null);
         }
         // Sending the messages again if not coming from the default DMQ:
         if (QueueImpl.getDefaultDMQId() != null && !agId.equals(QueueImpl.getDefaultDMQId())) {
@@ -2198,10 +2129,8 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
           // Do nothing (the context doesn't exist any more).
         }
       } else if (req instanceof ReceiveRequest) {
-        DestinationException exc = new DestinationException(
-          "Destination " + agId + " does not exist.");
-        MomExceptionReply mer = new MomExceptionReply(
-          req.getRequestId(), exc);
+        DestinationException exc = new DestinationException("Destination " + agId + " does not exist.");
+        MomExceptionReply mer = new MomExceptionReply(req.getRequestId(), exc);
         try {
           setCtx(req.getClientContext());
           if (activeCtx.getActivated()) {
@@ -2216,8 +2145,8 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         }
       }
       if (logger.isLoggable(BasicLevel.INFO))
-        logger.log(BasicLevel.INFO,
-                   "Connection " + req.getClientContext() + " notified of the deletion of destination " + agId);
+        logger.log(BasicLevel.INFO, "Connection " + req.getClientContext()
+            + " notified of the deletion of destination " + agId);
     }
   }
 
@@ -2243,13 +2172,10 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       if (sub != null)
         nbMaxMsg = sub.getNbMaxMsg();
 
-      replyToTopic(new GetNumberReply(nbMaxMsg),
-                   not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
+      replyToTopic(new GetNumberReply(nbMaxMsg), not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
     } else if (adminRequest instanceof GetDMQSettingsRequest) {
-      replyToTopic(new GetDMQSettingsReply((dmqId != null)?dmqId.toString():null, threshold),
-                   not.getReplyTo(),
-                   not.getRequestMsgId(),
-                   not.getReplyMsgId());
+      replyToTopic(new GetDMQSettingsReply((dmqId != null) ? dmqId.toString() : null, threshold),
+          not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
     } else if (adminRequest instanceof SetDMQRequest) {
       proxyAgent.setSave();
       
@@ -2258,21 +2184,17 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       else
         dmqId = null;
 
-      for (Enumeration keys = subsTable.keys(); keys.hasMoreElements();) 
-        ((ClientSubscription) subsTable.get(keys.nextElement())).setDMQId(dmqId);
+      for (Iterator subs = subsTable.values().iterator(); subs.hasNext();)
+        ((ClientSubscription) subs.next()).setDMQId(dmqId);
 
-      replyToTopic(new AdminReply(true, null),
-                   not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
+      replyToTopic(new AdminReply(true, null), not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
     } else if (adminRequest instanceof SetThresholdRequest) {
       proxyAgent.setSave(); // state change, so save.
       threshold = ((SetThresholdRequest) adminRequest).getThreshold();
-      for (Enumeration keys = subsTable.keys(); keys.hasMoreElements();) 
-        ((ClientSubscription) subsTable.get(keys.nextElement())).setThreshold(threshold);
+      for (Iterator subs = subsTable.values().iterator(); subs.hasNext();)
+        ((ClientSubscription) subs.next()).setThreshold(threshold);
 
-      replyToTopic(new AdminReply(true, null),
-                   not.getReplyTo(),
-                   not.getRequestMsgId(),
-                   not.getReplyMsgId());
+      replyToTopic(new AdminReply(true, null), not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
     } else if (adminRequest instanceof SetNbMaxMsgRequest) {
       proxyAgent.setSave(); // state change, so save.
       int nbMaxMsg = ((SetNbMaxMsgRequest) adminRequest).getNbMaxMsg();
@@ -2294,36 +2216,28 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         }
       }
 
-      replyToTopic(reply,
-                   not.getReplyTo(),
-                   not.getRequestMsgId(),
-                   not.getReplyMsgId());
+      replyToTopic(reply, not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
+    } else if (adminRequest instanceof DeleteUser) {
+      deleteProxy(not);
     } else {
-      logger.log(BasicLevel.ERROR,
-                 "Unknown administration request for proxy " + proxyAgent.getId());
-      replyToTopic(new AdminReply(AdminReply.UNKNOWN_REQUEST, null),
-                   not.getReplyTo(),
-                   not.getRequestMsgId(),
-                   not.getReplyMsgId());
+      logger.log(BasicLevel.ERROR, "Unknown administration request for proxy " + proxyAgent.getId());
+      replyToTopic(new AdminReply(AdminReply.UNKNOWN_REQUEST, null), not.getReplyTo(), not.getRequestMsgId(),
+          not.getReplyMsgId());
       
     }
   }
 
-  private void doReact(GetSubscriptions request,
-                       AgentId replyTo,
-                       String requestMsgId,
-                       String replyMsgId) {
-    Enumeration keys = subsTable.keys();
-    Enumeration values = subsTable.elements();
+  private void doReact(GetSubscriptions request, AgentId replyTo, String requestMsgId, String replyMsgId) {
+    Iterator subsIterator = subsTable.entrySet().iterator();
     String[] subNames = new String[subsTable.size()];
     String[] topicIds = new String[subsTable.size()];
     int[] messageCounts = new int[subsTable.size()];
     boolean[] durable = new boolean[subsTable.size()];
     int i = 0;
-    while (keys.hasMoreElements()) {
-      subNames[i] = (String)keys.nextElement();
-      ClientSubscription cs = 
-        (ClientSubscription)values.nextElement();
+    while (subsIterator.hasNext()) {
+      Map.Entry subEntry = (Map.Entry) subsIterator.next();
+      subNames[i] = (String) subEntry.getKey();
+      ClientSubscription cs = (ClientSubscription) subEntry.getValue();
       topicIds[i] = cs.getTopicId().toString();
       messageCounts[i] = cs.getPendingMessageCount();
       durable[i] = cs.getDurable();
@@ -2341,60 +2255,42 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * @return The list of subscriptions for this user.
    */
   public String[] getSubscriptionNames() {
-    Enumeration keys = subsTable.keys();
-    String[] res = new String[subsTable.size()];
-    int i = 0;
-    while (keys.hasMoreElements()) {
-      res[i] = (String)keys.nextElement();
-      i++;
-    }
-    return res;
+    return (String[]) subsTable.keySet().toArray(new String[subsTable.size()]);
   }
 
-  private void doReact(GetSubscriptionMessageIds request,
-                       AgentId replyTo,
-                       String requestMsgId,
-                       String replyMsgId) {
+  private void doReact(GetSubscriptionMessageIds request, AgentId replyTo, String requestMsgId,
+      String replyMsgId) {
     String subName = request.getSubscriptionName();
     ClientSubscription cs = null;
     if (subName != null) {
-      cs = (ClientSubscription)subsTable.get(subName);
+      cs = (ClientSubscription) subsTable.get(subName);
     }
     if (cs != null) {
-      GetSubscriptionMessageIdsRep reply = 
-        new GetSubscriptionMessageIdsRep(
-          cs.getMessageIds());
+      GetSubscriptionMessageIdsRep reply = new GetSubscriptionMessageIdsRep(cs.getMessageIds());
       replyToTopic(reply, replyTo, requestMsgId, replyMsgId);
     } else {
-      replyToTopic(new AdminReply(false, "Subscription not found: " + request.getSubscriptionName()), 
-                   replyTo, requestMsgId, replyMsgId);
+      replyToTopic(new AdminReply(false, "Subscription not found: " + request.getSubscriptionName()),
+          replyTo, requestMsgId, replyMsgId);
     }
   }
 
-  private void doReact(GetSubscription request,
-                       AgentId replyTo,
-                       String requestMsgId,
-                       String replyMsgId) {
+  private void doReact(GetSubscription request, AgentId replyTo, String requestMsgId, String replyMsgId) {
     String subName = request.getSubscriptionName();
     ClientSubscription cs = null;
     if (subName != null) {
-      cs = (ClientSubscription)subsTable.get(subName);
+      cs = (ClientSubscription) subsTable.get(subName);
     }
     if (cs != null) {
       GetSubscriptionRep reply = new GetSubscriptionRep(cs.getTopicId().toString(),
-                                                        cs.getPendingMessageCount(),
-                                                        cs.getDurable());
+          cs.getPendingMessageCount(), cs.getDurable());
       replyToTopic(reply, replyTo, requestMsgId, replyMsgId);
     } else {
-      replyToTopic(new org.objectweb.joram.shared.admin.AdminReply(false, "Subscription not found: " + request.getSubscriptionName()), 
-                   replyTo, requestMsgId, replyMsgId);
+      replyToTopic(new org.objectweb.joram.shared.admin.AdminReply(false, "Subscription not found: "
+          + request.getSubscriptionName()), replyTo, requestMsgId, replyMsgId);
     }
   }
 
-  private void doReact(GetSubscriptionMessage request,
-                       AgentId replyTo,
-                       String requestMsgId,
-                       String replyMsgId) {
+  private void doReact(GetSubscriptionMessage request, AgentId replyTo, String requestMsgId, String replyMsgId) {
     ClientSubscription cs = null;
     String subName = request.getSubscriptionName();
     if (subName != null) {
@@ -2425,22 +2321,19 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     }
   }
 
-  private void doReact(DeleteSubscriptionMessage request,
-                       AgentId replyTo,
-                       String requestMsgId,
-                       String replyMsgId) {
+  private void doReact(DeleteSubscriptionMessage request, AgentId replyTo, String requestMsgId,
+      String replyMsgId) {
     String subName = request.getSubscriptionName();
     ClientSubscription cs = null;
     if (subName != null) {
-      cs = (ClientSubscription)subsTable.get(subName);
+      cs = (ClientSubscription) subsTable.get(subName);
     }
     if (cs != null) {
       cs.deleteMessage(request.getMessageId());
-      replyToTopic(new AdminReply(true, null),
-                   replyTo, requestMsgId, replyMsgId);   
+      replyToTopic(new AdminReply(true, null), replyTo, requestMsgId, replyMsgId);
     } else {
-        replyToTopic(new AdminReply(false, "Subscription not found: " + request.getSubscriptionName()),
-                     replyTo, requestMsgId, replyMsgId);
+      replyToTopic(new AdminReply(false, "Subscription not found: " + request.getSubscriptionName()),
+          replyTo, requestMsgId, replyMsgId);
     }
   }
 
@@ -2452,18 +2345,14 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * @param subName  The subscription unique name.
    * @param msgId    The unique message's identifier.
    */
-  public void deleteSubscriptionMessage(String subName,
-                                        String msgId) {
-    ClientSubscription cs = (ClientSubscription)subsTable.get(subName);
+  public void deleteSubscriptionMessage(String subName, String msgId) {
+    ClientSubscription cs = (ClientSubscription) subsTable.get(subName);
     if (cs != null) {
       cs.deleteMessage(msgId);
     }
   }
   
-  private void doReact(ClearSubscription request,
-                       AgentId replyTo,
-                       String requestMsgId,
-                       String replyMsgId) {
+  private void doReact(ClearSubscription request, AgentId replyTo, String requestMsgId, String replyMsgId) {
     String subName = request.getSubscriptionName();
     ClientSubscription cs = null;
     if (subName != null) {
@@ -2471,22 +2360,18 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     }
     if (cs != null) {
       cs.clear();
-      replyToTopic(new AdminReply(true, null),
-                   replyTo, requestMsgId, replyMsgId);
+      replyToTopic(new AdminReply(true, null), replyTo, requestMsgId, replyMsgId);
     } else {
       replyToTopic(new AdminReply(false, "Subscription not found: " + request.getSubscriptionName()),
-                   replyTo, requestMsgId, replyMsgId);
+          replyTo, requestMsgId, replyMsgId);
     }
   }
 
-  private void replyToTopic(AdminReply reply,
-                            AgentId replyTo,
-                            String requestMsgId,
-                            String replyMsgId) {
+  private void replyToTopic(AdminReply reply, AgentId replyTo, String requestMsgId, String replyMsgId) {
     org.objectweb.joram.shared.messages.Message message = new org.objectweb.joram.shared.messages.Message();
     message.correlationId = requestMsgId;
     message.timestamp = System.currentTimeMillis();
-    message.setDestination(replyTo.toString(), message.TOPIC_TYPE);
+    message.setDestination(replyTo.toString(), org.objectweb.joram.shared.messages.Message.TOPIC_TYPE);
     message.id = replyMsgId;
     try {
       message.setAdminMessage(reply);
@@ -2553,28 +2438,23 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    */
   private void doReply(int key, AbstractJmsReply reply) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "ProxyImpl.doReply(" + key + ',' + reply + ')');
+      logger.log(BasicLevel.DEBUG, "ProxyImpl.doReply(" + key + ',' + reply + ')');
     proxyAgent.sendToClient(key, reply);
   }
 
   void cleanPendingMessages(long currentTime) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "ProxyImpl.cleanPendingMessages(" + messagesTable.size() + ')');
-
+      logger.log(BasicLevel.DEBUG, "ProxyImpl.cleanPendingMessages(" + messagesTable.size() + ')');
     
-    String id = null;
     Message message = null;
     DMQManager dmqManager = null;
 
-    for (Enumeration ids = messagesTable.keys(); ids.hasMoreElements(); ) {
-      id = (String) ids.nextElement();
-      message = (Message) messagesTable.get(id);
+    for (Iterator values = messagesTable.values().iterator(); values.hasNext();) {
+      message = (Message) values.next();
       if ((message == null) || message.isValid(currentTime))
         continue;
 
-      messagesTable.remove(id);
+      values.remove();
       if (message.durableAcksCounter > 0)
         message.delete();
 
@@ -2584,13 +2464,12 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.EXPIRED);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,
-                   "ProxyImpl expired message " + message.getIdentifier());
+        logger.log(BasicLevel.DEBUG, "ProxyImpl expired message " + message.getIdentifier());
     }
     
-    Enumeration en = subsTable.elements();
-    while (en.hasMoreElements()) {
-      ((ClientSubscription) en.nextElement()).cleanMessageIds();
+    Iterator subs = subsTable.values().iterator();
+    while (subs.hasNext()) {
+      ((ClientSubscription) subs.next()).cleanMessageIds();
     }
     
     // If needed, sending the dead messages to the DMQ:
@@ -2598,8 +2477,13 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       dmqManager.sendToDMQ();
 
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "ProxyImpl.cleanPendingMessages -> " + messagesTable.size());
+      logger.log(BasicLevel.DEBUG, "ProxyImpl.cleanPendingMessages -> " + messagesTable.size());
+  }
+
+  public void delete() {
+    DeleteUser request = new DeleteUser(getName(), proxyAgent.getId().toString());
+    FwdAdminRequestNot deleteNot = new FwdAdminRequestNot(request, null, null);
+    Channel.sendTo(AdminTopic.getDefault(), deleteNot);
   }
 
   /**
@@ -2609,56 +2493,59 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    *
    * @exception Exception  If the requester is not an administrator.
    */
-  public void deleteProxy(AgentId from) throws Exception {
+  private void deleteProxy(FwdAdminRequestNot not) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "--- " + this + " notified to be deleted.");
+      logger.log(BasicLevel.DEBUG, "--- " + this + " notified to be deleted.");
 
-    if (! from.equals(AdminTopic.getDefault()))
-      throw new Exception("Unauthorized deletion of proxy");
+    String userName = ((DeleteUser) not.getRequest()).getUserName();
+    if (contexts.size() > 0) {
+      String info = "Delete proxy request successful [false]: proxy [" + proxyAgent.getId() + "] of user ["
+          + userName + "] is currently in use.";
 
-    // Notifying the connected clients:
-    Enumeration keys = contexts.keys();
-    int key;
-    while (keys.hasMoreElements()) {
-      key = ((Integer) keys.nextElement()).intValue();
-      try {
-        setCtx(key);
+      if (not.getReplyTo() != null) {
+        replyToTopic(new AdminReply(AdminReply.PERMISSION_DENIED, info), not.getReplyTo(),
+            not.getRequestMsgId(), not.getReplyMsgId());
+      }
+      return;
+    }
 
-        doReply(new MomExceptionReply(new StateException("Client proxy is deleted.")));
+    AdminTopicImpl.deleteUser(userName);
 
-        // Denying the non acknowledged messages:
-        AgentId id;
-        for (Enumeration ids = activeCtx.getDeliveringQueues();
-             ids.hasMoreElements();) {
-          id = (AgentId) ids.nextElement();
-          proxyAgent.sendNot(id, new DenyRequest(activeCtxId));
-        }
+    String info = "Delete proxy request successful [true]: proxy [" + proxyAgent.getId() + "] of user ["
+        + userName + "] has been notified of deletion";
 
-        // Deleting the temporary destinations:
-        AgentId destId;
-        for (Enumeration dests = activeCtx.getTempDestinations();
-             dests.hasMoreElements();) {
-          destId = (AgentId) dests.nextElement();
-          deleteTemporaryDestination(destId);
-  
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG,
-                       "Sending DeleteNot to temporary destination " +
-                       destId.toString());
-        }
-      } catch (StateException pE) {}
+    if (not.getReplyTo() != null) {
+      replyToTopic(new AdminReply(true, info), not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
     }
 
     // Removing all proxy's subscriptions:
     AgentId destId;
-    for (Enumeration topics = topicsTable.keys(); topics.hasMoreElements();) {
-      destId = (AgentId) topics.nextElement();
+    for (Iterator topics = topicsTable.keySet().iterator(); topics.hasNext();) {
+      destId = (AgentId) topics.next();
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> topicsTable.remove(" + destId + ')');
-      topicsTable.remove(destId);
+      topics.remove();
       updateSubscriptionToTopic(destId, -1, -1);
     }
+    
+    // Delete all subscriptions
+    for (Iterator subs = subsTable.entrySet().iterator(); subs.hasNext();) {
+      Map.Entry subEntry = (Entry) subs.next();
+      String subName = (String) subEntry.getKey();
+      ClientSubscription sub = (ClientSubscription) subEntry.getValue();
+
+      // Deleting the subscription.
+      sub.delete();
+      try {
+        MXWrapper.unregisterMBean(getMBeanName(subName));
+      } catch (Exception e) {
+        if (logger.isLoggable(BasicLevel.WARN))
+          logger.log(BasicLevel.WARN, "  - Problem when unregistering ClientSubscriptionMbean", e);
+      }
+    }
+
+    Channel.sendTo(proxyAgent.getId(), new DeleteNot());
+
   }
 
   /**
@@ -2688,22 +2575,17 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
    * @return  <code>true</code> if a <code>SubscribeRequest</code> has been
    *          sent to the topic.
    */
-  private boolean updateSubscriptionToTopic(AgentId topicId,
-                                            int contextId,
-                                            int requestId,
-                                            boolean asyncSub)
-  {
+  private boolean updateSubscriptionToTopic(AgentId topicId, int contextId, int requestId, boolean asyncSub) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, 
-                 "ProxyImpl.updateSubscriptionToTopic(" +
-                 topicId + ',' + contextId + ',' + requestId + ',' + asyncSub +')');
+      logger.log(BasicLevel.DEBUG, "ProxyImpl.updateSubscriptionToTopic(" + topicId + ',' + contextId + ','
+          + requestId + ',' + asyncSub + ')');
+
     TopicSubscription tSub = (TopicSubscription) topicsTable.get(topicId);
 
     // No more subs to this topic: unsubscribing.
     if (tSub == null || tSub.isEmpty()) {
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,
-                   " -> topicsTable.remove(" + topicId + ')');
+        logger.log(BasicLevel.DEBUG, " -> topicsTable.remove(" + topicId + ')');
       topicsTable.remove(topicId);
       proxyAgent.sendNot(topicId,
                          new UnsubscribeRequest(contextId, requestId));
@@ -2729,11 +2611,9 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
   }
 
 
-  public void readBag(ObjectInputStream in) 
-    throws IOException, ClassNotFoundException {
+  public void readBag(ObjectInputStream in) throws IOException, ClassNotFoundException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "ProxyImpl[" + proxyAgent.getId() + "].readbag()");
+      logger.log(BasicLevel.DEBUG, "ProxyImpl[" + proxyAgent.getId() + "].readbag()");
 
     activeCtxId = in.readInt();
     /* // Orders elements is unknown, not use read bag in the same order
@@ -2751,26 +2631,26 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
        }*/
     /*** part modified */
     int size = in.readInt();
-    Object obj=null;
-    for(int j=0;j<size;j++){
-	obj=in.readObject();
-	ClientContext cc = (ClientContext) contexts.get(obj);
-	cc.setProxyAgent(proxyAgent);
-	cc.readBag(in);
+    Object obj = null;
+    for (int j = 0; j < size; j++) {
+      obj = in.readObject();
+      ClientContext cc = (ClientContext) contexts.get(obj);
+      cc.setProxyAgent(proxyAgent);
+      cc.readBag(in);
     }
     size = in.readInt();
-    for(int j=0;j<size;j++){
-	obj=in.readObject();
-	ClientSubscription cs = (ClientSubscription) subsTable.get(obj);
-	cs.setProxyAgent(proxyAgent);
-	cs.readBag(in);
+    for (int j = 0; j < size; j++) {
+      obj = in.readObject();
+      ClientSubscription cs = (ClientSubscription) subsTable.get(obj);
+      cs.setProxyAgent(proxyAgent);
+      cs.readBag(in);
     }
     /*** end part modified */  
     
     activeCtx = (ClientContext)contexts.get(
       new Integer(activeCtxId));
 
-    Vector messages = (Vector)in.readObject();
+    Vector messages = (Vector) in.readObject();
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, " -> messages = " + messages);
@@ -2778,24 +2658,21 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     topicsTable = new Hashtable();
     messagesTable = new Hashtable();
 
-    Vector topics = new Vector();
+//    Vector topics = new Vector();
     TopicSubscription tSub;
 
-
-    for (Enumeration subNames = subsTable.keys();
-         subNames.hasMoreElements();) {
-      String subName = (String) subNames.nextElement();
+    for (Iterator subsIterator = subsTable.entrySet().iterator(); subsIterator.hasNext();) {
+      Map.Entry subEntry = (Map.Entry) subsIterator.next();
+      String subName = (String) subEntry.getKey();
 
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> subName = " + subName);
       
-      ClientSubscription cSub = (ClientSubscription) subsTable.get(subName);
+      ClientSubscription cSub = (ClientSubscription) subEntry.getValue();
       AgentId destId = cSub.getTopicId();
-      if (! topics.contains(destId))
-        topics.add(destId);
-      cSub.reinitialize(messagesTable, 
-                        messages,
-                        false);
+//      if (! topics.contains(destId))
+//        topics.add(destId);
+      cSub.reinitialize(messagesTable, messages, false);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> destId = " + destId + ')');
@@ -2817,11 +2694,9 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 //     }
   }
 
-  public void writeBag(ObjectOutputStream out)
-    throws IOException {
+  public void writeBag(ObjectOutputStream out) throws IOException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "ProxyImpl[" + proxyAgent.getId() + "].writeBag()");
+      logger.log(BasicLevel.DEBUG, "ProxyImpl[" + proxyAgent.getId() + "].writeBag()");
 
     out.writeInt(activeCtxId);
     
@@ -2833,30 +2708,31 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
 	while (elements.hasMoreElements()) {
 	   ((ClientSubscription)elements.nextElement()).writeBag(out);
 	}*/
+
     /*** part modified */
-    // the number of keys in contexts hashtable
+    // the number of keys in contexts map
     out.writeInt(contexts.size());
-    Enumeration elements = contexts.keys();
-    Object obj=null;
-    while (elements.hasMoreElements()) {
-	obj=elements.nextElement();
-	out.writeObject(obj);
-	((ClientContext) contexts.get(obj)).writeBag(out);
+    Iterator ctxs = contexts.entrySet().iterator();
+    while (ctxs.hasNext()) {
+      Map.Entry ctxEntry = (Map.Entry) ctxs.next();
+      out.writeObject(ctxEntry.getKey());
+      ((ClientContext) ctxEntry.getValue()).writeBag(out);
     }
-    // the number of keys in subsTable hashtable
+
+    // the number of keys in subsTable map
     out.writeInt(subsTable.size());
-       elements = subsTable.keys();
-    while (elements.hasMoreElements()) {
-	obj=elements.nextElement();
-	out.writeObject(obj);
-	((ClientSubscription) subsTable.get(obj)).writeBag(out);
+    Iterator subs = subsTable.entrySet().iterator();
+    while (subs.hasNext()) {
+      Map.Entry subEntry = (Map.Entry) subs.next();
+      out.writeObject(subEntry.getKey());
+      ((ClientSubscription) subEntry.getValue()).writeBag(out);
     }
     /*** end part modified */
 
-    Vector messages = new Vector();
-    elements = messagesTable.elements();
-    while (elements.hasMoreElements()) {
-      messages.addElement(elements.nextElement());
+    List messages = new Vector();
+    Iterator msgs = messagesTable.values().iterator();
+    while (msgs.hasNext()) {
+      messages.add(msgs.next());
     }
 
     if (logger.isLoggable(BasicLevel.DEBUG))
@@ -2884,17 +2760,14 @@ class Xid implements java.io.Serializable {
   int fi;
   byte[] gti;
 
-
-  Xid(byte[] bq, int fi, byte[] gti)
-  {
+  Xid(byte[] bq, int fi, byte[] gti) {
     this.bq = bq;
     this.fi = fi;
     this.gti = gti;
   }
-  
-  public boolean equals(Object o)
-  {
-    if (! (o instanceof Xid))
+
+  public boolean equals(Object o) {
+    if (!(o instanceof Xid))
       return false;
 
     Xid other = (Xid) o;
@@ -2904,8 +2777,7 @@ class Xid implements java.io.Serializable {
            && java.util.Arrays.equals(gti, other.gti);
   }
 
-  public int hashCode()
-  {
+  public int hashCode() {
     return (new String(bq) + "-" + new String(gti)).hashCode();
-  }  
+  }
 }
