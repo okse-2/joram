@@ -22,6 +22,9 @@
  */
 package com.scalagent.appli.shared;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.scalagent.engine.shared.BaseWTO;
 
 /**
@@ -39,6 +42,7 @@ public class SubscriptionWTO extends BaseWTO {
   private int pendingMessageCount;
   private String selector;
   private int subRequestId;
+  private List<String> messagesList;
 
   public String getName() {
     return name;
@@ -80,6 +84,10 @@ public class SubscriptionWTO extends BaseWTO {
     return subRequestId;
   }
 
+  public List<String> getMessagesList() {
+    return messagesList;
+  }
+
   public void setName(String name) {
     this.name = name;
   }
@@ -116,11 +124,20 @@ public class SubscriptionWTO extends BaseWTO {
     this.selector = selector;
   }
 
+  public void addMessageToList(String messageId) {
+    messagesList.add(messageId);
+  }
+
+  public void removeMessageFromList(String messageId) {
+    messagesList.remove(messageId);
+  }
+  
   public void setSubRequestId(int subRequestId) {
     this.subRequestId = subRequestId;
   }
 
   public SubscriptionWTO() {
+    messagesList = new ArrayList<String>();
   }
 
   public SubscriptionWTO(String name, boolean active, boolean durable, int nbMaxMsg, int contextId,
@@ -138,6 +155,7 @@ public class SubscriptionWTO extends BaseWTO {
     this.pendingMessageCount = pendingMessageCount;
     this.selector = selector;
     this.subRequestId = subRequestId;
+    messagesList = new ArrayList<String>();
 
   }
 
