@@ -32,7 +32,6 @@ import com.scalagent.engine.shared.BaseWTO;
 @SuppressWarnings("unchecked")
 public class MessageWTO extends BaseWTO {
 
-  private String idS;
   private long expiration;
   private long timestamp;
   private int deliveryCount;
@@ -41,10 +40,6 @@ public class MessageWTO extends BaseWTO {
   private int type;
 
   private Map properties;
-
-  public String getIdS() {
-    return idS;
-  }
 
   public long getExpiration() {
     return expiration;
@@ -72,10 +67,6 @@ public class MessageWTO extends BaseWTO {
 
   public Map getProperties() {
     return properties;
-  }
-
-  public void setStringIdS(String idS) {
-    this.idS = idS;
   }
 
   public void setExpiration(long expiration) {
@@ -113,7 +104,6 @@ public class MessageWTO extends BaseWTO {
       String text, int type, Map properties) {
     super();
     this.id = idS;
-    this.idS = idS;
     this.expiration = expiration;
     this.timestamp = timestamp;
     this.deliveryCount = deliveryCount;
@@ -140,7 +130,7 @@ public class MessageWTO extends BaseWTO {
     int result = 1;
     result = prime * result + deliveryCount;
     result = prime * result + (int) (expiration ^ (expiration >>> 32));
-    result = prime * result + ((idS == null) ? 0 : idS.hashCode());
+    result = prime * result + ((id == null) ? 0 : id.hashCode());
     result = prime * result + priority;
     result = prime * result + ((text == null) ? 0 : text.hashCode());
     result = prime * result + (int) (timestamp ^ (timestamp >>> 32));
@@ -166,7 +156,6 @@ public class MessageWTO extends BaseWTO {
   public MessageWTO clone() {
 
     MessageWTO msg = new MessageWTO();
-
     msg.id = id;
     msg.expiration = expiration;
     msg.timestamp = timestamp;
