@@ -24,9 +24,9 @@ package com.scalagent.appli.client.presenter;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
-import java.util.Vector;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.scalagent.appli.client.Application;
@@ -66,6 +66,7 @@ public class QueueDetailPresenter extends
     BasePresenter<QueueDetailWidget, RPCServiceAsync, RPCServiceCacheClient> implements NewMessageHandler,
     DeletedMessageHandler, UpdatedMessageHandler, UpdateCompleteHandler, QueueNotFoundHandler,
     DeletedQueueHandler, UpdatedQueueHandler {
+
   private QueueWTO queue;
 
   public QueueDetailPresenter(RPCServiceAsync serviceRPC, HandlerManager eventBus,
@@ -211,7 +212,7 @@ public class QueueDetailPresenter extends
    * of the widget.
    */
   public void initList() {
-    Vector<String> vMessagesC = queue.getMessagesList();
+    List<String> vMessagesC = queue.getMessagesList();
     ArrayList<MessageWTO> listMessages = new ArrayList<MessageWTO>();
     for (String idMessage : vMessagesC) {
       listMessages.add(cache.getMessages().get(idMessage));
@@ -268,7 +269,7 @@ public class QueueDetailPresenter extends
    * message.
    */
   public void deleteMessage(MessageWTO message, QueueWTO queue) {
-    service.execute(new DeleteMessageAction(message.getIdS(), queue.getName()), new DeleteMessageHandler(
+    service.execute(new DeleteMessageAction(message.getId(), queue.getName()), new DeleteMessageHandler(
         eventBus) {
       @Override
       public void onSuccess(DeleteMessageResponse response) {
