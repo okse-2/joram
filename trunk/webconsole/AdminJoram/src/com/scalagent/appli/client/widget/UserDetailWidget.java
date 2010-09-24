@@ -29,8 +29,8 @@ import java.util.SortedMap;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.AbstractDataTable;
-import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
+import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.AnnotatedLegendPosition;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.Options;
@@ -98,7 +98,7 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
   VLayout vlHeader;
   HLayout hlHeader;
   IButton refreshButton;
-  IButton newSubButton;
+//  IButton newSubButton;
   HLayout hlHeader2;
   DetailViewer userDetail = new DetailViewer();
   DynamicForm columnForm;
@@ -150,24 +150,24 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
     refreshButton.setPrompt(Application.messages.queueWidget_buttonRefresh_prompt());
     refreshButton.addClickHandler(new RefreshAllClickHandler(presenter));
 
-    newSubButton = new IButton();
-    newSubButton.setMargin(0);
-    newSubButton.setAutoFit(true);
-    newSubButton.setIcon("new.png");
-    newSubButton.setTitle(Application.messages.subscriptionWidget_buttonNewSubscription_title());
-    newSubButton.setPrompt(Application.messages.subscriptionWidget_buttonNewSubscription_prompt());
-    newSubButton.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        drawForm(null);
-      }
-    });
+//    newSubButton = new IButton();
+//    newSubButton.setMargin(0);
+//    newSubButton.setAutoFit(true);
+//    newSubButton.setIcon("new.png");
+//    newSubButton.setTitle(Application.messages.subscriptionWidget_buttonNewSubscription_title());
+//    newSubButton.setPrompt(Application.messages.subscriptionWidget_buttonNewSubscription_prompt());
+//    newSubButton.addClickHandler(new ClickHandler() {
+//      public void onClick(ClickEvent event) {
+//        drawForm(null);
+//      }
+//    });
 
     hlHeader = new HLayout();
     hlHeader.setHeight(22);
     hlHeader.setPadding(5);
     hlHeader.setMembersMargin(5);
     hlHeader.addMember(refreshButton);
-    hlHeader.addMember(newSubButton);
+//    hlHeader.addMember(newSubButton);
 
     DetailViewerField nameFieldD = new DetailViewerField(UserListRecord.ATTRIBUTE_NAME,
         Application.messages.userWidget_nameFieldL_title());
@@ -528,9 +528,9 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
   private AbstractDataTable createSubTable() {
     DataTable data = DataTable.create();
     data.addColumn(ColumnType.DATETIME, Application.messages.common_time());
+    data.addColumn(ColumnType.NUMBER, Application.messages.common_pending());
     data.addColumn(ColumnType.NUMBER, Application.messages.common_delivered());
     data.addColumn(ColumnType.NUMBER, Application.messages.common_sentDMQ());
-    data.addColumn(ColumnType.NUMBER, Application.messages.common_pending());
 
     Record selectedRecord = subscriptionList.getSelectedRecord();
     if (selectedRecord != null) {
