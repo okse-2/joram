@@ -22,6 +22,11 @@
  */
 package org.ow2.joram.admin;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import org.objectweb.joram.mom.dest.AdminTopicImplMBean;
 import org.objectweb.joram.mom.dest.QueueImplMBean;
 import org.objectweb.joram.mom.dest.TopicImplMBean;
 import org.objectweb.joram.mom.proxies.ClientSubscriptionMBean;
@@ -35,6 +40,9 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
+import fr.dyade.aaa.agent.EngineMBean;
+import fr.dyade.aaa.agent.NetworkMBean;
+
 public class JoramAdminOSGi implements JoramAdmin, ServiceTrackerCustomizer {
 
   private static Filter filter;
@@ -45,13 +53,21 @@ public class JoramAdminOSGi implements JoramAdmin, ServiceTrackerCustomizer {
 
   private BundleContext context;
 
+  private AdminTopicImplMBean adminTopic;
+
+  private List<NetworkMBean> networks = new ArrayList<NetworkMBean>();
+
+  private EngineMBean engine;
+
   static {
     try {
       filter = FrameworkUtil.createFilter("(|(" + Constants.OBJECTCLASS + "="
           + QueueImplMBean.class.getName() + ")(" + Constants.OBJECTCLASS + "="
           + TopicImplMBean.class.getName() + ")(" + Constants.OBJECTCLASS + "="
           + ClientSubscriptionMBean.class.getName() + ")(" + Constants.OBJECTCLASS + "="
-          + ProxyImplMBean.class.getName() + "))");
+          + ProxyImplMBean.class.getName() + ")(" + Constants.OBJECTCLASS + "="
+          + NetworkMBean.class.getName() + ")(" + Constants.OBJECTCLASS + "=" + EngineMBean.class.getName()
+          + "))");
     } catch (InvalidSyntaxException exc) {
       exc.printStackTrace();
     }
@@ -73,6 +89,7 @@ public class JoramAdminOSGi implements JoramAdmin, ServiceTrackerCustomizer {
 
   public void stop() {
     serviceTracker.close();
+    adminTopic = null;
   }
 
   public void disconnect() {
@@ -85,6 +102,9 @@ public class JoramAdminOSGi implements JoramAdmin, ServiceTrackerCustomizer {
       listener.onQueueAdded(queueName, (QueueImplMBean) service);
     } else if (service instanceof TopicImplMBean) {
       String topicName = (String) reference.getProperty("name");
+      if (service instanceof AdminTopicImplMBean) {
+        adminTopic = (AdminTopicImplMBean) service;
+      }
       listener.onTopicAdded(topicName, (TopicImplMBean) service);
     } else if (service instanceof ProxyImplMBean) {
       String userName = (String) reference.getProperty("name");
@@ -92,6 +112,10 @@ public class JoramAdminOSGi implements JoramAdmin, ServiceTrackerCustomizer {
     } else if (service instanceof ClientSubscriptionMBean) {
       String subName = (String) reference.getProperty("name");
       listener.onSubscriptionAdded(subName, (ClientSubscriptionMBean) service);
+    } else if (service instanceof NetworkMBean) {
+      networks.add((NetworkMBean) service);
+    } else if (service instanceof EngineMBean) {
+      engine = (EngineMBean) service;
     }
     return service;
   }
@@ -109,6 +133,10 @@ public class JoramAdminOSGi implements JoramAdmin, ServiceTrackerCustomizer {
     } else if (service instanceof ClientSubscriptionMBean) {
       String subName = (String) reference.getProperty("name");
       listener.onSubscriptionRemoved(subName, (ClientSubscriptionMBean) service);
+    } else if (service instanceof NetworkMBean) {
+      networks.remove(service);
+    } else if (service instanceof EngineMBean) {
+      engine = null;
     }
   }
 
@@ -134,60 +162,79 @@ public class JoramAdminOSGi implements JoramAdmin, ServiceTrackerCustomizer {
 
   public boolean createNewTopic(String name, String DMQ, String destination, long period,
       boolean freeReading, boolean freeWriting) {
-    // TODO Auto-generated method stub
+    if (adminTopic != null) {
+      adminTopic.createTopic(name);
+      return true;
+    }
+    return false;
+  }
+
+  public boolean editTopic(TopicImplMBean topic, String DMQ, String destination, long period,
+      boolean freeReading, boolean freeWriting) {
+    topic.setFreeReading(freeReading);
+    topic.setFreeWriting(freeWriting);
+    topic.setPeriod(period);
     return true;
   }
 
-  public boolean editTopic(String name, String DMQ, String destination, long period, boolean freeReading,
-      boolean freeWriting) {
-    // TODO Auto-generated method stub
+  public boolean deleteTopic(TopicImplMBean topic) {
+    topic.delete();
     return true;
   }
 
-  public boolean deleteTopic(String topicName) {
-    // TODO Auto-generated method stub
+  public boolean createNewUser(String name, String password, long period) {
+    if (adminTopic != null) {
+      try {
+        adminTopic.createUser(name, password);
+      } catch (Exception exc) {
+        return false;
+      }
+      return true;
+    }
+    return false;
+  }
+
+  public boolean editUser(ProxyImplMBean user, String password, long period) {
+    user.setPeriod(period);
     return true;
   }
 
-  public boolean createNewUser(String name, long period) {
-    // TODO Auto-generated method stub
-    return true;
-  }
-
-  public boolean editUser(String name, long period) {
-    // TODO Auto-generated method stub
-    return true;
-  }
-
-  public boolean deleteUser(String userName) {
-    // TODO Auto-generated method stub
+  public boolean deleteUser(ProxyImplMBean user) {
+    user.delete();
     return true;
   }
 
   public boolean createNewQueue(String name, String DMQ, String destination, long period, int threshold,
       int nbMaxMsg, boolean freeReading, boolean freeWriting) {
-    // TODO Auto-generated method stub
-    return true;
+    if (adminTopic != null) {
+      adminTopic.createQueue(name);
+      return true;
+    }
+    return false;
   }
 
-  public boolean editQueue(String name, String DMQ, String destination, long period, int threshold,
+  public boolean editQueue(QueueImplMBean queue, String DMQ, String destination, long period, int threshold,
       int nbMaxMsg, boolean freeReading, boolean freeWriting) {
-    // TODO Auto-generated method stub
+    queue.setFreeReading(freeReading);
+    queue.setFreeWriting(freeWriting);
+    queue.setPeriod(period);
+    queue.setNbMaxMsg(nbMaxMsg);
+    queue.setThreshold(threshold);
     return true;
   }
 
-  public boolean deleteQueue(String queueName) {
-    // TODO Auto-generated method stub
+  public boolean deleteQueue(QueueImplMBean queue) {
+    queue.delete();
     return true;
   }
 
-  public boolean cleanWaitingRequest(String queueName) {
-    // TODO Auto-generated method stub
+  public boolean cleanWaitingRequest(QueueImplMBean queue) {
+    queue.cleanWaitingRequest();
     return true;
   }
 
-  public boolean cleanPendingMessage(String queueName) {
-    // TODO Auto-generated method stub
+  public boolean cleanPendingMessage(QueueImplMBean queue) {
+    queue.cleanPendingMessage();
     return true;
   }
 
@@ -206,6 +253,17 @@ public class JoramAdminOSGi implements JoramAdmin, ServiceTrackerCustomizer {
   public boolean deleteSubscription(String subscriptionName) {
     // TODO Auto-generated method stub
     return true;
+  }
+
+  public float[] getInfos() {
+    float[] infos = new float[networks.size() + 1];
+    if (engine != null) {
+      infos[0] = engine.getAverageLoad1() + new Random().nextInt(5);
+    }
+    for (int i = 1; i < infos.length; i++) {
+      infos[i] = networks.get(i).getAverageLoad1();
+    }
+    return null;
   }
 
 }

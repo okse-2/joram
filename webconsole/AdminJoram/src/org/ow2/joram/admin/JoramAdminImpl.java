@@ -29,10 +29,13 @@ import javax.management.NotificationListener;
 import javax.management.ObjectName;
 
 import org.objectweb.joram.mom.dest.QueueImpl;
+import org.objectweb.joram.mom.dest.QueueImplMBean;
 import org.objectweb.joram.mom.dest.TopicImpl;
+import org.objectweb.joram.mom.dest.TopicImplMBean;
 import org.objectweb.joram.mom.proxies.ClientSubscriptionMBean;
 import org.objectweb.joram.mom.proxies.ProxyImplMBean;
 
+import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 public class JoramAdminImpl implements JoramAdmin {
@@ -76,6 +79,9 @@ public class JoramAdminImpl implements JoramAdmin {
             + "-DMXServer=com.scalagent.jmx.JMXServer options in command line.");
         System.exit(-1);
       }
+
+      AgentServer.init((short) 0, "./s0", null);
+      AgentServer.start();
 
     } catch (Exception exc) {
       System.out.println("FATAL: Error launching JORAM server.");
@@ -171,28 +177,28 @@ public class JoramAdminImpl implements JoramAdmin {
     return true;
   }
 
-  public boolean editTopic(String name, String DMQ, String destination, long period, boolean freeReading,
-      boolean freeWriting) {
+  public boolean editTopic(TopicImplMBean topic, String DMQ, String destination, long period,
+      boolean freeReading, boolean freeWriting) {
     // TODO Auto-generated method stub
     return true;
   }
 
-  public boolean deleteTopic(String topicName) {
+  public boolean deleteTopic(TopicImplMBean topic) {
     // TODO Auto-generated method stub
     return true;
   }
 
-  public boolean createNewUser(String name, long period) {
+  public boolean createNewUser(String name, String password, long period) {
     // TODO Auto-generated method stub
     return true;
   }
 
-  public boolean editUser(String name, long period) {
+  public boolean editUser(ProxyImplMBean user, String password, long period) {
     // TODO Auto-generated method stub
     return true;
   }
 
-  public boolean deleteUser(String userName) {
+  public boolean deleteUser(ProxyImplMBean user) {
     // TODO Auto-generated method stub
     return true;
   }
@@ -203,23 +209,23 @@ public class JoramAdminImpl implements JoramAdmin {
     return true;
   }
 
-  public boolean editQueue(String name, String DMQ, String destination, long period, int threshold,
+  public boolean editQueue(QueueImplMBean queue, String DMQ, String destination, long period, int threshold,
       int nbMaxMsg, boolean freeReading, boolean freeWriting) {
     // TODO Auto-generated method stub
     return true;
   }
 
-  public boolean deleteQueue(String queueName) {
+  public boolean deleteQueue(QueueImplMBean queue) {
     // TODO Auto-generated method stub
     return true;
   }
 
-  public boolean cleanWaitingRequest(String queueName) {
+  public boolean cleanWaitingRequest(QueueImplMBean queue) {
     // TODO Auto-generated method stub
     return true;
   }
 
-  public boolean cleanPendingMessage(String queueName) {
+  public boolean cleanPendingMessage(QueueImplMBean queue) {
     // TODO Auto-generated method stub
     return true;
   }
@@ -239,6 +245,11 @@ public class JoramAdminImpl implements JoramAdmin {
   public boolean deleteSubscription(String subscriptionName) {
     // TODO Auto-generated method stub
     return true;
+  }
+
+  public float[] getInfos() {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }
