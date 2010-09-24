@@ -100,8 +100,8 @@ public final class UserAgent extends Agent implements BagSerializer, ProxyAgentI
    *
    * @see ConnectionManager
    */
-  public UserAgent(int stamp) {
-    super("JoramAdminProxy", true, stamp);
+  public UserAgent(String name, int stamp) {
+    super(name, true, stamp);
     init();
   }
 
@@ -120,7 +120,8 @@ public final class UserAgent extends Agent implements BagSerializer, ProxyAgentI
 
     super.agentInitialize(firstTime);
     proxyImpl.initialize(firstTime);
-    cleaningTask = new WakeUpTask(getId(), WakeUpNot.class, proxyImpl.getPeriod());
+    if (proxyImpl.getPeriod() > 0)
+      cleaningTask = new WakeUpTask(getId(), WakeUpNot.class, proxyImpl.getPeriod());
     try {
       MXWrapper.registerMBean(proxyImpl, getMBeanName());
     } catch (Exception exc) {
@@ -130,6 +131,8 @@ public final class UserAgent extends Agent implements BagSerializer, ProxyAgentI
 
   /** Finalizes the agent before it is garbaged. */
   public void agentFinalize(boolean lastTime) {
+    if (cleaningTask != null)
+      cleaningTask.cancel();
     try {
       MXWrapper.unregisterMBean(getMBeanName());
     } catch (Exception exc) {
@@ -183,15 +186,11 @@ public final class UserAgent extends Agent implements BagSerializer, ProxyAgentI
     } else if (not instanceof ProxyRequestGroupNot) {
       doReact((ProxyRequestGroupNot) not);
     } else if (not instanceof WakeUpNot) {
-      try {
-        proxyImpl.cleanPendingMessages(System.currentTimeMillis());
-      } catch (Exception exc) {
-        if (logger.isLoggable(BasicLevel.ERROR))
-          logger.log(BasicLevel.ERROR, "--- " + this + " Proxy(...)", exc);
+      if (cleaningTask == null || ((WakeUpNot) not).update) {
+        setPeriod(proxyImpl.getPeriod());
       }
-
-      if (cleaningTask == null) {
-        cleaningTask = new WakeUpTask(getId(), WakeUpNot.class, proxyImpl.getPeriod());
+      if (proxyImpl.getPeriod() > 0) {
+        proxyImpl.cleanPendingMessages(System.currentTimeMillis());
       }
     } else {
       try {
@@ -199,6 +198,20 @@ public final class UserAgent extends Agent implements BagSerializer, ProxyAgentI
       } catch (UnknownNotificationException exc) {
         super.react(from, not);
       }
+    }
+  }
+
+  private void setPeriod(long period) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, this + ": setPeriod(" + period + ")." + " -> task " + cleaningTask);
+    if (cleaningTask == null) {
+      cleaningTask = new WakeUpTask(getId(), WakeUpNot.class, period);
+    } else {
+      // cancel task
+      cleaningTask.cancel();
+      // Schedules the wake up task period.
+      if (period > 0)
+        cleaningTask = new WakeUpTask(getId(), WakeUpNot.class, period);
     }
   }
 
