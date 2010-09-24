@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -103,4 +103,9 @@ public interface ProxyImplMBean {
    * @param nbMaxMsg the maximum number of message (-1 set no limit).
    */
   void setNbMaxMsg(int nbMaxMsg);
+
+  /**
+   * Deletes this proxy.
+   */
+  void delete();
 }
