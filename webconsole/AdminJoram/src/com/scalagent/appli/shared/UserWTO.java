@@ -32,12 +32,17 @@ import com.scalagent.engine.shared.BaseWTO;
 public class UserWTO extends BaseWTO {
 
   private String name;
+  private String password;
   private long period;
   private long nbMsgsSentToDMQSinceCreation;
   private String[] subscriptionNames;
 
   public String getName() {
     return name;
+  }
+
+  public String getPassword() {
+    return password;
   }
 
   public long getPeriod() {
@@ -56,6 +61,10 @@ public class UserWTO extends BaseWTO {
     this.name = name;
   }
 
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
   public void setPeriod(long period) {
     this.period = period;
   }
@@ -71,9 +80,11 @@ public class UserWTO extends BaseWTO {
   public UserWTO() {
   }
 
-  public UserWTO(String name, long period, long nbMsgsSentToDMQSinceCreation, String[] subscriptionNames) {
+  public UserWTO(String name, String password, long period, long nbMsgsSentToDMQSinceCreation,
+      String[] subscriptionNames) {
     super();
     this.id = name;
+    this.password = password;
     this.name = name;
     this.period = period;
     this.nbMsgsSentToDMQSinceCreation = nbMsgsSentToDMQSinceCreation;
