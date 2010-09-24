@@ -932,38 +932,40 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
   String queueWidget_confirmDelete();
 
   /**
-   * Translated "Clear Waiting Request".
+   * Translated "Clean Waiting Request".
    * 
-   * @return translated "Clear Waiting Requests"
+   * @return translated "Clean Waiting Requests"
    */
-  @DefaultMessage("Clear Waiting Requests")
+  @DefaultMessage("Clean Waiting Requests")
   @Key("queueWidget.labelClearWaitingRequests.title")
   String queueWidget_labelClearWaitingRequests_title();
 
   /**
-   * Translated "Click to clear the waiting requests for this Queue".
+   * Translated "Click to clean the expired waiting requests for this Queue".
    * 
-   * @return translated "Click to clear the waiting requests for this Queue"
+   * @return translated
+   *         "Click to clean the expired waiting requests for this Queue"
    */
-  @DefaultMessage("Click to clear the waiting requests for this Queue")
+  @DefaultMessage("Click to clean the expired waiting requests for this Queue")
   @Key("queueWidget.labelClearWaitingRequests.tooltip")
   String queueWidget_labelClearWaitingRequests_tooltip();
 
   /**
-   * Translated "Clear Pending Messages".
+   * Translated "Clean Pending Messages".
    * 
-   * @return translated "Clear Pending Messages"
+   * @return translated "Clean Pending Messages"
    */
-  @DefaultMessage("Clear Pending Messages")
+  @DefaultMessage("Clean Pending Messages")
   @Key("queueWidget.labelClearPendingMessages.title")
   String queueWidget_labelClearPendingMessages_title();
 
   /**
-   * Translated "Click to clear the pending messages for this Queue".
+   * Translated "Click to clean the expired pending messages for this Queue".
    * 
-   * @return translated "Click to clear the pending messages for this Queue"
+   * @return translated
+   *         "Click to clean the expired pending messages for this Queue"
    */
-  @DefaultMessage("Click to clear the pending messages for this Queue")
+  @DefaultMessage("Click to clean the expired pending messages for this Queue")
   @Key("queueWidget.labelClearPendingMessages.tooltip")
   String queueWidget_labelClearPendingMessages_tooltip();
 
@@ -1638,6 +1640,15 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
   @DefaultMessage("Name")
   @Key("userWidget.nameItem.title")
   String userWidget_nameItem_title();
+
+  /**
+   * Translated "Password".
+   * 
+   * @return translated "Password"
+   */
+  @DefaultMessage("Password")
+  @Key("userWidget.passwordItem.title")
+  String userWidget_passwordItem_title();
 
   /**
    * Translated "Period".
