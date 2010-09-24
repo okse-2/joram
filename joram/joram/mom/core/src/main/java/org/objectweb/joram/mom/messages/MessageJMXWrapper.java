@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,8 @@
 package org.objectweb.joram.mom.messages;
 
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.management.openmbean.ArrayType;
@@ -123,12 +124,12 @@ public class MessageJMXWrapper {
    * 
    * @throws Exception
    */
-  public static TabularData createTabularDataSupport(Hashtable messages, Vector ids) throws Exception {
+  public static TabularData createTabularDataSupport(Map messages, List ids) throws Exception {
     String[] id = { "identifier" };
     TabularDataSupport tds = new TabularDataSupport(new TabularType("Messages", "Messages", rowType, id));
 
     for (int i=0; i<ids.size(); i++) {
-      Message message = (Message) messages.get(ids.elementAt(i));
+      Message message = (Message) messages.get(ids.get(i));
       tds.put(MessageJMXWrapper.createCompositeDataSupport(message));
     }
     return tds;
