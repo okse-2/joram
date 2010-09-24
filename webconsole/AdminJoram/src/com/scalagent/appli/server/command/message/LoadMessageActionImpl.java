@@ -41,11 +41,14 @@ public class LoadMessageActionImpl extends
 
     List<MessageWTO> messages;
     try {
-      messages = cache.getMessages(this.getHttpSession(), action.getQueueName());
+      if (action.isQueue())
+        messages = cache.getMessages(this.getHttpSession(), action.getName());
+      else
+        messages = cache.getSubMessages(this.getHttpSession(), action.getName());
     } catch (Exception e) {
-      return new LoadMessageResponse(null, action.getQueueName(), false);
+      return new LoadMessageResponse(null, action.getName(), false);
     }
-    return new LoadMessageResponse(messages, action.getQueueName(), true);
+    return new LoadMessageResponse(messages, action.getName(), true);
   }
 
 }
