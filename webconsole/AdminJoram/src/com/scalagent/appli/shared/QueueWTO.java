@@ -22,9 +22,10 @@
  */
 package com.scalagent.appli.shared;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Vector;
+import java.util.List;
 
 import com.scalagent.engine.shared.BaseWTO;
 
@@ -49,7 +50,7 @@ public class QueueWTO extends BaseWTO {
   private int pendingMessageCount;
   private int deliveredMessageCount;
   private int nbMaxMsg;
-  private Vector<String> messagesList;
+  private List<String> messagesList;
 
   public String getName() {
     return name;
@@ -123,7 +124,7 @@ public class QueueWTO extends BaseWTO {
     return nbMaxMsg;
   }
 
-  public Vector<String> getMessagesList() {
+  public List<String> getMessagesList() {
     return messagesList;
   }
 
@@ -230,12 +231,12 @@ public class QueueWTO extends BaseWTO {
     this.deliveredMessageCount = deliveredMessageCount;
     this.nbMaxMsg = nbMaxMsg;
 
-    this.messagesList = new Vector<String>();
+    this.messagesList = new ArrayList<String>();
 
   }
 
   public QueueWTO() {
-    this.messagesList = new Vector<String>();
+    this.messagesList = new ArrayList<String>();
   }
 
   @Override
