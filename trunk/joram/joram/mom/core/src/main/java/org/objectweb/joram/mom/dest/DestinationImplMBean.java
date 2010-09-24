@@ -151,4 +151,9 @@ public interface DestinationImplMBean {
    *          The period value to be set or -1 for unsetting previous value.
    */
   void setPeriod(long period);
+
+  /**
+   * Deletes the destination.
+   */
+  void delete();
 }

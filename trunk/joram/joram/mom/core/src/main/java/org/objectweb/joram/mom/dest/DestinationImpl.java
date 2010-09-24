@@ -49,6 +49,7 @@ import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.admin.AdminReply;
 import org.objectweb.joram.shared.admin.AdminRequest;
+import org.objectweb.joram.shared.admin.DeleteDestination;
 import org.objectweb.joram.shared.admin.GetStatsReply;
 import org.objectweb.joram.shared.admin.GetStatsRequest;
 import org.objectweb.joram.shared.admin.SetDMQRequest;
@@ -650,6 +651,12 @@ public abstract class DestinationImpl implements java.io.Serializable, Destinati
   abstract protected void doUnknownAgent(UnknownAgent not);
   abstract protected void doDeleteNot(DeleteNot not);
   
+  public void delete() {
+    DeleteDestination request = new DeleteDestination(getDestinationId());
+    FwdAdminRequestNot deleteNot = new FwdAdminRequestNot(request, null, null);
+    Channel.sendTo(AdminTopic.getDefault(), deleteNot);
+  }
+
   // AF (TODO): We have to define an interface that allow subclass to declare
   // a processing through delegation.
   
