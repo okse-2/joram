@@ -57,27 +57,27 @@ import org.objectweb.joram.shared.admin.CreateUserReply;
 import org.objectweb.joram.shared.admin.CreateUserRequest;
 import org.objectweb.joram.shared.admin.DeleteDestination;
 import org.objectweb.joram.shared.admin.DeleteUser;
+import org.objectweb.joram.shared.admin.GetClusterRequest;
 import org.objectweb.joram.shared.admin.GetConfigRequest;
+import org.objectweb.joram.shared.admin.GetDMQSettingsReply;
+import org.objectweb.joram.shared.admin.GetDMQSettingsRequest;
+import org.objectweb.joram.shared.admin.GetDestinationsReply;
+import org.objectweb.joram.shared.admin.GetDestinationsRequest;
 import org.objectweb.joram.shared.admin.GetDomainNames;
 import org.objectweb.joram.shared.admin.GetDomainNamesRep;
+import org.objectweb.joram.shared.admin.GetFatherRequest;
 import org.objectweb.joram.shared.admin.GetLocalServer;
 import org.objectweb.joram.shared.admin.GetLocalServerRep;
-import org.objectweb.joram.shared.admin.GetRightsReply;
-import org.objectweb.joram.shared.admin.GetRightsRequest;
-import org.objectweb.joram.shared.admin.GetSubscriberIds;
-import org.objectweb.joram.shared.admin.GetClusterRequest;
-import org.objectweb.joram.shared.admin.GetDMQSettingsRequest;
-import org.objectweb.joram.shared.admin.GetDMQSettingsReply;
-import org.objectweb.joram.shared.admin.GetDestinationsRequest;
-import org.objectweb.joram.shared.admin.GetDestinationsReply;
-import org.objectweb.joram.shared.admin.GetFatherRequest;
 import org.objectweb.joram.shared.admin.GetNbMaxMsgRequest;
 import org.objectweb.joram.shared.admin.GetPendingMessages;
 import org.objectweb.joram.shared.admin.GetPendingRequests;
-import org.objectweb.joram.shared.admin.GetServersIdsRequest;
+import org.objectweb.joram.shared.admin.GetRightsReply;
+import org.objectweb.joram.shared.admin.GetRightsRequest;
 import org.objectweb.joram.shared.admin.GetServersIdsReply;
-import org.objectweb.joram.shared.admin.GetStatsRequest;
+import org.objectweb.joram.shared.admin.GetServersIdsRequest;
 import org.objectweb.joram.shared.admin.GetStatsReply;
+import org.objectweb.joram.shared.admin.GetStatsRequest;
+import org.objectweb.joram.shared.admin.GetSubscriberIds;
 import org.objectweb.joram.shared.admin.GetSubscriptionsRequest;
 import org.objectweb.joram.shared.admin.GetUsersReply;
 import org.objectweb.joram.shared.admin.GetUsersRequest;
@@ -88,8 +88,8 @@ import org.objectweb.joram.shared.admin.SetCluster;
 import org.objectweb.joram.shared.admin.SetDMQRequest;
 import org.objectweb.joram.shared.admin.SetFather;
 import org.objectweb.joram.shared.admin.SetNbMaxMsgRequest;
-import org.objectweb.joram.shared.admin.SetThresholdRequest;
 import org.objectweb.joram.shared.admin.SetRight;
+import org.objectweb.joram.shared.admin.SetThresholdRequest;
 import org.objectweb.joram.shared.admin.SpecialAdmin;
 import org.objectweb.joram.shared.admin.StopServerRequest;
 import org.objectweb.joram.shared.admin.UpdateUser;
@@ -987,42 +987,29 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
    * Processes a <code>DeleteUser</code> instance requesting the deletion
    * of a user.
    */
-  private void doProcess(DeleteUser request,
-                         AgentId replyTo,
-                         String msgId) throws UnknownServerException {
+  private void doProcess(DeleteUser request, AgentId replyTo, String msgId) throws UnknownServerException {
     String name = request.getUserName();
     AgentId proxId = AgentId.fromString(request.getProxId());
 
     if (checkServerId(proxId.getTo())) {
       // If the user belong to this server, process the request.
-      String info;
-
       if (usersTable.containsKey(name)) {
-        forward(proxId, new DeleteNot());
-        usersTable.remove(name);
-        proxiesTable.remove(name);
-
-        info = strbuf.append("Request [").append(request.getClass().getName())
-        .append("], sent to AdminTopic on server [").append(serverId)
-        .append("], successful [true]: proxy [").append(proxId)
-        .append("], of user [").append(name)
-        .append("] has been notified of deletion").toString();
-        strbuf.setLength(0);
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "Forward delete request to proxy " + proxId);
+        forward(proxId, new FwdAdminRequestNot(request, replyTo, msgId, createMessageId()));
       } else {
-        info = strbuf.append("Request [").append(request.getClass().getName())
-        .append("], sent to AdminTopic on server [").append(serverId)
-        .append("], successful [false]: user [").append(name)
-        .append(" does not exist").toString();
+        String info = strbuf.append("Request [").append(request.getClass().getName())
+            .append("], sent to AdminTopic on server [").append(serverId)
+            .append("], successful [false]: user [").append(name).append("] does not exist").toString();
         strbuf.setLength(0);
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, info);
+        distributeReply(replyTo, msgId, new AdminReply(AdminReply.NAME_UNKNOWN, info));
       }
-      distributeReply(replyTo, msgId, new AdminReply(true, info));
 
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, info);
     } else {
       // Forward the request to the right AdminTopic agent.
-      forward(AdminTopic.getDefault(proxId.getTo()),
-              new FwdAdminRequestNot(request, replyTo, msgId));
+      forward(AdminTopic.getDefault(proxId.getTo()), new FwdAdminRequestNot(request, replyTo, msgId));
     }
   }
 
@@ -1827,6 +1814,11 @@ public final class AdminTopicImpl extends TopicImpl implements AdminTopicImplMBe
     Channel.sendTo(getId(), createNot);
   }
   
+  public static void deleteUser(String userName) {
+    ref.usersTable.remove(userName);
+    ref.proxiesTable.remove(userName);
+  }
+
   // ================================================================================
   // This code is used by the ProxyImpl to handle destination creation through the
   // JMS Session.
