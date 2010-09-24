@@ -51,7 +51,7 @@ public class MessageListRecord extends ListGridRecord {
     super();
 
     setMessage(message);
-    setIdS(message.getIdS());
+    setIdS(message.getId());
     setExpiration(message.getExpiration());
     setTimestamp(message.getTimestamp());
     setDeliveryCount(message.getDeliveryCount());
