@@ -41,10 +41,10 @@ public class SendNewMessageActionImpl extends
     String info = new String();
 
     if (result) {
-      info = "The message \"" + action.getMessage().getIdS() + "\" has been created on "
+      info = "The message \"" + action.getMessage().getId() + "\" has been created on "
           + action.getQueueName();
     } else {
-      info = "Error while creating new message \"" + action.getMessage().getIdS() + "\" on "
+      info = "Error while creating new message \"" + action.getMessage().getId() + "\" on "
           + action.getQueueName() + "";
     }
 

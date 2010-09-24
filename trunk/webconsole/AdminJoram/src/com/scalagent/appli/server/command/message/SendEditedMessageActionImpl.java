@@ -41,10 +41,10 @@ public class SendEditedMessageActionImpl extends
     String info = new String();
 
     if (result) {
-      info = "The message \"" + action.getMessage().getIdS() + "\" has been updated on "
+      info = "The message \"" + action.getMessage().getId() + "\" has been updated on "
           + action.getQueueName();
     } else {
-      info = "Error while updating message \"" + action.getMessage().getIdS() + "\" on "
+      info = "Error while updating message \"" + action.getMessage().getId() + "\" on "
           + action.getQueueName() + "";
     }
 
