@@ -22,6 +22,10 @@
  */
 package org.ow2.joram.admin;
 
+import org.objectweb.joram.mom.dest.QueueImplMBean;
+import org.objectweb.joram.mom.dest.TopicImplMBean;
+import org.objectweb.joram.mom.proxies.ProxyImplMBean;
+
 public interface JoramAdmin {
 
   public boolean connect(String login, String password);
@@ -124,28 +128,30 @@ public interface JoramAdmin {
    *          FreeWriting of the topic
    * @return Create successful
    */
-  public boolean editTopic(String name, String DMQ, String destination, long period, boolean freeReading,
-      boolean freeWriting);
+  public boolean editTopic(TopicImplMBean topic, String DMQ, String destination, long period,
+      boolean freeReading, boolean freeWriting);
 
   /**
    * Delete a topic in JORAM
    * 
-   * @param topicName
-   *          Name of the topic to delete
+   * @param topic
+   *          The topic to delete
    * @return Delete successful
    */
-  public boolean deleteTopic(String topicName);
+  public boolean deleteTopic(TopicImplMBean topic);
 
   /**
    * Create a user on JORAM
    * 
    * @param name
    *          Name of the user
+   * @param password
+   *          User's password
    * @param period
    *          Period of the user
    * @return Create successful
    */
-  public boolean createNewUser(String name, long period);
+  public boolean createNewUser(String name, String password, long period);
 
   /**
    * Edit a user on JORAM
@@ -156,16 +162,16 @@ public interface JoramAdmin {
    *          Period of the user
    * @return Edit successful
    */
-  public boolean editUser(String name, long period);
+  public boolean editUser(ProxyImplMBean user, String password, long period);
 
   /**
    * Delete a user on JORAM
    * 
-   * @param userName
-   *          Name of the user to delete
+   * @param user
+   *          User to delete
    * @return Delete successful
    */
-  public boolean deleteUser(String userName);
+  public boolean deleteUser(ProxyImplMBean user);
 
   /**
    * Create a queue on JORAM
@@ -212,17 +218,17 @@ public interface JoramAdmin {
    *          Is the queue FreeWriting
    * @return Edit successful
    */
-  public boolean editQueue(String name, String DMQ, String destination, long period, int threshold,
+  public boolean editQueue(QueueImplMBean queue, String DMQ, String destination, long period, int threshold,
       int nbMaxMsg, boolean freeReading, boolean freeWriting);
 
   /**
    * Delete a Queue on JORAM
    * 
-   * @param queueName
-   *          Name of the topic to delete
+   * @param queue
+   *          The queue to delete
    * @return Delete successful
    */
-  public boolean deleteQueue(String queueName);
+  public boolean deleteQueue(QueueImplMBean queue);
 
   /**
    * Clear the waiting requests for a queue on JORAM
@@ -231,7 +237,7 @@ public interface JoramAdmin {
    *          Name of the queue
    * @return Clear successful
    */
-  public boolean cleanWaitingRequest(String queueName);
+  public boolean cleanWaitingRequest(QueueImplMBean queue);
 
   /**
    * Clear the pending messages for a queue on JORAM
@@ -240,7 +246,7 @@ public interface JoramAdmin {
    *          Name of the queue
    * @return Clear successful
    */
-  public boolean cleanPendingMessage(String queueName);
+  public boolean cleanPendingMessage(QueueImplMBean queue);
 
   /**
    * Create a subscription on JORAM
@@ -294,5 +300,7 @@ public interface JoramAdmin {
    * @return Delete successful
    */
   public boolean deleteSubscription(String subscriptionName);
+
+  public float[] getInfos();
 
 }
