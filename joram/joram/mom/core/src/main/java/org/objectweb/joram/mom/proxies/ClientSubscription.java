@@ -31,6 +31,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.management.openmbean.CompositeData;
@@ -86,7 +87,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   protected int nbMaxMsg = -1;
 
   /** Vector of identifiers of the messages to deliver. */
-  private Vector messageIds;
+  private List messageIds;
   /** Table of delivered messages identifiers. */
   private Hashtable deliveredIds;
   /** Table keeping the denied messages identifiers. */
@@ -123,7 +124,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    * Proxy messages table. Be careful: currently this table is shared between
    * all subscription.
    */
-  private transient Hashtable messagesTable;
+  private transient Map messagesTable;
 
   private transient ProxyAgentItf proxy;
   
@@ -160,7 +161,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
                      AgentId dmqId,
                      int threshold,
                      int nbMaxMsg,
-                     Hashtable messagesTable) {
+                     Map messagesTable) {
     this.proxyId = proxyId;
     this.contextId = contextId;
     this.subRequestId = reqId;
@@ -295,7 +296,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    */
   public String[] getMessageIds() {
     String[] res = new String[messageIds.size()];
-    messageIds.copyInto(res);
+    messageIds.toArray(res);
     return res;
   }
   
@@ -310,9 +311,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    * @param persistedMessages  Proxy's persisted messages.
    * @param denyDeliveredMessages Denies already delivered messages.
    */
-  void reinitialize(Hashtable messagesTable,
-                    Vector persistedMessages,
-                    boolean denyDeliveredMessages) {
+  void reinitialize(Map messagesTable, List persistedMessages, boolean denyDeliveredMessages) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "ClientSubscription[" + this + "].reinitialize()");
     
@@ -321,8 +320,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     // Browsing the persisted messages.
     Message message;
     String msgId;
-    for (Enumeration e = persistedMessages.elements(); e.hasMoreElements();) {
-      message = (Message) e.nextElement();
+    for (Iterator e = persistedMessages.iterator(); e.hasNext();) {
+      message = (Message) e.next();
       msgId = message.getIdentifier();
 
       if (messageIds.contains(msgId) || deliveredIds.contains(msgId)) {
@@ -349,7 +348,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
 
     if (denyDeliveredMessages) {
       // Denying all previously delivered messages:
-      deny(deliveredIds.keys());
+      deny(deliveredIds.keySet().iterator());
       deliveredIds.clear();
     }
   }
@@ -398,7 +397,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     active = false;
    
     // Denying all delivered messages:
-    deny(deliveredIds.keys());
+    deny(deliveredIds.keySet().iterator());
     deliveredIds.clear();
     
     // deliveredIds is persistent
@@ -635,7 +634,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
       // Browsing the non delivered messages.
       int i = 0;
       while (i < messageIds.size()) {
-        id = (String) messageIds.elementAt(i);
+        id = (String) messageIds.get(i);
         message = (Message) messagesTable.get(id);
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> message = " + message);
@@ -735,9 +734,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   /**
    * Acknowledges messages.
    */
-  void acknowledge(Enumeration acks) {
-    while (acks.hasMoreElements()) {
-      String id = (String) acks.nextElement();
+  void acknowledge(Iterator acks) {
+    while (acks.hasNext()) {
+      String id = (String) acks.next();
       acknowledge(id);
     }
   }
@@ -760,7 +759,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   /**
    * Denies messages.
    */
-  void deny(Enumeration denies) {
+  void deny(Iterator denies) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, this + ".deny(" + denies + ')');
     String id;
@@ -772,8 +771,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     DMQManager dmqManager = null;
 
     denyLoop:
-    while (denies.hasMoreElements()) {
-      id = (String) denies.nextElement();
+ while (denies.hasNext()) {
+      id = (String) denies.next();
 
       String deliveredMsgId = (String)deliveredIds.remove(id);
       if (deliveredMsgId == null) {
@@ -816,7 +815,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
         i = 0;
         insertLoop:
         while (i < messageIds.size()) {
-          currentId = (String) messageIds.elementAt(i);
+          currentId = (String) messageIds.get(i);
           Message currentMessage = (Message) messagesTable.get(currentId);
             
           // Message may be null if it is not valid anymore
@@ -826,11 +825,11 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
             i++;
           } else {
             // Remove the invalid message
-            messageIds.removeElementAt(i);
+            messageIds.remove(i);
           }
         }
         
-        messageIds.insertElementAt(id, i);
+        messageIds.add(i, id);
         deniedMsgs.put(id, new Integer(deliveryAttempts));
       }
     }
@@ -849,9 +848,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     for (Enumeration e = deliveredIds.keys(); e.hasMoreElements();)
       messageIds.add(e.nextElement());
 
-    for (Enumeration allMessageIds = messageIds.elements();
-         allMessageIds.hasMoreElements();) {
-      removeMessage((String) allMessageIds.nextElement());
+    for (Iterator allMessageIds = messageIds.iterator(); allMessageIds.hasNext();) {
+      removeMessage((String) allMessageIds.next());
     }
   }
   
@@ -923,7 +921,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   public List getMessagesView() {
     List messages = new ArrayList();
     for (int i = 0; i < messageIds.size(); i++) {
-      messages.add(messagesTable.get(messageIds.elementAt(i)));
+      messages.add(messagesTable.get(messageIds.get(i)));
     }
     return messages;
   }
@@ -943,7 +941,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   public void clear() {
     DMQManager dmqManager = null;
     for (int i = 0; i < messageIds.size(); i++) {
-      String msgId = (String)messageIds.elementAt(i);
+      String msgId = (String) messageIds.get(i);
       Message message = removeMessage(msgId);
       if (message != null) {
         if (dmqManager == null)

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,9 +22,9 @@
  */
 package org.objectweb.joram.mom.proxies;
 
-import java.util.Enumeration;
 import java.util.Hashtable;
-
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * The <code>TopicSubscription</code> class holds the parameters of a proxy's
@@ -32,10 +32,9 @@ import java.util.Hashtable;
  */
 class TopicSubscription {
   /** Table of subscriptions selectors. */
-  private Hashtable subs;
+  private Map subs;
   /** Last built selector. */
   private String lastSelector = null;
-
 
   /** 
    * Creates a <code>TopicSubscription</code> instance.
@@ -43,7 +42,6 @@ class TopicSubscription {
   TopicSubscription() {
     this.subs = new Hashtable();
   }
-
  
   /**
    * Adds a new subscription or updates an existing one.
@@ -74,8 +72,8 @@ class TopicSubscription {
   String buildSelector() {
     String currentSel;
     String builtSelector = null;
-    for (Enumeration names = subs.keys(); names.hasMoreElements();) {
-      currentSel = (String) subs.get(names.nextElement());
+    for (Iterator names = subs.keySet().iterator(); names.hasNext();) {
+      currentSel = (String) subs.get(names.next());
 
       if (currentSel.equals("")) return "";
       
@@ -99,7 +97,7 @@ class TopicSubscription {
   }
 
   /** Returns the names of the subscriptions. */
-  Enumeration getNames() {
-    return subs.keys();
+  Iterator getNames() {
+    return subs.keySet().iterator();
   }
 }
