@@ -27,8 +27,8 @@ package org.objectweb.joram.mom.proxies;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Vector;
 
 import org.objectweb.joram.shared.client.AbstractJmsReply;
@@ -126,13 +126,13 @@ class ClientContext implements java.io.Serializable {
     proxy.setSave();
   }
    
-  Enumeration getTempDestinations() {
+  Iterator getTempDestinations() {
     //Creates an enumeration not backed by tempDestinations
     Vector tempDests = new Vector();
-    for(Enumeration dests = tempDestinations.elements(); dests.hasMoreElements(); ){  
-      tempDests.addElement(dests.nextElement());
+    for (Iterator dests = tempDestinations.iterator(); dests.hasNext();) {
+      tempDests.addElement(dests.next());
     }
-    return tempDests.elements();
+    return tempDests.iterator();
   }
 
   /** Removes a temporary destination identifier. */
@@ -151,8 +151,8 @@ class ClientContext implements java.io.Serializable {
   }
 
   /** Returns the pending deliveries. */
-  Enumeration getPendingDeliveries() {
-    return repliesBuffer.elements();
+  Iterator getPendingDeliveries() {
+    return repliesBuffer.iterator();
   }
 
   /** Clears the pending deliveries buffer. */
@@ -166,8 +166,8 @@ class ClientContext implements java.io.Serializable {
   }
 
   /** Returns the active subscriptions' names. */
-  Enumeration getActiveSubs() {
-    return activeSubs.elements();
+  Iterator getActiveSubs() {
+    return activeSubs.iterator();
   }
 
   /** Removes an active subscription name. */
@@ -195,8 +195,8 @@ class ClientContext implements java.io.Serializable {
   }
 
   /** Returns the identifiers of the delivering queues. */
-  Enumeration getDeliveringQueues() {
-    return deliveringQueues.keys();
+  Iterator getDeliveringQueues() {
+    return deliveringQueues.keySet().iterator();
   }
   
   /**
@@ -283,10 +283,10 @@ class ClientContext implements java.io.Serializable {
   }
   
   /** Returns the identifiers of the prepared transactions. */
-  Enumeration getTxIds() {
+  Iterator getTxIds() {
     if (transactionsTable == null)
-      return new Hashtable().keys();
-    return transactionsTable.keys();
+      return new Hashtable().keySet().iterator();
+    return transactionsTable.keySet().iterator();
   }
 
   public void readBag(ObjectInputStream in) 
