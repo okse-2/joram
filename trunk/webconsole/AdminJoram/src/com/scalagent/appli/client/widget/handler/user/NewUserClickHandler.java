@@ -49,9 +49,10 @@ public class NewUserClickHandler implements ClickHandler {
     try {
       if (form.validate()) {
         String nameValue = form.getValueAsString("nameItem");
+        String passwordValue = form.getValueAsString("passwordItem");
         int periodValue = Integer.parseInt(form.getValueAsString("periodItem"));
 
-        UserWTO newUser = new UserWTO(nameValue, periodValue, 0, null);
+        UserWTO newUser = new UserWTO(nameValue, passwordValue, periodValue, 0, null);
 
         presenter.createNewUser(newUser);
       }
