@@ -117,6 +117,22 @@ public class MainWidget extends BaseWidget<MainPresenter> {
     topTabSet.selectTab(tab);
   }
 
+  public void showUserTab() {
+    topTabSet.selectTab(UserListWidget.class.getName());
+  }
+
+  public void showSubscriptionTab() {
+    topTabSet.selectTab(SubscriptionListWidget.class.getName());
+  }
+
+  public void showQueueTab() {
+    topTabSet.selectTab(QueueListWidget.class.getName());
+  }
+
+  public String getSelectedTabTitle() {
+    return topTabSet.getSelectedTab().getTitle();
+  }
+
   public void createLogin() {
     cLogin = (Canvas) loginWidget.asWidget();
   }
@@ -152,14 +168,17 @@ public class MainWidget extends BaseWidget<MainPresenter> {
     Tab tabQueues = new Tab(Application.messages.mainWidget_tabQueue_title());
     tabQueues.setPane((Canvas) queueWidget.asWidget());
     tabQueues.setIcon("queues.png");
+    tabQueues.setID(QueueListWidget.class.getName());
 
     Tab tabSubscriptions = new Tab(Application.messages.mainWidget_tabSubscription_title());
     tabSubscriptions.setPane((Canvas) subscriptionWidget.asWidget());
     tabSubscriptions.setIcon("subs.png");
+    tabSubscriptions.setID(SubscriptionListWidget.class.getName());
 
     Tab tabUsers = new Tab(Application.messages.mainWidget_tabUsers_title());
     tabUsers.setPane((Canvas) userWidget.asWidget());
     tabUsers.setIcon("users.png");
+    tabUsers.setID(UserListWidget.class.getName());
 
     Tab tabConnections = new Tab(Application.messages.mainWidget_tabConnections_title());
     tabConnections.setPane(new Label("Connections... (To be done)"));
