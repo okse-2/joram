@@ -29,8 +29,8 @@ import java.util.SortedMap;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.AbstractDataTable;
-import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
+import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.AnnotatedLegendPosition;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.Options;
@@ -675,12 +675,12 @@ public class QueueListWidget extends BaseWidget<QueueListPresenter> {
     TextItem DMQItem = new TextItem();
     DMQItem.setTitle(Application.messages.queueWidget_DMQItem_title());
     DMQItem.setName("DMQItem");
-    DMQItem.setRequired(true);
+    DMQItem.setDisabled(true);
 
     TextItem destinationItem = new TextItem();
     destinationItem.setTitle(Application.messages.queueWidget_destinationItem_title());
     destinationItem.setName("destinationItem");
-    destinationItem.setRequired(true);
+    destinationItem.setDisabled(true);
 
     TextItem periodItem = new TextItem();
     periodItem.setTitle(Application.messages.queueWidget_periodItem_title());
