@@ -29,8 +29,8 @@ import java.util.SortedMap;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.AbstractDataTable;
-import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
+import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.AnnotatedLegendPosition;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.Options;
@@ -63,6 +63,7 @@ import com.smartgwt.client.widgets.events.DrawEvent;
 import com.smartgwt.client.widgets.events.DrawHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
 import com.smartgwt.client.widgets.form.fields.CheckboxItem;
+import com.smartgwt.client.widgets.form.fields.PasswordItem;
 import com.smartgwt.client.widgets.form.fields.TextItem;
 import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
@@ -506,6 +507,11 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
     nameItem.setName("nameItem");
     nameItem.setRequired(true);
 
+    PasswordItem passwordItem = new PasswordItem();
+    passwordItem.setTitle(Application.messages.userWidget_passwordItem_title());
+    passwordItem.setName("passwordItem");
+    passwordItem.setRequired(true);
+
     TextItem periodItem = new TextItem();
     periodItem.setTitle(Application.messages.userWidget_periodItem_title());
     periodItem.setName("periodItem");
@@ -518,7 +524,7 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
       periodItem.setValue(ulr.getAttributeAsString(UserListRecord.ATTRIBUTE_PERIOD));
     }
 
-    form.setFields(nameItem, periodItem);
+    form.setFields(nameItem, passwordItem, periodItem);
 
     IButton validateButton = new IButton();
     if (ulr == null) {
