@@ -87,10 +87,11 @@ public class MainPresenter extends BasePresenter<MainWidget, RPCServiceAsync, RP
    * hen get the focus.
    */
   public void onQueueDetailsClick(QueueWTO queue) {
+    String newTabTitle = "Queue: " + queue.getName();
 
-    if (!openedTabList.containsKey(queue.getName())) {
+    if (!openedTabList.containsKey(newTabTitle)) {
 
-      Tab tabQueue = new Tab(queue.getName());
+      Tab tabQueue = new Tab(newTabTitle);
 
       QueueDetailPresenter queueDetailsPresenter = new QueueDetailPresenter(service, eventBus, cache, queue);
 
@@ -111,10 +112,10 @@ public class MainPresenter extends BasePresenter<MainWidget, RPCServiceAsync, RP
       tabQueue.setCanClose(true);
 
       widget.addTab(tabQueue);
-      openedTabList.put(queue.getName(), tabQueue);
-      openedQueueList.put(queue.getName(), queueDetailsPresenter);
+      openedTabList.put(newTabTitle, tabQueue);
+      openedQueueList.put(newTabTitle, queueDetailsPresenter);
     }
-    widget.showTab(openedTabList.get(queue.getName()));
+    widget.showTab(openedTabList.get(newTabTitle));
   }
 
   /**
@@ -125,10 +126,11 @@ public class MainPresenter extends BasePresenter<MainWidget, RPCServiceAsync, RP
    * hen get the focus.
    */
   public void onUserDetailsClick(UserWTO user) {
+    String newTabTitle = "User: " + user.getName();
 
-    if (!openedTabList.containsKey(user.getName())) {
+    if (!openedTabList.containsKey(newTabTitle)) {
 
-      Tab tabUser = new Tab(user.getName());
+      Tab tabUser = new Tab(newTabTitle);
 
       UserDetailPresenter userDetailsPresenter = new UserDetailPresenter(service, eventBus, cache, user);
 
@@ -147,10 +149,10 @@ public class MainPresenter extends BasePresenter<MainWidget, RPCServiceAsync, RP
       tabUser.setCanClose(true);
 
       widget.addTab(tabUser);
-      openedTabList.put(user.getName(), tabUser);
-      openedUserList.put(user.getName(), userDetailsPresenter);
+      openedTabList.put(newTabTitle, tabUser);
+      openedUserList.put(newTabTitle, userDetailsPresenter);
     }
-    widget.showTab(openedTabList.get(user.getName()));
+    widget.showTab(openedTabList.get(newTabTitle));
   }
 
   /**
@@ -163,10 +165,11 @@ public class MainPresenter extends BasePresenter<MainWidget, RPCServiceAsync, RP
    */
   @Override
   public void onSubDetailsClick(SubscriptionWTO sub) {
+    String newTabTitle = "Sub: " + sub.getName();
 
-    if (!openedTabList.containsKey(sub.getName())) {
+    if (!openedTabList.containsKey(newTabTitle)) {
 
-      Tab tabSub = new Tab(sub.getName());
+      Tab tabSub = new Tab(newTabTitle);
 
       SubscriptionDetailPresenter subDetailsPresenter = new SubscriptionDetailPresenter(service, eventBus,
           cache, sub);
@@ -184,10 +187,11 @@ public class MainPresenter extends BasePresenter<MainWidget, RPCServiceAsync, RP
       tabSub.setCanClose(true);
 
       widget.addTab(tabSub);
-      openedTabList.put(sub.getName(), tabSub);
-      openedSubList.put(sub.getName(), subDetailsPresenter);
+      openedTabList.put(newTabTitle, tabSub);
+      openedSubList.put(newTabTitle, subDetailsPresenter);
+
     }
-    widget.showTab(openedTabList.get(sub.getName()));
+    widget.showTab(openedTabList.get(newTabTitle));
 
   }
 
@@ -196,11 +200,16 @@ public class MainPresenter extends BasePresenter<MainWidget, RPCServiceAsync, RP
    * The tab is removed from list and tabset.
    */
   public void onTabCloseClick(Tab tab) {
-
-    if (openedQueueList.keySet().contains(tab.getTitle()))
-      openedQueueList.get(tab.getTitle()).stopChart();
-    if (openedUserList.keySet().contains(tab.getTitle()))
-      openedUserList.get(tab.getTitle()).stopChart();
+    if (openedQueueList.containsKey(tab.getTitle())) {
+      openedQueueList.remove(tab.getTitle()).stopChart();
+      widget.showQueueTab();
+    } else if (openedUserList.containsKey(tab.getTitle())) {
+      openedUserList.remove(tab.getTitle()).stopChart();
+      widget.showUserTab();
+    } else if (openedSubList.containsKey(tab.getTitle())) {
+      openedSubList.remove(tab.getTitle()).stopChart();
+      widget.showSubscriptionTab();
+    }
     openedTabList.remove(tab.getTitle());
   }
 
