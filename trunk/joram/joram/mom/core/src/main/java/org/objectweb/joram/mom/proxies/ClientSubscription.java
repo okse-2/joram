@@ -27,7 +27,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -89,9 +88,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   /** Vector of identifiers of the messages to deliver. */
   private List messageIds;
   /** Table of delivered messages identifiers. */
-  private Hashtable deliveredIds;
+  private Map deliveredIds;
   /** Table keeping the denied messages identifiers. */
-  private Hashtable deniedMsgs;
+  private Map deniedMsgs;
 
   /** Identifier of the subscription context. */
   private transient int contextId;
@@ -324,7 +323,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
       message = (Message) e.next();
       msgId = message.getIdentifier();
 
-      if (messageIds.contains(msgId) || deliveredIds.contains(msgId)) {
+      if (messageIds.contains(msgId) || deliveredIds.containsKey(msgId)) {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, " -> contains message " + msgId);
         message.acksCounter++;
@@ -348,7 +347,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
 
     if (denyDeliveredMessages) {
       // Denying all previously delivered messages:
-      deny(deliveredIds.keySet().iterator());
+      deny(deliveredIds.keySet().iterator(), false);
       deliveredIds.clear();
     }
   }
@@ -397,7 +396,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     active = false;
    
     // Denying all delivered messages:
-    deny(deliveredIds.keySet().iterator());
+    deny(deliveredIds.keySet().iterator(), false);
     deliveredIds.clear();
     
     // deliveredIds is persistent
@@ -760,6 +759,18 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    * Denies messages.
    */
   void deny(Iterator denies) {
+    deny(denies, true);
+  }
+
+  /**
+   * Denies the messages.
+   * 
+   * @param denies all ids of the messages to deny
+   * @param remove true to remove messages from deliveredIds map. Must be false
+   *          when denies iterates over deliveredIds map keys, to avoid a
+   *          ConcurrentModificationException.
+   */
+  private void deny(Iterator denies, boolean remove) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, this + ".deny(" + denies + ')');
     String id;
@@ -770,16 +781,16 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     long currentO;
     DMQManager dmqManager = null;
 
-    denyLoop:
- while (denies.hasNext()) {
+    denyLoop: while (denies.hasNext()) {
       id = (String) denies.next();
 
-      String deliveredMsgId = (String)deliveredIds.remove(id);
-      if (deliveredMsgId == null) {
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, this + ": cannot deny message: " + id);
-
-        continue denyLoop;
+      if (remove) {
+        String deliveredMsgId = (String) deliveredIds.remove(id);
+        if (deliveredMsgId == null) {
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, this + ": cannot deny message: " + id);
+          continue denyLoop;
+        }
       }
       save();
       
@@ -845,8 +856,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    * deletes those not to be consumed anymore.
    */
   void delete() {
-    for (Enumeration e = deliveredIds.keys(); e.hasMoreElements();)
-      messageIds.add(e.nextElement());
+    messageIds.addAll(deliveredIds.keySet());
 
     for (Iterator allMessageIds = messageIds.iterator(); allMessageIds.hasNext();) {
       removeMessage((String) allMessageIds.next());
