@@ -515,6 +515,7 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> local sending");
       not.setPersistent(false);
+      not.setExpiration(0L);
       if (req.getAsyncSend()) {
         not.setAsyncSend(true);
       }
