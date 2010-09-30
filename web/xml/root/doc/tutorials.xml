@@ -23,6 +23,9 @@
         example shows the use of clustered queues either for load-balancing or availability.</li>
         <li><a href="tutorials/monitoring/monitoring.htm">Monitoring destination</a> sample: this
         example shows the use of monitoring queue and topic.</li>
+        <li><a href="tutorials/bridge/bridge.htm">JMS bridge destination</a> sample: this
+        example shows the use of JMS bridge queue and topic. It allows interoperability between
+        Joram and another JMS provider.</li>
         <li><a href="tutorials/stomp/stomp.htm">JASP: Joram Access using STOMP Protocol</a> sample: this
         sample shows the configuration of the Joram's STOMP bridge. Be careful this tutorial needs Joram 5.4.</li>
       </ul>
