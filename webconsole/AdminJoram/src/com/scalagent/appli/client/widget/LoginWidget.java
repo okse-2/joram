@@ -22,10 +22,13 @@
  */
 package com.scalagent.appli.client.widget;
 
-import com.scalagent.appli.client.Application;
+
+
 import com.google.gwt.user.client.ui.Widget;
+import com.scalagent.appli.client.Application;
 import com.scalagent.appli.client.presenter.LoginPresenter;
 import com.scalagent.appli.client.widget.handler.LoginClickHandler;
+import com.scalagent.appli.client.widget.handler.LoginKeyPressedHandler;
 import com.scalagent.engine.client.widget.BaseWidget;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.VerticalAlignment;
@@ -59,6 +62,8 @@ public class LoginWidget extends BaseWidget<LoginPresenter> {
     form.setShowEdges(false);
     form.setAlign(Alignment.CENTER);
     form.setPadding(30);
+    form.setAutoFocus(Boolean.TRUE);
+    form.addItemKeyPressHandler(new LoginKeyPressedHandler(presenter, form));
 
     TextItem username = new TextItem();
     username.setName("username");
@@ -66,6 +71,7 @@ public class LoginWidget extends BaseWidget<LoginPresenter> {
     username.setRequired(true);
     username.setWidth(150);
     username.setAlign(Alignment.CENTER);
+    username.setSelectOnFocus(Boolean.TRUE);
 
     PasswordItem password = new PasswordItem();
     password.setName("password");
