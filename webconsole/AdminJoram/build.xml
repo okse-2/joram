@@ -50,6 +50,10 @@
       <jvmarg value="-Xmx256M"/>
       <!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
       <arg value="com.scalagent.AdminJoram"/>
+      
+      <!-- Change style to ease debugging -->
+      <!-- arg value="-style"/>
+      <arg value="PRETTY"/ -->
     </java>
   </target>
 
@@ -76,7 +80,7 @@
 	
   <target name="jar" depends="war">
     <copy file="${ship.dir}/joram-web-admin.war" tofile="joram-web-admin.jar"/>
-    <echo file="joram-web-admin.bnd">Import-Package: !com.smartgwt.*, junit.framework;resolution:=optional, com.google.gwt.*;resolution:=optional, org.w3c.*;resolution:=optional, sun.misc;resolution:=optional, javax.imageio;resolution:=optional, javax.servlet.*;resolution:=optional, *
+    <echo file="joram-web-admin.bnd">Import-Package: !com.smartgwt.*, !com.allen_sauer.gwt.log.*, junit.framework;resolution:=optional, com.google.gwt.*;resolution:=optional, org.w3c.*;resolution:=optional, sun.misc;resolution:=optional, javax.imageio;resolution:=optional, javax.servlet.*;resolution:=optional, *
 Bundle-Name: Joram Admin
 Bundle-Version: 0.1.0
 Bundle-ClassPath: WEB-INF/classes, WEB-INF/lib/gwt-servlet.jar

@@ -22,8 +22,11 @@
  */
 package com.scalagent.appli.client;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine;
 import com.scalagent.appli.client.event.common.UpdateCompleteEvent;
@@ -66,10 +69,20 @@ public class Application implements BaseEntryPoint {
   private RPCServiceCacheClient serviceCache;
   private HandlerManager eventBus;
 
+  public void onModuleLoad() {
+    Log.setUncaughtExceptionHandler();
+
+    DeferredCommand.addCommand(new Command() {
+      public void execute() {
+        onModuleLoad2();
+      }
+    });
+  }
+
   /**
    * This is the entry point method.
    */
-  public void onModuleLoad() {
+  public void onModuleLoad2() {
 
     Runnable onLoadCallback = new Runnable() {
       public void run() {
