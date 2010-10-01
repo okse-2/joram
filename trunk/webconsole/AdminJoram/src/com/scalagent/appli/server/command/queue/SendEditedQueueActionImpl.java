@@ -41,9 +41,9 @@ public class SendEditedQueueActionImpl extends
     String info = "";
 
     if (result) {
-      info = "The Queue \"" + sendEditedQueueAction.getQueue().getName() + "\" has been updated.";
+      info = "The Queue \"" + sendEditedQueueAction.getQueue().getId() + "\" has been updated.";
     } else {
-      info = "Error while updating queue \"" + sendEditedQueueAction.getQueue().getName() + "\"";
+      info = "Error while updating queue \"" + sendEditedQueueAction.getQueue().getId() + "\"";
     }
 
     return new SendEditedQueueResponse(result, info);

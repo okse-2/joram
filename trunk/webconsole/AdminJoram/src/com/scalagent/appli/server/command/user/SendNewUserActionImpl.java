@@ -41,9 +41,9 @@ public class SendNewUserActionImpl extends
     String info = new String();
 
     if (result) {
-      info = "The User \"" + action.getUser().getName() + "\" has been created.";
+      info = "The User \"" + action.getUser().getId() + "\" has been created.";
     } else {
-      info = "Error while creating new User \"" + action.getUser().getName() + "\"";
+      info = "Error while creating new User \"" + action.getUser().getId() + "\"";
     }
 
     return new SendNewUserResponse(result, info);

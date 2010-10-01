@@ -41,9 +41,9 @@ public class SendEditedSubscriptionActionImpl extends
     String info = "";
 
     if (result) {
-      info = "The subscription \"" + action.getSubscription().getName() + "\" has been updated.";
+      info = "The subscription \"" + action.getSubscription().getId() + "\" has been updated.";
     } else {
-      info = "Error while updating queue \"" + action.getSubscription().getName() + "\"";
+      info = "Error while updating queue \"" + action.getSubscription().getId() + "\"";
     }
 
     return new SendEditedSubscriptionResponse(result, info);

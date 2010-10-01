@@ -108,7 +108,7 @@ public class QueueListPresenter extends
    * the selected queue.
    */
   public void clearPendingMessage(QueueWTO queue) {
-    service.execute(new ClearPendingMessageAction(queue.getName()), new ClearPendingMessageHandler(eventBus) {
+    service.execute(new ClearPendingMessageAction(queue.getId()), new ClearPendingMessageHandler(eventBus) {
       @Override
       public void onSuccess(ClearPendingMessageResponse response) {
         if (response.isSuccess()) {
@@ -128,7 +128,7 @@ public class QueueListPresenter extends
    * the selected queue.
    */
   public void clearWaintingRequest(QueueWTO queue) {
-    service.execute(new ClearWaitingRequestAction(queue.getName()), new ClearWaitingRequestHandler(eventBus) {
+    service.execute(new ClearWaitingRequestAction(queue.getId()), new ClearWaitingRequestHandler(eventBus) {
       @Override
       public void onSuccess(ClearWaitingRequestResponse response) {
         if (response.isSuccess()) {
@@ -228,7 +228,7 @@ public class QueueListPresenter extends
    * The queue name is sent to the server which delete the queue.
    */
   public void deleteQueue(QueueWTO queue) {
-    service.execute(new DeleteQueueAction(queue.getName()), new DeleteQueueHandler(eventBus) {
+    service.execute(new DeleteQueueAction(queue.getId()), new DeleteQueueHandler(eventBus) {
       @Override
       public void onSuccess(DeleteQueueResponse response) {
         if (response.isSuccess()) {

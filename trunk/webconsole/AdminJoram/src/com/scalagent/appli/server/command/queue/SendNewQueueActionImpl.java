@@ -41,9 +41,9 @@ public class SendNewQueueActionImpl extends
     String info = "";
 
     if (result) {
-      info = "The Queue \"" + sendNewQueueAction.getQueue().getName() + "\" has been created.";
+      info = "The Queue \"" + sendNewQueueAction.getQueue().getId() + "\" has been created.";
     } else {
-      info = "Error while creating new Queue \"" + sendNewQueueAction.getQueue().getName() + "\"";
+      info = "Error while creating new Queue \"" + sendNewQueueAction.getQueue().getId() + "\"";
     }
 
     return new SendNewQueueResponse(result, info);

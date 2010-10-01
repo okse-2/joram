@@ -43,7 +43,7 @@ public class UserListRecord extends ListGridRecord {
   public UserListRecord(UserWTO user) {
     super();
 
-    setName(user.getName());
+    setName(user.getId());
     setPeriod((int) user.getPeriod());
     setNbMsgsSentToDMQSinceCreation((int) user.getNbMsgsSentToDMQSinceCreation());
     setSubscriptionNames(user.getSubscriptionNames());

@@ -32,7 +32,6 @@ import com.scalagent.engine.shared.BaseWTO;
  */
 public class TopicWTO extends BaseWTO {
 
-  private String name;
   private Date creationDate = new Date();
   private String[] subscriberIds;
   private String DMQId;
@@ -44,10 +43,6 @@ public class TopicWTO extends BaseWTO {
   private String[] rights;
   private boolean freeReading;
   private boolean freeWriting;
-
-  public String getName() {
-    return name;
-  }
 
   public Date getCreationDate() {
     return creationDate;
@@ -101,10 +96,6 @@ public class TopicWTO extends BaseWTO {
     return freeWriting;
   }
 
-  public void setName(String name) {
-    this.name = name;
-  }
-
   public void setCreationDate(Date date) {
     this.creationDate = date;
   }
@@ -154,7 +145,6 @@ public class TopicWTO extends BaseWTO {
       long period, String[] rights, boolean freeReading, boolean freeWriting) {
 
     this.id = name;
-    this.name = name;
     this.creationDate = creationDate;
     this.subscriberIds = subscriberIds;
     this.DMQId = DMQId;
@@ -173,11 +163,11 @@ public class TopicWTO extends BaseWTO {
 
   @Override
   public String toString() {
-    return "[name=" + name + ", creationDate=" + creationDate + " ]";
+    return "[name=" + id + ", creationDate=" + creationDate + " ]";
   }
 
   public String toStringFullContent() {
-    return "[name=" + name + ", creationDate=" + creationDate + ", subscriberIds=" + subscriberIds
+    return "[name=" + id + ", creationDate=" + creationDate + ", subscriberIds=" + subscriberIds
         + ", DMQId=" + DMQId + ", nbMsgsDeliverSinceCreation=" + nbMsgsDeliverSinceCreation
         + ", nbMsgsReceiveSinceCreation=" + nbMsgsReceiveSinceCreation + ", nbMsgsSentToDMQSinceCreation="
         + nbMsgsSentToDMQSinceCreation + ", period=" + period + ", rights=" + rights + ", freeReading="
@@ -203,7 +193,7 @@ public class TopicWTO extends BaseWTO {
 
     TopicWTO topic = new TopicWTO();
 
-    topic.setName(this.getName());
+    topic.setId(this.getId());
     topic.setCreationDate(this.getCreationDate());
     topic.setSubscriberIds(this.getSubscriberIds());
     topic.setDMQId(this.getDMQId());
@@ -227,15 +217,14 @@ public class TopicWTO extends BaseWTO {
 
     TopicWTO obj = (TopicWTO) anObj;
 
-    boolean eq = equalsWithNull(this.id, obj.id) && equalsWithNull(this.name, obj.name)
+    boolean eq = equalsWithNull(this.id, obj.id)
         && equalsWithNull(this.creationDate, obj.creationDate)
-        && equalsWithNull(Arrays.asList(this.subscriberIds), Arrays.asList(obj.subscriberIds))
+        && Arrays.equals(this.subscriberIds, obj.subscriberIds)
         && equalsWithNull(this.DMQId, obj.DMQId) && equalsWithNull(this.destinationId, obj.destinationId)
         && equalsWithNull(this.nbMsgsDeliverSinceCreation, obj.nbMsgsDeliverSinceCreation)
         && equalsWithNull(this.nbMsgsReceiveSinceCreation, obj.nbMsgsReceiveSinceCreation)
         && equalsWithNull(this.nbMsgsSentToDMQSinceCreation, obj.nbMsgsSentToDMQSinceCreation)
-        && equalsWithNull(this.period, obj.period)
-        && equalsWithNull(Arrays.asList(this.rights), Arrays.asList(obj.rights))
+        && equalsWithNull(this.period, obj.period) && Arrays.equals(this.rights, obj.rights)
         && equalsWithNull(this.freeReading, obj.freeReading)
         && equalsWithNull(this.freeWriting, obj.freeWriting);
 
