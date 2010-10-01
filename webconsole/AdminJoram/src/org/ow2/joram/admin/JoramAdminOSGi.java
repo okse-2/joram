@@ -24,7 +24,6 @@ package org.ow2.joram.admin;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import org.objectweb.joram.mom.dest.AdminTopicImplMBean;
 import org.objectweb.joram.mom.dest.QueueImplMBean;
@@ -78,7 +77,7 @@ public class JoramAdminOSGi implements JoramAdmin, ServiceTrackerCustomizer {
   }
 
   public boolean connect(String login, String password) {
-    return login.equals(password);
+    return Activator.checkCredentials(login, password);
   }
 
   public void start(AdminListener listener) {
@@ -155,8 +154,8 @@ public class JoramAdminOSGi implements JoramAdmin, ServiceTrackerCustomizer {
     return true;
   }
 
-  public boolean deleteMessage(String messageName, String queueName) {
-    // TODO Auto-generated method stub
+  public boolean deleteSubscriptionMessage(ClientSubscriptionMBean sub, String msgId) {
+    sub.deleteMessage(msgId);
     return true;
   }
 
@@ -244,9 +243,9 @@ public class JoramAdminOSGi implements JoramAdmin, ServiceTrackerCustomizer {
     return true;
   }
 
-  public boolean editSubscription(String name, int nbMaxMsg, int context, String selector, int subRequest,
-      boolean active, boolean durable) {
-    // TODO Auto-generated method stub
+  public boolean editSubscription(ClientSubscriptionMBean sub, int nbMaxMsg, int context, String selector,
+      int subRequest, boolean active, boolean durable) {
+    sub.setNbMaxMsg(nbMaxMsg);
     return true;
   }
 

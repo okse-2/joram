@@ -166,7 +166,7 @@ public class JoramAdminImpl implements JoramAdmin {
     return true;
   }
 
-  public boolean deleteMessage(String messageName, String queueName) {
+  public boolean deleteSubscriptionMessage(ClientSubscriptionMBean sub, String msgId) {
     // TODO Auto-generated method stub
     return true;
   }
@@ -236,8 +236,8 @@ public class JoramAdminImpl implements JoramAdmin {
     return true;
   }
 
-  public boolean editSubscription(String name, int nbMaxMsg, int context, String selector, int subRequest,
-      boolean active, boolean durable) {
+  public boolean editSubscription(ClientSubscriptionMBean sub, int nbMaxMsg, int context, String selector,
+      int subRequest, boolean active, boolean durable) {
     // TODO Auto-generated method stub
     return true;
   }

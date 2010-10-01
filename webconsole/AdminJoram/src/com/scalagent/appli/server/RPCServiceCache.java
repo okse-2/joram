@@ -22,9 +22,9 @@
  */
 package com.scalagent.appli.server;
 
-import java.util.ArrayList;
+
+
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -82,7 +82,7 @@ public class RPCServiceCache extends BaseRPCServiceCache {
   private Map<String, QueueImplMBean> mapQueues;
   private Map<String, TopicImplMBean> mapTopics;
   private Map<String, ProxyImplMBean> mapUsers;
-  private List<ClientSubscriptionMBean> listSubscriptions;
+  private Map<String, SubscriptionWithName> listSubscriptions;
 
   private long lastupdate = 0;
 
@@ -144,7 +144,7 @@ public class RPCServiceCache extends BaseRPCServiceCache {
   }
 
   @SuppressWarnings("unchecked")
-  public List<MessageWTO> getMessages(HttpSession session, String queueName)
+  public List<MessageWTO> getMessages(HttpSession session, boolean retrieveAll, String queueName)
       throws Exception {
 
     synchWithJORAM(true);
@@ -173,6 +173,11 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 
     List<MessageWTO> toReturn = null;
     toReturn = compareEntities(newMessages, sessionMessagesQueue);
+
+    if (retrieveAll) {
+      toReturn = this.retrieveAll(sessionMessagesQueue);
+    }
+
     // save devices in session
     sessionMessagesAll.put(queueName, sessionMessagesQueue);
     session.setAttribute(RPCServiceCache.SESSION_MESSAGES, sessionMessagesAll);
@@ -181,19 +186,12 @@ public class RPCServiceCache extends BaseRPCServiceCache {
   }
 
   @SuppressWarnings("unchecked")
-  public List<MessageWTO> getSubMessages(HttpSession session, String subName) throws Exception {
+  public List<MessageWTO> getSubMessages(HttpSession session, boolean retrieveAll, String subName)
+      throws Exception {
 
     synchWithJORAM(true);
 
-    ClientSubscriptionMBean sub = null;
-    for (Iterator<ClientSubscriptionMBean> subs = listSubscriptions.iterator(); subs.hasNext();) {
-      ClientSubscriptionMBean subsc = subs.next();
-      if (subsc.getName().equals(subName)) {
-        sub = subsc;
-        break;
-      }
-    }
-
+    ClientSubscriptionMBean sub = listSubscriptions.get(subName).subscription;
     if (sub == null) {
       throw new Exception("Subscription not found");
     }
@@ -216,6 +214,11 @@ public class RPCServiceCache extends BaseRPCServiceCache {
 
     List<MessageWTO> toReturn = null;
     toReturn = compareEntities(newMessages, sessionMessagesSub);
+
+    if (retrieveAll) {
+      toReturn = this.retrieveAll(sessionMessagesSub);
+    }
+
     // save devices in session
     sessionMessagesAll.put(subName, sessionMessagesSub);
     session.setAttribute(RPCServiceCache.SUBSCRIPTION_MESSAGES, sessionMessagesAll);
@@ -320,7 +323,7 @@ public class RPCServiceCache extends BaseRPCServiceCache {
     if (!isConnected) {
       return false;
     }
-    return joramAdmin.createNewQueue(queue.getName(), queue.getDMQId(), queue.getDestinationId(),
+    return joramAdmin.createNewQueue(queue.getId(), queue.getDMQId(), queue.getDestinationId(),
         queue.getPeriod(), queue.getThreshold(), queue.getNbMaxMsg(), queue.isFreeReading(),
         queue.isFreeWriting());
   }
@@ -329,7 +332,7 @@ public class RPCServiceCache extends BaseRPCServiceCache {
     if (!isConnected) {
       return false;
     }
-    return joramAdmin.editQueue(mapQueues.get(queue.getName()), queue.getDMQId(), queue.getDestinationId(),
+    return joramAdmin.editQueue(mapQueues.get(queue.getId()), queue.getDMQId(), queue.getDestinationId(),
         queue.getPeriod(), queue.getThreshold(), queue.getNbMaxMsg(), queue.isFreeReading(),
         queue.isFreeWriting());
   }
@@ -361,14 +364,14 @@ public class RPCServiceCache extends BaseRPCServiceCache {
     if (!isConnected) {
       return false;
     }
-    return joramAdmin.createNewUser(user.getName(), user.getPassword(), user.getPeriod());
+    return joramAdmin.createNewUser(user.getId(), user.getPassword(), user.getPeriod());
   }
 
   public boolean editUser(UserWTO user) {
     if (!isConnected) {
       return false;
     }
-    return joramAdmin.editUser(mapUsers.get(user.getName()), user.getPassword(), user.getPeriod());
+    return joramAdmin.editUser(mapUsers.get(user.getId()), user.getPassword(), user.getPeriod());
   }
 
   public boolean deleteUser(String userName) {
@@ -396,11 +399,18 @@ public class RPCServiceCache extends BaseRPCServiceCache {
         message.getTimestamp(), message.getPriority(), message.getText(), message.getType());
   }
 
-  public boolean deleteMessage(String messageName, String queueName) {
+  public boolean deleteQueueMessage(String messageID, String queueName) {
     if (!isConnected) {
       return false;
     }
-    return joramAdmin.deleteMessage(messageName, queueName);
+    return false;
+  }
+
+  public boolean deleteSubscriptionMessage(String messageID, String subName) {
+    if (!isConnected) {
+      return false;
+    }
+    return joramAdmin.deleteSubscriptionMessage(listSubscriptions.get(subName).subscription, messageID);
   }
 
   /** TOPICS **/
@@ -409,7 +419,7 @@ public class RPCServiceCache extends BaseRPCServiceCache {
     if (!isConnected) {
       return false;
     }
-    return joramAdmin.createNewTopic(topic.getName(), topic.getDMQId(), topic.getDestinationId(),
+    return joramAdmin.createNewTopic(topic.getId(), topic.getDMQId(), topic.getDestinationId(),
         topic.getPeriod(), topic.isFreeReading(), topic.isFreeWriting());
   }
 
@@ -417,7 +427,7 @@ public class RPCServiceCache extends BaseRPCServiceCache {
     if (!isConnected) {
       return false;
     }
-    return joramAdmin.editTopic(mapTopics.get(topic.getName()), topic.getDMQId(), topic.getDestinationId(),
+    return joramAdmin.editTopic(mapTopics.get(topic.getId()), topic.getDMQId(), topic.getDestinationId(),
         topic.getPeriod(), topic.isFreeReading(), topic.isFreeWriting());
   }
 
@@ -434,7 +444,7 @@ public class RPCServiceCache extends BaseRPCServiceCache {
     if (!isConnected) {
       return false;
     }
-    return joramAdmin.createNewSubscription(sub.getName(), sub.getNbMaxMsg(), sub.getContextId(),
+    return joramAdmin.createNewSubscription(sub.getId(), sub.getNbMaxMsg(), sub.getContextId(),
         sub.getSelector(), sub.getSubRequestId(), sub.isActive(), sub.isDurable());
   }
 
@@ -442,9 +452,8 @@ public class RPCServiceCache extends BaseRPCServiceCache {
     if (!isConnected) {
       return false;
     }
-    synchWithJORAM(true);
-    return joramAdmin.editSubscription(sub.getName(), sub.getNbMaxMsg(), sub.getContextId(),
-        sub.getSelector(), sub.getSubRequestId(), sub.isActive(), sub.isDurable());
+    return joramAdmin.editSubscription(listSubscriptions.get(sub.getId()).subscription, sub.getNbMaxMsg(),
+        sub.getContextId(), sub.getSelector(), sub.getSubRequestId(), sub.isActive(), sub.isDurable());
   }
 
   public boolean deleteSubscription(String subName) {
@@ -459,7 +468,7 @@ public class RPCServiceCache extends BaseRPCServiceCache {
     private Map<String, QueueImplMBean> queues = new HashMap<String, QueueImplMBean>();
     private Map<String, TopicImplMBean> topics = new HashMap<String, TopicImplMBean>();
     private Map<String, ProxyImplMBean> users = new HashMap<String, ProxyImplMBean>();
-    private List<ClientSubscriptionMBean> subscriptions = new ArrayList<ClientSubscriptionMBean>();
+    private Map<String, SubscriptionWithName> subscriptions = new HashMap<String, SubscriptionWithName>();
 
     public void onQueueAdded(String queueName, QueueImplMBean queue) {
       queues.put(queueName, queue);
@@ -478,11 +487,11 @@ public class RPCServiceCache extends BaseRPCServiceCache {
     }
 
     public void onSubscriptionAdded(String userName, ClientSubscriptionMBean subscription) {
-      subscriptions.add(subscription);
+      subscriptions.put(subscription.getName(), new SubscriptionWithName(subscription, userName));
     }
 
     public void onSubscriptionRemoved(String userName, ClientSubscriptionMBean subscription) {
-      subscriptions.remove(subscription);
+      subscriptions.remove(subscription.getName());
     }
 
     public void onUserAdded(String userName, ProxyImplMBean user) {
@@ -505,10 +514,23 @@ public class RPCServiceCache extends BaseRPCServiceCache {
       return users;
     }
 
-    public List<ClientSubscriptionMBean> getSubscription() {
+    public Map<String, SubscriptionWithName> getSubscription() {
       return subscriptions;
     }
 
+  }
+
+  public static class SubscriptionWithName {
+
+    public ClientSubscriptionMBean subscription;
+
+    public String userName;
+
+    SubscriptionWithName(ClientSubscriptionMBean subscription, String name) {
+      super();
+      this.subscription = subscription;
+      this.userName = name;
+    }
   }
 
 }
