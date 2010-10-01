@@ -70,7 +70,7 @@ public class SubscriptionEditClickHandler implements ClickHandler {
         int subRequestIdValue = Integer.parseInt(form.getValueAsString("subRequestIdItem"));
 
         SubscriptionWTO newSub = new SubscriptionWTO(nameValue, activeValue, durableValue, nbMaxMsgValue,
-            contextIdValue, 0, 0, 0, selectorValue, subRequestIdValue);
+            contextIdValue, 0, 0, 0, selectorValue, subRequestIdValue, null);
 
         if (sPresenter != null)
           sPresenter.editSubscription(newSub);
