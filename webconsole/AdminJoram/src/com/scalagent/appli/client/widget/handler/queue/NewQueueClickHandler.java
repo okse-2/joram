@@ -22,15 +22,12 @@
  */
 package com.scalagent.appli.client.widget.handler.queue;
 
-import java.util.Date;
-
 import com.scalagent.appli.client.presenter.QueueListPresenter;
 import com.scalagent.appli.shared.QueueWTO;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.form.DynamicForm;
-import com.smartgwt.client.widgets.form.fields.CheckboxItem;
 
 /**
  * @author Yohann CINTRE
@@ -53,16 +50,9 @@ public class NewQueueClickHandler implements ClickHandler {
       if (form.validate()) {
 
         String nameValue = form.getValueAsString("nameItem");
-        String DMQValue = form.getValueAsString("DMQItem");
-        String destinationValue = form.getValueAsString("destinationItem");
-        int periodValue = Integer.parseInt(form.getValueAsString("periodItem"));
-        int thresholdValue = Integer.parseInt(form.getValueAsString("thresholdItem"));
-        int nbMaxMsgValue = Integer.parseInt(form.getValueAsString("nbMaxMsgItem"));
-        boolean freeReadingValue = ((CheckboxItem) form.getField("freeReadingItem")).getValueAsBoolean();
-        boolean freeWritingValue = ((CheckboxItem) form.getField("freeWritingItem")).getValueAsBoolean();
 
-        QueueWTO newQueue = new QueueWTO(nameValue, new Date(), DMQValue, destinationValue, 0, 0, 0,
-            periodValue, null, freeReadingValue, freeWritingValue, thresholdValue, 0, 0, 0, nbMaxMsgValue);
+        QueueWTO newQueue = new QueueWTO();
+        newQueue.setId(nameValue);
 
         queuePresenter.createNewQueue(newQueue);
       }
