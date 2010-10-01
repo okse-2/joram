@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Timer;
 import com.scalagent.appli.client.command.info.LoadServerInfoAction;
@@ -69,6 +71,7 @@ import com.scalagent.appli.client.event.topic.UpdatedTopicEvent;
 import com.scalagent.appli.client.event.user.DeletedUserEvent;
 import com.scalagent.appli.client.event.user.NewUserEvent;
 import com.scalagent.appli.client.event.user.UpdatedUserEvent;
+import com.scalagent.appli.client.presenter.SubscriptionDetailPresenter;
 import com.scalagent.appli.shared.MessageWTO;
 import com.scalagent.appli.shared.QueueWTO;
 import com.scalagent.appli.shared.SubscriptionWTO;
@@ -91,6 +94,8 @@ import com.scalagent.engine.shared.BaseWTO;
  * @author Yohann CINTRE
  */
 public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
+
+  private static final String logCategory = SubscriptionDetailPresenter.class.getName();
 
   public static final int QUEUE = 0;
   public static final int TOPIC = 1;
@@ -127,6 +132,8 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
   private boolean servRequest = true;
 
   public RPCServiceCacheClient(RPCServiceAsync RPCService, HandlerManager eventBus, int updatePeriod) {
+
+    Log.debug("RPCServiceCacheClient start.");
 
     this.RPCService = RPCService;
     this.eventBus = eventBus;
@@ -267,7 +274,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
             processTopics(response.getTopics());
             topicRequest = true;
           }
-          eventBus.fireEvent(new UpdateCompleteEvent("topic"));
+          fireBusEvent(new UpdateCompleteEvent("topic"));
         }
       });
     }
@@ -284,35 +291,37 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
             processQueues(response.getQueues());
             queueRequest = true;
           }
-          eventBus.fireEvent(new UpdateCompleteEvent("queue"));
+          fireBusEvent(new UpdateCompleteEvent("queue"));
         }
       });
     }
   }
 
-  public void retrieveMessageQueue(QueueWTO queue) {
-    RPCService.execute(new LoadMessageAction(queue.getName(), true), new LoadMessageHandler(eventBus) {
+  public void retrieveMessageQueue(QueueWTO queue, boolean retrieveAll) {
+    RPCService.execute(new LoadMessageAction(queue.getId(), retrieveAll, true), new LoadMessageHandler(
+        eventBus) {
       @Override
       public void onSuccess(LoadMessageResponse response) {
         if (response.isSuccess()) {
           processMessages(response.getMessages(), response.getQueueName());
-          eventBus.fireEvent(new UpdateCompleteEvent(response.getQueueName()));
+          fireBusEvent(new UpdateCompleteEvent(response.getQueueName()));
         } else {
-          eventBus.fireEvent(new QueueNotFoundEvent(response.getQueueName()));
+          fireBusEvent(new QueueNotFoundEvent(response.getQueueName()));
         }
       }
     });
   }
 
-  public void retrieveMessageSub(SubscriptionWTO sub) {
-    RPCService.execute(new LoadMessageAction(sub.getName(), false), new LoadMessageHandler(eventBus) {
+  public void retrieveMessageSub(SubscriptionWTO sub, boolean retrieveAll) {
+    RPCService.execute(new LoadMessageAction(sub.getId(), retrieveAll, false), new LoadMessageHandler(
+        eventBus) {
       @Override
       public void onSuccess(LoadMessageResponse response) {
         if (response.isSuccess()) {
           processSubMessages(response.getMessages(), response.getQueueName());
-          eventBus.fireEvent(new UpdateCompleteEvent(response.getQueueName()));
+          fireBusEvent(new UpdateCompleteEvent(response.getQueueName()));
         } else {
-          eventBus.fireEvent(new QueueNotFoundEvent(response.getQueueName()));
+          fireBusEvent(new QueueNotFoundEvent(response.getQueueName()));
         }
       }
     });
@@ -329,7 +338,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
             processUsers(response.getUsers());
             userRequest = true;
           }
-          eventBus.fireEvent(new UpdateCompleteEvent("user"));
+          fireBusEvent(new UpdateCompleteEvent("user"));
         }
       });
     }
@@ -346,7 +355,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
             processSubscriptions(response.getSubscriptions());
             subRequest = true;
           }
-          eventBus.fireEvent(new UpdateCompleteEvent("sub"));
+          fireBusEvent(new UpdateCompleteEvent("sub"));
         }
       });
     }
@@ -363,7 +372,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
             processInfos(response.getInfos());
             servRequest = true;
           }
-          eventBus.fireEvent(new UpdateCompleteEvent("sub"));
+          fireBusEvent(new UpdateCompleteEvent("server"));
         }
       });
     }
@@ -386,21 +395,21 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
         // new device
         if (topic.getDbChangeStatus() == BaseWTO.NEW) {
           topics.put(topic.getId(), topic);
-          eventBus.fireEvent(new NewTopicEvent(topic));
+          fireBusEvent(new NewTopicEvent(topic));
           continue;
         }
 
         // updated device
         if (topic.getDbChangeStatus() == BaseWTO.UPDATED) {
           topics.put(topic.getId(), topic);
-          eventBus.fireEvent(new UpdatedTopicEvent(topic));
+          fireBusEvent(new UpdatedTopicEvent(topic));
           continue;
         }
 
         // deleted device
         if (topic.getDbChangeStatus() == BaseWTO.DELETED) {
           topics.remove(topic.getId());
-          eventBus.fireEvent(new DeletedTopicEvent(topic));
+          fireBusEvent(new DeletedTopicEvent(topic));
           continue;
         }
       }
@@ -418,21 +427,21 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
         // new queue
         if (queue.getDbChangeStatus() == BaseWTO.NEW) {
           queues.put(queue.getId(), queue);
-          eventBus.fireEvent(new NewQueueEvent(queue));
+          fireBusEvent(new NewQueueEvent(queue));
           continue;
         }
 
         // updated queue
         if (queue.getDbChangeStatus() == BaseWTO.UPDATED) {
           queues.put(queue.getId(), queue);
-          eventBus.fireEvent(new UpdatedQueueEvent(queue));
+          fireBusEvent(new UpdatedQueueEvent(queue));
           continue;
         }
 
         // deleted device
         if (queue.getDbChangeStatus() == BaseWTO.DELETED) {
           queues.remove(queue.getId());
-          eventBus.fireEvent(new DeletedQueueEvent(queue));
+          fireBusEvent(new DeletedQueueEvent(queue));
           continue;
         }
       }
@@ -452,21 +461,21 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
         // new queue
         if (message.getDbChangeStatus() == BaseWTO.NEW) {
           messages.put(message.getId(), message);
-          eventBus.fireEvent(new NewMessageEvent(message, queueName));
+          fireBusEvent(new NewMessageEvent(message, queueName));
           continue;
         }
 
         // updated queue
         if (message.getDbChangeStatus() == BaseWTO.UPDATED) {
           messages.put(message.getId(), message);
-          eventBus.fireEvent(new UpdatedMessageEvent(message, queueName));
+          fireBusEvent(new UpdatedMessageEvent(message, queueName));
           continue;
         }
 
         // deleted device
         if (message.getDbChangeStatus() == BaseWTO.DELETED) {
           messages.remove(message.getId());
-          eventBus.fireEvent(new DeletedMessageEvent(message, queueName));
+          fireBusEvent(new DeletedMessageEvent(message, queueName));
           continue;
         }
       }
@@ -481,26 +490,26 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 
         MessageWTO message = newMessages.get(i);
 
-        subs.get(subName).addMessageToList(message.getId());
-
-        // new sub
+        // new sub message
         if (message.getDbChangeStatus() == BaseWTO.NEW) {
+          subs.get(subName).addMessageToList(message.getId());
           messages.put(message.getId(), message);
-          eventBus.fireEvent(new NewMessageEvent(message, subName));
+          fireBusEvent(new NewMessageEvent(message, subName));
           continue;
         }
 
-        // updated sub
+        // updated sub message
         if (message.getDbChangeStatus() == BaseWTO.UPDATED) {
           messages.put(message.getId(), message);
-          eventBus.fireEvent(new UpdatedMessageEvent(message, subName));
+          fireBusEvent(new UpdatedMessageEvent(message, subName));
           continue;
         }
 
-        // deleted sub
+        // deleted sub message
         if (message.getDbChangeStatus() == BaseWTO.DELETED) {
+          subs.get(subName).removeMessageFromList(message.getId());
           messages.remove(message.getId());
-          eventBus.fireEvent(new DeletedMessageEvent(message, subName));
+          fireBusEvent(new DeletedMessageEvent(message, subName));
           continue;
         }
       }
@@ -518,21 +527,21 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
         // new user
         if (user.getDbChangeStatus() == BaseWTO.NEW) {
           users.put(user.getId(), user);
-          eventBus.fireEvent(new NewUserEvent(user));
+          fireBusEvent(new NewUserEvent(user));
           continue;
         }
 
         // updated user
         if (user.getDbChangeStatus() == BaseWTO.UPDATED) {
           users.put(user.getId(), user);
-          eventBus.fireEvent(new UpdatedUserEvent(user));
+          fireBusEvent(new UpdatedUserEvent(user));
           continue;
         }
 
         // deleted user
         if (user.getDbChangeStatus() == BaseWTO.DELETED) {
           users.remove(user.getId());
-          eventBus.fireEvent(new DeletedUserEvent(user));
+          fireBusEvent(new DeletedUserEvent(user));
         }
       }
     }
@@ -546,28 +555,33 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 
         SubscriptionWTO sub = newSubs.get(i);
 
-        // new user
+        // new subscription
         if (sub.getDbChangeStatus() == BaseWTO.NEW) {
           subs.put(sub.getId(), sub);
-          eventBus.fireEvent(new NewSubscriptionEvent(sub));
+          fireBusEvent(new NewSubscriptionEvent(sub));
           continue;
         }
 
-        // updated user
+        // updated subscription
         if (sub.getDbChangeStatus() == BaseWTO.UPDATED) {
           subs.put(sub.getId(), sub);
-          eventBus.fireEvent(new UpdatedSubscriptionEvent(sub));
+          fireBusEvent(new UpdatedSubscriptionEvent(sub));
           continue;
         }
 
-        // deleted user
+        // deleted subscription
         if (sub.getDbChangeStatus() == BaseWTO.DELETED) {
           subs.remove(sub.getId());
-          eventBus.fireEvent(new DeletedSubscriptionEvent(sub));
+          fireBusEvent(new DeletedSubscriptionEvent(sub));
           continue;
         }
       }
     }
+  }
+
+  private void fireBusEvent(GwtEvent<?> event) {
+    Log.debug(logCategory, " fire BUS event : " + event.getClass().getName());
+    eventBus.fireEvent(event);
   }
 
   private void processInfos(float[] infos) {
