@@ -100,7 +100,7 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
   IButton refreshButton;
 //  IButton newSubButton;
   HLayout hlHeader2;
-  DetailViewer userDetail = new DetailViewer();
+  DetailViewer userDetail;
   DynamicForm columnForm;
   CheckboxItem showSentDMQBox;
   CheckboxItem showSubCountBox;
@@ -185,6 +185,7 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
     userDetail.setWidth("50%");
     userDetail.setFields(nameFieldD, periodFieldD, nbMsgsSentToDMQSinceCreationFieldD,
         subscriptionNamesFieldD);
+    userDetail.setLabelSuffix("");
 
     userDetail.setData(new Record[] { new UserListRecord(presenter.getUser()) });
 
@@ -262,6 +263,7 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
         if (fieldName.equals("deleteField")) {
 
           IButton buttonDelete = new IButton();
+          buttonDelete.setDisabled(true);
           buttonDelete.setAutoFit(true);
           buttonDelete.setHeight(20);
           buttonDelete.setIconSize(13);
@@ -357,6 +359,7 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
     subDetailLeft = new DetailViewer();
     subDetailLeft.setMargin(2);
     subDetailLeft.setWidth("25%");
+    subDetailLeft.setLabelSuffix("");
     subDetailLeft.setEmptyMessage(Application.messages.userDetailWidget_messageDetail_emptyMessage());
     subDetailLeft.setFields(nameFieldDSub, activeFieldDSub, nbMaxMsgFieldDSub, contextIDFieldDSub,
         nbMsgsDeliveredSinceCreationFieldDSub);
@@ -364,6 +367,7 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
     subDetailRight = new DetailViewer();
     subDetailRight.setMargin(2);
     subDetailRight.setWidth("25%");
+    subDetailRight.setLabelSuffix("");
     subDetailRight.setEmptyMessage(Application.messages.userDetailWidget_messageDetail_emptyMessage());
     subDetailRight.setFields(nbMsgsSentToDMQSinceCreationFieldDSub, pendingMessageCountFieldDSub,
         selectorFieldDSub, subRequestIdFieldDSub);
@@ -406,6 +410,8 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
     mainStack.addSection(detailSection);
     mainStack.setCanResizeSections(true);
 
+    presenter.initList();
+
     return mainStack;
 
   }
@@ -424,18 +430,18 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
     if (active) {
 
       SubscriptionListRecord subListRecord = (SubscriptionListRecord) subscriptionList.getRecordList().find(
-          SubscriptionListRecord.ATTRIBUTE_NAME, sub.getName());
+          SubscriptionListRecord.ATTRIBUTE_NAME, sub.getId());
       if (subListRecord != null) {
 
         subListRecord.setSubscription(sub);
         subListRecord.setSubscription(sub);
-        subListRecord.setName(sub.getName());
+        subListRecord.setName(sub.getId());
         subListRecord.setActive(sub.isActive());
         subListRecord.setDurable(sub.isDurable());
         subListRecord.setNbMaxMsg(sub.getNbMaxMsg());
         subListRecord.setContextId(sub.getContextId());
         subListRecord.setNbMsgsDeliveredSinceCreation(sub.getNbMsgsDeliveredSinceCreation());
-        subListRecord.setNbMsgsSentToDMQSinceCreation((int) sub.getNbMsgsSentToDMQSinceCreation());
+        subListRecord.setNbMsgsSentToDMQSinceCreation(sub.getNbMsgsSentToDMQSinceCreation());
         subListRecord.setPendingMessageCount(sub.getPendingMessageCount());
         subListRecord.setSelector(sub.getSelector());
         subListRecord.setSubRequestId(sub.getSubRequestId());
@@ -443,7 +449,7 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
         subscriptionList.markForRedraw();
       }
 
-      // Usefull when a subscription is alerady in the cache but not draw on this tab
+      // Useful when a subscription is already in the cache but not draw on this tab
       else {
         addSubscription(new SubscriptionListRecord(sub));
       }
@@ -633,27 +639,29 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
     TextItem contextIdItem = new TextItem();
     contextIdItem.setTitle(Application.messages.subscriptionWidget_contextIdItem_title());
     contextIdItem.setName("contextIdItem");
-    contextIdItem.setRequired(true);
     contextIdItem.setValidators(integerValidator);
+    contextIdItem.setDisabled(Boolean.TRUE);
 
     TextItem selectorItem = new TextItem();
     selectorItem.setTitle(Application.messages.subscriptionWidget_selectorItem_title());
     selectorItem.setName("selectorItem");
-    selectorItem.setRequired(true);
+    selectorItem.setDisabled(Boolean.TRUE);
 
     TextItem subRequestIdItem = new TextItem();
     subRequestIdItem.setTitle(Application.messages.subscriptionWidget_subRequestIdItem_title());
     subRequestIdItem.setName("subRequestIdItem");
-    subRequestIdItem.setRequired(true);
     subRequestIdItem.setValidators(integerValidator);
+    subRequestIdItem.setDisabled(Boolean.TRUE);
 
     CheckboxItem activeItem = new CheckboxItem();
     activeItem.setTitle(Application.messages.subscriptionWidget_activeItem_title());
     activeItem.setName("activeItem");
+    activeItem.setDisabled(Boolean.TRUE);
 
     CheckboxItem durableItem = new CheckboxItem();
     durableItem.setTitle(Application.messages.subscriptionWidget_durableItem_title());
     durableItem.setName("durableItem");
+    durableItem.setDisabled(Boolean.TRUE);
 
     if (slr != null) {
       nameItem.setValue(slr.getAttributeAsString(SubscriptionListRecord.ATTRIBUTE_NAME));

@@ -189,12 +189,13 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
         } else if (fieldName.equals("deleteField")) {
 
           IButton buttonDelete = new IButton();
+          buttonDelete.setDisabled(true);
           buttonDelete.setAutoFit(true);
           buttonDelete.setHeight(20);
           buttonDelete.setIconSize(13);
           buttonDelete.setIcon("remove.png");
           buttonDelete.setTitle(Application.messages.subscriptionWidget_buttonDelete_title());
-          buttonDelete.setPrompt(Application.messages.queueWidget_buttonDelete_prompt());
+          buttonDelete.setPrompt(Application.messages.subscriptionWidget_buttonDelete_prompt());
           buttonDelete.addClickHandler(new SubscriptionDeleteClickHandler(presenter,
               (SubscriptionListRecord) record));
 
@@ -288,6 +289,7 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
     subDetailLeft = new DetailViewer();
     subDetailLeft.setMargin(2);
     subDetailLeft.setWidth("25%");
+    subDetailLeft.setLabelSuffix("");
     subDetailLeft.setEmptyMessage(Application.messages.subscriptionWidget_subscriptionDetail_emptyMessage());
     subDetailLeft.setFields(nameFieldD, activeFieldD, nbMaxMsgFieldD, contextIDFieldD,
         nbMsgsDeliveredSinceCreationFieldD);
@@ -295,6 +297,7 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
     subDetailRight = new DetailViewer();
     subDetailRight.setMargin(2);
     subDetailRight.setWidth("25%");
+    subDetailRight.setLabelSuffix("");
     subDetailRight.setEmptyMessage(Application.messages.subscriptionWidget_subscriptionDetail_emptyMessage());
     subDetailRight.setFields(nbMsgsSentToDMQSinceCreationFieldD, pendingMessageCountFieldD, selectorFieldD,
         subRequestIdFieldD);
@@ -409,12 +412,12 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
     subList.markForRedraw();
   }
 
-  public void updateUser(SubscriptionWTO sub) {
+  public void updateSubscription(SubscriptionWTO sub) {
     SubscriptionListRecord subListRecords = (SubscriptionListRecord) subList.getRecordList().find(
-        SubscriptionListRecord.ATTRIBUTE_NAME, sub.getName());
+        SubscriptionListRecord.ATTRIBUTE_NAME, sub.getId());
     if (subListRecords != null) {
 
-      subListRecords.setAttribute(SubscriptionListRecord.ATTRIBUTE_NAME, sub.getName());
+      subListRecords.setAttribute(SubscriptionListRecord.ATTRIBUTE_NAME, sub.getId());
       subListRecords.setAttribute(SubscriptionListRecord.ATTRIBUTE_ACTIVE, sub.isActive());
       subListRecords.setAttribute(SubscriptionListRecord.ATTRIBUTE_NBMAXMSG, sub.getNbMaxMsg());
       subListRecords.setAttribute(SubscriptionListRecord.ATTRIBUTE_CONTEXTID, sub.getContextId());
@@ -571,27 +574,29 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
     TextItem contextIdItem = new TextItem();
     contextIdItem.setTitle(Application.messages.subscriptionWidget_contextIdItem_title());
     contextIdItem.setName("contextIdItem");
-    contextIdItem.setRequired(true);
     contextIdItem.setValidators(integerValidator);
+    contextIdItem.setDisabled(Boolean.TRUE);
 
     TextItem selectorItem = new TextItem();
     selectorItem.setTitle(Application.messages.subscriptionWidget_selectorItem_title());
     selectorItem.setName("selectorItem");
-    selectorItem.setRequired(true);
+    selectorItem.setDisabled(Boolean.TRUE);
 
     TextItem subRequestIdItem = new TextItem();
     subRequestIdItem.setTitle(Application.messages.subscriptionWidget_subRequestIdItem_title());
     subRequestIdItem.setName("subRequestIdItem");
-    subRequestIdItem.setRequired(true);
     subRequestIdItem.setValidators(integerValidator);
+    subRequestIdItem.setDisabled(Boolean.TRUE);
 
     CheckboxItem activeItem = new CheckboxItem();
     activeItem.setTitle(Application.messages.subscriptionWidget_activeItem_title());
     activeItem.setName("activeItem");
+    activeItem.setDisabled(Boolean.TRUE);
 
     CheckboxItem durableItem = new CheckboxItem();
     durableItem.setTitle(Application.messages.subscriptionWidget_durableItem_title());
     durableItem.setName("durableItem");
+    durableItem.setDisabled(Boolean.TRUE);
 
     if (slr != null) {
       nameItem.setValue(slr.getAttributeAsString(SubscriptionListRecord.ATTRIBUTE_NAME));

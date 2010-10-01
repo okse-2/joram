@@ -39,6 +39,7 @@ import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.Opti
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.WindowMode;
 import com.scalagent.appli.client.Application;
 import com.scalagent.appli.client.presenter.SubscriptionDetailPresenter;
+import com.scalagent.appli.client.widget.handler.message.MessageDeleteClickHandler;
 import com.scalagent.appli.client.widget.handler.message.MessageEditClickHandler;
 import com.scalagent.appli.client.widget.handler.message.NewMessageClickHandler;
 import com.scalagent.appli.client.widget.handler.queue.RefreshAllClickHandler;
@@ -100,11 +101,11 @@ public class SubscriptionDetailWidget extends BaseWidget<SubscriptionDetailPrese
   VLayout vl;
   HLayout hl;
   IButton refreshButton;
-  IButton newQueueButton;
+//  IButton newQueueButton;
   HLayout hl2;
 
-  DetailViewer subDetailLeft = new DetailViewer();
-  DetailViewer subDetailRight = new DetailViewer();;
+  DetailViewer subDetailLeft;
+  DetailViewer subDetailRight;
 
   SectionStackSection listStackSection;
   ListGrid messageList;
@@ -150,24 +151,24 @@ public class SubscriptionDetailWidget extends BaseWidget<SubscriptionDetailPrese
     refreshButton.setPrompt(Application.messages.queueWidget_buttonRefresh_prompt());
     refreshButton.addClickHandler(new RefreshAllClickHandler(presenter));
 
-    newQueueButton = new IButton();
-    newQueueButton.setMargin(0);
-    newQueueButton.setAutoFit(true);
-    newQueueButton.setIcon("new.png");
-    newQueueButton.setTitle(Application.messages.queueDetailWidget_buttonNewMessage_title());
-    newQueueButton.setPrompt(Application.messages.queueDetailWidget_buttonNewMessage_prompt());
-    newQueueButton.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        drawForm(null);
-      }
-    });
+//    newQueueButton = new IButton();
+//    newQueueButton.setMargin(0);
+//    newQueueButton.setAutoFit(true);
+//    newQueueButton.setIcon("new.png");
+//    newQueueButton.setTitle(Application.messages.queueDetailWidget_buttonNewMessage_title());
+//    newQueueButton.setPrompt(Application.messages.queueDetailWidget_buttonNewMessage_prompt());
+//    newQueueButton.addClickHandler(new ClickHandler() {
+//      public void onClick(ClickEvent event) {
+//        drawForm(null);
+//      }
+//    });
 
     hl = new HLayout();
     hl.setHeight(22);
     hl.setPadding(5);
     hl.setMembersMargin(5);
     hl.addMember(refreshButton);
-    hl.addMember(newQueueButton);
+//    hl.addMember(newQueueButton);
 
     DetailViewerField nameFieldD = new DetailViewerField(SubscriptionListRecord.ATTRIBUTE_NAME,
         Application.messages.subscriptionWidget_nameFieldD_title());
@@ -195,12 +196,14 @@ public class SubscriptionDetailWidget extends BaseWidget<SubscriptionDetailPrese
     subDetailLeft = new DetailViewer();
     subDetailLeft.setMargin(2);
     subDetailLeft.setWidth("25%");
+    subDetailLeft.setLabelSuffix("");
     subDetailLeft.setFields(nameFieldD, activeFieldD, nbMaxMsgFieldD, contextIDFieldD,
         nbMsgsDeliveredSinceCreationFieldD);
 
     subDetailRight = new DetailViewer();
     subDetailRight.setMargin(2);
     subDetailRight.setWidth("25%");
+    subDetailRight.setLabelSuffix("");
     subDetailRight.setFields(nbMsgsSentToDMQSinceCreationFieldD, pendingMessageCountFieldD, selectorFieldD,
         subRequestIdFieldD);
 
@@ -300,7 +303,7 @@ public class SubscriptionDetailWidget extends BaseWidget<SubscriptionDetailPrese
           buttonDelete.setIcon("remove.png");
           buttonDelete.setTitle(Application.messages.queueDetailWidget_buttonDelete_title());
           buttonDelete.setPrompt(Application.messages.queueDetailWidget_buttonDelete_prompt());
-          //					buttonDelete.addClickHandler(new MessageDeleteClickHandler(presenter, (MessageListRecord) record));
+          buttonDelete.addClickHandler(new MessageDeleteClickHandler(presenter, (MessageListRecord) record));
 
           return buttonDelete;
 
@@ -355,6 +358,7 @@ public class SubscriptionDetailWidget extends BaseWidget<SubscriptionDetailPrese
     messageDetailLeft = new DetailViewer();
     messageDetailLeft.setMargin(2);
     messageDetailLeft.setWidth("50%");
+    messageDetailLeft.setLabelSuffix("");
     messageDetailLeft.setEmptyMessage(Application.messages
         .subscriptionDetailWidget_messageDetail_emptyMessage());
     messageDetailLeft.setFields(idSFieldD, expirationFieldD, timestampFieldD, deliverycountFieldD,
@@ -363,6 +367,7 @@ public class SubscriptionDetailWidget extends BaseWidget<SubscriptionDetailPrese
     messageDetailRight = new DetailViewer();
     messageDetailRight.setMargin(2);
     messageDetailRight.setWidth("50%");
+    messageDetailRight.setLabelSuffix("");
     messageDetailRight.setEmptyMessage(Application.messages
         .subscriptionDetailWidget_messageDetail_emptyMessage());
     messageDetailRight.setFields(typeFieldD, textFieldD, propertiesFieldD);
@@ -405,6 +410,7 @@ public class SubscriptionDetailWidget extends BaseWidget<SubscriptionDetailPrese
     }
 
     messageList.setData(messageListRecord);
+    messageList.setShowAllRecords(Boolean.TRUE);
   }
 
   public void updateMessage(MessageWTO message) {
@@ -444,7 +450,7 @@ public class SubscriptionDetailWidget extends BaseWidget<SubscriptionDetailPrese
     messageList.markForRedraw();
   }
 
-  public void updateQueue() {
+  public void updateSubscription() {
     subDetailLeft.setData(new Record[] { new SubscriptionListRecord(presenter.getSubscription()) });
     subDetailRight.setData(new Record[] { new SubscriptionListRecord(presenter.getSubscription()) });
   }
@@ -584,7 +590,7 @@ public class SubscriptionDetailWidget extends BaseWidget<SubscriptionDetailPrese
     queueNameItem.setRequired(true);
     queueNameItem.setValueMap(mapNames);
     queueNameItem.setRequired(true);
-    queueNameItem.setDefaultValue(presenter.getSubscription().getName());
+    queueNameItem.setDefaultValue(presenter.getSubscription().getId());
 
     TextItem idItem = new TextItem();
     idItem.setTitle(Application.messages.queueDetailWidget_idItem_title());
