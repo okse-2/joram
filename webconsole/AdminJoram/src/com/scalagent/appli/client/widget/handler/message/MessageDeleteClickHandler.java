@@ -24,6 +24,7 @@ package com.scalagent.appli.client.widget.handler.message;
 
 import com.scalagent.appli.client.Application;
 import com.scalagent.appli.client.presenter.QueueDetailPresenter;
+import com.scalagent.appli.client.presenter.SubscriptionDetailPresenter;
 import com.scalagent.appli.client.widget.record.MessageListRecord;
 import com.smartgwt.client.util.BooleanCallback;
 import com.smartgwt.client.util.SC;
@@ -36,11 +37,18 @@ import com.smartgwt.client.widgets.events.ClickHandler;
 public class MessageDeleteClickHandler implements ClickHandler {
 
   private QueueDetailPresenter queueDetailPresenter;
+  private SubscriptionDetailPresenter subDetailPresenter;
   private MessageListRecord record;
 
   public MessageDeleteClickHandler(QueueDetailPresenter queueDetailPresenter, MessageListRecord record) {
     super();
     this.queueDetailPresenter = queueDetailPresenter;
+    this.record = record;
+  }
+
+  public MessageDeleteClickHandler(SubscriptionDetailPresenter subDetailPresenter, MessageListRecord record) {
+    super();
+    this.subDetailPresenter = subDetailPresenter;
     this.record = record;
   }
 
@@ -50,8 +58,13 @@ public class MessageDeleteClickHandler implements ClickHandler {
 
       @Override
       public void execute(Boolean value) {
-        if (value)
-          queueDetailPresenter.deleteMessage(record.getMessage(), queueDetailPresenter.getQueue());
+        if (value) {
+          if (queueDetailPresenter != null) {
+            queueDetailPresenter.deleteMessage(record.getMessage(), queueDetailPresenter.getQueue());
+          } else {
+            subDetailPresenter.deleteMessage(record.getMessage(), subDetailPresenter.getSubscription());
+          }
+        }
       }
     });
   }
