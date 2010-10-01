@@ -585,7 +585,7 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
    * 
    * @return translated "Click to delete the queue on JORAM"
    */
-  @DefaultMessage("Click to delete the queue on JORAM")
+  @DefaultMessage("Action not yet implemented.")
   @Key("queueWidget.buttonDelete.prompt")
   String queueWidget_buttonDelete_prompt();
 
@@ -1111,7 +1111,7 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
    * 
    * @return translated "Click to delete this message on JORAM"
    */
-  @DefaultMessage("Click to delete this message on JORAM")
+  @DefaultMessage("Action not yet implemented.")
   @Key("queueDetailWidget.buttonDelete.prompt")
   String queueDetailWidget_buttonDelete_prompt();
 
@@ -1345,7 +1345,7 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
    * 
    * @return translated "Click to edit the queue"
    */
-  @DefaultMessage("Click to edit the message")
+  @DefaultMessage("Action not yet implemented.")
   @Key("queueDetailWidget.buttonEdit.prompt")
   String queueDetailWidget_buttonEdit_prompt();
 
@@ -2064,7 +2064,7 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
    * 
    * @return translated "Click to delete the subscription on JORAM"
    */
-  @DefaultMessage("Click to subscription the queue on JORAM")
+  @DefaultMessage("Action not yet implemented.")
   @Key("subscriptionWidget.buttonDelete.prompt")
   String subscriptionWidget_buttonDelete_prompt();
 
