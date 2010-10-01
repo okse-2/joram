@@ -36,13 +36,15 @@ public class LoadMessageAction implements Action<LoadMessageResponse> {
 
   private String name;
   private boolean isQueue;
+  private boolean retrieveAll;
 
   public LoadMessageAction() {
   }
 
-  public LoadMessageAction(String queueName, boolean isQueue) {
+  public LoadMessageAction(String queueName, boolean retrieveAll, boolean isQueue) {
     this.name = queueName;
     this.isQueue = isQueue;
+    this.retrieveAll = retrieveAll;
   }
 
   public String getName() {
@@ -51,6 +53,10 @@ public class LoadMessageAction implements Action<LoadMessageResponse> {
 
   public boolean isQueue() {
     return isQueue;
+  }
+
+  public boolean isRetrieveAll() {
+    return retrieveAll;
   }
 
 }
