@@ -118,15 +118,15 @@ public class MainWidget extends BaseWidget<MainPresenter> {
   }
 
   public void showUserTab() {
-    topTabSet.selectTab(UserListWidget.class.getName());
+    topTabSet.selectTab("UserListWidget");
   }
 
   public void showSubscriptionTab() {
-    topTabSet.selectTab(SubscriptionListWidget.class.getName());
+    topTabSet.selectTab("SubscriptionListWidget");
   }
 
   public void showQueueTab() {
-    topTabSet.selectTab(QueueListWidget.class.getName());
+    topTabSet.selectTab("QueueListWidget");
   }
 
   public String getSelectedTabTitle() {
@@ -168,17 +168,17 @@ public class MainWidget extends BaseWidget<MainPresenter> {
     Tab tabQueues = new Tab(Application.messages.mainWidget_tabQueue_title());
     tabQueues.setPane((Canvas) queueWidget.asWidget());
     tabQueues.setIcon("queues.png");
-    tabQueues.setID(QueueListWidget.class.getName());
+    tabQueues.setID("QueueListWidget");
 
     Tab tabSubscriptions = new Tab(Application.messages.mainWidget_tabSubscription_title());
     tabSubscriptions.setPane((Canvas) subscriptionWidget.asWidget());
     tabSubscriptions.setIcon("subs.png");
-    tabSubscriptions.setID(SubscriptionListWidget.class.getName());
+    tabSubscriptions.setID("SubscriptionListWidget");
 
     Tab tabUsers = new Tab(Application.messages.mainWidget_tabUsers_title());
     tabUsers.setPane((Canvas) userWidget.asWidget());
     tabUsers.setIcon("users.png");
-    tabUsers.setID(UserListWidget.class.getName());
+    tabUsers.setID("UserListWidget");
 
     Tab tabConnections = new Tab(Application.messages.mainWidget_tabConnections_title());
     tabConnections.setPane(new Label("Connections... (To be done)"));
