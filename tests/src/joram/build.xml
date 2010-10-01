@@ -1461,7 +1461,7 @@ description=" --> launch all exceptionlistener tests">
 
   <!-- test admin -->
 
-  <target name="tests.admin" depends="admin.test1,admin.test2,admin.test3,admin.test4,admin.test5"/>
+  <target name="tests.admin" depends="admin.test1,admin.test2,admin.test3,admin.test4,admin.test5,admin.test6"/>
 
   <target name="admin.test1" depends="init.a3props,compile"
           description=" --> test admin configuration">
@@ -1518,6 +1518,18 @@ description=" --> launch all exceptionlistener tests">
       <param name="testid" value="admin.test5"/>
       <param name="jndiconf" value="admin/jndi.properties"/>
       <param name="a3conf" value="admin/a3servers2.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+  
+  <target name="admin.test6" depends="init.a3props,compile"
+          description=" --> test user deletion">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.admin.AdminTest6"/>
+      <param name="testid" value="admin.test6"/>
+      <param name="jndiconf" value="admin/jndi.properties"/>
+      <param name="a3conf" value="admin/a3servers1.xml"/>
       <param name="jvmargs" value=""/>
       <param name="args" value=""/>
     </antcall>
