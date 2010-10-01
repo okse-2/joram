@@ -24,6 +24,7 @@ package org.ow2.joram.admin;
 
 import org.objectweb.joram.mom.dest.QueueImplMBean;
 import org.objectweb.joram.mom.dest.TopicImplMBean;
+import org.objectweb.joram.mom.proxies.ClientSubscriptionMBean;
 import org.objectweb.joram.mom.proxies.ProxyImplMBean;
 
 public interface JoramAdmin {
@@ -81,15 +82,15 @@ public interface JoramAdmin {
       String text, int type);
 
   /**
-   * Delete a message in JORAM
+   * Delete a message in a given subscription.
    * 
-   * @param messageName
-   *          Name of the message to delete
-   * @param queueName
-   *          Name of the queue containing the message
+   * @param sub
+   *          The subscription where the message will be deleted.
+   * @param msgId
+   *          ID of the message to delete
    * @return suppression Delete Successful
    */
-  public boolean deleteMessage(String messageName, String queueName);
+  public boolean deleteSubscriptionMessage(ClientSubscriptionMBean sub, String msgId);
 
   /**
    * Create a topic on JORAM
@@ -273,8 +274,8 @@ public interface JoramAdmin {
   /**
    * Edit a subscription on JORAM
    * 
-   * @param name
-   *          Name of the subscription
+   * @param sub
+   *          The subscription to edit
    * @param nbMaxMsg
    *          Maximum messages on the subscription
    * @param context
@@ -289,8 +290,8 @@ public interface JoramAdmin {
    *          Is the subscription durable
    * @return Edit successful
    */
-  public boolean editSubscription(String name, int nbMaxMsg, int context, String selector, int subRequest,
-      boolean active, boolean durable);
+  public boolean editSubscription(ClientSubscriptionMBean sub, int nbMaxMsg, int context, String selector,
+      int subRequest, boolean active, boolean durable);
 
   /**
    * Delete a Queue in JORAM
