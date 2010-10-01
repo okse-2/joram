@@ -22,10 +22,9 @@
  */
 package com.scalagent.appli.client.presenter;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.SortedMap;
 
 import com.google.gwt.event.shared.HandlerManager;
@@ -103,13 +102,11 @@ public class UserDetailPresenter extends
     cache.retrieveUser(true);
     cache.retrieveSubscription(true);
 
-    List<String> lstSubSUser = Arrays.asList(user.getSubscriptionNames());
+    String[] subSUser = user.getSubscriptionNames();
     HashMap<String, SubscriptionWTO> lstSubsCache = cache.getSubscriptions();
 
-    for (String subName : lstSubsCache.keySet()) {
-      if (lstSubSUser.contains(subName)) {
-        getWidget().updateSubscription(lstSubsCache.get(subName));
-      }
+    for (int i = 0; i < subSUser.length; i++) {
+      getWidget().updateSubscription(lstSubsCache.get(subSUser[i]));
     }
   }
 
@@ -120,8 +117,7 @@ public class UserDetailPresenter extends
    * the displayed user
    */
   public void onNewSubscription(SubscriptionWTO sub) {
-    List<String> lstSub = Arrays.asList(user.getSubscriptionNames());
-    if (lstSub.contains(sub.getName())) {
+    if (sub.getUserName().equals(user.getId())) {
       getWidget().addSubscription(new SubscriptionListRecord(sub));
     }
   }
@@ -133,8 +129,7 @@ public class UserDetailPresenter extends
    * displayed user.
    */
   public void onSubscriptionUpdated(SubscriptionWTO sub) {
-    List<String> lstSub = Arrays.asList(user.getSubscriptionNames());
-    if (lstSub.contains(sub.getName())) {
+    if (sub.getUserName().equals(user.getId())) {
       getWidget().updateSubscription(sub);
     }
   }
@@ -146,11 +141,9 @@ public class UserDetailPresenter extends
    * to the displayed user.
    */
   public void onSubscriptionDeleted(SubscriptionWTO sub) {
-    List<String> lstSub = Arrays.asList(user.getSubscriptionNames());
-    if (lstSub.contains(sub.getName())) {
-      widget.removeSubscription(new SubscriptionListRecord(sub));
+    if (sub.getUserName().equals(user.getId())) {
+      getWidget().removeSubscription(new SubscriptionListRecord(sub));
     }
-
   }
 
   /**
@@ -171,7 +164,7 @@ public class UserDetailPresenter extends
    */
   public void onUserDeleted(UserWTO user) {
 
-    if (this.user.getName().equals(user.getName())) {
+    if (this.user.getId().equals(user.getId())) {
       widget.setActive(false);
       widget.getRefreshButton().disable();
       widget.getRefreshButton().setIcon("remove.png");
@@ -185,7 +178,7 @@ public class UserDetailPresenter extends
    * The widget is called to update it if the user is currently displayed.
    */
   public void onUserUpdated(UserWTO user) {
-    if (this.user.getName().equals(user.getName())) {
+    if (this.user.getId().equals(user.getId())) {
       this.user = user;
       widget.updateUser();
     }
@@ -201,12 +194,27 @@ public class UserDetailPresenter extends
   }
 
   /**
+   * This method is called by the UserDetailWidget when the widget is
+   * initialized.
+   * It retrieve the subscriptions for the current user to add them to the
+   * subscription list of the widget.
+   */
+  public void initList() {
+    String[] vSubC = user.getSubscriptionNames();
+    ArrayList<SubscriptionWTO> listSubs = new ArrayList<SubscriptionWTO>();
+    for (int i = 0; i < vSubC.length; i++) {
+      listSubs.add(cache.getSubscriptions().get(vSubC[i]));
+    }
+    widget.setData(listSubs);
+  }
+
+  /**
    * This method is called by the UserDetailWidget when the updating the chart.
    * 
    * @result A map containing the history of the current user
    */
   public SortedMap<Date, int[]> getUserHistory() {
-    return cache.getSpecificHistory(user.getName());
+    return cache.getSpecificHistory(user.getId());
   }
 
   /**
@@ -266,7 +274,7 @@ public class UserDetailPresenter extends
    * The subscription name is sent to the server which delete the subscription.
    */
   public void deleteSubscription(SubscriptionWTO sub) {
-    service.execute(new DeleteSubscriptionAction(sub.getName()), new DeleteSubscriptionHandler(eventBus) {
+    service.execute(new DeleteSubscriptionAction(sub.getId()), new DeleteSubscriptionHandler(eventBus) {
       @Override
       public void onSuccess(DeleteSubscriptionResponse response) {
         if (response.isSuccess()) {
