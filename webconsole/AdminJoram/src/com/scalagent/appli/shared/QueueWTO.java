@@ -34,7 +34,6 @@ import com.scalagent.engine.shared.BaseWTO;
  */
 public class QueueWTO extends BaseWTO {
 
-  private String name;
   private Date creationDate = new Date();
   private String DMQId;
   private String destinationId;
@@ -51,10 +50,6 @@ public class QueueWTO extends BaseWTO {
   private int deliveredMessageCount;
   private int nbMaxMsg;
   private List<String> messagesList;
-
-  public String getName() {
-    return name;
-  }
 
   public Date getCreationDate() {
     return creationDate;
@@ -128,8 +123,8 @@ public class QueueWTO extends BaseWTO {
     return messagesList;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public void clearMessagesList() {
+    this.messagesList.clear();
   }
 
   public void setCreationDate(Date date) {
@@ -214,7 +209,6 @@ public class QueueWTO extends BaseWTO {
       int waitingRequestCount, int pendingMessageCount, int deliveredMessageCount, int nbMaxMsg) {
 
     this.id = name;
-    this.name = name;
     this.creationDate = creationDate;
     this.DMQId = DMQId;
     this.destinationId = destinationId;
@@ -241,11 +235,11 @@ public class QueueWTO extends BaseWTO {
 
   @Override
   public String toString() {
-    return "[name=" + name + ", messagesList=" + messagesList + " ]";
+    return "[name=" + id + ", messagesList=" + messagesList + " ]";
   }
 
   public String toStringFullContent() {
-    return "[name=" + name + ", creationDate=" + creationDate + ", DMQId=" + DMQId
+    return "[name=" + id + ", creationDate=" + creationDate + ", DMQId=" + DMQId
         + ", nbMsgsDeliverSinceCreation=" + nbMsgsDeliverSinceCreation + ", nbMsgsReceiveSinceCreation="
         + nbMsgsReceiveSinceCreation + ", nbMsgsSentToDMQSinceCreation=" + nbMsgsSentToDMQSinceCreation
         + ", period=" + period + ", rights=" + rights + ", freeReading=" + freeReading + ", freeWriting="
@@ -264,7 +258,7 @@ public class QueueWTO extends BaseWTO {
     result = prime * result + ((destinationId == null) ? 0 : destinationId.hashCode());
     result = prime * result + (freeReading ? 1231 : 1237);
     result = prime * result + (freeWriting ? 1231 : 1237);
-    result = prime * result + ((name == null) ? 0 : name.hashCode());
+    result = prime * result + ((id == null) ? 0 : id.hashCode());
     result = prime * result + nbMaxMsg;
     result = prime * result + (int) (nbMsgsDeliverSinceCreation ^ (nbMsgsDeliverSinceCreation >>> 32));
     result = prime * result + (int) (nbMsgsReceiveSinceCreation ^ (nbMsgsReceiveSinceCreation >>> 32));
@@ -286,7 +280,7 @@ public class QueueWTO extends BaseWTO {
     if (!(anObj instanceof QueueWTO))
       return false;
     QueueWTO obj = (QueueWTO) anObj;
-    if (obj.name.equals(this.name))
+    if (obj.id.equals(this.id))
       return true;
     return false;
   }
@@ -296,7 +290,7 @@ public class QueueWTO extends BaseWTO {
 
     QueueWTO queue = new QueueWTO();
 
-    queue.setName(this.getName());
+    queue.setId(this.getId());
     queue.setCreationDate(this.getCreationDate());
     queue.setDMQId(this.getDMQId());
     queue.setDestinationId(this.getDestinationId());
@@ -324,13 +318,12 @@ public class QueueWTO extends BaseWTO {
 
     QueueWTO obj = (QueueWTO) anObj;
 
-    boolean eq = equalsWithNull(this.name, obj.name) && equalsWithNull(this.creationDate, obj.creationDate)
+    boolean eq = equalsWithNull(this.id, obj.id) && equalsWithNull(this.creationDate, obj.creationDate)
         && equalsWithNull(this.DMQId, obj.DMQId) && equalsWithNull(this.destinationId, obj.destinationId)
         && equalsWithNull(this.nbMsgsDeliverSinceCreation, obj.nbMsgsDeliverSinceCreation)
         && equalsWithNull(this.nbMsgsReceiveSinceCreation, obj.nbMsgsReceiveSinceCreation)
         && equalsWithNull(this.nbMsgsSentToDMQSinceCreation, obj.nbMsgsSentToDMQSinceCreation)
-        && equalsWithNull(this.period, obj.period)
-        && equalsWithNull(Arrays.asList(this.rights), Arrays.asList(obj.rights))
+        && equalsWithNull(this.period, obj.period) && Arrays.equals(this.rights, obj.rights)
         && equalsWithNull(this.freeReading, obj.freeReading)
         && equalsWithNull(this.freeWriting, obj.freeWriting) && equalsWithNull(this.threshold, obj.threshold)
         && equalsWithNull(this.waitingRequestCount, obj.waitingRequestCount)

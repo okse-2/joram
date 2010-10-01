@@ -53,7 +53,7 @@ public class TopicListRecord extends ListGridRecord {
   public TopicListRecord(TopicWTO topic) {
     super();
 
-    setName(topic.getName());
+    setName(topic.getId());
     setCreationDate(topic.getCreationDate());
     setSubscriberIds(topic.getSubscriberIds());
     setDMQId(topic.getDMQId());
@@ -66,7 +66,7 @@ public class TopicListRecord extends ListGridRecord {
     setFreeReading(topic.isFreeReading());
     setFreeWriting(topic.isFreeWriting());
 
-    setName(topic.getName());
+    setName(topic.getId());
 
     this.topic = topic;
   }

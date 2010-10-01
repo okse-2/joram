@@ -32,7 +32,6 @@ import com.scalagent.engine.shared.BaseWTO;
  */
 public class SubscriptionWTO extends BaseWTO {
 
-  private String name;
   private boolean active;
   private boolean durable;
   private int nbMaxMsg;
@@ -43,9 +42,14 @@ public class SubscriptionWTO extends BaseWTO {
   private String selector;
   private int subRequestId;
   private List<String> messagesList;
+  private String userName;
 
-  public String getName() {
-    return name;
+  public String getUserName() {
+    return userName;
+  }
+
+  public void setUserName(String userName) {
+    this.userName = userName;
   }
 
   public boolean isActive() {
@@ -88,8 +92,8 @@ public class SubscriptionWTO extends BaseWTO {
     return messagesList;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public void clearMessagesList() {
+    this.messagesList.clear();
   }
 
   public void setActive(boolean active) {
@@ -142,10 +146,9 @@ public class SubscriptionWTO extends BaseWTO {
 
   public SubscriptionWTO(String name, boolean active, boolean durable, int nbMaxMsg, int contextId,
       int nbMsgsDeliveredSinceCreation, int nbMsgsSentToDMQSinceCreation, int pendingMessageCount,
-      String selector, int subRequestId) {
+      String selector, int subRequestId, String userName) {
     super();
     this.id = name;
-    this.name = name;
     this.active = active;
     this.durable = durable;
     this.nbMaxMsg = nbMaxMsg;
@@ -155,19 +158,20 @@ public class SubscriptionWTO extends BaseWTO {
     this.pendingMessageCount = pendingMessageCount;
     this.selector = selector;
     this.subRequestId = subRequestId;
+    this.userName = userName;
     messagesList = new ArrayList<String>();
 
   }
 
   @Override
   public String toString() {
-    return "SubscriptionWTO [name=" + name + ", nbMaxMsg=" + nbMaxMsg + ", nbMsgsDeliveredSinceCreation="
+    return "SubscriptionWTO [name=" + id + ", nbMaxMsg=" + nbMaxMsg + ", nbMsgsDeliveredSinceCreation="
         + nbMsgsDeliveredSinceCreation + "]";
   }
 
   public String toStringFullContent() {
     return "SubscriptionWTO [active=" + active + ", contextId=" + contextId + ", durable=" + durable
-        + ", name=" + name + ", nbMaxMsg=" + nbMaxMsg + ", nbMsgsDeliveredSinceCreation="
+        + ", name=" + id + ", nbMaxMsg=" + nbMaxMsg + ", nbMsgsDeliveredSinceCreation="
         + nbMsgsDeliveredSinceCreation + ", nbMsgsSentToDMQSinceCreation=" + nbMsgsSentToDMQSinceCreation
         + ", pendingMessageCount=" + pendingMessageCount + ", selector=" + selector + ", subRequestId="
         + subRequestId + "]";
@@ -180,7 +184,7 @@ public class SubscriptionWTO extends BaseWTO {
     result = prime * result + (active ? 1231 : 1237);
     result = prime * result + contextId;
     result = prime * result + (durable ? 1231 : 1237);
-    result = prime * result + ((name == null) ? 0 : name.hashCode());
+    result = prime * result + ((id == null) ? 0 : id.hashCode());
     result = prime * result + nbMaxMsg;
     result = prime * result + nbMsgsDeliveredSinceCreation;
     result = prime * result + nbMsgsSentToDMQSinceCreation;
@@ -209,7 +213,7 @@ public class SubscriptionWTO extends BaseWTO {
 
     SubscriptionWTO sub = new SubscriptionWTO();
 
-    sub.name = name;
+    sub.id = id;
     sub.active = active;
     sub.durable = durable;
     sub.nbMaxMsg = nbMaxMsg;
@@ -219,6 +223,7 @@ public class SubscriptionWTO extends BaseWTO {
     sub.pendingMessageCount = pendingMessageCount;
     sub.selector = selector;
     sub.subRequestId = subRequestId;
+    sub.userName = userName;
 
     return sub;
   }
@@ -231,7 +236,7 @@ public class SubscriptionWTO extends BaseWTO {
 
     SubscriptionWTO obj = (SubscriptionWTO) anObj;
 
-    boolean eq = equalsWithNull(this.id, obj.id) && equalsWithNull(this.name, obj.name)
+    boolean eq = equalsWithNull(this.id, obj.id) && equalsWithNull(this.userName, obj.userName)
         && equalsWithNull(this.active, obj.active) && equalsWithNull(this.durable, obj.durable)
         && equalsWithNull(this.nbMaxMsg, obj.nbMaxMsg) && equalsWithNull(this.contextId, obj.contextId)
         && equalsWithNull(this.nbMsgsDeliveredSinceCreation, obj.nbMsgsDeliveredSinceCreation)

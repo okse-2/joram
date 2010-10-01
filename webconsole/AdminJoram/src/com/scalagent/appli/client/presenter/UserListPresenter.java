@@ -179,7 +179,7 @@ public class UserListPresenter extends BasePresenter<UserListWidget, RPCServiceA
    * The user name is sent to the server which delete the user.
    */
   public void deleteUser(UserWTO user) {
-    service.execute(new DeleteUserAction(user.getName()), new DeleteUserHandler(eventBus) {
+    service.execute(new DeleteUserAction(user.getId()), new DeleteUserHandler(eventBus) {
       @Override
       public void onSuccess(DeleteUserResponse response) {
         if (response.isSuccess()) {

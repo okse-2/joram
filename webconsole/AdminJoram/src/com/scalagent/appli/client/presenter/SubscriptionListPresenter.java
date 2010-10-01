@@ -111,7 +111,7 @@ public class SubscriptionListPresenter extends
    * The widget is called to update the subscription list.
    */
   public void onSubscriptionUpdated(SubscriptionWTO sub) {
-    widget.updateUser(sub);
+    widget.updateSubscription(sub);
   }
 
   /**
@@ -181,7 +181,7 @@ public class SubscriptionListPresenter extends
    * The subscription name is sent to the server which delete the subscription.
    */
   public void deleteSubscription(SubscriptionWTO sub) {
-    service.execute(new DeleteSubscriptionAction(sub.getName()), new DeleteSubscriptionHandler(eventBus) {
+    service.execute(new DeleteSubscriptionAction(sub.getId()), new DeleteSubscriptionHandler(eventBus) {
       @Override
       public void onSuccess(DeleteSubscriptionResponse response) {
         if (response.isSuccess()) {

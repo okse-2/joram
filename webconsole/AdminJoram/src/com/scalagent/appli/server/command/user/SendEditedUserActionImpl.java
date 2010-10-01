@@ -41,9 +41,9 @@ public class SendEditedUserActionImpl extends
     String info = new String();
 
     if (result) {
-      info = "The User \"" + action.getUser().getName() + "\" has been updated.";
+      info = "The User \"" + action.getUser().getId() + "\" has been updated.";
     } else {
-      info = "Error while updating user \"" + action.getUser().getName() + "\"";
+      info = "Error while updating user \"" + action.getUser().getId() + "\"";
     }
 
     return new SendEditedUserResponse(result, info);

@@ -52,7 +52,6 @@ import com.scalagent.appli.client.widget.QueueDetailWidget;
 import com.scalagent.appli.client.widget.record.MessageListRecord;
 import com.scalagent.appli.shared.MessageWTO;
 import com.scalagent.appli.shared.QueueWTO;
-import com.scalagent.appli.shared.SubscriptionWTO;
 import com.scalagent.engine.client.presenter.BasePresenter;
 import com.smartgwt.client.util.SC;
 
@@ -78,7 +77,9 @@ public class QueueDetailPresenter extends
     this.queue = queue;
 
     widget = new QueueDetailWidget(this);
-    cache.retrieveMessageQueue(queue);
+
+    queue.clearMessagesList();
+    cache.retrieveMessageQueue(queue, true);
 
   }
 
@@ -98,7 +99,7 @@ public class QueueDetailPresenter extends
   public void fireRefreshAll() {
     widget.getRefreshButton().disable();
     cache.retrieveQueue(true);
-    cache.retrieveMessageQueue(getQueue());
+    cache.retrieveMessageQueue(getQueue(), false);
   }
 
   /**
@@ -108,7 +109,7 @@ public class QueueDetailPresenter extends
    * displayed queue
    */
   public void onNewMessage(MessageWTO message, String queueName) {
-    if (queue.getName().equals(queueName))
+    if (queue.getId().equals(queueName))
       getWidget().addMessage(new MessageListRecord(message));
   }
 
@@ -119,7 +120,7 @@ public class QueueDetailPresenter extends
    * the displayed queue
    */
   public void onMessageDeleted(MessageWTO message, String queueName) {
-    if (queue.getName().equals(queueName))
+    if (queue.getId().equals(queueName))
       widget.removeMessage(new MessageListRecord(message));
   }
 
@@ -130,7 +131,7 @@ public class QueueDetailPresenter extends
    * queue.
    */
   public void onMessageUpdated(MessageWTO message, String queueName) {
-    if (queue.getName().equals(queueName))
+    if (queue.getId().equals(queueName))
       widget.updateMessage(message);
   }
 
@@ -139,7 +140,7 @@ public class QueueDetailPresenter extends
    * The refresh button is re-enabled and the chart redrawn
    */
   public void onUpdateComplete(String info) {
-    if (queue.getName().equals(info)) {
+    if (queue.getId().equals(info)) {
       widget.getRefreshButton().enable();
       widget.redrawChart(true);
     }
@@ -160,14 +161,14 @@ public class QueueDetailPresenter extends
    * The refresh button is disabled.
    */
   public void onQueueDeleted(QueueWTO queue) {
-    disableButtonRefresh(queue.getName());
+    disableButtonRefresh(queue.getId());
   }
 
   /**
    * This method disable the refresh button on the widget
    */
   public void disableButtonRefresh(String queueName) {
-    if (queue.getName().equals(queueName)) {
+    if (queue.getId().equals(queueName)) {
       widget.getRefreshButton().disable();
       widget.getRefreshButton().setIcon("remove.png");
       widget.getRefreshButton().setTooltip(Application.messages.queueDetailWidget_refreshbutton_tooltip());
@@ -180,7 +181,7 @@ public class QueueDetailPresenter extends
    * The widget is called to update it if the queue is currently displayed.
    */
   public void onQueueUpdated(QueueWTO queue) {
-    if (this.queue.getName().equals(queue.getName())) {
+    if (this.queue.getId().equals(queue.getId())) {
       this.queue = queue;
       widget.updateQueue();
     }
@@ -193,7 +194,7 @@ public class QueueDetailPresenter extends
    * @result A map containing the history of the current queue
    */
   public SortedMap<Date, int[]> getQueueHistory() {
-    return cache.getSpecificHistory(queue.getName());
+    return cache.getSpecificHistory(queue.getId());
   }
 
   /**
@@ -269,8 +270,8 @@ public class QueueDetailPresenter extends
    * message.
    */
   public void deleteMessage(MessageWTO message, QueueWTO queue) {
-    service.execute(new DeleteMessageAction(message.getId(), queue.getName()), new DeleteMessageHandler(
-        eventBus) {
+    service.execute(new DeleteMessageAction(message.getId(), queue.getId(), true),
+        new DeleteMessageHandler(eventBus) {
       @Override
       public void onSuccess(DeleteMessageResponse response) {
         if (response.isSuccess()) {
@@ -292,12 +293,4 @@ public class QueueDetailPresenter extends
     return cache.getQueues();
   }
 
-  /**
-   * This method is called by the QueueDetailWidget when updating the chart.
-   * 
-   * @return A map of the subscriptions in the client side cache.
-   */
-  public Map<String, SubscriptionWTO> getSubscriptions() {
-    return cache.getSubscriptions();
-  }
 }

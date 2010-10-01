@@ -58,7 +58,7 @@ public class QueueListRecord extends ListGridRecord {
   public QueueListRecord(QueueWTO queue) {
     super();
 
-    setName(queue.getName());
+    setName(queue.getId());
     setCreationDate(queue.getCreationDate());
     setDMQId(queue.getDMQId());
     setDestinationId(queue.getDestinationId());

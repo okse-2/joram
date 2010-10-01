@@ -41,9 +41,9 @@ public class SendNewTopicActionImpl extends
     String info = "";
 
     if (result) {
-      info = "The topic \"" + action.getTopic().getName() + "\" has been created.";
+      info = "The topic \"" + action.getTopic().getId() + "\" has been created.";
     } else {
-      info = "Error while creating new topic \"" + action.getTopic().getName() + "\"";
+      info = "Error while creating new topic \"" + action.getTopic().getId() + "\"";
     }
 
     return new SendNewTopicResponse(result, info);

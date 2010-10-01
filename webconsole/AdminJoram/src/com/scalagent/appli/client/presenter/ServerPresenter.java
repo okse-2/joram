@@ -102,6 +102,10 @@ public class ServerPresenter extends BasePresenter<ServerWidget, RPCServiceAsync
    * The histories are updated
    */
   public void onUpdateComplete(String info) {
+    if (!"server".equals(info)) {
+      return;
+    }
+
     cache.addToHistory(RPCServiceCacheClient.QUEUE, cache.getQueues().size());
     cache.addToHistory(RPCServiceCacheClient.SUB, cache.getSubscriptions().size());
     cache.addToHistory(RPCServiceCacheClient.TOPIC, cache.getTopics().size());
@@ -110,7 +114,7 @@ public class ServerPresenter extends BasePresenter<ServerWidget, RPCServiceAsync
     HashMap<String, QueueWTO> queues = cache.getQueues();
     for (String key : queues.keySet()) {
       QueueWTO queue = queues.get(key);
-      cache.addToSpecificHistory(queue.getName(), (int) queue.getNbMsgsReceiveSinceCreation(),
+      cache.addToSpecificHistory(queue.getId(), (int) queue.getNbMsgsReceiveSinceCreation(),
           (int) queue.getNbMsgsDeliverSinceCreation(), (int) queue.getNbMsgsSentToDMQSinceCreation(),
           (int) queue.getPendingMessageCount());
     }
@@ -118,27 +122,29 @@ public class ServerPresenter extends BasePresenter<ServerWidget, RPCServiceAsync
     HashMap<String, TopicWTO> topics = cache.getTopics();
     for (String key : topics.keySet()) {
       TopicWTO topic = topics.get(key);
-      cache.addToSpecificHistory(topic.getName(), (int) topic.getNbMsgsReceiveSinceCreation(),
+      cache.addToSpecificHistory(topic.getId(), (int) topic.getNbMsgsReceiveSinceCreation(),
           (int) topic.getNbMsgsDeliverSinceCreation(), (int) topic.getNbMsgsSentToDMQSinceCreation());
     }
 
     HashMap<String, UserWTO> users = cache.getUsers();
     for (String key : users.keySet()) {
       UserWTO user = users.get(key);
-      cache.addToSpecificHistory(user.getName(), (int) user.getNbMsgsSentToDMQSinceCreation(),
+      cache.addToSpecificHistory(user.getId(), (int) user.getNbMsgsSentToDMQSinceCreation(),
           (int) user.getSubscriptionNames().length);
     }
 
     HashMap<String, SubscriptionWTO> subs = cache.getSubscriptions();
     for (String key : subs.keySet()) {
       SubscriptionWTO sub = subs.get(key);
-      cache.addToSpecificHistory(sub.getName(), (int) sub.getPendingMessageCount(),
+      cache.addToSpecificHistory(sub.getId(), (int) sub.getPendingMessageCount(),
           (int) sub.getNbMsgsDeliveredSinceCreation(), (int) sub.getNbMsgsSentToDMQSinceCreation());
     }
 
     SortedMap<Date, float[]> h = cache.getServerHistory();
-    if (h.size() != 0)
+    if (h.size() != 0) {
       widget.initCharts(h.get(h.firstKey()).length);
+      widget.redrawChart(true, true);
+    }
   }
 
   /**

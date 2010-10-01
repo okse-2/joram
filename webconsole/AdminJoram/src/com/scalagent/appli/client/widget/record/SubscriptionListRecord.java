@@ -50,7 +50,7 @@ public class SubscriptionListRecord extends ListGridRecord {
     super();
 
     setSubscription(sub);
-    setName(sub.getName());
+    setName(sub.getId());
     setActive(sub.isActive());
     setDurable(sub.isDurable());
     setNbMaxMsg(sub.getNbMaxMsg());

@@ -41,9 +41,9 @@ public class SendEditedTopicActionImpl extends
     String info = "";
 
     if (result) {
-      info = "The topic \"" + action.getTopic().getName() + "\" has been updated.";
+      info = "The topic \"" + action.getTopic().getId() + "\" has been updated.";
     } else {
-      info = "Error while updating topic \"" + action.getTopic().getName() + "\".";
+      info = "Error while updating topic \"" + action.getTopic().getId() + "\".";
     }
 
     return new SendEditedTopicResponse(result, info);

@@ -41,9 +41,9 @@ public class SendNewSubscriptionActionImpl extends
     String info = "";
 
     if (result) {
-      info = "The subscription \"" + action.getSubscription().getName() + "\" has been created.";
+      info = "The subscription \"" + action.getSubscription().getId() + "\" has been created.";
     } else {
-      info = "Error while creating new subscription \"" + action.getSubscription().getName() + "\"";
+      info = "Error while creating new subscription \"" + action.getSubscription().getId() + "\"";
     }
 
     return new SendNewSubscriptionResponse(result, info);

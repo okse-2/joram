@@ -22,6 +22,8 @@
  */
 package com.scalagent.appli.client.presenter;
 
+
+
 import java.util.HashMap;
 
 import com.google.gwt.event.shared.HandlerManager;
@@ -87,7 +89,7 @@ public class MainPresenter extends BasePresenter<MainWidget, RPCServiceAsync, RP
    * hen get the focus.
    */
   public void onQueueDetailsClick(QueueWTO queue) {
-    String newTabTitle = "Queue: " + queue.getName();
+    String newTabTitle = "Queue: " + queue.getId();
 
     if (!openedTabList.containsKey(newTabTitle)) {
 
@@ -126,7 +128,7 @@ public class MainPresenter extends BasePresenter<MainWidget, RPCServiceAsync, RP
    * hen get the focus.
    */
   public void onUserDetailsClick(UserWTO user) {
-    String newTabTitle = "User: " + user.getName();
+    String newTabTitle = "User: " + user.getId();
 
     if (!openedTabList.containsKey(newTabTitle)) {
 
@@ -165,7 +167,7 @@ public class MainPresenter extends BasePresenter<MainWidget, RPCServiceAsync, RP
    */
   @Override
   public void onSubDetailsClick(SubscriptionWTO sub) {
-    String newTabTitle = "Sub: " + sub.getName();
+    String newTabTitle = "Sub: " + sub.getId();
 
     if (!openedTabList.containsKey(newTabTitle)) {
 
@@ -178,6 +180,8 @@ public class MainPresenter extends BasePresenter<MainWidget, RPCServiceAsync, RP
       eventBus.addHandler(DeletedMessageEvent.TYPE, subDetailsPresenter);
       eventBus.addHandler(UpdatedMessageEvent.TYPE, subDetailsPresenter);
       eventBus.addHandler(UpdateCompleteEvent.TYPE, subDetailsPresenter);
+      eventBus.addHandler(DeletedSubscriptionEvent.TYPE, subDetailsPresenter);
+      eventBus.addHandler(UpdatedSubscriptionEvent.TYPE, subDetailsPresenter);
 
       Canvas canvas = new Canvas();
       Widget wpie = subDetailsPresenter.getWidget().asWidget();

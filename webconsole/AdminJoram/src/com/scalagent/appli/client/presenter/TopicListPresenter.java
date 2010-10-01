@@ -169,7 +169,7 @@ public class TopicListPresenter extends
    * The topic name is sent to the server which delete the subscription.
    */
   public void deleteTopic(TopicWTO topic) {
-    service.execute(new DeleteTopicAction(topic.getName()), new DeleteTopicHandler(eventBus) {
+    service.execute(new DeleteTopicAction(topic.getId()), new DeleteTopicHandler(eventBus) {
       @Override
       public void onSuccess(DeleteTopicResponse response) {
         if (response.isSuccess()) {
