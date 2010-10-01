@@ -99,8 +99,6 @@ public class QueueListWidget extends BaseWidget<QueueListPresenter> {
   boolean showSentDMQ = true;
   boolean showPending = true;
 
-  SectionStack queueStack;
-
   SectionStackSection buttonSection;
   HLayout hl;
   IButton refreshButton;
@@ -141,13 +139,12 @@ public class QueueListWidget extends BaseWidget<QueueListPresenter> {
   @Override
   public Widget asWidget() {
 
-    queueStack = new SectionStack();
+    SectionStack queueStack = new SectionStack();
     queueStack.setVisibilityMode(VisibilityMode.MULTIPLE);
     queueStack.setWidth100();
     queueStack.setHeight100();
 
     refreshButton = new IButton();
-    refreshButton.setMargin(0);
     refreshButton.setAutoFit(true);
     refreshButton.setIcon("refresh.gif");
     refreshButton.setTitle(Application.messages.queueWidget_buttonRefresh_title());
@@ -295,6 +292,7 @@ public class QueueListWidget extends BaseWidget<QueueListPresenter> {
         nbMsgsSentToDMQSinceCreationFieldL, waitingRequestCountFieldL, pendingMessageCountFieldL,
         browseField, actionField, editField, deleteField);
     queueList.addRecordClickHandler(new RecordClickHandler() {
+      
       public void onRecordClick(RecordClickEvent event) {
         queueDetailLeft.setData(new Record[] { event.getRecord() });
         queueDetailRight.setData(new Record[] { event.getRecord() });
@@ -346,6 +344,7 @@ public class QueueListWidget extends BaseWidget<QueueListPresenter> {
     queueDetailLeft = new DetailViewer();
     queueDetailLeft.setMargin(2);
     queueDetailLeft.setWidth("25%");
+    queueDetailLeft.setLabelSuffix("");
     queueDetailLeft.setEmptyMessage(Application.messages.queueWidget_queueDetail_emptyMessage());
     queueDetailLeft.setFields(nameFieldD, creationDateFieldD, DMQIdFieldD, destinationIdFieldD,
         nbMsgsDeliverSinceCreationFieldD, nbMsgsReceiveSinceCreationFieldD,
@@ -354,6 +353,7 @@ public class QueueListWidget extends BaseWidget<QueueListPresenter> {
     queueDetailRight = new DetailViewer();
     queueDetailRight.setMargin(2);
     queueDetailRight.setWidth("25%");
+    queueDetailRight.setLabelSuffix("");
     queueDetailRight.setEmptyMessage(Application.messages.queueWidget_queueDetail_emptyMessage());
     queueDetailRight.setFields(rightsFieldD, freeReadingFieldD, freeWritingFieldD, thresholdFieldD,
         waitingRequestCountFieldD, pendingMessageCountFieldD, deliveredMessagecountFieldD, nbMaxMessFieldD);
@@ -468,10 +468,10 @@ public class QueueListWidget extends BaseWidget<QueueListPresenter> {
 
   public void updateQueue(QueueWTO queue) {
     QueueListRecord queueListRecords = (QueueListRecord) queueList.getRecordList().find(
-        QueueListRecord.ATTRIBUTE_NAME, queue.getName());
+        QueueListRecord.ATTRIBUTE_NAME, queue.getId());
     if (queueListRecords != null) {
 
-      queueListRecords.setAttribute(QueueListRecord.ATTRIBUTE_NAME, queue.getName());
+      queueListRecords.setAttribute(QueueListRecord.ATTRIBUTE_NAME, queue.getId());
       queueListRecords.setAttribute(QueueListRecord.ATTRIBUTE_CREATIONDATE, queue.getCreationDate());
       queueListRecords.setAttribute(QueueListRecord.ATTRIBUTE_DMQID, queue.getDMQId());
       queueListRecords.setAttribute(QueueListRecord.ATTRIBUTE_DESTINATIONID, queue.getDestinationId());
@@ -672,43 +672,43 @@ public class QueueListWidget extends BaseWidget<QueueListPresenter> {
     nameItem.setName("nameItem");
     nameItem.setRequired(true);
 
-    TextItem DMQItem = new TextItem();
-    DMQItem.setTitle(Application.messages.queueWidget_DMQItem_title());
-    DMQItem.setName("DMQItem");
-    DMQItem.setDisabled(true);
-
-    TextItem destinationItem = new TextItem();
-    destinationItem.setTitle(Application.messages.queueWidget_destinationItem_title());
-    destinationItem.setName("destinationItem");
-    destinationItem.setDisabled(true);
-
-    TextItem periodItem = new TextItem();
-    periodItem.setTitle(Application.messages.queueWidget_periodItem_title());
-    periodItem.setName("periodItem");
-    periodItem.setRequired(true);
-    periodItem.setValidators(integerRangeValidator, integerValidator);
-
-    TextItem thresholdItem = new TextItem();
-    thresholdItem.setTitle(Application.messages.queueWidget_thresholdItem_title());
-    thresholdItem.setName("thresholdItem");
-    thresholdItem.setRequired(true);
-    thresholdItem.setValidators(integerRangeValidator, integerValidator);
-
-    TextItem nbMaxMsgItem = new TextItem();
-    nbMaxMsgItem.setTitle(Application.messages.queueWidget_nbMaxMsgsItem_title());
-    nbMaxMsgItem.setName("nbMaxMsgItem");
-    nbMaxMsgItem.setRequired(true);
-    nbMaxMsgItem.setValidators(integerRangeValidator, integerValidator);
-
-    CheckboxItem freeReadingItem = new CheckboxItem();
-    freeReadingItem.setTitle(Application.messages.queueWidget_freeReadingItem_title());
-    freeReadingItem.setName("freeReadingItem");
-
-    CheckboxItem freeWritingItem = new CheckboxItem();
-    freeWritingItem.setTitle(Application.messages.queueWidget_freeWritingItem_title());
-    freeWritingItem.setName("freeWritingItem");
-
     if (qlr != null) {
+      TextItem DMQItem = new TextItem();
+      DMQItem.setTitle(Application.messages.queueWidget_DMQItem_title());
+      DMQItem.setName("DMQItem");
+      DMQItem.setDisabled(true);
+
+      TextItem destinationItem = new TextItem();
+      destinationItem.setTitle(Application.messages.queueWidget_destinationItem_title());
+      destinationItem.setName("destinationItem");
+      destinationItem.setDisabled(true);
+
+      TextItem periodItem = new TextItem();
+      periodItem.setTitle(Application.messages.queueWidget_periodItem_title());
+      periodItem.setName("periodItem");
+      periodItem.setRequired(true);
+      periodItem.setValidators(integerRangeValidator, integerValidator);
+
+      TextItem thresholdItem = new TextItem();
+      thresholdItem.setTitle(Application.messages.queueWidget_thresholdItem_title());
+      thresholdItem.setName("thresholdItem");
+      thresholdItem.setRequired(true);
+      thresholdItem.setValidators(integerRangeValidator, integerValidator);
+
+      TextItem nbMaxMsgItem = new TextItem();
+      nbMaxMsgItem.setTitle(Application.messages.queueWidget_nbMaxMsgsItem_title());
+      nbMaxMsgItem.setName("nbMaxMsgItem");
+      nbMaxMsgItem.setRequired(true);
+      nbMaxMsgItem.setValidators(integerRangeValidator, integerValidator);
+
+      CheckboxItem freeReadingItem = new CheckboxItem();
+      freeReadingItem.setTitle(Application.messages.queueWidget_freeReadingItem_title());
+      freeReadingItem.setName("freeReadingItem");
+
+      CheckboxItem freeWritingItem = new CheckboxItem();
+      freeWritingItem.setTitle(Application.messages.queueWidget_freeWritingItem_title());
+      freeWritingItem.setName("freeWritingItem");
+
       nameItem.setValue(qlr.getAttributeAsString(QueueListRecord.ATTRIBUTE_NAME));
       nameItem.setDisabled(true);
       DMQItem.setValue(qlr.getAttributeAsString(QueueListRecord.ATTRIBUTE_DMQID));
@@ -718,10 +718,14 @@ public class QueueListWidget extends BaseWidget<QueueListPresenter> {
       nbMaxMsgItem.setValue(qlr.getAttributeAsString(QueueListRecord.ATTRIBUTE_NBMAXMSG));
       freeReadingItem.setValue(qlr.getAttributeAsBoolean(QueueListRecord.ATTRIBUTE_FREEREADING));
       freeWritingItem.setValue(qlr.getAttributeAsBoolean(QueueListRecord.ATTRIBUTE_FREEWRITING));
+
+      form.setFields(nameItem, DMQItem, destinationItem, periodItem, thresholdItem, nbMaxMsgItem,
+          freeReadingItem, freeWritingItem);
+
+    } else {
+      form.setFields(nameItem);
     }
 
-    form.setFields(nameItem, DMQItem, destinationItem, periodItem, thresholdItem, nbMaxMsgItem,
-        freeReadingItem, freeWritingItem);
 
     IButton validateButton = new IButton();
     if (qlr == null) {

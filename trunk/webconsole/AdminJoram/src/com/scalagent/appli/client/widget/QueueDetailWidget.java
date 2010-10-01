@@ -102,7 +102,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
   VLayout vl;
   HLayout hl;
   IButton refreshButton;
-  IButton newQueueButton;
+//  IButton newQueueButton;
   HLayout hl2;
 
   DetailViewer queueDetailLeft = new DetailViewer();
@@ -153,24 +153,24 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
     refreshButton.setPrompt(Application.messages.queueWidget_buttonRefresh_prompt());
     refreshButton.addClickHandler(new RefreshAllClickHandler(presenter));
 
-    newQueueButton = new IButton();
-    newQueueButton.setMargin(0);
-    newQueueButton.setAutoFit(true);
-    newQueueButton.setIcon("new.png");
-    newQueueButton.setTitle(Application.messages.queueDetailWidget_buttonNewMessage_title());
-    newQueueButton.setPrompt(Application.messages.queueDetailWidget_buttonNewMessage_prompt());
-    newQueueButton.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        drawForm(null);
-      }
-    });
+//    newQueueButton = new IButton();
+//    newQueueButton.setMargin(0);
+//    newQueueButton.setAutoFit(true);
+//    newQueueButton.setIcon("new.png");
+//    newQueueButton.setTitle(Application.messages.queueDetailWidget_buttonNewMessage_title());
+//    newQueueButton.setPrompt(Application.messages.queueDetailWidget_buttonNewMessage_prompt());
+//    newQueueButton.addClickHandler(new ClickHandler() {
+//      public void onClick(ClickEvent event) {
+//        drawForm(null);
+//      }
+//    });
 
     hl = new HLayout();
     hl.setHeight(22);
     hl.setPadding(5);
     hl.setMembersMargin(5);
     hl.addMember(refreshButton);
-    hl.addMember(newQueueButton);
+//    hl.addMember(newQueueButton);
 
     DetailViewerField nameFieldD = new DetailViewerField(QueueListRecord.ATTRIBUTE_NAME,
         Application.messages.queueWidget_nameFieldD_title());
@@ -216,6 +216,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
     queueDetailLeft = new DetailViewer();
     queueDetailLeft.setMargin(2);
     queueDetailLeft.setWidth("25%");
+    queueDetailLeft.setLabelSuffix("");
     queueDetailLeft.setEmptyMessage(Application.messages.queueWidget_queueDetail_emptyMessage());
     queueDetailLeft.setFields(nameFieldD, creationDateFieldD, DMQIdFieldD, destinationIdFieldD,
         nbMsgsDeliverSinceCreationFieldD, nbMsgsReceiveSinceCreationFieldD,
@@ -224,6 +225,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
     queueDetailRight = new DetailViewer();
     queueDetailRight.setMargin(2);
     queueDetailRight.setWidth("25%");
+    queueDetailRight.setLabelSuffix("");
     queueDetailRight.setEmptyMessage(Application.messages.queueWidget_queueDetail_emptyMessage());
     queueDetailRight.setFields(rightsFieldD, freeReadingFieldD, freeWritingFieldD, thresholdFieldD,
         waitingRequestCountFieldD, pendingMessageCountFieldD, deliveredMessagecountFieldD, nbMaxMessFieldD);
@@ -329,6 +331,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
         if (fieldName.equals("deleteField")) {
 
           IButton buttonDelete = new IButton();
+          buttonDelete.setDisabled(true);
           buttonDelete.setAutoFit(true);
           buttonDelete.setHeight(20);
           buttonDelete.setIcon("remove.png");
@@ -341,6 +344,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
         } else if (fieldName.equals("editField")) {
 
           IButton buttonEdit = new IButton();
+          buttonEdit.setDisabled(true);
           buttonEdit.setAutoFit(true);
           buttonEdit.setHeight(20);
           buttonEdit.setIconSize(13);
@@ -408,6 +412,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
     messageDetailLeft = new DetailViewer();
     messageDetailLeft.setMargin(2);
     messageDetailLeft.setWidth("50%");
+    messageDetailLeft.setLabelSuffix("");
     messageDetailLeft.setEmptyMessage(Application.messages.queueDetailWidget_messageDetail_emptyMessage());
     messageDetailLeft.setFields(idSFieldD, expirationFieldD, timestampFieldD, deliverycountFieldD,
         priorityFieldD);
@@ -415,6 +420,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
     messageDetailRight = new DetailViewer();
     messageDetailRight.setMargin(2);
     messageDetailRight.setWidth("50%");
+    messageDetailRight.setLabelSuffix("");
     messageDetailRight.setEmptyMessage(Application.messages.queueDetailWidget_messageDetail_emptyMessage());
     messageDetailRight.setFields(typeFieldD, textFieldD, propertiesFieldD);
 
@@ -462,6 +468,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
     }
 
     messageList.setData(messageListRecord);
+    messageList.setShowAllRecords(Boolean.TRUE);
   }
 
   public void updateMessage(MessageWTO message) {
@@ -649,7 +656,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
     queueNameItem.setRequired(true);
     queueNameItem.setValueMap(mapNames);
     queueNameItem.setRequired(true);
-    queueNameItem.setDefaultValue(presenter.getQueue().getName());
+    queueNameItem.setDefaultValue(presenter.getQueue().getId());
 
     TextItem idItem = new TextItem();
     idItem.setTitle(Application.messages.queueDetailWidget_idItem_title());

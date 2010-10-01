@@ -271,6 +271,7 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
     userDetail = new DetailViewer();
     userDetail.setMargin(2);
     userDetail.setWidth("50%");
+    userDetail.setLabelSuffix("");
     userDetail.setEmptyMessage(Application.messages.userWidget_userDetail_emptyMessage());
     userDetail.setFields(nameFieldD, periodFieldD, nbMsgsSentToDMQSinceCreationFieldD,
         subscriptionNamesFieldD);
@@ -360,10 +361,10 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
 
   public void updateUser(UserWTO user) {
     UserListRecord userListRecords = (UserListRecord) userList.getRecordList().find(
-        UserListRecord.ATTRIBUTE_NAME, user.getName());
+        UserListRecord.ATTRIBUTE_NAME, user.getId());
     if (userListRecords != null) {
 
-      userListRecords.setAttribute(UserListRecord.ATTRIBUTE_NAME, user.getName());
+      userListRecords.setAttribute(UserListRecord.ATTRIBUTE_NAME, user.getId());
       userListRecords.setAttribute(UserListRecord.ATTRIBUTE_PERIOD, user.getPeriod());
       userListRecords.setAttribute(UserListRecord.ATTRIBUTE_NBMSGSSENTTODMQSINCECREATION,
           user.getNbMsgsSentToDMQSinceCreation());
@@ -507,24 +508,29 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
     nameItem.setName("nameItem");
     nameItem.setRequired(true);
 
-    PasswordItem passwordItem = new PasswordItem();
-    passwordItem.setTitle(Application.messages.userWidget_passwordItem_title());
-    passwordItem.setName("passwordItem");
-    passwordItem.setRequired(true);
+    PasswordItem passwordItem = null;
+    TextItem periodItem = null;
+    if (ulr == null) {
+      passwordItem = new PasswordItem();
+      passwordItem.setTitle(Application.messages.userWidget_passwordItem_title());
+      passwordItem.setName("passwordItem");
+      passwordItem.setRequired(true);
 
-    TextItem periodItem = new TextItem();
-    periodItem.setTitle(Application.messages.userWidget_periodItem_title());
-    periodItem.setName("periodItem");
-    periodItem.setRequired(true);
-    periodItem.setValidators(integerValidator);
+      form.setFields(nameItem, passwordItem);
+    } else {
+      periodItem = new TextItem();
+      periodItem.setTitle(Application.messages.userWidget_periodItem_title());
+      periodItem.setName("periodItem");
+      periodItem.setRequired(true);
+      periodItem.setValidators(integerValidator);
 
-    if (ulr != null) {
       nameItem.setValue(ulr.getAttributeAsString(UserListRecord.ATTRIBUTE_NAME));
       nameItem.setDisabled(true);
       periodItem.setValue(ulr.getAttributeAsString(UserListRecord.ATTRIBUTE_PERIOD));
+
+      form.setFields(nameItem, periodItem);
     }
 
-    form.setFields(nameItem, passwordItem, periodItem);
 
     IButton validateButton = new IButton();
     if (ulr == null) {

@@ -203,7 +203,6 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
     };
 
     topicList.setRecordComponentPoolingMode("viewport");
-    topicList.setShowGridSummary(true);
     topicList.setAlternateRecordStyles(true);
     topicList.setShowRecordComponents(true);
     topicList.setShowRecordComponentsByCell(true);
@@ -245,6 +244,7 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
     topicDetail = new DetailViewer();
     topicDetail.setMargin(2);
     topicDetail.setWidth("50%");
+    topicDetail.setLabelSuffix("");
     topicDetail.setEmptyMessage(Application.messages.topicWidget_topicDetail_emptyMessage());
 
     DetailViewerField nameFieldD = new DetailViewerField(TopicListRecord.ATTRIBUTE_NAME,
@@ -379,9 +379,9 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
 
   public void updateTopic(TopicWTO topic) {
     TopicListRecord topicListRecords = (TopicListRecord) topicList.getRecordList().find(
-        TopicListRecord.ATTRIBUTE_NAME, topic.getName());
+        TopicListRecord.ATTRIBUTE_NAME, topic.getId());
     if (topicListRecords != null) {
-      topicListRecords.setAttribute(TopicListRecord.ATTRIBUTE_NAME, topic.getName());
+      topicListRecords.setAttribute(TopicListRecord.ATTRIBUTE_NAME, topic.getId());
       topicListRecords.setAttribute(TopicListRecord.ATTRIBUTE_CREATIONDATE, topic.getCreationDate());
       topicListRecords.setAttribute(TopicListRecord.ATTRIBUTE_SUBSCRIBERIDS, topic.getSubscriberIds());
       topicListRecords.setAttribute(TopicListRecord.ATTRIBUTE_DMQID, topic.getDMQId());
@@ -407,16 +407,8 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
   }
 
   public void addTopic(TopicListRecord topic) {
-
-    ListGridRecord[] records = topicList.getRecords();
-    ListGridRecord[] newRecords = new ListGridRecord[records.length + 1];
-    for (int i = 0; i < records.length; i++) {
-      newRecords[i] = records[i];
-    }
-    newRecords[records.length] = topic;
-    topicList.setData(newRecords);
+    topicList.addData(topic);
     topicList.markForRedraw();
-
   }
 
   public void removeTopic(TopicListRecord topic) {
@@ -555,31 +547,31 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
     nameItem.setName("nameItem");
     nameItem.setRequired(true);
 
-    TextItem DMQItem = new TextItem();
-    DMQItem.setTitle(Application.messages.topicWidget_DMQItem_title());
-    DMQItem.setName("DMQItem");
-    DMQItem.setDisabled(true);
-
-    TextItem destinationItem = new TextItem();
-    destinationItem.setTitle(Application.messages.topicWidget_destinationItem_title());
-    destinationItem.setName("destinationItem");
-    destinationItem.setDisabled(true);
-
-    TextItem periodItem = new TextItem();
-    periodItem.setTitle(Application.messages.topicWidget_periodItem_title());
-    periodItem.setName("periodItem");
-    periodItem.setRequired(true);
-    periodItem.setValidators(integerValidator);
-
-    CheckboxItem freeReadingItem = new CheckboxItem();
-    freeReadingItem.setTitle(Application.messages.topicWidget_freeReadingItem_title());
-    freeReadingItem.setName("freeReadingItem");
-
-    CheckboxItem freeWritingItem = new CheckboxItem();
-    freeWritingItem.setTitle(Application.messages.topicWidget_freeWritingItem_title());
-    freeWritingItem.setName("freeWritingItem");
-
     if (tlr != null) {
+      TextItem DMQItem = new TextItem();
+      DMQItem.setTitle(Application.messages.topicWidget_DMQItem_title());
+      DMQItem.setName("DMQItem");
+      DMQItem.setDisabled(true);
+
+      TextItem destinationItem = new TextItem();
+      destinationItem.setTitle(Application.messages.topicWidget_destinationItem_title());
+      destinationItem.setName("destinationItem");
+      destinationItem.setDisabled(true);
+
+      TextItem periodItem = new TextItem();
+      periodItem.setTitle(Application.messages.topicWidget_periodItem_title());
+      periodItem.setName("periodItem");
+      periodItem.setRequired(true);
+      periodItem.setValidators(integerValidator);
+
+      CheckboxItem freeReadingItem = new CheckboxItem();
+      freeReadingItem.setTitle(Application.messages.topicWidget_freeReadingItem_title());
+      freeReadingItem.setName("freeReadingItem");
+
+      CheckboxItem freeWritingItem = new CheckboxItem();
+      freeWritingItem.setTitle(Application.messages.topicWidget_freeWritingItem_title());
+      freeWritingItem.setName("freeWritingItem");
+
       nameItem.setValue(tlr.getAttributeAsString(TopicListRecord.ATTRIBUTE_NAME));
       nameItem.setDisabled(true);
       DMQItem.setValue(tlr.getAttributeAsString(TopicListRecord.ATTRIBUTE_DMQID));
@@ -587,9 +579,12 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
       periodItem.setValue(tlr.getAttributeAsString(TopicListRecord.ATTRIBUTE_PERIOD));
       freeReadingItem.setValue(tlr.getAttributeAsBoolean(TopicListRecord.ATTRIBUTE_FREEREADING));
       freeWritingItem.setValue(tlr.getAttributeAsBoolean(TopicListRecord.ATTRIBUTE_FREEWRITING));
+
+      form.setFields(nameItem, DMQItem, destinationItem, periodItem, freeReadingItem, freeWritingItem);
+    } else {
+      form.setFields(nameItem);
     }
 
-    form.setFields(nameItem, DMQItem, destinationItem, periodItem, freeReadingItem, freeWritingItem);
 
     IButton validateButton = new IButton();
     if (tlr == null) {
