@@ -1,3 +1,9 @@
++==============================================================================
+| 2010/09/24 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix bug when deleting a user: user was partially removed when deletion is not
+allowed.
+ Change admin MBean name: user's name is used instead of 'JoramAdminProxy'.
 ###############################################################################
 # 2010/08/26 | Joram 5.4.0 tag.
 ###############################################################################
@@ -51,8 +57,8 @@ avoiding useless indirection in request and reply.
 | 2010/06/15 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Design of an extension framework for JMS destinations. In a first time it
-defines 2 destination for acquisition (create JMS message from external data)
-and distribution (create external data from JMS message) and simple interface
+defines 2 destinations for acquisition (create JMS message from external data)
+and distribution (create external data from JMS message) and a simple interface
 to implement for acquisition and distribution modules.
  Implementation of modules are provided to replace Collector, Mail, Monitoring
 and JMS bridge destinations.
