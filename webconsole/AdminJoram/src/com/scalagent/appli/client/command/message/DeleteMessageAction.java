@@ -34,23 +34,29 @@ import com.scalagent.engine.client.command.CalledMethod;
 @CalledMethod(value = DeleteMessageActionImpl.class)
 public class DeleteMessageAction implements Action<DeleteMessageResponse> {
 
-  private String messageName;
+  private String messageId;
   private String queueName;
+  private boolean isQueue;
 
   public DeleteMessageAction() {
   }
 
-  public DeleteMessageAction(String messageName, String queueName) {
-    this.messageName = messageName;
+  public DeleteMessageAction(String messageName, String queueName, boolean isQueue) {
+    this.messageId = messageName;
     this.queueName = queueName;
+    this.isQueue = isQueue;
   }
 
-  public String getMessageName() {
-    return messageName;
+  public String getMessageId() {
+    return messageId;
   }
 
   public String getQueueName() {
     return queueName;
+  }
+
+  public boolean isQueue() {
+    return isQueue;
   }
 
 }

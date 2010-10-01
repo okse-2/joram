@@ -36,14 +36,20 @@ public class DeleteMessageActionImpl extends
 
   @Override
   public DeleteMessageResponse execute(RPCServiceCache cache, DeleteMessageAction deleteMessageAction) {
-    boolean result = cache.deleteMessage(deleteMessageAction.getMessageName(),
-        deleteMessageAction.getQueueName());
+    boolean result = false;
+    if (deleteMessageAction.isQueue()) {
+      result = cache.deleteQueueMessage(deleteMessageAction.getMessageId(),
+          deleteMessageAction.getQueueName());
+    } else {
+      result = cache.deleteSubscriptionMessage(deleteMessageAction.getMessageId(),
+          deleteMessageAction.getQueueName());
+    }
 
     String info = "";
 
     if (!result) {
       info = BaseRPCService.getString("Error while deleting Message: \""
-          + deleteMessageAction.getMessageName() + "\" not found.");
+          + deleteMessageAction.getMessageId() + "\" not found.");
     }
 
     return new DeleteMessageResponse(result, info);

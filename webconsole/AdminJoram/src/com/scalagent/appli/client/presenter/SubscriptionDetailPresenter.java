@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.event.shared.HandlerManager;
 import com.scalagent.appli.client.RPCServiceAsync;
 import com.scalagent.appli.client.RPCServiceCacheClient;
@@ -44,10 +45,11 @@ import com.scalagent.appli.client.event.common.UpdateCompleteHandler;
 import com.scalagent.appli.client.event.message.DeletedMessageHandler;
 import com.scalagent.appli.client.event.message.NewMessageHandler;
 import com.scalagent.appli.client.event.message.UpdatedMessageHandler;
+import com.scalagent.appli.client.event.subscription.DeletedSubscriptionHandler;
+import com.scalagent.appli.client.event.subscription.UpdatedSubscriptionHandler;
 import com.scalagent.appli.client.widget.SubscriptionDetailWidget;
 import com.scalagent.appli.client.widget.record.MessageListRecord;
 import com.scalagent.appli.shared.MessageWTO;
-import com.scalagent.appli.shared.QueueWTO;
 import com.scalagent.appli.shared.SubscriptionWTO;
 import com.scalagent.engine.client.presenter.BasePresenter;
 import com.smartgwt.client.util.SC;
@@ -60,7 +62,10 @@ import com.smartgwt.client.util.SC;
  */
 public class SubscriptionDetailPresenter extends
     BasePresenter<SubscriptionDetailWidget, RPCServiceAsync, RPCServiceCacheClient> implements
-    NewMessageHandler, DeletedMessageHandler, UpdatedMessageHandler, UpdateCompleteHandler {
+    NewMessageHandler, DeletedMessageHandler, UpdatedMessageHandler, UpdateCompleteHandler,
+    DeletedSubscriptionHandler, UpdatedSubscriptionHandler {
+
+  private static final String logCategory = SubscriptionDetailPresenter.class.getName();
 
   private SubscriptionWTO sub;
 
@@ -73,7 +78,9 @@ public class SubscriptionDetailPresenter extends
     this.sub = sub;
 
     widget = new SubscriptionDetailWidget(this);
-    retrieveMessage(sub);
+
+    sub.clearMessagesList();
+    cache.retrieveMessageSub(sub, true);
 
   }
 
@@ -82,13 +89,6 @@ public class SubscriptionDetailPresenter extends
    */
   public SubscriptionWTO getSubscription() {
     return sub;
-  }
-
-  /**
-   * This method refresh the message list for the displayed subscription
-   */
-  public void retrieveMessage(SubscriptionWTO subscription) {
-    cache.retrieveMessageSub(subscription);
   }
 
   /**
@@ -101,7 +101,7 @@ public class SubscriptionDetailPresenter extends
   public void fireRefreshAll() {
     widget.getRefreshButton().disable();
     cache.retrieveSubscription(true);
-    cache.retrieveMessageSub(sub);
+    cache.retrieveMessageSub(sub, false);
   }
 
   /**
@@ -111,7 +111,7 @@ public class SubscriptionDetailPresenter extends
    * displayed subscription
    */
   public void onNewMessage(MessageWTO message, String subName) {
-    if (sub.getName().equals(subName))
+    if (sub.getId().equals(subName))
       getWidget().addMessage(new MessageListRecord(message));
   }
 
@@ -122,7 +122,7 @@ public class SubscriptionDetailPresenter extends
    * the displayed subscription
    */
   public void onMessageDeleted(MessageWTO message, String subName) {
-    if (sub.getName().equals(subName))
+    if (sub.getId().equals(subName))
       widget.removeMessage(new MessageListRecord(message));
   }
 
@@ -133,7 +133,7 @@ public class SubscriptionDetailPresenter extends
    * subscription.
    */
   public void onMessageUpdated(MessageWTO message, String subName) {
-    if (sub.getName().equals(subName))
+    if (sub.getId().equals(subName))
       widget.updateMessage(message);
   }
 
@@ -142,21 +142,46 @@ public class SubscriptionDetailPresenter extends
    * The refresh button is re-enabled and the chart redrawn
    */
   public void onUpdateComplete(String info) {
-    //SC.say("Update complete of " + info + " subName: " + sub.getName());
-    if (sub.getName().equals(info)) {
+    if (sub.getId().equals(info)) {
       widget.getRefreshButton().enable();
       widget.redrawChart(true);
     }
   }
 
   /**
+   * This method is called by the EventBus when a queue has been deleted on the
+   * server.
+   * The refresh button is disabled.
+   */
+  public void onSubscriptionDeleted(SubscriptionWTO sub) {
+    if (this.sub.getId().equals(sub.getId())) {
+      Log.debug(logCategory, "SubscriptionDetailPresenter: onSubscriptionDeleted " + sub.getId());
+      disableButtonRefresh(sub.getId());
+    }
+  }
+
+  /**
    * This method disable the refresh button on the widget
    */
-  public void disableButtonRefresh(String queueName) {
-    if (sub.getName().equals(queueName)) {
+  public void disableButtonRefresh(String subName) {
+    if (sub.getId().equals(subName)) {
       widget.getRefreshButton().disable();
       widget.getRefreshButton().setIcon("remove.png");
       widget.getRefreshButton().setTooltip("This subscription no longer exists on JORAM");
+    }
+  }
+  
+  /**
+   * This method is called by the EventBus when a queue has been updated on the
+   * server.
+   * The widget is called to update it if the queue is currently displayed.
+   */
+  public void onSubscriptionUpdated(SubscriptionWTO sub) {
+    if (this.sub.getId().equals(sub.getId())) {
+      Log.debug(logCategory,
+          "SubscriptionDetailPresenter: onSubscriptionUpdated " + sub.getId() + " " + sub.getMessagesList());
+      this.sub = sub;
+      widget.updateSubscription();
     }
   }
 
@@ -167,7 +192,8 @@ public class SubscriptionDetailPresenter extends
    * message.
    */
   public void deleteMessage(MessageWTO message, SubscriptionWTO sub) {
-    service.execute(new DeleteMessageAction(message.getId(), sub.getName()), new DeleteMessageHandler(
+    Log.debug(logCategory, "SubscriptionDetailPresenter: deleteMessage " + message.getId());
+    service.execute(new DeleteMessageAction(message.getId(), sub.getId(), false), new DeleteMessageHandler(
         eventBus) {
       @Override
       public void onSuccess(DeleteMessageResponse response) {
@@ -188,7 +214,7 @@ public class SubscriptionDetailPresenter extends
    * @result A map containing the history of the number of subscriptions.
    */
   public SortedMap<Date, int[]> getSubHistory() {
-    return cache.getSpecificHistory(sub.getName());
+    return cache.getSpecificHistory(sub.getId());
   }
 
   /**
@@ -201,8 +227,11 @@ public class SubscriptionDetailPresenter extends
   }
 
   public void initList() {
+    Log.debug(logCategory, "SubscriptionDetailPresenter: initList()");
+
     List<String> vMessagesC = sub.getMessagesList();
     ArrayList<MessageWTO> listMessages = new ArrayList<MessageWTO>();
+
     for (String idMessage : vMessagesC) {
       listMessages.add(cache.getMessages().get(idMessage));
     }
@@ -242,27 +271,6 @@ public class SubscriptionDetailPresenter extends
         if (response.isSuccess()) {
           SC.say(response.getMessage());
           widget.destroyForm();
-          fireRefreshAll();
-        } else {
-          SC.warn(response.getMessage());
-          fireRefreshAll();
-        }
-      }
-    });
-  }
-
-  /**
-   * This method is called by the SubscriptionDetailWidget when the user click
-   * the "delete" button of a message.
-   * The message ID and the queue name are sent to the server which delete the
-   * message.
-   */
-  public void deleteMessage(MessageWTO message, QueueWTO queue) {
-    service.execute(new DeleteMessageAction(message.getId(), queue.getName()), new DeleteMessageHandler(
-        eventBus) {
-      @Override
-      public void onSuccess(DeleteMessageResponse response) {
-        if (response.isSuccess()) {
           fireRefreshAll();
         } else {
           SC.warn(response.getMessage());
