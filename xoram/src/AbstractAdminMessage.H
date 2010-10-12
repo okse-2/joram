@@ -273,7 +273,7 @@ class CreateDestinationRequest : public AdminRequest {
   /** Properties needed to create destination object. */
   Properties* props;
 
-  char* expectedType;
+  byte expectedType;
 
  public:
   CreateDestinationRequest();
@@ -282,7 +282,7 @@ class CreateDestinationRequest : public AdminRequest {
                            char* name,
                            char* className,
                            Properties* props,
-                           char* expectedType);
+                           byte expectedType);
 
   ~CreateDestinationRequest();
 
@@ -306,7 +306,7 @@ class CreateDestinationRequest : public AdminRequest {
     return props;
   }
 
-  char* getExpectedType() {
+  byte getExpectedType() {
     return expectedType;
   }
 
@@ -340,7 +340,7 @@ class CreateDestinationReply : public AdminReply {
   /** Identifier of the created destination. */
   char* id;
   char* name;
-  char* type;
+  byte type;
 
  public:
   CreateDestinationReply();
@@ -352,7 +352,7 @@ class CreateDestinationReply : public AdminReply {
      */
   CreateDestinationReply(char* id,
                          char* name,
-                         char* type,
+                         byte type,
                          char* info);
   ~CreateDestinationReply();
 
@@ -365,7 +365,7 @@ class CreateDestinationReply : public AdminReply {
     return name;
   }
 
-  char* getType() {
+  byte getType() {
     return type;
   }
 
