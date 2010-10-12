@@ -22,6 +22,7 @@
  * Contributor(s):
  */
 #include <pthread.h>
+#include <time.h>
 #include "Synchronized.H"
 
 Synchronized::Synchronized() {
