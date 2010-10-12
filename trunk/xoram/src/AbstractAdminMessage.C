@@ -281,7 +281,7 @@ CreateDestinationRequest::CreateDestinationRequest(int serverId,
                                                    char* name,
                                                    char* className,
                                                    Properties* props,
-                                                   char* expectedType) : AdminRequest() {
+                                                   byte expectedType) : AdminRequest() {
   classid = CREATE_DESTINATION_REQUEST;
   this->serverId = serverId;
   this->name = name;
@@ -302,7 +302,7 @@ void CreateDestinationRequest::writeTo(OutputStream *os) throw (IOException) {
   if (os->writeString(name) == -1)  throw IOException();
   if (os->writeString(className) == -1)  throw IOException();
   os->writeProperties(props);
-  if (os->writeString(expectedType) == -1)  throw IOException();
+  if (os->writeByte(expectedType) == -1)  throw IOException();
 }
 
 void CreateDestinationRequest::readFrom(InputStream *is) throw (IOException) {
@@ -310,7 +310,7 @@ void CreateDestinationRequest::readFrom(InputStream *is) throw (IOException) {
   if (is->readString(&name) == -1)  throw IOException();
   if (is->readString(&className) == -1)  throw IOException();
   props = is->readProperties();
-  if (is->readString(&expectedType) == -1)  throw IOException();
+  if (is->readByte(&expectedType) == -1)  throw IOException();
 }
 
 // ######################################################################
@@ -323,7 +323,7 @@ CreateDestinationReply::CreateDestinationReply() : AdminReply() {
 
 CreateDestinationReply::CreateDestinationReply(char* id,
                                                char* name,
-                                               char* type,
+                                               byte type,
                                                char* info) : AdminReply(TRUE, info) {
   classid = CREATE_DESTINATION_REPLY;
   this->id = id;
@@ -345,14 +345,14 @@ void CreateDestinationReply::writeTo(OutputStream *os) throw (IOException) {
   AdminReply::writeTo(os);
   if (os->writeString(id) == -1)  throw IOException();
   if (os->writeString(name) == -1)  throw IOException();
-  if (os->writeString(type) == -1)  throw IOException();
+  //if (os->writeByte(type) == -1)  throw IOException();
 }
 
 void CreateDestinationReply::readFrom(InputStream *is) throw (IOException) {
   AdminReply::readFrom(is);
   if (is->readString(&id) == -1)  throw IOException();
   if (is->readString(&name) == -1)  throw IOException();
-  if (is->readString(&type) == -1)  throw IOException();
+  //if (is->readByte(&type) == -1)  throw IOException();
 }
 
 // ######################################################################
