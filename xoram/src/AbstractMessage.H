@@ -74,9 +74,11 @@ class AbstractMessage : Streamable {
 //    PING_REQUEST = 25,
 //    QBROWSE_REPLY = 26,
 //    QBROWSE_REQUEST = 27,
-    SESS_CREATE_TDREPLY = 28,
+    //SESS_CREATE_TDREPLY = 28,
+    SESS_CREATE_DEST_REPLY = 28,
+    SESS_CREATE_DEST_REQUEST = 29,
 //    SESS_CREATE_TQREQUEST = 29,
-    SESS_CREATE_TTREQUEST = 30,
+    XXX_CREATE_TTREQUEST = 30,
     TEMP_DEST_DELETE_REQUEST = 31
 //    XA_CNX_COMMIT = 32,
 //    XA_CNX_PREPARE = 33,
@@ -1200,10 +1202,10 @@ class TempDestDeleteRequest : public AbstractRequest {
 };
 
 /**
- * A <code>SessCreateTDReply</code> is used by a JMS proxy for replying
+ * A <code>SessCreateDestReply</code> is used by a JMS proxy for replying
  * to a <code>SessCreate&lt;TQ/TT&gt;Request</code>.
  */
-class SessCreateTDReply : public AbstractReply {
+class SessCreateDestReply : public AbstractReply {
  private:
   char* agentId;
 
@@ -1211,17 +1213,17 @@ class SessCreateTDReply : public AbstractReply {
   /**
    * Constructs a <code>SessCreateTDReply</code> instance.
    */
-  SessCreateTDReply();
+  SessCreateDestReply();
 
   /**
-   * Constructs a <code>SessCreateTDReply</code> instance.
+   * Constructs a <code>SessCreateDestReply</code> instance.
    *
    * @param request  The replied request.
    * @param agentId  String identifier of the destination agent.
    */
-  SessCreateTDReply(AbstractRequest* req, char* agentId);
+  SessCreateDestReply(AbstractRequest* req, char* agentId);
 
-  ~SessCreateTDReply();
+  ~SessCreateDestReply();
 
   /** Sets the destination identifier. */
   void setAgentId(char* agentId);
@@ -1251,14 +1253,63 @@ class SessCreateTDReply : public AbstractReply {
 };
 
 /**
- * A <code>SessCreateTTRequest</code> is sent by a <code>TopicSession</code>
- * for creating a <code>TemporaryTopic</code>.
+ * A <code>SessCreateDestRequest</code> is sent by a <code>Session</code>
+ * for creating a destination.
  */
-class SessCreateTTRequest : public AbstractRequest {
+class SessCreateDestRequest : public AbstractRequest {
+ private:
+	/** Destination type, Queue or Topic, temporary or not. */
+	byte type;
+	/** Name of the destination if any */
+	char* name;
+
  public:
-  /** Constructs a <code>SessCreateTTRequest</code> instance. */
-  SessCreateTTRequest();
-  ~SessCreateTTRequest();
+	/**
+	   * Constructs a <code>SessCreateDestRequest</code> instance.
+	   */
+	  SessCreateDestRequest();
+
+  /**
+   * Constructs a <code>SessCreateDestRequest</code> instance.
+   */
+  SessCreateDestRequest(byte type);
+
+  /** Constructs a <code>SessCreateTQRequest</code> instance. */
+  SessCreateDestRequest(byte type, char* name);
+
+  ~SessCreateDestRequest();
+
+  /** Returns destination's type. */
+  byte getType();
+
+  /**
+   * Returns the destination name if any.
+   *
+   * @return  the destination name if any, null if not set.
+   */
+  char* getName() {
+    return name;
+  }
+
+  /* ***** ***** ***** ***** *****
+   * Streamable interface
+   * ***** ***** ***** ***** ***** */
+
+  /**
+   *  The object implements the writeTo method to write its contents to
+   * the output stream.
+   *
+   * @param os the stream to write the object to
+   */
+  void writeTo(OutputStream* os) throw(IOException);
+
+  /**
+   *  The object implements the readFrom method to restore its contents from
+   * the input stream.
+   *
+   * @param is the stream to read data from in order to restore the object
+   */
+  void readFrom(InputStream* is) throw(IOException);
 };
 
 #endif /* ABSTRACT_MESSAGE_H */
