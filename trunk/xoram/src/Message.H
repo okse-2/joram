@@ -141,12 +141,12 @@ class Message : Streamable {
   /** The message destination identifier. */
   char* toId;
   /** The message destination type. */
-  char toType;
+  byte toType;
 
   /** The reply to destination identifier. */
   char* replyToId;
   /** <code>true</code> if the "reply to" destination is a queue. */
-  char replyToType;
+  byte replyToType;
 
   /** The correlation identifier field. */
   char* correlationId;
