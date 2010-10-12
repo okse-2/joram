@@ -56,7 +56,7 @@ Message::Message() {
   optionalHeader = (Properties*) NULL;
   properties = (Properties*) NULL;
   body = (byte*) NULL;
-  replyToType = Destination::NOTYPE;
+  //replyToType = Destination::NOTYPE;
   if(DEBUG)
     printf("<= Message():\n");
 }
@@ -438,11 +438,11 @@ void Message::writeTo(OutputStream* os) throw (IOException) {
   os->writeString(id);
   os->writeInt(priority);				// AF: Should be a byte
   os->writeString(toId);
-  os->writeString(Destination::typeToString(toType));	// AF: Should be a byte
+  os->writeByte(toType);
 
   os->writeLong(expiration);
   os->writeString(replyToId);
-  os->writeString(Destination::typeToString(replyToType));	// AF: Should be a byte
+  os->writeByte(replyToType);
   os->writeLong(timestamp);
   os->writeString(correlationId);
   os->writeInt(deliveryCount);
@@ -464,20 +464,16 @@ void Message::writeTo(OutputStream* os) throw (IOException) {
  * @param is the stream to read data from in order to restore the object
  */
 void Message::readFrom(InputStream* is) throw (IOException) {
-  char* typeStr;
-
   is->readInt(&type);
   optionalHeader = is->readProperties();
   properties = is->readProperties();
   is->readString(&id);
   is->readInt(&priority);
   is->readString(&toId);
-  is->readString(&typeStr);
-  toType = Destination::stringToType(typeStr);
+  is->readByte(&toType);
   is->readLong(&expiration);
   is->readString(&replyToId);
-  is->readString(&typeStr);
-  replyToType = Destination::stringToType(typeStr);
+  is->readByte(&replyToType);
   is->readLong(&timestamp);
   is->readString(&correlationId);
   is->readInt(&deliveryCount);
