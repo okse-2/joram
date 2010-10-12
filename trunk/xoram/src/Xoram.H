@@ -688,6 +688,8 @@ class Session : public Daemon {
 
   TemporaryTopic* createTemporaryTopic();
 
+  SessCreateDestReply* createDestination(byte type, char* name);
+
   /**
    * Unsubscribes a durable subscription that has been created by a client.
    */

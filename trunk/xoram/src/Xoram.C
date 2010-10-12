@@ -149,6 +149,17 @@ class TcpChannel : public Channel {
     }
   }
 
+  long long currentTimeMillis() {
+    long long time;
+    struct timespec ts;
+
+    clock_gettime(CLOCK_REALTIME, &ts);
+    time = ((long long)ts.tv_sec) *1000;
+    time += ts.tv_nsec /1000;
+
+    return time;
+  }
+
   virtual void connect()  {
     if (status != INIT) throw IllegalStateException();
     status = CONNECTING;
@@ -176,10 +187,15 @@ class TcpChannel : public Channel {
     in = new InputStream();
 
     // Joram magic number: should be defined in another way..
-    byte magic[] = {'J', 'O', 'R', 'A', 'M', 5, 3, 53};
+    byte magic[] = {'J', 'O', 'R', 'A', 'M', 5, 4, 54};
 
     // Writes the Joram magic number
     if (out->writeBuffer(magic, 8) ==-1) throw IOException();
+    // Writes the current date
+    long long date = currentTimeMillis();
+    if (out->writeLong(date) == -1) throw IOException();
+    if(DEBUG)
+      printf("write date OK = %lld\n", date);
 
     // Writes the identity using SimpleIdentity convention
     if (out->writeString("") ==-1) throw IOException();
@@ -194,6 +210,12 @@ class TcpChannel : public Channel {
 
       if (out->writeDataTo(sock) == -1) throw IOException();
       if (in->readFrom(sock) == -1) throw IOException();
+
+    // read dt
+    long long dt;
+    if (in->readLong(&dt) == -1) throw IOException();
+    if(DEBUG)
+      printf("read dt = %lld\n", dt);
 
       int res;
       if (in->readInt(&res) == -1) throw IOException();
@@ -901,7 +923,7 @@ Connection* TCPConnectionFactory::createConnection(char *user, char *pass, char 
 // Destination Class
 // ######################################################################
 
-Destination::Destination(char* uid, char type, char* name) {
+Destination::Destination(char* uid, byte type, char* name) {
   if (uid != (char*) NULL) {
     char* newUid = new char[strlen(uid)+1];
     strcpy(newUid, uid);
@@ -929,28 +951,28 @@ char* Destination::getName() {
 }
 
 boolean Destination::isQueue() {
-  return (type == QUEUE);
+  return (type == QUEUE_TYPE);
 }
 
 boolean Destination::isTopic() {
-  return (type == TOPIC);
+  return (type == TOPIC_TYPE);
 }
 
-char Destination::getType() {
+byte Destination::getType() {
   return type;
 }
 
-Destination* Destination::newInstance(char* uid, char type, char* name) {
-  if (type == QUEUE) {
+Destination* Destination::newInstance(char* uid, byte type, char* name) {
+  if (type == QUEUE_TYPE) {
     return new Queue(uid, name);
-  } else if (type == TOPIC) {
+  } else if (type == TOPIC_TYPE) {
     return new Topic(uid, name);
   } else {
     throw XoramException();
   }
 }
 
-TemporaryTopic::TemporaryTopic(char* agentId, Requestor* requestor) : Topic(agentId, Destination::typeToString(TMP_TOPIC)) {
+TemporaryTopic::TemporaryTopic(char* agentId, Requestor* requestor) : Topic(agentId, Destination::typeToString((byte)TOPIC_TEMP_TYPE)) {
   this->requestor = requestor;
 }
 
@@ -968,7 +990,7 @@ Requestor* TemporaryTopic::getRequestor() {
 }
 
 boolean TemporaryTopic::isTemporaryTopic() {
-  return (getType() == TMP_TOPIC);
+  return (getType() == TOPIC_TEMP_TYPE);
 }
 
 // ######################################################################
@@ -1072,11 +1094,25 @@ Topic* Session::createTopic(char* topicName) {
 }
 
 TemporaryTopic* Session::createTemporaryTopic() {
-  SessCreateTDReply* reply =
-    (SessCreateTDReply*) requestor->request(new SessCreateTTRequest());
+  SessCreateDestReply* reply =
+    (SessCreateDestReply*) requestor->request(new SessCreateDestRequest((byte)TOPIC_TEMP_TYPE));
+
   char* tempDest = reply->getAgentId();
   return new TemporaryTopic(tempDest, requestor);
 }
+
+/*
+SessCreateDestReply* Session::createDestination(byte type, String name) {
+  SessCreateDestReply* reply = (SessCreateDestReply) requestor->request(new SessCreateDestRequest(type, name));
+  return reply;
+}
+
+TemporaryQueue* Session::createTemporaryQueue() {
+  SessCreateDestReply* reply = (SessCreateDestReply) requestor->request(new SessCreateDestRequest((byte)QUEUE_TEMP_TYPE));
+  String tempDest = reply->getAgentId();
+  return new TemporaryQueue(tempDest, cnx);
+}
+*/
 
 /**
  * Creates a MessageProducer to send messages to the specified destination.
