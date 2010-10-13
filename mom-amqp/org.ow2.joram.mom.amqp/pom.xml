@@ -1,42 +1,26 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.ow2.joram</groupId>
-  <artifactId>mom.amqp</artifactId>
-  <name>JORAM</name>
-  <version>0.3</version>
+  <groupId>org.objectweb.joram</groupId>
+  <artifactId>mom-amqp</artifactId>
+  <name>JORAM :: mom :: amqp</name>
+  <description>Builds amqp.</description>
+  <version>0.4</version>
   <url>http://joram.ow2.org/</url>
   <organization>
     <name>Scalagent D.T.</name>
     <url>http://www.scalagent.com/</url>
   </organization>
   
-  <repositories>
-    <repository>
-      <id>ow2.snapshot</id>
-      <name>OW2 Maven 2 Snapshots Repository</name>
-      <url>http://maven.ow2.org/maven2-snapshot/</url>
-      <layout>default</layout>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-    <repository>
-      <id>ow2.release</id>
-      <name>OW2 Maven 2 Releases Repository</name>
-      <url>http://maven.ow2.org/maven2/</url>
-      <layout>default</layout>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </repository>
-  </repositories>
+  <parent>
+    <artifactId>ow2</artifactId>
+    <groupId>org.ow2</groupId>
+    <version>1.1</version>
+  </parent>
 
+  <properties>
+    <joram.version>5.3.3.53</joram.version>
+  </properties>
+  
   <build>
     <plugins>
       <plugin>
@@ -52,8 +36,13 @@
   <dependencies>
     <dependency>
       <groupId>org.objectweb.joram</groupId>
+      <artifactId>a3-common</artifactId>
+      <version>${joram.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>a3-rt</artifactId>
-      <version>[5.3.2.53-SNAPSHOT,)</version>
+      <version>${joram.version}</version>
     </dependency>
   </dependencies>
 </project>
