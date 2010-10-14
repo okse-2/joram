@@ -55,6 +55,7 @@ import com.scalagent.appli.client.presenter.TopicListPresenter;
 import com.scalagent.appli.client.presenter.UserListPresenter;
 import com.scalagent.appli.client.widget.MainWidget;
 import com.scalagent.engine.client.BaseEntryPoint;
+import com.scalagent.engine.client.event.SystemErrorEvent;
 import com.smartgwt.client.widgets.Canvas;
 
 /**
@@ -103,6 +104,7 @@ public class Application implements BaseEntryPoint {
         MainPresenter mainPresenter = new MainPresenter(serviceAsync, serviceCache, eventBus, loginPresenter,
             serverPresenter, topicPresenter, queuePresenter, userPresenter, subscriptionPresenter);
 
+        eventBus.addHandler(SystemErrorEvent.TYPE, mainPresenter);
         eventBus.addHandler(QueueDetailClickEvent.TYPE, mainPresenter);
         eventBus.addHandler(UserDetailClickEvent.TYPE, mainPresenter);
         eventBus.addHandler(SubscriptionDetailClickEvent.TYPE, mainPresenter);

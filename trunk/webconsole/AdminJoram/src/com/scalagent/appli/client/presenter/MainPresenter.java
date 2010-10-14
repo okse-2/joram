@@ -25,7 +25,9 @@ package com.scalagent.appli.client.presenter;
 
 
 import java.util.HashMap;
+import java.util.Map;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.Widget;
 import com.scalagent.appli.client.RPCServiceAsync;
@@ -50,7 +52,9 @@ import com.scalagent.appli.client.widget.MainWidget;
 import com.scalagent.appli.shared.QueueWTO;
 import com.scalagent.appli.shared.SubscriptionWTO;
 import com.scalagent.appli.shared.UserWTO;
+import com.scalagent.engine.client.event.SystemErrorHandler;
 import com.scalagent.engine.client.presenter.BasePresenter;
+import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.tab.Tab;
 
@@ -61,13 +65,13 @@ import com.smartgwt.client.widgets.tab.Tab;
  * @author Yohann CINTRE
  */
 public class MainPresenter extends BasePresenter<MainWidget, RPCServiceAsync, RPCServiceCacheClient>
-    implements QueueDetailClickHandler, UserDetailClickHandler, SubscriptionDetailClickHandler,
-    LoginValidHandler {
+    implements SystemErrorHandler, QueueDetailClickHandler, UserDetailClickHandler,
+    SubscriptionDetailClickHandler, LoginValidHandler {
 
-  private HashMap<String, Tab> openedTabList = new HashMap<String, Tab>();
-  private HashMap<String, QueueDetailPresenter> openedQueueList = new HashMap<String, QueueDetailPresenter>();
-  private HashMap<String, UserDetailPresenter> openedUserList = new HashMap<String, UserDetailPresenter>();
-  private HashMap<String, SubscriptionDetailPresenter> openedSubList = new HashMap<String, SubscriptionDetailPresenter>();
+  private Map<String, Tab> openedTabList = new HashMap<String, Tab>();
+  private Map<String, QueueDetailPresenter> openedQueueList = new HashMap<String, QueueDetailPresenter>();
+  private Map<String, UserDetailPresenter> openedUserList = new HashMap<String, UserDetailPresenter>();
+  private Map<String, SubscriptionDetailPresenter> openedSubList = new HashMap<String, SubscriptionDetailPresenter>();
 
   public MainPresenter(RPCServiceAsync testService, RPCServiceCacheClient cache, HandlerManager eventBus,
       LoginPresenter loginPresenter, ServerPresenter serverPresenter, TopicListPresenter topicPresenter,
@@ -234,11 +238,16 @@ public class MainPresenter extends BasePresenter<MainWidget, RPCServiceAsync, RP
   }
 
   /**
-   * This method is called when an error occured with the user session.
+   * This method is called when an error occurred with the user session.
    * The login widget is displayed and the admin panel hidden
    */
   public void onSessionError() {
     widget.showLogin();
     widget.hideAdminPanel();
+  }
+
+  public void onSystemError(Throwable throwable) {
+    Log.error("Contacting server failed.", throwable);
+    SC.say("The browser encountered an issue while accessing the server. Maybe the server is down or has been restarted.");
   }
 }
