@@ -59,7 +59,7 @@ public class LoginWidget extends BaseWidget<LoginPresenter> {
     DynamicForm form = new DynamicForm();
     form.setWidth(150);
     form.setHeight(500);
-    form.setShowEdges(false);
+    form.setShowEdges(Boolean.FALSE);
     form.setAlign(Alignment.CENTER);
     form.setPadding(30);
     form.setAutoFocus(Boolean.TRUE);
@@ -68,7 +68,7 @@ public class LoginWidget extends BaseWidget<LoginPresenter> {
     TextItem username = new TextItem();
     username.setName("username");
     username.setTitle(Application.messages.loginWidget_usernameField_title());
-    username.setRequired(true);
+    username.setRequired(Boolean.TRUE);
     username.setWidth(150);
     username.setAlign(Alignment.CENTER);
     username.setSelectOnFocus(Boolean.TRUE);
@@ -76,7 +76,7 @@ public class LoginWidget extends BaseWidget<LoginPresenter> {
     PasswordItem password = new PasswordItem();
     password.setName("password");
     password.setTitle(Application.messages.loginWidget_passwordField_title());
-    password.setRequired(true);
+    password.setRequired(Boolean.TRUE);
     password.setWidth(150);
     password.setAlign(Alignment.CENTER);
 

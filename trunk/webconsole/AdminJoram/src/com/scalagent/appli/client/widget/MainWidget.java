@@ -94,10 +94,10 @@ public class MainWidget extends BaseWidget<MainPresenter> {
     headerLayout.addMember(headerImg);
 
     applicationLayout = new VLayout();
-    applicationLayout.setShowEdges(false);
+    applicationLayout.setShowEdges(Boolean.FALSE);
     applicationLayout.setWidth100();
     applicationLayout.setHeight100();
-    applicationLayout.setShowResizeBar(true);
+    applicationLayout.setShowResizeBar(Boolean.TRUE);
     applicationLayout.setMembersMargin(2);
     applicationLayout.setLayoutMargin(2);
 
