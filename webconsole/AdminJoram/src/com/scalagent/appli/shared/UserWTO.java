@@ -138,9 +138,8 @@ public class UserWTO extends BaseWTO {
 
     UserWTO obj = (UserWTO) anObj;
 
-    boolean eq = equalsWithNull(this.id, obj.id)
-        && equalsWithNull(this.period, obj.period)
-        && equalsWithNull(this.nbMsgsSentToDMQSinceCreation, obj.nbMsgsSentToDMQSinceCreation)
+    boolean eq = equalsWithNull(this.id, obj.id) && this.period == obj.period
+        && this.nbMsgsSentToDMQSinceCreation == obj.nbMsgsSentToDMQSinceCreation
         && Arrays.equals(subscriptionNames, obj.subscriptionNames);
 
     return eq;

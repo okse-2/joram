@@ -217,16 +217,14 @@ public class TopicWTO extends BaseWTO {
 
     TopicWTO obj = (TopicWTO) anObj;
 
-    boolean eq = equalsWithNull(this.id, obj.id)
-        && equalsWithNull(this.creationDate, obj.creationDate)
-        && Arrays.equals(this.subscriberIds, obj.subscriberIds)
-        && equalsWithNull(this.DMQId, obj.DMQId) && equalsWithNull(this.destinationId, obj.destinationId)
-        && equalsWithNull(this.nbMsgsDeliverSinceCreation, obj.nbMsgsDeliverSinceCreation)
-        && equalsWithNull(this.nbMsgsReceiveSinceCreation, obj.nbMsgsReceiveSinceCreation)
-        && equalsWithNull(this.nbMsgsSentToDMQSinceCreation, obj.nbMsgsSentToDMQSinceCreation)
-        && equalsWithNull(this.period, obj.period) && Arrays.equals(this.rights, obj.rights)
-        && equalsWithNull(this.freeReading, obj.freeReading)
-        && equalsWithNull(this.freeWriting, obj.freeWriting);
+    boolean eq = equalsWithNull(this.id, obj.id) && equalsWithNull(this.creationDate, obj.creationDate)
+        && Arrays.equals(this.subscriberIds, obj.subscriberIds) && equalsWithNull(this.DMQId, obj.DMQId)
+        && equalsWithNull(this.destinationId, obj.destinationId)
+        && this.nbMsgsDeliverSinceCreation == obj.nbMsgsDeliverSinceCreation
+        && this.nbMsgsReceiveSinceCreation == obj.nbMsgsReceiveSinceCreation
+        && this.nbMsgsSentToDMQSinceCreation == obj.nbMsgsSentToDMQSinceCreation && this.period == obj.period
+        && Arrays.equals(this.rights, obj.rights) && this.freeReading == obj.freeReading
+        && this.freeWriting == obj.freeWriting;
 
     return eq;
 
