@@ -20,17 +20,13 @@
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
-/**
- * (c)2010 Scalagent Distributed Technologies
- */
-
 package com.scalagent.appli.client;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.Map;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.event.shared.GwtEvent;
@@ -95,32 +91,40 @@ import com.scalagent.engine.shared.BaseWTO;
  */
 public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 
+  public static class HistoryData {
+    public Date time;
+    public int[] data;
+
+    public HistoryData(Date time, int[] data) {
+      super();
+      this.time = time;
+      this.data = data;
+    }
+  }
+
+  public static class FloatHistoryData {
+    public Date time;
+    public float[] data;
+
+    public FloatHistoryData(Date time, float[] data) {
+      super();
+      this.time = time;
+      this.data = data;
+    }
+  }
+
   private static final String logCategory = SubscriptionDetailPresenter.class.getName();
 
-  public static final int QUEUE = 0;
-  public static final int TOPIC = 1;
-  public static final int MESSAGE = 2;
-  public static final int USER = 3;
-  public static final int SUB = 4;
-  public static final int GLOBAL = 5;
-  public static final int SERVER = 6;
-
   /** Devices available in the cache */
-  private HashMap<String, TopicWTO> topics = new HashMap<String, TopicWTO>();
-  private HashMap<String, QueueWTO> queues = new HashMap<String, QueueWTO>();
-  private HashMap<String, MessageWTO> messages = new HashMap<String, MessageWTO>();
-  private HashMap<String, UserWTO> users = new HashMap<String, UserWTO>();
-  private HashMap<String, SubscriptionWTO> subs = new HashMap<String, SubscriptionWTO>();
+  private Map<String, TopicWTO> topics = new HashMap<String, TopicWTO>();
+  private Map<String, QueueWTO> queues = new HashMap<String, QueueWTO>();
+  private Map<String, MessageWTO> messages = new HashMap<String, MessageWTO>();
+  private Map<String, UserWTO> users = new HashMap<String, UserWTO>();
+  private Map<String, SubscriptionWTO> subs = new HashMap<String, SubscriptionWTO>();
 
-  private SortedMap<Date, Integer> topicsHistory = new TreeMap<Date, Integer>();
-  private SortedMap<Date, Integer> queuesHistory = new TreeMap<Date, Integer>();
-  private SortedMap<Date, Integer> messagesHistory = new TreeMap<Date, Integer>();
-  private SortedMap<Date, Integer> usersHistory = new TreeMap<Date, Integer>();
-  private SortedMap<Date, Integer> subsHistory = new TreeMap<Date, Integer>();
-
-  private SortedMap<String, SortedMap<Date, int[]>> globalHistory = new TreeMap<String, SortedMap<Date, int[]>>();
-
-  private SortedMap<Date, float[]> serverHistory = new TreeMap<Date, float[]>();
+  private List<HistoryData> countHistory = new ArrayList<HistoryData>();
+  private Map<String, List<HistoryData>> globalHistory = new HashMap<String, List<HistoryData>>();
+  private List<FloatHistoryData> serverHistory = new ArrayList<FloatHistoryData>();
 
   private RPCServiceAsync RPCService;
   private HandlerManager eventBus;
@@ -145,91 +149,49 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
     }
   }
 
-  public HashMap<String, TopicWTO> getTopics() {
+  public Map<String, TopicWTO> getTopics() {
     return topics;
   }
 
-  public HashMap<String, QueueWTO> getQueues() {
+  public Map<String, QueueWTO> getQueues() {
     return queues;
   }
 
-  public HashMap<String, MessageWTO> getMessages() {
+  public Map<String, MessageWTO> getMessages() {
     return messages;
   }
 
-  public HashMap<String, UserWTO> getUsers() {
+  public Map<String, UserWTO> getUsers() {
     return users;
   }
 
-  public HashMap<String, SubscriptionWTO> getSubscriptions() {
+  public Map<String, SubscriptionWTO> getSubscriptions() {
     return subs;
   }
 
-  public SortedMap<Date, Integer> getTopicsHistory() {
-    return topicsHistory;
+  public List<HistoryData> getCountHistory() {
+    return countHistory;
   }
 
-  public SortedMap<Date, Integer> getQueuesHistory() {
-    return queuesHistory;
-  }
-
-  public SortedMap<Date, Integer> getMessagesHistory() {
-    return messagesHistory;
-  }
-
-  public SortedMap<Date, Integer> getUsersHistory() {
-    return usersHistory;
-  }
-
-  public SortedMap<Date, Integer> getSubsHistory() {
-    return subsHistory;
-  }
-
-  public SortedMap<Date, int[]> getSpecificHistory(String name) {
+  public List<HistoryData> getSpecificHistory(String name) {
     return globalHistory.get(name);
   }
 
-  public SortedMap<Date, float[]> getServerHistory() {
+  public List<FloatHistoryData> getServerHistory() {
     return serverHistory;
   }
 
-  public void addToHistory(int type, float... value) {
-
+  public void addToCountHistory(int... value) {
     Date nowSec = new Date(System.currentTimeMillis() / 1000 * 1000);
+    if (countHistory.size() == 0 || !countHistory.get(countHistory.size() - 1).time.equals(nowSec)) {
+      countHistory.add(new HistoryData(nowSec, value));
+    }
+  }
 
-    switch (type) {
-    case QUEUE:
-      if (!queuesHistory.containsKey(nowSec)) {
-        queuesHistory.put(nowSec, new Integer((int) value[0]));
-      }
-      break;
-
-    case TOPIC:
-      if (!topicsHistory.containsKey(nowSec)) {
-        topicsHistory.put(nowSec, new Integer((int) value[0]));
-      }
-      break;
-
-    case USER:
-      if (!usersHistory.containsKey(nowSec)) {
-        usersHistory.put(nowSec, new Integer((int) value[0]));
-      }
-      break;
-
-    case SUB:
-      if (!subsHistory.containsKey(nowSec)) {
-        subsHistory.put(nowSec, new Integer((int) value[0]));
-      }
-      break;
-
-    case SERVER:
-      if (!serverHistory.containsKey(nowSec)) {
-        serverHistory.put(nowSec, value);
-      }
-      break;
-
-    default:
-      break;
+  public void addToHistory(float... value) {
+    Date nowSec = new Date(System.currentTimeMillis() / 1000 * 1000);
+    if (serverHistory.size() == 0 || !serverHistory.get(serverHistory.size() - 1).time.equals(nowSec)) {
+      serverHistory.add(new FloatHistoryData(nowSec, value));
     }
   }
 
@@ -237,13 +199,12 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
     Date nowSec = new Date(System.currentTimeMillis() / 1000 * 1000);
 
     if (!globalHistory.containsKey(name)) {
-      globalHistory.put(name, new TreeMap<Date, int[]>());
+      globalHistory.put(name, new ArrayList<HistoryData>());
     }
 
-    SortedMap<Date, int[]> mapDate = globalHistory.get(name);
-
-    if (!mapDate.containsKey(nowSec)) {
-      mapDate.put(nowSec, value);
+    List<HistoryData> history = globalHistory.get(name);
+    if (history.size() == 0 || !history.get(history.size() - 1).time.equals(nowSec)) {
+      history.add(new HistoryData(nowSec, value));
     }
   }
 
@@ -274,7 +235,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
             processTopics(response.getTopics());
             topicRequest = true;
           }
-          fireBusEvent(new UpdateCompleteEvent("topic"));
+          fireBusEvent(new UpdateCompleteEvent(UpdateCompleteEvent.TOPIC_UPDATE));
         }
       });
     }
@@ -291,7 +252,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
             processQueues(response.getQueues());
             queueRequest = true;
           }
-          fireBusEvent(new UpdateCompleteEvent("queue"));
+          fireBusEvent(new UpdateCompleteEvent(UpdateCompleteEvent.QUEUE_UPDATE));
         }
       });
     }
@@ -304,7 +265,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
       public void onSuccess(LoadMessageResponse response) {
         if (response.isSuccess()) {
           processMessages(response.getMessages(), response.getQueueName());
-          fireBusEvent(new UpdateCompleteEvent(response.getQueueName()));
+          fireBusEvent(new UpdateCompleteEvent(UpdateCompleteEvent.GENERIC_UPDATE, response.getQueueName()));
         } else {
           fireBusEvent(new QueueNotFoundEvent(response.getQueueName()));
         }
@@ -319,7 +280,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
       public void onSuccess(LoadMessageResponse response) {
         if (response.isSuccess()) {
           processSubMessages(response.getMessages(), response.getQueueName());
-          fireBusEvent(new UpdateCompleteEvent(response.getQueueName()));
+          fireBusEvent(new UpdateCompleteEvent(UpdateCompleteEvent.GENERIC_UPDATE, response.getQueueName()));
         } else {
           fireBusEvent(new QueueNotFoundEvent(response.getQueueName()));
         }
@@ -338,7 +299,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
             processUsers(response.getUsers());
             userRequest = true;
           }
-          fireBusEvent(new UpdateCompleteEvent("user"));
+          fireBusEvent(new UpdateCompleteEvent(UpdateCompleteEvent.USER_UPDATE));
         }
       });
     }
@@ -355,7 +316,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
             processSubscriptions(response.getSubscriptions());
             subRequest = true;
           }
-          fireBusEvent(new UpdateCompleteEvent("sub"));
+          fireBusEvent(new UpdateCompleteEvent(UpdateCompleteEvent.SUBSCRIPTION_UPDATE));
         }
       });
     }
@@ -372,7 +333,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
             processInfos(response.getInfos());
             servRequest = true;
           }
-          fireBusEvent(new UpdateCompleteEvent("server"));
+          fireBusEvent(new UpdateCompleteEvent(UpdateCompleteEvent.SERVER_INFO_UPDATE));
         }
       });
     }
@@ -392,21 +353,21 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 
         TopicWTO topic = newTopics.get(i);
 
-        // new device
+        // new topic
         if (topic.getDbChangeStatus() == BaseWTO.NEW) {
           topics.put(topic.getId(), topic);
           fireBusEvent(new NewTopicEvent(topic));
           continue;
         }
 
-        // updated device
+        // updated topic
         if (topic.getDbChangeStatus() == BaseWTO.UPDATED) {
           topics.put(topic.getId(), topic);
           fireBusEvent(new UpdatedTopicEvent(topic));
           continue;
         }
 
-        // deleted device
+        // deleted topic
         if (topic.getDbChangeStatus() == BaseWTO.DELETED) {
           topics.remove(topic.getId());
           fireBusEvent(new DeletedTopicEvent(topic));
@@ -438,7 +399,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
           continue;
         }
 
-        // deleted device
+        // deleted queue
         if (queue.getDbChangeStatus() == BaseWTO.DELETED) {
           queues.remove(queue.getId());
           fireBusEvent(new DeletedQueueEvent(queue));
@@ -458,21 +419,21 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 
         queues.get(queueName).addMessageToList(message.getId());
 
-        // new queue
+        // new queue message
         if (message.getDbChangeStatus() == BaseWTO.NEW) {
           messages.put(message.getId(), message);
           fireBusEvent(new NewMessageEvent(message, queueName));
           continue;
         }
 
-        // updated queue
+        // updated queue message
         if (message.getDbChangeStatus() == BaseWTO.UPDATED) {
           messages.put(message.getId(), message);
           fireBusEvent(new UpdatedMessageEvent(message, queueName));
           continue;
         }
 
-        // deleted device
+        // deleted queue message
         if (message.getDbChangeStatus() == BaseWTO.DELETED) {
           messages.remove(message.getId());
           fireBusEvent(new DeletedMessageEvent(message, queueName));
@@ -586,7 +547,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
 
   private void processInfos(float[] infos) {
     if (infos != null) {
-      addToHistory(SERVER, infos);
+      addToHistory(infos);
     }
   }
 }
