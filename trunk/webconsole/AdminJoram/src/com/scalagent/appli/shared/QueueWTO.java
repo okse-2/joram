@@ -320,16 +320,14 @@ public class QueueWTO extends BaseWTO {
 
     boolean eq = equalsWithNull(this.id, obj.id) && equalsWithNull(this.creationDate, obj.creationDate)
         && equalsWithNull(this.DMQId, obj.DMQId) && equalsWithNull(this.destinationId, obj.destinationId)
-        && equalsWithNull(this.nbMsgsDeliverSinceCreation, obj.nbMsgsDeliverSinceCreation)
-        && equalsWithNull(this.nbMsgsReceiveSinceCreation, obj.nbMsgsReceiveSinceCreation)
-        && equalsWithNull(this.nbMsgsSentToDMQSinceCreation, obj.nbMsgsSentToDMQSinceCreation)
-        && equalsWithNull(this.period, obj.period) && Arrays.equals(this.rights, obj.rights)
-        && equalsWithNull(this.freeReading, obj.freeReading)
-        && equalsWithNull(this.freeWriting, obj.freeWriting) && equalsWithNull(this.threshold, obj.threshold)
-        && equalsWithNull(this.waitingRequestCount, obj.waitingRequestCount)
-        && equalsWithNull(this.pendingMessageCount, obj.pendingMessageCount)
-        && equalsWithNull(this.deliveredMessageCount, obj.deliveredMessageCount)
-        && equalsWithNull(this.nbMaxMsg, obj.nbMaxMsg);
+        && this.nbMsgsDeliverSinceCreation == obj.nbMsgsDeliverSinceCreation
+        && this.nbMsgsReceiveSinceCreation == obj.nbMsgsReceiveSinceCreation
+        && this.nbMsgsSentToDMQSinceCreation == obj.nbMsgsSentToDMQSinceCreation && this.period == obj.period
+        && Arrays.equals(this.rights, obj.rights) && this.freeReading == obj.freeReading
+        && this.freeWriting == obj.freeWriting && this.threshold == obj.threshold
+        && this.waitingRequestCount == obj.waitingRequestCount
+        && this.pendingMessageCount == obj.pendingMessageCount
+        && this.deliveredMessageCount == obj.deliveredMessageCount && this.nbMaxMsg == obj.nbMaxMsg;
 
     return eq;
 

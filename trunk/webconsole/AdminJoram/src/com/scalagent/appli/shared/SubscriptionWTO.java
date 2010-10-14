@@ -237,12 +237,12 @@ public class SubscriptionWTO extends BaseWTO {
     SubscriptionWTO obj = (SubscriptionWTO) anObj;
 
     boolean eq = equalsWithNull(this.id, obj.id) && equalsWithNull(this.userName, obj.userName)
-        && equalsWithNull(this.active, obj.active) && equalsWithNull(this.durable, obj.durable)
-        && equalsWithNull(this.nbMaxMsg, obj.nbMaxMsg) && equalsWithNull(this.contextId, obj.contextId)
-        && equalsWithNull(this.nbMsgsDeliveredSinceCreation, obj.nbMsgsDeliveredSinceCreation)
-        && equalsWithNull(this.nbMsgsSentToDMQSinceCreation, obj.nbMsgsSentToDMQSinceCreation)
-        && equalsWithNull(this.pendingMessageCount, obj.pendingMessageCount)
-        && equalsWithNull(this.selector, obj.selector) && equalsWithNull(this.subRequestId, obj.subRequestId);
+        && this.active == obj.active && this.durable == obj.durable && this.nbMaxMsg == obj.nbMaxMsg
+        && this.contextId == obj.contextId
+        && this.nbMsgsDeliveredSinceCreation == obj.nbMsgsDeliveredSinceCreation
+        && this.nbMsgsSentToDMQSinceCreation == obj.nbMsgsSentToDMQSinceCreation
+        && this.pendingMessageCount == obj.pendingMessageCount && equalsWithNull(this.selector, obj.selector)
+        && this.subRequestId == obj.subRequestId;
 
     return eq;
 

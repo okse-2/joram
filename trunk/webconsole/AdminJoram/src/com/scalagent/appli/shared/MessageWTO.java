@@ -175,10 +175,9 @@ public class MessageWTO extends BaseWTO {
 
     MessageWTO obj = (MessageWTO) anObj;
 
-    boolean eq = equalsWithNull(this.id, obj.id) && equalsWithNull(this.expiration, obj.expiration)
-        && equalsWithNull(this.timestamp, obj.timestamp)
-        && equalsWithNull(this.deliveryCount, obj.deliveryCount)
-        && equalsWithNull(this.priority, obj.priority) && equalsWithNull(this.priority, obj.priority)
+    boolean eq = equalsWithNull(this.id, obj.id) && this.expiration == obj.expiration
+        && this.timestamp == obj.timestamp && this.deliveryCount == obj.deliveryCount
+        && this.priority == obj.priority && this.priority == obj.priority
         && equalsWithNull(this.properties, obj.properties);
     return eq;
 
