@@ -22,12 +22,10 @@
  */
 package com.scalagent.appli.client.widget;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.AbstractDataTable;
@@ -38,6 +36,7 @@ import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.Anno
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.Options;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.WindowMode;
 import com.scalagent.appli.client.Application;
+import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.presenter.QueueDetailPresenter;
 import com.scalagent.appli.client.widget.handler.message.MessageDeleteClickHandler;
 import com.scalagent.appli.client.widget.handler.message.MessageEditClickHandler;
@@ -88,6 +87,7 @@ import com.smartgwt.client.widgets.viewer.DetailViewerField;
 public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
 
   boolean redrawChart = false;
+  Options chartOptions;
 
   int chartWidth;
 
@@ -106,7 +106,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
   HLayout hl2;
 
   DetailViewer queueDetailLeft = new DetailViewer();
-  DetailViewer queueDetailRight = new DetailViewer();;
+  DetailViewer queueDetailRight = new DetailViewer();
 
   SectionStackSection listStackSection;
   ListGrid messageList;
@@ -147,7 +147,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
     queueDetailStack.setHeight100();
 
     refreshButton = new IButton();
-    refreshButton.setAutoFit(true);
+    refreshButton.setAutoFit(Boolean.TRUE);
     refreshButton.setIcon("refresh.gif");
     refreshButton.setTitle(Application.messages.queueWidget_buttonRefresh_title());
     refreshButton.setPrompt(Application.messages.queueWidget_buttonRefresh_prompt());
@@ -155,7 +155,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
 
 //    newQueueButton = new IButton();
 //    newQueueButton.setMargin(0);
-//    newQueueButton.setAutoFit(true);
+//    newQueueButton.setAutoFit(Boolean.TRUE);
 //    newQueueButton.setIcon("new.png");
 //    newQueueButton.setTitle(Application.messages.queueDetailWidget_buttonNewMessage_title());
 //    newQueueButton.setPrompt(Application.messages.queueDetailWidget_buttonNewMessage_prompt());
@@ -234,7 +234,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
     queueDetailLeft.setData(new Record[] { new QueueListRecord(presenter.getQueue()) });
 
     chartWidth = (com.google.gwt.user.client.Window.getClientWidth() / 2) - 35;
-    chart = new AnnotatedTimeLine(createTable(), createOptions(true), "" + chartWidth, "170");
+    chart = new AnnotatedTimeLine(createTable(), createOptions(), "" + chartWidth, "170");
 
     columnForm = new DynamicForm();
     columnForm.setNumCols(8);
@@ -244,9 +244,13 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
     showReceivedBox.setValue(true);
     showReceivedBox.addChangedHandler(new ChangedHandler() {
       public void onChanged(ChangedEvent event) {
-        showReceived = showReceivedBox.getValueAsBoolean();
+        showReceived = showReceivedBox.getValueAsBoolean().booleanValue();
+        if (showReceived) {
+          chart.showDataColumns(0);
+        } else {
+          chart.hideDataColumns(0);
+        }
         enableDisableCheckbox();
-        redrawChart(false);
       }
     });
 
@@ -255,10 +259,13 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
     showDeliveredBox.setValue(true);
     showDeliveredBox.addChangedHandler(new ChangedHandler() {
       public void onChanged(ChangedEvent event) {
-
-        showDelivered = showDeliveredBox.getValueAsBoolean();
+        showDelivered = showDeliveredBox.getValueAsBoolean().booleanValue();
+        if (showDelivered) {
+          chart.showDataColumns(1);
+        } else {
+          chart.hideDataColumns(1);
+        }
         enableDisableCheckbox();
-        redrawChart(false);
       }
     });
 
@@ -267,9 +274,13 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
     showSentDMQBox.setValue(true);
     showSentDMQBox.addChangedHandler(new ChangedHandler() {
       public void onChanged(ChangedEvent event) {
-        showSentDMQ = showSentDMQBox.getValueAsBoolean();
+        showSentDMQ = showSentDMQBox.getValueAsBoolean().booleanValue();
+        if (showSentDMQ) {
+          chart.showDataColumns(2);
+        } else {
+          chart.hideDataColumns(2);
+        }
         enableDisableCheckbox();
-        redrawChart(false);
       }
     });
 
@@ -278,9 +289,13 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
     showPendingBox.setValue(true);
     showPendingBox.addChangedHandler(new ChangedHandler() {
       public void onChanged(ChangedEvent event) {
-        showPending = showPendingBox.getValueAsBoolean();
+        showPending = showPendingBox.getValueAsBoolean().booleanValue();
+        if (showPending) {
+          chart.showDataColumns(3);
+        } else {
+          chart.hideDataColumns(3);
+        }
         enableDisableCheckbox();
-        redrawChart(false);
       }
     });
 
@@ -293,7 +308,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
     queueChart.setHeight(175);
     queueChart.setAlign(Alignment.CENTER);
     queueChart.setAlign(VerticalAlignment.TOP);
-    queueChart.setShowEdges(true);
+    queueChart.setShowEdges(Boolean.TRUE);
     queueChart.setEdgeSize(1);
     queueChart.addMember(columnForm);
     queueChart.addMember(chart);
@@ -316,7 +331,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
     vl.addMember(hl2);
 
     buttonSection = new SectionStackSection(Application.messages.queueDetailWidget_buttonSection_title());
-    buttonSection.setExpanded(true);
+    buttonSection.setExpanded(Boolean.TRUE);
     buttonSection.addItem(vl);
 
     // Liste
@@ -332,7 +347,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
 
           IButton buttonDelete = new IButton();
           buttonDelete.setDisabled(true);
-          buttonDelete.setAutoFit(true);
+          buttonDelete.setAutoFit(Boolean.TRUE);
           buttonDelete.setHeight(20);
           buttonDelete.setIcon("remove.png");
           buttonDelete.setTitle(Application.messages.queueDetailWidget_buttonDelete_title());
@@ -345,7 +360,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
 
           IButton buttonEdit = new IButton();
           buttonEdit.setDisabled(true);
-          buttonEdit.setAutoFit(true);
+          buttonEdit.setAutoFit(Boolean.TRUE);
           buttonEdit.setHeight(20);
           buttonEdit.setIconSize(13);
           buttonEdit.setIcon("pencil.png");
@@ -365,9 +380,9 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
     };
 
     messageList.setRecordComponentPoolingMode("viewport");
-    messageList.setAlternateRecordStyles(true);
-    messageList.setShowRecordComponents(true);
-    messageList.setShowRecordComponentsByCell(true);
+    messageList.setAlternateRecordStyles(Boolean.TRUE);
+    messageList.setShowRecordComponents(Boolean.TRUE);
+    messageList.setShowRecordComponentsByCell(Boolean.TRUE);
 
     ListGridField idSFieldL = new ListGridField(MessageListRecord.ATTRIBUTE_IDS,
         Application.messages.queueDetailWidget_idFieldL_title());
@@ -427,7 +442,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
     //		queueChart = new VLayout();
     //		queueChart.setMargin(2);
     //		queueChart.setWidth("33%");
-    //		queueChart.setShowEdges(true);
+    //		queueChart.setShowEdges(Boolean.TRUE);
     //		queueChart.setAlign(Alignment.CENTER);
     //		queueChart.setAlign(VerticalAlignment.CENTER);
 
@@ -440,19 +455,19 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
 
     // Section stack of the queue list
     listStackSection = new SectionStackSection(Application.messages.queueDetailWidget_listSection_title());
-    listStackSection.setExpanded(true);
+    listStackSection.setExpanded(Boolean.TRUE);
     listStackSection.addItem(messageList);
 
     // Section stack of the view (details & buttons)
     viewSection = new SectionStackSection(Application.messages.queueDetailWidget_detailsSection_title());
-    viewSection.setExpanded(true);
+    viewSection.setExpanded(Boolean.TRUE);
     viewSection.addItem(queueView);
-    viewSection.setCanReorder(true);
+    viewSection.setCanReorder(Boolean.TRUE);
 
     queueDetailStack.addSection(buttonSection);
     queueDetailStack.addSection(listStackSection);
     queueDetailStack.addSection(viewSection);
-    queueDetailStack.setCanResizeSections(true);
+    queueDetailStack.setCanResizeSections(Boolean.TRUE);
 
     presenter.initList();
 
@@ -513,68 +528,49 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
     queueDetailRight.setData(new Record[] { new QueueListRecord(presenter.getQueue()) });
   }
 
-  public void redrawChart(boolean reuseChart) {
+  public void redrawChart() {
     if (redrawChart) {
-      chart.draw(createTable(), createOptions(reuseChart));
+      chart.draw(createTable(), createOptions());
     }
   }
 
-  private Options createOptions(boolean reuseChart) {
-    Options options = Options.create();
-    options.setDisplayAnnotations(false);
-    options.setDisplayAnnotationsFilter(false);
-    options.setDisplayZoomButtons(true);
-    options.setDisplayRangeSelector(false);
-    options.setAllowRedraw(reuseChart);
-    options.setDateFormat("dd MMM HH:mm:ss");
-    options.setFill(5);
-    options.setLegendPosition(AnnotatedLegendPosition.NEW_ROW);
-    options.setWindowMode(WindowMode.TRANSPARENT);
+  private Options createOptions() {
+    if (chartOptions != null) {
+      return chartOptions;
+    }
+    chartOptions = Options.create();
+    chartOptions.setDisplayAnnotations(false);
+    chartOptions.setDisplayAnnotationsFilter(false);
+    chartOptions.setDisplayZoomButtons(true);
+    chartOptions.setDisplayRangeSelector(false);
+    chartOptions.setAllowRedraw(true);
+    chartOptions.setDateFormat("dd MMM HH:mm:ss");
+    chartOptions.setFill(5);
+    chartOptions.setLegendPosition(AnnotatedLegendPosition.NEW_ROW);
+    chartOptions.setWindowMode(WindowMode.TRANSPARENT);
 
-    return options;
+    return chartOptions;
   }
 
   private AbstractDataTable createTable() {
     DataTable data = DataTable.create();
 
     data.addColumn(ColumnType.DATETIME, Application.messages.common_time());
-    if (showReceived)
-      data.addColumn(ColumnType.NUMBER, Application.messages.common_received());
-    if (showDelivered)
-      data.addColumn(ColumnType.NUMBER, Application.messages.common_delivered());
-    if (showSentDMQ)
-      data.addColumn(ColumnType.NUMBER, Application.messages.common_sentDMQ());
-    if (showPending)
-      data.addColumn(ColumnType.NUMBER, Application.messages.common_pending());
+    data.addColumn(ColumnType.NUMBER, Application.messages.common_received());
+    data.addColumn(ColumnType.NUMBER, Application.messages.common_delivered());
+    data.addColumn(ColumnType.NUMBER, Application.messages.common_sentDMQ());
+    data.addColumn(ColumnType.NUMBER, Application.messages.common_pending());
 
-    SortedMap<Date, int[]> history = presenter.getQueueHistory();
+    List<HistoryData> history = presenter.getQueueHistory();
     if (history != null) {
       data.addRows(history.size());
-
-      int i = 0;
-      for (Date d : history.keySet()) {
-        if (d != null) {
-          int j = 1;
-          data.setValue(i, 0, d);
-          if (showReceived) {
-            data.setValue(i, j, history.get(d)[0]);
-            j++;
-          }
-          if (showDelivered) {
-            data.setValue(i, j, history.get(d)[1]);
-            j++;
-          }
-          if (showSentDMQ) {
-            data.setValue(i, j, history.get(d)[2]);
-            j++;
-          }
-          if (showPending) {
-            data.setValue(i, j, history.get(d)[3]);
-            j++;
-          }
-          i++;
-          j = 1;
-        }
+      for (int i = 0; i < history.size(); i++) {
+        HistoryData hdata = history.get(i);
+        data.setValue(i, 0, hdata.time);
+        data.setValue(i, 1, hdata.data[0]);
+        data.setValue(i, 2, hdata.data[1]);
+        data.setValue(i, 3, hdata.data[2]);
+        data.setValue(i, 4, hdata.data[3]);
       }
     }
 
@@ -612,8 +608,8 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
     else
       winModal.setTitle("Message \"" + mlr.getAttributeAsString(MessageListRecord.ATTRIBUTE_IDS) + "\"");
     winModal.setShowMinimizeButton(false);
-    winModal.setIsModal(true);
-    winModal.setShowModalMask(true);
+    winModal.setIsModal(Boolean.TRUE);
+    winModal.setShowModalMask(Boolean.TRUE);
     winModal.centerInPage();
     winModal.addCloseClickHandler(new CloseClickHandler() {
       public void onCloseClick(CloseClientEvent event) {
@@ -653,49 +649,49 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
     SelectItem queueNameItem = new SelectItem();
     queueNameItem.setTitle(Application.messages.queueDetailWidget_queueNameItem_title());
     queueNameItem.setName("queueNameItem");
-    queueNameItem.setRequired(true);
+    queueNameItem.setRequired(Boolean.TRUE);
     queueNameItem.setValueMap(mapNames);
-    queueNameItem.setRequired(true);
+    queueNameItem.setRequired(Boolean.TRUE);
     queueNameItem.setDefaultValue(presenter.getQueue().getId());
 
     TextItem idItem = new TextItem();
     idItem.setTitle(Application.messages.queueDetailWidget_idItem_title());
     idItem.setName("idItem");
-    idItem.setRequired(true);
+    idItem.setRequired(Boolean.TRUE);
 
     TextItem expirationItem = new TextItem();
     expirationItem.setTitle(Application.messages.queueDetailWidget_expirationItem_title());
     expirationItem.setName("expirationItem");
-    expirationItem.setRequired(true);
+    expirationItem.setRequired(Boolean.TRUE);
     expirationItem.setValidators(integerValidator);
 
     TextItem timestampItem = new TextItem();
     timestampItem.setTitle(Application.messages.queueDetailWidget_timestampItem_title());
     timestampItem.setName("timestampItem");
-    timestampItem.setRequired(true);
+    timestampItem.setRequired(Boolean.TRUE);
     timestampItem.setValidators(integerValidator);
 
     TextItem priorityItem = new TextItem();
     priorityItem.setTitle(Application.messages.queueDetailWidget_priorityItem_title());
     priorityItem.setName("priorityItem");
-    priorityItem.setRequired(true);
+    priorityItem.setRequired(Boolean.TRUE);
     priorityItem.setValidators(integerValidator);
 
     TextItem textItem = new TextItem();
     textItem.setTitle(Application.messages.queueDetailWidget_textItem_title());
     textItem.setName("textItem");
-    textItem.setRequired(true);
+    textItem.setRequired(Boolean.TRUE);
 
     TextItem typeItem = new TextItem();
     typeItem.setTitle(Application.messages.queueDetailWidget_typeItem_title());
     typeItem.setName("typeItem");
-    typeItem.setRequired(true);
+    typeItem.setRequired(Boolean.TRUE);
     typeItem.setValidators(integerValidator);
 
     //		queueNameItem.setValue(presenter.getQueue().getName());
 
     if (mlr != null) {
-      queueNameItem.setDisabled(true);
+      queueNameItem.setDisabled(Boolean.TRUE);
       idItem.setValue(mlr.getAttributeAsString(MessageListRecord.ATTRIBUTE_IDS));
       expirationItem.setValue(mlr.getAttributeAsString(MessageListRecord.ATTRIBUTE_EXPIRATION));
       timestampItem.setValue(mlr.getAttributeAsString(MessageListRecord.ATTRIBUTE_TIMESTAMP));
@@ -716,14 +712,14 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
       validateButton.setIcon("accept.png");
       validateButton.addClickHandler(new MessageEditClickHandler(presenter, form));
     }
-    validateButton.setAutoFit(true);
+    validateButton.setAutoFit(Boolean.TRUE);
     validateButton.setLayoutAlign(VerticalAlignment.TOP);
     validateButton.setLayoutAlign(Alignment.CENTER);
 
     IButton cancelButton = new IButton();
     cancelButton.setTitle(Application.messages.queueWidget_cancelButton_title());
     cancelButton.setIcon("cancel.png");
-    cancelButton.setAutoFit(true);
+    cancelButton.setAutoFit(Boolean.TRUE);
     cancelButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {

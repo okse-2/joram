@@ -22,10 +22,7 @@
  */
 package com.scalagent.appli.client.widget;
 
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.SortedMap;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.AbstractDataTable;
@@ -36,6 +33,7 @@ import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.Anno
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.Options;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.WindowMode;
 import com.scalagent.appli.client.Application;
+import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.presenter.UserListPresenter;
 import com.scalagent.appli.client.widget.handler.queue.RefreshAllClickHandler;
 import com.scalagent.appli.client.widget.handler.user.NewUserClickHandler;
@@ -87,6 +85,8 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
 
   int chartWidth;
   boolean redrawChart = false;
+  Options chartOptions;
+  int lastFill = 5;
 
   boolean showSentDMQ = true;
   boolean showSubCount = true;
@@ -113,14 +113,8 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
 
   Window winModal = new Window();
 
-  HashMap<String, String> etat = new HashMap<String, String>();
-
   public UserListWidget(UserListPresenter userPresenter) {
     super(userPresenter);
-
-    etat.put("true", Application.baseMessages.main_true());
-    etat.put("false", Application.baseMessages.main_false());
-
   }
 
   public IButton getRefreshButton() {
@@ -140,7 +134,7 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
     userStack.setHeight100();
 
     refreshButton = new IButton();
-    refreshButton.setAutoFit(true);
+    refreshButton.setAutoFit(Boolean.TRUE);
     refreshButton.setIcon("refresh.gif");
     refreshButton.setTitle(Application.messages.queueWidget_buttonRefresh_title());
     refreshButton.setPrompt(Application.messages.queueWidget_buttonRefresh_prompt());
@@ -148,7 +142,7 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
 
     newUserButton = new IButton();
     newUserButton.setMargin(0);
-    newUserButton.setAutoFit(true);
+    newUserButton.setAutoFit(Boolean.TRUE);
     newUserButton.setIcon("new.png");
     newUserButton.setTitle(Application.messages.userWidget_buttonNewUser_title());
     newUserButton.setPrompt(Application.messages.userWidget_buttonNewUser_prompt());
@@ -166,7 +160,7 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
     hl.addMember(newUserButton);
 
     buttonSection = new SectionStackSection(Application.messages.userWidget_actionsSection_title());
-    buttonSection.setExpanded(true);
+    buttonSection.setExpanded(Boolean.TRUE);
     buttonSection.addItem(hl);
 
     // Liste
@@ -179,7 +173,7 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
         if (fieldName.equals("browse")) {
 
           IButton buttonBrowse = new IButton();
-          buttonBrowse.setAutoFit(true);
+          buttonBrowse.setAutoFit(Boolean.TRUE);
           buttonBrowse.setHeight(20);
           buttonBrowse.setIconSize(13);
           buttonBrowse.setIcon("view_right_p.png");
@@ -192,7 +186,7 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
         } else if (fieldName.equals("deleteField")) {
 
           IButton buttonDelete = new IButton();
-          buttonDelete.setAutoFit(true);
+          buttonDelete.setAutoFit(Boolean.TRUE);
           buttonDelete.setHeight(20);
           buttonDelete.setIconSize(13);
           buttonDelete.setIcon("remove.png");
@@ -205,7 +199,7 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
         } else if (fieldName.equals("editField")) {
 
           IButton buttonEdit = new IButton();
-          buttonEdit.setAutoFit(true);
+          buttonEdit.setAutoFit(Boolean.TRUE);
           buttonEdit.setHeight(20);
           buttonEdit.setIconSize(13);
           buttonEdit.setIcon("pencil.png");
@@ -225,9 +219,9 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
     };
 
     userList.setRecordComponentPoolingMode("viewport");
-    userList.setAlternateRecordStyles(true);
-    userList.setShowRecordComponents(true);
-    userList.setShowRecordComponentsByCell(true);
+    userList.setAlternateRecordStyles(Boolean.TRUE);
+    userList.setShowRecordComponents(Boolean.TRUE);
+    userList.setShowRecordComponentsByCell(Boolean.TRUE);
 
     ListGridField nameFieldL = new ListGridField(UserListRecord.ATTRIBUTE_NAME,
         Application.messages.userWidget_nameFieldL_title());
@@ -253,7 +247,7 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
       @Override
       public void onRecordClick(RecordClickEvent event) {
         userDetail.setData(new Record[] { event.getRecord() });
-        redrawChart(true);
+        redrawChart(false);
       }
     });
 
@@ -287,9 +281,13 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
     showSentDMQBox.setValue(true);
     showSentDMQBox.addChangedHandler(new ChangedHandler() {
       public void onChanged(ChangedEvent event) {
-        showSentDMQ = showSentDMQBox.getValueAsBoolean();
+        showSentDMQ = showSentDMQBox.getValueAsBoolean().booleanValue();
+        if (showSentDMQ) {
+          chart.showDataColumns(0);
+        } else {
+          chart.hideDataColumns(0);
+        }
         enableDisableCheckbox();
-        redrawChart(false);
       }
     });
 
@@ -298,9 +296,13 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
     showSubCountBox.setValue(true);
     showSubCountBox.addChangedHandler(new ChangedHandler() {
       public void onChanged(ChangedEvent event) {
-        showSubCount = showSubCountBox.getValueAsBoolean();
+        showSubCount = showSubCountBox.getValueAsBoolean().booleanValue();
+        if (showSubCount) {
+          chart.showDataColumns(1);
+        } else {
+          chart.hideDataColumns(1);
+        }
         enableDisableCheckbox();
-        redrawChart(false);
       }
     });
 
@@ -313,7 +315,7 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
     userChart.setHeight(220);
     userChart.setAlign(Alignment.CENTER);
     userChart.setAlign(VerticalAlignment.TOP);
-    userChart.setShowEdges(true);
+    userChart.setShowEdges(Boolean.TRUE);
     userChart.setEdgeSize(1);
     userChart.addMember(columnForm);
     userChart.addMember(chart);
@@ -332,19 +334,19 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
 
     //		 Section stack of the queue list
     listStackSection = new SectionStackSection(Application.messages.userWidget_usersSection_title());
-    listStackSection.setExpanded(true);
+    listStackSection.setExpanded(Boolean.TRUE);
     listStackSection.addItem(userList);
 
     // Section stack of the view (details & buttons)
     viewSection = new SectionStackSection(Application.messages.userWidget_userDetailsSection_title());
-    viewSection.setExpanded(true);
+    viewSection.setExpanded(Boolean.TRUE);
     viewSection.addItem(userView);
-    viewSection.setCanReorder(true);
+    viewSection.setCanReorder(Boolean.TRUE);
 
     userStack.addSection(buttonSection);
     userStack.addSection(listStackSection);
     userStack.addSection(viewSection);
-    userStack.setCanResizeSections(true);
+    userStack.setCanResizeSections(Boolean.TRUE);
 
     return userStack;
   }
@@ -392,52 +394,53 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
   }
 
   private Options createOptions(boolean reuseChart) {
-    Options options = Options.create();
-    options.setDisplayAnnotations(false);
-    options.setDisplayAnnotationsFilter(false);
-    options.setDisplayZoomButtons(true);
-    options.setDisplayRangeSelector(false);
-    options.setAllowRedraw(reuseChart);
-    options.setDateFormat("dd MMM HH:mm:ss");
-    options.setFill(5);
-    options.setLegendPosition(AnnotatedLegendPosition.NEW_ROW);
-    options.setWindowMode(WindowMode.TRANSPARENT);
+    if (chartOptions != null) {
+      /* The following is done to avoid a glitch when redrawing the chart: if
+       * the new chart time frame starts later than previous one, old values
+       * are kept on the chart. So we change an option to force a clean redraw. */
+      if (!reuseChart) {
+        if (lastFill == 5) {
+          chartOptions.setFill(6);
+          lastFill = 6;
+        } else {
+          chartOptions.setFill(5);
+          lastFill = 5;
+        }
+      }
+      return chartOptions;
+    }
+    chartOptions = Options.create();
+    chartOptions.setDisplayAnnotations(false);
+    chartOptions.setDisplayAnnotationsFilter(false);
+    chartOptions.setDisplayZoomButtons(true);
+    chartOptions.setDisplayRangeSelector(false);
+    chartOptions.setAllowRedraw(true);
+    chartOptions.setDateFormat("dd MMM HH:mm:ss");
+    chartOptions.setFill(5);
+    chartOptions.setLegendPosition(AnnotatedLegendPosition.NEW_ROW);
+    chartOptions.setWindowMode(WindowMode.TRANSPARENT);
 
-    return options;
+    return chartOptions;
   }
 
   private AbstractDataTable createTable() {
     DataTable data = DataTable.create();
 
     data.addColumn(ColumnType.DATETIME, Application.messages.common_time());
-    if (showSentDMQ)
-      data.addColumn(ColumnType.NUMBER, Application.messages.common_sentDMQ());
-    if (showSubCount)
-      data.addColumn(ColumnType.NUMBER, Application.messages.common_subscription());
+    data.addColumn(ColumnType.NUMBER, Application.messages.common_sentDMQ());
+    data.addColumn(ColumnType.NUMBER, Application.messages.common_subscription());
 
     Record selectedRecord = userList.getSelectedRecord();
     if (selectedRecord != null) {
-      SortedMap<Date, int[]> history = presenter.getUserHistory(selectedRecord
+      List<HistoryData> history = presenter.getUserHistory(selectedRecord
           .getAttributeAsString(QueueListRecord.ATTRIBUTE_NAME));
       if (history != null) {
         data.addRows(history.size());
-
-        int i = 0;
-        for (Date d : history.keySet()) {
-          if (d != null) {
-            int j = 1;
-            data.setValue(i, 0, d);
-            if (showSentDMQ) {
-              data.setValue(i, j, history.get(d)[0]);
-              j++;
-            }
-            if (showSubCount) {
-              data.setValue(i, j, history.get(d)[1]);
-              j++;
-            }
-            i++;
-            j = 1;
-          }
+        for (int i = 0; i < history.size(); i++) {
+          HistoryData hdata = history.get(i);
+          data.setValue(i, 0, hdata.time);
+          data.setValue(i, 1, hdata.data[0]);
+          data.setValue(i, 2, hdata.data[1]);
         }
       }
     }
@@ -448,6 +451,10 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
   public void redrawChart(boolean reuseChart) {
     if (redrawChart) {
       chart.draw(createTable(), createOptions(reuseChart));
+      if (!reuseChart) {
+        if (!showSentDMQ) chart.hideDataColumns(0);
+        if (!showSubCount) chart.hideDataColumns(1);
+      }
     }
   }
 
@@ -471,9 +478,9 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
       winModal.setTitle(Application.messages.userWidget_winModal_title());
     else
       winModal.setTitle("User \"" + ulr.getAttributeAsString(UserListRecord.ATTRIBUTE_NAME) + "\"");
-    winModal.setShowMinimizeButton(false);
-    winModal.setIsModal(true);
-    winModal.setShowModalMask(true);
+    winModal.setShowMinimizeButton(Boolean.FALSE);
+    winModal.setIsModal(Boolean.TRUE);
+    winModal.setShowModalMask(Boolean.TRUE);
     winModal.centerInPage();
     winModal.addCloseClickHandler(new CloseClickHandler() {
       public void onCloseClick(CloseClientEvent event) {
@@ -506,7 +513,7 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
     TextItem nameItem = new TextItem();
     nameItem.setTitle(Application.messages.userWidget_nameItem_title());
     nameItem.setName("nameItem");
-    nameItem.setRequired(true);
+    nameItem.setRequired(Boolean.TRUE);
 
     PasswordItem passwordItem = null;
     TextItem periodItem = null;
@@ -514,18 +521,18 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
       passwordItem = new PasswordItem();
       passwordItem.setTitle(Application.messages.userWidget_passwordItem_title());
       passwordItem.setName("passwordItem");
-      passwordItem.setRequired(true);
+      passwordItem.setRequired(Boolean.TRUE);
 
       form.setFields(nameItem, passwordItem);
     } else {
       periodItem = new TextItem();
       periodItem.setTitle(Application.messages.userWidget_periodItem_title());
       periodItem.setName("periodItem");
-      periodItem.setRequired(true);
+      periodItem.setRequired(Boolean.TRUE);
       periodItem.setValidators(integerValidator);
 
       nameItem.setValue(ulr.getAttributeAsString(UserListRecord.ATTRIBUTE_NAME));
-      nameItem.setDisabled(true);
+      nameItem.setDisabled(Boolean.TRUE);
       periodItem.setValue(ulr.getAttributeAsString(UserListRecord.ATTRIBUTE_PERIOD));
 
       form.setFields(nameItem, periodItem);
@@ -542,14 +549,14 @@ public class UserListWidget extends BaseWidget<UserListPresenter> {
       validateButton.setIcon("accept.png");
       validateButton.addClickHandler(new UserEditClickHandler(presenter, form));
     }
-    validateButton.setAutoFit(true);
+    validateButton.setAutoFit(Boolean.TRUE);
     validateButton.setLayoutAlign(VerticalAlignment.TOP);
     validateButton.setLayoutAlign(Alignment.CENTER);
 
     IButton cancelButton = new IButton();
     cancelButton.setTitle(Application.messages.userWidget_cancelButton_title());
     cancelButton.setIcon("cancel.png");
-    cancelButton.setAutoFit(true);
+    cancelButton.setAutoFit(Boolean.TRUE);
     cancelButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {

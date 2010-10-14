@@ -22,10 +22,10 @@
  */
 package com.scalagent.appli.client.widget;
 
-import java.util.Date;
+
+
 import java.util.HashMap;
 import java.util.List;
-import java.util.SortedMap;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.AbstractDataTable;
@@ -36,6 +36,7 @@ import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.Anno
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.Options;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.WindowMode;
 import com.scalagent.appli.client.Application;
+import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.presenter.TopicListPresenter;
 import com.scalagent.appli.client.widget.handler.queue.RefreshAllClickHandler;
 import com.scalagent.appli.client.widget.handler.topic.NewTopicClickHandler;
@@ -85,6 +86,8 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
 
   int chartWidth;
   boolean redrawChart = false;
+  Options chartOptions;
+  int lastFill = 5;
 
   boolean showReceived = true;
   boolean showDelivered = true;
@@ -131,7 +134,7 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
     topicStack.setHeight100();
 
     refreshButton = new IButton();
-    refreshButton.setAutoFit(true);
+    refreshButton.setAutoFit(Boolean.TRUE);
     refreshButton.setIcon("refresh.gif");
     refreshButton.setTitle(Application.messages.queueWidget_buttonRefresh_title());
     refreshButton.setPrompt(Application.messages.queueWidget_buttonRefresh_prompt());
@@ -139,7 +142,7 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
 
     newTopicButton = new IButton();
     newTopicButton.setMargin(0);
-    newTopicButton.setAutoFit(true);
+    newTopicButton.setAutoFit(Boolean.TRUE);
     newTopicButton.setIcon("new.png");
     newTopicButton.setTitle(Application.messages.topicWidget_buttonNewTopic_title());
     newTopicButton.setPrompt(Application.messages.topicWidget_buttonNewTopic_prompt());
@@ -157,7 +160,7 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
     hl.addMember(newTopicButton);
 
     buttonSection = new SectionStackSection(Application.messages.topicWidget_buttonSection_title());
-    buttonSection.setExpanded(true);
+    buttonSection.setExpanded(Boolean.TRUE);
     buttonSection.addItem(hl);
 
     topicList = new ListGrid() {
@@ -170,7 +173,7 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
         if (fieldName.equals("deleteField")) {
 
           IButton buttonDelete = new IButton();
-          buttonDelete.setAutoFit(true);
+          buttonDelete.setAutoFit(Boolean.TRUE);
           buttonDelete.setHeight(20);
           buttonDelete.setIconSize(13);
           buttonDelete.setIcon("remove.png");
@@ -183,7 +186,7 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
         } else if (fieldName.equals("editField")) {
 
           IButton buttonEdit = new IButton();
-          buttonEdit.setAutoFit(true);
+          buttonEdit.setAutoFit(Boolean.TRUE);
           buttonEdit.setHeight(20);
           buttonEdit.setIconSize(13);
           buttonEdit.setIcon("pencil.png");
@@ -203,9 +206,9 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
     };
 
     topicList.setRecordComponentPoolingMode("viewport");
-    topicList.setAlternateRecordStyles(true);
-    topicList.setShowRecordComponents(true);
-    topicList.setShowRecordComponentsByCell(true);
+    topicList.setAlternateRecordStyles(Boolean.TRUE);
+    topicList.setShowRecordComponents(Boolean.TRUE);
+    topicList.setShowRecordComponentsByCell(Boolean.TRUE);
 
     ListGridField nameFieldL = new ListGridField(TopicListRecord.ATTRIBUTE_NAME,
         Application.messages.topicWidget_nameFieldL_title());
@@ -237,7 +240,7 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
     topicList.addRecordClickHandler(new RecordClickHandler() {
       public void onRecordClick(RecordClickEvent event) {
         topicDetail.setData(new Record[] { event.getRecord() });
-        redrawChart(true);
+        redrawChart(false);
       }
     });
 
@@ -292,9 +295,13 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
     showReceivedBox.setValue(true);
     showReceivedBox.addChangedHandler(new ChangedHandler() {
       public void onChanged(ChangedEvent event) {
-        showReceived = showReceivedBox.getValueAsBoolean();
+        showReceived = showReceivedBox.getValueAsBoolean().booleanValue();
+        if (showReceived) {
+          chart.showDataColumns(0);
+        } else {
+          chart.hideDataColumns(0);
+        }
         enableDisableCheckbox();
-        redrawChart(false);
       }
     });
 
@@ -303,10 +310,13 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
     showDeliveredBox.setValue(true);
     showDeliveredBox.addChangedHandler(new ChangedHandler() {
       public void onChanged(ChangedEvent event) {
-
-        showDelivered = showDeliveredBox.getValueAsBoolean();
+        showDelivered = showDeliveredBox.getValueAsBoolean().booleanValue();
+        if (showDelivered) {
+          chart.showDataColumns(1);
+        } else {
+          chart.hideDataColumns(1);
+        }
         enableDisableCheckbox();
-        redrawChart(false);
       }
     });
 
@@ -315,9 +325,13 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
     showSentDMQBox.setValue(true);
     showSentDMQBox.addChangedHandler(new ChangedHandler() {
       public void onChanged(ChangedEvent event) {
-        showSentDMQ = showSentDMQBox.getValueAsBoolean();
+        showSentDMQ = showSentDMQBox.getValueAsBoolean().booleanValue();
+        if (showSentDMQ) {
+          chart.showDataColumns(2);
+        } else {
+          chart.hideDataColumns(2);
+        }
         enableDisableCheckbox();
-        redrawChart(false);
       }
     });
 
@@ -330,7 +344,7 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
     topicChart.setHeight(220);
     topicChart.setAlign(Alignment.CENTER);
     topicChart.setAlign(VerticalAlignment.TOP);
-    topicChart.setShowEdges(true);
+    topicChart.setShowEdges(Boolean.TRUE);
     topicChart.setEdgeSize(1);
     topicChart.addMember(columnForm);
     topicChart.addMember(chart);
@@ -349,19 +363,19 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
 
     // Section stack of the topic list
     listStackSection = new SectionStackSection(Application.messages.topicWidget_listStackSection_title());
-    listStackSection.setExpanded(true);
+    listStackSection.setExpanded(Boolean.TRUE);
     listStackSection.addItem(topicList);
 
     // Section stack of the view (details & buttons)
     viewSectionSection = new SectionStackSection(Application.messages.topicWidget_viewSectionSection_title());
-    viewSectionSection.setExpanded(true);
+    viewSectionSection.setExpanded(Boolean.TRUE);
     viewSectionSection.addItem(topicView);
-    viewSectionSection.setCanReorder(true);
+    viewSectionSection.setCanReorder(Boolean.TRUE);
 
     topicStack.addSection(buttonSection);
     topicStack.addSection(listStackSection);
     topicStack.addSection(viewSectionSection);
-    topicStack.setCanResizeSections(true);
+    topicStack.setCanResizeSections(Boolean.TRUE);
 
     return topicStack;
 
@@ -421,59 +435,55 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
   }
 
   private Options createOptions(boolean reuseChart) {
-    Options options = Options.create();
-    options.setDisplayAnnotations(false);
-    options.setDisplayAnnotationsFilter(false);
-    options.setDisplayZoomButtons(true);
-    options.setDisplayRangeSelector(false);
-    options.setAllowRedraw(reuseChart);
-    options.setDateFormat("dd MMM HH:mm:ss");
-    options.setFill(5);
-    options.setLegendPosition(AnnotatedLegendPosition.NEW_ROW);
-    options.setWindowMode(WindowMode.TRANSPARENT);
+    if (chartOptions != null) {
+      /* The following is done to avoid a glitch when redrawing the chart: if
+       * the new chart time frame starts later than previous one, old values
+       * are kept on the chart. So we change an option to force a clean redraw. */
+      if (!reuseChart) {
+        if (lastFill == 5) {
+          chartOptions.setFill(6);
+          lastFill = 6;
+        } else {
+          chartOptions.setFill(5);
+          lastFill = 5;
+        }
+      }
+      return chartOptions;
+    }
+    chartOptions = Options.create();
+    chartOptions.setDisplayAnnotations(false);
+    chartOptions.setDisplayAnnotationsFilter(false);
+    chartOptions.setDisplayZoomButtons(true);
+    chartOptions.setDisplayRangeSelector(false);
+    chartOptions.setAllowRedraw(true);
+    chartOptions.setDateFormat("dd MMM HH:mm:ss");
+    chartOptions.setFill(5);
+    chartOptions.setLegendPosition(AnnotatedLegendPosition.NEW_ROW);
+    chartOptions.setWindowMode(WindowMode.TRANSPARENT);
 
-    return options;
+    return chartOptions;
   }
 
   private AbstractDataTable createTable() {
     DataTable data = DataTable.create();
 
     data.addColumn(ColumnType.DATETIME, Application.messages.common_time());
-    if (showReceived)
-      data.addColumn(ColumnType.NUMBER, Application.messages.common_received());
-    if (showDelivered)
-      data.addColumn(ColumnType.NUMBER, Application.messages.common_delivered());
-    if (showSentDMQ)
-      data.addColumn(ColumnType.NUMBER, Application.messages.common_sentDMQ());
+    data.addColumn(ColumnType.NUMBER, Application.messages.common_received());
+    data.addColumn(ColumnType.NUMBER, Application.messages.common_delivered());
+    data.addColumn(ColumnType.NUMBER, Application.messages.common_sentDMQ());
 
     Record selectedRecord = topicList.getSelectedRecord();
     if (selectedRecord != null) {
-      SortedMap<Date, int[]> history = presenter.getTopicHistory(selectedRecord
+      List<HistoryData> history = presenter.getTopicHistory(selectedRecord
           .getAttributeAsString(QueueListRecord.ATTRIBUTE_NAME));
       if (history != null) {
-
         data.addRows(history.size());
-
-        int i = 0;
-        for (Date d : history.keySet()) {
-          if (d != null) {
-            int j = 1;
-            data.setValue(i, 0, d);
-            if (showReceived) {
-              data.setValue(i, j, history.get(d)[0]);
-              j++;
-            }
-            if (showDelivered) {
-              data.setValue(i, j, history.get(d)[1]);
-              j++;
-            }
-            if (showSentDMQ) {
-              data.setValue(i, j, history.get(d)[2]);
-              j++;
-            }
-            i++;
-            j = 1;
-          }
+        for (int i = 0; i < history.size(); i++) {
+          HistoryData hdata = history.get(i);
+          data.setValue(i, 0, hdata.time);
+          data.setValue(i, 1, hdata.data[0]);
+          data.setValue(i, 2, hdata.data[1]);
+          data.setValue(i, 3, hdata.data[2]);
         }
       }
     }
@@ -484,6 +494,11 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
   public void redrawChart(boolean reuseChart) {
     if (redrawChart) {
       chart.draw(createTable(), createOptions(reuseChart));
+      if (!reuseChart) {
+        if (!showReceived) chart.hideDataColumns(0);
+        if (!showDelivered) chart.hideDataColumns(1);
+        if (!showSentDMQ) chart.hideDataColumns(2);
+      }
     }
   }
 
@@ -510,9 +525,9 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
       winModal.setTitle(Application.messages.topicWidget_winModal_title());
     else
       winModal.setTitle("Topic \"" + tlr.getAttributeAsString(TopicListRecord.ATTRIBUTE_NAME) + "\"");
-    winModal.setShowMinimizeButton(false);
-    winModal.setIsModal(true);
-    winModal.setShowModalMask(true);
+    winModal.setShowMinimizeButton(Boolean.FALSE);
+    winModal.setIsModal(Boolean.TRUE);
+    winModal.setShowModalMask(Boolean.TRUE);
     winModal.centerInPage();
     winModal.addCloseClickHandler(new CloseClickHandler() {
       public void onCloseClick(CloseClientEvent event) {
@@ -545,23 +560,23 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
     TextItem nameItem = new TextItem();
     nameItem.setTitle(Application.messages.topicWidget_nameItem_title());
     nameItem.setName("nameItem");
-    nameItem.setRequired(true);
+    nameItem.setRequired(Boolean.TRUE);
 
     if (tlr != null) {
       TextItem DMQItem = new TextItem();
       DMQItem.setTitle(Application.messages.topicWidget_DMQItem_title());
       DMQItem.setName("DMQItem");
-      DMQItem.setDisabled(true);
+      DMQItem.setDisabled(Boolean.TRUE);
 
       TextItem destinationItem = new TextItem();
       destinationItem.setTitle(Application.messages.topicWidget_destinationItem_title());
       destinationItem.setName("destinationItem");
-      destinationItem.setDisabled(true);
+      destinationItem.setDisabled(Boolean.TRUE);
 
       TextItem periodItem = new TextItem();
       periodItem.setTitle(Application.messages.topicWidget_periodItem_title());
       periodItem.setName("periodItem");
-      periodItem.setRequired(true);
+      periodItem.setRequired(Boolean.TRUE);
       periodItem.setValidators(integerValidator);
 
       CheckboxItem freeReadingItem = new CheckboxItem();
@@ -573,7 +588,7 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
       freeWritingItem.setName("freeWritingItem");
 
       nameItem.setValue(tlr.getAttributeAsString(TopicListRecord.ATTRIBUTE_NAME));
-      nameItem.setDisabled(true);
+      nameItem.setDisabled(Boolean.TRUE);
       DMQItem.setValue(tlr.getAttributeAsString(TopicListRecord.ATTRIBUTE_DMQID));
       destinationItem.setValue(tlr.getAttributeAsString(TopicListRecord.ATTRIBUTE_DESTINATIONID));
       periodItem.setValue(tlr.getAttributeAsString(TopicListRecord.ATTRIBUTE_PERIOD));
@@ -596,14 +611,14 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
       validateButton.setIcon("accept.png");
       validateButton.addClickHandler(new TopicEditClickHandler(presenter, form));
     }
-    validateButton.setAutoFit(true);
+    validateButton.setAutoFit(Boolean.TRUE);
     validateButton.setLayoutAlign(VerticalAlignment.TOP);
     validateButton.setLayoutAlign(Alignment.CENTER);
 
     IButton cancelButton = new IButton();
     cancelButton.setTitle(Application.messages.topicWidget_cancelButton_title());
     cancelButton.setIcon("cancel.png");
-    cancelButton.setAutoFit(true);
+    cancelButton.setAutoFit(Boolean.TRUE);
     cancelButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {

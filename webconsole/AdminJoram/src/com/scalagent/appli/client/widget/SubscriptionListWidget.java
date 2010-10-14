@@ -22,10 +22,7 @@
  */
 package com.scalagent.appli.client.widget;
 
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.SortedMap;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.AbstractDataTable;
@@ -36,6 +33,7 @@ import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.Anno
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.Options;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.WindowMode;
 import com.scalagent.appli.client.Application;
+import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.presenter.SubscriptionListPresenter;
 import com.scalagent.appli.client.widget.handler.queue.RefreshAllClickHandler;
 import com.scalagent.appli.client.widget.handler.subscription.NewSubscriptionClickHandler;
@@ -86,6 +84,9 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
 
   int chartWidth;
   boolean redrawChart = false;
+  Options chartOptions;
+  int lastFill = 5;
+
   boolean showDelivered = true;
   boolean showSentDMQ = true;
   boolean showPending = true;
@@ -114,13 +115,8 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
 
   Window winModal = new Window();
 
-  HashMap<String, String> etat = new HashMap<String, String>();
-
   public SubscriptionListWidget(SubscriptionListPresenter subscriptionPresenter) {
     super(subscriptionPresenter);
-
-    etat.put("true", Application.baseMessages.main_true());
-    etat.put("false", Application.baseMessages.main_false());
   }
 
   public IButton getRefreshButton() {
@@ -136,7 +132,7 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
     subStack.setHeight100();
 
     refreshButton = new IButton();
-    refreshButton.setAutoFit(true);
+    refreshButton.setAutoFit(Boolean.TRUE);
     refreshButton.setIcon("refresh.gif");
     refreshButton.setTitle(Application.messages.queueWidget_buttonRefresh_title());
     refreshButton.setPrompt(Application.messages.queueWidget_buttonRefresh_prompt());
@@ -144,7 +140,7 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
 
 //    newSubButton = new IButton();
 //    newSubButton.setMargin(0);
-//    newSubButton.setAutoFit(true);
+//    newSubButton.setAutoFit(Boolean.TRUE);
 //    newSubButton.setIcon("new.png");
 //    newSubButton.setTitle(Application.messages.subscriptionWidget_buttonNewSubscription_title());
 //    newSubButton.setPrompt(Application.messages.subscriptionWidget_buttonNewSubscription_prompt());
@@ -162,7 +158,7 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
 //    hl.addMember(newSubButton);
 
     buttonSection = new SectionStackSection(Application.messages.subscriptionWidget_actionsSection_title());
-    buttonSection.setExpanded(true);
+    buttonSection.setExpanded(Boolean.TRUE);
     buttonSection.addItem(hl);
 
     subList = new ListGrid() {
@@ -175,7 +171,7 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
         if (fieldName.equals("browseField")) {
 
           IButton buttonBrowse = new IButton();
-          buttonBrowse.setAutoFit(true);
+          buttonBrowse.setAutoFit(Boolean.TRUE);
           buttonBrowse.setHeight(20);
           buttonBrowse.setIconSize(13);
           buttonBrowse.setIcon("view_right_p.png");
@@ -190,7 +186,7 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
 
           IButton buttonDelete = new IButton();
           buttonDelete.setDisabled(true);
-          buttonDelete.setAutoFit(true);
+          buttonDelete.setAutoFit(Boolean.TRUE);
           buttonDelete.setHeight(20);
           buttonDelete.setIconSize(13);
           buttonDelete.setIcon("remove.png");
@@ -204,7 +200,7 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
         } else if (fieldName.equals("editField")) {
 
           IButton buttonEdit = new IButton();
-          buttonEdit.setAutoFit(true);
+          buttonEdit.setAutoFit(Boolean.TRUE);
           buttonEdit.setHeight(20);
           buttonEdit.setIconSize(13);
           buttonEdit.setIcon("pencil.png");
@@ -223,9 +219,9 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
       }
     };
     subList.setRecordComponentPoolingMode("viewport");
-    subList.setAlternateRecordStyles(true);
-    subList.setShowRecordComponents(true);
-    subList.setShowRecordComponentsByCell(true);
+    subList.setAlternateRecordStyles(Boolean.TRUE);
+    subList.setShowRecordComponents(Boolean.TRUE);
+    subList.setShowRecordComponentsByCell(Boolean.TRUE);
 
     ListGridField nameFieldL = new ListGridField(SubscriptionListRecord.ATTRIBUTE_NAME,
         Application.messages.subscriptionWidget_nameFieldL_title());
@@ -259,7 +255,7 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
       public void onRecordClick(RecordClickEvent event) {
         subDetailLeft.setData(new Record[] { event.getRecord() });
         subDetailRight.setData(new Record[] { event.getRecord() });
-        redrawChart(true);
+        redrawChart(false);
       }
     });
 
@@ -313,10 +309,13 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
     showDeliveredBox.setValue(true);
     showDeliveredBox.addChangedHandler(new ChangedHandler() {
       public void onChanged(ChangedEvent event) {
-
-        showDelivered = showDeliveredBox.getValueAsBoolean();
+        showDelivered = showDeliveredBox.getValueAsBoolean().booleanValue();
+        if (showDelivered) {
+          chart.showDataColumns(1);
+        } else {
+          chart.hideDataColumns(1);
+        }
         enableDisableCheckbox();
-        redrawChart(false);
       }
     });
 
@@ -325,9 +324,13 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
     showSentDMQBox.setValue(true);
     showSentDMQBox.addChangedHandler(new ChangedHandler() {
       public void onChanged(ChangedEvent event) {
-        showSentDMQ = showSentDMQBox.getValueAsBoolean();
+        showSentDMQ = showSentDMQBox.getValueAsBoolean().booleanValue();
+        if (showSentDMQ) {
+          chart.showDataColumns(2);
+        } else {
+          chart.hideDataColumns(2);
+        }
         enableDisableCheckbox();
-        redrawChart(false);
       }
     });
 
@@ -336,9 +339,13 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
     showPendingBox.setValue(true);
     showPendingBox.addChangedHandler(new ChangedHandler() {
       public void onChanged(ChangedEvent event) {
-        showPending = showPendingBox.getValueAsBoolean();
+        showPending = showPendingBox.getValueAsBoolean().booleanValue();
+        if (showPending) {
+          chart.showDataColumns(0);
+        } else {
+          chart.hideDataColumns(0);
+        }
         enableDisableCheckbox();
-        redrawChart(false);
       }
     });
 
@@ -351,7 +358,7 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
     subChart.setHeight(220);
     subChart.setAlign(Alignment.CENTER);
     subChart.setAlign(VerticalAlignment.TOP);
-    subChart.setShowEdges(true);
+    subChart.setShowEdges(Boolean.TRUE);
     subChart.setEdgeSize(1);
     subChart.addMember(columnForm);
     subChart.addMember(chart);
@@ -371,20 +378,20 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
     //		 Section stack of the queue list
     listStackSection = new SectionStackSection(
         Application.messages.subscriptionWidget_subscriptionsSection_title());
-    listStackSection.setExpanded(true);
+    listStackSection.setExpanded(Boolean.TRUE);
     listStackSection.addItem(subList);
 
     // Section stack of the view (details & buttons)
     viewSection = new SectionStackSection(
         Application.messages.subscriptionWidget_subscriptionDetailsSection_title());
-    viewSection.setExpanded(true);
+    viewSection.setExpanded(Boolean.TRUE);
     viewSection.addItem(subView);
-    viewSection.setCanReorder(true);
+    viewSection.setCanReorder(Boolean.TRUE);
 
     subStack.addSection(buttonSection);
     subStack.addSection(listStackSection);
     subStack.addSection(viewSection);
-    subStack.setCanResizeSections(true);
+    subStack.setCanResizeSections(Boolean.TRUE);
 
     return subStack;
   }
@@ -439,58 +446,55 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
   }
 
   private Options createOptions(boolean reuseChart) {
-    Options options = Options.create();
-    options.setDisplayAnnotations(false);
-    options.setDisplayAnnotationsFilter(false);
-    options.setDisplayZoomButtons(true);
-    options.setDisplayRangeSelector(false);
-    options.setAllowRedraw(reuseChart);
-    options.setDateFormat("dd MMM HH:mm:ss");
-    options.setFill(5);
-    options.setLegendPosition(AnnotatedLegendPosition.NEW_ROW);
-    options.setWindowMode(WindowMode.TRANSPARENT);
+    if (chartOptions != null) {
+      /* The following is done to avoid a glitch when redrawing the chart: if
+       * the new chart time frame starts later than previous one, old values
+       * are kept on the chart. So we change an option to force a clean redraw. */
+      if (!reuseChart) {
+        if (lastFill == 5) {
+          chartOptions.setFill(6);
+          lastFill = 6;
+        } else {
+          chartOptions.setFill(5);
+          lastFill = 5;
+        }
+      }
+      return chartOptions;
+    }
+    chartOptions = Options.create();
+    chartOptions.setDisplayAnnotations(false);
+    chartOptions.setDisplayAnnotationsFilter(false);
+    chartOptions.setDisplayZoomButtons(true);
+    chartOptions.setDisplayRangeSelector(false);
+    chartOptions.setAllowRedraw(true);
+    chartOptions.setDateFormat("dd MMM HH:mm:ss");
+    chartOptions.setFill(5);
+    chartOptions.setLegendPosition(AnnotatedLegendPosition.NEW_ROW);
+    chartOptions.setWindowMode(WindowMode.TRANSPARENT);
 
-    return options;
+    return chartOptions;
   }
 
   private AbstractDataTable createTable() {
     DataTable data = DataTable.create();
 
     data.addColumn(ColumnType.DATETIME, Application.messages.common_time());
-    if (showPending)
-      data.addColumn(ColumnType.NUMBER, Application.messages.common_pending());
-    if (showDelivered)
-      data.addColumn(ColumnType.NUMBER, Application.messages.common_delivered());
-    if (showSentDMQ)
-      data.addColumn(ColumnType.NUMBER, Application.messages.common_sentDMQ());
+    data.addColumn(ColumnType.NUMBER, Application.messages.common_pending());
+    data.addColumn(ColumnType.NUMBER, Application.messages.common_delivered());
+    data.addColumn(ColumnType.NUMBER, Application.messages.common_sentDMQ());
 
     Record selectedRecord = subList.getSelectedRecord();
     if (selectedRecord != null) {
-      SortedMap<Date, int[]> history = presenter.getSubHistory(selectedRecord
+      List<HistoryData> history = presenter.getSubHistory(selectedRecord
           .getAttributeAsString(QueueListRecord.ATTRIBUTE_NAME));
       if (history != null) {
         data.addRows(history.size());
-
-        int i = 0;
-        for (Date d : history.keySet()) {
-          if (d != null) {
-            int j = 1;
-            data.setValue(i, 0, d);
-            if (showPending) {
-              data.setValue(i, j, history.get(d)[0]);
-              j++;
-            }
-            if (showDelivered) {
-              data.setValue(i, j, history.get(d)[1]);
-              j++;
-            }
-            if (showSentDMQ) {
-              data.setValue(i, j, history.get(d)[2]);
-              j++;
-            }
-            i++;
-            j = 1;
-          }
+        for (int i = 0; i < history.size(); i++) {
+          HistoryData hdata = history.get(i);
+          data.setValue(i, 0, hdata.time);
+          data.setValue(i, 1, hdata.data[0]);
+          data.setValue(i, 2, hdata.data[1]);
+          data.setValue(i, 3, hdata.data[2]);
         }
       }
     }
@@ -500,6 +504,11 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
   public void redrawChart(boolean reuseChart) {
     if (redrawChart) {
       chart.draw(createTable(), createOptions(reuseChart));
+      if (!reuseChart) {
+        if (!showDelivered) chart.hideDataColumns(1);
+        if (!showSentDMQ) chart.hideDataColumns(2);
+        if (!showPending) chart.hideDataColumns(3);
+      }
     }
   }
 
@@ -527,9 +536,9 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
     else
       winModal.setTitle("Subscription \"" + slr.getAttributeAsString(SubscriptionListRecord.ATTRIBUTE_NAME)
           + "\"");
-    winModal.setShowMinimizeButton(false);
-    winModal.setIsModal(true);
-    winModal.setShowModalMask(true);
+    winModal.setShowMinimizeButton(Boolean.FALSE);
+    winModal.setIsModal(Boolean.TRUE);
+    winModal.setShowModalMask(Boolean.TRUE);
     winModal.centerInPage();
     winModal.addCloseClickHandler(new CloseClickHandler() {
       public void onCloseClick(CloseClientEvent event) {
@@ -563,12 +572,12 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
     TextItem nameItem = new TextItem();
     nameItem.setTitle(Application.messages.subscriptionWidget_nameItem_title());
     nameItem.setName("nameItem");
-    nameItem.setRequired(true);
+    nameItem.setRequired(Boolean.TRUE);
 
     TextItem nbMaxMsgItem = new TextItem();
     nbMaxMsgItem.setTitle(Application.messages.subscriptionWidget_nbMaxMsgsItem_title());
     nbMaxMsgItem.setName("nbMaxMsgItem");
-    nbMaxMsgItem.setRequired(true);
+    nbMaxMsgItem.setRequired(Boolean.TRUE);
     nbMaxMsgItem.setValidators(integerValidator);
 
     TextItem contextIdItem = new TextItem();
@@ -600,7 +609,7 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
 
     if (slr != null) {
       nameItem.setValue(slr.getAttributeAsString(SubscriptionListRecord.ATTRIBUTE_NAME));
-      nameItem.setDisabled(true);
+      nameItem.setDisabled(Boolean.TRUE);
       nbMaxMsgItem.setValue(slr.getAttributeAsString(SubscriptionListRecord.ATTRIBUTE_NBMAXMSG));
       contextIdItem.setValue(slr.getAttributeAsString(SubscriptionListRecord.ATTRIBUTE_CONTEXTID));
       selectorItem.setValue(slr.getAttributeAsString(SubscriptionListRecord.ATTRIBUTE_SELECTOR));
@@ -622,14 +631,14 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
       validateButton.setIcon("accept.png");
       validateButton.addClickHandler(new SubscriptionEditClickHandler(presenter, form));
     }
-    validateButton.setAutoFit(true);
+    validateButton.setAutoFit(Boolean.TRUE);
     validateButton.setLayoutAlign(VerticalAlignment.TOP);
     validateButton.setLayoutAlign(Alignment.CENTER);
 
     IButton cancelButton = new IButton();
     cancelButton.setTitle(Application.messages.subscriptionWidget_cancelButton_title());
     cancelButton.setIcon("cancel.png");
-    cancelButton.setAutoFit(true);
+    cancelButton.setAutoFit(Boolean.TRUE);
     cancelButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {

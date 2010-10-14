@@ -22,10 +22,7 @@
  */
 package com.scalagent.appli.client.widget;
 
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.SortedMap;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.AbstractDataTable;
@@ -36,6 +33,7 @@ import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.Anno
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.Options;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.WindowMode;
 import com.scalagent.appli.client.Application;
+import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.presenter.UserDetailPresenter;
 import com.scalagent.appli.client.widget.handler.queue.RefreshAllClickHandler;
 import com.scalagent.appli.client.widget.handler.subscription.NewSubscriptionClickHandler;
@@ -88,6 +86,7 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
   AnnotatedTimeLine chartSub;
   int chartUserWidth;
   int chartSubWidth;
+  Options chartOptions;
 
   boolean showSentDMQ = true;
   boolean showSubCount = true;
@@ -117,8 +116,6 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
 
   Window winModal = new Window();
 
-  HashMap<String, String> etat = new HashMap<String, String>();
-
   private boolean active = true;
 
   public void setActive(boolean active) {
@@ -127,8 +124,6 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
 
   public UserDetailWidget(UserDetailPresenter userDetailPresenter) {
     super(userDetailPresenter);
-    etat.put("true", Application.baseMessages.main_true());
-    etat.put("false", Application.baseMessages.main_false());
   }
 
   public IButton getRefreshButton() {
@@ -144,7 +139,7 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
     mainStack.setHeight100();
 
     refreshButton = new IButton();
-    refreshButton.setAutoFit(true);
+    refreshButton.setAutoFit(Boolean.TRUE);
     refreshButton.setIcon("refresh.gif");
     refreshButton.setTitle(Application.messages.queueWidget_buttonRefresh_title());
     refreshButton.setPrompt(Application.messages.queueWidget_buttonRefresh_prompt());
@@ -152,7 +147,7 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
 
 //    newSubButton = new IButton();
 //    newSubButton.setMargin(0);
-//    newSubButton.setAutoFit(true);
+//    newSubButton.setAutoFit(Boolean.TRUE);
 //    newSubButton.setIcon("new.png");
 //    newSubButton.setTitle(Application.messages.subscriptionWidget_buttonNewSubscription_title());
 //    newSubButton.setPrompt(Application.messages.subscriptionWidget_buttonNewSubscription_prompt());
@@ -190,7 +185,7 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
     userDetail.setData(new Record[] { new UserListRecord(presenter.getUser()) });
 
     chartUserWidth = (com.google.gwt.user.client.Window.getClientWidth() / 2) - 35;
-    chartUser = new AnnotatedTimeLine(createUserTable(), createOptions(true), "" + chartUserWidth, "170");
+    chartUser = new AnnotatedTimeLine(createUserTable(), createOptions(), "" + chartUserWidth, "170");
 
     columnForm = new DynamicForm();
     columnForm.setNumCols(4);
@@ -200,9 +195,13 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
     showSentDMQBox.setValue(true);
     showSentDMQBox.addChangedHandler(new ChangedHandler() {
       public void onChanged(ChangedEvent event) {
-        showSentDMQ = showSentDMQBox.getValueAsBoolean();
+        showSentDMQ = showSentDMQBox.getValueAsBoolean().booleanValue();
+        if (showSentDMQ) {
+          chartUser.showDataColumns(0);
+        } else {
+          chartUser.hideDataColumns(0);
+        }
         enableDisableCheckbox();
-        redrawChart(false);
       }
     });
 
@@ -211,9 +210,13 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
     showSubCountBox.setValue(true);
     showSubCountBox.addChangedHandler(new ChangedHandler() {
       public void onChanged(ChangedEvent event) {
-        showSubCount = showSubCountBox.getValueAsBoolean();
+        showSubCount = showSubCountBox.getValueAsBoolean().booleanValue();
+        if (showSubCount) {
+          chartUser.showDataColumns(1);
+        } else {
+          chartUser.hideDataColumns(1);
+        }
         enableDisableCheckbox();
-        redrawChart(false);
       }
     });
 
@@ -226,7 +229,7 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
     usrChart.setHeight(175);
     usrChart.setAlign(Alignment.CENTER);
     usrChart.setAlign(VerticalAlignment.TOP);
-    usrChart.setShowEdges(true);
+    usrChart.setShowEdges(Boolean.TRUE);
     usrChart.setEdgeSize(1);
     usrChart.addMember(columnForm);
     usrChart.addMember(chartUser);
@@ -248,7 +251,7 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
     vlHeader.addMember(hlHeader2);
 
     headerSection = new SectionStackSection(Application.messages.userDetailsWidget_userDetailsSection_title());
-    headerSection.setExpanded(true);
+    headerSection.setExpanded(Boolean.TRUE);
     headerSection.addItem(vlHeader);
 
     // Liste
@@ -264,7 +267,7 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
 
           IButton buttonDelete = new IButton();
           buttonDelete.setDisabled(true);
-          buttonDelete.setAutoFit(true);
+          buttonDelete.setAutoFit(Boolean.TRUE);
           buttonDelete.setHeight(20);
           buttonDelete.setIconSize(13);
           buttonDelete.setIcon("remove.png");
@@ -278,7 +281,7 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
         } else if (fieldName.equals("editField")) {
 
           IButton buttonEdit = new IButton();
-          buttonEdit.setAutoFit(true);
+          buttonEdit.setAutoFit(Boolean.TRUE);
           buttonEdit.setHeight(20);
           buttonEdit.setIconSize(13);
           buttonEdit.setIcon("pencil.png");
@@ -298,9 +301,9 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
     };
 
     subscriptionList.setRecordComponentPoolingMode("viewport");
-    subscriptionList.setAlternateRecordStyles(true);
-    subscriptionList.setShowRecordComponents(true);
-    subscriptionList.setShowRecordComponentsByCell(true);
+    subscriptionList.setAlternateRecordStyles(Boolean.TRUE);
+    subscriptionList.setShowRecordComponents(Boolean.TRUE);
+    subscriptionList.setShowRecordComponentsByCell(Boolean.TRUE);
     ListGridField nameFieldL = new ListGridField(SubscriptionListRecord.ATTRIBUTE_NAME,
         Application.messages.subscriptionWidget_nameFieldL_title());
     ListGridField activeFieldL = new ListGridField(SubscriptionListRecord.ATTRIBUTE_ACTIVE,
@@ -329,7 +332,7 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
       public void onRecordClick(RecordClickEvent event) {
         subDetailLeft.setData(new Record[] { event.getRecord() });
         subDetailRight.setData(new Record[] { event.getRecord() });
-        redrawChart(true);
+        redrawChart();
       }
     });
 
@@ -373,7 +376,7 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
         selectorFieldDSub, subRequestIdFieldDSub);
 
     chartSubWidth = (com.google.gwt.user.client.Window.getClientWidth() / 2) - 35;
-    chartSub = new AnnotatedTimeLine(createSubTable(), createOptions(true), "" + chartSubWidth, "170");
+    chartSub = new AnnotatedTimeLine(createSubTable(), createOptions(), "" + chartSubWidth, "170");
 
     subChart = new VLayout();
     subChart.setMargin(2);
@@ -382,7 +385,7 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
     subChart.setHeight(175);
     subChart.setAlign(Alignment.CENTER);
     subChart.setAlign(VerticalAlignment.TOP);
-    subChart.setShowEdges(true);
+    subChart.setShowEdges(Boolean.TRUE);
     subChart.setEdgeSize(1);
     subChart.addMember(chartSub);
 
@@ -395,20 +398,20 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
 
     // Section stack of the queue list
     listSection = new SectionStackSection(Application.messages.userDetailsWidget_subscriptionsSection_title());
-    listSection.setExpanded(true);
+    listSection.setExpanded(Boolean.TRUE);
     listSection.addItem(subscriptionList);
 
     // Section stack of the view (details & buttons)
     detailSection = new SectionStackSection(
         Application.messages.userDetailsWidget_subscriptionDetailsSection_title());
-    detailSection.setExpanded(true);
+    detailSection.setExpanded(Boolean.TRUE);
     detailSection.addItem(hlDetail);
-    detailSection.setCanReorder(true);
+    detailSection.setCanReorder(Boolean.TRUE);
 
     mainStack.addSection(headerSection);
     mainStack.addSection(listSection);
     mainStack.addSection(detailSection);
-    mainStack.setCanResizeSections(true);
+    mainStack.setCanResizeSections(Boolean.TRUE);
 
     presenter.initList();
 
@@ -482,50 +485,39 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
       refreshButton.enable();
   }
 
-  private Options createOptions(boolean reuseChart) {
-    Options options = Options.create();
-    options.setDisplayAnnotations(false);
-    options.setDisplayAnnotationsFilter(false);
-    options.setDisplayZoomButtons(true);
-    options.setDisplayRangeSelector(false);
-    options.setAllowRedraw(reuseChart);
-    options.setDateFormat("dd MMM HH:mm:ss");
-    options.setFill(5);
-    options.setLegendPosition(AnnotatedLegendPosition.NEW_ROW);
-    options.setWindowMode(WindowMode.TRANSPARENT);
+  private Options createOptions() {
+    if (chartOptions != null) {
+      return chartOptions;
+    }
+    chartOptions = Options.create();
+    chartOptions.setDisplayAnnotations(false);
+    chartOptions.setDisplayAnnotationsFilter(false);
+    chartOptions.setDisplayZoomButtons(true);
+    chartOptions.setDisplayRangeSelector(false);
+    chartOptions.setAllowRedraw(true);
+    chartOptions.setDateFormat("dd MMM HH:mm:ss");
+    chartOptions.setFill(5);
+    chartOptions.setLegendPosition(AnnotatedLegendPosition.NEW_ROW);
+    chartOptions.setWindowMode(WindowMode.TRANSPARENT);
 
-    return options;
+    return chartOptions;
   }
 
   private AbstractDataTable createUserTable() {
     DataTable data = DataTable.create();
 
     data.addColumn(ColumnType.DATETIME, Application.messages.common_time());
-    if (showSentDMQ)
-      data.addColumn(ColumnType.NUMBER, Application.messages.common_sentDMQ());
-    if (showSubCount)
-      data.addColumn(ColumnType.NUMBER, Application.messages.common_subscription());
+    data.addColumn(ColumnType.NUMBER, Application.messages.common_sentDMQ());
+    data.addColumn(ColumnType.NUMBER, Application.messages.common_subscription());
 
-    SortedMap<Date, int[]> history = presenter.getUserHistory();
+    List<HistoryData> history = presenter.getUserHistory();
     if (history != null) {
       data.addRows(history.size());
-
-      int i = 0;
-      for (Date d : history.keySet()) {
-        if (d != null) {
-          int j = 1;
-          data.setValue(i, 0, d);
-          if (showSentDMQ) {
-            data.setValue(i, j, history.get(d)[0]);
-            j++;
-          }
-          if (showSubCount) {
-            data.setValue(i, j, history.get(d)[1]);
-            j++;
-          }
-          i++;
-          j = 1;
-        }
+      for (int i = 0; i < history.size(); i++) {
+        HistoryData hdata = history.get(i);
+        data.setValue(i, 0, hdata.time);
+        data.setValue(i, 1, hdata.data[0]);
+        data.setValue(i, 2, hdata.data[1]);
       }
     }
     return data;
@@ -540,19 +532,16 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
 
     Record selectedRecord = subscriptionList.getSelectedRecord();
     if (selectedRecord != null) {
-      SortedMap<Date, int[]> history = presenter.getSubHistory(selectedRecord
+      List<HistoryData> history = presenter.getSubHistory(selectedRecord
           .getAttributeAsString(SubscriptionListRecord.ATTRIBUTE_NAME));
       if (history != null) {
-
         data.addRows(history.size());
-
-        int i = 0;
-        for (Date d : history.keySet()) {
-          data.setValue(i, 0, d);
-          data.setValue(i, 1, history.get(d)[0]);
-          data.setValue(i, 2, history.get(d)[1]);
-          data.setValue(i, 3, history.get(d)[2]);
-          i++;
+        for (int i = 0; i < history.size(); i++) {
+          HistoryData hdata = history.get(i);
+          data.setValue(i, 0, hdata.time);
+          data.setValue(i, 1, hdata.data[0]);
+          data.setValue(i, 2, hdata.data[1]);
+          data.setValue(i, 3, hdata.data[2]);
         }
       }
     }
@@ -560,10 +549,10 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
     return data;
   }
 
-  public void redrawChart(boolean reuseChart) {
+  public void redrawChart() {
     if (redrawChart) {
-      chartUser.draw(createUserTable(), createOptions(reuseChart));
-      chartSub.draw(createSubTable(), createOptions(reuseChart));
+      chartUser.draw(createUserTable(), createOptions());
+      chartSub.draw(createSubTable(), createOptions());
     }
   }
 
@@ -592,9 +581,9 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
     else
       winModal.setTitle("Subscription \"" + slr.getAttributeAsString(SubscriptionListRecord.ATTRIBUTE_NAME)
           + "\"");
-    winModal.setShowMinimizeButton(false);
-    winModal.setIsModal(true);
-    winModal.setShowModalMask(true);
+    winModal.setShowMinimizeButton(Boolean.FALSE);
+    winModal.setIsModal(Boolean.TRUE);
+    winModal.setShowModalMask(Boolean.TRUE);
     winModal.centerInPage();
     winModal.addCloseClickHandler(new CloseClickHandler() {
       public void onCloseClick(CloseClientEvent event) {
@@ -628,12 +617,12 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
     TextItem nameItem = new TextItem();
     nameItem.setTitle(Application.messages.subscriptionWidget_nameItem_title());
     nameItem.setName("nameItem");
-    nameItem.setRequired(true);
+    nameItem.setRequired(Boolean.TRUE);
 
     TextItem nbMaxMsgItem = new TextItem();
     nbMaxMsgItem.setTitle(Application.messages.subscriptionWidget_nbMaxMsgsItem_title());
     nbMaxMsgItem.setName("nbMaxMsgItem");
-    nbMaxMsgItem.setRequired(true);
+    nbMaxMsgItem.setRequired(Boolean.TRUE);
     nbMaxMsgItem.setValidators(integerValidator);
 
     TextItem contextIdItem = new TextItem();
@@ -665,7 +654,7 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
 
     if (slr != null) {
       nameItem.setValue(slr.getAttributeAsString(SubscriptionListRecord.ATTRIBUTE_NAME));
-      nameItem.setDisabled(true);
+      nameItem.setDisabled(Boolean.TRUE);
       nbMaxMsgItem.setValue(slr.getAttributeAsString(SubscriptionListRecord.ATTRIBUTE_NBMAXMSG));
       contextIdItem.setValue(slr.getAttributeAsString(SubscriptionListRecord.ATTRIBUTE_CONTEXTID));
       selectorItem.setValue(slr.getAttributeAsString(SubscriptionListRecord.ATTRIBUTE_SELECTOR));
@@ -687,14 +676,14 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
       validateButton.setIcon("accept.png");
       validateButton.addClickHandler(new SubscriptionEditClickHandler(presenter, form));
     }
-    validateButton.setAutoFit(true);
+    validateButton.setAutoFit(Boolean.TRUE);
     validateButton.setLayoutAlign(VerticalAlignment.TOP);
     validateButton.setLayoutAlign(Alignment.CENTER);
 
     IButton cancelButton = new IButton();
     cancelButton.setTitle(Application.messages.subscriptionWidget_cancelButton_title());
     cancelButton.setIcon("cancel.png");
-    cancelButton.setAutoFit(true);
+    cancelButton.setAutoFit(Boolean.TRUE);
     cancelButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
