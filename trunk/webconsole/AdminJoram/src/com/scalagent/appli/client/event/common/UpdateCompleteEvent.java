@@ -31,10 +31,29 @@ public class UpdateCompleteEvent extends GwtEvent<UpdateCompleteHandler> {
 
   public static Type<UpdateCompleteHandler> TYPE = new Type<UpdateCompleteHandler>();
 
-  String info;
+  public static final int GENERIC_UPDATE = 0;
 
-  public UpdateCompleteEvent(String info) {
+  public static final int USER_UPDATE = 1;
+
+  public static final int TOPIC_UPDATE = 2;
+
+  public static final int QUEUE_UPDATE = 3;
+
+  public static final int SERVER_INFO_UPDATE = 4;
+
+  public static final int SUBSCRIPTION_UPDATE = 5;
+
+  private String info;
+
+  private int updateType = GENERIC_UPDATE;
+
+  public UpdateCompleteEvent(int updateType) {
+    this.updateType = updateType;
+  }
+
+  public UpdateCompleteEvent(int updateType, String info) {
     this.info = info;
+    this.updateType = updateType;
   }
 
   @Override
@@ -44,7 +63,7 @@ public class UpdateCompleteEvent extends GwtEvent<UpdateCompleteHandler> {
 
   @Override
   public void dispatch(UpdateCompleteHandler handler) {
-    handler.onUpdateComplete(info);
+    handler.onUpdateComplete(updateType, info);
   }
 
 }
