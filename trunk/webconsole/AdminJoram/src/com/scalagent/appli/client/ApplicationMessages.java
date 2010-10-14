@@ -111,11 +111,11 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
   String topicWidget_nbMsgsReceivesSinceCreationFieldL_title();
 
   /**
-   * Translated "Msgs Sent".
+   * Translated "Msgs Sent to DMQ".
    * 
-   * @return translated "Msgs Sent"
+   * @return translated "Msgs Sent to DMQ"
    */
-  @DefaultMessage("Msgs Sent")
+  @DefaultMessage("Msgs Sent to DMQ")
   @Key("topicWidget.nbMsgsSentSinceCreationFieldL.title")
   String topicWidget_nbMsgsSentSinceCreationFieldL_title();
 
@@ -219,11 +219,11 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
   String topicWidget_nbMsgsReceivesSinceCreationFieldD_title();
 
   /**
-   * Translated "Msgs Sent".
+   * Translated "Msgs Sent to DMQ".
    * 
-   * @return translated "Msgs Sent"
+   * @return translated "Msgs Sent to DMQ"
    */
-  @DefaultMessage("Msgs Sent")
+  @DefaultMessage("Msgs Sent to DMQ")
   @Key("topicWidget.nbMsgsSentSinceCreationFieldD.title")
   String topicWidget_nbMsgsSentSinceCreationFieldD_title();
 
@@ -725,11 +725,11 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
   String queueWidget_nbMsgsReceiveSinceCreationFieldD_title();
 
   /**
-   * Translated "Msgs Sent".
+   * Translated "Msgs Sent to DMQ".
    * 
-   * @return translated "Msgs Sent"
+   * @return translated "Msgs Sent to DMQ"
    */
-  @DefaultMessage("Msgs Sent")
+  @DefaultMessage("Msgs Sent to DMQ")
   @Key("queueWidget.nbMsgsSentToDMQSinceCreationFieldD.title")
   String queueWidget_nbMsgsSentToDMQSinceCreationFieldD_title();
 
@@ -851,11 +851,11 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
   String queueWidget_nbMsgsRecieveSinceCreationFieldL_summary();
 
   /**
-   * Translated "Msgs Sent".
+   * Translated "Msgs Sent to DMQ".
    * 
-   * @return translated "Msgs Sent"
+   * @return translated "Msgs Sent to DMQ"
    */
-  @DefaultMessage("Msgs Sent")
+  @DefaultMessage("Msgs Sent to DMQ")
   @Key("queueWidget.nbMsgsSentToDMQSinceCreationFieldL.title")
   String queueWidget_nbMsgsSentToDMQSinceCreationFieldL_title();
 
@@ -1561,11 +1561,11 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
   String userWidget_periodFieldL_title();
 
   /**
-   * Translated "Msgs Sent".
+   * Translated "Msgs Sent to DMQ".
    * 
-   * @return translated "Msgs Sent"
+   * @return translated "Msgs Sent to DMQ"
    */
-  @DefaultMessage("Msgs Sent")
+  @DefaultMessage("Msgs Sent to DMQ")
   @Key("userWidget.msgsSentField.title")
   String userWidget_msgsSentFieldL_title();
 
@@ -1781,11 +1781,11 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
   String subscriptionWidget_msgsDeliveredFieldL_title();
 
   /**
-   * Translated "Msgs Sent".
+   * Translated "Msgs Sent to DMQ".
    * 
-   * @return translated "Msgs Sent"
+   * @return translated "Msgs Sent to DMQ"
    */
-  @DefaultMessage("Msgs Sent")
+  @DefaultMessage("Msgs Sent to DMQ")
   @Key("subscriptionWidget.msgsSentFieldL.title")
   String subscriptionWidget_msgsSentFieldL_title();
 
@@ -1844,11 +1844,11 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
   String subscriptionWidget_msgsDeliveredFieldD_title();
 
   /**
-   * Translated "Msgs Sent".
+   * Translated "Msgs Sent to DMQ".
    * 
-   * @return translated "Msgs Sent"
+   * @return translated "Msgs Sent to DMQ"
    */
-  @DefaultMessage("Msgs Sent")
+  @DefaultMessage("Msgs Sent to DMQ")
   @Key("subscriptionWidget.msgsSentFieldD.title")
   String subscriptionWidget_msgsSentFieldD_title();
 
