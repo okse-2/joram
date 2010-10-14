@@ -22,19 +22,20 @@
  */
 package com.scalagent.appli.client.widget;
 
-import java.util.Date;
-import java.util.SortedMap;
+import java.util.List;
 import java.util.Vector;
 
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.visualization.client.AbstractDataTable;
-import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.AbstractDataTable.ColumnType;
+import com.google.gwt.visualization.client.DataTable;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.AnnotatedLegendPosition;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.Options;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine.WindowMode;
 import com.scalagent.appli.client.Application;
+import com.scalagent.appli.client.RPCServiceCacheClient.FloatHistoryData;
+import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.presenter.ServerPresenter;
 import com.scalagent.engine.client.widget.BaseWidget;
 import com.smartgwt.client.widgets.IButton;
@@ -89,6 +90,8 @@ public class ServerWidget extends BaseWidget<ServerPresenter> {
   Vector<CheckboxItem> vShowNetworkBox = new Vector<CheckboxItem>();
   AnnotatedTimeLine serverChart;
 
+  Options chartOptions;
+
   public ServerWidget(ServerPresenter serverPresenter) {
     super(serverPresenter);
   }
@@ -101,7 +104,7 @@ public class ServerWidget extends BaseWidget<ServerPresenter> {
     int pageWidth = com.google.gwt.user.client.Window.getClientWidth();
     refreshButton = new IButton();
     refreshButton.setMargin(0);
-    refreshButton.setAutoFit(true);
+    refreshButton.setAutoFit(Boolean.TRUE);
     refreshButton.setIcon("refresh.gif");
     refreshButton.setTitle(Application.messages.queueWidget_buttonRefresh_title());
     refreshButton.setPrompt(Application.messages.queueWidget_buttonRefresh_prompt());
@@ -109,14 +112,14 @@ public class ServerWidget extends BaseWidget<ServerPresenter> {
       @Override
       public void onClick(ClickEvent event) {
         presenter.refreshAll();
-        redrawChart(true, true);
+        redrawChart();
       }
     });
 
     countLabel = new Label(Application.messages.serverWidget_count());
     countLabel.setHeight(20);
     countLabel.setStyleName("title1");
-    countChart = new AnnotatedTimeLine(createTableCount(), createOptions(true),
+    countChart = new AnnotatedTimeLine(createTableCount(), createOptions(),
         Integer.toString(pageWidth - 150), "200");
 
     countForm = new DynamicForm();
@@ -127,11 +130,13 @@ public class ServerWidget extends BaseWidget<ServerPresenter> {
     showQueueBox.setValue(true);
     showQueueBox.addChangedHandler(new ChangedHandler() {
       public void onChanged(ChangedEvent event) {
-
-        showQueue = showQueueBox.getValueAsBoolean();
+        showQueue = showQueueBox.getValueAsBoolean().booleanValue();
+        if (showQueue) {
+          countChart.showDataColumns(0);
+        } else {
+          countChart.hideDataColumns(0);
+        }
         enableDisableCheckboxCount();
-        redrawChart(false, true);
-        redrawChart(true, true);
       }
     });
 
@@ -140,10 +145,13 @@ public class ServerWidget extends BaseWidget<ServerPresenter> {
     showTopicBox.setValue(true);
     showTopicBox.addChangedHandler(new ChangedHandler() {
       public void onChanged(ChangedEvent event) {
-        showTopic = showTopicBox.getValueAsBoolean();
+        showTopic = showTopicBox.getValueAsBoolean().booleanValue();
+        if (showTopic) {
+          countChart.showDataColumns(1);
+        } else {
+          countChart.hideDataColumns(1);
+        }
         enableDisableCheckboxCount();
-        redrawChart(false, true);
-        redrawChart(true, true);
       }
     });
 
@@ -152,10 +160,13 @@ public class ServerWidget extends BaseWidget<ServerPresenter> {
     showUserBox.setValue(true);
     showUserBox.addChangedHandler(new ChangedHandler() {
       public void onChanged(ChangedEvent event) {
-        showUser = showUserBox.getValueAsBoolean();
+        showUser = showUserBox.getValueAsBoolean().booleanValue();
+        if (showUser) {
+          countChart.showDataColumns(2);
+        } else {
+          countChart.hideDataColumns(2);
+        }
         enableDisableCheckboxCount();
-        redrawChart(false, true);
-        redrawChart(true, true);
       }
     });
 
@@ -164,10 +175,13 @@ public class ServerWidget extends BaseWidget<ServerPresenter> {
     showSubBox.setValue(true);
     showSubBox.addChangedHandler(new ChangedHandler() {
       public void onChanged(ChangedEvent event) {
-        showSub = showSubBox.getValueAsBoolean();
+        showSub = showSubBox.getValueAsBoolean().booleanValue();
+        if (showSub) {
+          countChart.showDataColumns(3);
+        } else {
+          countChart.hideDataColumns(3);
+        }
         enableDisableCheckboxCount();
-        redrawChart(false, true);
-        redrawChart(true, true);
       }
     });
 
@@ -181,7 +195,7 @@ public class ServerWidget extends BaseWidget<ServerPresenter> {
     serverLabel = new Label(Application.messages.serverWidget_engine());
     serverLabel.setHeight(20);
     serverLabel.setStyleName("title1");
-    serverChart = new AnnotatedTimeLine(createTableServer(), createOptions(true),
+    serverChart = new AnnotatedTimeLine(createTableServer(), createOptions(),
         Integer.toString(pageWidth - 150), "200");
 
     serverForm = new DynamicForm();
@@ -194,8 +208,7 @@ public class ServerWidget extends BaseWidget<ServerPresenter> {
       public void onChanged(ChangedEvent event) {
         showEngine = showEngineBox.getValueAsBoolean();
         enableDisableCheckboxEngine();
-        redrawChart(true, false);
-        redrawChart(true, true);
+        redrawChart();
       }
     });
 
@@ -209,8 +222,7 @@ public class ServerWidget extends BaseWidget<ServerPresenter> {
         public void onChanged(ChangedEvent event) {
           vShowNetwork.set(fit, check.getValueAsBoolean());
           enableDisableCheckboxEngine();
-          redrawChart(true, false);
-          redrawChart(true, true);
+          redrawChart();
         }
       });
       vShowNetworkBox.setElementAt(check, it);
@@ -253,10 +265,10 @@ public class ServerWidget extends BaseWidget<ServerPresenter> {
     return vl;
   }
 
-  public void redrawChart(boolean reuseCount, boolean reuseServer) {
+  public void redrawChart() {
     if (redrawChart && isInit) {
-      countChart.draw(createTableCount(), createOptions(reuseCount));
-      serverChart.draw(createTableServer(), createOptions(reuseServer));
+      countChart.draw(createTableCount(), createOptions());
+      serverChart.draw(createTableServer(), createOptions());
     }
   }
 
@@ -288,7 +300,7 @@ public class ServerWidget extends BaseWidget<ServerPresenter> {
       if (showEngine)
         showEngineBox.disable();
       else
-        vShowNetworkBox.get(vShowNetwork.indexOf(true)).disable();
+        vShowNetworkBox.get(vShowNetwork.indexOf(Boolean.TRUE)).disable();
     } else {
       showEngineBox.enable();
       for (CheckboxItem check : vShowNetworkBox)
@@ -296,65 +308,43 @@ public class ServerWidget extends BaseWidget<ServerPresenter> {
     }
   }
 
-  private Options createOptions(boolean reuseChart) {
-    Options options = Options.create();
-    options.setDisplayAnnotations(false);
-    options.setDisplayAnnotationsFilter(false);
-    options.setDisplayZoomButtons(true);
-    options.setDisplayRangeSelector(false);
-    options.setAllowRedraw(reuseChart);
-    options.setDateFormat("dd MMM HH:mm:ss");
-    options.setFill(5);
-    options.setLegendPosition(AnnotatedLegendPosition.NEW_ROW);
-    options.setWindowMode(WindowMode.TRANSPARENT);
+  private Options createOptions() {
+    if (chartOptions != null) {
+      return chartOptions;
+    }
+    chartOptions = Options.create();
+    chartOptions.setDisplayAnnotations(false);
+    chartOptions.setDisplayAnnotationsFilter(false);
+    chartOptions.setDisplayZoomButtons(true);
+    chartOptions.setDisplayRangeSelector(false);
+    chartOptions.setAllowRedraw(true);
+    chartOptions.setDateFormat("dd MMM HH:mm:ss");
+    chartOptions.setFill(5);
+    chartOptions.setLegendPosition(AnnotatedLegendPosition.NEW_ROW);
+    chartOptions.setWindowMode(WindowMode.TRANSPARENT);
 
-    return options;
+    return chartOptions;
   }
 
   private AbstractDataTable createTableCount() {
     DataTable data = DataTable.create();
 
     data.addColumn(ColumnType.DATETIME, Application.messages.common_time());
-    if (showQueue)
-      data.addColumn(ColumnType.NUMBER, Application.messages.serverWidget_queues());
-    if (showTopic)
-      data.addColumn(ColumnType.NUMBER, Application.messages.serverWidget_topics());
-    if (showUser)
-      data.addColumn(ColumnType.NUMBER, Application.messages.serverWidget_users());
-    if (showSub)
-      data.addColumn(ColumnType.NUMBER, Application.messages.serverWidget_subscriptions());
+    data.addColumn(ColumnType.NUMBER, Application.messages.serverWidget_queues());
+    data.addColumn(ColumnType.NUMBER, Application.messages.serverWidget_topics());
+    data.addColumn(ColumnType.NUMBER, Application.messages.serverWidget_users());
+    data.addColumn(ColumnType.NUMBER, Application.messages.serverWidget_subscriptions());
 
-    SortedMap<Date, Integer> queuesHistory = presenter.getQueuesHistory();
-    SortedMap<Date, Integer> topicsHistory = presenter.getTopicsHistory();
-    SortedMap<Date, Integer> usersHistory = presenter.getUsersHistory();
-    SortedMap<Date, Integer> subsHistory = presenter.getSubsHistory();
+    List<HistoryData> history = presenter.getCountHistory();
 
-    data.addRows(queuesHistory.size());
-
-    int i = 0;
-    for (Date d : queuesHistory.keySet()) {
-      if (d != null) {
-        int j = 1;
-        data.setValue(i, 0, d);
-        if (showQueue) {
-          data.setValue(i, j, queuesHistory.get(d));
-          j++;
-        }
-        if (showTopic) {
-          data.setValue(i, j, topicsHistory.get(d));
-          j++;
-        }
-        if (showUser) {
-          data.setValue(i, j, usersHistory.get(d));
-          j++;
-        }
-        if (showSub) {
-          data.setValue(i, j, subsHistory.get(d));
-          j++;
-        }
-        i++;
-        j = 1;
-      }
+    data.addRows(history.size());
+    for (int i = 0; i < history.size(); i++) {
+      HistoryData hdata = history.get(i);
+      data.setValue(i, 0, hdata.time);
+      data.setValue(i, 1, hdata.data[0]);
+      data.setValue(i, 2, hdata.data[1]);
+      data.setValue(i, 3, hdata.data[2]);
+      data.setValue(i, 4, hdata.data[3]);
     }
     return data;
   }
@@ -371,32 +361,29 @@ public class ServerWidget extends BaseWidget<ServerPresenter> {
       if (vShowNetwork.get(it))
         data.addColumn(ColumnType.NUMBER, "Network " + it);
     }
-    SortedMap<Date, float[]> engineHistory = presenter.getServerHistory();
+    List<FloatHistoryData> engineHistory = presenter.getServerHistory();
 
     data.addRows(engineHistory.size());
 
-    int i = 0;
-    for (Date d : engineHistory.keySet()) {
-      if (d != null) {
-        int j = 1;
-        data.setValue(i, 0, d);
-        if (showEngine) {
-          data.setValue(i, j, engineHistory.get(d)[0]);
+    for (int i = 0; i < engineHistory.size(); i++) {
+      FloatHistoryData hdata = engineHistory.get(i);
+      int j = 1;
+      data.setValue(i, 0, hdata.time);
+      if (showEngine) {
+        data.setValue(i, j, hdata.data[0]);
+        j++;
+      }
+      int k = 1;
+      for (boolean showNet : vShowNetwork) {
+        if (showNet) {
+          data.setValue(i, j, hdata.data[k]);
           j++;
         }
-        int k = 1;
-        for (boolean showNet : vShowNetwork) {
-          if (showNet) {
-            data.setValue(i, j, engineHistory.get(d)[k]);
-            j++;
-          }
-          k++;
-        }
-        i++;
-        j = 1;
+        k++;
       }
+      i++;
+      j = 1;
     }
-
     return data;
   }
 
@@ -404,7 +391,7 @@ public class ServerWidget extends BaseWidget<ServerPresenter> {
     if (!isInit && size != 0) {
 
       for (int i = 0; i < size - 1; i++) {
-        vShowNetwork.add(true);
+        vShowNetwork.add(Boolean.TRUE);
         vShowNetworkBox.add(new CheckboxItem());
       }
 
@@ -420,8 +407,7 @@ public class ServerWidget extends BaseWidget<ServerPresenter> {
         public void onChanged(ChangedEvent event) {
           showEngine = showEngineBox.getValueAsBoolean();
           enableDisableCheckboxEngine();
-          redrawChart(true, false);
-          redrawChart(true, true);
+          redrawChart();
         }
       });
 
@@ -435,8 +421,7 @@ public class ServerWidget extends BaseWidget<ServerPresenter> {
           public void onChanged(ChangedEvent event) {
             vShowNetwork.set(fit, check.getValueAsBoolean());
             enableDisableCheckboxEngine();
-            redrawChart(true, false);
-            redrawChart(true, true);
+            redrawChart();
           }
         });
         vShowNetworkBox.setElementAt(check, it);
