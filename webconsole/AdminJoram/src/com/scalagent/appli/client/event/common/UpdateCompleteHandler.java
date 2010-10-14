@@ -29,6 +29,6 @@ import com.google.gwt.event.shared.EventHandler;
  */
 public interface UpdateCompleteHandler extends EventHandler {
 
-  public void onUpdateComplete(String info);
+  public void onUpdateComplete(int updateType, String info);
 
 }
