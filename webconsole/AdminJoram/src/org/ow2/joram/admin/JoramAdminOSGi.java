@@ -259,8 +259,8 @@ public class JoramAdminOSGi implements JoramAdmin, ServiceTrackerCustomizer {
     if (engine != null) {
       infos[0] = engine.getAverageLoad1();
     }
-    for (int i = 1; i < infos.length; i++) {
-      infos[i] = networks.get(i).getAverageLoad1();
+    for (int i = 0; i < networks.size(); i++) {
+      infos[i + 1] = networks.get(i).getAverageLoad1();
     }
     return infos;
   }
