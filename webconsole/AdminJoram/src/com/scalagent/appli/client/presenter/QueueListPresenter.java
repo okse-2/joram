@@ -22,13 +22,12 @@
  */
 package com.scalagent.appli.client.presenter;
 
-import java.util.Date;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.List;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.scalagent.appli.client.RPCServiceAsync;
 import com.scalagent.appli.client.RPCServiceCacheClient;
+import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.command.queue.ClearPendingMessageAction;
 import com.scalagent.appli.client.command.queue.ClearPendingMessageHandler;
 import com.scalagent.appli.client.command.queue.ClearPendingMessageResponse;
@@ -44,6 +43,7 @@ import com.scalagent.appli.client.command.queue.SendEditedQueueResponse;
 import com.scalagent.appli.client.command.queue.SendNewQueueAction;
 import com.scalagent.appli.client.command.queue.SendNewQueueHandler;
 import com.scalagent.appli.client.command.queue.SendNewQueueResponse;
+import com.scalagent.appli.client.event.common.UpdateCompleteEvent;
 import com.scalagent.appli.client.event.common.UpdateCompleteHandler;
 import com.scalagent.appli.client.event.queue.DeletedQueueHandler;
 import com.scalagent.appli.client.event.queue.NewQueueHandler;
@@ -64,7 +64,6 @@ import com.smartgwt.client.util.SC;
 public class QueueListPresenter extends
     BasePresenter<QueueListWidget, RPCServiceAsync, RPCServiceCacheClient> implements NewQueueHandler,
     DeletedQueueHandler, UpdatedQueueHandler, UpdateCompleteHandler {
-  SortedMap<Date, Integer> chartHistory = new TreeMap<Date, Integer>();
 
   public QueueListPresenter(RPCServiceAsync testService, HandlerManager eventBus, RPCServiceCacheClient cache) {
 
@@ -164,8 +163,8 @@ public class QueueListPresenter extends
    * This method is called by the EventBus when the update is done.
    * The refresh button is re-enabled and the chart redrawn
    */
-  public void onUpdateComplete(String info) {
-    if (info.equals("queue")) {
+  public void onUpdateComplete(int updateType, String info) {
+    if (updateType == UpdateCompleteEvent.QUEUE_UPDATE) {
       widget.getRefreshButton().enable();
       widget.redrawChart(true);
     }
@@ -176,7 +175,7 @@ public class QueueListPresenter extends
    * 
    * @result A map containing the history of the current queue
    */
-  public SortedMap<Date, int[]> getQueueHistory(String name) {
+  public List<HistoryData> getQueueHistory(String name) {
     return cache.getSpecificHistory(name);
   }
 

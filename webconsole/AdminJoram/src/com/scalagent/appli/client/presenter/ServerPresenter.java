@@ -22,13 +22,15 @@
  */
 package com.scalagent.appli.client.presenter;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.SortedMap;
+import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.scalagent.appli.client.RPCServiceAsync;
 import com.scalagent.appli.client.RPCServiceCacheClient;
+import com.scalagent.appli.client.RPCServiceCacheClient.FloatHistoryData;
+import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
+import com.scalagent.appli.client.event.common.UpdateCompleteEvent;
 import com.scalagent.appli.client.event.common.UpdateCompleteHandler;
 import com.scalagent.appli.client.widget.ServerWidget;
 import com.scalagent.appli.shared.QueueWTO;
@@ -56,35 +58,8 @@ public class ServerPresenter extends BasePresenter<ServerWidget, RPCServiceAsync
    * 
    * @result A map containing the history of the number of queues.
    */
-  public SortedMap<Date, Integer> getQueuesHistory() {
-    return cache.getQueuesHistory();
-  }
-
-  /**
-   * This method is called by the ServerWidget when the updating the chart.
-   * 
-   * @result A map containing the history of the number of topics.
-   */
-  public SortedMap<Date, Integer> getTopicsHistory() {
-    return cache.getTopicsHistory();
-  }
-
-  /**
-   * This method is called by the ServerWidget when the updating the chart.
-   * 
-   * @result A map containing the history of the number of users.
-   */
-  public SortedMap<Date, Integer> getUsersHistory() {
-    return cache.getUsersHistory();
-  }
-
-  /**
-   * This method is called by the ServerWidget when the updating the chart.
-   * 
-   * @result A map containing the history of the number of subscriptions.
-   */
-  public SortedMap<Date, Integer> getSubsHistory() {
-    return cache.getSubsHistory();
+  public List<HistoryData> getCountHistory() {
+    return cache.getCountHistory();
   }
 
   /**
@@ -93,7 +68,7 @@ public class ServerPresenter extends BasePresenter<ServerWidget, RPCServiceAsync
    * @result A map containing the history of the average load of the engine and
    *         the networks.
    */
-  public SortedMap<Date, float[]> getServerHistory() {
+  public List<FloatHistoryData> getServerHistory() {
     return cache.getServerHistory();
   }
 
@@ -101,49 +76,56 @@ public class ServerPresenter extends BasePresenter<ServerWidget, RPCServiceAsync
    * This method is called by the EventBus when the update is done.
    * The histories are updated
    */
-  public void onUpdateComplete(String info) {
-    if (!"server".equals(info)) {
-      return;
-    }
+  public void onUpdateComplete(int updateType, String info) {
 
-    cache.addToHistory(RPCServiceCacheClient.QUEUE, cache.getQueues().size());
-    cache.addToHistory(RPCServiceCacheClient.SUB, cache.getSubscriptions().size());
-    cache.addToHistory(RPCServiceCacheClient.TOPIC, cache.getTopics().size());
-    cache.addToHistory(RPCServiceCacheClient.USER, cache.getUsers().size());
+    if (updateType == UpdateCompleteEvent.SERVER_INFO_UPDATE) {
 
-    HashMap<String, QueueWTO> queues = cache.getQueues();
-    for (String key : queues.keySet()) {
-      QueueWTO queue = queues.get(key);
-      cache.addToSpecificHistory(queue.getId(), (int) queue.getNbMsgsReceiveSinceCreation(),
-          (int) queue.getNbMsgsDeliverSinceCreation(), (int) queue.getNbMsgsSentToDMQSinceCreation(),
-          (int) queue.getPendingMessageCount());
-    }
+      cache.addToCountHistory(cache.getQueues().size(), cache.getTopics().size(), cache.getUsers().size(),
+          cache.getSubscriptions().size());
 
-    HashMap<String, TopicWTO> topics = cache.getTopics();
-    for (String key : topics.keySet()) {
-      TopicWTO topic = topics.get(key);
-      cache.addToSpecificHistory(topic.getId(), (int) topic.getNbMsgsReceiveSinceCreation(),
-          (int) topic.getNbMsgsDeliverSinceCreation(), (int) topic.getNbMsgsSentToDMQSinceCreation());
-    }
+      List<FloatHistoryData> history = cache.getServerHistory();
+      if (history.size() != 0) {
+        widget.initCharts(history.get(0).data.length);
+        widget.redrawChart();
+      }
 
-    HashMap<String, UserWTO> users = cache.getUsers();
-    for (String key : users.keySet()) {
-      UserWTO user = users.get(key);
-      cache.addToSpecificHistory(user.getId(), (int) user.getNbMsgsSentToDMQSinceCreation(),
-          (int) user.getSubscriptionNames().length);
-    }
+    } else if (updateType == UpdateCompleteEvent.QUEUE_UPDATE) {
 
-    HashMap<String, SubscriptionWTO> subs = cache.getSubscriptions();
-    for (String key : subs.keySet()) {
-      SubscriptionWTO sub = subs.get(key);
-      cache.addToSpecificHistory(sub.getId(), (int) sub.getPendingMessageCount(),
-          (int) sub.getNbMsgsDeliveredSinceCreation(), (int) sub.getNbMsgsSentToDMQSinceCreation());
-    }
+      Map<String, QueueWTO> queues = cache.getQueues();
+      for (String key : queues.keySet()) {
+        QueueWTO queue = queues.get(key);
+        cache.addToSpecificHistory(queue.getId(), (int) queue.getNbMsgsReceiveSinceCreation(),
+            (int) queue.getNbMsgsDeliverSinceCreation(), (int) queue.getNbMsgsSentToDMQSinceCreation(),
+            (int) queue.getPendingMessageCount());
+      }
 
-    SortedMap<Date, float[]> h = cache.getServerHistory();
-    if (h.size() != 0) {
-      widget.initCharts(h.get(h.firstKey()).length);
-      widget.redrawChart(true, true);
+    } else if (updateType == UpdateCompleteEvent.TOPIC_UPDATE) {
+
+      Map<String, TopicWTO> topics = cache.getTopics();
+      for (String key : topics.keySet()) {
+        TopicWTO topic = topics.get(key);
+        cache.addToSpecificHistory(topic.getId(), (int) topic.getNbMsgsReceiveSinceCreation(),
+            (int) topic.getNbMsgsDeliverSinceCreation(), (int) topic.getNbMsgsSentToDMQSinceCreation());
+      }
+
+    } else if (updateType == UpdateCompleteEvent.USER_UPDATE) {
+
+      Map<String, UserWTO> users = cache.getUsers();
+      for (String key : users.keySet()) {
+        UserWTO user = users.get(key);
+        cache.addToSpecificHistory(user.getId(), (int) user.getNbMsgsSentToDMQSinceCreation(),
+            (int) user.getSubscriptionNames().length);
+      }
+
+    } else if (updateType == UpdateCompleteEvent.SUBSCRIPTION_UPDATE) {
+
+      Map<String, SubscriptionWTO> subs = cache.getSubscriptions();
+      for (String key : subs.keySet()) {
+        SubscriptionWTO sub = subs.get(key);
+        cache.addToSpecificHistory(sub.getId(), (int) sub.getPendingMessageCount(),
+            (int) sub.getNbMsgsDeliveredSinceCreation(), (int) sub.getNbMsgsSentToDMQSinceCreation());
+      }
+
     }
   }
 

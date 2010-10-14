@@ -22,12 +22,12 @@
  */
 package com.scalagent.appli.client.presenter;
 
-import java.util.Date;
-import java.util.SortedMap;
+import java.util.List;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.scalagent.appli.client.RPCServiceAsync;
 import com.scalagent.appli.client.RPCServiceCacheClient;
+import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.command.user.DeleteUserAction;
 import com.scalagent.appli.client.command.user.DeleteUserHandler;
 import com.scalagent.appli.client.command.user.DeleteUserResponse;
@@ -37,6 +37,7 @@ import com.scalagent.appli.client.command.user.SendEditedUserResponse;
 import com.scalagent.appli.client.command.user.SendNewUserAction;
 import com.scalagent.appli.client.command.user.SendNewUserHandler;
 import com.scalagent.appli.client.command.user.SendNewUserResponse;
+import com.scalagent.appli.client.event.common.UpdateCompleteEvent;
 import com.scalagent.appli.client.event.common.UpdateCompleteHandler;
 import com.scalagent.appli.client.event.user.DeletedUserHandler;
 import com.scalagent.appli.client.event.user.NewUserHandler;
@@ -79,8 +80,8 @@ public class UserListPresenter extends BasePresenter<UserListWidget, RPCServiceA
    * This method is called by the EventBus when the update is done.
    * The refresh button is re-enabled and the chart redrawn
    */
-  public void onUpdateComplete(String info) {
-    if (info.equals("user")) {
+  public void onUpdateComplete(int updateType, String info) {
+    if (updateType == UpdateCompleteEvent.USER_UPDATE) {
       widget.getRefreshButton().enable();
       widget.redrawChart(true);
     }
@@ -127,7 +128,7 @@ public class UserListPresenter extends BasePresenter<UserListWidget, RPCServiceA
    * 
    * @result A map containing the history of the current user.
    */
-  public SortedMap<Date, int[]> getUserHistory(String name) {
+  public List<HistoryData> getUserHistory(String name) {
     return cache.getSpecificHistory(name);
   }
 

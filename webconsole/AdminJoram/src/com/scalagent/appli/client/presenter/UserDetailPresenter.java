@@ -23,13 +23,13 @@
 package com.scalagent.appli.client.presenter;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.SortedMap;
+import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.scalagent.appli.client.RPCServiceAsync;
 import com.scalagent.appli.client.RPCServiceCacheClient;
+import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.command.subscription.DeleteSubscriptionAction;
 import com.scalagent.appli.client.command.subscription.DeleteSubscriptionHandler;
 import com.scalagent.appli.client.command.subscription.DeleteSubscriptionResponse;
@@ -39,6 +39,7 @@ import com.scalagent.appli.client.command.subscription.SendEditedSubscriptionRes
 import com.scalagent.appli.client.command.subscription.SendNewSubscriptionAction;
 import com.scalagent.appli.client.command.subscription.SendNewSubscriptionHandler;
 import com.scalagent.appli.client.command.subscription.SendNewSubscriptionResponse;
+import com.scalagent.appli.client.event.common.UpdateCompleteEvent;
 import com.scalagent.appli.client.event.common.UpdateCompleteHandler;
 import com.scalagent.appli.client.event.subscription.DeletedSubscriptionHandler;
 import com.scalagent.appli.client.event.subscription.NewSubscriptionHandler;
@@ -103,7 +104,7 @@ public class UserDetailPresenter extends
     cache.retrieveSubscription(true);
 
     String[] subSUser = user.getSubscriptionNames();
-    HashMap<String, SubscriptionWTO> lstSubsCache = cache.getSubscriptions();
+    Map<String, SubscriptionWTO> lstSubsCache = cache.getSubscriptions();
 
     for (int i = 0; i < subSUser.length; i++) {
       getWidget().updateSubscription(lstSubsCache.get(subSUser[i]));
@@ -150,10 +151,10 @@ public class UserDetailPresenter extends
    * This method is called by the EventBus when the update is done.
    * The refresh button is re-enabled and the chart redrawn
    */
-  public void onUpdateComplete(String info) {
-    if (info.equals("user") || info.equals("sub")) {
+  public void onUpdateComplete(int updateType, String info) {
+    if (updateType == UpdateCompleteEvent.USER_UPDATE) {
       widget.enableRefreshButton();
-      widget.redrawChart(true);
+      widget.redrawChart();
     }
   }
 
@@ -213,7 +214,7 @@ public class UserDetailPresenter extends
    * 
    * @result A map containing the history of the current user
    */
-  public SortedMap<Date, int[]> getUserHistory() {
+  public List<HistoryData> getUserHistory() {
     return cache.getSpecificHistory(user.getId());
   }
 
@@ -222,7 +223,7 @@ public class UserDetailPresenter extends
    * 
    * @result A map containing the history of the specified subscription
    */
-  public SortedMap<Date, int[]> getSubHistory(String sub) {
+  public List<HistoryData> getSubHistory(String sub) {
     return cache.getSpecificHistory(sub);
   }
 

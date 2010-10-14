@@ -22,12 +22,12 @@
  */
 package com.scalagent.appli.client.presenter;
 
-import java.util.Date;
-import java.util.SortedMap;
+import java.util.List;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.scalagent.appli.client.RPCServiceAsync;
 import com.scalagent.appli.client.RPCServiceCacheClient;
+import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.command.topic.DeleteTopicAction;
 import com.scalagent.appli.client.command.topic.DeleteTopicHandler;
 import com.scalagent.appli.client.command.topic.DeleteTopicResponse;
@@ -37,6 +37,7 @@ import com.scalagent.appli.client.command.topic.SendEditedTopicResponse;
 import com.scalagent.appli.client.command.topic.SendNewTopicAction;
 import com.scalagent.appli.client.command.topic.SendNewTopicHandler;
 import com.scalagent.appli.client.command.topic.SendNewTopicResponse;
+import com.scalagent.appli.client.event.common.UpdateCompleteEvent;
 import com.scalagent.appli.client.event.common.UpdateCompleteHandler;
 import com.scalagent.appli.client.event.topic.DeletedTopicHandler;
 import com.scalagent.appli.client.event.topic.NewTopicHandler;
@@ -105,8 +106,8 @@ public class TopicListPresenter extends
    * This method is called by the EventBus when the update is done.
    * The refresh button is re-enabled and the chart redrawn
    */
-  public void onUpdateComplete(String info) {
-    if (info.equals("topic")) {
+  public void onUpdateComplete(int updateType, String info) {
+    if (updateType == UpdateCompleteEvent.TOPIC_UPDATE) {
       widget.getRefreshButton().enable();
       widget.redrawChart(true);
     }
@@ -117,7 +118,7 @@ public class TopicListPresenter extends
    * 
    * @result A map containing the history of the current topic
    */
-  public SortedMap<Date, int[]> getTopicHistory(String name) {
+  public List<HistoryData> getTopicHistory(String name) {
     return cache.getSpecificHistory(name);
   }
 

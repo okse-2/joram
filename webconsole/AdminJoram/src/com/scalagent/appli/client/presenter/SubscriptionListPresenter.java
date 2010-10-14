@@ -22,12 +22,12 @@
  */
 package com.scalagent.appli.client.presenter;
 
-import java.util.Date;
-import java.util.SortedMap;
+import java.util.List;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.scalagent.appli.client.RPCServiceAsync;
 import com.scalagent.appli.client.RPCServiceCacheClient;
+import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.command.subscription.DeleteSubscriptionAction;
 import com.scalagent.appli.client.command.subscription.DeleteSubscriptionHandler;
 import com.scalagent.appli.client.command.subscription.DeleteSubscriptionResponse;
@@ -37,6 +37,7 @@ import com.scalagent.appli.client.command.subscription.SendEditedSubscriptionRes
 import com.scalagent.appli.client.command.subscription.SendNewSubscriptionAction;
 import com.scalagent.appli.client.command.subscription.SendNewSubscriptionHandler;
 import com.scalagent.appli.client.command.subscription.SendNewSubscriptionResponse;
+import com.scalagent.appli.client.event.common.UpdateCompleteEvent;
 import com.scalagent.appli.client.event.common.UpdateCompleteHandler;
 import com.scalagent.appli.client.event.subscription.DeletedSubscriptionHandler;
 import com.scalagent.appli.client.event.subscription.NewSubscriptionHandler;
@@ -80,8 +81,8 @@ public class SubscriptionListPresenter extends
    * The refresh button is re-enabled and the chart redrawn
    */
   @Override
-  public void onUpdateComplete(String info) {
-    if (info.equals("sub")) {
+  public void onUpdateComplete(int updateType, String info) {
+    if (updateType == UpdateCompleteEvent.SUBSCRIPTION_UPDATE) {
       widget.getRefreshButton().enable();
       widget.redrawChart(true);
     }
@@ -120,7 +121,7 @@ public class SubscriptionListPresenter extends
    * 
    * @result A map containing the history of the current subscription
    */
-  public SortedMap<Date, int[]> getSubHistory(String name) {
+  public List<HistoryData> getSubHistory(String name) {
     return cache.getSpecificHistory(name);
   }
 

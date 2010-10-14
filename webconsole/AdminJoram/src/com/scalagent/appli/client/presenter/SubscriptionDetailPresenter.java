@@ -23,15 +23,14 @@
 package com.scalagent.appli.client.presenter;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.event.shared.HandlerManager;
 import com.scalagent.appli.client.RPCServiceAsync;
 import com.scalagent.appli.client.RPCServiceCacheClient;
+import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.command.message.DeleteMessageAction;
 import com.scalagent.appli.client.command.message.DeleteMessageHandler;
 import com.scalagent.appli.client.command.message.DeleteMessageResponse;
@@ -41,6 +40,7 @@ import com.scalagent.appli.client.command.message.SendEditedMessageResponse;
 import com.scalagent.appli.client.command.message.SendNewMessageAction;
 import com.scalagent.appli.client.command.message.SendNewMessageHandler;
 import com.scalagent.appli.client.command.message.SendNewMessageResponse;
+import com.scalagent.appli.client.event.common.UpdateCompleteEvent;
 import com.scalagent.appli.client.event.common.UpdateCompleteHandler;
 import com.scalagent.appli.client.event.message.DeletedMessageHandler;
 import com.scalagent.appli.client.event.message.NewMessageHandler;
@@ -141,10 +141,10 @@ public class SubscriptionDetailPresenter extends
    * This method is called by the EventBus when the update is done.
    * The refresh button is re-enabled and the chart redrawn
    */
-  public void onUpdateComplete(String info) {
-    if (sub.getId().equals(info)) {
+  public void onUpdateComplete(int updateType, String info) {
+    if (updateType == UpdateCompleteEvent.SUBSCRIPTION_UPDATE) {
       widget.getRefreshButton().enable();
-      widget.redrawChart(true);
+      widget.redrawChart();
     }
   }
 
@@ -213,7 +213,7 @@ public class SubscriptionDetailPresenter extends
    * 
    * @result A map containing the history of the number of subscriptions.
    */
-  public SortedMap<Date, int[]> getSubHistory() {
+  public List<HistoryData> getSubHistory() {
     return cache.getSpecificHistory(sub.getId());
   }
 
