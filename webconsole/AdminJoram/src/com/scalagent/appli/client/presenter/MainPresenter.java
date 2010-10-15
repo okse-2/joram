@@ -30,7 +30,6 @@ import java.util.Map;
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.ui.Widget;
-import com.scalagent.appli.client.RPCServiceAsync;
 import com.scalagent.appli.client.RPCServiceCacheClient;
 import com.scalagent.appli.client.event.common.UpdateCompleteEvent;
 import com.scalagent.appli.client.event.message.DeletedMessageEvent;
@@ -52,6 +51,7 @@ import com.scalagent.appli.client.widget.MainWidget;
 import com.scalagent.appli.shared.QueueWTO;
 import com.scalagent.appli.shared.SubscriptionWTO;
 import com.scalagent.appli.shared.UserWTO;
+import com.scalagent.engine.client.BaseRPCServiceAsync;
 import com.scalagent.engine.client.event.SystemErrorHandler;
 import com.scalagent.engine.client.presenter.BasePresenter;
 import com.smartgwt.client.util.SC;
@@ -64,7 +64,7 @@ import com.smartgwt.client.widgets.tab.Tab;
  * 
  * @author Yohann CINTRE
  */
-public class MainPresenter extends BasePresenter<MainWidget, RPCServiceAsync, RPCServiceCacheClient>
+public class MainPresenter extends BasePresenter<MainWidget, BaseRPCServiceAsync, RPCServiceCacheClient>
     implements SystemErrorHandler, QueueDetailClickHandler, UserDetailClickHandler,
     SubscriptionDetailClickHandler, LoginValidHandler {
 
@@ -73,7 +73,7 @@ public class MainPresenter extends BasePresenter<MainWidget, RPCServiceAsync, RP
   private Map<String, UserDetailPresenter> openedUserList = new HashMap<String, UserDetailPresenter>();
   private Map<String, SubscriptionDetailPresenter> openedSubList = new HashMap<String, SubscriptionDetailPresenter>();
 
-  public MainPresenter(RPCServiceAsync testService, RPCServiceCacheClient cache, HandlerManager eventBus,
+  public MainPresenter(BaseRPCServiceAsync testService, RPCServiceCacheClient cache, HandlerManager eventBus,
       LoginPresenter loginPresenter, ServerPresenter serverPresenter, TopicListPresenter topicPresenter,
       QueueListPresenter queuePresenter, UserListPresenter userPresenter,
       SubscriptionListPresenter subscriptionPresenter) {

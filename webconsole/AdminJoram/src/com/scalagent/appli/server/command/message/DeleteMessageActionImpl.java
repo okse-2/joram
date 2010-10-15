@@ -24,18 +24,18 @@ package com.scalagent.appli.server.command.message;
 
 import com.scalagent.appli.client.command.message.DeleteMessageAction;
 import com.scalagent.appli.client.command.message.DeleteMessageResponse;
-import com.scalagent.appli.server.RPCServiceCache;
-import com.scalagent.engine.server.BaseRPCService;
+import com.scalagent.appli.server.RPCServiceImpl;
+import com.scalagent.engine.server.BaseRPCServiceUtils;
 import com.scalagent.engine.server.command.ActionImpl;
 
 /**
  * @author Yohann CINTRE
  */
 public class DeleteMessageActionImpl extends
-    ActionImpl<DeleteMessageResponse, DeleteMessageAction, RPCServiceCache> {
+    ActionImpl<DeleteMessageResponse, DeleteMessageAction, RPCServiceImpl> {
 
   @Override
-  public DeleteMessageResponse execute(RPCServiceCache cache, DeleteMessageAction deleteMessageAction) {
+  public DeleteMessageResponse execute(RPCServiceImpl cache, DeleteMessageAction deleteMessageAction) {
     boolean result = false;
     if (deleteMessageAction.isQueue()) {
       result = cache.deleteQueueMessage(deleteMessageAction.getMessageId(),
@@ -48,7 +48,7 @@ public class DeleteMessageActionImpl extends
     String info = "";
 
     if (!result) {
-      info = BaseRPCService.getString("Error while deleting Message: \""
+      info = BaseRPCServiceUtils.getString("Error while deleting Message: \""
           + deleteMessageAction.getMessageId() + "\" not found.");
     }
 

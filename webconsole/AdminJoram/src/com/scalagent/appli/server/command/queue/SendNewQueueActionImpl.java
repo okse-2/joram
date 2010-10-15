@@ -24,17 +24,17 @@ package com.scalagent.appli.server.command.queue;
 
 import com.scalagent.appli.client.command.queue.SendNewQueueAction;
 import com.scalagent.appli.client.command.queue.SendNewQueueResponse;
-import com.scalagent.appli.server.RPCServiceCache;
+import com.scalagent.appli.server.RPCServiceImpl;
 import com.scalagent.engine.server.command.ActionImpl;
 
 /**
  * @author Yohann CINTRE
  */
 public class SendNewQueueActionImpl extends
-    ActionImpl<SendNewQueueResponse, SendNewQueueAction, RPCServiceCache> {
+    ActionImpl<SendNewQueueResponse, SendNewQueueAction, RPCServiceImpl> {
 
   @Override
-  public SendNewQueueResponse execute(RPCServiceCache cache, SendNewQueueAction sendNewQueueAction) {
+  public SendNewQueueResponse execute(RPCServiceImpl cache, SendNewQueueAction sendNewQueueAction) {
 
     boolean result = cache.createNewQueue(sendNewQueueAction.getQueue());
 

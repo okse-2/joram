@@ -24,18 +24,18 @@ package com.scalagent.appli.server.command.queue;
 
 import com.scalagent.appli.client.command.queue.ClearWaitingRequestAction;
 import com.scalagent.appli.client.command.queue.ClearWaitingRequestResponse;
-import com.scalagent.appli.server.RPCServiceCache;
-import com.scalagent.engine.server.BaseRPCService;
+import com.scalagent.appli.server.RPCServiceImpl;
+import com.scalagent.engine.server.BaseRPCServiceUtils;
 import com.scalagent.engine.server.command.ActionImpl;
 
 /**
  * @author Yohann CINTRE
  */
 public class ClearWaitingRequestActionImpl extends
-    ActionImpl<ClearWaitingRequestResponse, ClearWaitingRequestAction, RPCServiceCache> {
+    ActionImpl<ClearWaitingRequestResponse, ClearWaitingRequestAction, RPCServiceImpl> {
 
   @Override
-  public ClearWaitingRequestResponse execute(RPCServiceCache cache,
+  public ClearWaitingRequestResponse execute(RPCServiceImpl cache,
       ClearWaitingRequestAction clearWaitingRequestAction) {
 
     boolean result = cache.cleanWaitingRequest(clearWaitingRequestAction.getQueueName());
@@ -43,7 +43,7 @@ public class ClearWaitingRequestActionImpl extends
     String info = "";
 
     if (!result) {
-      info = BaseRPCService.getString("Error while clearing waiting request : Queue \""
+      info = BaseRPCServiceUtils.getString("Error while clearing waiting request : Queue \""
           + clearWaitingRequestAction.getQueueName() + "\" not found.");
     }
 

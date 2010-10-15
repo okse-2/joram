@@ -24,17 +24,17 @@ package com.scalagent.appli.server.command.info;
 
 import com.scalagent.appli.client.command.info.LoadServerInfoAction;
 import com.scalagent.appli.client.command.info.LoadServerInfoResponse;
-import com.scalagent.appli.server.RPCServiceCache;
+import com.scalagent.appli.server.RPCServiceImpl;
 import com.scalagent.engine.server.command.ActionImpl;
 
 /**
  * @author Yohann CINTRE
  */
 public class LoadServerInfoActionImpl extends
-    ActionImpl<LoadServerInfoResponse, LoadServerInfoAction, RPCServiceCache> {
+    ActionImpl<LoadServerInfoResponse, LoadServerInfoAction, RPCServiceImpl> {
 
   @Override
-  public LoadServerInfoResponse execute(RPCServiceCache cache, LoadServerInfoAction action) {
+  public LoadServerInfoResponse execute(RPCServiceImpl cache, LoadServerInfoAction action) {
 
     float[] infos = cache.getInfos(action.isforceUpdate());
     return new LoadServerInfoResponse(infos);

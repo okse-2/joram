@@ -9,7 +9,7 @@ import com.scalagent.engine.client.command.Response;
 /**
  * The client side stub for the RPC service.
  */
-@RemoteServiceRelativePath("baseService")
+@RemoteServiceRelativePath("rpc")
 public interface BaseRPCService extends RemoteService {
 	
 	public <R extends Response> R execute(Action<R> action);

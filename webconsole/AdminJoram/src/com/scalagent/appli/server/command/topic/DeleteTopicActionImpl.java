@@ -24,17 +24,17 @@ package com.scalagent.appli.server.command.topic;
 
 import com.scalagent.appli.client.command.topic.DeleteTopicAction;
 import com.scalagent.appli.client.command.topic.DeleteTopicResponse;
-import com.scalagent.appli.server.RPCServiceCache;
+import com.scalagent.appli.server.RPCServiceImpl;
 import com.scalagent.engine.server.command.ActionImpl;
 
 /**
  * @author Yohann CINTRE
  */
 public class DeleteTopicActionImpl extends
-    ActionImpl<DeleteTopicResponse, DeleteTopicAction, RPCServiceCache> {
+    ActionImpl<DeleteTopicResponse, DeleteTopicAction, RPCServiceImpl> {
 
   @Override
-  public DeleteTopicResponse execute(RPCServiceCache cache, DeleteTopicAction action) {
+  public DeleteTopicResponse execute(RPCServiceImpl cache, DeleteTopicAction action) {
     boolean result = cache.deleteTopic(action.getTopicName());
 
     String info = "";

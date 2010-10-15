@@ -28,7 +28,6 @@ import java.util.Map;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.event.shared.HandlerManager;
-import com.scalagent.appli.client.RPCServiceAsync;
 import com.scalagent.appli.client.RPCServiceCacheClient;
 import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.command.message.DeleteMessageAction;
@@ -51,6 +50,7 @@ import com.scalagent.appli.client.widget.SubscriptionDetailWidget;
 import com.scalagent.appli.client.widget.record.MessageListRecord;
 import com.scalagent.appli.shared.MessageWTO;
 import com.scalagent.appli.shared.SubscriptionWTO;
+import com.scalagent.engine.client.BaseRPCServiceAsync;
 import com.scalagent.engine.client.presenter.BasePresenter;
 import com.smartgwt.client.util.SC;
 
@@ -61,7 +61,7 @@ import com.smartgwt.client.util.SC;
  * @author Yohann CINTRE
  */
 public class SubscriptionDetailPresenter extends
-    BasePresenter<SubscriptionDetailWidget, RPCServiceAsync, RPCServiceCacheClient> implements
+    BasePresenter<SubscriptionDetailWidget, BaseRPCServiceAsync, RPCServiceCacheClient> implements
     NewMessageHandler, DeletedMessageHandler, UpdatedMessageHandler, UpdateCompleteHandler,
     DeletedSubscriptionHandler, UpdatedSubscriptionHandler {
 
@@ -69,7 +69,7 @@ public class SubscriptionDetailPresenter extends
 
   private SubscriptionWTO sub;
 
-  public SubscriptionDetailPresenter(RPCServiceAsync serviceRPC, HandlerManager eventBus,
+  public SubscriptionDetailPresenter(BaseRPCServiceAsync serviceRPC, HandlerManager eventBus,
       RPCServiceCacheClient cache, SubscriptionWTO sub) {
 
     super(serviceRPC, cache, eventBus);

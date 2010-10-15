@@ -35,7 +35,7 @@
 
   	<!-- Other module inherits    									--> 
   	<inherits name='com.smartgwt.SmartGwt'/> 
-  	<inherits name='com.google.gwt.visualization.Visualization'/>        <!-- Logging section                                            -->    <inherits name="com.allen_sauer.gwt.log.gwt-log-OFF" />    <!-- inherits name="com.allen_sauer.gwt.log.gwt-log-DEBUG" />        <set-property name="log_WindowLogger" value="ENABLED" />    <set-property name="log_DivLogger" value="DISABLED" />    <set-property name="compiler.emulatedStack" value="true" />    <set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true"/>    <set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true"/-->
+  	<inherits name='com.google.gwt.visualization.Visualization'/>        <!-- Logging section                                            -->    <!-- name="com.allen_sauer.gwt.log.gwt-log-OFF" /-->    <inherits name="com.allen_sauer.gwt.log.gwt-log-DEBUG" />        <set-property name="log_WindowLogger" value="ENABLED" />    <set-property name="log_DivLogger" value="DISABLED" />    <set-property name="compiler.emulatedStack" value="true" />    <set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true"/>    <set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true"/>
   	<!-- Specify the app entry point class.                         -->
     <entry-point class='com.scalagent.appli.client.Application'/>
 
@@ -43,7 +43,5 @@
   	<source path='appli/client'/>
   	<source path='appli/shared'/>
   	<source path='engine/client'/>
-  	<source path='engine/shared'/>
-
- 	<!-- set-property  name="user.agent" value="gecko1_8"></set-property-->
+  	<source path='engine/shared'/>     	<set-property  name="user.agent" value="gecko1_8"></set-property>
 </module>

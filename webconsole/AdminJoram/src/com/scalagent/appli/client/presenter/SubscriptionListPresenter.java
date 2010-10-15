@@ -25,7 +25,6 @@ package com.scalagent.appli.client.presenter;
 import java.util.List;
 
 import com.google.gwt.event.shared.HandlerManager;
-import com.scalagent.appli.client.RPCServiceAsync;
 import com.scalagent.appli.client.RPCServiceCacheClient;
 import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.command.subscription.DeleteSubscriptionAction;
@@ -46,6 +45,7 @@ import com.scalagent.appli.client.event.subscription.UpdatedSubscriptionHandler;
 import com.scalagent.appli.client.widget.SubscriptionListWidget;
 import com.scalagent.appli.client.widget.record.SubscriptionListRecord;
 import com.scalagent.appli.shared.SubscriptionWTO;
+import com.scalagent.engine.client.BaseRPCServiceAsync;
 import com.scalagent.engine.client.presenter.BasePresenter;
 import com.smartgwt.client.util.SC;
 
@@ -56,9 +56,10 @@ import com.smartgwt.client.util.SC;
  * @author Yohann CINTRE
  */
 public class SubscriptionListPresenter extends
-    BasePresenter<SubscriptionListWidget, RPCServiceAsync, RPCServiceCacheClient> implements
+    BasePresenter<SubscriptionListWidget, BaseRPCServiceAsync, RPCServiceCacheClient> implements
     NewSubscriptionHandler, DeletedSubscriptionHandler, UpdatedSubscriptionHandler, UpdateCompleteHandler {
-  public SubscriptionListPresenter(RPCServiceAsync testService, HandlerManager eventBus,
+
+  public SubscriptionListPresenter(BaseRPCServiceAsync testService, HandlerManager eventBus,
       RPCServiceCacheClient cache) {
     super(testService, cache, eventBus);
     this.eventBus = eventBus;

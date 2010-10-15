@@ -24,17 +24,17 @@ package com.scalagent.appli.server.command.user;
 
 import com.scalagent.appli.client.command.user.SendNewUserAction;
 import com.scalagent.appli.client.command.user.SendNewUserResponse;
-import com.scalagent.appli.server.RPCServiceCache;
+import com.scalagent.appli.server.RPCServiceImpl;
 import com.scalagent.engine.server.command.ActionImpl;
 
 /**
  * @author Yohann CINTRE
  */
 public class SendNewUserActionImpl extends
-    ActionImpl<SendNewUserResponse, SendNewUserAction, RPCServiceCache> {
+    ActionImpl<SendNewUserResponse, SendNewUserAction, RPCServiceImpl> {
 
   @Override
-  public SendNewUserResponse execute(RPCServiceCache cache, SendNewUserAction action) {
+  public SendNewUserResponse execute(RPCServiceImpl cache, SendNewUserAction action) {
 
     boolean result = cache.createNewUser(action.getUser());
 

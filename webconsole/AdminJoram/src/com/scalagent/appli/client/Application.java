@@ -23,6 +23,7 @@
 package com.scalagent.appli.client;
 
 import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Command;
@@ -54,19 +55,20 @@ import com.scalagent.appli.client.presenter.SubscriptionListPresenter;
 import com.scalagent.appli.client.presenter.TopicListPresenter;
 import com.scalagent.appli.client.presenter.UserListPresenter;
 import com.scalagent.appli.client.widget.MainWidget;
-import com.scalagent.engine.client.BaseEntryPoint;
+import com.scalagent.engine.client.BaseRPCService;
+import com.scalagent.engine.client.BaseRPCServiceAsync;
 import com.scalagent.engine.client.event.SystemErrorEvent;
 import com.smartgwt.client.widgets.Canvas;
 
 /**
  * @author Yohann CINTRE
  */
-public class Application implements BaseEntryPoint {
+public class Application implements EntryPoint {
 
   public static final ApplicationMessages messages = (ApplicationMessages) GWT
       .create(ApplicationMessages.class);
 
-  private RPCServiceAsync serviceAsync;
+  private BaseRPCServiceAsync serviceAsync;
   private RPCServiceCacheClient serviceCache;
   private HandlerManager eventBus;
 
@@ -88,7 +90,7 @@ public class Application implements BaseEntryPoint {
     Runnable onLoadCallback = new Runnable() {
       public void run() {
 
-        serviceAsync = GWT.create(RPCService.class);
+        serviceAsync = GWT.create(BaseRPCService.class);
 
         eventBus = new HandlerManager(null);
         serviceCache = new RPCServiceCacheClient(serviceAsync, eventBus, -1);

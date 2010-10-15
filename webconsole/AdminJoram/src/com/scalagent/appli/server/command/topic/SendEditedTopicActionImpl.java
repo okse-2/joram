@@ -24,17 +24,17 @@ package com.scalagent.appli.server.command.topic;
 
 import com.scalagent.appli.client.command.topic.SendEditedTopicAction;
 import com.scalagent.appli.client.command.topic.SendEditedTopicResponse;
-import com.scalagent.appli.server.RPCServiceCache;
+import com.scalagent.appli.server.RPCServiceImpl;
 import com.scalagent.engine.server.command.ActionImpl;
 
 /**
  * @author Yohann CINTRE
  */
 public class SendEditedTopicActionImpl extends
-    ActionImpl<SendEditedTopicResponse, SendEditedTopicAction, RPCServiceCache> {
+    ActionImpl<SendEditedTopicResponse, SendEditedTopicAction, RPCServiceImpl> {
 
   @Override
-  public SendEditedTopicResponse execute(RPCServiceCache cache, SendEditedTopicAction action) {
+  public SendEditedTopicResponse execute(RPCServiceImpl cache, SendEditedTopicAction action) {
 
     boolean result = cache.editTopic(action.getTopic());
 

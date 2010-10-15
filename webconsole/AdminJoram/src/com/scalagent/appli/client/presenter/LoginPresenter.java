@@ -23,13 +23,13 @@
 package com.scalagent.appli.client.presenter;
 
 import com.google.gwt.event.shared.HandlerManager;
-import com.scalagent.appli.client.RPCServiceAsync;
 import com.scalagent.appli.client.RPCServiceCacheClient;
 import com.scalagent.appli.client.command.session.LoginAction;
 import com.scalagent.appli.client.command.session.LoginHandler;
 import com.scalagent.appli.client.command.session.LoginResponse;
 import com.scalagent.appli.client.event.session.LoginValidEvent;
 import com.scalagent.appli.client.widget.LoginWidget;
+import com.scalagent.engine.client.BaseRPCServiceAsync;
 import com.scalagent.engine.client.presenter.BasePresenter;
 import com.smartgwt.client.util.SC;
 
@@ -39,8 +39,9 @@ import com.smartgwt.client.util.SC;
  * 
  * @author Yohann CINTRE
  */
-public class LoginPresenter extends BasePresenter<LoginWidget, RPCServiceAsync, RPCServiceCacheClient> {
-  public LoginPresenter(RPCServiceAsync testService, HandlerManager eventBus, RPCServiceCacheClient cache) {
+public class LoginPresenter extends BasePresenter<LoginWidget, BaseRPCServiceAsync, RPCServiceCacheClient> {
+
+  public LoginPresenter(BaseRPCServiceAsync testService, HandlerManager eventBus, RPCServiceCacheClient cache) {
     super(testService, cache, eventBus);
     this.widget = new LoginWidget(this);
   }

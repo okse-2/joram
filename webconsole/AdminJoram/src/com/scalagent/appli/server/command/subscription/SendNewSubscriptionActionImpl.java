@@ -24,17 +24,17 @@ package com.scalagent.appli.server.command.subscription;
 
 import com.scalagent.appli.client.command.subscription.SendNewSubscriptionAction;
 import com.scalagent.appli.client.command.subscription.SendNewSubscriptionResponse;
-import com.scalagent.appli.server.RPCServiceCache;
+import com.scalagent.appli.server.RPCServiceImpl;
 import com.scalagent.engine.server.command.ActionImpl;
 
 /**
  * @author Yohann CINTRE
  */
 public class SendNewSubscriptionActionImpl extends
-    ActionImpl<SendNewSubscriptionResponse, SendNewSubscriptionAction, RPCServiceCache> {
+    ActionImpl<SendNewSubscriptionResponse, SendNewSubscriptionAction, RPCServiceImpl> {
 
   @Override
-  public SendNewSubscriptionResponse execute(RPCServiceCache cache, SendNewSubscriptionAction action) {
+  public SendNewSubscriptionResponse execute(RPCServiceImpl cache, SendNewSubscriptionAction action) {
 
     boolean result = cache.createNewSubscription(action.getSubscription());
 

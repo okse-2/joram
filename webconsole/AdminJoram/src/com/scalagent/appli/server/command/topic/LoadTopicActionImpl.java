@@ -26,17 +26,17 @@ import java.util.List;
 
 import com.scalagent.appli.client.command.topic.LoadTopicAction;
 import com.scalagent.appli.client.command.topic.LoadTopicResponse;
-import com.scalagent.appli.server.RPCServiceCache;
+import com.scalagent.appli.server.RPCServiceImpl;
 import com.scalagent.appli.shared.TopicWTO;
 import com.scalagent.engine.server.command.ActionImpl;
 
 /**
  * @author Yohann CINTRE
  */
-public class LoadTopicActionImpl extends ActionImpl<LoadTopicResponse, LoadTopicAction, RPCServiceCache> {
+public class LoadTopicActionImpl extends ActionImpl<LoadTopicResponse, LoadTopicAction, RPCServiceImpl> {
 
   @Override
-  public LoadTopicResponse execute(RPCServiceCache cache, LoadTopicAction action) {
+  public LoadTopicResponse execute(RPCServiceImpl cache, LoadTopicAction action) {
 
     List<TopicWTO> topics = cache.getTopics(this.getHttpSession(), action.isRetrieveAll(),
         action.isforceUpdate());
