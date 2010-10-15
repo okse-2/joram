@@ -73,6 +73,7 @@ import com.scalagent.appli.shared.QueueWTO;
 import com.scalagent.appli.shared.SubscriptionWTO;
 import com.scalagent.appli.shared.TopicWTO;
 import com.scalagent.appli.shared.UserWTO;
+import com.scalagent.engine.client.BaseRPCServiceAsync;
 import com.scalagent.engine.client.BaseRPCServiceCacheClient;
 import com.scalagent.engine.shared.BaseWTO;
 
@@ -126,7 +127,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
   private Map<String, List<HistoryData>> globalHistory = new HashMap<String, List<HistoryData>>();
   private List<FloatHistoryData> serverHistory = new ArrayList<FloatHistoryData>();
 
-  private RPCServiceAsync RPCService;
+  private BaseRPCServiceAsync RPCService;
   private HandlerManager eventBus;
 
   private boolean topicRequest = true;
@@ -135,7 +136,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
   private boolean subRequest = true;
   private boolean servRequest = true;
 
-  public RPCServiceCacheClient(RPCServiceAsync RPCService, HandlerManager eventBus, int updatePeriod) {
+  public RPCServiceCacheClient(BaseRPCServiceAsync RPCService, HandlerManager eventBus, int updatePeriod) {
 
     Log.debug("RPCServiceCacheClient start.");
 

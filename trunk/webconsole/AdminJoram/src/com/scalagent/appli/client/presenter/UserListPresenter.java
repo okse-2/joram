@@ -25,7 +25,6 @@ package com.scalagent.appli.client.presenter;
 import java.util.List;
 
 import com.google.gwt.event.shared.HandlerManager;
-import com.scalagent.appli.client.RPCServiceAsync;
 import com.scalagent.appli.client.RPCServiceCacheClient;
 import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.command.user.DeleteUserAction;
@@ -46,6 +45,7 @@ import com.scalagent.appli.client.event.user.UserDetailClickEvent;
 import com.scalagent.appli.client.widget.UserListWidget;
 import com.scalagent.appli.client.widget.record.UserListRecord;
 import com.scalagent.appli.shared.UserWTO;
+import com.scalagent.engine.client.BaseRPCServiceAsync;
 import com.scalagent.engine.client.presenter.BasePresenter;
 import com.smartgwt.client.util.SC;
 
@@ -55,9 +55,12 @@ import com.smartgwt.client.util.SC;
  * 
  * @author Yohann CINTRE
  */
-public class UserListPresenter extends BasePresenter<UserListWidget, RPCServiceAsync, RPCServiceCacheClient>
-    implements NewUserHandler, DeletedUserHandler, UpdatedUserHandler, UpdateCompleteHandler {
-  public UserListPresenter(RPCServiceAsync testService, HandlerManager eventBus, RPCServiceCacheClient cache) {
+public class UserListPresenter extends
+    BasePresenter<UserListWidget, BaseRPCServiceAsync, RPCServiceCacheClient> implements NewUserHandler,
+    DeletedUserHandler, UpdatedUserHandler, UpdateCompleteHandler {
+
+  public UserListPresenter(BaseRPCServiceAsync testService, HandlerManager eventBus,
+      RPCServiceCacheClient cache) {
 
     super(testService, cache, eventBus);
 

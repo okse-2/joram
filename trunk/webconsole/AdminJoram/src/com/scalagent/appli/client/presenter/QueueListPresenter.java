@@ -25,7 +25,6 @@ package com.scalagent.appli.client.presenter;
 import java.util.List;
 
 import com.google.gwt.event.shared.HandlerManager;
-import com.scalagent.appli.client.RPCServiceAsync;
 import com.scalagent.appli.client.RPCServiceCacheClient;
 import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.command.queue.ClearPendingMessageAction;
@@ -52,6 +51,7 @@ import com.scalagent.appli.client.event.queue.UpdatedQueueHandler;
 import com.scalagent.appli.client.widget.QueueListWidget;
 import com.scalagent.appli.client.widget.record.QueueListRecord;
 import com.scalagent.appli.shared.QueueWTO;
+import com.scalagent.engine.client.BaseRPCServiceAsync;
 import com.scalagent.engine.client.presenter.BasePresenter;
 import com.smartgwt.client.util.SC;
 
@@ -62,10 +62,11 @@ import com.smartgwt.client.util.SC;
  * @author Yohann CINTRE
  */
 public class QueueListPresenter extends
-    BasePresenter<QueueListWidget, RPCServiceAsync, RPCServiceCacheClient> implements NewQueueHandler,
+    BasePresenter<QueueListWidget, BaseRPCServiceAsync, RPCServiceCacheClient> implements NewQueueHandler,
     DeletedQueueHandler, UpdatedQueueHandler, UpdateCompleteHandler {
 
-  public QueueListPresenter(RPCServiceAsync testService, HandlerManager eventBus, RPCServiceCacheClient cache) {
+  public QueueListPresenter(BaseRPCServiceAsync testService, HandlerManager eventBus,
+      RPCServiceCacheClient cache) {
 
     super(testService, cache, eventBus);
 

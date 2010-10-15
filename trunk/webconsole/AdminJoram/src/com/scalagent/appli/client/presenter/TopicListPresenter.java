@@ -25,7 +25,6 @@ package com.scalagent.appli.client.presenter;
 import java.util.List;
 
 import com.google.gwt.event.shared.HandlerManager;
-import com.scalagent.appli.client.RPCServiceAsync;
 import com.scalagent.appli.client.RPCServiceCacheClient;
 import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.command.topic.DeleteTopicAction;
@@ -45,6 +44,7 @@ import com.scalagent.appli.client.event.topic.UpdatedTopicHandler;
 import com.scalagent.appli.client.widget.TopicListWidget;
 import com.scalagent.appli.client.widget.record.TopicListRecord;
 import com.scalagent.appli.shared.TopicWTO;
+import com.scalagent.engine.client.BaseRPCServiceAsync;
 import com.scalagent.engine.client.presenter.BasePresenter;
 import com.smartgwt.client.util.SC;
 
@@ -55,9 +55,11 @@ import com.smartgwt.client.util.SC;
  * @author Yohann CINTRE
  */
 public class TopicListPresenter extends
-    BasePresenter<TopicListWidget, RPCServiceAsync, RPCServiceCacheClient> implements NewTopicHandler,
+    BasePresenter<TopicListWidget, BaseRPCServiceAsync, RPCServiceCacheClient> implements NewTopicHandler,
     DeletedTopicHandler, UpdatedTopicHandler, UpdateCompleteHandler {
-  public TopicListPresenter(RPCServiceAsync testService, HandlerManager eventBus, RPCServiceCacheClient cache) {
+
+  public TopicListPresenter(BaseRPCServiceAsync testService, HandlerManager eventBus,
+      RPCServiceCacheClient cache) {
 
     super(testService, cache, eventBus);
 

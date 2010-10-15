@@ -24,17 +24,17 @@ package com.scalagent.appli.server.command.subscription;
 
 import com.scalagent.appli.client.command.subscription.DeleteSubscriptionAction;
 import com.scalagent.appli.client.command.subscription.DeleteSubscriptionResponse;
-import com.scalagent.appli.server.RPCServiceCache;
+import com.scalagent.appli.server.RPCServiceImpl;
 import com.scalagent.engine.server.command.ActionImpl;
 
 /**
  * @author Yohann CINTRE
  */
 public class DeleteSubscriptionActionImpl extends
-    ActionImpl<DeleteSubscriptionResponse, DeleteSubscriptionAction, RPCServiceCache> {
+    ActionImpl<DeleteSubscriptionResponse, DeleteSubscriptionAction, RPCServiceImpl> {
 
   @Override
-  public DeleteSubscriptionResponse execute(RPCServiceCache cache, DeleteSubscriptionAction action) {
+  public DeleteSubscriptionResponse execute(RPCServiceImpl cache, DeleteSubscriptionAction action) {
     boolean result = cache.deleteSubscription(action.getSubscriptionName());
 
     String info = "";

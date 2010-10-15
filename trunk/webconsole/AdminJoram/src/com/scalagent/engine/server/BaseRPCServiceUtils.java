@@ -4,12 +4,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.Set;
 
 import com.scalagent.engine.shared.BaseWTO;
 
-
-public abstract class AbstractBaseRPCServiceCache {
+public class BaseRPCServiceUtils {
+  
+    private static HashMap<Locale, ResourceBundle> bundles = new HashMap<Locale, ResourceBundle>();
+    private static String bundleBasename;
+    private static Locale locale;
 
 	/**
 	 * Returns all entities stored in the hashmap given in params with their dbStatus set to NEW.
@@ -20,7 +25,7 @@ public abstract class AbstractBaseRPCServiceCache {
 	 * @return List of entities to return to the client 
 	 * 
 	 */
-	protected <W extends BaseWTO> List<W> retrieveAll(HashMap<String, W> entities) {
+	public static <W extends BaseWTO> List<W> retrieveAll(HashMap<String, W> entities) {
 
 		List<W> toReturn = new ArrayList<W>();
 		Set<String> keys = entities.keySet();
@@ -41,7 +46,7 @@ public abstract class AbstractBaseRPCServiceCache {
 	 * Not that if the application is multiuser, already sent entities must be stored in the session
 	 * because this list may be (temporarily) different for each user.
 	 */	
-	protected <W extends BaseWTO> List<W> compareEntities(W[] newEntities, HashMap<String, W> entities) {
+	public static <W extends BaseWTO> List<W> compareEntities(W[] newEntities, HashMap<String, W> entities) {
 
 		// new or updated entities
 		// =======================
@@ -104,5 +109,72 @@ public abstract class AbstractBaseRPCServiceCache {
 		}
 		return toReturn;
 	}
+	
+	   /**
+     * Return the localized string corresponding to the key given in param.
+     * If the key is not available in the bundle, returns the key itself.
+     * 
+     * @param key key to retrieve in the bundle
+     * @return the localized string or the key itself if it doesn't exist in the bundle.
+     */
+    public static String getString(String key) {
+
+        try {
+            String value = getBundle().getString(key);
+            return value; 
+        } catch (Exception e) {
+            return key;
+        }
+
+    }
+
+    /**
+     * Retrieve the bundle corresponding to the current locale.
+     * If the bundle is not available, try to load it.
+     * If the bundle is not available, return null.
+     * 
+     * @return the correct bundle.
+     */
+    private static ResourceBundle getBundle() {
+        if (locale == null) {
+            return null;
+        }
+
+        ResourceBundle bundle = bundles.get(locale);
+        if (bundle == null) {
+
+            try {
+                bundle = ResourceBundle.getBundle(bundleBasename, locale);
+                // store it
+                bundles.put(locale, bundle);
+                return bundle;
+            } catch (Exception e) {
+                return null;
+            }
+        } else {
+            return bundle; 
+        }
+
+    }
+
+    /**
+     * Sets the ResourceBundle base name.
+     * It has to be called in the initialization of the service.
+     * 
+     * @param bundleBasename bundle basename
+     */
+    protected static void setBundleBasename(String bundleBasename) {
+        BaseRPCServiceUtils.bundleBasename = bundleBasename;
+    }
+
+    /**
+     * Sets the locale used in the application.
+     * This method is automatically called by the method execute of BaseRPCServiceImpl or BaseRPCServiceFakeImpl.
+     * 
+     * @param locale locale to use
+     */
+    protected static void setLocale(Locale locale) {
+        BaseRPCServiceUtils.locale = locale;
+    }
 	
 }

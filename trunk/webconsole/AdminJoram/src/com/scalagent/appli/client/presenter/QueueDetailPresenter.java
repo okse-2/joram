@@ -28,7 +28,6 @@ import java.util.Map;
 
 import com.google.gwt.event.shared.HandlerManager;
 import com.scalagent.appli.client.Application;
-import com.scalagent.appli.client.RPCServiceAsync;
 import com.scalagent.appli.client.RPCServiceCacheClient;
 import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.command.message.DeleteMessageAction;
@@ -52,6 +51,7 @@ import com.scalagent.appli.client.widget.QueueDetailWidget;
 import com.scalagent.appli.client.widget.record.MessageListRecord;
 import com.scalagent.appli.shared.MessageWTO;
 import com.scalagent.appli.shared.QueueWTO;
+import com.scalagent.engine.client.BaseRPCServiceAsync;
 import com.scalagent.engine.client.presenter.BasePresenter;
 import com.smartgwt.client.util.SC;
 
@@ -62,13 +62,13 @@ import com.smartgwt.client.util.SC;
  * @author Yohann CINTRE
  */
 public class QueueDetailPresenter extends
-    BasePresenter<QueueDetailWidget, RPCServiceAsync, RPCServiceCacheClient> implements NewMessageHandler,
-    DeletedMessageHandler, UpdatedMessageHandler, UpdateCompleteHandler, QueueNotFoundHandler,
-    DeletedQueueHandler, UpdatedQueueHandler {
+    BasePresenter<QueueDetailWidget, BaseRPCServiceAsync, RPCServiceCacheClient> implements
+    NewMessageHandler, DeletedMessageHandler, UpdatedMessageHandler, UpdateCompleteHandler,
+    QueueNotFoundHandler, DeletedQueueHandler, UpdatedQueueHandler {
 
   private QueueWTO queue;
 
-  public QueueDetailPresenter(RPCServiceAsync serviceRPC, HandlerManager eventBus,
+  public QueueDetailPresenter(BaseRPCServiceAsync serviceRPC, HandlerManager eventBus,
       RPCServiceCacheClient cache, QueueWTO queue) {
 
     super(serviceRPC, cache, eventBus);

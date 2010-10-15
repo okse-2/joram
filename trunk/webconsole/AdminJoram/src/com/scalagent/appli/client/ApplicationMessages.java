@@ -2328,4 +2328,22 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
   @Key("common_subscription")
   String common_subscription();
 
+  /**
+   * Translated "true".
+   * 
+   * @return translated "true"
+   */
+  @DefaultMessage("true")
+  @Key("main_true")
+  String main_true();
+
+  /**
+   * Translated "false".
+   * 
+   * @return translated "false"
+   */
+  @DefaultMessage("false")
+  @Key("main_false")
+  String main_false();
+
 }

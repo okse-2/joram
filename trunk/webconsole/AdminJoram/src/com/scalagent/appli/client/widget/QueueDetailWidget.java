@@ -130,8 +130,8 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
 
   public QueueDetailWidget(QueueDetailPresenter queueDetailsPresenter) {
     super(queueDetailsPresenter);
-    etat.put("true", Application.baseMessages.main_true());
-    etat.put("false", Application.baseMessages.main_false());
+    etat.put("true", Application.messages.main_true());
+    etat.put("false", Application.messages.main_false());
   }
 
   public IButton getRefreshButton() {

@@ -24,23 +24,23 @@ package com.scalagent.appli.server.command.session;
 
 import com.scalagent.appli.client.command.session.LoginAction;
 import com.scalagent.appli.client.command.session.LoginResponse;
-import com.scalagent.appli.server.RPCServiceCache;
-import com.scalagent.engine.server.BaseRPCService;
+import com.scalagent.appli.server.RPCServiceImpl;
+import com.scalagent.engine.server.BaseRPCServiceUtils;
 import com.scalagent.engine.server.command.ActionImpl;
 
 /**
  * @author Yohann CINTRE
  */
-public class LoginActionImpl extends ActionImpl<LoginResponse, LoginAction, RPCServiceCache> {
+public class LoginActionImpl extends ActionImpl<LoginResponse, LoginAction, RPCServiceImpl> {
 
   @Override
-  public LoginResponse execute(RPCServiceCache cache, LoginAction loginAction) {
+  public LoginResponse execute(RPCServiceImpl cache, LoginAction loginAction) {
     boolean result = cache.connectJORAM(loginAction.getLogin(), loginAction.getPassword());
 
     String info = "";
 
     if (!result) {
-      info = BaseRPCService.getString("Error while loging-in");
+      info = BaseRPCServiceUtils.getString("Error while loging-in");
     }
 
     return new LoginResponse(result, info);

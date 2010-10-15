@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.event.shared.HandlerManager;
-import com.scalagent.appli.client.RPCServiceAsync;
 import com.scalagent.appli.client.RPCServiceCacheClient;
 import com.scalagent.appli.client.RPCServiceCacheClient.FloatHistoryData;
 import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
@@ -37,6 +36,7 @@ import com.scalagent.appli.shared.QueueWTO;
 import com.scalagent.appli.shared.SubscriptionWTO;
 import com.scalagent.appli.shared.TopicWTO;
 import com.scalagent.appli.shared.UserWTO;
+import com.scalagent.engine.client.BaseRPCServiceAsync;
 import com.scalagent.engine.client.presenter.BasePresenter;
 
 /**
@@ -45,9 +45,10 @@ import com.scalagent.engine.client.presenter.BasePresenter;
  * 
  * @author Yohann CINTRE
  */
-public class ServerPresenter extends BasePresenter<ServerWidget, RPCServiceAsync, RPCServiceCacheClient>
+public class ServerPresenter extends BasePresenter<ServerWidget, BaseRPCServiceAsync, RPCServiceCacheClient>
     implements UpdateCompleteHandler {
-  public ServerPresenter(RPCServiceAsync serviceRPC, HandlerManager eventBus, RPCServiceCacheClient cache) {
+
+  public ServerPresenter(BaseRPCServiceAsync serviceRPC, HandlerManager eventBus, RPCServiceCacheClient cache) {
     super(serviceRPC, cache, eventBus);
     this.eventBus = eventBus;
     widget = new ServerWidget(this);

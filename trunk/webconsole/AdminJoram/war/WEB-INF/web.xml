@@ -13,7 +13,7 @@
   
   <servlet-mapping>
     <servlet-name>RPCServlet</servlet-name>
-    <url-pattern>/appli/RPCService</url-pattern>
+    <url-pattern>/appli/rpc</url-pattern>
   </servlet-mapping>
   
   

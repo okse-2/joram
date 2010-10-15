@@ -41,11 +41,11 @@ public class BaseRPCServiceTimer extends Thread {
 			Iterator<String> iterator = keys.iterator();
 			while (iterator.hasNext()) {
 				String key = iterator.next();
-				Long sessionTimestamp = sessions.get(key);
-				Long currentTimestamp = new Long(System.currentTimeMillis());
+                Long sessionTimestamp = sessions.get(key);
+                long currentTimestamp = System.currentTimeMillis();
 
 				// check timestamp
-				if ((currentTimestamp - sessionTimestamp) > invalidateSessionDelay) {
+				if ((currentTimestamp - sessionTimestamp.longValue()) > invalidateSessionDelay) {
 					
 					// and remove it from the sessions hashmap
 					service.removeSession(key);

@@ -24,17 +24,17 @@ package com.scalagent.appli.server.command.user;
 
 import com.scalagent.appli.client.command.user.SendEditedUserAction;
 import com.scalagent.appli.client.command.user.SendEditedUserResponse;
-import com.scalagent.appli.server.RPCServiceCache;
+import com.scalagent.appli.server.RPCServiceImpl;
 import com.scalagent.engine.server.command.ActionImpl;
 
 /**
  * @author Yohann CINTRE
  */
 public class SendEditedUserActionImpl extends
-    ActionImpl<SendEditedUserResponse, SendEditedUserAction, RPCServiceCache> {
+    ActionImpl<SendEditedUserResponse, SendEditedUserAction, RPCServiceImpl> {
 
   @Override
-  public SendEditedUserResponse execute(RPCServiceCache cache, SendEditedUserAction action) {
+  public SendEditedUserResponse execute(RPCServiceImpl cache, SendEditedUserAction action) {
 
     boolean result = cache.editUser(action.getUser());
 

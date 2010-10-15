@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.event.shared.HandlerManager;
-import com.scalagent.appli.client.RPCServiceAsync;
 import com.scalagent.appli.client.RPCServiceCacheClient;
 import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.command.subscription.DeleteSubscriptionAction;
@@ -50,6 +49,7 @@ import com.scalagent.appli.client.widget.UserDetailWidget;
 import com.scalagent.appli.client.widget.record.SubscriptionListRecord;
 import com.scalagent.appli.shared.SubscriptionWTO;
 import com.scalagent.appli.shared.UserWTO;
+import com.scalagent.engine.client.BaseRPCServiceAsync;
 import com.scalagent.engine.client.presenter.BasePresenter;
 import com.smartgwt.client.util.SC;
 
@@ -60,12 +60,13 @@ import com.smartgwt.client.util.SC;
  * @author Yohann CINTRE
  */
 public class UserDetailPresenter extends
-    BasePresenter<UserDetailWidget, RPCServiceAsync, RPCServiceCacheClient> implements
+    BasePresenter<UserDetailWidget, BaseRPCServiceAsync, RPCServiceCacheClient> implements
     NewSubscriptionHandler, DeletedSubscriptionHandler, UpdatedSubscriptionHandler, UpdateCompleteHandler,
     DeletedUserHandler, UpdatedUserHandler {
+
   private UserWTO user;
 
-  public UserDetailPresenter(RPCServiceAsync serviceRPC, HandlerManager eventBus,
+  public UserDetailPresenter(BaseRPCServiceAsync serviceRPC, HandlerManager eventBus,
       RPCServiceCacheClient cache, UserWTO user) {
 
     super(serviceRPC, cache, eventBus);

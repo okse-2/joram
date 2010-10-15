@@ -24,17 +24,17 @@ package com.scalagent.appli.server.command.queue;
 
 import com.scalagent.appli.client.command.queue.DeleteQueueAction;
 import com.scalagent.appli.client.command.queue.DeleteQueueResponse;
-import com.scalagent.appli.server.RPCServiceCache;
+import com.scalagent.appli.server.RPCServiceImpl;
 import com.scalagent.engine.server.command.ActionImpl;
 
 /**
  * @author Yohann CINTRE
  */
 public class DeleteQueueActionImpl extends
-    ActionImpl<DeleteQueueResponse, DeleteQueueAction, RPCServiceCache> {
+    ActionImpl<DeleteQueueResponse, DeleteQueueAction, RPCServiceImpl> {
 
   @Override
-  public DeleteQueueResponse execute(RPCServiceCache cache, DeleteQueueAction deleteQueueAction) {
+  public DeleteQueueResponse execute(RPCServiceImpl cache, DeleteQueueAction deleteQueueAction) {
     boolean result = cache.deleteQueue(deleteQueueAction.getQueueName());
 
     String info = "";

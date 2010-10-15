@@ -117,8 +117,8 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
 
   public TopicListWidget(TopicListPresenter topicPresenter) {
     super(topicPresenter);
-    etat.put("true", Application.baseMessages.main_true());
-    etat.put("false", Application.baseMessages.main_false());
+    etat.put("true", Application.messages.main_true());
+    etat.put("false", Application.messages.main_false());
   }
 
   public IButton getRefreshButton() {

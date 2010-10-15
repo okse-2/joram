@@ -24,17 +24,17 @@ package com.scalagent.appli.server.command.topic;
 
 import com.scalagent.appli.client.command.topic.SendNewTopicAction;
 import com.scalagent.appli.client.command.topic.SendNewTopicResponse;
-import com.scalagent.appli.server.RPCServiceCache;
+import com.scalagent.appli.server.RPCServiceImpl;
 import com.scalagent.engine.server.command.ActionImpl;
 
 /**
  * @author Yohann CINTRE
  */
 public class SendNewTopicActionImpl extends
-    ActionImpl<SendNewTopicResponse, SendNewTopicAction, RPCServiceCache> {
+    ActionImpl<SendNewTopicResponse, SendNewTopicAction, RPCServiceImpl> {
 
   @Override
-  public SendNewTopicResponse execute(RPCServiceCache cache, SendNewTopicAction action) {
+  public SendNewTopicResponse execute(RPCServiceImpl cache, SendNewTopicAction action) {
 
     boolean result = cache.createNewTopic(action.getTopic());
 

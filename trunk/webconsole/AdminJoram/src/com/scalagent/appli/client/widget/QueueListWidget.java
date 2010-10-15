@@ -129,8 +129,8 @@ public class QueueListWidget extends BaseWidget<QueueListPresenter> {
   public QueueListWidget(QueueListPresenter queuePresenter) {
     super(queuePresenter);
 
-    etat.put("true", Application.baseMessages.main_true());
-    etat.put("false", Application.baseMessages.main_false());
+    etat.put("true", Application.messages.main_true());
+    etat.put("false", Application.messages.main_false());
   }
 
   public IButton getRefreshButton() {

@@ -26,7 +26,7 @@ import java.util.Map;
 
 import org.objectweb.joram.mom.proxies.ClientSubscriptionMBean;
 
-import com.scalagent.appli.server.RPCServiceCache.SubscriptionWithName;
+import com.scalagent.appli.server.RPCServiceImpl.SubscriptionWithName;
 import com.scalagent.appli.shared.SubscriptionWTO;
 
 /**

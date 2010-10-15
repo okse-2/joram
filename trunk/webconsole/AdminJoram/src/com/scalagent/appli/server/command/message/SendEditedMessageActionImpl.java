@@ -24,17 +24,17 @@ package com.scalagent.appli.server.command.message;
 
 import com.scalagent.appli.client.command.message.SendEditedMessageAction;
 import com.scalagent.appli.client.command.message.SendEditedMessageResponse;
-import com.scalagent.appli.server.RPCServiceCache;
+import com.scalagent.appli.server.RPCServiceImpl;
 import com.scalagent.engine.server.command.ActionImpl;
 
 /**
  * @author Yohann CINTRE
  */
 public class SendEditedMessageActionImpl extends
-    ActionImpl<SendEditedMessageResponse, SendEditedMessageAction, RPCServiceCache> {
+    ActionImpl<SendEditedMessageResponse, SendEditedMessageAction, RPCServiceImpl> {
 
   @Override
-  public SendEditedMessageResponse execute(RPCServiceCache cache, SendEditedMessageAction action) {
+  public SendEditedMessageResponse execute(RPCServiceImpl cache, SendEditedMessageAction action) {
 
     boolean result = cache.editMessage(action.getMessage(), action.getQueueName());
 

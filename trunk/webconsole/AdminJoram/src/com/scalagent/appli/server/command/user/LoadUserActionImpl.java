@@ -26,17 +26,17 @@ import java.util.List;
 
 import com.scalagent.appli.client.command.user.LoadUserAction;
 import com.scalagent.appli.client.command.user.LoadUserResponse;
-import com.scalagent.appli.server.RPCServiceCache;
+import com.scalagent.appli.server.RPCServiceImpl;
 import com.scalagent.appli.shared.UserWTO;
 import com.scalagent.engine.server.command.ActionImpl;
 
 /**
  * @author Yohann CINTRE
  */
-public class LoadUserActionImpl extends ActionImpl<LoadUserResponse, LoadUserAction, RPCServiceCache> {
+public class LoadUserActionImpl extends ActionImpl<LoadUserResponse, LoadUserAction, RPCServiceImpl> {
 
   @Override
-  public LoadUserResponse execute(RPCServiceCache cache, LoadUserAction action) {
+  public LoadUserResponse execute(RPCServiceImpl cache, LoadUserAction action) {
 
     List<UserWTO> users = cache.getUsers(this.getHttpSession(), action.isRetrieveAll(),
         action.isforceUpdate());

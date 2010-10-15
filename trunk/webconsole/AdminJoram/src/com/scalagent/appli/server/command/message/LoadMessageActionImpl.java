@@ -26,7 +26,7 @@ import java.util.List;
 
 import com.scalagent.appli.client.command.message.LoadMessageAction;
 import com.scalagent.appli.client.command.message.LoadMessageResponse;
-import com.scalagent.appli.server.RPCServiceCache;
+import com.scalagent.appli.server.RPCServiceImpl;
 import com.scalagent.appli.shared.MessageWTO;
 import com.scalagent.engine.server.command.ActionImpl;
 
@@ -34,10 +34,10 @@ import com.scalagent.engine.server.command.ActionImpl;
  * @author Yohann CINTRE
  */
 public class LoadMessageActionImpl extends
-    ActionImpl<LoadMessageResponse, LoadMessageAction, RPCServiceCache> {
+    ActionImpl<LoadMessageResponse, LoadMessageAction, RPCServiceImpl> {
 
   @Override
-  public LoadMessageResponse execute(RPCServiceCache cache, LoadMessageAction action) throws Exception {
+  public LoadMessageResponse execute(RPCServiceImpl cache, LoadMessageAction action) throws Exception {
 
     List<MessageWTO> messages;
     try {

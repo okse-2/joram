@@ -26,7 +26,7 @@ import java.util.List;
 
 import com.scalagent.appli.client.command.subscription.LoadSubscriptionAction;
 import com.scalagent.appli.client.command.subscription.LoadSubscriptionResponse;
-import com.scalagent.appli.server.RPCServiceCache;
+import com.scalagent.appli.server.RPCServiceImpl;
 import com.scalagent.appli.shared.SubscriptionWTO;
 import com.scalagent.engine.server.command.ActionImpl;
 
@@ -34,10 +34,10 @@ import com.scalagent.engine.server.command.ActionImpl;
  * @author Yohann CINTRE
  */
 public class LoadSubscriptionActionImpl extends
-    ActionImpl<LoadSubscriptionResponse, LoadSubscriptionAction, RPCServiceCache> {
+    ActionImpl<LoadSubscriptionResponse, LoadSubscriptionAction, RPCServiceImpl> {
 
   @Override
-  public LoadSubscriptionResponse execute(RPCServiceCache cache, LoadSubscriptionAction action) {
+  public LoadSubscriptionResponse execute(RPCServiceImpl cache, LoadSubscriptionAction action) {
 
     List<SubscriptionWTO> subs = cache.getSubscriptions(this.getHttpSession(), action.isRetrieveAll(),
         action.isforceUpdate());
