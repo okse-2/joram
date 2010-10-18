@@ -20,97 +20,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
-        
-          <!-- ============= joram-osgi =====================-->
-          <execution>
-            <id>joram-osgi</id>
-            <phase>install</phase>
-            <goals>
-            	<goal>single</goal>
-            </goals>
-            <configuration>
-              <descriptors>
-                <descriptor>../assembly/osgi-assembly.xml</descriptor>
-              </descriptors>
-              <ignoreDirFormatExtensions>false</ignoreDirFormatExtensions>
-            </configuration>
-          </execution>
-          
-          <!-- ============= ra =====================-->
-          <execution>
-            <id>joram-ra</id>
-            <phase>install</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <descriptors>
-                <descriptor>ra-assembly.xml</descriptor>
-              </descriptors>
-              <ignoreDirFormatExtensions>false</ignoreDirFormatExtensions>
-              <archive>
-                <manifest>
-                  <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                  <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                </manifest>
-                <manifestEntries>
-                  <Specification-Version>${pom.version}</Specification-Version>
-                  <Implementation-Version>${buildNumber}</Implementation-Version>
-                </manifestEntries>
-              </archive>
-            </configuration>
-          </execution>
-          
-          <!-- ============= ra-remote =====================-->
-          <execution>
-            <id>joram-ra-remote</id>
-            <phase>install</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <descriptors>
-                <descriptor>ra-remote-assembly.xml</descriptor>
-              </descriptors>
-              <ignoreDirFormatExtensions>false</ignoreDirFormatExtensions>
-              <archive>
-                <manifest>
-                  <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                  <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                </manifest>
-                <manifestEntries>
-                  <Specification-Version>${pom.version}</Specification-Version>
-                  <Implementation-Version>${buildNumber}</Implementation-Version>
-                </manifestEntries>
-              </archive>
-            </configuration>
-          </execution>
-          
-          <!-- ============= ra-jonas =====================-->
-          <execution>
-            <id>joram-ra-jonas</id>
-            <phase>install</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <descriptors>
-                <descriptor>ra-jonas-assembly.xml</descriptor>
-              </descriptors>
-              <ignoreDirFormatExtensions>false</ignoreDirFormatExtensions>
-              <archive>
-                <manifest>
-                  <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                  <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                </manifest>
-                <manifestEntries>
-                  <Specification-Version>${pom.version}</Specification-Version>
-                  <Implementation-Version>${buildNumber}</Implementation-Version>
-                </manifestEntries>
-              </archive>
-            </configuration>
-          </execution>
-          
+                  
           <!-- ============= src =====================-->
           <execution>
             <id>joram-src</id>
@@ -153,6 +63,52 @@
                 <descriptor>raconfig-assembly.xml</descriptor>
               </descriptors>
               <ignoreDirFormatExtensions>false</ignoreDirFormatExtensions>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.objectweb.joram</groupId>
+                  <artifactId>joram-jca-remote</artifactId>
+                  <version>${project.version}</version>
+                  <type>rar</type>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.objectweb.joram</groupId>
+                  <artifactId>joram-jca-ra</artifactId>
+                  <version>${project.version}</version>
+                  <type>rar</type>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.objectweb.joram</groupId>
+                  <artifactId>joram-jca-jonas</artifactId>
+                  <version>${project.version}</version>
+                  <type>rar</type>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.objectweb.joram</groupId>
+                  <artifactId>joram-assembly</artifactId>
+                  <version>${project.version}</version>
+                  <type>zip</type>
+                  <classifier>osgi</classifier>
+                </artifactItem>
+              </artifactItems>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <overWriteReleases>false</overWriteReleases>
+              <overWriteSnapshots>true</overWriteSnapshots>
             </configuration>
           </execution>
         </executions>
