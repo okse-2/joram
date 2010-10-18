@@ -13,13 +13,23 @@
 		<groupId>org.objectweb.joram</groupId>
 		<version>5.4.0.54-SNAPSHOT</version>
 	</parent>
+  
 	<modules>
-      <module>shared</module>
-      <module>client</module>
-      <module>mom</module>
-      <module>security</module>
+    <module>shared</module>
+    <module>client</module>
+    <module>mom</module>
+    <module>security</module>
 	  <module>tools</module>
 	</modules>
-	
 
+  <profiles>
+    <!-- Profile release -->
+    <profile>
+      <id>release</id>
+      <modules>
+        <module>jca</module>
+      </modules>
+    </profile>
+  </profiles>
+  
 </project>
