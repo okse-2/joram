@@ -119,7 +119,7 @@ public class MessageListRecord extends ListGridRecord {
   }
 
   public void setProperties(Map properties) {
-    setAttribute(ATTRIBUTE_PROPERTIES, properties);
+    setAttribute(ATTRIBUTE_PROPERTIES, properties.toString());
   }
 
   public MessageWTO getMessage() {
