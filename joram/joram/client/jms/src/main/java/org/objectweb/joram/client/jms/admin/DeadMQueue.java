@@ -97,7 +97,7 @@ public class DeadMQueue extends Queue {
    */
   public static Queue create(int serverId, String name) throws ConnectException, AdminException {
     DeadMQueue dmq = new DeadMQueue();
-    doCreate(serverId, name, DEAD_MQUEUE, null, dmq, QUEUE_TYPE);
+    dmq.doCreate(serverId, name, DEAD_MQUEUE, null, dmq, QUEUE_TYPE);
     return dmq;
   }
 
