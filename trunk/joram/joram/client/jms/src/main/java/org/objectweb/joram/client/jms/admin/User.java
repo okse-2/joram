@@ -89,6 +89,15 @@ public class User extends AdministeredObject implements UserMBean {
    * Constructs an <code>User</code> instance.
    *
    * @param name  The name of the user.
+   */
+  public User(String name) {
+    this.name = name;
+  }
+
+  /**
+   * Constructs an <code>User</code> instance.
+   *
+   * @param name  The name of the user.
    * @param proxyId  Identifier of the user's proxy agent.
    */
   public User(String name, String proxyId) {
@@ -235,9 +244,10 @@ public class User extends AdministeredObject implements UserMBean {
                             String identityClassName) throws ConnectException, AdminException {
     Identity identity = createIdentity(name, password, identityClassName);
 
-    AdminReply reply = AdminModule.doRequest(new CreateUserRequest(identity, serverId));
-    User user = new User(name, ((CreateUserReply) reply).getProxId());
-
+    User user = new User(name);
+    AdminReply reply = user.getWrapper().doRequest(new CreateUserRequest(identity, serverId));
+    user.proxyId = ((CreateUserReply) reply).getProxId();
+    
     // Be careful, MBean registration is now done explicitly
 
     return user;
