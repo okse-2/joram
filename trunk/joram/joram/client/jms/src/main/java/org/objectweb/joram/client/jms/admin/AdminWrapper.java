@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -430,7 +430,7 @@ public class AdminWrapper {
     String reply = getDefaultDMQId(serverId);
     if (reply == null) return null;
 
-    return new DeadMQueue(reply);
+    return new Queue(reply);
   }
 
   /**
