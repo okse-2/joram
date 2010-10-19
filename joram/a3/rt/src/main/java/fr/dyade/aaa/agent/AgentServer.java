@@ -1449,7 +1449,7 @@ public final class AgentServer {
     String config = getProperty(FileMonitoringTimerTask.MONITORING_CONFIG_PATH_PROPERTY,
                                 FileMonitoringTimerTask.DEFAULT_MONITORING_CONFIG_PATH);
     try {
-      // if "monitoring.props" file exists configure a MonitoringTimerTask.
+      // if "fileMonitoring.props" file exists configure a FileMonitoringTimerTask.
       File file = new File(config);
       if (file.exists()) {
         long period = getLong(FileMonitoringTimerTask.MONITORING_CONFIG_PERIOD_PROPERTY,
@@ -1479,7 +1479,7 @@ public final class AgentServer {
     config = getProperty(LogMonitoringTimerTask.MONITORING_CONFIG_PATH_PROPERTY,
                          LogMonitoringTimerTask.DEFAULT_MONITORING_CONFIG_PATH);
     try {
-      // if "monitoring.props" file exists configure a MonitoringTimerTask.
+      // if "logMonitoring.props" file exists configure a FileMonitoringTimerTask.
       File file = new File(config);
       if (file.exists()) {
         long period = getLong(LogMonitoringTimerTask.MONITORING_CONFIG_PERIOD_PROPERTY,
