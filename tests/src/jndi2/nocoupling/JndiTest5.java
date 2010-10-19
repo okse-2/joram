@@ -164,6 +164,23 @@ public class JndiTest5 extends TestCase {
       assertEquals("E", ctx3.lookup("/E"));
       assertEquals("F", ctx3.lookup("/F"));
 
+      // Stop server S0 then restart it (all datas are lost).
+      System.out.println("Stop S0");
+      stopAgentServer((short) 0);
+      Thread.sleep(1000);
+      System.out.println("Start S0");
+      startAgentServer((short) 0, new String[] { "-DTransaction=fr.dyade.aaa.util.NullTransaction" });
+      Thread.sleep(5000);
+
+      // Verify data on S0
+      System.out.println("Verify on S0");
+      assertEquals("A", ctx0.lookup("/A"));
+      assertEquals("B", ctx0.lookup("/B"));
+      assertEquals("C1", ctx0.lookup("/C"));
+      assertEquals("D1", ctx0.lookup("/D"));
+      assertEquals("E", ctx0.lookup("/E"));
+      assertEquals("F", ctx0.lookup("/F"));
+
     } catch (Exception exc) {
       exc.printStackTrace();
       error(exc);
