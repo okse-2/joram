@@ -56,7 +56,7 @@ public class TcpWriter extends Daemon {
   public TcpWriter(IOControl ioctrl,
                    AckedQueue replyQueue,
                    TcpConnection tcpConnection) {
-    super("tcpWriter");
+    super("tcpWriter." + tcpConnection.getKey());
     this.ioctrl = ioctrl;
     this.replyQueue = replyQueue;
     this.tcpConnection = tcpConnection;

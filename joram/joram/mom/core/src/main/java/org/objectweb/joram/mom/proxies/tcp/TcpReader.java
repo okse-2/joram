@@ -62,7 +62,7 @@ public class TcpReader extends Daemon {
                    AgentId proxyId,
                    TcpConnection tcpConnection,
                    boolean closeConnection) {
-    super("tcpReader");
+    super("tcpReader." + tcpConnection.getKey());
     this.ioctrl = ioctrl;
     this.proxyId = proxyId;
     this.tcpConnection = tcpConnection;
