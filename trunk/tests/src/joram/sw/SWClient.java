@@ -22,7 +22,6 @@
  */
 package joram.sw;
 
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -44,15 +43,24 @@ import fr.dyade.aaa.agent.AgentServer;
 import framework.TestCase;
 
 /**
- *
+ * This test reproduces a user's scenario:
+ *  - Multiples Joram's servers connected by a PoolNetwork component.
+ *  - On each server there is a topic, the 5 topics are clustered.
+ *  - Each server is colocated with a client defining:
+ *    - A producer sending quickly 1.000 messages on the topic, then waiting 120 seconds, and so on..
+ *    - A consumer receiving all messages sent to the clustered topic.
+ * The test will verify that all messages are received in a correct order.
  */
 public class SWClient extends TestCase implements MessageListener {
   int sid;
   int nbmsg = 0;
   
-  static long period = 300000;
+  // Be careful, this period must be bigger than the time needed for a round.
+  // Otherwise messages from different rounds are getting muddled.
+  static long period = 90000;
+  
   static int msgPerLoop = 1000;
-  static int nbLoop = 500;
+  static int nbLoop = 5;
   
   static Object lock = null;
   
@@ -84,11 +92,13 @@ public class SWClient extends TestCase implements MessageListener {
 
       Thread.sleep(5000);
 
-      List<Topic> cluster = local.getClusterFellows();
-      for (int i=0; i<cluster.size(); i++) {
-        Topic element = cluster.get(i);
-        System.out.println("#" + sid + " - " + element);
-      }
+//      List<Topic> cluster = local.getClusterFellows();
+//      for (int i=0; i<cluster.size(); i++) {
+//        Topic element = cluster.get(i);
+//        System.out.println("#" + sid + " - " + element);
+//      }
+//
+//      Thread.sleep(5000);
       
       LocalConnectionFactory cf = new LocalConnectionFactory();
       Connection cnx = cf.createConnection("anonymous", "anonymous");
@@ -127,22 +137,27 @@ public class SWClient extends TestCase implements MessageListener {
   long start, end;
   long dt = 0;
   
+  // Be careful, this array doesn't allow the use of a server with sid greater than 9.
+  int idx[] = {-1, -1, -1, -1, -1,-1, -1, -1, -1, -1};
+  
   /**
    * @see javax.jms.MessageListener#onMessage(javax.jms.Message)
    */
   public void onMessage(Message m) {
     try {
       TextMessage msg = (TextMessage) m;
-      int loop = msg.getIntProperty("loop");
-      int idx = msg.getIntProperty("idx");
+      int m_sid = msg.getIntProperty("sid");
+      int m_loop = msg.getIntProperty("loop");
+      int m_idx = msg.getIntProperty("idx");
       
       long time = System.currentTimeMillis();
-      if (loop != current) {
+      
+      if (m_loop != current) { // Start a new round
         if (current != -1) {
-          System.out.println("receiver#" + sid + '.' + current + " - " + (end/1000) + ' ' + nbmsg + '/' + (end -start));
+          System.out.println("receiver#" + sid + '.' + current + "(" + m_sid + ", " + m_idx + ") - " + (end/1000) + ' ' + nbmsg + '/' + (end -start));
           dt += (end - start);
         }
-        current = loop;
+        current = m_loop;
         synchronized(lock) {
           if (current == nbLoop) lock.notify();
         }
@@ -150,7 +165,10 @@ public class SWClient extends TestCase implements MessageListener {
       }
       end = time;
       
-//      System.out.println("#" + sid + " - " + msg.getText());
+      if ((idx[m_sid] != m_idx) && (m_idx != 0))
+          System.out.println("receiver#" + sid + '.' + current + "(" + m_sid + ", " + m_idx + ") should be " + idx[sid]);
+      idx[m_sid] = m_idx + 1;
+      
       nbmsg += 1;
     } catch (JMSException exc) {
       exc.printStackTrace();
@@ -169,23 +187,30 @@ public class SWClient extends TestCase implements MessageListener {
       this.producer = producer;
     }
     
+    public void send(int idx) throws JMSException {
+      TextMessage msg = session.createTextMessage("Server#" + sid + " updated " + loop + '.' + idx);
+      msg.setIntProperty("sid", sid);
+      msg.setIntProperty("loop", loop);
+      msg.setIntProperty("idx", idx);
+      producer.send(msg);
+    }
+    
     public void run() {
       long start, end;
-      TextMessage msg;
       
       try {
-        start = System.currentTimeMillis();
-        for (int idx=0; idx<msgPerLoop; idx++) {
-          msg = session.createTextMessage("Server#" + sid + " updated " + loop + '.' + idx);
-          msg.setIntProperty("sid", sid);
-          msg.setIntProperty("loop", loop);
-          msg.setIntProperty("idx", idx);
-          producer.send(msg);
+        if (loop < nbLoop) {
+          start = System.currentTimeMillis();
+          for (int idx=0; idx<msgPerLoop; idx++)
+            send(idx);
+          loop += 1;
+          end = System.currentTimeMillis();
+          System.out.println("sender#" + sid + '.' + loop + " - " + (end/1000) + ' ' + msgPerLoop + '/' + (end -start));
+          dt += (end - start);
+        } else {
+          // just send a unique message to display the statistics of previous round
+          send(0);
         }
-        loop += 1;
-        end = System.currentTimeMillis();
-        System.out.println("sender#" + sid + '.' + loop + " - " + (end/1000) + ' ' + msgPerLoop + '/' + (end -start));
-        dt += (end - start);
       } catch (JMSException exc) {
         exc.printStackTrace();
       }
