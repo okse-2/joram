@@ -298,13 +298,19 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
                 logger.log(BasicLevel.WARN, "Exception:: XA can't start resource : " + consumerRes, e);
             }
           }
-          org.objectweb.joram.client.jms.Message clientMessage = 
-            org.objectweb.joram.client.jms.Message.convertJMSMessage(consumer.receiveNoWait());
+          javax.jms.Message msg = consumer.receiveNoWait();
+          if (msg != null) {
+            org.objectweb.joram.client.jms.Message clientMessage = 
+              org.objectweb.joram.client.jms.Message.convertJMSMessage(msg);
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, "receiveNoWait: clientMessage=" + clientMessage);
 
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "receiveNoWait: clientMessage=" + clientMessage);
-
-          momMessage = clientMessage.getMomMsg();
+            momMessage = clientMessage.getMomMsg();
+          } else {
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG, "receiveNoWait: no message available");
+          }
+          
           if (isXA) {
             try {
               consumerRes.end(xid, XAResource.TMSUCCESS);
