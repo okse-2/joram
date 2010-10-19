@@ -123,7 +123,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
                              String className,
                              Properties prop) throws ConnectException, AdminException {
     Topic topic = new Topic();
-    doCreate(serverId, name, className, prop, topic, TOPIC_TYPE);
+    topic.doCreate(serverId, name, className, prop, topic, TOPIC_TYPE);
     return topic;
   }
 

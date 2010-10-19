@@ -248,7 +248,7 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
                              String className,
                              Properties prop) throws ConnectException, AdminException {
     Queue queue = new Queue();
-    doCreate(serverId, name, className, prop, queue, QUEUE_TYPE);
+    queue.doCreate(serverId, name, className, prop, queue, QUEUE_TYPE);
     return queue;
   }
 
