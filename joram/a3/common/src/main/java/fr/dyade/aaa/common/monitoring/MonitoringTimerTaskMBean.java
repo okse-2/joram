@@ -65,4 +65,9 @@ public interface MonitoringTimerTaskMBean {
    * @param MBeanName the name of the MBean.
    */
   void delMonitoredAttributes(String MBeanName);
+  
+  /**
+   * Cancels this timer task.
+   */
+  void cancelTask();
 }

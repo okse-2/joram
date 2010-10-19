@@ -61,7 +61,7 @@ public abstract class MonitoringTimerTask extends java.util.TimerTask implements
   public static Logger logger = Debug.getLogger(MonitoringTimerTask.class.getName());
   
   /**
-   * Initializes the <code>eMonitoringTimerTask</code> component.
+   * Initializes the <code>MonitoringTimerTask</code> component.
    * 
    * @param period  Period value of the resulting task
    * @param attlist List of JMX attributes to periodically watch.
@@ -199,4 +199,12 @@ public abstract class MonitoringTimerTask extends java.util.TimerTask implements
   public void delMonitoredAttributes(String MBeanName) {
     attlist.remove(MBeanName);
   }
+  
+  /**
+   * Cancels this timer task.
+   */
+  public void cancelTask() {
+    cancel();
+  }
+
 }
