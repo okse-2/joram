@@ -358,7 +358,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * @exception ConnectException  If the administration connection is closed or broken.
    * @exception AdminException  If the request fails.
    */
-  protected static void doCreate(int serverId,
+  protected void doCreate(int serverId,
                                  String name,
                                  String className,
                                  Properties props,
@@ -369,7 +369,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
                  "Destination.doCreate(" + serverId + ',' + name + ',' + className + ',' + props + ',' + dest + ',' + type + ')');
 
     CreateDestinationRequest cdr = new CreateDestinationRequest(serverId, name, className, props, type);
-    CreateDestinationReply reply = (CreateDestinationReply) AdminModule.doRequest(cdr);
+    CreateDestinationReply reply = (CreateDestinationReply) getWrapper().doRequest(cdr);
 
     dest.agentId = reply.getId();
     dest.adminName = name;
