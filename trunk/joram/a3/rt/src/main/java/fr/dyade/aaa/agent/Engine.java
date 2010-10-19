@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -347,10 +347,6 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
 
     NbMaxAgents = AgentServer.getInteger("NbMaxAgents", NbMaxAgents).intValue();
     qin = new MessageVector(name, AgentServer.getTransaction().isPersistent());
-    // No longer needed, see Engine.garbage.
-//    if (! AgentServer.getTransaction().isPersistent()) {
-//      NbMaxAgents = Integer.MAX_VALUE;
-//    }
     mq = new Queue();
 
     isRunning = false;
@@ -484,6 +480,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    */
   void deleteAgent(AgentId from) throws Exception {
     Agent ag;
+    Agent old = agent;
     try {
       ag = load(from);
       if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -513,7 +510,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
       logmon.log(BasicLevel.ERROR,
                  "Agent" + ag.id + " [" + ag.name + "] error during agentFinalize", exc);
     } finally {
-      agent = null;
+      agent = old;
     }
   }
 
@@ -616,8 +613,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    * @param id	The agent's unique identification.
    * @return	A string representation of specified agent.
    */
-  public String dumpAgent(AgentId id)
-  throws IOException, ClassNotFoundException, Exception {
+  public String dumpAgent(AgentId id) throws IOException, ClassNotFoundException {
     Agent ag = (Agent) agents.get(id);
     if (ag == null) {
       ag = Agent.load(id);
@@ -873,6 +869,40 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   protected boolean needToBeCommited = false;
   protected long timeout = Long.MAX_VALUE;
 
+  public boolean agentProfiling = false;
+  
+  public boolean isAgentProfiling() {
+    return this.agentProfiling;
+  }
+  
+  public void setAgentProfiling(boolean agentProfiling) {
+    this.agentProfiling = agentProfiling;
+  }
+
+  /**
+   * Time consumned during agent's reaction.
+   */
+  private long reactTime = 0L;
+
+  /**
+   * @return the reactTime
+   */
+  public long getReactTime() {
+    return reactTime;
+  }
+
+  /**
+   * Time consumned during reaction commit.
+   */
+  private long commitTime;
+
+  /**
+   * @return the commitTime
+   */
+  public long getCommitTime() {
+    return commitTime;
+  }
+
   protected void onTimeOut() throws Exception {}
 
   /**
@@ -880,6 +910,9 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    */
   public void run() {
     try {
+      long start = 0L;
+      long end = 0L;
+      
       main_loop:
         while (isRunning) {
           agent = null;
@@ -960,13 +993,22 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
             }
           }
 
+          if (agentProfiling) {
+            start = System.currentTimeMillis();
+          }
           if (agent != null) {
             if (logmon.isLoggable(BasicLevel.DEBUG))
               logmon.log(BasicLevel.DEBUG,
-                         getName() + ": " + agent + ".react(" +
-                         msg.from + ", " + msg.not + ")");
+                         getName() + ": " + agent + ".react(" + msg.from + ", " + msg.not + ")");
             try {
               agent.react(msg.from, msg.not);
+              agent.reactNb += 1;
+              if (agentProfiling) {
+                end  = System.currentTimeMillis();
+                agent.reactTime += (end - start);
+                reactTime += (end - start);
+                start = end;
+              }
             } catch (Exception exc) {
               logmon.log(BasicLevel.ERROR,
                          getName() + ": Uncaught exception during react, " +
@@ -978,8 +1020,8 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
                 // In case of unrecoverable error during the reaction we have
                 // to rollback.
                 abort(exc);
-              // then continue.
-              continue;
+                // then continue.
+                continue;
               case RP_EXIT:
                 // Stop the AgentServer
                 AgentServer.stop(false);
@@ -990,6 +1032,13 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
 
           // Commit all changes then continue.
           commit();
+
+          if (agentProfiling) {
+            end  = System.currentTimeMillis();
+            if (agent != null)
+              agent.commitTime += (end - start);
+            commitTime += (end - start);
+          }
         }
     } catch (Throwable exc) {
       //  There is an unrecoverable exception during the transaction
@@ -1014,6 +1063,9 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    * </ul>
    */
   void commit() throws Exception {
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, getName() + ": commit()");
+    
     AgentServer.getTransaction().begin();
     // Suppress the processed notification from message queue ..
     qin.pop();
@@ -1030,6 +1082,10 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     // The transaction has committed, then validate all messages.
     Channel.validate();
     AgentServer.getTransaction().release();
+    
+    if (logmon.isLoggable(BasicLevel.DEBUG))
+      logmon.log(BasicLevel.DEBUG, getName() + ": commited");
+
   }
 
   /**

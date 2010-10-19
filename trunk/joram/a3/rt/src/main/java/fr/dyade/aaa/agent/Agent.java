@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -76,6 +76,33 @@ public abstract class Agent implements AgentMBean, Serializable {
    */
   private transient boolean updated = true;
 
+  transient int reactNb = 0;
+  
+  /**
+   * @return the reactNb
+   */
+  public int getReactNb() {
+    return reactNb;
+  }
+
+  transient long reactTime = 0L;
+
+  /**
+   * @return the reactTime
+   */
+  public long getReactTime() {
+    return reactTime;
+  }
+
+  transient long commitTime = 0L;
+
+  /**
+   * @return the commitTime
+   */
+  public long getCommitTime() {
+    return commitTime;
+  }  
+  
   /**
    * Sets the <code>updated</code> field to <code>false</code> so that the
    * agent state is not saved after the current reaction; the field is set

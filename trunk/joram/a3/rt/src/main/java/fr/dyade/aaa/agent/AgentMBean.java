@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -57,4 +57,19 @@ public interface AgentMBean {
    * @return	A string representation of this agent. 
    */
   public String toString();
+  
+  /**
+   * @return the reactNb
+   */
+  public int getReactNb();
+  
+  /**
+   * @return the reactTime
+   */
+  public long getReactTime();
+  
+  /**
+   * @return the commitTime
+   */
+  public long getCommitTime();
 }
