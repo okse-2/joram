@@ -86,6 +86,20 @@ public interface EngineMBean {
 
   public String dumpAgent(String id) throws Exception;
   
+  public boolean isAgentProfiling();
+  
+  public void setAgentProfiling(boolean agentProfiling);
+  
+  /**
+   * @return the reactTime
+   */
+  public long getReactTime();
+
+  /**
+   * @return the commitTime
+   */
+  public long getCommitTime();
+
   /**
    * Returns the load averages for the last minute.
    * @return the load averages for the last minute.
