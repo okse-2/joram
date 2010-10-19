@@ -713,7 +713,7 @@ public class JoramSaxWrapper extends DefaultHandler {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG,
                        "JoramSaxWrapper creates wrapper (TCP): " + host + ',' + port + ',' + name);
-          ConnectionFactory cf =  (ConnectionFactory)TcpConnectionFactory.create(host, port, reliableClass);
+          ConnectionFactory cf = TcpConnectionFactory.create(host, port, reliableClass);
           cf.getParameters().connectingTimer = cnxTimer;
           cf.setIdentityClassName(identityClass);
 
@@ -725,7 +725,7 @@ public class JoramSaxWrapper extends DefaultHandler {
             logger.log(BasicLevel.DEBUG,
                        "JoramSaxWrapper creates wrapper (HA): " + url + ',' + name);
           
-          ConnectionFactory cf =  (ConnectionFactory) HATcpConnectionFactory.create(url);
+          ConnectionFactory cf = HATcpConnectionFactory.create(url);
           cf.getParameters().connectingTimer = cnxTimer;
           cf.setIdentityClassName(identityClass);
 
@@ -737,7 +737,7 @@ public class JoramSaxWrapper extends DefaultHandler {
             logger.log(BasicLevel.DEBUG,
                        "JoramSaxWrapper creates wrapper (Local): " + name);
           
-          ConnectionFactory cf =  (ConnectionFactory) LocalConnectionFactory.create();
+          ConnectionFactory cf = LocalConnectionFactory.create();
           cf.setIdentityClassName(identityClass);
 
           cnx = cf.createConnection(name, password);
