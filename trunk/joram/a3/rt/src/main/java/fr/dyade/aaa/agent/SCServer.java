@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,8 @@
 package fr.dyade.aaa.agent;
 
 import java.util.Enumeration;
+
+import fr.dyade.aaa.common.monitoring.DumpAttributes;
 
 public class SCServer implements SCServerMBean {
   public SCServer() {
@@ -74,5 +76,9 @@ public class SCServer implements SCServerMBean {
       strBuf.setLength(0);
     }
     return servers;
+  }
+  
+  public void dumpAttributes(String name, String path) {
+    DumpAttributes.dumpAttributes(name, path);
   }
 }
