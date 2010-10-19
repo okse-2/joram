@@ -209,7 +209,8 @@ public class JMSBridgeQueueImpl extends QueueImpl {
           message = null;
 
         QueueMsgReply reply = new QueueMsgReply(not);
-        reply.addMessage(message);
+        if (message != null)
+          reply.addMessage(message);
         forward(from, reply);
 
         if (logger.isLoggable(BasicLevel.DEBUG))
