@@ -35,24 +35,24 @@ import javax.jms.TextMessage;
 public class BridgeProducer {
   public static void main(String[] args) throws Exception {
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
-    Destination joramDest = (Destination) jndiCtx.lookup("joramQueue");
-    ConnectionFactory joramCF = (ConnectionFactory) jndiCtx.lookup("joramCF");
+    Destination bridgeDest = (Destination) jndiCtx.lookup("bridgeQueue");
+    ConnectionFactory bridgeCF = (ConnectionFactory) jndiCtx.lookup("bridgeCF");
     jndiCtx.close();
 
-    Connection joramCnx = joramCF.createConnection();
-    Session joramSess = joramCnx.createSession(true, 0);
-    MessageProducer joramSender = joramSess.createProducer(joramDest);
+    Connection bridgeCnx = bridgeCF.createConnection();
+    Session bridgeSess = bridgeCnx.createSession(true, 0);
+    MessageProducer bridgeProducer = bridgeSess.createProducer(bridgeDest);
 
-    TextMessage msg = joramSess.createTextMessage();
+    TextMessage msg = bridgeSess.createTextMessage();
 
     for (int i = 1; i < 11; i++) {
-      msg.setText("Joram message number " + i);
+      msg.setText("Joram message number " + i + "sent through bridge queue.");
       System.out.println("send msg = " + msg.getText());
-      joramSender.send(msg);
+      bridgeProducer.send(msg);
     }
 
-    joramSess.commit();
+    bridgeSess.commit();
 
-    joramCnx.close();
+    bridgeCnx.close();
   }
 }
