@@ -1,12 +1,33 @@
+###############################################################################
+# 2010/10/21 | Joram 5.4.0 tag.
+###############################################################################
++==============================================================================
+| 2010/10/19 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix in the JMS bridge, previously the use of receiveNoWait could cause a
+NPE in server and a client infinite wait.
+ Adds profiling attributes about number of reactions and CPU and I/O time
+consumption.
++==============================================================================
+| 2010/10/18 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Defines JCA artifacts for Joram adapter.
++==============================================================================
+| 2010/09/29 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Bug fix: Client blocking if sending a message with a TTL to a local destination
+(A possible cause of this problem can be a bad clock synchronization).
+In case of local interaction between the proxy and the destination the
+ClientMessage is sent in non persistent mode and the client should be notify
+after the destination reaction. Before this patch if TTL are set the CM could
+be deleted and the client is blocked, so we remove the expiration date on the
+CM in case of local sending.
 +==============================================================================
 | 2010/09/24 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Fix bug when deleting a user: user was partially removed when deletion is not
 allowed.
  Change admin MBean name: user's name is used instead of 'JoramAdminProxy'.
-###############################################################################
-# 2010/08/26 | Joram 5.4.0 tag.
-###############################################################################
 +==============================================================================
 | 2010/09/23 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
@@ -20,8 +41,8 @@ allowed.
 | 2010/09/17 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Fix a bug in administration of cluster destination through XML scripts (the
-administration wrapper was not set so at creation so there is an error during
-next operations).
+administration wrapper was not set at creation so there is an error during next
+operations).
 +==============================================================================
 | 2010/08/25 | Andre Freyssinet - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
