@@ -87,6 +87,9 @@ public class BridgeTest extends TestCase {
         assertEquals("Foreign message number "+i,msg.getText());
 
       }
+      msg=(TextMessage) joramCons.receiveNoWait();
+      assertTrue(msg == null);
+      
       foreignCnx.close();
       joramCnx.close();
 
