@@ -22,12 +22,22 @@
  */
 package org.objectweb.joram.shared.stream;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.StringTokenizer;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.common.Debug;
 
 /**
  *
  */
 public class MetaData {
+	public static Logger logger = Debug.getLogger(MetaData.class.getName());
+	
   public static byte[] joramMagic = {'J', 'O', 'R', 'A', 'M', 0, 0, 0};
   
   /** Joram's implementation version. */
@@ -46,7 +56,7 @@ public class MetaData {
   public static int protocol = 0;
   
   static {
-  	getVersion();
+  	getVersionInResource();
   	joramMagic[5] = (byte) major;
   	joramMagic[6] = (byte) minor;
   	joramMagic[7] = (byte) protocol;
@@ -56,15 +66,49 @@ public class MetaData {
   	// Read version from the package
   	Package pkg = MetaData.class.getPackage();
   	if (pkg != null) {
-  		String implVersion = pkg.getImplementationVersion();
-  		if (implVersion != null) {
-  			version = implVersion;
+  		try {
+  			String implVersion = pkg.getImplementationVersion();
+  			if (implVersion != null) {
+  				version = implVersion;
+  				StringTokenizer st = new StringTokenizer(implVersion, ".");
+  				major = Integer.parseInt(st.nextToken());
+  				minor = Integer.parseInt(st.nextToken());
+  				build = Integer.parseInt(st.nextToken());
+  				protocol = Integer.parseInt(st.nextToken("-").substring(1));
+  			}
+  		} catch (Exception e) {
+  			if (logger.isLoggable(BasicLevel.DEBUG))
+  	      logger.log(BasicLevel.DEBUG, "MetaData.getVersion:: EXCEPTION", e);
+  		}
+  	}
+  }
+  
+  private static void getVersionInResource() {
+  	String implVersion = null;
+  	// Read version from joram.version file in bundle. 
+  	try {
+  		InputStream in = MetaData.class.getResourceAsStream("/joram.version");
+  		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+  		String v = reader.readLine();
+  		implVersion = v.substring(v.indexOf('='), v.length());
+  	} catch (Exception e) {
+  		if (logger.isLoggable(BasicLevel.DEBUG))
+	      logger.log(BasicLevel.DEBUG, "MetaData.getVersionInResource:: EXCEPTION", e);
+  	}
+  	if (implVersion != null) {
+  		try {
+  			version = implVersion.trim();
   			StringTokenizer st = new StringTokenizer(implVersion, ".");
   			major = Integer.parseInt(st.nextToken());
   			minor = Integer.parseInt(st.nextToken());
   			build = Integer.parseInt(st.nextToken());
   			protocol = Integer.parseInt(st.nextToken("-").substring(1));
+  		} catch (Exception e) {
+  			if (logger.isLoggable(BasicLevel.DEBUG))
+  	      logger.log(BasicLevel.DEBUG, "MetaData.getVersionInResource:: EXCEPTION", e);
   		}
+  	} else {
+  		getVersion();
   	}
   }
   
