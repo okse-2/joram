@@ -804,7 +804,6 @@
 
  <target name="jca" depends="init"
     description="--> Runs the JCA connector">
-    <copy file="${conf.dir}/joramAdmin.xml" todir="${run.dir}"/>
     <java classname="connector.Connector" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
