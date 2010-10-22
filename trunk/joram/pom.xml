@@ -1,12 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.objectweb.joram</groupId>
   <artifactId>parent</artifactId>
   <packaging>pom</packaging>
   <!-- version : major.minor.build.protocol -->
-  <version>5.4.0.54-SNAPSHOT</version>
+  <version>5.4.0.54</version>
   <name>JORAM</name>
   <url>http://maven.apache.org</url>
   <description>Builds the Joram project.</description>
@@ -105,8 +104,8 @@
   
   <!-- Source code management -->
   <scm>
-    <connection>scm:svn:svn://svn.forge.objectweb.org/svnroot/joram/trunk</connection>
-    <developerConnection>scm:svn:svn+ssh://svn.forge.objectweb.org/svnroot/joram/trunk</developerConnection>
+    <connection>scm:svn:svn://svn.forge.objectweb.org/svnroot/joram/tags/JORAM_5_4_0</connection>
+    <developerConnection>scm:svn:svn+ssh://svn.forge.objectweb.org/svnroot/joram/tags/JORAM_5_4_0</developerConnection>
   </scm>
   
   <repositories>
