@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -24,10 +24,11 @@
 package org.objectweb.joram.client.jms;
 
 import java.util.Enumeration;
-import java.util.StringTokenizer;
 import java.util.Vector;
 
 import javax.jms.JMSException;
+
+import org.objectweb.joram.shared.stream.MetaData;
 
 /**
  * Implements the <code>javax.jms.ConnectionMetaData</code> interface.
@@ -51,26 +52,13 @@ public final class ConnectionMetaData implements javax.jms.ConnectionMetaData {
   private final static Vector jmsxProperties = new Vector();
   
   static {
-    jmsxProperties.add("JMSXDeliveryCount");
-    jmsxProperties.add("JMSXGroupID");
-    jmsxProperties.add("JMSXGroupSeq");
+  	jmsxProperties.add("JMSXDeliveryCount");
+  	jmsxProperties.add("JMSXGroupID");
+  	jmsxProperties.add("JMSXGroupSeq");
 
-    // Read version from the package
-    Package pkg = ConnectionMetaData.class.getPackage();
-    String implVersion = null;
-    if (pkg != null)
-      implVersion = pkg.getImplementationVersion();
-
-    if (implVersion != null) {
-      providerVersion = implVersion;
-      StringTokenizer st = new StringTokenizer(implVersion, ".");
-      providerMajorVersion = Integer.parseInt((String) st.nextElement());
-      providerMinorVersion = Integer.parseInt((String) st.nextElement());
-    } else {
-      providerVersion = "x.x.x";
-      providerMajorVersion = 0;
-      providerMinorVersion = 0;
-    }
+  	providerVersion = MetaData.version;
+  	providerMajorVersion = MetaData.major;
+  	providerMinorVersion = MetaData.minor;
   }
 
   /**
