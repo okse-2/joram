@@ -105,8 +105,8 @@
   
   <!-- Source code management -->
   <scm>
-    <connection>scm:svn:svn://svn.forge.objectweb.org/svnroot/joram/trunk/joram</connection>
-    <developerConnection>scm:svn:svn+ssh://svn.forge.objectweb.org/svnroot/joram/trunk/joram</developerConnection>
+    <connection>scm:svn:svn://svn.forge.objectweb.org/svnroot/joram/trunk</connection>
+    <developerConnection>scm:svn:svn+ssh://svn.forge.objectweb.org/svnroot/joram/trunk</developerConnection>
   </scm>
   
   <repositories>
