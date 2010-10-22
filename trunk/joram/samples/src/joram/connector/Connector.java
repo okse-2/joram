@@ -51,10 +51,9 @@ public class Connector {
       ja.start(bt);
       System.out.println("start ...");
      
-
       Context ictx = new InitialContext();
-      Queue queue = (Queue) ictx.lookup("sampleQueue");
-      Topic topic = (Topic) ictx.lookup("sampleTopic");
+      Queue queue = (Queue) ictx.lookup("queue");
+      Topic topic = (Topic) ictx.lookup("topic");
      
       ictx.close();
 
@@ -94,13 +93,13 @@ public class Connector {
       ActivationSpecImpl spec = new ActivationSpecImpl();
       spec.setResourceAdapter(ja);
       spec.setDestinationType("javax.jms.Queue");
-      spec.setDestination("sampleQueue");
+      spec.setDestination("queue");
 
       MessagePointFactory mep2 = new MessagePointFactory();
       ActivationSpecImpl spec2 = new ActivationSpecImpl();
       spec2.setResourceAdapter(ja);
       spec2.setDestinationType("javax.jms.Topic");
-      spec2.setDestination("sampleTopic");
+      spec2.setDestination("topic");
       
       
       ja.endpointActivation(mep , spec); // listener on queue
