@@ -11,7 +11,7 @@
 	<parent>
 		<groupId>org.objectweb.joram</groupId>
     <artifactId>joram</artifactId>
-		<version>5.4.1.54-SNAPSHOT</version>
+		<version>5.4.0.54-SNAPSHOT</version>
 	</parent>
 
   <profiles>
