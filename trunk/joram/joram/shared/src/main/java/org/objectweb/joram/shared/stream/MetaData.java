@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -61,28 +61,7 @@ public class MetaData {
   	joramMagic[6] = (byte) minor;
   	joramMagic[7] = (byte) protocol;
   }
-  
-  private static void getVersion() {
-  	// Read version from the package
-  	Package pkg = MetaData.class.getPackage();
-  	if (pkg != null) {
-  		try {
-  			String implVersion = pkg.getImplementationVersion();
-  			if (implVersion != null) {
-  				version = implVersion;
-  				StringTokenizer st = new StringTokenizer(implVersion, ".");
-  				major = Integer.parseInt(st.nextToken());
-  				minor = Integer.parseInt(st.nextToken());
-  				build = Integer.parseInt(st.nextToken());
-  				protocol = Integer.parseInt(st.nextToken("-").substring(1));
-  			}
-  		} catch (Exception e) {
-  			if (logger.isLoggable(BasicLevel.DEBUG))
-  	      logger.log(BasicLevel.DEBUG, "MetaData.getVersion:: EXCEPTION", e);
-  		}
-  	}
-  }
-  
+   
   private static void getVersionInResource() {
   	String implVersion = null;
   	// Read version from joram.version file in bundle. 
@@ -107,45 +86,6 @@ public class MetaData {
   			if (logger.isLoggable(BasicLevel.DEBUG))
   	      logger.log(BasicLevel.DEBUG, "MetaData.getVersionInResource:: EXCEPTION", e);
   		}
-  	} else {
-  		getVersion();
   	}
   }
-  
-//  static {
-//    int idx1 = 0;
-//    int idx2 = 0;
-//    
-//    try {
-//      idx2 = version.indexOf('.');
-//      if (idx2 != -1) {
-//        joramMagic[5] = Byte.parseByte(version.substring(idx1, idx2));
-//      } else {
-//        throw new IllegalArgumentException();
-//      }
-//    
-//      idx1 = idx2 +1;
-//      idx2 = version.indexOf('.', idx1);
-//      if (idx2 != -1) {
-//        joramMagic[6] = Byte.parseByte(version.substring(idx1, idx2));
-//      } else {
-//        throw new IllegalArgumentException();
-//      }
-//    
-//      idx1 = idx2 +1;
-//      idx2 = version.indexOf('.', idx1);
-//      if (idx2 != -1) {
-//        joramMagic[7] = Byte.parseByte(version.substring(idx1 +1, idx2));
-//      } else {
-//        throw new IllegalArgumentException();
-//      }
-//    } catch (Exception exc) {
-//      // Should never happen
-//    }
-//
-//    joramMagic[5] = (byte) major;
-//    joramMagic[6] = (byte) minor;
-//    joramMagic[7] = (byte) protocol;    
-//  }
-
 }
