@@ -78,7 +78,7 @@
             <executions>
               <execution>
                 <id>javadoc</id>
-                <phase>install</phase>
+                <phase>deploy</phase>
                 <goals>
                   <goal>aggregate</goal>
                 </goals>
