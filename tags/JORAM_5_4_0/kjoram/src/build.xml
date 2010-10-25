@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+
+<project default="build.kjoram" basedir=".">
+
+  <target name="setver" unless="version">
+    <!-- If version is not set, fix it -->
+    <property name="version" value="${joram.version}"/>
+  </target>
+    
+  <!-- Initializes properties -->
+  <target name="init" depends="setver">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Initialize the environment properties, use ${env.name} -->
+    <property environment="env"/>
+
+    <!-- Get the user defined properties from file -->
+    <property file="build.properties"/>
+
+    <!-- Initialize the directory structure properties -->
+    <property name="src.dir" location="."/>
+    <property name="obj.dir" location="../classes"/>
+    <property name="lib.dir" location="../lib"/>
+    <property name="licenses.dir" location="../licenses"/>
+    <property name="build.dir" location="../build"/>
+    <property name="ship.dir" location="../ship"/>
+    <property name="samples.dir" location="../samples/src"/>
+
+    <!-- Base classpath needed for execution -->
+    <path id="base.class.path">
+      <pathelement path="${java.class.path}/"/>
+      <fileset dir="${lib.dir}">
+        <include name="**.jar"/>
+      </fileset>
+    </path>
+
+    <!-- Project classpath needed for compilation -->
+    <path id="project.class.path">
+      <path refid="base.class.path"/>
+      <pathelement path="${obj.dir}"/>
+      <pathelement path="${additional.path}"/>
+    </path>
+  </target>
+
+  <!-- Clean all generated files -->
+  <target name="clean" depends="init">
+    <delete dir="${obj.dir}"/>
+    <delete dir="${build.dir}"/>
+    <delete dir="${ship.dir}"/>
+  </target>
+
+  <!-- Prepare compilation phase -->
+  <target name="prepare" depends="init">
+    <!-- Create the directory structure -->
+    <mkdir dir="${obj.dir}"/>
+    <mkdir dir="${build.dir}"/>
+  </target>
+
+  <!-- Compilation phase -->
+    <target name="compile" depends="prepare"
+        description="--> Compiles sources.">
+      <unzip src="${lib.dir}/ow_util_log_api.jar" dest="${obj.dir}"/>
+ 			<javac source="1.3" target="1.1"
+             bootclasspath="${lib.dir}/cldcapi11.jar"
+             classpath="${lib.dir}/midpapi21.jar"
+             srcdir="${src.dir}:${obj.dir}"
+             destdir="${obj.dir}"
+             debug="on"
+             deprecation="${deprecation}"
+             optimize="false"
+             nowarn="${nowarn}"
+             verbose="${verbose}">
+    		<include name="org/objectweb/kjoram/*.java"/>
+  	</javac>
+  </target>
+  
+  <!-- Builds kjoram (needs 1.1 compiler) -->
+    <target name="build.kjoram" depends="compile"
+        description="--> Builds kjoram jars.">
+      <!-- jars building -->
+      <jar jarfile="${build.dir}/kjoram.jar">
+        <manifest>
+          <attribute name="Implementation-Title" value="kjoram"/>
+          <attribute name="Implementation-Version" value="${version}"/>
+          <attribute name="Implementation-Vendor" value="ScalAgent D.T."/>
+        </manifest>
+        <metainf dir="${licenses.dir}">
+          <include name="NOTICE.TXT"/>
+        </metainf>
+        <fileset dir="${obj.dir}">
+          <include name="**/*.class"/>
+        </fileset>
+      </jar>
+      
+      <!-- create kjoram.jad -->
+      <length file="${build.dir}/kjoram.jar" property="length.kjoram.jar" />
+      <echo file="${build.dir}/kjoram.jad">MIDlet-Jar-Size: ${length.kjoram.jar}
+MIDlet-Jar-URL: kjoram.jar
+MIDlet-Name: kjoram Midlet Suite
+MIDlet-Vendor: ScalAgent D.T.
+MIDlet-Version: ${joram.version}
+MicroEdition-Configuration: CLDC-1.1
+MicroEdition-Profile: MIDP-2.0
+      </echo>       
+    </target>  
+  
+</project>

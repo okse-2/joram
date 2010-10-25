@@ -1,0 +1,48 @@
+<config>
+  <property name='Transaction' value='fr.dyade.aaa.util.NGTransaction' />
+  <property name='Transaction.MaxLogFileSize' value='16' />
+  <property name='Transaction.NbLogFile' value='4' />
+
+  <domain name='D0' network='fr.dyade.aaa.agent.PoolNetwork' />
+  <property name='D0.backlog' value='5' />
+  <property name='D0.CnxRetry' value='3' />
+  <property name='D0.TcpNoDelay' value='false' />
+  <property name='D0.SoLinger' value='-1' />
+  <property name='D0.SoTimeout' value='0' />
+  <property name='D0.ConnectTimeout' value='0' />
+  <property name='D0.PoolNetwork.nbMaxCnx' value='-1' />
+  <property name='D0.PoolNetwork.compressedFlows' value='false' />
+  <property name='D0.PoolNetwork.maxMessageInFlow' value='-1' />
+  <property name='D0.PoolNetwork.IdleTimeout' value='60000' />
+
+  <server id='0' name='s0' hostname='localhost'>
+    <service class='org.objectweb.joram.mom.proxies.ConnectionManager' args='root root' />
+    <service class='fr.dyade.aaa.jndi2.server.JndiServer' args='16400' />
+    <service class='org.objectweb.joram.mom.proxies.tcp.TcpProxyService' args='16010' />
+    <network domain='D0' port='16100' />
+  </server>
+
+  <server id='1' name='s1' hostname='localhost'>
+    <service class='org.objectweb.joram.mom.proxies.ConnectionManager' args='root root' />
+    <service class='org.objectweb.joram.mom.proxies.tcp.TcpProxyService' args='16011' />
+    <network domain='D0' port='16101' />
+  </server>
+
+  <server id='2' name='s2' hostname='localhost'>
+    <service class='org.objectweb.joram.mom.proxies.ConnectionManager' args='root root' />
+    <service class='org.objectweb.joram.mom.proxies.tcp.TcpProxyService' args='16012' />
+    <network domain='D0' port='16102' />
+  </server>
+
+  <server id='3' name='s3' hostname='localhost'>
+    <service class='org.objectweb.joram.mom.proxies.ConnectionManager' args='root root' />
+    <service class='org.objectweb.joram.mom.proxies.tcp.TcpProxyService' args='16013' />
+    <network domain='D0' port='16103' />
+  </server>
+
+  <server id='4' name='s4' hostname='localhost'>
+    <service class='org.objectweb.joram.mom.proxies.ConnectionManager' args='root root' />
+    <service class='org.objectweb.joram.mom.proxies.tcp.TcpProxyService' args='16014' />
+    <network domain='D0' port='16104' />
+  </server>
+</config>
