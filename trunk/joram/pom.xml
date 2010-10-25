@@ -5,7 +5,7 @@
   <artifactId>parent</artifactId>
   <packaging>pom</packaging>
   <!-- version : major.minor.build.protocol -->
-  <version>5.4.0.54</version>
+  <version>5.4.1.54-SNAPSHOT</version>
   <name>JORAM</name>
   <url>http://maven.apache.org</url>
   <description>Builds the Joram project.</description>
@@ -104,8 +104,8 @@
   
   <!-- Source code management -->
   <scm>
-    <connection>scm:svn:svn://svn.forge.objectweb.org/svnroot/joram/tags/JORAM_5_4_0</connection>
-    <developerConnection>scm:svn:svn+ssh://svn.forge.objectweb.org/svnroot/joram/tags/JORAM_5_4_0</developerConnection>
+    <connection>scm:svn:svn://svn.forge.objectweb.org/svnroot/joram/trunk</connection>
+    <developerConnection>scm:svn:svn+ssh://svn.forge.objectweb.org/svnroot/joram/trunk</developerConnection>
   </scm>
   
   <repositories>
