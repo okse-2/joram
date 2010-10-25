@@ -42,8 +42,7 @@ public class test6 extends TestCase {
       AgentServer.init(args);
       if ((excMsg != null) && (excMsg.length() != 0) &&
           (excType != null) && (excType.length() != 0))
-        addFailure(new Exception("Exception expecting: " +
-                                 excType + '(' + excMsg + ')'));
+        addFailure(new Exception("Exception expecting: " + excType + '(' + excMsg + ')'));
     } catch (Throwable exc) {
       assertEquals(excType, exc.getClass().getName());
       assertTrue(exc.getMessage().startsWith(excMsg));
