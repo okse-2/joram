@@ -1,0 +1,48 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.objectweb.joram</groupId>
+  <artifactId>mom-amqp</artifactId>
+  <name>JORAM :: mom :: amqp</name>
+  <description>Builds amqp.</description>
+  <version>0.4</version>
+  <url>http://joram.ow2.org/</url>
+  <organization>
+    <name>Scalagent D.T.</name>
+    <url>http://www.scalagent.com/</url>
+  </organization>
+  
+  <parent>
+    <artifactId>ow2</artifactId>
+    <groupId>org.ow2</groupId>
+    <version>1.1</version>
+  </parent>
+
+  <properties>
+    <joram.version>5.3.3.53</joram.version>
+  </properties>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.objectweb.joram</groupId>
+      <artifactId>a3-common</artifactId>
+      <version>${joram.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.objectweb.joram</groupId>
+      <artifactId>a3-rt</artifactId>
+      <version>${joram.version}</version>
+    </dependency>
+  </dependencies>
+</project>

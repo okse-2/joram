@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="joram-team@ow2.org">JORAM team</author>
+    <title>Partners</title>
+    <filename>partners.xml</filename>
+    <pathtoroot>.</pathtoroot>
+  </properties>
+
+  <body>
+    <s1 name="Current partners">
+    <table>	
+		<tr>
+      <td align="center" valign="middle">
+      <a href="http://www.scalagent.com/">
+      <img src="images/partners/scalagent.jpg" alt="ScalAgent logo"
+        border="0" width="295" height="101"/></a>
+      </td>
+      <td align="left" valign="middle">
+      <p><a href="http://www.scalagent.com/">ScalAgent Distributed Technologies</a> is a startup company spin-off
+      from <a href="http://www.inria.fr/">INRIA</a> and <a href="http://www.bull.com/">Bull</a>, which aims at
+      developing and market advanced mediation solutions for large-scale Internet business infrastructure and
+      applications. Scalagent is the main developer and integrator for JORAM.</p>
+      </td>
+    </tr>
+    </table>
+    </s1>
+
+    <s1 name="Thanks">
+      <s2 name="YourKit">
+        <p>Thanks to the people at <a href="http://www.yourkit.com/">YourKit</a> for providing us a free license
+        for their <a href="http://www.yourkit.com/">Java profiler</a>. It will be very useful in optimizing future
+        releases of Joram.</p>
+      </s2>
+    </s1>
+	
+    <s1 name="Sponsors">
+    <table>
+    <tr>
+      <td align="center" valign="middle">
+      <a href="http://www.cnes.fr/">
+      <img src="images/partners/CNES2.png" alt="CNES logo" border="0" height="49" width="140"/></a>
+      </td>
+      <td>
+      <p>The french space agency (<a href="http://www.cnes.fr">CNES</a>) uses Joram as main transport for its
+      new generation of Space Monitoring and Control (SM&amp;C) middleware.</p>
+      </td>
+    </tr>
+
+    <tr>
+      <td align="center" valign="middle">
+      <a href="http://www.rd.francetelecom.com/">
+      <img src="images/partners/logo-ftrd.gif" alt="France Telecom RD logo" border="0" height="33" width="140"/></a>
+      </td>
+      <td>
+      <p><a href="http://www.rd.francetelecom.com">France Telecom R&amp;D</a> is the main sponsor of many advanced
+      functions in Joram:</p>
+        <ul>
+          <li>Clustering facilities,</li>
+          <li>High Availability Joram Server,</li>
+          <li>JMS bridge,</li>
+          <li>WebLogic resources adapter.</li>
+        </ul>
+      </td>
+    </tr>
+    
+    <tr>
+      <td align="center" valign="middle">
+      <a href="http://www.bull.com/">
+      <img src="images/partners/logobull.gif" alt="Bull logo" border="0" height="61" width="140"/></a>
+      </td>
+      <td>
+      <p><a href="http://www.bull.com">Bull</a> is the main sponsor of the JCA1.5 Resource Adapter included in Joram
+      since version 4.1.</p>
+      </td>
+    </tr>
+       
+    <tr>
+      <td align="center" valign="middle">
+      <a href="http://www.agence-nationale-recherche.fr/">
+      <img src="images/partners/anr_logo.jpg" alt="ANR logo" border="0" height="60" width="140"/></a>
+      </td>
+      <td>
+      <p>The French National Research Agency (<a href="http://www.agence-nationale-recherche.fr">ANR</a>) has supported
+      Joram through many research projects. Currently ScalAgent D.T. is partner of 2 projects extending Joram:</p>
+      <ul>
+      <li><a href="http://selfxl.gforge.inria.fr/dokuwiki/doku.php">SelfXL</a> about Self-management of compleX
+      and Large scale systems.</li>
+      <li><a href="http://itemis-anr.org/">ITEmIS</a> about definition of a new generation SOA enabling IT and Embedded
+      Integrated Systems.</li>
+      </ul>
+      </td>
+    </tr>
+        
+    </table>		
+    </s1>
+
+    <s1 name="Initial partners">
+    <table>
+		<tr>
+      <td align="center" valign="middle">
+      <a href="http://www.bull.com/">
+      <img src="images/partners/bull.jpg" alt="Bull logo" border="0" height="67" width="210"/></a>
+      </td>
+      <td>
+      <p><a href="http://www.bull.com">Bull</a> was one of the initial contributors of the JORAM open source
+      JMS messaging platform.</p>
+      </td>
+    </tr>	
+    <tr>
+    <td align="center" valign="middle">
+    <img src="images/partners/dyade.gif" alt="Dyade logo" width="210" border="0" height="50"/>
+    </td>
+    <td><p>The G.I.E. Dyade was a BULL/INRIA advanced research joint venture. Its goals was the conception and development
+    of new technological components for future information systems.</p>
+    </td>
+    </tr>
+    <tr>
+    <td rowspan="1" colspan="1" valign="middle" align="center">
+    <a href="http://www.inria.fr/">
+    <img src="images/partners/inria.gif" border="0" width="210" height="57" alt="INRIA logo" align="middle"/></a>
+    </td>
+    <td rowspan="1" colspan="1" valign="middle" align="left">
+    <a href="http://www.inria.fr/">INRIA</a> is the French National Institute for Research in Computer Science and Control.
+    It is a scientific and technological institute operating under the dual authority of the Ministry of Research and the
+    Ministry of Industry.</td>
+    </tr>
+    </table>
+    </s1>
+    
+  </body>
+</document>

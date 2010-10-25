@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="test@objectweb.org">JORAM team</author>
+    <title>Test Suite Home Page</title>
+    <filename>index.xml</filename>
+    <pathtoroot>..</pathtoroot>
+  </properties>
+
+  <body>
+    <s1 name="History">
+      <subtitle>8th November 2002: SwiftMQ 4.0.0 implementing JMS 1.1
+        passes the Test Suite</subtitle>
+      <p>A new Admin class has been provided by Andreas Mueller. It
+         is available in CVS and in the package distribution.</p>
+      <hr />
+      <subtitle>18th June 2002: Branch of the Test Suite to add JMS
+        1.1 support</subtitle>
+      <p>The CVS repository of the Test Suite has been branched to
+        support JMS 1.1 tests:
+      </p>
+      <ul>
+        <li>the main branch of CVS is for JMS 1.1 tests</li>
+        <li>the branch <em>jms-1.0.2b</em> is for JMS 1.0.2b
+          ones</li>
+      </ul>
+      <hr />
+
+      <subtitle>6th June 2002: SwiftMQ 3.2.0 supports the Test
+        Suite</subtitle>
+      <p>Thanks to <a href="mailto:am@iit.de">Andreas Mueller</a>,
+        SwiftMQ 3.2.0, which is out for only a few days, already
+        supports the Test Suite. Congratulations to SwiftMQ team for
+        their new product and thanks for the contribution!</p>
+      
+      <hr />
+
+      <subtitle>1st May 2002: AshnaMQ supports the Test
+        Suite</subtitle>
+      <p>Thanks to <a href="mailto:support@ashnasoft.com">AshnaSoft
+          team</a>, both <a
+          href="http://www.ashnasoft.com/products.html">AshnaMQ</a> Standard and
+        Enterprise Edition are available for the Test Suite. Thanks!</p>
+      
+      <hr />
+      
+      <subtitle>23rd April 2002: Pramati supports the Test
+        Suite</subtitle>
+      <p>Thanks to <a href="mailto:rajdeep@pramati.com">Rajdeep
+          Dua</a>, <a href="http://www.pramati.com/">Pramati</a> has
+        contributed to the Test Suite and offered 
+        an Admin implementation to use the Test Suite with both their
+        Application Server and Message Server. Thanks Rajdeep!</p>
+
+      <hr />
+
+      <subtitle>15th April 2002: Test Suite web pages and package available</subtitle>
+      <p>The Test Suite has now its own web pages.</p>
+      <p>As requested by some people, it is now also
+        available as a <a href="../download/tests.tgz">package</a>.</p>
+    </s1>
+    <s1 name="About">
+      <p>This Test Suite is available under LGPL.
+        It tests JMS features and its code base is
+        <em>pure JMS without dependency from any vendor</em>.
+      </p>
+      <p>Technically, the administration step is done through a simple interface
+        that any provider can implement. For the moment, we provide
+        implementations for:</p>
+      <ul>
+        <li><a href="../index.html">JORAM</a></li>
+        <li><a href="http://www.ashnasoft.com/">AshnaMQ</a></li>
+        <li><a
+            href="http://fiorano.com/best_cgi/frame.cgi?target=products/fmq_tour.htm">FioranoMQ</a></li>
+        <li><a href="http://www.pramati.com/">Pramati</a></li>
+        <li><a href="http://www.swiftmq.com/">SwiftMQ</a></li>
+      </ul>
+      <p>We suggest that other JMS providers implement this
+        interface so that the suite can be used by potential users to test
+        implementations with respect to well known test scenarios.
+      </p>
+    </s1>
+    <s1 name="Mailing List">
+      <p>A mailing list (<a
+          href="mailto:test@objectweb.org">test@objectweb.org</a>) has
+        been created to discuss about this test suite. It is moderated
+        to avoid spam but you're welcome to subscribe if you're
+        interested in <em>using or developing</em> the Test Suite. 
+      </p>
+      <p>To subscribe, send a mail to <a
+          href="mailto:sympa@objectweb.org">sympa@objectweb.org</a>
+        with in the message body: <code>subscribe test</code></p>
+    </s1>
+    <s1 name="Getting Involved">
+      <p>Any input or personal view for improving and/or developing
+        this test suite is welcome. This test suite, as an open source
+        project, also welcomes external contributions.Interested?
+        Contact <a href="mailto:test@objectweb.org">us</a>.
+      </p>
+    </s1>
+  </body>
+
+</document>
