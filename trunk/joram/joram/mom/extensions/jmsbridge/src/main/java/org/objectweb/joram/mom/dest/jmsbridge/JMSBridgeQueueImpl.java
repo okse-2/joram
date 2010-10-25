@@ -185,15 +185,14 @@ public class JMSBridgeQueueImpl extends QueueImpl {
     int reqIndex = requests.size() - 1;
     deliverMessages(reqIndex);
 
-    // If the request has not been answered:
     if ((requests.size() - 1) == reqIndex) {
-      // If it is an immediate delivery request, requesting the foreign JMS
-      // destination for an immediate delivery.
+      // If the request has not been answered:
       if (not.getTimeOut() == -1) {
+        // If it is an immediate delivery request, requesting the foreign JMS
+        // destination for an immediate delivery.
         requests.remove(reqIndex);
 
         org.objectweb.joram.shared.messages.Message message = null;
-
         try {
           message = jmsModule.receiveNoWait();
         } catch (Exception exc) {
