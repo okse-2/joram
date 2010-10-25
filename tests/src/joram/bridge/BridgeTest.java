@@ -85,14 +85,24 @@ public class BridgeTest extends TestCase {
         msg=(TextMessage) joramCons.receive();
         System.out.println("receive msg = " + msg.getText());
         assertEquals("Foreign message number "+i,msg.getText());
-
       }
+      
       msg=(TextMessage) joramCons.receiveNoWait();
       assertTrue(msg == null);
       
+      foreignMsg = foreignSess.createTextMessage();
+      foreignMsg.setText("New foreign message");
+      foreignSender.send(foreignMsg);
+     
+      Thread.sleep(1000L);
+      
+      msg = (TextMessage) joramCons.receive();
+      assertTrue(msg != null);
+      if (msg != null)
+        assertEquals(foreignMsg.getText(), msg.getText());
+
       foreignCnx.close();
       joramCnx.close();
-
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);
