@@ -518,7 +518,7 @@ description=" --> launch all exceptionlistener tests">
      -->
     <property name="engine" value="fr.dyade.aaa.agent.Engine"/>
     <property name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
-    <property name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
+    <property name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
   </target>
 
   <target name="test.start">
@@ -2800,7 +2800,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="Destination"
              value="org.objectweb.joram.client.jms.Queue"/>
       <param name="transaction"
-             value="fr.dyade.aaa.util.NGTransaction"/>
+             value="fr.dyade.aaa.ext.NGTransaction"/>
       <!-- param name="transaction"
              value="fr.dyade.aaa.util.NullTransaction"/ -->
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
@@ -2825,7 +2825,7 @@ description=" --> launch all exceptionlistener tests">
   <target name="init.test6props">
     <property name="Destination" value="org.objectweb.joram.client.jms.Queue"/>
     <property name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
-    <property name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
+    <property name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
     <property name="engine" value="fr.dyade.aaa.agent.Engine"/>
     <property name="dupsOk" value="true"/>
     <property name="queueMessageReadMax" value="100"/>
@@ -3124,7 +3124,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test34"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
       <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DNbMsg=1000"/>
@@ -3132,7 +3132,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test34"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
       <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DNbMsg=10000"/>
@@ -3140,7 +3140,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test34"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
       <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef -DNbMsg=1000"/>
@@ -3148,7 +3148,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test34"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
       <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DNbMsg=1000"/>
@@ -3156,7 +3156,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test34"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
       <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DNbMsg=1000"/>
@@ -3164,7 +3164,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test34"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
       <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef -DNbMsg=1000"/>
@@ -3172,7 +3172,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test34"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
       <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=16 -DNTLogMemorySize=2048 -DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef -DNbMsg=500"/>
@@ -3180,7 +3180,7 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.perfs.Test34"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
       <param name="jvmargs" value="-DNTRepositoryImpl=fr.dyade.aaa.util.FileRepository -DNTLogFileSize=32 -DNTLogMemorySize=16384 -DMomMessageClass=org.objectweb.joram.shared.messages.MessageSoftRef -DNbMsg=800"/>
@@ -3213,7 +3213,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="className" value="joram.perfs.Test55"/>
       <param name="testid" value="perf.test55"/>
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
-      <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
       <param name="jndiconf" value="perfs/jndi.properties"/>
       <param name="a3conf" value="perfs/a3servers1.xml"/>
       <param name="jvmargs" value="-DNbMsg=15000 -DMsgSize=1680000 -Dmin=5000 -Dmax=6000 -DNTLogFileSize=32"/>
