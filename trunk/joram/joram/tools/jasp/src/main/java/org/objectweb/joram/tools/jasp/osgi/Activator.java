@@ -26,10 +26,10 @@ import java.util.Properties;
 
 import javax.jms.ConnectionFactory;
 
+import org.codehaus.stomp.jms.StompConnect;
 import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.codehaus.stomp.jms.StompConnect;
 
 /**
  *
@@ -41,7 +41,6 @@ public class Activator implements BundleActivator {
   /**
    * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
    */
-  @Override
   public void start(BundleContext context) throws Exception {
     cf = new LocalConnectionFactory();
 
@@ -60,7 +59,6 @@ public class Activator implements BundleActivator {
   /**
    * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
    */
-  @Override
   public void stop(BundleContext context) throws Exception {
     connect.stop();
     connect = null;
