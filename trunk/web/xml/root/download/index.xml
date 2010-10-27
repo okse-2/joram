@@ -21,16 +21,15 @@
       
 	    <p>The latest release packages are:</p>
 	    <ul>
-	      <li><code>joram-5.*.tgz</code>, including JORAM libraries and the JORAM samples sources;</li>
-	      <li><code>joram-5.*-osgi.tgz</code>, including JORAM bundles for OSGi, and the JORAM samples sources;</li>
-	      <li><code>joram-5.*-src.tgz</code>, including JORAM sources;</li>
-	      <li><code>joram-5.*-doc.tgz</code>, including JORAM javadoc;</li>
-	      <li><code>joram-jonasadapter-5.*.rar</code> ,JCA Adapter for Jonas </li>
-	      <li><code>joram-5.*-RA.rar</code>, the resource adapter for a collocated JORAM server within any J2EE 1.4 compliant 
+      <li><code>joram-release-5.*.zip</code>, including JORAM libraries and the JORAM samples sources;</li>
+      <li><code>joram-release-5.*-src.zip</code>, including JORAM sources;</li>
+	    <li><code>joram-5.*-doc.tgz</code>, including JORAM javadoc;</li>
+      <li><code>joram-jca-jonas-5.*.rar</code>, JCA Adapter for Jonas;</li>
+      <li><code>joram-jca-remote-5.*.rar</code>, the resource adapter for a collocated JORAM server within any J2EE compliant 
 	    	application server.</li>
-	      <li><code>joram-5.*-remoteRA.rar</code>, the resource adapter for any J2EE 1.4 application server with a non collocated 
-	    	JORAM server (possibly running remotely).</li>
-	      <li><code>joram-raconfig-5.*.tgz</code>, facilities enabling configuration of JCA rars.</li>
+      <li><code>joram-jca-ra-5.*.rar</code>, the resource adapter for a collocated JORAM server within any J2EE compliant 
+	    	application server.</li>
+      <li><code>joram-release-5.*-raconfig.zip</code>, facilities enabling configuration of JCA rars.</li>
 	    </ul>
  
 	    <p>The license agreement is displayed before the download can start.
@@ -48,18 +47,21 @@
       <p>The latest development snapshots are available from
       <a href="http://bamboo.ow2.org/browse/JORAM-ANT/latest/artifact/Releases/release/target">Continuous Integration Build Tool</a>:</p>
       <ul>
-      <li>joram-release-5.4.0.54-SNAPSHOT-osgi.zip</li>
-      <li>joram-release-5.4.0.54-SNAPSHOT-src.zip </li>
-      <li>joram-release-5.4.0.54-SNAPSHOT-samples.zip</li>
-      <li>joram-release-5.4.0.54-SNAPSHOT-joram-jonasadapter.rar</li>
-      <li>joram-release-5.4.0.54-SNAPSHOT-ra-remote.rar</li>
-      <li>joram-release-5.4.0.54-SNAPSHOT-ra.rar</li>
-      <li>joram-release-5.4.0.54-SNAPSHOT-raconfig.zip</li>
+      <li><code>joram-release-5.*-SNAPSHOT.zip</code>, including JORAM libraries and the JORAM samples sources;</li>
+      <li><code>joram-release-5.*-SNAPSHOT-src.zip</code>, including JORAM sources;</li>
+      <li><code>joram-jca-jonas-5.*-SNAPSHOT.rar</code>, JCA Adapter for Jonas;</li>
+      <li><code>joram-jca-remote-5.*-SNAPSHOT.rar</code>, the resource adapter for a collocated JORAM server within any J2EE compliant 
+	    	application server.</li>
+      <li><code>joram-jca-ra-5.*-SNAPSHOT.rar</code>, the resource adapter for a collocated JORAM server within any J2EE compliant 
+	    	application server.</li>
+      <li><code>joram-release-5.*-SNAPSHOT-raconfig.zip</code>, facilities enabling configuration of JCA rars.</li>
       </ul>
       <p>This will be built automatically from the current development code after each change in the SVN code base.</p>
       <p>If you need quickly a fix for a particular bug, you may be able to find a fixed Joram release here well
       before the fix makes it into the next release version. On the other hand, these snapshots might sometimes
       be unstable.</p>
+      <p>The JavaDoc of the version in development is generated each day at 00:00 AM CEST, it is available at:
+	    <a href="http://bamboo.ow2.org/browse/JORAM-ANT/latest/artifact/JavaDoc/target/site/apidocs/index.html">here</a>.</p>
       
       </s2>
       
