@@ -11,6 +11,55 @@
   </properties>
 
   <body>
+    <s1 name="October 27, 2010: JORAM 5.4.0 release is available">
+      <p>Joram 5.4.0 is available in the SVN repository with tag JORAM_5_4_0.</p>
+      <s2 name="New features and improvements">
+      <ul>
+        <li>Design of an extension framework for JMS destinations. In a first time it
+				defines 2 destinations for acquisition (create JMS message from external data)
+				and distribution (create external data from JMS message) and a simple interface
+				to implement for acquisition and distribution modules.</li>
+        <li>Implementation of Acquisition and Distribution modules are provided to replace
+        Collector, Mail, Monitoring and JMS bridge destinations.</li>
+        <li>Implementation of a STOMP proxy allowing Joram access through STOMP protocol.</li>
+        <li>Transaction: Adds FileRepository.useRandomAccessFile property allowing the
+				optional  use of RandomAccessFile or FileOutputStream. This option offers better
+				performance with some filesystems.</li>
+        <li>Possibility to create or retrieve destinations using symbolic name through
+        Session.create[Queue|Topic].</li>
+        <li>Adds many monitoring and statistics JMX attributes: messages waiting in
+        MessageConsumer components, number of reactions, CPU and I/O time consumption in
+        Engine.</li>
+        <li>Adds JMX dump functionnality.</li>
+        <li>Numerous changes in administration offering better functionnalities and
+        performances.</li>
+        <li>Change admin MBean name using root user's name is used instead of JoramAdminProxy.</li>
+        <li>Defines JCA artifacts for Joram adapter.</li>
+        <li>Use of OSGi based Joram server in the samples.</li>
+        <li>Many OSGi enhancements.</li>
+        <li>maven migration.</li>
+       </ul>
+      </s2>
+
+      <s2 name="Bug fixes">
+      <ul>
+        <li>Bug fix: in the JMS bridge, previously the use of receiveNoWait cause a NPE in
+				server and an infinite wait for the client.</li>
+        <li>Bug fix: Potential client blocking when sending a message with a TTL to a local
+        destination (A cause of this problem can be a bad clock synchronization).</li>
+        <li>Bug fix in FTP collector.</li>
+        <li>Potential bug fix in AgentId.equals with null.</li>
+        <li>Fix a bug in administration of cluster destination through XML scripts (the
+				administration wrapper was not set at creation so there is an error during next
+				operations).</li>
+        <li>The call to System.runFinalization in AgentServer.stop method seems to cause
+				deadlock with JOnAS. Normally this call is no longer needed so we remove it.</li>
+        <li>Fix bug when deleting a user: user was partially removed when deletion is not
+				allowed.</li>
+      </ul>
+      </s2>
+    </s1>
+
     <s1 name="May 05, 2010: JORAM 5.3.1 maintenance release is available">
       <p>Joram 5.3.1 is available in the SVN repository with tag JORAM_5_3_1.</p>
       <s2 name="New features and improvements">
@@ -35,7 +84,6 @@
       </ul>
       </s2>
     </s1>
-  
   
     <s1 name="JORAM release 5.3.0 (February 22, 2010)">
       <p>Joram is now designed with an OSGi<sup>TM</sup> based services architecture to provide a dynamically adaptable
