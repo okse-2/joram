@@ -69,6 +69,7 @@
     <antcall target="tests.tcp"/>
     <antcall target="tests.noreg"/>
     <antcall target="tests.xa"/>
+    <antcall target="tests.bridge"/>
     <antcall target="tests.schedqueue"/>
     <antcall target="tests.clusterTopic"/>
     <antcall target="tests.clusterQueue"/>
@@ -345,15 +346,21 @@ description=" --> launch all exceptionlistener tests">
   <target name="tests.bridge" description=" --> launch all bridge tests">
     <antcall target="bridge.test1"/>
     <antcall target="bridge.test1.1"/>
+    <antcall target="bridge.test1.2"/>
     <antcall target="bridge.test2"/>
     <antcall target="bridge.test2.1"/>
+    <antcall target="bridge.test2.2"/>
     <antcall target="bridge.test3"/>
     <antcall target="bridge.test3.1"/>
+    <antcall target="bridge.test3.2"/>
     <antcall target="bridge.test4"/>
+    <antcall target="bridge.test4.1"/>
     <antcall target="bridge.test5"/>
     <antcall target="bridge.test5.1"/>
+    <antcall target="bridge.test5.2"/>
     <antcall target="bridge.test6"/>
     <antcall target="bridge.test6.1"/>
+    <antcall target="bridge.test6.2"/>
     <antcall target="bridge.xatest1"/>
     <antcall target="bridge.xatest1.1"/>
     <antcall target="bridge.xatest2"/>
@@ -3958,6 +3965,19 @@ description=" --> launch all exceptionlistener tests">
        </antcall>
    </target>
   
+  <target name="bridge.test1.2" depends="init.a3props,compile"
+           description=" --> producer on foreign queue, consumer on bridge queue (using acquisition framework)">
+       <antcall target="bridge.test" inheritAll="true">
+         <param name="testid" value="bridge.test1.2"/>
+         <param name="adminClassName" value="joram.bridge.AcquisitionAdmin"/>
+         <param name="className" value="joram.bridge.BridgeTest"/>
+         <param name="jndiconf" value="bridge/jndi.properties"/>
+         <param name="a3conf" value="bridge/a3servers.xml"/>
+         <param name="jvmargs" value=""/>
+         <param name="jvmadminArgs" value=""/>
+       </antcall>
+   </target>
+  
   <target name="bridge.test2" depends="init.a3props,compile"
           description=" --> publisher on foreign topic and subscriber on bridge topic">
       <antcall target="bridge.test" inheritAll="true">
@@ -3981,6 +4001,19 @@ description=" --> launch all exceptionlistener tests">
         <param name="a3conf" value="bridge/a3servers.xml"/>
         <param name="jvmargs" value=""/>
         <param name="jvmadminArgs" value="-DautomaticRequest=true"/>
+      </antcall>
+  </target>
+  
+  <target name="bridge.test2.2" depends="init.a3props,compile"
+          description=" --> publisher on foreign topic and subscriber on bridge topic (using acquisition framework)">
+      <antcall target="bridge.test" inheritAll="true">
+        <param name="testid" value="bridge.test2.2"/>
+        <param name="adminClassName" value="joram.bridge.AcquisitionAdmin"/>
+        <param name="className" value="joram.bridge.BridgeTest2"/>
+        <param name="jndiconf" value="bridge/jndi.properties"/>
+        <param name="a3conf" value="bridge/a3servers.xml"/>
+        <param name="jvmargs" value=""/>
+        <param name="jvmadminArgs" value=""/>
       </antcall>
   </target>
 
@@ -4009,12 +4042,38 @@ description=" --> launch all exceptionlistener tests">
         <param name="jvmadminArgs" value="-DautomaticRequest=true"/>
       </antcall>
   </target>
+  
+  <target name="bridge.test3.2" depends="init.a3props,compile"
+          description=" --> publisher on bridge topic and subscriber on foreign topic (using distribution framework)">
+      <antcall target="bridge.test" inheritAll="true">
+        <param name="testid" value="bridge.test3.2"/>
+        <param name="adminClassName" value="joram.bridge.DistributionAdmin"/>
+        <param name="className" value="joram.bridge.BridgeTest3"/>
+        <param name="jndiconf" value="bridge/jndi.properties"/>
+        <param name="a3conf" value="bridge/a3servers.xml"/>
+        <param name="jvmargs" value=""/>
+        <param name="jvmadminArgs" value=""/>
+      </antcall>
+  </target>
 
   <target name="bridge.test4" depends="init.a3props,compile"
           description=" --> producer on bridge queue and consumer on foreign queue">
       <antcall target="bridge.test" inheritAll="true">
         <param name="testid" value="bridge.test4"/>
         <param name="adminClassName" value="joram.bridge.Admin"/>
+        <param name="className" value="joram.bridge.BridgeTest4"/>
+        <param name="jndiconf" value="bridge/jndi.properties"/>
+        <param name="a3conf" value="bridge/a3servers.xml"/>
+        <param name="jvmargs" value=""/>
+        <param name="jvmadminArgs" value=""/>
+      </antcall>
+  </target>
+  
+  <target name="bridge.test4.1" depends="init.a3props,compile"
+          description=" --> producer on bridge queue and consumer on foreign queue (using distribution framework)">
+      <antcall target="bridge.test" inheritAll="true">
+        <param name="testid" value="bridge.test4.1"/>
+        <param name="adminClassName" value="joram.bridge.DistributionAdmin"/>
         <param name="className" value="joram.bridge.BridgeTest4"/>
         <param name="jndiconf" value="bridge/jndi.properties"/>
         <param name="a3conf" value="bridge/a3servers.xml"/>
@@ -4048,9 +4107,22 @@ description=" --> launch all exceptionlistener tests">
        <param name="jvmadminArgs" value="-DautomaticRequest=true"/>
     </antcall>
   </target>
+  
+  <target name="bridge.test5.2" depends="init.a3props,compile"
+          description=" --> producer on bridge queue and subscriber on foreign topic (using distribution framework)">
+    <antcall target="bridge.test" inheritAll="true">
+      <param name="testid" value="bridge.test5.2"/>
+       <param name="adminClassName" value="joram.bridge.DistributionCrossAdmin"/>
+       <param name="className" value="joram.bridge.BridgeTest5"/>
+       <param name="jndiconf" value="bridge/jndi.properties"/>
+       <param name="a3conf" value="bridge/a3servers.xml"/>
+       <param name="jvmargs" value=""/>
+       <param name="jvmadminArgs" value=""/>
+    </antcall>
+  </target>
 
   <target name="bridge.test6" depends="init.a3props,compile"
-          description=" --> publisher on bridge queue and consumer on  foreign queue">
+          description=" --> publisher on bridge topic and consumer on  foreign queue">
       <antcall target="bridge.test" inheritAll="true">
         <param name="testid" value="bridge.test6"/>
         <param name="adminClassName" value="joram.bridge.CrossAdmin"/>
@@ -4063,7 +4135,7 @@ description=" --> launch all exceptionlistener tests">
   </target>
   
   <target name="bridge.test6.1" depends="init.a3props,compile"
-          description=" --> publisher on bridge queue and consumer on  foreign queue (automatic)">
+          description=" --> publisher on bridge topic and consumer on  foreign queue (automatic)">
     <antcall target="bridge.test" inheritAll="true">
       <param name="testid" value="bridge.test6.1"/>
       <param name="adminClassName" value="joram.bridge.CrossAdmin"/>
@@ -4072,6 +4144,19 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="bridge/a3servers.xml"/>
       <param name="jvmargs" value=""/>
       <param name="jvmadminArgs" value="-DautomaticRequest=true"/>
+    </antcall>
+  </target>
+  
+  <target name="bridge.test6.2" depends="init.a3props,compile"
+          description=" --> publisher on bridge topic and consumer on  foreign queue (using distribution framework)">
+    <antcall target="bridge.test" inheritAll="true">
+      <param name="testid" value="bridge.test6.2"/>
+      <param name="adminClassName" value="joram.bridge.DistributionCrossAdmin"/>
+      <param name="className" value="joram.bridge.BridgeTest6"/>
+      <param name="jndiconf" value="bridge/jndi.properties"/>
+      <param name="a3conf" value="bridge/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="jvmadminArgs" value=""/>
     </antcall>
   </target>
 
