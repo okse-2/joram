@@ -45,7 +45,6 @@
                 <artifactItem>
                   <groupId>org.objectweb.joram</groupId>
                   <artifactId>joram-assembly</artifactId>
-                  <classifier>osgi</classifier>
                   <type>zip</type>
                   <excludes>**/pom.*,**/META-INF/**</excludes>
                 </artifactItem>
@@ -66,7 +65,6 @@
       <groupId>org.objectweb.joram</groupId>
       <artifactId>joram-assembly</artifactId>
       <version>${project.version}</version>
-      <classifier>osgi</classifier>
       <type>zip</type>
     </dependency>
   </dependencies>
