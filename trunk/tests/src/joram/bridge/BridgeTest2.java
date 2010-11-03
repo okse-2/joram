@@ -54,7 +54,7 @@ class MsgListenerb implements MessageListener {
     try {
       count++;
       TextMessage msg2=(TextMessage) msg;
-      BridgeTest2.assertEquals("Foreign message number "+count,msg2.getText());
+      BridgeTest2.assertEquals("topic Foreign message number " + count, msg2.getText());
       System.out.println(who+" receive msg = " + msg2.getText());
     }catch (JMSException exc) {
       System.err.println("Exception in listener: " + exc);
@@ -88,7 +88,6 @@ public class BridgeTest2 extends TestCase {
       Connection joramCnx = joramCF.createConnection();
       Session joramSess = joramCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
       MessageConsumer joramCons = joramSess.createConsumer(joramDest);
-      //joramCons.setMessageListener(new MsgListenerb("topic joram"));
       joramCnx.start();  
 
       Connection foreignCnx = foreignCF.createConnection();
@@ -105,14 +104,28 @@ public class BridgeTest2 extends TestCase {
 
       foreignSess.commit();
 
-
-
       TextMessage msg;
       for (int i = 1; i < 11; i++) { 
         msg=(TextMessage)joramCons.receive();
         System.out.println("receive msg = " + msg.getText());
         assertEquals("topic Foreign message number "+i,msg.getText());
       }
+
+      // Using a message listener :
+      MsgListenerb listener = new MsgListenerb("topic joram");
+      joramCons.setMessageListener(listener);
+
+      for (int i = 1; i < 11; i++) {
+        foreignMsg.setText("topic Foreign message number " + i);
+        System.out.println("send msg = " + foreignMsg.getText());
+        foreignSender.send(foreignMsg);
+      }
+
+      foreignSess.commit();
+
+      Thread.sleep(2000);
+
+      assertEquals(10, listener.count);
 
       // System.in.read();
       joramCnx.close();
