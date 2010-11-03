@@ -25,10 +25,7 @@ package joram.bridge;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
 import javax.jms.MessageConsumer;
-import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
@@ -40,27 +37,6 @@ import framework.TestCase;
  * Test :
  *    
  */
-
-class MsgListenerBT3 implements MessageListener {
-  String who;
-  int count;
-  public MsgListenerBT3(String who) {
-    System.out.println("creation"+who);
-    this.who = who;
-    count=0;
-  }
-
-  public void onMessage(Message msg) {
-    try {
-      count++;
-      TextMessage msg2=(TextMessage) msg;
-      BridgeTest3.assertEquals("Foreign message number "+count,msg2.getText());
-      System.out.println(who+" receive msg = " + msg2.getText());
-    }catch (JMSException exc) {
-      System.err.println("Exception in listener: " + exc);
-    }
-  }
-}
 
 public class BridgeTest3 extends TestCase {
 
