@@ -32,7 +32,9 @@ import javax.jms.Session;
  * Consumes messages on a foreign destination through the JORAM bridge.
  */
 public class BridgeConsumer {
+
   public static void main(String[] args) throws Exception {
+
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     Destination bridgeDest = (Destination) jndiCtx.lookup("bridgeTopic");
     ConnectionFactory bridgeCF = (ConnectionFactory) jndiCtx.lookup("bridgeCF");
