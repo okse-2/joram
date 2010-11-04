@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2007 - ScalAgent DT
+ * Copyright (C) 2007 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -53,11 +53,10 @@ public class BridgeAdmin {
     prop.setProperty("jndiUrl", "scn://localhost:16400");
     prop.setProperty("connectionFactoryName", "cf");  // Foreign QueueConnectionFactory JNDI name
     prop.setProperty("destinationName", "queue");     // Foreign Queue JNDI name: foreignDest
-    prop.setProperty("automaticRequest", "false");    // automaticRequest
+    prop.setProperty("distribution.className", "org.objectweb.joram.mom.dest.jms.JMSDistribution");
+
     // Creating a Queue bridge on server 0:
-    Queue bridgeQueue = Queue.create(1,
-                                 "org.objectweb.joram.mom.dest.jmsbridge.JMSBridgeQueue",
-                                 prop);
+    Queue bridgeQueue = Queue.create(1, Queue.DISTRIBUTION_QUEUE, prop);
     bridgeQueue.setFreeReading();
     bridgeQueue.setFreeWriting();
     System.out.println("joram queue = " + bridgeQueue);
@@ -68,10 +67,10 @@ public class BridgeAdmin {
     prop.setProperty("jndiUrl", "scn://localhost:16400");
     prop.setProperty("connectionFactoryName", "cf"); // Foreign QueueConnectionFactory JNDI name
     prop.setProperty("destinationName", "topic"); // Foreign Queue JNDI name: foreignDest
+    prop.setProperty("acquisition.className", "org.objectweb.joram.mom.dest.jms.JMSAcquisition");
+
     // Creating a Topic bridge on server 0:
-    Topic bridgeTopic = Topic.create(1,
-                                 "org.objectweb.joram.mom.dest.jmsbridge.JMSBridgeTopic",
-                                 prop);
+    Topic bridgeTopic = Topic.create(1, Topic.ACQUISITION_TOPIC, prop);
     bridgeTopic.setFreeReading();
     bridgeTopic.setFreeWriting();
     System.out.println("joram topic = " + bridgeTopic);

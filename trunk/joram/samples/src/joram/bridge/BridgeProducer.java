@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2007 - ScalAgent DT
+ * Copyright (C) 2007 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,7 +33,9 @@ import javax.jms.TextMessage;
  * Produces messages on the foreign destination.
  */
 public class BridgeProducer {
+
   public static void main(String[] args) throws Exception {
+
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     Destination bridgeDest = (Destination) jndiCtx.lookup("bridgeQueue");
     ConnectionFactory bridgeCF = (ConnectionFactory) jndiCtx.lookup("bridgeCF");
@@ -46,7 +48,7 @@ public class BridgeProducer {
     TextMessage msg = bridgeSess.createTextMessage();
 
     for (int i = 1; i < 11; i++) {
-      msg.setText("Joram message number " + i + "sent through bridge queue.");
+      msg.setText("Joram message number " + i + " sent through distribution bridge queue.");
       System.out.println("send msg = " + msg.getText());
       bridgeProducer.send(msg);
     }
