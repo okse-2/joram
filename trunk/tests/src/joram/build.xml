@@ -69,7 +69,7 @@
     <antcall target="tests.tcp"/>
     <antcall target="tests.noreg"/>
     <antcall target="tests.xa"/>
-    <antcall target="tests.bridge"/>
+    <antcall target="tests.bridge.new"/>
     <antcall target="tests.schedqueue"/>
     <antcall target="tests.clusterTopic"/>
     <antcall target="tests.clusterQueue"/>
@@ -346,21 +346,15 @@ description=" --> launch all exceptionlistener tests">
   <target name="tests.bridge" description=" --> launch all bridge tests">
     <antcall target="bridge.test1"/>
     <antcall target="bridge.test1.1"/>
-    <antcall target="bridge.test1.2"/>
     <antcall target="bridge.test2"/>
     <antcall target="bridge.test2.1"/>
-    <antcall target="bridge.test2.2"/>
     <antcall target="bridge.test3"/>
     <antcall target="bridge.test3.1"/>
-    <antcall target="bridge.test3.2"/>
     <antcall target="bridge.test4"/>
-    <antcall target="bridge.test4.1"/>
     <antcall target="bridge.test5"/>
     <antcall target="bridge.test5.1"/>
-    <antcall target="bridge.test5.2"/>
     <antcall target="bridge.test6"/>
     <antcall target="bridge.test6.1"/>
-    <antcall target="bridge.test6.2"/>
     <antcall target="bridge.xatest1"/>
     <antcall target="bridge.xatest1.1"/>
     <antcall target="bridge.xatest2"/>
@@ -372,6 +366,16 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="bridge.xatest5.1"/>
     <antcall target="bridge.xatest6"/>
     <antcall target="bridge.xatest6.1"/>
+    <antcall target="tests.bridge.new"/>
+  </target>
+  
+  <target name="tests.bridge.new" description=" --> launch all bridge tests (acquisition/distribution framework)">
+    <antcall target="bridge.test1.2"/>
+    <antcall target="bridge.test2.2"/>
+    <antcall target="bridge.test3.2"/>
+    <antcall target="bridge.test4.1"/>
+    <antcall target="bridge.test5.2"/>
+    <antcall target="bridge.test6.2"/>
   </target>
 
   <target name="tests.schedqueue"
