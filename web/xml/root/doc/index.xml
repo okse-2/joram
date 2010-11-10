@@ -20,13 +20,17 @@
       sufficient and sometimes vague or unclear. Do not hesitate to provide
       any comment or feedback that could help us improving this doc. Of course, 
       any contribution is welcome ;-).</p>
-      <p>The Old documentation (before 4.1 version) is still accessible
-      <a href="old-documentation.html">here</a>. Since 4.1 the documentation
-      can be downloaded <a href="../download/index.html">in the download area</a>.</p>
 
+			<p>The documentation of the 5.4 release is accessible <a href="../current/doc/Joram-5.4-en.pdf">here</a>,
+			additionnals document are available:</p>
       <ul>
-        <li>Guide of the <a href="../current/doc/Joram-5.3-en.pdf">5.3 release</a>.</li>
+        <li>Guide of the <a href="../current/doc/Joram-5.4-JNDI-en.pdf">JNDI implementation</a>.</li>
+        <li>Guide of the <a href="../current/doc/Joram-JBoss-en.pdf">Joram - JBoss integration</a>.</li>
+        <li>Guide of the <a href="../current/doc/Joram-WebLogic-en.pdf">Joram - WebLogic integration</a>.</li>
       </ul>
+      
+			<p>Since 4.1 the documentation can be downloaded <a href="../download/index.html">in the download area</a>.
+			<br></br>The Old documentation (before 4.1 version) is still accessible <a href="old-documentation.html">here</a>.</p>
 			</s2>
 			
 			<s2 name="Joram Tutorials">
