@@ -47,7 +47,7 @@ import fr.dyade.aaa.common.Debug;
 
 public class JMSModule implements ExceptionListener {
 
-  private static final Logger logger = Debug.getLogger(JMSDistribution.class.getName());
+  private static final Logger logger = Debug.getLogger(JMSModule.class.getName());
 
   /** <code>true</code> if the module is fully usable. */
   protected boolean usable = true;
