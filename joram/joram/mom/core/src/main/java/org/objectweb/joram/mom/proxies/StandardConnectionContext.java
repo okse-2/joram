@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -24,11 +24,11 @@
  */
 package org.objectweb.joram.mom.proxies;
 
-import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
-import org.objectweb.joram.shared.client.MomExceptionReply;
 import org.objectweb.joram.shared.client.CnxCloseRequest;
+import org.objectweb.joram.shared.client.MomExceptionReply;
+import org.objectweb.joram.shared.excepts.MomException;
 
 import fr.dyade.aaa.common.Queue;
 
@@ -47,13 +47,10 @@ public class StandardConnectionContext
 
   private Queue queue;
   
-  private ProxyImpl proxyImpl;
-  
   private boolean closed;
 
-  StandardConnectionContext(ProxyImpl proxyImpl, int key) {
+  StandardConnectionContext(int key) {
     this.key = key;
-    this.proxyImpl = proxyImpl;
     queue = new Queue();
     closed = false;
   }

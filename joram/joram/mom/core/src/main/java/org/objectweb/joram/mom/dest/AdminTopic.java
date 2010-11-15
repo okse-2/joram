@@ -1859,7 +1859,7 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
   }
 
   // ================================================================================
-  // This code is used by the ProxyImpl to handle destination creation through the
+  // This code is used by the UserAgent to handle destination creation through the
   // JMS Session.
   // ================================================================================
 

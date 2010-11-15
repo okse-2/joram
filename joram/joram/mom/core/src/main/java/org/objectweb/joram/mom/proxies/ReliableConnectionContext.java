@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -53,14 +53,11 @@ public class ReliableConnectionContext implements ConnectionContext, Serializabl
 
   private int heartBeat;
   
-  private ProxyImpl proxyImpl;
-  
   private boolean closed;
 
-  ReliableConnectionContext(ProxyImpl proxyImpl, int key, int heartBeat) {
+  ReliableConnectionContext(int key, int heartBeat) {
     this.key = key;
     this.heartBeat = heartBeat;
-    this.proxyImpl = proxyImpl;
     inputCounter = -1;
     outputCounter = 0;
     queue = new AckedQueue();
