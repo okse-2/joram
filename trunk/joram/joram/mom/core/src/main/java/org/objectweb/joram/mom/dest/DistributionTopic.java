@@ -24,38 +24,91 @@ package org.objectweb.joram.mom.dest;
 
 import java.util.Properties;
 
+import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.shared.excepts.RequestException;
+import org.objectweb.joram.shared.messages.ConversionHelper;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.common.Debug;
 
 /**
- * An {@link DistributionTopic} agent is an agent hosting a
- * {@link DistributionTopicImpl}.
+ * The {@link DistributionQueue} class implements the MOM distribution topic
+ * behavior, delivering messages via the {@link DistributionModule}.
  */
 public class DistributionTopic extends Topic {
+
+  public static Logger logger = Debug.getLogger(DistributionTopic.class.getName());
 
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
+  private transient DistributionModule distributionModule;
+
+  private Properties properties;
+
   /**
-   * Empty constructor for newInstance(). 
-   */ 
-  public DistributionTopic() {
+   * Configures a {@link DistributionTopic} instance.
+   * 
+   * @param properties
+   *          The initial set of properties.
+   */
+  public void setProperties(Properties properties) throws RequestException {
+    super.setProperties(properties);
+
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "DistributionTopic.<init> prop = " + properties);
+    }
+
+    this.properties = (Properties) properties.clone();
+
+    // Check the existence of the distribution class and the presence of a no-arg constructor.
+    try {
+      String className = ConversionHelper.toString(properties.get(DistributionModule.CLASS_NAME));
+      Class.forName(className).getConstructor();
+    } catch (Exception exc) {
+      logger.log(BasicLevel.ERROR, "DistributionTopic: error with distribution class.", exc);
+      throw new RequestException(exc.getMessage());
+    }
+  }
+
+  public void initialize(boolean firstTime) {
+    super.initialize(firstTime);
+    if (distributionModule == null) {
+      try {
+        distributionModule = new DistributionModule(this, (Properties) properties.clone());
+      } catch (RequestException exc) {
+        // Should not happen as distribution module creation previously succeeded in constructor
+        logger.log(BasicLevel.ERROR, "DistributionTopic.initialize prop = " + properties, exc);
+      }
+    }
+  }
+
+  public void agentFinalize(boolean lastTime) {
+    super.agentFinalize(lastTime);
+    close();
   }
 
   /**
-   * Creates the {@link DistributionTopicImpl}.
-   *
-   * @param adminId  Identifier of the topic administrator.
-   * @param prop     The initial set of properties.
+   * @see DistributionModule#processMessages(ClientMessages)
+   * @see Destination#preProcess(AgentId, ClientMessages)
    */
-  public DestinationImpl createsImpl(AgentId adminId, Properties prop) throws RequestException {
-    return new DistributionTopicImpl(adminId, prop);
+  public ClientMessages preProcess(AgentId from, ClientMessages cm) {
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "DistributionTopic. preProcess(" + from + ", " + cm + ')');
+    }
+    return distributionModule.processMessages(cm);
   }
-  
-  public void agentFinalize(boolean lastTime) {
-    super.agentFinalize(lastTime);
-    ((DistributionTopicImpl) destImpl).close();
+
+  public String toString() {
+    return "DistributionTopic:" + getId().toString();
+  }
+
+  private void close() {
+    if (distributionModule != null) {
+      distributionModule.close();
+    }
   }
 
 }

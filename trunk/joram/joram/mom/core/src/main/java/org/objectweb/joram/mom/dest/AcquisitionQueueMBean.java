@@ -25,6 +25,6 @@ package org.objectweb.joram.mom.dest;
 /**
  * JMX interface for the monitoring queue.
  */
-public interface AcquisitionQueueImplMBean extends QueueImplMBean, AcquisitionMBean {
+public interface AcquisitionQueueMBean extends QueueMBean, AcquisitionMBean {
 
 }

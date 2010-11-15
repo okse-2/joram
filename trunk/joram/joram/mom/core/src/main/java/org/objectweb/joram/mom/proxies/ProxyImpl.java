@@ -38,11 +38,9 @@ import java.util.Map.Entry;
 import java.util.Vector;
 
 import org.objectweb.joram.mom.dest.AdminTopic;
-import org.objectweb.joram.mom.dest.AdminTopicImpl;
-import org.objectweb.joram.mom.dest.AdminTopicImpl.DestinationDesc;
+import org.objectweb.joram.mom.dest.AdminTopic.DestinationDesc;
 import org.objectweb.joram.mom.dest.Destination;
 import org.objectweb.joram.mom.dest.Queue;
-import org.objectweb.joram.mom.dest.QueueImpl;
 import org.objectweb.joram.mom.dest.Topic;
 import org.objectweb.joram.mom.messages.Message;
 import org.objectweb.joram.mom.notifications.AbortReceiveRequest;
@@ -535,7 +533,7 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     if (dmqId != null) {
       not.setDMQId(dmqId);
     } else {
-      not.setDMQId(QueueImpl.getDefaultDMQId());
+      not.setDMQId(Queue.getDefaultDMQId());
     }
   }
 
@@ -878,7 +876,7 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     AgentId destId = null;
 
     // Verify if the destination exists
-    DestinationDesc desc = AdminTopicImpl.lookupDest(req.getName(), req.getType());
+    DestinationDesc desc = AdminTopic.lookupDest(req.getName(), req.getType());
     if (desc == null) {
       Destination dest = null;
       if (DestinationConstants.isQueue(req.getType())) {
@@ -891,7 +889,7 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         throw new RequestException("Could not create destination, unknown type:" + req.getType());
       }
       dest.setName(req.getName());
-      dest.init(proxyAgent.getId(), null);
+      dest.setAdminId(proxyAgent.getId());
       dest.setFreeWriting(true); // Setting free WRITE right on the destination
       if (! DestinationConstants.isTemporary(req.getType()))
         dest.setFreeReading(true); // Setting free READ right on the destination
@@ -902,7 +900,7 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
         throw new RequestException("Could not create destination:" + exc.getMessage());
       }
       // Registers the newly created destination
-      AdminTopicImpl.registerDest(destId, (req.getName() == null) ? destId.toString() : req.getName(),
+      AdminTopic.registerDest(destId, (req.getName() == null) ? destId.toString() : req.getName(),
           req.getType());
 
       if (DestinationConstants.isTemporary(req.getType())) {
@@ -1338,7 +1336,7 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
     proxyAgent.sendNot(destId, new DeleteNot());
 //    proxyAgent.sendNot(AdminTopic.getDefault(),
 //                       new RegisterTmpDestNot(destId, false, false));
-    AdminTopicImpl.unregisterDest(destId.toString());
+    AdminTopic.unregisterDest(destId.toString());
   }
 
   /**
@@ -2105,7 +2103,7 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
             ((ClientSubscription) subs.next()).setDMQId(null);
         }
         // Sending the messages again if not coming from the default DMQ:
-        if (QueueImpl.getDefaultDMQId() != null && !agId.equals(QueueImpl.getDefaultDMQId())) {
+        if (Queue.getDefaultDMQId() != null && !agId.equals(Queue.getDefaultDMQId())) {
           DMQManager dmqManager = new DMQManager(dmqId, null);
           Iterator msgs = ((ClientMessages) req).getMessages().iterator();
           while (msgs.hasNext()) {
@@ -2510,7 +2508,7 @@ public final class ProxyImpl implements java.io.Serializable, ProxyImplMBean {
       return;
     }
 
-    AdminTopicImpl.deleteUser(userName);
+    AdminTopic.deleteUser(userName);
 
     String info = "Delete proxy request successful [true]: proxy [" + proxyAgent.getId() + "] of user ["
         + userName + "] has been notified of deletion";

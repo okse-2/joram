@@ -24,7 +24,7 @@ package org.objectweb.joram.mom.util;
 
 import java.util.Date;
 
-import org.objectweb.joram.mom.dest.QueueImpl;
+import org.objectweb.joram.mom.dest.Queue;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.messages.Message;
@@ -71,7 +71,7 @@ public class DMQManager {
       destDmqId = currentDestDmq;
     } else {
       // Sending the dead messages to the server's default DMQ
-      destDmqId = QueueImpl.getDefaultDMQId();
+      destDmqId = Queue.getDefaultDMQId();
     }
     this.senderId = senderId;
     if (logger.isLoggable(BasicLevel.DEBUG))
