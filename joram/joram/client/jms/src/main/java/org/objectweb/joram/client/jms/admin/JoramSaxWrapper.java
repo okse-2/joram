@@ -985,7 +985,7 @@ public class JoramSaxWrapper extends DefaultHandler {
           // Fix DMQ if any
           setDestinationDMQ(topic, dmq);
         } else if (rawName.equals(ELT_DMQUEUE)) {
-          className = "org.objectweb.joram.mom.dest.DeadMQueue";
+          className = "org.objectweb.joram.mom.dest.Queue";
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG,
                        "DeadMQueue.create(" + serverId + "," + name + ")");

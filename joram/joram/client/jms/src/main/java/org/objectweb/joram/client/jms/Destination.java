@@ -50,12 +50,12 @@ import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.admin.CreateDestinationReply;
 import org.objectweb.joram.shared.admin.CreateDestinationRequest;
 import org.objectweb.joram.shared.admin.DeleteDestination;
-import org.objectweb.joram.shared.admin.GetDMQSettingsRequest;
 import org.objectweb.joram.shared.admin.GetDMQSettingsReply;
+import org.objectweb.joram.shared.admin.GetDMQSettingsRequest;
 import org.objectweb.joram.shared.admin.GetRightsReply;
 import org.objectweb.joram.shared.admin.GetRightsRequest;
-import org.objectweb.joram.shared.admin.GetStatsRequest;
 import org.objectweb.joram.shared.admin.GetStatsReply;
+import org.objectweb.joram.shared.admin.GetStatsRequest;
 import org.objectweb.joram.shared.admin.SetDMQRequest;
 import org.objectweb.joram.shared.admin.SetReader;
 import org.objectweb.joram.shared.admin.SetWriter;
@@ -330,7 +330,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
 
   public static final String QUEUE = "org.objectweb.joram.mom.dest.Queue";
   public static final String TOPIC = "org.objectweb.joram.mom.dest.Topic";
-  public static final String DEAD_MQUEUE = "org.objectweb.joram.mom.dest.DeadMQueue";
+  public static final String DEAD_MQUEUE = "org.objectweb.joram.mom.dest.Queue";
   public static final String CLUSTER_QUEUE = "org.objectweb.joram.mom.dest.ClusterQueue";
   public static final String SCHEDULER_QUEUE = "com.scalagent.joram.mom.dest.scheduler.SchedulerQueue";
   public static final String ACQUISITION_QUEUE = "org.objectweb.joram.mom.dest.AcquisitionQueue";

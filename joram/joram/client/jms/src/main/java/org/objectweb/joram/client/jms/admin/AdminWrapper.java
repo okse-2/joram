@@ -825,7 +825,7 @@ public class AdminWrapper {
   public Queue createDeadMQueue(int serverId, String name) throws ConnectException, AdminException {
     CreateDestinationRequest cdr = new CreateDestinationRequest(serverId,
                                                                 name, 
-                                                                "org.objectweb.joram.mom.dest.DeadMQueue",
+                                                                "org.objectweb.joram.mom.dest.Queue",
                                                                 null,
                                                                 Queue.QUEUE_TYPE);
     CreateDestinationReply reply = (CreateDestinationReply) doRequest(cdr);
