@@ -22,7 +22,7 @@
  */
 package org.objectweb.joram.mom.dest;
 
-public interface DestinationImplMBean {
+public interface DestinationMBean {
   /**
    * Returns a string representation of this destination.
    */

@@ -71,9 +71,9 @@ public class DistributionModule implements Serializable {
   private DistributionHandler distributionHandler;
 
   /** The distribution queue or topic using this module. */
-  private final DestinationImpl destination;
+  private final Destination destination;
 
-  public DistributionModule(DestinationImpl destination, Properties properties) throws RequestException {
+  public DistributionModule(Destination destination, Properties properties) throws RequestException {
     this.destination = destination;
     setProperties(properties);
   }

@@ -36,7 +36,7 @@ import java.util.Vector;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
 
-import org.objectweb.joram.mom.dest.QueueImpl;
+import org.objectweb.joram.mom.dest.Queue;
 import org.objectweb.joram.mom.messages.Message;
 import org.objectweb.joram.mom.messages.MessageJMXWrapper;
 import org.objectweb.joram.mom.util.DMQManager;
@@ -873,8 +873,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     
     if (threshold > 0)
       return (deliveryAttempts >= threshold);
-    else if (QueueImpl.getDefaultThreshold() > 0)
-      return (deliveryAttempts >= QueueImpl.getDefaultThreshold());
+    else if (Queue.getDefaultThreshold() > 0)
+      return (deliveryAttempts >= Queue.getDefaultThreshold());
     return false;
   }
   

@@ -27,7 +27,7 @@ import java.util.List;
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.TabularData;
 
-public interface QueueImplMBean extends DestinationImplMBean {
+public interface QueueMBean extends DestinationMBean {
   /**
    * Returns  the threshold value of this queue, -1 if not set.
    *

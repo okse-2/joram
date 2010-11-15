@@ -24,7 +24,7 @@ package org.objectweb.joram.mom.dest;
 
 import org.objectweb.joram.shared.security.SimpleIdentity;
 
-public interface AdminTopicImplMBean extends TopicImplMBean {
+public interface AdminTopicMBean extends TopicMBean {
 
   /**
    * Creates a new topic on the selected server.

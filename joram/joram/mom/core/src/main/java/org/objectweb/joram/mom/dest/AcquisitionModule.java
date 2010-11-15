@@ -115,7 +115,7 @@ public class AcquisitionModule implements ReliableTransmitter {
   private long expiration = Message.DEFAULT_TIME_TO_LIVE;
 
   /** The acquisition queue or topic using this module. */
-  private final DestinationImpl destination;
+  private final Destination destination;
 
   /** The destination type set in acquired messages/ */
   private final byte destType;
@@ -132,7 +132,7 @@ public class AcquisitionModule implements ReliableTransmitter {
    */
   private boolean isDaemon = false;
 
-  public AcquisitionModule(DestinationImpl destination, String className, Properties properties, byte destType) {
+  public AcquisitionModule(Destination destination, String className, Properties properties, byte destType) {
     if (logger.isLoggable(BasicLevel.DEBUG)) {
       logger.log(BasicLevel.DEBUG, "AcquisitionModule.<init> prop = " + properties);
     }

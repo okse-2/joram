@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2005 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,33 +18,26 @@
  * USA.
  *
  * Initial developer(s): ScalAgent Distributed Technologies
- * Contributor(s):
+ * Contributor(s): 
  */
 package org.objectweb.joram.mom.dest;
 
-import java.util.Properties;
-
-import org.objectweb.joram.shared.excepts.RequestException;
-
-import fr.dyade.aaa.agent.AgentId;
-
-/**
- * The <code>AdminDestinationItf</code> interface defines the method needed by
- * the administration topic to create and initialize a destination agent.
- * <p>
- * To be administered by the administration topic, a destination agent must
- * implement this interface.
- * 
- * @see AdminTopicImpl
- */
-public interface AdminDestinationItf {
-
-  /** 
-   * Initializes the destination and sets the destination properties.
-   *
-   * @param adminId  	Identifier of the destination administrator.
-   * @param prop  	the initial set of properties.
-   * @throws RequestException 
+public interface TopicMBean extends DestinationMBean {
+  /**
+   * Returns the number of subscribers.
+   * Each user appears once even if there is multiples subscriptions, the different
+   * subscriptions can be enumerate through the proxy MBean.
+   * 
+   * @return the number of subscribers.
    */
-  public void init(AgentId adminId, Properties prop) throws RequestException;
+  int getNumberOfSubscribers();
+  
+  /**
+   * Returns the list of unique identifiers of all subscribers.
+   * Each user appears once even if there is multiples subscriptions, the different
+   * subscriptions can be enumerate through the proxy MBean.
+   *
+   * @return the list of unique identifiers of all subscribers.
+   */
+  String[] getSubscriberIds();
 }

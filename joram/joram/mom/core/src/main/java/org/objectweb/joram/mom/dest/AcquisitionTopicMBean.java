@@ -25,6 +25,6 @@ package org.objectweb.joram.mom.dest;
 /**
  * JMX interface for the monitoring topic.
  */
-public interface AcquisitionTopicImplMBean extends TopicImplMBean, AcquisitionMBean {
+public interface AcquisitionTopicMBean extends TopicMBean, AcquisitionMBean {
 
 }

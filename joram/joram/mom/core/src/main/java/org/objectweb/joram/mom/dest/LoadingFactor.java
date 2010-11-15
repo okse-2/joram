@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -77,22 +77,28 @@ public class LoadingFactor implements Serializable {
 
   /** status */
   private int status;
+
   /** status time */
   private long statusTime;
 
   /** consumer status */
   private int consumerStatus = 0;
+
   /** producer status */
   private int producerStatus = 0;
 
-  /** reference to clusterQueueImpl */
-  public ClusterQueueImpl clusterQueueImpl;
+  /** reference to clusterQueue */
+  public ClusterQueue clusterQueue;
+
   /** producer threshold */
   public int producThreshold = -1;
+
   /** consumer threshold */
   public int consumThreshold = -1;
+
   /** automatic eval threshold */
   public boolean autoEvalThreshold = false;
+
   /** validity period */
   public long validityPeriod = -1;
 
@@ -101,12 +107,12 @@ public class LoadingFactor implements Serializable {
   private int nbOfPendingMessages;
   private int nbOfPendingRequests;
 
-  public LoadingFactor(ClusterQueueImpl clusterQueueImpl,
+  public LoadingFactor(ClusterQueue clusterQueue,
                        int producThreshold,
                        int consumThreshold,
                        boolean autoEvalThreshold,
                        long validityPeriod) {
-    this.clusterQueueImpl = clusterQueueImpl;
+    this.clusterQueue = clusterQueue;
     this.producThreshold = producThreshold;
     this.consumThreshold = consumThreshold;
     this.autoEvalThreshold = autoEvalThreshold;
@@ -355,7 +361,7 @@ public class LoadingFactor implements Serializable {
     for (Enumeration e = clusters.keys(); e.hasMoreElements(); ) {
       AgentId id = (AgentId) e.nextElement();
       if (((Float) clusters.get(id)).floatValue() >= 1 && 
-          !id.equals(clusterQueueImpl.getId()))
+ !id.equals(clusterQueue.getId()))
         selected.add(id);
     }
 
@@ -372,8 +378,8 @@ public class LoadingFactor implements Serializable {
                    "LoadingFactor.processGive" +
                    " nbMsgGive = " + nbMsgGive +
                    ", id = " + id);
-      msgGive.setClientMessages(clusterQueueImpl.getClientMessages(nbMsgGive, null, true));
-      clusterQueueImpl.forward(id,msgGive);
+      msgGive.setClientMessages(clusterQueue.getClientMessages(nbMsgGive, null, true));
+      clusterQueue.forward(id, msgGive);
     } else {
       // dispatch to cluster.
       if (logger.isLoggable(BasicLevel.DEBUG))
@@ -383,8 +389,8 @@ public class LoadingFactor implements Serializable {
                    ", selected = " + selected);
       for (Enumeration e = selected.elements(); e.hasMoreElements(); ) {
         AgentId id = (AgentId) e.nextElement();
-        msgGive.setClientMessages(clusterQueueImpl.getClientMessages(nbGivePerQueue, null, true));
-        clusterQueueImpl.forward(id,msgGive);
+        msgGive.setClientMessages(clusterQueue.getClientMessages(nbGivePerQueue, null, true));
+        clusterQueue.forward(id, msgGive);
       }
     }
   }
@@ -406,7 +412,7 @@ public class LoadingFactor implements Serializable {
     for (Enumeration e = clusters.keys(); e.hasMoreElements(); ) {
       AgentId id = (AgentId) e.nextElement();
       if (((Float) clusters.get(id)).floatValue() <= 1 && 
-          !id.equals(clusterQueueImpl.getId()))
+ !id.equals(clusterQueue.getId()))
         selected.add(id);
     }
 
@@ -424,7 +430,7 @@ public class LoadingFactor implements Serializable {
                    ", id = " + id);
       LBMessageHope msgHope = new LBMessageHope(validityPeriod,rateOfFlow);
       msgHope.setNbMsg(nbMsgHope);
-      clusterQueueImpl.forward(id,msgHope);
+      clusterQueue.forward(id, msgHope);
 
     } else {
       // dispatch the hope request to clusterQueue.
@@ -438,7 +444,7 @@ public class LoadingFactor implements Serializable {
       for (Enumeration e = selected.elements(); e.hasMoreElements(); ) {
         AgentId id = (AgentId) e.nextElement();
         msgHope.setNbMsg(nbHopePerQueue);
-        clusterQueueImpl.forward(id,msgHope);
+        clusterQueue.forward(id, msgHope);
       }
     }
   }
