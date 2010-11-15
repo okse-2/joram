@@ -78,6 +78,7 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.BagSerializer;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.ExpiredNot;
@@ -89,7 +90,7 @@ import fr.dyade.aaa.common.Debug;
  * The <code>Queue</code> class implements the MOM queue behavior,
  * basically storing messages and delivering them upon clients requests.
  */
-public class Queue extends Destination implements QueueMBean {
+public class Queue extends Destination implements QueueMBean, BagSerializer {
 
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
