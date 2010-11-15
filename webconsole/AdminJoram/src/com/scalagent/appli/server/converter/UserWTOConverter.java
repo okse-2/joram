@@ -24,7 +24,7 @@ package com.scalagent.appli.server.converter;
 
 import java.util.Map;
 
-import org.objectweb.joram.mom.proxies.ProxyImplMBean;
+import org.objectweb.joram.mom.proxies.UserAgentMBean;
 
 import com.scalagent.appli.shared.UserWTO;
 
@@ -38,7 +38,7 @@ public class UserWTOConverter {
    * @param user A ProxyImplMBean containing the user info
    * @return A UserWTO object created from the ProxyImplMBean object
    */
-  public static UserWTO getUserWTO(String key, ProxyImplMBean user) {
+  public static UserWTO getUserWTO(String key, UserAgentMBean user) {
     UserWTO result = new UserWTO(key, null, user.getPeriod(), user.getNbMsgsSentToDMQSinceCreation(),
         user.getSubscriptionNames());
     return result;
@@ -48,7 +48,7 @@ public class UserWTOConverter {
    * @param map Map of ProxyImplMBean
    * @return An Array of UserWTO
    */
-  public static UserWTO[] getUserWTOArray(Map<String, ProxyImplMBean> map) {
+  public static UserWTO[] getUserWTOArray(Map<String, UserAgentMBean> map) {
 
     UserWTO[] newUsers = new UserWTO[map.size()];
 

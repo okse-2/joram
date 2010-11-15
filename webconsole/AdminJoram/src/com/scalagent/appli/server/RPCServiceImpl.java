@@ -22,19 +22,17 @@
  */
 package com.scalagent.appli.server;
 
-
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
-import org.objectweb.joram.mom.dest.QueueImplMBean;
-import org.objectweb.joram.mom.dest.TopicImplMBean;
+import org.objectweb.joram.mom.dest.QueueMBean;
+import org.objectweb.joram.mom.dest.TopicMBean;
 import org.objectweb.joram.mom.messages.MessageView;
 import org.objectweb.joram.mom.proxies.ClientSubscriptionMBean;
-import org.objectweb.joram.mom.proxies.ProxyImplMBean;
+import org.objectweb.joram.mom.proxies.UserAgentMBean;
 import org.ow2.joram.admin.Activator;
 import org.ow2.joram.admin.AdminListener;
 import org.ow2.joram.admin.JoramAdmin;
@@ -81,9 +79,9 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
   private JoramAdmin joramAdmin;
   private LiveListener listener = new LiveListener();
 
-  private Map<String, QueueImplMBean> mapQueues;
-  private Map<String, TopicImplMBean> mapTopics;
-  private Map<String, ProxyImplMBean> mapUsers;
+  private Map<String, QueueMBean> mapQueues;
+  private Map<String, TopicMBean> mapTopics;
+  private Map<String, UserAgentMBean> mapUsers;
   private Map<String, SubscriptionWithName> listSubscriptions;
 
   private long lastupdate = 0;
@@ -151,7 +149,7 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
 
     synchWithJORAM(true);
 
-    QueueImplMBean queue = mapQueues.get(queueName);
+    QueueMBean queue = mapQueues.get(queueName);
 
     if (queue == null) {
       throw new Exception("Queue not found");
@@ -467,24 +465,24 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
 
   static class LiveListener implements AdminListener {
 
-    private Map<String, QueueImplMBean> queues = new HashMap<String, QueueImplMBean>();
-    private Map<String, TopicImplMBean> topics = new HashMap<String, TopicImplMBean>();
-    private Map<String, ProxyImplMBean> users = new HashMap<String, ProxyImplMBean>();
+    private Map<String, QueueMBean> queues = new HashMap<String, QueueMBean>();
+    private Map<String, TopicMBean> topics = new HashMap<String, TopicMBean>();
+    private Map<String, UserAgentMBean> users = new HashMap<String, UserAgentMBean>();
     private Map<String, SubscriptionWithName> subscriptions = new HashMap<String, SubscriptionWithName>();
 
-    public void onQueueAdded(String queueName, QueueImplMBean queue) {
+    public void onQueueAdded(String queueName, QueueMBean queue) {
       queues.put(queueName, queue);
     }
 
-    public void onQueueRemoved(String queueName, QueueImplMBean queue) {
+    public void onQueueRemoved(String queueName, QueueMBean queue) {
       queues.remove(queueName);
     }
 
-    public void onTopicAdded(String topicName, TopicImplMBean topic) {
+    public void onTopicAdded(String topicName, TopicMBean topic) {
       topics.put(topicName, topic);
     }
 
-    public void onTopicRemoved(String topicName, TopicImplMBean topic) {
+    public void onTopicRemoved(String topicName, TopicMBean topic) {
       topics.remove(topicName);
     }
 
@@ -496,23 +494,23 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
       subscriptions.remove(subscription.getName());
     }
 
-    public void onUserAdded(String userName, ProxyImplMBean user) {
+    public void onUserAdded(String userName, UserAgentMBean user) {
       users.put(userName, user);
     }
 
-    public void onUserRemoved(String userName, ProxyImplMBean user) {
+    public void onUserRemoved(String userName, UserAgentMBean user) {
       users.remove(userName);
     }
 
-    public Map<String, QueueImplMBean> getQueues() {
+    public Map<String, QueueMBean> getQueues() {
       return queues;
     }
 
-    public Map<String, TopicImplMBean> getTopics() {
+    public Map<String, TopicMBean> getTopics() {
       return topics;
     }
 
-    public Map<String, ProxyImplMBean> getUsers() {
+    public Map<String, UserAgentMBean> getUsers() {
       return users;
     }
 
