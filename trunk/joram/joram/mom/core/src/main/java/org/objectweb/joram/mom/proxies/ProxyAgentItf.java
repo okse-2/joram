@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,35 +22,23 @@
  */
 package org.objectweb.joram.mom.proxies;
 
-import org.objectweb.joram.shared.client.AbstractJmsReply;
-
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Notification;
 
-
 /**
  * The <code>ProxyAgentItf</code> interface defines the methods which must be
- * provided by a proxy agent hosting a <code>ProxyImpl</code> instance.
+ * provided by a user agent instance.
  */
 public interface ProxyAgentItf {
+
   /** Returns the proxy's <code>AgentId</code> identifier. */
   public AgentId getId();
 
   /** Sends a notification to a given agent. */ 
   public void sendNot(AgentId to, Notification not);
 
-  /**
-   * Sends an <code>AbstractJmsReply</code> to a given client.
-   *
-   * @param id  Identifies the context within which the sending occurs.
-   * @param reply  The reply to send to the client.
-   */
-  public void sendToClient(int id, AbstractJmsReply reply);
-
   public void setNoSave();
+
   public void setSave();
 
-  public String getName();
-  
-  public String getMBeanName();
 }

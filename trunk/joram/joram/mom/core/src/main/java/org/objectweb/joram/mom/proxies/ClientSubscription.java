@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -479,7 +479,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    * to the subscriber.
    */
   // AF: TODO we should parse each message for each subscription
-  // see ProxyImpl.doFwd
+  // see UserAgent.doFwd
   void browseNewMessages(List newMessages) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, this + ".browseNewMessages(" + newMessages + ')');

@@ -23,7 +23,7 @@
 package org.objectweb.joram.mom.proxies;
 
 
-public interface ProxyImplMBean {
+public interface UserAgentMBean {
   /**
    * Returns the name of this queue, or its id if not set.
    *
