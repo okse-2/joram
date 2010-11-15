@@ -28,12 +28,10 @@ import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
 import javax.management.ObjectName;
 
-import org.objectweb.joram.mom.dest.QueueImpl;
-import org.objectweb.joram.mom.dest.QueueImplMBean;
-import org.objectweb.joram.mom.dest.TopicImpl;
-import org.objectweb.joram.mom.dest.TopicImplMBean;
+import org.objectweb.joram.mom.dest.QueueMBean;
+import org.objectweb.joram.mom.dest.TopicMBean;
 import org.objectweb.joram.mom.proxies.ClientSubscriptionMBean;
-import org.objectweb.joram.mom.proxies.ProxyImplMBean;
+import org.objectweb.joram.mom.proxies.UserAgentMBean;
 
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.util.management.MXWrapper;
@@ -103,8 +101,8 @@ public class JoramAdminImpl implements JoramAdmin {
         Object mbean = MXWrapper.getMBeanInstance(mbeanName);
 
         if (UserON.apply(mbeanName)) {
-          if (mbean instanceof ProxyImplMBean) {
-            ProxyImplMBean user = (ProxyImplMBean) mbean;
+          if (mbean instanceof UserAgentMBean) {
+            UserAgentMBean user = (UserAgentMBean) mbean;
             if (not.getType().equals(REGISTERED)) {
               adminListener.onUserAdded(user.getName(), user);
             } else if (not.getType().equals(UNREGISTERED)) {
@@ -121,15 +119,15 @@ public class JoramAdminImpl implements JoramAdmin {
             System.out.println("Unknown User: " + mbean.getClass().getName());
           }
         } else if (DestinationON.apply(mbeanName)) {
-          if (mbean instanceof QueueImpl) {
-            QueueImpl queue = (QueueImpl) mbean;
+          if (mbean instanceof QueueMBean) {
+            QueueMBean queue = (QueueMBean) mbean;
             if (not.getType().equals(REGISTERED)) {
               adminListener.onQueueAdded(queue.getName(), queue);
             } else if (not.getType().equals(UNREGISTERED)) {
               adminListener.onQueueRemoved(queue.getName(), queue);
             }
-          } else if (mbean instanceof TopicImpl) {
-            TopicImpl topic = (TopicImpl) mbean;
+          } else if (mbean instanceof TopicMBean) {
+            TopicMBean topic = (TopicMBean) mbean;
             if (not.getType().equals(REGISTERED)) {
               adminListener.onTopicAdded(topic.getName(), topic);
             } else if (not.getType().equals(UNREGISTERED)) {
@@ -177,13 +175,13 @@ public class JoramAdminImpl implements JoramAdmin {
     return true;
   }
 
-  public boolean editTopic(TopicImplMBean topic, String DMQ, String destination, long period,
+  public boolean editTopic(TopicMBean topic, String DMQ, String destination, long period,
       boolean freeReading, boolean freeWriting) {
     // TODO Auto-generated method stub
     return true;
   }
 
-  public boolean deleteTopic(TopicImplMBean topic) {
+  public boolean deleteTopic(TopicMBean topic) {
     // TODO Auto-generated method stub
     return true;
   }
@@ -193,12 +191,12 @@ public class JoramAdminImpl implements JoramAdmin {
     return true;
   }
 
-  public boolean editUser(ProxyImplMBean user, String password, long period) {
+  public boolean editUser(UserAgentMBean user, String password, long period) {
     // TODO Auto-generated method stub
     return true;
   }
 
-  public boolean deleteUser(ProxyImplMBean user) {
+  public boolean deleteUser(UserAgentMBean user) {
     // TODO Auto-generated method stub
     return true;
   }
@@ -209,23 +207,23 @@ public class JoramAdminImpl implements JoramAdmin {
     return true;
   }
 
-  public boolean editQueue(QueueImplMBean queue, String DMQ, String destination, long period, int threshold,
+  public boolean editQueue(QueueMBean queue, String DMQ, String destination, long period, int threshold,
       int nbMaxMsg, boolean freeReading, boolean freeWriting) {
     // TODO Auto-generated method stub
     return true;
   }
 
-  public boolean deleteQueue(QueueImplMBean queue) {
+  public boolean deleteQueue(QueueMBean queue) {
     // TODO Auto-generated method stub
     return true;
   }
 
-  public boolean cleanWaitingRequest(QueueImplMBean queue) {
+  public boolean cleanWaitingRequest(QueueMBean queue) {
     // TODO Auto-generated method stub
     return true;
   }
 
-  public boolean cleanPendingMessage(QueueImplMBean queue) {
+  public boolean cleanPendingMessage(QueueMBean queue) {
     // TODO Auto-generated method stub
     return true;
   }

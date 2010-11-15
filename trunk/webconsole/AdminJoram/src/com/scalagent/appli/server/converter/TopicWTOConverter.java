@@ -25,7 +25,7 @@ package com.scalagent.appli.server.converter;
 import java.util.Date;
 import java.util.Map;
 
-import org.objectweb.joram.mom.dest.TopicImplMBean;
+import org.objectweb.joram.mom.dest.TopicMBean;
 
 import com.scalagent.appli.shared.TopicWTO;
 
@@ -47,7 +47,7 @@ public class TopicWTOConverter {
    * @param topic A DestinationImplMBean containing the topic info
    * @return A TopicWTO object created from the DestinationImplMBean object
    */
-  public static TopicWTO getDeviceWTO(String key, TopicImplMBean topic) {
+  public static TopicWTO getDeviceWTO(String key, TopicMBean topic) {
     TopicWTO result = new TopicWTO(key, new Date(topic.getCreationTimeInMillis()), topic.getSubscriberIds(),
         topic.getDMQId(), topic.getDestinationId(), topic.getNbMsgsDeliverSinceCreation(),
         topic.getNbMsgsReceiveSinceCreation(), topic.getNbMsgsSentToDMQSinceCreation(), topic.getPeriod(),
@@ -59,7 +59,7 @@ public class TopicWTOConverter {
    * @param map Map of DestinationImplMBean
    * @return An Array of TopicWTO
    */
-  public static TopicWTO[] getTopicWTOArray(Map<String, TopicImplMBean> map) {
+  public static TopicWTO[] getTopicWTOArray(Map<String, TopicMBean> map) {
 
     TopicWTO[] newTopicsWTO = new TopicWTO[map.size()];
 

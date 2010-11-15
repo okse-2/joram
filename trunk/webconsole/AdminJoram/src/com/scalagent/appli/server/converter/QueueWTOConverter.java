@@ -25,7 +25,7 @@ package com.scalagent.appli.server.converter;
 import java.util.Date;
 import java.util.Map;
 
-import org.objectweb.joram.mom.dest.QueueImplMBean;
+import org.objectweb.joram.mom.dest.QueueMBean;
 
 import com.scalagent.appli.shared.QueueWTO;
 
@@ -41,7 +41,7 @@ public class QueueWTOConverter {
    *          A DestinationImplMBean containing the queue info
    * @return A QueueWTO object created from the DestinationImplMBean object
    */
-  public static QueueWTO getQueueWTO(String key, QueueImplMBean queue) {
+  public static QueueWTO getQueueWTO(String key, QueueMBean queue) {
     QueueWTO result = new QueueWTO(key, new Date(queue.getCreationTimeInMillis()), queue.getDMQId(),
         queue.getDestinationId(), queue.getNbMsgsDeliverSinceCreation(),
         queue.getNbMsgsReceiveSinceCreation(), queue.getNbMsgsSentToDMQSinceCreation(), queue.getPeriod(),
@@ -56,7 +56,7 @@ public class QueueWTOConverter {
    *          Map of DestinationImplMBean
    * @return An Array of QueueWTO
    */
-  public static QueueWTO[] getQueueWTOArray(Map<String, QueueImplMBean> map) {
+  public static QueueWTO[] getQueueWTOArray(Map<String, QueueMBean> map) {
 
     QueueWTO[] newQueuesWTO = new QueueWTO[map.size()];
 

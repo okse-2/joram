@@ -22,27 +22,27 @@
  */
 package org.ow2.joram.admin;
 
-import org.objectweb.joram.mom.dest.QueueImplMBean;
-import org.objectweb.joram.mom.dest.TopicImplMBean;
+import org.objectweb.joram.mom.dest.QueueMBean;
+import org.objectweb.joram.mom.dest.TopicMBean;
 import org.objectweb.joram.mom.proxies.ClientSubscriptionMBean;
-import org.objectweb.joram.mom.proxies.ProxyImplMBean;
+import org.objectweb.joram.mom.proxies.UserAgentMBean;
 
 public interface AdminListener {
 
-  public void onQueueAdded(String queueName, QueueImplMBean queue);
+  public void onQueueAdded(String queueName, QueueMBean queue);
 
-  public void onQueueRemoved(String queueName, QueueImplMBean queue);
+  public void onQueueRemoved(String queueName, QueueMBean queue);
 
-  public void onTopicAdded(String topicName, TopicImplMBean topic);
+  public void onTopicAdded(String topicName, TopicMBean topic);
 
-  public void onTopicRemoved(String topicName, TopicImplMBean topic);
+  public void onTopicRemoved(String topicName, TopicMBean topic);
 
   public void onSubscriptionAdded(String userName, ClientSubscriptionMBean subscription);
 
   public void onSubscriptionRemoved(String userName, ClientSubscriptionMBean subscription);
 
-  public void onUserAdded(String userName, ProxyImplMBean user);
+  public void onUserAdded(String userName, UserAgentMBean user);
 
-  public void onUserRemoved(String userName, ProxyImplMBean user);
+  public void onUserRemoved(String userName, UserAgentMBean user);
 
 }
