@@ -778,8 +778,8 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
       }
       replyToTopic(reply, replyTo, requestMsgId, replyMsgId);
     } else {
-      replyToTopic(new org.objectweb.joram.shared.admin.AdminReply(false, "Unknown message " + request.getMessageId()),
-                   replyTo, requestMsgId, replyMsgId);
+      replyToTopic(new AdminReply(false, "Unknown message " + request.getMessageId()), replyTo, requestMsgId,
+          replyMsgId);
     }
   }
 
@@ -799,8 +799,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
         break;
       }
     }
-    replyToTopic(new org.objectweb.joram.shared.admin.AdminReply(true, null),
-                 replyTo, requestMsgId, replyMsgId);
+    replyToTopic(new AdminReply(true, null), replyTo, requestMsgId, replyMsgId);
   }
 
   private void clearQueue(AgentId replyTo,
@@ -817,8 +816,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
       dmqManager.sendToDMQ();
       messages.clear();
     }
-    replyToTopic(new org.objectweb.joram.shared.admin.AdminReply(true, null),
-                 replyTo, requestMsgId, replyMsgId);
+    replyToTopic(new AdminReply(true, null), replyTo, requestMsgId, replyMsgId);
   }
 
   /**
