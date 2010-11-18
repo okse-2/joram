@@ -127,7 +127,7 @@ public class AdminTest2 extends TestCase {
     topic.setReader(user);
     topic.setWriter(user);
     topic.setDMQ(dmq2);
-    
+
     // Verify the default configuration
     assertTrue("Bad default DMQ", AdminModule.getDefaultDMQ(sid).equals(dmq1));
     assertTrue("Bad default threshold", (AdminModule.getDefaultThreshold(sid) == 1));
@@ -293,6 +293,7 @@ public class AdminTest2 extends TestCase {
     
     Message msg = consumer3.receiveNoWait();
     assertTrue("Message on queue1, should be deleted by TTL", (msg == null));
+
     // Verify that the right message is available on dmq2
     msg = consumer2.receive(1000L);
     assertTrue("No message on dmq2", (msg != null));
@@ -307,6 +308,7 @@ public class AdminTest2 extends TestCase {
 
     msg = consumer4.receiveNoWait();
     assertTrue("Message on queue2, should be deleted by TTL", (msg == null));
+
     // Verify that the right message is available on dmq1
     msg = consumer1.receive(2000L);
     assertTrue("No message on dmq1", (msg != null));
@@ -372,5 +374,23 @@ public class AdminTest2 extends TestCase {
       assertTrue("Bad message on dmq1", msg.getJMSMessageID().equals(msg7.getJMSMessageID()));
 
     connection.close();
+
+    // Verify that a subscriber is present after adding it to a topic
+    AdminModule.connect(cf);
+    assertEquals(0, topic.getSubscriptions());
+    assertEquals(0, topic.getSubscriberIds().length);
+
+    Connection cnx = cf.createConnection("XXX", "XXX");
+    Session sessionc = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+    cnx.start();
+    sessionc.createConsumer(topic);
+    assertEquals(1, topic.getSubscriptions());
+    assertEquals(1, topic.getSubscriberIds().length);
+
+    cnx.close();
+    assertEquals(0, topic.getSubscriptions());
+    assertEquals(0, topic.getSubscriberIds().length);
+    AdminModule.disconnect();
+
   }
 }
