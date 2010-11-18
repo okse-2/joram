@@ -36,6 +36,7 @@
     <antcall target="tests.dist"/>
     <antcall target="tests.admin"/>
     <antcall target="tests.client"/>
+    <antcall target="tests.connection"/>
     <antcall target="tests.local"/>
     <antcall target="tests.dursub"/>
     <antcall target="tests.tcp"/>
@@ -43,6 +44,7 @@
     <antcall target="tests.noreg"/>
     <antcall target="tests.xa"/>
     <antcall target="tests.bridge"/>
+    <antcall target="tests.bridge.new"/>
     <antcall target="tests.schedqueue"/>
     <antcall target="tests.clusterTopic"/>
     <antcall target="tests.clusterQueue"/>
@@ -64,6 +66,7 @@
     <antcall target="tests.recovery"/>
     <antcall target="tests.admin"/>
     <antcall target="tests.client"/>
+    <antcall target="tests.connection"/>
     <antcall target="tests.local"/>
     <antcall target="tests.dursub"/>
     <antcall target="tests.tcp"/>
@@ -2181,7 +2184,7 @@ description=" --> launch all exceptionlistener tests">
         <antcall target="test.start" inheritAll="true">
           <param name="className" value="joram.dursub.Test6b"/>
           <param name="testid" value="dursub.test6"/>
-          <param name="jvmargs" value="-Dosgi.shell.telnet.port=16010"/>
+          <param name="jvmargs" value="-Dosgi.shell.telnet.port=7890"/>
           <param name="args" value=""/>
         </antcall>
       </sequential>
