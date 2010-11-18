@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009-2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,15 +26,12 @@ import java.util.Properties;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceRegistration;
 
 import fr.dyade.aaa.agent.AdminProxy;
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.agent.SCServerMBean;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.Service;
 
@@ -51,26 +48,6 @@ public class Activator implements BundleActivator {
   public static BundleContext context;
 
   private ServiceRegistration adminproxyRegistration;
-
-  /**
-   * Stops the whole framework if agent server was stopped an other way than
-   * stopping agent server bundle, for example using
-   * {@link SCServerMBean#stop()}. This is done to preserve the previous
-   * non-OSGi behavior.
-   */
-  public static void stopFramework() {
-    if (context.getBundle().getState() != Bundle.STOPPING) {
-      try {
-        // The system bundle is always assigned a bundle identifier of zero (0).
-        Bundle bundle = context.getBundle(0);
-        bundle.stop();
-      } catch (BundleException exc) {
-        if (logmon.isLoggable(BasicLevel.ERROR)) {
-          logmon.log(BasicLevel.ERROR, "Error when stopping OSGi framework : ", exc);
-        }
-      }
-    }
-  }
 
   public void start(BundleContext context) throws Exception {
     Activator.context = context;
