@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,13 +32,13 @@ import fr.dyade.aaa.common.stream.StreamUtil;
  * A <code>SetNbMaxMsg</code> instance requests to set a 
  * number max of message in Queue or Subscription.
  */
-public class SetNbMaxMsgRequest extends AdminRequest {
+public class SetNbMaxMsgRequest extends DestinationAdminRequest {
+
   private static final long serialVersionUID = 1L;
 
-  /** Identifier of the queue or subscription. */
-  private String id;
   /** nbMaxMsg value (-1 no limit).*/
   private int nbMaxMsg;
+
   /** subscription name */
   private String subName = null;
 
@@ -49,7 +49,7 @@ public class SetNbMaxMsgRequest extends AdminRequest {
    * @param nbMaxMsg  nb Max of Message (-1 no limit).
    */
   public SetNbMaxMsgRequest(String id, int nbMaxMsg) {
-    this.id = id;
+    super(id);
     this.nbMaxMsg = nbMaxMsg;
   }
 
@@ -65,16 +65,11 @@ public class SetNbMaxMsgRequest extends AdminRequest {
   public SetNbMaxMsgRequest(String id, 
                      int nbMaxMsg,
                      String subName) {
-    this.id = id;
+    super(id);
     this.nbMaxMsg = nbMaxMsg;
     this.subName = subName;
   }
   
-  /** Returns the identifier of the queue or subscription. */
-  public String getId() {
-    return id;
-  }
-
   /** Returns the nbMaxMsg value. */
   public int getNbMaxMsg() {
     return nbMaxMsg;
@@ -90,13 +85,13 @@ public class SetNbMaxMsgRequest extends AdminRequest {
   }
   
   public void readFrom(InputStream is) throws IOException {
-    id = StreamUtil.readStringFrom(is);
+    super.readFrom(is);
     nbMaxMsg = StreamUtil.readIntFrom(is);
     subName = StreamUtil.readStringFrom(is);
   }
 
   public void writeTo(OutputStream os) throws IOException {
-    StreamUtil.writeTo(id, os);
+    super.writeTo(os);
     StreamUtil.writeTo(nbMaxMsg, os);
     StreamUtil.writeTo(subName, os);
   }

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -33,13 +33,12 @@ import fr.dyade.aaa.common.stream.StreamUtil;
  * A <code>SetFather</code> instance is used for linking two topics in a
  * hierarchical relationship.
  */
-public class SetFather extends AdminRequest {
+public class SetFather extends DestinationAdminRequest {
+
   private static final long serialVersionUID = 1L;
 
   /** Identifier of the father. */
   private String father;
-  /** Identifier of the son. */
-  private String son;
 
   /**
    * Constructs a <code>SetFather</code> instance.
@@ -48,8 +47,8 @@ public class SetFather extends AdminRequest {
    * @param son  Identifier of the son.
    */
   public SetFather(String father, String son) {
+    super(son);
     this.father = father;
-    this.son = son;
   }
 
   public SetFather() { }
@@ -59,22 +58,17 @@ public class SetFather extends AdminRequest {
     return father;
   }
 
-  /** Returns the identifier of the son. */
-  public String getSon() {
-    return son;
-  }
-  
   protected int getClassId() {
     return SET_FATHER;
   }
   
   public void readFrom(InputStream is) throws IOException {
     father = StreamUtil.readStringFrom(is);
-    son = StreamUtil.readStringFrom(is);
+    super.readFrom(is);
   }
 
   public void writeTo(OutputStream os) throws IOException {
     StreamUtil.writeTo(father, os);
-    StreamUtil.writeTo(son, os);
+    super.writeTo(os);
   }
 }
