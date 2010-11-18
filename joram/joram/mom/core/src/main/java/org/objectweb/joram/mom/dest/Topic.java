@@ -53,7 +53,7 @@ import org.objectweb.joram.shared.admin.GetFatherRequest;
 import org.objectweb.joram.shared.admin.GetNumberReply;
 import org.objectweb.joram.shared.admin.GetSubscriberIds;
 import org.objectweb.joram.shared.admin.GetSubscriberIdsRep;
-import org.objectweb.joram.shared.admin.GetSubscriptions;
+import org.objectweb.joram.shared.admin.GetSubscriptionsRequest;
 import org.objectweb.joram.shared.admin.SetCluster;
 import org.objectweb.joram.shared.admin.SetFather;
 import org.objectweb.joram.shared.excepts.AccessException;
@@ -380,7 +380,7 @@ public class Topic extends Destination implements TopicMBean {
     if (adminRequest instanceof GetSubscriberIds) {
       replyToTopic(new GetSubscriberIdsRep(getSubscriberIds()),
                    not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
-    } else if (adminRequest instanceof GetSubscriptions) {
+    } else if (adminRequest instanceof GetSubscriptionsRequest) {
       replyToTopic(new GetNumberReply(getNumberOfSubscribers()),
                    not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
     } else if (adminRequest instanceof GetDMQSettingsRequest) {
