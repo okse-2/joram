@@ -22,21 +22,14 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import fr.dyade.aaa.common.stream.StreamUtil;
 
 /**
  * A <code>Monitor_GetPendingRequests</code> instance requests the number of
  * pending requests on a given queue.
  */
-public class GetPendingRequests extends AdminRequest {
-  private static final long serialVersionUID = 1L;
+public class GetPendingRequests extends DestinationAdminRequest {
 
-  /** Identifier of the target destination. */
-  private String dest;
+  private static final long serialVersionUID = 1L;
 
   /**
    * Constructs a <code>Monitor_GetPendingRequests</code> instance.
@@ -44,25 +37,13 @@ public class GetPendingRequests extends AdminRequest {
    * @param dest  Identifier of the target destination.
    */
   public GetPendingRequests(String dest) {
-    this.dest = dest;
+    super(dest);
   }
 
   public GetPendingRequests() { }
   
-  /** Returns the identifier of the target destination. */
-  public String getDest() {
-    return dest;
-  }
-  
   protected int getClassId() {
     return MONITOR_GET_PENDING_REQUESTS;
   }
-  
-  public void readFrom(InputStream is) throws IOException {
-    dest = StreamUtil.readStringFrom(is);
-  }
 
-  public void writeTo(OutputStream os) throws IOException {
-    StreamUtil.writeTo(dest, os);
-  }
 }

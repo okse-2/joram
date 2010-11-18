@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -33,11 +33,10 @@ import fr.dyade.aaa.common.stream.StreamUtil;
  * A <code>SetRight</code> instance requests a given right to be granted to a
  * given user.
  */
-public abstract class SetRight extends AdminRequest {
+public abstract class SetRight extends DestinationAdminRequest {
+
   /** Identifier of the user's proxy, <code>null</code> for all users. */
   private String userProxId;
-  /** Identifier of the destination. */
-  private String destId;
 
   /**
    * Constructs a <code>SetRight</code> instance.
@@ -47,8 +46,8 @@ public abstract class SetRight extends AdminRequest {
    * @param destId  The identifier of the destination.
    */
   public SetRight(String userProxId, String destId) {
+    super(destId);
     this.userProxId = userProxId;
-    this.destId = destId;
   }
 
   public SetRight() { }
@@ -58,22 +57,17 @@ public abstract class SetRight extends AdminRequest {
     return userProxId;
   }
   
-  /** Returns the identifier of the destination. */
-  public String getDestId() {
-    return destId;
-  }
-  
   protected int getClassId() {
     return SET_RIGHT;
   }
   
   public void readFrom(InputStream is) throws IOException {
     userProxId = StreamUtil.readStringFrom(is);
-    destId = StreamUtil.readStringFrom(is);
+    super.readFrom(is);
   }
 
   public void writeTo(OutputStream os) throws IOException {
     StreamUtil.writeTo(userProxId, os);
-    StreamUtil.writeTo(destId, os);
+    super.writeTo(os);
   }
 }

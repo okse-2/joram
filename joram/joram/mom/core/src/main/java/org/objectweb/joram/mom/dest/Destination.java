@@ -36,14 +36,12 @@ import javax.management.MBeanAttributeInfo;
 import javax.management.ObjectName;
 
 import org.objectweb.joram.mom.notifications.AbstractRequestNot;
-import org.objectweb.joram.mom.notifications.AdminReplyNot;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.ExceptionReply;
 import org.objectweb.joram.mom.notifications.FwdAdminRequestNot;
 import org.objectweb.joram.mom.notifications.GetRightsReplyNot;
 import org.objectweb.joram.mom.notifications.GetRightsRequestNot;
 import org.objectweb.joram.mom.notifications.RequestGroupNot;
-import org.objectweb.joram.mom.notifications.SpecialAdminRequest;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.mom.proxies.SendRepliesNot;
 import org.objectweb.joram.mom.proxies.SendReplyNot;
@@ -198,8 +196,6 @@ public abstract class Destination extends Agent implements DestinationMBean {
     try {
       if (not instanceof GetRightsRequestNot)
         getRights(from, (GetRightsRequestNot) not);
-      else if (not instanceof SpecialAdminRequest)
-        specialAdminRequest(from, (SpecialAdminRequest) not);
       else if (not instanceof ClientMessages)
         clientMessages(from, (ClientMessages) not);
       else if (not instanceof UnknownAgent)
@@ -655,37 +651,6 @@ public abstract class Destination extends Agent implements DestinationMBean {
       deletable = true;
     }
   }
-
-  /**
-   * Method implementing the reaction to a <code>SpecialAdminRequest</code>
-   * notification requesting the special administration of the destination.
-   * <p>
-   */
-  protected void specialAdminRequest(AgentId from, SpecialAdminRequest not) {
-    Object obj = null;
-
-    setSave(); // state change, so save.
-
-    try {
-      if (!isAdministrator(from)) {
-        if (logger.isLoggable(BasicLevel.WARN))
-          logger.log(BasicLevel.WARN, 
-                     "Unauthorized SpecialAdminRequest request from " + from);
-        throw new RequestException("ADMIN right not granted");
-      }
-      
-      obj = specialAdminProcess(not);
-      strbuf.append("Request [").append(not.getClass().getName()).append("], sent to Destination [").append(getId()).append("], successful [true] ").toString();
-      forward(from, new AdminReplyNot(not, true, strbuf.toString(), obj)); 
-    } catch (RequestException exc) {
-      strbuf.append("Request [").append(not.getClass().getName()).append("], sent to Destination [").append(getId()).append("], successful [false]: ").append(exc.getMessage());
-      forward(from, new AdminReplyNot(not, false, strbuf.toString(), obj));
-    } finally {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, strbuf.toString());
-      strbuf.setLength(0);
-    }
-  }
   
   protected void requestGroupNot(AgentId from, RequestGroupNot not) {
     Enumeration en = not.getClientMessages();
@@ -715,10 +680,6 @@ public abstract class Destination extends Agent implements DestinationMBean {
     if (!not.isPersistent() && replies.size() > 0) {
       forward(from, new SendRepliesNot(replies));
     }
-  }
-  
-  protected Object specialAdminProcess(SpecialAdminRequest not) throws RequestException {
-    return null;
   }
 
   /**

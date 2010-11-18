@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,31 +29,27 @@ import java.io.OutputStream;
 import fr.dyade.aaa.common.stream.StreamUtil;
 
 /**
- * An <code>SpecialAdmin</code> is a request sent by 
- * a client administrator inside a 
- * <code>org.objectweb.joram.shared.messages.Message</code> to an
- * <code>org.objectweb.joram.mom.dest.AdminTopic</code> topic for
- * requesting an special admin operation.
+ * An <code>SpecialAdmin</code> is a request sent by a client administrator
+ * inside a <code>org.objectweb.joram.shared.messages.Message</code> to an
+ * <code>org.objectweb.joram.mom.dest.AdminTopic</code> topic for requesting an
+ * administration operation which will occur on the specified destination.
  */
-public class SpecialAdmin extends AdminRequest {
+public abstract class DestinationAdminRequest extends AdminRequest {
+
   private static final long serialVersionUID = 1L;
 
   /** Identifier of the destination. */
   private String destId;
   
-  public SpecialAdmin(String destId) {
+  public DestinationAdminRequest(String destId) {
     this.destId = destId;
   }
 
-  public SpecialAdmin() { }
+  public DestinationAdminRequest() { }
   
   /** Returns the identifier of the destination. */
   public String getDestId() {
     return destId;
-  }
-
-  protected int getClassId() {
-    return SPECIAL_ADMIN;
   }
 
   public void readFrom(InputStream is) throws IOException {

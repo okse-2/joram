@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,8 @@ import java.io.OutputStream;
 
 import fr.dyade.aaa.common.stream.StreamUtil;
 
-public class DeleteQueueMessage extends QueueAdminRequest {
+public class DeleteQueueMessage extends DestinationAdminRequest {
+
   private static final long serialVersionUID = 1L;
 
   private String msgId;

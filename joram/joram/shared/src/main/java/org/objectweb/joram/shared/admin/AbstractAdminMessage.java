@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,24 +22,22 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.Externalizable;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Externalizable;
 import java.io.IOException;
-
+import java.io.InputStream;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.io.OutputStream;
 import java.util.Hashtable;
 
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.stream.StreamUtil;
 import fr.dyade.aaa.common.stream.Streamable;
-
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
 /**
  * An <code>AbstractAdminMessage</code> is a message exchanged between a
@@ -111,9 +109,9 @@ public abstract class AbstractAdminMessage implements Externalizable, Streamable
   protected final static int GET_USERS_REQUEST = 58;
   protected final static int GET_USERS_REPLY = 59;
   protected final static int XXX_MONITOR_GET_WRITERS = 60;
-  protected final static int MONITOR_REPLY = 61;
-  protected final static int MONITOR_REQUEST = 62;
-  protected final static int QUEUE_ADMIN_REQUEST = 63;
+  protected final static int XXX_MONITOR_REPLY = 61;
+  protected final static int XXX_MONITOR_REQUEST = 62;
+  protected final static int XXX_QUEUE_ADMIN_REQUEST = 63;
   protected final static int REMOVE_DOMAIN_REQUEST = 64;
   protected final static int REMOVE_QUEUE_CLUSTER = 65;
   protected final static int REMOVE_SERVER_REQUEST = 66;
@@ -130,7 +128,7 @@ public abstract class AbstractAdminMessage implements Externalizable, Streamable
   protected final static int XXX_SET_USER_DMQ = 77;
   protected final static int XXX_SET_USER_THRESHOLD = 78;
   protected final static int SET_WRITER = 79;
-  protected final static int SPECIAL_ADMIN = 80;
+  protected final static int XXX_SPECIAL_ADMIN = 80;
   protected final static int STOP_SERVER_REQUEST = 81;
   protected final static int SUBSCRIPTION_ADMIN_REQUEST = 82;
   protected final static int XXX_UNSET_CLUSTER = 83;
@@ -212,7 +210,7 @@ public abstract class AbstractAdminMessage implements Externalizable, Streamable
     null,
     null,
     null,
-    QueueAdminRequest.class.getName(),
+    null,
     RemoveDomainRequest.class.getName(),
     RemoveQueueCluster.class.getName(),
     RemoveServerRequest.class.getName(),
@@ -229,7 +227,7 @@ public abstract class AbstractAdminMessage implements Externalizable, Streamable
     null,
     null,
     SetWriter.class.getName(),
-    SpecialAdmin.class.getName(),
+    null,
     StopServerRequest.class.getName(),
     SubscriptionAdminRequest.class.getName(),
     null,

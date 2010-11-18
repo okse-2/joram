@@ -35,6 +35,7 @@ import java.util.Set;
 import org.objectweb.joram.mom.messages.Message;
 import org.objectweb.joram.mom.notifications.AckJoinQueueCluster;
 import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.mom.notifications.FwdAdminRequestNot;
 import org.objectweb.joram.mom.notifications.JoinQueueCluster;
 import org.objectweb.joram.mom.notifications.LBCycleLife;
 import org.objectweb.joram.mom.notifications.LBMessageGive;
@@ -42,13 +43,13 @@ import org.objectweb.joram.mom.notifications.LBMessageHope;
 import org.objectweb.joram.mom.notifications.LeaveQueueCluster;
 import org.objectweb.joram.mom.notifications.QueueClusterNot;
 import org.objectweb.joram.mom.notifications.ReceiveRequest;
-import org.objectweb.joram.mom.notifications.SpecialAdminRequest;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.admin.AddQueueCluster;
+import org.objectweb.joram.shared.admin.AdminReply;
+import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.admin.ListClusterQueue;
 import org.objectweb.joram.shared.admin.RemoveQueueCluster;
-import org.objectweb.joram.shared.admin.SpecialAdmin;
 import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -158,6 +159,31 @@ public class ClusterQueue extends Queue {
     }
   }
 
+  public void handleAdminRequestNot(AgentId from, FwdAdminRequestNot not) {
+
+    setSave(); // state change, so save.
+
+    AdminRequest adminRequest = not.getRequest();
+    String info = strbuf.append("Request [").append(not.getClass().getName())
+        .append("], sent to Destination [").append(getId()).append("], successful [true] ").toString();
+
+    if (adminRequest instanceof ListClusterQueue) {
+      List list = doList((ListClusterQueue) adminRequest);
+      replyToTopic(new AdminReply(true, info, list), not.getReplyTo(), not.getRequestMsgId(),
+          not.getReplyMsgId());
+    } else if (adminRequest instanceof AddQueueCluster) {
+      addQueueCluster(((AddQueueCluster) adminRequest).joiningQueue, loadingFactor.getRateOfFlow());
+      replyToTopic(new AdminReply(true, info), not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
+    } else if (adminRequest instanceof RemoveQueueCluster) {
+      broadcastLeave(((RemoveQueueCluster) adminRequest).removeQueue);
+      removeQueueCluster(((RemoveQueueCluster) adminRequest).removeQueue);
+      replyToTopic(new AdminReply(true, info), not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
+    } else {
+      super.handleAdminRequestNot(from, not);
+    }
+    strbuf.setLength(0);
+  }
+
   /**
    * Distributes the received notifications to the appropriate reactions.
    * 
@@ -188,40 +214,6 @@ public class ClusterQueue extends Queue {
   public String toString() {
     return "ClusterQueue:" + getId().toString();
   }
- 
-  /**
-   * use to add or remove ClusterQueue to cluster. 
-   * 
-   * @param not
-   */
-  public Object specialAdminProcess(SpecialAdminRequest not) 
-    throws RequestException {
-
-    Object ret = null;
-    try {
-      SpecialAdmin req = not.getRequest();
-      
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, 
-                   "--- " + this + " specialAdminProcess : " + req);
-
-      if (req instanceof AddQueueCluster) {
-        addQueueCluster(((AddQueueCluster) req).joiningQueue,
-                        loadingFactor.getRateOfFlow());
-      } else if (req instanceof RemoveQueueCluster) {
-        broadcastLeave(((RemoveQueueCluster) req).removeQueue);
-        removeQueueCluster(((RemoveQueueCluster) req).removeQueue);
-      } else if(req instanceof ListClusterQueue) {
-        ret = doList((ListClusterQueue) req);
-      }
-    } catch (Exception exc) {
-      if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN, 
-                   "--- " + this + " specialAdminProcess", exc);
-      throw new RequestException(exc.getMessage());
-    }
-    return ret;
-  }
 
   /**
    * return the cluster list.
@@ -229,7 +221,7 @@ public class ClusterQueue extends Queue {
    * @param req
    * @return the cluster list.
    */
-  protected Object doList(ListClusterQueue req) {
+  protected List doList(ListClusterQueue req) {
     List vect = new ArrayList();
     for (Enumeration e = clusters.keys(); e.hasMoreElements(); )
       vect.add(e.nextElement().toString());

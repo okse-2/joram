@@ -32,12 +32,11 @@ import fr.dyade.aaa.common.stream.StreamUtil;
  * A <code>Monitor_GetNbMaxMsg</code> instance requests the
  * NbMaxMsg of the destination.
  */
-public class GetNbMaxMsgRequest extends AdminRequest {
+public class GetNbMaxMsgRequest extends DestinationAdminRequest {
+
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
-  /** Identifier of the destination. */
-  private String destId;
   /** subscription name */
   private String subName = null;
   
@@ -47,7 +46,7 @@ public class GetNbMaxMsgRequest extends AdminRequest {
    * @param destId  Identifier of the destination.
    */
   public GetNbMaxMsgRequest(String destId) {
-    this.destId = destId;
+    super(destId);
   }
   
   public GetNbMaxMsgRequest() { }
@@ -58,15 +57,9 @@ public class GetNbMaxMsgRequest extends AdminRequest {
    * @param destId  Identifier of the destination.
    * @param subName Subscription name.
    */
-  public GetNbMaxMsgRequest(String destId,
-                             String subName) {
-    this.destId = destId;
+  public GetNbMaxMsgRequest(String destId, String subName) {
+    super(destId);
     this.subName = subName;
-  }
-
-  /** Returns the identifier of the destination. */
-  public String getId() {
-    return destId;
   }
 
   /** Returns SubName */
@@ -79,12 +72,12 @@ public class GetNbMaxMsgRequest extends AdminRequest {
   }
   
   public void readFrom(InputStream is) throws IOException {
-    destId = StreamUtil.readStringFrom(is);
+    super.readFrom(is);
     subName = StreamUtil.readStringFrom(is);
   }
 
   public void writeTo(OutputStream os) throws IOException {
-    StreamUtil.writeTo(destId, os);
+    super.writeTo(os);
     StreamUtil.writeTo(subName, os);
   }
 }

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -30,7 +30,7 @@ import java.io.OutputStream;
 import fr.dyade.aaa.common.stream.StreamUtil;
 
 
-public class AddQueueCluster extends SpecialAdmin {
+public class AddQueueCluster extends DestinationAdminRequest {
   private static final long serialVersionUID = 1L;
 
   public String joiningQueue;

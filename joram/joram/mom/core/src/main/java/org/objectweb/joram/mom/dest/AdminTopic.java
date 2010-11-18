@@ -43,7 +43,6 @@ import org.objectweb.joram.mom.notifications.GetProxyIdNot;
 import org.objectweb.joram.mom.notifications.GetRightsReplyNot;
 import org.objectweb.joram.mom.notifications.GetRightsRequestNot;
 import org.objectweb.joram.mom.notifications.RequestGroupNot;
-import org.objectweb.joram.mom.notifications.SpecialAdminRequest;
 import org.objectweb.joram.mom.proxies.AdminNotification;
 import org.objectweb.joram.mom.proxies.SendReplyNot;
 import org.objectweb.joram.mom.proxies.UserAgent;
@@ -58,7 +57,7 @@ import org.objectweb.joram.shared.admin.CreateUserReply;
 import org.objectweb.joram.shared.admin.CreateUserRequest;
 import org.objectweb.joram.shared.admin.DeleteDestination;
 import org.objectweb.joram.shared.admin.DeleteUser;
-import org.objectweb.joram.shared.admin.GetClusterRequest;
+import org.objectweb.joram.shared.admin.DestinationAdminRequest;
 import org.objectweb.joram.shared.admin.GetConfigRequest;
 import org.objectweb.joram.shared.admin.GetDMQSettingsReply;
 import org.objectweb.joram.shared.admin.GetDMQSettingsRequest;
@@ -66,32 +65,20 @@ import org.objectweb.joram.shared.admin.GetDestinationsReply;
 import org.objectweb.joram.shared.admin.GetDestinationsRequest;
 import org.objectweb.joram.shared.admin.GetDomainNames;
 import org.objectweb.joram.shared.admin.GetDomainNamesRep;
-import org.objectweb.joram.shared.admin.GetFatherRequest;
 import org.objectweb.joram.shared.admin.GetLocalServer;
 import org.objectweb.joram.shared.admin.GetLocalServerRep;
-import org.objectweb.joram.shared.admin.GetNbMaxMsgRequest;
-import org.objectweb.joram.shared.admin.GetPendingMessages;
-import org.objectweb.joram.shared.admin.GetPendingRequests;
 import org.objectweb.joram.shared.admin.GetRightsReply;
 import org.objectweb.joram.shared.admin.GetRightsRequest;
 import org.objectweb.joram.shared.admin.GetServersIdsReply;
 import org.objectweb.joram.shared.admin.GetServersIdsRequest;
 import org.objectweb.joram.shared.admin.GetStatsReply;
 import org.objectweb.joram.shared.admin.GetStatsRequest;
-import org.objectweb.joram.shared.admin.GetSubscriberIds;
-import org.objectweb.joram.shared.admin.GetSubscriptionsRequest;
 import org.objectweb.joram.shared.admin.GetUsersReply;
 import org.objectweb.joram.shared.admin.GetUsersRequest;
-import org.objectweb.joram.shared.admin.QueueAdminRequest;
 import org.objectweb.joram.shared.admin.RemoveDomainRequest;
 import org.objectweb.joram.shared.admin.RemoveServerRequest;
-import org.objectweb.joram.shared.admin.SetCluster;
 import org.objectweb.joram.shared.admin.SetDMQRequest;
-import org.objectweb.joram.shared.admin.SetFather;
-import org.objectweb.joram.shared.admin.SetNbMaxMsgRequest;
-import org.objectweb.joram.shared.admin.SetRight;
 import org.objectweb.joram.shared.admin.SetThresholdRequest;
-import org.objectweb.joram.shared.admin.SpecialAdmin;
 import org.objectweb.joram.shared.admin.StopServerRequest;
 import org.objectweb.joram.shared.admin.UpdateUser;
 import org.objectweb.joram.shared.admin.UserAdminRequest;
@@ -583,22 +570,14 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
         doProcess((CreateDestinationRequest) request, replyTo, msgId);
       else if (request instanceof DeleteDestination)
         doProcess((DeleteDestination) request, replyTo, msgId);
-      else if (request instanceof SetCluster)
-        doProcess((SetCluster) request, replyTo, msgId);
-      else if (request instanceof SetFather)
-        doProcess((SetFather) request, replyTo, msgId);
       else if (request instanceof CreateUserRequest)
         doProcess((CreateUserRequest) request, replyTo, msgId);
       else if (request instanceof UpdateUser)
         doProcess((UpdateUser) request, replyTo, msgId);
       else if (request instanceof DeleteUser)
         doProcess((DeleteUser) request, replyTo, msgId);
-      else if (request instanceof SetRight)
-        doProcess((SetRight) request, replyTo, msgId);
       else if (request instanceof SetDMQRequest)
         doProcess((SetDMQRequest) request, replyTo, msgId);
-      else if (request instanceof SetNbMaxMsgRequest)
-        doProcess((SetNbMaxMsgRequest) request, replyTo, msgId);
       else if (request instanceof SetThresholdRequest)
         doProcess((SetThresholdRequest) request, replyTo, msgId);
       else if (request instanceof GetServersIdsRequest)
@@ -615,22 +594,10 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
         doProcess((GetRightsRequest) request, replyTo, msgId);
       else if (request instanceof GetDMQSettingsRequest)
         doProcess((GetDMQSettingsRequest) request, replyTo, msgId);
-      else if (request instanceof GetFatherRequest)
-        doProcess((GetFatherRequest) request, replyTo, msgId);
-      else if (request instanceof GetClusterRequest)
-        doProcess((GetClusterRequest) request, replyTo, msgId);
-      else if (request instanceof GetPendingMessages)
-        doProcess((GetPendingMessages) request, replyTo, msgId);
-      else if (request instanceof GetPendingRequests)
-        doProcess((GetPendingRequests) request, replyTo, msgId);
       else if (request instanceof GetStatsRequest)
         doProcess((GetStatsRequest) request, replyTo, msgId);
-      else if (request instanceof GetNbMaxMsgRequest)
-        doProcess((GetNbMaxMsgRequest) request, replyTo, msgId);
-      else if (request instanceof GetSubscriptionsRequest)
-        doProcess((GetSubscriptionsRequest) request, replyTo, msgId);
-      else if (request instanceof SpecialAdmin)
-        doProcess((SpecialAdmin) request, replyTo, msgId);
+      else if (request instanceof DestinationAdminRequest)
+        doProcess((DestinationAdminRequest) request, replyTo, msgId);
       else if (request instanceof AddServerRequest)
         doProcess((AddServerRequest) request, replyTo, msgId, from);
       else if (request instanceof AddDomainRequest)
@@ -643,10 +610,6 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
         doProcess((GetConfigRequest) request, replyTo, msgId);
       else if (request instanceof UserAdminRequest)
         doProcess((UserAdminRequest) request, replyTo, msgId);
-      else if (request instanceof GetSubscriberIds)
-        doProcess((GetSubscriberIds) request, replyTo, msgId);
-      else if (request instanceof QueueAdminRequest)
-        doProcess((QueueAdminRequest) request, replyTo, msgId);
     } catch (UnknownServerException exc) {
       // Caught when a target server is invalid.
       info = strbuf.append("Request [").append(request.getClass().getName())
@@ -851,42 +814,6 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
   }
 
   /**
-   * Processes a <code>Monitor_GetCluster</code> request by forwarding it to
-   * its target topic, if local.
-   */
-  private void doProcess(GetClusterRequest request, AgentId replyTo, String msgId) {
-    AgentId destId = AgentId.fromString(request.getTopic());
-    forward(destId, new FwdAdminRequestNot(request, replyTo, msgId, createMessageId()));
-  }
-
-  /**
-   * Processes a <code>SetCluster<code> instance requesting to link two topics
-   * in a cluster relationship.
-   */
-  private void doProcess(SetCluster request, AgentId replyTo, String msgId) {
-    AgentId destId = AgentId.fromString(request.getInitId());
-    forward(destId, new FwdAdminRequestNot(request, replyTo, msgId, createMessageId()));
-  }
-
-  /**
-   * Processes a <code>Monitor_GetFather</code> request by forwarding it to
-   * its target topic, if local.
-   */
-  private void doProcess(GetFatherRequest request, AgentId replyTo, String msgId) {
-    AgentId destId = AgentId.fromString(request.getTopic());
-    forward(destId, new FwdAdminRequestNot(request, replyTo, msgId, createMessageId()));
-  }
-
-  /**
-   * Processes a <code>SetFather<code> instance requesting to link two topics
-   * in a hierarchical relationship.
-   */
-  private void doProcess(SetFather request, AgentId replyTo, String msgId) {
-    AgentId destId = AgentId.fromString(request.getSon());
-    forward(destId, new FwdAdminRequestNot(request, replyTo, msgId, createMessageId()));
-  }
-
-  /**
    * Processes a <code>CreateUserRequest</code> instance requesting the
    * creation of a <code>UserAgent</code> for a given user.
    *
@@ -1056,15 +983,6 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
   }
 
   /**
-   * Processes a <code>SetRight</code> instance requesting to grant a user
-   * a given right on a given destination.
-   */
-  private void doProcess(SetRight request, AgentId replyTo, String msgId) {
-    AgentId destId = AgentId.fromString(request.getDestId());
-    forward(destId, new FwdAdminRequestNot(request, replyTo, msgId, createMessageId()));
-  }
-
-  /**
    * Processes a <code>SetDMQ</code> request requesting a given queue to be set as
    * the DMQ of a given destination or user.
    * If the AgentId of the destination is NullId set the default DMQ.
@@ -1127,15 +1045,6 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
       // Forward the request to the target.
       forward(destId, new FwdAdminRequestNot(request, replyTo, msgId, createMessageId()));
     }
-  }
-
-  /**
-   * Processes a <code>SetNbMaxMsg</code> request requesting
-   * a given nbMaxMsg value to be set in queue or subscription.
-   */
-  private void doProcess(SetNbMaxMsgRequest request, AgentId replyTo, String msgId) {
-    AgentId destId = AgentId.fromString(request.getId());
-    forward(destId, new FwdAdminRequestNot(request, replyTo, msgId, createMessageId()));
   }
 
   /**
@@ -1342,24 +1251,6 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
   }
 
   /**
-   * Processes a <code>Monitor_GetPendingMessages</code> request by
-   * forwarding it to its target queue, if local.
-   */
-  private void doProcess(GetPendingMessages request, AgentId replyTo, String msgId) {
-    AgentId destId = AgentId.fromString(request.getDest());
-    forward(destId, new FwdAdminRequestNot(request, replyTo, msgId, createMessageId()));
-  }
-
-  /**
-   * Processes a <code>Monitor_GetPendingRequests</code> request by
-   * forwarding it to its target queue, if local.
-   */
-  private void doProcess(GetPendingRequests request, AgentId replyTo, String msgId) {
-    AgentId destId = AgentId.fromString(request.getDest());
-    forward(destId, new FwdAdminRequestNot(request, replyTo, msgId, createMessageId()));
-  }
-
-  /**
    * Processes a <code>Monitor_GetStat</code> request by
    * forwarding it to its target destination, if local.
    */
@@ -1380,47 +1271,12 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
   }
 
   /**
-   * Processes an <code>Monitor_GetNbMaxMsg</code> request requesting
-   * to get the maximum number of messages.
+   * Processes a <code>DestinationRequest</code> request by
+   * forwarding it to its target destination, if local.
    */
-  private void doProcess(GetNbMaxMsgRequest request, AgentId replyTo, String msgId) {
-    AgentId destId = AgentId.fromString(request.getId());
-    forward(destId, new FwdAdminRequestNot(request, replyTo, msgId, createMessageId()));
-  }
-
-  /**
-   * Processes a <code>Monitor_GetSubscriptions</code> request by
-   * forwarding it to its target queue, if local.
-   */
-  private void doProcess(GetSubscriptionsRequest request, AgentId replyTo, String msgId) {
-    AgentId destId = AgentId.fromString(request.getDest());
-    forward(destId, new FwdAdminRequestNot(request, replyTo, msgId, createMessageId()));
-  }
-
-  private void doProcess(SpecialAdmin request,
-                         AgentId replyTo,
-                         String msgId) throws UnknownServerException {
+  private void doProcess(DestinationAdminRequest request, AgentId replyTo, String msgId) {
     AgentId destId = AgentId.fromString(request.getDestId());
-
-    if (checkServerId(destId.getTo())) {
-      // The destination is local, process the request.
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "AdminTopic.doProcess " + "SpecialAdminRequest destId=" + destId);
-
-      if (getId().equals(destId)) {
-        // If this destination is the target destination, doing nothing:
-        distributeReply(replyTo, msgId,
-                        new AdminReply(false, "destId mustn't be TopicAdmin."));
-        return;
-      }
-
-      forward(destId, new SpecialAdminRequest(msgId,request));
-      if (replyTo != null) requestsTable.put(msgId, replyTo);
-    } else {
-      // Forward the request to the right AdminTopic agent.
-      forward(getDefault(destId.getTo()),
-              new FwdAdminRequestNot(request, replyTo, msgId));
-    }
+    forward(destId, new FwdAdminRequestNot(request, replyTo, msgId, createMessageId()));
   }
 
   /* ***** ***** ***** ***** *****
@@ -1675,16 +1531,6 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
               new FwdAdminRequestNot(request, replyTo, requestMsgId, null));
     }
   }
-
-  private void doProcess(GetSubscriberIds request, AgentId replyTo, String requestMsgId) {
-      forward(AgentId.fromString(request.getTopicId()),
-              new FwdAdminRequestNot(request, replyTo, requestMsgId, createMessageId()));
-  }
-
-  private void doProcess(QueueAdminRequest request, AgentId replyTo, String requestMsgId) {
-      forward(AgentId.fromString(request.getQueueId()),
-              new FwdAdminRequestNot(request, replyTo, requestMsgId, createMessageId()));
-  }  
 
   /** 
    * Returns <code>true</code> if a given server identification corresponds

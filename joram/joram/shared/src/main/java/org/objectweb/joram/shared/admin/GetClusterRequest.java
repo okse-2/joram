@@ -22,47 +22,28 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import fr.dyade.aaa.common.stream.StreamUtil;
-
 /**
  * A <code>Monitor_GetCluster</code> instance requests the list of the topics
  * part of a cluster.
  */
-public class GetClusterRequest extends AdminRequest {
+public class GetClusterRequest extends DestinationAdminRequest {
+
   private static final long serialVersionUID = 1L;
 
-  /** Identifier of a topic part of the target cluster. */
-  private String topic;
-  
   /**
    * Constructs a <code>Monitor_GetCluster</code> instance.
    *
    * @param topic  Identifier of a topic part of the target cluster.
    */
   public GetClusterRequest(String topic) {
-    this.topic = topic;
+    super(topic);
   }
 
-  public GetClusterRequest() { }
-  
-  /** Returns the identifier of a topic part of the target cluster. */
-  public String getTopic() {
-    return topic;
+  public GetClusterRequest() {
   }
-  
+
   protected int getClassId() {
     return MONITOR_GET_CLUSTER;
   }
-  
-  public void readFrom(InputStream is) throws IOException {
-    topic = StreamUtil.readStringFrom(is);
-  }
 
-  public void writeTo(OutputStream os) throws IOException {
-    StreamUtil.writeTo(topic, os);
-  }
 }

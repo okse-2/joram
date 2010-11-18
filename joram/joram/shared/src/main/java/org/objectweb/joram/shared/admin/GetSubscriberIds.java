@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,36 +22,18 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+public class GetSubscriberIds extends DestinationAdminRequest {
 
-import fr.dyade.aaa.common.stream.StreamUtil;
-
-public class GetSubscriberIds extends AdminRequest {
   private static final long serialVersionUID = 1L;
 
-  private String topicId;
-
   public GetSubscriberIds(String topicId) {
-    this.topicId = topicId;
+    super(topicId);
   }
 
   public GetSubscriberIds() { }
   
-  public final String getTopicId() {
-    return topicId;
-  }
-  
   protected int getClassId() {
     return GET_SUBSCRIBER_IDS;
   }
-  
-  public void readFrom(InputStream is) throws IOException {
-    topicId = StreamUtil.readStringFrom(is);
-  }
 
-  public void writeTo(OutputStream os) throws IOException {
-    StreamUtil.writeTo(topicId, os);
-  }
 }

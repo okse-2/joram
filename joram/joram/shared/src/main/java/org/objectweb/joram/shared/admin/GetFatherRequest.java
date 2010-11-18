@@ -22,21 +22,13 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import fr.dyade.aaa.common.stream.StreamUtil;
-
 /**
  * A <code>Monitor_GetFather</code> instance requests the identifier of a
  * topic father.
  */
-public class GetFatherRequest extends AdminRequest {
-  private static final long serialVersionUID = 1L;
+public class GetFatherRequest extends DestinationAdminRequest {
 
-  /** Identifier of the target topic. */
-  private String topic;
+  private static final long serialVersionUID = 1L;
 
   /**
    * Constructs a <code>Monitor_GetFather</code> instance.
@@ -44,25 +36,13 @@ public class GetFatherRequest extends AdminRequest {
    * @param topic  Identifier of the target topic.
    */
   public GetFatherRequest(String topic) {
-    this.topic = topic;
+    super(topic);
   }
 
   public GetFatherRequest() { }
-  
-  /** Returns the identifier of the target topic. */
-  public String getTopic() {
-    return topic;
-  }
   
   protected int getClassId() {
     return MONITOR_GET_FATHER;
   }
   
-  public void readFrom(InputStream is) throws IOException {
-    topic = StreamUtil.readStringFrom(is);
-  }
-
-  public void writeTo(OutputStream os) throws IOException {
-    StreamUtil.writeTo(topic, os);
-  }
 }
