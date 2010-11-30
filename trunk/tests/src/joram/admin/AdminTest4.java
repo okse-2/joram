@@ -32,7 +32,6 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 
 import org.objectweb.joram.client.jms.Topic;
-import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
@@ -105,49 +104,38 @@ public class AdminTest4 extends TestCase {
     topic5.setFreeReading();
     topic5.setFreeWriting();
 
-    // Currently it is not authorized to add a topic to itself
-    boolean isException = false;
+    // Add a topic to itself
     try {
       topic1.addClusteredTopic(topic1);
     } catch(Exception exc) {
-      isException = true;
-      assertTrue("Bad exception", exc instanceof AdminException);
-      assertTrue("Bad exception message", exc.getMessage().equals("Joining topic already part of the cluster"));
+      fail("An exception should not be throwed");
     }
-    assertTrue("An exception should be throwed", isException);
+    assertEquals(1, topic1.getClusterFellows().size());
     
     // Add topic2 to topic1
-    isException = false;
     try {
       topic1.addClusteredTopic(topic2);
     } catch(Exception exc) {
-      isException = true;
-      exc.printStackTrace();
+      fail("An exception should not be throwed");
     }
-    assertFalse("An exception should not be throwed", isException);
-    
+
     // Add topic3 to topic2
-    isException = false;
     try {
       topic2.addClusteredTopic(topic3);
     } catch(Exception exc) {
-      isException = true;
-      exc.printStackTrace();
+      fail("An exception should not be throwed");
     }
-    assertFalse("An exception should not be throwed", isException);
     
-    // Adding a clustered topic (topic1) to topic4 is currently not authorized
-    isException = false;
+    // Adding a clustered topic (topic1) to topic4
     try {
       topic4.addClusteredTopic(topic1);
+      topic4.removeFromCluster();
     } catch(Exception exc) {
-      isException = true;
-      assertTrue("Bad exception", exc instanceof AdminException);
+      fail("An exception should not be throwed");
     }
-    assertTrue("An exception should be throwed", isException);
     
     // Add topic5 to topic1 then remove it
-    isException = false;
+    boolean isException = false;
     try {
       topic1.addClusteredTopic(topic5);
       topic5.removeFromCluster();
@@ -163,13 +151,15 @@ public class AdminTest4 extends TestCase {
     list.add(topic3);
     
     assertTrue("topic1 cluster should contain topic1, topic2 and topic3",
-               topic1.getClusterFellows().containsAll(list));
+               topic1.getClusterFellows().containsAll(list) && list.containsAll(topic1.getClusterFellows()));
     assertTrue("topic2 cluster should contain topic1, topic2 and topic3",
-               topic2.getClusterFellows().containsAll(list));
+               topic2.getClusterFellows().containsAll(list) && list.containsAll(topic2.getClusterFellows()));
     assertTrue("topic3 cluster should contain topic1, topic2 and topic3",
-               topic3.getClusterFellows().containsAll(list));
-    assertTrue("topic4 cluster should be empty", topic4.getClusterFellows().isEmpty());
-    assertTrue("topic5 cluster should be empty", topic5.getClusterFellows().isEmpty());
+               topic3.getClusterFellows().containsAll(list) && list.containsAll(topic3.getClusterFellows()));
+    assertEquals("topic4 should be alone", 1, topic4.getClusterFellows().size());
+    assertEquals("topic4 should be alone", topic4, topic4.getClusterFellows().get(0));
+    assertEquals("topic5 should be alone", 1, topic5.getClusterFellows().size());
+    assertEquals("topic5 should be alone", topic5, topic5.getClusterFellows().get(0));
        
     AdminModule.disconnect();
     
