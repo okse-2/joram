@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,10 +22,9 @@
  */
 package org.objectweb.joram.shared.client;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
-
 import java.util.Vector;
 
 import fr.dyade.aaa.common.stream.StreamUtil;
@@ -97,7 +96,7 @@ public final class ConsumerAckRequest extends AbstractJmsRequest {
    */
   public void writeTo(OutputStream os) throws IOException {
     super.writeTo(os);
-    StreamUtil.writeVectorOfStringTo(ids, os);
+    StreamUtil.writeListOfStringTo(ids, os);
     StreamUtil.writeTo(queueMode, os);
   }
 

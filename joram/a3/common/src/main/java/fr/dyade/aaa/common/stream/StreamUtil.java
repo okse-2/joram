@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,7 +27,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InvalidClassException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Vector;
 
 
@@ -484,20 +486,20 @@ public final class StreamUtil {
   }
 
   /**
-   * This  method allows to write a vector of String objects to the
+   * This method allows to write a generic list of String objects to the
    * output stream.
-   *
-   * @param v 	the Vector object to write
-   * @param os 	the stream to write the object to
+   * 
+   * @param v the List object to write
+   * @param os the stream to write the object to
    */
-  public static void writeVectorOfStringTo(Vector v, OutputStream os) throws IOException {
+  public static void writeListOfStringTo(List v, OutputStream os) throws IOException {
     if (v == null) {
       writeTo(-1, os);
     } else {
       int size = v.size();
       writeTo(size, os);
-      for (int i=0; i< size; i++) {
-        writeTo((String) v.elementAt(i), os);
+      for (int i = 0; i < size; i++) {
+        writeTo((String) v.get(i), os);
       }
     }
   }
@@ -505,9 +507,9 @@ public final class StreamUtil {
   /**
    * This method allows to restore a vector of String objects from the
    * input stream.
-   *
-   * @param is	the stream to read data from in order to restore the object
-   * @return 	the Properties object or null
+   * 
+   * @param is the stream to read data from in order to restore the object
+   * @return the Vector object or null
    */
   public static Vector readVectorOfStringFrom(InputStream is) throws IOException {
     int size = readIntFrom(is);
@@ -519,12 +521,31 @@ public final class StreamUtil {
     }
     return v;
   }
-  
+
   /**
-   * This  method allows to write a String array to the output stream.
-   *
-   * @param array   the String array to write
-   * @param os      the stream to write to
+   * This method allows to restore a list of String objects from the
+   * input stream.
+   * 
+   * @param is the stream to read data from in order to restore the object
+   * @return the ArrayList object or null
+   */
+  public static ArrayList readArrayListOfStringFrom(InputStream is) throws IOException {
+    int size = readIntFrom(is);
+    if (size == -1)
+      return null;
+
+    ArrayList v = new ArrayList(size);
+    for (int i = 0; i < size; i++) {
+      v.add(readStringFrom(is));
+    }
+    return v;
+  }
+
+  /**
+   * This method allows to write a String array to the output stream.
+   * 
+   * @param array the String array to write
+   * @param os the stream to write to
    */
   public static void writeArrayOfStringTo(String[] array, OutputStream os) throws IOException {
     if (array == null) {
