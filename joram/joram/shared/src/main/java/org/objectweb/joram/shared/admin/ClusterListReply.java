@@ -22,28 +22,53 @@
  */
 package org.objectweb.joram.shared.admin;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.List;
+
+import fr.dyade.aaa.common.stream.StreamUtil;
+
 /**
- * A <code>Monitor_GetCluster</code> instance requests the list of the topics
- * part of a cluster.
+ * A <code>ClusterListReply</code> instance holds the identifiers of a cluster's
+ * destinations.
  */
-public class GetClusterRequest extends DestinationAdminRequest {
+public class ClusterListReply extends AdminReply {
 
   private static final long serialVersionUID = 1L;
 
+  /** Identifiers of the cluster's topics. */
+  private List clusteredDest;
+
   /**
-   * Constructs a <code>Monitor_GetCluster</code> instance.
-   *
-   * @param topic  Identifier of a topic part of the target cluster.
+   * Constructs a <code>Monitor_GetClusterRep</code> instance.
+   * 
+   * @param clusteredDest Identifiers of the cluster's destinations.
    */
-  public GetClusterRequest(String topic) {
-    super(topic);
+  public ClusterListReply(List clusteredDest) {
+    super(true, null);
+    this.clusteredDest = clusteredDest;
   }
 
-  public GetClusterRequest() {
+  /** Returns the identifiers of the cluster's topics. */
+  public List getDestinations() {
+    return clusteredDest;
+  }
+
+  public ClusterListReply() {
   }
 
   protected int getClassId() {
-    return MONITOR_GET_CLUSTER;
+    return LIST_CLUSTER_DEST_REP;
   }
 
+  public void readFrom(InputStream is) throws IOException {
+    super.readFrom(is);
+    clusteredDest = StreamUtil.readArrayListOfStringFrom(is);
+  }
+
+  public void writeTo(OutputStream os) throws IOException {
+    super.writeTo(os);
+    StreamUtil.writeListOfStringTo(clusteredDest, os);
+  }
 }

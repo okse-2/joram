@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -61,9 +61,6 @@ public class AdminReply extends AbstractAdminMessage {
   /** Information. */
   private String info;
 
-  /** Object. */
-  private Object replyObj;
-
   /** Code d'erreur */
   private int errorCode;
 
@@ -75,21 +72,8 @@ public class AdminReply extends AbstractAdminMessage {
    * @param info  Information to carry.
    */
   public AdminReply(boolean success, String info) {
-    this(success, info, null);
-  }
-
-  /**
-   * Constructs an <code>AdminReply</code> instance.
-   *
-   * @param success  <code>true</code> if this reply replies to a successful
-   *          request.
-   * @param info  Information to carry.
-   * @param replyObj Object to carry.
-   */
-  public AdminReply(boolean success,  String info, Object replyObj) {
     this.success = success;
     this.info = info;
-    this.replyObj = replyObj;
   }
 
   /**
@@ -105,7 +89,6 @@ public class AdminReply extends AbstractAdminMessage {
     this.success = false;
     this.errorCode = errorCode;
     this.info = info;
-    this.replyObj = null;
   }
 
   public AdminReply() { }
@@ -122,22 +105,13 @@ public class AdminReply extends AbstractAdminMessage {
     return info;
   }
 
-  /** Returns the carried object. */
-  public final Object getReplyObject() {
-    return replyObj;
-  }
-
   /** Returns the error code. */
   public final int getErrorCode() {
     return errorCode;
   }
 
   public String toString() {
-    return '(' + super.toString() + 
-      ",success=" + success +
-      ",info=" + info + 
-      ",errorCode=" + errorCode + 
-      ",replyObj=" + replyObj + ')';
+    return '(' + super.toString() + ",success=" + success + ",info=" + info + ",errorCode=" + errorCode + ')';
   }
 
   protected int getClassId() {
@@ -151,14 +125,12 @@ public class AdminReply extends AbstractAdminMessage {
   public void writeTo(OutputStream os) throws IOException {
     StreamUtil.writeTo(success, os);
     StreamUtil.writeTo(info, os);
-    StreamUtil.writeObjectTo(replyObj, os);
     StreamUtil.writeTo(errorCode, os);
   }
   
   public void readFrom(InputStream is) throws IOException {
     success = StreamUtil.readBooleanFrom(is);
     info = StreamUtil.readStringFrom(is);
-    replyObj = StreamUtil.readObjectFrom(is);
     errorCode = StreamUtil.readIntFrom(is);
   }
 }

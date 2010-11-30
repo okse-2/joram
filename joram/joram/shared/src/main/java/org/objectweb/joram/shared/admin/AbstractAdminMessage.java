@@ -50,7 +50,7 @@ public abstract class AbstractAdminMessage implements Externalizable, Streamable
 
   protected final static int ABSTRACT_ADMIN_MESSAGE = 0;
   protected final static int ADD_DOMAIN_REQUEST = 1;
-  protected final static int ADD_QUEUE_CLUSTER = 2;
+  protected final static int ADD_DESTINATION_CLUSTER = 2;
   protected final static int ADD_SERVER_REQUEST = 3;
   protected final static int ADD_SERVICE_REQUEST = 4;
   protected final static int ADMIN_REPLY = 5;
@@ -84,9 +84,9 @@ public abstract class AbstractAdminMessage implements Externalizable, Streamable
   protected final static int GET_SUBSCRIPTION_REP = 33;
   protected final static int GET_SUBSCRIPTIONS = 34;
   protected final static int GET_SUBSCRIPTIONS_REP = 35;
-  protected final static int LIST_CLUSTER_QUEUE = 36;
-  protected final static int MONITOR_GET_CLUSTER = 37;
-  protected final static int MONITOR_GET_CLUSTER_REP = 38;
+  protected final static int LIST_CLUSTER_DEST = 36;
+  protected final static int XXX_MONITOR_GET_CLUSTER = 37;
+  protected final static int LIST_CLUSTER_DEST_REP = 38;
   protected final static int MONITOR_GET_DMQ_SETTINGS = 39;
   protected final static int MONITOR_GET_DMQ_SETTINGS_REP = 40;
   protected final static int MONITOR_GET_DESTINATIONS = 41;
@@ -113,10 +113,10 @@ public abstract class AbstractAdminMessage implements Externalizable, Streamable
   protected final static int XXX_MONITOR_REQUEST = 62;
   protected final static int XXX_QUEUE_ADMIN_REQUEST = 63;
   protected final static int REMOVE_DOMAIN_REQUEST = 64;
-  protected final static int REMOVE_QUEUE_CLUSTER = 65;
+  protected final static int REMOVE_DESTINATION_CLUSTER = 65;
   protected final static int REMOVE_SERVER_REQUEST = 66;
   protected final static int REMOVE_SERVICE_REQUEST = 67;
-  protected final static int SET_CLUSTER = 68;
+  protected final static int XXX_SET_CLUSTER = 68;
   protected final static int XXX_SET_DEFAULT_DMQ = 69;
   protected final static int SET_THRESHOLD = 70;
   protected final static int SET_DMQ = 71;
@@ -149,7 +149,7 @@ public abstract class AbstractAdminMessage implements Externalizable, Streamable
   protected static final String[] classnames = {
     AbstractAdminMessage.class.getName(),
     AddDomainRequest.class.getName(),
-    AddQueueCluster.class.getName(),
+    ClusterAdd.class.getName(),
     AddServerRequest.class.getName(),
     AddServiceRequest.class.getName(),
     AdminReply.class.getName(),
@@ -183,9 +183,9 @@ public abstract class AbstractAdminMessage implements Externalizable, Streamable
     GetSubscriptionRep.class.getName(),
     GetSubscriptions.class.getName(),
     GetSubscriptionsRep.class.getName(),
-    ListClusterQueue.class.getName(),
-    GetClusterRequest.class.getName(),
-    GetClusterReply.class.getName(),
+    ClusterList.class.getName(),
+    null,
+    ClusterListReply.class.getName(),
     GetDMQSettingsRequest.class.getName(),
     GetDMQSettingsReply.class.getName(),
     GetDestinationsRequest.class.getName(),
@@ -212,10 +212,10 @@ public abstract class AbstractAdminMessage implements Externalizable, Streamable
     null,
     null,
     RemoveDomainRequest.class.getName(),
-    RemoveQueueCluster.class.getName(),
+    ClusterLeave.class.getName(),
     RemoveServerRequest.class.getName(),
     RemoveServiceRequest.class.getName(),
-    SetCluster.class.getName(),
+    null,
     null,
     SetThresholdRequest.class.getName(),
     SetDMQRequest.class.getName(),

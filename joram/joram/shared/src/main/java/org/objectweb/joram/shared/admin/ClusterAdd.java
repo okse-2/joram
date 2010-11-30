@@ -30,48 +30,54 @@ import java.io.OutputStream;
 import fr.dyade.aaa.common.stream.StreamUtil;
 
 
-public class AddQueueCluster extends DestinationAdminRequest {
+public class ClusterAdd extends DestinationAdminRequest {
+
   private static final long serialVersionUID = 1L;
 
-  public String joiningQueue;
+  private String addedDest;
 
   /**
-   * Adds a queue to a cluster.
+   * Adds a destination to a cluster.
    * <p>
-   *
-   * @param clusterQueue  Queue part of the cluster.
-   * @param joiningQueue  Queue joining the cluster.
-   *
+   * 
+   * @param clusteredDest Destination part of the cluster.
+   * @param addedDest Destination joining the cluster.
    */
-  public AddQueueCluster(String clusterQueue,
-                         String joiningQueue) {
-    super(clusterQueue);
-    this.joiningQueue = joiningQueue;
+  public ClusterAdd(String clusteredDest, String addedDest) {
+    super(clusteredDest);
+    this.addedDest = addedDest;
   }
 
-  public AddQueueCluster() { }
+  public ClusterAdd() { }
   
   public String toString() {
     StringBuffer buff = new StringBuffer();
-    buff.append("AddQueueCluster (clusterQueue=");
+    buff.append("ClusterAdd (clusteredDest=");
     buff.append(getDestId());
-    buff.append(",joiningQueue=");
-    buff.append(joiningQueue);
+    buff.append(",joiningDest=");
+    buff.append(addedDest);
     buff.append(')');
     return buff.toString();
   }
   
   protected int getClassId() {
-    return ADD_QUEUE_CLUSTER;
+    return ADD_DESTINATION_CLUSTER;
+  }
+
+  /**
+   * @return the joiningDest
+   */
+  public String getAddedDest() {
+    return addedDest;
   }
 
   public void readFrom(InputStream is) throws IOException {
     super.readFrom(is);
-    joiningQueue = StreamUtil.readStringFrom(is);
+    addedDest = StreamUtil.readStringFrom(is);
   }
 
   public void writeTo(OutputStream os) throws IOException {
     super.writeTo(os);
-    StreamUtil.writeTo(joiningQueue, os);
+    StreamUtil.writeTo(addedDest, os);
   }
 }
