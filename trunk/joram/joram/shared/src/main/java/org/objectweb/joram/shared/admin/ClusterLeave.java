@@ -23,46 +23,24 @@
  */
 package org.objectweb.joram.shared.admin;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+public class ClusterLeave extends DestinationAdminRequest {
 
-import org.objectweb.joram.shared.admin.DestinationAdminRequest;
-
-import fr.dyade.aaa.common.stream.StreamUtil;
-
-public class RemoveQueueCluster extends DestinationAdminRequest {
   private static final long serialVersionUID = 1L;
 
-  public String removeQueue;
-
   /**
-   * Leave a queue to a cluster.
+   * Leave the cluster.
    * <p>
-   *
-   * @param clusterQueue  Queue part of the cluster.
-   * @param removeQueue  Queue to be removed from the cluster.
-   *
+   * 
+   * @param removedDest Destination to be removed from the cluster.
    */
-  public RemoveQueueCluster(String clusterQueue,
-                            String removeQueue) {
-    super(clusterQueue);
-    this.removeQueue = removeQueue;
+  public ClusterLeave(String removedDest) {
+    super(removedDest);
   }
   
-  public RemoveQueueCluster() { }
+  public ClusterLeave() { }
   
   protected int getClassId() {
-    return REMOVE_QUEUE_CLUSTER;
-  }
-  
-  public void readFrom(InputStream is) throws IOException {
-    super.readFrom(is);
-    removeQueue = StreamUtil.readStringFrom(is);
+    return REMOVE_DESTINATION_CLUSTER;
   }
 
-  public void writeTo(OutputStream os) throws IOException {
-    super.writeTo(os);
-    StreamUtil.writeTo(removeQueue, os);
-  }
 }

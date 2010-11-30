@@ -23,24 +23,23 @@
  */
 package org.objectweb.joram.shared.admin;
 
-public class ListClusterQueue extends DestinationAdminRequest {
+public class ClusterList extends DestinationAdminRequest {
 
   private static final long serialVersionUID = 1L;
 
   /**
-   * list the cluster queue.
-   *
-   * @param clusterQueue  Queue part of the cluster.
-   *
+   * List the cluster.
+   * 
+   * @param clusteredDest Destination part of the cluster.
    */
-  public ListClusterQueue(String clusterQueue) {
-    super(clusterQueue);
+  public ClusterList(String clusteredDest) {
+    super(clusteredDest);
   }
   
-  public ListClusterQueue() { }
+  public ClusterList() { }
   
   protected int getClassId() {
-    return LIST_CLUSTER_QUEUE;
+    return LIST_CLUSTER_DEST;
   }
 
 }
