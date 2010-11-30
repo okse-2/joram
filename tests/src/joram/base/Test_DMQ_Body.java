@@ -36,7 +36,6 @@ import javax.jms.TextMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
-
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.DeadMQueue;
 import org.objectweb.joram.client.jms.admin.User;
@@ -57,6 +56,8 @@ public class Test_DMQ_Body extends TestCase {
   public void run() {
     try {
       startAgentServer((short) 0);
+
+      Thread.sleep(1000);
 
       admin();
       System.out.println("admin config ok");
