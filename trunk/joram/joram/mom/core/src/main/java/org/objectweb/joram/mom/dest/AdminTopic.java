@@ -37,12 +37,15 @@ import java.util.Vector;
 import org.objectweb.joram.mom.notifications.AdminReplyNot;
 import org.objectweb.joram.mom.notifications.AdminRequestNot;
 import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.mom.notifications.ClusterJoinAck;
+import org.objectweb.joram.mom.notifications.ClusterJoinNot;
 import org.objectweb.joram.mom.notifications.FwdAdminRequestNot;
 import org.objectweb.joram.mom.notifications.GetProxyIdListNot;
 import org.objectweb.joram.mom.notifications.GetProxyIdNot;
 import org.objectweb.joram.mom.notifications.GetRightsReplyNot;
 import org.objectweb.joram.mom.notifications.GetRightsRequestNot;
 import org.objectweb.joram.mom.notifications.RequestGroupNot;
+import org.objectweb.joram.mom.notifications.TopicForwardNot;
 import org.objectweb.joram.mom.proxies.AdminNotification;
 import org.objectweb.joram.mom.proxies.SendReplyNot;
 import org.objectweb.joram.mom.proxies.UserAgent;
@@ -351,7 +354,7 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
     if (not instanceof GetRightsReplyNot)
       reply = doProcess((GetRightsReplyNot) not);
     else
-      reply = new AdminReply(not.getSuccess(), not.getInfo(), not.getReplyObject());
+      reply = new AdminReply(not.getSuccess(), not.getInfo());
 
     distributeReply(replyTo, requestId, reply);
   }
@@ -441,22 +444,10 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
    * ***** ***** ***** ***** ***** */
 
   /**
-   * Overrides this <code>Topic</code> method; AdminTopics do not
-   * accept to join clusters other than their admin topics cluster.
-   */ 
-  protected void clusterTest(AgentId from, ClusterTest request) {
-    if (logger.isLoggable(BasicLevel.WARN))
-      logger.log(BasicLevel.WARN, "Unexpected notification: " + request);
-    
-    forward(from, new ClusterAck(false, "Joining topic is an admin topic",
-                                 request.getReplyTo(), request.getRequestMsgId(), request.getReplyMsgId()));
-  }
-
-  /**
    * Overrides this <code>Topic</code> method; a <code>ClusterAck</code> is not
    * expected by an AdminTopic.
    */ 
-  protected void clusterAck(AgentId from, ClusterAck ack) {
+  protected void clusterJoinAck(ClusterJoinAck ack) {
     if (logger.isLoggable(BasicLevel.WARN))
       logger.log(BasicLevel.WARN, "Unexpected notification: " + ack);
   }
@@ -466,7 +457,7 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
    * server0, new cluster fellow is notified to other fellows and other
    * fellows are notified to it.
    */
-  protected void clusterNot(AgentId from, ClusterNot not) {
+  protected void clusterJoin(ClusterJoinNot not) {
     if (logger.isLoggable(BasicLevel.WARN))
       logger.log(BasicLevel.WARN, "Unexpected notification: " + not);
   }
@@ -475,7 +466,7 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
    * Overrides this <code>Topic</code> method; the forwarded messages
    * contain admin requests and will be processed.
    */
-  protected void topicForwardNot(TopicForwardNot not) {
+  protected void topicForwardNot(AgentId from, TopicForwardNot not) {
     if (logger.isLoggable(BasicLevel.WARN))
       logger.log(BasicLevel.WARN, "Unexpected notification: " + not);
   }
