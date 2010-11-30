@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2008 ScalAgent Distributed Technologies
+ * Copyright (C)  2008 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,7 +24,6 @@ package joram.cluster;
 
 
 import org.objectweb.joram.client.jms.Topic;
-import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 
 import framework.TestCase;
@@ -44,6 +43,8 @@ public class TestT2 extends TestCase {
       startAgentServer((short) 1);
       startAgentServer((short) 2);
       startAgentServer((short) 3);
+
+      Thread.sleep(2000);
 
       admin();
 
@@ -71,18 +72,15 @@ public class TestT2 extends TestCase {
     top0.addClusteredTopic(top1);
     top2.addClusteredTopic(top3);
 
-    AdminException exc = null;
-    try {
-      top0.addClusteredTopic(top2);
-    } catch (AdminException aexc) {
-      exc = aexc;
-    }
-    assertNotNull(exc);
+    // transitive closure
+    top0.addClusteredTopic(top2);
 
-    assertEquals(2, top0.getClusterFellows().size());
-    assertEquals(2, top1.getClusterFellows().size());
-    assertEquals(2, top2.getClusterFellows().size());
-    assertEquals(2, top3.getClusterFellows().size());
+
+    // Check transitive closure
+    assertEquals(4, top0.getClusterFellows().size());
+    assertEquals(4, top1.getClusterFellows().size());
+    assertEquals(4, top2.getClusterFellows().size());
+    assertEquals(4, top3.getClusterFellows().size());
 
     AdminModule.disconnect();
   }
