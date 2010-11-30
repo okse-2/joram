@@ -28,61 +28,41 @@ package org.objectweb.joram.mom.notifications;
  * a client administration request.
  */
 public class AdminReplyNot extends AbstractNotification {
+
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
   
   /** Field identifying the original request. */
   private String requestId;
+
   /** <code>true</code> if the request succeeded. */
   private boolean success;
+
   /** Info related to the processing of the request. */
   private String info;
-  /** possible return object */
-  private Object replyObj;
 
   /**
    * Constructs an <code>AdminReply</code>.
    */
-  public AdminReplyNot(AdminRequestNot request, 
-                       boolean success, 
-                       String info) {
-    this(request, success, info, null);
-  }
-
-  /**
-   * Constructs an <code>AdminReply</code>.
-   */
-  public AdminReplyNot(AdminRequestNot request, 
-                    boolean success, 
-                    String info,
-                    Object replyObj) {
+  public AdminReplyNot(AdminRequestNot request, boolean success, String info) {
     requestId = request.getId();
     this.success = success;
     this.info = info;
-    this.replyObj = replyObj;
   }
 
-
   /** Returns the request identifier. */
-  public String getRequestId()
-  {
+  public String getRequestId() {
     return requestId;
   }
 
   /** Returns <code>true</code> if the request was successful. */
-  public boolean getSuccess()
-  {
+  public boolean getSuccess() {
     return success;
   }
 
   /** Returns the info related to the processing of the request. */
-  public String getInfo()
-  {
+  public String getInfo() {
     return info;
   }
 
-  /** Returns an object related to the processing of the request. */
-  public Object getReplyObject() {
-    return replyObj;
-  }
 }

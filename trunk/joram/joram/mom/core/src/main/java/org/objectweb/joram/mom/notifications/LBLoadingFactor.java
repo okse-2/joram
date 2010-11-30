@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -23,12 +23,10 @@
  */
 package org.objectweb.joram.mom.notifications;
 
-public class LBLoadingFactor extends QueueClusterNot {
+public abstract class LBLoadingFactor extends ClusterLBNot {
 
-  /**
-   * 
-   */
   private static final long serialVersionUID = 1L;
+
   public long validityPeriode;
 
   public LBLoadingFactor(long validityPeriode,
