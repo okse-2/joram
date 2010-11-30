@@ -24,9 +24,10 @@
 package org.objectweb.joram.mom.dest;
 
 import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.objectweb.joram.mom.notifications.LBMessageGive;
 import org.objectweb.joram.mom.notifications.LBMessageHope;
@@ -37,6 +38,7 @@ import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.common.Debug;
 
 public class LoadingFactor implements Serializable {
+
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
@@ -247,7 +249,7 @@ public class LoadingFactor implements Serializable {
    * @param pendingMessages
    * @param pendingRequests
    */
-  public void factorCheck(Hashtable clusters,
+  public void factorCheck(Map clusters,
                           int pendingMessages,
                           int pendingRequests) {
 
@@ -315,7 +317,7 @@ public class LoadingFactor implements Serializable {
    * @param nbOfPendingMessages
    * @param nbOfPendingRequests
    */
-  private void dispatchAndSendTo(Hashtable clusters,
+  private void dispatchAndSendTo(Map clusters,
                                  int nbOfPendingMessages,
                                  int nbOfPendingRequests) {
     int nbMsgHope = -1;
@@ -351,17 +353,16 @@ public class LoadingFactor implements Serializable {
    * send nb messages on clusters.
    * 
    * @param nbMsgGive
-   * @param clusters  Hashtable of cluster Queue
+   * @param clusters Map of cluster Queue
    */
-  private void processGive(int nbMsgGive, Hashtable clusters) {
+  private void processGive(int nbMsgGive, Map clusters) {
     if (nbMsgGive < 1) return;
 
     // select queue in cluster who have a rateOfFlow > 1
-    Vector selected = new Vector();
-    for (Enumeration e = clusters.keys(); e.hasMoreElements(); ) {
-      AgentId id = (AgentId) e.nextElement();
-      if (((Float) clusters.get(id)).floatValue() >= 1 && 
- !id.equals(clusterQueue.getId()))
+    List selected = new ArrayList();
+    for (Iterator e = clusters.keySet().iterator(); e.hasNext();) {
+      AgentId id = (AgentId) e.next();
+      if (((Float) clusters.get(id)).floatValue() >= 1 && !id.equals(clusterQueue.getId()))
         selected.add(id);
     }
 
@@ -387,8 +388,8 @@ public class LoadingFactor implements Serializable {
                    "LoadingFactor.processGive" +
                    " givePerQueue = " + nbGivePerQueue +
                    ", selected = " + selected);
-      for (Enumeration e = selected.elements(); e.hasMoreElements(); ) {
-        AgentId id = (AgentId) e.nextElement();
+      for (Iterator e = selected.iterator(); e.hasNext();) {
+        AgentId id = (AgentId) e.next();
         msgGive.setClientMessages(clusterQueue.getClientMessages(nbGivePerQueue, null, true));
         clusterQueue.forward(id, msgGive);
       }
@@ -399,20 +400,19 @@ public class LoadingFactor implements Serializable {
    * send a hope request on a cluster queue.
    * 
    * @param nbMsgHope
-   * @param clusters   Hashtable of cluster Queue
+   * @param clusters Map of cluster Queue
    */
-  private void processHope(int nbMsgHope, Hashtable clusters) {
+  private void processHope(int nbMsgHope, Map clusters) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, 
                  "LoadingFactor.processHope" +
                  " nbMsgHope = " + nbMsgHope);
     if (nbMsgHope < 1) return;
 
-    Vector selected = new Vector();
-    for (Enumeration e = clusters.keys(); e.hasMoreElements(); ) {
-      AgentId id = (AgentId) e.nextElement();
-      if (((Float) clusters.get(id)).floatValue() <= 1 && 
- !id.equals(clusterQueue.getId()))
+    List selected = new ArrayList();
+    for (Iterator e = clusters.keySet().iterator(); e.hasNext();) {
+      AgentId id = (AgentId) e.next();
+      if (((Float) clusters.get(id)).floatValue() <= 1 && !id.equals(clusterQueue.getId()))
         selected.add(id);
     }
 
@@ -441,8 +441,8 @@ public class LoadingFactor implements Serializable {
                    ", selected = " + selected);
 
       LBMessageHope msgHope = new LBMessageHope(validityPeriod,rateOfFlow);
-      for (Enumeration e = selected.elements(); e.hasMoreElements(); ) {
-        AgentId id = (AgentId) e.nextElement();
+      for (Iterator e = selected.iterator(); e.hasNext();) {
+        AgentId id = (AgentId) e.next();
         msgHope.setNbMsg(nbHopePerQueue);
         clusterQueue.forward(id, msgHope);
       }
