@@ -30,9 +30,9 @@ import java.util.Properties;
 import java.util.Vector;
 
 import org.objectweb.joram.mom.dest.Topic;
-import org.objectweb.joram.mom.dest.TopicForwardNot;
 import org.objectweb.joram.mom.messages.Message;
 import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.mom.notifications.TopicForwardNot;
 import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.excepts.AccessException;
@@ -224,9 +224,9 @@ public class JMSBridgeTopic extends Topic {
    * This method forwards the messages, if needed, to the hierarchical father,
    * and to the foreign JMS destination.
    */
-  public void topicForwardNot(TopicForwardNot not) {
+  public void topicForwardNot(AgentId from, TopicForwardNot not) {
     // If the forward comes from a son, forwarding it to the father, if any.
-    if (not.toFather && fatherId != null)
+    if (not.fromCluster && fatherId != null)
       forward(fatherId, not);
 
     // Sending the received messages to the foreign JMS destination:
