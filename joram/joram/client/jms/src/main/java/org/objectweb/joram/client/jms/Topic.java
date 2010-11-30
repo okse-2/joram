@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -25,23 +25,24 @@
 package org.objectweb.joram.client.jms;
 
 import java.net.ConnectException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.Vector;
 
 import javax.jms.JMSException;
 
 import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.shared.admin.ClusterAdd;
+import org.objectweb.joram.shared.admin.ClusterLeave;
+import org.objectweb.joram.shared.admin.ClusterList;
+import org.objectweb.joram.shared.admin.ClusterListReply;
+import org.objectweb.joram.shared.admin.GetFatherReply;
+import org.objectweb.joram.shared.admin.GetFatherRequest;
+import org.objectweb.joram.shared.admin.GetNumberReply;
 import org.objectweb.joram.shared.admin.GetSubscriberIds;
 import org.objectweb.joram.shared.admin.GetSubscriberIdsRep;
-import org.objectweb.joram.shared.admin.GetClusterRequest;
-import org.objectweb.joram.shared.admin.GetClusterReply;
-import org.objectweb.joram.shared.admin.GetFatherRequest;
-import org.objectweb.joram.shared.admin.GetFatherReply;
-import org.objectweb.joram.shared.admin.GetNumberReply;
 import org.objectweb.joram.shared.admin.GetSubscriptionsRequest;
-import org.objectweb.joram.shared.admin.SetCluster;
 import org.objectweb.joram.shared.admin.SetFather;
 
 /**
@@ -51,6 +52,7 @@ import org.objectweb.joram.shared.admin.SetFather;
  * sending and the source of messages it receives.
  */
 public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
+
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
@@ -269,13 +271,15 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * @exception AdminException  If the request fails.
    */
   public List getClusterFellows() throws ConnectException, AdminException {
-    GetClusterRequest request = new GetClusterRequest(agentId);
-    GetClusterReply reply = (GetClusterReply) doRequest(request);
+    ClusterList request = new ClusterList(agentId);
+    ClusterListReply reply = (ClusterListReply) doRequest(request);
 
-    Vector topics = reply.getTopics();
-    Vector list = new Vector();
-    for (int i = 0; i < topics.size(); i++)
-      list.add(new Topic((String) topics.get(i)));
+    List topics = reply.getDestinations();
+    List list = new ArrayList();
+    if (topics != null) {
+      for (int i = 0; i < topics.size(); i++)
+        list.add(new Topic((String) topics.get(i)));
+    }
     return list;
   }
 
@@ -315,7 +319,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * @exception AdminException  If the request fails.
    */
   public void addClusteredTopic(Topic addedTopic) throws ConnectException, AdminException {
-    doRequest(new SetCluster(agentId, addedTopic.getName()));
+    doRequest(new ClusterAdd(agentId, addedTopic.getName()));
   }
 
   /**
@@ -328,7 +332,7 @@ public class Topic extends Destination implements javax.jms.Topic, TopicMBean {
    * @exception AdminException  If the request fails.
    */
   public void removeFromCluster() throws ConnectException, AdminException {
-    doRequest(new SetCluster(agentId, null));
+    doRequest(new ClusterLeave(agentId));
   }
 
   /**

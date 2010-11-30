@@ -24,12 +24,16 @@
  */
 package org.objectweb.joram.client.jms.admin;
 
+import java.net.ConnectException;
+
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
-import org.objectweb.joram.shared.admin.*;
-
-import java.net.ConnectException;
+import org.objectweb.joram.shared.admin.AdminReply;
+import org.objectweb.joram.shared.admin.ClusterAdd;
+import org.objectweb.joram.shared.admin.ClusterLeave;
+import org.objectweb.joram.shared.admin.ClusterList;
+import org.objectweb.joram.shared.admin.SetFather;
 
 /**
  * The <code>AdminHelper</code> class is a utility class providing methods
@@ -55,7 +59,7 @@ public class AdminHelper {
    */
   public static void setClusterLink(Topic clusterTopic,
                                     Topic joiningTopic) throws ConnectException, AdminException {
-    AdminModule.doRequest(new SetCluster(clusterTopic.getName(), joiningTopic.getName()));
+    AdminModule.doRequest(new ClusterAdd(clusterTopic.getName(), joiningTopic.getName()));
   }
 
   /**
@@ -71,7 +75,7 @@ public class AdminHelper {
    * @deprecated
    */
   public static void unsetClusterLink(Topic topic) throws ConnectException, AdminException {
-    AdminModule.doRequest(new SetCluster(topic.getName(), null));
+    AdminModule.doRequest(new ClusterLeave(topic.getName()));
   }
 
   /**
@@ -124,7 +128,7 @@ public class AdminHelper {
    */
   public static void setQueueCluster(Queue clusterQueue,
                                      Queue joiningQueue) throws ConnectException, AdminException {
-    AdminModule.doRequest(new AddQueueCluster(clusterQueue.getName(), joiningQueue.getName()));
+    AdminModule.doRequest(new ClusterAdd(clusterQueue.getName(), joiningQueue.getName()));
   }
 
   /**
@@ -143,7 +147,7 @@ public class AdminHelper {
    */
   public static void setQueueCluster(Destination clusterQueue,
                                      Queue joiningQueue) throws ConnectException, AdminException {
-    AdminModule.doRequest(new AddQueueCluster(clusterQueue.getName(), joiningQueue.getName()));
+    AdminModule.doRequest(new ClusterAdd(clusterQueue.getName(), joiningQueue.getName()));
   }
 
   /**
@@ -160,7 +164,7 @@ public class AdminHelper {
    * @deprecated
    */
   public static void leaveQueueCluster(Queue clusterQueue, Queue leaveQueue) throws ConnectException, AdminException {
-    AdminModule.doRequest(new RemoveQueueCluster(clusterQueue.getName(), leaveQueue.getName()));
+    AdminModule.doRequest(new ClusterLeave(leaveQueue.getName()));
   }
 
   /**
@@ -173,6 +177,6 @@ public class AdminHelper {
    * @deprecated
    */
   public static AdminReply listQueueCluster(Queue clusterQueue) throws ConnectException, AdminException {
-    return AdminModule.doRequest( new ListClusterQueue(clusterQueue.getName()));
+    return AdminModule.doRequest( new ClusterList(clusterQueue.getName()));
   }
 } 
