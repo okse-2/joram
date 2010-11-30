@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,13 +23,12 @@
  */
 package org.objectweb.joram.shared.client;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
-
-import java.util.Vector;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Vector;
 
 import fr.dyade.aaa.common.stream.StreamUtil;
 
@@ -190,7 +189,7 @@ public final class XACnxRollback extends AbstractJmsRequest {
         String key = (String) keys.nextElement();
         StreamUtil.writeTo(key, os);
         Vector ids = (Vector) qDenyings.get(key);
-        StreamUtil.writeVectorOfStringTo(ids, os);
+        StreamUtil.writeListOfStringTo(ids, os);
       }
     }
     if (subDenyings == null) {
@@ -202,7 +201,7 @@ public final class XACnxRollback extends AbstractJmsRequest {
         String key = (String) keys.nextElement();
         StreamUtil.writeTo(key, os);
         Vector ids = (Vector) subDenyings.get(key);
-        StreamUtil.writeVectorOfStringTo(ids, os);
+        StreamUtil.writeListOfStringTo(ids, os);
       }
     }
   }
