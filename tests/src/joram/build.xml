@@ -391,12 +391,15 @@ description=" --> launch all exceptionlistener tests">
 
   <target name="tests.clusterTopic"
           description=" --> launch all cluster topic tests">
+    <antcall target="cluster.testTAdmin"/>
     <antcall target="cluster.testT1"/>
     <antcall target="cluster.testT2"/>
+    <antcall target="cluster.testT3"/>
     </target>
 
     <target name="tests.clusterQueue"
             description=" --> launch all cluster queue tests">
+    <antcall target="cluster.testQAdmin"/>
     <antcall target="cluster.testQ1"/>
     <antcall target="cluster.testQ2"/>
     <antcall target="cluster.testQ3"/>
@@ -4360,6 +4363,17 @@ description=" --> launch all exceptionlistener tests">
 
 
   <!-- test cluster -->
+  <target name="cluster.testTAdmin" depends="init.a3props,compile"
+          description=" --> Test administration of clusters">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="cluster.testAdmin"/>
+      <param name="className" value="joram.cluster.TestTAdmin"/>
+      <param name="jndiconf" value="cluster/jndi.properties"/>
+      <param name="a3conf" value="cluster/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
+  
   <target name="cluster.testT1" depends="init.a3props,compile"
           description=" -->  test topic cluster send and receive message">
     <antcall target="test.run" inheritAll="true">
@@ -4372,10 +4386,32 @@ description=" --> launch all exceptionlistener tests">
   </target>
 
   <target name="cluster.testT2" depends="init.a3props,compile"
-          description=" -->  Test : can't cluster an already clustered topic">
+          description=" -->  Test : cluster an already clustered topic">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.cluster.TestT2"/>
       <param name="testid" value="cluster.testT2"/>
+      <param name="jndiconf" value="cluster/jndi.properties"/>
+      <param name="a3conf" value="cluster/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
+  
+  <target name="cluster.testT3" depends="init.a3props,compile"
+          description=" -->  Test : two clusters in a hierarchy">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.cluster.TestT3"/>
+      <param name="testid" value="cluster.testT3"/>
+      <param name="jndiconf" value="cluster/jndi.properties"/>
+      <param name="a3conf" value="cluster/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
+  
+  <target name="cluster.testQAdmin" depends="init.a3props,compile"
+          description=" --> Test administration of clusters">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="cluster.testAdmin"/>
+      <param name="className" value="joram.cluster.TestQAdmin"/>
       <param name="jndiconf" value="cluster/jndi.properties"/>
       <param name="a3conf" value="cluster/a3servers.xml"/>
       <param name="jvmargs" value=""/>
