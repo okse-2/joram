@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -25,29 +25,29 @@
 package org.objectweb.joram.client.jms;
 
 import java.net.ConnectException;
+import java.util.List;
 import java.util.Properties;
-import java.util.Vector;
 
 import javax.jms.JMSException;
 
 import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.shared.admin.AddQueueCluster;
-import org.objectweb.joram.shared.admin.AdminReply;
 import org.objectweb.joram.shared.admin.ClearQueue;
+import org.objectweb.joram.shared.admin.ClusterAdd;
+import org.objectweb.joram.shared.admin.ClusterLeave;
+import org.objectweb.joram.shared.admin.ClusterList;
+import org.objectweb.joram.shared.admin.ClusterListReply;
 import org.objectweb.joram.shared.admin.DeleteQueueMessage;
-import org.objectweb.joram.shared.admin.GetQueueMessage;
-import org.objectweb.joram.shared.admin.GetQueueMessageIds;
-import org.objectweb.joram.shared.admin.GetQueueMessageIdsRep;
-import org.objectweb.joram.shared.admin.GetQueueMessageRep;
-import org.objectweb.joram.shared.admin.ListClusterQueue;
-import org.objectweb.joram.shared.admin.GetDMQSettingsRequest;
 import org.objectweb.joram.shared.admin.GetDMQSettingsReply;
+import org.objectweb.joram.shared.admin.GetDMQSettingsRequest;
 import org.objectweb.joram.shared.admin.GetNbMaxMsgRequest;
 import org.objectweb.joram.shared.admin.GetNumberReply;
 import org.objectweb.joram.shared.admin.GetPendingMessages;
 import org.objectweb.joram.shared.admin.GetPendingRequests;
-import org.objectweb.joram.shared.admin.RemoveQueueCluster;
+import org.objectweb.joram.shared.admin.GetQueueMessage;
+import org.objectweb.joram.shared.admin.GetQueueMessageIds;
+import org.objectweb.joram.shared.admin.GetQueueMessageIdsRep;
+import org.objectweb.joram.shared.admin.GetQueueMessageRep;
 import org.objectweb.joram.shared.admin.SetNbMaxMsgRequest;
 import org.objectweb.joram.shared.admin.SetThresholdRequest;
 
@@ -469,22 +469,35 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * @exception AdminException  If the request fails.
    */
   public void addClusteredQueue(Queue addedQueue)  throws ConnectException, AdminException {
-    doRequest(new AddQueueCluster(agentId, addedQueue.getName()));
+    doRequest(new ClusterAdd(agentId, addedQueue.getName()));
   }
 
   /**
    * Removes a queue from the cluster this queue belongs to.
    * <p>
-   * The request fails if the queue does not exist or is not part of any 
+   * The request fails if the queue does not exist or is not part of any
    * cluster.
-   *
-   * @param removedQueue queue removed from the cluster
    * 
-   * @exception ConnectException  If the admin connection is closed or broken.
-   * @exception AdminException  If the request fails.
+   * @param removedQueue queue removed from the cluster
+   * @exception ConnectException If the admin connection is closed or broken.
+   * @exception AdminException If the request fails.
+   * @deprecated
    */
   public void removeClusteredQueue(Queue removedQueue) throws ConnectException, AdminException {
-    doRequest(new RemoveQueueCluster(agentId, removedQueue.getName()));
+    removedQueue.removeFromCluster();
+  }
+
+  /**
+   * Removes this queue from the cluster it belongs to.
+   * <p>
+   * The request fails if the queue does not exist or is not part of any
+   * cluster.
+   * 
+   * @exception ConnectException If the admin connection is closed or broken.
+   * @exception AdminException If the request fails.
+   */
+  public void removeFromCluster() throws ConnectException, AdminException {
+    doRequest(new ClusterLeave(agentId));
   }
 
   /**
@@ -494,11 +507,9 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    * @exception AdminException  If the request fails.
    */
   public String[] getQueueClusterElements() throws ConnectException, AdminException {
-    AdminReply reply = doRequest(new ListClusterQueue(agentId));
-    Vector list = (Vector)reply.getReplyObject();
-    String[] res = new String[list.size()];
-    list.copyInto(res);
-    return res;
+    ClusterListReply reply = (ClusterListReply) doRequest(new ClusterList(agentId));
+    List list = reply.getDestinations();
+    return list == null ? null : (String[]) list.toArray(new String[list.size()]);
   }
   
   /**
