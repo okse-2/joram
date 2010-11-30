@@ -24,28 +24,35 @@
  */
 package org.objectweb.joram.mom.dest;
 
-import java.util.Enumeration;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
 import org.objectweb.joram.mom.notifications.AbstractRequestNot;
 import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.mom.notifications.ClusterJoinAck;
+import org.objectweb.joram.mom.notifications.ClusterJoinNot;
+import org.objectweb.joram.mom.notifications.ClusterRemoveNot;
 import org.objectweb.joram.mom.notifications.ExceptionReply;
 import org.objectweb.joram.mom.notifications.FwdAdminRequestNot;
 import org.objectweb.joram.mom.notifications.SubscribeReply;
 import org.objectweb.joram.mom.notifications.SubscribeRequest;
+import org.objectweb.joram.mom.notifications.TopicForwardNot;
 import org.objectweb.joram.mom.notifications.TopicMsgsReply;
 import org.objectweb.joram.mom.notifications.UnsubscribeRequest;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.admin.AdminReply;
 import org.objectweb.joram.shared.admin.AdminRequest;
-import org.objectweb.joram.shared.admin.GetClusterReply;
-import org.objectweb.joram.shared.admin.GetClusterRequest;
+import org.objectweb.joram.shared.admin.ClusterAdd;
+import org.objectweb.joram.shared.admin.ClusterLeave;
+import org.objectweb.joram.shared.admin.ClusterList;
+import org.objectweb.joram.shared.admin.ClusterListReply;
 import org.objectweb.joram.shared.admin.GetDMQSettingsReply;
 import org.objectweb.joram.shared.admin.GetDMQSettingsRequest;
 import org.objectweb.joram.shared.admin.GetFatherReply;
@@ -54,13 +61,13 @@ import org.objectweb.joram.shared.admin.GetNumberReply;
 import org.objectweb.joram.shared.admin.GetSubscriberIds;
 import org.objectweb.joram.shared.admin.GetSubscriberIdsRep;
 import org.objectweb.joram.shared.admin.GetSubscriptionsRequest;
-import org.objectweb.joram.shared.admin.SetCluster;
 import org.objectweb.joram.shared.admin.SetFather;
 import org.objectweb.joram.shared.excepts.AccessException;
 import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.joram.shared.selectors.Selector;
 import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.AgentServer;
@@ -68,6 +75,7 @@ import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.agent.DeleteNot;
 import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.agent.UnknownAgent;
+import fr.dyade.aaa.common.Debug;
 
 /**
  * The <code>Topic</code> class implements the MOM topic behavior,
@@ -79,9 +87,11 @@ import fr.dyade.aaa.agent.UnknownAgent;
  * A topic might also be part of a cluster; if it is the case, it will have
  * friends to forward messages to.
  * <p>
- * A topic can't be part of a hierarchy and of a cluster at the same time.
+ * A topic can be part of a hierarchy and of a cluster at the same time.
  */
 public class Topic extends Destination implements TopicMBean {
+
+  public static Logger logger = Debug.getLogger(Topic.class.getName());
 
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
@@ -89,14 +99,14 @@ public class Topic extends Destination implements TopicMBean {
   /** Identifier of this topic's father, if any. */
   protected AgentId fatherId = null;
 
-  /** Set of cluster fellows, if any. */
+  /** Set of cluster elements (including itself), if any. */
   protected Set friends = null;
 
   /** Vector of subscribers' identifiers. */
-  protected Vector subscribers = new Vector();
+  protected List subscribers = new Vector();
 
   /** Table of subscribers' selectors. */
-  protected Hashtable selectors = new Hashtable();
+  protected Map selectors = new Hashtable();
 
   /** Internal boolean used for tagging local sendings. */
   protected transient boolean alreadySentLocally;
@@ -127,18 +137,18 @@ public class Topic extends Destination implements TopicMBean {
       logger.log(BasicLevel.DEBUG, "--- " + this + ": got " + not.getClass().getName() + " with id: " + reqId
           + " from: " + from.toString());
     try {
-      if (not instanceof ClusterTest)
-        clusterTest(from, (ClusterTest) not);
-      else if (not instanceof ClusterAck)
-        clusterAck(from, (ClusterAck) not);
-      else if (not instanceof ClusterNot)
-        clusterNot(from, (ClusterNot) not);
+      if (not instanceof ClusterJoinAck)
+        clusterJoinAck((ClusterJoinAck) not);
+      else if (not instanceof ClusterJoinNot)
+        clusterJoin((ClusterJoinNot) not);
+      else if (not instanceof ClusterRemoveNot)
+        clusterRemove(from);
       else if (not instanceof SubscribeRequest)
         subscribeRequest(from, (SubscribeRequest) not);
       else if (not instanceof UnsubscribeRequest)
         unsubscribeRequest(from);
       else if (not instanceof TopicForwardNot)
-        topicForwardNot((TopicForwardNot) not);
+        topicForwardNot(from, (TopicForwardNot) not);
       else
         super.react(from, not);
     } catch (MomException exc) {
@@ -171,106 +181,108 @@ public class Topic extends Destination implements TopicMBean {
   }
 
   /**
-   * Method implementing the reaction to a <code>ClusterTest</code>
-   * notification sent by a fellow topic for testing if this topic might be
-   * part of a cluster.
+   * Reaction to the request of adding a new cluster element.
    */
-  protected void clusterTest(AgentId from, ClusterTest not) {
-    String info = null;
-    // The topic is already part of a cluster: can't join an other cluster.
-    if (friends != null && ! friends.isEmpty()) {
-      if (friends.contains(from)) {
-        info = strbuf.append("Topic [").append(getId()).append("] already joined cluster of topic [")
-            .append(from).append(']').toString();
-        strbuf.setLength(0);
-        friends.add(from);
-        if (not.friends != null)
-          friends.addAll(not.friends);
-        // Remove self if present
-        friends.remove(getId());
-        forward(from, new ClusterAck(true, info,
-                                     not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId()));
-      } else {
-        info = strbuf.append("Topic [").append(getId()).append("] can't join cluster of topic [")
-            .append(from).append("] as it is already part of a cluster").toString();
-        strbuf.setLength(0);
-        forward(from, new ClusterAck(false, info,
-                                     not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId()));
-      }
-      // The topic is already part of a hierarchy: can't join a cluster.
-    } else if (fatherId != null) {
-      info = strbuf.append("Topic [").append(getId()).append("] can't join cluster of topic [").append(from)
-          .append("] as it is already part of a hierarchy").toString();
-      strbuf.setLength(0);
-      forward(from, new ClusterAck(false, info,
-                                   not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId()));
-      // The topic is free: joining the cluster.
-    } else {
-      // state change, so save.
-      setSave();
-      friends = new HashSet();
-      friends.add(from);
-      if (not.friends != null)
-        friends.addAll(not.friends);
-      // Remove self if present
-      friends.remove(getId());
-      info = strbuf.append("Topic [").append(getId()).append("] ok for joining cluster of topic [")
-          .append(from).append(']').toString();
-      strbuf.setLength(0);
-      forward(from, new ClusterAck(true, info,
-                                   not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId()));
+  private void clusterAdd(FwdAdminRequestNot req, String joiningTopic) {
+    AgentId newFriendId = AgentId.fromString(joiningTopic);
 
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,
-                   "Topic " + getId().toString() + " joins cluster of topic " + from.toString());
+    // Adds the given topic to the cluster containing the current one.
+    if (friends == null) {
+      friends = new HashSet();
+      friends.add(getId());
     }
+    forward(newFriendId,
+        new ClusterJoinNot(friends, req.getReplyTo(), req.getRequestMsgId(), req.getReplyMsgId()));
   }
 
   /**
-   * Method implementing the reaction to a <code>ClusterAck</code>
-   * notification sent by a topic requested to join the cluster.
-   */ 
-  protected void clusterAck(AgentId from, ClusterAck ack) {
-    // The topic does not accept to join the cluster: doing nothing.
-    if (! ack.ok) {
-      replyToTopic(new AdminReply(AdminReply.BAD_CLUSTER_REQUEST, ack.info),
-                   ack.getReplyTo(),
-                   ack.getRequestMsgId(),
-                   ack.getReplyMsgId());
-    } else {
-
+   * Method implementing the reaction to a {@link ClusterJoinNot} notification,
+   * sent by a fellow topic for notifying this topic to join the cluster, doing
+   * a transitive closure of clusters, if any.
+   */
+  protected void clusterJoin(ClusterJoinNot not) {
     setSave(); // state change, so save.
-    ClusterNot newFriendNot = new ClusterNot(from);
+    if (friends == null) {
+      friends = new HashSet();
+      friends.add(getId());
+    }
+    friends.addAll(not.getCluster());
+    sendToCluster(new ClusterJoinAck(friends));
+    replyToTopic(new AdminReply(true, null), not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
+  }
+
+  /**
+   * Method implementing the reaction to a {@link ClusterJoinAck} notification,
+   * doing a transitive closure with the current cluster and the one of the new
+   * cluster element.
+   */
+  protected void clusterJoinAck(ClusterJoinAck not) {
+    friends.addAll(not.getCluster());
+
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "--- " + this + " Topic.clusterJoinAck(" + not + ")" + "\nfriends="
+          + friends);
+  }
+
+  /**
+   * Returns the cluster list.
+   * 
+   * @return the cluster list.
+   */
+  private List clusterList() {
+    List cluster = new ArrayList();
     if (friends != null) {
       Iterator iterator = friends.iterator();
       while (iterator.hasNext()) {
-        // Notifying the current fellow of the joining topic.
-        forward((AgentId) iterator.next(), newFriendNot);
+        cluster.add(iterator.next().toString());
       }
     } else {
-      friends = new HashSet();
+      cluster.add(getAgentId());
     }
-    friends.add(from);
+    return cluster;
+  }
 
-    replyToTopic(new AdminReply(true, null),
-                 ack.getReplyTo(),
-                 ack.getRequestMsgId(),
-                 ack.getReplyMsgId());
+  /**
+   * Ask this topic to leave the cluster.
+   */
+  private void clusterLeave() {
+    // Removes this topic of its cluster
+    if (friends != null) {
+      // Sends a notification to all members asking to remove the topic
+      sendToCluster(new ClusterRemoveNot());
+      friends = null;
+      setSave(); // state change, so save.
     }
   }
 
   /**
-   * Method implementing the reaction to a <code>ClusterNot</code>
-   * notification sent by a fellow topic for notifying this topic
-   * of a new cluster fellow insertion or suppression.
+   * Remove the specified topic from current cluster.
+   * 
+   * @param topic The topic which left the cluster
    */
-  protected void clusterNot(AgentId from, ClusterNot not) {
+  private void clusterRemove(AgentId topic) {
     setSave(); // state change, so save.
-    if (not.topicId == null) {
-      friends.remove(from);
-      if (friends.isEmpty()) friends = null;
-    } else if (! not.topicId.equals(getId())) {
-      friends.add(not.topicId);
+    friends.remove(topic);
+    if (friends.size() == 1)
+      friends = null;
+  }
+
+  /**
+   * send to all queue in cluster.
+   * 
+   * @param not
+   */
+  protected void sendToCluster(Notification not) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "--- " + this + " ClusterQueue.sendToCluster(" + not + ")");
+
+    if (friends == null || friends.size() < 2)
+      return;
+
+    for (Iterator e = friends.iterator(); e.hasNext();) {
+      AgentId id = (AgentId) e.next();
+      if (!id.equals(getId()))
+        forward(id, not);
     }
   }
 
@@ -352,22 +364,15 @@ public class Topic extends Destination implements TopicMBean {
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG,  "Client " + from + " removed from the subscribers.");
-  } 
+  }
 
   /**
    * Method implementing the reaction to a <code>TopicForwardNot</code>
    * instance, carrying messages forwarded by a cluster fellow or a
    * hierarchical son.
    */
-  protected void topicForwardNot(TopicForwardNot not) {
-    // If the forward comes from a son, forwarding it to the father, if any.
-    if (not.toFather && fatherId != null) {
-      forward(fatherId, not);
-      alreadySentLocally = fatherId.getTo() == AgentServer.getServerId();
-    }
-
-    // Processing the received messages. 
-    processMessages(not.messages);
+  protected void topicForwardNot(AgentId from, TopicForwardNot not) {
+    doClientMessages(from, not.messages, not.fromCluster);
   }
 
   /**
@@ -394,47 +399,14 @@ public class Topic extends Destination implements TopicMBean {
     } else if (adminRequest instanceof GetFatherRequest) {
       replyToTopic(new GetFatherReply((fatherId != null)?fatherId.toString():null),
                    not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
-    } else if (adminRequest instanceof GetClusterRequest) {
-      Vector cluster = null;
-      if (friends != null) {
-        cluster = new Vector();
-        Iterator iterator = friends.iterator();
-        while (iterator.hasNext()) {
-          cluster.add(iterator.next().toString());
-        }
-        cluster.add(getId().toString());
-      }
-      replyToTopic(new GetClusterReply(cluster),
-                   not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
-    } else if (adminRequest instanceof SetCluster) {
-      AgentId newFriendId = AgentId.fromString(((SetCluster) adminRequest).getTopId());
-
-      if (newFriendId != null) {
-        // Adds the given topic to the cluster containing the current one.
-        if (getId().equals(newFriendId)) {
-          replyToTopic(new AdminReply(AdminReply.BAD_CLUSTER_REQUEST, "Joining topic already part of the cluster"),
-                       not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
-        } else {
-          forward(newFriendId,
-                  new ClusterTest(friends, not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId()));
-        }
-      } else {
-        // Removes this topic of its cluster
-        if ((friends != null) && ! friends.isEmpty()) {
-          // Sends a notification to all members asking to remove the topic
-          ClusterNot uncluster = new ClusterNot(null);
-          Iterator iterator = friends.iterator();
-          while (iterator.hasNext()) {
-            // Notify each fellow of the leave.
-            forward((AgentId) iterator.next(), uncluster);
-          }
-          friends = null;
-
-          setSave(); // state change, so save.
-        }
-        replyToTopic(new AdminReply(true, null),
-                     not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
-      }
+    } else if (adminRequest instanceof ClusterList) {
+      List clstr = clusterList();
+      replyToTopic(new ClusterListReply(clstr), not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
+    } else if (adminRequest instanceof ClusterAdd) {
+      clusterAdd(not, ((ClusterAdd) adminRequest).getAddedDest());
+    } else if (adminRequest instanceof ClusterLeave) {
+      clusterLeave();
+      replyToTopic(new AdminReply(true, null), not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
     } else {
       super.handleAdminRequestNot(from, not);
     }
@@ -461,7 +433,7 @@ public class Topic extends Destination implements TopicMBean {
   public final String[] getSubscriberIds() {
     String[] res = new String[subscribers.size()];
     for (int i = 0; i < res.length; i++) {
-      AgentId aid = (AgentId)subscribers.elementAt(i);
+      AgentId aid = (AgentId) subscribers.get(i);
       res[i] = aid.toString();
     }
     return res;
@@ -485,11 +457,11 @@ public class Topic extends Destination implements TopicMBean {
       forward(user, new ExceptionReply(new AccessException("READ right removed.")));
     } else {
       // Free reading right removed: removing all non readers.
-      for (Enumeration subs = subscribers.elements(); subs.hasMoreElements();) {
-        user = (AgentId) subs.nextElement();
+      for (Iterator subs = subscribers.iterator(); subs.hasNext();) {
+        user = (AgentId) subs.next();
         if (! isReader(user)) {
           setSave(); // state change, so save.
-          subscribers.remove(user);
+          subs.remove();
           selectors.remove(user);
           forward(user, new ExceptionReply(new AccessException("READ right removed.")));
         }
@@ -505,11 +477,15 @@ public class Topic extends Destination implements TopicMBean {
    * <code>TopicMsgsReply</code> instances to the valid subscribers.
    */
   protected void doClientMessages(AgentId from, ClientMessages not) {
-    ClientMessages clientMsgs = preProcess(from, not);
+    doClientMessages(from, not, false);
+  }
 
+  private void doClientMessages(AgentId from, ClientMessages not, boolean fromCluster) {
+    ClientMessages clientMsgs = preProcess(from, not);
     if (clientMsgs != null) {
       // Forwarding the messages to the father or the cluster fellows, if any:
-      forwardMessages(clientMsgs);
+      forwardMessages(clientMsgs, fromCluster);
+
       // Processing the messages:
       processMessages(clientMsgs);
 
@@ -529,12 +505,16 @@ public class Topic extends Destination implements TopicMBean {
     AgentId agId = uA.agent;
     Notification not = uA.not;
 
-    // Deleted topic was requested to join the cluster: notifying the
-    // requester:
-    if (not instanceof ClusterTest) {
-      ClusterTest cT = (ClusterTest) not;
-      replyToTopic(new AdminReply(AdminReply.BAD_CLUSTER_REQUEST, "Joining topic doesn't exist"),
-                   cT.getReplyTo(), cT.getRequestMsgId(), cT.getReplyMsgId());
+    if (not instanceof ClusterJoinNot) {
+      ClusterJoinNot cT = (ClusterJoinNot) not;
+      logger.log(BasicLevel.ERROR, "Cluster join failed: " + uA.agent + " unknown.");
+      String info = "Cluster join failed: Unknown destination.";
+      replyToTopic(new AdminReply(AdminReply.BAD_CLUSTER_REQUEST, info), cT.getReplyTo(),
+          cT.getRequestMsgId(), cT.getReplyMsgId());
+    } else if (not instanceof ClusterJoinAck || not instanceof ClusterRemoveNot) {
+      logger.log(BasicLevel.ERROR, "Cluster error: " + uA.agent + " unknown. "
+          + "The topic has probably been removed in the meantime.");
+      clusterRemove(agId);
     } else {
       setSave(); // state change, so save.
       // Removing the deleted client's subscriptions, if any.
@@ -544,18 +524,15 @@ public class Topic extends Destination implements TopicMBean {
       // Removing the father identifier, if needed.
       if (agId.equals(fatherId))
         fatherId = null;
-      
-      // AF (TODO): Vérifier si l'agent est membre du cluster.
     }
   }
 
   /**
-   * Method specifically processing a
-   * <code>fr.dyade.aaa.agent.DeleteNot</code> instance.
+   * Method specifically processing a <code>fr.dyade.aaa.agent.DeleteNot</code>
+   * instance.
    * <p>
-   * <code>UnknownAgent</code> notifications are sent to each subscriber
-   * and <code>UnclusterNot</code> notifications to the cluster
-   * fellows.
+   * <code>UnknownAgent</code> notifications are sent to each subscriber and
+   * <code>UnclusterNot</code> notifications to the cluster fellows.
    */
   protected void doDeleteNot(DeleteNot not) {
     AgentId clientId;
@@ -566,41 +543,27 @@ public class Topic extends Destination implements TopicMBean {
       forward(clientId, new UnknownAgent(getId(), null));
     }
 
-    // For each cluster fellow if any...
-    if (friends != null) {
-      Iterator iterator = friends.iterator();
-      while (iterator.hasNext()) {
-        // Notify each fellow of the leave.
-        forward((AgentId) iterator.next(), new ClusterNot(null));
-      }
-      friends = null;
-    }
-    
+    clusterLeave();
     setSave(); // state change, so save.
   }
 
   /**
-   * Actually forwards a vector of messages to the father or the cluster
+   * Actually forwards a list of messages to the father or the cluster
    * fellows, if any.
    */
   protected void forwardMessages(ClientMessages messages) {
-    if (friends != null && ! friends.isEmpty()) {
-      AgentId topicId;
-      Iterator iterator = friends.iterator();
-      while (iterator.hasNext()) {
-        topicId = (AgentId) iterator.next();
-        forward(topicId, new TopicForwardNot(messages, false));
+    forwardMessages(messages, false);
+  }
 
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG,
-                     "Messages forwarded to fellow " + topicId.toString());
-      } 
-    } else if (fatherId != null) {
-      forward(fatherId, new TopicForwardNot(messages, true));
+  private void forwardMessages(ClientMessages messages, boolean fromCluster) {
+    if (!fromCluster) {
+      sendToCluster(new TopicForwardNot(messages, true));
+    }
+    if (fatherId != null) {
+      forward(fatherId, new TopicForwardNot(messages, false));
 
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,
-                   "Messages forwarded to father " + fatherId.toString());
+        logger.log(BasicLevel.DEBUG, "Messages forwarded to father " + fatherId.toString());
     }
   }
 
@@ -622,9 +585,9 @@ public class Topic extends Destination implements TopicMBean {
     setNoSave();
     boolean persistent = false;
 
-    for (Enumeration subs = subscribers.elements(); subs.hasMoreElements();) {
+    for (Iterator subs = subscribers.iterator(); subs.hasNext();) {
       // Browsing the subscribers.
-      subscriber = (AgentId) subs.nextElement();
+      subscriber = (AgentId) subs.next();
       local = (subscriber.getTo() == AgentServer.getServerId());
       selector = (String) selectors.get(subscriber);
 
