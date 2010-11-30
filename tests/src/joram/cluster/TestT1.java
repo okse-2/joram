@@ -31,7 +31,6 @@ import javax.jms.TextMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
-
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
@@ -55,6 +54,8 @@ public class TestT1 extends TestCase {
       startAgentServer((short)0);
       startAgentServer((short)1);
       startAgentServer((short)2);
+
+      Thread.sleep(2000);
 
       // Creates users and destinations, then registers them in JNDI.
       admin();
@@ -96,40 +97,42 @@ public class TestT1 extends TestCase {
       // Starts the connection
       cnx2.start();
 
-      int i;
-      
       TextMessage msgs[] = new TextMessage[10];
       // Sends 10 messages on topic0
-      for (i=0; i<10; i++) {
+      for (int i = 0; i < 10; i++) {
         msgs[i] = sess0a.createTextMessage("Msg " + i);
         pub.send(msgs[i]);
       }
 
+      TextMessage msg = null;
       // Receives the messages through topic0
-      for (i=0; i<10; i++) {
-        TextMessage msg= (TextMessage)sub0.receive();
+      for (int i = 0; i < 10; i++) {
+        msg = (TextMessage) sub0.receive();
         assertEquals(msgs[i].getJMSMessageID(), msg.getJMSMessageID());
         assertEquals(msgs[i].getText(), msg.getText());
       }
-      assertEquals(10, i);
+      msg = (TextMessage) sub0.receive(1000);
+      assertNull(msg);
       cnx0.close();
 
       // Receives the messages through topic1
-      for (i=0; i<10; i++) {
-        TextMessage msg= (TextMessage)sub1.receive();
+      for (int i = 0; i < 10; i++) {
+        msg = (TextMessage) sub1.receive();
         assertEquals(msgs[i].getJMSMessageID(), msg.getJMSMessageID());
         assertEquals(msgs[i].getText(), msg.getText());
       }
-      assertEquals(10, i);
+      msg = (TextMessage) sub1.receive(1000);
+      assertNull(msg);
       cnx1.close();
 
       // Receives the messages through topic2
-      for (i=0; i<10; i++) {
-        TextMessage msg= (TextMessage)sub2.receive();
+      for (int i = 0; i < 10; i++) {
+        msg = (TextMessage) sub2.receive();
         assertEquals(msgs[i].getJMSMessageID(), msg.getJMSMessageID());
         assertEquals(msgs[i].getText(), msg.getText());
       }
-      assertEquals(10, i);
+      msg = (TextMessage) sub2.receive(1000);
+      assertNull(msg);
       cnx2.close();
     } catch (Throwable exc) {
       exc.printStackTrace();
@@ -154,9 +157,9 @@ public class TestT1 extends TestCase {
     javax.jms.ConnectionFactory cf1 = TcpConnectionFactory.create("localhost", 16011);
     javax.jms.ConnectionFactory cf2 = TcpConnectionFactory.create("localhost", 16012);
 
-    Topic top0 = (Topic) Topic.create(0);
-    Topic top1 = (Topic) Topic.create(1);
-    Topic top2 = (Topic) Topic.create(2);
+    Topic top0 = Topic.create(0);
+    Topic top1 = Topic.create(1);
+    Topic top2 = Topic.create(2);
 
     top0.setFreeReading();
     top1.setFreeReading();
