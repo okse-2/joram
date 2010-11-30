@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -21,9 +21,8 @@
  * Initial developer(s): Frederic Maistre (INRIA)
  * Contributor(s): Nicolas Tachker (ScalAgent)
  */
-package org.objectweb.joram.mom.dest;
+package org.objectweb.joram.mom.notifications;
 
-import org.objectweb.joram.mom.notifications.ClientMessages;
 
 /**
  * A <code>TopicForwardNot</code> is a notification sent by a topic to 
@@ -39,19 +38,20 @@ public class TopicForwardNot extends fr.dyade.aaa.agent.Notification {
    * <code>true</code> if the notification is destinated to a hierarchical
    * father.
    */
-  public boolean toFather;
+  public boolean fromCluster;
+
   /** The forwarded messages. */
   public ClientMessages messages;
 
   /**
    * Constructs a <code>TopicForwardNot</code> instance.
-   *
-   * @param messages  Notification to forward.
-   * @param toFather  <code>true</code> if the notification is destinated
-   *          to a hierarchical father.
+   * 
+   * @param messages Notification to forward.
+   * @param fromCluster <code>true</code> if the notification is coming
+   *          from a cluster friend.
    */
-  TopicForwardNot(ClientMessages messages, boolean toFather) {
+  public TopicForwardNot(ClientMessages messages, boolean fromCluster) {
     this.messages = messages;
-    this.toFather = toFather;
+    this.fromCluster = fromCluster;
   }
 }

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -25,15 +25,15 @@ package org.objectweb.joram.mom.notifications;
 
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
-public class LBCycleLife extends QueueClusterNot {
+public class LBCycleLife extends ClusterLBNot {
 
-  /**
-   * 
-   */
   private static final long serialVersionUID = 1L;
+
   private ClientMessages clientMessages;
-  private Hashtable visitTable;
+
+  private Map visitTable;
 
   /**
    * 
@@ -73,7 +73,7 @@ public class LBCycleLife extends QueueClusterNot {
    * 
    * @return visitTable
    */
-  public Hashtable getVisitTable() {
+  public Map getVisitTable() {
     return visitTable;
   }
 

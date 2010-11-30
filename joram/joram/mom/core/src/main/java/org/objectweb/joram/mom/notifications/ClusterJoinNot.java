@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2005 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,54 +18,49 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s):
  */
-package org.objectweb.joram.mom.dest;
+package org.objectweb.joram.mom.notifications;
 
 import java.util.Set;
 
 import fr.dyade.aaa.agent.AgentId;
 import fr.dyade.aaa.agent.Notification;
 
-/**
- * A <code>ClusterTest</code> instance is a notification sent by a topic 
- * to another topic for checking if it might be part of a cluster.
- */
-class ClusterTest extends Notification {
-  /** define serialVersionUID for interoperability */
+public class ClusterJoinNot extends Notification {
+  
   private static final long serialVersionUID = 1L;
 
-  /** Set containing AgentId of topics already in the cluster */
-  Set friends;
+  private Set cluster;
+  
   /** The JMS destination to send the reply */
   private AgentId replyTo = null;
+
   /** The JMS message id. of the request needed for the reply */
   private String requestMsgId;
+
   /** The generated JMS message id. for the reply */
   private String replyMsgId;
 
-  /**
-   * Constructs a <code>ClusterTest</code> instance.
-   *
-   * @param requester     The original requester.
-   * @param friends       The current members of the cluster.
-   * @param replyTo       The JMS destination to send the reply.
-   * @param requestMsgId  The JMS message id. of the request needed for the reply.
-   * @param replyMsgId    The generated JMS message id. for the reply.
-   */
-  ClusterTest(Set friends,
-              AgentId replyTo, String requestMsgId, String replyMsgId) {
-    this.friends = friends;
+  public ClusterJoinNot(Set cluster, AgentId replyTo, String requestMsgId, String replyMsgId) {
+    this.cluster = cluster;
     this.replyTo = replyTo;
     this.requestMsgId = requestMsgId;
     this.replyMsgId = replyMsgId;
   }
 
   /**
+   * @return the cluster
+   */
+  public Set getCluster() {
+    return cluster;
+  }
+
+  /**
    * Returns the JMS destination to send the reply.
    * 
-   * @return  The JMS destination to send the reply.
+   * @return The JMS destination to send the reply.
    */
   public AgentId getReplyTo() {
     return replyTo;
@@ -74,7 +69,7 @@ class ClusterTest extends Notification {
   /**
    * Returns the JMS message id. of the request needed for the reply.
    * 
-   * @return  The JMS message id. of the request needed for the reply.
+   * @return The JMS message id. of the request needed for the reply.
    */
   public String getRequestMsgId() {
     return requestMsgId;
@@ -83,9 +78,26 @@ class ClusterTest extends Notification {
   /**
    * Returns the generated JMS message id. for the reply.
    * 
-   * @return  The generated JMS message id. for the reply.
+   * @return The generated JMS message id. for the reply.
    */
   public String getReplyMsgId() {
     return replyMsgId;
+  }
+
+  /**
+   * Appends a string image for this object to the StringBuffer parameter.
+   * 
+   * @param output
+   *          buffer to fill in
+   * @return
+   *         <code>output</code> buffer is returned
+   */
+  public StringBuffer toString(StringBuffer output) {
+    output.append('(');
+    super.toString(output);
+    output.append(",cluster=").append(cluster);
+    output.append(')');
+
+    return output;
   }
 }

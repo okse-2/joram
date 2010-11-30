@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -25,15 +25,13 @@ package org.objectweb.joram.mom.notifications;
 
 import fr.dyade.aaa.agent.Notification;
 
-public class QueueClusterNot extends Notification {
+public abstract class ClusterLBNot extends Notification {
 
-  /**
-   * 
-   */
   private static final long serialVersionUID = 1L;
+
   private float rateOfFlow;
 
-  public QueueClusterNot(float rateOfFlow) {
+  public ClusterLBNot(float rateOfFlow) {
     this.rateOfFlow = rateOfFlow;
   }
 

@@ -1,7 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - ScalAgent Distributed Technologies
- * Copyright (C) 1996 - Dyade
+ * Copyright (C) 2005 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,32 +18,30 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Frederic Maistre (INRIA)
+ * Initial developer(s): Nicolas Tachker (ScalAgent)
  * Contributor(s):
  */
-package org.objectweb.joram.mom.dest;
+package org.objectweb.joram.mom.notifications;
 
-import fr.dyade.aaa.agent.AgentId;
+import java.util.Set;
+
 import fr.dyade.aaa.agent.Notification;
 
-/**
- * A <code>ClusterNot</code> instance is a notification sent by a topic 
- * to another topic for notifying it of a topic joining the cluster they
- * are part of.
- */
-class ClusterNot extends Notification {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
+public class ClusterJoinAck extends Notification {
   
-  /** The identifier of the topic to add to the cluster. */
-  AgentId topicId;
+  private static final long serialVersionUID = 1L;
+
+  private Set cluster;
+
+  public ClusterJoinAck(Set cluster) {
+    this.cluster = cluster;
+  }
 
   /**
-   * Constructs a <code>ClusterNot</code> instance.
-   *
-   * @param topicId  The identifier of the topic to add to the cluster.
+   * @return the cluster
    */
-  ClusterNot(AgentId topicId) {
-    this.topicId = topicId;
+  public Set getCluster() {
+    return cluster;
   }
+  
 }
