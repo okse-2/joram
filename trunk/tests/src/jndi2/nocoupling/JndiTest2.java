@@ -51,7 +51,7 @@ public class JndiTest2 extends TestCase {
     try {
       startAgentServer((short) 0, new String[] { "-DTransaction=fr.dyade.aaa.util.NTransaction" });
 
-      Thread.sleep(1000);
+      Thread.sleep(2000);
 
       Hashtable env0 = new Hashtable();
       env0.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
@@ -71,6 +71,8 @@ public class JndiTest2 extends TestCase {
       assertEquals(null, excp);
 
       startAgentServer((short) 1, new String[] { "-DTransaction=fr.dyade.aaa.util.NTransaction" });
+
+      Thread.sleep(2000);
 
       Hashtable env1 = new Hashtable();
       env1.put(NAMING_FACTORY_PROP, NAMING_FACTORY);
