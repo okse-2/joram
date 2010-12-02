@@ -26,7 +26,6 @@ import java.util.Properties;
 
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.shared.excepts.RequestException;
-import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -100,7 +99,7 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
   public void initialize(boolean firstTime) {
     super.initialize(firstTime);
     if (acquisitionModule == null) {
-      acquisitionModule = new AcquisitionModule(this, acquisitionClassName, properties, Message.QUEUE_TYPE);
+      acquisitionModule = new AcquisitionModule(this, acquisitionClassName, properties);
     }
   }
 
