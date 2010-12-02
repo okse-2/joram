@@ -22,7 +22,7 @@
  */
 package org.objectweb.joram.mom.dest;
 
-public interface TopicMBean extends DestinationMBean {
+public interface TopicMBean extends DestinationMBean, ClusterDestinationMBean {
   /**
    * Returns the number of subscribers.
    * Each user appears once even if there is multiples subscriptions, the different

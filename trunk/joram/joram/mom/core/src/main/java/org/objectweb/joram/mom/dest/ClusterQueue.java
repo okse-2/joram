@@ -64,7 +64,7 @@ import fr.dyade.aaa.agent.UnknownNotificationException;
 /**
  * The <code>ClusterQueue</code> class implements the cluster queue behavior.
  */
-public class ClusterQueue extends Queue {
+public class ClusterQueue extends Queue implements ClusterQueueMBean {
 
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
@@ -92,9 +92,6 @@ public class ClusterQueue extends Queue {
   /** Number of message send to cluster */
   private long clusterDeliveryCount = 0;
 
-  /** Waiting after a cluster request */
-  private long waitAfterClusterReq = -1;
-
   /**
    * Maximum period of time before forwarding a waiting message or request to
    * other queues of the cluster. By default it is set to
@@ -117,6 +114,7 @@ public class ClusterQueue extends Queue {
     /** automatic eval threshold */
     boolean autoEvalThreshold = false;
 
+    long waitAfterClusterReq = -1;
     if (prop != null) {
       try {
         waitAfterClusterReq = Long.valueOf(prop.getProperty("waitAfterClusterReq")).longValue();
@@ -277,6 +275,11 @@ public class ClusterQueue extends Queue {
     for (Iterator e = clusters.keySet().iterator(); e.hasNext();)
       list.add(e.next().toString());
     return list;
+  }
+
+  public String[] getClusterElements() {
+    List list = clusterList();
+    return (String[]) list.toArray(new String[list.size()]);
   }
 
   /**
@@ -504,7 +507,7 @@ public class ClusterQueue extends Queue {
     if (loadingFactor.getRateOfFlow() < 1) {
       int possibleGive = getPendingMessageCount() - getWaitingRequestCount();
       LBMessageGive msgGive = 
-        new LBMessageGive(waitAfterClusterReq,loadingFactor.getRateOfFlow());
+        new LBMessageGive(loadingFactor.validityPeriod, loadingFactor.getRateOfFlow());
       
       // get client messages, hope or possible give.
       ClientMessages cm = null;
@@ -659,7 +662,6 @@ public class ClusterQueue extends Queue {
    * @param waitAfterClusterReq
    */
   public void setWaitAfterClusterReq(long waitAfterClusterReq) {
-    this.waitAfterClusterReq = waitAfterClusterReq;
     loadingFactor.validityPeriod = waitAfterClusterReq;
   }
   
@@ -686,4 +688,41 @@ public class ClusterQueue extends Queue {
   public void setAutoEvalThreshold(boolean autoEvalThreshold) {
     loadingFactor.autoEvalThreshold = autoEvalThreshold;
   }
+
+  public int getProducThreshold() {
+    return loadingFactor.producThreshold;
+  }
+
+  public int getConsumThreshold() {
+    return loadingFactor.consumThreshold;
+  }
+
+  public boolean isAutoEvalThreshold() {
+    return loadingFactor.autoEvalThreshold;
+  }
+
+  public long getWaitAfterClusterReq() {
+    return loadingFactor.validityPeriod;
+  }
+
+  public float getRateOfFlow() {
+    return loadingFactor.getRateOfFlow();
+  }
+
+  public boolean isOverloaded() {
+    return loadingFactor.isOverloaded();
+  }
+
+  public String getStatus() {
+    return loadingFactor.getStatus();
+  }
+
+  public String getConsumerStatus() {
+    return loadingFactor.getConsumerStatus();
+  }
+
+  public String getProducerStatus() {
+    return loadingFactor.getProducerStatus();
+  }
+
 }

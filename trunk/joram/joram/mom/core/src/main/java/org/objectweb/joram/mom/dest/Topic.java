@@ -242,6 +242,11 @@ public class Topic extends Destination implements TopicMBean {
     return cluster;
   }
 
+  public String[] getClusterElements() {
+    List list = clusterList();
+    return (String[]) list.toArray(new String[list.size()]);
+  }
+
   /**
    * Ask this topic to leave the cluster.
    */
