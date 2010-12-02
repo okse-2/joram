@@ -131,6 +131,18 @@ public class LoadingFactor implements Serializable {
     return rateOfFlow;
   }
 
+  public String getStatus() {
+    return Status.names[status];
+  }
+
+  public String getProducerStatus() {
+    return ProducerStatus.names[producerStatus];
+  }
+
+  public String getConsumerStatus() {
+    return ConsumerStatus.names[consumerStatus];
+  }
+
   public void setWait() {
     status = Status.WAIT;
     statusTime = System.currentTimeMillis() + validityPeriod;
