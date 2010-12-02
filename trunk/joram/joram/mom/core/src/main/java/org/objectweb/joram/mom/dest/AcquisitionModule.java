@@ -117,9 +117,6 @@ public class AcquisitionModule implements ReliableTransmitter {
   /** The acquisition queue or topic using this module. */
   private final Destination destination;
 
-  /** The destination type set in acquired messages/ */
-  private final byte destType;
-
   /** The period before subsequent acquisition if positive. */
   private long period = 0;
 
@@ -132,13 +129,12 @@ public class AcquisitionModule implements ReliableTransmitter {
    */
   private boolean isDaemon = false;
 
-  public AcquisitionModule(Destination destination, String className, Properties properties, byte destType) {
+  public AcquisitionModule(Destination destination, String className, Properties properties) {
     if (logger.isLoggable(BasicLevel.DEBUG)) {
       logger.log(BasicLevel.DEBUG, "AcquisitionModule.<init> prop = " + properties);
     }
 
     this.destination = destination;
-    this.destType = destType;
 
     try {
       Class clazz = Class.forName(className);
@@ -349,7 +345,7 @@ public class AcquisitionModule implements ReliableTransmitter {
       message.id = "ID:" + destination.getDestinationId() + '_' + msgCount;
       message.timestamp = currentTime;
       message.persistent = isPersistent;
-      message.setDestination(destination.getId().toString(), destType);
+      message.setDestination(destination.getId().toString(), destination.getType());
       message.priority = priority;
       if (expiration > 0) {
         message.expiration = currentTime + expiration;
