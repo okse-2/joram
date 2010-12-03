@@ -69,7 +69,14 @@ public class MetaData {
   		InputStream in = MetaData.class.getResourceAsStream("/joram.version");
   		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
   		String v = reader.readLine();
-  		implVersion = v.substring(v.indexOf('='), v.length());
+  		while (v != null) {
+  			if (v.contains("version"))
+  				implVersion = v.substring(v.indexOf('=')+1, v.length());
+  			else if (v.contains("protocol"))
+  				protocol = Integer.parseInt(v.substring(v.indexOf('=')+1, v.length()).trim());
+  			v = reader.readLine();
+  		}
+
   	} catch (Exception e) {
   		if (logger.isLoggable(BasicLevel.DEBUG))
 	      logger.log(BasicLevel.DEBUG, "MetaData.getVersionInResource:: EXCEPTION", e);
@@ -81,7 +88,6 @@ public class MetaData {
   			major = Integer.parseInt(st.nextToken());
   			minor = Integer.parseInt(st.nextToken());
   			build = Integer.parseInt(st.nextToken());
-  			protocol = Integer.parseInt(st.nextToken("-").substring(1));
   		} catch (Exception e) {
   			if (logger.isLoggable(BasicLevel.DEBUG))
   	      logger.log(BasicLevel.DEBUG, "MetaData.getVersionInResource:: EXCEPTION", e);
