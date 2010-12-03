@@ -12,11 +12,12 @@
   <parent>
     <artifactId>joram</artifactId>
     <groupId>org.objectweb.joram</groupId>
-    <version>5.4.1.54-SNAPSHOT</version>
+    <version>5.5.0-SNAPSHOT</version>
   </parent>
 
   <properties>
-    <version.filter.value>${project.version}</version.filter.value> <!-- major.minor.build.protocol -->
+    <version.filter.value>${project.version}</version.filter.value>
+    <protocol.filter.value>${joram.protocol}</protocol.filter.value>
   </properties>
 
   <build>
