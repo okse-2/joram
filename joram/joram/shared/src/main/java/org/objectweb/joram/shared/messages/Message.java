@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,7 +34,6 @@ import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.admin.AbstractAdminMessage;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -185,11 +184,9 @@ public final class Message implements Cloneable, Serializable, Streamable {
    */
   public transient boolean redelivered = false;
 
-  public final static byte TOPIC_TYPE = DestinationConstants.TOPIC_TYPE;
-  public final static byte QUEUE_TYPE = DestinationConstants.QUEUE_TYPE;
-
   /** The message destination identifier. */
   public transient String toId = null;
+
   /** The message destination type. */
   public transient byte toType;
 
