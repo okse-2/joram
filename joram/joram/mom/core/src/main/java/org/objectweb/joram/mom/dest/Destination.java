@@ -64,6 +64,7 @@ import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.joram.shared.messages.ConversionHelper;
 import org.objectweb.joram.shared.messages.Message;
+import org.objectweb.joram.shared.messages.MessageHelper;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -915,11 +916,7 @@ public abstract class Destination extends Agent implements DestinationMBean {
                               AgentId replyTo,
                               String requestMsgId,
                               String replyMsgId) {
-    Message message = new Message();
-    message.correlationId = requestMsgId;
-    message.timestamp = System.currentTimeMillis();
-    message.setDestination(replyTo.toString(), Message.TOPIC_TYPE);
-    message.id = replyMsgId;
+    Message message = MessageHelper.createMessage(replyMsgId, requestMsgId, getAgentId(), getType());
     try {
       message.setAdminMessage(reply);
       ClientMessages clientMessages = new ClientMessages(-1, -1, message);

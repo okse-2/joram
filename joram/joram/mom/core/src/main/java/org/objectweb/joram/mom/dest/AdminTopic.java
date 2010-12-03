@@ -88,6 +88,7 @@ import org.objectweb.joram.shared.admin.UserAdminRequest;
 import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.joram.shared.messages.Message;
+import org.objectweb.joram.shared.messages.MessageHelper;
 import org.objectweb.joram.shared.security.Identity;
 import org.objectweb.joram.shared.security.SimpleIdentity;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -1481,11 +1482,7 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
 
     if (to == null) return;
 
-    Message message = new Message();
-    message.id = createMessageId();
-    message.correlationId = msgId;
-    message.timestamp = System.currentTimeMillis();
-    message.setDestination(getId().toString(), Message.TOPIC_TYPE);
+    Message message = MessageHelper.createMessage(createMessageId(), msgId, getAgentId(), getType());
     try {
       message.setAdminMessage(reply);
       ClientMessages clientMessages = new ClientMessages(-1, -1, message);

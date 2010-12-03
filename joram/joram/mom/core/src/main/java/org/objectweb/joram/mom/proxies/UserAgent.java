@@ -132,6 +132,7 @@ import org.objectweb.joram.shared.excepts.DestinationException;
 import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.joram.shared.excepts.StateException;
+import org.objectweb.joram.shared.messages.MessageHelper;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -2773,11 +2774,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
   }
 
   private void replyToTopic(AdminReply reply, AgentId replyTo, String requestMsgId, String replyMsgId) {
-    org.objectweb.joram.shared.messages.Message message = new org.objectweb.joram.shared.messages.Message();
-    message.correlationId = requestMsgId;
-    message.timestamp = System.currentTimeMillis();
-    message.setDestination(replyTo.toString(), org.objectweb.joram.shared.messages.Message.TOPIC_TYPE);
-    message.id = replyMsgId;
+    org.objectweb.joram.shared.messages.Message message = MessageHelper.createMessage(replyMsgId,
+        requestMsgId, replyTo.toString(), DestinationConstants.TOPIC_TYPE);
     try {
       message.setAdminMessage(reply);
       ClientMessages clientMessages = new ClientMessages(-1, -1, message);
