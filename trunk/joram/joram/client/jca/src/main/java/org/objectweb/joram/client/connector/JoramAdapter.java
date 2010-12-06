@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2006 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -27,11 +27,16 @@ package org.objectweb.joram.client.connector;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Method;
 import java.net.ConnectException;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.Vector;
 
+import javax.jms.JMSException;
 import javax.jms.Session;
 import javax.jms.XAConnection;
 import javax.management.MBeanServer;
@@ -77,7 +82,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * inbound connectivity (asynchronous message delivery as specified by the JCA
  * message inflow contract).
  */
-public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, JoramAdapterMBean {
+public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, JoramAdapterMBean, javax.jms.ExceptionListener {
   /** Define serialVersionUID for interoperability. */
   private static final long serialVersionUID = 1L;
 
@@ -87,6 +92,11 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
   private boolean started = false;
   /** <code>true</code> if the adapter has been stopped. */
   private boolean stopped = false;
+  
+  /** <code>true</code> if admin connection connection is active. */
+  private boolean isActive = false;
+  /** The duration of admin connection before change state.*/
+  private long adminDurationState = 0;
 
   // ------------------------------------------
   // --- JavaBean setter and getter methods ---
@@ -580,40 +590,33 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
       serverId = (short) AdminModule.getLocalServerId();
     } catch (Exception exc) {
       if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN,
-                   " - JORAM server not administerable: " + exc);
+        logger.log(BasicLevel.WARN, " - JORAM server not administerable: " + exc);
     }
 
     // Execute the XML script of configuration.
     try {
       if (logger.isLoggable(BasicLevel.INFO))
-        logger.log(BasicLevel.INFO,
-                   "  - Reading the provided admin file: " + adminFileXML);
+        logger.log(BasicLevel.INFO, "  - Reading the provided admin file: " + adminFileXML);
       AdminModule.executeXMLAdmin(platformConfigDir, adminFileXML);
     } catch (FileNotFoundException exc) {
       if (logger.isLoggable(BasicLevel.INFO))
-        logger.log(BasicLevel.INFO,
-                   "JoramAdapter - problem during XML configuration: " + adminFileExportXML);
+        logger.log(BasicLevel.INFO, "JoramAdapter - problem during XML configuration: " + adminFileExportXML);
     } catch (Exception exc) {
       if (logger.isLoggable(BasicLevel.ERROR))
-        logger.log(BasicLevel.ERROR,
-                   "JoramAdapter - problem during XML configuration: " + adminFileExportXML, exc);
+        logger.log(BasicLevel.ERROR, "JoramAdapter - problem during XML configuration: " + adminFileExportXML, exc);
     }
 
     // Execute the XML script corresponding to the export of the configuration.
     try {
       if (logger.isLoggable(BasicLevel.INFO))
-        logger.log(BasicLevel.INFO,
-                   "  - Reading the provided admin file: " + adminFileExportXML);
+        logger.log(BasicLevel.INFO, "  - Reading the provided admin file: " + adminFileExportXML);
       AdminModule.executeXMLAdmin(platformConfigDir, adminFileExportXML);
     } catch (FileNotFoundException exc) {
       if (logger.isLoggable(BasicLevel.INFO))
-        logger.log(BasicLevel.INFO,
-                   "JoramAdapter - problem during XML configuration: " + adminFileExportXML);
+        logger.log(BasicLevel.INFO, "JoramAdapter - problem during XML configuration: " + adminFileExportXML);
     } catch (Exception exc) {
       if (logger.isLoggable(BasicLevel.ERROR))
-        logger.log(BasicLevel.ERROR,
-                   "JoramAdapter - problem during XML configuration: " + adminFileExportXML, exc);
+        logger.log(BasicLevel.ERROR, "JoramAdapter - problem during XML configuration: " + adminFileExportXML, exc);
     }
 
     if (logger.isLoggable(BasicLevel.INFO))
@@ -622,8 +625,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
     started = true;
 
     if (logger.isLoggable(BasicLevel.INFO))
-      logger.log(BasicLevel.INFO,
-                 "JORAM adapter " + ConnectionMetaData.providerVersion + " successfully deployed.");
+      logger.log(BasicLevel.INFO, "JORAM adapter " + ConnectionMetaData.providerVersion + " successfully deployed.");
   }
 
   /**
@@ -655,23 +657,39 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
           cf = TcpConnectionFactory.create(hostName, serverPort);
       }
 
-      cf.getParameters().connectingTimer = 60;
+      if (connectingTimer == 0)
+      	cf.getParameters().connectingTimer = 60;
+      else
+      	cf.getParameters().connectingTimer = connectingTimer;
 
       AdminModule.connect(cf, rootName, rootPasswd, identityClass);
-
+      if (!isActive)
+      	adminDurationState = System.currentTimeMillis();
+      isActive = true;
+      
       // Registering MBeans...
       try {
         jmxServer.registerMBean(this, MXWrapper.objectName(jmxRootName, "type=JoramAdapter"));
       } catch (Exception e) {
         if (logger.isLoggable(BasicLevel.WARN))
-          logger.log(BasicLevel.WARN,
-                     "  - Could not register JoramAdapterMBean", e);
+          logger.log(BasicLevel.WARN, "  - Could not register JoramAdapterMBean", e);
       }
     } catch (ConnectException exc) {
+    	if (isActive)
+    		adminDurationState = System.currentTimeMillis();
+    	isActive = false;
       throw new AdminException("Admin connection can't be established: " + exc.getMessage());
     }
   }
 
+  void adminDisconnect() {
+  	// Finishing the admin session.
+    AdminModule.disconnect();
+    if (isActive)
+    	adminDurationState = System.currentTimeMillis();
+    isActive = false;
+  }
+  
   /**
    * Notifies the adapter to terminate the connections it manages, and if
    * needed, to shutdown the collocated JORAM server.
@@ -688,7 +706,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
       unbind((String) boundNames.remove(0));
 
     // Finishing the admin session.
-    AdminModule.disconnect();
+    adminDisconnect();
 
     try {
       jmxServer.unregisterMBean(MXWrapper.objectName(jmxRootName, "type=JoramAdapter"));
@@ -900,10 +918,12 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
       cf.setIdentityClassName(identityClass);
 
       XAConnection cnx = cf.createXAConnection(userName, password);
-
+      
+      // set Exception listener
+      cnx.setExceptionListener(this);
+      
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,
-                   this + " endpointActivation cnx = " + cnx);
+        logger.log(BasicLevel.DEBUG, this + " endpointActivation cnx = " + cnx);
 
       // Creating and registering a consumer instance for this endpoint.
       InboundConsumer consumer =
@@ -932,6 +952,76 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
     }
   }
 
+  public void onException(JMSException exception) {
+  	if (logger.isLoggable(BasicLevel.DEBUG))
+  		logger.log(BasicLevel.DEBUG, "JoramAdapter: onException " + exception);
+  	while (true) {
+  		try {
+  			if (logger.isLoggable(BasicLevel.WARN))
+  				logger.log(BasicLevel.WARN, "JoramAdapter: try to reconnect...");
+  			reconnect();
+  			if (logger.isLoggable(BasicLevel.WARN))
+  				logger.log(BasicLevel.WARN, "JoramAdapter: reconnected.");
+  			break;
+  		} catch (Exception e) {
+  			continue;
+  		}
+  	}
+  }
+  
+  public synchronized void reconnect() throws Exception {
+  	if (logger.isLoggable(BasicLevel.DEBUG))
+  		logger.log(BasicLevel.DEBUG, "JoramAdapter: reconnect()");
+  	boolean connected = false;
+  	try {
+  		AdminModule.getConfiguration();
+	    connected = true;
+    } catch (Exception e1) {
+	    try {
+	    	adminDisconnect();
+	    } catch (Exception e) {
+	    	if (logger.isLoggable(BasicLevel.DEBUG))
+	    		logger.log(BasicLevel.DEBUG, "JoramAdapter: reconnect " + e);
+      }
+	    try {
+	      adminConnect();
+      } catch (AdminException e) {
+      	if (logger.isLoggable(BasicLevel.DEBUG))
+	    		logger.log(BasicLevel.DEBUG, "JoramAdapter: reconnect " + e);
+      	throw e;
+      }
+    }
+    
+    if (connected)
+    	return;
+    
+    // consumers
+    Hashtable copyConsumers = (Hashtable) consumers.clone();
+    
+  	Set keys = copyConsumers.entrySet();
+  	Iterator it = keys.iterator();
+  	while (it.hasNext()) {
+  		Map.Entry entry = (Map.Entry) it.next();
+	    
+	    MessageEndpointFactory endpointFactory = ((InboundConsumer)entry.getValue()).endpointFactory;
+      ActivationSpec spec = (ActivationSpec) entry.getKey();
+      try {
+      	endpointDeactivation(endpointFactory, spec);
+	      endpointActivation(endpointFactory, spec);
+      } catch (ResourceException e) {
+      	if (logger.isLoggable(BasicLevel.INFO))
+	    		logger.log(BasicLevel.INFO, "JoramAdapter: reconnect spec = " + spec, e);
+      }
+    }
+  	
+  	// producers
+  	it = ((Vector) producers.clone()).iterator();
+  	while (it.hasNext()) {
+  		ManagedConnectionImpl mci = (ManagedConnectionImpl) it.next();
+  		mci.reconnect();
+  	}
+  }
+  
   /**
    * Notifies the adapter to deactivate message delivery for a given endpoint.
    */
@@ -1049,7 +1139,7 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
   // TODO (AF): Is it really needed?
   /** @deprecated */
   public void exit() {
-    AdminModule.disconnect();
+    adminDisconnect();
   }
 
   /** Returns a code depending on the adapter properties. */
@@ -1087,6 +1177,30 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
 
   // Implementation of MBean's interfaces
 
+  /**
+	  * return the activity of the Joram administration connection.
+	  * @return true if connection is active.
+	  */
+	public boolean isActive() {
+		return isActive;
+	}
+	
+	/**
+	 * get duration of admin connection before change state.
+	 * @return the duration of admin change connection state.
+	 */
+	public long getAdminDurationBeforeChangeState() {
+		return adminDurationState;
+	}
+	
+	/**
+	 * get duration of admin connection before change state.
+	 * @return the duration of admin connection before change state.
+	 */
+	public String getAdminDurationBeforeChangeStateDate() {
+		return new Date(adminDurationState).toString();
+	}
+  
   /**
    * Gets the JMS API version.
    * 

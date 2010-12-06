@@ -45,7 +45,7 @@ class InboundConsumer implements javax.jms.ServerSessionPool
   /** Application server's <code>WorkManager</code> instance. */
   private WorkManager workManager;
   /** Application's endpoints factory. */
-  private MessageEndpointFactory endpointFactory;
+  MessageEndpointFactory endpointFactory;
 
   /** The provided connection to the underlying JORAM server. */
   private XAConnection cnx;
