@@ -28,6 +28,24 @@ import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 
 public interface JoramAdapterMBean {
+	 /**
+	  * return the activity of the Joram administration connection.
+	  * @return true if connection admin connection is active.
+	  */
+	public boolean isActive();
+	
+	/**
+	 * get the duration of admin connection before change state.
+	 * @return the duration of admin connection before change state.
+	 */
+	public long getAdminDurationBeforeChangeState();
+	
+	/**
+	 * get the duration of admin connection before change state.
+	 * @return the duration of admin connection before change state.
+	 */
+	public String getAdminDurationBeforeChangeStateDate();
+	
   /**
    * Gets the JMS API version.
    * 

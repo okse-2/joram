@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -40,8 +40,10 @@ import javax.resource.spi.ConnectionEventListener;
 import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.IllegalStateException;
 import javax.resource.spi.LocalTransactionException;
+import javax.resource.spi.ManagedConnection;
 import javax.resource.spi.ManagedConnectionMetaData;
 import javax.resource.spi.ResourceAdapterInternalException;
+import javax.security.auth.Subject;
 import javax.transaction.xa.XAResource;
 
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -73,7 +75,7 @@ public class ManagedConnectionImpl
 
   /** <code>true</code> if the connection is valid. */
   private boolean valid = false;
-
+  
   /** hashCode */
   private int hashCode = -1;
 
@@ -90,6 +92,11 @@ public class ManagedConnectionImpl
    * distributed transactions.
    */
   Session session = null;
+  
+  /** only used for reconnection */
+  Subject subject;
+  /** only used for reconnection */
+  ConnectionRequestInfo cxRequest;
 
   /**
    * Creates a <code>ManagedConnectionImpl</code> instance wrapping a
@@ -506,9 +513,8 @@ public class ManagedConnectionImpl
 
   /** Notifies that the wrapped physical connection has been lost. */
   public synchronized void onException(JMSException exc) {
-
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " onException(" + exc + ")");
+      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " onException(" + exc + ')');
 
     // Physical connection already invalid: doing nothing.
     if (! isValid())
@@ -528,9 +534,26 @@ public class ManagedConnectionImpl
       listener.connectionErrorOccurred(event);
     }
 
-    valid = false;
+    try {
+    	cleanup();
+    } catch (ResourceException e) {
+    	if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+    		AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " onException.cleanup exception " + e);
+    }
   }
 
+  void reconnect() {
+  	valid = true;
+  	try {
+  		ManagedConnectionFactoryImpl mcf = new ManagedConnectionFactoryImpl();
+  		mcf.setResourceAdapter(ra);
+  		ManagedConnection mc = mcf.createManagedConnection(subject, cxRequest);
+  		destroy();
+  	}	catch (Exception e) {
+  		if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+        AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " reconnect exception " + e);
+  	}
+  }
 
   /**
    * Notifies that the local transaction is beginning.

@@ -387,12 +387,16 @@ public class ManagedConnectionFactoryImpl
       throw new ResourceException("Failed connecting process: " + exc);
     }
 
-    ManagedConnection managedCx = new ManagedConnectionImpl(ra,
-                                                            cnx,
-                                                            hostName,
-                                                            serverPort,
-                                                            userName);
+    ManagedConnectionImpl managedCx = new ManagedConnectionImpl(ra,
+                                                                cnx,
+                                                                hostName,
+                                                                serverPort,
+                                                                userName);
     managedCx.setLogWriter(out);
+    // for reconnection 
+    managedCx.subject = subject;
+    managedCx.cxRequest = cxRequest;
+    
 
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
