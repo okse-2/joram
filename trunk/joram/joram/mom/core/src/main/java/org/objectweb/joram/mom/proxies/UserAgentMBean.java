@@ -22,8 +22,9 @@
  */
 package org.objectweb.joram.mom.proxies;
 
+import fr.dyade.aaa.agent.AgentMBean;
 
-public interface UserAgentMBean {
+public interface UserAgentMBean extends AgentMBean {
   /**
    * Returns the name of this queue, or its id if not set.
    *
