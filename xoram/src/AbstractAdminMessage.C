@@ -258,15 +258,12 @@ AdminReply::~AdminReply() {
 void AdminReply::writeTo(OutputStream *os) throw (IOException) {
   if (os->writeBoolean(success) == -1) throw IOException();
   if (os->writeString(info) == -1) throw IOException();
-  if (os->writeByte((byte)-1) == -1) throw IOException();//replyObj not used in Xoram
   if (os->writeInt(errorCode) == -1) throw IOException();
 }
 
 void AdminReply::readFrom(InputStream *is) throw (IOException) {
   if (is->readBoolean(&success) == -1) throw IOException();
   if (is->readString(&info) == -1) throw IOException();
-  byte replyObj;
-  if (is->readByte(&replyObj) == -1) throw IOException();
   if (is->readInt(&errorCode) == -1) throw IOException();
 }
 
