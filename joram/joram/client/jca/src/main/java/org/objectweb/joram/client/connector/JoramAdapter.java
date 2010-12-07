@@ -973,11 +973,14 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
   	if (logger.isLoggable(BasicLevel.DEBUG))
   		logger.log(BasicLevel.DEBUG, "JoramAdapter: reconnect()");
   	boolean connected = false;
+  	if (!started || stopped)
+  		return;
+
   	try {
   		AdminModule.getConfiguration();
-	    connected = true;
-    } catch (Exception e1) {
-	    try {
+  		connected = true;
+  	} catch (Exception e1) {
+  		try {
 	    	adminDisconnect();
 	    } catch (Exception e) {
 	    	if (logger.isLoggable(BasicLevel.DEBUG))
