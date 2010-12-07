@@ -29,20 +29,20 @@ import org.objectweb.joram.mom.proxies.UserAgentMBean;
 
 public interface AdminListener {
 
-  public void onQueueAdded(String queueName, QueueMBean queue);
+  public void onQueueAdded(QueueMBean queue);
 
-  public void onQueueRemoved(String queueName, QueueMBean queue);
+  public void onQueueRemoved(QueueMBean queue);
 
-  public void onTopicAdded(String topicName, TopicMBean topic);
+  public void onTopicAdded(TopicMBean topic);
 
-  public void onTopicRemoved(String topicName, TopicMBean topic);
+  public void onTopicRemoved(TopicMBean topic);
 
   public void onSubscriptionAdded(String userName, ClientSubscriptionMBean subscription);
 
   public void onSubscriptionRemoved(String userName, ClientSubscriptionMBean subscription);
 
-  public void onUserAdded(String userName, UserAgentMBean user);
+  public void onUserAdded(UserAgentMBean user);
 
-  public void onUserRemoved(String userName, UserAgentMBean user);
+  public void onUserRemoved(UserAgentMBean user);
 
 }

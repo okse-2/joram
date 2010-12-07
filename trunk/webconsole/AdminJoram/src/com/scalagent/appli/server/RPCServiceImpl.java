@@ -470,20 +470,20 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
     private Map<String, UserAgentMBean> users = new HashMap<String, UserAgentMBean>();
     private Map<String, SubscriptionWithName> subscriptions = new HashMap<String, SubscriptionWithName>();
 
-    public void onQueueAdded(String queueName, QueueMBean queue) {
-      queues.put(queueName, queue);
+    public void onQueueAdded(QueueMBean queue) {
+      queues.put(queue.getName(), queue);
     }
 
-    public void onQueueRemoved(String queueName, QueueMBean queue) {
-      queues.remove(queueName);
+    public void onQueueRemoved(QueueMBean queue) {
+      queues.remove(queue.getName());
     }
 
-    public void onTopicAdded(String topicName, TopicMBean topic) {
-      topics.put(topicName, topic);
+    public void onTopicAdded(TopicMBean topic) {
+      topics.put(topic.getName(), topic);
     }
 
-    public void onTopicRemoved(String topicName, TopicMBean topic) {
-      topics.remove(topicName);
+    public void onTopicRemoved(TopicMBean topic) {
+      topics.remove(topic.getName());
     }
 
     public void onSubscriptionAdded(String userName, ClientSubscriptionMBean subscription) {
@@ -494,12 +494,12 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
       subscriptions.remove(subscription.getName());
     }
 
-    public void onUserAdded(String userName, UserAgentMBean user) {
-      users.put(userName, user);
+    public void onUserAdded(UserAgentMBean user) {
+      users.put(user.getName(), user);
     }
 
-    public void onUserRemoved(String userName, UserAgentMBean user) {
-      users.remove(userName);
+    public void onUserRemoved(UserAgentMBean user) {
+      users.remove(user.getName());
     }
 
     public Map<String, QueueMBean> getQueues() {
