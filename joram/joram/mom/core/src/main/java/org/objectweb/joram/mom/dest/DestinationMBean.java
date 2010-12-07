@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,9 @@
  */
 package org.objectweb.joram.mom.dest;
 
-public interface DestinationMBean {
+import fr.dyade.aaa.agent.AgentMBean;
+
+public interface DestinationMBean extends AgentMBean {
   /**
    * Returns a string representation of this destination.
    */
