@@ -19,9 +19,6 @@
         <include>conf/**</include>
         <include>jndi/**</include>
         <include>joram/**</include>
-        <include>mom/**</include>
-        <include>security/**</include>
-        <include>shared/**</include>
         <include>licenses/**</include>
         <include>samples/pom.xml</include>
         <include>samples/bin/**</include>
