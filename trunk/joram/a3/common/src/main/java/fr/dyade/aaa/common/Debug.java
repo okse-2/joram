@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2002 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -121,30 +121,28 @@ public class Debug {
   private static void initialize() throws Exception {
     String ldebugDir = debugDir;
     if (ldebugDir == null)
-      ldebugDir = System.getProperty(DEBUG_DIR_PROPERTY);
+      ldebugDir = System.getProperty(DEBUG_DIR_PROPERTY, DEFAULT_DEBUG_DIR);
+
     String ldebugFileName = debugFileName;
     if (ldebugFileName == null)
-      ldebugFileName = System.getProperty(DEBUG_FILE_PROPERTY,
-                                          DEFAULT_DEBUG_FILE);
-    if (ldebugDir != null) {
+      ldebugFileName = System.getProperty(DEBUG_FILE_PROPERTY, DEFAULT_DEBUG_FILE);
+
+    try {
       File debugFile = new File(ldebugDir, ldebugFileName);
-      try {
-        if (debugFile.exists() && debugFile.isFile() && (debugFile.length() != 0)) {
-          ldebugFileName = debugFile.getPath();
-        } else {
-          throw new IOException();
-        }
-      } catch (IOException exc) {
-        // debug configuration file seems not exist, search it from the
-        // search path used to load classes.
-        System.err.println("Unable to find \"" + debugFile.getPath() + "\".");
-        ldebugDir = null;
+      if (debugFile.exists() && debugFile.isFile() && (debugFile.length() != 0)) {
+        ldebugFileName = debugFile.getPath();
+      } else {
+        throw new IOException();
       }
+    } catch (IOException exc) {
+      // debug configuration file seems not exist, search it from the
+      // search path used to load classes.
+      System.err.println("Unable to find \"" + ldebugFileName + "\" in " + "\"" + ldebugDir + "\" directory.");
+      throw exc;
     }
 
     try {
-      System.setProperty(org.objectweb.util.monolog.Monolog.MONOLOG_FILE_NAME,
-                         ldebugFileName);
+      System.setProperty(org.objectweb.util.monolog.Monolog.MONOLOG_FILE_NAME, ldebugFileName);
       factory = org.objectweb.util.monolog.Monolog.initialize();
       if (factory == null) {
         System.err.println("Error in Monolog initialization: null factory");
