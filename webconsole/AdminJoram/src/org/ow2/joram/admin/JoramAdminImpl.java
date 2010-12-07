@@ -104,9 +104,9 @@ public class JoramAdminImpl implements JoramAdmin {
           if (mbean instanceof UserAgentMBean) {
             UserAgentMBean user = (UserAgentMBean) mbean;
             if (not.getType().equals(REGISTERED)) {
-              adminListener.onUserAdded(user.getName(), user);
+              adminListener.onUserAdded(user);
             } else if (not.getType().equals(UNREGISTERED)) {
-              adminListener.onUserRemoved(user.getName(), user);
+              adminListener.onUserRemoved(user);
             }
           } else if (mbean instanceof ClientSubscriptionMBean) {
             ClientSubscriptionMBean subscription = (ClientSubscriptionMBean) mbean;
@@ -122,16 +122,16 @@ public class JoramAdminImpl implements JoramAdmin {
           if (mbean instanceof QueueMBean) {
             QueueMBean queue = (QueueMBean) mbean;
             if (not.getType().equals(REGISTERED)) {
-              adminListener.onQueueAdded(queue.getName(), queue);
+              adminListener.onQueueAdded(queue);
             } else if (not.getType().equals(UNREGISTERED)) {
-              adminListener.onQueueRemoved(queue.getName(), queue);
+              adminListener.onQueueRemoved(queue);
             }
           } else if (mbean instanceof TopicMBean) {
             TopicMBean topic = (TopicMBean) mbean;
             if (not.getType().equals(REGISTERED)) {
-              adminListener.onTopicAdded(topic.getName(), topic);
+              adminListener.onTopicAdded(topic);
             } else if (not.getType().equals(UNREGISTERED)) {
-              adminListener.onTopicRemoved(topic.getName(), topic);
+              adminListener.onTopicRemoved(topic);
             }
           } else {
             System.out.println("Unknown Destination: " + mbean.getClass().getName());

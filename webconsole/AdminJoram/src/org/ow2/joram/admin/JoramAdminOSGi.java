@@ -97,20 +97,17 @@ public class JoramAdminOSGi implements JoramAdmin, ServiceTrackerCustomizer {
   public Object addingService(ServiceReference reference) {
     Object service = context.getService(reference);
     if (service instanceof QueueMBean) {
-      String queueName = (String) reference.getProperty("name");
-      listener.onQueueAdded(queueName, (QueueMBean) service);
+      listener.onQueueAdded((QueueMBean) service);
     } else if (service instanceof TopicMBean) {
-      String topicName = (String) reference.getProperty("name");
       if (service instanceof AdminTopicMBean) {
         adminTopic = (AdminTopicMBean) service;
       }
-      listener.onTopicAdded(topicName, (TopicMBean) service);
+      listener.onTopicAdded((TopicMBean) service);
     } else if (service instanceof UserAgentMBean) {
-      String userName = (String) reference.getProperty("name");
-      listener.onUserAdded(userName, (UserAgentMBean) service);
+      listener.onUserAdded((UserAgentMBean) service);
     } else if (service instanceof ClientSubscriptionMBean) {
-      String subName = (String) reference.getProperty("name");
-      listener.onSubscriptionAdded(subName, (ClientSubscriptionMBean) service);
+      String userName = (String) reference.getProperty("name");
+      listener.onSubscriptionAdded(userName, (ClientSubscriptionMBean) service);
     } else if (service instanceof NetworkMBean) {
       networks.add((NetworkMBean) service);
     } else if (service instanceof EngineMBean) {
@@ -121,17 +118,14 @@ public class JoramAdminOSGi implements JoramAdmin, ServiceTrackerCustomizer {
 
   public void removedService(ServiceReference reference, Object service) {
     if (service instanceof QueueMBean) {
-      String queueName = (String) reference.getProperty("name");
-      listener.onQueueRemoved(queueName, (QueueMBean) service);
+      listener.onQueueRemoved((QueueMBean) service);
     } else if (service instanceof TopicMBean) {
-      String topicName = (String) reference.getProperty("name");
-      listener.onTopicRemoved(topicName, (TopicMBean) service);
+      listener.onTopicRemoved((TopicMBean) service);
     } else if (service instanceof UserAgentMBean) {
-      String userName = (String) reference.getProperty("name");
-      listener.onUserRemoved(userName, (UserAgentMBean) service);
+      listener.onUserRemoved((UserAgentMBean) service);
     } else if (service instanceof ClientSubscriptionMBean) {
-      String subName = (String) reference.getProperty("name");
-      listener.onSubscriptionRemoved(subName, (ClientSubscriptionMBean) service);
+      String userName = (String) reference.getProperty("name");
+      listener.onSubscriptionRemoved(userName, (ClientSubscriptionMBean) service);
     } else if (service instanceof NetworkMBean) {
       networks.remove(service);
     } else if (service instanceof EngineMBean) {
