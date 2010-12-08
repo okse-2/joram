@@ -58,7 +58,7 @@ public class MessageListRecord extends ListGridRecord {
     setPriority(message.getPriority());
     setText(message.getText());
     setType(message.getType());
-    setProperties(message.getProperties());
+    setProperties(message.getProperties() == null ? "null" : message.getProperties().toString());
 
     this.message = message;
   }
@@ -118,8 +118,8 @@ public class MessageListRecord extends ListGridRecord {
     setAttribute(ATTRIBUTE_TYPE, type);
   }
 
-  public void setProperties(Map properties) {
-    setAttribute(ATTRIBUTE_PROPERTIES, properties.toString());
+  public void setProperties(String properties) {
+    setAttribute(ATTRIBUTE_PROPERTIES, properties);
   }
 
   public MessageWTO getMessage() {
