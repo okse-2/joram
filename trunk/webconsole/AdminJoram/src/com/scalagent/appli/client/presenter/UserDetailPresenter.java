@@ -112,6 +112,18 @@ public class UserDetailPresenter extends
     }
   }
 
+  private boolean isUserSubscription(String subName) {
+    boolean found = false;
+    String[] subscriptions = user.getSubscriptionNames();
+    for (int i = 0; i < subscriptions.length; i++) {
+      if (subscriptions[i].equals(subName)) {
+        found = true;
+        break;
+      }
+    }
+    return found;
+  }
+
   /**
    * This method is called by the EventBus when a new subscription has been
    * created on the server.
@@ -119,7 +131,7 @@ public class UserDetailPresenter extends
    * the displayed user
    */
   public void onNewSubscription(SubscriptionWTO sub) {
-    if (sub.getUserName().equals(user.getId())) {
+    if (isUserSubscription(sub.getId())) {
       getWidget().addSubscription(new SubscriptionListRecord(sub));
     }
   }
@@ -131,7 +143,7 @@ public class UserDetailPresenter extends
    * displayed user.
    */
   public void onSubscriptionUpdated(SubscriptionWTO sub) {
-    if (sub.getUserName().equals(user.getId())) {
+    if (isUserSubscription(sub.getId())) {
       getWidget().updateSubscription(sub);
     }
   }
@@ -143,9 +155,7 @@ public class UserDetailPresenter extends
    * to the displayed user.
    */
   public void onSubscriptionDeleted(SubscriptionWTO sub) {
-    if (sub.getUserName().equals(user.getId())) {
-      getWidget().removeSubscription(new SubscriptionListRecord(sub));
-    }
+    getWidget().removeSubscription(new SubscriptionListRecord(sub));
   }
 
   /**

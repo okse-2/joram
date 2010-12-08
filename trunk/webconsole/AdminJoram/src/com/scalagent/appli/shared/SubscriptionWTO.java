@@ -42,15 +42,6 @@ public class SubscriptionWTO extends BaseWTO {
   private String selector;
   private int subRequestId;
   private List<String> messagesList;
-  private String userName;
-
-  public String getUserName() {
-    return userName;
-  }
-
-  public void setUserName(String userName) {
-    this.userName = userName;
-  }
 
   public boolean isActive() {
     return active;
@@ -146,7 +137,7 @@ public class SubscriptionWTO extends BaseWTO {
 
   public SubscriptionWTO(String name, boolean active, boolean durable, int nbMaxMsg, int contextId,
       int nbMsgsDeliveredSinceCreation, int nbMsgsSentToDMQSinceCreation, int pendingMessageCount,
-      String selector, int subRequestId, String userName) {
+      String selector, int subRequestId) {
     super();
     this.id = name;
     this.active = active;
@@ -158,7 +149,6 @@ public class SubscriptionWTO extends BaseWTO {
     this.pendingMessageCount = pendingMessageCount;
     this.selector = selector;
     this.subRequestId = subRequestId;
-    this.userName = userName;
     messagesList = new ArrayList<String>();
 
   }
@@ -223,7 +213,6 @@ public class SubscriptionWTO extends BaseWTO {
     sub.pendingMessageCount = pendingMessageCount;
     sub.selector = selector;
     sub.subRequestId = subRequestId;
-    sub.userName = userName;
 
     return sub;
   }
@@ -236,7 +225,7 @@ public class SubscriptionWTO extends BaseWTO {
 
     SubscriptionWTO obj = (SubscriptionWTO) anObj;
 
-    boolean eq = equalsWithNull(this.id, obj.id) && equalsWithNull(this.userName, obj.userName)
+    boolean eq = equalsWithNull(this.id, obj.id)
         && this.active == obj.active && this.durable == obj.durable && this.nbMaxMsg == obj.nbMaxMsg
         && this.contextId == obj.contextId
         && this.nbMsgsDeliveredSinceCreation == obj.nbMsgsDeliveredSinceCreation

@@ -82,7 +82,7 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
   private Map<String, QueueMBean> mapQueues;
   private Map<String, TopicMBean> mapTopics;
   private Map<String, UserAgentMBean> mapUsers;
-  private Map<String, SubscriptionWithName> listSubscriptions;
+  private Map<String, ClientSubscriptionMBean> listSubscriptions;
 
   private long lastupdate = 0;
 
@@ -91,7 +91,7 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
 
     synchWithJORAM(forceUpdate);
 
-    TopicWTO[] newTopics = TopicWTOConverter.getTopicWTOArray(mapTopics);
+    TopicWTO[] newTopics = TopicWTOConverter.getTopicWTOArray(mapTopics.values());
 
     // retrieve previous devices list from session
     HashMap<String, TopicWTO> sessionTopics = (HashMap<String, TopicWTO>) session
@@ -120,7 +120,7 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
 
     synchWithJORAM(forceUpdate);
 
-    QueueWTO[] newQueues = QueueWTOConverter.getQueueWTOArray(mapQueues);
+    QueueWTO[] newQueues = QueueWTOConverter.getQueueWTOArray(mapQueues.values());
 
     // retrieve previous devices list from session
     HashMap<String, QueueWTO> sessionQueues = (HashMap<String, QueueWTO>) session
@@ -191,7 +191,7 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
 
     synchWithJORAM(true);
 
-    ClientSubscriptionMBean sub = listSubscriptions.get(subName).subscription;
+    ClientSubscriptionMBean sub = listSubscriptions.get(subName);
     if (sub == null) {
       throw new Exception("Subscription not found");
     }
@@ -231,7 +231,7 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
 
     synchWithJORAM(forceUpdate);
 
-    UserWTO[] newUsers = UserWTOConverter.getUserWTOArray(mapUsers);
+    UserWTO[] newUsers = UserWTOConverter.getUserWTOArray(mapUsers.values());
 
     // retrieve previous devices list from session
     HashMap<String, UserWTO> sessionUsers = (HashMap<String, UserWTO>) session
@@ -259,7 +259,7 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
 
     synchWithJORAM(forceUpdate);
 
-    SubscriptionWTO[] newSubscriptions = SubscriptionWTOConverter.getSubscriptionWTOArray(listSubscriptions);
+    SubscriptionWTO[] newSubscriptions = SubscriptionWTOConverter.getSubscriptionWTOArray(listSubscriptions.values());
 
     // retrieve previous devices list from session
     HashMap<String, SubscriptionWTO> sessionSubscriptions = (HashMap<String, SubscriptionWTO>) session
@@ -304,9 +304,8 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
   public void synchWithJORAM(boolean forceUpdate) {
 
     long now = System.currentTimeMillis();
-    long lastupdatePlus5 = lastupdate + 5000;
 
-    if (now > lastupdatePlus5 || mapQueues == null || forceUpdate) {
+    if (now > lastupdate + 5000 || mapQueues == null || forceUpdate) {
 
       mapQueues = listener.getQueues();
       mapTopics = listener.getTopics();
@@ -410,7 +409,7 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
     if (!isConnected) {
       return false;
     }
-    return joramAdmin.deleteSubscriptionMessage(listSubscriptions.get(subName).subscription, messageID);
+    return joramAdmin.deleteSubscriptionMessage(listSubscriptions.get(subName), messageID);
   }
 
   /** TOPICS **/
@@ -452,7 +451,7 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
     if (!isConnected) {
       return false;
     }
-    return joramAdmin.editSubscription(listSubscriptions.get(sub.getId()).subscription, sub.getNbMaxMsg(),
+    return joramAdmin.editSubscription(listSubscriptions.get(sub.getId()), sub.getNbMaxMsg(),
         sub.getContextId(), sub.getSelector(), sub.getSubRequestId(), sub.isActive(), sub.isDurable());
   }
 
@@ -468,7 +467,7 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
     private Map<String, QueueMBean> queues = new HashMap<String, QueueMBean>();
     private Map<String, TopicMBean> topics = new HashMap<String, TopicMBean>();
     private Map<String, UserAgentMBean> users = new HashMap<String, UserAgentMBean>();
-    private Map<String, SubscriptionWithName> subscriptions = new HashMap<String, SubscriptionWithName>();
+    private Map<String, ClientSubscriptionMBean> subscriptions = new HashMap<String, ClientSubscriptionMBean>();
 
     public void onQueueAdded(QueueMBean queue) {
       queues.put(queue.getName(), queue);
@@ -486,11 +485,11 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
       topics.remove(topic.getName());
     }
 
-    public void onSubscriptionAdded(String userName, ClientSubscriptionMBean subscription) {
-      subscriptions.put(subscription.getName(), new SubscriptionWithName(subscription, userName));
+    public void onSubscriptionAdded(ClientSubscriptionMBean subscription) {
+      subscriptions.put(subscription.getName(), subscription);
     }
 
-    public void onSubscriptionRemoved(String userName, ClientSubscriptionMBean subscription) {
+    public void onSubscriptionRemoved(ClientSubscriptionMBean subscription) {
       subscriptions.remove(subscription.getName());
     }
 
@@ -514,23 +513,10 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
       return users;
     }
 
-    public Map<String, SubscriptionWithName> getSubscription() {
+    public Map<String, ClientSubscriptionMBean> getSubscription() {
       return subscriptions;
     }
 
-  }
-
-  public static class SubscriptionWithName {
-
-    public ClientSubscriptionMBean subscription;
-
-    public String userName;
-
-    SubscriptionWithName(ClientSubscriptionMBean subscription, String name) {
-      super();
-      this.subscription = subscription;
-      this.userName = name;
-    }
   }
 
 }

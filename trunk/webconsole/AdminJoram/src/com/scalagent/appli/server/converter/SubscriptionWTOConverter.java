@@ -22,11 +22,10 @@
  */
 package com.scalagent.appli.server.converter;
 
-import java.util.Map;
+import java.util.Collection;
 
 import org.objectweb.joram.mom.proxies.ClientSubscriptionMBean;
 
-import com.scalagent.appli.server.RPCServiceImpl.SubscriptionWithName;
 import com.scalagent.appli.shared.SubscriptionWTO;
 
 /**
@@ -39,26 +38,25 @@ public class SubscriptionWTOConverter {
    * @return A SubscriptionWTO object created from the ClientSubscriptionMBean
    *         object
    */
-  public static SubscriptionWTO getSubscriptionWTO(ClientSubscriptionMBean sub, String userName) {
+  public static SubscriptionWTO getSubscriptionWTO(ClientSubscriptionMBean sub) {
     SubscriptionWTO result = new SubscriptionWTO(sub.getName(), sub.getActive(), sub.getDurable(),
         sub.getNbMaxMsg(), sub.getContextId(), (int) sub.getNbMsgsDeliveredSinceCreation(),
         (int) sub.getNbMsgsSentToDMQSinceCreation(), sub.getPendingMessageCount(), sub.getSelector(),
-        sub.getSubRequestId(), userName);
+        sub.getSubRequestId());
 
     return result;
   }
 
   /**
-   * @param lst A List of ClientSubscriptionMBean
+   * @param lst A Collection of ClientSubscriptionMBean
    * @return An array of SubscriptionWTO
    */
-  public static SubscriptionWTO[] getSubscriptionWTOArray(Map<String, SubscriptionWithName> lst) {
+  public static SubscriptionWTO[] getSubscriptionWTOArray(Collection<ClientSubscriptionMBean> lst) {
     SubscriptionWTO[] newSubWTO = new SubscriptionWTO[lst.size()];
 
     int i = 0;
-    for (String item : lst.keySet()) {
-      SubscriptionWithName subE = lst.get(item);
-      newSubWTO[i] = SubscriptionWTOConverter.getSubscriptionWTO(subE.subscription, subE.userName);
+    for (ClientSubscriptionMBean sub : lst) {
+      newSubWTO[i] = SubscriptionWTOConverter.getSubscriptionWTO(sub);
       i++;
     }
 
