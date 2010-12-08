@@ -585,7 +585,7 @@ public interface ApplicationMessages extends com.google.gwt.i18n.client.Messages
    * 
    * @return translated "Click to delete the queue on JORAM"
    */
-  @DefaultMessage("Action not yet implemented.")
+  @DefaultMessage("Click to delete the queue on JORAM.")
   @Key("queueWidget.buttonDelete.prompt")
   String queueWidget_buttonDelete_prompt();
 
