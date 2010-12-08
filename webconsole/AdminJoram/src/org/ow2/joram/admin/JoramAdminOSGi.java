@@ -22,10 +22,6 @@
  */
 package org.ow2.joram.admin;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.objectweb.joram.mom.dest.AdminTopicMBean;
 import org.objectweb.joram.mom.dest.QueueMBean;
 import org.objectweb.joram.mom.dest.TopicMBean;
 import org.objectweb.joram.mom.proxies.ClientSubscriptionMBean;
@@ -42,21 +38,13 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import fr.dyade.aaa.agent.EngineMBean;
 import fr.dyade.aaa.agent.NetworkMBean;
 
-public class JoramAdminOSGi implements JoramAdmin, ServiceTrackerCustomizer {
+public class JoramAdminOSGi extends JoramAdmin implements ServiceTrackerCustomizer {
 
   private static Filter filter;
-
-  private AdminListener listener;
 
   private ServiceTracker serviceTracker;
 
   private BundleContext context;
-
-  private AdminTopicMBean adminTopic;
-
-  private List<NetworkMBean> networks = new ArrayList<NetworkMBean>();
-
-  private EngineMBean engine;
 
   static {
     try {
@@ -81,14 +69,14 @@ public class JoramAdminOSGi implements JoramAdmin, ServiceTrackerCustomizer {
   }
 
   public void start(AdminListener listener) {
-    this.listener = listener;
+    super.start(listener);
     serviceTracker = new ServiceTracker(context, filter, this);
     serviceTracker.open();
   }
 
   public void stop() {
+    super.stop();
     serviceTracker.close();
-    adminTopic = null;
   }
 
   public void disconnect() {
@@ -96,167 +84,15 @@ public class JoramAdminOSGi implements JoramAdmin, ServiceTrackerCustomizer {
 
   public Object addingService(ServiceReference reference) {
     Object service = context.getService(reference);
-    if (service instanceof QueueMBean) {
-      listener.onQueueAdded((QueueMBean) service);
-    } else if (service instanceof TopicMBean) {
-      if (service instanceof AdminTopicMBean) {
-        adminTopic = (AdminTopicMBean) service;
-      }
-      listener.onTopicAdded((TopicMBean) service);
-    } else if (service instanceof UserAgentMBean) {
-      listener.onUserAdded((UserAgentMBean) service);
-    } else if (service instanceof ClientSubscriptionMBean) {
-      String userName = (String) reference.getProperty("name");
-      listener.onSubscriptionAdded(userName, (ClientSubscriptionMBean) service);
-    } else if (service instanceof NetworkMBean) {
-      networks.add((NetworkMBean) service);
-    } else if (service instanceof EngineMBean) {
-      engine = (EngineMBean) service;
-    }
+    super.handleAdminObjectAdded(service);
     return service;
   }
 
   public void removedService(ServiceReference reference, Object service) {
-    if (service instanceof QueueMBean) {
-      listener.onQueueRemoved((QueueMBean) service);
-    } else if (service instanceof TopicMBean) {
-      listener.onTopicRemoved((TopicMBean) service);
-    } else if (service instanceof UserAgentMBean) {
-      listener.onUserRemoved((UserAgentMBean) service);
-    } else if (service instanceof ClientSubscriptionMBean) {
-      String userName = (String) reference.getProperty("name");
-      listener.onSubscriptionRemoved(userName, (ClientSubscriptionMBean) service);
-    } else if (service instanceof NetworkMBean) {
-      networks.remove(service);
-    } else if (service instanceof EngineMBean) {
-      engine = null;
-    }
+    super.handleAdminObjectRemoved(service);
   }
 
   public void modifiedService(ServiceReference arg0, Object arg1) {
-  }
-
-  public boolean createNewMessage(String queueName, String id, long expiration, long timestamp, int priority,
-      String text, int type) {
-    // TODO Auto-generated method stub
-    return true;
-  }
-
-  public boolean editMessage(String queueName, String id, long expiration, long timestamp, int priority,
-      String text, int type) {
-    // TODO Auto-generated method stub
-    return true;
-  }
-
-  public boolean deleteSubscriptionMessage(ClientSubscriptionMBean sub, String msgId) {
-    sub.deleteMessage(msgId);
-    return true;
-  }
-
-  public boolean createNewTopic(String name, String DMQ, String destination, long period,
-      boolean freeReading, boolean freeWriting) {
-    if (adminTopic != null) {
-      adminTopic.createTopic(name);
-      return true;
-    }
-    return false;
-  }
-
-  public boolean editTopic(TopicMBean topic, String DMQ, String destination, long period,
-      boolean freeReading, boolean freeWriting) {
-    topic.setFreeReading(freeReading);
-    topic.setFreeWriting(freeWriting);
-    topic.setPeriod(period);
-    return true;
-  }
-
-  public boolean deleteTopic(TopicMBean topic) {
-    topic.delete();
-    return true;
-  }
-
-  public boolean createNewUser(String name, String password, long period) {
-    if (adminTopic != null) {
-      try {
-        adminTopic.createUser(name, password);
-      } catch (Exception exc) {
-        return false;
-      }
-      return true;
-    }
-    return false;
-  }
-
-  public boolean editUser(UserAgentMBean user, String password, long period) {
-    user.setPeriod(period);
-    return true;
-  }
-
-  public boolean deleteUser(UserAgentMBean user) {
-    user.delete();
-    return true;
-  }
-
-  public boolean createNewQueue(String name, String DMQ, String destination, long period, int threshold,
-      int nbMaxMsg, boolean freeReading, boolean freeWriting) {
-    if (adminTopic != null) {
-      adminTopic.createQueue(name);
-      return true;
-    }
-    return false;
-  }
-
-  public boolean editQueue(QueueMBean queue, String DMQ, String destination, long period, int threshold,
-      int nbMaxMsg, boolean freeReading, boolean freeWriting) {
-    queue.setFreeReading(freeReading);
-    queue.setFreeWriting(freeWriting);
-    queue.setPeriod(period);
-    queue.setNbMaxMsg(nbMaxMsg);
-    queue.setThreshold(threshold);
-    return true;
-  }
-
-  public boolean deleteQueue(QueueMBean queue) {
-    queue.delete();
-    return true;
-  }
-
-  public boolean cleanWaitingRequest(QueueMBean queue) {
-    queue.cleanWaitingRequest();
-    return true;
-  }
-
-  public boolean cleanPendingMessage(QueueMBean queue) {
-    queue.cleanPendingMessage();
-    return true;
-  }
-
-  public boolean createNewSubscription(String name, int nbMaxMsg, int context, String selector,
-      int subRequest, boolean active, boolean durable) {
-    // TODO Auto-generated method stub
-    return true;
-  }
-
-  public boolean editSubscription(ClientSubscriptionMBean sub, int nbMaxMsg, int context, String selector,
-      int subRequest, boolean active, boolean durable) {
-    sub.setNbMaxMsg(nbMaxMsg);
-    return true;
-  }
-
-  public boolean deleteSubscription(String subscriptionName) {
-    // TODO Auto-generated method stub
-    return true;
-  }
-
-  public float[] getInfos() {
-    float[] infos = new float[networks.size() + 1];
-    if (engine != null) {
-      infos[0] = engine.getAverageLoad1();
-    }
-    for (int i = 0; i < networks.size(); i++) {
-      infos[i + 1] = networks.get(i).getAverageLoad1();
-    }
-    return infos;
   }
 
 }
