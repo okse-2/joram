@@ -37,9 +37,9 @@ public interface AdminListener {
 
   public void onTopicRemoved(TopicMBean topic);
 
-  public void onSubscriptionAdded(String userName, ClientSubscriptionMBean subscription);
+  public void onSubscriptionAdded(ClientSubscriptionMBean subscription);
 
-  public void onSubscriptionRemoved(String userName, ClientSubscriptionMBean subscription);
+  public void onSubscriptionRemoved(ClientSubscriptionMBean subscription);
 
   public void onUserAdded(UserAgentMBean user);
 
