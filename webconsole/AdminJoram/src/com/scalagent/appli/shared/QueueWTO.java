@@ -55,14 +55,6 @@ public class QueueWTO extends BaseWTO {
     return creationDate;
   }
 
-  public String getCreationDateinString() {
-    return creationDate.toString();
-  }
-
-  public long getCreationTimeInMillis() {
-    return creationDate.getTime();
-  }
-
   public String getDMQId() {
     return DMQId;
   }
