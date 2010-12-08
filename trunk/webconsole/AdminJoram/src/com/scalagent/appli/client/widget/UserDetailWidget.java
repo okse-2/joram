@@ -266,7 +266,6 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
         if (fieldName.equals("deleteField")) {
 
           IButton buttonDelete = new IButton();
-          buttonDelete.setDisabled(true);
           buttonDelete.setAutoFit(Boolean.TRUE);
           buttonDelete.setHeight(20);
           buttonDelete.setIconSize(13);
@@ -275,6 +274,7 @@ public class UserDetailWidget extends BaseWidget<UserDetailPresenter> {
           buttonDelete.setPrompt(Application.messages.queueWidget_buttonDelete_prompt());
           buttonDelete.addClickHandler(new SubscriptionDeleteClickHandler(presenter,
               (SubscriptionListRecord) record));
+          buttonDelete.setDisabled(true);
 
           return buttonDelete;
 

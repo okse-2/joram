@@ -346,20 +346,19 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
         if (fieldName.equals("deleteField")) {
 
           IButton buttonDelete = new IButton();
-          buttonDelete.setDisabled(true);
           buttonDelete.setAutoFit(Boolean.TRUE);
           buttonDelete.setHeight(20);
           buttonDelete.setIcon("remove.png");
           buttonDelete.setTitle(Application.messages.queueDetailWidget_buttonDelete_title());
           buttonDelete.setPrompt(Application.messages.queueDetailWidget_buttonDelete_prompt());
           buttonDelete.addClickHandler(new MessageDeleteClickHandler(presenter, (MessageListRecord) record));
+          buttonDelete.setDisabled(true);
 
           return buttonDelete;
 
         } else if (fieldName.equals("editField")) {
 
           IButton buttonEdit = new IButton();
-          buttonEdit.setDisabled(true);
           buttonEdit.setAutoFit(Boolean.TRUE);
           buttonEdit.setHeight(20);
           buttonEdit.setIconSize(13);
@@ -371,6 +370,7 @@ public class QueueDetailWidget extends BaseWidget<QueueDetailPresenter> {
               drawForm((MessageListRecord) record);
             }
           });
+          buttonEdit.setDisabled(true);
           return buttonEdit;
 
         } else {

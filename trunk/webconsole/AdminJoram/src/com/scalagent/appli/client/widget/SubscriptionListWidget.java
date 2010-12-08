@@ -185,7 +185,6 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
         } else if (fieldName.equals("deleteField")) {
 
           IButton buttonDelete = new IButton();
-          buttonDelete.setDisabled(true);
           buttonDelete.setAutoFit(Boolean.TRUE);
           buttonDelete.setHeight(20);
           buttonDelete.setIconSize(13);
@@ -194,6 +193,7 @@ public class SubscriptionListWidget extends BaseWidget<SubscriptionListPresenter
           buttonDelete.setPrompt(Application.messages.subscriptionWidget_buttonDelete_prompt());
           buttonDelete.addClickHandler(new SubscriptionDeleteClickHandler(presenter,
               (SubscriptionListRecord) record));
+          buttonDelete.setDisabled(true);
 
           return buttonDelete;
 
