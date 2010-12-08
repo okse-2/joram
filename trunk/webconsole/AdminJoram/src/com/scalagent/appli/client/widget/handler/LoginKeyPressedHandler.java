@@ -40,7 +40,7 @@ public class LoginKeyPressedHandler implements ItemKeyPressHandler {
   }
 
   public void onItemKeyPress(ItemKeyPressEvent event) {
-    if (event.getCharacterValue() == '\r') {
+    if (event.getKeyName().equals("Enter")) {
       if (form.validate()) {
         String login = (String) form.getField("username").getValue();
         String password = (String) form.getField("password").getValue();
