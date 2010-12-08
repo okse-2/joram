@@ -37,6 +37,8 @@ import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.NotCompliantMBeanException;
+import javax.management.NotificationFilter;
+import javax.management.NotificationListener;
 import javax.management.ObjectName;
 import javax.management.RuntimeOperationsException;
 
@@ -54,6 +56,7 @@ public class JMXServer implements MXServer {
   private MBeanServer mxserver = null;
 
   private Map registeredServices = new HashMap();
+  private Map registeredMBeans = new HashMap();
 
   public static boolean registerAsService = false;
 
@@ -109,9 +112,10 @@ public class JMXServer implements MXServer {
 
   public String registerMBean(Object bean, String fullName) throws Exception {
     if (mxserver == null) return null;
-    //    Debug.getLogger("toto").log(BasicLevel.ERROR, "Register MBean: " + fullName);
+
     try {
       ObjectName objName = ObjectName.getInstance(fullName);
+      registeredMBeans.put(objName, bean);
       mxserver.registerMBean(bean, objName);
       registerOSGi(bean, objName);
     } catch (InstanceAlreadyExistsException exc) {
@@ -138,6 +142,8 @@ public class JMXServer implements MXServer {
     try {
       ObjectName objName = ObjectName.getInstance(fullName);
       mxserver.unregisterMBean(objName);
+      registeredMBeans.remove(objName);
+
       if (registerAsService) {
         ServiceRegistration registration = (ServiceRegistration) registeredServices.remove(objName);
         if (registration != null) {
@@ -158,10 +164,42 @@ public class JMXServer implements MXServer {
   }
   
   public void setAttribute(ObjectName name, Attribute attribute) throws Exception {
-  	if (mxserver != null)
-  		mxserver.setAttribute(name, attribute);
+    if (mxserver != null)
+        mxserver.setAttribute(name, attribute);
   }
   
+  public Object getMBeanInstance(ObjectName objName) {
+    return registeredMBeans.get(objName);
+  }
+  
+  /**
+   * Adds a listener to a registered MBean.
+   */
+  public void addNotificationListener(ObjectName name,
+                               NotificationListener listener,
+                               NotificationFilter filter,
+                               Object handback) throws Exception {
+    mxserver.addNotificationListener(name, listener, filter, handback);
+  }
+  
+  /**
+   * Removes a listener from a registered MBean.
+   */
+  public void removeNotificationListener(ObjectName name,
+                                  NotificationListener listener) throws Exception {
+    mxserver.removeNotificationListener(name, listener);
+  }
+  
+  /**
+   * Removes a listener from a registered MBean.
+   */
+  public void removeNotificationListener(ObjectName name,
+                                  NotificationListener listener,
+                                  NotificationFilter filter,
+                                  Object handback) throws Exception {
+    mxserver.removeNotificationListener(name, listener, filter, handback);
+  }
+
   public Object getAttribute(ObjectName objectName, String attribute) throws Exception {
     if (mxserver == null) {
       return null;
