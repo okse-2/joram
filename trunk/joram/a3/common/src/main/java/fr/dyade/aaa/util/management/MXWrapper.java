@@ -23,6 +23,8 @@ import java.util.Set;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.MBeanAttributeInfo;
+import javax.management.NotificationFilter;
+import javax.management.NotificationListener;
 import javax.management.ObjectName;
 
 public final class MXWrapper {
@@ -59,6 +61,12 @@ public final class MXWrapper {
     return mxserver.registerMBean(bean, fullName);
   }
 
+  public static Object getMBeanInstance(ObjectName objName) {
+    if (mxserver == null)
+      return null;
+    return mxserver.getMBeanInstance(objName);
+  }
+
   public static void unregisterMBean(String domain, String name) throws Exception {
     unregisterMBean(objectName(domain, name));
   }
@@ -78,10 +86,37 @@ public final class MXWrapper {
   }
   
   public static void setAttribute(ObjectName name, Attribute attribute) throws Exception {
-  	if (mxserver != null)
-  		mxserver.setAttribute(name, attribute);
+    if (mxserver != null)
+      mxserver.setAttribute(name, attribute);
   }
   
+  /**
+   * Adds a listener to a registered MBean.
+   */
+  public static void addNotificationListener(ObjectName name, NotificationListener listener,
+      NotificationFilter filter, Object handback) throws Exception {
+    if (mxserver != null)
+      mxserver.addNotificationListener(name, listener, filter, handback);
+  }
+
+  /**
+   * Removes a listener from a registered MBean.
+   */
+  public static void removeNotificationListener(ObjectName name, NotificationListener listener)
+      throws Exception {
+    if (mxserver != null)
+      mxserver.removeNotificationListener(name, listener);
+  }
+
+  /**
+   * Removes a listener from a registered MBean.
+   */
+  public static void removeNotificationListener(ObjectName name, NotificationListener listener,
+      NotificationFilter filter, Object handback) throws Exception {
+    if (mxserver != null)
+      mxserver.removeNotificationListener(name, listener, filter, handback);
+  }
+
   public static Object getAttribute(ObjectName objectName, String attribute) throws Exception {
     if (mxserver == null) {
       return null;

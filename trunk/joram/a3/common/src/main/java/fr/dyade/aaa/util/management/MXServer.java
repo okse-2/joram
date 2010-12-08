@@ -23,12 +23,16 @@ import java.util.Set;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.MBeanAttributeInfo;
+import javax.management.NotificationFilter;
+import javax.management.NotificationListener;
 import javax.management.ObjectName;
 
 public interface MXServer {
   public String registerMBean(Object bean, String name) throws Exception;
 
   public void unregisterMBean(String name) throws Exception;
+  
+  public Object getMBeanInstance(ObjectName objName);
   
   public Object getAttribute(ObjectName objectName, String attribute) throws Exception;
   
@@ -39,4 +43,26 @@ public interface MXServer {
   public AttributeList setAttributes(ObjectName name, AttributeList attributes) throws Exception;
   
   public Set queryNames(ObjectName objectName);
+  
+  /**
+   * Adds a listener to a registered MBean.
+   */
+  void addNotificationListener(ObjectName name,
+                               NotificationListener listener,
+                               NotificationFilter filter,
+                               Object handback) throws Exception;
+  
+  /**
+   * Removes a listener from a registered MBean.
+   */
+  void removeNotificationListener(ObjectName name,
+                                  NotificationListener listener) throws Exception;
+  
+  /**
+   * Removes a listener from a registered MBean.
+   */
+  void removeNotificationListener(ObjectName name,
+                                  NotificationListener listener,
+                                  NotificationFilter filter,
+                                  Object handback) throws Exception;
 }
