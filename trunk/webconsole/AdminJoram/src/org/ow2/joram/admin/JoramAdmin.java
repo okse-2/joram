@@ -22,20 +22,39 @@
  */
 package org.ow2.joram.admin;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.objectweb.joram.mom.dest.AdminTopicMBean;
 import org.objectweb.joram.mom.dest.QueueMBean;
 import org.objectweb.joram.mom.dest.TopicMBean;
 import org.objectweb.joram.mom.proxies.ClientSubscriptionMBean;
 import org.objectweb.joram.mom.proxies.UserAgentMBean;
 
-public interface JoramAdmin {
+import fr.dyade.aaa.agent.EngineMBean;
+import fr.dyade.aaa.agent.NetworkMBean;
 
-  public boolean connect(String login, String password);
+public abstract class JoramAdmin {
 
-  public void start(AdminListener listener);
+  private AdminListener listener;
 
-  public void stop();
+  private AdminTopicMBean adminTopic;
 
-  public void disconnect();
+  private List<NetworkMBean> networks = new ArrayList<NetworkMBean>();
+
+  private EngineMBean engine;
+
+  public abstract boolean connect(String login, String password);
+
+  public void start(AdminListener listener) {
+    this.listener = listener;
+  }
+
+  public void stop() {
+    adminTopic = null;
+  }
+
+  public abstract void disconnect();
 
   /**
    * Create a message on a queue in JORAM
@@ -57,7 +76,10 @@ public interface JoramAdmin {
    * @return Create successful
    */
   public boolean createNewMessage(String queueName, String id, long expiration, long timestamp, int priority,
-      String text, int type);
+      String text, int type) {
+    // TODO Auto-generated method stub
+    return true;
+  }
 
   /**
    * Edit a message on a queue in JORAM
@@ -79,7 +101,10 @@ public interface JoramAdmin {
    * @return Edit successful
    */
   public boolean editMessage(String queueName, String id, long expiration, long timestamp, int priority,
-      String text, int type);
+      String text, int type) {
+    // TODO Auto-generated method stub
+    return true;
+  }
 
   /**
    * Delete a message in a given subscription.
@@ -90,7 +115,10 @@ public interface JoramAdmin {
    *          ID of the message to delete
    * @return suppression Delete Successful
    */
-  public boolean deleteSubscriptionMessage(ClientSubscriptionMBean sub, String msgId);
+  public boolean deleteSubscriptionMessage(ClientSubscriptionMBean sub, String msgId) {
+    sub.deleteMessage(msgId);
+    return true;
+  }
 
   /**
    * Create a topic on JORAM
@@ -110,7 +138,13 @@ public interface JoramAdmin {
    * @return Create successful
    */
   public boolean createNewTopic(String name, String DMQ, String destination, long period,
-      boolean freeReading, boolean freeWriting);
+      boolean freeReading, boolean freeWriting) {
+    if (adminTopic != null) {
+      adminTopic.createTopic(name);
+      return true;
+    }
+    return false;
+  }
 
   /**
    * Edit a topic on JORAM
@@ -130,7 +164,12 @@ public interface JoramAdmin {
    * @return Create successful
    */
   public boolean editTopic(TopicMBean topic, String DMQ, String destination, long period,
-      boolean freeReading, boolean freeWriting);
+      boolean freeReading, boolean freeWriting) {
+    topic.setFreeReading(freeReading);
+    topic.setFreeWriting(freeWriting);
+    topic.setPeriod(period);
+    return true;
+  }
 
   /**
    * Delete a topic in JORAM
@@ -139,7 +178,10 @@ public interface JoramAdmin {
    *          The topic to delete
    * @return Delete successful
    */
-  public boolean deleteTopic(TopicMBean topic);
+  public boolean deleteTopic(TopicMBean topic) {
+    topic.delete();
+    return true;
+  }
 
   /**
    * Create a user on JORAM
@@ -152,7 +194,17 @@ public interface JoramAdmin {
    *          Period of the user
    * @return Create successful
    */
-  public boolean createNewUser(String name, String password, long period);
+  public boolean createNewUser(String name, String password, long period) {
+    if (adminTopic != null) {
+      try {
+        adminTopic.createUser(name, password);
+      } catch (Exception exc) {
+        return false;
+      }
+      return true;
+    }
+    return false;
+  }
 
   /**
    * Edit a user on JORAM
@@ -163,7 +215,10 @@ public interface JoramAdmin {
    *          Period of the user
    * @return Edit successful
    */
-  public boolean editUser(UserAgentMBean user, String password, long period);
+  public boolean editUser(UserAgentMBean user, String password, long period) {
+    user.setPeriod(period);
+    return true;
+  }
 
   /**
    * Delete a user on JORAM
@@ -172,7 +227,10 @@ public interface JoramAdmin {
    *          User to delete
    * @return Delete successful
    */
-  public boolean deleteUser(UserAgentMBean user);
+  public boolean deleteUser(UserAgentMBean user) {
+    user.delete();
+    return true;
+  }
 
   /**
    * Create a queue on JORAM
@@ -196,7 +254,13 @@ public interface JoramAdmin {
    * @return Create successful
    */
   public boolean createNewQueue(String name, String DMQ, String destination, long period, int threshold,
-      int nbMaxMsg, boolean freeReading, boolean freeWriting);
+      int nbMaxMsg, boolean freeReading, boolean freeWriting) {
+    if (adminTopic != null) {
+      adminTopic.createQueue(name);
+      return true;
+    }
+    return false;
+  }
 
   /**
    * Edit a queue on JORAM
@@ -220,7 +284,14 @@ public interface JoramAdmin {
    * @return Edit successful
    */
   public boolean editQueue(QueueMBean queue, String DMQ, String destination, long period, int threshold,
-      int nbMaxMsg, boolean freeReading, boolean freeWriting);
+      int nbMaxMsg, boolean freeReading, boolean freeWriting) {
+    queue.setFreeReading(freeReading);
+    queue.setFreeWriting(freeWriting);
+    queue.setPeriod(period);
+    queue.setNbMaxMsg(nbMaxMsg);
+    queue.setThreshold(threshold);
+    return true;
+  }
 
   /**
    * Delete a Queue on JORAM
@@ -229,7 +300,10 @@ public interface JoramAdmin {
    *          The queue to delete
    * @return Delete successful
    */
-  public boolean deleteQueue(QueueMBean queue);
+  public boolean deleteQueue(QueueMBean queue) {
+    queue.delete();
+    return true;
+  }
 
   /**
    * Clear the waiting requests for a queue on JORAM
@@ -238,7 +312,10 @@ public interface JoramAdmin {
    *          Name of the queue
    * @return Clear successful
    */
-  public boolean cleanWaitingRequest(QueueMBean queue);
+  public boolean cleanWaitingRequest(QueueMBean queue) {
+    queue.cleanWaitingRequest();
+    return true;
+  }
 
   /**
    * Clear the pending messages for a queue on JORAM
@@ -247,7 +324,10 @@ public interface JoramAdmin {
    *          Name of the queue
    * @return Clear successful
    */
-  public boolean cleanPendingMessage(QueueMBean queue);
+  public boolean cleanPendingMessage(QueueMBean queue) {
+    queue.cleanPendingMessage();
+    return true;
+  }
 
   /**
    * Create a subscription on JORAM
@@ -269,7 +349,10 @@ public interface JoramAdmin {
    * @return Create successful
    */
   public boolean createNewSubscription(String name, int nbMaxMsg, int context, String selector,
-      int subRequest, boolean active, boolean durable);
+      int subRequest, boolean active, boolean durable) {
+    // TODO Auto-generated method stub
+    return true;
+  }
 
   /**
    * Edit a subscription on JORAM
@@ -291,7 +374,10 @@ public interface JoramAdmin {
    * @return Edit successful
    */
   public boolean editSubscription(ClientSubscriptionMBean sub, int nbMaxMsg, int context, String selector,
-      int subRequest, boolean active, boolean durable);
+      int subRequest, boolean active, boolean durable) {
+    sub.setNbMaxMsg(nbMaxMsg);
+    return true;
+  }
 
   /**
    * Delete a Queue in JORAM
@@ -300,8 +386,58 @@ public interface JoramAdmin {
    *          Name of the subscription to delete
    * @return Delete successful
    */
-  public boolean deleteSubscription(String subscriptionName);
+  public boolean deleteSubscription(String subscriptionName) {
+    // TODO Auto-generated method stub
+    return true;
+  }
 
-  public float[] getInfos();
+  public float[] getInfos() {
+    float[] infos = new float[networks.size() + 1];
+    if (engine != null) {
+      infos[0] = engine.getAverageLoad1();
+    }
+    for (int i = 0; i < networks.size(); i++) {
+      infos[i + 1] = networks.get(i).getAverageLoad1();
+    }
+    return infos;
+  }
+
+  public void handleAdminObjectAdded(Object obj) {
+    if (obj instanceof QueueMBean) {
+      listener.onQueueAdded((QueueMBean) obj);
+    } else if (obj instanceof TopicMBean) {
+      if (obj instanceof AdminTopicMBean) {
+        adminTopic = (AdminTopicMBean) obj;
+      }
+      listener.onTopicAdded((TopicMBean) obj);
+    } else if (obj instanceof UserAgentMBean) {
+      listener.onUserAdded((UserAgentMBean) obj);
+    } else if (obj instanceof ClientSubscriptionMBean) {
+      listener.onSubscriptionAdded((ClientSubscriptionMBean) obj);
+    } else if (obj instanceof NetworkMBean) {
+      networks.add((NetworkMBean) obj);
+    } else if (obj instanceof EngineMBean) {
+      engine = (EngineMBean) obj;
+    }
+  }
+
+  public void handleAdminObjectRemoved(Object obj) {
+    if (obj instanceof QueueMBean) {
+      listener.onQueueRemoved((QueueMBean) obj);
+    } else if (obj instanceof TopicMBean) {
+      if (obj instanceof AdminTopicMBean) {
+        adminTopic = null;
+      }
+      listener.onTopicRemoved((TopicMBean) obj);
+    } else if (obj instanceof UserAgentMBean) {
+      listener.onUserRemoved((UserAgentMBean) obj);
+    } else if (obj instanceof ClientSubscriptionMBean) {
+      listener.onSubscriptionRemoved((ClientSubscriptionMBean) obj);
+    } else if (obj instanceof NetworkMBean) {
+      networks.remove(obj);
+    } else if (obj instanceof EngineMBean) {
+      engine = null;
+    }
+  }
 
 }
