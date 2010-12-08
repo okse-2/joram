@@ -22,8 +22,8 @@
  */
 package com.scalagent.appli.server.converter;
 
+import java.util.Collection;
 import java.util.Date;
-import java.util.Map;
 
 import org.objectweb.joram.mom.dest.TopicMBean;
 
@@ -35,37 +35,29 @@ import com.scalagent.appli.shared.TopicWTO;
 public class TopicWTOConverter {
 
   /**
-   * @param key
-   *          The ID of the queue
-   * @param queue
-   *          A DestinationImplMBean containing the queue info
-   * @return A QueueWTO object created from the DestinationImplMBean object
+   * @param topic A TopicMBean containing the topic info
+   * @return A TopicWTO object created from the TopicMBean object
    */
-
-  /**
-   * @param key The ID of the topic
-   * @param topic A DestinationImplMBean containing the topic info
-   * @return A TopicWTO object created from the DestinationImplMBean object
-   */
-  public static TopicWTO getDeviceWTO(String key, TopicMBean topic) {
-    TopicWTO result = new TopicWTO(key, new Date(topic.getCreationTimeInMillis()), topic.getSubscriberIds(),
-        topic.getDMQId(), topic.getDestinationId(), topic.getNbMsgsDeliverSinceCreation(),
-        topic.getNbMsgsReceiveSinceCreation(), topic.getNbMsgsSentToDMQSinceCreation(), topic.getPeriod(),
-        topic.getRights(), topic.isFreeReading(), topic.isFreeWriting());
+  public static TopicWTO getDeviceWTO(TopicMBean topic) {
+    TopicWTO result = new TopicWTO(topic.getName(), new Date(topic.getCreationTimeInMillis()),
+        topic.getSubscriberIds(), topic.getDMQId(), topic.getDestinationId(),
+        topic.getNbMsgsDeliverSinceCreation(), topic.getNbMsgsReceiveSinceCreation(),
+        topic.getNbMsgsSentToDMQSinceCreation(), topic.getPeriod(), topic.getRights(), topic.isFreeReading(),
+        topic.isFreeWriting());
     return result;
   }
 
   /**
-   * @param map Map of DestinationImplMBean
+   * @param topics A colelction of TopicMBean
    * @return An Array of TopicWTO
    */
-  public static TopicWTO[] getTopicWTOArray(Map<String, TopicMBean> map) {
+  public static TopicWTO[] getTopicWTOArray(Collection<TopicMBean> topics) {
 
-    TopicWTO[] newTopicsWTO = new TopicWTO[map.size()];
+    TopicWTO[] newTopicsWTO = new TopicWTO[topics.size()];
 
     int i = 0;
-    for (String mapKey : map.keySet()) {
-      newTopicsWTO[i] = TopicWTOConverter.getDeviceWTO(mapKey, map.get(mapKey));
+    for (TopicMBean topic : topics) {
+      newTopicsWTO[i] = TopicWTOConverter.getDeviceWTO(topic);
       i++;
     }
 

@@ -22,7 +22,7 @@
  */
 package com.scalagent.appli.server.converter;
 
-import java.util.Map;
+import java.util.Collection;
 
 import org.objectweb.joram.mom.proxies.UserAgentMBean;
 
@@ -34,27 +34,26 @@ import com.scalagent.appli.shared.UserWTO;
 public class UserWTOConverter {
 
   /**
-   * @param key The ID of the user
-   * @param user A ProxyImplMBean containing the user info
-   * @return A UserWTO object created from the ProxyImplMBean object
+   * @param user A UserAgentMBean containing the user info
+   * @return A UserWTO object created from the UserAgentMBean object
    */
-  public static UserWTO getUserWTO(String key, UserAgentMBean user) {
-    UserWTO result = new UserWTO(key, null, user.getPeriod(), user.getNbMsgsSentToDMQSinceCreation(),
-        user.getSubscriptionNames());
+  public static UserWTO getUserWTO(UserAgentMBean user) {
+    UserWTO result = new UserWTO(user.getName(), null, user.getPeriod(),
+        user.getNbMsgsSentToDMQSinceCreation(), user.getSubscriptionNames());
     return result;
   }
 
   /**
-   * @param map Map of ProxyImplMBean
+   * @param users A collection of UserAgentMBean
    * @return An Array of UserWTO
    */
-  public static UserWTO[] getUserWTOArray(Map<String, UserAgentMBean> map) {
+  public static UserWTO[] getUserWTOArray(Collection<UserAgentMBean> users) {
 
-    UserWTO[] newUsers = new UserWTO[map.size()];
+    UserWTO[] newUsers = new UserWTO[users.size()];
 
     int i = 0;
-    for (String mapKey : map.keySet()) {
-      newUsers[i] = UserWTOConverter.getUserWTO(mapKey, map.get(mapKey));
+    for (UserAgentMBean user : users) {
+      newUsers[i] = UserWTOConverter.getUserWTO(user);
       i++;
     }
 

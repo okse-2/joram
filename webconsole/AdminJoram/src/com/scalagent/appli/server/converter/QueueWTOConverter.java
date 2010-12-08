@@ -22,8 +22,8 @@
  */
 package com.scalagent.appli.server.converter;
 
+import java.util.Collection;
 import java.util.Date;
-import java.util.Map;
 
 import org.objectweb.joram.mom.dest.QueueMBean;
 
@@ -35,15 +35,13 @@ import com.scalagent.appli.shared.QueueWTO;
 public class QueueWTOConverter {
 
   /**
-   * @param key
-   *          The ID of the queue
    * @param queue
-   *          A DestinationImplMBean containing the queue info
-   * @return A QueueWTO object created from the DestinationImplMBean object
+   *          A QueueMBean containing the queue info
+   * @return A QueueWTO object created from the QueueMBean object
    */
-  public static QueueWTO getQueueWTO(String key, QueueMBean queue) {
-    QueueWTO result = new QueueWTO(key, new Date(queue.getCreationTimeInMillis()), queue.getDMQId(),
-        queue.getDestinationId(), queue.getNbMsgsDeliverSinceCreation(),
+  public static QueueWTO getQueueWTO(QueueMBean queue) {
+    QueueWTO result = new QueueWTO(queue.getName(), new Date(queue.getCreationTimeInMillis()),
+        queue.getDMQId(), queue.getDestinationId(), queue.getNbMsgsDeliverSinceCreation(),
         queue.getNbMsgsReceiveSinceCreation(), queue.getNbMsgsSentToDMQSinceCreation(), queue.getPeriod(),
         queue.getRights(), queue.isFreeReading(), queue.isFreeWriting(), queue.getThreshold(),
         queue.getWaitingRequestCount(), queue.getPendingMessageCount(), queue.getDeliveredMessageCount(),
@@ -52,17 +50,17 @@ public class QueueWTOConverter {
   }
 
   /**
-   * @param map
-   *          Map of DestinationImplMBean
+   * @param queues
+   *          A collection of QueueMBean
    * @return An Array of QueueWTO
    */
-  public static QueueWTO[] getQueueWTOArray(Map<String, QueueMBean> map) {
+  public static QueueWTO[] getQueueWTOArray(Collection<QueueMBean> queues) {
 
-    QueueWTO[] newQueuesWTO = new QueueWTO[map.size()];
+    QueueWTO[] newQueuesWTO = new QueueWTO[queues.size()];
 
     int i = 0;
-    for (String mapKey : map.keySet()) {
-      newQueuesWTO[i] = QueueWTOConverter.getQueueWTO(mapKey, map.get(mapKey));
+    for (QueueMBean queue : queues) {
+      newQueuesWTO[i] = QueueWTOConverter.getQueueWTO(queue);
       i++;
     }
 
