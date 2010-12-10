@@ -12,6 +12,12 @@
     <url>http://www.scalagent.com/</url>
   </organization>
 
+  <parent>
+    <groupId>org.ow2</groupId>
+    <artifactId>ow2</artifactId>
+    <version>1.1</version>
+  </parent>
+  
   <properties>
     <joram.version>5.5.0-SNAPSHOT</joram.version>
   </properties>
@@ -63,7 +69,16 @@
 
   <build>
     <plugins>
-
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+    
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
