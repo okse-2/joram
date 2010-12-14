@@ -77,6 +77,10 @@
           through the Administration API of JORAM. This great feature, combined with updated JMX implementation,
           initiates a new set of  management facilities in JORAM.</li>
         </ul>
+        
+        <p>For a complete list please refer to <a href="features.html">the features description</a> or
+        documentation.</p>
+        
       </s2>
 
       <s2 name="Getting Involved">

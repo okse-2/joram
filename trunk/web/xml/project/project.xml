@@ -14,8 +14,8 @@
       <legend>Project Links</legend>
       <menuitem><a href="index.html">Home</a></menuitem>
       <menuitem><a href="doc/starting.html">Getting Started</a></menuitem>
-      <menuitem><a href="features.html">Specification</a></menuitem>
       <menuitem><a href="technical.html">Specification</a></menuitem>
+      <menuitem><a href="features.html">Features</a></menuitem>
       <menuitem><a href="download/index.html">Download</a></menuitem>
       <menuitem><a href="doc/index.html">Documentation</a></menuitem>
       <menuitem><a href="doc/tutorials.html">Tutorials</a></menuitem>
