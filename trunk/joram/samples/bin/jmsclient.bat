@@ -7,27 +7,31 @@ REM Test the argument number
 if [%1]==[] goto no_arg
 if not [%2]==[]  goto too_many_args
 
-
 set CONFIG_DIR=%JORAM_HOME%\samples\config
-set JORAM_LIBS=%JORAM_HOME%\ship\lib
+set JORAM_BUNDLES=%JORAM_HOME%\ship\bundle
 set RUN_DIR=%JORAM_HOME%\samples\run
 set SAMPLE_CLASSES=%JORAM_HOME%\samples\classes\joram
 
-if not exist "%RUN_DIR%\a3servers.xml" goto nokRunDir
+if not exist "%RUN_DIR%" goto nokRunDir
+
+cp %CONFIG_DIR%\a3debug.cfg %RUN_DIR%\a3debug.cfg
+cp %CONFIG_DIR%\jndi.properties %RUN_DIR%\jndi.properties
 
 REM  Building the Classpath
-set CLASSPATH=%JORAM_LIBS%\joram-client.jar
-set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\joram-shared.jar
-set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\JCup.jar
-set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\geronimo-jms_1.1_spec-1.1.1.jar
-set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\ow_monolog.jar
+set CLASSPATH=%JORAM_BUNDLES%\a3-common.jar
+set CLASSPATH=%CLASSPATH%;%JORAM_BUNDLES%\jndi-client.jar
+set CLASSPATH=%CLASSPATH%;%JORAM_BUNDLES%\jndi-shared.jar
+set CLASSPATH=%CLASSPATH%;%JORAM_BUNDLES%\geronimo-jms_1.1_spec.jar
+set CLASSPATH=%CLASSPATH%;%JORAM_BUNDLES%\joram-client-jms.jar
+set CLASSPATH=%CLASSPATH%;%JORAM_BUNDLES%\joram-shared.jar
+set CLASSPATH=%CLASSPATH%;%JORAM_BUNDLES%\jcup.jar
+set CLASSPATH=%CLASSPATH%;%JORAM_BUNDLES%\monolog.jar
 set CLASSPATH=%CLASSPATH%;%SAMPLE_CLASSES%
 set CLASSPATH=%CLASSPATH%;%RUN_DIR%
 
 set PATH=%JAVA_HOME%\bin;%PATH%
 
 echo == Launching the %1 client ==
-echo %CLASSPATH%
 start /D %RUN_DIR% /B java -classpath %CLASSPATH% %1
 goto end
 :nokHome
@@ -42,7 +46,7 @@ goto end
 echo You must first launch servers to create run directory.
 goto end
 :no_arg
-echo !! Missing classname argument !!
+echo !! Missing classname argument: try 'classic.ClassicAdmin', 'classic.Sender' and 'classic.Receiver' for example !!
 goto usage
 :too_many_args
 echo !! Too many arguments !!

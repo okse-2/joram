@@ -6,27 +6,25 @@ REM Verify if JAVA_HOME is well defined
 if not exist "%JAVA_HOME%\bin\java.exe" goto nokJava
 
 set CONFIG_DIR=%JORAM_HOME%\samples\config
-set JORAM_LIBS=%JORAM_HOME%\ship\lib
+set JORAM_BIN=%JORAM_HOME%\ship\bin
 set RUN_DIR=%JORAM_HOME%\samples\run
+set SERVER_RUN_DIR=%RUN_DIR%\server0
 
 REM  Building the Classpath
-set CLASSPATH=%JORAM_LIBS%\joram-mom.jar
-set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\joram-shared.jar
-set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\JCup.jar
-set CLASSPATH=%CLASSPATH%;%JORAM_LIBS%\ow_monolog.jar
-set CLASSPATH=%CLASSPATH%;%RUN_DIR%
+set CLASSPATH=%JORAM_BIN%\felix.jar
 
 mkdir %RUN_DIR%
-copy %CONFIG_DIR%\a3config.dtd %RUN_DIR%\a3config.dtd
-copy %CONFIG_DIR%\a3debug.cfg %RUN_DIR%\a3debug.cfg
-copy %CONFIG_DIR%\sslcentralized_a3servers.xml %RUN_DIR%\a3servers.xml
-copy %CONFIG_DIR%\jndi.properties %RUN_DIR%\jndi.properties
+mkdir %SERVER_RUN_DIR%
+copy %CONFIG_DIR%\a3config.dtd %SERVER_RUN_DIR%\a3config.dtd
+copy %CONFIG_DIR%\a3debug.cfg %SERVER_RUN_DIR%\a3debug.cfg
+copy %CONFIG_DIR%\sslcentralized_a3servers.xml %SERVER_RUN_DIR%\a3servers.xml
+copy %CONFIG_DIR%\config.properties %SERVER_RUN_DIR%\config.properties
 copy %CONFIG_DIR%\joram_ks %RUN_DIR%\joram_ks
 
 set PATH=%JAVA_HOME%\bin;%PATH%
 
-echo == Launching a non persistent server#0 with SSLProxyService ==
-start /D %RUN_DIR% /B %JAVA_HOME%\bin\java -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -Dkeystore=%RUN_DIR%\joram_ks -Dkeystore_pass=passpass -classpath %CLASSPATH% fr.dyade.aaa.agent.AgentServer 0 ./s0
+echo == Launching a non persistent server#0 with SSLTcpProxyService ==
+start /D %SERVER_RUN_DIR% java -Dfelix.config.properties=file:config.properties -Dfr.dyade.aaa.agent.AgentServer.id=0 -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -Dorg.objectweb.joram.keystore=%RUN_DIR%\joram_ks -Dorg.objectweb.joram.keystorepass=jorampass -classpath %CLASSPATH% org.apache.felix.main.Main
 goto end
 :nokHome
 echo The JORAM_HOME environment variable is not defined correctly
