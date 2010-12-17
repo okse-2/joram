@@ -13,6 +13,8 @@ if $cygwin; then
   [ -n "$CLASSPATH" ] && CLASSPATH=`cygpath --path --unix "$CLASSPATH"`
 fi
 
+echo $JORAM_HOME
+
 # Verify if JORAM_HOME is well defined
 if [ ! -r "$JORAM_HOME"/samples/bin/clean.sh ]; then
   echo "The JORAM_HOME environment variable is not defined correctly"
@@ -28,21 +30,20 @@ if [ ! -r "$JAVA_HOME"/bin/java ]; then
 fi
 
 CONFIG_DIR=$JORAM_HOME/samples/config
-JORAM_LIBS=$JORAM_HOME/ship/lib
+JORAM_BIN=$JORAM_HOME/ship/bin
 RUN_DIR=$JORAM_HOME/samples/run
+SERVER_RUN_DIR=$RUN_DIR/server0
+JORAM_KS=$RUN_DIR/joram_ks
 
 # Building the Classpath
-CLASSPATH=$JORAM_LIBS/joram-mom.jar
-CLASSPATH=$CLASSPATH:$JORAM_LIBS/joram-shared.jar
-CLASSPATH=$CLASSPATH:$JORAM_LIBS/JCup.jar
-CLASSPATH=$CLASSPATH:$JORAM_LIBS/ow_monolog.jar
-CLASSPATH=$CLASSPATH:$RUN_DIR
+CLASSPATH=$CLASSPATH:$JORAM_BIN/felix.jar
 
 mkdir $RUN_DIR
-cp $CONFIG_DIR/a3config.dtd $RUN_DIR/a3config.dtd
-cp $CONFIG_DIR/a3debug.cfg $RUN_DIR/a3debug.cfg
-cp $CONFIG_DIR/sslcentralized_a3servers.xml $RUN_DIR/a3servers.xml
-cp $CONFIG_DIR/jndi.properties $RUN_DIR/jndi.properties
+mkdir $SERVER_RUN_DIR
+cp $CONFIG_DIR/a3config.dtd $SERVER_RUN_DIR/a3config.dtd
+cp $CONFIG_DIR/a3debug.cfg $SERVER_RUN_DIR/a3debug.cfg
+cp $CONFIG_DIR/sslcentralized_a3servers.xml $SERVER_RUN_DIR/a3servers.xml
+cp $CONFIG_DIR/config.properties $SERVER_RUN_DIR/config.properties
 cp $CONFIG_DIR/joram_ks $RUN_DIR/joram_ks
 
 # For Cygwin, switch paths to Windows format before running java
@@ -50,7 +51,8 @@ if $cygwin; then
   JAVA_HOME=`cygpath --path --windows "$JAVA_HOME"`
   JORAM_HOME=`cygpath --path --windows "$JORAM_HOME"`
   CLASSPATH=`cygpath --path --windows "$CLASSPATH"`
+  JORAM_KS=`cygpath --path --windows "$JORAM_KS"`
 fi
 
-echo "== Launching a non persistent server#0 with SSLProxyService =="
-cd $RUN_DIR; exec $JAVA_HOME/bin/java -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -Dkeystore=%RUN_DIR%\joram_ks -Dkeystore_pass=passpass -classpath $CLASSPATH fr.dyade.aaa.agent.AgentServer 0 ./s0
+echo "== Launching a non persistent server#0 with SSLTcpProxyService =="
+cd $SERVER_RUN_DIR; exec "${JAVA_HOME}"/bin/java -Dfelix.config.properties=file:config.properties -Dfr.dyade.aaa.agent.AgentServer.id=0 -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -Dorg.objectweb.joram.keystore=$JORAM_KS -Dorg.objectweb.joram.keystorepass=jorampass -classpath $CLASSPATH org.apache.felix.main.Main

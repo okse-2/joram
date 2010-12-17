@@ -13,6 +13,8 @@ if $cygwin; then
   [ -n "$CLASSPATH" ] && CLASSPATH=`cygpath --path --unix "$CLASSPATH"`
 fi
 
+echo $JORAM_HOME
+
 # Verify if JORAM_HOME is well defined
 if [ ! -r "$JORAM_HOME"/samples/bin/clean.sh ]; then
   echo "The JORAM_HOME environment variable is not defined correctly"
@@ -30,7 +32,7 @@ fi
 # Test the argument number
 if [ -z $1 ]
 then
-  echo "!! Missing server id argument !!"
+  echo "!! Missing server id argument (0, 1 or 2) - see a3servers.xml !!"
   exit 1
 fi
 
@@ -41,21 +43,19 @@ then
 fi
 
 CONFIG_DIR=$JORAM_HOME/samples/config
-JORAM_LIBS=$JORAM_HOME/ship/lib
+JORAM_BIN=$JORAM_HOME/ship/bin
 RUN_DIR=$JORAM_HOME/samples/run
+SERVER_RUN_DIR=$RUN_DIR/server$1
 
 # Building the Classpath
-CLASSPATH=$JORAM_LIBS/joram-mom.jar
-CLASSPATH=$CLASSPATH:$JORAM_LIBS/joram-shared.jar
-CLASSPATH=$CLASSPATH:$JORAM_LIBS/JCup.jar
-CLASSPATH=$CLASSPATH:$JORAM_LIBS/ow_monolog.jar
-CLASSPATH=$CLASSPATH:$RUN_DIR
+CLASSPATH=$CLASSPATH:$JORAM_BIN/felix.jar
 
 mkdir $RUN_DIR
-cp $CONFIG_DIR/a3config.dtd $RUN_DIR/a3config.dtd
-cp $CONFIG_DIR/a3debug.cfg $RUN_DIR/a3debug.cfg
-cp $CONFIG_DIR/distributed_a3servers.xml $RUN_DIR/a3servers.xml
-cp $CONFIG_DIR/jndi.properties $RUN_DIR/jndi.properties
+mkdir $SERVER_RUN_DIR
+cp $CONFIG_DIR/a3config.dtd $SERVER_RUN_DIR/a3config.dtd
+cp $CONFIG_DIR/a3debug.cfg $SERVER_RUN_DIR/a3debug.cfg
+cp $CONFIG_DIR/distributed_a3servers.xml $SERVER_RUN_DIR/a3servers.xml
+cp $CONFIG_DIR/config.properties $SERVER_RUN_DIR/config.properties
 
 # For Cygwin, switch paths to Windows format before running java
 if $cygwin; then
@@ -65,4 +65,4 @@ if $cygwin; then
 fi
 
 echo "== Launching a persistent server#$1 =="
-cd $RUN_DIR; exec "${JAVA_HOME}"/bin/java  -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -classpath $CLASSPATH fr.dyade.aaa.agent.AgentServer $1 ./s$1
+cd $SERVER_RUN_DIR; exec "${JAVA_HOME}"/bin/java  -Dosgi.shell.telnet.port=1600$1 -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -Dfr.dyade.aaa.agent.AgentServer.id=$1 -classpath $CLASSPATH org.apache.felix.main.Main
