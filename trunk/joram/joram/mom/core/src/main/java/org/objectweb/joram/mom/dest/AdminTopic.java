@@ -419,9 +419,10 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
   }
 
   /**
-   * Overrides this <code>DestinationImpl</code> method;
-   * <code>ClientMessages</code> notifications hold requests sent by an
-   * administrator.
+   * Overrides this {@link Destination} method;
+   * 
+   * @param msgs <code>ClientMessages</code> notifications hold requests sent by
+   *          an administrator.
    */
   protected ClientMessages preProcess(AgentId from, ClientMessages msgs) {
     if (logger.isLoggable(BasicLevel.DEBUG))
@@ -476,7 +477,7 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
    * ***** ***** ***** ***** ***** */
 
   /**
-   * Overrides this <code>DestinationImpl</code> method.
+   * Overrides this {@link Destination} method.
    * Deletion requests are not accepted by AdminTopics.
    */
   public void deleteNot(AgentId from, DeleteNot not) {
