@@ -1,3 +1,19 @@
++==============================================================================
+| 2010/12/17 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix outdated samples scripts.
++==============================================================================
+| 2010/11/30 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Clustering enhancements:
+ - rework administration
+ - harmonize behaviors and notifications exchanges between queues and topics
+ - allow transitive closure of clusters
+ - fix various problems
++==============================================================================
+| 2010/11/15 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Merge destination agents with their implementation, update MBeans.
 ###############################################################################
 # 2010/10/21 | Joram 5.4.0 tag.
 ###############################################################################
