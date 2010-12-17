@@ -634,7 +634,7 @@
 <!-- ***************************************************************** -->
 <!-- *                            SSL                                * -->
 <!-- ***************************************************************** -->
-  <target name="sslinit" depends="init">
+  <target name="sslinit" depends="simple_init">
     <property name="keystore" location="${run.dir}/joram_ks"/>
     <property name="keystore_pass" value="jorampass"/>
   </target>
