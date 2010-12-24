@@ -1528,4 +1528,21 @@ public final class AdminModule {
     
     return wrapper.getTimeOutToAbortRequest();
   }
+  
+  /**
+   * The method send the admin JMS message on JORAM server (AdminTopic).
+   * 
+   * @param targetId agent Id target.
+   * @param command the command to execute.
+   * @param prop the properties.
+   * @return the reply.
+   * @exception AdminException    
+   * @exception ConnectException  If the connection fails.
+   */
+  public static AdminReply processAdmin(String targetId, int command, Properties prop) throws ConnectException, AdminException {
+  	if (wrapper == null)
+      throw new ConnectException("Administrator not connected.");
+  	
+  	return wrapper.processAdmin(targetId, command, prop);
+  }
 }
