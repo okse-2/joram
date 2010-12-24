@@ -52,8 +52,11 @@ import org.objectweb.joram.mom.proxies.UserAgent;
 import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.admin.AddDomainRequest;
 import org.objectweb.joram.shared.admin.AddServerRequest;
+import org.objectweb.joram.shared.admin.AdminCommandConstant;
 import org.objectweb.joram.shared.admin.AdminReply;
 import org.objectweb.joram.shared.admin.AdminRequest;
+import org.objectweb.joram.shared.admin.AdminCommandReply;
+import org.objectweb.joram.shared.admin.AdminCommandRequest;
 import org.objectweb.joram.shared.admin.CreateDestinationReply;
 import org.objectweb.joram.shared.admin.CreateDestinationRequest;
 import org.objectweb.joram.shared.admin.CreateUserReply;
@@ -603,6 +606,8 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
         doProcess((GetConfigRequest) request, replyTo, msgId);
       else if (request instanceof UserAdminRequest)
         doProcess((UserAdminRequest) request, replyTo, msgId);
+      else if (request instanceof AdminCommandRequest)
+        doProcess((AdminCommandRequest) request, replyTo, msgId);
     } catch (UnknownServerException exc) {
       // Caught when a target server is invalid.
       info = strbuf.append("Request [").append(request.getClass().getName())
@@ -1001,7 +1006,7 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
                 new FwdAdminRequestNot(request, replyTo, msgId));
       }
     } else {
-      // Send the rquest to the destination or User.
+      // Send the request to the destination or User.
       forward(destId, new FwdAdminRequestNot(request, replyTo, msgId, createMessageId()));
     }
 
@@ -1519,6 +1524,48 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
       forward(getDefault(userId.getTo()),
               new FwdAdminRequestNot(request, replyTo, requestMsgId, null));
     }
+  }
+  
+  /**
+   * Proccess an admin command.
+   * 
+   * @param request The administration request.
+   * @param replyTo The destination to reply.
+   * @param requestMsgId The JMS message id needed to reply.
+   * @throws UnknownServerException
+   */
+  private void doProcess(AdminCommandRequest request,	AgentId replyTo, String requestMsgId) throws UnknownServerException {
+  	AgentId targetId = AgentId.fromString(request.getTargetId());
+  	if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "AdminTopic.doProcess(" + request + ',' + replyTo + ',' + requestMsgId + ")   targetId = " + targetId);
+
+  	if (!targetId.isNullId()) {
+  		if (targetId.equals(getAgentId())) {
+  			Properties replyProp  = null;
+  			try {
+  				//TODO: refactor admin here.
+  				switch (request.getCommand()) {
+  				case AdminCommandConstant.CMD_NO:
+  					break;
+  				
+  				default:
+  					throw new Exception("Bad command : \"" + AdminCommandConstant.commandNames[request.getCommand()] + "\"");
+  				}
+  				distributeReply(replyTo, requestMsgId, new AdminCommandReply(true, AdminCommandConstant.commandNames[request.getCommand()] + " done.", replyProp));
+  			} catch (Exception exc) {
+  				if (logger.isLoggable(BasicLevel.WARN))
+  					logger.log(BasicLevel.WARN, "", exc);
+  				distributeReply(replyTo, requestMsgId, new AdminReply(-1, exc.toString()));
+  			}
+  		} else {
+  			// forward to the target agent.
+  			forward(targetId, new FwdAdminRequestNot(request, replyTo, requestMsgId));
+  		}
+  	} else {
+  		if (logger.isLoggable(BasicLevel.WARN))
+  			logger.log(BasicLevel.WARN, "Request (AdminCommandRequest) to an undefined targetId (null).");
+  		distributeReply(replyTo, requestMsgId, new AdminReply(AdminReply.UNKNOWN_SERVER, "Request (AdminCommandRequest) to an undefined targetId (null)."));
+  	}
   }
 
   /** 
