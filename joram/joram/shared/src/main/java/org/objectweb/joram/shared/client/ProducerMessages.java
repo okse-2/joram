@@ -81,6 +81,15 @@ public final class ProducerMessages extends AbstractJmsRequest {
       messages.addElement(e.nextElement());
   }
 
+  /**
+   * Replace old messages vector by new newMsgs vector
+   * 
+   * @param newMsgs new messages vector.
+   */
+  public void setMessages(Vector newMsgs) {
+  	messages = newMsgs;
+  }
+  
   protected int getClassId() {
     return PRODUCER_MESSAGES;
   }
