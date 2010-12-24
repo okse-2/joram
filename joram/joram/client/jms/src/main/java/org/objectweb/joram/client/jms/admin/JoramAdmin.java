@@ -24,6 +24,7 @@ package org.objectweb.joram.client.jms.admin;
 
 import java.net.ConnectException;
 import java.util.Iterator;
+import java.util.Properties;
 
 import javax.jms.Connection;
 import javax.jms.JMSException;
@@ -31,6 +32,7 @@ import javax.jms.JMSSecurityException;
 import javax.management.ObjectName;
 
 import org.objectweb.joram.client.jms.Destination;
+import org.objectweb.joram.shared.admin.AdminReply;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -734,5 +736,19 @@ public class JoramAdmin implements JoramAdminMBean {
   public void exportRepositoryToFile(String exportDir,
                                      String exportFilename) throws AdminException {
     AdminModule.exportRepositoryToFile(exportDir, exportFilename);
+  }
+  
+  /**
+   * The method send the admin JMS message on JORAM server (AdminTopic).
+   * 
+   * @param targetId agent Id target.
+   * @param command the command to execute.
+   * @param prop the properties.
+   * @return the reply.
+   * @exception AdminException    
+   * @exception ConnectException  If the connection fails.
+   */
+  public AdminReply processAdmin(String targetId, int command, Properties prop) throws ConnectException, AdminException {
+  	return wrapper.processAdmin(targetId, command, prop);
   }
 }

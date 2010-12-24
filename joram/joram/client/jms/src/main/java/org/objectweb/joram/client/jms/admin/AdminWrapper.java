@@ -38,6 +38,7 @@ import org.objectweb.joram.shared.admin.AddDomainRequest;
 import org.objectweb.joram.shared.admin.AddServerRequest;
 import org.objectweb.joram.shared.admin.AdminReply;
 import org.objectweb.joram.shared.admin.AdminRequest;
+import org.objectweb.joram.shared.admin.AdminCommandRequest;
 import org.objectweb.joram.shared.admin.CreateDestinationReply;
 import org.objectweb.joram.shared.admin.CreateDestinationRequest;
 import org.objectweb.joram.shared.admin.CreateUserReply;
@@ -1048,6 +1049,22 @@ public class AdminWrapper {
     return server.getName();
   }
 
+  /**
+   * The method send the admin JMS message on JORAM server (AdminTopic).
+   * 
+   * @param targetId agent Id target.
+   * @param command the command to execute.
+   * @param prop the properties.
+   * @return the reply.
+   * @exception AdminException    
+   * @exception ConnectException  If the connection fails.
+   */
+  public AdminReply processAdmin(String targetId, int command, Properties prop) throws ConnectException, AdminException {
+  	AdminCommandRequest request = new AdminCommandRequest(targetId, command, prop);
+  	AdminReply reply = (AdminReply) doRequest(request);
+    return reply;
+  }
+  
   /**
    * Method actually sending an <code>AdminRequest</code> instance to
    * the platform and getting an <code>AdminReply</code> instance.

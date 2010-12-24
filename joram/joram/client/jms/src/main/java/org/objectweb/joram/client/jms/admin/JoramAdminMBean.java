@@ -23,6 +23,9 @@
 package org.objectweb.joram.client.jms.admin;
 
 import java.net.ConnectException;
+import java.util.Properties;
+
+import org.objectweb.joram.shared.admin.AdminReply;
 
 /**
  * MBean interface for JoramAdmin.
@@ -484,4 +487,16 @@ public interface JoramAdminMBean {
    * @param path    The script pathname.
    */
   public void executeXMLAdmin(String path) throws Exception;
+  
+  /**
+   * The method send the admin JMS message on JORAM server (AdminTopic).
+   * 
+   * @param targetId agent Id target.
+   * @param command the command to execute.
+   * @param prop the properties.
+   * @return the reply.
+   * @exception AdminException    
+   * @exception ConnectException  If the connection fails.
+   */
+  public AdminReply processAdmin(String targetId, int command, Properties prop) throws ConnectException, AdminException;
 }
