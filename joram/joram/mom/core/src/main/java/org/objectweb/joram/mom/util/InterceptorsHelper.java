@@ -21,6 +21,8 @@
  */
 package org.objectweb.joram.mom.util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -59,10 +61,12 @@ public class InterceptorsHelper {
 				} catch(Throwable t) {
 					if (logger.isLoggable(BasicLevel.WARN))
 						logger.log(BasicLevel.WARN, "addInterceptors", t);
+					StringWriter sw = new StringWriter();
+					t.printStackTrace(new PrintWriter(sw));
 					if (error == null)
-						error = "(" + interceptorClassName + " exc=" + t.getMessage() + ')';
+						error = "(" + interceptorClassName + " exc=" + sw.toString() + ')';
 					else
-						error = error + "(" + interceptorClassName + " exc=" + t.getMessage() + ')';
+						error = error + "(" + interceptorClassName + " exc=" + sw.toString() + ')';
 				}
 			}
 			if (error != null)
@@ -111,10 +115,12 @@ public class InterceptorsHelper {
   			} catch(Throwable t) {
   				if (logger.isLoggable(BasicLevel.WARN))
   					logger.log(BasicLevel.WARN, "removeInterceptors", t);
+  				StringWriter sw = new StringWriter();
+					t.printStackTrace(new PrintWriter(sw));
   				if (error == null)
-  					error = "(" + interceptorClassName + " exc=" + t.getMessage() + ')';
+  					error = "(" + interceptorClassName + " exc=" + sw.toString() + ')';
   				else
-  					error = error + "(" + interceptorClassName + " exc=" + t.getMessage() + ')';
+  					error = error + "(" + interceptorClassName + " exc=" + sw.toString() + ')';
   			}
   		}
   		if (error != null)
