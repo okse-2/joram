@@ -40,6 +40,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.TimerTask;
 import java.util.Vector;
 
@@ -68,8 +69,13 @@ import org.objectweb.joram.mom.notifications.TopicMsgsReply;
 import org.objectweb.joram.mom.notifications.UnsubscribeRequest;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.mom.util.DMQManager;
+import org.objectweb.joram.mom.util.InterceptorsHelper;
+import org.objectweb.joram.mom.util.MessageInterceptor;
 import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.MessageErrorConstants;
+import org.objectweb.joram.shared.admin.AdminCommandConstant;
+import org.objectweb.joram.shared.admin.AdminCommandReply;
+import org.objectweb.joram.shared.admin.AdminCommandRequest;
 import org.objectweb.joram.shared.admin.AdminReply;
 import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.admin.ClearSubscription;
@@ -160,6 +166,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
 
   public static Logger logger = Debug.getLogger(UserAgent.class.getName());
 
+  /** the in and out interceptors list. */
+  private List interceptorsOUT = null;
+  private List interceptorsIN = null;
+    
   /** period to run the cleaning task, by default 60s. */
   private long period = 60000L;
   
@@ -665,7 +675,42 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     if (connections != null) {
       ConnectionContext ctx = (ConnectionContext) connections.get(objKey);
       if (ctx != null) {
-        ctx.pushReply(reply);
+      	// interceptors process...
+      	if (interceptorsOUT != null && !interceptorsOUT.isEmpty()) {
+      		if (reply instanceof ConsumerMessages) {
+      			org.objectweb.joram.shared.messages.Message[] m = new org.objectweb.joram.shared.messages.Message[1];
+      			Vector msgs = ((ConsumerMessages) reply).getMessages();
+      			Vector newMsgs = new Vector();
+      			Vector acks = new Vector();
+      			for (int i = 0; i < msgs.size(); i++) {
+      				m[0] = (org.objectweb.joram.shared.messages.Message) msgs.elementAt(i);
+      				// interceptors iterator
+      				Iterator it = interceptorsOUT.iterator();
+      				while (it.hasNext()) {
+      					MessageInterceptor interceptor = (MessageInterceptor) it.next();
+      					// interceptor handle
+      					if (!interceptor.handle(m) || m[0] == null)
+      						break;
+      				}
+      				if (m[0] != null)
+    						newMsgs.add(m[0]);
+      				else
+      					acks.add(((org.objectweb.joram.shared.messages.Message) msgs.elementAt(i)).id);
+      			}
+      			if (newMsgs.size() == 0 && !msgs.isEmpty()) {  
+      				// no message to send because interceptors set msg to null.
+      				// So send the original messages to the user DMQ.
+      				sendToDMQ(((ConsumerMessages) reply).getMessages(), MessageErrorConstants.UNDELIVERABLE);
+      				// ack messages
+      				org.objectweb.joram.shared.messages.Message msg = (org.objectweb.joram.shared.messages.Message) msgs.firstElement(); 
+      				sendNot(AgentId.fromString(msg.toId), new AcknowledgeRequest(activeCtxId, reply.getCorrelationId(), acks));
+      			}
+      			//update consumer message.
+      			((ConsumerMessages) reply).setMessages(newMsgs);
+      		}
+      	}
+      	// push the reply
+      	ctx.pushReply(reply);
       }
     }
     // else may happen. Drop the reply.
@@ -968,7 +1013,41 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     if (destId == null)
       throw new RequestException("Request to an undefined destination (null).");
 
-    ClientMessages not = new ClientMessages(key, req.getRequestId(), req.getMessages());
+    ProducerMessages pm = req; 
+    if (interceptorsIN != null && !interceptorsIN.isEmpty()) {
+    	org.objectweb.joram.shared.messages.Message[] m = new org.objectweb.joram.shared.messages.Message[1];
+    	Vector msgs = ((ProducerMessages) req).getMessages();
+    	Vector newMsgs = new Vector();
+    	for (int i = 0; i < msgs.size(); i++) {
+    		m[0] = (org.objectweb.joram.shared.messages.Message) msgs.elementAt(i);
+    		Iterator it = interceptorsIN.iterator();
+    		while (it.hasNext()) {
+    			MessageInterceptor interceptor = (MessageInterceptor) it.next();
+    			if (!interceptor.handle(m) || m[0] == null)
+    				break;
+    		}
+    		if  (m[0] != null)
+    			newMsgs.add(m[0]);
+    	}
+    	// no message to send. Send reply to the producer and send ProducerMessage to DMQ.
+    	if (newMsgs.size() == 0 && !msgs.isEmpty()) { 
+    		if (logger.isLoggable(BasicLevel.DEBUG))
+    			logger.log(BasicLevel.DEBUG, "UserAgent.reactToClientRequest : no message to send.");
+    		// send the originals messages to the user DMQ.
+    		sendToDMQ(((ProducerMessages) pm).getMessages(),MessageErrorConstants.UNDELIVERABLE);
+    		
+    		if (destId.getTo() == getId().getTo() && !pm.getAsyncSend()) {
+    			// send producer reply
+    			sendNot(getId(), new SendReplyNot(key, pm.getRequestId()));
+    		}
+    		return;
+    	}
+    	//update producer message.
+    	((ProducerMessages) pm).setMessages(newMsgs);
+    	pm = req;
+    }
+
+    ClientMessages not = new ClientMessages(key, pm.getRequestId(), pm.getMessages());
     setDmq(not);
 
     if (destId.getTo() == getId().getTo()) {
@@ -976,20 +1055,33 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
         logger.log(BasicLevel.DEBUG, " -> local sending");
       not.setPersistent(false);
       not.setExpiration(0L);
-      if (req.getAsyncSend()) {
+      if (pm.getAsyncSend()) {
         not.setAsyncSend(true);
       }
     } else {
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> remote sending");
-      if (!req.getAsyncSend()) {
-        sendNot(getId(), new SendReplyNot(key, req.getRequestId()));
+      if (!pm.getAsyncSend()) {
+        sendNot(getId(), new SendReplyNot(key, pm.getRequestId()));
       }
     }
 
     sendNot(destId, not);
   }
 
+  private void sendToDMQ(List msgs, short messageError) {
+  	if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "sendToDMQ(" + msgs + ',' + messageError + ')');
+  	DMQManager dmqManager = new DMQManager(dmqId, null);
+		Iterator it = msgs.iterator();
+		while (it.hasNext()) {
+			org.objectweb.joram.shared.messages.Message msg = (org.objectweb.joram.shared.messages.Message) it.next();
+			nbMsgsSentToDMQSinceCreation++;
+			dmqManager.addDeadMessage(msg, messageError);
+		}
+		dmqManager.sendToDMQ();
+  }
+  
   private void setDmq(ClientMessages not) {
     //  Setting the producer's DMQ identifier field: 
     if (dmqId != null) {
@@ -2625,6 +2717,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       replyToTopic(reply, not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
     } else if (adminRequest instanceof DeleteUser) {
       deleteProxy(not);
+    } else if (adminRequest instanceof AdminCommandRequest) {
+    	doReact((AdminCommandRequest) adminRequest, not.getReplyTo(), not.getRequestMsgId());
     } else {
       logger.log(BasicLevel.ERROR, "Unknown administration request for proxy " + getId());
       replyToTopic(new AdminReply(AdminReply.UNKNOWN_REQUEST, null), not.getReplyTo(), not.getRequestMsgId(),
@@ -2633,6 +2727,45 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     }
   }
 
+  private void doReact(AdminCommandRequest request, AgentId replyTo, String requestMsgId) {
+  	if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "doReact(" + request + ", " + replyTo + ", " + requestMsgId + ')');
+  	Properties prop = null;
+  	Properties replyProp = null;
+  	try {
+			switch (request.getCommand()) {
+			case AdminCommandConstant.CMD_ADD_INTERCEPTORS:
+				prop = request.getProp();
+				if (interceptorsOUT == null)
+					interceptorsOUT = new ArrayList();
+				InterceptorsHelper.addInterceptors((String) prop.get("interceptorsOUT"), interceptorsOUT);
+				if (interceptorsIN == null)
+					interceptorsIN = new ArrayList();
+				InterceptorsHelper.addInterceptors((String) prop.get("interceptorsIN"), interceptorsIN);
+				break;
+			case AdminCommandConstant.CMD_REMOVE_INTERCEPTORS:
+				prop = request.getProp();
+				InterceptorsHelper.removeInterceptors((String) prop.get("interceptorsOUT"), interceptorsOUT);
+				InterceptorsHelper.removeInterceptors((String) prop.get("interceptorsIN"), interceptorsIN);
+				break;
+			case AdminCommandConstant.CMD_GET_INTERCEPTORS:
+				replyProp = new Properties();
+				replyProp.put("interceptorsIN", InterceptorsHelper.getListInterceptors(interceptorsIN));
+				replyProp.put("interceptorsOUT", InterceptorsHelper.getListInterceptors(interceptorsOUT));
+				break;
+
+			default:
+				throw new Exception("Bad command : \"" + request.getCommand() + "\"");
+			}
+			// reply
+			replyToTopic(new AdminCommandReply(true, AdminCommandConstant.commandNames[request.getCommand()] + " done.", replyProp), replyTo, requestMsgId, requestMsgId);
+		} catch (Exception exc) {
+			if (logger.isLoggable(BasicLevel.WARN))
+				logger.log(BasicLevel.WARN, "", exc);
+			replyToTopic(new AdminReply(-1, exc.getMessage()), replyTo, requestMsgId, requestMsgId);
+		}
+  }
+  
   private void doReact(GetSubscriptions request, AgentId replyTo, String requestMsgId, String replyMsgId) {
     Iterator subsIterator = subsTable.entrySet().iterator();
     String[] subNames = new String[subsTable.size()];
