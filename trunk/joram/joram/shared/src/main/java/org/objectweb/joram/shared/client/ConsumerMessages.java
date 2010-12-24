@@ -62,6 +62,15 @@ public final class ConsumerMessages extends AbstractJmsReply {
     return messages.size();
   }
 
+  /**
+   * Replace old messages vector by new newMsgs vector
+   * 
+   * @param newMsgs new messages vector.
+   */
+  public void setMessages(Vector newMsgs) {
+  	messages = newMsgs;
+  }
+  
   /** Name of the subscription or the queue the messages come from. */
   private String comingFrom = null;
 
