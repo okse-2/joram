@@ -143,6 +143,8 @@ public abstract class AbstractAdminMessage implements Externalizable, Streamable
   protected final static int UNSET_WRITER = 92;
   protected final static int UPDATE_USER = 93;
   protected final static int USER_ADMIN_REQUEST = 94;
+  protected final static int CMD_ADMIN_REQUEST = 95;
+  protected final static int CMD_ADMIN_REPLY = 96;
 
   protected int classid;
 
@@ -242,6 +244,8 @@ public abstract class AbstractAdminMessage implements Externalizable, Streamable
     UnsetWriter.class.getName(),
     UpdateUser.class.getName(),
     UserAdminRequest.class.getName(),
+    AdminCommandRequest.class.getName(),
+    AdminCommandReply.class.getName(),
   };
   
   protected abstract int getClassId();
