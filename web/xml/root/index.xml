@@ -58,6 +58,17 @@
     </s1>
    
     <s1 name="Latest News">
+      <s2 name="January 3, 2011: Best wishes from the ScalAgent team.">
+      
+        <table border="0" width="100%">
+  	      <tr>
+	          <td align="center">
+	            <img src="images/JoramWish.png" alt="JORAM Logo" height="376" width="640" border="0" hspace="2"/>
+            </td>
+	        </tr>
+        </table>
+      </s2>
+
       <s2 name="October 27, 2010: JORAM 5.4.0 release is available.">
       <p>This release introduces some improvements and bug fixes, essentially:</p>
       <ul>
