@@ -524,9 +524,21 @@ description=" --> launch all exceptionlistener tests">
         <include name="utils/*.class"/>
       </fileset>
     </jar>
+  	
+  	<available file="${manifest.mf}" type="file"
+  	           property="test-bundle.available"/>
+  	<antcall target="test-bundle" inheritAll="true"/>
   </target>
 
-  <target name="cpJoramAdmin" if="joramAdmin.available">
+	<target name="test-bundle" if="test-bundle.available">
+    <jar jarfile="${obj.dir}/test-bundle.jar" manifest="${manifest.mf}">
+		  <fileset dir="${obj.dir}">
+		    <include name="${include.classes}"/>
+      </fileset>
+    </jar>
+	</target>
+  
+	<target name="cpJoramAdmin" if="joramAdmin.available">
     <copy file="${joramAdmin}" tofile="${test.dir}/joramAdmin.xml"/>
   </target>
 
@@ -5054,7 +5066,7 @@ description=" --> launch all exceptionlistener tests">
   	</antcall>
   </target>
 
-	<!-- interceptors -->
+	<!-- interceptors -->	
 	<target name="interceptors.test1" depends="init.a3props,compile"
 	          description=" --> test interceptors">
 	    <antcall target="test.run" inheritAll="true">
@@ -5065,6 +5077,8 @@ description=" --> launch all exceptionlistener tests">
 	      <param name="jvmargs" value=""/>
 	      <param name="testid" value="interceptors.test1"/>
 	      <param name="args" value=""/>
+	    	<param name="manifest.mf" value="interceptors/manifest.mf"/>
+	    	<param name="include.classes" value="joram/interceptors/Exit*.class"/>
 	    </antcall>
 	  </target>
 	
@@ -5078,6 +5092,8 @@ description=" --> launch all exceptionlistener tests">
 		      <param name="jvmargs" value=""/>
 		      <param name="testid" value="interceptors.test2"/>
 		      <param name="args" value=""/>
+	        <param name="manifest.mf" value="interceptors/manifest.mf"/>
+		    	<param name="include.classes" value="joram/interceptors/Exit*.class"/>
 		    </antcall>
 		  </target>
 	
@@ -5091,6 +5107,8 @@ description=" --> launch all exceptionlistener tests">
 			      <param name="jvmargs" value=""/>
 			      <param name="testid" value="interceptors.test3"/>
 			      <param name="args" value=""/>
+		        <param name="manifest.mf" value="interceptors/manifest.mf"/>
+			    	<param name="include.classes" value="joram/interceptors/Exit*.class"/>			    	
 			    </antcall>
 			  </target>
 	
