@@ -26,19 +26,6 @@
     control large Joram's configuration.</p>
     </s2>
     
-    <s2 name="AMQP">
-    <p>Thank's to third party users, the Joram team should announce soon the support of AMQP in Joram.
-    The Advanced Message Queuing Protocol (AMQP) is an open standard application layer protocol for messaging
-		middleware, an AMQP messaging infrastructure will be open, platform agnostic and interoperable. Defining
-		an AMQP entry point for the Joram server will allow the use of the MOM through multiples clients, languages
-		and platform.</p>
-		<p>An implementation of AMQP v0.9 is already available, a work will be planned when AMQP 1.0 will be announced.</p>
-    </s2>
-
-  </s1>
-
-  <s1 name="Extensions planned">
-  
 		<s2 name="A Web 2.0 administration console for Joram.">
     <p>The goal of this project is to implement a graphical user interface to manage the Joram provider
     and access Joram administration and monitoring from Web browsers. This Web console would be implemented
@@ -46,6 +33,20 @@
     <p>First release of this Web console is expected for end of second quarter of year 2010.</p>
     </s2>
     
+    <s2 name="AMQP">
+    <p>Thank's to third party users, the Joram team should announce soon the support of AMQP in Joram.
+    The Advanced Message Queuing Protocol (AMQP) is an open standard application layer protocol for messaging
+		middleware, an AMQP messaging infrastructure will be open, platform agnostic and interoperable. Defining
+		an AMQP entry point for the Joram server will allow the use of the MOM through multiples clients, languages
+		and platform.</p>
+		<p>An implementation of AMQP v0.9.1 is already available, a work will be planned when AMQP 1.0 will be
+		announced.</p>
+    </s2>
+
+  </s1>
+
+  <s1 name="Extensions planned">
+  
 		<s2 name="A Shell bundle dedicated to Joram administration.">
     <p>Since release 5.3 Joram is now designed with an OSGi based services architecture to provide a
     dynamically adaptable messaging server.</p>
@@ -56,12 +57,12 @@
 		user interfaces: textual, graphical, etc.</p>
     </s2>
 
-		<s2 name="Joram access with the Stomp Protocol.">
-    <p>Streaming Text Oriented Message Protocol (STOMP) is a simple text oriented messaging protocol
-		designed for working with Message Oriented Middleware. It has a list of implementations in different
-		languages such as C, C++, Ruby, Python and so on and provides an interoperable wire format that
-		allows Stomp Clients to talk with any Stomp Message Broker.</p>
-		<p>We aim to offer a STOMP access point to Joram allowing the use of widespread STOMP clients with Joram.</p>
+		<s2 name="Joram access with the SAM framework.">
+		<p>The main objective of the SAM extension is to open up the messaging infrastructure to the
+		PHP scripting environment by providing an API that allows the most common and simple messaging
+		operations to be accomplished with a minimal investment.</p>
+		<p>We aim to offer a JORAM connection factory for SAM allowing a simple and convenient use of
+		JORAM with PHP scripts. </p>
     </s2>
 
   </s1>
