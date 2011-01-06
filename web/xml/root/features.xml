@@ -41,7 +41,7 @@
 			<s2 name="General">
 
 				<p>
-					JORAM fully supports <strong>JMS 1.1</strong> and <strong>J2EE 1.4</strong> with support
+					JORAM fully supports <strong>JMS 1.1</strong> and <strong>Java EE 5</strong> with support
 					for transient, persistent, transactional and XA messaging (JORAM provide a fully functional
 					XAResource implementation, JORAM sessions can then be enlisted in any JTA transaction acording
 					to the normal JTA semantics).
@@ -303,7 +303,8 @@
 				</p>
 				
 				<ul>
-					<li>JMS acquisition / distribution (JMS bridge),</li>
+					<li>JMS acquisition / distribution (JMS bridge), 100% once and only once delivery is guaranteed
+					with a JMS bridge without having to resort to more heavyweight solutions such as JTA (XA).</li>
 					<li>Mail acquisition / distribution,</li>
 					<li>URL acquisition,</li>
 					<li>JMX acquisition,</li>
