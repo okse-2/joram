@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -41,16 +41,12 @@ public class TcpServer {
 
   private AgentId serverId;
 
-  public TcpServer(ServerSocket listen,
-                   int poolSize,
-                   int timeout,
-                   AgentId serverId) {
+  public TcpServer(ServerSocket listen, int poolSize, int timeout, AgentId serverId) {
     this.listen = listen;
     this.monitors = new Monitor[poolSize];
     this.serverId = serverId;
     for (int i = 0; i < monitors.length; i++) {
-      monitors[i] = new Monitor(
-        "JndiServer.Monitor#" + i, timeout, this);
+      monitors[i] = new Monitor("JndiServer.Monitor#" + i, timeout, this);
       monitors[i].setDaemon(true);
       monitors[i].setThreadGroup(AgentServer.getThreadGroup());
     }
@@ -66,13 +62,16 @@ public class TcpServer {
     if (Trace.logger.isLoggable(BasicLevel.DEBUG))
       Trace.logger.log(
         BasicLevel.DEBUG, "TcpServer.stop()");
+    for (int i = 0; i < monitors.length; i++) {
+      monitors[i].stopping = true;
+    }
     try {
       listen.close();
       listen = null;
     } catch (Exception exc) {}
     for (int i = 0; i < monitors.length; i++) {
       monitors[i].stop();
-    }    
+    }
   }
 
   public final ServerSocket getListen() {
@@ -88,6 +87,8 @@ public class TcpServer {
     private int timeout;
 
     private TcpServer tcpServer;
+
+    boolean stopping = false;
 
     protected Monitor(String name, int timeout, TcpServer tcpServer) {
       super(name);
@@ -114,9 +115,8 @@ public class TcpServer {
           } catch (IOException exc) {
             canStop = false;
             Thread.interrupted();
-            if (running) {
-              Trace.logger.log(BasicLevel.DEBUG,
-                               this.getName() + ", error during accept", exc);
+            if (running && !stopping) {
+              Trace.logger.log(BasicLevel.DEBUG, this.getName() + ", error during accept", exc);
               try {
                 Thread.sleep(1000);
               } catch (InterruptedException ie) {
@@ -134,15 +134,14 @@ public class TcpServer {
 
           if (Trace.logger.isLoggable(BasicLevel.DEBUG)) {
             Trace.logger.log(BasicLevel.DEBUG,
-                             this.getName() + ", connection from " + socket.getInetAddress() + ':' + socket.getPort());
+                this.getName() + ", connection from " + socket.getInetAddress() + ':' + socket.getPort());
           }
 
           try {
             TcpRequestContext ctx = new TcpRequestContext(socket);
             Channel.sendTo(tcpServer.getServerId(), new TcpRequestNot(ctx));
           } catch (Exception exc) {
-            Trace.logger.log(BasicLevel.ERROR, this.getName()
-                + ", error during send", exc);
+            Trace.logger.log(BasicLevel.ERROR, this.getName() + ", error during send", exc);
             if (socket != null) {
               try {
                 socket.close();
