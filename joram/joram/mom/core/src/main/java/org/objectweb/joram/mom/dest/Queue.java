@@ -1013,14 +1013,33 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
   /**
    * Actually stores a message in the deliverables vector.
    *
-   * @param message  The message to store.
+   * @param msg  The message to store.
    */
-  protected final synchronized void storeMessage(Message message) {
+  protected final synchronized void storeMessage(Message msg) {
+  	Message message = msg;
+  	if (interceptorsAvailable()) {
+  		// interceptors process
+  		org.objectweb.joram.shared.messages.Message m = processInterceptors(msg.getFullMessage());
+  		if (m == null) {
+  			// send message to the DMQ
+  			DMQManager dmqManager = new DMQManager(dmqId, getId());
+        nbMsgsSentToDMQSinceCreation++;
+        dmqManager.addDeadMessage(msg.getFullMessage(), MessageErrorConstants.INTERCEPTORS);
+        dmqManager.sendToDMQ();
+  			msg.releaseFullMessage();
+  			return;
+  		} else {
+  			message = new org.objectweb.joram.mom.messages.Message(m);
+  		}
+  	}
+
     if (addMessage(message)) {
       // Persisting the message.
       setMsgTxName(message);
       message.save();
       message.releaseFullMessage();
+      if (interceptorsAvailable())
+      	msg.releaseFullMessage();
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "Message " + message.getIdentifier() + " stored.");
     }
