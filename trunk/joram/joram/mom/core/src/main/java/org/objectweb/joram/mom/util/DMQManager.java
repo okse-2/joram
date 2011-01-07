@@ -148,6 +148,10 @@ public class DMQManager {
         mess.setProperty(causePropertyName, "Unexpected error");
         mess.setProperty(codePropertyName, new Short(MessageErrorConstants.UNEXPECTED_ERROR));
         break;
+      case MessageErrorConstants.INTERCEPTORS:
+        mess.setProperty(causePropertyName, "Interceptors");
+        mess.setProperty(codePropertyName, new Short(MessageErrorConstants.INTERCEPTORS));
+        break;
       default:
         break;
       }
