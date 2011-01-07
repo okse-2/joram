@@ -26,11 +26,12 @@ import org.objectweb.joram.shared.messages.Message;
 public interface MessageInterceptor {
 
 	/**
-	 * Implement this method to intercept message on server side (in UserAgent).
+	 * Implement this method to intercept message on server side.
 	 *  
-	 * @param msgs  message array (usually one single message) 
-	 * @return true if continue with the nex interceptor.
+	 * @param msg  message 
+	 * @return true if continue with the next interceptor, 
+	 *         false send the message in DMQ.
 	 */
-	boolean handle(Message[] msgs);
+	boolean handle(Message msg);
 
 }

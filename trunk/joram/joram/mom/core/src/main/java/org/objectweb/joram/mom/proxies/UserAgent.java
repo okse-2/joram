@@ -678,29 +678,31 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       	// interceptors process...
       	if (interceptorsOUT != null && !interceptorsOUT.isEmpty()) {
       		if (reply instanceof ConsumerMessages) {
-      			org.objectweb.joram.shared.messages.Message[] m = new org.objectweb.joram.shared.messages.Message[1];
+      			org.objectweb.joram.shared.messages.Message m = null;
       			Vector msgs = ((ConsumerMessages) reply).getMessages();
       			Vector newMsgs = new Vector();
       			Vector acks = new Vector();
       			for (int i = 0; i < msgs.size(); i++) {
-      				m[0] = (org.objectweb.joram.shared.messages.Message) msgs.elementAt(i);
+      				m = (org.objectweb.joram.shared.messages.Message) msgs.elementAt(i);
       				// interceptors iterator
       				Iterator it = interceptorsOUT.iterator();
       				while (it.hasNext()) {
       					MessageInterceptor interceptor = (MessageInterceptor) it.next();
       					// interceptor handle
-      					if (!interceptor.handle(m) || m[0] == null)
+      					if (!interceptor.handle(m)) {
+      						m = null;
       						break;
+      					}
       				}
-      				if (m[0] != null)
-    						newMsgs.add(m[0]);
-      				else
+      				if (m != null) {
+    						newMsgs.add(m);
+      				} else {
       					acks.add(((org.objectweb.joram.shared.messages.Message) msgs.elementAt(i)).id);
+      				// Send the original messages to the user DMQ.
+        				sendToDMQ((org.objectweb.joram.shared.messages.Message) msgs.elementAt(i), MessageErrorConstants.INTERCEPTORS);
+      				}
       			}
       			if (newMsgs.size() == 0 && !msgs.isEmpty()) {  
-      				// no message to send because interceptors set msg to null.
-      				// So send the original messages to the user DMQ.
-      				sendToDMQ(((ConsumerMessages) reply).getMessages(), MessageErrorConstants.UNDELIVERABLE);
       				// ack messages
       				org.objectweb.joram.shared.messages.Message msg = (org.objectweb.joram.shared.messages.Message) msgs.firstElement(); 
       				sendNot(AgentId.fromString(msg.toId), new AcknowledgeRequest(activeCtxId, reply.getCorrelationId(), acks));
@@ -1015,27 +1017,30 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
 
     ProducerMessages pm = req; 
     if (interceptorsIN != null && !interceptorsIN.isEmpty()) {
-    	org.objectweb.joram.shared.messages.Message[] m = new org.objectweb.joram.shared.messages.Message[1];
+    	org.objectweb.joram.shared.messages.Message m = null;
     	Vector msgs = ((ProducerMessages) req).getMessages();
     	Vector newMsgs = new Vector();
     	for (int i = 0; i < msgs.size(); i++) {
-    		m[0] = (org.objectweb.joram.shared.messages.Message) msgs.elementAt(i);
+    		m = (org.objectweb.joram.shared.messages.Message) msgs.elementAt(i);
     		Iterator it = interceptorsIN.iterator();
     		while (it.hasNext()) {
     			MessageInterceptor interceptor = (MessageInterceptor) it.next();
-    			if (!interceptor.handle(m) || m[0] == null)
+    			if (!interceptor.handle(m)) {
+    				m = null;
     				break;
+    			}
     		}
-    		if  (m[0] != null)
-    			newMsgs.add(m[0]);
+    		if (m != null) {
+    			newMsgs.add(m);
+    		} else {
+    			// send the originals messages to the user DMQ.
+    			sendToDMQ((org.objectweb.joram.shared.messages.Message) msgs.elementAt(i), MessageErrorConstants.INTERCEPTORS);
+    		}
     	}
-    	// no message to send. Send reply to the producer and send ProducerMessage to DMQ.
+    	// no message to send. Send reply to the producer.
     	if (newMsgs.size() == 0 && !msgs.isEmpty()) { 
     		if (logger.isLoggable(BasicLevel.DEBUG))
     			logger.log(BasicLevel.DEBUG, "UserAgent.reactToClientRequest : no message to send.");
-    		// send the originals messages to the user DMQ.
-    		sendToDMQ(((ProducerMessages) pm).getMessages(),MessageErrorConstants.UNDELIVERABLE);
-    		
     		if (destId.getTo() == getId().getTo() && !pm.getAsyncSend()) {
     			// send producer reply
     			sendNot(getId(), new SendReplyNot(key, pm.getRequestId()));
@@ -1069,17 +1074,13 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     sendNot(destId, not);
   }
 
-  private void sendToDMQ(List msgs, short messageError) {
+  private void sendToDMQ(org.objectweb.joram.shared.messages.Message msg, short messageError) {
   	if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "sendToDMQ(" + msgs + ',' + messageError + ')');
+  		logger.log(BasicLevel.DEBUG, "sendToDMQ(" + msg + ',' + messageError + ')');
   	DMQManager dmqManager = new DMQManager(dmqId, null);
-		Iterator it = msgs.iterator();
-		while (it.hasNext()) {
-			org.objectweb.joram.shared.messages.Message msg = (org.objectweb.joram.shared.messages.Message) it.next();
-			nbMsgsSentToDMQSinceCreation++;
-			dmqManager.addDeadMessage(msg, messageError);
-		}
-		dmqManager.sendToDMQ();
+  	nbMsgsSentToDMQSinceCreation++;
+  	dmqManager.addDeadMessage(msg, messageError);
+  	dmqManager.sendToDMQ();
   }
   
   private void setDmq(ClientMessages not) {
@@ -2747,6 +2748,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
 				prop = request.getProp();
 				InterceptorsHelper.removeInterceptors((String) prop.get("interceptorsOUT"), interceptorsOUT);
 				InterceptorsHelper.removeInterceptors((String) prop.get("interceptorsIN"), interceptorsIN);
+				if (interceptorsIN != null && interceptorsIN.isEmpty())
+					interceptorsIN = null;
+				if (interceptorsOUT != null && interceptorsOUT.isEmpty())
+					interceptorsOUT = null;
 				break;
 			case AdminCommandConstant.CMD_GET_INTERCEPTORS:
 				replyProp = new Properties();
