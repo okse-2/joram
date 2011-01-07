@@ -22,8 +22,6 @@
  */
 package joram.interceptors;
 
-import java.util.Properties;
-
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Message;
@@ -36,19 +34,17 @@ import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-import org.objectweb.joram.shared.admin.AdminCommandConstant;
-import org.objectweb.joram.shared.admin.AdminCommandReply;
 
 import framework.TestCase;
 
 /**
  * Testing:
  *
- * - Add interceptors IN.
+ * - Add user interceptors IN.
  * The interceptors Exit1 and Exit2 add a property on message.
- * The interceptor Exit3 set msg to null.
+ * The interceptor Exit3 return false.
  * 
- * - Get interceptors, verify it's ok.
+ * - Get user interceptors, verify it's ok.
  * 
  * send and receive message, verify no message receive.
  * read and check the message on the DMQ
@@ -81,28 +77,22 @@ public class Test2 extends TestCase {
       dmq.setFreeWriting();
       user.setDMQId(dmq.getName());
       
-      Properties prop = new Properties();
-      prop.put("interceptorsIN", "joram.interceptors.Exit1,joram.interceptors.Exit2,joram.interceptors.Exit3");
-      AdminModule.processAdmin(user.getProxyId(), AdminCommandConstant.CMD_ADD_INTERCEPTORS, prop);
+      // add interceptors
+      user.addInterceptorsIN("joram.interceptors.Exit1,joram.interceptors.Exit2,joram.interceptors.Exit3");
 
-      AdminCommandReply reply = (AdminCommandReply) AdminModule.processAdmin(user.getProxyId(), AdminCommandConstant.CMD_GET_INTERCEPTORS, null);
-      String in = (String) reply.getProp().get("interceptorsIN");
-
-      assertEquals("joram.interceptors.Exit1,joram.interceptors.Exit2,joram.interceptors.Exit3", in);
+      // get interceptors
+      assertEquals("joram.interceptors.Exit1,joram.interceptors.Exit2,joram.interceptors.Exit3", user.getInterceptorsIN());
       
       ConnectionFactory cf = TcpConnectionFactory.create("localhost", 2560);
 
       Connection connection = cf.createConnection("anonymous", "anonymous"); 
       connection.start();
       
-      //System.out.println("Create a session");
       Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
       
-      //System.out.println("Create a producer");
       MessageProducer producer = session.createProducer(queue);
       
       Session session1 = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      //System.out.println("Create a message listener");
       MessageConsumer consumer = session1.createConsumer(queue);
 
       // create DMQ session
@@ -123,9 +113,7 @@ public class Test2 extends TestCase {
       	assertEquals("test interceptors", msg.getText());
 
       // remove interceptorsIN
-      prop = new Properties();
-      prop.put("interceptorsIN", "joram.interceptors.Exit3");
-      AdminModule.processAdmin(user.getProxyId(), AdminCommandConstant.CMD_REMOVE_INTERCEPTORS, prop);
+      user.removeInterceptorsIN("joram.interceptors.Exit3");
       
       // send message
       producer.send(session.createTextMessage("test interceptors 1"));
@@ -136,9 +124,7 @@ public class Test2 extends TestCase {
       assertEquals("Exit1", message.getStringProperty("interceptor.1"));
       assertEquals("Exit2", message.getStringProperty("interceptor.2"));
       
-      //System.out.println("Concurrent close of the connection");
       connection.stop();
-      //System.out.println("Connection closed");
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);
