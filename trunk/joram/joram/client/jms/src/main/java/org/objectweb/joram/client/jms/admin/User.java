@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -36,6 +36,8 @@ import javax.naming.StringRefAddr;
 
 import org.objectweb.joram.client.jms.Message;
 import org.objectweb.joram.client.jms.Queue;
+import org.objectweb.joram.shared.admin.AdminCommandConstant;
+import org.objectweb.joram.shared.admin.AdminCommandReply;
 import org.objectweb.joram.shared.admin.AdminReply;
 import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.admin.ClearSubscription;
@@ -615,6 +617,82 @@ public class User extends AdministeredObject implements UserMBean {
     return prop;
   }
 
+  /**
+   * add interceptors 
+   * 
+   * @param interceptors list of string className interceptor (separate with ",")
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public void addInterceptorsIN(String interceptors) throws ConnectException, AdminException {
+  	Properties prop = new Properties();
+    prop.put("interceptorsIN", interceptors);
+    getWrapper().processAdmin(getProxyId(), AdminCommandConstant.CMD_ADD_INTERCEPTORS, prop);
+  }
+  
+  /**
+   * get interceptors.
+   * 
+   * @return list of string className interceptor (separate with ",")
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public String getInterceptorsIN() throws ConnectException, AdminException {
+  	AdminCommandReply reply = (AdminCommandReply) AdminModule.processAdmin(getProxyId(), AdminCommandConstant.CMD_GET_INTERCEPTORS, null);
+    return (String) reply.getProp().get("interceptorsIN");
+  }
+  
+  /**
+   * remove interceptors 
+   * 
+   * @param interceptors list of string className interceptor (separate with ",")
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public void removeInterceptorsIN(String interceptors) throws ConnectException, AdminException {
+  	Properties prop = new Properties();
+  	prop.put("interceptorsIN", interceptors);
+  	AdminModule.processAdmin(getProxyId(), AdminCommandConstant.CMD_REMOVE_INTERCEPTORS, prop);
+  }
+  
+  /**
+   * add interceptors
+   * 
+   * @param interceptors list of string className interceptor (separate with ",")
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public void addInterceptorsOUT(String interceptors) throws ConnectException, AdminException {
+  	Properties prop = new Properties();
+    prop.put("interceptorsOUT", interceptors);
+    getWrapper().processAdmin(getProxyId(), AdminCommandConstant.CMD_ADD_INTERCEPTORS, prop);
+  }
+  
+  /**
+   * get interceptors.
+   * 
+   * @return list of string className interceptor (separate with ",")
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public String getInterceptorsOUT() throws ConnectException, AdminException {
+  	AdminCommandReply reply = (AdminCommandReply) AdminModule.processAdmin(getProxyId(), AdminCommandConstant.CMD_GET_INTERCEPTORS, null);
+    return (String) reply.getProp().get("interceptorsOUT");
+  }
+  
+  /**
+   * remove interceptors 
+   * 
+   * @param interceptors list of string className interceptor (separate with ",")
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public void removeInterceptorsOUT(String interceptors) throws ConnectException, AdminException {
+  	Properties prop = new Properties();
+  	prop.put("interceptorsOUT", interceptors);
+  	AdminModule.processAdmin(getProxyId(), AdminCommandConstant.CMD_REMOVE_INTERCEPTORS, prop);
+  }
+  
   /**
    * @deprecated
    */

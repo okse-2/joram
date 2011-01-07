@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -45,6 +45,8 @@ import org.objectweb.joram.client.jms.admin.AdministeredObject;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.admin.XmlSerializer;
 import org.objectweb.joram.shared.DestinationConstants;
+import org.objectweb.joram.shared.admin.AdminCommandConstant;
+import org.objectweb.joram.shared.admin.AdminCommandReply;
 import org.objectweb.joram.shared.admin.AdminReply;
 import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.admin.CreateDestinationReply;
@@ -930,5 +932,41 @@ public abstract class Destination extends AdministeredObject implements javax.jm
   public void decode(Hashtable h) {
     agentId = (String) h.get("agentId");
     type = ((Byte) h.get("type")).byteValue();
+  }
+  
+  /**
+   * add interceptors 
+   * 
+   * @param interceptors list of string className interceptor (separate with ",")
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public void addInterceptors(String interceptors) throws ConnectException, AdminException {
+  	Properties prop = new Properties();
+    prop.put("interceptors", interceptors);
+    getWrapper().processAdmin(getName(), AdminCommandConstant.CMD_ADD_INTERCEPTORS, prop);
+  }
+  
+  /**
+   * @return list of string className interceptor (separate with ",")
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public String getInterceptors() throws ConnectException, AdminException {
+  	AdminCommandReply reply = (AdminCommandReply) AdminModule.processAdmin(getName(), AdminCommandConstant.CMD_GET_INTERCEPTORS, null);
+    return (String) reply.getProp().get("interceptors");
+  }
+  
+  /**
+   * remove interceptors 
+   * 
+   * @param interceptors list of string className interceptor (separate with ",")
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public void removeInterceptors(String interceptors) throws ConnectException, AdminException {
+  	Properties prop = new Properties();
+  	prop.put("interceptors", interceptors);
+  	AdminModule.processAdmin(getName(), AdminCommandConstant.CMD_REMOVE_INTERCEPTORS, prop);
   }
 }
