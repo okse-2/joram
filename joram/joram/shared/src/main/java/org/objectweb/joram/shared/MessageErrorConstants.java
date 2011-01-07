@@ -64,4 +64,9 @@ public interface MessageErrorConstants {
    */
   public static final short UNEXPECTED_ERROR = 6;
   
+  /**
+   * If an interceptors error happened.
+   */
+  public static final short INTERCEPTORS = 7;
+  
 }
