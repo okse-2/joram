@@ -24,6 +24,7 @@
 package org.objectweb.joram.mom.dest;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -46,7 +47,12 @@ import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.mom.proxies.SendRepliesNot;
 import org.objectweb.joram.mom.proxies.SendReplyNot;
 import org.objectweb.joram.mom.util.DMQManager;
+import org.objectweb.joram.mom.util.InterceptorsHelper;
+import org.objectweb.joram.mom.util.MessageInterceptor;
 import org.objectweb.joram.shared.MessageErrorConstants;
+import org.objectweb.joram.shared.admin.AdminCommandConstant;
+import org.objectweb.joram.shared.admin.AdminCommandReply;
+import org.objectweb.joram.shared.admin.AdminCommandRequest;
 import org.objectweb.joram.shared.admin.AdminReply;
 import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.admin.DeleteDestination;
@@ -110,6 +116,9 @@ public abstract class Destination extends Agent implements DestinationMBean {
   
   protected transient WakeUpTask task;
 
+  /** the interceptors list. */
+  private List interceptors = null;
+  
   /**
    * Empty constructor for newInstance().
    */
@@ -957,6 +966,8 @@ public abstract class Destination extends Agent implements DestinationMBean {
 
       replyToTopic(new AdminReply(true, null),
                    not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
+    } else if (adminRequest instanceof AdminCommandRequest) {
+      processAdminCommand((AdminCommandRequest) adminRequest, not.getReplyTo(), not.getRequestMsgId());
     } else {
       logger.log(BasicLevel.ERROR, "Unknown administration request for destination " + getId());
       replyToTopic(new AdminReply(AdminReply.UNKNOWN_REQUEST, null),
@@ -965,5 +976,76 @@ public abstract class Destination extends Agent implements DestinationMBean {
                    not.getReplyMsgId());
       
     }
+  }
+  
+  /**
+   * Proccess an admin command.
+   * 
+   * @param request The administration request.
+   * @param replyTo The destination to reply.
+   * @param requestMsgId The JMS message id needed to reply.
+   */
+  protected void processAdminCommand(AdminCommandRequest request,	AgentId replyTo, String requestMsgId) {
+  	if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "processAdminCommand(" + request + ", " + replyTo + ", " + requestMsgId + ')');
+  	Properties prop = null;
+  	Properties replyProp = null;
+  	try {
+			switch (request.getCommand()) {
+			case AdminCommandConstant.CMD_ADD_INTERCEPTORS:
+				prop = request.getProp();
+				if (interceptors == null)
+					interceptors = new ArrayList();
+				InterceptorsHelper.addInterceptors((String) prop.get("interceptors"), interceptors);
+				break;
+			case AdminCommandConstant.CMD_REMOVE_INTERCEPTORS:
+				prop = request.getProp();
+				InterceptorsHelper.removeInterceptors((String) prop.get("interceptors"), interceptors);
+				if (interceptors.isEmpty())
+					interceptors = null;
+				break;
+			case AdminCommandConstant.CMD_GET_INTERCEPTORS:
+				replyProp = new Properties();
+				replyProp.put("interceptors", InterceptorsHelper.getListInterceptors(interceptors));
+				break;
+
+			default:
+				throw new Exception("Bad command : \"" + request.getCommand() + "\"");
+			}
+			// reply
+			replyToTopic(new AdminCommandReply(true, AdminCommandConstant.commandNames[request.getCommand()] + " done.", replyProp), replyTo, requestMsgId, requestMsgId);
+		} catch (Exception exc) {
+			if (logger.isLoggable(BasicLevel.WARN))
+				logger.log(BasicLevel.WARN, "", exc);
+			replyToTopic(new AdminReply(-1, exc.getMessage()), replyTo, requestMsgId, requestMsgId);
+		}
+  }
+  
+  /**
+   * Interceptors process
+   * 
+   * @param msg the message
+   * @return message potentially modified by the interceptors (message can be null)
+   */
+  protected Message processInterceptors(Message msg) {
+  	if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "processInterceptors(" + msg + ')');
+  	
+  	if (interceptors != null && !interceptors.isEmpty()) {
+  		Iterator it = interceptors.iterator();
+  		while (it.hasNext()) {
+  			MessageInterceptor interceptor = (MessageInterceptor) it.next();
+  			if (!interceptor.handle(msg))
+  				return null;
+  		}
+  	}
+  	return msg;
+  }
+  
+  /**
+   * @return true if interceptors set
+   */
+  protected boolean interceptorsAvailable() {
+  	return interceptors != null && !interceptors.isEmpty();
   }
 }

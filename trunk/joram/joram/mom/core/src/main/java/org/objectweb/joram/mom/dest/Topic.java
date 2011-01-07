@@ -46,7 +46,9 @@ import org.objectweb.joram.mom.notifications.TopicForwardNot;
 import org.objectweb.joram.mom.notifications.TopicMsgsReply;
 import org.objectweb.joram.mom.notifications.UnsubscribeRequest;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
+import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.DestinationConstants;
+import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.admin.AdminReply;
 import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.admin.ClusterAdd;
@@ -586,7 +588,36 @@ public class Topic extends Destination implements TopicMBean {
     Message message;
 
     nbMsgsReceiveSinceCreation = nbMsgsReceiveSinceCreation + messages.size();
-
+    
+    // interceptors process
+    if (interceptorsAvailable()) {
+    	DMQManager dmqManager = null;
+    	List newMessages = new ArrayList();
+    	Iterator it = messages.iterator();
+    	while (it.hasNext()) {
+    		Message m = (Message) it.next();
+    		message = processInterceptors(m);
+    		if (message != null) {
+    			newMessages.add(message);
+    		} else {
+    			//send message to the DMQ
+    			if (dmqManager == null)
+    				dmqManager = new DMQManager(dmqId, getId());
+          nbMsgsSentToDMQSinceCreation++;
+          dmqManager.addDeadMessage(m, MessageErrorConstants.INTERCEPTORS);
+    		}
+    	}
+    	
+    	if (dmqManager != null)
+    		dmqManager.sendToDMQ();
+    	
+    	if (!newMessages.isEmpty()) {
+    		messages = newMessages;
+    	} else {
+    		return;
+    	}
+    }
+    
     setNoSave();
     boolean persistent = false;
 
