@@ -33,9 +33,8 @@ public class Exit3 implements MessageInterceptor {
 
 	 public static Logger logger = Debug.getLogger(Exit3.class.getName());
 	 
-	public boolean handle(Message[] m) {
-		logger.log(BasicLevel.DEBUG, getClass().getName() + " interceptor.Exit3 = " + m[0]);
-		m[0] = null;
+	public boolean handle(Message m) {
+		logger.log(BasicLevel.DEBUG, getClass().getName() + " interceptor.Exit3 = " + m);
 		return false;
 	}
 
