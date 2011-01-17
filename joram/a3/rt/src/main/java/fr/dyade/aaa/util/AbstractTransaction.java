@@ -20,12 +20,21 @@ package fr.dyade.aaa.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamConstants;
 import java.io.Serializable;
 import java.util.Hashtable;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.common.Debug;
 
 /**
  *  The AbstractTransaction class implements the common part of the Transaction
@@ -35,6 +44,19 @@ import java.util.Hashtable;
  * @see Transaction
  */
 public abstract class AbstractTransaction implements Transaction {
+  // Logging monitor
+  protected static Logger logmon = null;
+
+  protected long startTime = 0L;
+
+  /**
+   * Returns the starting time.
+   *
+   * @return The starting time.
+   */
+  public long getStartTime() {
+    return startTime;
+  }
   
   public AbstractTransaction() {}
   
@@ -69,6 +91,61 @@ public abstract class AbstractTransaction implements Transaction {
    */
   protected abstract void setPhase(int newPhase) throws IOException;
 
+  protected File dir = null;
+
+  /**
+   *  ThreadLocal variable used to get the log to associate state with each
+   * thread. The log contains all operations do by the current thread since
+   * the last <code>commit</code>. On commit, its content is added to current
+   * log (clog, memory + disk), then it is freed.
+   */
+  protected ThreadLocal perThreadContext = null;
+
+  public abstract void initRepository() throws IOException;
+
+  public final void init(String path) throws IOException {
+    phase = INIT;
+
+    logmon = Debug.getLogger(Transaction.class.getName());
+    if (logmon.isLoggable(BasicLevel.INFO))
+      logmon.log(BasicLevel.INFO, "Transaction, init():");
+
+    dir = new File(path);
+    if (!dir.exists()) dir.mkdir();
+    if (!dir.isDirectory())
+      throw new FileNotFoundException(path + " is not a directory.");
+
+    // Saves the transaction classname in order to prevent use of a
+    // different one after restart (see AgentServer.init).
+    DataOutputStream ldos = null;
+    try {
+      File tfc = new File(dir, "TFC");
+      if (! tfc.exists()) {
+        ldos = new DataOutputStream(new FileOutputStream(tfc));
+        ldos.writeUTF(getClass().getName());
+        ldos.flush();
+      }
+    } finally {
+      if (ldos != null) ldos.close();
+    }
+
+    initRepository();
+    
+    perThreadContext = new ThreadLocal() {
+      protected synchronized Object initialValue() {
+        return new Context();
+      }
+    };
+    
+    startTime = System.currentTimeMillis();
+
+    if (logmon.isLoggable(BasicLevel.INFO))
+      logmon.log(BasicLevel.INFO, "Transaction, initialized " + startTime);
+
+    /* The Transaction subsystem is ready */
+    setPhase(FREE);
+  }
+  
   /**
    *  Start a transaction validation, the validation phase needs 3 phases: begin, commit
    * and release. The begin ensure the mutual exclusion of the current transaction.
@@ -86,24 +163,20 @@ public abstract class AbstractTransaction implements Transaction {
     setPhase(RUN);
   }
 
-  protected class Context {
-    Hashtable log = null;
-    ByteArrayOutputStream bos = null;
-    ObjectOutputStream oos = null;
+  public class Context {
+    private Hashtable log = null;
+    private ByteArrayOutputStream bos = null;
+    private ObjectOutputStream oos = null;
 
+    public final Hashtable getLog() {
+      return log;
+    }
+    
     Context() {
       log = new Hashtable(15);
       bos = new ByteArrayOutputStream(256);
     }
   }
-
-  /**
-   *  ThreadLocal variable used to get the log to associate state with each
-   * thread. The log contains all operations do by the current thread since
-   * the last <code>commit</code>. On commit, its content is added to current
-   * log (clog, memory + disk), then it is freed.
-   */
-  protected ThreadLocal perThreadContext = null;
 
   /**
    *  The OOS_STREAM_HEADER allows to reset an ObjectOutputStream built on top of
@@ -350,7 +423,7 @@ public abstract class AbstractTransaction implements Transaction {
    */
   public synchronized void release() throws IOException {
     if ((phase != RUN) && (phase != COMMIT) && (phase != ROLLBACK))
-      throw new IllegalStateException("Can not release transaction.");
+      throw new IllegalStateException("Can not release transaction: " + getPhaseInfo() + '.');
 
     // Change the transaction state.
     setPhase(FREE);

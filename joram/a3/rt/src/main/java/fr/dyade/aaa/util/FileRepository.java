@@ -37,7 +37,7 @@ import fr.dyade.aaa.common.Configuration;
  * @see NTransaction
  * @see Repository
  */
-final class FileRepository implements Repository {
+public final class FileRepository implements Repository {
   File dir = null;
 
   /** The number of save operation to repository. */
@@ -98,7 +98,8 @@ final class FileRepository implements Repository {
    */
   private boolean useFileOutputStream;
 
-  FileRepository() {}
+  // Be careful the constructor must be public to allow newInstance from another package.
+  public FileRepository() {}
 
   /**
    * Initializes the repository.

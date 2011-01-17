@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,13 +29,6 @@ public interface DBTransactionMBean extends TransactionMBean {
    * @return The pool size for <code>operation</code> objects.
    */
   int getLogThresholdOperation();
-
-  /**
-   * Returns the starting time.
-   *
-   * @return The starting time.
-   */
-  public long getStartTime();
 
   /**
    *

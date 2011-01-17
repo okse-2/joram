@@ -42,7 +42,7 @@ import java.sql.SQLException;
  * @see NTransaction
  * @see Repository
  */
-final class DBRepository implements Repository {
+public final class DBRepository implements Repository {
   String driver = "org.apache.derby.jdbc.EmbeddedDriver";
   String connurl = "jdbc:derby:";
 //   String driver = "org.hsqldb.jdbcDriver";
@@ -96,7 +96,8 @@ final class DBRepository implements Repository {
   
   Connection conn = null;
   
-  DBRepository() {}
+  // Be careful the constructor must be public to allow newInstance from another package.
+  public DBRepository() {}
 
   PreparedStatement insertStmt = null;
   PreparedStatement updateStmt = null;
