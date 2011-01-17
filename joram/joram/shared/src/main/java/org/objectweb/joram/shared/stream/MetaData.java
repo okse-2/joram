@@ -71,7 +71,7 @@ public class MetaData {
   		String v = reader.readLine();
   		while (v != null) {
   			if (v.contains("version"))
-  				implVersion = v.substring(v.indexOf('=')+1, v.length());
+  				implVersion = (v.substring(v.indexOf('=')+1, v.length())).trim();
   			else if (v.contains("protocol"))
   				protocol = Integer.parseInt(v.substring(v.indexOf('=')+1, v.length()).trim());
   			v = reader.readLine();
@@ -87,7 +87,12 @@ public class MetaData {
   			StringTokenizer st = new StringTokenizer(implVersion, ".");
   			major = Integer.parseInt(st.nextToken());
   			minor = Integer.parseInt(st.nextToken());
-  			build = Integer.parseInt(st.nextToken());
+  			String b = st.nextToken();
+  			//remove -SNAPSHOT
+  			int i = b.indexOf("-");
+  			if (i > 0)
+  				b = b.substring(0, i);
+  			build = Integer.parseInt(b);
   		} catch (Exception e) {
   			if (logger.isLoggable(BasicLevel.DEBUG))
   	      logger.log(BasicLevel.DEBUG, "MetaData.getVersionInResource:: EXCEPTION", e);
