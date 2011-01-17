@@ -93,13 +93,6 @@ public interface NTransactionMBean extends TransactionMBean {
   public int getGarbageCount();
 
   /**
-   * Returns the starting time.
-   *
-   * @return The starting time.
-   */
-  public long getStartTime();
-
-  /**
    * Returns the cumulated time of garbage operations.
    *
    * @return The cumulated time of garbage operations.
@@ -147,13 +140,6 @@ public interface NTransactionMBean extends TransactionMBean {
    * Garbage the log file.
    */
   public void garbage();
-
-  /**
-   *
-   */
-  public int getPhase();
-
-  public String getPhaseInfo();
 
   public String getRepositoryImpl();
 

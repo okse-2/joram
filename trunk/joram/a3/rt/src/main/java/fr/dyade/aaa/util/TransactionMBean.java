@@ -35,4 +35,11 @@ public interface TransactionMBean {
   public int getPhase();
 
   public String getPhaseInfo();
+
+  /**
+   * Returns the starting time.
+   *
+   * @return The starting time.
+   */
+  public long getStartTime();
 }

@@ -22,10 +22,8 @@
 package fr.dyade.aaa.util;
 
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Enumeration;
@@ -34,11 +32,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Configuration;
 import fr.dyade.aaa.common.Debug;
-import fr.dyade.aaa.common.Pool;
 
 /**
  *  The NTransaction class implements a transactional storage.
@@ -57,9 +53,6 @@ import fr.dyade.aaa.common.Pool;
  * @see MySqlDBRepository
  */
 public final class NTransaction extends AbstractTransaction implements NTransactionMBean {
-  // Logging monitor
-  private static Logger logmon = null;
-
   /**
    *  Global in memory log initial capacity, by default 4096.
    *  This value can be adjusted for a particular server by setting
@@ -266,17 +259,6 @@ public final class NTransaction extends AbstractTransaction implements NTransact
     }
   }
 
-  long startTime = 0L;
-
-  /**
-   * Returns the starting time.
-   *
-   * @return The starting time.
-   */
-  public long getStartTime() {
-    return startTime;
-  }
-
   /**
    * Returns the cumulated time of garbage operations since starting up.
    *
@@ -350,8 +332,6 @@ public final class NTransaction extends AbstractTransaction implements NTransact
   public int getNbLoadedObjects() {
     return repository.getNbLoadedObjects();
   }
-  
-  File dir = null;
 
   LogFile logFile = null;
 
@@ -370,39 +350,13 @@ public final class NTransaction extends AbstractTransaction implements NTransact
     return true;
   }
 
-  public final void init(String path) throws IOException {
-    phase = INIT;
-
+  public final void initRepository() throws IOException {
     LogMemoryCapacity = Configuration.getInteger("NTLogMemoryCapacity", LogMemoryCapacity).intValue();
     MaxLogFileSize = Configuration.getInteger("NTLogFileSize", MaxLogFileSize / Mb).intValue() * Mb;
     MaxLogMemorySize = Configuration.getInteger("NTLogMemorySize", MaxLogMemorySize / Kb).intValue() * Kb;
 
     LogThresholdOperation = Configuration.getInteger("NTLogThresholdOperation", LogThresholdOperation).intValue();
-    Operation.pool = new Pool("NTransaction$Operation", LogThresholdOperation);
-
-    logmon = Debug.getLogger(Transaction.class.getName());
-    if (logmon.isLoggable(BasicLevel.INFO))
-      logmon.log(BasicLevel.INFO, "NTransaction, init():" +
-                 (MaxLogFileSize /Mb) + '/' + (MaxLogMemorySize /Kb));
-
-    dir = new File(path);
-    if (!dir.exists()) dir.mkdir();
-    if (!dir.isDirectory())
-      throw new FileNotFoundException(path + " is not a directory.");
-
-    // Saves the transaction classname in order to prevent use of a
-    // different one after restart (see AgentServer.init).
-    DataOutputStream ldos = null;
-    try {
-      File tfc = new File(dir, "TFC");
-      if (! tfc.exists()) {
-        ldos = new DataOutputStream(new FileOutputStream(tfc));
-        ldos.writeUTF(getClass().getName());
-        ldos.flush();
-      }
-    } finally {
-      if (ldos != null) ldos.close();
-    }
+    Operation.initPool(LogThresholdOperation);
 
     try {
       repositoryImpl = System.getProperty("NTRepositoryImpl", repositoryImpl);
@@ -422,24 +376,10 @@ public final class NTransaction extends AbstractTransaction implements NTransact
       throw new IOException(exc.getMessage());
     }
     logFile = new LogFile(dir, repository);
-
-    perThreadContext = new ThreadLocal() {
-      protected synchronized Object initialValue() {
-        return new Context();
-      }
-    };
     
     // Be careful, setGarbageDelay and garbageAsync use logFile !!
     setGarbageDelay(Configuration.getInteger("NTGarbageDelay", getGarbageDelay()).intValue());
     garbageAsync(Configuration.getBoolean("NTAsyncGarbage"));
-
-    startTime = System.currentTimeMillis();
-
-    if (logmon.isLoggable(BasicLevel.INFO))
-      logmon.log(BasicLevel.INFO, "NTransaction, initialized " + startTime);
-
-    /* The Transaction subsystem is ready */
-    setPhase(FREE);
   }
 
   /**
@@ -565,7 +505,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
   private final byte[] getFromLog(String dirName, String name) throws IOException {
     // First searches in the logs a new value for the object.
     Object key = OperationKey.newKey(dirName, name);
-    byte[] buf = getFromLog(((Context) perThreadContext.get()).log, key);
+    byte[] buf = getFromLog(((Context) perThreadContext.get()).getLog(), key);
     if (buf != null) return buf;
     
     if ((buf = getFromLog(logFile.log, key)) != null) {
@@ -603,7 +543,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
 
     Object key = OperationKey.newKey(dirName, name);
 
-    Hashtable log = ((Context) perThreadContext.get()).log;
+    Hashtable log = ((Context) perThreadContext.get()).getLog();
     Operation op = Operation.alloc(Operation.DELETE, dirName, name);
     Operation old = (Operation) log.put(key, op);
     if (old != null) {
@@ -619,7 +559,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, "NTransaction, commit(" + release + ')');
     
-    Hashtable log = ((Context) perThreadContext.get()).log;
+    Hashtable log = ((Context) perThreadContext.get()).getLog();
     if (! log.isEmpty()) {
       logFile.commit(log);
       log.clear();

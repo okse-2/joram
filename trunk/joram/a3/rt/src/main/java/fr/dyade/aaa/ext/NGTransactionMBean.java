@@ -20,12 +20,14 @@
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
-package fr.dyade.aaa.util;
+package fr.dyade.aaa.ext;
+
+import fr.dyade.aaa.util.TransactionMBean;
 
 /**
  *
  */
-public interface NGTransactionMBean {
+public interface NGTransactionMBean extends TransactionMBean {
 
   /**
    * Returns the initial capacity of global in memory log (by default 4096).
@@ -98,13 +100,6 @@ public interface NGTransactionMBean {
   public int getNbLoadedFromLog();
 
   /**
-   * Returns the starting time.
-   *
-   * @return The starting time.
-   */
-  public long getStartTime();
-
-  /**
    * Returns the cumulated time of garbage operations.
    *
    * @return The cumulated time of garbage operations.
@@ -130,12 +125,6 @@ public interface NGTransactionMBean {
 //   */
 //  public void garbage();
 
-  /**
-   *
-   */
-  public int getPhase();
-
-  public String getPhaseInfo();
 
   public String getRepositoryImpl();
 

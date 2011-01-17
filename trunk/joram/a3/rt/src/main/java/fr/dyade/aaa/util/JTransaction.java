@@ -39,7 +39,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
 import fr.dyade.aaa.common.Configuration;
-import fr.dyade.aaa.common.Pool;
 
 /**
  *  The JTransaction class implements a transactionnal storage.
@@ -49,6 +48,17 @@ import fr.dyade.aaa.common.Pool;
  * @see Transaction
  */
 public final class JTransaction implements Transaction, JTransactionMBean {
+  protected long startTime = 0L;
+
+  /**
+   * Returns the starting time.
+   *
+   * @return The starting time.
+   */
+  public long getStartTime() {
+    return startTime;
+  }
+
   public static final String EMPTY_STRING = new String();
 
   /**
@@ -101,7 +111,7 @@ public final class JTransaction implements Transaction, JTransactionMBean {
     }
 
     LogThresholdOperation = Configuration.getInteger("LogThresholdOperation", LogThresholdOperation).intValue();
-    Operation.pool = new Pool("JTransaction$Operation", LogThresholdOperation);
+    Operation.initPool(LogThresholdOperation);
 
     // Read the log, then...
     int oldPhase = FREE;
@@ -132,6 +142,9 @@ public final class JTransaction implements Transaction, JTransactionMBean {
       }
       _commit();
     }
+    
+    startTime = System.currentTimeMillis();
+
     setPhase(FREE);
   }
 

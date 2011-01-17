@@ -93,7 +93,7 @@ import fr.dyade.aaa.common.Debug;
  * @see NTransaction
  * @see Repository
  */
-final class MySqlDBRepository implements Repository {
+public final class MySqlDBRepository implements Repository {
   /*
   String driver = "org.apache.derby.jdbc.EmbeddedDriver";
   String connurl = "jdbc:derby:";
@@ -159,7 +159,8 @@ final class MySqlDBRepository implements Repository {
   
   Connection conn = null;
   
-  MySqlDBRepository() {}
+  // Be careful the constructor must be public to allow newInstance from another package.
+  public MySqlDBRepository() {}
 
   PreparedStatement insertStmt = null;
   PreparedStatement updateStmt = null;

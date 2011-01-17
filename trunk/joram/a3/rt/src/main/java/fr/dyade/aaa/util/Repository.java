@@ -27,7 +27,10 @@ import java.io.IOException;
 /**
  *  This interface defines a repository for serializable objects and bytes
  * array.
- *
+ * 
+ *  Note: Be careful the constructor must be public to allow newInstance from
+ * another package.
+ *  
  * @see NTransaction
  */
 public interface Repository {

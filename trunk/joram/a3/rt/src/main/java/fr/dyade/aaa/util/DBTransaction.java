@@ -21,10 +21,6 @@
  */
 package fr.dyade.aaa.util;
 
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.sql.Connection;
@@ -37,9 +33,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
-import fr.dyade.aaa.agent.Debug;
 import fr.dyade.aaa.common.Pool;
 
 /**
@@ -56,11 +50,6 @@ import fr.dyade.aaa.common.Pool;
  * @see DerbyDBTransaction
  */
 public abstract class DBTransaction extends AbstractTransaction implements DBTransactionMBean {
-  // Logging monitor
-  protected static Logger logmon = null;
-
-  File dir = null;
-
   /**
    *  Number of pooled operation, by default 1000.
    *  This value can be adjusted for a particular server by setting
@@ -80,17 +69,6 @@ public abstract class DBTransaction extends AbstractTransaction implements DBTra
     return LogThresholdOperation;
   }
 
-  long startTime = 0L;
-
-  /**
-   * Returns the starting time.
-   *
-   * @return The starting time.
-   */
-  public long getStartTime() {
-    return startTime;
-  }
-
   protected Connection conn = null;
 
   private PreparedStatement insertStmt = null;
@@ -99,34 +77,7 @@ public abstract class DBTransaction extends AbstractTransaction implements DBTra
 
   public DBTransaction() {}
 
-  public void init(String path) throws IOException {
-    phase = INIT;
-
-    logmon = Debug.getLogger(Transaction.class.getName());
-    if (logmon.isLoggable(BasicLevel.INFO))
-      logmon.log(BasicLevel.INFO, "DBTransaction, init()");
-
-    dir = new File(path);
-    if (!dir.exists())
-      dir.mkdir();
-    if (!dir.isDirectory())
-      throw new FileNotFoundException(path + " is not a directory.");
-
-    // Saves the transaction classname in order to prevent use of a
-    // different one after restart (see AgentServer.init).
-    DataOutputStream ldos = null;
-    try {
-      File tfc = new File(dir, "TFC");
-      if (!tfc.exists()) {
-        ldos = new DataOutputStream(new FileOutputStream(tfc));
-        ldos.writeUTF(getClass().getName());
-        ldos.flush();
-      }
-    } finally {
-      if (ldos != null)
-        ldos.close();
-    }
-
+  public void initRepository() throws IOException {
     initDB();
 
     try {
@@ -137,20 +88,6 @@ public abstract class DBTransaction extends AbstractTransaction implements DBTra
       sqle.printStackTrace();
       throw new IOException(sqle.getMessage());
     }
-
-    perThreadContext = new ThreadLocal() {
-        protected synchronized Object initialValue() {
-          return new Context();
-        }
-      };
-
-    startTime = System.currentTimeMillis();
-
-    if (logmon.isLoggable(BasicLevel.INFO))
-      logmon.log(BasicLevel.INFO, "DBTransaction, initialized " + startTime);
-
-    /* The Transaction subsystem is ready */
-    setPhase(FREE);
   }
 
   /**
@@ -256,7 +193,7 @@ public abstract class DBTransaction extends AbstractTransaction implements DBTra
       logmon.log(BasicLevel.DEBUG, "DBTransaction, loadByteArray(" + fname + ")");
 
     // Searchs in the log a new value for the object.
-    Hashtable log = ((Context) perThreadContext.get()).log;
+    Hashtable log = ((Context) perThreadContext.get()).getLog();
     DBOperation op = (DBOperation) log.get(fname);
     if (op != null) {
       if (op.type == DBOperation.SAVE) {
@@ -293,7 +230,7 @@ public abstract class DBTransaction extends AbstractTransaction implements DBTra
       logmon.log(BasicLevel.DEBUG,
                  "DBTransaction, delete(" + fname + ")");
 
-    Hashtable log = ((Context) perThreadContext.get()).log;
+    Hashtable log = ((Context) perThreadContext.get()).getLog();
     DBOperation op = DBOperation.alloc(DBOperation.DELETE, fname);
     op = (DBOperation) log.put(fname, op);
     if (op != null) op.free();
@@ -306,7 +243,7 @@ public abstract class DBTransaction extends AbstractTransaction implements DBTra
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, "DBTransaction, commit");
     
-    Hashtable log = ((Context) perThreadContext.get()).log;
+    Hashtable log = ((Context) perThreadContext.get()).getLog();
     if (! log.isEmpty()) {
       DBOperation op = null;
       for (Enumeration e = log.elements(); e.hasMoreElements(); ) {

@@ -28,6 +28,16 @@ import java.io.IOException;
 import java.io.Serializable;
 
 public final class NullTransaction implements Transaction, NullTransactionMBean {
+  protected long startTime = 0L;
+
+  /**
+   * Returns the starting time.
+   *
+   * @return The starting time.
+   */
+  public long getStartTime() {
+    return startTime;
+  }
   
   // State of the transaction monitor.
   protected int phase;
@@ -57,6 +67,8 @@ public final class NullTransaction implements Transaction, NullTransactionMBean 
 
   public void init(String path) throws IOException {
     phase = INIT;
+
+    startTime = System.currentTimeMillis();
 
     /* The Transaction subsystem is ready */
     setPhase(FREE);

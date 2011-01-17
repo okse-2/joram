@@ -19,13 +19,11 @@
  * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
-package fr.dyade.aaa.util;
+package fr.dyade.aaa.ext;
 
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
@@ -37,11 +35,15 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Configuration;
 import fr.dyade.aaa.common.Debug;
-import fr.dyade.aaa.common.Pool;
+import fr.dyade.aaa.util.AbstractTransaction;
+import fr.dyade.aaa.util.Operation;
+import fr.dyade.aaa.util.OperationKey;
+import fr.dyade.aaa.util.Repository;
+import fr.dyade.aaa.util.StartWithFilter;
+import fr.dyade.aaa.util.Transaction;
 
 /**
  *  The NGTransaction class implements a transactional storage.
@@ -59,9 +61,6 @@ import fr.dyade.aaa.common.Pool;
  * @see MySqlDBRepository
  */
 public final class NGTransaction extends AbstractTransaction implements NGTransactionMBean {
-  // Logging monitor
-  private static Logger logmon = null;
-
   /**
    *  Global in memory log initial capacity, by default 4096.
    *  This value can be adjusted for a particular server by setting
@@ -267,57 +266,19 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
     return repository.getNbLoadedObjects();
   }
 
-  long startTime = 0L;
-
-  /**
-   * Returns the starting time.
-   *
-   * @return The starting time.
-   */
-  public long getStartTime() {
-    return startTime;
-  }
-
-  File dir = null;
-
   LogManager logManager = null;
 
   Repository repository = null;
 
   public NGTransaction() {}
 
-  public final void init(String path) throws IOException {
-    phase = INIT;
-
-    logmon = Debug.getLogger(Transaction.class.getName());
-    if (logmon.isLoggable(BasicLevel.INFO))
-      logmon.log(BasicLevel.INFO, "NTransaction, init():");
-
+  public final void initRepository() throws IOException {
     LogMemoryCapacity = Configuration.getInteger("Transaction.LogMemoryCapacity", LogMemoryCapacity).intValue();
     MaxLogFileSize = Configuration.getInteger("Transaction.MaxLogFileSize", MaxLogFileSize / Mb).intValue() * Mb;
     nbLogFile = Configuration.getInteger("Transaction.NbLogFile", nbLogFile).intValue();
 
     LogThresholdOperation = Configuration.getInteger("Transaction.LogThresholdOperation", LogThresholdOperation).intValue();
-    Operation.pool = new Pool("Transaction$Operation", LogThresholdOperation);
-
-    dir = new File(path);
-    if (!dir.exists()) dir.mkdir();
-    if (!dir.isDirectory())
-      throw new FileNotFoundException(path + " is not a directory.");
-
-    // Saves the transaction classname in order to prevent use of a
-    // different one after restart (see AgentServer.init).
-    DataOutputStream ldos = null;
-    try {
-      File tfc = new File(dir, "TFC");
-      if (! tfc.exists()) {
-        ldos = new DataOutputStream(new FileOutputStream(tfc));
-        ldos.writeUTF(getClass().getName());
-        ldos.flush();
-      }
-    } finally {
-      if (ldos != null) ldos.close();
-    }
+    Operation.initPool(LogThresholdOperation);
 
     try {
       repositoryImpl = Configuration.getProperty("Transaction.RepositoryImpl", repositoryImpl);
@@ -337,20 +298,6 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
       throw new IOException(exc.getMessage());
     }
     logManager = new LogManager(dir, repository);
-
-    perThreadContext = new ThreadLocal() {
-      protected synchronized Object initialValue() {
-        return new Context();
-      }
-    };
-    
-    startTime = System.currentTimeMillis();
-
-    if (logmon.isLoggable(BasicLevel.INFO))
-      logmon.log(BasicLevel.INFO, "NTransaction, initialized " + startTime);
-
-    /* The Transaction subsystem is ready */
-    setPhase(FREE);
   }
 
   /**
@@ -441,7 +388,7 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
   private final synchronized byte[] getFromLog(String dirName, String name) throws IOException {
     // First searches in the current transaction log a new value for the object.
     Object key = OperationKey.newKey(dirName, name);
-    byte[] buf = getFromLog(((Context) perThreadContext.get()).log, key);
+    byte[] buf = getFromLog(((Context) perThreadContext.get()).getLog(), key);
     if (buf != null) return buf;
     
     // Then search in the log files and repository.
@@ -473,7 +420,7 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
 
     Object key = OperationKey.newKey(dirName, name);
 
-    Hashtable log = ((Context) perThreadContext.get()).log;
+    Hashtable log = ((Context) perThreadContext.get()).getLog();
     Operation op = Operation.alloc(Operation.DELETE, dirName, name);
     Operation old = (Operation) log.put(key, op);
     if (old != null) {
@@ -492,7 +439,7 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
     // TODO (AF): Only the call to logManager.commit and the phase change needs to
     // be synchronized..
     
-    Hashtable log = ((Context) perThreadContext.get()).log;
+    Hashtable log = ((Context) perThreadContext.get()).getLog();
     if (! log.isEmpty()) {
       logManager.commit(log);
       log.clear();

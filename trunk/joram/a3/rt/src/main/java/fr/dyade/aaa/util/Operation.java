@@ -33,28 +33,28 @@ public class Operation implements Serializable {
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
-  static final int SAVE = 1;
-  static final int CREATE = 4;
-  static final int DELETE = 2;
-  static final int NOOP = 5;  // Create then delete
-  static final int COMMIT = 3;
-  static final int END = 127;
+  public static final int SAVE = 1;
+  public static final int CREATE = 4;
+  public static final int DELETE = 2;
+  public static final int NOOP = 5;  // Create then delete
+  public static final int COMMIT = 3;
+  public static final int END = 127;
  
   /** Type of the operation. */
-  int type;
+  public int type;
   /** Relative path of the object if any, null otherwise. */
-  String dirName;
+  public String dirName;
   /** Name of the object */
-  String name;
+  public String name;
   /** Binary representation of the object (only for create and save operation). */
-  byte[] value;
+  public byte[] value;
 
   // Actually the value below are only needed for NGTransaction
   
   // Index of the log file recording the operation.
-  int logidx;
+  public int logidx;
   // Pointer of the operation in the log file.
-  int logptr;
+  public int logptr;
 
   private Operation(int type, String dirName, String name, byte[] value) {
     this.type = type;
@@ -81,15 +81,19 @@ public class Operation implements Serializable {
     return strbuf.toString();
   }
 
-  static Pool pool = null;
+  private static Pool pool = null;
+  
+  public static void initPool(int LogThresholdOperation) {
+    pool = new Pool("Transaction$Operation", LogThresholdOperation);
+  }
 
-  static Operation alloc(int type, String dirName, String name) {
+  public static Operation alloc(int type, String dirName, String name) {
     return alloc(type, dirName, name, null);
   }
 
-  static Operation alloc(int type,
-                         String dirName, String name,
-                         byte[] value) {
+  public static Operation alloc(int type,
+                                String dirName, String name,
+                                byte[] value) {
     Operation op = null;
     
     try {
@@ -104,7 +108,7 @@ public class Operation implements Serializable {
     return op;
   }
 
-  void free() {
+  public void free() {
     /* to let gc do its work */
     dirName = null;
     name = null;

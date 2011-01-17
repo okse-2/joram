@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -37,15 +37,8 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.agent.Debug;
-import fr.dyade.aaa.common.Pool;
 
 public final class ATransaction extends AbstractTransaction implements ATransactionMBean, Runnable {
-
-  private static Logger logmon = null;
-
   final static int CLEANUP_THRESHOLD_COMMIT = 9600;
   final static int CLEANUP_THRESHOLD_OPERATION = 36000;
   final static int CLEANUP_THRESHOLD_SIZE = 8 * Mb;
@@ -65,8 +58,6 @@ public final class ATransaction extends AbstractTransaction implements ATransact
    * operation it contents on disk, then it deletes it.
    */
   private Hashtable plog = null;
-
-  private File dir = null;
 
   static private final String LOCK = "lock";
   static private final String LOG = "log";
@@ -90,45 +81,20 @@ public final class ATransaction extends AbstractTransaction implements ATransact
     return true;
   }
 
-  public final void init(String path) throws IOException {
-    phase = INIT;
-
-    Operation.pool = new Pool("Atransaction$Operation", CLEANUP_THRESHOLD_OPERATION);
-
-    logmon = Debug.getLogger(Transaction.class.getName());
-    if (logmon.isLoggable(BasicLevel.INFO))
-      logmon.log(BasicLevel.INFO, "ATransaction, init()");
+  public final void initRepository() throws IOException {
+    Operation.initPool(CLEANUP_THRESHOLD_OPERATION);
 
     //  Search for log files: plog then clog, reads it, then apply all
     // committed operation, finally deletes it.
-    dir = new File(path);
-    if (!dir.exists()) dir.mkdir();
-    if (!dir.isDirectory())
-      throw new FileNotFoundException(path + " is not a directory.");
 
-    // Saves the transaction classname in order to prevent use of a
-    // different one after restart (see AgentServer.init).
-    DataOutputStream ldos = null;
-    try {
-      lockFile = new File(dir, LOCK);
-      if (! lockFile.createNewFile()) {
-        logmon.log(BasicLevel.FATAL,
-                   "ATransaction.init(): " +
-                   "Either the server is already running, " + 
-                   "either you have to remove lock file: " +
-                   lockFile.getAbsolutePath());
-        throw new IOException("Transaction already running.");
-      }
-      lockFile.deleteOnExit();
-      File tfc = new File(dir, "TFC");
-      if (! tfc.exists()) {
-        ldos = new DataOutputStream(new FileOutputStream(tfc));
-        ldos.writeUTF(getClass().getName());
-        ldos.flush();
-      }
-    } finally {
-      if (ldos != null) ldos.close();
+    lockFile = new File(dir, LOCK);
+    if (! lockFile.createNewFile()) {
+      logmon.log(BasicLevel.FATAL,
+                 "ATransaction.init(): Either the server is already running, " + 
+                 "either you have to remove lock file: " + lockFile.getAbsolutePath());
+      throw new IOException("Transaction already running.");
     }
+    lockFile.deleteOnExit();
 
     logFilePN = new File(dir, LOG);
     plogFilePN = new File(dir, PLOG);
@@ -140,12 +106,6 @@ public final class ATransaction extends AbstractTransaction implements ATransact
 
     plogFilePN.delete();
     logFilePN.delete();
-
-    perThreadContext = new ThreadLocal() {
-      protected synchronized Object initialValue() {
-        return new Context();
-      }
-    };
 
     clog = new Hashtable(CLEANUP_THRESHOLD_OPERATION / 2);
     plog = new Hashtable(CLEANUP_THRESHOLD_OPERATION / 2);
@@ -159,12 +119,6 @@ public final class ATransaction extends AbstractTransaction implements ATransact
     garbage = false;
     gThread = new Thread(this, "TGarbage");
     gThread.start();
-
-    if (logmon.isLoggable(BasicLevel.INFO))
-      logmon.log(BasicLevel.INFO, "ATransaction, initialized");
-
-    /* The Transaction subsystem is ready */
-    setPhase(FREE);
   }
 
   private final void restart(Hashtable log, File logFilePN) throws IOException {
@@ -274,7 +228,7 @@ public final class ATransaction extends AbstractTransaction implements ATransact
   private final byte[] getFromLog(String dirName, String name) throws IOException {
     // First searchs in the logs a new value for the object.
     Object key = OperationKey.newKey(dirName, name);
-    byte[] buf = getFromLog(((Context) perThreadContext.get()).log, key);
+    byte[] buf = getFromLog(((Context) perThreadContext.get()).getLog(), key);
     if (buf != null) return buf;
 
     if (((buf = getFromLog(clog, key)) != null) ||
@@ -317,7 +271,7 @@ public final class ATransaction extends AbstractTransaction implements ATransact
   public final void delete(String dirName, String name) {
     Object key = OperationKey.newKey(dirName, name);
 
-    Hashtable log = ((Context) perThreadContext.get()).log;
+    Hashtable log = ((Context) perThreadContext.get()).getLog();
     Operation op = Operation.alloc(Operation.DELETE, dirName, name);
     op = (Operation) log.put(key, op);
     if (op != null) op.free();
@@ -336,7 +290,7 @@ public final class ATransaction extends AbstractTransaction implements ATransact
       logmon.log(BasicLevel.DEBUG, "ATransaction, commit");
 
     commitCount += 1; // AF: Monitoring
-    Hashtable log = ((Context) perThreadContext.get()).log;
+    Hashtable log = ((Context) perThreadContext.get()).getLog();
     if (! log.isEmpty()) {
       Operation op = null;
       for (Enumeration e = log.elements(); e.hasMoreElements(); ) {
@@ -402,7 +356,7 @@ public final class ATransaction extends AbstractTransaction implements ATransact
       logmon.log(BasicLevel.DEBUG, "ATransaction, rollback");
 
     setPhase(ROLLBACK);
-    ((Context) perThreadContext.get()).log.clear();
+    ((Context) perThreadContext.get()).getLog().clear();
   }
 
   public final synchronized void release() throws IOException {
@@ -417,10 +371,14 @@ public final class ATransaction extends AbstractTransaction implements ATransact
         garbage = true;
         // Change the transaction state.
         setPhase(GARBAGE);
+        // wake-up an eventually user's thread in begin
         lock.notify();
       }
     } else {
-      super.release();
+      // Change the transaction state.
+      setPhase(FREE);
+      // wake-up an eventually user's thread in begin
+      notify();
     }
   }
 
@@ -599,6 +557,13 @@ public final class ATransaction extends AbstractTransaction implements ATransact
     }
   }
 
+  private synchronized void _release() throws IOException {
+    // Change the transaction state.
+    setPhase(FREE);
+    // wake-up an eventually user's thread in begin
+    notify();
+  }
+
   private final void wakeup() throws IOException {
     if (logmon.isLoggable(BasicLevel.INFO))
       logmon.log(BasicLevel.INFO,
@@ -615,7 +580,7 @@ public final class ATransaction extends AbstractTransaction implements ATransact
     logFilePN.renameTo(plogFilePN);
     newLogFile();
 
-    super.release();
+    _release();
 
     commit(plog);
     // commit clears the log and frees Operations object.
