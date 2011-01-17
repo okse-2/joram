@@ -348,7 +348,8 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     NbMaxAgents = AgentServer.getInteger("NbMaxAgents", NbMaxAgents).intValue();
     qin = new MessageVector(name, AgentServer.getTransaction().isPersistent());
     mq = new Queue();
-
+    agentProfiling = AgentServer.getBoolean("AgentProfiling");
+    
     isRunning = false;
     canStop = false;
     thread = null;
@@ -869,12 +870,27 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   protected boolean needToBeCommited = false;
   protected long timeout = Long.MAX_VALUE;
 
+  /**
+   * Boolean value indicating if the agent profiling is on.
+   * If true, the cumulative time of reaction and commit is kept for each agent.
+   * In addition the total reaction and commit time is calculated for this engine.
+   */
   public boolean agentProfiling = false;
   
+  /**
+   * Returns true if the agent profiling is on.
+   * 
+   * @see fr.dyade.aaa.agent.EngineMBean#isAgentProfiling()
+   */
   public boolean isAgentProfiling() {
     return this.agentProfiling;
   }
   
+  /**
+   * Sets the agent profiling.
+   * 
+   * @see fr.dyade.aaa.agent.EngineMBean#setAgentProfiling(boolean)
+   */
   public void setAgentProfiling(boolean agentProfiling) {
     this.agentProfiling = agentProfiling;
   }
@@ -912,11 +928,13 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     try {
       long start = 0L;
       long end = 0L;
+      boolean profiling;
       
       main_loop:
         while (isRunning) {
           agent = null;
           canStop = true;
+          profiling = agentProfiling;
 
           // Get a notification, then execute the right reaction.
           try {
@@ -993,7 +1011,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
             }
           }
 
-          if (agentProfiling) {
+          if (profiling) {
             start = System.currentTimeMillis();
           }
           if (agent != null) {
@@ -1003,7 +1021,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
             try {
               agent.react(msg.from, msg.not);
               agent.reactNb += 1;
-              if (agentProfiling) {
+              if (profiling) {
                 end  = System.currentTimeMillis();
                 agent.reactTime += (end - start);
                 reactTime += (end - start);
@@ -1033,7 +1051,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
           // Commit all changes then continue.
           commit();
 
-          if (agentProfiling) {
+          if (profiling) {
             end  = System.currentTimeMillis();
             if (agent != null)
               agent.commitTime += (end - start);
