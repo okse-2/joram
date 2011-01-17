@@ -62,45 +62,48 @@ public class DumpAttributes {
   public static void dumpAttributes(String name, String path) {
     FileWriter writer = null;
     try {
-      writer = new FileWriter(path, true);
+      Set mBeans = null;
+      try {
+        mBeans = MXWrapper.queryNames(new ObjectName(name));
+      } catch (MalformedObjectNameException exc) {
+        logger.log(BasicLevel.ERROR,
+                   "DumpAttributes.dumpAttributes, bad name: " + name, exc);
+        return;
+      }
+      
+      if (mBeans != null) {
+        writer = new FileWriter(path, true);
+        StringBuffer strbuf = new StringBuffer();
+
+        for (Iterator iterator = mBeans.iterator(); iterator.hasNext();) {
+          ObjectName mBean = (ObjectName) iterator.next();
+
+          // Get all mbean's attributes
+          try {
+            MBeanAttributeInfo[] attributes = MXWrapper.getAttributes(mBean);
+            if (attributes != null) {
+              for (int i = 0; i < attributes.length; i++) {
+                String attname = attributes[i].getName();
+                try {
+                  addRecord(strbuf, mBean, attname, MXWrapper.getAttribute(mBean, attname));
+                } catch (Exception exc) {
+                  logger.log(BasicLevel.ERROR,
+                             "DumpAttributes.dumpAttributes, bad attribute : " + mBean + ":" + attname, exc);
+                }
+              }
+            }
+            writer.write(strbuf.toString());
+            strbuf.setLength(0);
+          } catch (Exception exc) {
+            logger.log(BasicLevel.ERROR, "DumpAttributes.dumpAttributes", exc);
+          }
+        }
+        
+        writer.close();
+      }
     } catch (IOException exc) {
       logger.log(BasicLevel.ERROR,
                  "FileMonitoringTimerTask.<init>, cannot open file \"" + path + "\"", exc);
-    }
-    StringBuffer strbuf = new StringBuffer();
-
-    Set mBeans = null;
-    try {
-      mBeans = MXWrapper.queryNames(new ObjectName(name));
-    } catch (MalformedObjectNameException exc) {
-      logger.log(BasicLevel.ERROR,
-                 "DumpAttributes.dumpAttributes, bad name: " + name, exc);
-    }
-
-    if (mBeans != null) {
-      for (Iterator iterator = mBeans.iterator(); iterator.hasNext();) {
-        ObjectName mBean = (ObjectName) iterator.next();
-
-        // Get all mbean's attributes
-        try {
-          MBeanAttributeInfo[] attributes = MXWrapper.getAttributes(mBean);
-          if (attributes != null) {
-            for (int i = 0; i < attributes.length; i++) {
-              String attname = attributes[i].getName();
-              try {
-                addRecord(strbuf, mBean, attname, MXWrapper.getAttribute(mBean, attname));
-              } catch (Exception exc) {
-                logger.log(BasicLevel.ERROR,
-                           "DumpAttributes.dumpAttributes, bad attribute : " + mBean + ":" + attname, exc);
-              }
-            }
-          }
-          writer.write(strbuf.toString());
-          strbuf.setLength(0);
-        } catch (Exception exc) {
-          logger.log(BasicLevel.ERROR, "DumpAttributes.dumpAttributes", exc);
-        }
-      }
     }
   }
 }
