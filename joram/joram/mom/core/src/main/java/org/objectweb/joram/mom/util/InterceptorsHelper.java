@@ -45,7 +45,7 @@ public class InterceptorsHelper {
 	 * Add the interceptors className list (used by Joram admin).
 	 * 
 	 * @param listInterceptorClassName list of string className interceptors (separate with INTERCEPTOR_CLASS_NAME_SEPARATOR)
-	 * @param interceptors	the interceptors List (maybe IN or OUT)
+	 * @param interceptors	the interceptors List.
 	 * @throws Exception
 	 */
 	public static synchronized void addInterceptors(String listInterceptorClassName, List interceptors) throws Exception {
@@ -75,10 +75,10 @@ public class InterceptorsHelper {
 	}
 
   /**
-   * Remove the interceptor.
+   * Remove the first occurrence of interceptorClassName.
    * 
    * @param interceptorClassName the interceptor to remove.
-	 * @param interceptors	the interceptors List (maybe IN or OUT)
+	 * @param interceptors	the interceptors List.
    * @return true if removed.
    */
   private static boolean removeInterceptor(String interceptorClassName, List interceptors) {
@@ -89,6 +89,7 @@ public class InterceptorsHelper {
   			if (interceptorClassName.equals(it.next().getClass().getName())) {
   				removed=true;
   				it.remove();
+  				break;
   			}
   		}
   	}
@@ -96,10 +97,10 @@ public class InterceptorsHelper {
   }
   
   /**
-   * Remove the interceptors.
+   * Remove the first occurrence of interceptorClassName.
    * 
    * @param listInterceptorClassName list of string className interceptors (separate by INTERCEPTOR_CLASS_NAME_SEPARATOR)
-	 * @param interceptors	the interceptors List (maybe IN or OUT)
+	 * @param interceptors	the interceptors List.
 	 * @throws Exception
    */
   public static synchronized void removeInterceptors(String listInterceptorClassName, List interceptors) throws Exception {
@@ -128,10 +129,50 @@ public class InterceptorsHelper {
   	}
   }
 
+  /**
+   * Replace the first occurrence of oldInterceptorClassName by the newInterceptorClassName.
+   * 
+   * @param newInterceptorClassName the new className interceptor.
+   * @param oldInterceptorClassName the old className interceptor.
+	 * @param interceptors	the interceptors List.
+	 * @return true if replaced.
+	 * @throws Exception
+   */
+  public static synchronized boolean replaceInterceptor(String newInterceptorClassName, String oldInterceptorClassName, List interceptors) throws Exception {
+  	if (newInterceptorClassName != null && oldInterceptorClassName != null && interceptors != null) {
+  		if (logger.isLoggable(BasicLevel.DEBUG))
+  			logger.log(BasicLevel.DEBUG, "replaceInterceptor(" + newInterceptorClassName + ", " + oldInterceptorClassName + ", " + interceptors + ')');
+  		try {
+  			boolean replaced = false;
+  			Iterator it = interceptors.iterator();
+  			while (it.hasNext()) {
+  				MessageInterceptor oldMI = (MessageInterceptor) it.next();
+  				if (oldInterceptorClassName.equals(oldMI.getClass().getName())) {
+  					int index = interceptors.indexOf(oldMI);
+  					interceptors.remove(index);
+  					interceptors.add(index, (MessageInterceptor)Class.forName(newInterceptorClassName).newInstance());
+  					if (logger.isLoggable(BasicLevel.DEBUG))
+  						logger.log(BasicLevel.DEBUG, "replaceInterceptor index = " + index);
+  					replaced=true;
+  					break;
+  				}
+  			}
+  			return replaced;
+  		} catch(Throwable t) {
+  			if (logger.isLoggable(BasicLevel.WARN))
+  				logger.log(BasicLevel.WARN, "replaceInterceptor", t);
+  			StringWriter sw = new StringWriter();
+  			t.printStackTrace(new PrintWriter(sw));
+  			throw new Exception("(" + newInterceptorClassName + " exc=" + sw.toString() + ')');
+  		}
+  	}
+  	return false;
+  }
+  
 	/**
 	 * get the interceptors list.
 	 * 
-	 * @param interceptors  the interceptors List (maybe IN or OUT)
+	 * @param interceptors  the interceptors List.
 	 * @return string representation of interceptors List separate by INTERCEPTOR_CLASS_NAME_SEPARATOR
 	 */
 	public static String getListInterceptors(List interceptors) {
