@@ -943,7 +943,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    */
   public void addInterceptors(String interceptors) throws ConnectException, AdminException {
   	Properties prop = new Properties();
-    prop.put("interceptors", interceptors);
+    prop.put(AdminCommandConstant.INTERCEPTORS, interceptors);
     getWrapper().processAdmin(getName(), AdminCommandConstant.CMD_ADD_INTERCEPTORS, prop);
   }
   
@@ -954,7 +954,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    */
   public String getInterceptors() throws ConnectException, AdminException {
   	AdminCommandReply reply = (AdminCommandReply) AdminModule.processAdmin(getName(), AdminCommandConstant.CMD_GET_INTERCEPTORS, null);
-    return (String) reply.getProp().get("interceptors");
+    return (String) reply.getProp().get(AdminCommandConstant.INTERCEPTORS);
   }
   
   /**
@@ -966,7 +966,22 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    */
   public void removeInterceptors(String interceptors) throws ConnectException, AdminException {
   	Properties prop = new Properties();
-  	prop.put("interceptors", interceptors);
+  	prop.put(AdminCommandConstant.INTERCEPTORS, interceptors);
   	AdminModule.processAdmin(getName(), AdminCommandConstant.CMD_REMOVE_INTERCEPTORS, prop);
+  }
+  
+  /**
+   * replace interceptor
+   * 
+   * @param newInterceptor the new className interceptor.
+   * @param oldInterceptor the old className interceptor.
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public void replaceInterceptor(String newInterceptor, String oldInterceptor) throws ConnectException, AdminException {
+  	Properties prop = new Properties();
+    prop.put(AdminCommandConstant.INTERCEPTORS_NEW, newInterceptor);
+    prop.put(AdminCommandConstant.INTERCEPTORS_OLD, oldInterceptor);
+    getWrapper().processAdmin(getName(), AdminCommandConstant.CMD_REPLACE_INTERCEPTORS, prop);
   }
 }
