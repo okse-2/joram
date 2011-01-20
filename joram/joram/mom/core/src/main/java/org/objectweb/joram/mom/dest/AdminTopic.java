@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -861,8 +861,12 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
         UserAgent proxy = new UserAgent();
         proxy.setName(name);
         proxId = proxy.getId();
-
+        
+      	// set interceptors.
+      	proxy.setInterceptors(request.getProperties());
+        
         try {
+        	// deploy UserAgent
           proxy.deploy();
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG, "doProcess CreateUserRequest:: store (in usersTable) this identity = " + identity);
@@ -877,6 +881,8 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
           strbuf.setLength(0);
         }
         catch (Exception exc) {
+        	if (logger.isLoggable(BasicLevel.ERROR))
+            logger.log(BasicLevel.ERROR, "EXCEPTION:: createUser [" + name + "]", exc);
           throw new RequestException("User proxy not deployed: " + exc);
         }
       }
@@ -1535,7 +1541,13 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
    * @throws UnknownServerException
    */
   private void doProcess(AdminCommandRequest request,	AgentId replyTo, String requestMsgId) throws UnknownServerException {
-  	AgentId targetId = AgentId.fromString(request.getTargetId());
+  	AgentId targetId = null;
+  	try {
+  		targetId = AgentId.fromString(request.getTargetId());
+  	} catch (Exception e) {
+			throw new UnknownServerException(e.getMessage());
+		}
+  	
   	if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "AdminTopic.doProcess(" + request + ',' + replyTo + ',' + requestMsgId + ")   targetId = " + targetId);
 
@@ -1683,7 +1695,7 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
     } catch (Exception e) {
       throw new RequestException(e.getMessage());
     }
-    CreateUserRequest request = new CreateUserRequest(identity, serverId);
+    CreateUserRequest request = new CreateUserRequest(identity, serverId, null);
     FwdAdminRequestNot createNot = new FwdAdminRequestNot(request, null, null);
     Channel.sendTo(getId(), createNot);
   }
