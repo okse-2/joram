@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -539,6 +539,7 @@ public class JoramSaxWrapper extends DefaultHandler {
         name = atts.getValue(ATT_NAME);
         login = atts.getValue(ATT_LOGIN);
         password = atts.getValue(ATT_PASSWORD);
+        properties = null;
         try {
           String value = atts.getValue(ATT_SERVERID);
           if (value == null)
@@ -857,11 +858,11 @@ public class JoramSaxWrapper extends DefaultHandler {
         } else if (rawName.equals(ELT_USER)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
             logger.log(BasicLevel.DEBUG,
-                       "User.create(" + name + "," + login + "," + "-," + serverId + ")");
+                       "User.create(" + name + "," + login + "," + "-," + serverId + " ," + properties + ")");
           
           if (! isSet(login)) login = name;
           if (! isSet(identityClass)) identityClass = SimpleIdentity.class.getName();
-          User user = getWrapper().createUser(login, password, serverId, identityClass);
+          User user = getWrapper().createUser(login, password, serverId, identityClass, properties);
           users.put(name, user);
 
           if (threshold > 0)
@@ -875,6 +876,7 @@ public class JoramSaxWrapper extends DefaultHandler {
                          "User.create(), unknown DMQ: " + dmq);
             }
           }
+          properties = null;
         } else if (rawName.equals(ELT_DESTINATION)) {
           Destination dest = null;
           if (logger.isLoggable(BasicLevel.DEBUG))
