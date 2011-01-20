@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,6 @@
 package org.objectweb.joram.mom.dest;
 
 import java.io.Serializable;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 
@@ -51,18 +50,6 @@ public class DistributionModule implements Serializable {
 
   /** Keep message property name: tells if distributed message is kept in destination. */
   public static final String KEEP_MESSAGE_OPTION = "distribution.keep";
-
-  private static Properties transform(fr.dyade.aaa.common.stream.Properties properties) {
-    if (properties == null)
-      return null;
-    Properties prop = new Properties();
-    Enumeration e = properties.keys();
-    while (e.hasMoreElements()) {
-      String key = (String) e.nextElement();
-      prop.put(key, properties.get(key));
-    }
-    return prop;
-  }
 
   /** Tells if distributed message is kept in destination */
   private boolean keep = false;
@@ -130,7 +117,6 @@ public class DistributionModule implements Serializable {
     for (int i = 0; i < msgs.size(); i++) {
       Message msg = (Message) msgs.get(i);
       try {
-        setProperties(transform(msg.properties));
         distributionHandler.distribute(msg);
       } catch (Exception exc) {
         logger.log(BasicLevel.ERROR, "DistributionModule: distribution error.", exc);
@@ -150,6 +136,16 @@ public class DistributionModule implements Serializable {
     return null;
   }
 
+  /**
+   * Update the properties, resets the distribution properties.
+   * 
+   * @param properties new properties
+   * @throws Exception
+   */
+  public void updateProperties(Properties properties) throws Exception {
+  	setProperties(properties);
+  }
+  
   public void close() {
     distributionHandler.close();
   }
