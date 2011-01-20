@@ -953,8 +953,33 @@ public class AdminWrapper {
   public User createUser(String name, String password,
                          int serverId,
                          String identityClassName) throws ConnectException, AdminException {
+  	return createUser(name, password, serverId, identityClassName, null);
+  }
+  
+  /**
+   * Admin method creating a user for a given server and instantiating the
+   * corresponding <code>User</code> object.
+   * <p>
+   * If the user has already been set on this server, the method simply
+   * returns the corresponding <code>User</code> object. Its fails if the
+   * target server does not belong to the platform, or if a proxy could not
+   * be deployed server side for a new user. 
+   *
+   * @param name                Name of the user.
+   * @param password            Password of the user.
+   * @param serverId            The identifier of the user's server.
+   * @param identityClassName   By default user/password for SimpleIdentity.
+   * @param prop								properties
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException    If the request fails.
+   */ 
+  public User createUser(String name, String password,
+                         int serverId,
+                         String identityClassName,
+                         Properties prop) throws ConnectException, AdminException {
     Identity identity = createIdentity(name, password, identityClassName);
-    AdminReply reply = doRequest(new CreateUserRequest(identity, serverId));
+    AdminReply reply = doRequest(new CreateUserRequest(identity, serverId, prop));
     User user = new User(name, ((CreateUserReply) reply).getProxId());
     
     if (AdminModule.wrapper != this)
