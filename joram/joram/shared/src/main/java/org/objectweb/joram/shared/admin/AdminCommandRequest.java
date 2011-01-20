@@ -80,7 +80,7 @@ public class AdminCommandRequest extends AdminRequest {
   	buff.append("targetId=");
   	buff.append(targetId);
   	buff.append(", command=");
-  	buff.append(command);
+  	buff.append(AdminCommandConstant.commandNames[command]);
   	buff.append(", prop=");
   	buff.append(prop);
   	buff.append(')');
