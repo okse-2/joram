@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,6 @@
  */
 package org.objectweb.joram.mom.dest;
 
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -88,18 +87,6 @@ public class AcquisitionModule implements ReliableTransmitter {
       throw new Exception("Acquisition class " + className
           + " must implement either AcquisitionHandler or AcquisitionDaemon interface.");
     }
-  }
-
-  private static Properties transform(fr.dyade.aaa.common.stream.Properties properties) {
-    if (properties == null)
-      return null;
-    Properties prop = new Properties();
-    Enumeration e = properties.keys();
-    while (e.hasMoreElements()) {
-      String key = (String) e.nextElement();
-      prop.put(key, properties.get(key));
-    }
-    return prop;
   }
 
   /** The acquisition logic. */
@@ -289,41 +276,66 @@ public class AcquisitionModule implements ReliableTransmitter {
       ((AcquisitionHandler) acquisitionHandler).setProperties(props);
     }
   }
-
+  
   /**
-   * In <b>periodic mode</b> (period > 0), a message with non-null properties
-   * will be treated as a new configuration for the destination, and ignored
-   * otherwise.<br>
-   * <br>
-   * In <b>request mode</b>, a message received will launch an acquisition
-   * process with the given message properties or use the last known properties
-   * if empty.<br>
-   * <br>
-   * Destination mode can be changed using the "period" property.
+   * Update the properties.
+   * If daemon stop before resets the acquisition properties.
+   * 
+   * @param properties new properties
+   * @throws Exception
    */
-  public Properties processMessages(ClientMessages cm) {
-    Iterator msgs = cm.getMessages().iterator();
-    Properties lastProperties = null;
-    while (msgs.hasNext()) {
-      Message msg = (Message) msgs.next();
-      // If non-empty, sets the new properties
-      if (msg.properties != null) {
-        lastProperties = AcquisitionModule.transform(msg.properties);
-        if (isDaemon) {
-          ((AcquisitionDaemon) acquisitionHandler).stop();
-          setProperties(lastProperties);
-        } else {
-          setProperties(lastProperties);
-        }
-      }
-      if (!isDaemon && period <= 0) {
-        acquisitionTask = new AcquisitionTask();
-        AgentServer.getTimer().schedule(acquisitionTask, 0);
-      }
-    }
-    return lastProperties;
+  public void updateProperties(Properties properties) throws Exception {
+  	// If non-empty, sets the new properties
+  	if (properties != null) {
+  		if (isDaemon) {
+  			((AcquisitionDaemon) acquisitionHandler).stop();
+  			setProperties(properties);
+  		} else {
+  			setProperties(properties);
+  		}
+  	}
+  	if (!isDaemon && period <= 0) {
+  		acquisitionTask = new AcquisitionTask();
+  		AgentServer.getTimer().schedule(acquisitionTask, 0);
+  	}
   }
 
+  /**
+   * Start the daemon.
+   * 
+   * @param prop properties for start if needed
+   * @return properties for the reply.
+   * @throws Exception
+   */
+  public Properties startHandler(Properties prop) throws Exception { 
+  	if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "AcquisitionModule.startHandler(" + prop + ')');
+    }
+  	// TODO: test is running
+  	if (isDaemon) {
+  		((AcquisitionDaemon) acquisitionHandler).start(prop, this);
+  	}
+  	return null;
+  }
+
+  /**
+   * Stop the daemon.
+   * 
+   * @param prop properties for stop if needed
+   * @return properties for the reply.
+   * @throws Exception
+   */
+  protected Properties stopHandler(Properties prop) throws Exception {
+  	if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "AcquisitionModule.stopHandler(" + prop + ')');
+    }
+  	// TODO: test is running
+  	if (isDaemon) {
+  		((AcquisitionDaemon) acquisitionHandler).stop();
+  	}
+  	return null;
+  }
+  
   public ClientMessages acquisitionNot(AcquisitionNot not, long msgCount) {
     if (logger.isLoggable(BasicLevel.DEBUG)) {
       logger.log(BasicLevel.DEBUG, "AcquisitionModule.acquisitionNot(" + not + ")");
