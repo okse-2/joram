@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -117,7 +117,8 @@ public abstract class Destination extends Agent implements DestinationMBean {
   protected transient WakeUpTask task;
 
   /** the interceptors list. */
-  private List interceptors = null;
+  private String interceptorsStr = null;
+  private transient List interceptors = null;
   
   /**
    * Empty constructor for newInstance().
@@ -156,6 +157,13 @@ public abstract class Destination extends Agent implements DestinationMBean {
       logger.log(BasicLevel.DEBUG, "agentInitialize(" + firstTime + ')');
 
     super.agentInitialize(firstTime);
+    
+    // interceptors
+    if (interceptorsStr != null) {
+    	interceptors = new ArrayList();
+    	InterceptorsHelper.addInterceptors(interceptorsStr, interceptors);
+    }
+    
     initialize(firstTime);
 
     if (getPeriod() > -1)
@@ -316,6 +324,13 @@ public abstract class Destination extends Agent implements DestinationMBean {
       period = -1L;
     } catch (NumberFormatException e) {
       period = -1L;
+    }
+    
+    // interceptors set in destination creation
+    if (prop != null && interceptorsStr == null && prop.containsKey(AdminCommandConstant.INTERCEPTORS)) {
+    	if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, this + ": setProperties interceptors = " + prop.get(AdminCommandConstant.INTERCEPTORS));
+    	interceptorsStr = (String) prop.get(AdminCommandConstant.INTERCEPTORS);
     }
     
     if (logger.isLoggable(BasicLevel.DEBUG))
@@ -786,6 +801,7 @@ public abstract class Destination extends Agent implements DestinationMBean {
     out.writeLong(nbMsgsDeliverSinceCreation);
     out.writeLong(nbMsgsSentToDMQSinceCreation);
     out.writeLong(period);
+    out.writeObject(interceptorsStr);
   }
 
   private void readObject(java.io.ObjectInputStream in)
@@ -802,6 +818,7 @@ public abstract class Destination extends Agent implements DestinationMBean {
     nbMsgsDeliverSinceCreation = in.readLong();
     nbMsgsSentToDMQSinceCreation = in.readLong();
     period = in.readLong();
+    interceptorsStr = (String) in.readObject();
   }
 
   // DestinationMBean interface
@@ -996,17 +1013,44 @@ public abstract class Destination extends Agent implements DestinationMBean {
 				prop = request.getProp();
 				if (interceptors == null)
 					interceptors = new ArrayList();
-				InterceptorsHelper.addInterceptors((String) prop.get("interceptors"), interceptors);
+				InterceptorsHelper.addInterceptors((String) prop.get(AdminCommandConstant.INTERCEPTORS), interceptors);
+				interceptorsStr = InterceptorsHelper.getListInterceptors(interceptors);
+				// state change
+				setSave();
 				break;
 			case AdminCommandConstant.CMD_REMOVE_INTERCEPTORS:
 				prop = request.getProp();
-				InterceptorsHelper.removeInterceptors((String) prop.get("interceptors"), interceptors);
+				InterceptorsHelper.removeInterceptors((String) prop.get(AdminCommandConstant.INTERCEPTORS), interceptors);
+				interceptorsStr = InterceptorsHelper.getListInterceptors(interceptors);
 				if (interceptors.isEmpty())
 					interceptors = null;
+				// state change
+				setSave();
 				break;
 			case AdminCommandConstant.CMD_GET_INTERCEPTORS:
 				replyProp = new Properties();
-				replyProp.put("interceptors", InterceptorsHelper.getListInterceptors(interceptors));
+				replyProp.put(AdminCommandConstant.INTERCEPTORS, InterceptorsHelper.getListInterceptors(interceptors));
+				break;
+			case AdminCommandConstant.CMD_REPLACE_INTERCEPTORS:
+				prop = request.getProp();
+				if (interceptors == null)
+					throw new Exception("interceptors == null.");
+				InterceptorsHelper.replaceInterceptor(
+						((String) prop.get(AdminCommandConstant.INTERCEPTORS_NEW)), 
+						((String) prop.get(AdminCommandConstant.INTERCEPTORS_OLD)), 
+						interceptors);
+						interceptorsStr = InterceptorsHelper.getListInterceptors(interceptors);
+				// state change
+				setSave();
+				break;
+			case AdminCommandConstant.CMD_SET_PROPERTIES:
+				updateProperties(request.getProp());
+				break;
+			case AdminCommandConstant.CMD_START_HANDLER:
+				replyProp = processStartHandler(request.getProp());
+				break;
+			case AdminCommandConstant.CMD_STOP_HANDLER:
+				replyProp = processStopHandler(request.getProp());
 				break;
 
 			default:
@@ -1019,6 +1063,49 @@ public abstract class Destination extends Agent implements DestinationMBean {
 				logger.log(BasicLevel.WARN, "", exc);
 			replyToTopic(new AdminReply(-1, exc.getMessage()), replyTo, requestMsgId, requestMsgId);
 		}
+  }
+  
+  /**
+   * Update properties configuration. 
+   * (overload in specific destination)
+   *  
+   * @param prop properties to update.
+   * @throws Exception
+   */
+  protected void updateProperties(Properties prop) throws Exception { }
+  
+  /**
+   * Start the acquisition queue/topic handler.
+   * 
+   * @param prop properties for start if needed (can be null)
+   * @return properties for the reply.
+   * @throws Exception
+   */
+  protected Properties processStartHandler(Properties prop) throws Exception { 
+  	if (this instanceof AcquisitionQueue) {
+  		return ((AcquisitionQueue) this).startHandler(prop);
+  	} else if (this instanceof AcquisitionTopic) {
+  		return ((AcquisitionTopic) this).startHandler(prop);
+  	} else {
+  		throw new Exception("processStartHandler :: bad destination.");
+  	}
+  }
+  
+  /**
+   * Stop the acquisition queue/topic handler.
+   * 
+   * @param prop properties for start if needed (can be null)
+   * @return properties for the reply.
+   * @throws Exception
+   */
+  protected Properties processStopHandler(Properties prop) throws Exception { 
+  	if (this instanceof AcquisitionQueue) {
+  		return ((AcquisitionQueue) this).stopHandler(prop);
+  	} else if (this instanceof AcquisitionTopic) {
+  		return ((AcquisitionTopic) this).stopHandler(prop);
+  	} else {
+  		throw new Exception("processStopHandler :: bad destination.");
+  	}
   }
   
   /**
