@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -153,4 +153,29 @@ public interface DestinationMBean {
    *         The keys are the name of corresponding attributes.
    */
   public Hashtable getStatistics() throws ConnectException, AdminException;
+  
+  /**
+   * add interceptors 
+   * 
+   * @param interceptors list of string className interceptor (separate with ",")
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public void addInterceptors(String interceptors) throws ConnectException, AdminException;
+  
+  /**
+   * @return list of string className interceptor (separate with ",")
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public String getInterceptors() throws ConnectException, AdminException;
+  
+  /**
+   * remove interceptors 
+   * 
+   * @param interceptors list of string className interceptor (separate with ",")
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public void removeInterceptors(String interceptors) throws ConnectException, AdminException;
 }
