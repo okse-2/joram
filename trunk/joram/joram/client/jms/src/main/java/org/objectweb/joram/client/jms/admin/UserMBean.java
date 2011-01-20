@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -107,4 +107,58 @@ public interface UserMBean {
    
   /** Returns the identifier of the user's proxy. */
   public String getProxyId();
+  
+  /**
+   * add interceptors 
+   * 
+   * @param interceptors list of string className interceptor (separate with ",")
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public void addInterceptorsIN(String interceptors) throws ConnectException, AdminException ;
+  
+  /**
+   * get interceptors.
+   * 
+   * @return list of string className interceptor (separate with ",")
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public String getInterceptorsIN() throws ConnectException, AdminException;
+  
+  /**
+   * remove interceptors 
+   * 
+   * @param interceptors list of string className interceptor (separate with ",")
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public void removeInterceptorsIN(String interceptors) throws ConnectException, AdminException;
+  
+  /**
+   * add interceptors
+   * 
+   * @param interceptors list of string className interceptor (separate with ",")
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public void addInterceptorsOUT(String interceptors) throws ConnectException, AdminException;
+  
+  /**
+   * get interceptors.
+   * 
+   * @return list of string className interceptor (separate with ",")
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public String getInterceptorsOUT() throws ConnectException, AdminException;
+  
+  /**
+   * remove interceptors 
+   * 
+   * @param interceptors list of string className interceptor (separate with ",")
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public void removeInterceptorsOUT(String interceptors) throws ConnectException, AdminException;
 }
