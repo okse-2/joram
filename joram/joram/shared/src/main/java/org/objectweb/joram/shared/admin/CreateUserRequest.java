@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2003 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -26,6 +26,7 @@ package org.objectweb.joram.shared.admin;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Properties;
 
 import org.objectweb.joram.shared.security.Identity;
 
@@ -42,16 +43,20 @@ public class CreateUserRequest extends AdminRequest {
   private Identity identity;
   /** Id of the server where deploying the proxy. */
   private int serverId;
-
+  /** properties */
+  private Properties prop;
+  
   /**
    * Constructs a <code>CreateUserRequest</code> instance.
    *
    * @param identity  The authentication of the user.
    * @param serverId  The id of the server where deploying its proxy.
+   * @param prop properties
    */
-  public CreateUserRequest(Identity identity, int serverId) {
+  public CreateUserRequest(Identity identity, int serverId, Properties prop) {
     this.identity = identity;
     this.serverId = serverId;
+    this.prop = prop;
   }
 
   public CreateUserRequest() { }
@@ -62,6 +67,13 @@ public class CreateUserRequest extends AdminRequest {
    */
   public Identity getIdentity() {
     return identity;
+  }
+  
+  /**
+   * @return return the properties.
+   */
+	public Properties getProperties() {
+	  return prop;
   }
 
   /** Returns the id of the server where deploying its proxy. */
@@ -80,10 +92,16 @@ public class CreateUserRequest extends AdminRequest {
     } catch (Exception e) {
       throw new IOException(e.getClass() + ":: " + e.getMessage());
     }
+    try {
+    	prop = StreamUtil.readJPropertiesFrom(is);
+    } catch (Exception e) {
+			prop = null; // compatibility
+		}
   }
 
   public void writeTo(OutputStream os) throws IOException {
     StreamUtil.writeTo(serverId, os);
     Identity.write(identity, os);
+    StreamUtil.writeTo(prop, os);
   }
 }
