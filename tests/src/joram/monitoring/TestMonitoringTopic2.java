@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,7 +31,6 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
-import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -42,6 +41,7 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.mom.dest.MonitoringAcquisition;
+import org.objectweb.joram.shared.admin.AdminReply;
 
 import framework.TestCase;
 
@@ -69,11 +69,9 @@ public class TestMonitoringTopic2 extends TestCase implements MessageListener {
 
       Connection cnx = cf.createConnection();
       Session sessionc = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      Session sessionp = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
-      // create a producer and a consumer
+      // create a consumer
       MessageConsumer consumer = sessionc.createConsumer(topic);
-      MessageProducer producer = sessionp.createProducer(topic);
 
       // the consumer records on the topic
       consumer.setMessageListener(this);
@@ -84,23 +82,24 @@ public class TestMonitoringTopic2 extends TestCase implements MessageListener {
       
       assertTrue(nbReceived == 0);
       
-      Message msg = sessionp.createMessage();
-      msg.setStringProperty("AgentServer:server=AgentServer#0,cons=Transaction", "LogMemorySize,GarbageRatio");
-      producer.send(msg);
+      Properties prop = new Properties();
+      prop.setProperty("AgentServer:server=AgentServer#0,cons=Transaction", "LogMemorySize,GarbageRatio");
+      AdminReply reply = topic.setProperties(prop);
+      //System.out.println("reply = " + reply);
       
       Thread.sleep(10000);
 
       assertTrue(nbReceived == 1);
       
-      msg = sessionp.createMessage();
-      msg.setLongProperty("acquisition.period", 2000L);
-      msg.setStringProperty("AgentServer:server=AgentServer#0,cons=Transaction", "LogMemorySize,GarbageRatio");
-      producer.send(msg);
+      prop.setProperty("acquisition.period", "2000");
+      prop.setProperty("AgentServer:server=AgentServer#0,cons=Transaction", "LogMemorySize,GarbageRatio");
+      //reply = topic.setProperties(prop);
       
       Thread.sleep(10000);
 
       assertTrue(nbReceived > 3);
       
+      AdminModule.disconnect();
       cnx.close();
     } catch (Throwable exc) {
       exc.printStackTrace();
@@ -136,8 +135,6 @@ public class TestMonitoringTopic2 extends TestCase implements MessageListener {
     jndiCtx.bind("cf", cf);
     jndiCtx.bind("MonitoringTopic", topic);
     jndiCtx.close();
-
-    AdminModule.disconnect();
   }
 
   public void onMessage(Message message) {
