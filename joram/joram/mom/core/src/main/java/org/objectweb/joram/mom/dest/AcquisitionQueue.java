@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,7 @@
  */
 package org.objectweb.joram.mom.dest;
 
+import java.util.Enumeration;
 import java.util.Properties;
 
 import org.objectweb.joram.mom.notifications.ClientMessages;
@@ -115,21 +116,60 @@ public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
     super.agentFinalize(lastTime);
     close();
   }
+  
+  /**
+   * Update properties configuration, they are processed by the distribution module 
+   * 
+   * @param prop the new properties.
+   * @throws Exception
+   */
+  public void updateProperties(Properties prop) throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "AcquisitionQueue.updateProperties(" + prop + ')');
+    }
+    super.setProperties(prop);
+    // update this.properties
+    Enumeration e = prop.keys();
+    while (e.hasMoreElements()) {
+    	String key = (String) e.nextElement();
+    	properties.put(key, prop.get(key));
+    }
+    // update the module
+    acquisitionModule.updateProperties(properties);
+  }
+  
+  /**
+   * Start the handler.
+   * 
+   * @param prop properties for start if needed
+   * @return properties for the reply.
+   * @throws Exception
+   */
+  protected Properties startHandler(Properties prop) throws Exception { 
+  	if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "AcquisitionQueue.startHandler(" + prop + ')');
+    }
+  	Properties p = prop;
+  	if (p == null)
+  		p = properties;
+  	return acquisitionModule.startHandler(p);
+  }
 
   /**
-   * Incoming JMS messages are used for configuration, they are processed by the
-   * acquisition module and a null ClientMessages is always returned to the base
-   * implementation.
+   * Stop the handler.
    * 
-   * @see AcquisitionModule#processMessages(ClientMessages)
-   * @see Destination#preProcess(AgentId, ClientMessages)
+   * @param prop properties for stop if needed
+   * @return properties for the reply.
+   * @throws Exception
    */
-  public ClientMessages preProcess(AgentId from, ClientMessages cm) {
-    if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "AcquisitionQueue. preProcess(" + from + ", " + cm + ')');
+  protected Properties stopHandler(Properties prop) throws Exception {
+  	if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "AcquisitionQueue.stopHandler(" + prop + ')');
     }
-    properties = acquisitionModule.processMessages(cm);
-    return null;
+  	Properties p = prop;
+  	if (p == null)
+  		p = properties;
+  	return acquisitionModule.stopHandler(p); 
   }
 
   /**
