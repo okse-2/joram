@@ -81,7 +81,7 @@
         threshold CDATA "-1"
         dmq      CDATA "">
 
-<!ELEMENT User EMPTY>
+<!ELEMENT User (reader)*>
 <!ATTLIST User
 	name     CDATA #REQUIRED
 	password CDATA #REQUIRED
