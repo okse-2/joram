@@ -33,7 +33,10 @@
     <jndi name=""/>
   </ConnectionFactory>
   
-  <User name="" login="" password="" serverId=""/>
+  <User name="" login="" password="" serverId="">
+    <property name="jms_joram_interceptors_in" value=""/>
+    <property name="jms_joram_interceptors_out" value=""/>
+  </User>
   
   <Server serverId="" dmq="" threshold=""/>
 
