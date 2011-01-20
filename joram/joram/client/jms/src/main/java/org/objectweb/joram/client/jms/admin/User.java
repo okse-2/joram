@@ -244,10 +244,37 @@ public class User extends AdministeredObject implements UserMBean {
   public static User create(String name, String password,
                             int serverId,
                             String identityClassName) throws ConnectException, AdminException {
+  	return create(name, password, serverId, identityClassName, null);
+  }
+  
+  /**
+   * Admin method creating a user for a given server and instantiating the
+   * corresponding <code>User</code> object.
+   * <p>
+   * If the user has already been set on this server, the method simply
+   * returns the corresponding <code>User</code> object. Its fails if the
+   * target server does not belong to the platform, or if a proxy could not
+   * be deployed server side for a new user. 
+   * <p>
+   * Be careful this method use the static AdminModule connection.
+   *
+   * @param name  Name of the user.
+   * @param password  Password of the user.
+   * @param serverId  The identifier of the user's server.
+   * @param identityClassName user/password or JAAS... (default SimpleIdentity).
+   * @param prop properties
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */ 
+  public static User create(String name, String password,
+                            int serverId,
+                            String identityClassName,
+                            Properties prop) throws ConnectException, AdminException {
     Identity identity = createIdentity(name, password, identityClassName);
 
     User user = new User(name);
-    AdminReply reply = user.getWrapper().doRequest(new CreateUserRequest(identity, serverId));
+    AdminReply reply = user.getWrapper().doRequest(new CreateUserRequest(identity, serverId, prop));
     user.proxyId = ((CreateUserReply) reply).getProxId();
     
     // Be careful, MBean registration is now done explicitly
@@ -626,7 +653,7 @@ public class User extends AdministeredObject implements UserMBean {
    */
   public void addInterceptorsIN(String interceptors) throws ConnectException, AdminException {
   	Properties prop = new Properties();
-    prop.put("interceptorsIN", interceptors);
+    prop.put(AdminCommandConstant.INTERCEPTORS_IN, interceptors);
     getWrapper().processAdmin(getProxyId(), AdminCommandConstant.CMD_ADD_INTERCEPTORS, prop);
   }
   
@@ -639,7 +666,7 @@ public class User extends AdministeredObject implements UserMBean {
    */
   public String getInterceptorsIN() throws ConnectException, AdminException {
   	AdminCommandReply reply = (AdminCommandReply) AdminModule.processAdmin(getProxyId(), AdminCommandConstant.CMD_GET_INTERCEPTORS, null);
-    return (String) reply.getProp().get("interceptorsIN");
+    return (String) reply.getProp().get(AdminCommandConstant.INTERCEPTORS_IN);
   }
   
   /**
@@ -651,7 +678,7 @@ public class User extends AdministeredObject implements UserMBean {
    */
   public void removeInterceptorsIN(String interceptors) throws ConnectException, AdminException {
   	Properties prop = new Properties();
-  	prop.put("interceptorsIN", interceptors);
+  	prop.put(AdminCommandConstant.INTERCEPTORS_IN, interceptors);
   	AdminModule.processAdmin(getProxyId(), AdminCommandConstant.CMD_REMOVE_INTERCEPTORS, prop);
   }
   
@@ -664,7 +691,7 @@ public class User extends AdministeredObject implements UserMBean {
    */
   public void addInterceptorsOUT(String interceptors) throws ConnectException, AdminException {
   	Properties prop = new Properties();
-    prop.put("interceptorsOUT", interceptors);
+    prop.put(AdminCommandConstant.INTERCEPTORS_OUT, interceptors);
     getWrapper().processAdmin(getProxyId(), AdminCommandConstant.CMD_ADD_INTERCEPTORS, prop);
   }
   
@@ -677,7 +704,7 @@ public class User extends AdministeredObject implements UserMBean {
    */
   public String getInterceptorsOUT() throws ConnectException, AdminException {
   	AdminCommandReply reply = (AdminCommandReply) AdminModule.processAdmin(getProxyId(), AdminCommandConstant.CMD_GET_INTERCEPTORS, null);
-    return (String) reply.getProp().get("interceptorsOUT");
+    return (String) reply.getProp().get(AdminCommandConstant.INTERCEPTORS_OUT);
   }
   
   /**
@@ -689,8 +716,38 @@ public class User extends AdministeredObject implements UserMBean {
    */
   public void removeInterceptorsOUT(String interceptors) throws ConnectException, AdminException {
   	Properties prop = new Properties();
-  	prop.put("interceptorsOUT", interceptors);
+  	prop.put(AdminCommandConstant.INTERCEPTORS_OUT, interceptors);
   	AdminModule.processAdmin(getProxyId(), AdminCommandConstant.CMD_REMOVE_INTERCEPTORS, prop);
+  }
+  
+  /**
+   * replace interceptor IN
+   * 
+   * @param newInterceptor the new className interceptor.
+   * @param oldInterceptor the old className interceptor.
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public void replaceInterceptorIN(String newInterceptor, String oldInterceptor) throws ConnectException, AdminException {
+  	Properties prop = new Properties();
+    prop.put(AdminCommandConstant.INTERCEPTORS_IN_NEW, newInterceptor);
+    prop.put(AdminCommandConstant.INTERCEPTORS_IN_OLD, oldInterceptor);
+    getWrapper().processAdmin(getProxyId(), AdminCommandConstant.CMD_REPLACE_INTERCEPTORS, prop);
+  }
+  
+  /**
+   * replace interceptor OUT
+   * 
+   * @param newInterceptor the new className interceptor.
+   * @param oldInterceptor the old className interceptor.
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public void replaceInterceptorOUT(String newInterceptor, String oldInterceptor) throws ConnectException, AdminException {
+  	Properties prop = new Properties();
+    prop.put(AdminCommandConstant.INTERCEPTORS_OUT_NEW, newInterceptor);
+    prop.put(AdminCommandConstant.INTERCEPTORS_OUT_OLD, oldInterceptor);
+    getWrapper().processAdmin(getProxyId(), AdminCommandConstant.CMD_REPLACE_INTERCEPTORS, prop);
   }
   
   /**
