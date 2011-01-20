@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 2003 - 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
@@ -167,8 +167,10 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
   public static Logger logger = Debug.getLogger(UserAgent.class.getName());
 
   /** the in and out interceptors list. */
-  private List interceptorsOUT = null;
-  private List interceptorsIN = null;
+  private String interceptors_in = null;
+  private String interceptors_out = null;
+  private transient List interceptorsOUT = null;
+  private transient List interceptorsIN = null;
     
   /** period to run the cleaning task, by default 60s. */
   private long period = 60000L;
@@ -836,6 +838,21 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
   }
 
   /**
+   * Only call in UserAgent creation.
+   * 
+   * @param prop properties
+   */
+  public void setInterceptors(Properties prop) {
+  	if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "--- " + this + " initInterceptors(" + prop + ')');
+  	
+  	if (prop == null) return;
+
+  	interceptors_out = (String) prop.get(AdminCommandConstant.INTERCEPTORS_OUT);
+  	interceptors_in = (String) prop.get(AdminCommandConstant.INTERCEPTORS_IN);
+  }
+  
+  /**
    * (Re)initializes the proxy.
    * 
    * @param firstTime 
@@ -849,11 +866,21 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
  
     topicsTable = new Hashtable();
     messagesTable = new Hashtable();
-
+    
     setActiveCtxId(-1);
     
     // Re-initializing after a crash or a server stop.
 
+    // interceptors
+    if (interceptors_out != null) {
+    	interceptorsOUT = new ArrayList();
+    	InterceptorsHelper.addInterceptors(interceptors_out, interceptorsOUT);
+    }
+    if (interceptors_in != null) {
+    	interceptorsIN = new ArrayList();
+    	InterceptorsHelper.addInterceptors(interceptors_in, interceptorsIN);
+    }
+    
     // Browsing the pre-crash contexts:
     ClientContext activeCtx;
     AgentId destId;
@@ -2739,24 +2766,53 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
 				prop = request.getProp();
 				if (interceptorsOUT == null)
 					interceptorsOUT = new ArrayList();
-				InterceptorsHelper.addInterceptors((String) prop.get("interceptorsOUT"), interceptorsOUT);
+				InterceptorsHelper.addInterceptors((String) prop.get(AdminCommandConstant.INTERCEPTORS_OUT), interceptorsOUT);
+				interceptors_out = InterceptorsHelper.getListInterceptors(interceptorsOUT);
 				if (interceptorsIN == null)
 					interceptorsIN = new ArrayList();
-				InterceptorsHelper.addInterceptors((String) prop.get("interceptorsIN"), interceptorsIN);
+				InterceptorsHelper.addInterceptors((String) prop.get(AdminCommandConstant.INTERCEPTORS_IN), interceptorsIN);
+				interceptors_in = InterceptorsHelper.getListInterceptors(interceptorsIN);
+				// state change
+				setSave();
 				break;
 			case AdminCommandConstant.CMD_REMOVE_INTERCEPTORS:
 				prop = request.getProp();
-				InterceptorsHelper.removeInterceptors((String) prop.get("interceptorsOUT"), interceptorsOUT);
-				InterceptorsHelper.removeInterceptors((String) prop.get("interceptorsIN"), interceptorsIN);
+				InterceptorsHelper.removeInterceptors((String) prop.get(AdminCommandConstant.INTERCEPTORS_OUT), interceptorsOUT);
+				interceptors_out = InterceptorsHelper.getListInterceptors(interceptorsOUT);
+				InterceptorsHelper.removeInterceptors((String) prop.get(AdminCommandConstant.INTERCEPTORS_IN), interceptorsIN);
+				interceptors_in = InterceptorsHelper.getListInterceptors(interceptorsIN);
 				if (interceptorsIN != null && interceptorsIN.isEmpty())
 					interceptorsIN = null;
 				if (interceptorsOUT != null && interceptorsOUT.isEmpty())
 					interceptorsOUT = null;
+				// state change
+				setSave();
 				break;
 			case AdminCommandConstant.CMD_GET_INTERCEPTORS:
 				replyProp = new Properties();
-				replyProp.put("interceptorsIN", InterceptorsHelper.getListInterceptors(interceptorsIN));
-				replyProp.put("interceptorsOUT", InterceptorsHelper.getListInterceptors(interceptorsOUT));
+				replyProp.put(AdminCommandConstant.INTERCEPTORS_IN, InterceptorsHelper.getListInterceptors(interceptorsIN));
+				replyProp.put(AdminCommandConstant.INTERCEPTORS_OUT, InterceptorsHelper.getListInterceptors(interceptorsOUT));
+				break;
+			case AdminCommandConstant.CMD_REPLACE_INTERCEPTORS:
+				prop = request.getProp();
+				if (interceptorsIN == null && prop.containsKey(AdminCommandConstant.INTERCEPTORS_IN_NEW))
+					throw new Exception("interceptorsIN == null.");
+				if (interceptorsOUT == null && prop.containsKey(AdminCommandConstant.INTERCEPTORS_OUT_NEW))
+					throw new Exception("interceptorsOUT == null.");
+				// replace IN interceptor
+				InterceptorsHelper.replaceInterceptor(
+						((String) prop.get(AdminCommandConstant.INTERCEPTORS_IN_NEW)), 
+						((String) prop.get(AdminCommandConstant.INTERCEPTORS_IN_OLD)), 
+						interceptorsIN);
+				interceptors_in = InterceptorsHelper.getListInterceptors(interceptorsIN);
+				// replace OUT interceptor
+				InterceptorsHelper.replaceInterceptor(
+						((String) prop.get(AdminCommandConstant.INTERCEPTORS_OUT_NEW)), 
+						((String) prop.get(AdminCommandConstant.INTERCEPTORS_OUT_OLD)), 
+						interceptorsOUT);
+				interceptors_out = InterceptorsHelper.getListInterceptors(interceptorsOUT);
+				// state change
+				setSave();
 				break;
 
 			default:
