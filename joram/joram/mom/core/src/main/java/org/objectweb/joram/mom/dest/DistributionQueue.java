@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,7 @@
  */
 package org.objectweb.joram.mom.dest;
 
+import java.util.Enumeration;
 import java.util.Properties;
 
 import org.objectweb.joram.mom.notifications.ClientMessages;
@@ -111,4 +112,23 @@ public class DistributionQueue extends Queue {
     }
   }
 
+  /**
+   * Update properties configuration, they are processed by the distribution module 
+   * @param prop properties to update.
+   * @throws Exception
+   */
+  public void updateProperties(Properties prop) throws Exception {
+  	if (logger.isLoggable(BasicLevel.DEBUG)) {
+  		logger.log(BasicLevel.DEBUG, "DistributionQueue.updateProperties(" + prop + ')');
+  	}
+  	super.setProperties(prop);
+  	// update this.properties
+  	Enumeration e = prop.keys();
+  	while (e.hasMoreElements()) {
+  		String key = (String) e.nextElement();
+  		properties.put(key, prop.get(key));
+  	}
+  	// update the module
+  	distributionModule.updateProperties(properties);
+  }
 }
