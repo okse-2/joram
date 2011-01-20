@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2008 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C)  2008 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,7 +30,6 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
-import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -40,6 +39,7 @@ import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.shared.admin.AdminCommandReply;
 
 import com.scalagent.joram.mom.dest.collector.URLAcquisition;
 
@@ -70,11 +70,9 @@ public class TestCollectorTopic2 extends TestCase implements MessageListener {
 
       Connection cnx = cf.createConnection();
       Session sessionc = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      Session sessionp = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
-      // create a producer and a consumer
+      // create a consumer
       MessageConsumer consumer = sessionc.createConsumer(topic);
-      MessageProducer producer = sessionp.createProducer(topic);
 
       // the consumer records on the topic
       consumer.setMessageListener(this);
@@ -86,18 +84,20 @@ public class TestCollectorTopic2 extends TestCase implements MessageListener {
       assertTrue(nbReceived == 0);
 
       url = "http://www.gnu.org/licenses/lgpl.txt";
-      Message msg = sessionp.createMessage();
-      msg.setStringProperty("expiration", "0");
-      msg.setStringProperty("persistent", "true");
-      msg.setStringProperty("acquisition.period", "5000");
-      msg.setStringProperty("collector.url", url);
-      msg.setStringProperty("collector.type", "" + org.objectweb.joram.shared.messages.Message.BYTES);
-      producer.send(msg);
+      Properties prop = new Properties();
+      prop.setProperty("expiration", "0");
+      prop.setProperty("persistent", "true");
+      prop.setProperty("acquisition.period", "5000");
+      prop.setProperty("collector.url", url);
+      prop.setProperty("collector.type", "" + org.objectweb.joram.shared.messages.Message.BYTES);
+      AdminCommandReply reply = (AdminCommandReply) topic.setProperties(prop);
+      // System.out.println("reply = " + reply);
       
       Thread.sleep(12000);
 
       assertTrue(nbReceived >= 2);
       
+      AdminModule.disconnect();
       cnx.close();
     } catch (Throwable exc) {
       exc.printStackTrace();
@@ -133,8 +133,6 @@ public class TestCollectorTopic2 extends TestCase implements MessageListener {
     jndiCtx.bind("cf", cf);
     jndiCtx.bind("CollectorTopic", topic);
     jndiCtx.close();
-
-    AdminModule.disconnect();
   }
 
   public void onMessage(Message message) {
