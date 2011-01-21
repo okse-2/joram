@@ -93,7 +93,7 @@ public class TestMonitoringTopic2 extends TestCase implements MessageListener {
       
       prop.setProperty("acquisition.period", "2000");
       prop.setProperty("AgentServer:server=AgentServer#0,cons=Transaction", "LogMemorySize,GarbageRatio");
-      //reply = topic.setProperties(prop);
+      reply = topic.setProperties(prop);
       
       Thread.sleep(10000);
 
