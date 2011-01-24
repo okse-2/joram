@@ -38,10 +38,8 @@
               fr.dyade.aaa.util.management,
               javax.naming,
               org.objectweb.util.monolog,
-              org.objectweb.util.monolog.api,
-              org.osgi.framework</Import-Package>
+              org.objectweb.util.monolog.api</Import-Package>
               <DynamicImport-Package>*</DynamicImport-Package>
-            <Bundle-Activator>fr.dyade.aaa.jndi2.server.osgi.Activator</Bundle-Activator>
           </instructions>
         </configuration>
       </plugin>
