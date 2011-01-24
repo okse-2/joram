@@ -4,7 +4,7 @@
     <!ENTITY common SYSTEM "../common.xml">
 ]>
 
-<project default="tests.all" basedir=".">
+<project default="tests.all.osgi" basedir=".">
   <!-- Includes generic stuff -->
   &common;
 
