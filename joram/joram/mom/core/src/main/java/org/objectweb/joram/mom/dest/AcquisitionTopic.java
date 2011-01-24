@@ -118,6 +118,23 @@ public class AcquisitionTopic extends Topic implements AcquisitionTopicMBean {
   }
   
   /**
+   * Incoming JMS messages are processed by the acquisition module 
+   * and a null ClientMessages is always returned to the base
+   * implementation.
+   * 
+   * @see AcquisitionModule#processMessages(ClientMessages)
+   * @see Destination#preProcess(AgentId, ClientMessages)
+   */
+  public ClientMessages preProcess(AgentId from, ClientMessages cm) {
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "AcquisitionTopic.preProcess(" + from + ", " + cm + ')');
+    }
+    acquisitionModule.processMessages(cm);
+    return null;
+  }
+  
+  
+  /**
    * Update properties configuration, they are processed by the distribution module 
    * @param prop the new properties.
    * @throws Exception
