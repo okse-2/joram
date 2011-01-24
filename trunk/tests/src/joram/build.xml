@@ -464,9 +464,11 @@ description=" --> launch all exceptionlistener tests">
     <antcall target="collector.TestT1"/>
     <antcall target="collector.TestT2"/>
   	<antcall target="collector.TestT3"/>
+  	<antcall target="collector.TestT4"/>  	
     <antcall target="collector.TestQ1"/>
     <antcall target="collector.TestQ2"/>
   	<antcall target="collector.TestQ3"/>
+  	<antcall target="collector.TestQ4"/>
   </target>
 
 	<target name="tests.interceptors"
@@ -4941,6 +4943,18 @@ description=" --> launch all exceptionlistener tests">
     </antcall>
   </target>
 	
+  <target name="collector.TestQ4" depends="init.a3props,compile"
+          description=" --> Simple collector">
+  	<antcall target="test.run" inheritAll="true">
+      <param name="testid" value="collector.TestQ4"/>
+      <param name="className" value="joram.collector.TestCollectorQueue4"/>
+      <param name="jndiconf" value="collector/jndi.properties"/>
+      <param name="a3conf" value="collector/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+  	
   <target name="collector.TestT1" depends="init.a3props,compile"
           description=" --> Simple collector">
     <antcall target="test.run" inheritAll="true">
@@ -4978,7 +4992,19 @@ description=" --> launch all exceptionlistener tests">
   		<param name="include.classes" value="joram/collector/Empty*.class"/>
     </antcall>
   </target>
-  			
+
+  <target name="collector.TestT4" depends="init.a3props,compile"
+          description=" --> Simple collector">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="collector.TestT4"/>
+      <param name="className" value="joram.collector.TestCollectorTopic4"/>
+      <param name="jndiconf" value="collector/jndi.properties"/>
+      <param name="a3conf" value="collector/a3servers.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+	
   <target name="pool.Test1" depends="init.a3props,compile"
           description=" --> Tests pool of Connection.">
     <antcall target="test.run" inheritAll="true">
