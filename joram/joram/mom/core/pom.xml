@@ -54,10 +54,8 @@
               org.objectweb.joram.shared.selectors,
               org.objectweb.joram.shared.stream,
               org.objectweb.util.monolog,
-              org.objectweb.util.monolog.api,
-              org.osgi.framework</Import-Package>
+              org.objectweb.util.monolog.api</Import-Package>
             <DynamicImport-Package>*</DynamicImport-Package>
-            <Bundle-Activator>org.objectweb.joram.mom.osgi.Activator</Bundle-Activator>
           </instructions>
         </configuration>
       </plugin>
