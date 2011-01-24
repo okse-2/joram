@@ -22,18 +22,13 @@
  */
 package fr.dyade.aaa.agent.osgi;
 
-import java.util.Properties;
-
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 
-import fr.dyade.aaa.agent.AdminProxy;
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
-import fr.dyade.aaa.common.Service;
 
 public class Activator implements BundleActivator {
 
@@ -47,8 +42,6 @@ public class Activator implements BundleActivator {
 
   public static BundleContext context;
 
-  private ServiceRegistration adminproxyRegistration;
-
   public void start(BundleContext context) throws Exception {
     Activator.context = context;
     //AgentServer.isOSGi = true;
@@ -56,10 +49,6 @@ public class Activator implements BundleActivator {
     short sid = getShortProperty(AGENT_SERVER_ID_PROPERTY, (short) 0);
     String path = getProperty(AGENT_SERVER_STORAGE_PROPERTY, "s" + sid);
     short cid = getShortProperty(AGENT_SERVER_CLUSTERID_PROPERTY, AgentServer.NULL_ID);
-
-    Properties props = new Properties();
-    props.put(Service.SERVICE_NAME_PROP, AdminProxy.class.getName());
-    adminproxyRegistration = context.registerService(Service.class.getName(), new Service(), props);
 
     try {
       AgentServer.init(sid, path, null, cid);
@@ -72,8 +61,6 @@ public class Activator implements BundleActivator {
   public void stop(BundleContext context) throws Exception {
     AgentServer.stop();
     AgentServer.reset();
-
-    adminproxyRegistration.unregister();
     Activator.context = null;
   }
 
