@@ -26,20 +26,23 @@ import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 import org.ow2.joram.mom.amqp.exceptions.AMQPException;
 import org.ow2.joram.mom.amqp.exceptions.InterruptedException;
+import org.ow2.joram.mom.amqp.structures.Deliver;
 
+import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.common.Debug;
 
 /**
- *
+ * The {@link StubAgentOut} class handles output interactions with other Joram
+ * AMQP servers.
  */
-public class StubAgentOut {
+public class StubAgentOut implements DeliveryListener {
 
   /** logger */
   public static Logger logger = Debug.getLogger(StubAgentOut.class.getName());
   
   private static long timeOut;
   private static long lockCount;
-  
+
   /**
    * @param timeOut
    */
@@ -116,4 +119,14 @@ public class StubAgentOut {
       logger.log(BasicLevel.DEBUG, "asyncSend(" + request + ", " + serverId + ')');
     AMQPAgent.sendRequestTo(request, serverId, proxyId, null);
   }
+
+  public void deliver(Deliver deliver, Queue queue) {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "StubAgentIn.deliver(" + deliver + ", " + queue + ')');
+    AMQPResponseNot not = new AMQPResponseNot();
+    not.obj = deliver;
+    not.keyLock = -1;
+    Channel.sendTo(AMQPAgent.getAMQPId(deliver.serverId), not);
+  }
+
 }

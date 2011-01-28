@@ -23,7 +23,7 @@
 package org.ow2.joram.mom.amqp;
 
 import java.rmi.AlreadyBoundException;
-import java.util.Enumeration;
+import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -33,7 +33,7 @@ import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
 
 /**
- *
+ * Naming directory for all local exchanges, proxies and queues.
  */
 public class Naming {
 
@@ -98,8 +98,8 @@ public class Naming {
   /**
    * @return
    */
-  public static Enumeration<Queue> getQueues() {
-    return queues.elements();
+  public static Collection<Queue> getQueues() {
+    return queues.values();
   }
   
   /**
@@ -134,14 +134,16 @@ public class Naming {
     else
       return name.substring(0, index);
   }
-  
+
   /**
-   * name: 
-   *  - serverName/QueueName  (serverName see a3servers.xml)
-   *  - serverName/ExchangeName
-   *  - QueueName
-   *  - ExchangeName ...
-   *  
+   * name:
+   * <ul>
+   * <li>serverName/QueueName (serverName see a3servers.xml)</li>
+   * <li>serverName/ExchangeName</li>
+   * <li>QueueName</li>
+   * <li>ExchangeName ...</li>
+   * </ul>
+   * 
    * @param name
    * @return the QueueName, ExchangeName.
    */
@@ -237,8 +239,8 @@ public class Naming {
   /**
    * @return
    */
-  public static Enumeration<Proxy> getProxies() {
-    return proxies.elements();
+  public static Collection<Proxy> getProxies() {
+    return proxies.values();
   }
   
   public static void createDefaults() throws Exception {

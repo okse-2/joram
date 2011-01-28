@@ -53,6 +53,8 @@ import org.ow2.joram.mom.amqp.marshalling.AbstractMarshallingMethod;
 import org.ow2.joram.mom.amqp.structures.Ack;
 import org.ow2.joram.mom.amqp.structures.Cancel;
 import org.ow2.joram.mom.amqp.structures.ConsumeMessage;
+import org.ow2.joram.mom.amqp.structures.Deliver;
+import org.ow2.joram.mom.amqp.structures.GetResponse;
 import org.ow2.joram.mom.amqp.structures.Recover;
 import org.ow2.joram.mom.amqp.structures.Returned;
 
@@ -62,6 +64,9 @@ import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.StoppedQueueException;
 import fr.dyade.aaa.util.Transaction;
 
+/**
+ * Handles the AMQP frames received by the {@link AMQPConnectionListener}.
+ */
 public class Proxy implements DeliveryListener {
 
   public static Logger logger = Debug.getLogger(Proxy.class.getName());
@@ -396,7 +401,7 @@ public class Proxy implements DeliveryListener {
         Collection<QueueShell> queueShells = channelContext.consumerQueues.values();
         Iterator<QueueShell> it = queueShells.iterator();
         while (it.hasNext()) {
-          QueueShell queueShell = (QueueShell) it.next();
+          QueueShell queueShell = it.next();
           if (!queueShell.islocal()) {
             String name = queueShell.getName();
             if (Naming.resolveServerId(name) == sid) {

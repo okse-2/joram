@@ -25,6 +25,10 @@ package org.ow2.joram.mom.amqp.exceptions;
 
 import org.ow2.joram.mom.amqp.marshalling.AMQP;
 
+/**
+ * Exception thrown if the client requested a method that was not allowed
+ * because some precondition failed.
+ */
 public class PreconditionFailedException extends ChannelException {
 
   private static final long serialVersionUID = 1L;

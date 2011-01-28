@@ -30,6 +30,11 @@ import org.ow2.joram.mom.amqp.marshalling.AMQP;
 import org.ow2.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 import org.ow2.joram.mom.amqp.marshalling.AMQP.Basic.Publish;
 
+/**
+ * Class used by the {@link AMQPConnectionListener} to hold all the parameters (
+ * <code>Basic.Publish</code> method, header and body) necessary to publish a
+ * message while they are received on the socket.
+ */
 public class PublishRequest implements Serializable {
   
   private static final long serialVersionUID = 1L;

@@ -25,6 +25,10 @@ package org.ow2.joram.mom.amqp.exceptions;
 
 import org.ow2.joram.mom.amqp.marshalling.AMQP;
 
+/**
+ * Exception thrown if the client attempted to work with a server entity to
+ * which it has no access because another client is working with it.
+ */
 public class ResourceLockedException extends ChannelException {
 
   private static final long serialVersionUID = 1L;

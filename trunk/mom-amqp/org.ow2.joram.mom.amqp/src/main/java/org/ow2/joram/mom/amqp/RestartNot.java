@@ -25,7 +25,8 @@ package org.ow2.joram.mom.amqp;
 import fr.dyade.aaa.agent.Notification;
 
 /**
- *
+ * Notification used to tell other Joram AMQP servers that a server has
+ * restarted.
  */
 public class RestartNot extends Notification {
 

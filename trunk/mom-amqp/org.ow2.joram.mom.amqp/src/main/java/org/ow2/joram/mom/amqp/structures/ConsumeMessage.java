@@ -2,6 +2,11 @@ package org.ow2.joram.mom.amqp.structures;
 
 import java.io.Serializable;
 
+/**
+ * A {@link ConsumeMessage} is sent to the proxy on <code>Basic.Consume</code>
+ * method, in order to request a message on the specified queue. This message
+ * will be requeued as long as there are more messages on the queue.
+ */
 public class ConsumeMessage implements Serializable {
 
   private static final long serialVersionUID = 1L;

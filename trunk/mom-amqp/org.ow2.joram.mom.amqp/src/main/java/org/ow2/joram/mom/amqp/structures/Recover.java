@@ -25,6 +25,15 @@ package org.ow2.joram.mom.amqp.structures;
 import java.io.Serializable;
 import java.util.List;
 
+import org.ow2.joram.mom.amqp.AMQPRequestNot;
+
+/**
+ * This class is used in an {@link AMQPRequestNot} to notify the distant
+ * queue to put back the specified unacknowledged messages in the
+ * "ready to deliver" list. This is used on <code>Basic.Recover</code> and
+ * <code>Basic.Reject</code> methods, or when a message could not reach its
+ * receiver.
+ */
 public class Recover implements Serializable {
 
   private static final long serialVersionUID = 1L;

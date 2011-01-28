@@ -1,10 +1,13 @@
-package org.ow2.joram.mom.amqp;
+package org.ow2.joram.mom.amqp.structures;
 
 import java.io.Serializable;
 
 import org.ow2.joram.mom.amqp.marshalling.AMQP;
 import org.ow2.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 
+/**
+ * Holds a complete <code>Basic.Deliver</code> response with headers and body.
+ */
 public class Deliver implements Serializable {
 
   /**
@@ -12,16 +15,16 @@ public class Deliver implements Serializable {
    */
   private static final long serialVersionUID = 1L;
 
-  AMQP.Basic.Deliver deliver;
+  public AMQP.Basic.Deliver deliver;
 
-  AMQP.Basic.BasicProperties properties;
+  public AMQP.Basic.BasicProperties properties;
 
-  byte[] body;
+  public byte[] body;
   
-  short serverId;
-  long proxyId;
-  String queueName;
-  long msgId;
+  public short serverId;
+  public long proxyId;
+  public String queueName;
+  public long msgId;
 
   public Deliver(AMQP.Basic.Deliver deliver, BasicProperties properties, byte[] body, long msgId, short serverId, long proxyId, String queueName) {
     this.deliver = deliver;

@@ -48,6 +48,8 @@ import org.ow2.joram.mom.amqp.marshalling.Frame;
 import org.ow2.joram.mom.amqp.marshalling.LongStringHelper;
 import org.ow2.joram.mom.amqp.marshalling.MarshallingHeader;
 import org.ow2.joram.mom.amqp.marshalling.AMQP.Connection.TuneOk;
+import org.ow2.joram.mom.amqp.structures.Deliver;
+import org.ow2.joram.mom.amqp.structures.GetResponse;
 import org.ow2.joram.mom.amqp.structures.Returned;
 
 import fr.dyade.aaa.common.Daemon;

@@ -25,6 +25,11 @@ package org.ow2.joram.mom.amqp.exceptions;
 
 import org.ow2.joram.mom.amqp.marshalling.AMQP;
 
+/**
+ * Exception thrown if the client attempted to work with a channel that had not
+ * been correctly opened. This most likely indicates a fault in the client
+ * layer.
+ */
 public class ChannelErrorException extends ConnectionException {
 
   private static final long serialVersionUID = 1L;

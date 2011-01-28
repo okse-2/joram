@@ -20,6 +20,9 @@ import org.ow2.joram.mom.amqp.structures.AddBoundExchange;
 import org.ow2.joram.mom.amqp.structures.RemoveBoundExchange;
 import org.ow2.joram.mom.amqp.structures.RemoveQueueBindings;
 
+/**
+ * The {@link StubLocal} class handles interactions with local AMQP objects.
+ */
 public class StubLocal {
 
   public static AMQP.Queue.DeclareOk queueDeclare(String queueName, boolean passive, boolean durable,

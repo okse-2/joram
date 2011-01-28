@@ -23,7 +23,7 @@
 package org.ow2.joram.mom.amqp;
 
 /**
- *
+ * The class {@link ProxyName} is used to identify uniquely a {@link Proxy}.
  */
 public class ProxyName {
   short serverId;
