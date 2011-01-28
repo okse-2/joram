@@ -25,6 +25,10 @@ package org.ow2.joram.mom.amqp.exceptions;
 
 import org.ow2.joram.mom.amqp.marshalling.AMQP;
 
+/**
+ * The client attempted to work with a server entity to which it has no access
+ * due to security settings.
+ */
 public class AccessRefusedException extends ChannelException {
 
   private static final long serialVersionUID = 1L;

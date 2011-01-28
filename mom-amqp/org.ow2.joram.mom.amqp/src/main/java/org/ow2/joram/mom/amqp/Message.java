@@ -4,6 +4,9 @@ import java.io.Serializable;
 
 import org.ow2.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 
+/**
+ * A Joram AMQP MOM message.
+ */
 public class Message implements Serializable, Comparable<Message> {
 
   /** define serialVersionUID for interoperability */

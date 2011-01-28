@@ -5,6 +5,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Class used to hold all the contextual data relative to one channel.
+ */
 public class ChannelContext {
 
   public static class Delivery {
@@ -29,8 +32,7 @@ public class ChannelContext {
   String lastQueueCreated;
 
   /**
-   * Maps a delivery tag to a delivery. Keeps the deliveries waiting for an
-   * acknowledgment.
+   * Keeps the deliveries waiting for an acknowledgment.
    */
   List<Delivery> deliveriesToAck = new LinkedList<Delivery>();
 

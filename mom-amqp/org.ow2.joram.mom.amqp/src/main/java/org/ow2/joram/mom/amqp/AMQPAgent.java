@@ -25,6 +25,7 @@ package org.ow2.joram.mom.amqp;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -40,7 +41,8 @@ import fr.dyade.aaa.agent.Notification;
 import fr.dyade.aaa.common.Debug;
 
 /**
- *
+ * An {@link AMQPAgent} is responsible of the communications with other Joram
+ * AMQP servers.
  */
 public class AMQPAgent extends Agent {
 
@@ -59,7 +61,7 @@ public class AMQPAgent extends Agent {
   
   public static StubAgentIn stubAgentIn;
   public static StubAgentOut stubAgentOut;
-  
+
   /**
    * Empty constructor for newInstance(). 
    */ 
@@ -88,10 +90,10 @@ public class AMQPAgent extends Agent {
     
     // create stub agent in
     stubAgentIn = new StubAgentIn();
-    
+
     // create stub agent out
     stubAgentOut = new StubAgentOut(60000);
-    
+
     if (!firstTime) {
       sendRestart();
     }
@@ -147,15 +149,15 @@ public class AMQPAgent extends Agent {
     } else if (not instanceof RestartNot) {
       short sid = from.getFrom();
       // clean proxies
-      Enumeration<Proxy> proxies = Naming.getProxies();
-      while (proxies.hasMoreElements()) {
-        Proxy proxy = (Proxy) proxies.nextElement();
+      Iterator<Proxy> proxies = Naming.getProxies().iterator();
+      while (proxies.hasNext()) {
+        Proxy proxy = proxies.next();
         proxy.cleanConsumers(sid);
       }
       // clean queues
-      Enumeration<Queue> queues = Naming.getQueues();
-      while (queues.hasMoreElements()) {
-        Queue queue = (Queue) queues.nextElement();
+      Iterator<Queue> queues = Naming.getQueues().iterator();
+      while (queues.hasNext()) {
+        Queue queue = queues.next();
         queue.cleanConsumers(sid);
       }
     } else {
@@ -211,7 +213,7 @@ public class AMQPAgent extends Agent {
         Message msg = (Message) response;
         AMQPRequestNot not = new AMQPRequestNot();
         List<Long> list = new ArrayList<Long>();
-        list.add(msg.queueMsgId);
+        list.add(Long.valueOf(msg.queueMsgId));
         not.obj = new Recover(msg.queueName, list);
         Channel.sendTo(from, not);
         if (logger.isLoggable(BasicLevel.DEBUG))
@@ -238,7 +240,7 @@ public class AMQPAgent extends Agent {
       if (sid.shortValue() != AgentServer.getServerId()) {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, "AMQPAgent.sendRestart notification to " + sid);
-        Channel.sendTo(getAMQPId(sid), new RestartNot());
+        Channel.sendTo(getAMQPId(sid.shortValue()), new RestartNot());
       }
     }
   }

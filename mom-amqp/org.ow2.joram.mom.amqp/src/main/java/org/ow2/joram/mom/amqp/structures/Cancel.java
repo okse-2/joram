@@ -24,6 +24,13 @@ package org.ow2.joram.mom.amqp.structures;
 
 import java.io.Serializable;
 
+import org.ow2.joram.mom.amqp.AMQPRequestNot;
+
+/**
+ * This class is used in an {@link AMQPRequestNot} to notify the distant queue
+ * to cancel the specified consumer, due to channel closing or
+ * <code>Basic.Cancel</code> method.
+ */
 public class Cancel implements Serializable {
 
   private static final long serialVersionUID = 1L;

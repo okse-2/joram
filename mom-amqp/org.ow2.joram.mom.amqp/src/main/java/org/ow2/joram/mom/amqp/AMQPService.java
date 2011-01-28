@@ -38,6 +38,10 @@ import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.util.Transaction;
 
+/**
+ * AMQP service used to open the server socket and start the connection
+ * listeners.
+ */
 public class AMQPService {
 
   public static Logger logger = Debug.getLogger(AMQPService.class.getName());

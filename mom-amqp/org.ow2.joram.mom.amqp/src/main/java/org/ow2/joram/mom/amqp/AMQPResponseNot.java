@@ -25,7 +25,7 @@ package org.ow2.joram.mom.amqp;
 import fr.dyade.aaa.agent.Notification;
 
 /**
- *
+ * Notification used to answer a request coming from another Joram AMQP server.
  */
 public class AMQPResponseNot extends Notification {
   public Object obj;

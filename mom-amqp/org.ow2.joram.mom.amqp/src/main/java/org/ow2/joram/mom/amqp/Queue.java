@@ -31,9 +31,9 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -42,10 +42,14 @@ import org.ow2.joram.mom.amqp.exceptions.NoConsumersException;
 import org.ow2.joram.mom.amqp.exceptions.ResourceLockedException;
 import org.ow2.joram.mom.amqp.exceptions.TransactionException;
 import org.ow2.joram.mom.amqp.marshalling.AMQP;
+import org.ow2.joram.mom.amqp.structures.Deliver;
 
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.util.Transaction;
 
+/**
+ * An AMQP queue.
+ */
 public class Queue implements Serializable {
 
   /** define serialVersionUID for interoperability */
@@ -250,7 +254,7 @@ public class Queue implements Serializable {
     Set<SubscriptionKey> subscriptionKeys = consumers.keySet();
     Iterator<SubscriptionKey> it = subscriptionKeys.iterator();
     while (it.hasNext()) {
-      SubscriptionKey subKey = (SubscriptionKey) it.next();
+      SubscriptionKey subKey = it.next();
       if (subKey.serverId == sid) {
         consumers.remove(subKey);
         if (logger.isLoggable(BasicLevel.DEBUG))

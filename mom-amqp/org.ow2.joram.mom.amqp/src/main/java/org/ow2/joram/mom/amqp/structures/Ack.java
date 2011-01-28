@@ -25,6 +25,14 @@ package org.ow2.joram.mom.amqp.structures;
 import java.io.Serializable;
 import java.util.List;
 
+import org.ow2.joram.mom.amqp.AMQPRequestNot;
+
+/**
+ * This class is used in an {@link AMQPRequestNot} to notify the distant
+ * queue to acknowledge the specified messages. This is used on method
+ * <code>Basic.Ack</code> or <code>Basic.Reject</code> when requeuing is not
+ * necessary.
+ */
 public class Ack implements Serializable {
 
   private static final long serialVersionUID = 1L;

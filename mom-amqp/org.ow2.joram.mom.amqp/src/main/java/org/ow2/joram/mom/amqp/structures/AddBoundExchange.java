@@ -2,6 +2,13 @@ package org.ow2.joram.mom.amqp.structures;
 
 import java.io.Serializable;
 
+import org.ow2.joram.mom.amqp.AMQPRequestNot;
+
+/**
+ * This class is used in an {@link AMQPRequestNot} to notify the distant queue
+ * to add a binding with the specified exchange, because of a
+ * <code>Queue.Bind</code> method.
+ */
 public class AddBoundExchange implements Serializable {
 
   private static final long serialVersionUID = 1L;

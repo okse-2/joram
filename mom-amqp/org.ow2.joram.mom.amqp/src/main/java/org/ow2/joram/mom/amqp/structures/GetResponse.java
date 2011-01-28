@@ -1,16 +1,19 @@
-package org.ow2.joram.mom.amqp;
+package org.ow2.joram.mom.amqp.structures;
 
 import org.ow2.joram.mom.amqp.marshalling.AMQP;
 import org.ow2.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 import org.ow2.joram.mom.amqp.marshalling.AMQP.Basic.GetOk;
 
+/**
+ * Holds a complete <code>Basic.Get</code> response with headers and body.
+ */
 public class GetResponse {
 
-  AMQP.Basic.GetOk getOk;
+  public AMQP.Basic.GetOk getOk;
 
-  AMQP.Basic.BasicProperties properties;
+  public AMQP.Basic.BasicProperties properties;
 
-  byte[] body;
+  public byte[] body;
 
   public GetResponse(GetOk getOk, BasicProperties properties, byte[] body) {
     super();

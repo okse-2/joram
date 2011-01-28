@@ -2,10 +2,15 @@ package org.ow2.joram.mom.amqp.structures;
 
 import java.io.Serializable;
 
+import org.ow2.joram.mom.amqp.AMQPRequestNot;
 import org.ow2.joram.mom.amqp.Message;
 import org.ow2.joram.mom.amqp.Queue;
 import org.ow2.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 
+/**
+ * This class is used in an {@link AMQPRequestNot} to publish a message to a
+ * distant queue after exchange routing.
+ */
 public class PublishToQueue implements Serializable {
 
   private static final long serialVersionUID = 1L;

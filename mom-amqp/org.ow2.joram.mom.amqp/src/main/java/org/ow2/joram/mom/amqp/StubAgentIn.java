@@ -44,6 +44,7 @@ import org.ow2.joram.mom.amqp.structures.Ack;
 import org.ow2.joram.mom.amqp.structures.AddBoundExchange;
 import org.ow2.joram.mom.amqp.structures.Cancel;
 import org.ow2.joram.mom.amqp.structures.ConsumeMessage;
+import org.ow2.joram.mom.amqp.structures.Deliver;
 import org.ow2.joram.mom.amqp.structures.PublishToQueue;
 import org.ow2.joram.mom.amqp.structures.Recover;
 import org.ow2.joram.mom.amqp.structures.RemoveBoundExchange;
@@ -56,17 +57,16 @@ import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.common.Debug;
 
 /**
- *
+ * The {@link StubAgentIn} class handles input interactions with other Joram
+ * AMQP servers.
  */
-public class StubAgentIn implements DeliveryListener {
+public class StubAgentIn {
 
   static class Null {
   }
 
   /** logger */
   public static Logger logger = Debug.getLogger(StubAgentIn.class.getName());
-  
-  private static StubAgentIn stubInstance = new StubAgentIn();
 
   private static Null nullResponse = new Null();
 
@@ -87,7 +87,7 @@ public class StubAgentIn implements DeliveryListener {
           logger.log(BasicLevel.DEBUG, "processResponse recover Deliver: queue = " + ((Deliver) response).queueName + ", msgId = " + ((Deliver) response).msgId);
         AMQPRequestNot not = new AMQPRequestNot();
         List<Long> list = new ArrayList<Long>();
-        list.add(((Deliver) response).msgId);
+        list.add(Long.valueOf(((Deliver) response).msgId));
         not.obj = new Recover(((Deliver) response).queueName, list);
         Channel.sendTo(from, not);
       } else {
@@ -405,7 +405,7 @@ public class StubAgentIn implements DeliveryListener {
 
   public static void basicConsume(AMQP.Basic.Consume basicConsume, short serverId, long proxyId)
       throws NotFoundException, ResourceLockedException, AccessRefusedException {
-    StubLocal.basicConsume(stubInstance, basicConsume.queue, basicConsume.consumerTag,
+    StubLocal.basicConsume(AMQPAgent.stubAgentOut, basicConsume.queue, basicConsume.consumerTag,
         basicConsume.exclusive, basicConsume.noAck, basicConsume.noLocal, basicConsume.channelNumber,
         serverId, proxyId);
   }
@@ -484,19 +484,11 @@ public class StubAgentIn implements DeliveryListener {
       AMQP.Basic.Deliver deliver = new AMQP.Basic.Deliver(consumeMessage.consumerTag, msg.queueMsgId,
           msg.redelivered, msg.exchange, msg.routingKey);
       deliver.channelNumber = consumeMessage.channelNumber;
-      stubInstance.deliver(new Deliver(deliver, msg.properties, msg.body, msg.queueMsgId, consumeMessage.consumerServerId,
-          proxyId, consumeMessage.queueName), queue);
+      AMQPAgent.stubAgentOut.deliver(new Deliver(deliver, msg.properties, msg.body, msg.queueMsgId,
+          consumeMessage.consumerServerId, proxyId, consumeMessage.queueName), queue);
       // Send to itself in order to finally get all messages on the queue
       StubAgentOut.asyncSend(consumeMessage, AgentServer.getServerId(), proxyId);
     }
   }
 
-  public void deliver(Deliver deliver, Queue queue) {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "StubAgentIn.deliver(" + deliver + ", " + queue + ')');
-    AMQPResponseNot not = new AMQPResponseNot();
-    not.obj = deliver;
-    not.keyLock = -1;
-    Channel.sendTo(AMQPAgent.getAMQPId(deliver.serverId), not);
-  }
 }
