@@ -27,7 +27,7 @@ public class StubLocal {
 
   public static AMQP.Queue.DeclareOk queueDeclare(String queueName, boolean passive, boolean durable,
       boolean autoDelete, boolean exclusive, short serverId, long proxyId) throws NotFoundException,
-      ResourceLockedException, TransactionException {
+      ResourceLockedException, PreconditionFailedException, TransactionException {
     // Generate queue name if unspecified
     if (queueName.equals("")) {
       queueName = Naming.nextQueueName();
@@ -40,8 +40,7 @@ public class StubLocal {
       if (passive) {
         throw new NotFoundException("Passive declaration of an unknown queue.");
       }
-      queue = new Queue(queueName, durable, autoDelete, exclusive,
-          serverId, proxyId);
+      queue = new Queue(queueName, durable, autoDelete, exclusive, serverId, proxyId);
       try {
         Naming.bindQueue(queueName, queue);
       } catch (AlreadyBoundException exc) {
@@ -50,16 +49,28 @@ public class StubLocal {
 
       // All message queues MUST BE automatically bound to the nameless exchange using the
       // message queue's name as routing key.
-      queueBind(queueName, IExchange.DEFAULT_EXCHANGE_NAME, queueName, null);
+      queueBind(queueName, IExchange.DEFAULT_EXCHANGE_NAME, queueName, null, serverId, proxyId);
       return new AMQP.Queue.DeclareOk(queueName, 0, 0);
 
     } else {
+      if (!passive) {
+        if (durable != queue.isDurable()) {
+          throw new PreconditionFailedException("Queue durable property do not match existing queue one.");
+        }
+        if (exclusive != queue.isExclusive()) {
+          throw new ResourceLockedException("Queue exclusive property do not match existing queue one.");
+        }
+        if (autoDelete != queue.isAutodelete()) {
+          throw new PreconditionFailedException("Queue autodelete property do not match existing queue one.");
+        }
+      }
       return queue.getInfo(serverId, proxyId);
     }
   }
 
-  public static int queueDelete(String queueName, boolean ifUnused, boolean ifEmpty)
-      throws PreconditionFailedException, NotFoundException, TransactionException {
+  public static int queueDelete(String queueName, boolean ifUnused, boolean ifEmpty, short serverId,
+      long proxyId) throws PreconditionFailedException, NotFoundException, ResourceLockedException,
+      TransactionException {
     Queue queue = Naming.lookupQueue(queueName);
     if (queue == null) {
       throw new NotFoundException("Unknown queue for deletion: " + queueName);
@@ -71,9 +82,8 @@ public class StubLocal {
     if (ifUnused && queue.getConsumerCount() > 0) {
       throw new PreconditionFailedException("Queue not unused.");
     }
+    queue.deleteQueue(queueName, serverId, proxyId);
     Naming.unbindQueue(queueName);
-    if (queue.isDurable())
-      queue.deleteQueue(queueName);
 
     // Unbind exchanges bound to the queue
     List<String> boundExchanges = queue.getBoundExchanges();
@@ -94,7 +104,8 @@ public class StubLocal {
   }
 
   public static void queueBind(String queueName, String exchangeName, String routingKey,
-      Map<String, Object> arguments) throws NotFoundException, TransactionException {
+      Map<String, Object> arguments, short serverId, long proxyId) throws NotFoundException,
+      ResourceLockedException, TransactionException {
     IExchange exchange = Naming.lookupExchange(exchangeName);
     if (exchange == null) {
       throw new NotFoundException("Binding to a non-existent exchange.");
@@ -104,7 +115,7 @@ public class StubLocal {
       if (queue == null) {
         throw new NotFoundException("Binding to a non-existent queue.");
       }
-      queue.addBoundExchange(exchangeName);
+      queue.addBoundExchange(exchangeName, serverId, proxyId);
     } else {
       StubAgentOut.asyncSend(new AddBoundExchange(queueName, exchangeName), Naming.resolveServerId(queueName));
     }
@@ -112,14 +123,15 @@ public class StubLocal {
   }
 
   public static void queueUnbind(String exchangeName, String queueName, String routingKey,
-      Map<String, Object> arguments) throws NotFoundException {
+      Map<String, Object> arguments, short serverId, long proxyId) throws NotFoundException,
+      ResourceLockedException {
     IExchange exchange = Naming.lookupExchange(exchangeName);
     if (exchange != null) {
       if (Naming.isLocal(queueName)) {
         Queue queue = Naming.lookupQueue(queueName);
         if (queue != null) {
+          queue.removeBoundExchange(exchangeName, serverId, proxyId);
           exchange.unbind(queueName, routingKey, arguments);
-          queue.removeBoundExchange(exchangeName);
         } else {
           throw new NotFoundException("Queue not found.");
         }
@@ -141,7 +153,7 @@ public class StubLocal {
   }
 
   public static void exchangeDeclare(String exchangeName, String type, boolean durable, boolean passive)
-      throws NotFoundException, CommandInvalidException, NotAllowedException {
+      throws NotFoundException, CommandInvalidException, NotAllowedException, PreconditionFailedException {
     IExchange exchange = Naming.lookupExchange(exchangeName);
     if (exchange == null) {
       if (passive) {
@@ -159,6 +171,8 @@ public class StubLocal {
         try {
           Class exchangeClass = Class.forName(type);
           exchange = (IExchange) exchangeClass.newInstance();
+        } catch (ClassNotFoundException exc) {
+          throw new CommandInvalidException("Unknown exchange type: " + type);
         } catch (Exception exc) {
           throw new CommandInvalidException(exc.getMessage());
         }
@@ -170,6 +184,9 @@ public class StubLocal {
         // TODO
       }
     } else {
+      if (passive) {
+        return;
+      }
       // Check if exchange type corresponds with existing exchange
       if (type.equalsIgnoreCase(DirectExchange.TYPE)) {
         if (!(exchange instanceof DirectExchange)) {
@@ -189,8 +206,12 @@ public class StubLocal {
         }
       } else {
         if (!exchange.getClass().getName().equals(type)) {
-          throw new NotAllowedException("Exchange type do not match existing exchange.");
+          throw new CommandInvalidException("Exchange type do not match existing exchange.");
         }
+      }
+
+      if (durable != exchange.isDurable()) {
+        throw new PreconditionFailedException("Exchange durable property do not match existing exchange one.");
       }
     }
   }
