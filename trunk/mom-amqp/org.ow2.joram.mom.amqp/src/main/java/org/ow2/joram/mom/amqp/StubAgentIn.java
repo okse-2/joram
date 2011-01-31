@@ -136,11 +136,11 @@ public class StubAgentIn {
       } else if (request instanceof PublishToQueue) {
         publishToQueue((PublishToQueue) request);
       } else if (request instanceof AddBoundExchange) {
-        addBoundExchange((AddBoundExchange) request);
+        addBoundExchange((AddBoundExchange) request, from.getFrom(), proxyId);
       } else if (request instanceof RemoveQueueBindings) {
         removeQueueBindings((RemoveQueueBindings) request);
       } else if (request instanceof RemoveBoundExchange) {
-        removeBoundExchange((RemoveBoundExchange) request);
+        removeBoundExchange((RemoveBoundExchange) request, from.getFrom(), proxyId);
       } else if (request instanceof ConsumeMessage) {
         consumeMessage((ConsumeMessage) request, proxyId);
       }
@@ -215,7 +215,7 @@ public class StubAgentIn {
 
         case AMQP.Queue.Bind.INDEX:
           AMQP.Queue.Bind bind = (AMQP.Queue.Bind) method;
-          queueBind(bind);
+          queueBind(bind, serverId, proxyId);
           if (bind.noWait == false) {
             AMQP.Queue.BindOk bindOk = new AMQP.Queue.BindOk();
             bindOk.channelNumber = channelNumber;
@@ -225,7 +225,7 @@ public class StubAgentIn {
           
         case AMQP.Queue.Unbind.INDEX:
           AMQP.Queue.Unbind unbind = (AMQP.Queue.Unbind) method;
-          queueUnbind(unbind);
+          queueUnbind(unbind, serverId, proxyId);
           AMQP.Queue.UnbindOk unbindOk = new AMQP.Queue.UnbindOk();
           unbindOk.channelNumber = channelNumber;
           response = unbindOk;
@@ -342,10 +342,11 @@ public class StubAgentIn {
     }
   }
 
-  private static void addBoundExchange(AddBoundExchange request) throws TransactionException {
+  private static void addBoundExchange(AddBoundExchange request, short serverId, long proxyId)
+      throws ResourceLockedException, TransactionException {
     Queue queue = Naming.lookupQueue(request.getQueueName());
     if (queue != null) {
-      queue.addBoundExchange(request.getExchangeName());
+      queue.addBoundExchange(request.getExchangeName(), serverId, proxyId);
     }
   }
 
@@ -368,10 +369,11 @@ public class StubAgentIn {
     }
   }
 
-  private static void removeBoundExchange(RemoveBoundExchange request) {
+  private static void removeBoundExchange(RemoveBoundExchange request, short serverId, long proxyId)
+      throws ResourceLockedException {
     Queue queue = Naming.lookupQueue(request.getQueueName());
     if (queue != null) {
-      queue.removeBoundExchange(request.getExchangeName());
+      queue.removeBoundExchange(request.getExchangeName(), serverId, proxyId);
     }
   }
   
@@ -396,7 +398,7 @@ public class StubAgentIn {
       if (queue.getConsumerCount() == 0 && queue.isAutodelete()) {
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG, "StubAgentIn: no more consumers -> autodelete");
-        StubLocal.queueDelete(queueName, true, true);
+        StubLocal.queueDelete(queueName, true, true, serverId, proxyId);
         return Boolean.TRUE;
       }
     }
@@ -441,7 +443,7 @@ public class StubAgentIn {
   }
 
   public static void exchangeDeclare(AMQP.Exchange.Declare exchangeDeclare) throws CommandInvalidException,
-      NotAllowedException, NotFoundException {
+      PreconditionFailedException, NotAllowedException, NotFoundException {
     StubLocal.exchangeDeclare(exchangeDeclare.exchange, exchangeDeclare.type, exchangeDeclare.durable,
         exchangeDeclare.passive);
   }
@@ -451,19 +453,23 @@ public class StubAgentIn {
     StubLocal.exchangeDelete(exchangeDelete.exchange, exchangeDelete.ifUnused);
   }
 
-  public static void queueBind(AMQP.Queue.Bind queueBind) throws NotFoundException, TransactionException {
-    StubLocal.queueBind(queueBind.queue, queueBind.exchange, queueBind.routingKey, queueBind.arguments);
+  public static void queueBind(AMQP.Queue.Bind queueBind, short serverId, long proxyId)
+      throws NotFoundException, ResourceLockedException, TransactionException {
+    StubLocal.queueBind(queueBind.queue, queueBind.exchange, queueBind.routingKey, queueBind.arguments,
+        serverId, proxyId);
   }
 
   public static AMQP.Queue.DeclareOk queueDeclare(AMQP.Queue.Declare queueDeclare, short serverId,
-      long proxyId) throws ResourceLockedException, NotFoundException, TransactionException {
+      long proxyId) throws ResourceLockedException, NotFoundException, PreconditionFailedException,
+      TransactionException {
     return StubLocal.queueDeclare(queueDeclare.queue, queueDeclare.passive, queueDeclare.durable,
         queueDeclare.autoDelete, queueDeclare.exclusive, serverId, proxyId);
   }
 
   public static AMQP.Queue.DeleteOk queueDelete(AMQP.Queue.Delete queueDelete, short serverId, long proxyId)
-      throws NotFoundException, PreconditionFailedException, TransactionException {
-    int msgCount = StubLocal.queueDelete(queueDelete.queue, queueDelete.ifUnused, queueDelete.ifEmpty);
+      throws NotFoundException, PreconditionFailedException, ResourceLockedException, TransactionException {
+    int msgCount = StubLocal.queueDelete(queueDelete.queue, queueDelete.ifUnused, queueDelete.ifEmpty,
+        serverId, proxyId);
     return new AMQP.Queue.DeleteOk(msgCount);
   }
 
@@ -472,8 +478,10 @@ public class StubAgentIn {
     return new AMQP.Queue.PurgeOk(StubLocal.queuePurge(queuePurge.queue, serverId, proxyId));
   }
 
-  public static void queueUnbind(AMQP.Queue.Unbind queueUnbind) throws NotFoundException {
-    StubLocal.queueUnbind(queueUnbind.exchange, queueUnbind.queue, queueUnbind.routingKey, queueUnbind.arguments);
+  public static void queueUnbind(AMQP.Queue.Unbind queueUnbind, short serverId, long proxyId)
+      throws NotFoundException, ResourceLockedException {
+    StubLocal.queueUnbind(queueUnbind.exchange, queueUnbind.queue, queueUnbind.routingKey,
+        queueUnbind.arguments, serverId, proxyId);
   }
 
   private static void consumeMessage(ConsumeMessage consumeMessage, long proxyId) throws TransactionException {
