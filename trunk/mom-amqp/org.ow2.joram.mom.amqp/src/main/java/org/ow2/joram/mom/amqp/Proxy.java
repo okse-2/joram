@@ -70,7 +70,9 @@ import fr.dyade.aaa.util.Transaction;
 public class Proxy implements DeliveryListener {
 
   public static Logger logger = Debug.getLogger(Proxy.class.getName());
+
   public final static String PREFIX_PX = "AMQPPx"; 
+
   private static volatile long proxyId = 0;
 
   private static synchronized long getNextProxyId() {
@@ -343,7 +345,7 @@ public class Proxy implements DeliveryListener {
    * notification to the client.
    */
   private void throwException(AMQPException amqe, int channelNumber, int classId, int methodId)
-  throws Exception {
+      throws Exception {
     if (amqe instanceof ChannelException) {
       channelClose(channelNumber);
       AMQP.Channel.Close close = new AMQP.Channel.Close(amqe.getCode(), amqe.getMessage(), classId, methodId);
@@ -712,10 +714,9 @@ public class Proxy implements DeliveryListener {
     }
 
     // Delete exclusive queues
-    Iterator<QueueShell> iterQueues = exclusiveQueues.iterator();
-    while (iterQueues.hasNext()) {
-      QueueShell queue = iterQueues.next();
-      iterQueues.remove();
+    QueueShell[] queueArray = exclusiveQueues.toArray(new QueueShell[exclusiveQueues.size()]);
+    for (int i = 0; i < queueArray.length; i++) {
+      QueueShell queue = queueArray[i];
       try {
         if (queue.islocal()) {
           queueDelete(new AMQP.Queue.Delete(0, queue.getReference().getName(), false, false, true));
@@ -727,6 +728,7 @@ public class Proxy implements DeliveryListener {
           logger.log(BasicLevel.WARN, "Error while cleaning exclusive queue " + queue, exc);
       }
     }
+    exclusiveQueues.clear();
 
     stop();
   }
@@ -757,7 +759,7 @@ public class Proxy implements DeliveryListener {
   }
 
   public void queueBind(AMQP.Queue.Bind queueBind) throws NotFoundException, SyntaxErrorException,
-      AMQPException {
+      ResourceLockedException, AMQPException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Proxy.queueBind(" + queueBind + ')');
 
@@ -784,7 +786,8 @@ public class Proxy implements DeliveryListener {
     }
 
     if (Naming.isLocal(queueBind.exchange)) {
-      StubLocal.queueBind(queueName, queueBind.exchange, queueBind.routingKey, queueBind.arguments);
+      StubLocal.queueBind(queueName, queueBind.exchange, queueBind.routingKey, queueBind.arguments,
+          name.serverId, name.proxyId);
     } else {
       // Assign queue name in case we use lastQueueCreated field
       queueBind.queue = Naming.getGlobalName(queueName);
@@ -817,7 +820,7 @@ public class Proxy implements DeliveryListener {
   }
 
   public AMQP.Queue.DeleteOk queueDelete(AMQP.Queue.Delete queueDelete) throws NotFoundException,
-      PreconditionFailedException, AMQPException {
+      PreconditionFailedException, ResourceLockedException, AMQPException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Proxy.queueDelete(" + queueDelete + ')');
     
@@ -825,7 +828,8 @@ public class Proxy implements DeliveryListener {
     AMQP.Queue.DeleteOk deleteOk;
     if (Naming.isLocal(queueDelete.queue)) {
       queueShell = new QueueShell(Naming.lookupQueue(queueDelete.queue));
-      int msgCount = StubLocal.queueDelete(queueDelete.queue, queueDelete.ifUnused, queueDelete.ifEmpty);
+      int msgCount = StubLocal.queueDelete(queueDelete.queue, queueDelete.ifUnused, queueDelete.ifEmpty,
+          name.serverId, name.proxyId);
       deleteOk = new AMQP.Queue.DeleteOk(msgCount);
     } else {
       queueShell = new QueueShell(queueDelete.queue);
@@ -880,7 +884,8 @@ public class Proxy implements DeliveryListener {
       logger.log(BasicLevel.DEBUG, "Proxy.queueUnbind(" + queueUnbind + ')');
 
     if (Naming.isLocal(queueUnbind.exchange)) {
-      StubLocal.queueUnbind(queueUnbind.exchange, queueUnbind.queue, queueUnbind.routingKey, queueUnbind.arguments);
+      StubLocal.queueUnbind(queueUnbind.exchange, queueUnbind.queue, queueUnbind.routingKey,
+          queueUnbind.arguments, name.serverId, name.proxyId);
     } else {
       queueUnbind.queue = Naming.getGlobalName(queueUnbind.queue);
       StubAgentOut.syncSend(queueUnbind, Naming.resolveServerId(queueUnbind.exchange));
