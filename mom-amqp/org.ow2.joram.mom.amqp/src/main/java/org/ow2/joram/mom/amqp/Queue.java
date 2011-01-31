@@ -113,7 +113,7 @@ public class Queue implements Serializable {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Queue.receive()");
 
-    if (exclusive && this.serverId != serverId && this.proxyId != proxyId) {
+    if (exclusive && (this.serverId != serverId || this.proxyId != proxyId)) {
       throw new ResourceLockedException("Can't get a message on a non-owned exclusive queue");
     }
     if (toDeliver.size() > 0) {
@@ -138,7 +138,7 @@ public class Queue implements Serializable {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Queue.consume()");
 
-    if (exclusive && this.serverId != serverId && this.proxyId != proxyId) {
+    if (exclusive && (this.serverId != serverId || this.proxyId != proxyId)) {
       throw new ResourceLockedException("Can't consume on a non-owned exclusive queue.");
     }
     if (exclusiveConsumer && consumers.size() != 0) {
@@ -240,7 +240,7 @@ public class Queue implements Serializable {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Queue.cancel()");
 
-    if (exclusive && this.serverId != serverId && this.proxyId != proxyId) {
+    if (exclusive && (this.serverId != serverId || this.proxyId != proxyId)) {
       throw new ResourceLockedException("Can't cancel a consumer on a non-owned exclusive queue");
     }
     
@@ -267,7 +267,7 @@ public class Queue implements Serializable {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Queue.purge() " + toDeliver.size());
 
-    if (exclusive && this.serverId != serverId && this.proxyId != proxyId) {
+    if (exclusive && (this.serverId != serverId || this.proxyId != proxyId)) {
       throw new ResourceLockedException("Can't clear a non-owned exclusive queue");
     }
     int msgCount = toDeliver.size();
@@ -385,17 +385,62 @@ public class Queue implements Serializable {
     return boundExchanges;
   }
 
-  public synchronized void addBoundExchange(String exchange) throws TransactionException {    
+  public boolean isDurable() {
+    return durable;
+  }
+
+  public boolean isExclusive() {
+    return exclusive;
+  }
+
+  public synchronized void addBoundExchange(String exchange, short serverId, long proxyId)
+      throws TransactionException, ResourceLockedException {
+    if (exclusive && (this.serverId != serverId || this.proxyId != proxyId)) {
+      throw new ResourceLockedException("Can't bind a non-owned exclusive queue");
+    }
     boundExchanges.add(exchange);
     if (durable) {
       saveBoundExchange(exchange);
     }
   }
 
-  public synchronized void removeBoundExchange(String exchangeName)  {
+  public synchronized void removeBoundExchange(String exchangeName) {
+    try {
+      removeBoundExchange(exchangeName, serverId, proxyId);
+    } catch (ResourceLockedException exc) {
+      // Can't happen
+    }
+  }
+
+  public synchronized void removeBoundExchange(String exchangeName, short serverId, long proxyId)
+      throws ResourceLockedException {
+    if (exclusive && (this.serverId != serverId || this.proxyId != proxyId)) {
+      throw new ResourceLockedException("Can't unbind a non-owned exclusive queue");
+    }
     boundExchanges.remove(exchangeName);
     if (durable) {
       deleteBoundExchange(exchangeName);
+    }
+  }
+
+  public void deleteQueue(String queueName, short serverId, long proxyId) throws ResourceLockedException,
+      TransactionException {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Queue.deleteQueue(" + queueName + ')');
+
+    if (exclusive && (this.serverId != serverId || this.proxyId != proxyId)) {
+      throw new ResourceLockedException("Can't delete a non-owned exclusive queue");
+    }
+
+    if (durable) {
+      transaction.delete(PREFIX_QUEUE + Naming.getLocalName(queueName));
+      deleteAllMessage(toDeliver);
+      deleteAllMessage(toAck);
+      Iterator<String> iterBoundExchanges = boundExchanges.iterator();
+      while (iterBoundExchanges.hasNext()) {
+        String exchangeName = iterBoundExchanges.next();
+        deleteBoundExchange(exchangeName);
+      }
     }
   }
 
@@ -458,9 +503,6 @@ public class Queue implements Serializable {
   //**********************************************************
   //* Persistence
   //**********************************************************
-  public boolean isDurable() {
-    return durable;
-  }
 
   public static Queue loadQueue(String name) throws IOException, ClassNotFoundException, TransactionException {
     if (logger.isLoggable(BasicLevel.DEBUG))
@@ -510,19 +552,6 @@ public class Queue implements Serializable {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "Queue.saveQueue ERROR::", e);
       throw new TransactionException(e.getMessage());  
-    }
-  }
-  
-  public void deleteQueue(String queueName) throws TransactionException {
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Queue.deleteQueue(" + queueName + ')');
-    transaction.delete(PREFIX_QUEUE + Naming.getLocalName(queueName));
-    deleteAllMessage(toDeliver);
-    deleteAllMessage(toAck);
-    Iterator<String> iterBoundExchanges = boundExchanges.iterator();
-    while (iterBoundExchanges.hasNext()) {
-      String exchangeName = iterBoundExchanges.next();
-      deleteBoundExchange(exchangeName);
     }
   }
   
@@ -624,4 +653,5 @@ public class Queue implements Serializable {
     prefixMsg = PREFIX_MSG + localName;
     prefixBE = PREFIX_BOUND_EXCHANGE + localName;
   }
+
 }
