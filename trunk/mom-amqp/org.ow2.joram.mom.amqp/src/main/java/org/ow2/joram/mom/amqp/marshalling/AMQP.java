@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
@@ -36,6 +36,7 @@ public class AMQP {
     public static int MAJOR = 0;
     public static int MINOR = 9;
     public static final int PORT = 5672;
+    public static final int REVISION = 1;
   }
 
   /**
