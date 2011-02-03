@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2008 CNES
  *
  * This library is free software; you can redistribute it and/or
@@ -30,6 +30,7 @@ import java.io.IOException;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 import org.ow2.joram.mom.amqp.exceptions.ConnectionException;
+import org.ow2.joram.mom.amqp.exceptions.FrameErrorException;
 import org.ow2.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 
 import fr.dyade.aaa.common.Debug;
@@ -38,8 +39,6 @@ import fr.dyade.aaa.common.stream.StreamUtil;
 public class MarshallingHeader {
   
   public static Logger logger = Debug.getLogger(MarshallingHeader.class.getName());
-
-  protected final static int NULL_CLASS_ID = -1;
 
   private int classId = -1;
   private long bodySize = -1;
@@ -74,13 +73,17 @@ public class MarshallingHeader {
 
     MarshallingHeader marshallingHeader = new MarshallingHeader();
     int classid = in.readShort();
-    if (classid != NULL_CLASS_ID) {
-      marshallingHeader.classId = classid;
-      in.readShort(); // Read weight : The weight field is unused and must be zero
-      marshallingHeader.bodySize = in.readLonglong();
-      marshallingHeader.basicProperties = new BasicProperties();
-      marshallingHeader.basicProperties.readFrom(in);
+    if (classid != AMQP.Basic.INDEX) {
+      throw new FrameErrorException("The class-id MUST match the method frame class id.");
     }
+    marshallingHeader.classId = classid;
+    int weight = in.readShort();
+    if (weight != 0) {
+      throw new FrameErrorException("The header weight field must be zero");
+    }
+    marshallingHeader.bodySize = in.readLonglong();
+    marshallingHeader.basicProperties = new BasicProperties();
+    marshallingHeader.basicProperties.readFrom(in);
     return marshallingHeader;
   }
   
