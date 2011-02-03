@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
@@ -31,6 +31,7 @@ import java.util.Set;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
+import org.ow2.joram.mom.amqp.exceptions.AccessRefusedException;
 import org.ow2.joram.mom.amqp.exceptions.NoConsumersException;
 import org.ow2.joram.mom.amqp.exceptions.NotFoundException;
 import org.ow2.joram.mom.amqp.exceptions.TransactionException;
@@ -153,9 +154,12 @@ public abstract class IExchange implements Serializable {
     }
   }
 
-  protected final void deleteExchange() {
+  protected final void deleteExchange() throws AccessRefusedException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "IExchange.deleteExchange(" + name + ')');
+    if (name.equals(DEFAULT_EXCHANGE_NAME)) {
+      throw new AccessRefusedException("Can't delete default exchange.");
+    }
     if (durable) {
       transaction.delete(saveName);
     }
