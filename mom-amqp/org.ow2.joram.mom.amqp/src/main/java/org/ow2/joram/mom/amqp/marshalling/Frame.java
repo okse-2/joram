@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2008 CNES
  *
  * This library is free software; you can redistribute it and/or
@@ -41,7 +41,7 @@ import fr.dyade.aaa.common.stream.StreamUtil;
 public class Frame {
   
   public static Logger logger = Debug.getLogger(Frame.class.getName());
-  
+
   /** type code AMQP.FRAME_XXX constants */
   private int type;
   
@@ -78,15 +78,30 @@ public class Frame {
     return new Frame(type, channel, payload);
   }
 
-  public static void writeTo(Frame frame, OutputStream out) throws IOException {
-    StreamUtil.writeTo((byte) frame.getType(), out);
-    StreamUtil.writeTo((short) frame.getChannel(), out);
-    if (frame.getPayload() == null) {
-      StreamUtil.writeTo(0, out);
+  public static void writeTo(Frame frame, OutputStream out, int maxBodySize) throws IOException {
+    if (maxBodySize == 0 || frame.getPayload() == null) {
+      StreamUtil.writeTo((byte) frame.getType(), out);
+      StreamUtil.writeTo((short) frame.getChannel(), out);
+      if (frame.getPayload() == null) {
+        StreamUtil.writeTo(0, out);
+      } else {
+        StreamUtil.writeTo(frame.getPayload(), out);
+      }
+      StreamUtil.writeTo((byte) AMQP.FRAME_END, out);
     } else {
-      StreamUtil.writeTo(frame.getPayload(), out);
+      int copied = 0;
+      while (copied < frame.getPayload().length) {
+        int length = Math.min(frame.getPayload().length - copied, maxBodySize);
+        byte[] array = new byte[length];
+        System.arraycopy(frame.getPayload(), copied, array, 0, length);
+        StreamUtil.writeTo((byte) frame.getType(), out);
+        StreamUtil.writeTo((short) frame.getChannel(), out);
+        StreamUtil.writeTo(array, out);
+        StreamUtil.writeTo((byte) AMQP.FRAME_END, out);
+        copied += length;
+        out.flush();
+      }
     }
-    StreamUtil.writeTo((byte) AMQP.FRAME_END, out);
   }
 
   /**
