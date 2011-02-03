@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2008 CNES
  *
  * This library is free software; you can redistribute it and/or
@@ -49,36 +49,32 @@ public class AMQPService {
   public static Naming naming;
   public static IExchange exchange;
   
-  /**
-   * Default value for the TCP SO_TIMEOUT property.
-   */
+  /** Default value for the TCP SO_TIMEOUT property. */
   public static final int DEFAULT_SO_TIMEOUT = 100000;
+
   /**
    * Name the property that allow to fix the TCP SO_TIMEOUT property for the
    * client's connections.
    */
   public static final String SO_TIMEOUT_PROP = "AMQP.soTimeout";
-  /**
-   * Default value for the TCP port of the listen socket.
-   */
-  public static final int DEFAULT_PORT = 5672;
+
+  /** Default value for the TCP port of the listen socket. */
+  public static final int DEFAULT_PORT = AMQP.PROTOCOL.PORT;
+
   public static final String DEFAULT_BINDADDRESS = "0.0.0.0"; // all
+
   /**
    * Name the property that allow to fix the pool size for the
    * connection's listener.
    */
   public static final String POOL_SIZE_PROP = "AMQP.poolSize";
   
-  /**
-   * Default value for the pool size.
-   */
+  /** Default value for the pool size. */
   public static final int DEFAULT_POOL_SIZE = 500;
   
   public static int poolSize;
   
-  /**
-   * Default value for the TCP BACKLOG property.
-   */
+  /** Default value for the TCP BACKLOG property. */
   public static final int DEFAULT_BACKLOG = 10;
   /**
    * Name the property that allow to fix the TCP BACKLOG property for the
@@ -88,9 +84,7 @@ public class AMQPService {
   
   public static int timeout;
   
-  /**
-   * The proxy reference (used to stop it).
-   */
+  /** The proxy reference (used to stop it). */
   protected static AMQPService amqpService;
    
   private static int port;
@@ -268,7 +262,7 @@ public class AMQPService {
     }
   }
   
-  public static void closeConnectionListener(AMQPConnectionListener cnxListener) {
+  public static void removeConnectionListener(AMQPConnectionListener cnxListener) {
     connectionListeners.remove(cnxListener);
   }
 }
