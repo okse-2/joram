@@ -1,3 +1,25 @@
+/*
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2011 ScalAgent Distributed Technologies
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
+ *
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
+ */
 package org.ow2.joram.mom.amqp;
 
 import java.rmi.AlreadyBoundException;
@@ -5,6 +27,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.ow2.joram.mom.amqp.exceptions.AccessRefusedException;
 import org.ow2.joram.mom.amqp.exceptions.CommandInvalidException;
@@ -24,6 +48,12 @@ import org.ow2.joram.mom.amqp.structures.RemoveQueueBindings;
  * The {@link StubLocal} class handles interactions with local AMQP objects.
  */
 public class StubLocal {
+
+  /**
+   * The exchange name consists of a non-empty sequence of these characters:
+   * letters, digits, hyphen, underscore, period, or colon.
+   */
+  private static final Pattern exchangeNamePattern = Pattern.compile("[-_.:a-zA-Z0-9]*");
 
   public static AMQP.Queue.DeclareOk queueDeclare(String queueName, boolean passive, boolean durable,
       boolean autoDelete, boolean exclusive, short serverId, long proxyId) throws NotFoundException,
@@ -152,13 +182,29 @@ public class StubLocal {
     return queue.clear(serverId, proxyId);
   }
 
+  private static void checkExchangeName(String name) throws AccessRefusedException,
+      PreconditionFailedException {
+    if (name.startsWith("amq.")) {
+      throw new AccessRefusedException(
+          "Exchange names starting with 'amq.' are reserved for pre-declared and standardised exchanges.");
+    }
+    // The exchange name consists of a non-empty sequence of these characters:
+    // letters, digits, hyphen, underscore, period, or colon.
+    Matcher m = exchangeNamePattern.matcher(name);
+    if (!m.matches()) {
+      throw new PreconditionFailedException("Exchange name contains an invalid character.");
+    }
+  }
+
   public static void exchangeDeclare(String exchangeName, String type, boolean durable, boolean passive)
-      throws NotFoundException, CommandInvalidException, NotAllowedException, PreconditionFailedException {
+      throws NotFoundException, CommandInvalidException, NotAllowedException, PreconditionFailedException,
+      AccessRefusedException {
     IExchange exchange = Naming.lookupExchange(exchangeName);
     if (exchange == null) {
       if (passive) {
         throw new NotFoundException("Passive declaration of an unknown exchange.");
       }
+      checkExchangeName(exchangeName);
       if (type.equalsIgnoreCase(DirectExchange.TYPE)) {
         exchange = new DirectExchange(exchangeName, durable);
       } else if (type.equalsIgnoreCase(TopicExchange.TYPE)) {
@@ -206,7 +252,7 @@ public class StubLocal {
         }
       } else {
         if (!exchange.getClass().getName().equals(type)) {
-          throw new CommandInvalidException("Exchange type do not match existing exchange.");
+          throw new NotAllowedException("Exchange type do not match existing exchange.");
         }
       }
 
@@ -217,7 +263,7 @@ public class StubLocal {
   }
 
   public static void exchangeDelete(String exchangeName, boolean ifUnused) throws NotFoundException,
-      PreconditionFailedException {
+      PreconditionFailedException, AccessRefusedException {
     IExchange exchange = Naming.lookupExchange(exchangeName);
     if (exchange == null) {
       throw new NotFoundException("Exchange not found for deletion.");
@@ -225,10 +271,11 @@ public class StubLocal {
     if (ifUnused && !exchange.isUnused()) {
       throw new PreconditionFailedException("Exchange not unused.");
     }
-    Naming.unbindExchange(exchangeName);
     
-    if (exchange.durable)
+    if (exchange.durable) {
       exchange.deleteExchange();
+    }
+    Naming.unbindExchange(exchangeName);
 
     // Unbind queues bound to the exchange
     Set<String> boundQueues = exchange.getBoundQueues();
