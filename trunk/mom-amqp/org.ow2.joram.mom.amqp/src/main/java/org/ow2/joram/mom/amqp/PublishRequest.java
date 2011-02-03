@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2008 CNES
  *
  * This library is free software; you can redistribute it and/or
@@ -23,7 +23,6 @@
  */
 package org.ow2.joram.mom.amqp;
 
-import java.io.IOException;
 import java.io.Serializable;
 
 import org.ow2.joram.mom.amqp.marshalling.AMQP;
@@ -84,7 +83,7 @@ public class PublishRequest implements Serializable {
     return body;
   }
 
-  public boolean appendBody(byte[] bodyPart) throws IOException {
+  public boolean appendBody(byte[] bodyPart) {
     System.arraycopy(bodyPart, 0, body, bodyRead, bodyPart.length);
     bodyRead += bodyPart.length;
     return bodyRead == body.length;
