@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -443,13 +443,13 @@ public class StubAgentIn {
   }
 
   public static void exchangeDeclare(AMQP.Exchange.Declare exchangeDeclare) throws CommandInvalidException,
-      PreconditionFailedException, NotAllowedException, NotFoundException {
+      PreconditionFailedException, NotAllowedException, NotFoundException, AccessRefusedException {
     StubLocal.exchangeDeclare(exchangeDeclare.exchange, exchangeDeclare.type, exchangeDeclare.durable,
         exchangeDeclare.passive);
   }
 
   public static void exchangeDelete(AMQP.Exchange.Delete exchangeDelete) throws NotFoundException,
-      PreconditionFailedException {
+      PreconditionFailedException, AccessRefusedException {
     StubLocal.exchangeDelete(exchangeDelete.exchange, exchangeDelete.ifUnused);
   }
 
