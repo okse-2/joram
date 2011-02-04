@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
@@ -27,10 +27,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 import org.ow2.joram.mom.amqp.exceptions.SyntaxErrorException;
 
@@ -112,13 +115,77 @@ public class AMQPInputStream {
     return result;
   }
 
+  private final Object readFieldValue() throws IOException, SyntaxErrorException {
+    Object value = null;
+    int type = StreamUtil.readUnsignedByteFrom(in);
+    switch (type) {
+    case 'S':
+      value = readLongstr();
+      break;
+    case 'I':
+      value = new Integer(StreamUtil.readIntFrom(in));
+      break;
+    case 'D':
+      int scale = StreamUtil.readUnsignedByteFrom(in);
+      byte[] unscaled = StreamUtil.readByteArrayFrom(in, 4);
+      value = new BigDecimal(new BigInteger(unscaled), scale);
+      break;
+    case 'T':
+      value = readTimestamp();
+      break;
+    case 'F':
+      value = readTable();
+      break;
+    case 'B':
+      value = new Byte(StreamUtil.readByteFrom(in));
+      break;
+    case 'U':
+      value = new Short(StreamUtil.readShortFrom(in));
+      break;
+    case 'L':
+      value = new Long(StreamUtil.readLongFrom(in));
+      break;
+    case 'A':
+      value = readArray();
+      break;
+    case 'f':
+      value = new Float(StreamUtil.readFloatFrom(in));
+      break;
+    case 'd':
+      value = new Double(StreamUtil.readDoubleFrom(in));
+      break;
+    case 'b':
+      value = new Byte(StreamUtil.readByteFrom(in));
+      break;
+    case 'l':
+      value = new Long(StreamUtil.readLongFrom(in));
+      break;
+    case 't':
+      value = new Boolean(readBoolean());
+      break;
+    case 'V':
+      value = null;
+      break;
+    case 's':
+      value = new Boolean(StreamUtil.readShortStringFrom(in));
+      break;
+    default:
+      throw new SyntaxErrorException("Unrecognised object type in table: " + (char) type);
+    }
+    return value;
+  }
+
   public final Map readTable() throws IOException, SyntaxErrorException {
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "readTable()");
+    }
+
     clearBits();
     if (in.available() < 1)
       return null;
     long tableLength = StreamUtil.readUnsignedIntFrom(in);
-    if (tableLength < 1)
-      return null;
+    if (tableLength < 0)
+      throw new SyntaxErrorException("Negative table size.");
     Map table = new HashMap();
 
     InputStream oldIn = in;
@@ -126,192 +193,41 @@ public class AMQPInputStream {
     Object value = null;
     while (in.available() > 0) {
       String name = readShortstr();
-      int type = StreamUtil.readUnsignedByteFrom(in);
-      switch (type) {
-      case 'S':
-        value = readLongstr();
-        break;
-      case 'I':
-        value = new Integer(StreamUtil.readIntFrom(in));
-        break;
-      case 'D':
-        int scale = StreamUtil.readUnsignedByteFrom(in);
-        byte[] unscaled = StreamUtil.readByteArrayFrom(in, 4);
-        value = new BigDecimal(new BigInteger(unscaled), scale);
-        break;
-      case 'T':
-        value = readTimestamp();
-        break;
-      case 'F':
-        value = readTable();
-        break;
-
-      // Taken from AMQP 0.9.1 spec
-      case 'B':
-        value = new Byte(StreamUtil.readByteFrom(in));
-        break;
-      case 'U':
-        value = new Short(StreamUtil.readShortFrom(in));
-        break;
-      case 'L':
-        value = new Long(StreamUtil.readLongFrom(in));
-        break;
-      case 'A':
-        value = readArray();
-        break;
-      case 'f':
-        value = new Float(StreamUtil.readFloatFrom(in));
-        break;
-      case 'd':
-        value = new Double(StreamUtil.readDoubleFrom(in));
-        break;
-      case 'b':
-        value = new Byte(StreamUtil.readByteFrom(in));
-        break;
-      case 'l':
-        value = new Long(StreamUtil.readLongFrom(in));
-        break;
-      case 't':
-        value = new Boolean(readBoolean());
-        break;
-      case 'V':
-        value = null;
-        break;
-      case 's':
-        value = new Boolean(StreamUtil.readShortStringFrom(in));
-        break;
-      default:
-        throw new SyntaxErrorException("Unrecognised object type in table: " + (char) type);
-      }
-
+      value = readFieldValue();
       if (!table.containsKey(name))
         table.put(name, value);
     }
 
     in = oldIn;
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "readTable -> " + table);
+    }
     return table;
   }
 
   private final Object[] readArray() throws IOException, SyntaxErrorException {
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "readArray()");
+    }
 
-    long arrayLength = StreamUtil.readUnsignedIntFrom(in);
-    if (arrayLength < 1)
-      return null;
+    long arrayLength = StreamUtil.readIntFrom(in);
+    if (arrayLength < 0)
+      throw new SyntaxErrorException("Negative array size.");
 
-    //    DataInputStream in = new DataInputStream(new TruncatedInputStream(in, arrayLength));
     InputStream oldIn = in;
     in = new TruncatedInputStream(this.in, arrayLength);
 
-    int typeCode = StreamUtil.readUnsignedByteFrom(in);
-    int count = StreamUtil.readIntFrom(in);
-
-    Object[] value = null;
-    switch (typeCode) {
-    case 'S':
-      value = new LongString[count];
-      for (int i = 0; i < count; i++) {
-        value[i] = readLongstr();
-      }
-      break;
-    case 'I':
-      value = new Integer[count];
-      for (int i = 0; i < count; i++) {
-        value[i] = new Integer(StreamUtil.readIntFrom(in));
-      }
-      break;
-    case 'U':
-      value = new Short[count];
-      for (int i = 0; i < count; i++) {
-        value[i] = new Short(StreamUtil.readShortFrom(in));
-      }
-      break;
-    case 'B':
-      value = new Byte[count];
-      for (int i = 0; i < count; i++) {
-        value[i] = new Byte(StreamUtil.readByteFrom(in));
-      }
-      break;
-    case 'D':
-      value = new BigDecimal[count];
-      for (int i = 0; i < count; i++) {
-        int scale = StreamUtil.readUnsignedByteFrom(in);
-        byte[] unscaled = StreamUtil.readByteArrayFrom(in, 4);
-        value[i] = new BigDecimal(new BigInteger(unscaled), scale);
-      }
-      break;
-    case 'T':
-      value = new Date[count];
-      for (int i = 0; i < count; i++) {
-        value[i] = readTimestamp();
-      }
-      break;
-    case 'F':
-      value = new HashMap[count];
-      for (int i = 0; i < count; i++) {
-        value[i] = readTable();
-      }
-      break;
-    case 'L':
-      value = new Long[count];
-      for (int i = 0; i < count; i++) {
-        value[i] = new Long(StreamUtil.readLongFrom(in));
-      }
-      break;
-    case 'A':
-      value = new Object[count][];
-      for (int i = 0; i < count; i++) {
-        value[i] = readArray();
-      }
-      break;
-    case 'f':
-      value = new Float[count];
-      for (int i = 0; i < count; i++) {
-        value[i] = new Float(StreamUtil.readFloatFrom(in));
-      }
-      break;
-    case 'd':
-      value = new Double[count];
-      for (int i = 0; i < count; i++) {
-        value[i] = new Double(StreamUtil.readDoubleFrom(in));
-      }
-      break;
-    case 'b':
-      value = new Byte[count];
-      for (int i = 0; i < count; i++) {
-        value[i] = new Byte(StreamUtil.readByteFrom(in));
-      }
-      break;
-    case 'l':
-      value = new Long[count];
-      for (int i = 0; i < count; i++) {
-        value[i] = new Long(StreamUtil.readLongFrom(in));
-      }
-      break;
-    case 't':
-      value = new Boolean[count];
-      for (int i = 0; i < count; i++) {
-        value[i] = new Boolean(readBoolean());
-      }
-      break;
-    case 'V':
-      value = new Object[count];
-      break;
-    case 's':
-      value = new String[count];
-      for (int i = 0; i < count; i++) {
-        value[i] = StreamUtil.readShortStringFrom(in);
-      }
-      break;
-    default:
-      throw new SyntaxErrorException("Unrecognised type in table: " + (char) typeCode);
+    List<Object> list = new ArrayList<Object>();
+    while (in.available() > 0) {
+      list.add(readFieldValue());
     }
 
-    if (in.available() > 0) {
-      throw new IOException("Incorrect array size.");
-    }
     in = oldIn;
-    
-    return value;
+
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "readArray -> " + list);
+    }
+    return list.toArray();
   }
 
   public final int readOctet() throws IOException {
