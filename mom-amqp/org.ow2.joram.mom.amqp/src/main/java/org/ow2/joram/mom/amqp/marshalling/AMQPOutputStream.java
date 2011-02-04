@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
@@ -30,10 +30,12 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Debug;
@@ -138,6 +140,9 @@ public class AMQPOutputStream {
   }
 
   public final void writeTable(Map table) throws IOException {
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "writeTable -> " + table);
+    }
     bitflush();
     if (table == null) {
       StreamUtil.writeTo(0, out);
@@ -146,151 +151,75 @@ public class AMQPOutputStream {
       for (Iterator entries = table.entrySet().iterator(); entries.hasNext();) {
         Map.Entry entry = (Map.Entry) entries.next();
         writeShortstr((String) entry.getKey());
-        Object value = entry.getValue();
-        if (value == null) {
-          writeOctet('V');
-        } else if (value instanceof String) {
-          writeOctet('s');
-          writeShortstr((String) value);
-        } else if (value instanceof LongString) {
-          writeOctet('S');
-          writeLongstr((LongString) value);
-        } else if (value instanceof Integer) {
-          writeOctet('I');
-          writeLong(((Integer) value).intValue());
-        } else if (value instanceof Short) {
-          writeOctet('U');
-          writeShort(((Short) value).shortValue());
-        } else if (value instanceof Byte) {
-          writeOctet('b');
-          writeByte(((Byte) value).byteValue());
-        } else if (value instanceof BigDecimal) {
-          writeOctet('D');
-          BigDecimal decimal = (BigDecimal) value;
-          writeOctet(decimal.scale());
-          BigInteger unscaled = decimal.unscaledValue();
-          if (unscaled.bitLength() > 32) /* Integer.SIZE in Java 1.5 */
-            throw new IllegalArgumentException("BigDecimal too large to be encoded");
-          writeLong(decimal.unscaledValue().intValue());
-        } else if (value instanceof Date) {
-          writeOctet('T');
-          writeTimestamp((Date) value);
-        } else if (value instanceof Boolean) {
-          writeOctet('t');
-          writeBoolean(((Boolean) value).booleanValue());
-        } else if (value instanceof Map) {
-          writeOctet('F');
-          writeTable((Map) value);
-        } else if (value instanceof Long) {
-          writeOctet('l');
-          writeLonglong(((Long) value).longValue());
-        } else if (value instanceof Double) {
-          writeOctet('d');
-          writeDouble(((Double) value).doubleValue());
-        } else if (value instanceof Float) {
-          writeOctet('f');
-          writeFloat(((Float) value).floatValue());
-        } else if (value instanceof Object[]) {
-          writeOctet('A');
-          writeArray((Object[]) value);
-        } else {
-          throw new IllegalArgumentException("Invalid value type: " + value.getClass().getName()
-              + " for key " + entry.getKey());
-        }
+        writeFieldValue(entry.getValue());
       }
     }
   }
 
-  private void writeArray(Object[] value) throws IOException {
-    int len = value.length;
-
-    StreamUtil.writeTo(arraySize(value), out);
-
-    if (value instanceof String[]) {
+  private void writeFieldValue(Object value) throws IOException {
+    if (value == null) {
+      writeOctet('V');
+    } else if (value instanceof String) {
       writeOctet('s');
-      StreamUtil.writeTo(len, out);
-      for (int i = 0; i < len; i++) {
-        writeShortstr((String) value[i]);
-      }
-    } else if (value instanceof LongString[]) {
+      writeShortstr((String) value);
+    } else if (value instanceof LongString) {
       writeOctet('S');
-      StreamUtil.writeTo(len, out);
-      for (int i = 0; i < len; i++) {
-        writeLongstr((LongString) value[i]);
-      }
-    } else if (value instanceof Integer[]) {
+      writeLongstr((LongString) value);
+    } else if (value instanceof Integer) {
       writeOctet('I');
-      StreamUtil.writeTo(len, out);
-      for (int i = 0; i < len; i++) {
-        writeLong(((Integer) value[i]).intValue());
-      }
-    } else if (value instanceof Short[]) {
+      writeLong(((Integer) value).intValue());
+    } else if (value instanceof Short) {
       writeOctet('U');
-      StreamUtil.writeTo(len, out);
-      for (int i = 0; i < len; i++) {
-        writeShort(((Short) value[i]).shortValue());
-      }
-    } else if (value instanceof Byte[]) {
+      writeShort(((Short) value).shortValue());
+    } else if (value instanceof Byte) {
       writeOctet('b');
-      StreamUtil.writeTo(len, out);
-      for (int i = 0; i < len; i++) {
-        writeByte(((Byte) value[i]).byteValue());
-      }
-    } else if (value instanceof BigDecimal[]) {
+      writeByte(((Byte) value).byteValue());
+    } else if (value instanceof BigDecimal) {
       writeOctet('D');
-      StreamUtil.writeTo(len, out);
-      for (int i = 0; i < len; i++) {
-        BigDecimal decimal = (BigDecimal) value[i];
-        StreamUtil.writeTo((byte) decimal.scale(), out);
-        BigInteger unscaled = decimal.unscaledValue();
-        if (unscaled.bitLength() > 32) /* Integer.SIZE in Java 1.5 */
-          throw new IllegalArgumentException("BigDecimal too large to be encoded");
-        StreamUtil.writeTo(decimal.unscaledValue().intValue(), out);
-      }
-    } else if (value instanceof Date[]) {
+      BigDecimal decimal = (BigDecimal) value;
+      writeOctet(decimal.scale());
+      BigInteger unscaled = decimal.unscaledValue();
+      if (unscaled.bitLength() > 32) /* Integer.SIZE in Java 1.5 */
+        throw new IllegalArgumentException("BigDecimal too large to be encoded");
+      writeLong(decimal.unscaledValue().intValue());
+    } else if (value instanceof Date) {
       writeOctet('T');
-      StreamUtil.writeTo(len, out);
-      for (int i = 0; i < len; i++) {
-        writeTimestamp((Date) value[i]);
-      }
-    } else if (value instanceof Boolean[]) {
+      writeTimestamp((Date) value);
+    } else if (value instanceof Boolean) {
       writeOctet('t');
-      StreamUtil.writeTo(len, out);
-      for (int i = 0; i < len; i++) {
-        writeBoolean(((Boolean) value[i]).booleanValue());
-      }
-    } else if (value instanceof Long[]) {
-      writeOctet('l');
-      StreamUtil.writeTo(len, out);
-      for (int i = 0; i < len; i++) {
-        writeLonglong(((Long) value[i]).longValue());
-      }
-    } else if (value instanceof Double[]) {
-      writeOctet('d');
-      StreamUtil.writeTo(len, out);
-      for (int i = 0; i < len; i++) {
-        writeDouble(((Double) value[i]).doubleValue());
-      }
-    } else if (value instanceof Float[]) {
-      writeOctet('f');
-      StreamUtil.writeTo(len, out);
-      for (int i = 0; i < len; i++) {
-        writeFloat(((Float) value[i]).floatValue());
-      }
-    } else if (value instanceof Map[]) {
+      writeBoolean(((Boolean) value).booleanValue());
+    } else if (value instanceof Map) {
       writeOctet('F');
-      StreamUtil.writeTo(len, out);
-      for (int i = 0; i < len; i++) {
-        writeTable((Map) value[i]);
-      }
-    } else if (value instanceof Object[][]) {
+      writeTable((Map) value);
+    } else if (value instanceof Long) {
+      writeOctet('l');
+      writeLonglong(((Long) value).longValue());
+    } else if (value instanceof Double) {
+      writeOctet('d');
+      writeDouble(((Double) value).doubleValue());
+    } else if (value instanceof Float) {
+      writeOctet('f');
+      writeFloat(((Float) value).floatValue());
+    } else if (value instanceof Object[]) {
       writeOctet('A');
-      StreamUtil.writeTo(len, out);
-      for (int i = 0; i < len; i++) {
-        writeArray((Object[]) value[i]);
-      }
+      writeArray((Object[]) value);
     } else {
-      throw new IllegalArgumentException("invalid value in table: " + value.getClass().getName());
+      throw new IllegalArgumentException("Invalid value type: " + value.getClass().getName());
+    }
+  }
+
+  private void writeArray(Object[] array) throws IOException {
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "writeArray -> " + Arrays.toString(array));
+    }
+    StreamUtil.writeTo(arraySize(array), out);
+
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "arrayLength -> " + arraySize(array));
+    }
+
+    for (int i = 0; i < array.length; i++) {
+      writeFieldValue(array[i]);
     }
   }
 
@@ -328,75 +257,48 @@ public class AMQPOutputStream {
     long acc = 0;
     for (Iterator entries = table.entrySet().iterator(); entries.hasNext();) {
       Map.Entry entry = (Map.Entry) entries.next();
-      acc += shortStrSize((String) entry.getKey());
-      acc += 1;
-      Object value = entry.getValue();
-      if (value == null) {
-        continue;
-      } else if (value instanceof Byte || value instanceof Boolean) {
-        acc++;
-      } else if (value instanceof String) {
-        acc += shortStrSize((String) entry.getValue());
-      } else if (value instanceof LongString) {
-        acc += 4;
-        acc += ((LongString) value).length();
-      } else if (value instanceof Integer || value instanceof Float) {
-        acc += 4;
-      } else if (value instanceof Short) {
-        acc += 2;
-      } else if (value instanceof BigDecimal) {
-        acc += 5;
-      } else if (value instanceof Long || value instanceof Date || value instanceof Timestamp
-          || value instanceof Double) {
-        acc += 8;
-      } else if (value instanceof Map) {
-        acc += 4;
-        acc += tableSize((Map) value);
-      } else if (value instanceof Object[]) {
-        acc += 4;
-        acc += arraySize((Object[]) value);
-      } else {
-        throw new IllegalArgumentException("Invalid value in table: " + value.getClass().getName());
-      }
+      acc += shortStrSize((String) entry.getKey()); // key name
+      acc += fieldValueSize(entry.getValue()); // key value
     }
-
     return acc;
+  }
+
+  private long fieldValueSize(Object value) throws UnsupportedEncodingException {
+    long size = 1; // field value type
+    if (value == null) {
+      // 0
+    } else if (value instanceof Byte || value instanceof Boolean) {
+      size++;
+    } else if (value instanceof String) {
+      size += shortStrSize((String) value);
+    } else if (value instanceof LongString) {
+      size += 4;
+      size += ((LongString) value).length();
+    } else if (value instanceof Integer || value instanceof Float) {
+      size += 4;
+    } else if (value instanceof Short) {
+      size += 2;
+    } else if (value instanceof BigDecimal) {
+      size += 5;
+    } else if (value instanceof Long || value instanceof Date || value instanceof Timestamp
+        || value instanceof Double) {
+      size += 8;
+    } else if (value instanceof Map) {
+      size += 4;
+      size += tableSize((Map) value);
+    } else if (value instanceof Object[]) {
+      size += 4;
+      size += arraySize((Object[]) value);
+    } else {
+      throw new IllegalArgumentException("Invalid value in table: " + value.getClass().getName());
+    }
+    return size;
   }
 
   private int arraySize(Object[] value) throws UnsupportedEncodingException {
     int acc = 0;
-    acc += 1;
-    acc += 4;
-    int len = value.length;
-    if (value instanceof String[]) {
-      for (int i = 0; i < len; i++) {
-        acc += shortStrSize((String) value[i]);
-      }
-    } else if (value instanceof LongString[]) {
-      for (int i = 0; i < len; i++) {
-        acc += 4;
-        acc += ((LongString) value[i]).length();
-      }
-    } else if (value instanceof Integer[] || value instanceof Float[]) {
-      acc += 4 * len;
-    } else if (value instanceof Short[]) {
-      acc += 2 * len;
-    } else if (value instanceof Byte[] || value instanceof Boolean[]) {
-      acc += len;
-    } else if (value instanceof BigDecimal[]) {
-      acc += 5 * len;
-    } else if (value instanceof Long[] || value instanceof Date[] || value instanceof Timestamp[]
-        || value instanceof Double[]) {
-      acc += 8 * len;
-    } else if (value instanceof Map[]) {
-      for (int i = 0; i < len; i++) {
-        acc += 4;
-        acc += tableSize((Map) value[i]);
-      }
-    } else if (value instanceof Object[][]) {
-      acc += arraySize(value);
-    } else {
-      throw new IllegalArgumentException("invalid value in table: " + value.getClass().getName());
+    for (int i = 0; i < value.length; i++) {
+      acc += fieldValueSize(value[i]);
     }
     return acc;
   }
