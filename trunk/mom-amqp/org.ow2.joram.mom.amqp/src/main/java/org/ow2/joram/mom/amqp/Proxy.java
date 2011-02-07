@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
@@ -417,7 +417,8 @@ public class Proxy implements DeliveryListener {
     }
   }
   
-  public void basicAck(long deliveryTag, boolean multiple, int channelNumber) {
+  public void basicAck(long deliveryTag, boolean multiple, int channelNumber)
+      throws PreconditionFailedException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Proxy.basicAck(" + deliveryTag + ", " + channelNumber + ')');
 
@@ -439,6 +440,7 @@ public class Proxy implements DeliveryListener {
           return;
         }
       }
+      throw new PreconditionFailedException("Acknowledgement error: invalid tag.");
     } else {
       Map<QueueShell, List<Long>> deliveryMap = new HashMap<QueueShell, List<Long>>();
       while (iter.hasNext()) {
@@ -454,6 +456,9 @@ public class Proxy implements DeliveryListener {
         } else if (delivery.deliveryTag > deliveryTag) {
           break;
         }
+      }
+      if (deliveryMap.size() == 0) {
+        throw new PreconditionFailedException("Acknowledgement error: invalid tag.");
       }
       Iterator<QueueShell> iterQueues = deliveryMap.keySet().iterator();
       while (iterQueues.hasNext()) {
