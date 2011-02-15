@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
@@ -95,14 +95,19 @@ public class DirectExchange extends IExchange {
       throws NotFoundException {
     Set<String> boundQueues = bindings.get(routingKey);
     if (boundQueues != null) {
-      boundQueues.remove(queueName);
+      boolean removed = boundQueues.remove(queueName);
+      if (!removed) {
+        throw new NotFoundException("Unknown routing key '" + routingKey + "' between direct exchange '"
+            + name + "' and queue '" + queueName + "'.");
+      }
       if (boundQueues.size() == 0) {
         bindings.remove(routingKey);
       }
       if (durable)
         saveExchange();
     } else {
-      throw new NotFoundException("Unknown routing key: " + routingKey);
+      throw new NotFoundException("Unknown routing key '" + routingKey + "' between direct exchange '" + name
+          + "' and queue '" + queueName + "'.");
     }
   }
 

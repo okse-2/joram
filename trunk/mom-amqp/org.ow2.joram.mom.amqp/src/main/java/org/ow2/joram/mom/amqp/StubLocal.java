@@ -68,7 +68,7 @@ public class StubLocal {
 
     if (queue == null) {
       if (passive) {
-        throw new NotFoundException("Passive declaration of an unknown queue.");
+        throw new NotFoundException("Passive declaration of an unknown queue: '" + queueName + "'.");
       }
       queue = new Queue(queueName, durable, autoDelete, exclusive, serverId, proxyId);
       try {
@@ -85,13 +85,16 @@ public class StubLocal {
     } else {
       if (!passive) {
         if (durable != queue.isDurable()) {
-          throw new PreconditionFailedException("Queue durable property do not match existing queue one.");
+          throw new PreconditionFailedException("Queue durable property do not match existing queue '"
+              + queueName + "'.");
         }
         if (exclusive != queue.isExclusive()) {
-          throw new ResourceLockedException("Queue exclusive property do not match existing queue one.");
+          throw new ResourceLockedException("Queue exclusive property do not match existing queue '"
+              + queueName + "'.");
         }
         if (autoDelete != queue.isAutodelete()) {
-          throw new PreconditionFailedException("Queue autodelete property do not match existing queue one.");
+          throw new PreconditionFailedException("Queue autodelete property do not match existing queue one '"
+              + queueName + "'.");
         }
       }
       return queue.getInfo(serverId, proxyId);
@@ -103,14 +106,14 @@ public class StubLocal {
       TransactionException {
     Queue queue = Naming.lookupQueue(queueName);
     if (queue == null) {
-      throw new NotFoundException("Unknown queue for deletion: " + queueName);
+      throw new NotFoundException("Unknown queue for deletion: '" + queueName + "'.");
     }
 
     if (ifEmpty && queue.getMessageCount() > 0) {
-      throw new PreconditionFailedException("Queue not empty.");
+      throw new PreconditionFailedException("Deletion error: queue '" + queueName + "' is not empty.");
     }
     if (ifUnused && queue.getConsumerCount() > 0) {
-      throw new PreconditionFailedException("Queue not unused.");
+      throw new PreconditionFailedException("Deletion error: queue '" + queueName + "' is not unused.");
     }
     queue.deleteQueue(queueName, serverId, proxyId);
     Naming.unbindQueue(queueName);
@@ -138,12 +141,12 @@ public class StubLocal {
       ResourceLockedException, TransactionException {
     IExchange exchange = Naming.lookupExchange(exchangeName);
     if (exchange == null) {
-      throw new NotFoundException("Binding to a non-existent exchange.");
+      throw new NotFoundException("Binding to a non-existent exchange: '" + exchangeName + "'.");
     }
     if (Naming.isLocal(queueName)) {
       Queue queue = Naming.lookupQueue(queueName);
       if (queue == null) {
-        throw new NotFoundException("Binding to a non-existent queue.");
+        throw new NotFoundException("Binding to a non-existent queue: '" + queueName + "'.");
       }
       queue.addBoundExchange(exchangeName, serverId, proxyId);
     } else {
@@ -163,13 +166,13 @@ public class StubLocal {
           queue.removeBoundExchange(exchangeName, serverId, proxyId);
           exchange.unbind(queueName, routingKey, arguments);
         } else {
-          throw new NotFoundException("Queue not found.");
+          throw new NotFoundException("Queue not found for unbinding: '" + queueName + "'.");
         }
       } else {
         StubAgentOut.asyncSend(new RemoveBoundExchange(queueName, exchangeName), Naming.resolveServerId(queueName));
       }
     } else {
-      throw new NotFoundException("Exchange not found.");
+      throw new NotFoundException("Exchange not found for unbinding: '" + exchangeName + "'.");
     }
   }
 
@@ -177,7 +180,7 @@ public class StubLocal {
       NotFoundException, ResourceLockedException, TransactionException {
     Queue queue = Naming.lookupQueue(queueName);
     if (queue == null) {
-      throw new NotFoundException("Purging non-existent queue");
+      throw new NotFoundException("Purging non-existent queue: '" + queueName + "'.");
     }
     return queue.clear(serverId, proxyId);
   }
@@ -192,7 +195,7 @@ public class StubLocal {
     // letters, digits, hyphen, underscore, period, or colon.
     Matcher m = exchangeNamePattern.matcher(name);
     if (!m.matches()) {
-      throw new PreconditionFailedException("Exchange name contains an invalid character.");
+      throw new PreconditionFailedException("Exchange name contains an invalid character: '" + name + "'.");
     }
   }
 
@@ -202,7 +205,7 @@ public class StubLocal {
     IExchange exchange = Naming.lookupExchange(exchangeName);
     if (exchange == null) {
       if (passive) {
-        throw new NotFoundException("Passive declaration of an unknown exchange.");
+        throw new NotFoundException("Passive declaration of an unknown exchange: '" + exchangeName + "'.");
       }
       checkExchangeName(exchangeName);
       if (type.equalsIgnoreCase(DirectExchange.TYPE)) {
@@ -236,28 +239,29 @@ public class StubLocal {
       // Check if exchange type corresponds with existing exchange
       if (type.equalsIgnoreCase(DirectExchange.TYPE)) {
         if (!(exchange instanceof DirectExchange)) {
-          throw new NotAllowedException("Exchange type do not match existing exchange.");
+          throw new NotAllowedException("Exchange type do not match existing exchange '" + exchangeName + "'.");
         }
       } else if (type.equalsIgnoreCase(TopicExchange.TYPE)) {
         if (!(exchange instanceof TopicExchange)) {
-          throw new NotAllowedException("Exchange type do not match existing exchange.");
+          throw new NotAllowedException("Exchange type do not match existing exchange '" + exchangeName + "'.");
         }
       } else if (type.equalsIgnoreCase(FanoutExchange.TYPE)) {
         if (!(exchange instanceof FanoutExchange)) {
-          throw new NotAllowedException("Exchange type do not match existing exchange.");
+          throw new NotAllowedException("Exchange type do not match existing exchange '" + exchangeName + "'.");
         }
       } else if (type.equalsIgnoreCase(HeadersExchange.TYPE)) {
         if (!(exchange instanceof HeadersExchange)) {
-          throw new NotAllowedException("Exchange type do not match existing exchange.");
+          throw new NotAllowedException("Exchange type do not match existing exchange '" + exchangeName + "'.");
         }
       } else {
         if (!exchange.getClass().getName().equals(type)) {
-          throw new NotAllowedException("Exchange type do not match existing exchange.");
+          throw new NotAllowedException("Exchange type do not match existing exchange '" + exchangeName + "'.");
         }
       }
 
       if (durable != exchange.isDurable()) {
-        throw new PreconditionFailedException("Exchange durable property do not match existing exchange one.");
+        throw new PreconditionFailedException("Exchange durable property do not match existing exchange '"
+            + exchangeName + "'.");
       }
     }
   }
@@ -266,10 +270,10 @@ public class StubLocal {
       PreconditionFailedException, AccessRefusedException {
     IExchange exchange = Naming.lookupExchange(exchangeName);
     if (exchange == null) {
-      throw new NotFoundException("Exchange not found for deletion.");
+      throw new NotFoundException("Exchange not found for deletion: '" + exchangeName + "'.");
     }
     if (ifUnused && !exchange.isUnused()) {
-      throw new PreconditionFailedException("Exchange not unused.");
+      throw new PreconditionFailedException("Deletion error: Exchange '" + exchangeName + "' is not unused.");
     }
     
     if (exchange.durable) {
@@ -295,7 +299,7 @@ public class StubLocal {
       throws NotFoundException, ResourceLockedException, TransactionException {
     Queue queue = Naming.lookupQueue(queueName);
     if (queue == null) {
-      throw new NotFoundException("Can't get message on an unknown queue.");
+      throw new NotFoundException("Can't get message on an unknown queue: '" + queueName + "'.");
     }
     Message msg = queue.receive(noAck, serverId, proxyId);
     return msg;
@@ -306,7 +310,7 @@ public class StubLocal {
       short serverId, long proxyId) throws NotFoundException, ResourceLockedException, AccessRefusedException {
     Queue queue = Naming.lookupQueue(queueName);
     if (queue == null) {
-      throw new NotFoundException("Consuming from non-existent queue.");
+      throw new NotFoundException("Consuming from non-existent queue: '" + queueName + "'.");
     }
     queue.consume(deliveryListener, channelNumber, consumerTag, exclusive, noAck, noLocal, serverId, proxyId);
   }
@@ -315,7 +319,8 @@ public class StubLocal {
       throws NotFoundException, NoConsumersException, TransactionException {
     IExchange exchange = Naming.lookupExchange(publishRequest.getPublish().exchange);
     if (exchange == null) {
-      throw new NotFoundException("Exchange " + publishRequest.getPublish().exchange + " not found.");
+      throw new NotFoundException("Can't publish on an unknwon exchange: '"
+          + publishRequest.getPublish().exchange + "'.");
     }
     exchange.publish(publishRequest.getPublish().routingKey, publishRequest.getPublish().mandatory,
         publishRequest.getPublish().immediate, publishRequest.getHeader(), publishRequest.getBody(),

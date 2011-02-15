@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
@@ -114,7 +114,7 @@ public class Queue implements Serializable {
       logger.log(BasicLevel.DEBUG, "Queue.receive()");
 
     if (exclusive && (this.serverId != serverId || this.proxyId != proxyId)) {
-      throw new ResourceLockedException("Can't get a message on a non-owned exclusive queue");
+      throw new ResourceLockedException("Can't get message on the non-owned exclusive queue '" + name + "'.");
     }
     if (toDeliver.size() > 0) {
       Message msg = toDeliver.pollFirst();
@@ -139,13 +139,15 @@ public class Queue implements Serializable {
       logger.log(BasicLevel.DEBUG, "Queue.consume()");
 
     if (exclusive && (this.serverId != serverId || this.proxyId != proxyId)) {
-      throw new ResourceLockedException("Can't consume on a non-owned exclusive queue.");
+      throw new ResourceLockedException("Can't consume on the non-owned exclusive queue '" + name + "'.");
     }
     if (exclusiveConsumer && consumers.size() != 0) {
-      throw new AccessRefusedException("Exclusive consume request failed due to previous consumer.");
+      throw new AccessRefusedException("Exclusive consume request failed due to previous consumer on queue '"
+          + name + "'.");
     }
     if (consumers.size() == 1 && consumers.values().iterator().next().exclusive) {
-      throw new AccessRefusedException("Consume request failed due to previous exclusive consumer.");
+      throw new AccessRefusedException("Consume request failed due to previous exclusive consumer on queue '"
+          + name + "'.");
     }
 
     consumers.put(new SubscriptionKey(serverId, proxyId, channelId, consumerTag), new Subscription(proxy,
@@ -178,7 +180,7 @@ public class Queue implements Serializable {
 
     if (exclusive && serverId != -1 && this.serverId != serverId && this.proxyId != proxyId) {
       if (logger.isLoggable(BasicLevel.WARN))
-        logger.log(BasicLevel.WARN, "Publishing to a non-owned exclusive queue.");
+        logger.log(BasicLevel.WARN, "Publishing to a non-owned exclusive queue '" + name + "'.");
       // TODO ?
       return;
     }
@@ -221,7 +223,7 @@ public class Queue implements Serializable {
       consumers.put(entry.getKey(), entry.getValue());
     } else {
       if (immediate) {
-        throw new NoConsumersException("No consumer available for immediate publication.");
+        throw new NoConsumersException("No consumer available for immediate publication on queue '" + name + "'.");
       } else {
         toDeliver.add(msg);
         if (durable) {
@@ -241,7 +243,7 @@ public class Queue implements Serializable {
       logger.log(BasicLevel.DEBUG, "Queue.cancel()");
 
     if (exclusive && (this.serverId != serverId || this.proxyId != proxyId)) {
-      throw new ResourceLockedException("Can't cancel a consumer on a non-owned exclusive queue");
+      throw new ResourceLockedException("Can't cancel a consumer on the non-owned exclusive queue '" + name + "'.");
     }
     
     SubscriptionKey subKey = new SubscriptionKey(serverId, proxyId, channelNumber, consumerTag);
@@ -268,7 +270,7 @@ public class Queue implements Serializable {
       logger.log(BasicLevel.DEBUG, "Queue.purge() " + toDeliver.size());
 
     if (exclusive && (this.serverId != serverId || this.proxyId != proxyId)) {
-      throw new ResourceLockedException("Can't clear a non-owned exclusive queue");
+      throw new ResourceLockedException("Can't clear the non-owned exclusive queue '" + name + "'.");
     }
     int msgCount = toDeliver.size();
     if (durable && msgCount > 0)
@@ -335,7 +337,7 @@ public class Queue implements Serializable {
       logger.log(BasicLevel.DEBUG, "Queue.getInfo()");
 
     if (exclusive && (this.serverId != serverId || this.proxyId != proxyId)) {
-      throw new ResourceLockedException("Can't declare a non-owned existing exclusive queue");
+      throw new ResourceLockedException("Can't redeclare the non-owned exclusive queue '" + name + "'.");
     }
     AMQP.Queue.DeclareOk queueInfo = new AMQP.Queue.DeclareOk(name, toDeliver.size(), consumers.size());
     return queueInfo;
@@ -396,7 +398,7 @@ public class Queue implements Serializable {
   public synchronized void addBoundExchange(String exchange, short serverId, long proxyId)
       throws TransactionException, ResourceLockedException {
     if (exclusive && (this.serverId != serverId || this.proxyId != proxyId)) {
-      throw new ResourceLockedException("Can't bind a non-owned exclusive queue");
+      throw new ResourceLockedException("Can't bind the non-owned exclusive queue '" + name + "'.");
     }
     boundExchanges.add(exchange);
     if (durable) {
@@ -415,7 +417,7 @@ public class Queue implements Serializable {
   public synchronized void removeBoundExchange(String exchangeName, short serverId, long proxyId)
       throws ResourceLockedException {
     if (exclusive && (this.serverId != serverId || this.proxyId != proxyId)) {
-      throw new ResourceLockedException("Can't unbind a non-owned exclusive queue");
+      throw new ResourceLockedException("Can't unbind the non-owned exclusive queue '" + name + "'.");
     }
     boundExchanges.remove(exchangeName);
     if (durable) {
@@ -429,7 +431,7 @@ public class Queue implements Serializable {
       logger.log(BasicLevel.DEBUG, "Queue.deleteQueue(" + queueName + ')');
 
     if (exclusive && (this.serverId != serverId || this.proxyId != proxyId)) {
-      throw new ResourceLockedException("Can't delete a non-owned exclusive queue");
+      throw new ResourceLockedException("Can't delete the non-owned exclusive queue '" + name + "'.");
     }
 
     if (durable) {
