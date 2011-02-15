@@ -274,7 +274,7 @@ public class StubAgentIn {
           throw new IllegalStateException();
           
         case AMQP.Basic.Reject.INDEX:
-          throw new NotImplementedException("Reject method currently not implemented.");
+          throw new IllegalStateException();
 
         case AMQP.Basic.RecoverAsync.INDEX:
           throw new IllegalStateException();
@@ -283,7 +283,7 @@ public class StubAgentIn {
           throw new IllegalStateException();
 
         case AMQP.Basic.Qos.INDEX:
-          throw new NotImplementedException("Reject method currently not implemented.");
+          throw new NotImplementedException("Qos method currently not implemented.");
 
         default:
           break;
