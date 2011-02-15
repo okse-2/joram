@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
@@ -114,7 +114,11 @@ public class TopicExchange extends IExchange {
     KeyAndPattern keyAndPattern = new KeyAndPattern(routingKey, routingPattern);
     Set<String> boundQueues = bindings.get(keyAndPattern);
     if (boundQueues != null) {
-      boundQueues.remove(queueName);
+      boolean removed = boundQueues.remove(queueName);
+      if (!removed) {
+        throw new NotFoundException("Unknown binding '" + routingKey + "' between topic exchange '" + name
+            + "' and queue '" + queueName + "'.");
+      }
       if (boundQueues.size() == 0) {
         bindings.remove(keyAndPattern);
       }
@@ -122,7 +126,8 @@ public class TopicExchange extends IExchange {
         saveExchange();
       }
     } else {
-      throw new NotFoundException("Unknown topic: " + routingKey);
+      throw new NotFoundException("Unknown binding '" + routingKey + "' between topic exchange '" + name
+          + "' and queue '" + queueName + "'.");
     }
   }
 

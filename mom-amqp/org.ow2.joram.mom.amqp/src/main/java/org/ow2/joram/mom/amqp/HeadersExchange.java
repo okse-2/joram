@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
@@ -33,9 +33,9 @@ import java.util.Set;
 import org.ow2.joram.mom.amqp.exceptions.NoConsumersException;
 import org.ow2.joram.mom.amqp.exceptions.NotFoundException;
 import org.ow2.joram.mom.amqp.exceptions.TransactionException;
+import org.ow2.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 import org.ow2.joram.mom.amqp.marshalling.LongString;
 import org.ow2.joram.mom.amqp.marshalling.LongStringHelper;
-import org.ow2.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 
 /**
  * The headers exchange type works as follows:
@@ -104,7 +104,11 @@ public class HeadersExchange extends IExchange {
       throws NotFoundException {
     Set<String> boundQueues = bindings.get(arguments);
     if (boundQueues != null) {
-      boundQueues.remove(queueName);
+      boolean removed = boundQueues.remove(queueName);
+      if (!removed) {
+        throw new NotFoundException("Unknown headers '" + arguments + "' between headers exchange '" + name
+            + "' and queue '" + queueName + "'.");
+      }
       if (boundQueues.size() == 0) {
         bindings.remove(arguments);
       }
@@ -112,7 +116,8 @@ public class HeadersExchange extends IExchange {
         saveExchange();
       }
     } else {
-      throw new NotFoundException("Unknown headers: " + arguments);
+      throw new NotFoundException("Unknown headers '" + arguments + "' between headers exchange '" + name
+          + "' and queue '" + queueName + "'.");
     }
   }
 

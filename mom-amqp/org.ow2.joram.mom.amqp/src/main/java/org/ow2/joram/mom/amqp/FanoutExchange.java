@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2008 - 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
@@ -75,7 +75,7 @@ public class FanoutExchange extends IExchange {
       throws NotFoundException {
     boolean removed = boundQueues.remove(queueName);
     if (!removed) {
-      throw new NotFoundException("Queue not bound: " + queueName);
+      throw new NotFoundException("Fanout exchange '" + name + "' not bound with queue '" + queueName + "'.");
     }
     if (durable) {
       saveExchange();
