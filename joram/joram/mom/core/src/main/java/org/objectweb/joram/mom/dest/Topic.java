@@ -596,6 +596,8 @@ public class Topic extends Destination implements TopicMBean {
     	Iterator it = messages.iterator();
     	while (it.hasNext()) {
     		Message m = (Message) it.next();
+    		// set the destination name to the message
+    		m.setProperty("JMSDestinationName", getName());
     		message = processInterceptors(m);
     		if (message != null) {
     			newMessages.add(message);
