@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -243,6 +243,12 @@ public class Naming {
     return proxies.values();
   }
   
+  public static void clearAll() {
+    exchanges.clear();
+    queues.clear();
+    proxies.clear();
+  }
+
   public static void createDefaults() throws Exception {
     IExchange exchange;
     exchange = new DirectExchange(IExchange.DEFAULT_EXCHANGE_NAME, true);

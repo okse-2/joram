@@ -204,6 +204,7 @@ public class AMQPService {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "AMQPService.stopService()");
     amqpService.stop();
+    Naming.clearAll();
   }
 
   /**
