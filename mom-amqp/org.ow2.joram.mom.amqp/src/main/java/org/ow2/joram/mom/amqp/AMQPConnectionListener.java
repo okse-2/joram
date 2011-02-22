@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -447,7 +448,8 @@ public class AMQPConnectionListener extends Daemon {
         if (!isChannelOpen(channelNumber)) {
           throw new ChannelErrorException("Channel not opened.");
         }
-        throw new NotImplementedException("Transactions currently not implemented.");
+        sendToProxy(method);
+        break;
         
       default:
         // nothing
@@ -672,10 +674,6 @@ public class AMQPConnectionListener extends Daemon {
   
   private void closeChannel(int channel) {
     openChannel.remove(Integer.valueOf(channel));
-    //TODO close cnx if openChannel isEmpty ?
-//    if (openChannel.isEmpty()) {
-//      closeConnection(close);
-//    }
   }
   
   private PublishRequest createPublishRequest(int channel) {
@@ -832,6 +830,8 @@ public class AMQPConnectionListener extends Daemon {
           if (!running)
             break;
         }
+      } catch (SocketException exc) {
+        this.logmon.log(BasicLevel.DEBUG, this.getName() + ", socket error", exc);
       } catch (Exception exc) {
         this.logmon.log(BasicLevel.FATAL, this.getName() + ", unrecoverable exception", exc);
       } finally {
