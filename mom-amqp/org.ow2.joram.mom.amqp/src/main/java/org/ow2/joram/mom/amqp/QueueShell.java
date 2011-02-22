@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2009 CNES
  *
  * This library is free software; you can redistribute it and/or
@@ -71,6 +71,13 @@ public class QueueShell {
       return queue.hashCode();
     else
       return queueName.hashCode();
+  }
+
+  public String toString() {
+    if (islocal()) {
+      return queue.getName() + "(local)";
+    }
+    return queueName + "(distant)";
   }
 
 }
