@@ -733,6 +733,8 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     if (isRunning) return;
 
     thread = new EngineThread(this);
+    int priority = AgentServer.getInteger("Engine.threadPriority", Thread.MAX_PRIORITY).intValue();
+    thread.setPriority(priority);
     thread.setDaemon(false);
 
     logmon.log(BasicLevel.DEBUG, getName() + " starting.");
