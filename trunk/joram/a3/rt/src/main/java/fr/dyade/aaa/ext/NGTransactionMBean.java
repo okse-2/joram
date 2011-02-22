@@ -72,6 +72,12 @@ public interface NGTransactionMBean extends TransactionMBean {
   int getNbLogFiles();
   
   /**
+   * Returns true if every write in the log file is synced to disk.
+   * @return true if every write in the log file is synced to disk.
+   */
+   boolean isSyncOnWrite();
+
+  /**
    * Returns the pool size for <code>operation</code> objects, by default 1000.
    *
    * @return The pool size for <code>operation</code> objects.

@@ -146,6 +146,16 @@ public final class NTransaction extends AbstractTransaction implements NTransact
   public final int getLogFileSize() {
     return (logFile.getLogFileSize() /Kb);
   }
+  
+  /** If true every write in the log file is synced to disk. */
+  boolean syncOnWrite = false;
+
+  /**
+   * @return the syncOnWrite
+   */
+  public boolean isSyncOnWrite() {
+    return syncOnWrite;
+  }
 
   /**
    *  Number of pooled operation, by default 1000.
@@ -375,7 +385,9 @@ public final class NTransaction extends AbstractTransaction implements NTransact
                  "NTransaction, cannot initializes the repository ", exc);
       throw new IOException(exc.getMessage());
     }
-    logFile = new LogFile(dir, repository);
+    
+    syncOnWrite = Boolean.getBoolean("NTSyncOnWrite");
+    logFile = new LogFile(dir, repository, syncOnWrite);
     
     // Be careful, setGarbageDelay and garbageAsync use logFile !!
     setGarbageDelay(Configuration.getInteger("NTGarbageDelay", getGarbageDelay()).intValue());
@@ -485,7 +497,6 @@ public final class NTransaction extends AbstractTransaction implements NTransact
       System.arraycopy(buf, 0, op.value, 0, buf.length);
     }
     if (old != null) old.free();
-
   }
 
   private final byte[] getFromLog(Hashtable log, Object key) throws IOException {
@@ -722,8 +733,10 @@ public final class NTransaction extends AbstractTransaction implements NTransact
     private File lockFile = null;
 
     private Repository repository = null;
+    
+    private String mode;
 
-    LogFile(File dir, Repository repository) throws IOException {
+    LogFile(File dir, Repository repository, boolean syncOnWrite) throws IOException {
       super(4 * Kb);
       this.repository = repository;
 
@@ -741,6 +754,11 @@ public final class NTransaction extends AbstractTransaction implements NTransact
         lockFile.deleteOnExit();
       }
 
+      if (syncOnWrite)
+        mode = "rwd";
+      else
+        mode = "rw";
+      
       log = new Hashtable(LogMemoryCapacity);
 
       //  Search for old log file, then apply all committed operation,
@@ -769,8 +787,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
 
               if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
                 logmon.log(BasicLevel.DEBUG,
-                           "NTransaction.init(), OPERATION=" +
-                           optype + ", " + name);
+                           "NTransaction.init(), OPERATION=" + optype + ", " + name);
 
               Operation op = null;
               if ((optype == Operation.SAVE) || (optype == Operation.CREATE)) {
@@ -809,10 +826,10 @@ public final class NTransaction extends AbstractTransaction implements NTransact
           logFile.close();
         }
 
-        logFile = new RandomAccessFile(logFilePN, "rwd");
+        logFile = new RandomAccessFile(logFilePN, mode);
         garbage();
       } else {
-        logFile = new RandomAccessFile(logFilePN, "rwd");
+        logFile = new RandomAccessFile(logFilePN, mode);
         logFile.setLength(MaxLogFileSize);
 
         current = 1;
@@ -909,15 +926,8 @@ public final class NTransaction extends AbstractTransaction implements NTransact
       }
       write(Operation.END);
 
-      // AF: Is it needed? Normally the file pointer should already set at
-      // the right position... To be verified, but not really a big cost.
       logFile.seek(current);
       logFile.write(buf, 0, count);
-
-      // AF: May be we can avoid this second synchronous write, using a
-      // marker: determination d'un marqueur lie au log courant (date en
-      // millis par exemple), ecriture du marqueur au debut du log, puis
-      // ecriture du marqueur apres chaque Operation.COMMIT.
       logFile.seek(current -1);
       logFile.write(Operation.COMMIT);
 

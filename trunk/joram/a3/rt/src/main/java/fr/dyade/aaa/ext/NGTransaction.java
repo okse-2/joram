@@ -145,6 +145,16 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
   public final int getNbLogFiles() {
     return nbLogFile;
   }
+  
+  /** If true every write in the log file is synced to disk. */
+  boolean syncOnWrite = false;
+
+  /**
+   * @return the syncOnWrite
+   */
+  public boolean isSyncOnWrite() {
+    return syncOnWrite;
+  }
 
   /**
    *  Number of pooled operation, by default 1000.
@@ -265,7 +275,7 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
   public int getNbLoadedObjects() {
     return repository.getNbLoadedObjects();
   }
-
+  
   LogManager logManager = null;
 
   Repository repository = null;
@@ -297,7 +307,9 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
                  "NTransaction, cannot initializes the repository ", exc);
       throw new IOException(exc.getMessage());
     }
-    logManager = new LogManager(dir, repository);
+    
+    syncOnWrite = Boolean.getBoolean("Transaction.SyncOnWrite");
+    logManager = new LogManager(dir, repository, syncOnWrite);
   }
 
   /**
@@ -580,7 +592,9 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
 
     File dir;
     
-    LogManager(File dir, Repository repository) throws IOException {
+    private String mode;
+    
+    LogManager(File dir, Repository repository, boolean syncOnWrite) throws IOException {
       super(4 * Kb);
       this.repository = repository;
       
@@ -596,6 +610,11 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
         lockFile.deleteOnExit();
       }
       
+      if (syncOnWrite)
+        mode = "rwd";
+      else
+        mode = "rw";
+
       log = new Hashtable(LogMemoryCapacity);
       
       long start = System.currentTimeMillis();
@@ -621,7 +640,7 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
           // are garbaged.
           if (logidx == -1) logidx = idx;
           try {
-            LogFile logf = new LogFile(dir, idx);
+            LogFile logf = new LogFile(dir, idx, mode);
             int optype = logf.read();
             if (optype == Operation.END) {
               // The log is empty
@@ -740,7 +759,7 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
       
       if (logFile[logidx%nbLogFile] == null) {
         // Creates a log file
-        logFile[logidx%nbLogFile] = new LogFile(dir, logidx);
+        logFile[logidx%nbLogFile] = new LogFile(dir, logidx, mode);
         logFile[logidx%nbLogFile].setLength(MaxLogFileSize);
 
         // Initializes the log file
@@ -884,7 +903,7 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
         }
 
         // Creates and initializes a new log file
-        logFile[logidx%nbLogFile] = new LogFile(dir, logidx);
+        logFile[logidx%nbLogFile] = new LogFile(dir, logidx, mode);
         logFile[logidx%nbLogFile].setLength(MaxLogFileSize);
 
         // Cleans log file (needed only for new log file, already done in garbage).
@@ -1175,8 +1194,8 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
      *  
      * @param file the specified file.
      */
-    public LogFile(File dir, int logidx) throws FileNotFoundException {
-      super(new File(dir, "log#" + logidx), "rwd");
+    public LogFile(File dir, int logidx, String mode) throws FileNotFoundException {
+      super(new File(dir, "log#" + logidx), mode);
       this.logidx = logidx;
       this.dir = dir;
     }

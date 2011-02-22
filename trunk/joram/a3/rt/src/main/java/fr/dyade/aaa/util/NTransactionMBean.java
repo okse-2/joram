@@ -70,6 +70,12 @@ public interface NTransactionMBean extends TransactionMBean {
    * @return The size of disk log in Mb.
    */
   int getLogFileSize();
+  
+  /**
+   * Returns true if every write in the log file is synced to disk.
+   * @return true if every write in the log file is synced to disk.
+   */
+   boolean isSyncOnWrite();
 
   /**
    * Returns the pool size for <code>operation</code> objects, by default 1000.
