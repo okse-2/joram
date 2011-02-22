@@ -27,9 +27,8 @@ import javax.jms.Session;
 
 /**
  * Session level message interceptor interface.
- * The <code>MessageInterceptor</code> should be 
- * implemented by any class whose instances are 
- * intended to intercept either or both following 
+ * The <code>MessageInterceptor</code> should be implemented by any class
+ * whose instances are intended to intercept either or both following 
  * operations within  a {@link javax.jms.Session.Session JMS Session}:
  * <ul>
  * <li>{@link javax.jms.MessageProducer#send(Message) sending a message}</li>
@@ -38,8 +37,8 @@ import javax.jms.Session;
  * The <code>interceptor</code> can be attached to a 
  * {@link javax.jms.Session.Session JMS Session} through configuration
  * (see <code>joramAdmin.xml</code>) as <code>IN</code> 
- * (when consumming a message) or <code>OUT</code> (when producing a message)
- * intereceptor.
+ * (when consuming a message) or <code>OUT</code> (when producing a message)
+ * interceptor.
  * @author benammoura
  */
 public interface MessageInterceptor {
