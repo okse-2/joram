@@ -39,7 +39,6 @@ import org.ow2.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 import org.ow2.joram.mom.amqp.structures.PublishToQueue;
 
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.util.Transaction;
 
 public abstract class IExchange implements Serializable {
   
@@ -60,8 +59,6 @@ public abstract class IExchange implements Serializable {
   
   private boolean published;
   
-  protected static Transaction transaction = AgentServer.getTransaction();
-
   public IExchange() { }
   
   public IExchange(String name, boolean durable) {
@@ -120,7 +117,7 @@ public abstract class IExchange implements Serializable {
       logger.log(BasicLevel.DEBUG, "IExchange.loadExchange(" + name + ')');
 
     // load IExchange
-    IExchange exchange = (IExchange) transaction.load(name);
+    IExchange exchange = (IExchange) AgentServer.getTransaction().load(name);
     try {
       Naming.bindExchange(exchange.name, exchange);
     } catch (AlreadyBoundException exc) {
@@ -134,7 +131,7 @@ public abstract class IExchange implements Serializable {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "IExchange.createExchange(" + name + ')');
     try {
-      transaction.create(this, saveName);
+      AgentServer.getTransaction().create(this, saveName);
     } catch (IOException e) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "IExchange.createExchange ERROR::", e);
@@ -146,7 +143,7 @@ public abstract class IExchange implements Serializable {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "IExchange.saveExchange(" + name + ')');
     try {
-      transaction.save(this, saveName);
+      AgentServer.getTransaction().save(this, saveName);
     } catch (IOException e) {
       if (logger.isLoggable(BasicLevel.ERROR))
         logger.log(BasicLevel.ERROR, "IExchange.saveExchange ERROR::", e);
@@ -161,7 +158,7 @@ public abstract class IExchange implements Serializable {
       throw new AccessRefusedException("Can't delete default exchange.");
     }
     if (durable) {
-      transaction.delete(saveName);
+      AgentServer.getTransaction().delete(saveName);
     }
   }
 
