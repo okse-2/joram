@@ -409,7 +409,7 @@ public class Connection implements javax.jms.Connection {
    * <br>The execution follows the order of the elements within the list.
    * @return the list of the IN message interceptors.
    */
-  public final List getInInterceptors(){
+  final List getInInterceptors() {
 	  return factoryParameters.inInterceptors;
   }
   /**
@@ -419,7 +419,7 @@ public class Connection implements javax.jms.Connection {
    * <br>The execution follows the order of the elements within the list.
    * @return the list of the OUT message interceptors.
    */
-  public final List getOutInterceptors(){
+  final List getOutInterceptors() {
 	  return factoryParameters.outInterceptors;
   }
   /**

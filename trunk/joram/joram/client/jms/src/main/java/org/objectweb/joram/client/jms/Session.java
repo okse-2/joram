@@ -578,21 +578,21 @@ public class Session implements javax.jms.Session {
   private List inInterceptors;
   private List outInterceptors;
 
-  /**
-   * Sets the list of IN message interceptors.
-   * @param pInInterceptors
-   */
-  public void setInMessageInterceptors(List pInInterceptors) {
-    inInterceptors = pInInterceptors;
-  }
-
-  /**
-   * Sets the OUT message interceptor.
-   * @param pOutInterceptor
-   */
-  public void setOutMessageInterceptors(List pOutInterceptors) {
-    outInterceptors = pOutInterceptors;
-  }
+//  /**
+//   * Sets the list of IN message interceptors.
+//   * @param pInInterceptors
+//   */
+//  public void setInMessageInterceptors(List pInInterceptors) {
+//    inInterceptors = pInInterceptors;
+//  }
+//
+//  /**
+//   * Sets the OUT message interceptor.
+//   * @param pOutInterceptor
+//   */
+//  public void setOutMessageInterceptors(List pOutInterceptors) {
+//    outInterceptors = pOutInterceptors;
+//  }
 
   /**
    * Opens a session.
@@ -2045,8 +2045,7 @@ public class Session implements javax.jms.Session {
     checkThreadOfControl();
 
     // Updating the message property fields:
-    String msgID = cnx.nextMessageId();
-    msg.setJMSMessageID(msgID);
+    msg.setJMSMessageID(cnx.nextMessageId());
     msg.setJMSDeliveryMode(deliveryMode);
     msg.setJMSDestination(dest);
     if (timeToLive == 0) {
