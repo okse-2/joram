@@ -57,7 +57,7 @@ public class StubLocal {
 
   public static AMQP.Queue.DeclareOk queueDeclare(String queueName, boolean passive, boolean durable,
       boolean autoDelete, boolean exclusive, short serverId, long proxyId) throws NotFoundException,
-      ResourceLockedException, PreconditionFailedException, TransactionException {
+      ResourceLockedException, PreconditionFailedException, AccessRefusedException, TransactionException {
     // Generate queue name if unspecified
     if (queueName.equals("")) {
       queueName = Naming.nextQueueName();
@@ -70,6 +70,7 @@ public class StubLocal {
       if (passive) {
         throw new NotFoundException("Passive declaration of an unknown queue: '" + queueName + "'.");
       }
+      checkName(queueName);
       queue = new Queue(queueName, durable, autoDelete, exclusive, serverId, proxyId);
       try {
         Naming.bindQueue(queueName, queue);
@@ -185,11 +186,10 @@ public class StubLocal {
     return queue.clear(serverId, proxyId);
   }
 
-  private static void checkExchangeName(String name) throws AccessRefusedException,
-      PreconditionFailedException {
+  private static void checkName(String name) throws AccessRefusedException, PreconditionFailedException {
     if (name.startsWith("amq.")) {
       throw new AccessRefusedException(
-          "Exchange names starting with 'amq.' are reserved for pre-declared and standardised exchanges.");
+          "Queue or Exchange names starting with 'amq.' are reserved for pre-declared and standardised queues or exchanges.");
     }
     // The exchange name consists of a non-empty sequence of these characters:
     // letters, digits, hyphen, underscore, period, or colon.
@@ -207,7 +207,7 @@ public class StubLocal {
       if (passive) {
         throw new NotFoundException("Passive declaration of an unknown exchange: '" + exchangeName + "'.");
       }
-      checkExchangeName(exchangeName);
+      checkName(exchangeName);
       if (type.equalsIgnoreCase(DirectExchange.TYPE)) {
         exchange = new DirectExchange(exchangeName, durable);
       } else if (type.equalsIgnoreCase(TopicExchange.TYPE)) {

@@ -461,7 +461,7 @@ public class StubAgentIn {
 
   public static AMQP.Queue.DeclareOk queueDeclare(AMQP.Queue.Declare queueDeclare, short serverId,
       long proxyId) throws ResourceLockedException, NotFoundException, PreconditionFailedException,
-      TransactionException {
+      AccessRefusedException, TransactionException {
     return StubLocal.queueDeclare(queueDeclare.queue, queueDeclare.passive, queueDeclare.durable,
         queueDeclare.autoDelete, queueDeclare.exclusive, serverId, proxyId);
   }
