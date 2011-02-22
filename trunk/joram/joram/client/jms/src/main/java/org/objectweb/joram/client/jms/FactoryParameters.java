@@ -512,7 +512,7 @@ public class FactoryParameters implements java.io.Serializable, Cloneable {
     return removed;
   }
   
-  // Methods needed to serialize interceptors in Reference (JNDOI).
+  // Methods needed to serialize interceptors in Reference (JNDI).
   
   private static final String INTERCEPTOR_CLASS_NAME_SEPARATOR =",";
   
