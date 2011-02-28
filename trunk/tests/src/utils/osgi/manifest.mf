@@ -2,8 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: JORAM :: Test Util classes
 Bundle-SymbolicName: fr.dyade.aaa.agent
-Export-Package: framework,
- utils
+Export-Package: utils
 Import-Package: com.scalagent.jmx,
  fr.dyade.aaa.agent,
  fr.dyade.aaa.common,
