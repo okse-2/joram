@@ -538,27 +538,22 @@ description=" --> launch all exceptionlistener tests">
                property="monitoring.available"/>
     <antcall target="cpMonitoring" inheritAll="true"/>
     
-    <jar jarfile="${obj.dir}/test-util-bundle.jar" manifest="${src.dir}/utils/osgi/manifest.mf">
-      <fileset dir="${obj.dir}">
-        <include name="framework/*.class"/>
-        <include name="utils/*.class"/>
-      </fileset>
-    </jar>
-  	
-  	<available file="${manifest.mf}" type="file"
-  	           property="test-bundle.available"/>
+  	<available file="${src.dir}/${manifest.mf}" type="file" property="test-bundle.available"/>
   	<antcall target="test-bundle" inheritAll="true"/>
   </target>
 
-	<target name="test-bundle" if="test-bundle.available">
-    <jar jarfile="${obj.dir}/test-bundle.jar" manifest="${manifest.mf}">
-		  <fileset dir="${obj.dir}">
-		    <include name="${include.classes}"/>
+  <target name="test-bundle" if="test-bundle.available">
+    <jar jarfile="${obj.dir}/test-bundle.jar" manifest="${src.dir}/${manifest.mf}">
+      <fileset dir="${obj.dir}">
+        <include name="${include.classes}"/>
       </fileset>
     </jar>
-	</target>
+    <copy file="config-extended.properties" tofile="${test.dir}/config.properties" overwrite="true"/>    <property name="bundle.dir" location="${ship.dir}/bundle" />
+    <replace file="${test.dir}/config.properties" token="@BUNDLE_DIR@" value="${bundle.dir}" />
+    <replace file="${test.dir}/config.properties" token="\" value="/" />
+  </target>
   
-	<target name="cpJoramAdmin" if="joramAdmin.available">
+  <target name="cpJoramAdmin" if="joramAdmin.available">
     <copy file="${joramAdmin}" tofile="${test.dir}/joramAdmin.xml"/>
   </target>
 
@@ -1433,6 +1428,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test distributed with 2 serveurs and queue">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.distrib.Distrib_2serv"/>
+      <param name="testid" value="dist.test1"/>
       <param name="jndiconf" value="distrib/jndi.properties"/>
       <param name="a3conf" value="distrib/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -1444,6 +1440,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test distributed with 3 serveurs and queue">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.distrib.Distrib_3serv"/>
+      <param name="testid" value="dist.test2"/>
       <param name="jndiconf" value="distrib/jndi.properties"/>
       <param name="a3conf" value="distrib/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -1455,6 +1452,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test distributed with 2 serveurs and topic">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.distrib.Distrib_2serv_T"/>
+      <param name="testid" value="dist.test3"/>
       <param name="jndiconf" value="distrib/jndi.properties"/>
       <param name="a3conf" value="distrib/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -1466,6 +1464,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test distributed with 3 serveurs and topic">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.distrib.Distrib_3serv_T"/>
+      <param name="testid" value="dist.test4"/>
       <param name="jndiconf" value="distrib/jndi.properties"/>
       <param name="a3conf" value="distrib/a3servers.xml"/>
       <param name="jvmargs" value=""/>
@@ -1477,10 +1476,14 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test distributed with 2 serveurs, a queue and a bad network">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.distrib.Distrib_2serv_BadNetwork"/>
+      <param name="testid" value="dist.test5"/>
       <param name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="jndiconf" value="distrib/jndi.properties"/>
       <param name="a3conf" value="distrib/a3servers2.xml"/>
-      <param name="jvmargs" value="-DNbRound=200 -DNbMsgPerRound=100"/>
+      <param name="jvmargs" value="-DNbRound=1000 -DNbMsgPerRound=100"/>
+      <param name="manifest.mf" value="utils/osgi/manifest.mf"/>
+      <param name="include.classes" value="utils/*.class"/>
     </antcall>
   </target>
   
@@ -1488,10 +1491,14 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test distributed with 2 serveurs, a topic and a bad network">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.distrib.Distrib_2serv_T_BadNetwork"/>
+      <param name="testid" value="dist.test6"/>
       <param name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="jndiconf" value="distrib/jndi.properties"/>
       <param name="a3conf" value="distrib/a3servers2.xml"/>
-      <param name="jvmargs" value="-DNbRound=200 -DNbMsgPerRound=100"/>
+      <param name="jvmargs" value="-DNbRound=1000 -DNbMsgPerRound=100"/>
+      <param name="manifest.mf" value="utils/osgi/manifest.mf"/>
+      <param name="include.classes" value="utils/*.class"/>
     </antcall>
   </target>
   
@@ -1499,6 +1506,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test distributed with 2 serveurs, a topic and an http network">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.distrib.Distrib_2serv_T_Http"/>
+      <param name="testid" value="dist.test.http"/>
       <param name="jndiconf" value="distrib/jndi.properties"/>
       <param name="a3conf" value="distrib/a3servers.http.xml"/>
       <param name="jvmargs" value="-DNbRound=10 -DNbMsgPerRound=1"/>
@@ -1509,6 +1517,7 @@ description=" --> launch all exceptionlistener tests">
           description=" --> test distributed with 2 serveurs, a topic and an http network">
     <antcall target="test.run" inheritAll="true">
       <param name="className" value="joram.distrib.Distrib_2serv_T_Http"/>
+      <param name="testid" value="dist.test.http.long"/>
       <param name="jndiconf" value="distrib/jndi.properties"/>
       <param name="a3conf" value="distrib/a3servers.http.xml"/>
       <param name="jvmargs" value="-DNbRound=100 -DNbMsgPerRound=1"/>
@@ -1987,6 +1996,7 @@ description=" --> launch all exceptionlistener tests">
   
   <target name="client.cnxtime_2" depends="init.a3props,compile" unless="isOSGi"
           description=" --> when kill client with connectingtimer, context is not destroy before connectingtimer">
+    
     <antcall target="init.test" inheritAll="true">
         <param name="a3conf" value="client/a3servers.xml"/>
     </antcall>
@@ -2018,6 +2028,7 @@ description=" --> launch all exceptionlistener tests">
 
   <target name="client.cnxtime_2.osgi" depends="init.a3props,compile" if="isOSGi"
           description=" --> when kill client with connectingtimer, context is not destroy before connectingtimer">
+
     <antcall target="init.test" inheritAll="true">
         <param name="a3conf" value="client/a3servers.xml"/>
     </antcall>
@@ -4938,7 +4949,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="collector/a3servers.xml"/>
       <param name="jvmargs" value=""/>
       <param name="args" value=""/>
-  		<param name="manifest.mf" value="collector/manifest.mf"/>
+  		<param name="manifest.mf" value="joram/collector/manifest.mf"/>
   		<param name="include.classes" value="joram/collector/Empty*.class"/>
     </antcall>
   </target>
@@ -4988,7 +4999,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="a3conf" value="collector/a3servers.xml"/>
       <param name="jvmargs" value=""/>
       <param name="args" value=""/>
-  		<param name="manifest.mf" value="collector/manifest.mf"/>
+  		<param name="manifest.mf" value="joram/collector/manifest.mf"/>
   		<param name="include.classes" value="joram/collector/Empty*.class"/>
     </antcall>
   </target>
@@ -5149,7 +5160,7 @@ description=" --> launch all exceptionlistener tests">
 	    <param name="jvmargs" value=""/>
 	    <param name="testid" value="interceptors.test1"/>
 	    <param name="args" value=""/>
-	    <param name="manifest.mf" value="interceptors/manifest.mf"/>
+	    <param name="manifest.mf" value="joram/interceptors/manifest.mf"/>
 	    <param name="include.classes" value="joram/interceptors/Exit*.class"/>
 	  </antcall>
 	</target>
@@ -5164,7 +5175,7 @@ description=" --> launch all exceptionlistener tests">
 		  <param name="jvmargs" value=""/>
 		  <param name="testid" value="interceptors.test2"/>
 		  <param name="args" value=""/>
-	    <param name="manifest.mf" value="interceptors/manifest.mf"/>
+	    <param name="manifest.mf" value="joram/interceptors/manifest.mf"/>
 		  <param name="include.classes" value="joram/interceptors/Exit*.class"/>
 		</antcall>
   </target>
@@ -5179,7 +5190,7 @@ description=" --> launch all exceptionlistener tests">
 			<param name="jvmargs" value=""/>
 			<param name="testid" value="interceptors.test3"/>
 			<param name="args" value=""/>
-		  <param name="manifest.mf" value="interceptors/manifest.mf"/>
+		  <param name="manifest.mf" value="joram/interceptors/manifest.mf"/>
 			<param name="include.classes" value="joram/interceptors/Exit*.class"/>			    	
     </antcall>
   </target>
@@ -5194,7 +5205,7 @@ description=" --> launch all exceptionlistener tests">
 			<param name="jvmargs" value=""/>
 			<param name="testid" value="interceptors.test4"/>
 			<param name="args" value=""/>
-		  <param name="manifest.mf" value="interceptors/manifest.mf"/>
+		  <param name="manifest.mf" value="joram/interceptors/manifest.mf"/>
 			<param name="include.classes" value="joram/interceptors/Exit*.class"/>			    	
     </antcall>
   </target>	
@@ -5209,7 +5220,7 @@ description=" --> launch all exceptionlistener tests">
 			<param name="jvmargs" value=""/>
 			<param name="testid" value="interceptors.test5"/>
 			<param name="args" value=""/>
-		  <param name="manifest.mf" value="interceptors/manifest.mf"/>
+		  <param name="manifest.mf" value="joram/interceptors/manifest.mf"/>
 			<param name="include.classes" value="joram/interceptors/Exit*.class"/>			    	
     </antcall>
   </target>
@@ -5224,7 +5235,7 @@ description=" --> launch all exceptionlistener tests">
   		<param name="jvmargs" value=""/>
   		<param name="testid" value="interceptors.test6"/>
   		<param name="args" value=""/>
-  	  <param name="manifest.mf" value="interceptors/manifest.mf"/>
+  	  <param name="manifest.mf" value="joram/interceptors/manifest.mf"/>
   		<param name="include.classes" value="joram/interceptors/Exit*.class"/>			    	
     </antcall>
   </target>
@@ -5239,7 +5250,7 @@ description=" --> launch all exceptionlistener tests">
   		<param name="jvmargs" value=""/>
   		<param name="testid" value="interceptors.test7"/>
   		<param name="args" value=""/>
-  	  <param name="manifest.mf" value="interceptors/manifest.mf"/>
+  	  <param name="manifest.mf" value="joram/interceptors/manifest.mf"/>
   		<param name="include.classes" value="joram/interceptors/Exit*.class"/>			    	
     </antcall>
   </target>
@@ -5254,7 +5265,7 @@ description=" --> launch all exceptionlistener tests">
 			<param name="jvmargs" value=""/>
 			<param name="testid" value="interceptors.test_Q"/>
 			<param name="args" value=""/>
-			<param name="manifest.mf" value="interceptors/manifest.mf"/>
+			<param name="manifest.mf" value="joram/interceptors/manifest.mf"/>
 			<param name="include.classes" value="joram/interceptors/Exit*.class"/>			    	
     </antcall>
   </target>
@@ -5269,7 +5280,7 @@ description=" --> launch all exceptionlistener tests">
 			<param name="jvmargs" value=""/>
 			<param name="testid" value="interceptors.test_T"/>
 			<param name="args" value=""/>
-			<param name="manifest.mf" value="interceptors/manifest.mf"/>
+			<param name="manifest.mf" value="joram/interceptors/manifest.mf"/>
 			<param name="include.classes" value="joram/interceptors/Exit*.class"/>			    	
 	  </antcall>
 	</target>
@@ -5284,7 +5295,7 @@ description=" --> launch all exceptionlistener tests">
 			<param name="jvmargs" value=""/>
 			<param name="testid" value="interceptors.test_Q2"/>
 			<param name="args" value=""/>
-			<param name="manifest.mf" value="interceptors/manifest.mf"/>
+			<param name="manifest.mf" value="joram/interceptors/manifest.mf"/>
 			<param name="include.classes" value="joram/interceptors/Exit*.class"/>			    	
 	  </antcall>
 	</target>
@@ -5299,7 +5310,7 @@ description=" --> launch all exceptionlistener tests">
 			<param name="jvmargs" value=""/>
 			<param name="testid" value="interceptors.test_T2"/>
 			<param name="args" value=""/>
-			<param name="manifest.mf" value="interceptors/manifest.mf"/>
+			<param name="manifest.mf" value="joram/interceptors/manifest.mf"/>
 			<param name="include.classes" value="joram/interceptors/Exit*.class"/>			    	
 	  </antcall>
 	</target>
@@ -5314,7 +5325,7 @@ description=" --> launch all exceptionlistener tests">
 			<param name="jvmargs" value=""/>
 			<param name="testid" value="interceptors.test_Q3"/>
 			<param name="args" value=""/>
-			<param name="manifest.mf" value="interceptors/manifest.mf"/>
+			<param name="manifest.mf" value="joram/interceptors/manifest.mf"/>
 			<param name="include.classes" value="joram/interceptors/Exit*.class"/>			    	
 	  </antcall>
 	</target>	
@@ -5329,7 +5340,7 @@ description=" --> launch all exceptionlistener tests">
 			<param name="jvmargs" value=""/>
 			<param name="testid" value="interceptors.test_T3"/>
 			<param name="args" value=""/>
-			<param name="manifest.mf" value="interceptors/manifest.mf"/>
+			<param name="manifest.mf" value="joram/interceptors/manifest.mf"/>
 			<param name="include.classes" value="joram/interceptors/Exit*.class"/>			    	
 	  </antcall>
   </target>
@@ -5344,7 +5355,7 @@ description=" --> launch all exceptionlistener tests">
 			<param name="jvmargs" value=""/>
 			<param name="testid" value="interceptors.test_Q4"/>
 			<param name="args" value=""/>
-			<param name="manifest.mf" value="interceptors/manifest.mf"/>
+			<param name="manifest.mf" value="joram/interceptors/manifest.mf"/>
 		<param name="include.classes" value="joram/interceptors/Exit*.class"/>			    	
 	  </antcall>
   </target>
@@ -5359,7 +5370,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jvmargs" value=""/>
       <param name="testid" value="interceptors.test_T4"/>
       <param name="args" value=""/>
-      <param name="manifest.mf" value="interceptors/manifest.mf"/>
+      <param name="manifest.mf" value="joram/interceptors/manifest.mf"/>
       <param name="include.classes" value="joram/interceptors/Exit*.class"/>			    	
    </antcall>
   </target>
@@ -5374,7 +5385,7 @@ description=" --> launch all exceptionlistener tests">
 			<param name="jvmargs" value=""/>
 			<param name="testid" value="interceptors.test_Q5"/>
 			<param name="args" value=""/>
-			<param name="manifest.mf" value="interceptors/manifest.mf"/>
+			<param name="manifest.mf" value="joram/interceptors/manifest.mf"/>
 		<param name="include.classes" value="joram/interceptors/Exit*.class"/>			    	
 	  </antcall>
   </target>
@@ -5389,7 +5400,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jvmargs" value=""/>
       <param name="testid" value="interceptors.test_T5"/>
       <param name="args" value=""/>
-      <param name="manifest.mf" value="interceptors/manifest.mf"/>
+      <param name="manifest.mf" value="joram/interceptors/manifest.mf"/>
       <param name="include.classes" value="joram/interceptors/Exit*.class"/>			    	
    </antcall>
   </target>
@@ -5404,7 +5415,7 @@ description=" --> launch all exceptionlistener tests">
 			<param name="jvmargs" value=""/>
 			<param name="testid" value="interceptors.test_Q6"/>
 			<param name="args" value=""/>
-			<param name="manifest.mf" value="interceptors/manifest.mf"/>
+			<param name="manifest.mf" value="joram/interceptors/manifest.mf"/>
 		<param name="include.classes" value="joram/interceptors/Exit*.class"/>			    	
 	  </antcall>
   </target>
@@ -5419,7 +5430,7 @@ description=" --> launch all exceptionlistener tests">
       <param name="jvmargs" value=""/>
       <param name="testid" value="interceptors.test_T6"/>
       <param name="args" value=""/>
-      <param name="manifest.mf" value="interceptors/manifest.mf"/>
+      <param name="manifest.mf" value="joram/interceptors/manifest.mf"/>
       <param name="include.classes" value="joram/interceptors/Exit*.class"/>			    	
    </antcall>
   </target>
