@@ -39,7 +39,8 @@ public interface DistributionHandler {
    * 
    * @param message
    *          the message to distribute
-   * @throws Exception
+   * @throws Exception if the message could not be distributed. The message will
+   *           be forwarded to a DMQ, if any.
    */
   public void distribute(Message message) throws Exception;
 
