@@ -275,13 +275,13 @@ public class Topic extends Destination implements TopicMBean {
   }
 
   /**
-   * send to all queue in cluster.
+   * Sends a notification to all topics in cluster.
    * 
-   * @param not
+   * @param not The notification to send.
    */
   protected void sendToCluster(Notification not) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "--- " + this + " ClusterQueue.sendToCluster(" + not + ")");
+      logger.log(BasicLevel.DEBUG, "--- " + this + " Topic.sendToCluster(" + not + ")");
 
     if (friends == null || friends.size() < 2)
       return;
