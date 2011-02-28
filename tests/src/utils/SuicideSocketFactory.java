@@ -88,7 +88,7 @@ public class SuicideSocketFactory extends SocketFactory {
     }
     
     try {
-      Timer timer = new Timer();
+      Timer timer = new Timer(true);
       timer.schedule(new SuicideSocketTask(socket, timer), MIN_SURVIVAL_TIME + extraTime);
       if (logger.isLoggable(BasicLevel.DEBUG)) {
         logger.log(BasicLevel.DEBUG, "Socket will be destroyed in " + (MIN_SURVIVAL_TIME + extraTime) + " ms.");

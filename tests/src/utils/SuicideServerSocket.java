@@ -68,7 +68,7 @@ public class SuicideServerSocket extends ServerSocket {
 
     try {
       int extraTime = RAND.nextInt(MAX_EXTRA_TIME);
-      Timer timer = new Timer();
+      Timer timer = new Timer(true);
       timer.schedule(new SuicideSocketTask(socket, timer), MIN_SURVIVAL_TIME + extraTime);
       if (logger.isLoggable(BasicLevel.DEBUG)) {
         logger.log(BasicLevel.DEBUG, "Server socket will be destroyed in " + (MIN_SURVIVAL_TIME + extraTime) + " ms.");
