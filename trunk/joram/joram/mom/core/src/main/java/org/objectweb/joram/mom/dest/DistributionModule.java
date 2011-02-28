@@ -30,7 +30,6 @@ import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.excepts.MessageValueException;
-import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.joram.shared.messages.ConversionHelper;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -60,7 +59,7 @@ public class DistributionModule implements Serializable {
   /** The distribution queue or topic using this module. */
   private final Destination destination;
 
-  public DistributionModule(Destination destination, Properties properties) throws RequestException {
+  public DistributionModule(Destination destination, Properties properties) {
     this.destination = destination;
     setProperties(properties);
   }
@@ -68,7 +67,7 @@ public class DistributionModule implements Serializable {
   /**
    * Resets the distribution properties.
    */
-  private void setProperties(Properties props) throws RequestException {
+  private void setProperties(Properties props) {
 
     if (props == null) {
       return;
@@ -97,11 +96,7 @@ public class DistributionModule implements Serializable {
 
       } catch (Exception exc) {
         logger.log(BasicLevel.ERROR, "DistributionModule: can't create distribution handler.", exc);
-        throw new RequestException(exc.getMessage());
       }
-    } else if (distributionHandler == null) {
-      throw new RequestException("Distribution class not defined: use " + CLASS_NAME
-          + " property to chose distribution class.");
     }
 
   }
