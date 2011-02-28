@@ -157,7 +157,6 @@ public class Distrib_2serv_T_Http extends TestCase {
     int counter = 0;
 
     int next = -1;
-    int errors = 0;
 
     public void onMessage(Message m) {
       try {
@@ -167,10 +166,8 @@ public class Distrib_2serv_T_Http extends TestCase {
 
         int index = msg.getIntProperty("index");
 
-        if (index != next) {
-          errors++;
-          next = index;
-        }
+        assertEquals(index, next);
+
         next--;
 
         if (index == 0) {
