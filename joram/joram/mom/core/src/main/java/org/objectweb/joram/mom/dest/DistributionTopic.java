@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -77,12 +77,7 @@ public class DistributionTopic extends Topic {
   public void initialize(boolean firstTime) {
     super.initialize(firstTime);
     if (distributionModule == null) {
-      try {
-        distributionModule = new DistributionModule(this, (Properties) properties.clone());
-      } catch (RequestException exc) {
-        // Should not happen as distribution module creation previously succeeded in constructor
-        logger.log(BasicLevel.ERROR, "DistributionTopic.initialize prop = " + properties, exc);
-      }
+      distributionModule = new DistributionModule(this, (Properties) properties.clone());
     }
   }
 

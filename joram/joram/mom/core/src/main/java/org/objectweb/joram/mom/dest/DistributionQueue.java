@@ -77,12 +77,7 @@ public class DistributionQueue extends Queue {
   public void initialize(boolean firstTime) {
     super.initialize(firstTime);
     if (distributionModule == null) {
-      try {
-        distributionModule = new DistributionModule(this, (Properties) properties.clone());
-      } catch (RequestException exc) {
-        // Should not happen as distribution module creation previously succeeded in constructor
-        logger.log(BasicLevel.ERROR, "DistributionQueue.initialize prop = " + properties, exc);
-      }
+      distributionModule = new DistributionModule(this, (Properties) properties.clone());
     }
   }
 
