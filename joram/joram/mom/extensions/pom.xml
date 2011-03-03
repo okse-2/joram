@@ -15,6 +15,7 @@
   </parent>
 	
   <modules>
+    <module>amqp</module>
     <module>collector</module>
     <module>jmsbridge</module>
     <module>mail</module>
