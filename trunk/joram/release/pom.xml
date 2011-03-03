@@ -191,6 +191,12 @@
     </dependency>
     <dependency>
       <groupId>org.objectweb.joram</groupId>
+      <artifactId>joram-mom-extensions-amqp</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.objectweb.joram</groupId>
       <artifactId>joram-mom-extensions-ftp</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
