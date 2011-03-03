@@ -153,16 +153,22 @@ public class AmqpAcquisition implements AcquisitionDaemon {
         message.type = Message.BYTES;
       }
       message.correlationId = properties.getCorrelationId();
-      if (properties.getDeliveryMode().intValue() == 1) {
-        message.persistent = false;
-      } else if (properties.getDeliveryMode().intValue() == 2) {
-        message.persistent = true;
+      Integer deliveryMode = properties.getDeliveryMode();
+      if (deliveryMode != null) {
+      	if (deliveryMode.intValue() == 1) {
+      		message.persistent = false;
+      	} else if (deliveryMode.intValue() == 2) {
+      		message.persistent = true;
+      	}
       }
-      message.priority = properties.getPriority().intValue();
-      message.timestamp = properties.getTimestamp().getTime();
+      if (properties.getPriority() != null)
+      	message.priority = properties.getPriority().intValue();
+      if (properties.getTimestamp() != null)
+      	message.timestamp = properties.getTimestamp().getTime();
 
       try {
-        message.expiration = Long.parseLong(properties.getExpiration());
+      	if (properties.getExpiration() != null)
+      		message.expiration = Long.parseLong(properties.getExpiration());
       } catch (NumberFormatException nfe) {
         if (logger.isLoggable(BasicLevel.WARN)) {
           logger.log(BasicLevel.WARN, "Expiration field could not be parsed.", nfe);
