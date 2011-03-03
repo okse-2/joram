@@ -877,7 +877,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
     	for (Iterator msgs = not.getMessages().iterator(); msgs.hasNext();) {
     		org.objectweb.joram.shared.messages.Message message = (org.objectweb.joram.shared.messages.Message) msgs.next();
     		// set the destination name
-    		message.setProperty("JMSDestinationName", getName());
+    		message.setProperty("JoramDestinationName", getName());
     		// interceptors process
     		org.objectweb.joram.shared.messages.Message m = processInterceptors(message);
     		if (m == null) {
@@ -1448,7 +1448,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
         	// get the shared message
         	org.objectweb.joram.shared.messages.Message message = msg.getFullMessage();
         	// set the destination name
-        	message.setProperty("JMSDestinationName", getName());
+        	message.setProperty("JoramDestinationName", getName());
         	// interceptors process
       		org.objectweb.joram.shared.messages.Message m = processInterceptors(message);
       		if (m == null) {
