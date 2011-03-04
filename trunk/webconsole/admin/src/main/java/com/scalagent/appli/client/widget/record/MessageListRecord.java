@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,7 @@
  */
 package com.scalagent.appli.client.widget.record;
 
+import java.util.Date;
 import java.util.Map;
 
 import com.scalagent.appli.shared.MessageWTO;
@@ -30,7 +31,6 @@ import com.smartgwt.client.widgets.grid.ListGridRecord;
 /**
  * @author Yohann CINTRE
  */
-@SuppressWarnings("unchecked")
 public class MessageListRecord extends ListGridRecord {
 
   public static String ATTRIBUTE_IDS = "idS";
@@ -53,7 +53,7 @@ public class MessageListRecord extends ListGridRecord {
     setMessage(message);
     setIdS(message.getId());
     setExpiration(message.getExpiration());
-    setTimestamp(message.getTimestamp());
+    setTimestamp(new Date(message.getTimestamp()));
     setDeliveryCount(message.getDeliveryCount());
     setPriority(message.getPriority());
     setText(message.getText());
@@ -98,7 +98,7 @@ public class MessageListRecord extends ListGridRecord {
     setAttribute(ATTRIBUTE_EXPIRATION, expiration);
   }
 
-  public void setTimestamp(long timestamp) {
+  public void setTimestamp(Date timestamp) {
     setAttribute(ATTRIBUTE_TIMESTAMP, timestamp);
   }
 
@@ -134,8 +134,8 @@ public class MessageListRecord extends ListGridRecord {
     return getAttributeAsInt(ATTRIBUTE_EXPIRATION);
   }
 
-  public long getTimestamp() {
-    return getAttributeAsInt(ATTRIBUTE_TIMESTAMP);
+  public Date getTimestamp() {
+    return getAttributeAsDate(ATTRIBUTE_TIMESTAMP);
   }
 
   public int getDeliveryCount() {
