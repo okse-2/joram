@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,7 @@ package com.scalagent.appli.client.presenter;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.scalagent.appli.client.RPCServiceCacheClient;
 import com.scalagent.appli.client.RPCServiceCacheClient.FloatHistoryData;
 import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
@@ -48,7 +48,7 @@ import com.scalagent.engine.client.presenter.BasePresenter;
 public class ServerPresenter extends BasePresenter<ServerWidget, BaseRPCServiceAsync, RPCServiceCacheClient>
     implements UpdateCompleteHandler {
 
-  public ServerPresenter(BaseRPCServiceAsync serviceRPC, HandlerManager eventBus, RPCServiceCacheClient cache) {
+  public ServerPresenter(BaseRPCServiceAsync serviceRPC, SimpleEventBus eventBus, RPCServiceCacheClient cache) {
     super(serviceRPC, cache, eventBus);
     this.eventBus = eventBus;
     widget = new ServerWidget(this);

@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,7 +24,7 @@ package com.scalagent.appli.client.presenter;
 
 import java.util.List;
 
-import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.scalagent.appli.client.RPCServiceCacheClient;
 import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.command.topic.DeleteTopicAction;
@@ -58,7 +58,7 @@ public class TopicListPresenter extends
     BasePresenter<TopicListWidget, BaseRPCServiceAsync, RPCServiceCacheClient> implements NewTopicHandler,
     DeletedTopicHandler, UpdatedTopicHandler, UpdateCompleteHandler {
 
-  public TopicListPresenter(BaseRPCServiceAsync testService, HandlerManager eventBus,
+  public TopicListPresenter(BaseRPCServiceAsync testService, SimpleEventBus eventBus,
       RPCServiceCacheClient cache) {
 
     super(testService, cache, eventBus);
