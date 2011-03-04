@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,7 @@
  */
 package com.scalagent.appli.client.command.topic;
 
-import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.scalagent.engine.client.command.Handler;
 
 /**
@@ -30,7 +30,7 @@ import com.scalagent.engine.client.command.Handler;
  */
 public abstract class SendNewTopicHandler extends Handler<SendNewTopicResponse> {
 
-  public SendNewTopicHandler(HandlerManager eventBus) {
+  public SendNewTopicHandler(SimpleEventBus eventBus) {
     super(eventBus);
   }
 

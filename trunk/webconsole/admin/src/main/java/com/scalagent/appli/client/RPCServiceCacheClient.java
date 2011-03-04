@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,7 +30,7 @@ import java.util.Map;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.event.shared.GwtEvent;
-import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.Timer;
 import com.scalagent.appli.client.command.info.LoadServerInfoAction;
 import com.scalagent.appli.client.command.info.LoadServerInfoHandler;
@@ -128,7 +128,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
   private List<FloatHistoryData> serverHistory = new ArrayList<FloatHistoryData>();
 
   private BaseRPCServiceAsync RPCService;
-  private HandlerManager eventBus;
+  private SimpleEventBus eventBus;
 
   private boolean topicRequest = true;
   private boolean queueRequest = true;
@@ -136,7 +136,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
   private boolean subRequest = true;
   private boolean servRequest = true;
 
-  public RPCServiceCacheClient(BaseRPCServiceAsync RPCService, HandlerManager eventBus, int updatePeriod) {
+  public RPCServiceCacheClient(BaseRPCServiceAsync RPCService, SimpleEventBus eventBus, int updatePeriod) {
 
     Log.debug("RPCServiceCacheClient start.");
 

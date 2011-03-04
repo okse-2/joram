@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,9 +25,9 @@ package com.scalagent.appli.client;
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.visualization.client.VisualizationUtils;
 import com.google.gwt.visualization.client.visualizations.AnnotatedTimeLine;
 import com.scalagent.appli.client.event.common.UpdateCompleteEvent;
@@ -70,12 +70,12 @@ public class Application implements EntryPoint {
 
   private BaseRPCServiceAsync serviceAsync;
   private RPCServiceCacheClient serviceCache;
-  private HandlerManager eventBus;
+  private SimpleEventBus eventBus;
 
   public void onModuleLoad() {
     Log.setUncaughtExceptionHandler();
 
-    DeferredCommand.addCommand(new Command() {
+    Scheduler.get().scheduleDeferred(new Command() {
       public void execute() {
         onModuleLoad2();
       }
@@ -92,7 +92,7 @@ public class Application implements EntryPoint {
 
         serviceAsync = GWT.create(BaseRPCService.class);
 
-        eventBus = new HandlerManager(null);
+        eventBus = new SimpleEventBus();
         serviceCache = new RPCServiceCacheClient(serviceAsync, eventBus, -1);
 
         ServerPresenter serverPresenter = new ServerPresenter(serviceAsync, eventBus, serviceCache);

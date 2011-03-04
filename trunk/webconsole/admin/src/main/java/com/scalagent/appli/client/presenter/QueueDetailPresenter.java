@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,7 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.event.shared.HandlerManager;
+import com.allen_sauer.gwt.log.client.Log;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.scalagent.appli.client.Application;
 import com.scalagent.appli.client.RPCServiceCacheClient;
 import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
@@ -66,9 +67,11 @@ public class QueueDetailPresenter extends
     NewMessageHandler, DeletedMessageHandler, UpdatedMessageHandler, UpdateCompleteHandler,
     QueueNotFoundHandler, DeletedQueueHandler, UpdatedQueueHandler {
 
+  private static final String logCategory = QueueDetailPresenter.class.getName();
+
   private QueueWTO queue;
 
-  public QueueDetailPresenter(BaseRPCServiceAsync serviceRPC, HandlerManager eventBus,
+  public QueueDetailPresenter(BaseRPCServiceAsync serviceRPC, SimpleEventBus eventBus,
       RPCServiceCacheClient cache, QueueWTO queue) {
 
     super(serviceRPC, cache, eventBus);
@@ -109,8 +112,14 @@ public class QueueDetailPresenter extends
    * displayed queue
    */
   public void onNewMessage(MessageWTO message, String queueName) {
-    if (queue.getId().equals(queueName))
-      getWidget().addMessage(new MessageListRecord(message));
+    if (queue.getId().equals(queueName)) {
+      try {
+        Log.debug(logCategory, "** NewMessage " + message + " on " + queueName);
+        getWidget().addMessage(new MessageListRecord(message));
+      } catch (Throwable exc) {
+        Log.error(logCategory, "** NewMessage ERROR", exc);
+      }
+    }
   }
 
   /**

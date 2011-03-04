@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,13 +22,11 @@
  */
 package com.scalagent.appli.client.presenter;
 
-
-
 import java.util.HashMap;
 import java.util.Map;
 
 import com.allen_sauer.gwt.log.client.Log;
-import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.ui.Widget;
 import com.scalagent.appli.client.RPCServiceCacheClient;
 import com.scalagent.appli.client.event.common.UpdateCompleteEvent;
@@ -73,7 +71,7 @@ public class MainPresenter extends BasePresenter<MainWidget, BaseRPCServiceAsync
   private Map<String, UserDetailPresenter> openedUserList = new HashMap<String, UserDetailPresenter>();
   private Map<String, SubscriptionDetailPresenter> openedSubList = new HashMap<String, SubscriptionDetailPresenter>();
 
-  public MainPresenter(BaseRPCServiceAsync testService, RPCServiceCacheClient cache, HandlerManager eventBus,
+  public MainPresenter(BaseRPCServiceAsync testService, RPCServiceCacheClient cache, SimpleEventBus eventBus,
       LoginPresenter loginPresenter, ServerPresenter serverPresenter, TopicListPresenter topicPresenter,
       QueueListPresenter queuePresenter, UserListPresenter userPresenter,
       SubscriptionListPresenter subscriptionPresenter) {

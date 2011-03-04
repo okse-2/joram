@@ -1,12 +1,9 @@
 package com.scalagent.engine.client.presenter;
 
-
-
-import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.scalagent.engine.client.BaseRPCServiceAsync;
 import com.scalagent.engine.client.BaseRPCServiceCacheClient;
 import com.scalagent.engine.client.widget.BaseWidget;
-
 
 /**
  * Base class for all presenters.
@@ -22,9 +19,9 @@ public abstract class BasePresenter<D extends BaseWidget<?>, S extends BaseRPCSe
 	protected D widget;
 	protected S service;
 	protected C cache;
-	protected HandlerManager eventBus;
+	protected SimpleEventBus eventBus;
 	
-	public BasePresenter(S service, C cache, HandlerManager eventBus) {
+	public BasePresenter(S service, C cache, SimpleEventBus eventBus) {
 		this.service = service;
 		this.cache = cache;
 		this.eventBus = eventBus;
@@ -42,7 +39,7 @@ public abstract class BasePresenter<D extends BaseWidget<?>, S extends BaseRPCSe
 		return cache;
 	}
 	
-	public HandlerManager getEventBus() {
+  public SimpleEventBus getEventBus() {
 		return eventBus;
 	}
 	

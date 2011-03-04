@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.scalagent.appli.client.RPCServiceCacheClient;
 import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.command.subscription.DeleteSubscriptionAction;
@@ -66,7 +66,7 @@ public class UserDetailPresenter extends
 
   private UserWTO user;
 
-  public UserDetailPresenter(BaseRPCServiceAsync serviceRPC, HandlerManager eventBus,
+  public UserDetailPresenter(BaseRPCServiceAsync serviceRPC, SimpleEventBus eventBus,
       RPCServiceCacheClient cache, UserWTO user) {
 
     super(serviceRPC, cache, eventBus);
