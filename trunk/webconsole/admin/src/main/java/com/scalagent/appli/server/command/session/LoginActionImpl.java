@@ -35,14 +35,16 @@ public class LoginActionImpl extends ActionImpl<LoginResponse, LoginAction, RPCS
 
   @Override
   public LoginResponse execute(RPCServiceImpl cache, LoginAction loginAction) {
-    boolean result = cache.connectJORAM(loginAction.getLogin(), loginAction.getPassword());
-
     String info = "";
-
-    if (!result) {
-      info = BaseRPCServiceUtils.getString("Error while loging-in");
+    boolean result = false;
+    try {
+      result = cache.connectJORAM(loginAction.getLogin(), loginAction.getPassword());
+      if (!result) {
+        info = BaseRPCServiceUtils.getString("Error while loging-in");
+      }
+    } catch (Throwable exc) {
+      info = "Unexpected server error: " + exc.toString();
     }
-
     return new LoginResponse(result, info);
   }
 
