@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,7 @@
  */
 package com.scalagent.appli.client.widget;
 
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -427,7 +428,7 @@ public class SubscriptionDetailWidget extends BaseWidget<SubscriptionDetailPrese
 
       messageListRecords.setIdS(message.getId());
       messageListRecords.setExpiration(message.getExpiration());
-      messageListRecords.setTimestamp(message.getTimestamp());
+      messageListRecords.setTimestamp(new Date(message.getTimestamp()));
       messageListRecords.setDeliveryCount(message.getDeliveryCount());
       messageListRecords.setPriority(message.getPriority());
       messageListRecords.setText(message.getText());
