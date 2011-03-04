@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,6 +33,8 @@ import org.objectweb.joram.mom.dest.TopicMBean;
 import org.objectweb.joram.mom.messages.MessageView;
 import org.objectweb.joram.mom.proxies.ClientSubscriptionMBean;
 import org.objectweb.joram.mom.proxies.UserAgentMBean;
+import org.osgi.framework.BundleContext;
+import org.ow2.easybeans.osgi.annotation.OSGiResource;
 import org.ow2.joram.admin.Activator;
 import org.ow2.joram.admin.AdminListener;
 import org.ow2.joram.admin.JoramAdmin;
@@ -74,6 +76,9 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
   private static final String SUBSCRIPTION_MESSAGES = "subMessagesList";
   private static final String SESSION_USERS = "usersList";
   private static final String SESSION_SUBSCRIPTION = "subscriptionList";
+
+  @OSGiResource
+  private BundleContext bundleContext = null;
 
   private boolean isConnected = false;
   private JoramAdmin joramAdmin;
@@ -292,8 +297,15 @@ public class RPCServiceImpl extends BaseRPCServiceImpl {
 
   }
 
-  public boolean connectJORAM(String login, String password) {
-    joramAdmin = new JoramAdminOSGi(Activator.getContext());
+  public boolean connectJORAM(String login, String password) throws Exception {
+    // If context has not been injected, we should be in pax web OSGi case.
+    if (bundleContext == null) {
+      bundleContext = Activator.getContext();
+    }
+    if (bundleContext == null) {
+      throw new Exception("OSGi context has not been found, server is not configured properly.");
+    }
+    joramAdmin = new JoramAdminOSGi(bundleContext);
     isConnected = joramAdmin.connect(login, password);
     if (isConnected) {
       joramAdmin.start(listener);
