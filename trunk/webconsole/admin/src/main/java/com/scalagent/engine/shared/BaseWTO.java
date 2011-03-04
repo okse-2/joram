@@ -5,6 +5,8 @@
 package com.scalagent.engine.shared;
 
 
+import java.io.Serializable;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
@@ -13,7 +15,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * Web Transfer Objects are used to transfer data between a web server and a web client.
  * @author sgonzalez
  */
-public abstract class BaseWTO implements IsSerializable {
+public abstract class BaseWTO implements IsSerializable, Serializable {
 
 	/**
 	 * Status indicating the object was created in the database
