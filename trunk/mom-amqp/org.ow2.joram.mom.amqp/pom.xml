@@ -19,9 +19,9 @@
   </parent>
 
   <properties>
-    <joram.version>5.5.0-SNAPSHOT</joram.version>
+    <joram.version>5.5.0</joram.version>
   </properties>
-  
+
   <build>
     <plugins>
       <plugin>
@@ -38,7 +38,10 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-            <Export-Package>org.ow2.joram.mom.amqp</Export-Package>
+            <Export-Package>org.ow2.joram.mom.amqp,
+              org.ow2.joram.mom.amqp.marshalling,
+              org.ow2.joram.mom.amqp.structures,
+              org.ow2.joram.mom.amqp.exceptions</Export-Package>
           </instructions>
         </configuration>
       </plugin>
