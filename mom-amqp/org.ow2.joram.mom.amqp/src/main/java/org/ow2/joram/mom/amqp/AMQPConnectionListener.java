@@ -370,7 +370,7 @@ public class AMQPConnectionListener extends Daemon {
           throw new NotImplementedException("Flow method currently not implemented.");
 
         case AMQP.Channel.FlowOk.INDEX:
-            //TODO 
+          // Server doesn't send flow requests for now.
           break;
 
         case AMQP.Channel.Close.INDEX:
@@ -750,78 +750,13 @@ public class AMQPConnectionListener extends Daemon {
         }
 
         while (running) {
+          Object obj = null;
+
           canStop = true;
           try {
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
               this.logmon.log(BasicLevel.DEBUG, "waiting message");
-
-            Object obj = queueOut.getAndPop();
-            
-            if (this.logmon.isLoggable(BasicLevel.DEBUG))
-              this.logmon.log(BasicLevel.DEBUG, "getAndPop = " + obj + " closing=" + closing);
-            
-            if (closing) {
-              if (!(obj instanceof AMQP.Connection.Close) && !(obj instanceof AMQP.Connection.CloseOk)) {
-                if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                  this.logmon.log(BasicLevel.DEBUG, "Method not sent: closing.");
-                continue;
-              }
-            }
-
-            if (obj instanceof AbstractMarshallingMethod)  {
-              AbstractMarshallingMethod method = (AbstractMarshallingMethod) obj;
-              if (!isChannelOpen(method.channelNumber))
-                continue;
-              // is a Channel.Close method ?
-              if (method instanceof AMQP.Channel.Close || method instanceof AMQP.Channel.CloseOk) {
-                closeChannel(method.channelNumber);
-              }
-              writeToPeer(method.toFrame());
-              if (method instanceof AMQP.Connection.CloseOk) {
-                stop();
-              }
-              if (method instanceof AMQP.Connection.Close) {
-                stop();
-                closing = true;
-              }
-            } else if (obj instanceof Deliver) {
-              Deliver deliver = (Deliver) obj;
-              writeToPeer(deliver.deliver.toFrame());
-              int channelNumber = deliver.deliver.channelNumber;
-              if (deliver.body == null) {
-                writeToPeer(MarshallingHeader.toFrame(0, deliver.properties, channelNumber));
-              } else {
-                writeToPeer(MarshallingHeader.toFrame(deliver.body.length, deliver.properties, channelNumber));
-                writeToPeer(new Frame(AMQP.FRAME_BODY, channelNumber, deliver.body));
-              }
-
-            } else if (obj instanceof GetResponse) {
-              GetResponse resp = (GetResponse) obj;
-              writeToPeer(resp.getOk.toFrame());
-              int channelNumber = resp.getOk.channelNumber;
-              if (resp.body == null) {
-                writeToPeer(MarshallingHeader.toFrame(0, resp.properties, channelNumber));
-              } else {
-                writeToPeer(MarshallingHeader.toFrame(resp.body.length, resp.properties, channelNumber));
-                writeToPeer(new Frame(AMQP.FRAME_BODY, channelNumber, resp.body));
-              }
-            } else if (obj instanceof Returned) {
-              Returned returned = (Returned) obj;
-              writeToPeer(returned.returned.toFrame());
-              int channelNumber = returned.returned.channelNumber;
-              if (returned.body == null) {
-                writeToPeer(MarshallingHeader.toFrame(0, returned.properties, channelNumber));
-              } else {
-                writeToPeer(MarshallingHeader.toFrame(returned.body.length, returned.properties, channelNumber));
-                writeToPeer(new Frame(AMQP.FRAME_BODY, channelNumber, returned.body));
-              }
-
-            } else if (obj instanceof Frame) {
-              writeToPeer((Frame) obj);
-            } else {
-              if (logger.isLoggable(BasicLevel.ERROR))
-                logger.log(BasicLevel.ERROR, this.getName() + ": UNEXPECTED OBJECT CLASS: " + obj.getClass().getName());
-            }
+            obj = queueOut.getAndPop();
           } catch (InterruptedException exc) {
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
               this.logmon.log(BasicLevel.DEBUG, this.getName() + ", interrupted");
@@ -829,6 +764,73 @@ public class AMQPConnectionListener extends Daemon {
           canStop = false;
           if (!running)
             break;
+            
+          if (this.logmon.isLoggable(BasicLevel.DEBUG))
+            this.logmon.log(BasicLevel.DEBUG, "getAndPop = " + obj + " closing=" + closing);
+
+          if (closing) {
+            if (!(obj instanceof AMQP.Connection.Close) && !(obj instanceof AMQP.Connection.CloseOk)) {
+              if (this.logmon.isLoggable(BasicLevel.DEBUG))
+                this.logmon.log(BasicLevel.DEBUG, "Method not sent: closing.");
+              continue;
+            }
+          }
+
+          if (obj instanceof AbstractMarshallingMethod) {
+            AbstractMarshallingMethod method = (AbstractMarshallingMethod) obj;
+            if (!isChannelOpen(method.channelNumber))
+              continue;
+            // is a Channel.Close method ?
+            if (method instanceof AMQP.Channel.Close || method instanceof AMQP.Channel.CloseOk) {
+              closeChannel(method.channelNumber);
+            }
+            writeToPeer(method.toFrame());
+            if (method instanceof AMQP.Connection.CloseOk) {
+              stop();
+            }
+            if (method instanceof AMQP.Connection.Close) {
+              stop();
+              closing = true;
+            }
+          } else if (obj instanceof Deliver) {
+            Deliver deliver = (Deliver) obj;
+            writeToPeer(deliver.deliver.toFrame());
+            int channelNumber = deliver.deliver.channelNumber;
+            if (deliver.body == null) {
+              writeToPeer(MarshallingHeader.toFrame(0, deliver.properties, channelNumber));
+            } else {
+              writeToPeer(MarshallingHeader.toFrame(deliver.body.length, deliver.properties, channelNumber));
+              writeToPeer(new Frame(AMQP.FRAME_BODY, channelNumber, deliver.body));
+            }
+
+          } else if (obj instanceof GetResponse) {
+            GetResponse resp = (GetResponse) obj;
+            writeToPeer(resp.getOk.toFrame());
+            int channelNumber = resp.getOk.channelNumber;
+            if (resp.body == null) {
+              writeToPeer(MarshallingHeader.toFrame(0, resp.properties, channelNumber));
+            } else {
+              writeToPeer(MarshallingHeader.toFrame(resp.body.length, resp.properties, channelNumber));
+              writeToPeer(new Frame(AMQP.FRAME_BODY, channelNumber, resp.body));
+            }
+          } else if (obj instanceof Returned) {
+            Returned returned = (Returned) obj;
+            writeToPeer(returned.returned.toFrame());
+            int channelNumber = returned.returned.channelNumber;
+            if (returned.body == null) {
+              writeToPeer(MarshallingHeader.toFrame(0, returned.properties, channelNumber));
+            } else {
+              writeToPeer(MarshallingHeader.toFrame(returned.body.length, returned.properties, channelNumber));
+              writeToPeer(new Frame(AMQP.FRAME_BODY, channelNumber, returned.body));
+            }
+
+          } else if (obj instanceof Frame) {
+            writeToPeer((Frame) obj);
+          } else {
+            if (logger.isLoggable(BasicLevel.ERROR))
+              logger.log(BasicLevel.ERROR, this.getName() + ": UNEXPECTED OBJECT CLASS: "
+                  + obj.getClass().getName());
+          }
         }
       } catch (SocketException exc) {
         this.logmon.log(BasicLevel.DEBUG, this.getName() + ", socket error", exc);
