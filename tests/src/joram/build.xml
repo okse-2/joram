@@ -542,18 +542,18 @@ description=" --> launch all exceptionlistener tests">
   	<antcall target="test-bundle" inheritAll="true"/>
   </target>
 
-  <target name="test-bundle" if="test-bundle.available">
+	<target name="test-bundle" if="test-bundle.available">
     <jar jarfile="${obj.dir}/test-bundle.jar" manifest="${src.dir}/${manifest.mf}">
-      <fileset dir="${obj.dir}">
-        <include name="${include.classes}"/>
+		  <fileset dir="${obj.dir}">
+		    <include name="${include.classes}"/>
       </fileset>
     </jar>
     <copy file="config-extended.properties" tofile="${test.dir}/config.properties" overwrite="true"/>    <property name="bundle.dir" location="${ship.dir}/bundle" />
     <replace file="${test.dir}/config.properties" token="@BUNDLE_DIR@" value="${bundle.dir}" />
     <replace file="${test.dir}/config.properties" token="\" value="/" />
-  </target>
+	</target>
   
-  <target name="cpJoramAdmin" if="joramAdmin.available">
+	<target name="cpJoramAdmin" if="joramAdmin.available">
     <copy file="${joramAdmin}" tofile="${test.dir}/joramAdmin.xml"/>
   </target>
 
@@ -1996,7 +1996,6 @@ description=" --> launch all exceptionlistener tests">
   
   <target name="client.cnxtime_2" depends="init.a3props,compile" unless="isOSGi"
           description=" --> when kill client with connectingtimer, context is not destroy before connectingtimer">
-    
     <antcall target="init.test" inheritAll="true">
         <param name="a3conf" value="client/a3servers.xml"/>
     </antcall>
@@ -2028,7 +2027,6 @@ description=" --> launch all exceptionlistener tests">
 
   <target name="client.cnxtime_2.osgi" depends="init.a3props,compile" if="isOSGi"
           description=" --> when kill client with connectingtimer, context is not destroy before connectingtimer">
-
     <antcall target="init.test" inheritAll="true">
         <param name="a3conf" value="client/a3servers.xml"/>
     </antcall>
@@ -2871,22 +2869,22 @@ description=" --> launch all exceptionlistener tests">
       <param name="transaction"
              value="fr.dyade.aaa.ext.NGTransaction"/>
       <!-- param name="transaction"
-             value="fr.dyade.aaa.util.NullTransaction"/ -->
+             value="fr.dyade.aaa.util.NTransaction"/ -->
       <param name="engine" value="fr.dyade.aaa.agent.Engine"/>
       <!-- param name="engine" value="fr.dyade.aaa.agent.GCEngine"/ -->
       <!-- param name="BaseClass" value="joram.perfs.TcpBaseTest"/ -->
       <param name="BaseClass" value="joram.perfs.ColocatedBaseTest"/>
       <param name="dupsOk" value="false"/>
-      <param name="queueMessageReadMax" value="1"/>
+      <param name="queueMessageReadMax" value="10"/>
       <param name="topicAckBufferMax" value="50"/>
       <param name="implicitAck" value="false"/>
       <param name="MsgTransient" value="false"/>
       <param name="SubDurable" value="false"/>
-      <param name="Transacted" value="true"/>
-      <param name="NbRound" value="10"/>
+      <param name="Transacted" value="false"/>
+      <param name="NbRound" value="100"/>
       <param name="NbMsgPerRound" value="10000"/>
       <param name="NbProdCons" value="1"/>
-      <param name="MsgSize" value="50"/>
+      <param name="MsgSize" value="100"/>
     </antcall>
   </target>
 
