@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2006 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -36,6 +36,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
 
+import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import javax.jms.Session;
 import javax.jms.XAConnection;
@@ -49,6 +50,7 @@ import javax.resource.spi.ActivationSpec;
 import javax.resource.spi.BootstrapContext;
 import javax.resource.spi.CommException;
 import javax.resource.spi.IllegalStateException;
+import javax.resource.spi.ResourceAdapter;
 import javax.resource.spi.ResourceAdapterInternalException;
 import javax.resource.spi.endpoint.MessageEndpointFactory;
 import javax.resource.spi.work.WorkManager;
@@ -77,12 +79,12 @@ import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
- * A <code>JoramAdapter</code> instance manages connectivities to an underlying 
+ * A <code>JoramAdapter</code> instance manages connectivities to an underlying
  * JORAM server: outbound connectivity (JCA connection management contract) and
  * inbound connectivity (asynchronous message delivery as specified by the JCA
  * message inflow contract).
  */
-public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, JoramAdapterMBean, javax.jms.ExceptionListener {
+public final class JoramAdapter implements ResourceAdapter, JoramAdapterMBean, ExceptionListener {
   /** Define serialVersionUID for interoperability. */
   private static final long serialVersionUID = 1L;
 
@@ -480,8 +482,9 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
 
   public JMXServer jmxServer;
   
-  /** Local MBean server. */
-  private static MBeanServer mbs = null;
+  public void setJmxServer(MBeanServer jmxServer) {
+    this.jmxServer = new JMXServer(jmxServer);
+  }
 
   /** Name of the root in the MBean tree */
   private static String jmxRootName = "joramClient";
@@ -492,6 +495,10 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
   /** <code>WorkManager</code> instance provided by the application server. */
   private transient WorkManager workManager;
 
+  public void setWorkManager(WorkManager workManager) {
+    this.workManager = workManager;
+  }
+
   /**
    * Table holding the adapter's <code>InboundConsumer</code> instances,
    * for inbound messaging.
@@ -499,12 +506,14 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    * <b>Key:</b> <code>ActivationSpec</code> instance<br>
    * <b>Value:</b> <code>InboundConsumer</code> instance
    */
-  private transient Hashtable consumers;
+  private transient Hashtable consumers = new Hashtable();
+
   /**
    * Vector holding the <code>ManagedConnectionImpl</code> instances for
    * managed outbound messaging.
    */
-  private transient Vector producers;
+  private transient Vector producers = new Vector();
+
   /**
    * Table holding the adapter's <code>XAConnection</code> instances used for
    * recovering the XA resources.
@@ -521,13 +530,19 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
     if (logger.isLoggable(BasicLevel.INFO))
       logger.log(BasicLevel.INFO, "JORAM adapter instantiated.");
 
-    consumers = new Hashtable();
-    producers = new Vector();
-
     java.util.ArrayList array = MBeanServerFactory.findMBeanServer(null);
-    if (!array.isEmpty())
-      mbs = (MBeanServer) array.get(0);
-    jmxServer = new JMXServer(mbs);
+    if (!array.isEmpty()) {
+      setJmxServer((MBeanServer) array.get(0));
+    }
+  }
+
+  /**
+   * Constructs a <code>JoramAdapter</code> instance.
+   */
+  public JoramAdapter(MBeanServer jmxServer) {
+    if (logger.isLoggable(BasicLevel.INFO))
+      logger.log(BasicLevel.INFO, "JORAM adapter instantiated.");
+    setJmxServer(jmxServer);
   }
 
   /**
@@ -538,18 +553,25 @@ public final class JoramAdapter implements javax.resource.spi.ResourceAdapter, J
    *                                              initialized.
    */
   public synchronized void start(BootstrapContext ctx) throws ResourceAdapterInternalException {
+    setWorkManager(ctx.getWorkManager());
+    start();
+  }
+    
+  public synchronized void start() throws ResourceAdapterInternalException {
     if (started)
       throw new ResourceAdapterInternalException("Adapter already started.");
     if (stopped)
       throw new ResourceAdapterInternalException("Adapter has been stopped.");
+
+    if (workManager == null) {
+      throw new ResourceAdapterInternalException("WorkManager has not been set.");
+    }
 
     // set HA mode if needed
     AdminModule.setHa(isHa);
 
     if (logger.isLoggable(BasicLevel.INFO))
       logger.log(BasicLevel.INFO, "JORAM adapter starting deployment...");
-
-    workManager = ctx.getWorkManager();
 
     // Collocated mode: starting the JORAM server.
     if (collocated) {
