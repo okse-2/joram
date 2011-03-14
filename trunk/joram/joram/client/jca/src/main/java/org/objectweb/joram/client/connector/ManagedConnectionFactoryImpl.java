@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2006 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -566,16 +566,16 @@ public class ManagedConnectionFactoryImpl
     }
 
     this.ra = (JoramAdapter) ra;
-    collocated = ((JoramAdapter) ra).collocated;
-    isHa = ((JoramAdapter) ra).isHa;
-    hostName = ((JoramAdapter) ra).hostName;
-    serverPort = ((JoramAdapter) ra).serverPort;
-    connectingTimer = ((JoramAdapter) ra).connectingTimer;
-    txPendingTimer = ((JoramAdapter) ra).txPendingTimer;
-    cnxPendingTimer = ((JoramAdapter) ra).cnxPendingTimer;
-    asyncSend = ((JoramAdapter) ra).asyncSend;
-    multiThreadSync = ((JoramAdapter) ra).multiThreadSync;
-    multiThreadSyncDelay = ((JoramAdapter) ra).multiThreadSyncDelay;
+    collocated = this.ra.collocated;
+    isHa = this.ra.isHa;
+    hostName = this.ra.hostName;
+    serverPort = this.ra.serverPort;
+    connectingTimer = this.ra.connectingTimer;
+    txPendingTimer = this.ra.txPendingTimer;
+    cnxPendingTimer = this.ra.cnxPendingTimer;
+    asyncSend = this.ra.asyncSend;
+    multiThreadSync = this.ra.multiThreadSync;
+    multiThreadSyncDelay = this.ra.multiThreadSyncDelay;
 
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
