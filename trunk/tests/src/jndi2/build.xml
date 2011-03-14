@@ -24,8 +24,12 @@
   <target name="tests.all"
           description=" --> launch all jndi2 tests">
     <ant dir="." antfile="build.xml" target="tests.base" />
-    <ant dir="." antfile="build.xml" target="tests.distributed" />
-    <ant dir="." antfile="build.xml" target="tests.nocoupling" />
+    <ant dir="." antfile="build.xml" target="tests.distributed">
+    	<param name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
+    </ant>
+    <ant dir="." antfile="build.xml" target="tests.nocoupling">
+    	<param name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
+    </ant>
   </target>
 
   <target name="tests.base"
@@ -56,11 +60,28 @@
 
 
   <!--  ************ init and start ************ -->
+	
+  <target name="init.a3props">
+    <!-- Theses default properties can be overidden by param defines
+      -  in specific target.
+     -->
+    <property name="engine" value="fr.dyade.aaa.agent.Engine"/>
+    <property name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
+    <property name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+  </target>
 
-  <target name="init.test" depends="init">
+  <target name="init.test" depends="init,init.a3props">
     <delete dir="${test.dir}" />
     <mkdir dir="${test.dir}" />
     <copy file="${a3conf}" tofile="${test.dir}/a3servers.xml" />
+  	
+    <replace file="${test.dir}/a3servers.xml"
+             token="@engine@" value="${engine}"/>
+    <replace file="${test.dir}/a3servers.xml"
+             token="@transaction@" value="${transaction}"/>
+    <replace file="${test.dir}/a3servers.xml"
+             token="@network@" value="${network}"/>
+
     <copy file="a3debug.cfg" tofile="${test.dir}/a3debug.cfg" />
     
     <copy file="config.properties" todir="${test.dir}"/>
