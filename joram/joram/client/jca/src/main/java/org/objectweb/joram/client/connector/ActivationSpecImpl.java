@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - Bull SA
+ * Copyright (C) 2004 - 2011 Bull SA
  * Copyright (C) 2008 - ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
@@ -270,7 +270,7 @@ public class ActivationSpecImpl
     return messageSelector;
   }
 
-  /** Returns the subscription durabbility. */
+  /** Returns the subscription durability. */
   public String getSubscriptionDurability()
   {
     return subscriptionDurability;
