@@ -34,29 +34,10 @@
 
   <target name="tests.all"
           description=" --> launch all a3 tests with various 'standard' configuration">
-    <!-- SimpleNetwork + JTransaction -->
-    <antcall target="tests">
-      <param name="transaction" value="fr.dyade.aaa.util.JTransaction"/>
-      <param name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
-    </antcall>
-    <!-- SimpleNetwork + NTransaction -->
-    <antcall target="tests">
-      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
-    </antcall>
     <!-- PoolNetwork + NTransaction -->
-    <antcall target="tests">
-      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-      <param name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
-    </antcall>
+    <antcall target="tests"/>
     <!-- HttpNetwork + NTransaction -->
     <antcall target="tests.http"/>
-    <!-- PoolNetwork + NGTransaction
-    <antcall target="tests">
-      <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
-      <param name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
-    </antcall>
-  	 -->
   </target>
 
   <!--
@@ -108,6 +89,7 @@
 
   <target name="tests.transaction"
           description=" --> launch all a3 tests with various transaction implementation">
+    <ant dir="." antfile="build.xml" target="tests.atransaction"/>
     <ant dir="." antfile="build.xml" target="tests.jtransaction"/>
     <ant dir="." antfile="build.xml" target="tests.ntransaction"/>
     <ant dir="." antfile="build.xml" target="tests.ngtransaction"/>
@@ -137,7 +119,7 @@
   <target name="tests.ngtransaction"
           description=" --> launch tests with NGTransaction">
     <antcall target="tests">
-      <param name="transaction" value="fr.dyade.aaa.util.NGTransaction"/>
+      <param name="transaction" value="fr.dyade.aaa.ext.NGTransaction"/>
     </antcall>
   </target>
   
@@ -1378,8 +1360,20 @@
   <target name="test10.recovery" depends="init.a3props,compile">
     <antcall target="test.run" inheritAll="true">
       <param name="classname" value="a3.recovery.test10"/>
-      <param name="testid" value="1"/>
+      <param name="testid" value="10"/>
       <param name="a3conf" value="recovery/a3servers1.xml"/>
+    </antcall>
+  </target>
+
+  <!--
+    - Test the Transaction behavior during init/start/stop/reset sequence.
+    -->
+  <target name="test11.recovery" depends="init.a3props,compile">
+    <antcall target="test.run" inheritAll="true">
+      <param name="classname" value="a3.recovery.test11"/>
+      <param name="testid" value="11"/>
+      <param name="a3conf" value="recovery/a3servers1.xml"/>
+    	<param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
     </antcall>
   </target>
 

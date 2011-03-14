@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<joram:Config xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:joram="http:///joram.ow2.org/ecore/joram">
+  <servers xsi:type="joram:JORAM" host="tiga" sid="1">
+    <services xsi:type="joram:ConnectionManager"/>
+    <services xsi:type="joram:TCPProxyService" port="16011"/>
+    <network port="16101" domain="//@domains.0"/>
+    <jmsObjects xsi:type="joram:User"/>
+    <jmsObjects xsi:type="joram:Topic" jndiName=""/>
+  </servers>
+  <servers xsi:type="joram:JORAM" host="aroe" sid="2">
+    <services xsi:type="joram:ConnectionManager"/>
+    <services xsi:type="joram:TCPProxyService"/>
+    <network domain="//@domains.0"/>
+    <jmsObjects xsi:type="joram:User"/>
+  </servers>
+  <servers xsi:type="joram:JORAM" host="tiga">
+    <services xsi:type="joram:ConnectionManager"/>
+    <services xsi:type="joram:TCPProxyService"/>
+    <services xsi:type="joram:JNDIServer"/>
+    <network domain="//@domains.0"/>
+    <jmsObjects xsi:type="joram:Queue" name="sampleQueue"/>
+    <jmsObjects xsi:type="joram:Topic" name="sampleTopic"/>
+    <jmsObjects xsi:type="joram:User"/>
+  </servers>
+  <domains/>
+  <hosts hostName="tiga"/>
+  <hosts hostName="aroe"/>
+</joram:Config>

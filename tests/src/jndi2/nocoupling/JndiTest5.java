@@ -85,7 +85,7 @@ public class JndiTest5 extends TestCase {
       ctx0.bind("/A", "A");
       ctx0.bind("/B", "B");
 
-      Thread.sleep(5000);
+      Thread.sleep(15000);
 
       // Verify data on S1
       System.out.println("Verify on S1");

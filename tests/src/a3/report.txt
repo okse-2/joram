@@ -1,0 +1,780 @@
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:17:34 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test1-1" OK [62].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:17:37 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test2-1" OK [62].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:17:40 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test3-1" OK [1218].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:17:44 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test3-2" OK [1812].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:17:59 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test4-1" OK [4749].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:18:09 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test4-2" OK [7514].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:18:12 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test5-1" OK [1124].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:18:16 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test5-2" OK [2547].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:18:23 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test5-3" OK [5592].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:18:25 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test6-1" OK [1156].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:18:31 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test6-2" FAILED, failures: 1, errors: 0, [218].
++0) java.lang.Exception: Exception expecting: java.lang.Exception(Can't start transaction manager)
+	at a3.base.test6.runTest(test6.java:45)
+	at a3.base.test6.main(test6.java:54)
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:18:34 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test8-1" OK [0].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:18:38 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test9-1" OK [2531].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:18:41 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test11-1" OK [1453].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:18:45 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test12-1" OK [1874].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:18:49 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test14-1" OK [2140].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:18:54 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test15-1" OK [3296].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:18:59 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test15-2" OK [3311].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:19:01 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test18-1" OK [0].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:19:04 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test19-test19.base" OK [1031].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:19:11 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test20-test20.base" OK [4046].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:19:58 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test21-test21A-1.base" OK [43943].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:23:28 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test21-test21A-2.base" OK [200563].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:28:25 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test21-test21A-3.base" OK [261361].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:29:19 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test21-test21A-4.base" OK [48614].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:30:14 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test21-test21B-1.base" OK [50332].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:30:54 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test21-test21B-2.base" OK [36163].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:31:43 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test21-test21B-3.base" OK [45521].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:32:33 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test21-test21B-4.base" OK [45818].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:32:43 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test22-test22A-1.base" OK [4921].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:32:54 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test22-test22A-2.base" OK [7686].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:33:05 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test22-test22A-3.base" OK [8014].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:33:24 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test22-test22A-4.base" OK [15575].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:33:32 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test22-test22B-1.base" OK [5140].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:33:41 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test22-test22B-2.base" OK [5624].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:33:53 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test22-test22B-3.base" OK [8154].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:34:11 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test22-test22B-4.base" OK [14544].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:34:34 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.recovery.test1-3" OK [21620].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:35:00 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.recovery.test2-1" OK [23729].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:35:08 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.recovery.test3-1" OK [7373].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:35:26 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.recovery.test4-1" OK [15793].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:35:48 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.recovery.test5-test5.recovery" OK [20932].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:36:48 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.recovery.test6-1" OK [58846].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:37:07 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.recovery.test7-1" OK [17449].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:37:31 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.recovery.test8-1" OK [22386].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:37:51 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.recovery.test8-2" OK [18386].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:38:21 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.recovery.test9-1" OK [28306].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:38:25 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.recovery.test10-1" OK [2515].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:39:01 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.perf.test1-1" OK [35116].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:39:21 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.perf.test1-2" OK [18620].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:39:23 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.perf.test1-3" OK [937].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:39:31 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.perf.test2-1" OK [6686].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:39:48 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.perf.test2-2" OK [15215].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:39:49 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.perf.test2-3" OK [32].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:39:53 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.perf.test5-1" OK [2671].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Fri Oct 22 11:40:01 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.perf.test5-2" OK [6264].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:25:05 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test6-2" OK [79].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:29:09 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test6-1" OK [250].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:29:14 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test6-2" OK [78].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:29:42 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test1-1" OK [0].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:29:43 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test2-1" OK [16].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:29:46 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test3-1" OK [1047].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:29:49 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test3-2" OK [1609].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:29:51 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test4-1" OK [703].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:29:55 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test4-2" OK [2375].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:29:57 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test5-1" OK [375].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:30:00 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test5-2" OK [1875].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:30:05 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test5-3" OK [3016].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:30:06 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test6-1" OK [235].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:30:11 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test6-2" OK [78].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:30:12 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test8-1" OK [281].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:30:17 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test9-1" OK [2953].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:30:19 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test11-1" OK [1406].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:30:23 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test12-1" OK [1547].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:30:26 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test14-1" OK [2031].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:30:31 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test15-1" OK [3235].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:30:35 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test15-2" OK [3234].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:30:37 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test18-1" OK [0].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:30:39 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test19-test19.base" OK [1016].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:30:45 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test20-test20.base" OK [3657].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:31:27 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test21-test21A-1.base" OK [38504].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:32:09 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test21-test21A-2.base" OK [38519].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:32:59 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test21-test21A-3.base" OK [46130].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:33:47 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test21-test21A-4.base" OK [45269].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:34:31 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test21-test21B-1.base" OK [39784].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:35:20 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test21-test21B-2.base" OK [44924].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:36:07 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test21-test21B-3.base" OK [43830].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:36:55 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test21-test21B-4.base" OK [43829].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:37:04 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test22-test22A-1.base" OK [5219].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:37:15 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test22-test22A-2.base" OK [7813].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:37:26 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test22-test22A-3.base" OK [7734].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:37:46 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test22-test22A-4.base" OK [16391].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:37:55 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test22-test22B-1.base" OK [5500].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:38:06 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test22-test22B-2.base" OK [7141].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:38:18 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test22-test22B-3.base" OK [8407].
+----------------------------------------------------
+| hostname: palaos
+| System: x86, OS: Windows XP, Nb processor(s): 2
+| Date: Mon Oct 25 15:38:35 CEST 2010
+| Joram 5.4.0.54-SNAPSHOT
+TEST "a3.base.test22-test22B-4.base" OK [13219].
+----------------------------------------------------
+| hostname: wallis
+| System: amd64, OS: Windows 7, Nb processor(s): 8
+| Date: Mon Jan 24 17:27:49 CET 2011
+| Joram 5.5.0-SNAPSHOT
+TEST "a3.recovery.test1-3" OK [12599].
+----------------------------------------------------
+| hostname: wallis
+| System: amd64, OS: Windows 7, Nb processor(s): 8
+| Date: Mon Jan 24 17:27:54 CET 2011
+| Joram 5.5.0-SNAPSHOT
+TEST "a3.recovery.test2-1" OK [3292].
+----------------------------------------------------
+| hostname: wallis
+| System: amd64, OS: Windows 7, Nb processor(s): 8
+| Date: Mon Jan 24 17:28:02 CET 2011
+| Joram 5.5.0-SNAPSHOT
+TEST "a3.recovery.test3-1" OK [6265].
+----------------------------------------------------
+| hostname: wallis
+| System: amd64, OS: Windows 7, Nb processor(s): 8
+| Date: Mon Jan 24 17:36:02 CET 2011
+| Joram 5.5.0-SNAPSHOT
+TEST "a3.recovery.test1-3" OK [12093].
+----------------------------------------------------
+| hostname: wallis
+| System: amd64, OS: Windows 7, Nb processor(s): 8
+| Date: Mon Jan 24 17:36:07 CET 2011
+| Joram 5.5.0-SNAPSHOT
+TEST "a3.recovery.test2-1" OK [3255].
+----------------------------------------------------
+| hostname: wallis
+| System: amd64, OS: Windows 7, Nb processor(s): 8
+| Date: Mon Jan 24 17:36:15 CET 2011
+| Joram 5.5.0-SNAPSHOT
+TEST "a3.recovery.test3-1" OK [6252].
+----------------------------------------------------
+| hostname: wallis
+| System: amd64, OS: Windows 7, Nb processor(s): 8
+| Date: Mon Jan 24 17:36:39 CET 2011
+| Joram 5.5.0-SNAPSHOT
+TEST "a3.recovery.test4-1" OK [23060].
+----------------------------------------------------
+| hostname: wallis
+| System: amd64, OS: Windows 7, Nb processor(s): 8
+| Date: Mon Jan 24 17:37:04 CET 2011
+| Joram 5.5.0-SNAPSHOT
+TEST "a3.recovery.test5-test5.recovery" OK [23095].
+----------------------------------------------------
+| hostname: wallis
+| System: amd64, OS: Windows 7, Nb processor(s): 8
+| Date: Mon Jan 24 17:38:03 CET 2011
+| Joram 5.5.0-SNAPSHOT
+TEST "a3.recovery.test6-1" OK [57665].
++0) java.lang.Exception: SCAdminClassic: Can't stop server#1
+	at framework.SCAdminClassic.stopAgentServer(SCAdminClassic.java:211)
+	at framework.TestCase.stopAgentServer(TestCase.java:119)
+	at a3.recovery.test6$Test6Agent.react(test6.java:102)
+	at fr.dyade.aaa.agent.Engine.run(Engine.java:1022)
+	at java.lang.Thread.run(Thread.java:662)
+Caused by: java.net.ConnectException: Connection refused: connect
+	at java.net.PlainSocketImpl.socketConnect(Native Method)
+	at java.net.PlainSocketImpl.doConnect(PlainSocketImpl.java:333)
+	at java.net.PlainSocketImpl.connectToAddress(PlainSocketImpl.java:195)
+	at java.net.PlainSocketImpl.connect(PlainSocketImpl.java:182)
+	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:366)
+	at java.net.Socket.connect(Socket.java:529)
+	at java.net.Socket.connect(Socket.java:478)
+	at java.net.Socket.<init>(Socket.java:375)
+	at java.net.Socket.<init>(Socket.java:189)
+	at framework.SCAdminClassic.stopAgentServer(SCAdminClassic.java:199)
+	... 4 more
++1) java.lang.Exception: SCAdminClassic: Can't stop server#1
+	at framework.SCAdminClassic.stopAgentServer(SCAdminClassic.java:211)
+	at framework.TestCase.stopAgentServer(TestCase.java:119)
+	at a3.recovery.test6$Test6Agent.react(test6.java:102)
+	at fr.dyade.aaa.agent.Engine.run(Engine.java:1022)
+	at java.lang.Thread.run(Thread.java:662)
+Caused by: java.net.ConnectException: Connection refused: connect
+	at java.net.PlainSocketImpl.socketConnect(Native Method)
+	at java.net.PlainSocketImpl.doConnect(PlainSocketImpl.java:333)
+	at java.net.PlainSocketImpl.connectToAddress(PlainSocketImpl.java:195)
+	at java.net.PlainSocketImpl.connect(PlainSocketImpl.java:182)
+	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:366)
+	at java.net.Socket.connect(Socket.java:529)
+	at java.net.Socket.connect(Socket.java:478)
+	at java.net.Socket.<init>(Socket.java:375)
+	at java.net.Socket.<init>(Socket.java:189)
+	at framework.SCAdminClassic.stopAgentServer(SCAdminClassic.java:199)
+	... 4 more
++2) java.lang.Exception: SCAdminClassic: Can't stop server#1
+	at framework.SCAdminClassic.stopAgentServer(SCAdminClassic.java:211)
+	at framework.TestCase.stopAgentServer(TestCase.java:119)
+	at a3.recovery.test6$Test6Agent.react(test6.java:102)
+	at fr.dyade.aaa.agent.Engine.run(Engine.java:1022)
+	at java.lang.Thread.run(Thread.java:662)
+Caused by: java.net.ConnectException: Connection refused: connect
+	at java.net.PlainSocketImpl.socketConnect(Native Method)
+	at java.net.PlainSocketImpl.doConnect(PlainSocketImpl.java:333)
+	at java.net.PlainSocketImpl.connectToAddress(PlainSocketImpl.java:195)
+	at java.net.PlainSocketImpl.connect(PlainSocketImpl.java:182)
+	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:366)
+	at java.net.Socket.connect(Socket.java:529)
+	at java.net.Socket.connect(Socket.java:478)
+	at java.net.Socket.<init>(Socket.java:375)
+	at java.net.Socket.<init>(Socket.java:189)
+	at framework.SCAdminClassic.stopAgentServer(SCAdminClassic.java:199)
+	... 4 more
++3) java.lang.Exception: SCAdminClassic: Can't stop server#1
+	at framework.SCAdminClassic.stopAgentServer(SCAdminClassic.java:211)
+	at framework.TestCase.stopAgentServer(TestCase.java:119)
+	at a3.recovery.test6$Test6Agent.react(test6.java:102)
+	at fr.dyade.aaa.agent.Engine.run(Engine.java:1022)
+	at java.lang.Thread.run(Thread.java:662)
+Caused by: java.net.ConnectException: Connection refused: connect
+	at java.net.PlainSocketImpl.socketConnect(Native Method)
+	at java.net.PlainSocketImpl.doConnect(PlainSocketImpl.java:333)
+	at java.net.PlainSocketImpl.connectToAddress(PlainSocketImpl.java:195)
+	at java.net.PlainSocketImpl.connect(PlainSocketImpl.java:182)
+	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:366)
+	at java.net.Socket.connect(Socket.java:529)
+	at java.net.Socket.connect(Socket.java:478)
+	at java.net.Socket.<init>(Socket.java:375)
+	at java.net.Socket.<init>(Socket.java:189)
+	at framework.SCAdminClassic.stopAgentServer(SCAdminClassic.java:199)
+	... 4 more
++4) java.lang.Exception: SCAdminClassic: Can't stop server#1
+	at framework.SCAdminClassic.stopAgentServer(SCAdminClassic.java:211)
+	at framework.TestCase.stopAgentServer(TestCase.java:119)
+	at a3.recovery.test6$Test6Agent.react(test6.java:102)
+	at fr.dyade.aaa.agent.Engine.run(Engine.java:1022)
+	at java.lang.Thread.run(Thread.java:662)
+Caused by: java.net.ConnectException: Connection refused: connect
+	at java.net.PlainSocketImpl.socketConnect(Native Method)
+	at java.net.PlainSocketImpl.doConnect(PlainSocketImpl.java:333)
+	at java.net.PlainSocketImpl.connectToAddress(PlainSocketImpl.java:195)
+	at java.net.PlainSocketImpl.connect(PlainSocketImpl.java:182)
+	at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:366)
+	at java.net.Socket.connect(Socket.java:529)
+	at java.net.Socket.connect(Socket.java:478)
+	at java.net.Socket.<init>(Socket.java:375)
+	at java.net.Socket.<init>(Socket.java:189)
+	at framework.SCAdminClassic.stopAgentServer(SCAdminClassic.java:199)
+	... 4 more
+----------------------------------------------------
+| hostname: wallis
+| System: amd64, OS: Windows 7, Nb processor(s): 8
+| Date: Mon Jan 24 17:38:22 CET 2011
+| Joram 5.5.0-SNAPSHOT
+TEST "a3.recovery.test7-1" OK [17054].
+----------------------------------------------------
+| hostname: wallis
+| System: amd64, OS: Windows 7, Nb processor(s): 8
+| Date: Mon Jan 24 17:38:30 CET 2011
+| Joram 5.5.0-SNAPSHOT
+TEST "a3.recovery.test8-1" OK [6724].
+----------------------------------------------------
+| hostname: wallis
+| System: amd64, OS: Windows 7, Nb processor(s): 8
+| Date: Mon Jan 24 17:38:36 CET 2011
+| Joram 5.5.0-SNAPSHOT
+TEST "a3.recovery.test8-2" OK [4617].
+----------------------------------------------------
+| hostname: wallis
+| System: amd64, OS: Windows 7, Nb processor(s): 8
+| Date: Mon Jan 24 17:39:05 CET 2011
+| Joram 5.5.0-SNAPSHOT
+TEST "a3.recovery.test9-1" OK [27429].
+----------------------------------------------------
+| hostname: wallis
+| System: amd64, OS: Windows 7, Nb processor(s): 8
+| Date: Mon Jan 24 17:39:09 CET 2011
+| Joram 5.5.0-SNAPSHOT
+TEST "a3.recovery.test10-1" OK [2036].
+----------------------------------------------------
+| hostname: wallis
+| System: amd64, OS: Windows 7, Nb processor(s): 8
+| Date: Tue Feb 22 08:42:32 CET 2011
+| Joram 5.5.0-SNAPSHOT
+TEST "a3.recovery.test11-11" FAILED, failures: 0, errors: 1, [60002].
++0) java.lang.Exception: timeout expired
+	at framework.BaseTestCase.runTest(BaseTestCase.java:686)
+	at a3.recovery.test11.main(test11.java:35)
+----------------------------------------------------
+| hostname: wallis
+| System: amd64, OS: Windows 7, Nb processor(s): 8
+| Date: Tue Feb 22 08:43:09 CET 2011
+| Joram 5.5.0-SNAPSHOT
+TEST "a3.recovery.test11-11" OK [405].
+----------------------------------------------------
+| hostname: wallis
+| System: amd64, OS: Windows 7, Nb processor(s): 8
+| Date: Tue Feb 22 09:02:38 CET 2011
+| Joram 5.5.0-SNAPSHOT
+TEST "a3.recovery.test11-11" OK [472].
+----------------------------------------------------
+| hostname: wallis
+| System: amd64, OS: Windows 7, Nb processor(s): 8
+| Date: Tue Feb 22 09:04:02 CET 2011
+| Joram 5.5.0-SNAPSHOT
+TEST "a3.recovery.test11-11" OK [337].

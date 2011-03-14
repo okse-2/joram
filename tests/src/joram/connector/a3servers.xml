@@ -1,7 +1,5 @@
 <?xml version="1.0"?>
 <config>
-  <property name="Transaction" value="fr.dyade.aaa.util.NullTransaction"/>
-
   <server id="0" name="S0" hostname="localhost">
     <service class="fr.dyade.aaa.agent.AdminProxy" args="7890"/>
     <service class="org.objectweb.joram.mom.proxies.ConnectionManager"
