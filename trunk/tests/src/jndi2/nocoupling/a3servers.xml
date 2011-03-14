@@ -2,7 +2,7 @@
 
 <config>
   <property name="fr.dyade.aaa.jndi2.impl.LooseCoupling" value="true" />
-  <domain name="D0" network="fr.dyade.aaa.agent.PoolNetwork"/>
+  <domain name="D0" network="@network@"/>
   <server id="0" name="s0" hostname="localhost">
     <network domain="D0" port="27300"/>
     <service class="fr.dyade.aaa.agent.AdminProxy" args="8090"/>

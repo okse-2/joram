@@ -81,7 +81,7 @@ public class JndiTest2 extends TestCase {
 
       InitialContext ctx1 = new InitialContext(env1);
 
-      Thread.sleep(5000);
+      Thread.sleep(30000);
       stopAgentServer((short) 0);
 
       String look = (String) ctx1.lookup("/B");
