@@ -111,7 +111,7 @@ public abstract class AbstractTransaction implements Transaction {
       logmon.log(BasicLevel.INFO, "Transaction, init():");
 
     dir = new File(path);
-    if (!dir.exists()) dir.mkdir();
+    if (!dir.exists()) dir.mkdirs();
     if (!dir.isDirectory())
       throw new FileNotFoundException(path + " is not a directory.");
 
