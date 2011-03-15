@@ -23,39 +23,39 @@
 
   <target name="tests.all"
           description=" --> launch all jndi2 tests">
-    <ant dir="." antfile="build.xml" target="tests.base" />
-    <ant dir="." antfile="build.xml" target="tests.distributed">
+    <antcall target="tests.base" />
+    <antcall target="tests.distributed">
     	<param name="network" value="fr.dyade.aaa.agent.SimpleNetwork"/>
-    </ant>
-    <ant dir="." antfile="build.xml" target="tests.nocoupling">
+    </antcall>
+    <antcall target="tests.nocoupling">
     	<param name="network" value="fr.dyade.aaa.agent.PoolNetwork"/>
-    </ant>
+    </antcall>
   </target>
 
   <target name="tests.base"
           description=" --> launch all jndi base tests">
-    <ant dir="." antfile="build.xml" target="jndi.test1" />
-    <ant dir="." antfile="build.xml" target="jndi.test2" />
+    <antcall target="jndi.test1" />
+    <antcall target="jndi.test2" />
   </target>
 
   <target name="tests.distributed"
           description=" --> launch all jndi distributed tests">
-    <ant dir="." antfile="build.xml" target="test.dtb" />
-    <ant dir="." antfile="build.xml" target="test.dtb2" />
-    <ant dir="." antfile="build.xml" target="test.dtb3" />
-    <ant dir="." antfile="build.xml" target="test.dtb4" />
-    <ant dir="." antfile="build.xml" target="test.dtb5" />
-    <ant dir="." antfile="build.xml" target="test.dtb6" />
-    <ant dir="." antfile="build.xml" target="test.dtb.crash" />
+    <antcall target="test.dtb" />
+    <antcall target="test.dtb2" />
+    <antcall target="test.dtb3" />
+    <antcall target="test.dtb4" />
+    <antcall target="test.dtb5" />
+    <antcall target="test.dtb6" />
+    <antcall target="test.dtb.crash" />
   </target>
 
   <target name="tests.nocoupling"
           description=" --> launch all jndi loose couplig tests">
-    <ant dir="." antfile="build.xml" target="nocoupling.test1" />
-    <ant dir="." antfile="build.xml" target="nocoupling.test2" />
-    <ant dir="." antfile="build.xml" target="nocoupling.test3" />
-    <ant dir="." antfile="build.xml" target="nocoupling.test4" />
-    <ant dir="." antfile="build.xml" target="nocoupling.test5" />
+    <antcall target="nocoupling.test1" />
+    <antcall target="nocoupling.test2" />
+    <antcall target="nocoupling.test3" />
+    <antcall target="nocoupling.test4" />
+    <antcall target="nocoupling.test5" />
   </target>
 
 
