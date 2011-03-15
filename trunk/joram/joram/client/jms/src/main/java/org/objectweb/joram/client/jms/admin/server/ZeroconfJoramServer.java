@@ -12,12 +12,15 @@ import java.net.ServerSocket;
 import java.util.List;
 import java.util.Random;
 
+import javax.jms.ConnectionFactory;
+
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.NameAlreadyUsedException;
 import org.objectweb.joram.client.jms.admin.Server;
 import org.objectweb.joram.client.jms.admin.StartFailureException;
 import org.objectweb.joram.client.jms.admin.UnknownServerException;
 import org.objectweb.joram.client.jms.admin.User;
+import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 
 import fr.dyade.aaa.agent.AgentServer;
 
@@ -76,11 +79,10 @@ public class ZeroconfJoramServer {
     int adminPort = Integer.getInteger(ADMIN_PORT, 16010).intValue();
     String rootUserName = System.getProperty(ROOT_USER_NAME, "root");
     String rootUserPwd = System.getProperty(ROOT_USER_PWD, "root");
-    AdminModule.connect(
-      adminHostName,
-      adminPort,
-      rootUserName,
-      rootUserPwd, 60);
+    
+    ConnectionFactory cf = TcpConnectionFactory.create(adminHostName, adminPort);
+    ((TcpConnectionFactory) cf).getParameters().connectingTimer = 60;
+    AdminModule.connect(cf, rootUserName, rootUserPwd);
   }
 
   /**
@@ -94,7 +96,6 @@ public class ZeroconfJoramServer {
       serverId = loadServerId();
     } catch (IOException exc) {
       baseDir.mkdir();
-
       adminConnect();
 
       int adminServerId = AdminModule.getLocalServerId();
@@ -111,9 +112,8 @@ public class ZeroconfJoramServer {
         Random random = new Random();
         while (i < tryNb) {
           try {
-            AdminModule.addDomain(
-              "D0", adminServerId,
-              initialDomainPort + random.nextInt(tryNb) * 100);
+            AdminModule.addDomain("D0", adminServerId,
+                                  initialDomainPort + random.nextInt(tryNb) * 100);
             break;
           } catch (NameAlreadyUsedException exc1) {
             throw exc1;
@@ -123,23 +123,20 @@ public class ZeroconfJoramServer {
           }
         }
       }
-      
+
       ServerSocket sock1 = new ServerSocket(0);
       int port1 = sock1.getLocalPort();
       ServerSocket sock2 = new ServerSocket(0);
       int port2 = sock2.getLocalPort();
 
       serverId = newServerId();
-      
-      AdminModule.addServer(
-        serverId,
-        hostName, 
-        domainName, 
-        port1, 
-        serverName,
-        new String[]{"org.objectweb.joram.mom.proxies.tcp.TcpProxyService"},
-        new String[] { String.valueOf(port2) });
-      
+
+      AdminModule.addServer(serverId, hostName, 
+                            domainName,  port1, 
+                            serverName,
+                            new String[]{"org.objectweb.joram.mom.proxies.tcp.TcpProxyService"},
+                            new String[] { String.valueOf(port2) });
+
       String configXml = AdminModule.getConfiguration();
       File sconfig = new File(baseDir, A3_SERVERS_XML);
       FileOutputStream fos = new FileOutputStream(sconfig);
@@ -154,20 +151,27 @@ public class ZeroconfJoramServer {
       sock1.close();
       sock2.close();
     }
-    
-    System.getProperties().put(AgentServer.CFG_DIR_PROPERTY,
-                               baseDirPath);
-    fr.dyade.aaa.agent.AgentServer.init(
-      (short)serverId, 
-      new File(baseDir, JORAM_SERVER_DATA).getPath(), 
-      null);
-    fr.dyade.aaa.agent.AgentServer.start();
-    
-    User.create("anonymous", "anonymous", serverId);
+    startServer(serverId);
 
     AdminModule.disconnect();
   }
+  
+  private static void startServer(int serverId) throws Exception {
+    System.getProperties().put(AgentServer.CFG_DIR_PROPERTY, baseDirPath);
+    AgentServer.init((short) serverId, 
+                     new File(baseDir, JORAM_SERVER_DATA).getPath(), 
+                     null);
+    AgentServer.start();
 
+    User.create("anonymous", "anonymous", serverId);
+  }
+
+  /**
+   * Allocate a new identifier for the created server.
+   * 
+   * @return The new identifier.
+   * @throws Exception
+   */
   private static int newServerId() throws Exception {
     List serverIds = AdminModule.getServersIds();
     int newSid = 0;
@@ -179,10 +183,14 @@ public class ZeroconfJoramServer {
     return newSid;
   }
 
-  private static void saveServerId(int sid) 
-    throws IOException {
-    FileOutputStream fos = new FileOutputStream(
-      new File(baseDir, SERVER_ID));
+  /**
+   * Save the unique identifier of the created server for future use.
+   * 
+   * @param sid The unique identifier of the created server.
+   * @throws IOException An error occurs during writing.
+   */
+  private static void saveServerId(int sid) throws IOException {
+    FileOutputStream fos = new FileOutputStream(new File(baseDir, SERVER_ID));
     ObjectOutputStream oos = new ObjectOutputStream(fos);
     oos.writeInt(sid);
     oos.flush();
@@ -191,20 +199,33 @@ public class ZeroconfJoramServer {
     fos.close();
   }
 
-  private static int loadServerId() 
-    throws IOException {
-    FileInputStream fis = new FileInputStream(
-      new File(baseDir, SERVER_ID));
+  /**
+   * Try to get a previously created configuration.
+   * 
+   * @return The unique identifier of the server
+   * @throws IOException An error occurs during reading.
+   */
+  private static int loadServerId() throws IOException {
+    FileInputStream fis = new FileInputStream(new File(baseDir, SERVER_ID));
     ObjectInputStream ois = new ObjectInputStream(fis);
     int res = ois.readInt();
     fis.close();
     return res;
   }
 
+  /**
+   * Stop the created server.
+   */
   public static void stop() {
     AgentServer.stop();
   }
 
+  /**
+   * Destroy the created server.
+   * Remove it from the global configuration then clean the datas.
+   * 
+   * @throws Exception
+   */
   public static void destroy() throws Exception {
     init();
     if (baseDir.exists()) {
