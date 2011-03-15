@@ -45,6 +45,7 @@
                name=""
                dmq=""
                className="">
+    <property name="jms_joram_interceptors" value=""/>
     <property name="" value=""/>
     <property name="" value=""/>
     <reader user=""/>
@@ -71,6 +72,7 @@
          dmq=""
          nbMaxMsg=""
          threshold="">
+    <property name="jms_joram_interceptors" value=""/>
     <property name="" value=""/>
     <property name="" value=""/>
     <reader user=""/>
@@ -85,6 +87,7 @@
          serverId=""
          className=""
          dmq="">
+    <property name="jms_joram_interceptors" value=""/>
     <property name="" value=""/>
     <property name="" value=""/>
     <reader user=""/>
