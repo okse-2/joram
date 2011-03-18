@@ -333,6 +333,9 @@ public class AcquisitionModule implements ReliableTransmitter {
    * @throws Exception
    */
   public void updateProperties(Properties properties) throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "AcquisitionModule.updateProperties(" + properties + ')');
+    }
   	// If non-empty, sets the new properties
   	if (properties != null) {
   		if (isDaemon) {
@@ -341,10 +344,6 @@ public class AcquisitionModule implements ReliableTransmitter {
   		} else {
   			setProperties(properties);
   		}
-  	}
-  	if (!isDaemon && period <= 0) {
-  		acquisitionTask = new AcquisitionTask();
-  		AgentServer.getTimer().schedule(acquisitionTask, 0);
   	}
   }
 
@@ -452,7 +451,7 @@ public class AcquisitionModule implements ReliableTransmitter {
     public void run() {
       try {
         ((AcquisitionHandler) acquisitionHandler).retrieve(AcquisitionModule.this);
-      } catch (Exception exc) {
+      } catch (Throwable exc) {
         logger.log(BasicLevel.ERROR, "Error while doing acquisition.", exc);
       }
     }
