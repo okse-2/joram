@@ -86,7 +86,7 @@ public class TestCollectorQueue3 extends TestCase implements MessageListener {
       
       Thread.sleep(100);
 
-      assertTrue(nbReceived >= 2);
+      assertEquals(3, nbReceived);
       
       cnx.close();
     } catch (Throwable exc) {
@@ -108,8 +108,6 @@ public class TestCollectorQueue3 extends TestCase implements MessageListener {
     Properties properties = new Properties();
     properties.setProperty("expiration", "0");
     properties.setProperty("persistent", "true");
-    properties.setProperty("acquisition.period", "5000");
-    properties.setProperty("collector.type", "" + org.objectweb.joram.shared.messages.Message.TEXT);
     properties.setProperty("acquisition.className", EmptyAcquisiton.class.getName());
         
     // create a Queue   
