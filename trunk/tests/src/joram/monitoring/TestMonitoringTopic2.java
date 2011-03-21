@@ -31,6 +31,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
+import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -41,7 +42,6 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.mom.dest.MonitoringAcquisition;
-import org.objectweb.joram.shared.admin.AdminReply;
 
 import framework.TestCase;
 
@@ -69,9 +69,11 @@ public class TestMonitoringTopic2 extends TestCase implements MessageListener {
 
       Connection cnx = cf.createConnection();
       Session sessionc = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      Session sessionp = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
-      // create a consumer
+      // create a producer and a consumer
       MessageConsumer consumer = sessionc.createConsumer(topic);
+      MessageProducer producer = sessionp.createProducer(topic);
 
       // the consumer records on the topic
       consumer.setMessageListener(this);
@@ -84,8 +86,10 @@ public class TestMonitoringTopic2 extends TestCase implements MessageListener {
       
       Properties prop = new Properties();
       prop.setProperty("AgentServer:server=AgentServer#0,cons=Transaction", "LogMemorySize,GarbageRatio");
-      AdminReply reply = topic.setProperties(prop);
-      //System.out.println("reply = " + reply);
+      topic.setProperties(prop);
+
+      // Launch an acquisition
+      producer.send(sessionp.createMessage());
       
       Thread.sleep(10000);
 
@@ -93,7 +97,7 @@ public class TestMonitoringTopic2 extends TestCase implements MessageListener {
       
       prop.setProperty("acquisition.period", "2000");
       prop.setProperty("AgentServer:server=AgentServer#0,cons=Transaction", "LogMemorySize,GarbageRatio");
-      reply = topic.setProperties(prop);
+      topic.setProperties(prop);
       
       Thread.sleep(10000);
 
