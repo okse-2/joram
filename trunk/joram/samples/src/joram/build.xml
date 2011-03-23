@@ -62,7 +62,7 @@
       <include name="**/*.java"/>
     </javac>
   </target>
-
+	
   <!-- Initializes a centralized configuration -->
   <target name="server_init" depends="init">
     <mkdir dir="${run.dir}/server${sid}"/>
@@ -114,6 +114,16 @@
       <param name="sid" value="0"/>
       <param name="a3.conf" value="${conf.dir}/centralized_a3servers.xml"/>
       <param name="osgi.conf" value="${conf.dir}/config_stomp.properties"/>    	
+    </antcall>
+  </target>
+
+  <!-- Start a single server in NullTransaction mode with extension bundles needed for the WEB console -->
+  <target name="console_server" depends="init"
+          description="--> Starts a single server in non-persistent mode">
+    <antcall target="server">
+      <param name="sid" value="0"/>
+      <param name="a3.conf" value="${conf.dir}/centralized_a3servers.xml"/>
+      <param name="osgi.conf" value="${conf.dir}/config_console.properties"/>    	
     </antcall>
   </target>
 
@@ -777,6 +787,18 @@
     <java classname="bridge.BridgeAdmin" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Setup the bridge configuration -->
+  <target name="bridge_adminxml" depends="simple_init"
+          description="-->  Runs XML administration script for bridge sample">
+    <copy file="${src.dir}/bridge/joramAdmin.xml" overwrite="true" todir="${run.dir}"/>
+    <java classname="org.objectweb.joram.client.jms.admin.AdminModule"
+      failonerror="no" fork="yes"
+      dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <arg line="./joramAdmin.xml"/>
     </java>
   </target>
 
