@@ -1,7 +1,84 @@
 +==============================================================================
+| 2011/03/18 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix: do not schedule a task when updating properties on AcquisitionModule.
++==============================================================================
+| 2011/03/14 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Creates all needed directory for persistence.
++==============================================================================
+| 2011/03/14 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Various changes on JCA connector to enable Joram to be started as a JOnAS OSGi
+service.
+###############################################################################
+# 2011/03/11 | Joram 5.5.0 tag.
+###############################################################################
++==============================================================================
+| 2011/03/07 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Improve NetServerOut daemon.
++==============================================================================
+| 2011/03/03 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Use JoramDestinationName instead of JMSDestinationName in message property for
+the interceptors.
+ Fix: avoid possible NPE in AMQP acquisition module.
++==============================================================================
+| 2011/03/03 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Initial revision of AMQP acquisition / distribution destinations.
++==============================================================================
+| 2011/02/28 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Harmonize exception handling between acquisition and distribution modules.
++==============================================================================
+| 2011/02/22 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Changes about JMS interceptors handling.
+ Allows to deactivate the default syncOnWrite mechanism on persistence
+handling.
+ Allows to configure the thread priority of Engine through the threadPriority
+Engine's property.
++==============================================================================
+| 2011/01/20 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Allows to set properties at user creation.
+ Allows to add/replace/remove interceptors through administration commands.
+ Allows to start/stop acquisition handlers.
++==============================================================================
+| 2011/01/17 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Software architecture changes: adds an extension package.
+ Migrates NGTransaction from util to ext package.
+ Fix minor issues in agent profiling.
++==============================================================================
+| 2011/01/07 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix: Add 'stopping' boolean to avoid losing one useless second when stopping
+the JNDI server.
++==============================================================================
+| 2010/12/24 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds generic administration command.
+ Adds interceptors on users and destinations.
++==============================================================================
+| 2010/12/08 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds the ability to add and remove notification listeners on the MX server.
+ Fix initialization in Debug module.
++==============================================================================
 | 2010/12/17 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Fix outdated samples scripts.
++==============================================================================
+| 2010/12/06 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Add automatic reconnection in Joram adapter.
++==============================================================================
+| 2010/12/03 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Create a Helper to ease the creation of well formed messages.
 +==============================================================================
 | 2010/11/30 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
@@ -9,11 +86,13 @@
  - rework administration
  - harmonize behaviors and notifications exchanges between queues and topics
  - allow transitive closure of clusters
+ - add specific MBeans
  - fix various problems
 +==============================================================================
 | 2010/11/15 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
- Merge destination agents with their implementation, update MBeans.
+ Merge destination and user proxy agents with their implementation, update the
+corresponding MBeans.
 ###############################################################################
 # 2010/10/25 | Joram 5.4.0 tag.
 ###############################################################################
