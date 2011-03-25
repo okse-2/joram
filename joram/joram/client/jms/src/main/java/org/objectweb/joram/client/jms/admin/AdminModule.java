@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -51,6 +51,9 @@ import org.objectweb.joram.client.jms.ha.local.HALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
 import org.objectweb.joram.client.jms.local.LocalConnectionFactory;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.shared.DestinationConstants;
+import org.objectweb.joram.shared.admin.AdminCommandConstant;
+import org.objectweb.joram.shared.admin.AdminCommandReply;
 import org.objectweb.joram.shared.admin.AdminReply;
 import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.security.SimpleIdentity;
@@ -1544,5 +1547,70 @@ public final class AdminModule {
       throw new ConnectException("Administrator not connected.");
   	
   	return wrapper.processAdmin(targetId, command, prop);
+  }
+
+  /**
+   * Invokes the specified static method with the specified parameters on the
+   * local server. The parameters types of the invoked method must be java
+   * primitive types, the java objects wrapping them or String type.
+   * 
+   * @param className the name of the class holding the static method
+   * @param methodName the name of the invoked method
+   * @param parameterTypes the list of parameters
+   * @param args the arguments used for the method call
+   * @return the result of the invoked method after applying
+   *         {@link Object#toString()} method
+   * @throws ConnectException If the connection fails.
+   * @throws AdminException If the invocation can't be done or fails
+   */
+  public static String invokeStaticServerMethod(String className, String methodName, Class[] parameterTypes,
+      Object[] args) throws ConnectException, AdminException {
+    return invokeStaticServerMethod(getLocalServerId(), className, methodName, parameterTypes, args);
+  }
+
+  /**
+   * Invokes the specified static method with the specified parameters on the
+   * chosen server. The parameters types of the invoked method must be java
+   * primitive types, the java objects wrapping them or String type.
+   * 
+   * @param serverId the identifier of the server.
+   * @param className the name of the class holding the static method
+   * @param methodName the name of the invoked method
+   * @param parameterTypes the list of parameters
+   * @param args the arguments used for the method call
+   * @return the result of the invoked method after applying
+   *         {@link Object#toString()} method
+   * @throws ConnectException If the connection fails.
+   * @throws AdminException If the invocation can't be done or fails
+   */
+  public static String invokeStaticServerMethod(int serverId, String className, String methodName,
+      Class[] parameterTypes, Object[] args) throws ConnectException, AdminException {
+    if (wrapper == null)
+      throw new ConnectException("Administration connection is closed.");
+
+    if (parameterTypes == null && (args != null && args.length > 0)) {
+      throw new AdminException("Parameter types array is null while args array is not null or empty.");
+    }
+    if (args == null && (parameterTypes != null && parameterTypes.length > 0)) {
+      throw new AdminException("Args array is null while parameter types array is not null or empty.");
+    }
+    if (parameterTypes != null && args != null && parameterTypes.length != args.length) {
+      throw new AdminException("Parameter types array size do not match args array size.");
+    }
+    Properties props = new Properties();
+    props.setProperty(AdminCommandConstant.INVOKE_CLASS_NAME, className);
+    props.setProperty(AdminCommandConstant.INVOKE_METHOD_NAME, methodName);
+    if (parameterTypes != null) {
+      for (int i = 0; i < parameterTypes.length; i++) {
+        props.setProperty(AdminCommandConstant.INVOKE_METHOD_ARG + i, parameterTypes[i].getName());
+        if (args[i] != null) {
+          props.setProperty(AdminCommandConstant.INVOKE_METHOD_ARG_VALUE + i, args[i].toString());
+        }
+      }
+    }
+    AdminCommandReply reply = null;
+    reply = (AdminCommandReply) wrapper.processAdmin(DestinationConstants.getNullId(serverId),
+          AdminCommandConstant.CMD_INVOKE_STATIC, props);
+    return reply.getProp().getProperty(AdminCommandConstant.INVOKE_METHOD_RESULT);
   }
 }
