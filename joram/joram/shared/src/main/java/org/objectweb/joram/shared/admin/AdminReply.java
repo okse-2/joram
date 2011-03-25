@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -62,7 +62,7 @@ public class AdminReply extends AbstractAdminMessage {
   private String info;
 
   /** Code d'erreur */
-  private int errorCode;
+  private int errorCode = -1;
 
   /**
    * Constructs an <code>AdminReply</code> instance.
