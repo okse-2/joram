@@ -27,9 +27,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
@@ -53,10 +57,10 @@ import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.admin.AddDomainRequest;
 import org.objectweb.joram.shared.admin.AddServerRequest;
 import org.objectweb.joram.shared.admin.AdminCommandConstant;
-import org.objectweb.joram.shared.admin.AdminReply;
-import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.admin.AdminCommandReply;
 import org.objectweb.joram.shared.admin.AdminCommandRequest;
+import org.objectweb.joram.shared.admin.AdminReply;
+import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.admin.CreateDestinationReply;
 import org.objectweb.joram.shared.admin.CreateDestinationRequest;
 import org.objectweb.joram.shared.admin.CreateUserReply;
@@ -373,14 +377,13 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
   }
 
   private void handleGetProxyIdListNot(GetProxyIdListNot not) {
-    Vector idList = new Vector();
+    List idList = new ArrayList();
     Iterator ids = proxiesTable.values().iterator();
     while (ids.hasNext()) {
       AgentId aid = (AgentId) ids.next();
-      idList.addElement(aid);
+      idList.add(aid);
     }
-    AgentId[] res = new AgentId[idList.size()];
-    idList.copyInto(res);
+    AgentId[] res = (AgentId[]) idList.toArray(new AgentId[idList.size()]);
     not.Return(res);
   }
 
@@ -615,7 +618,7 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
       .append(exc.getMessage()).toString();
       strbuf.setLength(0);
 
-      distributeReply(replyTo, msgId, new AdminReply(false, info));
+      distributeReply(replyTo, msgId, new AdminReply(AdminReply.UNKNOWN_SERVER, info));
     } catch (MomException exc) {
       if (logger.isLoggable(BasicLevel.WARN))
         logger.log(BasicLevel.WARN, exc);
@@ -1066,30 +1069,29 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
         String[] names;
         String[] hostNames;
         String domainName = request.getDomainName();
-        Enumeration servers;
+        Iterator servers;
         A3CMLConfig config = AgentServer.getConfig();
         int serversCount;
         if (domainName != null) {
           A3CMLDomain domain = config.getDomain(domainName);
-          servers = domain.servers.elements();
+          servers = domain.servers.iterator();
           serversCount = domain.servers.size();
         } else {
-          servers = config.servers.elements();
+          servers = config.servers.values().iterator();
           serversCount = config.servers.size();
         }
         ids = new int[serversCount];
         names = new String[serversCount];
         hostNames = new String[serversCount];
         int i = 0;
-        while (servers.hasMoreElements()) {
-          A3CMLServer server = (A3CMLServer)servers.nextElement();
+        while (servers.hasNext()) {
+          A3CMLServer server = (A3CMLServer) servers.next();
           ids[i] = server.sid;
           names[i] = server.name;
           hostNames[i] = server.hostname;
           i++;
         }
-        GetServersIdsReply reply = new GetServersIdsReply(
-                                                                      ids, names, hostNames);
+        GetServersIdsReply reply = new GetServersIdsReply(ids, names, hostNames);
         distributeReply(replyTo, msgId, reply);
       } catch (Exception exc) {
         if (logger.isLoggable(BasicLevel.DEBUG))
@@ -1533,51 +1535,187 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
   }
   
   /**
-   * Proccess an admin command.
+   * Process an admin command.
    * 
    * @param request The administration request.
    * @param replyTo The destination to reply.
    * @param requestMsgId The JMS message id needed to reply.
    * @throws UnknownServerException
    */
-  private void doProcess(AdminCommandRequest request,	AgentId replyTo, String requestMsgId) throws UnknownServerException {
-  	AgentId targetId = null;
-  	try {
-  		targetId = AgentId.fromString(request.getTargetId());
-  	} catch (Exception e) {
-			throw new UnknownServerException(e.getMessage());
-		}
-  	
-  	if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "AdminTopic.doProcess(" + request + ',' + replyTo + ',' + requestMsgId + ")   targetId = " + targetId);
+  private void doProcess(AdminCommandRequest request, AgentId replyTo, String requestMsgId)
+      throws UnknownServerException {
+    AgentId targetId = null;
+    try {
+      targetId = AgentId.fromString(request.getTargetId());
+    } catch (Exception e) {
+      throw new UnknownServerException(e.getMessage());
+    }
 
-  	if (!targetId.isNullId()) {
-  		if (targetId.equals(getAgentId())) {
-  			Properties replyProp  = null;
-  			try {
-  				//TODO: refactor admin here.
-  				switch (request.getCommand()) {
-  				case AdminCommandConstant.CMD_NO:
-  					break;
-  				
-  				default:
-  					throw new Exception("Bad command : \"" + AdminCommandConstant.commandNames[request.getCommand()] + "\"");
-  				}
-  				distributeReply(replyTo, requestMsgId, new AdminCommandReply(true, AdminCommandConstant.commandNames[request.getCommand()] + " done.", replyProp));
-  			} catch (Exception exc) {
-  				if (logger.isLoggable(BasicLevel.WARN))
-  					logger.log(BasicLevel.WARN, "", exc);
-  				distributeReply(replyTo, requestMsgId, new AdminReply(-1, exc.toString()));
-  			}
-  		} else {
-  			// forward to the target agent.
-  			forward(targetId, new FwdAdminRequestNot(request, replyTo, requestMsgId));
-  		}
-  	} else {
-  		if (logger.isLoggable(BasicLevel.WARN))
-  			logger.log(BasicLevel.WARN, "Request (AdminCommandRequest) to an undefined targetId (null).");
-  		distributeReply(replyTo, requestMsgId, new AdminReply(AdminReply.UNKNOWN_SERVER, "Request (AdminCommandRequest) to an undefined targetId (null)."));
-  	}
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "AdminTopic.doProcess(" + request + ',' + replyTo + ',' + requestMsgId
+          + ")   targetId = " + targetId);
+
+    if (targetId == null) {
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN, "Request (AdminCommandRequest) to an undefined targetId (null).");
+      distributeReply(replyTo, requestMsgId, new AdminReply(AdminReply.UNKNOWN_SERVER,
+          "Request (AdminCommandRequest) to an undefined targetId (null)."));
+      return;
+    }
+    if (targetId.isNullId()) {
+      if (checkServerId(targetId.getTo())) {
+        Properties replyProp = null;
+        try {
+          switch (request.getCommand()) {
+          case AdminCommandConstant.CMD_NO:
+            break;
+          case AdminCommandConstant.CMD_INVOKE_STATIC:
+            Object result = invokeStaticMethod(request.getProp());
+            if (result != null) {
+              replyProp = new Properties();
+              replyProp.setProperty(AdminCommandConstant.INVOKE_METHOD_RESULT, result.toString());
+            }
+            break;
+
+          default:
+            throw new Exception("Bad command : \"" + AdminCommandConstant.commandNames[request.getCommand()] + "\"");
+          }
+          distributeReply(replyTo, requestMsgId, new AdminCommandReply(true,
+              AdminCommandConstant.commandNames[request.getCommand()] + " done.", replyProp));
+        } catch (Exception exc) {
+          if (logger.isLoggable(BasicLevel.WARN))
+            logger.log(BasicLevel.WARN, "", exc);
+          distributeReply(replyTo, requestMsgId, new AdminReply(false, exc.toString()));
+        }
+      } else {
+        // Forward the request to the right AdminTopic agent.
+        forward(getDefault(targetId.getTo()), new FwdAdminRequestNot(request, replyTo, requestMsgId));
+      }
+    } else {
+      // Forward the request to the target.
+      forward(targetId, new FwdAdminRequestNot(request, replyTo, requestMsgId, createMessageId()));
+    }
+  }
+
+  /**
+   * Invokes a static method on the server using the specified properties.
+   * 
+   * @param prop
+   */
+  private static Object invokeStaticMethod(Properties prop) throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "AdminTopic.invokeStaticMethod(" + prop + ")");
+
+    String className = prop.getProperty(AdminCommandConstant.INVOKE_CLASS_NAME);
+    if (className == null) {
+      throw new IllegalArgumentException("Class name property must be specified to invoke method.");
+    }
+    String methodName = prop.getProperty(AdminCommandConstant.INVOKE_METHOD_NAME);
+    if (methodName == null) {
+      throw new IllegalArgumentException("Method name property must be specified to invoke method.");
+    }
+    
+    int i = 0;
+    String paramType;
+    List paramClasses = new ArrayList();
+    List paramValues = new ArrayList();
+    while ((paramType = prop.getProperty(AdminCommandConstant.INVOKE_METHOD_ARG + i)) != null) {
+      String paramValue = prop.getProperty(AdminCommandConstant.INVOKE_METHOD_ARG_VALUE + i);
+      if (paramType.equals(Integer.TYPE.getName())) {
+        paramClasses.add(Integer.TYPE);
+        if (paramValue == null) {
+          throw new IllegalArgumentException("Primitive type can't be null to invoke method.");
+        }
+        paramValues.add(new Integer(paramValue));
+      } else if (paramType.equals(Integer.class.getName())) {
+        paramClasses.add(Integer.class);
+        paramValues.add(paramValue == null ? null : new Integer(paramValue));
+      } else if (paramType.equals(String.class.getName())) {
+        paramClasses.add(String.class);
+        paramValues.add(paramValue == null ? null : paramValue);
+      } else if (paramType.equals(Byte.TYPE.getName())) {
+        paramClasses.add(Byte.TYPE);
+        if (paramValue == null) {
+          throw new IllegalArgumentException("Primitive type can't be null to invoke method.");
+        }
+        paramValues.add(new Byte(paramValue));
+      } else if (paramType.equals(Byte.class.getName())) {
+        paramClasses.add(Byte.class);
+        paramValues.add(paramValue == null ? null : new Byte(paramValue));
+      } else if (paramType.equals(Short.TYPE.getName())) {
+        paramClasses.add(Short.TYPE);
+        if (paramValue == null) {
+          throw new IllegalArgumentException("Primitive type can't be null to invoke method.");
+        }
+        paramValues.add(new Short(paramValue));
+      } else if (paramType.equals(Short.class.getName())) {
+        paramClasses.add(Short.class);
+        paramValues.add(paramValue == null ? null : new Short(paramValue));
+      } else if (paramType.equals(Long.TYPE.getName())) {
+        paramClasses.add(Long.TYPE);
+        if (paramValue == null) {
+          throw new IllegalArgumentException("Primitive type can't be null to invoke method.");
+        }
+        paramValues.add(new Long(paramValue));
+      } else if (paramType.equals(Long.class.getName())) {
+        paramClasses.add(Long.class);
+        paramValues.add(paramValue == null ? null : new Long(paramValue));
+      } else if (paramType.equals(Float.TYPE.getName())) {
+        paramClasses.add(Float.TYPE);
+        if (paramValue == null) {
+          throw new IllegalArgumentException("Primitive type can't be null to invoke method.");
+        }
+        paramValues.add(new Float(paramValue));
+      } else if (paramType.equals(Float.class.getName())) {
+        paramClasses.add(Float.class);
+        paramValues.add(paramValue == null ? null : new Float(paramValue));
+      } else if (paramType.equals(Double.TYPE.getName())) {
+        paramClasses.add(Double.TYPE);
+        if (paramValue == null) {
+          throw new IllegalArgumentException("Primitive type can't be null to invoke method.");
+        }
+        paramValues.add(new Double(paramValue));
+      } else if (paramType.equals(Double.class.getName())) {
+        paramClasses.add(Double.class);
+        paramValues.add(paramValue == null ? null : new Double(paramValue));
+      } else if (paramType.equals(Boolean.TYPE.getName())) {
+        paramClasses.add(Boolean.TYPE);
+        if (paramValue == null) {
+          throw new IllegalArgumentException("Primitive type can't be null to invoke method.");
+        }
+        paramValues.add(new Boolean(paramValue));
+      } else if (paramType.equals(Boolean.class.getName())) {
+        paramClasses.add(Boolean.class);
+        paramValues.add(paramValue == null ? null : new Boolean(paramValue));
+      } else if (paramType.equals(Character.TYPE.getName())) {
+        paramClasses.add(Character.TYPE);
+        if (paramValue == null) {
+          throw new IllegalArgumentException("Primitive type can't be null to invoke method.");
+        }
+        if (paramValue.length() == 0) {
+          throw new IllegalArgumentException("Empty value for char argument.");
+        }
+        paramValues.add(new Character(paramValue.charAt(0)));
+      } else if (paramType.equals(Character.class.getName())) {
+        paramClasses.add(Character.class);
+        if (paramValue != null && paramValue.length() == 0) {
+          throw new IllegalArgumentException("Empty value for java.lang.Character argument.");
+        }
+        paramValues.add(paramValue == null ? null : new Character(paramValue.charAt(0)));
+      } else {
+        throw new IllegalArgumentException("Class not allowed for static invocation: " + paramType);
+      }
+      i++;
+    }
+
+    Class clazz = Class.forName(className);
+    Method method = clazz.getMethod(methodName,
+        (Class[]) paramClasses.toArray(new Class[paramClasses.size()]));
+    if (Modifier.isStatic(method.getModifiers())) {
+      return method.invoke(null, paramValues.toArray());
+    } else {
+      throw new IllegalArgumentException("Specified method must be static: " + method);
+    }
   }
 
   /** 
