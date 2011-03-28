@@ -58,15 +58,29 @@
     </s1>
    
     <s1 name="Latest News">
-      <s2 name="January 3, 2011: Best wishes from the ScalAgent team.">
-      
-        <table border="0" width="100%">
-  	      <tr>
-	          <td align="center">
-	            <img src="images/JoramWish.png" alt="JORAM Logo" height="376" width="640" border="0" hspace="2"/>
-            </td>
-	        </tr>
-        </table>
+      <s2 name="March 28, 2011: JORAM 5.5.0 release is available.">
+      <p>This release introduces some improvements and bug fixes, essentially:</p>
+      <ul>
+        <li>Implementation of an AMQP bridge mechanism based on acquisition / distribution
+        destinations. The implementation allows load-balancing and fail-over through
+        multiples AMQP providers.
+        A detailed description is available in section 4.6.10 of the
+        <a href="doc/Joram-en.pdf">user's guide</a>.</li>
+        <li>Achievement of an interception mechanism for processing messages in the MOM.
+        Interceptors can be located on destinations and on connection in/out channels.
+        A detailed description is available in section 3.5 of the
+				<a href="doc/Joram-en.pdf">user's guide</a>.</li>
+        <li>Implementation of a recovery mechanism for the JCA connector with automatic reconnection.</li>
+        <li>Enhancements on clustering destinations.</li>
+        <li>Configuration for the default syncOnWrite mechanism on persistence handling.</li>
+        <li>Bug fix: Removes useless timeout during JNDI service stop.</li>
+      </ul>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>,
+      and in Maven repository.</p>
+      <p>This version is bundled in Jonas 5.2.</p>
+      <p>It is tagged in SVN (JORAM_5_5_0), the complete list of changes can be viewed either in
+      <a href="dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
       </s2>
 
       <s2 name="October 27, 2010: JORAM 5.4.0 release is available.">

@@ -21,7 +21,7 @@
       any comment or feedback that could help us improving this doc. Of course, 
       any contribution is welcome ;-).</p>
 
-			<p>The documentation of the 5.4 release is accessible <a href="../current/doc/Joram-5.4-en.pdf">here</a>,
+			<p>The documentation of the last release is accessible <a href="Joram-en.pdf">here</a>,
 			additionnals document are available:</p>
       <ul>
         <li>Guide of the <a href="../current/doc/Joram-5.4-JNDI-en.pdf">JNDI implementation</a>.</li>
@@ -39,7 +39,7 @@
 			
       <s2 name="API documentation">
       <ul>
-        <li>Browsing the user <a href="../current/javadoc/">Joram 5.3 javadoc</a>.</li>
+        <li>Browsing the user <a href="../current/javadoc/">Joram javadoc</a>.</li>
         <li>For advanced user and programmer a detailed documentation generated with Doxygen is available <a href="../current/joramdox/html/index.html">here</a>.</li>
 				<li>Browsing the <a href="../current/xoramdox/html/index.html">Xoram 1.3.0/52 apidoc</a>.</li>
       </ul>
