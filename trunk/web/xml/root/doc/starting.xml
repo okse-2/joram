@@ -74,7 +74,7 @@
     <s1 name="Running a sample using ant">
       <p>Once you have downloaded and installed Joram (see above), you can try to run one of the multiples
       examples provided in the distribution. The sources of these examples are located under the
-      <code>joram/samples/src/</code> directory.</p>
+      <code>samples/src/joram</code> directory.</p>
       <p>You need <a href="http://ant.apache.org/">Ant 1.6.5</a> or greater in order to run this tutorial.</p>
         
 	    <s2 name="Building the samples">
