@@ -11,6 +11,36 @@
   </properties>
 
   <body>
+    <s1 name="March 28, 2011: JORAM 5.5.0 release is available">
+      <p>Joram 5.5.0 is available in the SVN repository with tag JORAM_5_5_0.</p>
+      <p>This version is bundled in Jonas 5.2.</p>
+      <s2 name="New features and improvements">
+      <ul>
+        <li>Implementation of an AMQP bridge mechanism based on acquisition / distribution
+        destinations. The implementation allows load-balancing and fail-over through
+        multiples AMQP providers.
+        A detailed description is available in section 4.6.10 of the
+        <a href="../doc/Joram-en.pdf">user's guide</a>.</li>
+        <li>Achievement of an interception mechanism for processing messages in the MOM.
+        Interceptors can be located on destinations and on connection in/out channels.
+        A detailed description is available in section 3.5 of the
+				<a href="../doc/Joram-en.pdf">user's guide</a>.</li>
+        <li>Implementation of a recovery mechanism for the JCA connector with automatic reconnection.</li>
+        <li>Enhancements on clustering destinations.</li>
+        <li>Configuration for the default syncOnWrite mechanism on persistence handling.</li>
+        <li>Improvements in NetServerOut daemon.</li>
+      </ul>
+      </s2>
+
+      <s2 name="Bug fixes">
+      <ul>
+        <li>Bug fix: Removes useless timeout during JNDI service stop.</li>
+        <li>Bug fix: Avoid possible NPE in AMQP acquisition module.</li>
+        <li>Fix minor issues in agent profiling.</li>
+      </ul>
+      </s2>
+    </s1>
+
     <s1 name="October 27, 2010: JORAM 5.4.0 release is available">
       <p>Joram 5.4.0 is available in the SVN repository with tag JORAM_5_4_0.</p>
       <s2 name="New features and improvements">

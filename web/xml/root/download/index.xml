@@ -36,9 +36,9 @@
       <a href="http://forge.objectweb.org/project/showfiles.php?group_id=4">
       Click here to start the download process</a>.</p>
 	
-	    <p>Note: all the packages are available as .tgz files. To unzip these files, just go where you want
-	    to install JORAM, and unzip it. You can use gunzip and tar tools on unix-like systems, or winzip utility
-	    on Windows. Please consult the <a href="../doc/index.html">JORAM documentation</a> for installation
+	    <p>Note: all the packages are available as .zip files. To unzip these files, just go where you want
+	    to install JORAM, and unzip it.
+	    Please consult the <a href="../doc/index.html">JORAM documentation</a> for installation
 	    instructions and a tutorial.</p>
       </s2>
       
