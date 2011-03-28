@@ -35,11 +35,12 @@
 	    <s2 name="Installation">
         <p>Installing Joram is simple:</p>
         <ul>
-          <li>Obtain the latest Joram release from <a href="../download/index.html">Download</a> page: joram-5.x.y.tgz.</li>
+          <li>Obtain the latest Joram release from <a href="../download/index.html">Download</a> page:
+          joram-release-5.x.y.zip.</li>
           <li>Expand the files into a directory:
             <ul>
-              <li>using gunzip and tar command for unix users:<br/>
-              <code>gunzip joram-5.x.y.tgz | tar xvf -</code>,</li>
+              <li>using unzip for unix users:<br/>
+              <code>unzip joram-release-5.x.y.zip</code>,</li>
               <li>using <a href="http://www.7-zip.org">7-Zip</a> utility for Windows users.</li>
             </ul>
           </li>
