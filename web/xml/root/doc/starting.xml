@@ -137,7 +137,7 @@
 	        <li>Scheduler queues,</li>
 	        <li>Monitoring topics and topics (see <a href="tutorials/monitoring/monitoring.htm">tutorial</a>),</li>
 	        <li>Collector queues and topics,</li>
-	        <li>JMS Bridge destinations.</li>
+	        <li>JMS Bridge destinations (see <a href="tutorials/bridge/bridge.htm">tutorial</a>).</li>
 	      </ul>
       	      
 	      <subtitle>Enhanced behavior</subtitle>
@@ -151,25 +151,25 @@
 
         <p>For more informations about these samples, see the Joram <a href="../doc/index.html">Documentation</a>.</p>
       </s2>
-      
-	    <s2 name="Building Joram from of a source distribution">
-        <p>Building Joram is simple:</p>
-        <ul>
-          <li>Obtain the latest Joram source distribution from <a href="../download/index.html">Download</a> page:
-          joram-release-5.x.y-src.zip.</li>
-          <li>Expand the files into a directory:
-            <ul>
-              <li>using unzip for unix users:<br/>
-              <code>unzip joram-release-5.x.y-src.zip</code>,</li>
-              <li>using <a href="http://www.7-zip.org">7-Zip</a> utility for Windows users.</li>
-            </ul>
-          </li>
-          <li>Change to <code>joram-5.x.y</code> created directory.</li>
-          <li>Launch maven through <code>mvn install</code> command.</li>
-        </ul>
-        <p>Joram is now ready to work.</p>
-      </s2>
 
+    </s1>
+      
+    <s1 name="Building Joram from of a source distribution">
+      <p>Building Joram is simple:</p>
+      <ul>
+        <li>Obtain the latest Joram source distribution from <a href="../download/index.html">Download</a> page:
+        joram-release-5.x.y-src.zip.</li>
+        <li>Expand the files into a directory:
+          <ul>
+            <li>using unzip for unix users:<br/>
+            <code>unzip joram-release-5.x.y-src.zip</code>,</li>
+            <li>using <a href="http://www.7-zip.org">7-Zip</a> utility for Windows users.</li>
+          </ul>
+        </li>
+        <li>Change to <code>joram-5.x.y</code> created directory.</li>
+        <li>Launch maven through <code>mvn install</code> command.</li>
+      </ul>
+      <p>Joram is now ready to work.</p>
     </s1>
 
   </body>
