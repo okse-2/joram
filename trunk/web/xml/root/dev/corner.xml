@@ -14,10 +14,13 @@
 
     <s1 name="Welcome at the developers' corner">
   
-    <p>Many people from various origins have contributed to JORAM, and new contributors are always welcome.</p>
-    <p>A contribution can be the development of a new feature, but also new or improved documentation, suggestions,
-    feedbacks, debugging.</p>
-    <p>Simply send your ideas, documents and developments (if any) to the <a href="mailto:joram-team@ow2.org">joram team</a>.</p>
+    <p>Many people from various origins have contributed to JORAM, and new contributors
+    are always welcome.</p>
+    <p>A contribution can be a bug fix or the development of a new feature, but also new
+    or improved documentation, suggestions, feedbacks, debugging.</p>
+    
+    <p>Simply send your ideas, documents and developments (if any) to the
+    <a href="mailto:joram-team@ow2.org">joram team</a>.</p>
     <p></p>
 
     <p>The following resources are proposed to the advanced users and developers:</p>
