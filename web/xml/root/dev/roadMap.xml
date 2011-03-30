@@ -12,6 +12,17 @@
 
   <body>
 
+  <s1 name="Road Map">
+    <p>These is an informal plan for the next Joram releases.</p>
+	
+	  <p>This is not a fixed set of features, they are all subject to change based on
+	  user needs or ideas. If you have ideas, share them, any input or personal view for
+	  improving and/or developing JORAM is welcome.</p>
+	
+	  <p><a href="mailto:joram-team@ow2.org">Contact us</a></p>
+	
+  </s1>
+
   <s1 name="Work in progress">
 
 		<s2 name="OSGi support and administration tool">
