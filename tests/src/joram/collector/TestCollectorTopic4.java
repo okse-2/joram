@@ -24,8 +24,10 @@ package joram.collector;
 
 import java.util.Properties;
 
+import javax.jms.BytesMessage;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.DeliveryMode;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
@@ -88,7 +90,10 @@ public class TestCollectorTopic4 extends TestCase implements MessageListener {
       url = "http://www.gnu.org/licenses/lgpl.txt";
       Message msg = sessionp.createMessage();
       msg.setStringProperty("collector.url", url);
-      msg.setStringProperty("collector.type", "" + org.objectweb.joram.shared.messages.Message.BYTES);
+      msg.setIntProperty("collector.type", org.objectweb.joram.shared.messages.Message.BYTES);
+      msg.setLongProperty("expiration", 0);
+      msg.setBooleanProperty("persistent", false);
+      msg.setLongProperty("acquisition.period", 3000);
       producer.send(msg);
       
       Thread.sleep(12000);
@@ -143,6 +148,8 @@ public class TestCollectorTopic4 extends TestCase implements MessageListener {
     try {
 //      System.out.println("\n --> Message received :" + message + ", url = " + message.getStringProperty("collector.url"));
       assertTrue(url.equals(message.getStringProperty("collector.url")));
+      assertTrue(message instanceof BytesMessage);
+      assertEquals(DeliveryMode.NON_PERSISTENT, message.getJMSDeliveryMode());
     } catch (JMSException exc) {
       addError(exc);
     }
