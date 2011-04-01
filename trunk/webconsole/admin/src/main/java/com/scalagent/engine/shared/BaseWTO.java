@@ -66,7 +66,7 @@ public abstract class BaseWTO implements IsSerializable, Serializable {
 	 * @param o2
 	 * @return {@code true} if o1.equals(o2), {@code false} otherwise.
 	 */
-	public boolean equalsWithNull(Object o1, Object o2){
+  public static boolean equalsWithNull(Object o1, Object o2) {
 		if((o1==null && o2!=null) || (o1!=null && o2==null))
 			return false;
 		if(o1==null && o2==null)
