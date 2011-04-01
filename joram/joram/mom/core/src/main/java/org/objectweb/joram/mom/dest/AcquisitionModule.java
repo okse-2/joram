@@ -97,7 +97,7 @@ public class AcquisitionModule implements ReliableTransmitter {
     Enumeration e = properties.keys();
     while (e.hasMoreElements()) {
       String key = (String) e.nextElement();
-      prop.put(key, properties.get(key));
+      prop.setProperty(key, properties.get(key).toString());
     }
     return prop;
   }
@@ -137,6 +137,9 @@ public class AcquisitionModule implements ReliableTransmitter {
    * daemon.
    */
   private boolean isDaemon = false;
+
+  /** <code>true</code> if the acquisition daemon is running. */
+  private boolean running;
 
   public AcquisitionModule(Destination destination, String className, Properties properties) {
     if (logger.isLoggable(BasicLevel.DEBUG)) {
@@ -222,8 +225,9 @@ public class AcquisitionModule implements ReliableTransmitter {
    * Resets the acquisition properties.
    */
   private void setProperties(Properties properties) {
-    if (isDaemon) {
+    if (isDaemon && running) {
       ((AcquisitionDaemon) acquisitionHandler).stop();
+      running = false;
     }
 
     // Clone properties as it is modified before setting handler properties
@@ -298,6 +302,7 @@ public class AcquisitionModule implements ReliableTransmitter {
 
     if (isDaemon) {
       ((AcquisitionDaemon) acquisitionHandler).start(props, this);
+      running = true;
     } else {
       ((AcquisitionHandler) acquisitionHandler).setProperties(props);
     }
@@ -326,8 +331,7 @@ public class AcquisitionModule implements ReliableTransmitter {
         setProperties(msgProperties);
       }
       if (!isDaemon && period <= 0) {
-        acquisitionTask = new AcquisitionTask();
-        AgentServer.getTimer().schedule(acquisitionTask, 0);
+        AgentServer.getTimer().schedule(new AcquisitionTask(), 0);
       }
     }
   }
@@ -361,9 +365,9 @@ public class AcquisitionModule implements ReliableTransmitter {
   	if (logger.isLoggable(BasicLevel.DEBUG)) {
       logger.log(BasicLevel.DEBUG, "AcquisitionModule.startHandler(" + prop + ')');
     }
-  	// TODO: test is running
-    if (isDaemon) {
+    if (isDaemon && !running) {
       ((AcquisitionDaemon) acquisitionHandler).start(prop, this);
+      running = true;
     }
   	return null;
   }
@@ -379,9 +383,9 @@ public class AcquisitionModule implements ReliableTransmitter {
   	if (logger.isLoggable(BasicLevel.DEBUG)) {
       logger.log(BasicLevel.DEBUG, "AcquisitionModule.stopHandler(" + prop + ')');
     }
-    // TODO: test is running
-    if (isDaemon) {
+    if (isDaemon && running) {
       ((AcquisitionDaemon) acquisitionHandler).stop();
+      running = false;
     }
     return null;
   }
@@ -411,7 +415,11 @@ public class AcquisitionModule implements ReliableTransmitter {
         message.timestamp = currentTime;
       }
       if (isExpirationSet) {
-        message.expiration = currentTime + expiration;
+        if (expiration > 0) {
+          message.expiration = currentTime + expiration;
+        } else {
+          message.expiration = 0;
+        }
       }
       if (isPrioritySet) {
         message.priority = priority;
@@ -427,8 +435,9 @@ public class AcquisitionModule implements ReliableTransmitter {
    * Closes the handler.
    */
   public void close() {
-    if (isDaemon) {
+    if (isDaemon && running) {
       ((AcquisitionDaemon) acquisitionHandler).stop();
+      running = false;
     } else {
       if (acquisitionTask != null) {
         acquisitionTask.cancel();
