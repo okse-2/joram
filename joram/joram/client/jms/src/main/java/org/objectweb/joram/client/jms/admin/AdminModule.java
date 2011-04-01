@@ -1611,6 +1611,9 @@ public final class AdminModule {
     AdminCommandReply reply = null;
     reply = (AdminCommandReply) wrapper.processAdmin(DestinationConstants.getNullId(serverId),
           AdminCommandConstant.CMD_INVOKE_STATIC, props);
+    if (reply.getProp() == null) {
+      return null;
+    }
     return reply.getProp().getProperty(AdminCommandConstant.INVOKE_METHOD_RESULT);
   }
 }
