@@ -106,13 +106,22 @@ public class AcquisitionModule implements ReliableTransmitter {
   protected Object acquisitionHandler;
 
   /** The priority of produced messages, default is 4. */
-  private int priority = Message.DEFAULT_PRIORITY;
+  private int priority;
+
+  /** <code>true</code> if the priority property has been set. */
+  private boolean isPrioritySet = false;
 
   /** Tells if the messages produced are persistent. */
-  private boolean isPersistent = (Message.DEFAULT_DELIVERY_MODE == Message.PERSISTENT);
+  private boolean isPersistent;
+
+  /** <code>true</code> if the persistence property has been set. */
+  private boolean isPersistencySet = false;
 
   /** The duration of produced messages. */
-  private long expiration = Message.DEFAULT_TIME_TO_LIVE;
+  private long expiration;
+
+  /** <code>true</code> if the expiration property has been set. */
+  private boolean isExpirationSet = false;
 
   /** The acquisition queue or topic using this module. */
   private final Destination destination;
@@ -143,11 +152,8 @@ public class AcquisitionModule implements ReliableTransmitter {
       // Verify that one and only one correct interface is implemented.
       if (acquisitionHandler instanceof AcquisitionDaemon) {
         isDaemon = true;
-        setProperties(properties);
-      } else {
-        acquisitionTask = new AcquisitionTask();
-        setProperties(properties);
       }
+      setProperties(properties);
 
     } catch (Exception exc) {
       logger.log(BasicLevel.ERROR, "AcquisitionModule: can't create acquisition handler.", exc);
@@ -216,6 +222,10 @@ public class AcquisitionModule implements ReliableTransmitter {
    * Resets the acquisition properties.
    */
   private void setProperties(Properties properties) {
+    if (isDaemon) {
+      ((AcquisitionDaemon) acquisitionHandler).stop();
+    }
+
     // Clone properties as it is modified before setting handler properties
     // and we want to keep all properties in destinations to persist them
     Properties props = (Properties) properties.clone();
@@ -225,9 +235,9 @@ public class AcquisitionModule implements ReliableTransmitter {
     }
 
     // Restore defaults
-    priority = Message.DEFAULT_PRIORITY;
-    isPersistent = (Message.DEFAULT_DELIVERY_MODE == Message.PERSISTENT);
-    expiration = Message.DEFAULT_TIME_TO_LIVE;
+    isPrioritySet = false;
+    isPersistencySet = false;
+    isExpirationSet = false;
     period = 0;
     if (acquisitionTask != null) {
       acquisitionTask.cancel();
@@ -252,6 +262,7 @@ public class AcquisitionModule implements ReliableTransmitter {
     if (props.containsKey(PERSISTENT_PROPERTY)) {
       try {
         isPersistent = ConversionHelper.toBoolean(props.get(PERSISTENT_PROPERTY));
+        isPersistencySet = true;
       } catch (MessageValueException exc) {
         logger.log(BasicLevel.ERROR, "AcquisitionModule: can't parse defined message persistence property.");
       }
@@ -261,6 +272,7 @@ public class AcquisitionModule implements ReliableTransmitter {
     if (props.containsKey(PRIORITY_PROPERTY)) {
       try {
         priority = ConversionHelper.toInt(props.get(PRIORITY_PROPERTY));
+        isPrioritySet = true;
       } catch (MessageValueException exc) {
         logger.log(BasicLevel.ERROR, "AcquisitionModule: can't parse defined message priority property.");
       }
@@ -270,6 +282,7 @@ public class AcquisitionModule implements ReliableTransmitter {
     if (props.containsKey(EXPIRATION_PROPERTY)) {
       try {
         expiration = ConversionHelper.toLong(props.get(EXPIRATION_PROPERTY));
+        isExpirationSet = true;
       } catch (MessageValueException exc) {
         logger.log(BasicLevel.ERROR, "AcquisitionModule: can't parse defined message expiration property.");
       }
@@ -310,12 +323,7 @@ public class AcquisitionModule implements ReliableTransmitter {
       // If non-empty, sets the new properties
       if (msg.properties != null) {
       	msgProperties = AcquisitionModule.transform(msg.properties);
-        if (isDaemon) {
-          ((AcquisitionDaemon) acquisitionHandler).stop();
-          ((AcquisitionDaemon) acquisitionHandler).start(msgProperties, this);
-        } else {
-        	((AcquisitionHandler) acquisitionHandler).setProperties(msgProperties);
-        }
+        setProperties(msgProperties);
       }
       if (!isDaemon && period <= 0) {
         acquisitionTask = new AcquisitionTask();
@@ -337,14 +345,9 @@ public class AcquisitionModule implements ReliableTransmitter {
       logger.log(BasicLevel.DEBUG, "AcquisitionModule.updateProperties(" + properties + ')');
     }
   	// If non-empty, sets the new properties
-  	if (properties != null) {
-  		if (isDaemon) {
-  			((AcquisitionDaemon) acquisitionHandler).stop();
-  			setProperties(properties);
-  		} else {
-  			setProperties(properties);
-  		}
-  	}
+    if (properties != null) {
+      setProperties(properties);
+    }
   }
 
   /**
@@ -359,9 +362,9 @@ public class AcquisitionModule implements ReliableTransmitter {
       logger.log(BasicLevel.DEBUG, "AcquisitionModule.startHandler(" + prop + ')');
     }
   	// TODO: test is running
-  	if (isDaemon) {
-  		((AcquisitionDaemon) acquisitionHandler).start(prop, this);
-  	}
+    if (isDaemon) {
+      ((AcquisitionDaemon) acquisitionHandler).start(prop, this);
+    }
   	return null;
   }
 
@@ -376,11 +379,11 @@ public class AcquisitionModule implements ReliableTransmitter {
   	if (logger.isLoggable(BasicLevel.DEBUG)) {
       logger.log(BasicLevel.DEBUG, "AcquisitionModule.stopHandler(" + prop + ')');
     }
-  	// TODO: test is running
-  	if (isDaemon) {
-  		((AcquisitionDaemon) acquisitionHandler).stop();
-  	}
-  	return null;
+    // TODO: test is running
+    if (isDaemon) {
+      ((AcquisitionDaemon) acquisitionHandler).stop();
+    }
+    return null;
   }
   
   public ClientMessages acquisitionNot(AcquisitionNot not, long msgCount) {
@@ -402,14 +405,19 @@ public class AcquisitionModule implements ReliableTransmitter {
       Message message = (Message) iterator.next();
 
       message.id = "ID:" + destination.getDestinationId() + '_' + msgCount;
-      message.timestamp = currentTime;
-      message.persistent = isPersistent;
       message.setDestination(destination.getId().toString(), destination.getType());
-      message.priority = priority;
-      if (expiration > 0) {
+
+      if (message.timestamp == 0) {
+        message.timestamp = currentTime;
+      }
+      if (isExpirationSet) {
         message.expiration = currentTime + expiration;
-      } else {
-        message.expiration = 0;
+      }
+      if (isPrioritySet) {
+        message.priority = priority;
+      }
+      if (isPersistencySet) {
+        message.persistent = isPersistent;
       }
       msgCount++;
     }
