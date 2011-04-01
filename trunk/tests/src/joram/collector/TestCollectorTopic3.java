@@ -40,7 +40,6 @@ import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.shared.admin.AdminCommandConstant;
-import org.objectweb.joram.shared.admin.AdminCommandReply;
 
 import framework.TestCase;
 
@@ -77,11 +76,9 @@ public class TestCollectorTopic3 extends TestCase implements MessageListener {
       consumer.setMessageListener(this);
       
       AdminModule.connect("localhost", 2560, "root", "root", 60);
-      AdminCommandReply reply = (AdminCommandReply) AdminModule.processAdmin(topic.getName(), AdminCommandConstant.CMD_START_HANDLER, null);
-      //System.out.println("reply = " + reply);
+      AdminModule.processAdmin(topic.getName(), AdminCommandConstant.CMD_STOP_HANDLER, null);
       
-      reply = (AdminCommandReply) AdminModule.processAdmin(topic.getName(), AdminCommandConstant.CMD_STOP_HANDLER, null);
-      //System.out.println("reply = " + reply);
+      AdminModule.processAdmin(topic.getName(), AdminCommandConstant.CMD_START_HANDLER, null);
       AdminModule.disconnect();
       
       Thread.sleep(100);
@@ -134,9 +131,9 @@ public class TestCollectorTopic3 extends TestCase implements MessageListener {
     nbReceived++;
     try {
       System.out.println("\n --> Message received :" + message + ", status = " + message.getStringProperty("collector.status"));
-      if (nbReceived == 1)
-      assertTrue("start".equals(message.getStringProperty("collector.status")));
-      else if (nbReceived == 2)
+      if (nbReceived == 2)
+        assertTrue("start".equals(message.getStringProperty("collector.status")));
+      else if (nbReceived == 1)
         assertTrue("stop".equals(message.getStringProperty("collector.status")));
     } catch (JMSException exc) {
       addError(exc);
