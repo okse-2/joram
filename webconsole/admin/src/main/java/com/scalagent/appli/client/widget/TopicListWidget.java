@@ -137,8 +137,8 @@ public class TopicListWidget extends BaseWidget<TopicListPresenter> {
     refreshButton = new IButton();
     refreshButton.setAutoFit(Boolean.TRUE);
     refreshButton.setIcon("refresh.gif");
-    refreshButton.setTitle(Application.messages.queueWidget_buttonRefresh_title());
-    refreshButton.setPrompt(Application.messages.queueWidget_buttonRefresh_prompt());
+    refreshButton.setTitle(Application.messages.topicWidget_buttonRefresh_title());
+    refreshButton.setPrompt(Application.messages.topicWidget_buttonRefresh_prompt());
     refreshButton.addClickHandler(new RefreshAllClickHandler(presenter));
 
     newTopicButton = new IButton();
