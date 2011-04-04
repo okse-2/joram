@@ -23,7 +23,6 @@
 package org.objectweb.joram.mom.dest.amqp;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -42,23 +41,23 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * A {@link LiveServerConnection} keeps alive a connection to an AMQP server.
  * When the connection fails, a reconnection routine starts.
  */
-public class LiveServerConnection implements LiveServerConnectionMBean {
+public class LiveServerConnection implements LiveServerConnectionMBean, ShutdownListener {
 
   private static final Logger logger = Debug.getLogger(LiveServerConnection.class.getName());
 
   private final ConnectionFactory cnxFactory;
 
-  private ReconnectionDaemon cnxDaemon = new ReconnectionDaemon();
-
-  private ShutdownListener shutdownListener = new CnxShutdownListener();
+  private ReconnectionDaemon cnxDaemon;
 
   private volatile Connection conn = null;
+
+  private String name;
 
   /**
    * Starts a connection with a default AMQP server.
    */
-  public LiveServerConnection() {
-    this(new ConnectionFactory());
+  public LiveServerConnection(String name) {
+    this(name, new ConnectionFactory());
   }
 
   /**
@@ -66,12 +65,14 @@ public class LiveServerConnection implements LiveServerConnectionMBean {
    * 
    * @param factory the factory used to access the server.
    */
-  public LiveServerConnection(ConnectionFactory factory) {
+  public LiveServerConnection(String name, ConnectionFactory factory) {
     this.cnxFactory = factory;
+    this.name = name;
+    cnxDaemon = new ReconnectionDaemon();
 
     try {
       conn = cnxFactory.newConnection();
-      conn.addShutdownListener(shutdownListener);
+      conn.addShutdownListener(this);
     } catch (Exception exc) {
       if (logger.isLoggable(BasicLevel.DEBUG)) {
         logger.log(BasicLevel.DEBUG, "connection failed, start daemon.", exc);
@@ -100,35 +101,15 @@ public class LiveServerConnection implements LiveServerConnectionMBean {
     return cnxFactory;
   }
 
-  public int hashCode() {
-    return 31 * cnxFactory.getHost().hashCode() + cnxFactory.getPort();
-  }
-
   private String getMBeanName() {
     StringBuilder strbuf = new StringBuilder();
 
     strbuf.append("AMQP#").append(AgentServer.getServerId());
     strbuf.append(':');
-    strbuf.append("type=Connections,name=").append(cnxFactory.getHost());
-    strbuf.append('[').append(cnxFactory.getPort()).append(']');
+    strbuf.append("type=Connections,name=").append(name);
+    strbuf.append('[').append(cnxFactory.getHost()).append(']');
 
     return strbuf.toString();
-  }
-
-  /**
-   * 2 {@link LiveServerConnection} are equals if they have the same address and
-   * port, their connection state doesn't matter.
-   */
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (!(obj instanceof LiveServerConnection))
-      return false;
-    LiveServerConnection other = (LiveServerConnection) obj;
-    return new InetSocketAddress(cnxFactory.getHost(), cnxFactory.getPort()).equals(new InetSocketAddress(
-        other.cnxFactory.getHost(), other.cnxFactory.getPort()));
   }
 
   /**
@@ -139,9 +120,7 @@ public class LiveServerConnection implements LiveServerConnectionMBean {
       logger.log(BasicLevel.DEBUG, "Close connection.");
     }
     if (conn != null) {
-      if (shutdownListener != null) {
-        conn.removeShutdownListener(shutdownListener);
-      }
+      conn.removeShutdownListener(this);
       try {
         conn.close();
       } catch (IOException exc) {
@@ -162,18 +141,11 @@ public class LiveServerConnection implements LiveServerConnectionMBean {
     }
   }
 
-  private class CnxShutdownListener implements ShutdownListener {
-
-    public CnxShutdownListener() {
+  public void shutdownCompleted(ShutdownSignalException cause) {
+    if (logger.isLoggable(BasicLevel.WARN)) {
+      logger.log(BasicLevel.WARN, "Connection with AMQP server lost, start reconnecting.", cause);
     }
-
-    public void shutdownCompleted(ShutdownSignalException cause) {
-      if (logger.isLoggable(BasicLevel.WARN)) {
-        logger.log(BasicLevel.WARN, "Connection with AMQP server lost, start reconnecting.", cause);
-      }
-      cnxDaemon.start();
-    }
-
+    cnxDaemon.start();
   }
 
   /**
@@ -199,7 +171,7 @@ public class LiveServerConnection implements LiveServerConnectionMBean {
 
     /** Constructs a <code>ReconnectionDaemon</code> thread. */
     protected ReconnectionDaemon() {
-      super("ReconnectionDaemon", logger);
+      super("ReconnectionDaemon#" + name, logger);
       setDaemon(false);
       if (logmon.isLoggable(BasicLevel.DEBUG)) {
         logmon.log(BasicLevel.DEBUG, "ReconnectionDaemon<init>");
@@ -243,11 +215,11 @@ public class LiveServerConnection implements LiveServerConnectionMBean {
             canStop = false;
 
             conn = cnxFactory.newConnection();
-            conn.addShutdownListener(shutdownListener);
+            conn.addShutdownListener(LiveServerConnection.this);
 
           } catch (Exception exc) {
             if (logmon.isLoggable(BasicLevel.DEBUG)) {
-              logmon.log(BasicLevel.DEBUG, "connection failed, continue...", exc);
+              logmon.log(BasicLevel.DEBUG, "connection failed, continue... " + exc.getMessage());
             }
             continue;
           }
@@ -278,6 +250,10 @@ public class LiveServerConnection implements LiveServerConnectionMBean {
 
   public int getPort() {
     return cnxFactory.getPort();
+  }
+
+  public String getName() {
+    return name;
   }
 
   public String getUserName() {

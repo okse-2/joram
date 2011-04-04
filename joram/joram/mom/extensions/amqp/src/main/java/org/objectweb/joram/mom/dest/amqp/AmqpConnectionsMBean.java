@@ -22,48 +22,39 @@
  */
 package org.objectweb.joram.mom.dest.amqp;
 
-import com.rabbitmq.client.ConnectionFactory;
-
-public interface AmqpConnectionHandlerMBean {
+public interface AmqpConnectionsMBean {
 
   /**
    * Adds an AMQP server and starts a live connection with it, accessible via
-   * the {@link ConnectionFactory} provided. A server is uniquely identified
-   * with its host and port. Adding an existing server won't do anything.
-   * 
-   * @param factory the factory used to access the server, configured properly
-   *          (host, port, login, password...)
-   */
-  public void addServer(ConnectionFactory factory);
+   * the host and port provided. A server is uniquely identified by the given
+   * name. Adding an existing server won't do anything.
 
-  /**
-   * Adds an AMQP server and starts a live connection with it, accessible via
-   * the {@link ConnectionFactory} provided. A server is uniquely identified
-   * with its host and port. Adding an existing server won't do anything.
-   * 
+   * @param name the name identifying the server
    * @param host host of the added server
    * @param port port of the added server
    */
-  public void addServer(String host, int port);
+  public void addServer(String name, String host, int port);
 
   /**
    * Adds an AMQP server and starts a live connection with it, accessible via
-   * the {@link ConnectionFactory} provided. A server is uniquely identified
-   * with its host and port. Adding an existing server won't do anything.
+   * the host and port provided. A server is uniquely identified by the given
+   * name. Adding an existing server won't do anything.
    * 
+   * @param name the name identifying the server
    * @param host host of the added server
    * @param port port of the added server
    * @param user user name
    * @param pass user password
    */
-  public void addServer(String host, int port, String user, String pass);
+  public void addServer(String name, String host, int port, String user, String pass);
 
   /**
    * Removes the live connection to the specified AMQP server.
    * 
-   * @param host host of the removed server
-   * @param port port of the removed server
+   * @param name the name identifying the server
    */
-  public void deleteServer(String host, int port);
+  public void deleteServer(String name);
+
+  public String[] getConnectionNames();
 
 }

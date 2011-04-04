@@ -37,7 +37,6 @@ import org.objectweb.util.monolog.api.Logger;
 
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.ShutdownSignalException;
@@ -46,6 +45,9 @@ import com.rabbitmq.client.impl.LongString;
 import fr.dyade.aaa.common.Daemon;
 import fr.dyade.aaa.common.Debug;
 
+/**
+ * Acquisition daemon for the AMQP acquisition bridge.
+ */
 public class AmqpAcquisition implements AcquisitionDaemon {
 
   private static final Logger logger = Debug.getLogger(AmqpAcquisition.class.getName());
@@ -54,12 +56,16 @@ public class AmqpAcquisition implements AcquisitionDaemon {
 
   private static final String UPDATE_PERIOD_PROP = "amqp.ConnectionUpdatePeriod";
 
+  private static final String ROUTING_PROP = "amqp.Routing";
+
   private static ConnectionUpdater connectionUpdater;
 
   private ReliableTransmitter transmitter;
 
   // Use a vector as it is used by 2 different threads
   private List<Channel> channels = new Vector<Channel>();
+
+  private List<String> connectionNames = null;
 
   private String amqpQueue = null;
 
@@ -83,7 +89,9 @@ public class AmqpAcquisition implements AcquisitionDaemon {
           + "could not be parsed properly, use default value.", nfe);
     }
 
-    this.transmitter = transmitter;
+    if (properties.containsKey(ROUTING_PROP)) {
+      connectionNames = AmqpConnectionService.convertToList(properties.getProperty(ROUTING_PROP));
+    }
 
     if (connectionUpdater == null) {
       connectionUpdater = new ConnectionUpdater(updatePeriod);
@@ -116,28 +124,34 @@ public class AmqpAcquisition implements AcquisitionDaemon {
   /**
    * Create a new AMQP consumer for each connection available.
    */
-  public void onNewConnections(List<Connection> connections) {
-    for (Connection connection : connections) {
-      if (logger.isLoggable(BasicLevel.DEBUG)) {
-        logger.log(BasicLevel.DEBUG, "Creating a new consumer on queue " + amqpQueue + " for connection "
-            + connection);
-      }
-      try {
-        Channel chan = connection.createChannel();
-        chan.queueDeclarePassive(amqpQueue);
-        AmqpConsumer consumer = new AmqpConsumer(chan);
-        chan.basicConsume(amqpQueue, false, consumer);
-        channels.add(chan);
-      } catch (Exception e) {
-        logger.log(BasicLevel.ERROR, "Error while starting consumer on connection: " + connection, e);
+  public void onNewConnections(List<LiveServerConnection> connections) {
+    for (LiveServerConnection connection : connections) {
+      if (connectionNames == null || connectionNames.contains(connection.getName())) {
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
+          logger.log(BasicLevel.DEBUG, "Creating a new consumer on queue " + amqpQueue + " for connection "
+              + connection.getName());
+        }
+        try {
+          Channel chan = connection.getConnection().createChannel();
+          chan.queueDeclarePassive(amqpQueue);
+          AmqpConsumer consumer = new AmqpConsumer(chan, connection.getName());
+          chan.basicConsume(amqpQueue, false, consumer);
+          channels.add(chan);
+        } catch (Exception e) {
+          logger.log(BasicLevel.ERROR,
+              "Error while starting consumer on connection: " + connection.getName(), e);
+        }
       }
     }
   }
 
   private class AmqpConsumer extends DefaultConsumer {
 
-    public AmqpConsumer(Channel channel) {
+    private String name;
+
+    public AmqpConsumer(Channel channel, String name) {
       super(channel);
+      this.name = name;
     }
 
     public void handleDelivery(String consumerTag, Envelope envelope, BasicProperties properties, byte[] body)
@@ -155,20 +169,20 @@ public class AmqpAcquisition implements AcquisitionDaemon {
       message.correlationId = properties.getCorrelationId();
       Integer deliveryMode = properties.getDeliveryMode();
       if (deliveryMode != null) {
-      	if (deliveryMode.intValue() == 1) {
-      		message.persistent = false;
-      	} else if (deliveryMode.intValue() == 2) {
-      		message.persistent = true;
-      	}
+        if (deliveryMode.intValue() == 1) {
+          message.persistent = false;
+        } else if (deliveryMode.intValue() == 2) {
+          message.persistent = true;
+        }
       }
       if (properties.getPriority() != null)
-      	message.priority = properties.getPriority().intValue();
+        message.priority = properties.getPriority().intValue();
       if (properties.getTimestamp() != null)
-      	message.timestamp = properties.getTimestamp().getTime();
+        message.timestamp = properties.getTimestamp().getTime();
 
       try {
-      	if (properties.getExpiration() != null)
-      		message.expiration = Long.parseLong(properties.getExpiration());
+        if (properties.getExpiration() != null)
+          message.expiration = Long.parseLong(properties.getExpiration());
       } catch (NumberFormatException nfe) {
         if (logger.isLoggable(BasicLevel.WARN)) {
           logger.log(BasicLevel.WARN, "Expiration field could not be parsed.", nfe);
@@ -193,7 +207,7 @@ public class AmqpAcquisition implements AcquisitionDaemon {
       }
       
       if (logger.isLoggable(BasicLevel.DEBUG)) {
-        logger.log(BasicLevel.DEBUG, "New incoming message : " + message);
+        logger.log(BasicLevel.DEBUG, name + ": New incoming message : " + message);
       }
 
       transmitter.transmit(message, properties.getMessageId());
@@ -203,7 +217,7 @@ public class AmqpAcquisition implements AcquisitionDaemon {
 
     public void handleShutdownSignal(String consumerTag, ShutdownSignalException sig) {
       if (logger.isLoggable(BasicLevel.DEBUG)) {
-        logger.log(BasicLevel.DEBUG, "Consumer error for connection " + getChannel().getConnection());
+        logger.log(BasicLevel.DEBUG, name + ": Consumer error for connection " + getChannel().getConnection());
       }
       if (!closing) {
         channels.remove(getChannel());
@@ -218,7 +232,7 @@ public class AmqpAcquisition implements AcquisitionDaemon {
    */
   private static class ConnectionUpdater extends Daemon {
 
-    private List<Connection> connections = new ArrayList<Connection>();
+    private List<LiveServerConnection> connections = new ArrayList<LiveServerConnection>();
 
     private List<AmqpAcquisition> listeners = new ArrayList<AmqpAcquisition>();
 
@@ -241,21 +255,34 @@ public class AmqpAcquisition implements AcquisitionDaemon {
       }
 
       try {
+        boolean firstTime = true;
         while (running) {
+          if (logmon.isLoggable(BasicLevel.DEBUG)) {
+            logmon.log(BasicLevel.DEBUG, "update connections in " + period + " ms");
+          }
+
           canStop = true;
-          try {
-            Thread.sleep(period);
-          } catch (InterruptedException exc) {
-            if (logmon.isLoggable(BasicLevel.DEBUG)) {
-              logmon.log(BasicLevel.DEBUG, "Thread interrupted.");
+          if (firstTime) {
+            firstTime = false;
+          } else {
+            try {
+              Thread.sleep(period);
+            } catch (InterruptedException exc) {
+              if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                logmon.log(BasicLevel.DEBUG, "Thread interrupted.");
+              }
+              continue;
             }
-            continue;
           }
           canStop = false;
 
-          List<Connection> currentConnections = AmqpConnectionHandler.getConnections();
+          if (logmon.isLoggable(BasicLevel.DEBUG)) {
+            logmon.log(BasicLevel.DEBUG, "update connections");
+          }
 
-          List<Connection> newConnections = new ArrayList<Connection>(currentConnections);
+          List<LiveServerConnection> currentConnections = AmqpConnectionService.getInstance().getConnections();
+
+          List<LiveServerConnection> newConnections = new ArrayList<LiveServerConnection>(currentConnections);
           newConnections.removeAll(connections);
 
           synchronized (listeners) {
@@ -292,8 +319,8 @@ public class AmqpAcquisition implements AcquisitionDaemon {
           start();
         }
       }
-      List<Connection> existingConnections;
-      existingConnections = new ArrayList<Connection>(connections);
+      List<LiveServerConnection> existingConnections;
+      existingConnections = new ArrayList<LiveServerConnection>(connections);
       listener.onNewConnections(existingConnections);
 
     }
@@ -301,6 +328,9 @@ public class AmqpAcquisition implements AcquisitionDaemon {
     protected void removeUpdateListener(AmqpAcquisition listener) {
       synchronized (listeners) {
         listeners.remove(listener);
+        if (listeners.size() == 0) {
+          stop();
+        }
       }
     }
   }
