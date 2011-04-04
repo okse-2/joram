@@ -39,10 +39,12 @@ import org.objectweb.util.monolog.api.Logger;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.AlreadyClosedException;
 import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
 
 import fr.dyade.aaa.common.Debug;
 
+/**
+ * Distribution handler for the AMQP distribution bridge.
+ */
 public class AmqpDistribution implements DistributionHandler {
 
   private static final Logger logger = Debug.getLogger(AmqpDistribution.class.getName());
@@ -51,8 +53,12 @@ public class AmqpDistribution implements DistributionHandler {
 
   private static final String UPDATE_PERIOD_PROP = "amqp.ConnectionUpdatePeriod";
 
+  private static final String ROUTING_PROP = "amqp.Routing";
+
   // Least recently used Map.
-  private LinkedHashMap<Connection, Channel> channels = new LinkedHashMap<Connection, Channel>(16, 0.75f, true);
+  private LinkedHashMap<String, Channel> channels = new LinkedHashMap<String, Channel>(16, 0.75f, true);
+
+  private List<String> connectionNames = null;
 
   private String amqpQueue = null;
 
@@ -73,9 +79,14 @@ public class AmqpDistribution implements DistributionHandler {
       logger.log(BasicLevel.ERROR, "Property " + UPDATE_PERIOD_PROP
           + "could not be parsed properly, use default value.", nfe);
     }
+    if (properties.containsKey(ROUTING_PROP)) {
+      connectionNames = AmqpConnectionService.convertToList(properties.getProperty(ROUTING_PROP));
+    }
   }
 
   public void distribute(Message message) throws Exception {
+
+    List<String> connectionNames = this.connectionNames;
 
     // Convert message properties
     AMQP.BasicProperties props = new AMQP.BasicProperties();
@@ -95,18 +106,29 @@ public class AmqpDistribution implements DistributionHandler {
       Map<String, Object> headers = new HashMap<String, Object>();
       message.properties.copyInto(headers);
       props.setHeaders(headers);
+
+      Object customRouting = message.properties.get(ROUTING_PROP);
+      if (customRouting != null && customRouting instanceof String) {
+        connectionNames = AmqpConnectionService.convertToList((String) customRouting);
+      }
     }
 
     // Update channels if necessary
     long now = System.currentTimeMillis();
     if (now - lastUpdate > updatePeriod) {
-      List<Connection> connections = AmqpConnectionHandler.getConnections();
-      for (Connection connection : connections) {
-        if (!channels.containsKey(connection)) {
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "Updating channels.");
+      }
+      List<LiveServerConnection> connections = AmqpConnectionService.getInstance().getConnections();
+      for (LiveServerConnection connection : connections) {
+        if (!channels.containsKey(connection.getName())) {
+          if (logger.isLoggable(BasicLevel.DEBUG)) {
+            logger.log(BasicLevel.DEBUG, connection.getName() + ": New channel available for distribution.");
+          }
           try {
-            Channel chan = connection.createChannel();
+            Channel chan = connection.getConnection().createChannel();
             chan.queueDeclarePassive(amqpQueue);
-            channels.put(connection, chan);
+            channels.put(connection.getName(), chan);
           } catch (IOException exc) {
             if (logger.isLoggable(BasicLevel.DEBUG)) {
               logger.log(BasicLevel.DEBUG, "Channel is not usable.", exc);
@@ -118,17 +140,24 @@ public class AmqpDistribution implements DistributionHandler {
     }
 
     // Send the message
-    Iterator<Map.Entry<Connection, Channel>> iter = channels.entrySet().iterator();
+    Iterator<Map.Entry<String, Channel>> iter = channels.entrySet().iterator();
     while (iter.hasNext()) {
-      Map.Entry<Connection, Channel> entry = iter.next();
+      Map.Entry<String, Channel> entry = iter.next();
       try {
         Channel chan = entry.getValue();
+        String cnxName = entry.getKey();
         if (!chan.isOpen()) {
           iter.remove();
           continue;
         }
+        if (!connectionNames.contains(cnxName)) {
+          continue;
+        }
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
+          logger.log(BasicLevel.DEBUG, "Sending message on " + entry.getKey());
+        }
         chan.basicPublish("", amqpQueue, props, message.body);
-        channels.get(entry.getKey()); // Access the used connection to update the LRU map
+        channels.get(cnxName); // Access the used connection to update the LRU map
         return;
       } catch (IOException exc) {
         if (logger.isLoggable(BasicLevel.DEBUG)) {
