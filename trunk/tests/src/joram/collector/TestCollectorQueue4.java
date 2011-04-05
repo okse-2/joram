@@ -32,7 +32,6 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
-import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -48,12 +47,12 @@ import com.scalagent.joram.mom.dest.collector.URLAcquisition;
 import framework.TestCase;
 
 /**
- * Tests send properties in client message.
+ * Tests updating properties with client message.
  */
 public class TestCollectorQueue4 extends TestCase implements MessageListener {
 
   private int nbReceived;
-  String url = null;
+  String url = "http://www.gnu.org/licenses/lgpl.txt";
 
   public static void main(String[] args) {
     new TestCollectorQueue4().run();
@@ -72,11 +71,9 @@ public class TestCollectorQueue4 extends TestCase implements MessageListener {
 
       Connection cnx = cf.createConnection();
       Session sessionc = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      Session sessionp = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
       // create a producer and a consumer
       MessageConsumer consumer = sessionc.createConsumer(queue);
-      MessageProducer producer = sessionp.createProducer(queue);
 
       // the consumer records on the queue
       consumer.setMessageListener(this);
@@ -87,14 +84,11 @@ public class TestCollectorQueue4 extends TestCase implements MessageListener {
       
       assertTrue(nbReceived == 0);
       
-      url = "http://www.gnu.org/licenses/lgpl.txt";
-      Message msg = sessionp.createMessage();
-      msg.setStringProperty("collector.url", url);
-      msg.setIntProperty("collector.type", org.objectweb.joram.shared.messages.Message.BYTES);
-      msg.setLongProperty("expiration", 0);
-      msg.setBooleanProperty("persistent", false);
-      msg.setLongProperty("acquisition.period", 3000);
-      producer.send(msg);
+      // Sets the url to retrieve for the timer to be effective
+      AdminModule.connect(cf);
+      Properties props = new Properties();
+      props.setProperty("collector.url", url);
+      queue.setProperties(props);
       
       Thread.sleep(12000);
 

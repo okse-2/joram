@@ -32,7 +32,6 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
-import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -48,12 +47,12 @@ import com.scalagent.joram.mom.dest.collector.URLAcquisition;
 import framework.TestCase;
 
 /**
- * Tests modifying parameters monitored by the CollectorTopic.
+ * Tests updating properties with client message.
  */
 public class TestCollectorTopic4 extends TestCase implements MessageListener {
 
   private int nbReceived;
-  String url = null;
+  String url = "http://www.gnu.org/licenses/lgpl.txt";
 
   public static void main(String[] args) {
     new TestCollectorTopic4().run();
@@ -72,11 +71,9 @@ public class TestCollectorTopic4 extends TestCase implements MessageListener {
 
       Connection cnx = cf.createConnection();
       Session sessionc = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      Session sessionp = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
       // create a producer and a consumer
       MessageConsumer consumer = sessionc.createConsumer(topic);
-      MessageProducer producer = sessionp.createProducer(topic);
 
       // the consumer records on the topic
       consumer.setMessageListener(this);
@@ -87,14 +84,12 @@ public class TestCollectorTopic4 extends TestCase implements MessageListener {
       
       assertTrue(nbReceived == 0);
 
-      url = "http://www.gnu.org/licenses/lgpl.txt";
-      Message msg = sessionp.createMessage();
-      msg.setStringProperty("collector.url", url);
-      msg.setIntProperty("collector.type", org.objectweb.joram.shared.messages.Message.BYTES);
-      msg.setLongProperty("expiration", 0);
-      msg.setBooleanProperty("persistent", false);
-      msg.setLongProperty("acquisition.period", 3000);
-      producer.send(msg);
+      // Sets the url to retrieve for the timer to be effective
+      AdminModule.connect(cf);
+      Properties props = new Properties();
+      props.setProperty("collector.url", url);
+      topic.setProperties(props);
+      AdminModule.disconnect();
       
       Thread.sleep(12000);
 
@@ -121,7 +116,7 @@ public class TestCollectorTopic4 extends TestCase implements MessageListener {
     Properties props = new Properties();
     props.setProperty("acquisition.className", URLAcquisition.class.getName());
     props.setProperty("expiration", "0");
-    props.setProperty("persistent", "true");
+    props.setProperty("persistent", "false");
     props.setProperty("acquisition.period", "3000");
     props.setProperty("collector.type", "" + org.objectweb.joram.shared.messages.Message.BYTES);
     Topic topic = Topic.create(0, "CollectorTopic", Destination.ACQUISITION_TOPIC, props);

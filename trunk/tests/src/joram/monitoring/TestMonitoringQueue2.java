@@ -46,7 +46,7 @@ import org.objectweb.joram.mom.dest.MonitoringAcquisition;
 import framework.TestCase;
 
 /**
- * Tests modifying parameters monitored by the MonitoringTopic.
+ * Tests modifying parameters monitored by the MonitoringQueue.
  */
 public class TestMonitoringQueue2 extends TestCase implements MessageListener {
 
@@ -80,23 +80,23 @@ public class TestMonitoringQueue2 extends TestCase implements MessageListener {
       
       cnx.start();
 
-      Thread.sleep(10000);
+      Thread.sleep(3000);
       
       assertTrue(nbReceived == 0);
       
-      Properties prop = new Properties();
-      prop.setProperty("AgentServer:server=AgentServer#0,cons=Transaction", "LogMemorySize,GarbageRatio");
-      queue.setProperties(prop);
-
       // Launch an acquisition
-      producer.send(sessionp.createMessage());
+      Message m = sessionp.createMessage();
+      m.setStringProperty("AgentServer:server=AgentServer#0,cons=Transaction", "LogMemorySize,GarbageRatio");
+      producer.send(m);
       
-      Thread.sleep(10000);
+      Thread.sleep(3000);
 
       assertTrue(nbReceived == 1);
       
+      // Change mode
+      Properties prop = new Properties();
       prop.setProperty("acquisition.period", "2000");
-      prop.setProperty("AgentServer:server=AgentServer#0,cons=Transaction", "LogMemorySize,GarbageRatio");
+      prop.setProperty("AgentServer:server=AgentServer#0,cons=Transaction", "LogFileSize,NbLoadedObjects");
       queue.setProperties(prop);
       
       Thread.sleep(10000);
@@ -152,6 +152,7 @@ public class TestMonitoringQueue2 extends TestCase implements MessageListener {
         String name = (String) enumNames.nextElement();
 //        System.out.println(name + " : " + message.getObjectProperty(name));
       }
+      assertEquals(2, nbMonitoringResults);
     } catch (JMSException exc) {
       addError(exc);
     }

@@ -30,6 +30,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
+import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -46,12 +47,13 @@ import com.scalagent.joram.mom.dest.collector.URLAcquisition;
 import framework.TestCase;
 
 /**
- * Tests modifying parameters monitored by the CollectorTopic.
+ * Tests changing acquisition mode with setProperties method.
  */
 public class TestCollectorTopic2 extends TestCase implements MessageListener {
 
   private int nbReceived;
-  String url = null;
+  String url1 = "http://www.gnu.org/licenses/lgpl-3.0-standalone.html";
+  String url2 = "http://www.gnu.org/licenses/lgpl.txt";
 
   public static void main(String[] args) {
     new TestCollectorTopic2().run();
@@ -70,9 +72,11 @@ public class TestCollectorTopic2 extends TestCase implements MessageListener {
 
       Connection cnx = cf.createConnection();
       Session sessionc = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      Session sessionp = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
       // create a consumer
       MessageConsumer consumer = sessionc.createConsumer(topic);
+      MessageProducer producer = sessionp.createProducer(topic);
 
       // the consumer records on the topic
       consumer.setMessageListener(this);
@@ -82,20 +86,23 @@ public class TestCollectorTopic2 extends TestCase implements MessageListener {
       Thread.sleep(10000);
       
       assertTrue(nbReceived == 0);
+      
+      Message m = sessionp.createMessage();
+      m.setStringProperty("collector.url", url1);
+      producer.send(m);
 
-      url = "http://www.gnu.org/licenses/lgpl.txt";
       Properties prop = new Properties();
       prop.setProperty("expiration", "0");
       prop.setProperty("persistent", "true");
       prop.setProperty("acquisition.period", "5000");
-      prop.setProperty("collector.url", url);
+      prop.setProperty("collector.url", url2);
       prop.setProperty("collector.type", "" + org.objectweb.joram.shared.messages.Message.BYTES);
       AdminCommandReply reply = (AdminCommandReply) topic.setProperties(prop);
       // System.out.println("reply = " + reply);
       
       Thread.sleep(12000);
 
-      assertTrue(nbReceived >= 2);
+      assertTrue(nbReceived >= 3);
       
       AdminModule.disconnect();
       cnx.close();
@@ -139,7 +146,11 @@ public class TestCollectorTopic2 extends TestCase implements MessageListener {
     nbReceived++;
     try {
 //      System.out.println("\n --> Message received :" + message + ", url = " + message.getStringProperty("collector.url"));
-      assertTrue(url.equals(message.getStringProperty("collector.url")));
+      if (nbReceived == 1) {
+        assertTrue(url1.equals(message.getStringProperty("collector.url")));
+      } else {
+        assertTrue(url2.equals(message.getStringProperty("collector.url")));
+      }
     } catch (JMSException exc) {
       addError(exc);
     }

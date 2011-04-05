@@ -46,7 +46,7 @@ import org.objectweb.joram.mom.dest.MonitoringAcquisition;
 import framework.TestCase;
 
 /**
- * Tests retrieving the AdminTopic created as a service.
+ * Tests modifying parameters monitored by the MonitoringTopic.
  */
 public class TestMonitoringTopic3 extends TestCase implements MessageListener {
 
@@ -80,7 +80,7 @@ public class TestMonitoringTopic3 extends TestCase implements MessageListener {
       
       cnx.start();
       
-      Thread.sleep(10000);
+      Thread.sleep(3000);
       
       assertTrue(nbReceived == 0);
       
@@ -91,12 +91,12 @@ public class TestMonitoringTopic3 extends TestCase implements MessageListener {
       // Launch an acquisition
       producer.send(sessionp.createMessage());
       
-      Thread.sleep(10000);
+      Thread.sleep(3000);
 
       assertTrue(nbReceived == 1);
       
       prop.setProperty("acquisition.period", "2000");
-      prop.setProperty("AgentServer:server=AgentServer#0,cons=Transaction", "LogMemorySize,GarbageRatio");
+      prop.setProperty("AgentServer:server=AgentServer#0,cons=Transaction", "LogFileSize,NbLoadedObjects");
       topic.setProperties(prop);
       
       Thread.sleep(10000);
@@ -151,6 +151,7 @@ public class TestMonitoringTopic3 extends TestCase implements MessageListener {
         String name = (String) enumNames.nextElement();
         //      System.out.println(name + " : " + message.getObjectProperty(name));
       }
+      assertEquals(2, nbMonitoringResults);
     } catch (JMSException exc) {
       addError(exc);
     }
