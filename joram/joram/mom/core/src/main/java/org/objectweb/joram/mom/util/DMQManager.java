@@ -152,6 +152,10 @@ public class DMQManager {
         mess.setProperty(causePropertyName, "Interceptors");
         mess.setProperty(codePropertyName, new Short(MessageErrorConstants.INTERCEPTORS));
         break;
+      case MessageErrorConstants.NOT_ALLOWED:
+        mess.setProperty(causePropertyName, "Operation is not allowed");
+        mess.setProperty(codePropertyName, new Short(MessageErrorConstants.NOT_ALLOWED));
+        break;
       default:
         break;
       }
