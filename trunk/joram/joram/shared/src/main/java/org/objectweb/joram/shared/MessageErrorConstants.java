@@ -69,4 +69,10 @@ public interface MessageErrorConstants {
    */
   public static final short INTERCEPTORS = 7;
   
+  /**
+   * If the client tried to work with some entity in a manner that is prohibited
+   * by the server
+   */
+  public static final short NOT_ALLOWED = 8;
+
 }
