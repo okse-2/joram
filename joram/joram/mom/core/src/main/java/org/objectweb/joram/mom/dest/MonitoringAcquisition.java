@@ -46,6 +46,7 @@ public class MonitoringAcquisition implements AcquisitionHandler {
 
   public void setProperties(Properties properties) {
     if (properties != null) {
+      elements.clear();
       Enumeration e = properties.keys();
       while (e.hasMoreElements()) {
         String name = (String) e.nextElement();
