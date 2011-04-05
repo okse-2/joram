@@ -22,7 +22,6 @@
  */
 package org.objectweb.joram.mom.dest;
 
-import java.util.Enumeration;
 import java.util.Properties;
 
 import org.objectweb.joram.mom.notifications.ClientMessages;
@@ -144,12 +143,7 @@ public class AcquisitionTopic extends Topic implements AcquisitionTopicMBean {
       logger.log(BasicLevel.DEBUG, "AcquisitionTopic.updateProperties(" + prop + ')');
     }
     super.setProperties(prop);
-    // update this.properties
-    Enumeration e = prop.keys();
-    while (e.hasMoreElements()) {
-    	String key = (String) e.nextElement();
-    	properties.put(key, prop.get(key));
-    }
+    this.properties = prop;
     // update the module
     acquisitionModule.updateProperties(properties);
   }

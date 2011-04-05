@@ -29,6 +29,8 @@ import java.util.Properties;
 import java.util.TimerTask;
 
 import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.mom.util.DMQManager;
+import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.excepts.MessageValueException;
 import org.objectweb.joram.shared.messages.ConversionHelper;
 import org.objectweb.joram.shared.messages.Message;
@@ -62,6 +64,7 @@ public class AcquisitionModule implements ReliableTransmitter {
   /** Priority property name: tells the JMS priority of produced messages. */
   public static final String PRIORITY_PROPERTY = "priority";
 
+  /** Verify that one and only one correct interface is implemented. */
   public static void checkAcquisitionClass(String className) throws Exception {
     if (className == null) {
       throw new Exception("AcquisitionHandler class not defined: use " + CLASS_NAME
@@ -152,7 +155,6 @@ public class AcquisitionModule implements ReliableTransmitter {
       Class clazz = Class.forName(className);
       acquisitionHandler = clazz.newInstance();
 
-      // Verify that one and only one correct interface is implemented.
       if (acquisitionHandler instanceof AcquisitionDaemon) {
         isDaemon = true;
       }
@@ -238,11 +240,6 @@ public class AcquisitionModule implements ReliableTransmitter {
       logger.log(BasicLevel.DEBUG, "AcquisitionModule.setProperties = " + props + " daemon = " + isDaemon);
     }
 
-    // Restore defaults
-    isPrioritySet = false;
-    isPersistencySet = false;
-    isExpirationSet = false;
-    period = 0;
     if (acquisitionTask != null) {
       acquisitionTask.cancel();
     }
@@ -309,30 +306,37 @@ public class AcquisitionModule implements ReliableTransmitter {
   }
   
   /**
-   * In <b>periodic mode</b> (period > 0), a message with non-null properties
-   * transmit properties to the handler.<br>
+   * In <b>request mode</b> (period <= 0), a message received on the acquisition
+   * destination will launch an acquisition process. If the message holds
+   * non-null properties, these properties are first transmitted to the handler.<br>
    * <br>
-   * In <b>request mode</b>, a message received will launch an acquisition
-   * process with the given message properties or use the last known properties
-   * if empty.<br>
-   * <br>
+   * In other modes (<b>periodic mode</b> or <b>daemon</b>), such a message
+   * should not be received, so it is forwarded to the DMQ.
    */
   public void processMessages(ClientMessages cm) {
   	if (logger.isLoggable(BasicLevel.DEBUG)) {
       logger.log(BasicLevel.DEBUG, "AcquisitionModule.processMessages(" + cm + ')');
   	}
+    if (isDaemon || period > 0) {
+      // Go to DMQ
+      DMQManager dmqManager = new DMQManager(destination.getDMQAgentId(), destination.getId());
+      Iterator msgs = cm.getMessages().iterator();
+      while (msgs.hasNext()) {
+        dmqManager.addDeadMessage((Message) msgs.next(), MessageErrorConstants.NOT_ALLOWED);
+      }
+      dmqManager.sendToDMQ();
+      return;
+    }
     Iterator msgs = cm.getMessages().iterator();
-    Properties msgProperties = null;
     while (msgs.hasNext()) {
       Message msg = (Message) msgs.next();
-      // If non-empty, sets the new properties
+      // If non-empty, sets the new properties on the handler
+      // AcquisitionModule properties are left unchanged, unless we use setProperties admin command.
       if (msg.properties != null) {
-      	msgProperties = AcquisitionModule.transform(msg.properties);
-        setProperties(msgProperties);
+        Properties msgProperties = AcquisitionModule.transform(msg.properties);
+        ((AcquisitionHandler) acquisitionHandler).setProperties(msgProperties);
       }
-      if (!isDaemon && period <= 0) {
-        AgentServer.getTimer().schedule(new AcquisitionTask(), 0);
-      }
+      AgentServer.getTimer().schedule(new AcquisitionTask(), 0);
     }
   }
   
