@@ -84,6 +84,7 @@ public class ConnectionClose4 extends TestCase {
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);
+      stopAgentServer((short) 0);
     } finally {
       endTest();     
     }
