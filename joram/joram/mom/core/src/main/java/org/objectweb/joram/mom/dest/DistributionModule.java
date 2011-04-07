@@ -113,11 +113,13 @@ public class DistributionModule implements Serializable {
       Message msg = (Message) msgs.get(i);
       try {
         distributionHandler.distribute(msg);
+        destination.nbMsgsDeliverSinceCreation++;
       } catch (Exception exc) {
         logger.log(BasicLevel.ERROR, "DistributionModule: distribution error.", exc);
         if (dmqManager == null) {
           dmqManager = new DMQManager(cm.getDMQId(), destination.getDMQAgentId(), destination.getId());
         }
+        destination.nbMsgsSentToDMQSinceCreation++;
         dmqManager.addDeadMessage(msg, MessageErrorConstants.UNDELIVERABLE);
       }
     }
