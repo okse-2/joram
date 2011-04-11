@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.objectweb.joram.mom.dest.AdminTopic;
+import org.objectweb.joram.mom.notifications.GetProxyIdNot;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.JmsRequestGroup;
 import org.objectweb.joram.shared.client.ProducerMessages;
@@ -315,5 +316,26 @@ public class ConnectionManager implements ConnectionManagerMBean {
       initCount += cnxManager.getInitiatedConnectionCount();
     }
     return initCount;
+  }
+
+  /**
+   * Checks the validity of the given name and password.
+   * 
+   * @param userName the name of the user
+   * @param password the password of the user
+   * @return <code>true</code> if the name and password match an existing user.
+   */
+  public boolean checkCredentials(String userName, String password) {
+    try {
+      Identity identity = createIdentity(Identity.getRootName(userName), password,
+          Identity.getRootIdentityClass(userName));
+      GetProxyIdNot gpin = new GetProxyIdNot(identity, null);
+      gpin.invoke(AdminTopic.getDefault());
+      return true;
+    } catch (Exception exc) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG, "", exc);
+      return false;
+    }
   }
 }
