@@ -91,7 +91,8 @@
          optimize="${optimize}"
          deprecation="${deprecation}"
          nowarn="${nowarn}"
-         verbose="${verbose}">
+         verbose="${verbose}"
+         includeantruntime="false">
     <classpath refid="project.class.path"/>
     <include name="framework/*.java"/>
     <include name="utils/*.java"/>
