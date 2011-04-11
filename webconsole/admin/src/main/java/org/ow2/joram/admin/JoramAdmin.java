@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -44,7 +44,7 @@ public abstract class JoramAdmin {
 
   private EngineMBean engine;
 
-  public abstract boolean connect(String login, String password);
+  public abstract boolean connect(String login, String password) throws Exception;
 
   public void start(AdminListener listener) {
     this.listener = listener;
