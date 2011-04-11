@@ -140,6 +140,7 @@
               !com.google.gwt.*,
               !com.smartgwt.*,
               !com.allen_sauer.gwt.log.*,
+              !org.ow2.easybeans.osgi.annotation,
               javax.servlet,
               *</Import-Package>
             <Bundle-Activator>org.ow2.joram.admin.Activator</Bundle-Activator>
