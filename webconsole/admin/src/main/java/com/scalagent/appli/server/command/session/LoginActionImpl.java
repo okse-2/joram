@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -40,7 +40,7 @@ public class LoginActionImpl extends ActionImpl<LoginResponse, LoginAction, RPCS
     try {
       result = cache.connectJORAM(loginAction.getLogin(), loginAction.getPassword());
       if (!result) {
-        info = BaseRPCServiceUtils.getString("Error while loging-in");
+        info = BaseRPCServiceUtils.getString("Incorrect user / password.");
       }
     } catch (Throwable exc) {
       info = "Unexpected server error: " + exc.toString();
