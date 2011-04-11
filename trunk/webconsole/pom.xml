@@ -21,7 +21,7 @@
   </parent>
     
   <properties>
-    <joram.version>5.5.0-SNAPSHOT</joram.version>
+    <joram.version>5.6.0-SNAPSHOT</joram.version>
   </properties>
 
   <modules>
