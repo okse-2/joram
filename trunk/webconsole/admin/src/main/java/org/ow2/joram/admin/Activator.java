@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,29 +27,14 @@ import org.osgi.framework.BundleContext;
 
 public class Activator implements BundleActivator {
 
-  private static final String LOGIN_PROPERTY = "org.ow2.joram.web.admin.name";
-  private static final String PASSWORD_PROPERTY = "org.ow2.joram.web.admin.password";
-
   private static BundleContext m_context;
-
-  private static String adminName = "joram";
-
-  private static String adminPass = "joram";
 
   public static BundleContext getContext() {
     return m_context;
   }
 
-  public static boolean checkCredentials(String user, String pass) {
-    return user.equals(adminName) && pass.equals(adminPass);
-  }
-
   public void start(BundleContext context) throws Exception {
     m_context = context;
-    if (context.getProperty(LOGIN_PROPERTY) != null)
-      adminName = context.getProperty(LOGIN_PROPERTY);
-    if (context.getProperty(PASSWORD_PROPERTY) != null)
-      adminPass = context.getProperty(PASSWORD_PROPERTY);
   }
 
   public void stop(BundleContext context) throws Exception {
