@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,6 +24,7 @@ package org.objectweb.joram.client.jms;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Map;
 
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
@@ -388,7 +389,7 @@ public class Message implements javax.jms.Message {
    * @exception JMSException  Actually never thrown.
    */
   public final String getJMSType() throws JMSException {
-    return ConversionHelper.toString(momMsg.getOptionalHeader("JMSType"));
+    return momMsg.jmsType;
   }
 
   /**
@@ -397,17 +398,7 @@ public class Message implements javax.jms.Message {
    * @exception JMSException  Actually never thrown.
    */
   public final void setJMSType(String type) throws JMSException {
-    momMsg.setOptionalHeader("JMSType", type);
-  }
-
-  /**
-   *  Copies all of the mappings from the optionalHeader of this message to
-   * the specified hashtable. These mappings will replace any mappings that
-   * this Hashtable had for any of the keys currently in the optional header.
-   */
-  public void getOptionalHeader(Hashtable h) {
-    if (momMsg.optionalHeader == null) return;
-    momMsg.optionalHeader.copyInto(h);
+    momMsg.jmsType = type;
   }
 
   // =========================================================
@@ -455,11 +446,11 @@ public class Message implements javax.jms.Message {
   }
 
   /**
-   *  Copies all of the mappings from the properties of this message to
-   * the specified hashtable. These mappings will replace any mappings that
-   * this Hashtable had for any of the keys currently in the properties.
+   * Copies all of the mappings from the properties of this message to
+   * the specified map. These mappings will replace any mappings that
+   * this Map had for any of the keys currently in the properties.
    */
-  public void getProperties(Hashtable h) {
+  public void getProperties(Map h) {
     if (momMsg.properties == null) return;
     momMsg.properties.copyInto(h);
   }
@@ -625,16 +616,20 @@ public class Message implements javax.jms.Message {
 
     if (name.startsWith("JMSX")) {
       if (name.equals("JMSXGroupID")) {
-        momMsg.setOptionalHeader(name, ConversionHelper.toString(value));
+        momMsg.setProperty(name, ConversionHelper.toString(value));
       } else if (name.equals("JMSXGroupSeq")) {
         try {
-          momMsg.setOptionalHeader(name, new Integer(ConversionHelper.toInt(value)));
+          momMsg.setProperty(name, new Integer(ConversionHelper.toInt(value)));
         } catch (MessageValueException mE) {
           throw new MessageFormatException(mE.getMessage());
         }
       } else {
         throw new JMSException("Property names with prefix 'JMSX' are reserved.");
       }
+    } else if (name.startsWith("JMS_JORAM")) {
+      if (propertiesRO)
+        throw new MessageNotWriteableException("Can't set property as the message properties are READ-ONLY.");
+      momMsg.setProperty(name, value);
     } else if (name.startsWith("JMS")) {
       throw new JMSException("Property names with prefix 'JMS' are  reserved.");
     } else if (name.equalsIgnoreCase("NULL") ||
@@ -801,10 +796,8 @@ public class Message implements javax.jms.Message {
     if (name == null || name.equals(""))
       throw new IllegalArgumentException("Invalid property name: " + name);
 
-    if (name.startsWith("JMSX")) {
-      if (name.equals("JMSXDeliveryCount"))
-        return new Integer(momMsg.deliveryCount);
-      return momMsg.getOptionalHeader(name);
+    if (name.equals("JMSXDeliveryCount")) {
+      return new Integer(momMsg.deliveryCount);
     }
     return momMsg.getProperty(name);
   }

@@ -45,6 +45,9 @@ import org.objectweb.joram.shared.admin.CreateUserReply;
 import org.objectweb.joram.shared.admin.CreateUserRequest;
 import org.objectweb.joram.shared.admin.DeleteSubscriptionMessage;
 import org.objectweb.joram.shared.admin.DeleteUser;
+import org.objectweb.joram.shared.admin.GetDMQSettingsReply;
+import org.objectweb.joram.shared.admin.GetDMQSettingsRequest;
+import org.objectweb.joram.shared.admin.GetNbMaxMsgRequest;
 import org.objectweb.joram.shared.admin.GetNumberReply;
 import org.objectweb.joram.shared.admin.GetSubscription;
 import org.objectweb.joram.shared.admin.GetSubscriptionMessage;
@@ -54,9 +57,6 @@ import org.objectweb.joram.shared.admin.GetSubscriptionMessageRep;
 import org.objectweb.joram.shared.admin.GetSubscriptionRep;
 import org.objectweb.joram.shared.admin.GetSubscriptions;
 import org.objectweb.joram.shared.admin.GetSubscriptionsRep;
-import org.objectweb.joram.shared.admin.GetDMQSettingsRequest;
-import org.objectweb.joram.shared.admin.GetDMQSettingsReply;
-import org.objectweb.joram.shared.admin.GetNbMaxMsgRequest;
 import org.objectweb.joram.shared.admin.SetDMQRequest;
 import org.objectweb.joram.shared.admin.SetNbMaxMsgRequest;
 import org.objectweb.joram.shared.admin.SetThresholdRequest;
@@ -625,9 +625,6 @@ public class User extends AdministeredObject implements UserMBean {
                      new Long(msg.getJMSTimestamp()).toString());
     if (msg.getJMSType() != null)
       prop.setProperty("JMSType", msg.getJMSType());
-
-    // Adds optional header properties
-    msg.getOptionalHeader(prop);
 
     return prop;
   }
