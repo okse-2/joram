@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -23,6 +23,7 @@
 package org.objectweb.joram.client.jms.connection;
 
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -60,13 +61,33 @@ public class RequestMultiplexer {
   
   private static Logger logger = Debug.getLogger(RequestMultiplexer.class.getName());
 
+  /**
+   * Converts a {@link MomExceptionReply} to the corresponding
+   * {@link JMSException}.
+   * 
+   * @param excReply the MOM reply to convert
+   * @return the corresponding Exception
+   */
+  public static JMSException buildJmsException(MomExceptionReply excReply) {
+    JMSException jmsExc = null;
+    int excType = excReply.getType();
+    if (excType == MomExceptionReply.AccessException) {
+      jmsExc = new JMSSecurityException(excReply.getMessage());
+    } else if (excType == MomExceptionReply.DestinationException) {
+      jmsExc = new InvalidDestinationException(excReply.getMessage());
+    } else {
+      jmsExc = new JMSException(excReply.getMessage());
+    }
+    return jmsExc;
+  }
+
   private Connection cnx;
 
   private volatile int status;
 
   private RequestChannel channel;
 
-  public Hashtable requestsTable;
+  private Map requestsTable;
 
   private int requestCounter;
 
@@ -285,20 +306,13 @@ public class RequestMultiplexer {
     ReplyListener rl = (ReplyListener)requestsTable.get(requestKey);
     if (reply instanceof MomExceptionReply) {
       MomExceptionReply excReply = (MomExceptionReply) reply;
-      int excType =  excReply.getType();
-      JMSException jmsExc = null;
-      if (excType == MomExceptionReply.AccessException) {
-        jmsExc = new JMSSecurityException(excReply.getMessage());
-      } else if (excType == MomExceptionReply.DestinationException) {
-        jmsExc = new InvalidDestinationException(excReply.getMessage());
-      } else {
-        jmsExc = new JMSException(excReply.getMessage());
-      }
       if (rl instanceof ErrorListener) {
-        ((ErrorListener)rl).errorReceived(requestId, jmsExc);
+        ((ErrorListener) rl).errorReceived(requestId, excReply);
       } else {
         // The listener is null or doesn't implement ErrorListener
-        onException(jmsExc);
+        if (exceptionListener != null) {
+          exceptionListener.onException(buildJmsException(excReply));
+        }
       }
     } else {
       if (logger.isLoggable(BasicLevel.DEBUG))
@@ -518,7 +532,5 @@ public class RequestMultiplexer {
         timer.schedule(this, heartBeat, heartBeat);
     }
   }
-
-  
 
 }

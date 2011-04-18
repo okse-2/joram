@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -29,6 +29,7 @@ import javax.jms.JMSSecurityException;
 import org.objectweb.joram.shared.client.AbstractJmsReply;
 import org.objectweb.joram.shared.client.AbstractJmsRequest;
 import org.objectweb.joram.shared.client.ConsumerMessages;
+import org.objectweb.joram.shared.client.MomExceptionReply;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -173,11 +174,12 @@ public class Requestor implements ReplyListener, ErrorListener {
       } else if (status == Status.DONE) {
         // Status
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, " -> request #" + requestId + " done");      
-        if (reply instanceof AbstractJmsReply) {
-          return (AbstractJmsReply)reply;
-        } else if (reply instanceof JMSException) {
-          throw (JMSException)reply;
+          logger.log(BasicLevel.DEBUG, " -> request #" + requestId + " done");
+        if (reply instanceof MomExceptionReply) {
+          JMSException jmsExc = RequestMultiplexer.buildJmsException((MomExceptionReply) reply);
+          throw jmsExc;
+        } else if (reply instanceof AbstractJmsReply) {
+          return (AbstractJmsReply) reply;
         } else {
           // Reply aborted or thread interrupted.
           return null;
@@ -203,7 +205,7 @@ public class Requestor implements ReplyListener, ErrorListener {
     throw new AbortedRequestException();
   }
 
-  public synchronized void errorReceived(int replyId, JMSException exc) {
+  public synchronized void errorReceived(int replyId, MomExceptionReply exc) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Requestor.errorReceived(" + replyId + ',' + exc + ')');
     
