@@ -163,7 +163,7 @@
   
   <properties>
     <!-- joram protocol -->
-    <joram.protocol>55</joram.protocol>
+    <joram.protocol>56</joram.protocol>
     <!--  dependencies versions -->
     <ow2.version>1.1</ow2.version>
     <mail.version>1.4.1</mail.version>
@@ -179,9 +179,9 @@
     <commons-dbcp.version>1.2.2</commons-dbcp.version>
     <mysql-connector-java.version>5.1.6</mysql-connector-java.version>
     <connector.version>1.0.3</connector.version>
-    <felix.main.version>3.0.1</felix.main.version>
-    <felix.shell.version>1.4.1</felix.shell.version>
-    <felix.remote.version>1.0.4</felix.remote.version>
+    <felix.main.version>3.2.0</felix.main.version>
+    <felix.shell.version>1.4.2</felix.shell.version>
+    <felix.remote.version>1.1.2</felix.remote.version>
     <felix.tui.version>1.4.1</felix.tui.version>
     <!-- to prevent [WARNING] Using platform encoding -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
