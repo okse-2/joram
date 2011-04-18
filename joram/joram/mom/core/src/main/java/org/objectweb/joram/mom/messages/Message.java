@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
-import org.objectweb.joram.shared.excepts.MessageException;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -276,7 +275,7 @@ public final class Message implements Serializable, MessageView {
    * @throws MessageException          Specified by the JMS API.
    * @throws IllegalArgumentException  If the key name is illegal (null or empty string).
    */
-  public void setObjectProperty(String name, Object value) throws MessageException {
+  public void setObjectProperty(String name, Object value) {
     msg.setProperty(name, value);
   }
 
