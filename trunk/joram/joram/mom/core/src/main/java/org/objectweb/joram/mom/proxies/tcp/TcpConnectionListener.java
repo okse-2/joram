@@ -190,10 +190,10 @@ public class TcpConnectionListener extends Daemon {
       NetOutputStream nos = new NetOutputStream(sock);
 
       byte[] magic = StreamUtil.readByteArrayFrom(is, 8);
-      for (int i=0; i<5; i++) {
-        if (magic[i] != MetaData.joramMagic[i] && magic[i] > 0) {
-          String errorMsg = "Bad magic number:" + new String(magic, 0, 5) + magic[5] + '.' + magic[6] + '/' + magic[7];
-        	logger.log(BasicLevel.ERROR, errorMsg);
+      for (int i = 0; i < 5; i++) {
+        if (magic.length == i || magic[i] != MetaData.joramMagic[i] && magic[i] > 0) {
+          String errorMsg = "Bad magic number. Client is not compatible with JORAM.";
+          logger.log(BasicLevel.ERROR, errorMsg);
           protocolErrorCount++;
           throw new IllegalAccessException(errorMsg);
         }
