@@ -83,13 +83,9 @@ class Interpreter {
       else
           value = "NON_PERSISTENT";
     } else if (name.equals("JMSType")) {
-      value = wrapToString(message.getOptionalHeader("JMSType"));
-    } else if (name.startsWith("JMSX")) {
-      if (name.equals("JMSXDeliveryCounts"))
-        // Checking JMSX header names:
-        value = new Integer(message.deliveryCount);
-      else
-        value = message.getOptionalHeader(name);
+      value = message.jmsType;
+    } else if (name.equals("JMSXDeliveryCount")) {
+      value = new Integer(message.deliveryCount);
     } else {
       // Checking properties:
       value = message.getProperty(name);
