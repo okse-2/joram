@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -429,9 +429,6 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
                      new Long(msg.getJMSTimestamp()).toString());
     if (msg.getJMSType() != null)
       prop.setProperty("JMSType", msg.getJMSType());
-
-    // Adds optional header properties
-    msg.getOptionalHeader(prop);
 
     return prop;
   }
