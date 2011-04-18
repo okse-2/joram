@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2006 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,7 @@ import org.objectweb.joram.shared.client.MomExceptionReply;
  * A <code>MessageValueException</code> is thrown when a value carried by a
  * message is incorrectly accessed or typed.
  */
-public class MessageValueException extends MessageException {
+public class MessageValueException extends MomException {
   /**
    * 
    */
