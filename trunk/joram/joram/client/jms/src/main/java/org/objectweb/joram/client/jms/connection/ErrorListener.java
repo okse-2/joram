@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2004 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -22,10 +22,10 @@
  */
 package org.objectweb.joram.client.jms.connection;
 
-import javax.jms.JMSException;
+import org.objectweb.joram.shared.client.MomExceptionReply;
 
 public interface ErrorListener {
 
-  public void errorReceived(int requestId, JMSException exc);
+  public void errorReceived(int requestId, MomExceptionReply exc);
 
 }
