@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -48,7 +48,7 @@ import fr.dyade.aaa.common.stream.Streamable;
  */
 public final class Message implements Cloneable, Serializable, Streamable {
   /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 2L;
+  private static final long serialVersionUID = 3L;
 
   // default value from javax.jms.Message (jms 1.1)
   public static final int NON_PERSISTENT = 1;
@@ -64,41 +64,6 @@ public final class Message implements Cloneable, Serializable, Streamable {
    * Constructs a bright new <code>Message</code>.
    */
   public Message() {}
-
-  /**
-   * Table holding header fields that may be required by particular
-   * clients (such as JMS clients).
-   */
-  public transient Properties optionalHeader = null;
-
-  /**
-   * Returns an optional header field value.
-   *
-   * @param name  The header field name.
-   */
-  public Object getOptionalHeader(String name) {
-    if (optionalHeader == null)
-      return null;
-
-    return optionalHeader.get(name);
-  }
-
-  /**
-   * Sets an optional header field value.
-   *
-   * @param name  The header field name.
-   * @param value  The corresponding value.
-   */
-  public void setOptionalHeader(String name, Object value) {
-    if (name == null || name.equals(""))
-      throw new IllegalArgumentException("Invalid header name: " + name);
-
-    if (value == null) return;
-
-    if (optionalHeader == null)
-      optionalHeader = new Properties();
-    optionalHeader.put(name, value);
-  }
 
   /** Body of the message. */
   public transient byte[] body = null;
@@ -167,10 +132,16 @@ public final class Message implements Cloneable, Serializable, Streamable {
   public transient int type = SIMPLE;
 
   /**
+   * The JMSType header field contains a message type identifier supplied by a
+   * client when a message is sent.
+   */
+  public transient String jmsType = null;
+
+  /**
    * The message priority from 0 to 9, 9 being the highest.
    * By default, the priority is 4?
    */
-  public transient int priority = 4;
+  public transient int priority = DEFAULT_PRIORITY;
  
   /** The message expiration time, by default 0 for infinite time-to-live. */
   public transient long expiration = 0;
@@ -408,9 +379,6 @@ public final class Message implements Cloneable, Serializable, Streamable {
         clone.body = new byte[body.length];
         System.arraycopy(body, 0, clone.body, 0, body.length);
       }
-      if (optionalHeader != null) {
-        clone.optionalHeader = (Properties) optionalHeader.clone();
-      }
       if (properties != null) {
         clone.properties = (Properties) properties.clone();
       }
@@ -432,10 +400,17 @@ public final class Message implements Cloneable, Serializable, Streamable {
     return null;
   }
 
-//   public static int bodyROFlag = 	0x00000001;
-//   public static int propertiesROFlag =  0x00000002;
-  public static int redeliveredFlag =   0x00000004;
-  public static int persistentFlag =    0x00000008;
+  private static final short typeFlag = 0x0001;
+  private static final short replyToIdFlag = 0x0002;
+  private static final short replyToTypeFlag = 0x0004;
+  private static final short propertiesFlag = 0x0008;
+  private static final short priorityFlag = 0x0010;
+  private static final short expirationFlag = 0x0020;
+  private static final short corrrelationIdFlag = 0x0040;
+  private static final short deliveryCountFlag = 0x0080;
+  private static final short jmsTypeFlag = 0x0100;
+  private static final short redeliveredFlag = 0x0200;
+  private static final short persistentFlag = 0x0400;
 
   /* ***** ***** ***** ***** *****
    * Streamable interface
@@ -453,27 +428,37 @@ public final class Message implements Cloneable, Serializable, Streamable {
   }
 
   public void writeHeaderTo(OutputStream os) throws IOException {
-    int bool = 0;
-
-    StreamUtil.writeTo(type, os);
-    StreamUtil.writeTo(optionalHeader, os);
-//     bool = bool | (bodyRO?bodyROFlag:0);
-//     bool = bool | (propertiesRO?propertiesROFlag:0);
-    StreamUtil.writeTo(properties, os);
     StreamUtil.writeTo(id, os);
-    StreamUtil.writeTo(priority, os);
     StreamUtil.writeTo(toId, os);
     StreamUtil.writeTo(toType, os);
-    StreamUtil.writeTo(expiration, os);
-    StreamUtil.writeTo(replyToId, os);
-    StreamUtil.writeTo(replyToType, os);
     StreamUtil.writeTo(timestamp, os);
-    StreamUtil.writeTo(correlationId, os);
-    StreamUtil.writeTo(deliveryCount, os);
 
-    bool = bool | (redelivered?redeliveredFlag:0);
-    bool = bool | (persistent?persistentFlag:0);
-    StreamUtil.writeTo(bool, os);
+    // One short is used to know which fields are set
+    short s = 0;
+    if (type != SIMPLE) { s |= typeFlag; }
+    if (replyToId != null) { s |= replyToIdFlag; }
+    if (replyToType != 0) { s |= replyToTypeFlag; }
+    if (properties != null) { s |= propertiesFlag; }
+    if (priority != DEFAULT_PRIORITY) { s |= priorityFlag; }
+    if (expiration != 0) { s |= expirationFlag; }
+    if (correlationId != null) { s |= corrrelationIdFlag; }
+    if (deliveryCount != 0) { s |= deliveryCountFlag; }
+    if (jmsType != null) { s |= jmsTypeFlag; }
+    if (redelivered) { s |= redeliveredFlag; }
+    if (persistent) { s |= persistentFlag; }
+    
+    StreamUtil.writeTo(s, os);
+    
+    if (type != SIMPLE) { StreamUtil.writeTo(type, os); }
+    if (replyToId != null) { StreamUtil.writeTo(replyToId, os); }
+    if (replyToType != 0) { StreamUtil.writeTo(replyToType, os); }
+    if (properties != null) { StreamUtil.writeTo(properties, os); }
+    if (priority != DEFAULT_PRIORITY) { StreamUtil.writeTo(priority, os); }
+    if (expiration != 0) { StreamUtil.writeTo(expiration, os); }
+    if (correlationId != null) { StreamUtil.writeTo(correlationId, os); }
+    if (deliveryCount != 0) { StreamUtil.writeTo(deliveryCount, os); }
+    if (jmsType != null) { StreamUtil.writeTo(jmsType, os); }
+
   }
 
   /**
@@ -488,25 +473,25 @@ public final class Message implements Cloneable, Serializable, Streamable {
   }
 
   public void readHeaderFrom(InputStream is) throws IOException {
-    type = StreamUtil.readIntFrom(is);
-    optionalHeader = StreamUtil.readPropertiesFrom(is);
-    properties = StreamUtil.readPropertiesFrom(is);
     id = StreamUtil.readStringFrom(is);
-    priority = StreamUtil.readIntFrom(is);
     toId = StreamUtil.readStringFrom(is);
     toType = StreamUtil.readByteFrom(is);
-    expiration = StreamUtil.readLongFrom(is);
-    replyToId = StreamUtil.readStringFrom(is);
-    replyToType = StreamUtil.readByteFrom(is);
     timestamp = StreamUtil.readLongFrom(is);
-    correlationId = StreamUtil.readStringFrom(is);
-    deliveryCount = StreamUtil.readIntFrom(is);
+    
+    short s = StreamUtil.readShortFrom(is);
 
-    int bool = StreamUtil.readIntFrom(is);
-//     bodyRO = ((bool & bodyROFlag) != 0);
-//     propertiesRO = ((bool & propertiesROFlag) != 0);
-    redelivered = ((bool & redeliveredFlag) != 0);
-    persistent = ((bool & persistentFlag) != 0);
+    if ((s & typeFlag) != 0) { type = StreamUtil.readIntFrom(is); }
+    if ((s & replyToIdFlag) != 0) { replyToId = StreamUtil.readStringFrom(is); }
+    if ((s & replyToTypeFlag) != 0) { replyToType = StreamUtil.readByteFrom(is); }
+    if ((s & propertiesFlag) != 0) { properties = StreamUtil.readPropertiesFrom(is); }
+    if ((s & priorityFlag) != 0) { priority = StreamUtil.readIntFrom(is); }
+    if ((s & expirationFlag) != 0) { expiration = StreamUtil.readLongFrom(is); }
+    if ((s & corrrelationIdFlag) != 0) { correlationId = StreamUtil.readStringFrom(is); }
+    if ((s & deliveryCountFlag) != 0) { deliveryCount = StreamUtil.readIntFrom(is); }
+    if ((s & jmsTypeFlag) != 0) { jmsType = StreamUtil.readStringFrom(is); }
+    redelivered = (s & redeliveredFlag) != 0;
+    persistent = (s & persistentFlag) != 0;
+
   }
 
   /**
