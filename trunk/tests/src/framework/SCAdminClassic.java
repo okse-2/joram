@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -139,7 +139,6 @@ public class SCAdminClassic implements SCAdminItf {
 
     // Add JMX monitoring options
     argv.add("-Dcom.sun.management.jmxremote");
-    argv.add("-DMXServer=com.scalagent.jmx.JMXServer");
 
     // Retrieve port from a3 configuration file (a3servers.xml)
     int port = -1;
