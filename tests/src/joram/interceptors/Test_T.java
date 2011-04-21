@@ -69,6 +69,8 @@ public class Test_T extends TestCase implements javax.jms.MessageListener {
       topic.setFreeReading();
       topic.setFreeWriting();
 
+      assertEquals("", topic.getInterceptors());
+
       // add interceptors
       topic.addInterceptors("joram.interceptors.Exit1");
 
