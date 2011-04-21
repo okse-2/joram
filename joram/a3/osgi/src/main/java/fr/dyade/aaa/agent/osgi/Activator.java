@@ -44,7 +44,6 @@ public class Activator implements BundleActivator {
 
   public void start(BundleContext context) throws Exception {
     Activator.context = context;
-    //AgentServer.isOSGi = true;
 
     short sid = getShortProperty(AGENT_SERVER_ID_PROPERTY, (short) 0);
     String path = getProperty(AGENT_SERVER_STORAGE_PROPERTY, "s" + sid);
@@ -52,9 +51,29 @@ public class Activator implements BundleActivator {
 
     try {
       AgentServer.init(sid, path, null, cid);
-      AgentServer.start();
-    } catch (RuntimeException exc) {
-      logmon.log(BasicLevel.ERROR, "Error when starting AgentServer: ", exc);
+    } catch (Exception exc) {
+      System.out.println(AgentServer.getName() + "initialization failed: " + AgentServer.ERRORSTRING);
+      System.out.println(exc.toString());
+      System.out.println(AgentServer.ENDSTRING);
+      logmon.log(BasicLevel.ERROR, AgentServer.getName() + " initialization failed", exc);
+      throw exc;
+    }
+
+    try {
+      String errStr = AgentServer.start();
+      if (errStr == null) {
+        System.out.println(AgentServer.getName() + " started: " + AgentServer.OKSTRING);
+      } else {
+        System.out.println(AgentServer.getName() + " started: " + AgentServer.ERRORSTRING);
+        System.out.print(errStr);
+        System.out.println(AgentServer.ENDSTRING);
+      }
+    } catch (Exception exc) {
+      System.out.println(AgentServer.getName() + " start failed: " + AgentServer.ERRORSTRING);
+      System.out.print(exc.toString());
+      System.out.println(AgentServer.ENDSTRING);
+      logmon.log(BasicLevel.ERROR, AgentServer.getName() + " failed", exc);
+      throw exc;
     }
   }
 
