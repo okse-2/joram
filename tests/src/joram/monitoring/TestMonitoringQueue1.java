@@ -129,10 +129,10 @@ public class TestMonitoringQueue1 extends TestCase implements MessageListener {
       Enumeration enu = message.getPropertyNames();
       while (enu.hasMoreElements()) {
         String name = (String) enu.nextElement();
-        System.out.println(message.getStringProperty(name));
+        System.out.println(name + " -> " + message.getStringProperty(name));
       }
-      String id = message.getStringProperty("Joram#0:type=Destination,name=JoramAdminTopic:DestinationId");
-      assertTrue("#0.0.10".equals(id));
+      String id = message.getStringProperty("Joram#0:name=JoramAdminTopic,type=Destination:DestinationId");
+      assertEquals("#0.0.10", id);
     } catch (JMSException exc) {
       addError(exc);
     }

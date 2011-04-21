@@ -125,8 +125,8 @@ public class TestMonitoringTopic1 extends TestCase implements MessageListener {
     nbReceived++;
     // System.out.println("\n --> Message received :" + message);
     try {
-      String id = message.getStringProperty("Joram#0:type=Destination,name=JoramAdminTopic:DestinationId");
-      assertTrue("#0.0.10".equals(id));
+      String id = message.getStringProperty("Joram#0:name=JoramAdminTopic,type=Destination:DestinationId");
+      assertEquals("#0.0.10", id);
     } catch (JMSException exc) {
       addError(exc);
     }
