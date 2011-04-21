@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,43 +22,36 @@
 package com.scalagent.jmx;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.management.Attribute;
-import javax.management.AttributeList;
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
 import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
-import javax.management.NotCompliantMBeanException;
-import javax.management.NotificationFilter;
-import javax.management.NotificationListener;
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import javax.management.RuntimeOperationsException;
 
 import org.osgi.framework.ServiceRegistration;
 
 import fr.dyade.aaa.common.osgi.Activator;
-import fr.dyade.aaa.util.management.MXServer;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  * 
  */
-public class JMXServer implements MXServer {
+public class JMXServer {
+
+  public static boolean registerAsService = false;
   
   private MBeanServer mxserver = null;
 
   private Map registeredServices = new HashMap();
-  private Map registeredMBeans = new HashMap();
-
-  public static boolean registerAsService = false;
 
   public JMXServer(MBeanServer mxserver) {
     this.mxserver = mxserver;
@@ -110,122 +103,58 @@ public class JMXServer implements MXServer {
     computeOSGiServiceNames(beanClass.getSuperclass(), bean, registered);
   }
 
-  public String registerMBean(Object bean, String fullName) throws Exception {
-    if (mxserver == null) return null;
-
-    try {
-      ObjectName objName = ObjectName.getInstance(fullName);
-      registeredMBeans.put(objName, bean);
-      mxserver.registerMBean(bean, objName);
-      registerOSGi(bean, objName);
-    } catch (InstanceAlreadyExistsException exc) {
-      // The MBean is already under the control of the MBean server.
-      throw exc;
-    } catch (MBeanRegistrationException exc) {
-      // The preRegister (MBeanRegistration  interface) method of the MBean
-      // has thrown an exception. The MBean will not be registered.
-      throw exc;
-    } catch (NotCompliantMBeanException exc) {
-      // This object is not a JMX compliant MBean
-      throw exc;
-    } catch (RuntimeOperationsException exc) {
-      // Wraps a java.lang.IllegalArgumentException
-      throw exc;
-    }
-    
-    return fullName;
+  public void registerMBean(Object bean, String fullName) throws Exception {
+    if (mxserver == null)
+      return;
+    ObjectName objName = ObjectName.getInstance(fullName);
+    mxserver.registerMBean(bean, objName);
+    registerOSGi(bean, objName);
   }
 
   public void unregisterMBean(String fullName) throws Exception {
     if (mxserver == null)
       return;
-    try {
-      ObjectName objName = ObjectName.getInstance(fullName);
-      mxserver.unregisterMBean(objName);
-      registeredMBeans.remove(objName);
+    ObjectName objName = ObjectName.getInstance(fullName);
+    mxserver.unregisterMBean(objName);
 
-      if (registerAsService) {
-        ServiceRegistration registration = (ServiceRegistration) registeredServices.remove(objName);
-        if (registration != null) {
-          registration.unregister();
-        }
+    if (registerAsService) {
+      ServiceRegistration registration = (ServiceRegistration) registeredServices.remove(objName);
+      if (registration != null) {
+        registration.unregister();
       }
-    } catch (InstanceNotFoundException exc) {
-      // The MBean is not registered in the MBean server.
-      throw exc;
-    } catch (MBeanRegistrationException exc) {
-      // The preDeregister (MBeanRegistration  interface) method of the MBean
-      // has thrown an exception.
-      throw exc;
-    } catch (RuntimeOperationsException exc) {
-      // Wraps a java.lang.IllegalArgumentException
-      throw exc;
     }
-  }
-  
-  public void setAttribute(ObjectName name, Attribute attribute) throws Exception {
-    if (mxserver != null)
-        mxserver.setAttribute(name, attribute);
-  }
-  
-  public Object getMBeanInstance(ObjectName objName) {
-    return registeredMBeans.get(objName);
-  }
-  
-  /**
-   * Adds a listener to a registered MBean.
-   */
-  public void addNotificationListener(ObjectName name,
-                               NotificationListener listener,
-                               NotificationFilter filter,
-                               Object handback) throws Exception {
-    mxserver.addNotificationListener(name, listener, filter, handback);
-  }
-  
-  /**
-   * Removes a listener from a registered MBean.
-   */
-  public void removeNotificationListener(ObjectName name,
-                                  NotificationListener listener) throws Exception {
-    mxserver.removeNotificationListener(name, listener);
-  }
-  
-  /**
-   * Removes a listener from a registered MBean.
-   */
-  public void removeNotificationListener(ObjectName name,
-                                  NotificationListener listener,
-                                  NotificationFilter filter,
-                                  Object handback) throws Exception {
-    mxserver.removeNotificationListener(name, listener, filter, handback);
   }
 
-  public Object getAttribute(ObjectName objectName, String attribute) throws Exception {
+  public Object getAttribute(String objectName, String attribute) throws Exception {
     if (mxserver == null) {
       return null;
     }
-    return mxserver.getAttribute(objectName, attribute);
+    return mxserver.getAttribute(new ObjectName(objectName), attribute);
   }
   
-  public MBeanAttributeInfo[] getAttributes(ObjectName objectName) throws Exception {
+  public List getAttributeNames(String objectName) throws Exception {
     if (mxserver == null) {
       return null;
     }
-    return mxserver.getMBeanInfo(objectName).getAttributes();
+    MBeanAttributeInfo[] attrs = mxserver.getMBeanInfo(new ObjectName(objectName)).getAttributes();
+    List names = new ArrayList();
+    for (int i = 0; i < attrs.length; i++) {
+      names.add(attrs[i].getName());
+    }
+    return names;
   }
   
-  public AttributeList setAttributes(ObjectName name, AttributeList attributes) throws Exception {
-  	if (mxserver == null) {
-  		return null;
-  	}
-  	return mxserver.setAttributes(name, attributes);
-  }
-  
-  public Set queryNames(ObjectName objectName) {
+  public Set queryNames(String objectName) throws MalformedObjectNameException {
     if (mxserver == null) {
       return null;
     }
-    return mxserver.queryNames(objectName, null);
+    Set objectNames = mxserver.queryNames(new ObjectName(objectName), null);
+    Set names = new HashSet();
+    for (Iterator iterator = objectNames.iterator(); iterator.hasNext();) {
+      ObjectName objName = (ObjectName) iterator.next();
+      names.add(objName.getCanonicalName());
+    }
+    return names;
   }
   
 }
