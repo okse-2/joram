@@ -66,6 +66,9 @@ public class Test_Q extends TestCase {
         org.objectweb.joram.client.jms.Queue.create(0);
       queue.setFreeReading();
       queue.setFreeWriting();
+
+      assertEquals("", queue.getInterceptors());
+
       //add interceptors
       queue.addInterceptors("joram.interceptors.Exit1");
 
