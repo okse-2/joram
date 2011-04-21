@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,7 +29,6 @@ import java.util.Properties;
 import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
-import javax.management.ObjectName;
 
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.shared.admin.AdminReply;
@@ -89,23 +88,23 @@ public class JoramAdmin implements JoramAdminMBean {
    */
   public void exit() {
     try {
-      Iterator mbeans = MXWrapper.queryNames(new ObjectName(JMXBaseName + ":type=User,location=*,name=*")).iterator();
+      Iterator mbeans = MXWrapper.queryNames(JMXBaseName + ":type=User,location=*,name=*").iterator();
       while (mbeans.hasNext()) {
-        String name = ((ObjectName) mbeans.next()).getCanonicalName();
+        String name = (String) mbeans.next();
         System.out.println("unregisterMBean: " + name);
         MXWrapper.unregisterMBean(name);
       }
 
-      mbeans = MXWrapper.queryNames(new ObjectName(JMXBaseName + ":type=Queue,location=*,name=*")).iterator();
+      mbeans = MXWrapper.queryNames(JMXBaseName + ":type=Queue,location=*,name=*").iterator();
       while (mbeans.hasNext()) {
-        String name = ((ObjectName) mbeans.next()).getCanonicalName();
+        String name = (String) mbeans.next();
         System.out.println("unregisterMBean: " + name);
         MXWrapper.unregisterMBean(name);
       }
 
-      mbeans = MXWrapper.queryNames(new ObjectName(JMXBaseName + ":type=Topic,location=*,name=*")).iterator();
+      mbeans = MXWrapper.queryNames(JMXBaseName + ":type=Topic,location=*,name=*").iterator();
       while (mbeans.hasNext()) {
-        String name = ((ObjectName) mbeans.next()).getCanonicalName();
+        String name = (String) mbeans.next();
         System.out.println("unregisterMBean: " + name);
         MXWrapper.unregisterMBean(name);
       }
@@ -636,10 +635,7 @@ public class JoramAdmin implements JoramAdminMBean {
   transient protected String JMXBaseName = null;
 
   public void registerMBean(String base) {
-    if (MXWrapper.mxserver == null) return;
-
     JMXBaseName = base;
-    
     try {
       MXWrapper.registerMBean(this, JMXBaseName, "type=JoramAdmin");
     } catch (Exception e) {
@@ -649,6 +645,9 @@ public class JoramAdmin implements JoramAdminMBean {
   }
 
   public void unregisterMBean() {
+    if (JMXBaseName == null) {
+      return;
+    }
     try {
       MXWrapper.unregisterMBean(JMXBaseName, "type=JoramAdmin");
     } catch (Exception e) {

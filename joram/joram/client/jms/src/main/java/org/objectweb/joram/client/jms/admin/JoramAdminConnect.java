@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -47,7 +47,6 @@ public class JoramAdminConnect implements JoramAdminConnectMBean {
   
   public static void main(String args[]) {
     try {
-      MXWrapper.init();
 
       JoramAdminConnect admin = new JoramAdminConnect();
       admin.registerMBean();
@@ -63,8 +62,6 @@ public class JoramAdminConnect implements JoramAdminConnectMBean {
   }
 
   public void registerMBean() {
-    if (MXWrapper.mxserver == null) return;
-    
     try {
       MXWrapper.registerMBean(this, "JoramAdmin", "type=AdminConnect");
     } catch (Exception e) {
