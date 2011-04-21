@@ -60,7 +60,7 @@
   </target>
   
   <target name="custom.tests.bamboo"
-          description=" --> custom selection of tests to run on bamboo">
+          description=" --> custom selection of tests to run on bamboo (excludes dist, reconf, bridge, perf)">
     <property name="SCAdminClass" value="framework.SCAdminOSGi"/>
     <property name="isOSGi" value="true"/>
     <antcall target="tests.base"/>
@@ -160,10 +160,10 @@
     <antcall target="base.test_Trans_T"/>
   </target>
 
-  <target name="tests.exceptionlistener" 
-description=" --> launch all exceptionlistener tests">
+  <target name="tests.exceptionlistener" description=" --> launch all exceptionlistener tests">
     <antcall target="base.test_ExcpList_Q"/>
     <antcall target="base.test_ExcpList_T"/>
+	<antcall target="base.test_Exceptions"/>
   </target>
 
   <target name="tests.ha"
@@ -578,7 +578,7 @@ description=" --> launch all exceptionlistener tests">
     <!-- Launch test without initialization -->
     <java classname="${className}" failonerror="no" fork="yes" maxmemory="256m" dir="${test.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-DSCAdminClass=${SCAdminClass} -Dfelix.dir=${felix.dir} -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -Dframework.TestCase.TestId=${testid} -Dframework.TestCase.OutFile=${report.file} ${jvmargs}"/>
+      <jvmarg line="-DSCAdminClass=${SCAdminClass} -Dfelix.dir=${felix.dir} -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote -Dframework.TestCase.TestId=${testid} -Dframework.TestCase.OutFile=${report.file} ${jvmargs}"/>
       <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
       <arg line="${args}"/>
     </java>
@@ -1067,6 +1067,19 @@ description=" --> launch all exceptionlistener tests">
       <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
       <param name="testid" value="base.test_ExcpList_Q"/>
       <param name="className" value="joram.base.Test_ExcpList_Q"/>
+      <param name="jndiconf" value="base/jndi.properties"/>
+      <param name="a3conf" value="base/a3servers1.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="args" value=""/>
+    </antcall>
+  </target>
+  
+  <target name="base.test_Exceptions" depends="init.a3props,compile"
+          description=" --> test ExceptionListener with a queue.">
+    <antcall target="test.run" inheritAll="true">
+      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+      <param name="testid" value="base.test_Exceptions"/>
+      <param name="className" value="joram.base.Test_Exceptions"/>
       <param name="jndiconf" value="base/jndi.properties"/>
       <param name="a3conf" value="base/a3servers1.xml"/>
       <param name="jvmargs" value=""/>
@@ -1953,7 +1966,7 @@ description=" --> launch all exceptionlistener tests">
     <parallel>
       <java classname="fr.dyade.aaa.agent.AgentServer" failonerror="no" fork="yes" dir="${test.dir}">
         <classpath path="${project.class.path}"/>
-        <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+        <jvmarg line="-Dcom.sun.management.jmxremote"/>
         <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
         <arg line="0 ./s0"/>
       </java>
@@ -1984,7 +1997,7 @@ description=" --> launch all exceptionlistener tests">
     <parallel>
       <java classname="org.apache.felix.main.Main" failonerror="no" fork="yes" dir="${test.dir}">
         <classpath path="${felix.class.path}"/>
-        <jvmarg line="-Dosgi.shell.telnet.port=16010 -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+        <jvmarg line="-Dosgi.shell.telnet.port=16010 -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote"/>
         <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
         <arg line="0 ./s0"/>
       </java>
@@ -2015,7 +2028,7 @@ description=" --> launch all exceptionlistener tests">
     <parallel>
       <java classname="fr.dyade.aaa.agent.AgentServer" failonerror="no" fork="yes" dir="${test.dir}">
         <classpath path="${project.class.path}"/>
-        <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+        <jvmarg line="-Dcom.sun.management.jmxremote"/>
         <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
         <arg line="0 ./s0"/>
       </java>
@@ -2046,7 +2059,7 @@ description=" --> launch all exceptionlistener tests">
     <parallel>
       <java classname="org.apache.felix.main.Main" failonerror="no" fork="yes" dir="${test.dir}">
         <classpath path="${felix.class.path}"/>
-        <jvmarg line="-Dosgi.shell.telnet.port=16010 -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+        <jvmarg line="-Dosgi.shell.telnet.port=16010 -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote"/>
         <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
       </java>
 
@@ -2233,7 +2246,7 @@ description=" --> launch all exceptionlistener tests">
     <parallel>
       <java classname="fr.dyade.aaa.agent.AgentServer" failonerror="no" fork="yes" dir="${test.dir}">
         <classpath path="${project.class.path}"/>
-        <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+        <jvmarg line="-Dcom.sun.management.jmxremote"/>
         <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
         <arg line="0 ./s0"/>
       </java>
@@ -2265,7 +2278,7 @@ description=" --> launch all exceptionlistener tests">
     <parallel>
       <java classname="org.apache.felix.main.Main" failonerror="no" fork="yes" dir="${test.dir}">
         <classpath path="${felix.class.path}"/>
-        <jvmarg line="-Dosgi.shell.telnet.port=16010 -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+        <jvmarg line="-Dosgi.shell.telnet.port=16010 -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote"/>
         <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
       </java>
 
