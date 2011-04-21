@@ -60,17 +60,17 @@ public class HATest4 extends HABaseTest {
       // Starts the 3 replicas
       
       pw.println("Start the replica 0");
-      p[0] = CollocatedClient.startHACollocatedClient((short) 0, null, "0", type);
+      p[0] = CollocatedClient.startHACollocatedClient((short) 0, "0", type);
       
       Thread.sleep(2000);
 
       pw.println("Start the replica 1");
-      p[1] = CollocatedClient.startHACollocatedClient((short) 0, null, "1", type);
+      p[1] = CollocatedClient.startHACollocatedClient((short) 0, "1", type);
       
       Thread.sleep(2000);
 
       pw.println("Start the replica 2");
-      p[2] = CollocatedClient.startHACollocatedClient((short) 0, null, "2", type);
+      p[2] = CollocatedClient.startHACollocatedClient((short) 0, "2", type);
 
       Thread.sleep(2000);
 
@@ -119,7 +119,7 @@ public class HATest4 extends HABaseTest {
         Thread.sleep(10 * pause);
 
         pw.println("Start the replica " + i);
-        p[i] = CollocatedClient.startHACollocatedClient((short) 0, null, "" + i, type);
+        p[i] = CollocatedClient.startHACollocatedClient((short) 0, "" + i, type);
 
         i = ((i +1) %3);
       }
