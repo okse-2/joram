@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,14 +25,11 @@ import org.objectweb.joram.client.jms.admin.JoramAdminConnect;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-import fr.dyade.aaa.util.management.MXWrapper;
-
 public class Activator implements BundleActivator {
   
   private JoramAdminConnect joramAdminConnect;
   
   public void start(BundleContext context) throws Exception {
-    MXWrapper.init();
     joramAdminConnect = new JoramAdminConnect();
     joramAdminConnect.registerMBean();
   }
