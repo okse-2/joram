@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,53 +18,44 @@
  */
 package fr.dyade.aaa.util.management;
 
+import java.util.List;
 import java.util.Set;
 
-import javax.management.Attribute;
-import javax.management.AttributeList;
-import javax.management.MBeanAttributeInfo;
-import javax.management.NotificationFilter;
-import javax.management.NotificationListener;
-import javax.management.ObjectName;
+import com.scalagent.jmx.JMXServer;
 
 public final class MXWrapper {
-  /**
-   *  Name of the property that allow to configure the JMX server proxy: it
-   * gives the name of the implementation class of the MXServer interface.
-   * If the property is not defined JMX is not used.
-   */
-  public final static String ServerImpl = "MXServer";
 
-  public static MXServer mxserver = null;
-  
-  public static void init() throws Exception {
-    if (mxserver != null)
-      return;
-    String mxname = System.getProperty(ServerImpl);
-    if ((mxname != null) && (mxname.length() > 0))
-      Class.forName(mxname).newInstance();
+  public final static String NO_JMX = "JoramNoJMX";
+
+  private static JMXServer mxserver = null;
+
+  private static boolean firstTime = true;
+
+  private static void init() {
+    if (firstTime) {
+      firstTime = false;
+      // Initializes the JMX Wrapper
+      boolean noJmx = Boolean.getBoolean(NO_JMX);
+      if (!noJmx) {
+        mxserver = new JMXServer();
+      }
+    }
   }
-  
+
   public static String objectName(String domain, String name) {
     StringBuffer strbuf = new StringBuffer();
     strbuf.append(domain).append(':').append(name);
     return strbuf.toString();
   }
 
-  public static String  registerMBean(Object bean, String domain, String name) throws Exception {
-    return registerMBean(bean, objectName(domain, name));
-  }
-  
-  public static String registerMBean(Object bean, String fullName) throws Exception {
-    if (mxserver == null)
-      return null;
-    return mxserver.registerMBean(bean, fullName);
+  public static void registerMBean(Object bean, String domain, String name) throws Exception {
+    registerMBean(bean, objectName(domain, name));
   }
 
-  public static Object getMBeanInstance(ObjectName objName) {
-    if (mxserver == null)
-      return null;
-    return mxserver.getMBeanInstance(objName);
+  public static void registerMBean(Object bean, String fullName) throws Exception {
+    init();
+    if (mxserver != null)
+      mxserver.registerMBean(bean, fullName);
   }
 
   public static void unregisterMBean(String domain, String name) throws Exception {
@@ -72,77 +63,41 @@ public final class MXWrapper {
   }
 
   public static void unregisterMBean(String fullName) throws Exception {
-    if (mxserver == null)
-      return;
-    mxserver.unregisterMBean(fullName);
+    init();
+    if (mxserver != null)
+      mxserver.unregisterMBean(fullName);
   }
 
-  public static void setMXServer(MXServer server) {
+  public static void setMXServer(JMXServer server) {
     mxserver = server;
   }
 
-  public static MXServer getMXServer() {
+  public static JMXServer getMXServer() {
     return mxserver;
   }
-  
-  public static void setAttribute(ObjectName name, Attribute attribute) throws Exception {
-    if (mxserver != null)
-      mxserver.setAttribute(name, attribute);
-  }
-  
-  /**
-   * Adds a listener to a registered MBean.
-   */
-  public static void addNotificationListener(ObjectName name, NotificationListener listener,
-      NotificationFilter filter, Object handback) throws Exception {
-    if (mxserver != null)
-      mxserver.addNotificationListener(name, listener, filter, handback);
-  }
 
-  /**
-   * Removes a listener from a registered MBean.
-   */
-  public static void removeNotificationListener(ObjectName name, NotificationListener listener)
-      throws Exception {
-    if (mxserver != null)
-      mxserver.removeNotificationListener(name, listener);
-  }
-
-  /**
-   * Removes a listener from a registered MBean.
-   */
-  public static void removeNotificationListener(ObjectName name, NotificationListener listener,
-      NotificationFilter filter, Object handback) throws Exception {
-    if (mxserver != null)
-      mxserver.removeNotificationListener(name, listener, filter, handback);
-  }
-
-  public static Object getAttribute(ObjectName objectName, String attribute) throws Exception {
+  public static Object getAttribute(String objectName, String attribute) throws Exception {
+    init();
     if (mxserver == null) {
       return null;
     }
     return mxserver.getAttribute(objectName, attribute);
   }
-  
-  public static MBeanAttributeInfo[] getAttributes(ObjectName objectName) throws Exception {
-    if (mxserver == null) {
-      return null;
-    }
-    return mxserver.getAttributes(objectName);
-  }
-  
-  public AttributeList setAttributes(ObjectName name, AttributeList attributes) throws Exception {
-  	if (mxserver == null) {
-  		return null;
-  	}
-  	return mxserver.setAttributes(name, attributes);
-  }
-  
-  public static Set queryNames(ObjectName objectName) {
+
+  public static Set queryNames(String objectName) throws Exception {
+    init();
     if (mxserver == null) {
       return null;
     }
     return mxserver.queryNames(objectName);
   }
-  
+
+  public static List getAttributeNames(String mBean) throws Exception {
+    init();
+    if (mxserver == null) {
+      return null;
+    }
+    return mxserver.getAttributeNames(mBean);
+  }
+
 }
