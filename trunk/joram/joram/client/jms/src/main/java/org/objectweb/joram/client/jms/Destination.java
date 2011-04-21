@@ -409,8 +409,6 @@ public abstract class Destination extends AdministeredObject implements javax.jm
   }
   
   public String registerMBean(String base) {
-    if (MXWrapper.mxserver == null) return null;
-
     JMXBeanName = getJMXBeanName(base, this);
     try {
        MXWrapper.registerMBean(this, JMXBeanName);
@@ -423,7 +421,8 @@ public abstract class Destination extends AdministeredObject implements javax.jm
   }
 
   public void unregisterMBean() {
-    if ((MXWrapper.mxserver == null) || (JMXBeanName == null)) return;
+    if (JMXBeanName == null)
+      return;
 
     try {
       MXWrapper.unregisterMBean(JMXBeanName);
@@ -955,7 +954,8 @@ public abstract class Destination extends AdministeredObject implements javax.jm
    * @throws AdminException
    */
   public String getInterceptors() throws ConnectException, AdminException {
-  	AdminCommandReply reply = (AdminCommandReply) AdminModule.processAdmin(getName(), AdminCommandConstant.CMD_GET_INTERCEPTORS, null);
+    AdminCommandReply reply = (AdminCommandReply) getWrapper().processAdmin(getName(),
+        AdminCommandConstant.CMD_GET_INTERCEPTORS, null);
     return (String) reply.getProp().get(AdminCommandConstant.INTERCEPTORS);
   }
   
@@ -969,7 +969,7 @@ public abstract class Destination extends AdministeredObject implements javax.jm
   public void removeInterceptors(String interceptors) throws ConnectException, AdminException {
   	Properties prop = new Properties();
   	prop.put(AdminCommandConstant.INTERCEPTORS, interceptors);
-  	AdminModule.processAdmin(getName(), AdminCommandConstant.CMD_REMOVE_INTERCEPTORS, prop);
+    getWrapper().processAdmin(getName(), AdminCommandConstant.CMD_REMOVE_INTERCEPTORS, prop);
   }
   
   /**

@@ -286,8 +286,6 @@ public class User extends AdministeredObject implements UserMBean {
   transient protected String JMXBeanName = null;
 
   public String registerMBean(String base) {
-    if (MXWrapper.mxserver == null) return null;
-
     int sid = Integer.parseInt(proxyId.substring(proxyId.indexOf('.') +1, proxyId.lastIndexOf('.')));
     StringBuffer buf = new StringBuffer();
     buf.append(base);
@@ -305,7 +303,8 @@ public class User extends AdministeredObject implements UserMBean {
   }
 
   public void unregisterMBean() {
-    if ((MXWrapper.mxserver == null) || (JMXBeanName == null)) return;
+    if (JMXBeanName == null)
+      return;
 
     try {
       MXWrapper.unregisterMBean(JMXBeanName);
@@ -642,7 +641,7 @@ public class User extends AdministeredObject implements UserMBean {
   }
 
   /**
-   * add interceptors 
+   * Add interceptors
    * 
    * @param interceptors list of string className interceptor (separate with ",")
    * @throws ConnectException
@@ -655,19 +654,20 @@ public class User extends AdministeredObject implements UserMBean {
   }
   
   /**
-   * get interceptors.
+   * Get interceptors.
    * 
    * @return list of string className interceptor (separate with ",")
    * @throws ConnectException
    * @throws AdminException
    */
   public String getInterceptorsIN() throws ConnectException, AdminException {
-  	AdminCommandReply reply = (AdminCommandReply) AdminModule.processAdmin(getProxyId(), AdminCommandConstant.CMD_GET_INTERCEPTORS, null);
+    AdminCommandReply reply = (AdminCommandReply) getWrapper().processAdmin(getProxyId(),
+        AdminCommandConstant.CMD_GET_INTERCEPTORS, null);
     return (String) reply.getProp().get(AdminCommandConstant.INTERCEPTORS_IN);
   }
   
   /**
-   * remove interceptors 
+   * Remove interceptors 
    * 
    * @param interceptors list of string className interceptor (separate with ",")
    * @throws ConnectException
@@ -676,11 +676,11 @@ public class User extends AdministeredObject implements UserMBean {
   public void removeInterceptorsIN(String interceptors) throws ConnectException, AdminException {
   	Properties prop = new Properties();
   	prop.put(AdminCommandConstant.INTERCEPTORS_IN, interceptors);
-  	AdminModule.processAdmin(getProxyId(), AdminCommandConstant.CMD_REMOVE_INTERCEPTORS, prop);
+    getWrapper().processAdmin(getProxyId(), AdminCommandConstant.CMD_REMOVE_INTERCEPTORS, prop);
   }
   
   /**
-   * add interceptors
+   * Add interceptors
    * 
    * @param interceptors list of string className interceptor (separate with ",")
    * @throws ConnectException
@@ -693,19 +693,20 @@ public class User extends AdministeredObject implements UserMBean {
   }
   
   /**
-   * get interceptors.
+   * Get interceptors.
    * 
    * @return list of string className interceptor (separate with ",")
    * @throws ConnectException
    * @throws AdminException
    */
   public String getInterceptorsOUT() throws ConnectException, AdminException {
-  	AdminCommandReply reply = (AdminCommandReply) AdminModule.processAdmin(getProxyId(), AdminCommandConstant.CMD_GET_INTERCEPTORS, null);
+    AdminCommandReply reply = (AdminCommandReply) getWrapper().processAdmin(getProxyId(),
+        AdminCommandConstant.CMD_GET_INTERCEPTORS, null);
     return (String) reply.getProp().get(AdminCommandConstant.INTERCEPTORS_OUT);
   }
   
   /**
-   * remove interceptors 
+   * Remove interceptors 
    * 
    * @param interceptors list of string className interceptor (separate with ",")
    * @throws ConnectException
@@ -714,11 +715,11 @@ public class User extends AdministeredObject implements UserMBean {
   public void removeInterceptorsOUT(String interceptors) throws ConnectException, AdminException {
   	Properties prop = new Properties();
   	prop.put(AdminCommandConstant.INTERCEPTORS_OUT, interceptors);
-  	AdminModule.processAdmin(getProxyId(), AdminCommandConstant.CMD_REMOVE_INTERCEPTORS, prop);
+    getWrapper().processAdmin(getProxyId(), AdminCommandConstant.CMD_REMOVE_INTERCEPTORS, prop);
   }
   
   /**
-   * replace interceptor IN
+   * Replace interceptor IN
    * 
    * @param newInterceptor the new className interceptor.
    * @param oldInterceptor the old className interceptor.
@@ -733,7 +734,7 @@ public class User extends AdministeredObject implements UserMBean {
   }
   
   /**
-   * replace interceptor OUT
+   * Replace interceptor OUT
    * 
    * @param newInterceptor the new className interceptor.
    * @param oldInterceptor the old className interceptor.
