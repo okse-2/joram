@@ -46,7 +46,7 @@ goto end
 echo You must first launch servers to create run directory.
 goto end
 :no_arg
-echo !! Missing classname argument: try 'classic.ClassicAdmin', 'classic.Sender' and 'classic.Receiver' for example !!
+echo !! Missing classname argument: compile samples and try 'classic.ClassicAdmin', 'classic.Sender' and 'classic.Receiver' for example !!
 goto usage
 :too_many_args
 echo !! Too many arguments !!

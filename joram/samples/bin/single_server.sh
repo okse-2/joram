@@ -52,4 +52,4 @@ if $cygwin; then
 fi
 
 echo "== Launching a non persistent server#0 =="
-cd $SERVER_RUN_DIR; exec "${JAVA_HOME}"/bin/java -Dfelix.config.properties=file:config.properties -Dfr.dyade.aaa.agent.AgentServer.id=0 -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -classpath $CLASSPATH org.apache.felix.main.Main
+cd $SERVER_RUN_DIR; exec "${JAVA_HOME}"/bin/java -Dfelix.config.properties=file:config.properties -Dfr.dyade.aaa.agent.AgentServer.id=0 -Dcom.sun.management.jmxremote -classpath $CLASSPATH org.apache.felix.main.Main
