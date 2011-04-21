@@ -24,7 +24,7 @@ copy %CONFIG_DIR%\joram_ks %RUN_DIR%\joram_ks
 set PATH=%JAVA_HOME%\bin;%PATH%
 
 echo == Launching a non persistent server#0 with SSLTcpProxyService ==
-start /D %SERVER_RUN_DIR% java -Dfelix.config.properties=file:config.properties -Dfr.dyade.aaa.agent.AgentServer.id=0 -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -Dorg.objectweb.joram.keystore=%RUN_DIR%\joram_ks -Dorg.objectweb.joram.keystorepass=jorampass -classpath %CLASSPATH% org.apache.felix.main.Main
+start /D %SERVER_RUN_DIR% java -Dfelix.config.properties=file:config.properties -Dfr.dyade.aaa.agent.AgentServer.id=0 -Dcom.sun.management.jmxremote -Dorg.objectweb.joram.keystore=%RUN_DIR%\joram_ks -Dorg.objectweb.joram.keystorepass=jorampass -classpath %CLASSPATH% org.apache.felix.main.Main
 goto end
 :nokHome
 echo The JORAM_HOME environment variable is not defined correctly

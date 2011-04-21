@@ -28,9 +28,7 @@
     
     <path id="felix.class.path">
       <pathelement path="${java.class.path}/"/>
-      <fileset dir="${felix.dir}">
-        <include name="*.jar"/>
-      </fileset>
+      <fileset file="${felix.dir}/felix.jar"/>
     </path>
     <property name="felix.class.path" refid="felix.class.path"/>  	
   </target>
@@ -82,7 +80,7 @@
           failonerror="no" fork="yes"
           dir="${run.dir}/server${sid}">
       <classpath path="${felix.class.path}"/>
-      <jvmarg line="-Dfelix.config.properties=file:config.properties -Dfr.dyade.aaa.agent.AgentServer.id=${sid} -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <jvmarg line="-Dfelix.config.properties=file:config.properties -Dfr.dyade.aaa.agent.AgentServer.id=${sid} -Dcom.sun.management.jmxremote"/>
       <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y"/ -->
     </java>
   </target>
@@ -170,7 +168,7 @@
     <java classname="org.objectweb.joram.client.jms.admin.JoramAdminConnect"
           failonerror="no" fork="yes"
           dir="${run.dir}">
-      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote"/>
       <classpath path="${project.class.path}"/>
     </java>
   </target>
@@ -668,7 +666,7 @@
           failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer -Dorg.objectweb.joram.keystore=${keystore} -Dorg.objectweb.joram.keystorepass=${keystore_pass}"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote -Dorg.objectweb.joram.keystore=${keystore} -Dorg.objectweb.joram.keystorepass=${keystore_pass}"/>
       <arg line="0 s0"/>
     </java>
   </target>
@@ -1090,7 +1088,7 @@
 	          failonerror="no" fork="yes"
 	          dir="${run.dir}/ha${haId}">
 	      <classpath path="${project.class.path}"/>
-	      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+	      <jvmarg line="-Dcom.sun.management.jmxremote"/>
 	      <arg line="${sid} ./s${sid} ${haId}"/>
 	    </java>
 	  </target>
@@ -1165,7 +1163,7 @@
 	            failonerror="no" fork="yes"
 	            dir="${run.dir}/hajndi${haId}">
 	        <classpath path="${project.class.path}"/>
-	        <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+	        <jvmarg line="-Dcom.sun.management.jmxremote"/>
 	        <arg line="${sid} ./s${sid} ${haId}"/>
 	      </java>
 	    </target>
@@ -1199,7 +1197,7 @@
 	    		    failonerror="no" fork="yes"
 	      		  dir="${run.dir}/hajndi3">
 	    		<classpath path="${project.class.path}"/>
-	    		<jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+	    		<jvmarg line="-Dcom.sun.management.jmxremote"/>
 	    		<arg line="3 ./s3"/>
 	  		</java>
 			</target>

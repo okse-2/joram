@@ -30,7 +30,7 @@ fi
 # Test the argument number
 if [ -z $1 ]
 then
-  echo "!! Missing class argument: try 'classic.ClassicAdmin', 'classic.Sender' and 'classic.Receiver' for example !!"
+  echo "!! Missing class argument: compile samples and try 'classic.ClassicAdmin', 'classic.Sender' and 'classic.Receiver' for example !!"
   exit 1
 fi
 
