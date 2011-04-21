@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,9 @@
  */
 package org.ow2.joram.admin;
 
+import java.lang.management.ManagementFactory;
+
+import javax.management.MBeanServer;
 import javax.management.MBeanServerNotification;
 import javax.management.Notification;
 import javax.management.NotificationFilter;
@@ -29,14 +32,23 @@ import javax.management.NotificationListener;
 import javax.management.ObjectName;
 
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.util.management.MXWrapper;
 
+/**
+ * Utility class used to test the web admin module, without running over OSGi,
+ * for example in GWT hosted mode.
+ */
 public class JoramAdminJMX extends JoramAdmin {
 
   static final String REGISTERED = "JMX.mbean.registered";
   static final String UNREGISTERED = "JMX.mbean.unregistered";
 
+  private MBeanServer mbeanServer;
+
   ObjectName UserON, DestinationON;
+
+  public JoramAdminJMX() {
+    mbeanServer = ManagementFactory.getPlatformMBeanServer();
+  }
 
   public boolean connect(String login, String password) {
     return login.equals(password);
@@ -57,17 +69,9 @@ public class JoramAdminJMX extends JoramAdmin {
       DestinationON = new ObjectName("Joram#0:type=Destination,*");
 
       System.setProperty("com.sun.management.jmxremote", "true");
-      System.setProperty("MXServer", "com.scalagent.jmx.JMXServer");
 
-      MXWrapper.init();
-      try {
-        MXWrapper.addNotificationListener(new ObjectName("JMImplementation:type=MBeanServerDelegate"),
-            jmxListener, filter, null);
-      } catch (NullPointerException exc) {
-        System.err.println("JMX must be enabled, use -Dcom.sun.management.jmxremote "
-            + "-DMXServer=com.scalagent.jmx.JMXServer options in command line.");
-        System.exit(-1);
-      }
+      mbeanServer.addNotificationListener(new ObjectName("JMImplementation:type=MBeanServerDelegate"),
+          jmxListener, filter, null);
 
       AgentServer.init((short) 0, "./s0", null);
       AgentServer.start();
@@ -90,7 +94,7 @@ public class JoramAdminJMX extends JoramAdmin {
         MBeanServerNotification not = (MBeanServerNotification) n;
         ObjectName mbeanName = not.getMBeanName();
 
-        Object mbean = MXWrapper.getMBeanInstance(mbeanName);
+        Object mbean = mbeanServer.getObjectInstance(mbeanName);
 
         if (not.getType().equals(REGISTERED)) {
           handleAdminObjectAdded(mbean);
