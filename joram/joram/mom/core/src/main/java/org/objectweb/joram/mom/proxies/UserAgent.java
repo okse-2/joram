@@ -1382,17 +1382,11 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
   /**
    * Method implementing the JMS proxy reaction to a <code>SessCreateDestRequest</code>
    * requesting the creation of a destination.
-   * 
-   * 
    * <p>
    * Creates the queue, sends it a <code>SetRightRequest</code> for granting
    * WRITE access to all, and wraps a <code>SessCreateTDReply</code> in a
    * <code>SyncReply</code> notification it sends to itself. This latest
    * action's purpose is to preserve causality.
-   *
-   * Method implementing the JMS proxy reaction to a
-   * <code>SessCreateTTRequest</code> requesting the creation of a temporary
-   * topic.
    * <p>
    * Creates the topic, sends it a <code>SetRightRequest</code> for granting
    * WRITE access to all, and wraps a <code>SessCreateTDReply</code> in a
@@ -2790,8 +2784,16 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
 				break;
 			case AdminCommandConstant.CMD_GET_INTERCEPTORS:
 				replyProp = new Properties();
-				replyProp.put(AdminCommandConstant.INTERCEPTORS_IN, InterceptorsHelper.getListInterceptors(interceptorsIN));
-				replyProp.put(AdminCommandConstant.INTERCEPTORS_OUT, InterceptorsHelper.getListInterceptors(interceptorsOUT));
+				if (interceptors_in == null) {
+	                replyProp.put(AdminCommandConstant.INTERCEPTORS_IN, "");
+				} else {
+	                replyProp.put(AdminCommandConstant.INTERCEPTORS_IN, InterceptorsHelper.getListInterceptors(interceptorsIN));
+				}
+				if (interceptors_out == null) {
+	                replyProp.put(AdminCommandConstant.INTERCEPTORS_OUT, "");
+				} else {
+	                replyProp.put(AdminCommandConstant.INTERCEPTORS_OUT, InterceptorsHelper.getListInterceptors(interceptorsOUT));
+				}
 				break;
 			case AdminCommandConstant.CMD_REPLACE_INTERCEPTORS:
 				prop = request.getProp();
