@@ -33,9 +33,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
-import javax.management.MBeanAttributeInfo;
-import javax.management.ObjectName;
-
 import org.objectweb.joram.mom.notifications.AbstractRequestNot;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.notifications.ExceptionReply;
@@ -564,15 +561,13 @@ public abstract class Destination extends Agent implements DestinationMBean {
     Hashtable stats = null;
 
     try {
-      ObjectName mbeanName = new ObjectName(getMBeanName());
-
-      MBeanAttributeInfo[] attributes = MXWrapper.getAttributes(mbeanName);
+      List attributes = MXWrapper.getAttributeNames(getMBeanName());
       if (attributes != null) {
-        stats = new Hashtable(attributes.length);
-        for (int k=0; k<attributes.length; k++) {
-          String name = attributes[k].getName();
+        stats = new Hashtable(attributes.size());
+        for (int k = 0; k < attributes.size(); k++) {
+          String name = (String) attributes.get(k);
           if (isValidJMXAttribute(name)) {
-            Object value = MXWrapper.getAttribute(mbeanName, name);
+            Object value = MXWrapper.getAttribute(getMBeanName(), name);
             if ((value != null) && ((value instanceof String) || (value instanceof Number)))
               stats.put(name, value);
           }
@@ -1029,7 +1024,11 @@ public abstract class Destination extends Agent implements DestinationMBean {
 				break;
 			case AdminCommandConstant.CMD_GET_INTERCEPTORS:
 				replyProp = new Properties();
-				replyProp.put(AdminCommandConstant.INTERCEPTORS, InterceptorsHelper.getListInterceptors(interceptors));
+				if (interceptors == null) {
+                    replyProp.put(AdminCommandConstant.INTERCEPTORS, "");
+				} else {
+	                replyProp.put(AdminCommandConstant.INTERCEPTORS, InterceptorsHelper.getListInterceptors(interceptors));
+				}
 				break;
 			case AdminCommandConstant.CMD_REPLACE_INTERCEPTORS:
 				prop = request.getProp();
