@@ -25,6 +25,8 @@ package joram.ha;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
@@ -41,23 +43,36 @@ import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.ha.local.HALocalConnectionFactory;
 
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.agent.SCAdminHelper;
 import framework.TestCase;
 
 public class CollocatedClient extends TestCase {
 
   public static Process startHACollocatedClient(short sid,
-                                                File dir,
                                                 String rid,
                                                 String dest) throws Exception {
-    String[] jvmargs = new String[] {
-                                     "-DnbClusterExpected=2",
-                                     "-DTransaction=fr.dyade.aaa.util.NullTransaction",
-                                     "-Ddest=" + dest};
 
-    String[] args = new String[] { rid };
+    String javapath = new File(new File(System.getProperty("java.home"), "bin"), "java").getPath();
+    String classpath = System.getProperty("java.class.path");
 
-    Process p = new SCAdminHelper().execAgentServer(sid, dir, jvmargs, "joram.ha.CollocatedClient", args);
+    List argv = new ArrayList();
+    argv.add(javapath);
+    argv.add("-classpath");
+    argv.add(classpath);
+    System.out.println(classpath);
+    argv.add("-DnbClusterExpected=2");
+    argv.add("-DTransaction=fr.dyade.aaa.util.NullTransaction");
+    argv.add("-Dcom.sun.management.jmxremote");
+    argv.add("-Ddest=" + dest);
+
+    argv.add(CollocatedClient.class.getName());
+    argv.add(Short.toString(sid));
+    argv.add("s" + sid);
+    argv.add(rid);
+
+    String[] command = (String[]) argv.toArray(new String[argv.size()]);
+
+    Process p = Runtime.getRuntime().exec(command);
+
     p.getErrorStream().close();
     p.getInputStream().close();
     p.getOutputStream().close();

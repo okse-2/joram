@@ -54,17 +54,17 @@ public class HATest3 extends HABaseTest {
       // Starts the 3 replicas
 
       pw.println("Start the replica 0");
-      p0 = CollocatedClient.startHACollocatedClient((short) 0, null, "0", type);
+      p0 = CollocatedClient.startHACollocatedClient((short) 0, "0", type);
 
       Thread.sleep(2000);
 
       pw.println("Start the replica 1");
-      p1 = CollocatedClient.startHACollocatedClient((short) 0, null, "1", type);
+      p1 = CollocatedClient.startHACollocatedClient((short) 0, "1", type);
 
       Thread.sleep(2000);
 
       pw.println("Start the replica 2");
-      p2 = CollocatedClient.startHACollocatedClient((short) 0, null, "2", type);
+      p2 = CollocatedClient.startHACollocatedClient((short) 0, "2", type);
 
       Thread.sleep(1000);
 
@@ -138,7 +138,7 @@ public class HATest3 extends HABaseTest {
       
       // Restarts the killed replica.
       pw.println("Start the replica 0");
-      p0 = CollocatedClient.startHACollocatedClient((short) 0, null, "0", type);
+      p0 = CollocatedClient.startHACollocatedClient((short) 0, "0", type);
 
       Thread.sleep(5000);
       
@@ -160,7 +160,7 @@ public class HATest3 extends HABaseTest {
       
       // Restarts the killed replica.
       pw.println("Start the replica 1");
-      p1 = CollocatedClient.startHACollocatedClient((short) 0, null, "1", type);
+      p1 = CollocatedClient.startHACollocatedClient((short) 0, "1", type);
 
       Thread.sleep(5000);
       
@@ -182,7 +182,7 @@ public class HATest3 extends HABaseTest {
       
       // Restarts the killed replica.
       pw.println("Start the replica 2");
-      p2 = CollocatedClient.startHACollocatedClient((short) 0, null, "2", type);
+      p2 = CollocatedClient.startHACollocatedClient((short) 0, "2", type);
 
       int i=0;
       for (; i < 3 * msgPerRound; ) {
