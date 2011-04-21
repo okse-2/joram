@@ -1157,13 +1157,6 @@ public final class AgentServer {
       // set properties
       setProperties(serverId, clusterId);
 
-      // Initializes the JMX Wrapper
-      try {
-        MXWrapper.init();
-      } catch (Exception exc) {
-        logmon.log(BasicLevel.ERROR, "can't instantiate MXServer.", exc);
-      }
-
       if (transaction == null) {
         try {
           String tname = getProperty("Transaction", "fr.dyade.aaa.util.NTransaction");
