@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,14 +24,11 @@ package fr.dyade.aaa.common.monitoring;
 
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Timer;
-
-import javax.management.MBeanAttributeInfo;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -92,7 +89,7 @@ public abstract class MonitoringTimerTask extends java.util.TimerTask implements
    * @param att   The name of the related attribute.
    * @param value The value of the related attribute.
    */
-  protected abstract void addRecord(ObjectName mbean, String att, Object value);
+  protected abstract void addRecord(String mbean, String att, Object value);
   
   /**
    * Finalize the record for the current time.
@@ -116,24 +113,24 @@ public abstract class MonitoringTimerTask extends java.util.TimerTask implements
 
       Set mBeans = null;
       try {
-        mBeans = MXWrapper.queryNames(new ObjectName(name));
-      } catch (MalformedObjectNameException exc) {
+        mBeans = MXWrapper.queryNames(name);
+      } catch (Exception exc) {
         logger.log(BasicLevel.ERROR, "MonitoringTimerTask.run, bad name: " + name, exc);
       }
 
       if (mBeans != null) {
         for (Iterator iterator = mBeans.iterator(); iterator.hasNext();) {
-          ObjectName mBean = (ObjectName) iterator.next();
+          String mBean = (String) iterator.next();
           StringTokenizer st = new StringTokenizer((String) attlist.get(name), ",");
           while (st.hasMoreTokens()) {
             String token = st.nextToken();
             if (token.equals("*")) {
               // Get all mbean's attributes
               try {
-                MBeanAttributeInfo[] attributes = MXWrapper.getAttributes(mBean);
+                List attributes = MXWrapper.getAttributeNames(mBean);
                 if (attributes != null) {
-                  for (int i = 0; i < attributes.length; i++) {
-                    String attname = attributes[i].getName();
+                  for (int i = 0; i < attributes.size(); i++) {
+                    String attname = (String) attributes.get(i);
                     try {
                       addRecord(mBean, attname, MXWrapper.getAttribute(mBean, attname));
                     } catch (Exception exc) {

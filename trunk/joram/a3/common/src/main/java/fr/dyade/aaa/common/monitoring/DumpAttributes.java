@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,10 +25,8 @@ package fr.dyade.aaa.common.monitoring;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
-import javax.management.MBeanAttributeInfo;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -52,8 +50,7 @@ public class DumpAttributes {
    * @param att    The name of the related attribute.
    * @param value  The value of the related attribute.
    */
-  static void addRecord(StringBuffer strbuf,
-                        ObjectName mbean, String att, Object value) {
+  static void addRecord(StringBuffer strbuf, String mbean, String att, Object value) {
     strbuf.append(mbean).append(':').append(att).append('=');
     Strings.toString(strbuf, value);
     strbuf.append('\n');
@@ -64,10 +61,9 @@ public class DumpAttributes {
     try {
       Set mBeans = null;
       try {
-        mBeans = MXWrapper.queryNames(new ObjectName(name));
-      } catch (MalformedObjectNameException exc) {
-        logger.log(BasicLevel.ERROR,
-                   "DumpAttributes.dumpAttributes, bad name: " + name, exc);
+        mBeans = MXWrapper.queryNames(name);
+      } catch (Exception exc) {
+        logger.log(BasicLevel.ERROR, "DumpAttributes.dumpAttributes, bad name: " + name, exc);
         return;
       }
       
@@ -76,14 +72,14 @@ public class DumpAttributes {
         StringBuffer strbuf = new StringBuffer();
 
         for (Iterator iterator = mBeans.iterator(); iterator.hasNext();) {
-          ObjectName mBean = (ObjectName) iterator.next();
+          String mBean = (String) iterator.next();
 
           // Get all mbean's attributes
           try {
-            MBeanAttributeInfo[] attributes = MXWrapper.getAttributes(mBean);
+            List attributes = MXWrapper.getAttributeNames(mBean);
             if (attributes != null) {
-              for (int i = 0; i < attributes.length; i++) {
-                String attname = attributes[i].getName();
+              for (int i = 0; i < attributes.size(); i++) {
+                String attname = (String) attributes.get(i);
                 try {
                   addRecord(strbuf, mBean, attname, MXWrapper.getAttribute(mBean, attname));
                 } catch (Exception exc) {

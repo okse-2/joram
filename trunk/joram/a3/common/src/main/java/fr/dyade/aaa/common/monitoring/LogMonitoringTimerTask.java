@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,8 +24,6 @@ package fr.dyade.aaa.common.monitoring;
 
 import java.util.Properties;
 import java.util.Timer;
-
-import javax.management.ObjectName;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -178,7 +176,7 @@ public class LogMonitoringTimerTask extends MonitoringTimerTask {
    * 
    * @see fr.dyade.aaa.common.monitoring.MonitoringTimerTask#addRecord(javax.management.ObjectName, java.lang.String, java.lang.Object)
    */
-  protected void addRecord(ObjectName mbean, String att, Object value) {
+  protected void addRecord(String mbean, String att, Object value) {
     strbuf.append('(').append(mbean).append(':').append(att).append('=').append(value).append(')');
   }
 
