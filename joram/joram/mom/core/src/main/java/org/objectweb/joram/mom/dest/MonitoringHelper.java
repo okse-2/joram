@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,12 +23,9 @@
 package org.objectweb.joram.mom.dest;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
-
-import javax.management.MBeanAttributeInfo;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
 
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -54,18 +51,18 @@ public class MonitoringHelper {
         logger.log(BasicLevel.DEBUG, "MonitoringHelper.getJMXValues() -> " + element.mbean);
       
       try {
-        Set mBeans = MXWrapper.queryNames(new ObjectName(element.mbean));
+        Set mBeans = MXWrapper.queryNames(element.mbean);
         if (mBeans != null) {
           for (Iterator iterator = mBeans.iterator(); iterator.hasNext();) {
-            ObjectName mBean = (ObjectName) iterator.next();
+            String mBean = (String) iterator.next();
             
             for (int j=0; j<element.attributes.length; j++) {
               try {
                 if (element.attributes[j].equals("*")) {
-                  MBeanAttributeInfo[] attributes = MXWrapper.getAttributes(mBean);
+                  List attributes = MXWrapper.getAttributeNames(mBean);
                   if (attributes != null) {
-                    for (int k=0; k<attributes.length; k++) {
-                      setMessageProperty(message, mBean, attributes[k].getName());
+                    for (int k = 0; k < attributes.size(); k++) {
+                      setMessageProperty(message, mBean, (String) attributes.get(k));
                     }
                   }
                 } else {
@@ -77,15 +74,13 @@ public class MonitoringHelper {
             }
           }
         }
-      } catch (MalformedObjectNameException exc) {
+      } catch (Exception exc) {
         logger.log(BasicLevel.ERROR, "Invalid MBean name : " + element.mbean, exc);
       }
     }
   }
   
-  private static void setMessageProperty(Message message,
-                                         ObjectName mbeanName,
-                                         String attrName) throws Exception {
+  private static void setMessageProperty(Message message, String mbeanName, String attrName) throws Exception {
     Object value = MXWrapper.getAttribute(mbeanName, attrName);
     if (value != null)
       message.setProperty(mbeanName + ":" + attrName, value);
