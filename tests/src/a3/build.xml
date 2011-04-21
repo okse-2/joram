@@ -254,7 +254,7 @@
       <classpath path="${project.class.path}"/>
       <jvmarg value="-Dframework.TestCase.TestId=${testid}"/>
       <jvmarg value="-Dframework.TestCase.OutFile=${report.file}"/>
-      <jvmarg line="-DSCAdminClass=${SCAdminClass} -Dfelix.dir=${felix.dir} -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer ${jvmargs}"/>
+      <jvmarg line="-DSCAdminClass=${SCAdminClass} -Dfelix.dir=${felix.dir} -Dfelix.config.properties=file:config.properties -Dcom.sun.management.jmxremote ${jvmargs}"/>
       <!-- jvmarg line="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y ${jvmargs}" -->
       <arg line="0 ./s0"/>
     </java>
@@ -976,7 +976,7 @@
           failonerror="no" fork="yes"
           dir="${test.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote"/>
       <arg line="0 ./s0"/>
     </java>
   </target>
@@ -986,7 +986,7 @@
           failonerror="no" fork="yes"
           dir="${test.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote"/>
       <arg line="1 ./s1"/>
     </java>
   </target>
@@ -996,7 +996,7 @@
           failonerror="no" fork="yes"
           dir="${test.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote"/>
       <arg line="2 ./s2"/>
     </java>
   </target>
@@ -1006,7 +1006,7 @@
           failonerror="no" fork="yes"
           dir="${test.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote"/>
       <arg line="1 ./s1"/>
     </java>
   </target>
@@ -1016,7 +1016,7 @@
           failonerror="no" fork="yes"
           dir="${test.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote"/>
       <arg line="2 ./s2"/>
     </java>
   </target>
@@ -1039,7 +1039,7 @@
           failonerror="no" fork="yes"
           dir="${test.dir}/server0">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote"/>
       <arg line="0 ./s0"/>
     </java>
   </target>
@@ -1050,7 +1050,7 @@
           failonerror="no" fork="yes"
           dir="${test.dir}/server0">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote"/>
       <arg line="0 ./s0"/>
     </java>
   </target>
@@ -1061,7 +1061,7 @@
           failonerror="no" fork="yes"
           dir="${test.dir}/server1">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote"/>
       <arg line="1 ./s1"/>
     </java>
   </target>
@@ -1072,7 +1072,7 @@
           failonerror="no" fork="yes"
           dir="${test.dir}/server2">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote"/>
       <arg line="2 ./s2"/>
     </java>
   </target>
@@ -1564,7 +1564,7 @@
           failonerror="no" fork="yes"
           dir="${test.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote"/>
       <arg line="0 ./s0"/>
     </java>
   </target>
@@ -1574,7 +1574,7 @@
           failonerror="no" fork="yes"
           dir="${test.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-Dcom.sun.management.jmxremote -DMXServer=com.scalagent.jmx.JMXServer"/>
+      <jvmarg line="-Dcom.sun.management.jmxremote"/>
       <arg line="0 ./s0"/>
     </java>
   </target>

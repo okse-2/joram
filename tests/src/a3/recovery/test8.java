@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C)  2001 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,11 +22,14 @@
  */
 package a3.recovery;
 
-import java.util.*;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
-
-
-import fr.dyade.aaa.agent.*;
+import fr.dyade.aaa.agent.Agent;
+import fr.dyade.aaa.agent.AgentId;
+import fr.dyade.aaa.agent.Channel;
+import fr.dyade.aaa.agent.Notification;
 import framework.TestCase;
 
 public class test8 extends TestCase {
@@ -127,7 +130,7 @@ public class test8 extends TestCase {
     public void react(AgentId from, Notification not) {
       try {
         if (not instanceof StartNot) {
-          String[] jvmargs = {"-DNTNoLockFile=true", "-Dcom.sun.management.jmxremote", "-DMXServer=com.scalagent.jmx.JMXServer"};
+          String[] jvmargs = { "-DNTNoLockFile=true", "-Dcom.sun.management.jmxremote" };
           System.out.println("start " + remote + " - " + bounce);
           startAgentServer(remote, jvmargs);
         } else if (not instanceof StopNot) {
