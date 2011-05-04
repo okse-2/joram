@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.objectweb.joram</groupId>
   <artifactId>joram-release</artifactId>
@@ -7,68 +8,16 @@
   <name>JORAM :: release</name>
   <url>http://maven.apache.org</url>
   <description>Provides a Joram release target.</description>
-  
+
   <parent>
-	  <groupId>org.objectweb.joram</groupId>
-		<artifactId>parent</artifactId>
-		<version>5.6.0-SNAPSHOT</version>
-	</parent>
-       
+    <groupId>org.objectweb.joram</groupId>
+    <artifactId>parent</artifactId>
+    <version>5.6.0-SNAPSHOT</version>
+  </parent>
+
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <executions>
-                  
-          <!-- ============= src =====================-->
-          <execution>
-            <id>joram-src</id>
-            <phase>install</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <descriptors>
-                <descriptor>src-assembly.xml</descriptor>
-              </descriptors>
-              <ignoreDirFormatExtensions>false</ignoreDirFormatExtensions>
-            </configuration>
-          </execution>
-          
-          <!-- ============= bin =====================-->
-          <execution>
-            <id>joram-bin</id>
-            <phase>install</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <descriptors>
-                <descriptor>samples-assembly.xml</descriptor>
-              </descriptors>
-              <appendAssemblyId>false</appendAssemblyId>
-              <ignoreDirFormatExtensions>false</ignoreDirFormatExtensions>
-            </configuration>
-          </execution>
-          
-          <!-- ============= raconfig =====================-->
-          <execution>
-            <id>joram-raconfig</id>
-            <phase>install</phase>
-            <goals>
-            	<goal>single</goal>
-            </goals>
-            <configuration>
-              <descriptors>
-                <descriptor>raconfig-assembly.xml</descriptor>
-              </descriptors>
-              <ignoreDirFormatExtensions>false</ignoreDirFormatExtensions>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      
+     
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -107,10 +56,309 @@
           </execution>
         </executions>
       </plugin>
+
+      <plugin>
+        <!-- Before the assembly execution, place the bundles in the appropriate directory -->
+        <groupId>org.ow2.util.maven</groupId>
+        <artifactId>maven-jbuilding-plugin</artifactId>
+        <version>1.0.29</version>
+        <inherited>false</inherited>
+
+        <executions>
+          <execution>
+            <id>copy-joram-artifacts</id>
+            <goals>
+              <goal>assemble</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <directory>repositories/maven2-internal</directory>
+              <artifactItems combine.children="append">
+                <!-- Joram base -->
+                <artifactItem>
+                  <groupId>org.objectweb.joram</groupId>
+                  <artifactId>a3-common</artifactId>
+                  <version>${joram.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.objectweb.joram</groupId>
+                  <artifactId>a3-rt</artifactId>
+                  <version>${joram.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.objectweb.joram</groupId>
+                  <artifactId>jcup</artifactId>
+                  <version>${joram.jcup.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.objectweb.joram</groupId>
+                  <artifactId>jndi-shared</artifactId>
+                  <version>${joram.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.objectweb.joram</groupId>
+                  <artifactId>jndi-server</artifactId>
+                  <version>${joram.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.objectweb.joram</groupId>
+                  <artifactId>joram-shared</artifactId>
+                  <version>${joram.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.objectweb.joram</groupId>
+                  <artifactId>joram-mom-core</artifactId>
+                  <version>${joram.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.objectweb.joram</groupId>
+                  <artifactId>jndi-client</artifactId>
+                  <version>${joram.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.objectweb.joram</groupId>
+                  <artifactId>joram-client-jms</artifactId>
+                  <version>${joram.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.objectweb.joram</groupId>
+                  <artifactId>joram-client-jca</artifactId>
+                  <version>${joram.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.objectweb.joram</groupId>
+                  <artifactId>joram-jca-jonas</artifactId>
+                  <version>${joram.version}</version>
+                  <type>rar</type>
+                  <side>server</side>
+                </artifactItem>
+                <!-- Joram extension -->
+                <artifactItem>
+                  <groupId>org.objectweb.joram</groupId>
+                  <artifactId>joram-mom-extensions-amqp</artifactId>
+                  <version>${joram.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.objectweb.joram</groupId>
+                  <artifactId>joram-mom-extensions-collector</artifactId>
+                  <version>${joram.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.objectweb.joram</groupId>
+                  <artifactId>joram-mom-extensions-ftp</artifactId>
+                  <version>${joram.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.objectweb.joram</groupId>
+                  <artifactId>joram-mom-extensions-jmsbridge</artifactId>
+                  <version>${joram.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.objectweb.joram</groupId>
+                  <artifactId>joram-mom-extensions-mail</artifactId>
+                  <version>${joram.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.objectweb.joram</groupId>
+                  <artifactId>joram-mom-extensions-scheduler</artifactId>
+                  <version>${joram.version}</version>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>generate-joram-deployment-plans</id>
+            <goals>
+              <goal>generate-maven2-deployment-plans</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <directory>/</directory>
+              <deploymentPlans>
+                <!-- Joram base -->
+                <deploymentPlan>
+                  <name>joram</name>
+                  <artifactItems>
+                    <artifactItem>
+                      <groupId>org.objectweb.joram</groupId>
+                      <artifactId>a3-common</artifactId>
+                      <version>${joram.version}</version>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.objectweb.joram</groupId>
+                      <artifactId>a3-rt</artifactId>
+                      <version>${joram.version}</version>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.objectweb.joram</groupId>
+                      <artifactId>jcup</artifactId>
+                      <version>${joram.jcup.version}</version>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.objectweb.joram</groupId>
+                      <artifactId>jndi-shared</artifactId>
+                      <version>${joram.version}</version>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.objectweb.joram</groupId>
+                      <artifactId>jndi-server</artifactId>
+                      <version>${joram.version}</version>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.objectweb.joram</groupId>
+                      <artifactId>joram-shared</artifactId>
+                      <version>${joram.version}</version>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.objectweb.joram</groupId>
+                      <artifactId>joram-mom-core</artifactId>
+                      <version>${joram.version}</version>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.objectweb.joram</groupId>
+                      <artifactId>jndi-client</artifactId>
+                      <version>${joram.version}</version>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.objectweb.joram</groupId>
+                      <artifactId>joram-client-jms</artifactId>
+                      <version>${joram.version}</version>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.objectweb.joram</groupId>
+                      <artifactId>joram-client-jca</artifactId>
+                      <version>${joram.version}</version>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.objectweb.joram</groupId>
+                      <artifactId>joram-jca-jonas</artifactId>
+                      <version>${joram.version}</version>
+                      <type>rar</type>
+                    </artifactItem>
+                  </artifactItems>
+                </deploymentPlan>
+                <!-- Joram extension -->
+                <deploymentPlan>
+                  <name>joram-extension</name>
+                  <artifactItems>
+                    <artifactItem>
+                      <groupId>org.objectweb.joram</groupId>
+                      <artifactId>joram-mom-extensions-amqp</artifactId>
+                      <version>${joram.version}</version>
+                      <start>false</start>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.objectweb.joram</groupId>
+                      <artifactId>joram-mom-extensions-collector</artifactId>
+                      <version>${joram.version}</version>
+                      <start>false</start>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.objectweb.joram</groupId>
+                      <artifactId>joram-mom-extensions-ftp</artifactId>
+                      <version>${joram.version}</version>
+                      <start>false</start>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.objectweb.joram</groupId>
+                      <artifactId>joram-mom-extensions-jmsbridge</artifactId>
+                      <version>${joram.version}</version>
+                      <start>false</start>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.objectweb.joram</groupId>
+                      <artifactId>joram-mom-extensions-mail</artifactId>
+                      <version>${joram.version}</version>
+                      <start>false</start>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.objectweb.joram</groupId>
+                      <artifactId>joram-mom-extensions-scheduler</artifactId>
+                      <version>${joram.version}</version>
+                      <start>false</start>
+                    </artifactItem>
+                  </artifactItems>
+                </deploymentPlan>
+              </deploymentPlans>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+
+          <!-- ============= src ===================== -->
+          <execution>
+            <id>joram-src</id>
+            <phase>install</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>src-assembly.xml</descriptor>
+              </descriptors>
+              <ignoreDirFormatExtensions>false</ignoreDirFormatExtensions>
+            </configuration>
+          </execution>
+
+          <!-- ============= bin ===================== -->
+          <execution>
+            <id>joram-bin</id>
+            <phase>install</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>samples-assembly.xml</descriptor>
+              </descriptors>
+              <appendAssemblyId>false</appendAssemblyId>
+              <ignoreDirFormatExtensions>false</ignoreDirFormatExtensions>
+            </configuration>
+          </execution>
+
+          <!-- ============= raconfig ===================== -->
+          <execution>
+            <id>joram-raconfig</id>
+            <phase>install</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>raconfig-assembly.xml</descriptor>
+              </descriptors>
+              <ignoreDirFormatExtensions>false</ignoreDirFormatExtensions>
+            </configuration>
+          </execution>
+          
+          <!-- ============= repositories ===================== -->
+          <execution>
+            <id>joram-repositories</id>
+            <phase>install</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>repositories-assembly.xml</descriptor>
+              </descriptors>
+              <ignoreDirFormatExtensions>false</ignoreDirFormatExtensions>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      
     </plugins>
   </build>
 
-  <dependencies>  
+
+  <dependencies>
     <dependency>
       <groupId>org.apache.geronimo.specs</groupId>
       <artifactId>geronimo-jms_1.1_spec</artifactId>
@@ -122,7 +370,7 @@
     <dependency>
       <groupId>org.objectweb.joram</groupId>
       <artifactId>jcup</artifactId>
-    </dependency> 
+    </dependency>
     <dependency>
       <groupId>org.objectweb.joram</groupId>
       <artifactId>joram-shared</artifactId>
@@ -289,5 +537,5 @@
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
-  </dependencies>  
+  </dependencies>
 </project>
