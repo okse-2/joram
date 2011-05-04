@@ -609,39 +609,67 @@ public class AMQPConnectionListener extends Daemon {
   private static void readProtocolHeader(InputStream in) throws IOException, FrameErrorException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "AMQPConnectionListener.readProtocolHeader(" + in + ')');
+
     StringBuffer buff = new StringBuffer();
     char c = (char) StreamUtil.readUnsignedByteFrom(in);
     buff.append(c);
-    if (c != 'A')
+    if (c != 'A') {
       throw new FrameErrorException("Invalid header: " + buff);
+    }
+
     c = (char) StreamUtil.readUnsignedByteFrom(in);
     buff.append(c);
-    if (c != 'M')
+    if (c != 'M') {
       throw new FrameErrorException("Invalid header: " + buff);
+    }
+
     c = (char) StreamUtil.readUnsignedByteFrom(in);
     buff.append(c);
-    if (c != 'Q')
+    if (c != 'Q') {
       throw new FrameErrorException("Invalid header: " + buff);
+    }
+
     c = (char) StreamUtil.readUnsignedByteFrom(in);
     buff.append(c);
-    if (c != 'P')
+    if (c != 'P') {
       throw new FrameErrorException("Invalid header: " + buff);
+    }
+
+    // Header style has changed between 0.9 and 0.9.1: try to accept 0.9 style
+    boolean style09 = false;
     int i = StreamUtil.readUnsignedByteFrom(in);
     buff.append(i);
-//    if (i != 0)
-//      throw new FrameErrorException("Invalid header: " + buff);
+    if (i != 0) {
+      if (i == 1) {
+        style09 = true;
+      } else {
+        throw new FrameErrorException("Invalid header: " + buff);
+      }
+    }
+
     i = StreamUtil.readUnsignedByteFrom(in);
     buff.append(i);
-//    if (i != AMQP.PROTOCOL.MAJOR)
-//      throw new FrameErrorException("Incorrect major version: " + i);
+    if (i != AMQP.PROTOCOL.MAJOR) {
+      if (!style09 || i != 1) {
+        throw new FrameErrorException("Incorrect major version: " + i);
+      }
+    }
+
     i = StreamUtil.readUnsignedByteFrom(in);
     buff.append(i);
-//    if (i != AMQP.PROTOCOL.MINOR)
-//      throw new FrameErrorException("Incorrect minor version: " + i);
+    if (i != AMQP.PROTOCOL.MINOR) {
+      if (!style09 || i != AMQP.PROTOCOL.MAJOR) {
+        throw new FrameErrorException("Incorrect minor version: " + i);
+      }
+    }
+
     i = StreamUtil.readUnsignedByteFrom(in);
     buff.append(i);
-//    if (i != AMQP.PROTOCOL.REVISION)
-//      throw new FrameErrorException("Incorrect revision version: " + i);
+    if (i != AMQP.PROTOCOL.REVISION) {
+      if (!style09 || i != AMQP.PROTOCOL.MINOR) {
+        throw new FrameErrorException("Incorrect revision version: " + i);
+      }
+    }
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "AMQPConnectionListener.readProtocolHeader: client protocol = "
           + buff.toString());
