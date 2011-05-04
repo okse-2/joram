@@ -131,7 +131,7 @@ public class TopicExchange extends IExchange {
     }
   }
 
-  public void publish(String routingKey, boolean mandatory, boolean immediate, BasicProperties properties,
+  public void doPublish(String routingKey, boolean mandatory, boolean immediate, BasicProperties properties,
       byte[] body, int channelNumber, short serverId, long proxyId) throws NoConsumersException,
       NotFoundException, TransactionException {
     Set<String> destQueues = new HashSet<String>();
@@ -161,6 +161,10 @@ public class TopicExchange extends IExchange {
 
   public boolean isUnused() {
     return bindings.size() == 0;
+  }
+
+  public String getType() {
+    return TYPE;
   }
 
   /**

@@ -46,15 +46,16 @@ import org.ow2.joram.mom.amqp.structures.Deliver;
 
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.util.Transaction;
+import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  * An AMQP queue.
  */
-public class Queue implements Serializable {
+public class Queue implements QueueMBean, Serializable {
 
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
-  
+
   public final static Logger logger = 
     fr.dyade.aaa.common.Debug.getLogger(Queue.class.getName());
   
@@ -105,6 +106,11 @@ public class Queue implements Serializable {
     prefixBE = PREFIX_BOUND_EXCHANGE + localName;
     if (durable) {
       saveQueue(this);
+    }
+    try {
+      MXWrapper.registerMBean(this, "AMQP", "type=Queue,name=" + name);
+    } catch (Exception exc) {
+      logger.log(BasicLevel.DEBUG, "Error registering MBean.", exc);
     }
   }
   
@@ -378,8 +384,16 @@ public class Queue implements Serializable {
     return autodelete;
   }
 
-  public int getMessageCount() {
+  public int getToDeliverMessageCount() {
     return toDeliver.size();
+  }
+
+  public int getToAckMessageCount() {
+    return toAck.size();
+  }
+
+  public long getHandledMessageCount() {
+    return msgCounter;
   }
 
   public List<String> getBoundExchanges() {
@@ -442,6 +456,12 @@ public class Queue implements Serializable {
         String exchangeName = iterBoundExchanges.next();
         deleteBoundExchange(exchangeName);
       }
+    }
+
+    try {
+      MXWrapper.unregisterMBean("AMQP", "type=Queue,name=" + name);
+    } catch (Exception exc) {
+      logger.log(BasicLevel.DEBUG, "Error unregistering MBean.", exc);
     }
   }
 

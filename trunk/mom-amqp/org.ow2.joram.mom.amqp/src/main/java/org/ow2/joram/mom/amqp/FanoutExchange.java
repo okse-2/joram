@@ -82,7 +82,7 @@ public class FanoutExchange extends IExchange {
     }
   }
 
-  public void publish(String routingKey, boolean mandatory, boolean immediate, BasicProperties properties,
+  public void doPublish(String routingKey, boolean mandatory, boolean immediate, BasicProperties properties,
       byte[] body, int channelNumber, short serverId, long proxyId) throws NoConsumersException,
       NotFoundException, TransactionException {
     Iterator<String> it = boundQueues.iterator();
@@ -100,6 +100,10 @@ public class FanoutExchange extends IExchange {
 
   public boolean isUnused() {
     return boundQueues.size() == 0;
+  }
+
+  public String getType() {
+    return TYPE;
   }
 
   public synchronized void removeQueueBindings(String queueName) {
