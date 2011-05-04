@@ -39,8 +39,9 @@ import org.ow2.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 import org.ow2.joram.mom.amqp.structures.PublishToQueue;
 
 import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.util.management.MXWrapper;
 
-public abstract class IExchange implements Serializable {
+public abstract class IExchange implements IExchangeMBean, Serializable {
   
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
@@ -57,6 +58,10 @@ public abstract class IExchange implements Serializable {
 
   protected boolean durable;
   
+  private long handledMessageCount;
+
+  private long publishedMessageCount;
+
   private boolean published;
   
   public IExchange() { }
@@ -65,12 +70,18 @@ public abstract class IExchange implements Serializable {
     this.name = name;
     this.durable = durable;
     saveName = PREFIX_EXCHANGE + Naming.getLocalName(name);
+    try {
+      MXWrapper.registerMBean(this, "AMQP", "type=Exchange,name=" + name);
+    } catch (Exception exc) {
+      logger.log(BasicLevel.DEBUG, "Error registering MBean.", exc);
+    }
   }
   
   protected void publishToQueue(String queueName, String routingKey, boolean immediate,
       BasicProperties properties, byte[] body, int channelNumber, short serverId, long proxyId)
       throws NoConsumersException, TransactionException {
     published = true;
+    publishedMessageCount++;
     if (Naming.isLocal(queueName)) {
       Queue queue = Naming.lookupQueue(queueName);
       queue.publish(new Message(name, routingKey, properties, body, Queue.FIRST_DELIVERY, false), immediate,
@@ -88,7 +99,14 @@ public abstract class IExchange implements Serializable {
     published = false;
   }
 
-  public abstract void publish(String routingKey, boolean mandatory, boolean immediate,
+  public final void publish(String routingKey, boolean mandatory, boolean immediate,
+      BasicProperties properties, byte[] body, int channelNumber, short serverId, long proxyId)
+      throws NoConsumersException, NotFoundException, TransactionException {
+    handledMessageCount++;
+    doPublish(routingKey, mandatory, immediate, properties, body, channelNumber, serverId, proxyId);
+  }
+
+  public abstract void doPublish(String routingKey, boolean mandatory, boolean immediate,
       BasicProperties properties, byte[] body, int channelNumber, short serverId, long proxyId)
       throws NoConsumersException, NotFoundException, TransactionException;
 
@@ -105,6 +123,18 @@ public abstract class IExchange implements Serializable {
 
   public abstract Set<String> getBoundQueues();
   
+  public String getName() {
+    return name;
+  }
+
+  public long getHandledMessageCount() {
+    return handledMessageCount;
+  }
+
+  public long getPublishedMessageCount() {
+    return publishedMessageCount;
+  }
+
   //**********************************************************
   //* Persistence
   //**********************************************************
@@ -159,6 +189,11 @@ public abstract class IExchange implements Serializable {
     }
     if (durable) {
       AgentServer.getTransaction().delete(saveName);
+    }
+    try {
+      MXWrapper.unregisterMBean("AMQP", "type=Exchange,name=" + name);
+    } catch (Exception exc) {
+      logger.log(BasicLevel.DEBUG, "Error unregistering MBean.", exc);
     }
   }
 

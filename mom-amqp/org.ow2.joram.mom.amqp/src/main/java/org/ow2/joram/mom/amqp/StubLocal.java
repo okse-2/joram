@@ -85,6 +85,9 @@ public class StubLocal {
 
     } else {
       if (!passive) {
+        // If passive is not set and the queue exists, the server MUST check that the
+        // existing queue has the same values for durable, exclusive, auto-delete,
+        // and arguments fields.
         if (durable != queue.isDurable()) {
           throw new PreconditionFailedException("Queue durable property do not match existing queue '"
               + queueName + "'.");
@@ -110,7 +113,7 @@ public class StubLocal {
       throw new NotFoundException("Unknown queue for deletion: '" + queueName + "'.");
     }
 
-    if (ifEmpty && queue.getMessageCount() > 0) {
+    if (ifEmpty && queue.getToDeliverMessageCount() > 0) {
       throw new PreconditionFailedException("Deletion error: queue '" + queueName + "' is not empty.");
     }
     if (ifUnused && queue.getConsumerCount() > 0) {
@@ -134,7 +137,7 @@ public class StubLocal {
       }
     }
     
-    return queue.getMessageCount();
+    return queue.getToDeliverMessageCount();
   }
 
   public static void queueBind(String queueName, String exchangeName, String routingKey,
@@ -276,9 +279,7 @@ public class StubLocal {
       throw new PreconditionFailedException("Deletion error: Exchange '" + exchangeName + "' is not unused.");
     }
     
-    if (exchange.durable) {
-      exchange.deleteExchange();
-    }
+    exchange.deleteExchange();
     Naming.unbindExchange(exchangeName);
 
     // Unbind queues bound to the exchange

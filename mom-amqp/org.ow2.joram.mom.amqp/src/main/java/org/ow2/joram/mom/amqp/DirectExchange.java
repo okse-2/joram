@@ -111,7 +111,7 @@ public class DirectExchange extends IExchange {
     }
   }
 
-  public void publish(String routingKey, boolean mandatory, boolean immediate, BasicProperties properties,
+  public void doPublish(String routingKey, boolean mandatory, boolean immediate, BasicProperties properties,
       byte[] body, int channelNumber, short serverId, long proxyId) throws NotFoundException,
       NoConsumersException, TransactionException {
     if (logger.isLoggable(BasicLevel.DEBUG)) {
@@ -136,6 +136,10 @@ public class DirectExchange extends IExchange {
 
   public boolean isUnused() {
     return bindings.size() == 0;
+  }
+
+  public String getType() {
+    return TYPE;
   }
 
   public synchronized void removeQueueBindings(String queueName) {
