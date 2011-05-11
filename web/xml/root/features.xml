@@ -304,8 +304,13 @@
 				</p>
 				
 				<ul>
-					<li>JMS acquisition / distribution (JMS bridge), 100% once and only once delivery is guaranteed
-					with a JMS bridge without having to resort to more heavyweight solutions such as JTA (XA).</li>
+					<li>JMS acquisition / distribution (JMS bridge), 100% once and only once delivery is
+					guaranteed with a JMS bridge without having to resort to more heavyweight solutions
+					such as JTA (XA). The last implementation (5.5) allows load-balancing and fail-over
+					through multiples JMS providers.</li>
+					<li>AMQP acquisition / distribution (AMQP bridge since 5.4), the implementation allows
+					load-balancing and fail-over through multiples AMQP providers with a 100% once and only
+					once delivery guaranteed.</li>
 					<li>Mail acquisition / distribution,</li>
 					<li>URL acquisition,</li>
 					<li>JMX acquisition,</li>
@@ -329,8 +334,8 @@
 				<strong>JMS bridge and others.</strong><br></br>
 				This allows you to bridge between JORAM and any other JMS 1.1 compliant provider.
 				This generic gateway allows JORAM applications to interoperate seamlessly with foreign applications
-				running on any JMS compliant messaging service. Additional gateways are also available with the SMTP
-				mail system and with the FTP file transfer.
+				running on any JMS compliant messaging service. Additional gateways are also available with AMQP, the
+				SMTP mail system and with the FTP file transfer.
 				Bridges are highly configurable.
 				</p>
 
@@ -392,9 +397,11 @@
 				</p>
 
 				<p>
-				<strong>Pluggable JMS interceptor.</strong><br></br>
+				<strong>Pluggable JMS and MOM interceptor.</strong><br></br>
 				JORAM defines an interceptor mechanism allowing to transparently process incoming and outcoming
-				messages.
+				messages through JMS sessions.<br></br>
+				A similar interception mechanism is available for processing messages in the MOM. Interceptors can
+				be located on destinations and on connection in/out channels.
 				</p>
 
 			</s2>
