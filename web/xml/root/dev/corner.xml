@@ -25,11 +25,11 @@
 
     <p>The following resources are proposed to the advanced users and developers:</p>
     <ul>
-      <li>The <a href="roadMap.xml">road map</a> presents the expected Joram evolutions.
+      <li>The <a href="roadMap.html">road map</a> presents the expected Joram evolutions.
       It also contains some calls to contributions.</li>
     </ul>
     <ul>
-      <li>The <a href="versions.xml">code updates</a> page provides in-depth descriptions of
+      <li>The <a href="versions.html">code updates</a> page provides in-depth descriptions of
       the evolutions of the SVN code base.</li>
     </ul>
     <ul>
