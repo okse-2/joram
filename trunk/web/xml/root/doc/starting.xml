@@ -171,6 +171,18 @@
       </ul>
       <p>Joram is now ready to work.</p>
     </s1>
+      
+    <s1 name="Checking out from SVN and building">
+      <p>Make sure you have SVN (subversion) installed; if not download it from the
+      <a href="http://subversion.tigris.org/">subversion</a> site:</p><ul>
+        <li><code>svn checkout svn://svn.forge.objectweb.org/svnroot/joram/trunk/joram</code></li>
+        <li>Change to <code>joram</code> created directory.</li>
+        <li>Launch maven through <code>mvn install</code> command.</li>
+      </ul>
+      <p>Joram is now ready to work.</p>
+      <p>Additionnals informations about svn are available
+      <a href="http://forge.ow2.org/plugins/scmsvn/index.php?group_id=4">here</a>.</p>
+    </s1>
 
   </body>
 </document>
