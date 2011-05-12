@@ -63,11 +63,12 @@ import fr.dyade.aaa.common.Daemon;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.StoppedQueueException;
 import fr.dyade.aaa.util.Transaction;
+import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  * Handles the AMQP frames received by the {@link AMQPConnectionListener}.
  */
-public class Proxy implements DeliveryListener {
+public class Proxy implements DeliveryListener, ProxyMBean {
 
   public static Logger logger = Debug.getLogger(Proxy.class.getName());
 
@@ -1055,10 +1056,38 @@ public class Proxy implements DeliveryListener {
   public void stop() {
     //queueIn.close();
     netServerIn.stop();
+
+    try {
+      MXWrapper.unregisterMBean("AMQP", "type=Proxy,name=" + name);
+    } catch (Exception exc) {
+      logger.log(BasicLevel.DEBUG, "Error unregistering MBean.", exc);
+    }
   }
 
   public void start() {
     netServerIn.start();
+
+    try {
+      MXWrapper.registerMBean(this, "AMQP", "type=Proxy,name=" + name);
+    } catch (Exception exc) {
+      logger.log(BasicLevel.DEBUG, "Error registering MBean.", exc);
+    }
+  }
+
+  public int getQueueInSize() {
+    return queueIn.size();
+  }
+
+  public int getQueueOutSize() {
+    return queueOut.size();
+  }
+
+  public List<QueueShell> getExclusiveQueues() {
+    return exclusiveQueues;
+  }
+
+  public Set<Integer> getOpenedChannels() {
+    return channelContexts.keySet();
   }
 
   final class NetServerIn extends Daemon {
