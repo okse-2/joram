@@ -24,6 +24,8 @@
 package org.ow2.joram.mom.amqp;
 
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -116,11 +118,13 @@ public class FanoutExchange extends IExchange {
   public Set<String> getBoundQueues() {
     return boundQueues;
   }
+
   /**
    * @param out
    * @throws IOException
    */
-  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+  public void writeExternal(ObjectOutput out) throws IOException {
+    super.writeExternal(out);
     out.writeObject(boundQueues);
   }
 
@@ -129,8 +133,8 @@ public class FanoutExchange extends IExchange {
    * @throws IOException
    * @throws ClassNotFoundException
    */
-  private void readObject(java.io.ObjectInputStream in)
-  throws IOException, ClassNotFoundException {
+  public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    super.readExternal(in);
     boundQueues = (Set<String>) in.readObject();
   }
 }

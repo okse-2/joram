@@ -23,8 +23,10 @@
  */
 package org.ow2.joram.mom.amqp;
 
+import java.io.Externalizable;
 import java.io.IOException;
-import java.io.Serializable;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.rmi.AlreadyBoundException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -50,7 +52,7 @@ import fr.dyade.aaa.util.Transaction;
 /**
  * An AMQP queue.
  */
-public class Queue implements QueueMBean, Serializable {
+public class Queue implements QueueMBean, Externalizable {
 
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
@@ -69,20 +71,20 @@ public class Queue implements QueueMBean, Serializable {
   private boolean exclusive;
 
   // Exchanges bound to this queue. May contain duplicates.
-  private transient List<String> boundExchanges = new ArrayList<String>();
+  private List<String> boundExchanges = new ArrayList<String>();
 
   // These 2 fields are used to identify the consumer for exclusive queues
-  private transient short serverId;
-  private transient long proxyId;
+  private short serverId;
+  private long proxyId;
 
   private long msgCounter;
 
-  private transient TreeSet<Message> toDeliver = new TreeSet<Message>();
+  private TreeSet<Message> toDeliver = new TreeSet<Message>();
   
-  private transient TreeSet<Message> toAck = new TreeSet<Message>();
+  private TreeSet<Message> toAck = new TreeSet<Message>();
   
   // Use LinkedHashMap because ordering is necessary for round robin consumers
-  private transient Map<SubscriptionKey, Subscription> consumers = new LinkedHashMap<SubscriptionKey, Subscription>();
+  private Map<SubscriptionKey, Subscription> consumers = new LinkedHashMap<SubscriptionKey, Subscription>();
   
   public static String PREFIX_QUEUE = "Queue_";
   private static final String PREFIX_MSG = "M.";
@@ -620,7 +622,7 @@ public class Queue implements QueueMBean, Serializable {
    * @param out
    * @throws IOException
    */
-  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+  public void writeExternal(ObjectOutput out) throws IOException {
     // Writes queue name
     out.writeObject(name);
     // Writes durable
@@ -640,8 +642,7 @@ public class Queue implements QueueMBean, Serializable {
    * @throws IOException
    * @throws ClassNotFoundException
    */
-  private void readObject(java.io.ObjectInputStream in)
-  throws IOException, ClassNotFoundException {
+  public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
     toDeliver = new TreeSet<Message>();
     toAck = new TreeSet<Message>();
     consumers = new LinkedHashMap<SubscriptionKey, Subscription>();
