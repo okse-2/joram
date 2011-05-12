@@ -24,6 +24,7 @@ package org.ow2.joram.mom.amqp;
 
 import java.rmi.AlreadyBoundException;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -31,6 +32,7 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  * Naming directory for all local exchanges, proxies and queues.
@@ -63,6 +65,12 @@ public class Naming {
     IExchange previousValue = exchanges.putIfAbsent(localName, ref);
     if (previousValue != null) {
       throw new AlreadyBoundException(name);
+    } else {
+      try {
+        MXWrapper.registerMBean(ref, "AMQP", "type=Exchange,name=" + localName);
+      } catch (Exception exc) {
+        logger.log(BasicLevel.DEBUG, "Error registering MBean.", exc);
+      }
     }
   }
 
@@ -76,6 +84,12 @@ public class Naming {
     Queue previousValue = queues.putIfAbsent(localName, ref);
     if (previousValue != null) {
       throw new AlreadyBoundException(name);
+    } else {
+      try {
+        MXWrapper.registerMBean(ref, "AMQP", "type=Queue,name=" + localName);
+      } catch (Exception exc) {
+        logger.log(BasicLevel.DEBUG, "Error registering MBean.", exc);
+      }
     }
   }
 
@@ -106,14 +120,30 @@ public class Naming {
    * @param name
    */
   public static void unbindQueue(String name) {
-    queues.remove(getLocalName(name));
+    String localName = getLocalName(name);
+    Queue queue = queues.remove(localName);
+    if (queue != null) {
+      try {
+        MXWrapper.unregisterMBean("AMQP", "type=Queue,name=" + localName);
+      } catch (Exception exc) {
+        logger.log(BasicLevel.DEBUG, "Error unregistering MBean.", exc);
+      }
+    }
   }
 
   /**
    * @param name
    */
   public static void unbindExchange(String name) {
-    exchanges.remove(getLocalName(name));
+    String localName = getLocalName(name);
+    IExchange exchange = exchanges.remove(localName);
+    if (exchange != null) {
+      try {
+        MXWrapper.unregisterMBean("AMQP", "type=Exchange,name=" + localName);
+      } catch (Exception exc) {
+        logger.log(BasicLevel.DEBUG, "Error unregistering MBean.", exc);
+      }
+    }
   }
 
   /**
@@ -244,8 +274,24 @@ public class Naming {
   }
   
   public static void clearAll() {
+    for (Iterator<String> iterator = exchanges.keySet().iterator(); iterator.hasNext();) {
+      try {
+        MXWrapper.unregisterMBean("AMQP", "type=Exchange,name=" + iterator.next());
+      } catch (Exception exc) {
+        logger.log(BasicLevel.DEBUG, "Error unregistering MBean.", exc);
+      }
+    }
     exchanges.clear();
+
+    for (Iterator<String> iterator = queues.keySet().iterator(); iterator.hasNext();) {
+      try {
+        MXWrapper.unregisterMBean("AMQP", "type=Queue,name=" + iterator.next());
+      } catch (Exception exc) {
+        logger.log(BasicLevel.DEBUG, "Error unregistering MBean.", exc);
+      }
+    }
     queues.clear();
+
     proxies.clear();
   }
 

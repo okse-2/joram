@@ -46,7 +46,6 @@ import org.ow2.joram.mom.amqp.structures.Deliver;
 
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.util.Transaction;
-import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
  * An AMQP queue.
@@ -106,11 +105,6 @@ public class Queue implements QueueMBean, Serializable {
     prefixBE = PREFIX_BOUND_EXCHANGE + localName;
     if (durable) {
       saveQueue(this);
-    }
-    try {
-      MXWrapper.registerMBean(this, "AMQP", "type=Queue,name=" + name);
-    } catch (Exception exc) {
-      logger.log(BasicLevel.DEBUG, "Error registering MBean.", exc);
     }
   }
   
@@ -456,12 +450,6 @@ public class Queue implements QueueMBean, Serializable {
         String exchangeName = iterBoundExchanges.next();
         deleteBoundExchange(exchangeName);
       }
-    }
-
-    try {
-      MXWrapper.unregisterMBean("AMQP", "type=Queue,name=" + name);
-    } catch (Exception exc) {
-      logger.log(BasicLevel.DEBUG, "Error unregistering MBean.", exc);
     }
   }
 
