@@ -39,7 +39,6 @@ import org.ow2.joram.mom.amqp.marshalling.AMQP.Basic.BasicProperties;
 import org.ow2.joram.mom.amqp.structures.PublishToQueue;
 
 import fr.dyade.aaa.agent.AgentServer;
-import fr.dyade.aaa.util.management.MXWrapper;
 
 public abstract class IExchange implements IExchangeMBean, Serializable {
   
@@ -70,11 +69,6 @@ public abstract class IExchange implements IExchangeMBean, Serializable {
     this.name = name;
     this.durable = durable;
     saveName = PREFIX_EXCHANGE + Naming.getLocalName(name);
-    try {
-      MXWrapper.registerMBean(this, "AMQP", "type=Exchange,name=" + name);
-    } catch (Exception exc) {
-      logger.log(BasicLevel.DEBUG, "Error registering MBean.", exc);
-    }
   }
   
   protected void publishToQueue(String queueName, String routingKey, boolean immediate,
@@ -189,11 +183,6 @@ public abstract class IExchange implements IExchangeMBean, Serializable {
     }
     if (durable) {
       AgentServer.getTransaction().delete(saveName);
-    }
-    try {
-      MXWrapper.unregisterMBean("AMQP", "type=Exchange,name=" + name);
-    } catch (Exception exc) {
-      logger.log(BasicLevel.DEBUG, "Error unregistering MBean.", exc);
     }
   }
 
