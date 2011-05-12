@@ -23,8 +23,10 @@
  */
 package org.ow2.joram.mom.amqp;
 
+import java.io.Externalizable;
 import java.io.IOException;
-import java.io.Serializable;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.rmi.AlreadyBoundException;
 import java.util.Map;
 import java.util.Set;
@@ -40,7 +42,7 @@ import org.ow2.joram.mom.amqp.structures.PublishToQueue;
 
 import fr.dyade.aaa.agent.AgentServer;
 
-public abstract class IExchange implements IExchangeMBean, Serializable {
+public abstract class IExchange implements IExchangeMBean, Externalizable {
   
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
@@ -190,10 +192,8 @@ public abstract class IExchange implements IExchangeMBean, Serializable {
    * @param out
    * @throws IOException
    */
-  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-    // Writes exchange name
+  public void writeExternal(ObjectOutput out) throws IOException {
     out.writeObject(name);
-    // Writes durable
     out.writeBoolean(durable);
   }
 
@@ -202,11 +202,8 @@ public abstract class IExchange implements IExchangeMBean, Serializable {
    * @throws IOException
    * @throws ClassNotFoundException
    */
-  private void readObject(java.io.ObjectInputStream in)
-  throws IOException, ClassNotFoundException {
-    // Reads exchange name
+  public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
     name = (String) in.readObject();
-    // Reads durable
     durable = in.readBoolean();
     saveName = PREFIX_EXCHANGE + Naming.getLocalName(name);
   }
