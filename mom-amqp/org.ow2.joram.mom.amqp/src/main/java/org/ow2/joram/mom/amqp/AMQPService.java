@@ -47,7 +47,6 @@ public class AMQPService {
   public static Logger logger = Debug.getLogger(AMQPService.class.getName());
   
   public static Naming naming;
-  public static IExchange exchange;
   
   /** Default value for the TCP SO_TIMEOUT property. */
   public static final int DEFAULT_SO_TIMEOUT = 100000;
@@ -170,7 +169,7 @@ public class AMQPService {
     AMQPAgent agentAMQP = new AMQPAgent();
     agentAMQP.deploy();
     
-    amqpService = new AMQPService(firstTime);
+    amqpService = new AMQPService();
     amqpService.start();
   }
 
@@ -219,11 +218,10 @@ public class AMQPService {
   public static Vector<AMQPConnectionListener> connectionListeners;
   
   /**
-   * @param firstTime
    * @throws IOException 
    * @throws Exception 
    */
-  public AMQPService(boolean firstTime) throws IOException {
+  public AMQPService() throws IOException {
     connectionListeners = new Vector<AMQPConnectionListener>();
     AMQPConnectionListener cnxListener = new AMQPConnectionListener(serverSocket, timeout);
     connectionListeners.add(cnxListener);
