@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2008 CNES
  *
  * This library is free software; you can redistribute it and/or
@@ -41,8 +41,6 @@ public abstract class AbstractMarshallingMethod implements Serializable {
 
   public static Logger logger = Debug.getLogger(AbstractMarshallingMethod.class.getName());
 
-  public final static int NULL_METHOD_ID = -1;
-
   public int channelNumber;
   public abstract int getClassId();
   public abstract String getClassName();
@@ -65,21 +63,17 @@ public abstract class AbstractMarshallingMethod implements Serializable {
 
     AbstractMarshallingMethod marshallingMethod = null;
     AbstractMarshallingClass marshallingClass = AbstractMarshallingClass.read(in);
-    if (marshallingClass != null) {
-      int methodid = in.readShort();
-      if (methodid != NULL_METHOD_ID) {
-        try {
-          if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG,"AbstractMarshallingMethod read Method class : " + marshallingClass.getMethodName(methodid) + ", id = " + methodid);
-          marshallingMethod = (AbstractMarshallingMethod) Class.forName(
-              marshallingClass.getMethodName(methodid)).newInstance();
-          marshallingMethod.readFrom(in);
-        } catch (Exception e) {
-          if (logger.isLoggable(BasicLevel.WARN))
-            logger.log(BasicLevel.WARN, "AbstractMarshallingMethod read error :: ", e);
-          throw new FrameErrorException("Error instantiating method id: " + methodid);
-        }
-      }
+    int methodid = in.readShort();
+    try {
+      if (logger.isLoggable(BasicLevel.DEBUG))
+        logger.log(BasicLevel.DEBUG,"AbstractMarshallingMethod read Method class : " + marshallingClass.getMethodName(methodid) + ", id = " + methodid);
+      marshallingMethod = (AbstractMarshallingMethod) Class.forName(
+          marshallingClass.getMethodName(methodid)).newInstance();
+      marshallingMethod.readFrom(in);
+    } catch (Exception e) {
+      if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN, "AbstractMarshallingMethod read error :: ", e);
+      throw new FrameErrorException("Error instantiating method id: " + methodid);
     }
     return marshallingMethod;
   }

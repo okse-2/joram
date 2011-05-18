@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2008 CNES
  *
  * This library is free software; you can redistribute it and/or
@@ -35,57 +35,28 @@ public abstract class AbstractMarshallingClass {
   
   public static Logger logger = Debug.getLogger(AbstractMarshallingClass.class.getName());
   
-  protected final static int NULL_CLASS_ID = -1;
-  
-  protected int classId;
-  
-  protected abstract int getClassId();
-  
-  protected abstract String getClassName();
-  
   protected abstract String getMethodName(int id);
 
   /**
    * Constructs an <code>AbstractMarshallingClass</code>.
    */
   public AbstractMarshallingClass() {
-    classId = getClassId();
   }
   
-  private static int getPosition(int id) {
-    for (int i = 0; i < AMQP.ids.length; i++) {
-      if (AMQP.ids[i] == id)
-        return i;
-    }
-    return -1;
-  }
-  
-  private static String getClassName(int id) {
-    int pos = getPosition(id);
-    if (pos < 0)
-      return "";
-    return AMQP.classnames[pos];  
-  }
+  public static AbstractMarshallingClass read(AMQPInputStream is) throws IOException, FrameErrorException {
+    int classid = is.readShort();
+    AbstractMarshallingClass marshallingClass = AMQP.getAmqpClass(classid);
 
-  static public AbstractMarshallingClass read(AMQPInputStream is) throws IOException, FrameErrorException {
-    int classid = -1;
-    AbstractMarshallingClass marshallingClass = null;
-
-    classid = is.readShort();
-    if (classid != NULL_CLASS_ID) {
-      if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG,  "AbstractMarshallingClass read Class : " + getClassName(classid));
-      try {
-        marshallingClass = (AbstractMarshallingClass) Class.forName(getClassName(classid)).newInstance();
-      } catch (Exception exc) {
-        if (logger.isLoggable(BasicLevel.WARN))
-          logger.log(BasicLevel.WARN, "AbstractMarshallingClass read :: ", exc);
-        throw new FrameErrorException("Error instantiating class id: " + classid);
+    if (marshallingClass == null) {
+      if (logger.isLoggable(BasicLevel.WARN)) {
+        logger.log(BasicLevel.WARN, "Unknown class id: " + classid);
       }
+      throw new FrameErrorException("Unknown class id: " + classid);
     }
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
       logger.log(BasicLevel.DEBUG, "AbstractMarshallingClass.read: " + marshallingClass);
+    }
 
     return marshallingClass;
   }

@@ -81,14 +81,29 @@ public class AMQP {
 
   public static final int[] ids = { 10, 20, 40, 50, 60, 90 };
   
-  public static final java.lang.String[] classnames = {
-    "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection",
-    "org.ow2.joram.mom.amqp.marshalling.AMQP$Channel",
-    "org.ow2.joram.mom.amqp.marshalling.AMQP$Exchange",
-    "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue",
-    "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic",
-    "org.ow2.joram.mom.amqp.marshalling.AMQP$Tx"
+  public static final AbstractMarshallingClass[] classes = {
+    new Connection(),
+    new Channel(),
+    new Exchange(),
+    new Queue(),
+    new Basic(),
+    new Tx()
   };
+  
+  private static int getPosition(int id) {
+    for (int i = 0; i < AMQP.ids.length; i++) {
+      if (AMQP.ids[i] == id)
+        return i;
+    }
+    return -1;
+  }
+  
+  public static AbstractMarshallingClass getAmqpClass(int id) {
+    int pos = getPosition(id);
+    if (pos < 0)
+      return null;
+    return AMQP.classes[pos];
+  }
   
     public static final int FRAME_METHOD = 1;
   public static final int FRAME_HEADER = 2;
@@ -120,14 +135,6 @@ public class AMQP {
     private static final long serialVersionUID = 1L;
 
     public final static int INDEX = 10;
-      
-    public int getClassId() { 
-      return INDEX;
-    }
-
-    public java.lang.String getClassName() { 
-      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Connection";
-    }
 
     public static int[] mids = { 10, 11, 20, 21, 30, 31, 40, 41, 50, 51 };
     
@@ -244,7 +251,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Start(");
+      buff.append("Connection.Start(");
       
       buff.append("versionMajor=");
       buff.append(versionMajor);
@@ -340,7 +347,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("StartOk(");
+      buff.append("Connection.StartOk(");
       
       buff.append("clientProperties=");
       buff.append(clientProperties);
@@ -413,7 +420,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Secure(");
+      buff.append("Connection.Secure(");
       
       buff.append("challenge=");
       buff.append(challenge);
@@ -477,7 +484,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("SecureOk(");
+      buff.append("Connection.SecureOk(");
       
       buff.append("response=");
       buff.append(response);
@@ -561,7 +568,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Tune(");
+      buff.append("Connection.Tune(");
       
       buff.append("channelMax=");
       buff.append(channelMax);
@@ -645,7 +652,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("TuneOk(");
+      buff.append("Connection.TuneOk(");
       
       buff.append("channelMax=");
       buff.append(channelMax);
@@ -729,7 +736,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Open(");
+      buff.append("Connection.Open(");
       
       buff.append("virtualHost=");
       buff.append(virtualHost);
@@ -799,7 +806,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("OpenOk(");
+      buff.append("Connection.OpenOk(");
       
       buff.append("reserved1=");
         buff.append(reserved1);
@@ -893,7 +900,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Close(");
+      buff.append("Connection.Close(");
       
       buff.append("replyCode=");
         buff.append(replyCode);
@@ -959,7 +966,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("CloseOk(");
+      buff.append("Connection.CloseOk(");
       
       buff.append(')');
         return buff.toString();
@@ -979,14 +986,6 @@ public class AMQP {
     private static final long serialVersionUID = 1L;
 
     public final static int INDEX = 20;
-      
-    public int getClassId() { 
-      return INDEX;
-    }
-
-    public java.lang.String getClassName() { 
-      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Channel";
-    }
 
     public static final int[] mids = { 10, 11, 20, 21, 40, 41 };
     
@@ -1070,7 +1069,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Open(");
+      buff.append("Channel.Open(");
       
       buff.append("reserved1=");
         buff.append(reserved1);
@@ -1134,7 +1133,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("OpenOk(");
+      buff.append("Channel.OpenOk(");
       
       buff.append("reserved1=");
         buff.append(reserved1);
@@ -1207,7 +1206,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Flow(");
+      buff.append("Channel.Flow(");
       
       buff.append("active=");
       buff.append(active);
@@ -1271,7 +1270,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("FlowOk(");
+      buff.append("Channel.FlowOk(");
       
       buff.append("active=");
       buff.append(active);
@@ -1356,7 +1355,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Close(");
+      buff.append("Channel.Close(");
       
       buff.append("replyCode=");
       buff.append(replyCode);
@@ -1419,7 +1418,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("CloseOk(");
+      buff.append("Channel.CloseOk(");
       
       buff.append(')');
       return buff.toString();
@@ -1439,14 +1438,6 @@ public class AMQP {
     private static final long serialVersionUID = 1L;
 
     public final static int INDEX = 40;
-      
-    public int getClassId() { 
-      return INDEX;
-    }
-
-    public java.lang.String getClassName() { 
-      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Exchange";
-    }
 
     public static final int[] mids = { 10, 11, 20, 21 };
     
@@ -1595,7 +1586,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Declare(");
+      buff.append("Exchange.Declare(");
       
         buff.append("reserved1=");
         buff.append(reserved1);
@@ -1674,7 +1665,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("DeclareOk(");
+      buff.append("Exchange.DeclareOk(");
       
       buff.append(')');
       return buff.toString();
@@ -1759,7 +1750,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Delete(");
+      buff.append("Exchange.Delete(");
       
       buff.append("reserved1=");
         buff.append(reserved1);
@@ -1820,7 +1811,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("DeleteOk(");
+      buff.append("Exchange.DeleteOk(");
       
       buff.append(')');
       return buff.toString();
@@ -1840,14 +1831,6 @@ public class AMQP {
     private static final long serialVersionUID = 1L;
 
     public final static int INDEX = 50;
-      
-    public int getClassId() { 
-      return INDEX;
-    }
-
-    public java.lang.String getClassName() { 
-      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Queue";
-    }
 
     public static final int[] mids = { 10, 11, 20, 21, 50, 51, 30, 31, 40, 41 };
     
@@ -2004,7 +1987,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Declare(");
+      buff.append("Queue.Declare(");
       
       buff.append("reserved1=");
         buff.append(reserved1);
@@ -2108,7 +2091,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("DeclareOk(");
+      buff.append("Queue.DeclareOk(");
       
       buff.append("queue=");
         buff.append(queue);
@@ -2227,7 +2210,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Bind(");
+      buff.append("Queue.Bind(");
       
       buff.append("reserved1=");
         buff.append(reserved1);
@@ -2295,7 +2278,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("BindOk(");
+      buff.append("Queue.BindOk(");
       
       buff.append(')');
       return buff.toString();
@@ -2382,7 +2365,7 @@ public class AMQP {
     
     public String toString() {
         StringBuffer buff = new StringBuffer();
-        buff.append("Unbind(");
+        buff.append("Queue.Unbind(");
 
         buff.append("reserved1=");
         buff.append(reserved1);
@@ -2446,7 +2429,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("UnbindOk(");
+      buff.append("Queue.UnbindOk(");
       
       buff.append(')');
         return buff.toString();
@@ -2522,7 +2505,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Purge(");
+      buff.append("Queue.Purge(");
       
       buff.append("reserved1=");
         buff.append(reserved1);
@@ -2591,7 +2574,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("PurgeOk(");
+      buff.append("Queue.PurgeOk(");
       
       buff.append("messageCount=");
         buff.append(messageCount);
@@ -2688,7 +2671,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Delete(");
+      buff.append("Queue.Delete(");
       
       buff.append("reserved1=");
         buff.append(reserved1);
@@ -2763,7 +2746,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("DeleteOk(");
+      buff.append("Queue.DeleteOk(");
       
       buff.append("messageCount=");
         buff.append(messageCount);
@@ -2990,14 +2973,6 @@ public class AMQP {
     }
 
     public final static int INDEX = 60;
-      
-    public int getClassId() { 
-      return INDEX;
-    }
-
-    public java.lang.String getClassName() { 
-      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Basic";
-    }
 
     public static final int[] mids = { 10, 11, 20, 21, 30, 31, 40, 50, 60, 70, 71, 72, 80, 90, 100, 110, 111 };
     
@@ -3126,7 +3101,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Qos(");
+      buff.append("Basic.Qos(");
       
         buff.append("prefetchSize=");
         buff.append(prefetchSize);
@@ -3189,7 +3164,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("QosOk(");
+      buff.append("Basic.QosOk(");
       
       buff.append(')');
       return buff.toString();
@@ -3305,7 +3280,7 @@ public class AMQP {
 
       public String toString() {
         StringBuffer buff = new StringBuffer();
-        buff.append("Consume(");
+        buff.append("Basic.Consume(");
 
         buff.append("reserved1=");
         buff.append(reserved1);
@@ -3392,7 +3367,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("ConsumeOk(");
+      buff.append("Basic.ConsumeOk(");
       
         buff.append("consumerTag=");
         buff.append(consumerTag);
@@ -3469,7 +3444,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Cancel(");
+      buff.append("Basic.Cancel(");
       
         buff.append("consumerTag=");
         buff.append(consumerTag);
@@ -3535,7 +3510,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-        buff.append("CancelOk(");
+        buff.append("Basic.CancelOk(");
 
         buff.append("consumerTag=");
         buff.append(consumerTag);
@@ -3645,7 +3620,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Publish(");
+      buff.append("Basic.Publish(");
       
         buff.append("reserved1=");
         buff.append(reserved1);
@@ -3750,7 +3725,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Return(");
+      buff.append("Basic.Return(");
       
       buff.append("replyCode=");
         buff.append(replyCode);
@@ -3857,7 +3832,7 @@ public class AMQP {
 
       public String toString() {
         StringBuffer buff = new StringBuffer();
-        buff.append("Deliver(");
+        buff.append("Basic.Deliver(");
 
         buff.append("consumerTag=");
         buff.append(consumerTag);
@@ -3948,7 +3923,7 @@ public class AMQP {
 
       public String toString() {
         StringBuffer buff = new StringBuffer();
-        buff.append("Get(");
+        buff.append("Basic.Get(");
 
         buff.append("reserved1=");
         buff.append(reserved1);
@@ -4053,7 +4028,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("GetOk(");
+      buff.append("Basic.GetOk(");
       
       buff.append("deliveryTag=");
         buff.append(deliveryTag);
@@ -4130,7 +4105,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("GetEmpty(");
+      buff.append("Basic.GetEmpty(");
       
       buff.append("reserved1=");
         buff.append(reserved1);
@@ -4208,7 +4183,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Ack(");
+      buff.append("Basic.Ack(");
       
       buff.append("deliveryTag=");
         buff.append(deliveryTag);
@@ -4287,7 +4262,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Reject(");
+      buff.append("Basic.Reject(");
       
       buff.append("deliveryTag=");
         buff.append(deliveryTag);
@@ -4358,7 +4333,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("RecoverAsync(");
+      buff.append("Basic.RecoverAsync(");
       
       buff.append("requeue=");
       buff.append(requeue);
@@ -4427,7 +4402,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Recover(");
+      buff.append("Basic.Recover(");
       
       buff.append("requeue=");
         buff.append(requeue);
@@ -4479,7 +4454,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("RecoverOk(");
+      buff.append("Basic.RecoverOk(");
       
       buff.append(')');
       return buff.toString();
@@ -4499,14 +4474,6 @@ public class AMQP {
     private static final long serialVersionUID = 1L;
 
     public final static int INDEX = 90;
-      
-    public int getClassId() { 
-      return INDEX;
-    }
-
-    public java.lang.String getClassName() { 
-      return "org.ow2.joram.mom.amqp.marshalling.AMQP$Tx";
-    }
 
     public static final int[] mids = { 10, 11, 20, 21, 30, 31 };
     
@@ -4582,7 +4549,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Select(");
+      buff.append("Tx.Select(");
       
       buff.append(')');
       return buff.toString();
@@ -4633,7 +4600,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("SelectOk(");
+      buff.append("Tx.SelectOk(");
       
       buff.append(')');
       return buff.toString();
@@ -4687,7 +4654,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Commit(");
+      buff.append("Tx.Commit(");
       
       buff.append(')');
       return buff.toString();
@@ -4739,7 +4706,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("CommitOk(");
+      buff.append("Tx.CommitOk(");
       
       buff.append(')');
       return buff.toString();
@@ -4796,7 +4763,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("Rollback(");
+      buff.append("Tx.Rollback(");
       
       buff.append(')');
       return buff.toString();
@@ -4848,7 +4815,7 @@ public class AMQP {
     
     public String toString() {
       StringBuffer buff = new StringBuffer();
-      buff.append("RollbackOk(");
+      buff.append("Tx.RollbackOk(");
       
       buff.append(')');
       return buff.toString();
