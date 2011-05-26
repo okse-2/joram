@@ -61,8 +61,8 @@
 					JORAM is an <strong>all-in-one</strong> mature messaging solution, it includes many features
 					that are missing in competitive offerings and it does not require third-party products, it
 					provides a built-in atomic storage and a distributed JNDI server.
-					JORAM is shipped with multiples transport implementation: an invm transport implementation for
-					when both the client(s) and server are in the same Java virtual machine, and also a TCP based
+					JORAM is shipped with multiples transport implementations: an InVM transport implementation
+					for when both the client(s) and server are in the same Java virtual machine, and also a TCP based
 					implementation when clients and server are remote.
 				</p>
 				<p>
@@ -111,11 +111,11 @@
 				<strong>Configurable Client/Server communication system.</strong><br></br>
 				The JORAM Client/Server transport is configurable and extensible.
 				<br></br>
-				JORAM is shipped with multiples transport implementation:
+				JORAM is shipped with multiples transport implementations:
 				</p>
 				<ul>
 					<li><em>In-VM transport</em> - If client(s) and servers are running in the same Java
-					virtual machine, then can be configured to us the In-VM tranport which creates direct connections
+					virtual machine, then can be configured to use the InVM tranport which creates direct connections
 					in code.
 					</li>
 					<li><em>TCP or SSL transport</em> - Clients and servers can be configured to communicate using
@@ -138,7 +138,7 @@
 				The JORAM low level transport is completely pluggable, it defines a Service Provider Interface (SPI)
 				that you can implement in order to plug-in a new provider.
 				<br></br>
-				JORAM is shipped with multiples transport implementation:
+				JORAM is shipped with multiples transport implementations:
 				</p>
 				<ul>
 					<li><em>TCP transport</em> - Servers can be configured to communicate using standard
@@ -341,7 +341,7 @@
 
 				<p>
 				<strong>Extensibility.</strong><br></br>
-				Queue and Topic implements an extension framework for data acquisition (create JMS message from
+				Queue and Topic implement an extension framework for data acquisition (create JMS message from
 				external data), handling, transformation, and data distribution (create external data from JMS message).
 				The agent API, available besides the pure JMS API, allows the rapid development of complex distributed
 				applications while ensuring full interoperability with JMS applications.
@@ -358,12 +358,12 @@
 				a temporary network problem. Reconnection can be configured with retry-interval, it includes an
 				heart-beat mechanism to detect network failures. 
 				<br></br>
-				Needed datas are safely resent in case of failure without running the risk of lost or duplicate
+				Needed data is safely resent in case of failure without running the risk of lost or duplicate
 				messages.
 				</p>
 
 				<p>
-				<strong>Automatic reconnect for inbound connections in JCA Resource Adapter.</strong><br></br>
+				<strong>Automatic reconnection for inbound connections in JCA Resource Adapter.</strong><br></br>
 				Inbound connections will be destroyed and reconnected, if the connection that receives the
 				messages fails. This mechanism allows transparent fail-over for MDBs when the JMS provider
 				become unavailable, e.g. due to a temporary network problem or perhaps the server is being
@@ -398,7 +398,7 @@
 
 				<p>
 				<strong>Pluggable JMS and MOM interceptor.</strong><br></br>
-				JORAM defines an interceptor mechanism allowing to transparently process incoming and outcoming
+				JORAM defines an interceptor mechanism allowing to transparently process incoming and outgoing
 				messages through JMS sessions.<br></br>
 				A similar interception mechanism is available for processing messages in the MOM. Interceptors can
 				be located on destinations and on connection in/out channels.
