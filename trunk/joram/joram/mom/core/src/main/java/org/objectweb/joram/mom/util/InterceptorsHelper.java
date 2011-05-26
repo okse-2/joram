@@ -33,7 +33,7 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.common.Debug;
 
 /**
- * Helper class for interceptors. 
+ * Helper class to handle interceptors in destination and user's proxy. 
  */
 public class InterceptorsHelper {
 	/** logger */
@@ -42,7 +42,7 @@ public class InterceptorsHelper {
 	private static final String INTERCEPTOR_CLASS_NAME_SEPARATOR =",";
 
 	/**
-	 * Add the interceptors className list (used by Joram admin).
+	 * Add the specified interceptors in the list.
 	 * 
 	 * @param listInterceptorClassName list of string className interceptors (separate with INTERCEPTOR_CLASS_NAME_SEPARATOR)
 	 * @param interceptors	the interceptors List.
