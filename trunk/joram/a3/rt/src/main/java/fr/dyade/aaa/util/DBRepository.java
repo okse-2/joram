@@ -122,7 +122,7 @@ public final class DBRepository implements Repository {
     } catch (IllegalAccessException exc) {
       throw new IOException(exc.getMessage());
     } catch (ClassNotFoundException exc) {
-      throw new IOException(exc.getMessage());
+      throw new IOException("Class not found: " + exc.getMessage());
     } catch (InstantiationException exc) {
       throw new IOException(exc.getMessage());
     } catch (SQLException sqle) {
