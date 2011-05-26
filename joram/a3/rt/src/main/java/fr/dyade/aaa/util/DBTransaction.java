@@ -251,7 +251,7 @@ public abstract class DBTransaction extends AbstractTransaction implements DBTra
         if (op.type == DBOperation.SAVE) {
           if (logmon.isLoggable(BasicLevel.DEBUG))
             logmon.log(BasicLevel.DEBUG,
-                       "DBTransaction, commit.save (" + op.name + ')');
+                       "DBTransaction, commit.save (" + op.name + ", " + op.value.length + ')');
 
           try {
             insertStmt.setString(1, op.name);
