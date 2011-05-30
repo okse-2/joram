@@ -55,7 +55,7 @@ public class AmqpDistribution implements DistributionHandler {
 
   private static final String ROUTING_PROP = "amqp.Routing";
 
-  // Least recently used Map.
+  // LRU (Least Recently Used) Map.
   private LinkedHashMap<String, Channel> channels = new LinkedHashMap<String, Channel>(16, 0.75f, true);
 
   private List<String> connectionNames = null;
@@ -150,11 +150,11 @@ public class AmqpDistribution implements DistributionHandler {
           iter.remove();
           continue;
         }
-        if (!connectionNames.contains(cnxName)) {
+        if (connectionNames != null && !connectionNames.contains(cnxName)) {
           continue;
         }
         if (logger.isLoggable(BasicLevel.DEBUG)) {
-          logger.log(BasicLevel.DEBUG, "Sending message on " + entry.getKey());
+          logger.log(BasicLevel.DEBUG, "Sending message on " + cnxName);
         }
         chan.basicPublish("", amqpQueue, props, message.body);
         channels.get(cnxName); // Access the used connection to update the LRU map
