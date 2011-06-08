@@ -497,46 +497,50 @@ public class HttpNetwork extends StreamNetwork implements HttpNetworkMBean {
     }
     
     int nbCnxTry = 0;
-    long lastCnxTry = 0;
 
     protected void open(long currentTimeMillis) throws IOException {
       if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG,
-                   this.getName() + ", open: " + nbCnxTry);
+        logmon.log(BasicLevel.DEBUG, this.getName() + ", open: " + nbCnxTry);
 
-      // Open the connection.
-      socket = null;
+      // If there are errors wait to open the connection.
       if (nbCnxTry != 0) {
-        if (! (((nbCnxTry < WDNbRetryLevel1) && 
-            ((lastCnxTry + WDRetryPeriod1) < currentTimeMillis)) ||
-            ((nbCnxTry < WDNbRetryLevel2) &&
-                ((lastCnxTry + WDRetryPeriod2) < currentTimeMillis)) ||
-                ((lastCnxTry + WDRetryPeriod3) < currentTimeMillis))) {
-          throw new IOException("Wait for watchdog period");
-        }
+        try {
+          if (nbCnxTry < WDNbRetryLevel1) {
+            if (logmon.isLoggable(BasicLevel.DEBUG))
+              logmon.log(BasicLevel.DEBUG, this.getName() + ", wait for " + WDRetryPeriod1);
+            Thread.sleep(WDRetryPeriod1);
+          } else if (nbCnxTry < WDNbRetryLevel2) {
+            if (logmon.isLoggable(BasicLevel.DEBUG))
+              logmon.log(BasicLevel.DEBUG, this.getName() + ", wait for " + WDRetryPeriod2);
+            Thread.sleep(WDRetryPeriod2);
+          } else {
+            if (logmon.isLoggable(BasicLevel.DEBUG))
+              logmon.log(BasicLevel.DEBUG, this.getName() + ", wait for " + WDRetryPeriod3);
+            Thread.sleep(WDRetryPeriod3);
+          }
+        } catch (InterruptedException exc) {}
+        
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG, this.getName() + ", end of watchdog period");
       }
-
-      lastCnxTry = currentTimeMillis;
+      
       // Open the connection.
       socket = null;
 
+      nbCnxTry += 1;
       if (proxy == null) {
         try {
           socket = createSocket(server);
         } catch (IOException exc) {
-          logmon.log(BasicLevel.WARN,
-                     this.getName() + ", connection refused", exc);
-          nbCnxTry += 1;
+          logmon.log(BasicLevel.WARN, this.getName() + ", connection refused", exc);
           throw exc;
         }
       } else {
         try {
           socket = createSocket(proxy, proxyport);
         } catch (IOException exc) {
-          logmon.log(BasicLevel.WARN,
-                     this.getName() + ", connection refused, reset addr");
+          logmon.log(BasicLevel.WARN, this.getName() + ", connection refused, reset addr");
           proxy = InetAddress.getByName(proxyhost);
-          nbCnxTry += 1;
           throw exc;
         }
       }
