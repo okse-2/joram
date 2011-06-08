@@ -664,7 +664,8 @@ public abstract class Network implements MessageConsumer, NetworkMBean {
     // Saves the message.
     msg.save();
     // Push it in "ready to deliver" queue.
-    qout.push(msg);  nbMessageOut += 1;
+    qout.push(msg);
+    nbMessageOut += 1;
   }
 
   /**
