@@ -34,21 +34,20 @@ import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 public class PerfsAdmin {
 
   public static void main(String[] args) throws Exception {
-    
-    AdminModule.connect("root", "root", 60);
-
-    Queue queue = Queue.create(0);
-    Topic topic = Topic.create(0);
-
     javax.jms.ConnectionFactory cf =
       TcpConnectionFactory.create("localhost", 16010);
+    
+    AdminModule.connect(cf, "root", "root");
+
+    Queue queue = Queue.create(0);
+    queue.setFreeReading();
+    queue.setFreeWriting();
+    
+    Topic topic = Topic.create(0);
+    topic.setFreeReading();
+    topic.setFreeWriting();
 
     User.create("anonymous", "anonymous", 0);
-
-    queue.setFreeReading();
-    topic.setFreeReading();
-    queue.setFreeWriting();
-    topic.setFreeWriting();
 
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     jndiCtx.bind("cf", cf);
