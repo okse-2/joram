@@ -94,6 +94,27 @@
       <param name="osgi.conf" value="${conf.dir}/config.properties"/>    	
     </antcall>
   </target>
+  
+  <!-- Start a single server with NGTransaction component -->
+  <target name="ngt_server" depends="init"
+          description="--> Starts a single server with NGTransaction component">
+    <antcall target="server">
+      <param name="sid" value="0"/>
+      <param name="a3.conf" value="${conf.dir}/ngt_a3servers.xml"/>
+      <param name="osgi.conf" value="${conf.dir}/config.properties"/>    	
+    </antcall>
+  </target>
+
+  <!-- Start a single server with DerbyTransaction   -->
+  <!-- Be careful: Needs the derby.jar bundle        -->
+  <target name="derby_server" depends="init"
+          description="--> Starts a single server in persistent mode with a Derby repository">
+    <antcall target="server">
+      <param name="sid" value="0"/>
+      <param name="a3.conf" value="${conf.dir}/derby_a3servers.xml"/>
+      <param name="osgi.conf" value="${conf.dir}/config_derby.properties"/>
+    </antcall>
+  </target>
 
   <!-- Start a single server in NullTransaction mode with all extension bundles -->
   <target name="extended_server" depends="init"
@@ -639,6 +660,38 @@
     </java>
   </target>
 
+	<!-- ***************************************************************** -->
+	<!-- *                       HTTP Network                            * -->
+	<!-- ***************************************************************** -->
+
+	<!-- Setup a distributed architecture with 2 Http servers -->
+  <target name="http_server0" depends="init"
+          description="--> Starts a server for a distributed hhtp architecture (w/ id 0)">
+    <antcall target="server">
+      <param name="sid" value="0"/>
+      <param name="a3.conf" value="${conf.dir}/http_a3servers.xml"/>
+      <param name="osgi.conf" value="${conf.dir}/config_min.properties"/>    	
+    </antcall>
+  </target>
+	
+  <target name="http_server1" depends="init"
+          description="--> Starts a server for a distributed http architecture (w/ id 1)">
+    <antcall target="server">
+      <param name="sid" value="1"/>
+      <param name="a3.conf" value="${conf.dir}/http_a3servers.xml"/>
+      <param name="osgi.conf" value="${conf.dir}/config_min.properties"/>    	
+    </antcall>
+  </target>
+	
+  <!-- Setup the classic configuration -->
+  <target name="http_admin" depends="simple_init"
+          description="--> Runs a clasic administration (for a distributed hhtp architecture)">
+    <java classname="httpnet.HttpAdmin" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
 <!-- ***************************************************************** -->
 <!-- *                            SSL                                * -->
 <!-- ***************************************************************** -->
@@ -660,7 +713,7 @@
     <copy file="${conf.dir}/joram_ks" todir="${run.dir}"/>
   </target>
 
-  <!-- Start a server in NullTransaction mode -->
+  <!-- Start a SSL server in NullTransaction mode -->
   <target name="sslsingle_server" depends="sslsimple_init">
     <java classname="fr.dyade.aaa.agent.AgentServer"
           failonerror="no" fork="yes"
@@ -1006,7 +1059,7 @@
        * Performance Sample (Topic)
        ************************************************** -->
 
-  <!-- Runs the perfs tests administrator -->
+  <!-- Runs the performance sample administration code -->
   <target name="perfs_admin" depends="simple_init"
     description="--> Starts the PERFS admin">
     <java classname="perfs.PerfsAdmin" failonerror="no" fork="yes"
@@ -1014,40 +1067,80 @@
       <classpath path="${project.class.path}"/>
     </java>
   </target>
-
-  <!-- Runs the perfs tests sender -->
-  <target name="perfs_sender" depends="simple_init"
-    description="--> Starts the PERFS sender">
-    <java classname="perfs.PerfsSender" failonerror="no" fork="yes"
+ 
+  <!-- Runs the performance sample producer: send 50.000 transient messages on queue -->
+  <target name="perfs_prod_q1" depends="simple_init"
+    description="--> Starts the PERFS producer">
+    <java classname="perfs.Producer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
+      <jvmarg line="-DMsgTransient=true" />
+      <arg line="queue"/>
+    </java>
+  </target>
+	
+  <!-- Runs the performance sample producer: send 50.000 persistent messages on queue -->
+  <target name="perfs_prod_q2" depends="simple_init"
+    description="--> Starts the PERFS producer">
+    <java classname="perfs.Producer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-DMsgTransient=false" />
+      <arg line="queue"/>
     </java>
   </target>
 
-  <!-- Runs the perfs tests receiver -->
-  <target name="perfs_receiver" depends="simple_init"
-    description="--> Starts the PERFS receiver">
-    <java classname="perfs.PerfsReceiver" failonerror="no" fork="yes"
+  <!-- Runs the performance sample consumer on queue -->
+  <target name="perfs_cons_q" depends="simple_init"
+    description="--> Starts the PERFS consumer">
+    <java classname="perfs.Consumer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
+      <arg line="queue"/>
     </java>
   </target>
 
-  <!-- Runs the perfs tests publisher -->
-  <target name="perfs_pub" depends="simple_init"
-    description="--> Starts the PERFS publisher">
-    <java classname="perfs.PerfsPublisher" failonerror="no" fork="yes"
+  <!-- Runs the performance sample producer: send 50.000 transient messages on topic -->
+  <target name="perfs_prod_t1" depends="simple_init"
+    description="--> Starts the PERFS producer">
+    <java classname="perfs.Producer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
+      <jvmarg line="-DMsgTransient=true" />
+      <arg line="topic"/>
+    </java>
+  </target>
+	
+  <!-- Runs the performance sample producer: send 50.000 persistent messages on topic -->
+  <target name="perfs_prod_t2" depends="simple_init"
+    description="--> Starts the PERFS producer">
+    <java classname="perfs.Producer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-DMsgTransient=false" />
+      <arg line="topic"/>
     </java>
   </target>
 
-  <!-- Runs the perfs tests subscriber -->
-  <target name="perfs_sub" depends="simple_init"
-    description="--> Starts the PERFS subscriber">
-    <java classname="perfs.PerfsSubscriber" failonerror="no" fork="yes"
+  <!-- Runs the performance sample consumer on topic -->
+  <target name="perfs_cons_t" depends="simple_init"
+    description="--> Starts the PERFS consumer">
+    <java classname="perfs.Consumer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
+      <jvmarg line="-DSubDurable=false" />
+      <arg line="topic"/>
+    </java>
+  </target>
+
+  <!-- Runs the performance sample consumer on topic with durable subscription -->
+  <target name="perfs_cons_td" depends="simple_init"
+    description="--> Starts the PERFS consumer">
+    <java classname="perfs.Consumer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-DSubDurable=true" />
+      <arg line="topic"/>
     </java>
   </target>
   
