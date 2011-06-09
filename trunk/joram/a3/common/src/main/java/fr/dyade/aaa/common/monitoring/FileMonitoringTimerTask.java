@@ -46,7 +46,7 @@ public class FileMonitoringTimerTask extends MonitoringTimerTask {
   public final static String MONITORING_CONFIG_PERIOD_PROPERTY = "FILE_MONITORING_CONFIG_PERIOD";
   /**
    *  Default value for the scanning period for the  csv file monitoring task in the
-   * server, value is <code>60000L</code> (5 seconds).
+   * server, value is <code>60000L</code> (60 seconds).
    * 
    * @see fr.dyade.aaa.common.monitoring.FileMonitoringTimerTask
    */
