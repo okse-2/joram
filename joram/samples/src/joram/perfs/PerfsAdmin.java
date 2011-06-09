@@ -39,11 +39,11 @@ public class PerfsAdmin {
     
     AdminModule.connect(cf, "root", "root");
 
-    Queue queue = Queue.create(0);
+    Queue queue = Queue.create("queue");
     queue.setFreeReading();
     queue.setFreeWriting();
     
-    Topic topic = Topic.create(0);
+    Topic topic = Topic.create("topic");
     topic.setFreeReading();
     topic.setFreeWriting();
 
