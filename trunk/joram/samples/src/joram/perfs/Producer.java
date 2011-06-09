@@ -44,6 +44,7 @@ public class Producer {
   static ConnectionFactory cf = null;
 
   static boolean MsgTransient = true;
+  static boolean SwapAllowed = false;
   static boolean transacted = true;
 
   public static boolean getBoolean(String key, boolean def) {
@@ -56,6 +57,7 @@ public class Producer {
     MsgSize = Integer.getInteger("MsgSize", MsgSize).intValue();
 
     MsgTransient = getBoolean("MsgTransient", MsgTransient);
+    SwapAllowed = getBoolean("SwapAllowed", SwapAllowed);
     transacted = getBoolean("Transacted", transacted);
     
     InitialContext ictx = new InitialContext();
@@ -64,13 +66,17 @@ public class Producer {
     ictx.close();
 
     System.out.println("Destination: " + (dest.isQueue()?"Queue":"Topic"));
-    System.out.println("Message: transient=" + MsgTransient);
+    System.out.println("Message: MsgTransient=" + MsgTransient);
+    System.out.println("Message: SwapAllowed=" + SwapAllowed);
     System.out.println("Transacted=" + transacted);
     System.out.println("NbMsg=" + (Round*NbMsgPerRound) + ", MsgSize=" + MsgSize);
 
     Connection cnx = cf.createConnection();
     Session session = cnx.createSession(transacted, Session.AUTO_ACKNOWLEDGE);
     MessageProducer producer = session.createProducer(dest);
+    if (MsgTransient) {
+      producer.setDeliveryMode(javax.jms.DeliveryMode.NON_PERSISTENT);
+    }
 
     byte[] content = new byte[MsgSize];
     for (int i = 0; i< MsgSize; i++)
@@ -80,8 +86,8 @@ public class Producer {
     long start = System.currentTimeMillis();
     for (int i=0; i<(Round*NbMsgPerRound); i++) {
       BytesMessage msg = session.createBytesMessage();
-      if (MsgTransient) {
-        producer.setDeliveryMode(javax.jms.DeliveryMode.NON_PERSISTENT);
+      if (SwapAllowed) {
+        msg.setBooleanProperty("JMS_JORAM_SWAPALLOWED", true);
       }
       msg.writeBytes(content);
       msg.setLongProperty("time", System.currentTimeMillis());
@@ -91,7 +97,7 @@ public class Producer {
       if (transacted && ((i%10) == 9)) session.commit();
       
       if ((i%NbMsgPerRound) == (NbMsgPerRound-1)) {
-        long dtx1 = (i * 1000) / mps;
+        long dtx1 = (i * 1000L) / mps;
         long dtx2 = System.currentTimeMillis() - start;
         if (dtx1 > (dtx2 + 20)) {
           dtx += (dtx1 - dtx2);
