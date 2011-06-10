@@ -1,0 +1,3 @@
+java.lang.Exception
+	at jmx.remote.jms.MBeanServerConnectionDelegate.getAttribute(MBeanServerConnectionDelegate.java:274)
+	at jmx.remote.jms.JmsJmxConnectorClientLaunch.main(JmsJmxConnectorClientLaunch.java:139)
