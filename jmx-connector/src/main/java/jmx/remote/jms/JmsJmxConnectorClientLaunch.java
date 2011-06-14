@@ -228,6 +228,23 @@ public class JmsJmxConnectorClientLaunch {
 		
 		System.out.println();
 		System.out.println("--------------------------------------------------");
+		System.out.println("test de la methode : removeNotificationListener(ObjectName name,NotificationListener listener)");
+		System.out.println("--------------------------------------------------");
+		try {
+			mbeanServerConnection.removeNotificationListener(name2, notificationListener);
+		} catch (ListenerNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("--------------------------------------------------");
+		System.out.println("fin du test de la methode : removeNotificationListener(ObjectName name,NotificationListener listener)");
+		System.out.println("--------------------------------------------------");
+		mbeanServerConnection.invoke(name2, operationName3, params3, sig3);
+		System.out.println();
+		
+		
+		/*
+		System.out.println("--------------------------------------------------");
 		System.out.println("test de la methode : removeNotificationListener(ObjectName name,NotificationListener listener,NotificationFilter filter,Object handback)");
 		System.out.println("--------------------------------------------------");
 		try {
@@ -252,7 +269,10 @@ public class JmsJmxConnectorClientLaunch {
 		System.out.println("--------------------------------------------------");
 		System.out.println("RE : fin du test de la methode : removeNotificationListener(ObjectName name,NotificationListener listener,NotificationFilter filter,Object handback)");
 		System.out.println("--------------------------------------------------");
-		
+		System.out.println();*/
+		System.out.println("***********************************************************************");
+		System.out.println("                        FIN  DU TEST");
+		System.out.println("***********************************************************************");
 	
 	
 		

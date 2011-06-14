@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
+import javax.management.ListenerNotFoundException;
 import javax.management.MBeanException;
 import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
@@ -93,7 +94,26 @@ public class JmsJmxConnectorServerLaunch {
 			Object[] params3 = new Object[0];
 			String[] sig3 = new String[0];
 			operationName3 = "remove";
+			mbs.invoke(name2, operationName3, params3, sig3);
+			System.out.println();
+			System.out.println("--------------------------------------------------");
+			System.out.println("test de la methode : removeNotificationListener(ObjectName name,NotificationListener listener)");
+			System.out.println("--------------------------------------------------");
+			try {
+				mbs.removeNotificationListener(name2, notificationListener, null, null);
+				System.out.println("je suis la!!!!!!!!");
+			} catch (ListenerNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			System.out.println("--------------------------------------------------");
+			System.out.println("fin du test de la methode : removeNotificationListener(ObjectName name,NotificationListener listener)");
+			System.out.println("--------------------------------------------------");
+			System.out.println();
+			
 			mbs.invoke(name2, operationName3, params3, sig3);*/
+		
+			
 		} catch (InstanceAlreadyExistsException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -103,16 +123,16 @@ public class JmsJmxConnectorServerLaunch {
 		} catch (NotCompliantMBeanException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} /*catch (InstanceNotFoundException e) {
+		}/* catch (InstanceNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ReflectionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (MBeanException e) {
+		} */catch (MBeanException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}*/
+		}
 		
 		try {
 			connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(serverURL,serverEnv,mbs);

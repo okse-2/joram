@@ -8,6 +8,7 @@ import java.lang.management.ManagementFactory;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import javax.jms.Connection;
@@ -394,10 +395,13 @@ import fr.dyade.aaa.common.Pool;
     	  try{
     	  key = new Integer(value);
     	  System.out.println(key.toString());
-    	  System.out.println("hashhhhhhhhhhhhhhhhhhh");
     	  AddNotificationListenerStored objectAddNotificationListenerStored = new AddNotificationListenerStored(name, listener, filter, handback);
     	  hashTableNotificationListener.put(key, objectAddNotificationListenerStored);
     	  hashKey.put(objectAddNotificationListenerStored, key);
+    	  System.out.println("ici: "+hashKey.get(new AddNotificationListenerStored(name, listener, filter, handback)));
+    	  System.out.println("hashhhhhhhhhhhhhhhhhhh");
+    	  
+    	  System.out.println("affichage du contenu de hashKey"+hashKey);
     	  
     	  AddNotificationListener addNotificationListener = new AddNotificationListener(name, filter,key);
     	
@@ -446,31 +450,99 @@ import fr.dyade.aaa.common.Pool;
     	  Object keyRestored = null;
     	  value--;
     	  AddNotificationListenerStored objectAddNotificationListenerStored = new AddNotificationListenerStored(name, listener, null, null); 
-    	  Set cles = hashKey.keySet();
-    	  Iterator it = cles.iterator();
+    	  Iterator<Map.Entry<Integer,AddNotificationListenerStored>> it = hashTableNotificationListener.entrySet().iterator();
+    	  Map.Entry<Integer,AddNotificationListenerStored> pairKeyListener ;
+    	  while (it.hasNext()) {
+
+    		  pairKeyListener = it.next();
+    	      if(pairKeyListener.getValue().equals(objectAddNotificationListenerStored)){
+    	    	  keyRestored = pairKeyListener.getKey();
+    			   System.out.println("la clé a ete touvé !! key = "+keyRestored);
+    			   System.out.println("------------->    keyRestored de removeNotificationListener(ObjectName name,NotificationListener listener)  : "+keyRestored);
+    		    	  it.remove();//remove(keyRestored);
+    		    	  System.out.println(hashTableNotificationListener.toString());
+    		    	  System.out.println("***----> l'objet objectAddNotificationListenerStored a ete supprimé de la hashTableNotificationListener ");
+
+    		    	  RemoveNotificationListener3 objectRemoveNotificationListener3 = new RemoveNotificationListener3(name,keyRestored);
+    		    	  try {
+    					clientJms.doRequete(objectRemoveNotificationListener3);
+    				} catch (JMSException e) {
+    					// TODO Auto-generated catch block
+    					e.printStackTrace();
+    				}
+   	        }
+   	    	
+    	    	  
+    	      }
+
+
+    	  }
+    	  
+    	  
+    	  
+    	  
+    	  
+    /*  Set<Map.Entry<Object, AddNotificationListenerStored>> set = hashTableNotificationListener.entrySet();
+    	  Iterator it = set.iterator();
     	  while (it.hasNext()){
+    		  if(objectAddNotificationListenerStored.equals(it.next))
+    	  }
+          
+
+    	  for (Map.Entry<Object, AddNotificationListenerStored> me : set) {
+    	        if(me.getValue().equals(objectAddNotificationListenerStored)){
+    	         keyRestored = me.getKey();
+     			   System.out.println("la clé a ete touvé !! key = "+keyRestored);
+     			   System.out.println("------------->    keyRestored de removeNotificationListener(ObjectName name,NotificationListener listener)  : "+keyRestored);
+     		    	  hashTableNotificationListener.remove(keyRestored);
+     		    	  System.out.println("***----> l'objet objectAddNotificationListenerStored a ete supprimé de la hashTableNotificationListener ");
+
+     		    	  RemoveNotificationListener3 objectRemoveNotificationListener3 = new RemoveNotificationListener3(name,keyRestored);
+     		    	  try {
+     					clientJms.doRequete(objectRemoveNotificationListener3);
+     				} catch (JMSException e) {
+     					// TODO Auto-generated catch block
+     					e.printStackTrace();
+     				}
+    	        }
+    	    	
+    	    	//System.out.print(me.getKey() + ": ");
+    	        //System.out.println(me.getValue());
+    	      }*/
+
+    	  
+    	  
+    	  
+    	  
+    	 
+    	//  Set cles = hashKey.keySet();
+    	 // Iterator it = cles.iterator();
+    	/*  while (it.hasNext()){
     		    
     		   AddNotificationListenerStored cle = (AddNotificationListenerStored) it.next();
     		   if(objectAddNotificationListenerStored.equals(cle)){
     			   objectAddNotificationListenerStored = cle;
     			   keyRestored = hashKey.get(objectAddNotificationListenerStored);
     			   System.out.println("la clé a ete touvé !! key = "+keyRestored);
-    			   break;
+    			   System.out.println("------------->    keyRestored de removeNotificationListener(ObjectName name,NotificationListener listener)  : "+keyRestored);
+    		    	  hashTableNotificationListener.remove(keyRestored);
+    		    	  System.out.println("***----> l'objet objectAddNotificationListenerStored a ete supprimé de la hashTableNotificationListener ");
+
+    		    	  RemoveNotificationListener3 objectRemoveNotificationListener3 = new RemoveNotificationListener3(name,keyRestored);
+    		    	  try {
+    					clientJms.doRequete(objectRemoveNotificationListener3);
+    				} catch (JMSException e) {
+    					// TODO Auto-generated catch block
+    					e.printStackTrace();
+    				}
     			   
     		   }
     		  
-    	  }
+    	  }*/
     	 
-    	  System.out.println("------------->    keyRestored de removeNotificationListener(ObjectName name,NotificationListener listener)  : "+keyRestored);
-    	  RemoveNotificationListener3 objectRemoveNotificationListener3 = new RemoveNotificationListener3(name,keyRestored);
-    	  try {
-			clientJms.doRequete(objectRemoveNotificationListener3);
-		} catch (JMSException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+  
          
-    }
+    
  
      public synchronized void removeNotificationListener(ObjectName name,NotificationListener listener,NotificationFilter filter,Object handback) throws InstanceNotFoundException,ListenerNotFoundException,IOException{
     	  f.write("Appel a la methode removeNotificationListener(ObjectName name,NotificationListener listener,NotificationFilter filter,Object handback) \n ");
