@@ -96,8 +96,7 @@ public class BroadcastingUser extends User implements
 public void removeNotificationListener(NotificationListener listener,
 		NotificationFilter filter, Object handback)
 		throws ListenerNotFoundException {
-	// TODO Auto-generated method stub
-	
+	broadcaster.removeNotificationListener(listener, filter, handback);
 }
 
 }

@@ -59,7 +59,7 @@ public class JMSConnector implements MessageListener{
 	private MBeanServer mbs = null;
 	static Object reponse = null;
 	MessageProducer producer;
-	Session session2;
+	Session session2,session;
 	Destination replyTo;
 	Queue qToto;
 	Object handback;
@@ -89,7 +89,7 @@ public class JMSConnector implements MessageListener{
 		jndiContext.close();
 		//Création des artéfacts nécessaires pour se connecter à la file et au sujet
 		Connection connection = connectionFactory.createConnection();
-		Session session = connection.createSession(false,Session.AUTO_ACKNOWLEDGE); //la session accuse
+		/*Session*/ session = connection.createSession(false,Session.AUTO_ACKNOWLEDGE); //la session accuse
 		Queue qtoto = (Queue) session.createQueue("Qtoto");
 		//queueNotification = (Queue) session.createQueue("QNotification");
 		session2 = connection.createSession(false,Session.AUTO_ACKNOWLEDGE);
@@ -279,7 +279,7 @@ public class JMSConnector implements MessageListener{
 	 ObjectMessage messageReponse = null;
 	if(!(objetRecu instanceof AddNotificationListener)){
 	 try {
-		messageReponse = session2.createObjectMessage();
+		messageReponse = session.createObjectMessage();
 	} catch (JMSException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
