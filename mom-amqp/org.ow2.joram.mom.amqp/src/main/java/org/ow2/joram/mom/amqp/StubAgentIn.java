@@ -43,7 +43,6 @@ import org.ow2.joram.mom.amqp.marshalling.AbstractMarshallingMethod;
 import org.ow2.joram.mom.amqp.structures.Ack;
 import org.ow2.joram.mom.amqp.structures.AddBoundExchange;
 import org.ow2.joram.mom.amqp.structures.Cancel;
-import org.ow2.joram.mom.amqp.structures.ConsumeMessage;
 import org.ow2.joram.mom.amqp.structures.Deliver;
 import org.ow2.joram.mom.amqp.structures.PublishToQueue;
 import org.ow2.joram.mom.amqp.structures.Recover;
@@ -52,7 +51,6 @@ import org.ow2.joram.mom.amqp.structures.RemoveQueueBindings;
 import org.ow2.joram.mom.amqp.structures.Returned;
 
 import fr.dyade.aaa.agent.AgentId;
-import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.agent.Channel;
 import fr.dyade.aaa.common.Debug;
 
@@ -141,8 +139,6 @@ public class StubAgentIn {
         removeQueueBindings((RemoveQueueBindings) request);
       } else if (request instanceof RemoveBoundExchange) {
         removeBoundExchange((RemoveBoundExchange) request, from.getFrom(), proxyId);
-      } else if (request instanceof ConsumeMessage) {
-        consumeMessage((ConsumeMessage) request, proxyId);
       }
     } catch (AMQPException exc) {
       if (logger.isLoggable(BasicLevel.DEBUG)) {
@@ -482,21 +478,6 @@ public class StubAgentIn {
       throws NotFoundException, ResourceLockedException {
     StubLocal.queueUnbind(queueUnbind.exchange, queueUnbind.queue, queueUnbind.routingKey,
         queueUnbind.arguments, serverId, proxyId);
-  }
-
-  private static void consumeMessage(ConsumeMessage consumeMessage, long proxyId) throws TransactionException {
-    Queue queue = Naming.lookupQueue(consumeMessage.queueName);
-    Message msg = queue.consumeMessage(consumeMessage.noAck, consumeMessage.consumerTag,
-        consumeMessage.channelNumber, consumeMessage.consumerServerId, proxyId);
-    if (msg != null) {
-      AMQP.Basic.Deliver deliver = new AMQP.Basic.Deliver(consumeMessage.consumerTag, msg.queueMsgId,
-          msg.redelivered, msg.exchange, msg.routingKey);
-      deliver.channelNumber = consumeMessage.channelNumber;
-      AMQPAgent.stubAgentOut.deliver(new Deliver(deliver, msg.properties, msg.body, msg.queueMsgId,
-          consumeMessage.consumerServerId, proxyId, consumeMessage.queueName), queue);
-      // Send to itself in order to finally get all messages on the queue
-      StubAgentOut.asyncSend(consumeMessage, AgentServer.getServerId(), proxyId);
-    }
   }
 
 }
