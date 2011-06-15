@@ -53,11 +53,6 @@ public class AmqpConnectionService {
     return singleton;
   }
 
-
-  public static void addServer(String name, ConnectionFactory factory) {
-    getInstance().addServer(name, factory);
-  }
-
   /**
    * Adds an AMQP server and starts a live connection with it, accessible via
    * the host and port provided. A server is uniquely identified by the given
@@ -95,36 +90,37 @@ public class AmqpConnectionService {
     getInstance().deleteServer(name);
   }
 
-  public static String[] getConnectionNames() {
-    return getInstance().getConnectionNames();
+  /**
+   * Gets the list of known servers.
+   */
+  public static String[] getServerNames() {
+    return getInstance().getServerNames();
   }
 
   /**
    * Initializes the service. Starts a connection with one server.
    */
   public static void init(String args, boolean firstTime) throws Exception {
-
-    String host = ConnectionFactory.DEFAULT_HOST;
-    int port = ConnectionFactory.DEFAULT_AMQP_PORT;
-    String name = "default";
-    if (args != null) {
-      StringTokenizer st = new StringTokenizer(args);
-      if (st.hasMoreTokens()) {
-        host = st.nextToken();
+    if (firstTime) {
+      String host = ConnectionFactory.DEFAULT_HOST;
+      int port = ConnectionFactory.DEFAULT_AMQP_PORT;
+      String name = "default";
+      if (args != null) {
+        StringTokenizer st = new StringTokenizer(args);
+        if (st.hasMoreTokens()) {
+          host = st.nextToken();
+        }
+        if (st.hasMoreTokens()) {
+          port = Integer.parseInt(st.nextToken());
+        }
+        if (st.hasMoreTokens()) {
+          name = st.nextToken();
+        }
       }
-      if (st.hasMoreTokens()) {
-        port = Integer.parseInt(st.nextToken());
-      }
-      if (st.hasMoreTokens()) {
-        name = st.nextToken();
-      }
+      getInstance().addServer(name, host, port);
+    } else {
+      getInstance().readSavedConf();
     }
-
-    ConnectionFactory factory = new ConnectionFactory();
-    factory.setHost(host);
-    factory.setPort(port);
-
-    getInstance().addServer(name, factory);
 
   }
 

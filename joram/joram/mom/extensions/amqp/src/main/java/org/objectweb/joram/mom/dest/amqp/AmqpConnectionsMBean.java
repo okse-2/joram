@@ -55,6 +55,9 @@ public interface AmqpConnectionsMBean {
    */
   public void deleteServer(String name);
 
-  public String[] getConnectionNames();
+  /**
+   * Gets the list of known servers.
+   */
+  public String[] getServerNames();
 
 }
