@@ -23,7 +23,7 @@
 package org.ow2.joram.mom.amqp;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +33,7 @@ import java.util.Map;
  */
 public class ChannelContext {
 
-  public static class Delivery {
+  static class Delivery {
 
     long queueMsgId;
 
@@ -63,20 +63,30 @@ public class ChannelContext {
   String lastQueueCreated;
 
   /**
+   * The configured maximum prefetched message count. 0 means no limit.
+   */
+  int prefetchCount = 0;
+
+  /**
    * Keeps the deliveries waiting for an acknowledgment.
    */
   List<Delivery> deliveriesToAck = new LinkedList<Delivery>();
 
   /**
-   * Maps a consumer tag to a queue.
+   * Maps a consumer tag to a queue. A Least Recently Used map is necessary to
+   * get new deliveries on a round-robin basis when an acknowledgment is
+   * received.
    */
-  Map<String, QueueShell> consumerQueues = new HashMap<String, QueueShell>();
+  Map<String, QueueShell> consumerQueues = new LinkedHashMap(16, 0.75f, true);
 
   /**
    * Tells if the channel is in transacted mode.
    */
   boolean transacted = false;
 
+  /**
+   * The publish requests waiting the Tx.Commit command.
+   */
   List<PublishRequest> pubToCommit = new ArrayList<PublishRequest>();
 
   /**
