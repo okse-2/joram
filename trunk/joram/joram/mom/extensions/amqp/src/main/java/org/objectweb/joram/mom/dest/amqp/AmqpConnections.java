@@ -22,12 +22,20 @@
  */
 package org.objectweb.joram.mom.dest.amqp;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
 import com.rabbitmq.client.ConnectionFactory;
+
+import fr.dyade.aaa.agent.AgentServer;
+import fr.dyade.aaa.common.Debug;
 
 /**
  * The {@link AmqpConnections} service handles the list of known AMQP
@@ -35,25 +43,25 @@ import com.rabbitmq.client.ConnectionFactory;
  */
 public class AmqpConnections implements AmqpConnectionsMBean {
 
+  private static final Logger logger = Debug.getLogger(AmqpConnections.class.getName());
+
+  static final String SAVE_FILE_NAME = "Amqp_Cnx";
+
   private Map<String, LiveServerConnection> servers = new HashMap<String, LiveServerConnection>();
 
   AmqpConnections() {
   }
 
-  /**
-   * Adds an AMQP server and starts a live connection with it, accessible via
-   * the {@link ConnectionFactory} provided. A server is uniquely identified
-   * by the given name. Adding an existing server won't do anything.
-   * 
-   * @param name the name identifying the server
-   * @param factory the factory used to access the server, configured properly
-   *          (host, port, login, password...)
-   */
-  public void addServer(String name, ConnectionFactory factory) {
-    synchronized (servers) {
-      if (!servers.containsKey(name)) {
-        servers.put(name, new LiveServerConnection(name, factory));
+  void readSavedConf() {
+    try {
+      servers = (Map<String, LiveServerConnection>) AgentServer.getTransaction().load(SAVE_FILE_NAME);
+      Iterator<LiveServerConnection> iter = servers.values().iterator();
+      while (iter.hasNext()) {
+        iter.next().startLiveConnection();
       }
+    } catch (Exception exc) {
+      logger.log(BasicLevel.ERROR, "Error while loading persisted servers", exc);
+      servers = new HashMap<String, LiveServerConnection>();
     }
   }
 
@@ -62,17 +70,29 @@ public class AmqpConnections implements AmqpConnectionsMBean {
     ConnectionFactory factory = new ConnectionFactory();
     factory.setHost(host);
     factory.setPort(port);
-    addServer(name, factory);
+    addServer(name, host, port, null, null);
   }
 
   /** {@inheritDoc} */
   public void addServer(String name, String host, int port, String user, String pass) {
-    ConnectionFactory factory = new ConnectionFactory();
-    factory.setHost(host);
-    factory.setPort(port);
-    factory.setUsername(user);
-    factory.setPassword(pass);
-    addServer(name, factory);
+    synchronized (servers) {
+      if (!servers.containsKey(name)) {
+        LiveServerConnection cnx = new LiveServerConnection(name, host, port, user, pass);
+        cnx.startLiveConnection();
+        servers.put(name, cnx);
+      }
+    }
+    try {
+      if (Thread.currentThread() != AgentServer.getEngineThread()) {
+        AgentServer.getTransaction().begin();
+      }
+      AgentServer.getTransaction().save((HashMap) servers, SAVE_FILE_NAME);
+      if (Thread.currentThread() != AgentServer.getEngineThread()) {
+        AgentServer.getTransaction().commit(true);
+      }
+    } catch (IOException exc) {
+      logger.log(BasicLevel.ERROR, "Error while persisting new server " + name + ": " + host + ':' + port, exc);
+    }
   }
 
   /** {@inheritDoc} */
@@ -81,11 +101,23 @@ public class AmqpConnections implements AmqpConnectionsMBean {
       LiveServerConnection cnx = servers.remove(name);
       if (cnx != null) {
         cnx.stopLiveConnection();
+        try {
+          if (Thread.currentThread() != AgentServer.getEngineThread()) {
+            AgentServer.getTransaction().begin();
+          }
+          AgentServer.getTransaction().save((HashMap) servers, SAVE_FILE_NAME);
+          if (Thread.currentThread() != AgentServer.getEngineThread()) {
+            AgentServer.getTransaction().commit(true);
+          }
+        } catch (IOException exc) {
+          logger.log(BasicLevel.ERROR, "Error while deleting server " + name, exc);
+        }
       }
     }
   }
 
-  public String[] getConnectionNames() {
+  /** {@inheritDoc} */
+  public String[] getServerNames() {
     return servers.keySet().toArray(new String[servers.size()]);
   }
 

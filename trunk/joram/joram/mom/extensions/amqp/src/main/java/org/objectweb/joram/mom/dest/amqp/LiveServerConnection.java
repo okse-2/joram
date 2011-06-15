@@ -23,6 +23,7 @@
 package org.objectweb.joram.mom.dest.amqp;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -41,23 +42,32 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * A {@link LiveServerConnection} keeps alive a connection to an AMQP server.
  * When the connection fails, a reconnection routine starts.
  */
-public class LiveServerConnection implements LiveServerConnectionMBean, ShutdownListener {
+public class LiveServerConnection implements LiveServerConnectionMBean, ShutdownListener, Serializable {
+
+  private static final long serialVersionUID = 1L;
 
   private static final Logger logger = Debug.getLogger(LiveServerConnection.class.getName());
 
-  private final ConnectionFactory cnxFactory;
+  private transient ConnectionFactory cnxFactory;
 
-  private ReconnectionDaemon cnxDaemon;
+  private transient ReconnectionDaemon cnxDaemon;
 
-  private volatile Connection conn = null;
+  private transient volatile Connection conn = null;
 
   private String name;
+
+  private String host;
+
+  private int port;
+
+  private String user;
+
+  private String password;
 
   /**
    * Starts a connection with a default AMQP server.
    */
-  public LiveServerConnection(String name) {
-    this(name, new ConnectionFactory());
+  public LiveServerConnection() {
   }
 
   /**
@@ -65,9 +75,24 @@ public class LiveServerConnection implements LiveServerConnectionMBean, Shutdown
    * 
    * @param factory the factory used to access the server.
    */
-  public LiveServerConnection(String name, ConnectionFactory factory) {
-    this.cnxFactory = factory;
+  public LiveServerConnection(String name, String host, int port, String user, String password) {
     this.name = name;
+    this.host = host;
+    this.port = port;
+    this.user = user;
+    this.password = password;
+  }
+
+  public void startLiveConnection() {
+    this.cnxFactory = new ConnectionFactory();
+    cnxFactory.setHost(host);
+    cnxFactory.setPort(port);
+    if (user != null) {
+      cnxFactory.setUsername(user);
+    }
+    if (password != null) {
+      cnxFactory.setPassword(password);
+    }
     cnxDaemon = new ReconnectionDaemon();
 
     try {
@@ -245,11 +270,11 @@ public class LiveServerConnection implements LiveServerConnectionMBean, Shutdown
   }
 
   public String getHost() {
-    return cnxFactory.getHost();
+    return host;
   }
 
   public int getPort() {
-    return cnxFactory.getPort();
+    return port;
   }
 
   public String getName() {
@@ -257,7 +282,7 @@ public class LiveServerConnection implements LiveServerConnectionMBean, Shutdown
   }
 
   public String getUserName() {
-    return cnxFactory.getUsername();
+    return user;
   }
 
   public String getState() {
