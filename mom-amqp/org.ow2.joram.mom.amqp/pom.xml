@@ -5,13 +5,13 @@
   <packaging>bundle</packaging>
   <name>JORAM :: mom :: amqp</name>
   <description>Builds amqp.</description>
-  <version>0.4</version>
+  <version>0.5</version>
   <url>http://joram.ow2.org/</url>
   <organization>
     <name>Scalagent D.T.</name>
     <url>http://www.scalagent.com/</url>
   </organization>
-  
+
   <parent>
     <artifactId>ow2</artifactId>
     <groupId>org.ow2</groupId>
@@ -47,17 +47,13 @@
       </plugin>
     </plugins>
   </build>
-  
+
   <dependencies>
-    <dependency>
-      <groupId>org.objectweb.joram</groupId>
-      <artifactId>a3-common</artifactId>
-      <version>${joram.version}</version>
-    </dependency>
     <dependency>
       <groupId>org.objectweb.joram</groupId>
       <artifactId>a3-rt</artifactId>
       <version>${joram.version}</version>
     </dependency>
   </dependencies>
+
 </project>
