@@ -22,6 +22,9 @@
  */
 package org.ow2.joram.mom.amqp;
 
+import java.util.Iterator;
+import java.util.List;
+
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 import org.ow2.joram.mom.amqp.exceptions.AMQPException;
@@ -120,13 +123,18 @@ public class StubAgentOut implements DeliveryListener {
     AMQPAgent.sendRequestTo(request, serverId, proxyId, null);
   }
 
-  public void deliver(Deliver deliver, Queue queue) {
+  public boolean deliver(String consumerTag, int channelId, Queue queue, short serverId, long proxyId) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "StubAgentIn.deliver(" + deliver + ", " + queue + ')');
-    AMQPResponseNot not = new AMQPResponseNot();
-    not.obj = deliver;
-    not.keyLock = -1;
-    Channel.sendTo(AMQPAgent.getAMQPId(deliver.serverId), not);
+      logger.log(BasicLevel.DEBUG, "StubAgentOut.deliver(" + queue + ')');
+    List<Deliver> deliveries = queue.getDeliveries(consumerTag, channelId, 1, serverId, proxyId);
+    for (Iterator<Deliver> iterator = deliveries.iterator(); iterator.hasNext();) {
+      Deliver deliver = iterator.next();
+      AMQPResponseNot not = new AMQPResponseNot();
+      not.obj = deliver;
+      not.keyLock = -1;
+      Channel.sendTo(AMQPAgent.getAMQPId(deliver.serverId), not);
+    }
+    return true;
   }
 
 }
