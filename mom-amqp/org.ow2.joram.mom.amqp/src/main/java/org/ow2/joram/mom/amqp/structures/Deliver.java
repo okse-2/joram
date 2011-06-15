@@ -47,8 +47,10 @@ public class Deliver implements Serializable {
   public long proxyId;
   public String queueName;
   public long msgId;
+  public boolean noAck;
 
-  public Deliver(AMQP.Basic.Deliver deliver, BasicProperties properties, byte[] body, long msgId, short serverId, long proxyId, String queueName) {
+  public Deliver(AMQP.Basic.Deliver deliver, BasicProperties properties, byte[] body, long msgId,
+      short serverId, long proxyId, String queueName, boolean noAck) {
     this.deliver = deliver;
     this.properties = properties;
     this.body = body;
@@ -56,6 +58,7 @@ public class Deliver implements Serializable {
     this.proxyId = proxyId;
     this.queueName = queueName;
     this.msgId = msgId;
+    this.noAck = noAck;
   }
 
 }
