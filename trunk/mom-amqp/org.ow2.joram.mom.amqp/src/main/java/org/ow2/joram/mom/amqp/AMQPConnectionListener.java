@@ -33,6 +33,9 @@ import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -75,7 +78,7 @@ public class AMQPConnectionListener extends Daemon {
   /**
    * The implementation version of the broker.
    */
-  public static final String JORAM_AMQP_VERSION = "0.4";
+  public static final String JORAM_AMQP_VERSION = "0.5";
 
   /**
    * The message locale that the server supports. The locale defines the
@@ -127,11 +130,12 @@ public class AMQPConnectionListener extends Daemon {
   /** The socket used to listen. */
   private Socket sock;
   
-  /** Timeout when listening on the socket. */
-  private int timeout;
-  
+  /** Heartbeats requested by client and server, in seconds. */
+  private int sHeartbeat;
+  private int cHeartbeat;
+
   private Queue queueIn;
-  private Queue queueOut;
+  private BlockingQueue queueOut;
 
   private NetServerOut netServerOut;
 
@@ -146,17 +150,17 @@ public class AMQPConnectionListener extends Daemon {
    * 
    * @param serverSocket
    *          the server socket to listen to
-   * @param timeout
+   * @param heartbeat
    *          the socket timeout delay.
    * @throws IOException 
    * @throws Exception 
    */
-  public AMQPConnectionListener(ServerSocket serverSocket, int timeout) throws IOException {
+  public AMQPConnectionListener(ServerSocket serverSocket, int heartbeat) throws IOException {
     super("AMQPConnectionListener");
     this.serverSocket = serverSocket;
-    this.timeout = timeout;
+    this.sHeartbeat = heartbeat;
     queueIn = new Queue();
-    queueOut = new Queue();
+    queueOut = new LinkedBlockingDeque();
     
     // create Proxy
     Proxy proxy = new Proxy(queueIn, queueOut);
@@ -232,7 +236,6 @@ public class AMQPConnectionListener extends Daemon {
       if (channelNumber != NO_CHANNEL) {
         throw new CommandInvalidException("Non-zero channel number for heartbeat frame.");
       }
-      queueOut.push(new Frame(AMQP.FRAME_HEARTBEAT, NO_CHANNEL));
       break;
 
     default:
@@ -261,7 +264,7 @@ public class AMQPConnectionListener extends Daemon {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "send method : " + method);
     method.channelNumber = channelNumber;
-    queueOut.push(method);
+    queueOut.add(method);
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "method sent");
   }
@@ -308,12 +311,12 @@ public class AMQPConnectionListener extends Daemon {
           }
           // TODO secure the connection if necessary
           sendMethodToPeer(new AMQP.Connection.Tune(JORAM_AMQP_MAX_CHANNELS, JORAM_AMQP_MAX_FRAME_SIZE,
-              timeout / 2), channelNumber);
+              sHeartbeat), channelNumber);
           break;
 
         case AMQP.Connection.SecureOk.INDEX:
           sendMethodToPeer(new AMQP.Connection.Tune(JORAM_AMQP_MAX_CHANNELS, JORAM_AMQP_MAX_FRAME_SIZE,
-              timeout / 2), channelNumber);
+              sHeartbeat), channelNumber);
           break;
 
         case AMQP.Connection.TuneOk.INDEX:
@@ -489,6 +492,9 @@ public class AMQPConnectionListener extends Daemon {
     } else {
       throw new SyntaxErrorException("Error negotiating max channel number.");
     }
+
+    cHeartbeat = tuneOk.heartbeat;
+
   }
 
   /**
@@ -564,10 +570,9 @@ public class AMQPConnectionListener extends Daemon {
     }
 
     sock.setTcpNoDelay(true);
-    // Fix bug when the client doesn't
-    // use the right protocol (e.g. Telnet)
-    // and blocks this listener.
-    sock.setSoTimeout(timeout);
+    //If a peer detects no incoming traffic (i.e. received octets) for two heartbeat
+    // intervals or longer, it should close the connection
+    sock.setSoTimeout(sHeartbeat * 2000);
 
     try {
       readProtocolHeader(sock.getInputStream());
@@ -597,7 +602,7 @@ public class AMQPConnectionListener extends Daemon {
     netServerOut.start();
 
     AMQP.Connection.Start startMethod = getConnectionStartMethod();
-    queueOut.push(startMethod);
+    queueOut.add(startMethod);
 
     InputStream cnxInputStream = sock.getInputStream();
     while (true) {
@@ -744,7 +749,7 @@ public class AMQPConnectionListener extends Daemon {
     private OutputStream os = null;
 
     NetServerOut(String name) {
-      super(name + ".NetServerOut");
+      super(name + ".NetServerOut", logger);
     }
 
     protected void close() {
@@ -758,7 +763,7 @@ public class AMQPConnectionListener extends Daemon {
     }
 
     protected void shutdown() {
-      queueOut.close();
+//      queueOut.close();
     }
 
     private void writeToPeer(Frame frame) throws IOException {
@@ -782,9 +787,14 @@ public class AMQPConnectionListener extends Daemon {
 
           canStop = true;
           try {
-            if (this.logmon.isLoggable(BasicLevel.DEBUG))
+            if (this.logmon.isLoggable(BasicLevel.DEBUG)) {
               this.logmon.log(BasicLevel.DEBUG, "waiting message");
-            obj = queueOut.getAndPop();
+            }
+            if (cHeartbeat <= 0) {
+              obj = queueOut.take();
+            } else {
+              obj = queueOut.poll(cHeartbeat, TimeUnit.SECONDS);
+            }
           } catch (InterruptedException exc) {
             if (this.logmon.isLoggable(BasicLevel.DEBUG))
               this.logmon.log(BasicLevel.DEBUG, this.getName() + ", interrupted");
@@ -802,6 +812,14 @@ public class AMQPConnectionListener extends Daemon {
                 this.logmon.log(BasicLevel.DEBUG, "Method not sent: closing.");
               continue;
             }
+          }
+
+          if (obj == null) {
+            if (this.logmon.isLoggable(BasicLevel.DEBUG)) {
+              this.logmon.log(BasicLevel.DEBUG, "Send heartbeat to client.");
+            }
+            writeToPeer(new Frame(AMQP.FRAME_HEARTBEAT, NO_CHANNEL));
+            continue;
           }
 
           if (obj instanceof AbstractMarshallingMethod) {
