@@ -48,40 +48,30 @@ public class AMQPService {
   
   public static Naming naming;
   
-  /** Default value for the TCP SO_TIMEOUT property. */
-  public static final int DEFAULT_SO_TIMEOUT = 100000;
+  /** Default value in seconds for the server heartbeat property. */
+  public static final int DEFAULT_HEARTBEAT = 10;
 
   /**
-   * Name the property that allow to fix the TCP SO_TIMEOUT property for the
-   * client's connections.
+   * Name of the property that allows to set the server requested heartbeat.
+   * Socket timeout (SO_TIMEOUT) property will be 2 times the desired heartbeat.
    */
-  public static final String SO_TIMEOUT_PROP = "AMQP.soTimeout";
+  public static final String HEARTBEAT_PROP = "AMQP.heartbeat";
 
   /** Default value for the TCP port of the listen socket. */
   public static final int DEFAULT_PORT = AMQP.PROTOCOL.PORT;
 
   public static final String DEFAULT_BINDADDRESS = "0.0.0.0"; // all
-
-  /**
-   * Name the property that allow to fix the pool size for the
-   * connection's listener.
-   */
-  public static final String POOL_SIZE_PROP = "AMQP.poolSize";
-  
-  /** Default value for the pool size. */
-  public static final int DEFAULT_POOL_SIZE = 500;
-  
-  public static int poolSize;
   
   /** Default value for the TCP BACKLOG property. */
   public static final int DEFAULT_BACKLOG = 10;
+
   /**
-   * Name the property that allow to fix the TCP BACKLOG property for the
+   * Name of the property that allow to fix the TCP BACKLOG property for the
    * client's connections.
    */
   public static final String BACKLOG_PROP = "AMQP.backlog";
   
-  public static int timeout;
+  public static int heartbeat;
   
   /** The proxy reference (used to stop it). */
   protected static AMQPService amqpService;
@@ -111,6 +101,8 @@ public class AMQPService {
 
     port = DEFAULT_PORT;
     address = DEFAULT_BINDADDRESS;
+
+    // Mix some method numbers to set up a server harshly supporting AMQP 0.8 if needed
     if (args != null) {
       StringTokenizer st = new StringTokenizer(args);
 
@@ -152,8 +144,7 @@ public class AMQPService {
       serverSocket = new ServerSocket(port, backlog, InetAddress.getByName(address));
     }
 
-    poolSize = AgentServer.getInteger(POOL_SIZE_PROP, DEFAULT_POOL_SIZE).intValue();
-    timeout = AgentServer.getInteger(SO_TIMEOUT_PROP, DEFAULT_SO_TIMEOUT).intValue();
+    heartbeat = AgentServer.getInteger(HEARTBEAT_PROP, DEFAULT_HEARTBEAT).intValue();
      
     // Initialization Naming 
     naming = new Naming();
@@ -223,7 +214,7 @@ public class AMQPService {
    */
   public AMQPService() throws IOException {
     connectionListeners = new Vector<AMQPConnectionListener>();
-    AMQPConnectionListener cnxListener = new AMQPConnectionListener(serverSocket, timeout);
+    AMQPConnectionListener cnxListener = new AMQPConnectionListener(serverSocket, heartbeat);
     connectionListeners.add(cnxListener);
   }
 
@@ -254,11 +245,9 @@ public class AMQPService {
   }
 
   public static void createConnectionListener() throws IOException {
-    if (connectionListeners.size() < poolSize) {
-      AMQPConnectionListener cnxListener = new AMQPConnectionListener(serverSocket, timeout);
-      connectionListeners.add(cnxListener);
-      cnxListener.start();
-    }
+    AMQPConnectionListener cnxListener = new AMQPConnectionListener(serverSocket, heartbeat);
+    connectionListeners.add(cnxListener);
+    cnxListener.start();
   }
   
   public static void removeConnectionListener(AMQPConnectionListener cnxListener) {
