@@ -247,6 +247,13 @@ public final class AgentServer {
   }
 
   /**
+   * Returns the agent server engine thread.
+   */
+  public static Thread getEngineThread() {
+    return engine.thread;
+  }
+
+  /**
    * Returns the load averages for the last minute.
    * @return the load averages for the last minute.
    */
