@@ -22,7 +22,6 @@
  */
 package org.ow2.joram.mom.amqp;
 
-import java.util.List;
 import java.util.Set;
 
 public interface ProxyMBean {
@@ -31,8 +30,8 @@ public interface ProxyMBean {
 
   public int getQueueOutSize();
 
-  public List<QueueShell> getExclusiveQueues();
+  public Set<String> getExclusiveQueues();
 
-  public Set<Integer> getOpenedChannels();
+  public Integer[] getOpenedChannels();
 
 }
