@@ -26,8 +26,8 @@
     <menu>
       <legend>Developers' Corner</legend>
       <menuitem><a href="dev/corner.html">Welcome</a></menuitem>
-      <menuitem><connect href="dev/roadMap.html">Road map</connect></menuitem>
-      <menuitem><connect href="dev/versions.html">Code updates</connect></menuitem>
+      <menuitem><a href="dev/roadMap.html">Road map</a></menuitem>
+      <menuitem><a href="dev/versions.html">Code updates</a></menuitem>
       <menuitem><a href="http://svn.forge.objectweb.org/cgi-bin/viewcvs.cgi/joram">SVN repository</a></menuitem>
       <menuitem><a href="http://forge.objectweb.org/projects/joram">ObjectWeb Forge site</a></menuitem>
       <menuitem><a href="license.html">Licenses</a></menuitem>
