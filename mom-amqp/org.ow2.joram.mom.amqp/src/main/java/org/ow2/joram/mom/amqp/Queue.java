@@ -441,7 +441,8 @@ public class Queue implements QueueMBean, Externalizable {
     }
   }
 
-  public void deleteQueue(String queueName, short serverId, long proxyId) throws ResourceLockedException,
+  public synchronized void deleteQueue(String queueName, short serverId, long proxyId)
+      throws ResourceLockedException,
       TransactionException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Queue.deleteQueue(" + queueName + ')');
