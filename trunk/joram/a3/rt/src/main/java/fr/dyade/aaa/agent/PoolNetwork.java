@@ -680,6 +680,8 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
           } catch (Exception exc) {
             this.logmon.log(BasicLevel.ERROR,
                             this.getName() + ", bad connection setup", exc);
+            // Close the incoming connection
+            sock.close();
           }
         }
       } catch (IOException exc) {
