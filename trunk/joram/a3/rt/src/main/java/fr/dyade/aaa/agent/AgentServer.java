@@ -335,13 +335,13 @@ public final class AgentServer {
     return consumers.elements();
   }
 
-  static MessageConsumer getConsumer(String domain) throws Exception {
+  public static MessageConsumer getConsumer(String domain) throws Exception {
     if (! consumers.containsKey(domain))
       throw new Exception("Unknown consumer for domain " + domain);
     return (MessageConsumer) consumers.get(domain);
   }
 
-  static void removeConsumer(String domain) {
+  public static void removeConsumer(String domain) {
     MessageConsumer cons = (MessageConsumer) consumers.remove(domain);
     if (cons != null) {
       cons.stop();
