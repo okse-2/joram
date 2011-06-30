@@ -88,6 +88,7 @@ import org.objectweb.joram.shared.admin.GetUsersRequest;
 import org.objectweb.joram.shared.admin.RemoveDomainRequest;
 import org.objectweb.joram.shared.admin.RemoveServerRequest;
 import org.objectweb.joram.shared.admin.SetDMQRequest;
+import org.objectweb.joram.shared.admin.SetRight;
 import org.objectweb.joram.shared.admin.SetThresholdRequest;
 import org.objectweb.joram.shared.admin.StopServerRequest;
 import org.objectweb.joram.shared.admin.UpdateUser;
@@ -1957,94 +1958,94 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
   // TODO (AF): This code should be moved in an helper class.
   // ================================================================================
 
-//  /**
-//   * Processes a <code>CreateUserRequest</code> instance requesting the
-//   * creation of a <code>UserAgent</code> for a given user and save Agent
-//   * AdminTopic. (used by ScalAgent mediation)
-//   *
-//   * @exception UnknownServerException  If the target server does not exist.
-//   * @exception RequestException  If the user already exists but with a
-//   *              different password, or if the proxy deployment failed.
-//   * @throws IOException transaction exception
-//   * 
-//   * @deprecated
-//   */
-//  public static void CreateUserAndSave(CreateUserRequest request,
-//                                       AgentId replyTo,
-//                                       String msgId) throws UnknownServerException, RequestException, IOException {
-//    ref.doProcess(request, replyTo, msgId);
-//    //  save Agent AdminTopic
-//    AgentServer.getTransaction().save(ref.agent, ref.getId().toString()); 
-//  }
-//
-//  /**
-//   * Instantiating the destination class or retrieving the destination
-//   * and save Agent AdminTopic. (used by ScalAgent mediation)
-//   * 
-//   * @param destName           destination Name
-//   * @param adminId            other admin (null for TopicAdmin)
-//   * @param properties         destination properties
-//   * @param type               destination type ("queue" or "topic")
-//   * @param className          creates an instance of the class
-//   * @param requestClassName  
-//   * @param strbuf             information
-//   * @return DestinationDesc   contain destination description
-//   * @throws UnknownServerException
-//   * @throws RequestException
-//   * @throws IOException  transaction exception.
-//   * 
-//   * @deprecated
-//   */
-//  public static DestinationDesc createDestinationAndSave(String destName,
-//                                                         AgentId adminId,
-//                                                         Properties properties,
-//                                                         byte type,
-//                                                         String className,
-//                                                         String requestClassName,
-//                                                         StringBuffer strbuf) throws UnknownServerException, RequestException, IOException {
-//    // create destination.
-//    DestinationDesc destDesc = ref.createDestination(destName,
-//                                                     adminId, properties,
-//                                                     type, className,
-//                                                     requestClassName,
-//                                                     strbuf);
-//    // save Agent AdminTopic
-//    AgentServer.getTransaction().save(ref.agent, ref.getId().toString()); 
-//    return destDesc;
-//  }
-//
-//  /**
-//   * Processes a <code>SetRight</code> instance requesting to grant a user
-//   * a given right on a given destination. And save Agent TopicAdmin.
-//   * (used by ScalAgent mediation)
-//   *
-//   * @param request
-//   * @param replyTo
-//   * @param msgId
-//   * 
-//   * @throws UnknownServerException
-//   * @throws IOException
-//   * 
-//   * @deprecated
-//   */
-//  public static void setRightAndSave(SetRight request,
-//                                     AgentId replyTo,
-//                                     String msgId) throws UnknownServerException, IOException {
-//    ref.doProcess(request, replyTo, msgId);
-//    // save Agent AdminTopic
-//    AgentServer.getTransaction().save(ref.agent, ref.getId().toString()); 
-//  }
-//
-//  /**
-//   * is destinationTable contain destName ?
-//   * (used by ScalAgent mediation)
-//   * 
-//   * @param destName destination name.
-//   * @return true if contain.
-//   * 
-//   * @deprecated
-//   */
-//  public static boolean isDestinationTableContain(String destName) {
-//    return ref.destinationsTable.containsKey(destName);
-//  }
+  /**
+   * Processes a <code>CreateUserRequest</code> instance requesting the
+   * creation of a <code>UserAgent</code> for a given user and save Agent
+   * AdminTopic. (used by ScalAgent mediation)
+   *
+   * @exception UnknownServerException  If the target server does not exist.
+   * @exception RequestException  If the user already exists but with a
+   *              different password, or if the proxy deployment failed.
+   * @throws IOException transaction exception
+   * 
+   * @deprecated
+   */
+  public static void CreateUserAndSave(CreateUserRequest request,
+                                       AgentId replyTo,
+                                       String msgId) throws UnknownServerException, RequestException, IOException {
+    ref.doProcess(request, replyTo, msgId);
+    //  save Agent AdminTopic
+    AgentServer.getTransaction().save(ref, ref.getId().toString()); 
+  }
+
+  /**
+   * Instantiating the destination class or retrieving the destination
+   * and save Agent AdminTopic. (used by ScalAgent mediation)
+   * 
+   * @param destName           destination Name
+   * @param adminId            other admin (null for TopicAdmin)
+   * @param properties         destination properties
+   * @param type               destination type ("queue" or "topic")
+   * @param className          creates an instance of the class
+   * @param requestClassName  
+   * @param strbuf             information
+   * @return DestinationDesc   contain destination description
+   * @throws UnknownServerException
+   * @throws RequestException
+   * @throws IOException  transaction exception.
+   * 
+   * @deprecated
+   */
+  public static DestinationDesc createDestinationAndSave(String destName,
+                                                         AgentId adminId,
+                                                         Properties properties,
+                                                         byte type,
+                                                         String className,
+                                                         String requestClassName,
+                                                         StringBuffer strbuf) throws UnknownServerException, RequestException, IOException {
+    // create destination.
+    DestinationDesc destDesc = ref.createDestination(destName,
+                                                     adminId, properties,
+                                                     type, className,
+                                                     requestClassName,
+                                                     strbuf);
+    // save Agent AdminTopic
+    AgentServer.getTransaction().save(ref, ref.getId().toString()); 
+    return destDesc;
+  }
+
+  /**
+   * Processes a <code>SetRight</code> instance requesting to grant a user
+   * a given right on a given destination. And save Agent TopicAdmin.
+   * (used by ScalAgent mediation)
+   *
+   * @param request
+   * @param replyTo
+   * @param msgId
+   * 
+   * @throws UnknownServerException
+   * @throws IOException
+   * 
+   * @deprecated
+   */
+  public static void setRightAndSave(SetRight request,
+                                     AgentId replyTo,
+                                     String msgId) throws UnknownServerException, IOException {
+    ref.doProcess(request, replyTo, msgId);
+    // save Agent AdminTopic
+    AgentServer.getTransaction().save(ref, ref.getId().toString()); 
+  }
+
+  /**
+   * is destinationTable contain destName ?
+   * (used by ScalAgent mediation)
+   * 
+   * @param destName destination name.
+   * @return true if contain.
+   * 
+   * @deprecated
+   */
+  public static boolean isDestinationTableContain(String destName) {
+    return ref.destinationsTable.containsKey(destName);
+  }
 }
