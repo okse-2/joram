@@ -22,12 +22,14 @@
  */
 package org.objectweb.joram.mom.dest;
 
-import java.util.Enumeration;
+import java.util.List;
 import java.util.Properties;
 
 import org.objectweb.joram.mom.notifications.ClientMessages;
+import org.objectweb.joram.mom.util.DMQManager;
+import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.excepts.RequestException;
-import org.objectweb.joram.shared.messages.ConversionHelper;
+import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -46,6 +48,9 @@ public class DistributionTopic extends Topic {
   private static final long serialVersionUID = 1L;
 
   private transient DistributionModule distributionModule;
+  
+  /** The acquisition class name. */
+  private String distributionClassName;
 
   private Properties properties;
 
@@ -55,35 +60,50 @@ public class DistributionTopic extends Topic {
    * @param properties
    *          The initial set of properties.
    */
-  public void setProperties(Properties properties) throws RequestException {
-    super.setProperties(properties);
+  public void setProperties(Properties properties, boolean firstTime) throws Exception {
+    super.setProperties(properties, firstTime);
 
     if (logger.isLoggable(BasicLevel.DEBUG)) {
       logger.log(BasicLevel.DEBUG, "DistributionTopic.<init> prop = " + properties);
     }
 
-    this.properties = (Properties) properties.clone();
+    this.properties = properties;
 
-    // Check the existence of the distribution class and the presence of a no-arg constructor.
-    try {
-      String className = ConversionHelper.toString(properties.get(DistributionModule.CLASS_NAME));
-      Class.forName(className).getConstructor();
-    } catch (Exception exc) {
-      logger.log(BasicLevel.ERROR, "DistributionTopic: error with distribution class.", exc);
-      throw new RequestException(exc.getMessage());
+    if (firstTime) {
+      if (properties != null) {
+        distributionClassName = properties.getProperty(DistributionModule.CLASS_NAME);
+        properties.remove(DistributionModule.CLASS_NAME);
+      }
+      if (distributionClassName == null) {
+        throw new RequestException("Distribution class name not found: " + DistributionModule.CLASS_NAME
+            + " property must be set on queue creation.");
+      }
+
+      // Check the existence of the distribution class and the presence of a no-arg constructor.
+      try {
+        String className = distributionClassName;
+        Class.forName(className).getConstructor();
+      } catch (Exception exc) {
+        logger.log(BasicLevel.ERROR, "DistributionQueue: error with distribution class.", exc);
+        throw new RequestException(exc.getMessage());
+      }
+    } else {
+      distributionModule.setProperties(properties);
     }
   }
 
   public void initialize(boolean firstTime) {
     super.initialize(firstTime);
     if (distributionModule == null) {
-      distributionModule = new DistributionModule(this, (Properties) properties.clone());
+      distributionModule = new DistributionModule(distributionClassName, properties);
     }
   }
 
   public void agentFinalize(boolean lastTime) {
     super.agentFinalize(lastTime);
-    close();
+    if (distributionModule != null) {
+      distributionModule.close();
+    }
   }
 
   /**
@@ -94,36 +114,32 @@ public class DistributionTopic extends Topic {
     if (logger.isLoggable(BasicLevel.DEBUG)) {
       logger.log(BasicLevel.DEBUG, "DistributionTopic. preProcess(" + from + ", " + cm + ')');
     }
-    return distributionModule.processMessages(cm);
+    List msgs = cm.getMessages();
+    DMQManager dmqManager = null;
+    for (int i = 0; i < msgs.size(); i++) {
+      Message msg = (Message) msgs.get(i);
+      try {
+        distributionModule.processMessage(msg);
+        nbMsgsDeliverSinceCreation++;
+      } catch (Exception exc) {
+        if (logger.isLoggable(BasicLevel.WARN)) {
+          logger.log(BasicLevel.WARN, "DistributionTopic: distribution error.", exc);
+        }
+        if (dmqManager == null) {
+          dmqManager = new DMQManager(cm.getDMQId(), getDMQAgentId(), getId());
+        }
+        nbMsgsSentToDMQSinceCreation++;
+        dmqManager.addDeadMessage(msg, MessageErrorConstants.UNDELIVERABLE);
+      }
+    }
+    if (dmqManager != null) {
+      dmqManager.sendToDMQ();
+    }
+    return null;
   }
 
   public String toString() {
     return "DistributionTopic:" + getId().toString();
   }
 
-  private void close() {
-    if (distributionModule != null) {
-      distributionModule.close();
-    }
-  }
-
-  /**
-   * Update properties configuration, they are processed by the distribution module 
-   * @param prop properties to update.
-   * @throws Exception
-   */
-  public void updateProperties(Properties prop) throws Exception {
-    if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "DistributionTopic.updateProperties(" + prop + ')');
-    }
-    super.setProperties(prop);
-    // update this.properties
-    Enumeration e = prop.keys();
-    while (e.hasMoreElements()) {
-    	String key = (String) e.nextElement();
-    	properties.put(key, prop.get(key));
-    }
-    // update the module
-    distributionModule.updateProperties(properties);
-  }
 }

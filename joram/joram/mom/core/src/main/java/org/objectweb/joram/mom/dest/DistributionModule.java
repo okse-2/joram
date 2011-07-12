@@ -23,14 +23,8 @@
 package org.objectweb.joram.mom.dest;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Properties;
 
-import org.objectweb.joram.mom.notifications.ClientMessages;
-import org.objectweb.joram.mom.util.DMQManager;
-import org.objectweb.joram.shared.MessageErrorConstants;
-import org.objectweb.joram.shared.excepts.MessageValueException;
-import org.objectweb.joram.shared.messages.ConversionHelper;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -47,104 +41,34 @@ public class DistributionModule implements Serializable {
   /** The property name for the distribution handler class name. */
   public static final String CLASS_NAME = "distribution.className";
 
-  /** Keep message property name: tells if distributed message is kept in destination. */
-  public static final String KEEP_MESSAGE_OPTION = "distribution.keep";
-
-  /** Tells if distributed message is kept in destination */
-  private boolean keep = false;
-
   /** Holds the distribution logic. */
   private DistributionHandler distributionHandler;
 
-  /** The distribution queue or topic using this module. */
-  private final Destination destination;
-
-  public DistributionModule(Destination destination, Properties properties) {
-    this.destination = destination;
+  public DistributionModule(String className, Properties properties) {
+    try {
+      Class clazz = Class.forName(className);
+      distributionHandler = (DistributionHandler) clazz.newInstance();
+    } catch (Exception exc) {
+      logger.log(BasicLevel.ERROR, "DistributionModule: can't create distribution handler.", exc);
+    }
     setProperties(properties);
   }
 
   /**
    * Resets the distribution properties.
    */
-  private void setProperties(Properties props) {
-
-    if (props == null) {
-      return;
+  public void setProperties(Properties properties) {
+    if (distributionHandler != null) {
+      distributionHandler.init(properties);
     }
-
-    // reset default
-    keep = false;
-
-    if (props.containsKey(KEEP_MESSAGE_OPTION)) {
-      try {
-        keep = ConversionHelper.toBoolean(props.get(KEEP_MESSAGE_OPTION));
-      } catch (MessageValueException exc) {
-        logger.log(BasicLevel.ERROR, "DistributionModule: can't parse keep message option.", exc);
-      }
-      props.remove(KEEP_MESSAGE_OPTION);
-    }
-
-    if (props.containsKey(CLASS_NAME)) {
-      try {
-        String className = ConversionHelper.toString(props.get(CLASS_NAME));
-        props.remove(CLASS_NAME);
-
-        Class clazz = Class.forName(className);
-        distributionHandler = (DistributionHandler) clazz.newInstance();
-        distributionHandler.init(props);
-
-      } catch (Exception exc) {
-        logger.log(BasicLevel.ERROR, "DistributionModule: can't create distribution handler.", exc);
-      }
-    }
-
-  }
-
-  /**
-   * Messages received on the distribution destination are distributed using the
-   * specified {@link DistributionHandler}.
-   */
-  public ClientMessages processMessages(ClientMessages cm) {
-
-    List msgs = cm.getMessages();
-    DMQManager dmqManager = null;
-    for (int i = 0; i < msgs.size(); i++) {
-      Message msg = (Message) msgs.get(i);
-      try {
-        distributionHandler.distribute(msg);
-        destination.nbMsgsDeliverSinceCreation++;
-      } catch (Exception exc) {
-        logger.log(BasicLevel.ERROR, "DistributionModule: distribution error.", exc);
-        if (dmqManager == null) {
-          dmqManager = new DMQManager(cm.getDMQId(), destination.getDMQAgentId(), destination.getId());
-        }
-        destination.nbMsgsSentToDMQSinceCreation++;
-        dmqManager.addDeadMessage(msg, MessageErrorConstants.UNDELIVERABLE);
-      }
-    }
-    if (dmqManager != null) {
-      dmqManager.sendToDMQ();
-    }
-
-    if (keep) {
-      return cm;
-    }
-    return null;
-  }
-
-  /**
-   * Update the properties, resets the distribution properties.
-   * 
-   * @param properties new properties
-   * @throws Exception
-   */
-  public void updateProperties(Properties properties) throws Exception {
-  	setProperties(properties);
   }
   
   public void close() {
     distributionHandler.close();
+  }
+
+  public void processMessage(Message fullMessage) throws Exception {
+    distributionHandler.distribute(fullMessage);
   }
 
 }
