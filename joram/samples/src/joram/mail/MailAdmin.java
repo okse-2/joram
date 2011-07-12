@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -54,11 +54,9 @@ public class MailAdmin {
 
     User.create("anonymous", "anonymous", 0);
 
-    queue.setFreeReading();
-    queue.setFreeWriting();
-
-    topic.setFreeReading();
     topic.setFreeWriting();
+
+    queue.setFreeReading();
 
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     jndiCtx.bind("cf", cf);
