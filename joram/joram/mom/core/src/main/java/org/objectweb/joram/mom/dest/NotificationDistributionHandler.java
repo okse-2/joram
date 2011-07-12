@@ -20,71 +20,42 @@ import fr.dyade.aaa.common.Debug;
  * an A3 acquisition notification.
  * 
  * @author willy malvault (willy.malvault@scalagent.fr)
- * 
  * @see AcquisitionNot
- * 
  */
-public class NotificationDistributionHandler implements DistributionHandler
-{
-	public static Logger logger = Debug
-			.getLogger(NotificationDistributionHandler.class.getName());
+public class NotificationDistributionHandler implements DistributionHandler {
+  public static Logger logger = Debug.getLogger(NotificationDistributionHandler.class.getName());
 
-	/* the queue to send the notification to */
-	private AgentId remoteDestinationID = null;
+  /** the queue to send the notification to */
+  private AgentId remoteDestinationID = null;
 
-	/*
-	 * @see
-	 * org.objectweb.joram.mom.dest.DistributionHandler#init(java.util.Properties
-	 * )
-	 */
-	@Override
-	public void init(Properties properties)
-	{
-		remoteDestinationID = AgentId.fromString(properties
-				.getProperty("remoteAgentID"));
+  /** @see DistributionHandler#init(Properties) */
+  public void init(Properties properties) {
+    remoteDestinationID = AgentId.fromString(properties.getProperty("remoteAgentID"));
 
-		if (logger.isLoggable(BasicLevel.INFO))
-			logger.log(
-					BasicLevel.INFO,
-					"--- "
-							+ this
-							+ " notification distribution handler bind to destination ("
-							+ remoteDestinationID + ")");
-	}
+    if (logger.isLoggable(BasicLevel.INFO))
+      logger.log(BasicLevel.INFO, "--- " + this + " notification distribution handler bind to destination ("
+          + remoteDestinationID + ")");
+  }
 
-	/*
-	 * @see
-	 * org.objectweb.joram.mom.dest.DistributionHandler#distribute(org.objectweb
-	 * .joram.shared.messages.Message)
-	 */
-	@Override
-	public void distribute(Message message) throws Exception
-	{
-		/* building a ClientMessages object for the notification */
-		ClientMessages cm = new ClientMessages();
-		cm.addMessage(message);
+  /** @see DistributionHandler#distribute(Message) */
+  public void distribute(Message message) throws Exception {
+    /* building a ClientMessages object for the notification */
+    ClientMessages cm = new ClientMessages();
+    cm.addMessage(message);
 
-		/*
-		 * building a notification that inherits messages properties (id and
-		 * persistent)
-		 */
-		AcquisitionNot an = new AcquisitionNot(cm, message.persistent,
-				message.id);
+    /* building a notification that inherits messages properties (id and
+     * persistent) */
+    AcquisitionNot an = new AcquisitionNot(cm, message.persistent, message.id);
 
-		if (remoteDestinationID == null)
-			throw new Exception(
-					"Remote \"alias destination\" A3 agent identifier is null. Did you set the property \"remoteAgentID\" of the distribution destination?");
+    if (remoteDestinationID == null)
+      throw new Exception("Remote \"alias destination\" A3 agent identifier is null. Did you set the property \"remoteAgentID\" of the distribution destination?");
 
-		/* sending the notification */
-		Channel.sendTo(remoteDestinationID, an);
-	}
+    /* sending the notification */
+    Channel.sendTo(remoteDestinationID, an);
+  }
 
-	/*
-	 * @see org.objectweb.joram.mom.dest.AcquisitionHandler#close()
-	 */
-	@Override
-	public void close()
-	{
-		// Nothing to do
-	}
+  /** @see AcquisitionHandler#close() */
+  public void close() {
+    // Nothing to do
+  }
 }
