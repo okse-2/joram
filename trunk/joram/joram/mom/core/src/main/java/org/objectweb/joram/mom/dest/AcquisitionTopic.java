@@ -74,25 +74,34 @@ public class AcquisitionTopic extends Topic implements AcquisitionTopicMBean {
    * @param properties
    *          The initial set of properties.
    */
-  public void setProperties(Properties properties) throws RequestException {
-    super.setProperties(properties);
+  public void setProperties(Properties properties, boolean firstTime) throws Exception {
+    super.setProperties(properties, firstTime);
 
     if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "AcquisitionTopic.<init> prop = " + properties);
-    }
-    if (properties == null) {
-      throw new RequestException("No property found: At least " + AcquisitionModule.CLASS_NAME
-          + " property must be defined on topic creation.");
+      logger.log(BasicLevel.DEBUG, "AcquisitionTopic.setProperties prop = " + properties);
     }
     this.properties = properties;
 
-    acquisitionClassName = properties.getProperty(AcquisitionModule.CLASS_NAME);
-    properties.remove(AcquisitionModule.CLASS_NAME);
-    try {
-      AcquisitionModule.checkAcquisitionClass(acquisitionClassName);
-    } catch (Exception exc) {
-      logger.log(BasicLevel.ERROR, "AcquisitionTopic: error with acquisition class.", exc);
-      throw new RequestException(exc.getMessage());
+    // Acquisition class name can only be set the first time.
+    if (firstTime) {
+      if (properties != null) {
+        acquisitionClassName = properties.getProperty(AcquisitionModule.CLASS_NAME);
+        properties.remove(AcquisitionModule.CLASS_NAME);
+      }
+      if (acquisitionClassName == null) {
+        throw new RequestException("Acquisition class name not found: " + AcquisitionModule.CLASS_NAME
+            + " property must be set on topic creation.");
+      }
+      try {
+        AcquisitionModule.checkAcquisitionClass(acquisitionClassName);
+      } catch (Exception exc) {
+        logger.log(BasicLevel.ERROR, "AcquisitionTopic: error with acquisition class.", exc);
+        throw new RequestException(exc.getMessage());
+      }
+    }
+
+    if (!firstTime) {
+      acquisitionModule.setProperties(properties);
     }
   }
 
@@ -130,22 +139,6 @@ public class AcquisitionTopic extends Topic implements AcquisitionTopicMBean {
     }
     acquisitionModule.processMessages(cm);
     return null;
-  }
-  
-  
-  /**
-   * Update properties configuration, they are processed by the distribution module 
-   * @param prop the new properties.
-   * @throws Exception
-   */
-  public void updateProperties(Properties prop) throws Exception {
-    if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "AcquisitionTopic.updateProperties(" + prop + ')');
-    }
-    super.setProperties(prop);
-    this.properties = prop;
-    // update the module
-    acquisitionModule.updateProperties(properties);
   }
   
   /**

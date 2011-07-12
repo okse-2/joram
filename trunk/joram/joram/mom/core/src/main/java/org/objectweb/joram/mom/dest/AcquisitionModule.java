@@ -112,25 +112,25 @@ public class AcquisitionModule implements ReliableTransmitter {
   private int priority;
 
   /** <code>true</code> if the priority property has been set. */
-  private boolean isPrioritySet = false;
+  private boolean isPrioritySet;
 
   /** Tells if the messages produced are persistent. */
   private boolean isPersistent;
 
   /** <code>true</code> if the persistence property has been set. */
-  private boolean isPersistencySet = false;
+  private boolean isPersistencySet;
 
   /** The duration of produced messages. */
   private long expiration;
 
   /** <code>true</code> if the expiration property has been set. */
-  private boolean isExpirationSet = false;
+  private boolean isExpirationSet;
 
   /** The acquisition queue or topic using this module. */
   private final Destination destination;
 
   /** The period before subsequent acquisition if positive. */
-  private long period = 0;
+  private long period;
 
   /** The task used to launch a new acquisition. */
   private AcquisitionTask acquisitionTask;
@@ -226,11 +226,22 @@ public class AcquisitionModule implements ReliableTransmitter {
   /**
    * Resets the acquisition properties.
    */
-  private void setProperties(Properties properties) {
+  public void setProperties(Properties properties) {
+
     if (isDaemon && running) {
       ((AcquisitionDaemon) acquisitionHandler).stop();
       running = false;
     }
+
+    if (acquisitionTask != null) {
+      acquisitionTask.cancel();
+    }
+
+    // Reset to defaults
+    period = 0;
+    isExpirationSet = false;
+    isPersistencySet = false;
+    isPrioritySet = false;
 
     // Clone properties as it is modified before setting handler properties
     // and we want to keep all properties in destinations to persist them
@@ -238,10 +249,6 @@ public class AcquisitionModule implements ReliableTransmitter {
 
     if (logger.isLoggable(BasicLevel.DEBUG)) {
       logger.log(BasicLevel.DEBUG, "AcquisitionModule.setProperties = " + props + " daemon = " + isDaemon);
-    }
-
-    if (acquisitionTask != null) {
-      acquisitionTask.cancel();
     }
 
     if (props.containsKey(PERIOD)) {
@@ -337,24 +344,6 @@ public class AcquisitionModule implements ReliableTransmitter {
         ((AcquisitionHandler) acquisitionHandler).setProperties(msgProperties);
       }
       AgentServer.getTimer().schedule(new AcquisitionTask(), 0);
-    }
-  }
-  
-  
-  /**
-   * Update the properties.
-   * If daemon stop before resets the acquisition properties.
-   * 
-   * @param properties new properties
-   * @throws Exception
-   */
-  public void updateProperties(Properties properties) throws Exception {
-    if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "AcquisitionModule.updateProperties(" + properties + ')');
-    }
-  	// If non-empty, sets the new properties
-    if (properties != null) {
-      setProperties(properties);
     }
   }
 

@@ -62,7 +62,6 @@ import org.objectweb.joram.shared.admin.SetWriter;
 import org.objectweb.joram.shared.admin.UnsetReader;
 import org.objectweb.joram.shared.admin.UnsetWriter;
 import org.objectweb.joram.shared.excepts.AccessException;
-import org.objectweb.joram.shared.excepts.MessageValueException;
 import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.joram.shared.messages.ConversionHelper;
@@ -157,8 +156,8 @@ public abstract class Destination extends Agent implements DestinationMBean {
     
     // interceptors
     if (interceptorsStr != null) {
-    	interceptors = new ArrayList();
-    	InterceptorsHelper.addInterceptors(interceptorsStr, interceptors);
+      interceptors = new ArrayList();
+      InterceptorsHelper.addInterceptors(interceptorsStr, interceptors);
     }
     
     initialize(firstTime);
@@ -309,29 +308,48 @@ public abstract class Destination extends Agent implements DestinationMBean {
   }
 
   /**
-   * Configures a <code>Destination</code>.
+   * Sets the configuration of a <code>Destination</code>. Be careful, this is
+   * done a first time before {@link #deploy()}, so the agent is serialized and
+   * initialized afterwards.<br>
+   * After deployment, firstTime argument is set to false.
    * 
    * @param prop The initial set of properties.
    */ 
-  public void setProperties(Properties prop) throws RequestException {
-    try {
-      if (prop != null)
-        period = ConversionHelper.toLong(prop.get(WAKEUP_PERIOD));
-    } catch (MessageValueException e) {
-      period = -1L;
-    } catch (NumberFormatException e) {
-      period = -1L;
+  public void setProperties(Properties prop, boolean firstTime) throws Exception {
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, this + ", setProperties.");
+    }
+
+    long newPeriod = -1;
+    if (prop != null && prop.containsKey(WAKEUP_PERIOD)) {
+      try {
+        newPeriod = ConversionHelper.toLong(prop.get(WAKEUP_PERIOD));
+      } catch (Exception e) {
+        logger.log(BasicLevel.ERROR, this + ": error setting destination period", e);
+      }
+    }
+    if (firstTime) {
+      period = newPeriod;
+    } else {
+      setPeriod(newPeriod);
     }
     
-    // interceptors set in destination creation
-    if (prop != null && interceptorsStr == null && prop.containsKey(AdminCommandConstant.INTERCEPTORS)) {
-    	if (logger.isLoggable(BasicLevel.DEBUG))
+    interceptorsStr = null;
+    interceptors = null;
+    if (prop != null && prop.containsKey(AdminCommandConstant.INTERCEPTORS)) {
+      if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, this + ": setProperties interceptors = " + prop.get(AdminCommandConstant.INTERCEPTORS));
-    	interceptorsStr = (String) prop.get(AdminCommandConstant.INTERCEPTORS);
+      interceptorsStr = (String) prop.get(AdminCommandConstant.INTERCEPTORS);
     }
-    
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, this + ", init.");
+    // Interceptors are set the first time in agent initialization
+    if (!firstTime) {
+      if (interceptorsStr != null) {
+        interceptors = new ArrayList();
+        InterceptorsHelper.addInterceptors(interceptorsStr, interceptors);
+      } else {
+        interceptors = null;
+      }
+    }
   }
 
   /**
@@ -1043,7 +1061,8 @@ public abstract class Destination extends Agent implements DestinationMBean {
 				setSave();
 				break;
 			case AdminCommandConstant.CMD_SET_PROPERTIES:
-				updateProperties(request.getProp());
+				setProperties(request.getProp(), false);
+				setSave();
 				break;
 			case AdminCommandConstant.CMD_START_HANDLER:
 				replyProp = processStartHandler(request.getProp());
@@ -1063,15 +1082,6 @@ public abstract class Destination extends Agent implements DestinationMBean {
 			replyToTopic(new AdminReply(-1, exc.getMessage()), replyTo, requestMsgId, requestMsgId);
 		}
   }
-  
-  /**
-   * Update properties configuration. 
-   * (overload in specific destination)
-   *  
-   * @param prop properties to update.
-   * @throws Exception
-   */
-  protected void updateProperties(Properties prop) throws Exception { }
   
   /**
    * Start the acquisition queue/topic handler.

@@ -52,7 +52,6 @@ import org.objectweb.joram.shared.admin.ClusterLeave;
 import org.objectweb.joram.shared.admin.ClusterList;
 import org.objectweb.joram.shared.admin.ClusterListReply;
 import org.objectweb.joram.shared.excepts.AccessException;
-import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.util.monolog.api.BasicLevel;
 
 import fr.dyade.aaa.agent.AgentId;
@@ -104,38 +103,41 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
    * 
    * @param prop The initial set of properties.
    */
-  public void setProperties(Properties prop) throws RequestException {
-    super.setProperties(prop);
+  public void setProperties(Properties prop, boolean firstTime) throws Exception {
+    super.setProperties(prop, firstTime);
 
     /** producer threshold */
-    int producThreshold = -1;
+    int producThreshold = 10000;
     /** consumer threshold */
-    int consumThreshold = -1;
+    int consumThreshold = 10000;
     /** automatic eval threshold */
     boolean autoEvalThreshold = false;
 
-    long waitAfterClusterReq = -1;
+    long waitAfterClusterReq = 60000;
+
+    timeThreshold = getPeriod();
+
     if (prop != null) {
       try {
         waitAfterClusterReq = Long.valueOf(prop.getProperty("waitAfterClusterReq")).longValue();
       } catch (NumberFormatException exc) {
-        waitAfterClusterReq = 60000;
+        logger.log(BasicLevel.ERROR, "Incorrect waitAfterClusterReq value" + exc);
       }
       try {
         producThreshold = Integer.valueOf(prop.getProperty("producThreshold")).intValue();
       } catch (NumberFormatException exc) {
-        producThreshold = 10000;
+        logger.log(BasicLevel.ERROR, "Incorrect producThreshold value" + exc);
       }
       try {
         consumThreshold = Integer.valueOf(prop.getProperty("consumThreshold")).intValue();
       } catch (NumberFormatException exc) {
-        consumThreshold = 10000;
+        logger.log(BasicLevel.ERROR, "Incorrect consumThreshold value" + exc);
       }
       autoEvalThreshold = Boolean.valueOf(prop.getProperty("autoEvalThreshold")).booleanValue();
       try {
         timeThreshold = Long.valueOf(prop.getProperty("timeThreshold")).longValue();
       } catch (NumberFormatException exc) {
-        timeThreshold = getPeriod();
+        logger.log(BasicLevel.ERROR, "Incorrect timeThreshold value" + exc);
       }
     }
 
