@@ -88,6 +88,10 @@ public class TestCollectorQueue4 extends TestCase implements MessageListener {
       AdminModule.connect(cf);
       Properties props = new Properties();
       props.setProperty("collector.url", url);
+      props.setProperty("expiration", "0");
+      props.setProperty("persistent", "false");
+      props.setProperty("acquisition.period", "3000");
+      props.setProperty("collector.type", "" + org.objectweb.joram.shared.messages.Message.BYTES);
       queue.setProperties(props);
       
       Thread.sleep(12000);
