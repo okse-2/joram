@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2007 ScalAgent Distributed Technologies
+ * Copyright (C)  2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s):Badolle Fabien (ScalAgent D.T.)
+ * Initial developer(s):
  * Contributor(s): 
  */
 package joram.alias;
@@ -45,111 +45,98 @@ import framework.TestCase;
  * Test : The message received by the consumer is the same that the message sent
  * by the producer Use two alias queues
  */
-public class AliasTestQ extends TestCase
-{
+public class AliasTestQ extends TestCase {
 
-	private static String MESSAGE_CONTENT = "Scalagent Distributed Technologies";
-	
-	public static void main(String[] args)
-	{
-		new AliasTestQ().run();
-	}
+  private static String MESSAGE_CONTENT = "Scalagent Distributed Technologies";
 
-	public void run()
-	{
-		try
-		{
-			System.out.println("server start");
-			startAgentServer((short) 0);
+  public static void main(String[] args) {
+    new AliasTestQ().run();
+  }
 
-			admin();
-			System.out.println("admin config ok");
+  public void run() {
+    try {
+      System.out.println("server start");
+      startAgentServer((short) 0);
 
-			Context ictx = new InitialContext();
-			Queue qdist = (Queue) ictx.lookup("qdist");
-			Queue qack = (Queue) ictx.lookup("qack");
-			ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cf");
-			ictx.close();
+      admin();
+      System.out.println("admin config ok");
 
-			Connection cnx = cf.createConnection();
-			Session sessionp = cnx.createSession(false,
-					Session.AUTO_ACKNOWLEDGE);
-			Session sessionc = cnx.createSession(false,
-					Session.AUTO_ACKNOWLEDGE);
-			cnx.start();
+      Context ictx = new InitialContext();
+      Queue qdist = (Queue) ictx.lookup("qdist");
+      Queue qack = (Queue) ictx.lookup("qack");
+      ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cf");
+      ictx.close();
 
-			// create a producer and a consumer
-			MessageProducer producer = sessionp.createProducer(qdist);
-			MessageConsumer consumer = sessionc.createConsumer(qack);
-			// create a message send to the queue by the producer
-			TextMessage msg = sessionp.createTextMessage();
-			msg.setText(MESSAGE_CONTENT);
-			msg.setStringProperty("foo", "bar");
-			
-			producer.send(msg);
+      Connection cnx = cf.createConnection();
+      Session sessionp = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      Session sessionc = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      cnx.start();
 
-			// the consumer receive the message from the queue
-			Message msg1 = consumer.receive();
+      // create a producer and a consumer
+      MessageProducer producer = sessionp.createProducer(qdist);
+      MessageConsumer consumer = sessionc.createConsumer(qack);
+      // create a message send to the queue by the producer
+      TextMessage msg = sessionp.createTextMessage();
+      msg.setText(MESSAGE_CONTENT);
+      msg.setStringProperty("foo", "bar");
 
-			// test messages, are same !
-			assertEquals(msg.getJMSType(), msg1.getJMSType());
-			assertEquals(msg.getText(),((TextMessage) msg1).getText());
-			assertEquals(msg.getStringProperty("foo"),msg1.getStringProperty("foo"));
+      producer.send(msg);
 
-			cnx.close();
-		} catch (Throwable exc)
-		{
-			exc.printStackTrace();
-			error(exc);
-		} finally
-		{
-			System.out.println("Server stop ");
-			stopAgentServer((short) 0);
-			endTest();
-		}
-	}
+      // the consumer receive the message from the queue
+      Message msg1 = consumer.receive();
 
-	/**
-	 * Admin : Create queue and a user anonymous use jndi
-	 */
-	public void admin() throws Exception
-	{
+      // test messages, are same !
+      assertEquals(msg.getJMSType(), msg1.getJMSType());
+      assertEquals(msg.getText(), ((TextMessage) msg1).getText());
+      assertEquals(msg.getStringProperty("foo"), msg1.getStringProperty("foo"));
 
-		AdminModule.connect("localhost", 2560, "root", "root", 60);
+      cnx.close();
+    } catch (Throwable exc) {
+      exc.printStackTrace();
+      error(exc);
+    } finally {
+      System.out.println("Server stop ");
+      stopAgentServer((short) 0);
+      endTest();
+    }
+  }
 
-		/* creating acquisition and distribution queues */
+  /**
+   * Admin : Create queue and a user anonymous use jndi
+   */
+  public void admin() throws Exception {
 
-		Properties propAckQueue = new Properties();
-		propAckQueue.put("acquisition.className",
-				"org.objectweb.joram.mom.dest.VoidAcquisitionHandler");
-		Queue qack = Queue.create(0, "qack", Queue.ACQUISITION_QUEUE,
-				propAckQueue);
+    AdminModule.connect("localhost", 2560, "root", "root", 60);
 
-		Properties propDistQueue = new Properties();
-		propDistQueue.put("distribution.className",
-				"org.objectweb.joram.mom.dest.NotificationDistributionHandler");
-		propDistQueue.put("remoteAgentID", qack.getName());
-		Queue qdist = Queue.create(0, "qdist", Queue.DISTRIBUTION_QUEUE,
-				propDistQueue);
+    /* creating acquisition and distribution queues */
 
-		User.create("anonymous", "anonymous");
+    Properties propAckQueue = new Properties();
+    propAckQueue.put("acquisition.className", "org.objectweb.joram.mom.dest.VoidAcquisitionHandler");
+    Queue qack = Queue.create(0, "qack", Queue.ACQUISITION_QUEUE, propAckQueue);
 
-		qack.setFreeReading();
-		qdist.setFreeReading();
+    Properties propDistQueue = new Properties();
+    propDistQueue.put("distribution.className",
+        "org.objectweb.joram.mom.dest.NotificationDistributionHandler");
+    propDistQueue.put("remoteAgentID", qack.getName());
+    Queue qdist = Queue.create(0, "qdist", Queue.DISTRIBUTION_QUEUE, propDistQueue);
 
-		qack.setFreeWriting();
-		qdist.setFreeWriting();
+    User.create("anonymous", "anonymous");
 
-		javax.jms.ConnectionFactory cf = TcpConnectionFactory.create(
-				"localhost", 2560);
+    qack.setFreeReading();
+    qdist.setFreeReading();
 
-		javax.naming.Context jndiCtx = new javax.naming.InitialContext();
+    qack.setFreeWriting();
+    qdist.setFreeWriting();
 
-		jndiCtx.bind("cf", cf);
-		jndiCtx.bind("qack", qack);
-		jndiCtx.bind("qdist", qdist);
-		jndiCtx.close();
+    javax.jms.ConnectionFactory cf = TcpConnectionFactory.create("localhost", 2560);
 
-		AdminModule.disconnect();
-	}
+    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
+
+    jndiCtx.bind("cf", cf);
+    jndiCtx.bind("qack", qack);
+    jndiCtx.bind("qdist", qdist);
+    jndiCtx.close();
+
+    AdminModule.disconnect();
+  }
 }
