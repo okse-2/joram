@@ -59,6 +59,7 @@ public class DistributionTest2 extends TestCase {
       startAgentServer((short) 0);
 
       ConnectionFactory cf = TcpConnectionFactory.create("localhost", 2560);
+      ((org.objectweb.joram.client.jms.ConnectionFactory) cf).getParameters().connectingTimer = 60;
       AdminModule.connect(cf);
 
       Properties prop = new Properties();
