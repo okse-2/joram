@@ -31,6 +31,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.management.openmbean.CompositeData;
@@ -144,16 +145,16 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
   private int priority; 
 
   /** Table keeping the messages' consumers identifiers. */
-  protected Hashtable consumers = new Hashtable();
+  protected Map consumers = new Hashtable();
 
   /** Table keeping the messages' consumers contexts. */
-  protected Hashtable contexts = new Hashtable();
+  protected Map contexts = new Hashtable();
 
   /** Counter of messages arrivals. */
   protected long arrivalsCounter = 0;
 
-  /** Vector holding the requests before reply or expiry. */
-  protected Vector requests = new Vector();
+  /** List holding the requests before reply or expiry. */
+  protected List requests = new Vector();
 
   /**
    * Distributes the received notifications to the appropriate reactions.
@@ -236,8 +237,8 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
   /** <code>true</code> if the queue is currently receiving messages. */
   protected transient boolean receiving = false;
 
-  /** Vector holding the messages before delivery. */
-  protected transient Vector messages;
+  /** List holding the messages before delivery. */
+  protected transient List messages;
 
   /**
    * Removes all messages that the time-to-live is expired.
@@ -299,7 +300,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
   }
 
   /** Table holding the delivered messages before acknowledgment. */
-  protected transient Hashtable deliveredMsgs;
+  protected transient Map deliveredMsgs;
 
   /**
    * Returns the number of messages delivered and waiting for acknowledge.
@@ -357,8 +358,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
     if (firstTime) return;
 
     // Retrieving the persisted messages, if any.
-    Vector persistedMsgs = null;
-    persistedMsgs = Message.loadAll(getMsgTxPrefix().toString());
+    List persistedMsgs = Message.loadAll(getMsgTxPrefix().toString());
 
     if (persistedMsgs != null) {
       Message persistedMsg;
@@ -566,11 +566,13 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
       // If the deny request is empty, the denying is a contextual one: it
       // requests the denying of all the messages consumed by the denier in
       // the denying context:
-      for (Enumeration delIds = deliveredMsgs.keys(); delIds.hasMoreElements();) {
+      for (Iterator entries = deliveredMsgs.entrySet().iterator(); entries.hasNext();) {
         // Browsing the delivered messages:
-        msgId = (String) delIds.nextElement();
+        Map.Entry entry = (Map.Entry) entries.next();
 
-        message = (Message) deliveredMsgs.get(msgId);
+        msgId = (String) entry.getKey();
+        message = (Message) entry.getValue();
+
         consId = (AgentId) consumers.get(msgId);
         consCtx = ((Integer) contexts.get(msgId)).intValue();
 
@@ -584,11 +586,11 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
           setSave();
           consumers.remove(msgId);
           contexts.remove(msgId);
-          deliveredMsgs.remove(msgId);
+          entries.remove();
           message.setRedelivered();
 
           // If message considered as undeliverable, adding
-          // it to the vector of dead messages:
+          // it to the list of dead messages:
           if (isUndeliverable(message)) {
             message.delete();
             if (dmqManager == null)
@@ -596,7 +598,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
             nbMsgsSentToDMQSinceCreation++;
             dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.UNDELIVERABLE);
           } else {
-            // Else, putting the message back into the deliverables vector:
+            // Else, putting the message back into the deliverables list:
             storeMessageHeader(message);
           }
 
@@ -634,7 +636,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
       contexts.remove(msgId);
 
       // If message considered as undeliverable, adding it
-      // to the vector of dead messages:
+      // to the list of dead messages:
       if (isUndeliverable(message)) {
         message.delete();
         if (dmqManager == null)
@@ -642,7 +644,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
         nbMsgsSentToDMQSinceCreation++;
         dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.UNDELIVERABLE);
       } else {
-        // Else, putting the message back into the deliverables vector:
+        // Else, putting the message back into the deliverables list:
         storeMessageHeader(message);
       }
 
@@ -751,7 +753,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
                                   String replyMsgId) {
     String[] res = new String[messages.size()];
     for (int i = 0; i < messages.size(); i++) {
-      Message msg = (Message)messages.elementAt(i);
+      Message msg = (Message) messages.get(i);
       res[i] = msg.getIdentifier();
     }
     replyToTopic(new GetQueueMessageIdsRep(res), replyTo, requestMsgId, replyMsgId);
@@ -764,7 +766,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
     Message message = null;
 
     for (int i = 0; i < messages.size(); i++) {
-      message = (Message) messages.elementAt(i);
+      message = (Message) messages.get(i);
       if (message.getIdentifier().equals(request.getMessageId())) break;
       message = null;
     }
@@ -788,9 +790,9 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
                                   String requestMsgId,
                                   String replyMsgId) {
     for (int i = 0; i < messages.size(); i++) {
-      Message message = (Message) messages.elementAt(i);
+      Message message = (Message) messages.get(i);
       if (message.getIdentifier().equals(request.getMessageId())) {
-        messages.removeElementAt(i);
+        messages.remove(i);
         message.delete();
         DMQManager dmqManager = new DMQManager(dmqId, getId());
         nbMsgsSentToDMQSinceCreation++;
@@ -808,7 +810,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
     if (messages.size() > 0) {
       DMQManager dmqManager = new DMQManager(dmqId, getId());
       for (int i = 0; i < messages.size(); i++) {
-        Message message = (Message) messages.elementAt(i);
+        Message message = (Message) messages.get(i);
         message.delete();
         nbMsgsSentToDMQSinceCreation++;
         dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.ADMIN_DELETED);
@@ -948,14 +950,17 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
     Message message;
     AgentId consId;
     DMQManager dmqManager = null;
-    for (Enumeration e = deliveredMsgs.keys(); e.hasMoreElements();) {
-      msgId = (String) e.nextElement();
-      message = (Message) deliveredMsgs.get(msgId);
+    for (Iterator entries = deliveredMsgs.entrySet().iterator(); entries.hasNext();) {
+      Map.Entry entry = (Map.Entry) entries.next();
+
+      msgId = (String) entry.getKey();
+      message = (Message) entry.getValue();
+
       consId = (AgentId) consumers.get(msgId);
       // Delivered message has been delivered to the deleted client:
       // denying it.
       if (consId.equals(client)) {
-        deliveredMsgs.remove(msgId);
+        entries.remove();
         message.setRedelivered();
 
         // state change, so save.
@@ -964,7 +969,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
         contexts.remove(msgId);
 
         // If message considered as undeliverable, adding it to the
-        // vector of dead messages:
+        // list of dead messages:
         if (isUndeliverable(message)) {
           message.delete();
           if (dmqManager == null)
@@ -972,7 +977,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
           nbMsgsSentToDMQSinceCreation++;
           dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.UNDELIVERABLE);
         } else {
-          // Else, putting it back into the deliverables vector:
+          // Else, putting it back into the deliverables list:
           storeMessageHeader(message);
         }
 
@@ -1004,7 +1009,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
     // Sending it to the pending receivers:
     cleanWaitingRequest(System.currentTimeMillis());
     for (int i = 0; i < requests.size(); i++) {
-      rec = (ReceiveRequest) requests.elementAt(i);
+      rec = (ReceiveRequest) requests.get(i);
 
       excRep = new ExceptionReply(rec, exc);
       if (logger.isLoggable(BasicLevel.DEBUG))
@@ -1048,9 +1053,9 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
   }
 
   /**
-   * Actually stores a message in the deliverables vector.
-   *
-   * @param msg  The message to store.
+   * Actually stores a message in the deliverables list.
+   * 
+   * @param msg The message to store.
    */
   protected final synchronized void storeMessage(Message msg) {
     if (addMessage(msg)) {
@@ -1064,7 +1069,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
   }
   
   /**
-   * Actually stores a message header in the deliverables vector.
+   * Actually stores a message header in the deliverables list.
    * 
    * @param message
    *          The message to store.
@@ -1114,12 +1119,12 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
         // arrival order.
         long currentO;
         int i = 0;
-        for (Enumeration e = messages.elements(); e.hasMoreElements();) {
-          currentO = ((Message) e.nextElement()).order;
+        for (Iterator ite = messages.iterator(); ite.hasNext();) {
+          currentO = ((Message) ite.next()).order;
           if (currentO > message.order) break;
           i++;
         }
-        messages.insertElementAt(message, i);
+        messages.add(i, message);
       }
     } else {
       // Non constant priorities: inserting the message according to its 
@@ -1128,8 +1133,8 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
       int currentP;
       long currentO;
       int i = 0;
-      for (Enumeration e = messages.elements(); e.hasMoreElements();) {
-        currentMsg = (Message) e.nextElement();
+      for (Iterator ite = messages.iterator(); ite.hasNext();) {
+        currentMsg = (Message) ite.next();
         currentP = currentMsg.getPriority();
         currentO = currentMsg.order;
 
@@ -1143,7 +1148,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
         }
         i++;
       }
-      messages.insertElementAt(message, i);
+      messages.add(i, message);
     }
     return true;
   }
@@ -1249,8 +1254,8 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
 
   private Message getMomMessage(String msgId) {
     Message msg = null;
-    for (Enumeration e = messages.elements(); e.hasMoreElements(); ) {
-      msg = (Message) e.nextElement();
+    for (Iterator ite = messages.iterator(); ite.hasNext();) {
+      msg = (Message) ite.next();
       if (msgId.equals(msg.getIdentifier()))
         return msg;
     }
@@ -1474,11 +1479,11 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
 
   public void readBag(ObjectInputStream in) throws IOException, ClassNotFoundException {
     receiving = in.readBoolean();
-    messages = (Vector) in.readObject();
-    deliveredMsgs = (Hashtable) in.readObject();
+    messages = (List) in.readObject();
+    deliveredMsgs = (Map) in.readObject();
 
     for (int i = 0; i < messages.size(); i++) {
-      Message message = (Message)messages.elementAt(i);
+      Message message = (Message) messages.get(i);
       // Persisting the message.
       setMsgTxName(message);
       message.save();

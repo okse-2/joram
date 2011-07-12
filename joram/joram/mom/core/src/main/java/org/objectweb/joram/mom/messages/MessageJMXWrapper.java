@@ -25,7 +25,6 @@ package org.objectweb.joram.mom.messages;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeData;
@@ -105,12 +104,12 @@ public class MessageJMXWrapper {
    * 
    * @throws Exception
    */
-  public static TabularData createTabularDataSupport(Vector messages) throws Exception {
+  public static TabularData createTabularDataSupport(List messages) throws Exception {
     String[] id = { "identifier" };
     TabularDataSupport tds = new TabularDataSupport(new TabularType("Messages", "Messages", rowType, id));
 
     for (int i=0; i<messages.size(); i++) {
-      Message message = (Message) messages.elementAt(i);
+      Message message = (Message) messages.get(i);
       tds.put(MessageJMXWrapper.createCompositeDataSupport(message));
     }
     return tds;
