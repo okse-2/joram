@@ -144,25 +144,33 @@ public class JMSModule implements ExceptionListener {
       logger.log(BasicLevel.DEBUG, "close()");
     }
 
-    try {
-      cnx.setExceptionListener(null);
-    } catch (JMSException exc1) {
-      logger.log(BasicLevel.ERROR, "", exc1);
+    if (cnx != null) {
+      try {
+        cnx.setExceptionListener(null);
+      } catch (JMSException exc1) {
+        logger.log(BasicLevel.ERROR, "", exc1);
+      }
     }
 
-    try {
-      cnx.stop();
-    } catch (JMSException exc) {
+    if (cnx != null) {
+      try {
+        cnx.stop();
+      } catch (JMSException exc) {
+      }
     }
 
-    try {
-      reconnectionDaemon.stop();
-    } catch (Exception exc) {
+    if (reconnectionDaemon != null) {
+      try {
+        reconnectionDaemon.stop();
+      } catch (Exception exc) {
+      }
     }
 
-    try {
-      cnx.close();
-    } catch (JMSException exc) {
+    if (cnx != null) {
+      try {
+        cnx.close();
+      } catch (JMSException exc) {
+      }
     }
   }
 
