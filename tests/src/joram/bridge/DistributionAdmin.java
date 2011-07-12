@@ -80,7 +80,6 @@ public class DistributionAdmin {
 
       // Creating a Queue bridge on server 0:
       Queue joramQueue = Queue.create(0, Queue.DISTRIBUTION_QUEUE, prop);
-      joramQueue.setFreeReading();
       joramQueue.setFreeWriting();
       System.out.println("joram queue = " + joramQueue);
 
@@ -98,7 +97,6 @@ public class DistributionAdmin {
 
       // Creating a Topic bridge on server 0:
       Topic joramTopic = Topic.create(0, Topic.DISTRIBUTION_TOPIC, prop);
-      joramTopic.setFreeReading();
       joramTopic.setFreeWriting();
       System.out.println("joram topic = " + joramTopic);
 
