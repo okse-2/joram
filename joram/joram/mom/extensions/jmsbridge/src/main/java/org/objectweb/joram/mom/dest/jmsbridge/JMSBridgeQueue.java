@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -37,7 +37,6 @@ import org.objectweb.joram.mom.notifications.ReceiveRequest;
 import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.MessageErrorConstants;
 import org.objectweb.joram.shared.excepts.AccessException;
-import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.joram.shared.selectors.Selector;
 import org.objectweb.util.monolog.api.BasicLevel;
 
@@ -81,8 +80,8 @@ public class JMSBridgeQueue extends Queue {
    * 
    * @param prop The initial set of properties.
    */
-  public void setProperties(Properties prop) throws RequestException {
-    super.setProperties(prop);
+  public void setProperties(Properties prop, boolean firstTime) throws Exception {
+    super.setProperties(prop, firstTime);
     // creates the JMS module for communication with external provider
     jmsModule = new JMSBridgeModule(prop);
   }

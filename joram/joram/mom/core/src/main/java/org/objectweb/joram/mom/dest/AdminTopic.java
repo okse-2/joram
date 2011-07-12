@@ -30,6 +30,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -736,7 +737,7 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
         dest = (Destination) Class.forName(className).newInstance();
         dest.setName(destName);
         dest.setAdminId(adminId);
-        dest.setProperties(properties);
+        dest.setProperties(properties, true);
       } catch (Exception exc) {
         logger.log(BasicLevel.ERROR,
                    "Could not instantiate Destination class [" + className + "]: ", exc);
@@ -1574,7 +1575,12 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
             Object result = invokeStaticMethod(request.getProp());
             if (result != null) {
               replyProp = new Properties();
-              replyProp.setProperty(AdminCommandConstant.INVOKE_METHOD_RESULT, result.toString());
+              if (result instanceof Object[]) {
+                replyProp.setProperty(AdminCommandConstant.INVOKE_METHOD_RESULT,
+                    Arrays.toString((Object[]) result));
+              } else {
+                replyProp.setProperty(AdminCommandConstant.INVOKE_METHOD_RESULT, result.toString());
+              }
             }
             break;
 

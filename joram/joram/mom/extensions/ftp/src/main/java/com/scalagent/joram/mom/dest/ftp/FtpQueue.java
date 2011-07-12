@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,7 +31,6 @@ import org.objectweb.joram.mom.dest.Queue;
 import org.objectweb.joram.mom.notifications.ClientMessages;
 import org.objectweb.joram.mom.util.DMQManager;
 import org.objectweb.joram.shared.MessageErrorConstants;
-import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -50,31 +49,20 @@ public class FtpQueue extends Queue {
 
   public static Logger logger = Debug.getLogger(FtpQueue.class.getName());
   
-  private String user = "anonymous";
-  private String pass = "no@no.no";
-  private String path = null;
-  private transient TransferItf transfer = null;
-  private AgentId dmq = null;
+  private String user;
+  private String pass;
+  private String path;
+  private transient TransferItf transfer;
+  private AgentId dmq;
   private int clientContext;
   private int requestId;
 
-  public String ftpImplName = "com.scalagent.joram.mom.dest.ftp.TransferImplRef";
+  public String ftpImplName;
 
   private Hashtable transferTable;
 
   public FtpQueue() {
     fixed = true;
-
-    transferTable = new Hashtable();
-    try {
-      if ((ftpImplName != null) && (ftpImplName.length() > 0))
-        transfer = (TransferItf) Class.forName(ftpImplName).newInstance();
-    } catch (Exception exc) {
-      transfer = null;
-      logger.log(BasicLevel.ERROR, "FtpQueue: transfer = null", exc);
-    }
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "--- " + this + " transfer = " + transfer);
   }
 
   /**
@@ -82,16 +70,20 @@ public class FtpQueue extends Queue {
    * 
    * @param prop The initial set of properties.
    */
-  public void setProperties(Properties prop) throws RequestException {
-    if (prop == null)
-      return;
-    super.setProperties(prop);
-    user = prop.getProperty("user", user);
-    pass = prop.getProperty("pass", pass);
-    path = prop.getProperty("path", path);
-    ftpImplName = prop.getProperty("ftpImpl", ftpImplName);
+  public void setProperties(Properties prop, boolean firstTime) throws Exception {
+    super.setProperties(prop, firstTime);
+    user = "anonymous";
+    pass = "no@no.no";
+    path = null;
+    ftpImplName = "com.scalagent.joram.mom.dest.ftp.TransferImplRef";
+    if (prop != null) {
+      user = prop.getProperty("user", user);
+      pass = prop.getProperty("pass", pass);
+      path = prop.getProperty("path", path);
+      ftpImplName = prop.getProperty("ftpImpl", ftpImplName);
+    }
   }
-  
+
   /**
    * Initializes the destination.
    * 
