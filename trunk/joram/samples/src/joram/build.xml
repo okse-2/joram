@@ -68,6 +68,7 @@
     <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}/server${sid}"/>
     <copy file="${a3.conf}" tofile="${run.dir}/server${sid}/a3servers.xml"/>
     <copy file="${osgi.conf}" tofile="${run.dir}/server${sid}/config.properties"/>
+    <!-- copy file="${conf.dir}/fileMonitoring.props" todir="${run.dir}/server${sid}"/ -->
   </target>
 
   <target name="simple_init" depends="init">
@@ -267,6 +268,26 @@
     <java classname="classic.Browser" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+
+  <!-- Runs the classic consumer client for queue -->
+  <target name="aconsumer" depends="simple_init"
+    description="--> Starts a Consumer client">
+    <java classname="classic.AConsumer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    	<arg line="queue"/>
+    </java>
+  </target>
+
+  <!-- Runs the classic producer client for queue -->
+  <target name="aproducer" depends="simple_init"
+    description="--> Starts a Producer client">
+    <java classname="classic.AProducer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    	<arg line="queue"/>
     </java>
   </target>
 
@@ -1074,7 +1095,7 @@
     <java classname="perfs.Producer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-DMsgTransient=true" />
+      <jvmarg line="-DRound=50 -DMsgSize=500 -DMsgTransient=true" />
       <arg line="queue"/>
     </java>
   </target>
@@ -1085,7 +1106,7 @@
     <java classname="perfs.Producer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-DMsgTransient=false" />
+      <jvmarg line="-DRound=50 -DMsgSize=500 -DMsgTransient=false" />
       <arg line="queue"/>
     </java>
   </target>
@@ -1106,7 +1127,7 @@
     <java classname="perfs.Producer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-DMsgTransient=true" />
+      <jvmarg line="-DRound=50 -DMsgSize=500 -DMsgTransient=true" />
       <arg line="topic"/>
     </java>
   </target>
@@ -1117,7 +1138,7 @@
     <java classname="perfs.Producer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-DMsgTransient=false" />
+      <jvmarg line="-DRound=50 -DMsgSize=500 -DMsgTransient=false" />
       <arg line="topic"/>
     </java>
   </target>
