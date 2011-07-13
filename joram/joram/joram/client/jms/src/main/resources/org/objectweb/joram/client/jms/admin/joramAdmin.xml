@@ -1,0 +1,516 @@
+  
+<!-- ====================================== -->
+<!-- ====================================== -->
+<!-- ==    Different possibilities       == -->
+<!-- ==       see JoramAdmin.dtd         == -->
+<!-- ====================================== -->
+<!-- ====================================== -->
+<?xml version="1.0"?>
+  
+<JoramAdmin>
+  <AdminModule>
+    <connect hostName="" port=""
+             name="" password=""
+             cnxTimer="" reliableClass=""/>
+  </AdminModule>
+  
+  <AdminModule>
+    <collocatedConnect name="" password=""/>
+  </AdminModule>
+  
+  
+  <ConnectionFactory name="" className="">
+    <tcp host=""
+         port=""
+         reliableClass=""/>
+    <local/>
+    <hatcp url=""
+           reliableClass=""/>
+    <halocal/>
+    <soap host=""
+          port=""
+          timeout=""/>
+    <jndi name=""/>
+  </ConnectionFactory>
+  
+  <User name="" login="" password="" serverId="">
+    <property name="jms_joram_interceptors_in" value=""/>
+    <property name="jms_joram_interceptors_out" value=""/>
+  </User>
+  
+  <Server serverId="" dmq="" threshold=""/>
+
+  <Destination type=""
+               serverId=""
+               name=""
+               dmq=""
+               className="">
+    <property name="jms_joram_interceptors" value=""/>
+    <property name="" value=""/>
+    <property name="" value=""/>
+    <reader user=""/>
+    <reader user=""/>
+    <writer user=""/>
+    <writer user=""/>
+    <freeReader/>
+    <freeWriter/>
+    <jndi name=""/>
+  </Destination>
+  
+  <DMQueue name=""
+           serverId="">
+    <reader user=""/>
+    <writer user=""/>
+    <freeReader/>
+    <freeWriter/>
+    <jndi name=""/>
+  </DMQueue>
+  
+  <Queue name=""
+         serverId=""
+         className=""
+         dmq=""
+         nbMaxMsg=""
+         threshold="">
+    <property name="jms_joram_interceptors" value=""/>
+    <property name="" value=""/>
+    <property name="" value=""/>
+    <reader user=""/>
+    <writer user=""/>
+    <freeReader/>
+    <freeWriter/>
+    <jndi name=""/>
+  </Queue>
+  
+  <Topic name=""
+         parent=""
+         serverId=""
+         className=""
+         dmq="">
+    <property name="jms_joram_interceptors" value=""/>
+    <property name="" value=""/>
+    <property name="" value=""/>
+    <reader user=""/>
+    <writer user=""/>
+    <freeReader/>
+    <freeWriter/>
+    <jndi name=""/>
+  </Topic>
+  
+  <Cluster>
+    <Topic name=""
+           parent=""
+           serverId=""
+           className=""
+           dmq="">
+      <property name="" value=""/>
+      <property name="" value=""/>
+      <reader user=""/>
+      <writer user=""/>
+      <freeReader/>
+      <freeWriter/>
+      <jndi name=""/>
+    </Topic>
+    <Topic name=""
+           parent=""
+           serverId=""
+           className=""
+           dmq="">
+      <property name="" value=""/>
+      <property name="" value=""/>
+      <reader user=""/>
+      <writer user=""/>
+      <freeReader/>
+      <freeWriter/>
+      <jndi name=""/>
+    </Topic>
+    <freeReader/>
+    <freeWriter/>
+    <reader user=""/>
+    <writer user=""/>
+    <reader user=""/>
+    <writer user=""/>
+    <jndi name=""/>
+  </Cluster>
+  
+  <Cluster>
+    <Queue name=""
+           serverId=""
+           className=""
+           dmq=""
+           nbMaxMsg=""
+           threshold="">
+      <property name="" value=""/>
+      <property name="" value=""/>
+      <reader user=""/>
+      <writer user=""/>
+      <freeReader/>
+      <freeWriter/>
+      <jndi name=""/>
+    </Queue>
+    <Queue name=""
+           serverId=""
+           className=""
+           dmq=""
+           nbMaxMsg=""
+           threshold="">
+      <property name="" value=""/>
+      <property name="" value=""/>
+      <reader user=""/>
+      <writer user=""/>
+      <freeReader/>
+      <freeWriter/>
+      <jndi name=""/>
+    </Queue>
+    <freeReader/>
+    <freeWriter/>
+    <reader user=""/>
+    <writer user=""/>
+    <reader user=""/>
+    <writer user=""/>
+    <jndi name=""/>
+  </Cluster>
+  
+  <InitialContext>
+    <property name="" value=""/>
+    <property name="" value=""/>
+    <property name="" value=""/>
+  </InitialContext>
+</JoramAdmin>
+  
+<!-- ====================================== -->
+<!-- ====================================== -->
+<!-- = SAMPLE :                             -->
+<!-- ====================================== -->
+<!-- ====================================== -->
+
+<!-- ============ Dead Message Queue ====== -->
+<?xml version="1.0"?>
+  
+<JoramAdmin>
+  <AdminModule>
+    <connect hostName="localhost"
+             port="16010"
+             name="root"
+             password="root"/>
+  </AdminModule>
+  
+  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.TcpConnectionFactory">
+    <tcp host="localhost"
+         port="16010"/>
+    <jndi name="cnxFact"/>
+  </ConnectionFactory>
+  
+  <User name="dmq"
+        password="dmq"
+        serverId="0"/>
+  
+  <DMQueue name="userDmq"
+           serverId="0">
+    <reader user="dmq"/>
+    <writer user="dmq"/>
+    <jndi name="userDmq"/>
+  </DMQueue>
+  
+  <DMQueue name="destDmq"
+           serverId="0">
+    <reader user="dmq"/>
+    <writer user="dmq"/>
+    <jndi name="destDmq"/>
+  </DMQueue>
+  
+  <User name="anonymous"
+        password="anonymous"
+        serverId="0"
+        dmq="userDmq"
+        threshold="2"/>
+  
+  <Queue name="queue"
+         dmq="destDmq"
+         threshold="2">
+    <freeReader/>
+    <freeWriter/>
+    <jndi name="queue"/>
+  </Queue>
+  
+  <Topic name="topic"
+         dmq="destDmq">
+    <freeReader/>
+    <freeWriter/>
+    <jndi name="topic"/>
+  </Topic>
+  
+  <InitialContext>
+    <property name="java.naming.factory.initial" value="fr.dyade.aaa.jndi2.client.NamingContextFactory"/>
+    <property name="java.naming.factory.host" value="localhost"/>
+    <property name="java.naming.factory.port" value="16400"/>
+  </InitialContext>
+</JoramAdmin>
+  
+<!-- ============ Jonas Collocated + SchedulerQueue ====== -->
+<?xml version="1.0"?>
+  
+<JoramAdmin>
+  <AdminModule>
+    <collocatedConnect name="root" password="root"/>
+  </AdminModule>
+  
+  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.TcpConnectionFactory">
+    <tcp host="localhost"
+         port="16010"/>
+    <jndi name="JCF"/>
+  </ConnectionFactory>
+  
+  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory">
+    <tcp host="localhost"
+         port="16010"/>
+    <jndi name="JQCF"/>
+  </ConnectionFactory>
+  
+  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory">
+    <tcp host="localhost"
+         port="16010"/>
+    <jndi name="JTCF"/>
+  </ConnectionFactory>
+  
+  <User name="anonymous"
+        password="anonymous"
+        serverId="0"/>
+  
+  <Destination type="queue"
+               serverId="0"
+               name="schedulerQueue"
+               className="com.scalagent.joram.mom.dest.scheduler.SchedulerQueue">
+    <freeReader/>
+    <freeWriter/>
+    <jndi name="schedulerQueue"/>
+  </Destination>
+  
+  <Queue name="sampleQueue">
+    <freeReader/>
+    <freeWriter/>
+    <jndi name="sampleQueue"/>
+  </Queue>
+  
+  <Queue name="simpaReplyQ">
+    <freeReader/>
+    <freeWriter/>
+    <jndi name="simpaReplyQ"/>
+  </Queue>
+  
+  <Topic name="sampleTopic">
+    <freeReader/>
+    <freeWriter/>
+    <jndi name="sampleTopic"/>
+  </Topic>
+</JoramAdmin>
+  
+<!-- ============ Classic sample ====== -->
+<?xml version="1.0"?>
+  
+<JoramAdmin>
+  <AdminModule>
+    <connect hostName="localhost"
+             port="16010"
+             name="root"
+             password="root"/>
+  </AdminModule>
+  
+  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.TcpConnectionFactory">
+    <tcp host="localhost"
+         port="16010"/>
+    <jndi name="cf"/>
+  </ConnectionFactory>
+  
+  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.TopicTcpConnectionFactory">
+    <tcp host="localhost"
+         port="16010"/>
+    <jndi name="tcf"/>
+  </ConnectionFactory>
+  
+  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory">
+    <tcp host="localhost"
+         port="16010"/>
+    <jndi name="qcf"/>
+  </ConnectionFactory>
+  
+  <User name="anonymous"
+        password="anonymous"/>
+  
+  <Queue name="queue">
+    <freeReader/>
+    <freeWriter/>
+    <jndi name="queue"/>
+  </Queue>
+  
+  <Topic name="topic">
+    <freeReader/>
+    <freeWriter/>
+    <jndi name="topic"/>
+  </Topic>
+</JoramAdmin>
+  
+<!-- ============ Cluster topic sample ====== -->
+<?xml version="1.0"?>
+  
+<JoramAdmin>
+  <AdminModule>
+    <connect hostName="localhost"
+             port="16010"
+             name="root"
+             password="root"/>
+  </AdminModule>
+  
+  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.TcpConnectionFactory">
+    <tcp host="localhost"
+         port="16010"/>
+    <jndi name="cf0"/>
+  </ConnectionFactory>
+  
+  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.TcpConnectionFactory">
+    <tcp host="localhost"
+         port="16011"/>
+    <jndi name="cf1"/>
+  </ConnectionFactory>
+  
+  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.TcpConnectionFactory">
+    <tcp host="localhost"
+         port="16012"/>
+    <jndi name="cf2"/>
+  </ConnectionFactory>
+  
+  <User name="publisher00"
+        password="publisher00"
+        serverId="0"/>
+  <User name="subscriber10"
+        password="subscriber10"
+        serverId="1"/>
+  <User name="subscriber20"
+        password="subscriber20"
+        serverId="2"/>
+  <User name="subscriber21"
+        password="subscriber21"
+        serverId="2"/>
+  
+  <Cluster>
+    <Topic name="top0"
+           serverId="0">
+      <jndi name="top0"/>
+    </Topic>
+    <Topic name="top1"
+           serverId="1">
+      <jndi name="top1"/>
+    </Topic>
+    <Topic name="top2"
+           serverId="2">
+      <jndi name="top2"/>
+    </Topic>
+    <freeReader/>
+    <freeWriter/>
+    <reader user="publisher00"/>
+    <writer user="publisher00"/>
+    <reader user="publisher10"/>
+    <writer user="publisher10"/>
+    <reader user="publisher20"/>
+    <writer user="publisher20"/>
+  </Cluster>
+  
+  <InitialContext>
+    <property name="java.naming.factory.initial" value="fr.dyade.aaa.jndi2.client.NamingContextFactory"/>
+    <property name="java.naming.factory.host" value="localhost"/>
+    <property name="java.naming.factory.port" value="16400"/>
+  </InitialContext>
+</JoramAdmin>
+  
+<!-- ============ Cluster queue sample ====== -->
+<?xml version="1.0"?>
+  
+<JoramAdmin>
+  <AdminModule>
+    <connect hostName="localhost"
+             port="16010"
+             name="root"
+             password="root"/>
+  </AdminModule>
+  
+  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory">
+    <tcp host="localhost"
+         port="16010"/>
+    <jndi name="qcf0"/>
+  </ConnectionFactory>
+  
+  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory">
+    <tcp host="localhost"
+         port="16011"/>
+    <jndi name="qcf1"/>
+  </ConnectionFactory>
+  
+  <ConnectionFactory className="org.objectweb.joram.client.jms.tcp.QueueTcpConnectionFactory">
+    <tcp host="localhost"
+         port="16012"/>
+    <jndi name="qcf2"/>
+  </ConnectionFactory>
+  
+  <User name="user0"
+        password="user0"
+        serverId="0"/>
+  <User name="user1"
+        password="user1"
+        serverId="1"/>
+  <User name="user2"
+        password="user2"
+        serverId="2"/>
+  
+  <Cluster>
+    <Queue name="queue0"
+           serverId="0"
+           className="org.objectweb.joram.mom.dest.ClusterQueue">
+      <freeReader/>
+      <freeWriter/>
+        <property name="period" value="10000"/>
+        <property name="producThreshold" value="50"/>
+        <property name="consumThreshold" value="2"/>
+        <property name="autoEvalThreshold" value="false"/>
+        <property name="waitAfterClusterReq" value="1000"/>
+      <jndi name="queue0"/>
+    </Queue>
+    <Queue name="queue1"
+           serverId="1"
+           className="org.objectweb.joram.mom.dest.ClusterQueue">
+      <freeReader/>
+      <freeWriter/>
+        <property name="period" value="10000"/>
+        <property name="producThreshold" value="50"/>
+        <property name="consumThreshold" value="2"/>
+        <property name="autoEvalThreshold" value="false"/>
+        <property name="waitAfterClusterReq" value="1000"/>
+      <jndi name="queue1"/>
+    </Queue>
+    <Queue name="queue2"
+           serverId="2"
+           className="org.objectweb.joram.mom.dest.ClusterQueue">
+      <freeReader/>
+      <freeWriter/>
+        <property name="period" value="10000"/>
+        <property name="producThreshold" value="50"/>
+        <property name="consumThreshold" value="2"/>
+        <property name="autoEvalThreshold" value="false"/>
+        <property name="waitAfterClusterReq" value="1000"/>
+      <jndi name="queue2"/>
+    </Queue>
+    <freeReader/>
+    <freeWriter/>
+    <reader user="user0"/>
+    <writer user="user0"/>
+    <reader user="user1"/>
+    <writer user="user1"/>
+    <reader user="user2"/>
+    <writer user="user2"/>
+  </Cluster>
+  
+  <InitialContext>
+    <property name="java.naming.factory.initial" value="fr.dyade.aaa.jndi2.client.NamingContextFactory"/>
+    <property name="java.naming.factory.host" value="localhost"/>
+    <property name="java.naming.factory.port" value="16400"/>
+  </InitialContext>
+</JoramAdmin>
