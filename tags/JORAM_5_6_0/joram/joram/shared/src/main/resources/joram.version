@@ -1,0 +1,2 @@
+joram.version = ${version.filter.value}
+joram.protocol = ${protocol.filter.value}
