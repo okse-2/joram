@@ -1,3 +1,62 @@
+###############################################################################
+# 2011/07/13 | Joram 5.6.0 tag.
+###############################################################################
++==============================================================================
+| 2011/07/12 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds persistence to distribution queues for messages that can't be
+distributed. The queue tries to send the messages regularly.
++==============================================================================
+| 2011/07/11 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix possible NPE in JMS module for acquisition and distribution JMS bridge
+destinations.
++==============================================================================
+| 2011/07/04 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ New JoramHelper component allowing static administration from server side.
++==============================================================================
+| 2011/06/22 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix a potential issue in PoolNetwork when a connection is initiated by a bad
+component (the incoming component still connected).
++==============================================================================
+| 2011/06/22 | Willy Malvault - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds root mechanism to create 'alias' destinations based on acquisition and
+distribution destinations.
++==============================================================================
+| 2011/05/30 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds a persistence mechanism for AMQP connections pool (AMQP acquisition and
+distribution destinations).
++==============================================================================
+| 2011/06/08 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds samples configurations for Derby and NGT Transaction components.
+ Adds samples configurations and clients for HttpNetwork Network components.
+ Updates performance sample.
++==============================================================================
+| 2011/05/30 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Fix NPE in AMQP distribution destination when amqp.Routing property is not
+correctly set.
++==============================================================================
+| 2011/05/04 | Nicolas Tachker - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Adds deployment plans for JOnAS.
++==============================================================================
+| 2011/04/18 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Removes optional header table in messages.
++==============================================================================
+| 2011/04/04 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Evolves AMQP acquisition and distribution destinations.
++==============================================================================
+| 2011/03/25 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Allows invocation of static administration method from Joram AdminModule.
 +==============================================================================
 | 2011/03/18 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
