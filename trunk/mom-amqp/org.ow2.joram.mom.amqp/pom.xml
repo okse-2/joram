@@ -5,7 +5,7 @@
   <packaging>bundle</packaging>
   <name>JORAM :: mom :: amqp</name>
   <description>Builds amqp.</description>
-  <version>1.0</version>
+  <version>1.1-SNAPSHOT</version>
   <url>http://joram.ow2.org/</url>
   <organization>
     <name>Scalagent D.T.</name>
