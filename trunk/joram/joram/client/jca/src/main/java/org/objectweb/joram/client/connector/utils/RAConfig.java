@@ -650,13 +650,14 @@ public class RAConfig {
         updateJoramAdminXml(hostName, port);
     }
 
-    // update jar
-    updateZIP(tmpDir + JORAM_CONFIG_JAR,A3SERVERS_XML,tmpDir + A3SERVERS_XML,A3SERVERS_XML);
-    // update rar
-    updateZIP(rarName,JORAM_CONFIG_JAR,tmpDir +JORAM_CONFIG_JAR,JORAM_CONFIG_JAR);
-
-    // remove temporary file
-    new File(tmpDir + JORAM_CONFIG_JAR).delete();
+    if (new File(tmpDir +JORAM_CONFIG_JAR).exists()) {
+      // update jar
+      updateZIP(tmpDir + JORAM_CONFIG_JAR,A3SERVERS_XML,tmpDir + A3SERVERS_XML,A3SERVERS_XML);
+      // update rar
+      updateZIP(rarName,JORAM_CONFIG_JAR,tmpDir +JORAM_CONFIG_JAR,JORAM_CONFIG_JAR);
+      // remove temporary file
+      new File(tmpDir + JORAM_CONFIG_JAR).delete();
+    }
     new File(tmpDir + A3SERVERS_XML).delete();
   }
 
