@@ -45,7 +45,7 @@
       <s2 name="Latest snpashots from Continuous Integration Build Tool">
       
       <p>The latest development snapshots are available from
-      <a href="http://bamboo.ow2.org/browse/JORAM-ANT/latest/artifact/Releases/release/target">Continuous Integration Build Tool</a>:</p>
+      <a href="http://bamboo.ow2.org/artifact/JORAM-ANT/JOB1/build-latest/Releases/release/target">Continuous Integration Build Tool</a>:</p>
       <ul>
       <li><code>joram-release-5.*-SNAPSHOT.zip</code>, including JORAM libraries and the JORAM samples sources;</li>
       <li><code>joram-release-5.*-SNAPSHOT-src.zip</code>, including JORAM sources;</li>
@@ -61,7 +61,7 @@
       before the fix makes it into the next release version. On the other hand, these snapshots might sometimes
       be unstable.</p>
       <p>The JavaDoc of the version in development is generated each day at 00:00 AM CEST, it is available at:
-	    <a href="http://bamboo.ow2.org/browse/JORAM-ANT/latest/artifact/JavaDoc/target/apidocs/index.html">here</a>.</p>
+	    <a href="http://bamboo.ow2.org/artifact/JORAM-ANT/JOB1/build-latest/JavaDoc/target/apidocs/index.html">here</a>.</p>
       
       </s2>
       
@@ -85,7 +85,7 @@
 	      <li><a href="http://forge.objectweb.org/svnsnapshots/joram-tests-svn-latest.tar.gz">Tests</a>.</li>
 	    </ul>
 	    <p>You can find the corresponding JavaDoc
-	    <a href="http://bamboo.ow2.org/browse/JORAM-ANT/latest/artifact/JavaDoc/target/site/apidocs/index.html">here</a>.</p>
+	    <a href="http://bamboo.ow2.org/artifact/JORAM-ANT/JOB1/build-latest/JavaDoc/target/apidocs/index.html">here</a>.</p>
       </s2>
 
       <s2 name="Maven access">
