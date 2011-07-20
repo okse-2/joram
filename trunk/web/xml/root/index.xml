@@ -217,7 +217,7 @@
        
       <s2 name="October 16, 2009: Joram Snapshot are now available">
       <p>The latest development snapshots are now available from
-      <a href="http://bamboo.ow2.org/browse/JORAM-REL/latest/artifact/Releases/release/target">Continuous Integration Build Tool</a>.
+      <a href="http://bamboo.ow2.org/artifact/JORAM-ANT/JOB1/build-latest/Releases/release/target">Continuous Integration Build Tool</a>.
       This will be built automatically from the current development code after each change in the SVN code base.</p>
       <p>If you need quickly a fix for a particular bug, you may be able to find a fixed Joram release here well
       before the fix makes it into the next release version. On the other hand, these snapshots might sometimes
@@ -226,7 +226,7 @@
 			
       <s2 name="January 18, 2006">
         <p>JORAM is acknowledged as the best open source MOM implementation, according to
-        <a href="http://jdj.sys-con.com/read/171303_3.htm">JDJ's readers</a>, challenging
+        <a href="http://java.sys-con.com/node/171304">JDJ's readers</a>, challenging
         proprietary products from IBM, Sun and TIBCO.</p>
       </s2>
 
