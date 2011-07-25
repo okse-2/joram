@@ -38,7 +38,7 @@ public interface SCAdmin {
 
   public static final String RUNNING_DIR = System.getProperty("user.dir") + "/target/run";
 
-  public static final String JORAM_VERSION = "5.6.0-SNAPSHOT";
+  public static final String JORAM_VERSION = "5.6.0";
 
   /**
    * Starts a new AgentServer.
