@@ -32,8 +32,6 @@ import java.util.Map;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import com.rabbitmq.client.ConnectionFactory;
-
 import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Debug;
 
@@ -67,9 +65,6 @@ public class AmqpConnections implements AmqpConnectionsMBean {
 
   /** {@inheritDoc} */
   public void addServer(String name, String host, int port) {
-    ConnectionFactory factory = new ConnectionFactory();
-    factory.setHost(host);
-    factory.setPort(port);
     addServer(name, host, port, null, null);
   }
 
