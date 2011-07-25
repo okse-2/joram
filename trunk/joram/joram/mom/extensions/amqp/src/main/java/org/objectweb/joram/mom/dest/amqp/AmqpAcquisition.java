@@ -238,13 +238,13 @@ public class AmqpAcquisition implements AcquisitionDaemon {
 
     private long period;
 
-    /** Constructs a <code>ReconnectionDaemon</code> thread. */
+    /** Constructs a <code>ConnectionUpdater</code> thread. */
     protected ConnectionUpdater(long updatePeriod) {
       super("ConnectionUpdater", logger);
       setDaemon(false);
       period = updatePeriod;
       if (logmon.isLoggable(BasicLevel.DEBUG)) {
-        logmon.log(BasicLevel.DEBUG, "ReconnectionDaemon<init>");
+        logmon.log(BasicLevel.DEBUG, "ConnectionUpdater<init>");
       }
     }
 
