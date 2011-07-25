@@ -20,12 +20,12 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
+        <version>${maven.bundle.plugin.version}</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Bundle-Activator>org.objectweb.joram.tools.jasp.osgi.Activator</Bundle-Activator>
-            <Export-Package>org.objectweb.joram.tools.jasp</Export-Package>
             <Embed-Dependency>stompconnect|commons-logging;scope=compile|runtime;inline=true</Embed-Dependency>
             <Embed-Transitive>true</Embed-Transitive>
             <Import-Package>

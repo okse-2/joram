@@ -20,10 +20,11 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
+        <version>${maven.bundle.plugin.version}</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <DynamicImport-Package>*</DynamicImport-Package>
             <Bundle-Activator>fr.dyade.aaa.common.osgi.Activator</Bundle-Activator>
             <Export-Package>com.scalagent.jmx,

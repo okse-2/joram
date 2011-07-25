@@ -20,10 +20,11 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
+        <version>${maven.bundle.plugin.version}</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Bundle-Activator>fr.dyade.aaa.agent.osgi.Activator</Bundle-Activator>
             <Export-Package>fr.dyade.aaa.agent.osgi</Export-Package>
             <Import-Package>fr.dyade.aaa.agent,
