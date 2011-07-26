@@ -21,25 +21,33 @@
  * 
  */
 
-package jmx.remote.jms.structure;
+package jmx.remote.jms.structures;
 
 import java.io.Serializable;
+
 import javax.management.ObjectName;
 
 /**
- * <b>GetMBeanInfo</b> is the object that is sent by a requestor who wishes to
- * appeal JMX getMBeanInfo(ObjectName n).
+ * <b>Invoke</b> is the object that is sent by a requestor who wishes to appeal
+ * JMX invoke(ObjectName name,String operationName,Object[] parametres,String[]
+ * signature).
  * 
  * 
  * @author Djamel-Eddine Boumchedda
  * 
  */
 
-public class GetMBeanInfo implements Serializable {
+public class Invoke implements Serializable {
   public ObjectName name;
+  public String operationName;
+  public Object[] parametres;
+  public String[] signature;
 
-  public GetMBeanInfo(ObjectName n) {
+  public Invoke(ObjectName n, String opN, Object[] p, String[] s) {
     name = n;
-  }
+    operationName = opN;
+    parametres = p;
+    signature = s;
 
+  }
 }

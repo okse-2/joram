@@ -21,32 +21,28 @@
  * 
  */
 
-package jmx.remote.jms.structure;
+package jmx.remote.jms.structures;
 
 import java.io.Serializable;
 
+import javax.management.AttributeList;
 import javax.management.ObjectName;
 
 /**
- * <b>CreateMBean3</b> is the object that is sent by a requestor who wishes to
- * appeal JMX createMBean(String className, ObjectName name,ObjectName
- * loaderName,Object[] parametres,String[] signature)
+ * <b>SetAttributes</b> is the object that is sent by a requestor who wishes to
+ * appeal JMX setAttributes(ObjectName name, AttributeList attributes).
  * 
  * 
  * @author Djamel-Eddine Boumchedda
  * 
  */
-public class CreateMBean3 extends CreateMBean implements Serializable {
-  public ObjectName loaderName;
-  public Object[] parametres;
-  public String[] signature;
+public class SetAttributes implements Serializable {
+  public ObjectName name;
+  public AttributeList attributes;
 
-  public CreateMBean3(String className, ObjectName name, ObjectName loaderName, Object[] parametres,
-      String[] signature) {
-    super(className, name);
-    this.loaderName = loaderName;
-    this.parametres = parametres;
-    this.signature = signature;
-    // TODO Auto-generated constructor stub
+  public SetAttributes(ObjectName name, AttributeList attributes) {
+    this.name = name;
+    this.attributes = attributes;
   }
+
 }

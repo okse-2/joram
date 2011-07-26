@@ -21,29 +21,25 @@
  * 
  */
 
-package jmx.remote.jms.structure;
+package jmx.remote.jms.structures;
 
 import java.io.Serializable;
 
-import javax.management.NotificationFilter;
-import javax.management.NotificationListener;
 import javax.management.ObjectName;
 
 /**
- * <b>RemoveNotificationListener1</b> is the object that is sent by a requestor
- * who wishes to appeal JMX removeNotificationListener1(ObjectName
- * name,NotificationFilter filter,Object handback).
+ * <b>IsRegistered</b> is the object that is sent by a requestor who wishes to
+ * appeal JMX isRegistered(ObjectName name).
  * 
  * 
  * @author Djamel-Eddine Boumchedda
  * 
  */
-public class RemoveNotificationListener1 extends RemoveNotificationListener implements Serializable {
-  public NotificationFilter filter;
+public class IsRegistered implements Serializable {
+  public ObjectName name;
 
-  public RemoveNotificationListener1(ObjectName name, NotificationFilter filter, Object handback) {
-    super(name, handback);
-    this.filter = filter;
+  public IsRegistered(ObjectName name) {
+    this.name = name;
   }
 
 }

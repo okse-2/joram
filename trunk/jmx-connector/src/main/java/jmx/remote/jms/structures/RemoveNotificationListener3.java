@@ -21,27 +21,31 @@
  * 
  */
 
-package jmx.remote.jms.structure;
+package jmx.remote.jms.structures;
 
 import java.io.Serializable;
 
+import javax.management.NotificationFilter;
 import javax.management.ObjectName;
 
 /**
- * <b>GetAttribute</b> is the object that is sent by a requestor who wishes to
- * appeal JMX getAttribute(ObjectName n, String a).
+ * <b>RemoveNotificationListener3</b> is the object that is sent by a requestor
+ * who wishes to appeal JMX removeNotificationListener3(ObjectName
+ * name,ObjectName listener,NotificationFilter filter,Object handback).
  * 
  * 
  * @author Djamel-Eddine Boumchedda
  * 
  */
-public class GetAttribute implements Serializable {
-  public ObjectName name;
-  public String attributes;
+public class RemoveNotificationListener3 extends RemoveNotificationListener implements Serializable {
+  public ObjectName listener;
+  public NotificationFilter filter;
 
-  public GetAttribute(ObjectName n, String a) {
-    name = n;
-    attributes = a;
+  public RemoveNotificationListener3(ObjectName name, ObjectName listener, NotificationFilter filter,
+      Object handback) {
+    super(name, handback);
+    this.listener = listener;
+    this.filter = filter;
   }
 
 }

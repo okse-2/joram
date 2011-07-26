@@ -26,7 +26,7 @@ package jmx.remote.jms;
 import java.lang.management.*;
 import javax.management.*;
 
-import jmx.remote.jms.structure.UserListenerMBean;
+import jmx.remote.jms.structures.UserListenerMBean;
 
 class User {
   String name;

@@ -21,18 +21,32 @@
  * 
  */
 
-package jmx.remote.jms.structure;
+package jmx.remote.jms.structures;
 
 import java.io.Serializable;
 
+import javax.management.ObjectName;
+
 /**
- * <b>GetDomains</b> is the object that is sent by a requestor who wishes to
- * appeal JMX getDomains().
+ * <b>CreateMBean3</b> is the object that is sent by a requestor who wishes to
+ * appeal JMX createMBean(String className, ObjectName name,ObjectName
+ * loaderName,Object[] parametres,String[] signature)
  * 
  * 
  * @author Djamel-Eddine Boumchedda
  * 
  */
-public class GetDomains implements Serializable {
+public class CreateMBean3 extends CreateMBean implements Serializable {
+  public ObjectName loaderName;
+  public Object[] parametres;
+  public String[] signature;
 
+  public CreateMBean3(String className, ObjectName name, ObjectName loaderName, Object[] parametres,
+      String[] signature) {
+    super(className, name);
+    this.loaderName = loaderName;
+    this.parametres = parametres;
+    this.signature = signature;
+    // TODO Auto-generated constructor stub
+  }
 }

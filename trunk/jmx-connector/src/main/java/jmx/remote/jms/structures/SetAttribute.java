@@ -21,27 +21,27 @@
  * 
  */
 
-package jmx.remote.jms.structure;
+package jmx.remote.jms.structures;
 
 import java.io.Serializable;
-
 import javax.management.ObjectName;
-import javax.management.QueryExp;
+import javax.management.Attribute;
 
 /**
- * <b>QueryMbeans</b> is the object that is sent by a requestor who wishes to
- * appeal JMX queryMbeans(ObjectName name,QueryExp query).
+ * <b>SetAttribute</b> is the object that is sent by a requestor who wishes to
+ * appeal JMX setAttribute(ObjectName name, Attribute attribute).
  * 
  * 
  * @author Djamel-Eddine Boumchedda
  * 
  */
-public class QueryMbeans implements Serializable {
+public class SetAttribute implements Serializable {
   public ObjectName name;
-  public QueryExp query;
+  public Attribute attribute;
 
-  public QueryMbeans(ObjectName name, QueryExp query) {
-    this.name = name;
-    this.query = query;
+  public SetAttribute(ObjectName n, Attribute at) {
+    name = n;
+    attribute = at;
   }
+
 }
