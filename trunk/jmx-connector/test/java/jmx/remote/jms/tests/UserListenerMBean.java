@@ -21,7 +21,7 @@
  * 
  */
 
-package jmx.remote.jms.structures;
+package jmx.remote.jms.tests;
 
 public interface UserListenerMBean {
 

@@ -21,7 +21,7 @@
  * 
  */
 
-package jmx.remote.jms;
+package jmx.remote.jms.tests;
 
 /**
  * Interface MBean of The MBean A

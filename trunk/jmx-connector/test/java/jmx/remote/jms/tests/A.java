@@ -21,7 +21,7 @@
  * 
  */
 
-package jmx.remote.jms;
+package jmx.remote.jms.tests;
 
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;

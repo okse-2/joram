@@ -21,12 +21,11 @@
  * 
  */
 
-package jmx.remote.jms;
+package jmx.remote.jms.tests;
 
 import java.lang.management.*;
 import javax.management.*;
 
-import jmx.remote.jms.structures.UserListenerMBean;
 
 class User {
   String name;

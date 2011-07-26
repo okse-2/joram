@@ -53,10 +53,10 @@ import javax.swing.JOptionPane;
 import net.java.balloontip.BalloonTip;
 import net.java.balloontip.utils.TimingUtils;
 
-import jmx.remote.jms.A;
-import jmx.remote.jms.BroadcastingUser;
-import jmx.remote.jms.JmsJmxConnectorServerLaunch;
 import jmx.remote.jms.ShowMessageInformations;
+import jmx.remote.jms.tests.A;
+import jmx.remote.jms.tests.BroadcastingUser;
+import jmx.remote.jms.tests.JmsJmxConnectorServerLaunch;
 
 /**
  * the <b>JmsJmxConnectorServerAgent </b> class launches the server connector in
