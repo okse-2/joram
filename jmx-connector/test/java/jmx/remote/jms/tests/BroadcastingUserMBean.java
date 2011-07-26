@@ -21,7 +21,7 @@
  * 
  */
 
-package jmx.remote.jms;
+package jmx.remote.jms.tests;
 
 public interface BroadcastingUserMBean {
   public String getName();

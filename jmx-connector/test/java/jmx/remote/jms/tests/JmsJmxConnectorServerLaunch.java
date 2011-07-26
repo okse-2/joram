@@ -21,7 +21,7 @@
  * 
  */
 
-package jmx.remote.jms;
+package jmx.remote.jms.tests;
 
 import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
@@ -50,7 +50,7 @@ import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 import java.util.logging.*;
 
-import jmx.remote.jms.A;
+import jmx.remote.jms.tests.A;
 import joram.jmx.remote.provider.jms.*;
 
 /**

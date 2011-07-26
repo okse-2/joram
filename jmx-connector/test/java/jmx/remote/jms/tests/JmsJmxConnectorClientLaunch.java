@@ -21,7 +21,7 @@
  * 
  */
 
-package jmx.remote.jms;
+package jmx.remote.jms.tests;
 
 import java.io.IOException;
 import java.util.HashMap;

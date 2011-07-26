@@ -99,10 +99,10 @@ public class JmsJmxConnector implements JMXConnector {
   public void connect(Map<String, ?> env) throws IOException {
     // TODO Auto-generated method stub
     try {
-
-      // ClientJMS clientJms = new ClientJMS();
-      // On créé la connection à partir de la connection Factory enregistrée
-      // dans la jndi
+        
+      //We created the connection from the connection factory registered
+      //In the jndi
+      
       // Récupération du contexte JNDI
       Context jndiContext = new InitialContext();
       // Recherche des objets administrés
@@ -116,104 +116,14 @@ public class JmsJmxConnector implements JMXConnector {
 
       mbeanServerConnectionDelegate = new MBeanServerConnectionDelegate(connection);
 
-      ObjectName name = new ObjectName("SimpleAgent:name=A");
-      String path = new File("").getAbsolutePath();
-      System.out.println("*************" + path);
-      File f = new File(path + "\\trace-Client");
-      PrintStream pS = new PrintStream(f);
-      Exception e = new Exception();
-      e.printStackTrace(pS);
-      // mbeanServerConnectionDelegate.getAttribute(name, "a");
-      /*
-       * mbeanServerConnectionDelegate.isRegistered(name); String operationName;
-       * Object[] params = new Object[0]; String[] sig = new String[0];
-       * operationName = "affiche"; mbeanServerConnectionDelegate.invoke(name,
-       * operationName, params, sig);
-       * 
-       * mbeanServerConnectionDelegate.getAttribute(name,"a");
-       * mbeanServerConnectionDelegate.getMBeanInfo(name); String [] attributes
-       * = new String[1]; attributes[0] = "a";
-       * mbeanServerConnectionDelegate.getAttributes(name, attributes);
-       * mbeanServerConnectionDelegate.getDefaultDomain();
-       * mbeanServerConnectionDelegate.queryNames(name, null);
-       */
 
-    } catch (NamingException e) {
+    } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
-    } catch (JMSException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (NullPointerException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (MalformedObjectNameException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } /*
-       * catch (AttributeNotFoundException e) { // TODO Auto-generated catch
-       * block e.printStackTrace(); } catch (InstanceNotFoundException e) { //
-       * TODO Auto-generated catch block e.printStackTrace(); } catch
-       * (MBeanException e) { // TODO Auto-generated catch block
-       * e.printStackTrace(); } catch (ReflectionException e) { // TODO
-       * Auto-generated catch block e.printStackTrace(); }
-       *//*
-          * catch (InstanceNotFoundException e) { // TODO Auto-generated catch
-          * block e.printStackTrace(); } catch (MBeanException e) { // TODO
-          * Auto-generated catch block e.printStackTrace(); } catch
-          * (ReflectionException e) { // TODO Auto-generated catch block
-          * e.printStackTrace(); } catch (AttributeNotFoundException e) { //
-          * TODO Auto-generated catch block e.printStackTrace(); } catch
-          * (IntrospectionException e) { // TODO Auto-generated catch block
-          * e.printStackTrace(); }
-          */
-
+    } 
   }
 
-  /*
-   * 
-   * ClientJMS clientJms = new ClientJMS(); /**Construction et Envoi des
-   * requettes jms GetAttributes getAttributes = new GetAttributes(new
-   * ObjectName("SimpleAgent:name=A"),"a"); Attribute attribute = new
-   * Attribute("a",new Integer(3)); SetAttributes setAttributes = new
-   * SetAttributes(new ObjectName("SimpleAgent:name=A"),attribute);*Invoke**
-   * 
-   * ****Initialisation des paramètres de la méthode invoke avec les params et
-   * la signature de la methode affiche*****
-   * 
-   * ObjectName name,name2,name3; String operationName,operationName2; Object[]
-   * params = new Object[0]; String[] sig = new String[0]; /*contient le type
-   * des paramètres passé dans la méthode qu'on veut appeler* name = new
-   * ObjectName("SimpleAgent:name=A"); operationName = "affiche";
-   * 
-   * /*****Initialisation des paramètres de la méthode invoke avec les params et
-   * la signature de la methode addValeurs*****
-   * 
-   * Object[] params2 = new Object[2]; String[] sig2 = new String[2]; sig2[0] =
-   * "int"; sig2[1] = "int"; params2[0] = new Integer(3); params2[1] = new
-   * Integer(4);
-   * 
-   * 
-   * name2 = new ObjectName("SimpleAgent:name=A"); operationName2 =
-   * "addValeurs"; Invoke invoke = new Invoke(name,operationName,params,sig);
-   * 
-   * Invoke invoke2 = new Invoke(name2,operationName2,params2,sig2);*MBean
-   * Info** name3 = new ObjectName("SimpleAgent:name=A"); GetMBeanInfo mbeanInfo
-   * = new GetMBeanInfo(name3);
-   * 
-   * clientJms.doRequete(getAttributes); clientJms.doRequete(setAttributes);
-   * clientJms.doRequete(getAttributes); clientJms.doRequete(invoke);
-   * clientJms.doRequete(invoke2); **Invoker la methode addValeurs **
-   * clientJms.doRequete(mbeanInfo);
-   * 
-   * } catch (NamingException e) { // TODO Auto-generated catch block
-   * e.printStackTrace(); } catch (JMSException e) { // TODO Auto-generated
-   * catch block e.printStackTrace(); } catch (AdminException e) { // TODO
-   * Auto-generated catch block e.printStackTrace(); } catch
-   * (MalformedObjectNameException e) { // TODO Auto-generated catch block
-   * e.printStackTrace(); } catch (NullPointerException e) { // TODO
-   * Auto-generated catch block e.printStackTrace(); }
-   */
+ 
 
   public MBeanServerConnection getMBeanServerConnection() throws IOException {
     // TODO Auto-generated method stub
