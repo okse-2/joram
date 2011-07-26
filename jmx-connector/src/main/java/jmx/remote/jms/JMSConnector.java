@@ -18,6 +18,7 @@ import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.NotCompliantMBeanException;
 import javax.management.NotificationListener;
+import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
@@ -32,17 +33,16 @@ import org.objectweb.joram.client.jms.admin.AdminException;
 /**
  * 
 
- * <b>JMSConnector est la classe représentant le connecteur destiné a envoyé la réponse construite à partir du méssage envoyé par le client</b>
+ * <b>JMSConnector which represents the comportement of the server connector</b>
  * <p>
  * <ul>
- * <li>Destination : Le connecteur JMS construit sa propre destination qui est une queue, il la construit a partir de l'objet session et la met dans le Serveur.</li>
+ * <li>Destination : The JMS connector builds his own destination  with Queue type from  the Session object.</li>
  * </ul>
  * <ul>
- * <li>Filtrage de Messages : Dans cette version le Connecteur JMS fait un filtrage des messages qu'il reçoit afin d'être sur que le message en question lui est bien destiné, si c'est le cas 
- * 						     il construit la reponse et recupère la destination du client en faisant un getJMSReplyTo du message reçu et envoit la reponse vers cette destination.</li>
+ * <li>Message filtering : JMS Connector does a filtering of messages it receives to be sure that the message in question him is intended, in  this case, it builds the response and retrieves the customer's destination from  message received with  getJMSReplyTo, and then sends the response to this destination.</li>
  * </ul>
  * <ul>
- * <li>Reception de Messages : Dans cette version la classe du  Connecteur JMS <b><i>JMSConnecteur</b></i> implemente l'interface <b><i>MessageListener</b></i> donc implicitement un listener sera associé au consomateur du connecteur ce qu'il fait que dès que le client envoit un message vers la destination du connecteur en question celui-ci sera prevenu directement et le message reçu sera traité dans la méthode <b><i>onMessage</b></i> qui prend en paramètre le message reçu.</li>
+ * <li>Receiving Messages : <b><i>JMSConnecteur</b></i>  JMSConnecteur  implements the MessageListener interface, so  a listener will be implicitly associated to consummer of the server connector, so  when the client sends a message to the destination of the connector in question it will be notified directly and the message received will be processed in the method <b><i>onMessage</b></i> which takes in parameter the received message. </li>
  * </ul>
  * </p>
  *
@@ -97,18 +97,6 @@ public class JMSConnector implements MessageListener{
 		MessageConsumer consumer = session.createConsumer(qtoto,selecteur);
 		producer = session.createProducer(null);
 		consumer.setMessageListener(this);	
-		
-		/***Creation du Connecteur JMS coté Serveur***/
-		/**
-		 * 
-		 
-		MBeanServer mbs = MBeanServerFactory.createMBeanServer();
-		JMXServiceURL addr = new JMXServiceURL("jms", null, 0);
-		// addr = JmsJmxConnectorSupport.getProviderURL(addr);
-
-		JMXConnectorServer cs = JMXConnectorServerFactory.newJMXConnectorServer(addr, null, mbs);
-		cs.start();
-		*/
 		connection.start();
 	}
 	
@@ -166,17 +154,22 @@ public class JMSConnector implements MessageListener{
 				CreateMbean objectCreateMbean = (CreateMbean)objetRecu;
 				reponse = mbs.createMBean(objectCreateMbean.className, objectCreateMbean.name);
 			}
-			else if (objetRecu instanceof CreateMbean2){
-				CreateMbean2 objectCreateMbean2 = (CreateMbean2)objetRecu;
-				reponse = mbs.createMBean(objectCreateMbean2.className, objectCreateMbean2.name, objectCreateMbean2.loaderName);
+			else if (objetRecu instanceof CreateMBean1){
+				CreateMBean1 objectCreateMBean1 = (CreateMBean1)objetRecu;
+				reponse = mbs.createMBean(objectCreateMBean1.className, objectCreateMBean1.name, objectCreateMBean1.loaderName);
 			}
-			else if (objetRecu instanceof CreateMbean3){
-				CreateMbean3 objectCreateMbean3 = (CreateMbean3)objetRecu;
-				reponse = mbs.createMBean(objectCreateMbean3.className, objectCreateMbean3.name, objectCreateMbean3.parametres, objectCreateMbean3.signature);
+			else if (objetRecu instanceof CreateMBean2){
+				CreateMBean2 objectCreateMBean2 = (CreateMBean2)objetRecu;
+				reponse = mbs.createMBean(objectCreateMBean2.className, objectCreateMBean2.name, objectCreateMBean2.parametres, objectCreateMBean2.signature);
+			}
+			else if (objetRecu instanceof CreateMBean3){
+				CreateMBean3 objectCreateMBean3 = (CreateMBean3)objetRecu;
+				reponse = mbs.createMBean(objectCreateMBean3.className, objectCreateMBean3.name,objectCreateMBean3.loaderName,objectCreateMBean3.parametres, objectCreateMBean3.signature);
 			}
 			else if (objetRecu instanceof UnregisterMbean){
 				UnregisterMbean objectUnregisterMbean = (UnregisterMbean)objetRecu;
 				 mbs.unregisterMBean(objectUnregisterMbean.name);
+				 reponse = "Unregistering of the MBean : "+objectUnregisterMbean.name+ "is done";
 			}
 			else if (objetRecu instanceof GetObjectInstance){
 				GetObjectInstance objectGetObjectInstance = (GetObjectInstance)objetRecu;
@@ -211,16 +204,36 @@ public class JMSConnector implements MessageListener{
 				reponse = new String("Le Listener a ete enregistré!");
 				
 			}
-			else if (objetRecu instanceof RemoveNotificationListener4){
-				RemoveNotificationListener4 objectRemoveNotificationListener4 = (RemoveNotificationListener4)objetRecu;
+			else if (objetRecu instanceof RemoveNotificationListener1){
+				RemoveNotificationListener1 objectRemoveNotificationListener1 = (RemoveNotificationListener1)objetRecu;
 				//ObjectNotificationListenerToRemoved objectNotificationListenerToRemoved = new ObjectNotificationListenerToRemoved();
 				
-				System.out.println("le handback du RemoveNotificationListener : "+objectRemoveNotificationListener4.handback);
-					ObjectNotificationListener objectNotificationListenerRecovered = (ObjectNotificationListener) myNotificationListener.get(objectRemoveNotificationListener4.handback);
+				System.out.println("le handback du RemoveNotificationListener : "+objectRemoveNotificationListener1.handback);
+					ObjectNotificationListener objectNotificationListenerRecovered = (ObjectNotificationListener) myNotificationListener.get(objectRemoveNotificationListener1.handback);
 				System.out.println("objectNotificationListenerRecovered : "+objectNotificationListenerRecovered.toString());
-				mbs.removeNotificationListener(objectRemoveNotificationListener4.name,objectNotificationListenerRecovered , objectNotificationListenerRecovered.filter, objectNotificationListenerRecovered.handback);
+				mbs.removeNotificationListener(objectRemoveNotificationListener1.name,objectNotificationListenerRecovered , objectNotificationListenerRecovered.filter, objectNotificationListenerRecovered.handback);
 				 System.out.println("je suis dans le Remoooooooooooooooooveeeeeeeeeeeeeeeeeeeeeeeeeeeee");
 				reponse = new String("Remove de la notificationListener4 avec le handback :");//+objectRemoveNotificationListener4.handback.toString());
+			}
+			else if (objetRecu instanceof RemoveNotificationListener){
+				RemoveNotificationListener objectRemoveNotificationListener = (RemoveNotificationListener)objetRecu;
+				//ObjectNotificationListenerToRemoved objectNotificationListenerToRemoved = new ObjectNotificationListenerToRemoved();
+				
+				System.out.println("le handback du RemoveNotificationListener : "+objectRemoveNotificationListener.handback);
+				ObjectNotificationListener objectNotificationListenerRecovered = (ObjectNotificationListener) myNotificationListener.get(objectRemoveNotificationListener.handback);
+				System.out.println("objectNotificationListenerRecovered : "+objectNotificationListenerRecovered.toString());
+				mbs.removeNotificationListener(objectRemoveNotificationListener.name, objectNotificationListenerRecovered);
+				reponse = new String("Remove de la notificationListener3 avec le handback :");//+objectRemoveNotificationListener4.handback.toString());
+			}
+			else if (objetRecu instanceof RemoveNotificationListener2){
+				RemoveNotificationListener2 objectRemoveNotificationListener2 = (RemoveNotificationListener2)objetRecu;
+				//ObjectNotificationListenerToRemoved objectNotificationListenerToRemoved = new ObjectNotificationListenerToRemoved();
+				
+				System.out.println("le handback du RemoveNotificationListener : "+objectRemoveNotificationListener2.handback);
+				ObjectNotificationListener objectNotificationListenerRecovered = (ObjectNotificationListener) myNotificationListener.get(objectRemoveNotificationListener2.handback);
+				System.out.println("objectNotificationListenerRecovered : "+objectNotificationListenerRecovered.toString());
+				mbs.removeNotificationListener(objectRemoveNotificationListener2.name, objectNotificationListenerRecovered);
+				reponse = new String("Remove de la notificationListener3 avec le handback :");//+objectRemoveNotificationListener4.handback.toString());
 			}
 			else if (objetRecu instanceof RemoveNotificationListener3){
 				RemoveNotificationListener3 objectRemoveNotificationListener3 = (RemoveNotificationListener3)objetRecu;
@@ -229,9 +242,10 @@ public class JMSConnector implements MessageListener{
 				System.out.println("le handback du RemoveNotificationListener : "+objectRemoveNotificationListener3.handback);
 				ObjectNotificationListener objectNotificationListenerRecovered = (ObjectNotificationListener) myNotificationListener.get(objectRemoveNotificationListener3.handback);
 				System.out.println("objectNotificationListenerRecovered : "+objectNotificationListenerRecovered.toString());
-				mbs.removeNotificationListener(objectRemoveNotificationListener3.name, objectNotificationListenerRecovered);
+				mbs.removeNotificationListener(objectRemoveNotificationListener3.name, objectNotificationListenerRecovered,objectRemoveNotificationListener3.filter,objectRemoveNotificationListener3.handback);
 				reponse = new String("Remove de la notificationListener3 avec le handback :");//+objectRemoveNotificationListener4.handback.toString());
 			}
+			
 			
 			
 			
@@ -284,6 +298,7 @@ public class JMSConnector implements MessageListener{
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
+	
 	 try {
 		messageReponse.setObject((Serializable) reponse);
 	} catch (JMSException e) {

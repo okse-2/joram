@@ -11,14 +11,17 @@ package joram.jmx.remote.provider.jms;
 	  
 
 	  public class ServerProvider implements JMXConnectorServerProvider{
-	     /***
-	       * Create a JmsJmxConnectorServer
-	       * @param url
-	       * @param environment
-	       * @param server
-	       * @return the JmsJmxConnectorServer
-	       * @throws IOException 
-	       */
+		   /***
+		    * Create a JmsJmxConnectorServer
+		    * @param url
+		    * @param environment
+		    * @param server
+		    * @return the JmsJmxConnectorServer
+		    * @throws IOException
+		    * 
+		    * @author Djamel-Eddine Boumchedda 
+		    */
+	 
 	      public JMXConnectorServer newJMXConnectorServer(JMXServiceURL url,Map environment,MBeanServer server) throws IOException{
 	          String protocol = url.getProtocol();
 	          if (!"jms".equals(protocol)) throw new MalformedURLException("Wrong protocol " + protocol + " for provider" + this);

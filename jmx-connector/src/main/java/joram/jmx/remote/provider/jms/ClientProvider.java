@@ -11,21 +11,23 @@ import java.net.MalformedURLException;
 import java.util.Map;
 import jmx.remote.jms.JmsJmxConnector;
 
-  
+/***
+ * Construct a new JMXConnector
+ * @param url
+ * @param environment
+ * @return the new Connector
+ * @throws IOException
+ * 
+ * @author Djamel-Eddine Boumchedda
+ */
   public class ClientProvider implements JMXConnectorProvider
   {
-      /***
-      * Construct a new JMXConnector
-      * @param url
-       * @param environment
-       * @return the new Connector
-       * @throws IOException
-       */
+   
     public JMXConnector newJMXConnector(JMXServiceURL url, Map environment) throws IOException
      {
          String protocol = url.getProtocol();
         if (!"jms".equals(protocol)) throw new MalformedURLException("Wrong protocol " + protocol + " for provider " + this);
-     	System.out.println("Je suis la!!!!!!!!!!!!!!!!!!");
+     	System.out.println("Je suis la -> Dans le CLient Provider!!!!!!!!!!!!!!!!!!");
          File f = new File("trace-Client.txt");
 		PrintStream pS = new PrintStream(f);
 		Exception e = new Exception();
