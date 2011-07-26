@@ -1,4 +1,4 @@
-/**
+/*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2011 ScalAgent Distributed Technologies
  *
