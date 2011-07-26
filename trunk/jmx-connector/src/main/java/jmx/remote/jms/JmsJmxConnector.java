@@ -38,6 +38,14 @@ import org.objectweb.joram.client.jms.admin.AdminException;
 
 import com.sun.java.browser.net.ProxyService;
 
+/**
+ * In the Class <b>JmsJmxConnector</b>, the methodes of the client connector are implemented like : connect,getMBeanServerConnection() ...
+ * 
+ * The <i>MBeanServerConnection</i> is provided by the <i>MBeanServerConnectionDelegate</i> Class.
+ * 
+ * @author Djamel-Eddine Boumchedda
+ *
+ */
 public class JmsJmxConnector implements JMXConnector {
 	private JMXServiceURL jmsURL;
 	private Map env;
@@ -67,8 +75,24 @@ public class JmsJmxConnector implements JMXConnector {
 	public void connect(Map<String, ?> env) throws IOException {
 		// TODO Auto-generated method stub
 	      try{
-	    	ClientJMS clientJms = new ClientJMS();
-			mbeanServerConnectionDelegate = new MBeanServerConnectionDelegate(clientJms,clientJms.connection);
+	    	
+	    	//ClientJMS clientJms = new ClientJMS();
+	    	//On créé la connection à partir de la connection Factory enregistrée dans la jndi
+	    	//Récupération du contexte JNDI
+	  		Context jndiContext = new InitialContext();
+	  		//Recherche des objets administrés
+	  		ConnectionFactory connectionFactory = (ConnectionFactory)jndiContext.lookup("ConnectionFactory");
+	  		jndiContext.close();
+	  		//Création des artéfacts nécessaires pour se connecter à la file et au sujet
+	  		Connection connection = connectionFactory.createConnection();
+	  		System.out.println("Connection : "+connection.toString());
+	  		connection.start();  
+	    	  
+	    	  
+			mbeanServerConnectionDelegate = new MBeanServerConnectionDelegate(connection); 
+			
+	    	
+			
 			ObjectName name = new ObjectName("SimpleAgent:name=A");
 			String path = new File("").getAbsolutePath();
 			System.out.println("*************"+path);
@@ -100,9 +124,6 @@ public class JmsJmxConnector implements JMXConnector {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (NullPointerException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (AdminException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (MalformedObjectNameException e) {

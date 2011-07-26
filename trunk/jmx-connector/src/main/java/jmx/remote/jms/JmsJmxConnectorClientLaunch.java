@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.jms.JMSException;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
+import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
 import javax.management.InvalidAttributeValueException;
@@ -14,6 +16,7 @@ import javax.management.ListenerNotFoundException;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
 import javax.management.Notification;
 import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
@@ -22,7 +25,15 @@ import javax.management.ReflectionException;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+import javax.naming.NamingException;
 
+import org.objectweb.joram.client.jms.admin.AdminException;
+/**
+ * <b><i>JmsJmxConnectorClientLaunch</i></b> launches the client connector,and made a series of test.
+ * 
+ * @author Djamel-Eddine Boumchedda
+ *
+ */
 public class JmsJmxConnectorClientLaunch {
 	public static void main(String[] args) throws IOException, MalformedObjectNameException, NullPointerException, AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException {
 		JMXServiceURL clientURL=new JMXServiceURL("service:jmx:jms:///tcp://localhost:6000");
@@ -40,14 +51,45 @@ public class JmsJmxConnectorClientLaunch {
 		System.out.println("                         LANCEMENT DU TEST");
 		System.out.println("***********************************************************************");
 		
-		System.out.println("--------------------------------------------------");
-		System.out.println("test de la methode : isRegistered(ObjectName name)");
-		System.out.println("--------------------------------------------------");
+			System.out.println("--------------------------------------------------");
+			System.out.println("test de la methode : isRegistered(ObjectName name)");
+			System.out.println("--------------------------------------------------");
 		mbeanServerConnection.isRegistered(name);
 		System.out.println("--------------------------------------------------");
 		System.out.println("fin du test de la methode : isRegistered(ObjectName name)");
 		System.out.println("--------------------------------------------------");
 		System.out.println();
+//		System.out.println("--------------------------------------------------");
+//		System.out.println("test de la methode : createMBean(String className,ObjectName name)");
+//		System.out.println("--------------------------------------------------");
+//		try {
+//			ClientJMS clientJms = new ClientJMS();
+//			
+//			System.out.println(clientJms.getClass());
+//			mbeanServerConnection.createMBean(clientJms.getClass().toString(), new ObjectName("SimpleAgent:name=ClientJMS"));
+//		} catch (InstanceAlreadyExistsException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		} catch (NotCompliantMBeanException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		} catch (NamingException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (JMSException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (AdminException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		System.out.println("--------------------------------------------------");
+//		System.out.println("fin du test de la methode : createMBean(String className,ObjectName name)");
+//		System.out.println("--------------------------------------------------");
+//		System.out.println();
+		
+		
+		
 		System.out.println("--------------------------------------------------");
 		System.out.println("test de la methode : isInstanceOf(name, className)");
 		System.out.println("--------------------------------------------------");
@@ -144,6 +186,7 @@ public class JmsJmxConnectorClientLaunch {
 		System.out.println("--------------------------------------------------");
 		System.out.println("test de la methode : setAttributes(ObjectName name,AttributeList attributes) ");
 		System.out.println("--------------------------------------------------");
+		
 		Attribute attribute2 = new Attribute("b",new Integer(5));
 		AttributeList attributes = new AttributeList();
 		int index = 0;
@@ -155,7 +198,7 @@ public class JmsJmxConnectorClientLaunch {
 		System.out.println("fin du test de la methode : setAttributes(ObjectName name,AttributeList attributes) ");
 		System.out.println("--------------------------------------------------");
 		System.out.println();
-		System.out.println("--------------------------------------------------");
+		 System.out.println("--------------------------------------------------");
 		System.out.println("test de la methode : getAttributes(ObjectName name,String[] attributes) ");
 		System.out.println("--------------------------------------------------");
 		String [] stringAttributes = new String[2];
@@ -207,7 +250,8 @@ public class JmsJmxConnectorClientLaunch {
 			}
 		};
 		Object handback = new String("handback");
-		mbeanServerConnection.addNotificationListener(name2, notificationListener, null, null);
+		Object handback2 = new String("handback2");
+		mbeanServerConnection.addNotificationListener(name2, notificationListener, null, handback);
 
 		System.out.println("--------------------------------------------------");
 		System.out.println("fin du test de la methode : addNotificationListener(ObjectName name,NotificationListener listener,NotificationFilter filter,Object handback) ");
@@ -216,7 +260,7 @@ public class JmsJmxConnectorClientLaunch {
 		System.out.println("--------------------------------------------------");
 		System.out.println("RE : test de la methode : addNotificationListener(ObjectName name,NotificationListener listener,NotificationFilter filter,Object handback) ");
 		System.out.println("--------------------------------------------------");
-		mbeanServerConnection.addNotificationListener(name2, notificationListener, null, null);
+		mbeanServerConnection.addNotificationListener(name2, notificationListener, null,handback2);
 		System.out.println("--------------------------------------------------");
 		System.out.println("RE : fin du test de la methode : addNotificationListener(ObjectName name,NotificationListener listener,NotificationFilter filter,Object handback) ");
 		System.out.println("--------------------------------------------------");
@@ -231,7 +275,7 @@ public class JmsJmxConnectorClientLaunch {
 		System.out.println("test de la methode : removeNotificationListener(ObjectName name,NotificationListener listener)");
 		System.out.println("--------------------------------------------------");
 		try {
-			mbeanServerConnection.removeNotificationListener(name2, notificationListener);
+			mbeanServerConnection.removeNotificationListener(name2, notificationListener,null,handback);
 		} catch (ListenerNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -11,7 +11,13 @@ import javax.naming.NamingException;
 
 import org.objectweb.joram.client.jms.admin.AdminException;
 
-
+/**
+ * In the Class <b>Jms JmxConnectorServer</b>,  the methodes of the server connector are implemented  like : start, stop ...
+ * 
+ * 
+ * @author Djamel-Eddine Boumchedda
+ *
+ */
 public class JmsJmxConnectorServer extends JMXConnectorServer {
 	private JMXServiceURL urlServer;
 	private final Map envServer;

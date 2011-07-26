@@ -11,7 +11,12 @@ import javax.management.Notification;
 import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
 
-
+/**<ul>In order to retrieve the notifications  issued by the MBeans registered in the MBeanServer we provide listener own.</ul>
+ * <ul>This class is call'd by the server connector  before doing the call JMX <i>addNotificationListener</i>, after creating the object ObjectNotificationListener a notification listener is created that will be passed as a parameter of the method JMX <i>addNotificationListener.</i></ul>
+ * 
+ * @author Djamel-Eddine Boumchedda
+ *
+ */
 public class ObjectNotificationListener implements NotificationListener {
     Session session;
     MessageProducer producer;
@@ -27,9 +32,7 @@ public class ObjectNotificationListener implements NotificationListener {
 		
 		
 	}
-	public ObjectNotificationListener(){
-		
-	}
+
 	public void handleNotification(Notification notification, Object handback) {
 		ObjectMessage messageReponse = null;
 		try {

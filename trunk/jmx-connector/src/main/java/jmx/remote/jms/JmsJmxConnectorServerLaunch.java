@@ -1,8 +1,11 @@
 package jmx.remote.jms;
 
 import java.io.IOException;
+import java.lang.instrument.ClassFileTransformer;
+import java.lang.instrument.IllegalClassFormatException;
 import java.lang.management.ManagementFactory;
 import java.net.MalformedURLException;
+import java.security.ProtectionDomain;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,11 +31,17 @@ import java.util.logging.*;
 import jmx.remote.jms.A;
 import joram.jmx.remote.provider.jms.*;
 
-public class JmsJmxConnectorServerLaunch {
+/**
+ * This <b><i>JmsJmxConnectorServerLaunch</i></b> Class launches the server connector.
+ * 
+ * @author Djamel-Eddine Boumchedda
+ *
+ */
+public class JmsJmxConnectorServerLaunch implements ClassFileTransformer {
 	  protected static Logger logger;
 	public static void main(String[] args) throws SecurityException, IOException {
 		JMXServiceURL serverURL=new JMXServiceURL("service:jmx:jms:///tcp://localhost:6000");
-		//MBeanServer mbs = MBeanServerFactory.createMBeanServer();
+		//MBeanServer mbs = MBeanServerFactory.createMBeanServer();	
 		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 		System.out.println(mbs.toString());
 		Map serverEnv=new HashMap();
@@ -53,6 +62,7 @@ public class JmsJmxConnectorServerLaunch {
 			
 	
 		} catch (MalformedObjectNameException e1) {
+			
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} catch (NullPointerException e1) {
@@ -100,7 +110,7 @@ public class JmsJmxConnectorServerLaunch {
 			System.out.println("test de la methode : removeNotificationListener(ObjectName name,NotificationListener listener)");
 			System.out.println("--------------------------------------------------");
 			try {
-				mbs.removeNotificationListener(name2, notificationListener, null, null);
+				mbs.removeNotificationListener(name2, notificationListener);
 				System.out.println("je suis la!!!!!!!!");
 			} catch (ListenerNotFoundException e) {
 				// TODO Auto-generated catch block
@@ -123,13 +133,13 @@ public class JmsJmxConnectorServerLaunch {
 		} catch (NotCompliantMBeanException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}/* catch (InstanceNotFoundException e) {
+		} /*catch (InstanceNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ReflectionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} */catch (MBeanException e) {
+		}*/ catch (MBeanException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -149,8 +159,12 @@ public class JmsJmxConnectorServerLaunch {
 		}
 		
 	}
+	public byte[] transform(ClassLoader loader, String className,
+			Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
+			byte[] classfileBuffer) throws IllegalClassFormatException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
-	
-
 
 }
