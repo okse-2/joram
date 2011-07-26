@@ -1,5 +1,0 @@
-java.lang.Exception
-	at joram.jmx.remote.provider.jms.ClientProvider.newJMXConnector(ClientProvider.java:31)
-	at javax.management.remote.JMXConnectorFactory.newJMXConnector(JMXConnectorFactory.java:338)
-	at javax.management.remote.JMXConnectorFactory.connect(JMXConnectorFactory.java:247)
-	at jmx.remote.jms.JmsJmxConnectorClientLaunch.main(JmsJmxConnectorClientLaunch.java:37)
