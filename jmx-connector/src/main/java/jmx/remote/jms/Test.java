@@ -1,6 +1,27 @@
-package jmx.remote.jms;
+/**
+ * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2011 ScalAgent Distributed Technologies
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ * USA.
+ *
+ * Initial developer(s): Djamel-Eddine Boumchedda
+ * 
+ */
 
-//import java.awt.AWTException;
+package jmx.remote.jms;
 
 import java.awt.Color;
 
@@ -20,194 +41,168 @@ import java.awt.event.ActionListener;
 
 import java.awt.image.BufferedImage;
 
-
-
 public class Test {
 
-	private static final int WIDTH		= 24;
+  private static final int WIDTH = 24;
 
-	private static final int HEIGHT		= 24;
+  private static final int HEIGHT = 24;
 
-	private int              value		= 0;	// valeur
+  private int value = 0; // valeur
 
-	private TrayIcon         trayIcon	= null;
+  private TrayIcon trayIcon = null;
 
-	private MyImageRefresh   refresh	= null;
+  private MyImageRefresh refresh = null;
 
+  public static void main(final String[] args) {
 
+    new Test();
 
-	public static void main(final String[] args) {
+  }
 
-		new Test();
+  public Test() {
 
-	}
+    buildTray();
 
+  }
 
+  private void buildTray() {
 
-	public Test() {
+    if (SystemTray.isSupported()) {
 
-		buildTray();
+      final SystemTray tray = SystemTray.getSystemTray();
 
-	}
+      final PopupMenu popup = new PopupMenu();
 
+      final MenuItem defaultItem = new MenuItem("Quitter");
 
+      defaultItem.addActionListener(new ActionListener() {
 
-	private void buildTray() {
+        public void actionPerformed(final ActionEvent e) {
 
-		if (SystemTray.isSupported()) {
+          if (refresh != null)
 
+            refresh.end();
 
+          System.exit(0);
 
-			final SystemTray tray = SystemTray.getSystemTray();
+        }
 
-			final PopupMenu popup = new PopupMenu();
+      });
 
-			final MenuItem defaultItem = new MenuItem("Quitter");
+      popup.add(defaultItem);
 
-			defaultItem.addActionListener(new ActionListener() {
+      trayIcon = new TrayIcon(getImage(), "Test icon thread !", popup);
 
-				public void actionPerformed(final ActionEvent e) {
+      final ActionListener actionListener = new ActionListener() {
 
-					if (refresh != null)
+        public void actionPerformed(final ActionEvent e) {
 
-						refresh.end();
+          trayIcon.displayMessage("Java 6 new feature !",
 
-					System.exit(0);
+          "Le System Tray en action !",
 
-				}
+          TrayIcon.MessageType.INFO);
 
-			});
+        }
 
-			popup.add(defaultItem);
+      };
 
+      trayIcon.setImageAutoSize(true);
 
+      trayIcon.addActionListener(actionListener);
 
-			trayIcon = new TrayIcon(getImage(), "Test icon thread !", popup);
+      try {
 
+        tray.add(trayIcon);
 
+        // démarrage du thread
 
-			final ActionListener actionListener = new ActionListener() {
+        refresh = new MyImageRefresh();
 
-				public void actionPerformed(final ActionEvent e) {
+        refresh.start();
 
-					trayIcon.displayMessage("Java 6 new feature !",
+      } catch (final Exception e) {
 
-							"Le System Tray en action !",
+        e.printStackTrace();
 
-							TrayIcon.MessageType.INFO);
+      }
 
-				}
+    } else {
 
-			};
+      // ...
 
-			trayIcon.setImageAutoSize(true);
+    }
 
-			trayIcon.addActionListener(actionListener);
+  }
 
+  public BufferedImage getImage() {
 
+    // création de l'image
 
-			try {
+    // ici le code est fait à l'arache et absolument pas optimisé.
 
-				tray.add(trayIcon);
+    final BufferedImage img = new BufferedImage(WIDTH, HEIGHT,
 
-				// démarrage du thread
+    BufferedImage.TYPE_INT_ARGB);
 
-				refresh = new MyImageRefresh();
+    final Graphics2D g2 = img.createGraphics();
 
-				refresh.start();
+    g2.setColor(Color.BLACK);
 
-			} catch (final Exception e) {
+    g2.drawString("" + value, 2, 15);
 
-				e.printStackTrace();
+    return img;
 
-			}
+  }
 
+  private class MyImageRefresh extends Thread {
 
+    private boolean end = false;
 
-		} else {
+    public void run() {
 
-			// ...
+      while (!end) {
 
-		}
+        // refresh toute les secondes
 
-	}
+        try {
 
+          sleep(1000);
 
+        } catch (final InterruptedException e) {
 
-	public BufferedImage getImage() {
+          e.printStackTrace();
 
-		// création de l'image
+        }
 
-		// ici le code est fait à l'arache et absolument pas optimisé.
+        // juste un petit test pour faire bouger le text de l'icon
 
-		final BufferedImage img = new BufferedImage(WIDTH, HEIGHT,
+        if (value < 100)
 
-				BufferedImage.TYPE_INT_ARGB);
+          value++;
 
-		final Graphics2D g2 = img.createGraphics();
+        else
 
-		g2.setColor(Color.BLACK);
+          value = 0;
 
-		g2.drawString("" + value, 2, 15);
+        // modification de l'image
 
-		return img;
+        synchronized (trayIcon) {
 
-	}
+          trayIcon.setImage(getImage());
 
+        }
 
+      }
 
-	private class MyImageRefresh extends Thread {
+    }
 
-		private boolean	end	= false;
+    public void end() {
 
+      end = true;
 
+    }
 
-		public void run() {
-
-			while (!end) {
-
-				// refresh toute les secondes
-
-				try {
-
-					sleep(1000);
-
-				} catch (final InterruptedException e) {
-
-					e.printStackTrace();
-
-				}
-
-				// juste un petit test pour faire bouger le text de l'icon
-
-				if (value < 100)
-
-					value++;
-
-				else
-
-					value = 0;
-
-                                // modification de l'image
-
-				synchronized (trayIcon) {
-
-					trayIcon.setImage(getImage());
-
-				}
-
-			}
-
-		}
-
-
-
-		public void end() {
-
-			end = true;
-
-		}
-
-	}
+  }
 
 }

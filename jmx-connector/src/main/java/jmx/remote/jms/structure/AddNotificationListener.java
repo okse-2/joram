@@ -21,32 +21,32 @@
  * 
  */
 
-package jmx.remote.jms;
+package jmx.remote.jms.structure;
 
 import java.io.Serializable;
-
-import javax.management.Notification;
+import javax.management.NotificationFilter;
+import javax.management.NotificationListener;
+import javax.management.ObjectName;
 
 /**
- * When a notification is issued by an MBean registered in the MBeanServer we
- * instantiate the object <i>NotificatinoAndKey</i> in the
- * <i>handleNotification</i> method, of the <i>NotificationListener</i>
- * interface passing it a parameters, <i>notification</i> and </i>key<i>, and
- * then object is sent to the client so that it can receive the notification.
- * 
+ * <b>AddNotificationListener</b> is the object that is sent by a requestor who
+ * wishes to appeal JMX addNotificationListener(ObjectName
+ * name,NotificationListener listener,NotificationFilter filter,Object
+ * handback).
  * 
  * @author Djamel-Eddine Boumchedda
  * 
  */
+public class AddNotificationListener implements Serializable {
+  public ObjectName name;
+  public NotificationListener listener;
+  public NotificationFilter filter;
+  public Object key;
 
-public class NotificationAndKey implements Serializable {
-  Notification notification;
-  Object handback;
-
-  public NotificationAndKey(Notification notification, Object handback) {
-    this.notification = notification;
-    this.handback = handback;
-
+  public AddNotificationListener(ObjectName name, NotificationFilter filter, Object key) {
+    this.name = name;
+    this.filter = filter;
+    this.key = key;
   }
 
 }

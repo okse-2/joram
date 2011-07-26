@@ -21,32 +21,27 @@
  * 
  */
 
-package jmx.remote.jms;
+package jmx.remote.jms.structure;
 
 import java.io.Serializable;
 
-import javax.management.Notification;
+import javax.management.ObjectName;
 
 /**
- * When a notification is issued by an MBean registered in the MBeanServer we
- * instantiate the object <i>NotificatinoAndKey</i> in the
- * <i>handleNotification</i> method, of the <i>NotificationListener</i>
- * interface passing it a parameters, <i>notification</i> and </i>key<i>, and
- * then object is sent to the client so that it can receive the notification.
+ * <b>IsInstanceOf</b> is the object that is sent by a requestor who wishes to
+ * appeal JMX IsInstanceOf(ObjectName name, String className).
  * 
  * 
  * @author Djamel-Eddine Boumchedda
  * 
  */
+public class IsInstanceOf implements Serializable {
+  public ObjectName name;
+  public String className;
 
-public class NotificationAndKey implements Serializable {
-  Notification notification;
-  Object handback;
-
-  public NotificationAndKey(Notification notification, Object handback) {
-    this.notification = notification;
-    this.handback = handback;
-
+  public IsInstanceOf(ObjectName name, String className) {
+    this.name = name;
+    this.className = className;
   }
 
 }
