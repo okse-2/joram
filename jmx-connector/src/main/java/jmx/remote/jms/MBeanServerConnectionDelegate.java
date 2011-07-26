@@ -61,7 +61,8 @@ import javax.management.QueryExp;
 import javax.management.ReflectionException;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
-import jmx.remote.jms.structure.*;
+
+import jmx.remote.jms.structures.*;
 import fr.dyade.aaa.common.Pool;
 
 /***

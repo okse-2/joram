@@ -21,27 +21,28 @@
  * 
  */
 
-package jmx.remote.jms.structure;
+package jmx.remote.jms.structures;
 
 import java.io.Serializable;
 import javax.management.ObjectName;
-import javax.management.Attribute;
+import javax.management.QueryExp;
 
 /**
- * <b>SetAttribute</b> is the object that is sent by a requestor who wishes to
- * appeal JMX setAttribute(ObjectName name, Attribute attribute).
+ * <b>QueryName</b> is the object that is sent by a requestor who wishes to
+ * appeal JMX queryName(ObjectName name,QueryExp query).
  * 
  * 
  * @author Djamel-Eddine Boumchedda
  * 
  */
-public class SetAttribute implements Serializable {
+public class QueryName implements Serializable {
   public ObjectName name;
-  public Attribute attribute;
+  public QueryExp query;
 
-  public SetAttribute(ObjectName n, Attribute at) {
-    name = n;
-    attribute = at;
+  public QueryName(ObjectName name, QueryExp query) {
+    this.name = name;
+    this.query = query;
+
   }
 
 }

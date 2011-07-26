@@ -21,27 +21,28 @@
  * 
  */
 
-package jmx.remote.jms.structure;
+package jmx.remote.jms.structures;
 
 import java.io.Serializable;
 
 import javax.management.ObjectName;
 
 /**
- * <b>IsInstanceOf</b> is the object that is sent by a requestor who wishes to
- * appeal JMX IsInstanceOf(ObjectName name, String className).
+ * <b>GetAttributes</b> is the object that is sent by a requestor who wishes to
+ * appeal JMX getAttributes(ObjectName name, String[] attributes).
  * 
  * 
  * @author Djamel-Eddine Boumchedda
  * 
  */
-public class IsInstanceOf implements Serializable {
+public class GetAttributes implements Serializable {
+  // Appel a la methode getAttributes(ObjectName name,String[] attributes)
   public ObjectName name;
-  public String className;
+  public String[] attributes;
 
-  public IsInstanceOf(ObjectName name, String className) {
+  public GetAttributes(ObjectName name, String[] attributes) {
     this.name = name;
-    this.className = className;
+    this.attributes = attributes;
   }
 
 }

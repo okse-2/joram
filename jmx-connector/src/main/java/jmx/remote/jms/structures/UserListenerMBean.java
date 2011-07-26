@@ -21,28 +21,8 @@
  * 
  */
 
-package jmx.remote.jms.structure;
+package jmx.remote.jms.structures;
 
-import java.io.Serializable;
-import javax.management.ObjectName;
-import javax.management.QueryExp;
-
-/**
- * <b>QueryName</b> is the object that is sent by a requestor who wishes to
- * appeal JMX queryName(ObjectName name,QueryExp query).
- * 
- * 
- * @author Djamel-Eddine Boumchedda
- * 
- */
-public class QueryName implements Serializable {
-  public ObjectName name;
-  public QueryExp query;
-
-  public QueryName(ObjectName name, QueryExp query) {
-    this.name = name;
-    this.query = query;
-
-  }
+public interface UserListenerMBean {
 
 }

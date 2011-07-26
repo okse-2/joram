@@ -21,27 +21,26 @@
  * 
  */
 
-package jmx.remote.jms.structure;
+package jmx.remote.jms.structures;
 
 import java.io.Serializable;
 
 import javax.management.ObjectName;
 
 /**
- * <b>RemoveNotificationListener2</b> is the object that is sent by a requestor
- * who wishes to appeal JMX removeNotificationListener2(ObjectName
- * name,ObjectName listener,Object handback).
+ * <b>UnregisterMbean</b> is the object that is sent by a requestor who wishes
+ * to appeal JMX unregisterMbean(ObjectName n).
  * 
  * 
  * @author Djamel-Eddine Boumchedda
  * 
  */
-public class RemoveNotificationListener2 extends RemoveNotificationListener implements Serializable {
-  public ObjectName listener;
+public class UnregisterMbean implements Serializable {
+  public ObjectName name;
 
-  public RemoveNotificationListener2(ObjectName name, ObjectName listener, Object handback) {
-    super(name, handback);
-    this.listener = listener;
+  public UnregisterMbean(ObjectName name) {
+    this.name = name;
+
   }
 
 }
