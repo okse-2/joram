@@ -1,4 +1,0 @@
-java.lang.Exception
-	at jmx.remote.jms.JmsJmxConnector.connect(JmsJmxConnector.java:77)
-	at javax.management.remote.JMXConnectorFactory.connect(JMXConnectorFactory.java:248)
-	at jmx.remote.jms.JmsJmxConnectorClientLaunch.main(JmsJmxConnectorClientLaunch.java:31)
