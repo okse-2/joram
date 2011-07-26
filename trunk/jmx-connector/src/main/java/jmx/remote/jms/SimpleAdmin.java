@@ -45,15 +45,15 @@ public class SimpleAdmin {
   public static void main(String[] args) throws ConnectException, AdminException, Exception {
     System.out.println();
     System.out.println("Launch of Simple administration...");
-    javax.jms.ConnectionFactory cf = TcpConnectionFactory.create("localhost", 16010);// on
-                                                                                     // crée
-                                                                                     // la
+    javax.jms.ConnectionFactory cf = TcpConnectionFactory.create("localhost", 16010);// we
+                                                                                     // create
+                                                                                     // the
                                                                                      // connectionFactory
-    AdminModule.connect(cf, "root", "root");// il faut etre administrateur pour
-                                            // crée les files d'attente et les
-                                            // sujets
+    AdminModule.connect(cf, "root", "root");// must be an administrator to
+                                            // Create queues and
+                                            // Topics
     User.create("anonymous", "anonymous");
-    // On enregistre la connextionFactory dans la JNDI
+    // is recorder in the JNDI, the connectionFactory
     javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     jndiCtx.bind("ConnectionFactory", cf);
     jndiCtx.close();
