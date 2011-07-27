@@ -49,7 +49,7 @@ public class Test5 extends TestCase {
     try {
       startAgentServer(
         (short)0, new String[]{"-DTransaction=fr.dyade.aaa.util.NullTransaction"});
-      Thread.sleep(1000);
+      Thread.sleep(2500);
       
       ConnectionFactory qcf =
         org.objectweb.joram.client.jms.tcp.TcpConnectionFactory.create(
