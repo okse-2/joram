@@ -75,25 +75,19 @@ public class AddNotificationListenerStored {
           + this.listener.equals(objectANLStored.listener));
       if (this.filter == null && this.handback == null) {
         System.out.println("Cas où le handback et le filtrer sont égal à null");
-        if (this.name.equals(objectANLStored.name) && (this.listener.equals(objectANLStored.listener))) {// &&
-                                                                                                         // (this.filter.equals(objectANLStored.filter))
-                                                                                                         // &&
-                                                                                                         // (this.handback.equals(objectANLStored.handback))){
-          System.out.println("Les deux objet sont egauuuuuuuuuuuuuuuuuuuuuux!!!!!!!");
+        if (this.name.equals(objectANLStored.name) && (this.listener.equals(objectANLStored.listener))) {
           return true;
         }
       } else if (this.filter == null && this.handback != null) {
         System.out.println("Cas où le handback != null et   filter = null");
         if ((this.name.equals(objectANLStored.name)) && (this.listener.equals(objectANLStored.listener))
             && (this.handback.equals(objectANLStored.handback))) {
-          System.out.println("Les deux objet sont egauuuuuuuuuuuuuuuuuuuuuux!!!!!!!");
           return true;
         }
       } else if (this.filter != null && this.handback == null) {
         System.out.println("Cas où le handback = null et   filter != null");
         if ((this.name.equals(objectANLStored.name)) && (this.listener.equals(objectANLStored.listener))
             && (this.filter.equals(objectANLStored.filter))) {
-          System.out.println("Les deux objet sont egauuuuuuuuuuuuuuuuuuuuuux!!!!!!!");
           return true;
         }
       } else if (this.filter != null && this.handback != null) {
@@ -101,11 +95,9 @@ public class AddNotificationListenerStored {
         if ((this.name.equals(objectANLStored.name)) && (this.listener.equals(objectANLStored.listener))
             && (this.handback.equals(objectANLStored.handback))
             && (this.filter.equals(objectANLStored.filter))) {
-          System.out.println("Les deux objet sont egauuuuuuuuuuuuuuuuuuuuuux!!!!!!!");
           return true;
         }
       } else {
-        System.out.println("il n'y a pas d'objet egals!!!!!!!!!!!!!!!!!!!!");
         return false;
       }
     }

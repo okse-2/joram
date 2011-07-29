@@ -34,6 +34,10 @@ import javax.management.remote.JMXServiceURL;
 import javax.naming.NamingException;
 
 import org.objectweb.joram.client.jms.admin.AdminException;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.common.Debug;
 
 /**
  * In the Class <b>Jms JmxConnectorServer</b>, the methodes of the server
@@ -44,18 +48,16 @@ import org.objectweb.joram.client.jms.admin.AdminException;
  * 
  */
 public class JmsJmxConnectorServer extends JMXConnectorServer {
+  private static final Logger logger = Debug.getLogger(JmsJmxConnectorServer.class.getName());
   private JMXServiceURL urlServer;
   private final Map envServer;
   private URI jmsURL;
   private boolean stopped = true;
 
   public JmsJmxConnectorServer(JMXServiceURL url, Map environment, MBeanServer server) throws IOException {
-    // super(server);
     this.urlServer = url;
     this.envServer = environment;
-    // this.jmsURL = JmsJmxConnectorSupport.getProviderURL(url);
-    // set any props in the url
-    // JmsJmxConnectorSupport.populateProperties(this, jmsURL);
+
   }
 
   public void start() throws IOException {
@@ -63,7 +65,10 @@ public class JmsJmxConnectorServer extends JMXConnectorServer {
     stopped = false;
     try {
       JMSConnector jmsConnector = new JMSConnector();
-      System.out.println("Instantiation de la classe JmsConnector");
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "Instantiation of the class JmsConnector in the start method of the server connector.");
+      }
+      
     } catch (NamingException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

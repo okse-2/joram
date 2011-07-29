@@ -26,7 +26,11 @@ package jmx.remote.jms;
 import java.awt.Component;
 
 import javax.swing.JOptionPane;
-
+/**
+ * JDialog to Show the error
+ * @author Djamel-Eddine Boumchedda
+ *
+ */
 public class ShowMessageInformations {
 
   public ShowMessageInformations(Component parentComponent, Object message, String titleOfMessage,

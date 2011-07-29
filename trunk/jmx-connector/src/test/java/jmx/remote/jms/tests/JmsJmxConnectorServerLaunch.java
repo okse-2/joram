@@ -49,8 +49,6 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 import java.util.logging.*;
-
-import jmx.remote.jms.tests.A;
 import joram.jmx.remote.provider.jms.*;
 
 /**
@@ -60,7 +58,7 @@ import joram.jmx.remote.provider.jms.*;
  * @author Djamel-Eddine Boumchedda
  * 
  */
-public class JmsJmxConnectorServerLaunch implements ClassFileTransformer {
+public class JmsJmxConnectorServerLaunch  {
   protected static Logger logger;
 
   public static void main(String[] args) throws SecurityException, IOException {
@@ -189,11 +187,4 @@ public class JmsJmxConnectorServerLaunch implements ClassFileTransformer {
     }
 
   }
-
-  public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
-      ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
 }
