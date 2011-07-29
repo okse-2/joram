@@ -7,9 +7,10 @@ import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Map;
+import jmx.remote.jms.*;
 
-import jmx.remote.jms.JmsJmxConnectorServer;
-import jmx.remote.jms.tests.*;
+
+
 
 public class ServerProvider implements JMXConnectorServerProvider {
   /***

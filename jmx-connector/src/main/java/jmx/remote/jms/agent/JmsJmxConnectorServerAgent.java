@@ -22,7 +22,7 @@
  */
 
 package jmx.remote.jms.agent;
-
+import jmx.remote.jms.*;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
@@ -46,17 +46,10 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 
-import net.java.balloontip.BalloonTip;
-import net.java.balloontip.utils.TimingUtils;
 
-import jmx.remote.jms.ShowMessageInformations;
-import jmx.remote.jms.tests.A;
-import jmx.remote.jms.tests.BroadcastingUser;
-import jmx.remote.jms.tests.JmsJmxConnectorServerLaunch;
 
 /**
  * the <b>JmsJmxConnectorServerAgent </b> class launches the server connector in
@@ -126,15 +119,9 @@ public class JmsJmxConnectorServerAgent {
     }
     try {
       connectorServer.start();
-      System.out.println("!!--> Le JmsJmxConnecteur Serveur est lancé voici son addresse :" + serverURL);
-      // me.getComponent();
-      // BalloonTip balloonTip = new BalloonTip((JComponent) me.getComponent(),
-      // "I will dissapear in 3 seconds.");
-      // Now make the balloon tip disappear in 3000 milliseconds
-      // TimingUtils.showTimedBalloon(balloonTip, 3000);
-      ShowMessageInformations showMessageInformations = new ShowMessageInformations(null,
-          "The Connector Server is launch with these URL adress :" + serverURL, "Lauch of Connector Server ",
-          JOptionPane.INFORMATION_MESSAGE);
+      System.out.println("!!--> The Server JmsJmxConnecteur  is launched with this address :" + serverURL);
+      //Launch of the Icon in the TaskBar of the JMXConnector Software
+      IconeJMXConnectorSoftware iconeJMXConnectorSoftware = new IconeJMXConnectorSoftware();
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
