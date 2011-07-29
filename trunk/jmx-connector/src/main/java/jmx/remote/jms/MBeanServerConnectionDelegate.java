@@ -81,6 +81,7 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
   Object key;
   static int value = 0;
   PoolRequestor poolRequestors;
+  final static int  defaultValueOfSizeOfPoolRequestor = 10;
 
   public MBeanServerConnectionDelegate(Connection connection) throws IOException {
     this.connection = connection;
@@ -89,14 +90,23 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
     f = new FileWriter(new File(path + "\\Ordre d'Appel des methodes.txt"), true);
     hashTableNotificationListener = new HashMap();
     poolRequestors = new PoolRequestor(connection);
+    int SizePoolRequestor;
     try {
-      int SizePoolRequestor = Integer.parseInt(System.getProperty("SizePoolRequestor"));
+      SizePoolRequestor = Integer.parseInt(System.getProperty("SizePoolRequestor"));
+      if(SizePoolRequestor <=0){
+        SizePoolRequestor = defaultValueOfSizeOfPoolRequestor;
+        ShowMessageInformations showMessageInformations = new ShowMessageInformations(null,
+            "Wrong input the size of the Pool Requestor, you Should choose an integer more than  0, A default value is choosen which is"+defaultValueOfSizeOfPoolRequestor,
+            "Wrong Size Pool Requestor", JOptionPane.ERROR_MESSAGE);
+      }
       System.out.println("***************** taille du pool Requestor = " + SizePoolRequestor);
       poolRequestors.initPool(SizePoolRequestor);
     } catch (Exception e) {
 
+      SizePoolRequestor = defaultValueOfSizeOfPoolRequestor;
+      poolRequestors.initPool(SizePoolRequestor);
       ShowMessageInformations showMessageInformations = new ShowMessageInformations(null,
-          "Wrong input the size of the Pool Requestor, you Should choose an integer more than  0",
+          "Wrong input the size of the Pool Requestor, you Should choose an integer more than  0, A default value is choosen which is"+defaultValueOfSizeOfPoolRequestor,
           "Wrong Size Pool Requestor", JOptionPane.ERROR_MESSAGE);
       e.printStackTrace();
     }
