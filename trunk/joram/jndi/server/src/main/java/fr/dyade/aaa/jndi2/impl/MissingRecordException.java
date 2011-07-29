@@ -1,4 +1,4 @@
-/**
+/*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
  * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
  *
@@ -22,7 +22,8 @@
  */
 package fr.dyade.aaa.jndi2.impl;
 
-import javax.naming.*;
+import javax.naming.NameNotFoundException;
+import javax.naming.NamingException;
 
 /**
  * Thrown when a <code>ContextRecord</code> has not been found
