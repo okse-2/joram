@@ -101,11 +101,7 @@ import javax.swing.JOptionPane;
 public class JmsJmxConnectorServerAgent {
 
   public static void premain(String agentArgs, Instrumentation inst) throws MalformedURLException {
-    // System.out.println("*** Premain method is called : loading " +
-    // JmsJmxConnectorServerLaunch.class.getSimpleName());
-    // inst.addTransformer(new JmsJmxConnectorServerLaunch());
     JMXServiceURL serverURL = new JMXServiceURL("service:jmx:jms:///tcp://localhost:6000");
-    // MBeanServer mbs = MBeanServerFactory.createMBeanServer();
     MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
     System.out.println(mbs.toString());
     Map serverEnv = new HashMap();

@@ -58,8 +58,12 @@ import org.objectweb.joram.client.jms.MessageProducer;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.TemporaryQueue;
 import org.objectweb.joram.client.jms.admin.AdminException;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import com.sun.java.browser.net.ProxyService;
+
+import fr.dyade.aaa.common.Debug;
 
 /**
  * In the Class <b>JmsJmxConnector</b>, the methodes of the client connector are
@@ -72,6 +76,7 @@ import com.sun.java.browser.net.ProxyService;
  * 
  */
 public class JmsJmxConnector implements JMXConnector {
+  private static final Logger logger = Debug.getLogger(JmsJmxConnector.class.getName());
   private JMXServiceURL jmsURL;
   private Map env;
   private boolean connected = false;
@@ -80,14 +85,6 @@ public class JmsJmxConnector implements JMXConnector {
   public JmsJmxConnector(Map env, JMXServiceURL url) throws IOException {
     this.env = env;
     this.jmsURL = url;
-    String path = new File("").getAbsolutePath();
-    /*
-     * File f = new File(path+"\\trace-Client"); PrintStream pS = new
-     * PrintStream(f); Exception e = new Exception(); e.printStackTrace(pS);
-     */
-    // set any props in the url
-    // JmsJmxConnectorSupport.populateProperties(this,jmsURL);
-
   }
 
   public void connect() throws IOException {
@@ -103,15 +100,15 @@ public class JmsJmxConnector implements JMXConnector {
       //We created the connection from the connection factory registered
       //In the jndi
       
-      // Récupération du contexte JNDI
+      // Recovering the context of the JNDI
       Context jndiContext = new InitialContext();
-      // Recherche des objets administrés
+      // Research administered objects
       ConnectionFactory connectionFactory = (ConnectionFactory) jndiContext.lookup("ConnectionFactory");
       jndiContext.close();
-      // Création des artéfacts nécessaires pour se connecter à la file et au
-      // sujet
       Connection connection = connectionFactory.createConnection();
-      System.out.println("Connection : " + connection.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "the connection : "+connection.getClass().getName()+ "common to all requestors was created.");
+      }
       connection.start();
 
       mbeanServerConnectionDelegate = new MBeanServerConnectionDelegate(connection);

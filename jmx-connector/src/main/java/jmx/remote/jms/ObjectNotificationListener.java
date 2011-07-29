@@ -34,6 +34,11 @@ import javax.management.Notification;
 import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
 
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.common.Debug;
+
 /**
  * <ul>
  * In order to retrieve the notifications issued by the MBeans registered in the
@@ -50,6 +55,7 @@ import javax.management.NotificationListener;
  * 
  */
 public class ObjectNotificationListener implements NotificationListener {
+  private static final Logger logger = Debug.getLogger(ObjectNotificationListener.class.getName());
   Session session;
   MessageProducer producer;
   Destination queueNotification;
@@ -77,14 +83,15 @@ public class ObjectNotificationListener implements NotificationListener {
     try {
       NotificationAndKey notificationAndKey = new NotificationAndKey(notification, handback);
       messageReponse.setObject((Serializable) notificationAndKey);
-      System.out.println("Noooooooooootificationn and keyyyyyyyyyyyyyyyyyyyyyyysssssssssssssss");
     } catch (JMSException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
     try {
       producer.send(queueNotification, messageReponse);
-      System.out.println("L'objet listener contenant la notification et le handback a ete envoye");
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The object containing the notification and handback(key) has been sent " );
+        }
     } catch (JMSException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

@@ -62,7 +62,11 @@ import javax.management.ReflectionException;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
 import jmx.remote.jms.structures.*;
+import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.common.Pool;
 
 /***
@@ -74,9 +78,9 @@ import fr.dyade.aaa.common.Pool;
  * @version $Revision: 1.1 $
  */
 public class MBeanServerConnectionDelegate implements MBeanServerConnection {
+  private static final Logger logger = Debug.getLogger(MBeanServerConnectionDelegate.class.getName());
   protected Connection connection;
   MBeanServerConnection mbs = ManagementFactory.getPlatformMBeanServer();
-  FileWriter f;
   static HashMap hashTableNotificationListener;
   Object key;
   static int value = 0;
@@ -86,20 +90,24 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
   public MBeanServerConnectionDelegate(Connection connection) throws IOException {
     this.connection = connection;
     String path = new File("").getAbsolutePath();
-    System.out.println("***MBC*****" + path);
-    f = new FileWriter(new File(path + "\\Ordre d'Appel des methodes.txt"), true);
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Instantiation of the MBeanServerConnectionDelegate Class  : "+this.getClass().getName());
+    }
     hashTableNotificationListener = new HashMap();
     poolRequestors = new PoolRequestor(connection);
     int SizePoolRequestor;
     try {
       SizePoolRequestor = Integer.parseInt(System.getProperty("SizePoolRequestor"));
-      if(SizePoolRequestor <=0){
+      if(SizePoolRequestor <= 0){
         SizePoolRequestor = defaultValueOfSizeOfPoolRequestor;
         ShowMessageInformations showMessageInformations = new ShowMessageInformations(null,
-            "Wrong input the size of the Pool Requestor, you Should choose an integer more than  0, A default value is choosen which is"+defaultValueOfSizeOfPoolRequestor,
+            "Wrong input the size of the Pool Requestor, you Should choose an integer more than  0, A default value is choosen which is "+defaultValueOfSizeOfPoolRequestor,
             "Wrong Size Pool Requestor", JOptionPane.ERROR_MESSAGE);
       }
-      System.out.println("***************** taille du pool Requestor = " + SizePoolRequestor);
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "Size of the PoolRequestor : "+SizePoolRequestor);
+      }
+      
       poolRequestors.initPool(SizePoolRequestor);
     } catch (Exception e) {
 
@@ -108,6 +116,9 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
       ShowMessageInformations showMessageInformations = new ShowMessageInformations(null,
           "Wrong input the size of the Pool Requestor, you Should choose an integer more than  0, A default value is choosen which is"+defaultValueOfSizeOfPoolRequestor,
           "Wrong Size Pool Requestor", JOptionPane.ERROR_MESSAGE);
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "Size of the PoolRequestor : "+SizePoolRequestor);
+      }
       e.printStackTrace();
     }
   }
@@ -116,18 +127,23 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
       InstanceAlreadyExistsException, MBeanRegistrationException, MBeanException, NotCompliantMBeanException,
       IOException {
     Requestor requestor = null;
-    f.write("Appel a la methode createMBean(String className,ObjectName name) \n ");
-    System.out.println("Appel a la methode ObjectInstance createMBean(String className,ObjectName name)");
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : ObjectInstance createMBean(String className, ObjectName name)" );
+    }
     CreateMBean createMbean = new CreateMBean(className, name);
     ObjectInstance objectInstanceResult = null;
     try {
       requestor = poolRequestors.allocRequestor();
-      System.out.println("********* * * * J'ai pris le requestor numero : " + requestor.toString());
-      System.out.println("****** * * * Connexion : " + requestor.connection.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+        logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+      }
       requestor.doRequete(createMbean);
       objectInstanceResult = (ObjectInstance) requestor.doReceive().getObject();
       poolRequestors.freeRequestor(requestor);
-      System.out.println("********* * * * J'ai libere le requestor numero : " + requestor.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+      }
 
       return objectInstanceResult;
 
@@ -141,20 +157,24 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
   public ObjectInstance createMBean(String className, ObjectName name, ObjectName loaderName)
       throws ReflectionException, InstanceAlreadyExistsException, MBeanRegistrationException, MBeanException,
       NotCompliantMBeanException, InstanceNotFoundException, IOException {
-    f.write("Appel a la methode createMBean(String className,ObjectName name,ObjectName loaderName) \n ");
-    System.out
-        .println("Appel a la methode ObjectInstance createMBean(String className,ObjectName name,ObjectName loaderName)");
-    CreateMBean1 createMBean1 = new CreateMBean1(className, name, loaderName);
-    ObjectInstance objectInstanceResult = null;
-    try {
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : ObjectInstance createMBean(String className, ObjectName name, ObjectName loaderName)" );
+      }
+      CreateMBean1 createMBean1 = new CreateMBean1(className, name, loaderName);
+      ObjectInstance objectInstanceResult = null;
+      try {
       Requestor requestor = null;
       requestor = poolRequestors.allocRequestor();
-      System.out.println("********* * * * J'ai pris le requestor numero : " + requestor.toString());
-      System.out.println("****** * * * Connexion : " + requestor.connection.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+        logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+      }
       requestor.doRequete(createMBean1);
       objectInstanceResult = (ObjectInstance) requestor.doReceive().getObject();
       poolRequestors.freeRequestor(requestor);
-      System.out.println("********* * * * J'ai libere le requestor numero : " + requestor.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+      }
       return objectInstanceResult;
     } catch (JMSException e) {
       // TODO Auto-generated catch block
@@ -166,20 +186,24 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
   public ObjectInstance createMBean(String className, ObjectName name, Object[] params, String[] signature)
       throws ReflectionException, InstanceAlreadyExistsException, MBeanRegistrationException, MBeanException,
       NotCompliantMBeanException, IOException {
-    f.write("Appel a la methode createMBean(String className,ObjectName name,Object[] params,String[] signature) \n ");
-    System.out
-        .println("Appel a la methode createMBean(String className,ObjectName name,Object[] params,String[] signature)");
-    CreateMBean2 createMBean2 = new CreateMBean2(className, name, params, signature);
-    ObjectInstance objectInstanceResult = null;
-    try {
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : ObjectInstance createMBean(String className, ObjectName name, Object[] params, String[] signature)" );
+      }
+      CreateMBean2 createMBean2 = new CreateMBean2(className, name, params, signature);
+      ObjectInstance objectInstanceResult = null;
+      try {
       Requestor requestor = null;
       requestor = poolRequestors.allocRequestor();
-      System.out.println("********* * * * J'ai pris le requestor numero : " + requestor.toString());
-      System.out.println("****** * * * Connexion : " + requestor.connection.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+        logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+      }
       requestor.doRequete(createMBean2);
       objectInstanceResult = (ObjectInstance) requestor.doReceive().getObject();
       poolRequestors.freeRequestor(requestor);
-      System.out.println("********* * * * J'ai libere le requestor numero : " + requestor.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+      }
       return objectInstanceResult;
     } catch (JMSException e) {
       // TODO Auto-generated catch block
@@ -193,20 +217,24 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
       Object[] params, String[] signature) throws ReflectionException, InstanceAlreadyExistsException,
       MBeanRegistrationException, MBeanException, NotCompliantMBeanException, InstanceNotFoundException,
       IOException {
-    f.write("Appel a la methode  createMBean(String className,ObjectName name,ObjectName loaderName,Object[] params,String[] signature) \n ");
-    System.out
-        .println("Appel a la methode  createMBean(String className,ObjectName name,ObjectName loaderName,Object[] params,String[] signature)");
-    CreateMBean3 createMBean3 = new CreateMBean3(className, name, loaderName, params, signature);
-    ObjectInstance objectInstanceResult = null;
-    try {
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : ObjectInstance createMBean(String className, ObjectName name, ObjectName loaderName,Object[] params, String[] signature)" );
+      }
+      CreateMBean3 createMBean3 = new CreateMBean3(className, name, loaderName, params, signature);
+      ObjectInstance objectInstanceResult = null;
+      try {
       Requestor requestor = null;
       requestor = poolRequestors.allocRequestor();
-      System.out.println("********* * * * J'ai pris le requestor numero : " + requestor.toString());
-      System.out.println("****** * * * Connexion : " + requestor.connection.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+        logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+      }
       requestor.doRequete(createMBean3);
       objectInstanceResult = (ObjectInstance) requestor.doReceive().getObject();
       poolRequestors.freeRequestor(requestor);
-      System.out.println("********* * * * J'ai libere le requestor numero : " + requestor.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+      }
       return objectInstanceResult;
     } catch (JMSException e) {
       // TODO Auto-generated catch block
@@ -218,18 +246,23 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
 
   public void unregisterMBean(ObjectName name) throws InstanceNotFoundException, MBeanRegistrationException,
       IOException {
-    f.write("Appel a la methode unregisterMBean(ObjectName name) \n ");
-    System.out.println("Appel a la methode void unregisterMBean(ObjectName name)");
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : void unregisterMBean(ObjectName name)" );
+      }
     UnregisterMbean unregisterMbean = new UnregisterMbean(name);
     try {
       Requestor requestor = null;
       requestor = poolRequestors.allocRequestor();
-      System.out.println("********* * * * J'ai pris le requestor numero : " + requestor.toString());
-      System.out.println("****** * * * Connexion : " + requestor.connection.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+        logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+      }
       requestor.doRequete(unregisterMbean);
       requestor.doReceive();
       poolRequestors.freeRequestor(requestor);
-      System.out.println("********* * * * J'ai libere le requestor numero : " + requestor.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+      }
     } catch (JMSException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -237,19 +270,24 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
   }
 
   public ObjectInstance getObjectInstance(ObjectName name) throws InstanceNotFoundException, IOException {
-    f.write("Appel a la methode getObjectInstance(ObjectName name) \n ");
-    System.out.println("Appel a la methode getObjectInstance(ObjectName name)");
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : ObjectInstance getObjectInstance(ObjectName name)" );
+      }
     GetObjectInstance getObjectInstance = new GetObjectInstance(name);
     ObjectInstance objectInstanceResult = null;
     try {
       Requestor requestor = null;
       requestor = poolRequestors.allocRequestor();
-      System.out.println("********* * * * J'ai pris le requestor numero : " + requestor.toString());
-      System.out.println("****** * * * Connexion : " + requestor.connection.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+        logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+      }
       requestor.doRequete(getObjectInstance);
       objectInstanceResult = (ObjectInstance) requestor.doReceive().getObject();
       poolRequestors.freeRequestor(requestor);
-      System.out.println("********* * * * J'ai libere le requestor numero : " + requestor.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+      }
       return objectInstanceResult;
     } catch (JMSException e) {
       // TODO Auto-generated catch block
@@ -259,19 +297,24 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
   }
 
   public Set queryMBeans(ObjectName name, QueryExp query) throws IOException {
-    f.write("Appel a la methode queryMBeans(ObjectName name,QueryExp query) \n ");
-    System.out.println("Appel a la methode queryMBeans(ObjectName name,QueryExp query)");
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : Set queryMBeans(ObjectName name, QueryExp query)" );
+      }
     QueryMbeans queryMbeans = new QueryMbeans(name, query);
     Set setResult = null;
     try {
       Requestor requestor = null;
       requestor = poolRequestors.allocRequestor();
-      System.out.println("********* * * * J'ai pris le requestor numero : " + requestor.toString());
-      System.out.println("****** * * * Connexion : " + requestor.connection.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+        logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+      }
       requestor.doRequete(queryMbeans);
       setResult = (Set) requestor.doReceive().getObject();
       poolRequestors.freeRequestor(requestor);
-      System.out.println("********* * * * J'ai libere le requestor numero : " + requestor.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+      }
       return setResult;
     } catch (JMSException e) {
       // TODO Auto-generated catch block
@@ -281,21 +324,24 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
   }
 
   public Set queryNames(ObjectName name, QueryExp query) throws IOException {
-    System.out.println("******* * * * Connexion : ");
-    f.write("Appel a la methode queryNames(ObjectName name,QueryExp query) \n ");
-    System.out.println("Appel a la methode queryNames() \n ");
-    System.out.println("thread appelant : " + Thread.currentThread().getName());
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : Set queryNames(ObjectName name, QueryExp query)" );
+      }
     QueryName queryNames = new QueryName(name, query);
     Set setResult = null;
     try {
       Requestor requestor = null;
       requestor = poolRequestors.allocRequestor();
-      System.out.println("********* * * * J'ai pris le requestor numero : " + requestor.toString());
-      System.out.println("****** * * * Connexion : " + requestor.connection.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+        logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+      }
       requestor.doRequete(queryNames);
       setResult = (Set) requestor.doReceive().getObject();
       poolRequestors.freeRequestor(requestor);
-      System.out.println("********* * * * J'ai libere le requestor numero : " + requestor.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+      }
       return setResult;
     } catch (JMSException e) {
       // TODO Auto-generated catch block
@@ -307,20 +353,23 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
 
   public boolean isRegistered(ObjectName name) throws IOException {
     Requestor requestor = null;
-    f.write("Appel a la methode isRegistered(ObjectName name)\n ");
-    f.write("name = " + name);
-    System.out.println("Appel a la methode isRegistered(ObjectName name) \n ");
-    System.out.println("thread appelant : " + Thread.currentThread().getName());
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : boolean isRegistered(ObjectName name)" );
+      }
     IsRegistered isRegistered = new IsRegistered(name);
     Boolean booleanResult = false;
     try {
       requestor = (Requestor) poolRequestors.allocRequestor();
-      System.out.println("********* * * * J'ai pris le requestor numero : " + requestor.toString());
-      System.out.println("****** * * * Connexion : " + requestor.connection.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+        logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+      }
       requestor.doRequete(isRegistered);
       booleanResult = (Boolean) requestor.doReceive().getObject();
       poolRequestors.freeRequestor(requestor);
-      System.out.println("********* * * * J'ai libere le requestor numero : " + requestor.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+      }
       return booleanResult;
     } catch (JMSException e) {
       // TODO Auto-generated catch block
@@ -331,18 +380,23 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
 
   public Integer getMBeanCount() throws IOException {
     Requestor requestor = null;
-    f.write("Appel a la methode getMBeanCount() \n ");
-    System.out.println("Appel a la methode getMBeanCount()");
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : Integer getMBeanCount()" );
+      }
     GetMBeanCount getMBeanCount = new GetMBeanCount();
     Integer integerResult = null;
     try {
       requestor = (Requestor) poolRequestors.allocRequestor();
-      System.out.println("********* * * * Jai pris le requestor numero : " + requestor.toString());
-      System.out.println("****** * * * Connexion : " + requestor.connection.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+        logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+      }
       requestor.doRequete(getMBeanCount);
       integerResult = (Integer) requestor.doReceive().getObject();
       poolRequestors.freeRequestor(requestor);
-      System.out.println("********* * * * J'ai libere le requestor numero : " + requestor.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+      }
       return integerResult;
     } catch (JMSException e) {
       // TODO Auto-generated catch block
@@ -354,19 +408,23 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
   public Object getAttribute(ObjectName name, String attribute) throws MBeanException,
       AttributeNotFoundException, InstanceNotFoundException, ReflectionException, IOException {
     Requestor requestor = null;
-    f.write("Appel a la methode getAttribute(ObjectName name,String attribute) \n ");
-    System.out.println("Appel a la methode getAttribute() \n ");
-    System.out.println("thread appelant : " + Thread.currentThread().getName());
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : Object getAttribute(ObjectName name, String attribute)" );
+      }
     GetAttribute getAttribute = new GetAttribute(name, attribute);
     Object objectResult = null;
     try {
       requestor = (Requestor) poolRequestors.allocRequestor();
-      System.out.println("********* * * * Jai pris le requestor numero : " + requestor.toString());
-      System.out.println("****** * * * Connexion : " + requestor.connection.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+        logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+      }
       requestor.doRequete(getAttribute);
       objectResult = requestor.doReceive().getObject();
       poolRequestors.freeRequestor(requestor);
-      System.out.println("********* * * * J'ai libere le requestor numero : " + requestor.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+      }
     } catch (JMSException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -377,19 +435,23 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
   public AttributeList getAttributes(ObjectName name, String[] attributes) throws InstanceNotFoundException,
       ReflectionException, IOException {
     Requestor requestor = null;
-    f.write("Appel a la methode getAttributes(ObjectName name,String[] attributes) \n ");
-    System.out.println("Appel a la methode getAttributes() \n ");
-    System.out.println("thread appelant : " + Thread.currentThread().getName());
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : AttributeList getAttributes(ObjectName name, String[] attributes)" );
+      }
     GetAttributes getAttributes = new GetAttributes(name, attributes);
     AttributeList attributeListResult = null;
     try {
       requestor = (Requestor) poolRequestors.allocRequestor();
-      System.out.println("********* * * * Jai pris le requestor numero : " + requestor.toString());
-      System.out.println("****** * * * Connexion : " + requestor.connection.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+        logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+      }
       requestor.doRequete(getAttributes);
       attributeListResult = (AttributeList) requestor.doReceive().getObject();
       poolRequestors.freeRequestor(requestor);
-      System.out.println("********* * * * J'ai libere le requestor numero : " + requestor.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+      }
 
     } catch (JMSException e) {
       // TODO Auto-generated catch block
@@ -405,18 +467,22 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
       AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException,
       IOException {
     Requestor requestor = null;
-    f.write("Appel a la methode setAttribute(ObjectName name,Attribute attribute) \n ");
-    System.out.println("Appel a la methode setAttribute(ObjectName name,Attribute attribute)");
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : void setAttribute(ObjectName name, Attribute attribute)" );
+      }
     SetAttribute setAttribute = new SetAttribute(name, attribute);
-    System.out.println("Appel a la methode setAttribute() \n ");
     try {
       requestor = (Requestor) poolRequestors.allocRequestor();
-      System.out.println("********* * * * Jai pris le requestor numero : " + requestor.toString());
-      System.out.println("****** * * * Connexion : " + requestor.connection.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+        logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+      }
       requestor.doRequete(setAttribute);
       requestor.doReceive();
       poolRequestors.freeRequestor(requestor);
-      System.out.println("********* * * * J'ai libere le requestor numero : " + requestor.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+      }
     } catch (JMSException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -430,19 +496,23 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
   public AttributeList setAttributes(ObjectName name, AttributeList attributes)
       throws InstanceNotFoundException, ReflectionException, IOException {
     Requestor requestor = null;
-    f.write("Appel a la methode setAttributes(ObjectName name,AttributeList attributes) \n ");
-    System.out.println("Appel a la methode setAttributes(ObjectName name,AttributeList attributes)");
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : AttributeList setAttributes(ObjectName name, AttributeList attributes)" );
+      }
     SetAttributes setAttributes = new SetAttributes(name, attributes);
     AttributeList attributeListResult = null;
     try {
       requestor = (Requestor) poolRequestors.allocRequestor();
-      System.out.println("********* * * * Jai pris le requestor numero : " + requestor.toString());
-      System.out.println("****** * * * Connexion : " + requestor.connection.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+        logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+      }
       requestor.doRequete(setAttributes);
       attributeListResult = (AttributeList) requestor.doReceive().getObject();
-      System.out.println("Je suis lalallalalalalalallalaa ");
       poolRequestors.freeRequestor(requestor);
-      System.out.println("********* * * * J'ai libere le requestor numero : " + requestor.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+      }
     } catch (JMSException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -453,19 +523,23 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
   public Object invoke(ObjectName name, String operationName, Object[] params, String[] signature)
       throws InstanceNotFoundException, MBeanException, ReflectionException, IOException {
     Requestor requestor = null;
-    f.write("Appel a la methode invoke(ObjectName name,String operationName,Object[] params,String[] signature) \n ");
-    System.out.println("Appel a la methode invoke()");
-    System.out.println("thread appelant : " + Thread.currentThread().getName());
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : Object invoke(ObjectName name, String operationName, Object[] params, String[] signature)" );
+      }
     Invoke invoke = new Invoke(name, operationName, params, signature);
     Object objectResult = null;
     try {
       requestor = (Requestor) poolRequestors.allocRequestor();
-      System.out.println("********* * * * Jai pris le requestor numero : " + requestor.toString());
-      System.out.println("****** * * * Connexion : " + requestor.connection.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+        logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+      }
       requestor.doRequete(invoke);
       objectResult = requestor.doReceive().getObject();
       poolRequestors.freeRequestor(requestor);
-      System.out.println("********* * * * J'ai libere le requestor numero : " + requestor.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+      }
     } catch (JMSException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -476,19 +550,23 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
 
   public String getDefaultDomain() throws IOException {
     Requestor requestor = null;
-    f.write("Appel a la methode getDefaultDomain() \n ");
     GetDefaultDomain getDefaultDomain = new GetDefaultDomain();
-    System.out.println("Appel a la methode String getDefaultDomain() \n ");
-    System.out.println("thread appelant : " + Thread.currentThread().getName());
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : String getDefaultDomain()" );
+      }
     String stringResult = "getDefaultDomain is not done yet";
     try {
       requestor = (Requestor) poolRequestors.allocRequestor();
-      System.out.println("********* * * * Jai pris le requestor numero : " + requestor.toString());
-      System.out.println("****** * * * Connexion : " + requestor.connection.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+        logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+      }
       requestor.doRequete(getDefaultDomain);
       stringResult = (String) requestor.doReceive().getObject();
       poolRequestors.freeRequestor(requestor);
-      System.out.println("********* * * * J'ai libere le requestor numero : " + requestor.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+      }
       return stringResult;
 
     } catch (JMSException e) {
@@ -504,18 +582,23 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
 
   public String[] getDomains() throws IOException {
     Requestor requestor = null;
-    f.write("Appel a la methode getDomains() \n ");
-    System.out.println("Appel a la methode:  String[] getDomains()");
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : String[] getDomains()" );
+      }
     GetDomains getDomains = new GetDomains();
     String[] stringResult = null;
     try {
       requestor = (Requestor) poolRequestors.allocRequestor();
-      System.out.println("********* * * * Jai pris le requestor numero : " + requestor.toString());
-      System.out.println("****** * * * Connexion : " + requestor.connection.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+        logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+      }
       requestor.doRequete(getDomains);
       stringResult = (String[]) requestor.doReceive().getObject();
       poolRequestors.freeRequestor(requestor);
-      System.out.println("********* * * * J'ai libere le requestor numero : " + requestor.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+      }
       return stringResult;
 
     } catch (JMSException e) {
@@ -544,25 +627,31 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
    */
   public void addNotificationListener(ObjectName name, NotificationListener listener,
       NotificationFilter filter, Object handback) throws InstanceNotFoundException, IOException {
-    f.write("Appel a la methode addNotificationListener(ObjectName name,NotificationListener listener,NotificationFilter filter,Object handback) \n ");
-    System.out
-        .println("--> Appel a la methode addNotificationListener(ObjectName name,NotificationListener listener,NotificationFilter filter,Object handback)");
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : void addNotificationListener(ObjectName name, NotificationListener listener,NotificationFilter filter, Object handback)" );
+      }
     value++;
     try {
       key = new Integer(value);
-      System.out.println(key.toString());
       AddNotificationListenerStored objectAddNotificationListenerStored = new AddNotificationListenerStored(
           name, listener, filter, handback);
       hashTableNotificationListener.put(key, objectAddNotificationListenerStored);
-      System.out.println("Contenu de la hashTableNotificationListener : " + hashTableNotificationListener);
-      System.out.println("hashhhhhhhhhhhhhhhhhhh");
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "Content of  hashTableNotificationListener : "+hashTableNotificationListener);
+        }
       AddNotificationListener addNotificationListener = new AddNotificationListener(name, filter, key);
       try {
         Requestor requestor;
         requestor = (Requestor) poolRequestors.allocRequestor();
-        System.out.println("********* * * * Jai pris le requestor numero : " + requestor.toString());
-        System.out.println("****** * * * Connexion : " + requestor.connection.toString());
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
+          logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+          logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+        }
         requestor.subscribeToNotifications(addNotificationListener);
+        poolRequestors.freeRequestor(requestor);
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
+          logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+        }
         System.out
             .println("--> L'objet addNotificationListener contenant le name,filter et la key a ete envoye");
 
@@ -592,26 +681,31 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
 
   public void addNotificationListener(ObjectName name, ObjectName listener, NotificationFilter filter,
       Object handback) throws InstanceNotFoundException, IOException {
-    f.write("Appel a la methode addNotificationListener(ObjectName name,ObjectName listener,NotificationFilter filter,Object handback) \n ");
-    // mbs.addNotificationListener(name, listener, filter, handback);
-    System.out
-        .println("Appel a la methode addNotificationListener(ObjectName name,ObjectName listener,NotificationFilter filter,Object handback)");
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : void addNotificationListener(ObjectName name, ObjectName listener, NotificationFilter filter,Object handback)" );
+      }
     value++;
     try {
       key = new Integer(value);
-      System.out.println(key.toString());
       AddNotificationListenerStored objectAddNotificationListenerStored = new AddNotificationListenerStored(
           name, listener, filter, handback);
       hashTableNotificationListener.put(key, objectAddNotificationListenerStored);
-      System.out.println("Contenu de la hashTableNotificationListener : " + hashTableNotificationListener);
-      System.out.println("hashhhhhhhhhhhhhhhhhhh");
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "Content of  hashTableNotificationListener : "+hashTableNotificationListener);
+        }
       AddNotificationListener addNotificationListener = new AddNotificationListener(name, filter, key);
       try {
         Requestor requestor;
         requestor = (Requestor) poolRequestors.allocRequestor();
-        System.out.println("********* * * * Jai pris le requestor numero : " + requestor.toString());
-        System.out.println("****** * * * Connexion : " + requestor.connection.toString());
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
+          logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+          logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+        }
         requestor.subscribeToNotifications(addNotificationListener);
+        poolRequestors.freeRequestor(requestor);
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
+          logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+        }
         System.out
             .println("--> L'objet addNotificationListener contenant le name,filter et la key a ete envoye");
 
@@ -644,8 +738,9 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
 
   public void removeNotificationListener(ObjectName name, ObjectName listener)
       throws InstanceNotFoundException, ListenerNotFoundException, IOException {
-    f.write("Appel a la methode removeNotificationListener(ObjectName name,ObjectName listener) \n ");
-    System.out.println("Appel a la methode removeNotificationListener(ObjectName name,ObjectName listener)");
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : void removeNotificationListener(ObjectName name, ObjectName listener)" );
+      }
     Object keyRestored = null;
     value--;
     AddNotificationListenerStored objectAddNotificationListenerStored = new AddNotificationListenerStored(
@@ -659,23 +754,27 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
       pairKeyListener = it.next();
       if (pairKeyListener.getValue().equals(objectAddNotificationListenerStored)) {
         keyRestored = pairKeyListener.getKey();
-        System.out.println("la clé a ete touvé !! key = " + keyRestored);
-        System.out
-            .println("------------->    keyRestored de removeNotificationListener(ObjectName name,NotificationListener listener)  : "
-                + keyRestored);
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
+          logger.log(BasicLevel.DEBUG, "Value of the KeyRestored of removeNotificationListener(ObjectName name,NotificationListener listener) : "+keyRestored );
+          }
         it.remove();// remove(keyRestored);
-        System.out.println("Contenu de la hashTableNotificationListener : " + hashTableNotificationListener);
-        System.out.println("***----> l'objet objectAddNotificationListenerStored"
-            + hashTableNotificationListener.get(keyRestored)
-            + " a ete supprimé de la hashTableNotificationListener ");
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
+          logger.log(BasicLevel.DEBUG, "New Content of  hashTableNotificationListener after calling the method removeNotificationListener(ObjectName name, ObjectName listener) : "+hashTableNotificationListener);
+          }
         RemoveNotificationListener2 objectRemoveNotificationListener2 = new RemoveNotificationListener2(name,
             listener, keyRestored);
         try {
           Requestor requestor;
           requestor = (Requestor) poolRequestors.allocRequestor();
-          System.out.println("********* * * * Jai pris le requestor numero : " + requestor.toString());
-          System.out.println("****** * * * Connexion : " + requestor.connection.toString());
+          if (logger.isLoggable(BasicLevel.DEBUG)) {
+            logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+            logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+          }
           requestor.doRequete(objectRemoveNotificationListener2);
+          poolRequestors.freeRequestor(requestor);
+          if (logger.isLoggable(BasicLevel.DEBUG)) {
+            logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+          }
         } catch (JMSException e) {
           // TODO Auto-generated catch block
           e.printStackTrace();
@@ -707,9 +806,9 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
 
   public void removeNotificationListener(ObjectName name, ObjectName listener, NotificationFilter filter,
       Object handback) throws InstanceNotFoundException, ListenerNotFoundException, IOException {
-    f.write("Appel a la methode removeNotificationListener(ObjectName name,ObjectName listener,NotificationFilter filter,Object handback) \n ");
-    System.out
-        .println("**************************Appel a la methode removeNotificationListener(ObjectName name,ObjectName listener,NotificationFilter filter,Object handback)");
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : void removeNotificationListener(ObjectName name, ObjectName listener, NotificationFilter filter,Object handback)" );
+      }
     Object keyRestored = null;
     value--;
     AddNotificationListenerStored objectAddNotificationListenerStored = new AddNotificationListenerStored(
@@ -723,26 +822,31 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
       pairKeyListener = it.next();
       if (pairKeyListener.getValue().equals(objectAddNotificationListenerStored)) {
         keyRestored = pairKeyListener.getKey();
-        System.out.println("la clé a ete touvé !! key = " + keyRestored);
-        System.out
-            .println("------------->    keyRestored de removeNotificationListener(ObjectName name,NotificationListener listener)  : "
-                + keyRestored);
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
+          logger.log(BasicLevel.DEBUG, "Value of the KeyRestored of removeNotificationListener(ObjectName name,NotificationListener listener) : "+keyRestored );
+          }
         it.remove();// remove(keyRestored);
-        System.out.println("Contenu de la hashTableNotificationListener : " + hashTableNotificationListener);
-        System.out.println("***----> l'objet objectAddNotificationListenerStored"
-            + hashTableNotificationListener.get(keyRestored)
-            + " a ete supprimé de la hashTableNotificationListener ");
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
+          logger.log(BasicLevel.DEBUG, "New Content of  hashTableNotificationListener  after calling the method removeNotificationListener(ObjectName name, ObjectName listener, NotificationFilter filter, Object handback) : "+hashTableNotificationListener);
+          }
         RemoveNotificationListener3 objectRemoveNotificationListener3 = new RemoveNotificationListener3(name,
             listener, filter, keyRestored);
         try {
           Requestor requestor;
           requestor = (Requestor) poolRequestors.allocRequestor();
-          System.out.println("********* * * * Jai pris le requestor numero : " + requestor.toString());
-          System.out.println("****** * * * Connexion : " + requestor.connection.toString());
+          if (logger.isLoggable(BasicLevel.DEBUG)) {
+            logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+            logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+          }
           requestor.doRequete(objectRemoveNotificationListener3);
+          poolRequestors.freeRequestor(requestor);
+          if (logger.isLoggable(BasicLevel.DEBUG)) {
+            logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+          }
           break; // The MBean must have a listener that exactly matches the
                  // given listener, filter, and handback parameters. If there is
                  // more than one such listener, only one is removed.
+          
         } catch (JMSException e) {
           // TODO Auto-generated catch block
           e.printStackTrace();
@@ -772,9 +876,9 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
 
   public void removeNotificationListener(ObjectName name, NotificationListener listener)
       throws InstanceNotFoundException, ListenerNotFoundException, IOException {
-    f.write("Appel a la methode removeNotificationListener(ObjectName name,NotificationListener listener) \n ");
-    System.out
-        .println("**************************Appel a la methode removeNotificationListener(ObjectName name,NotificationListener listener)");
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : void removeNotificationListener(ObjectName name, NotificationListener listener)");
+      }
     Object keyRestored = null;
     value--;
     AddNotificationListenerStored objectAddNotificationListenerStored = new AddNotificationListenerStored(
@@ -788,24 +892,28 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
       pairKeyListener = it.next();
       if (pairKeyListener.getValue().equals(objectAddNotificationListenerStored)) {
         keyRestored = pairKeyListener.getKey();
-        System.out.println("la clé a ete touvé !! key = " + keyRestored);
-        System.out
-            .println("------------->    keyRestored de removeNotificationListener(ObjectName name,NotificationListener listener)  : "
-                + keyRestored);
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
+          logger.log(BasicLevel.DEBUG, "Value of the KeyRestored of removeNotificationListener(ObjectName name,NotificationListener listener) : "+keyRestored );
+          }
         it.remove();// remove(keyRestored);
-        System.out.println("Contenu de la hashTableNotificationListener : " + hashTableNotificationListener);
-        System.out.println("***----> l'objet objectAddNotificationListenerStored"
-            + hashTableNotificationListener.get(keyRestored)
-            + " a ete supprimé de la hashTableNotificationListener ");
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
+          logger.log(BasicLevel.DEBUG, "New Content of  hashTableNotificationListener after calling the method removeNotificationListener(ObjectName name, NotificationListener listener) : "+hashTableNotificationListener);
+          }
 
         RemoveNotificationListener objectRemoveNotificationListener = new RemoveNotificationListener(name,
             keyRestored);
         try {
           Requestor requestor;
           requestor = (Requestor) poolRequestors.allocRequestor();
-          System.out.println("********* * * * Jai pris le requestor numero : " + requestor.toString());
-          System.out.println("****** * * * Connexion : " + requestor.connection.toString());
+          if (logger.isLoggable(BasicLevel.DEBUG)) {
+            logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+            logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+          }
           requestor.doRequete(objectRemoveNotificationListener);
+          poolRequestors.freeRequestor(requestor);
+          if (logger.isLoggable(BasicLevel.DEBUG)) {
+            logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+          }
         } catch (JMSException e) {
           // TODO Auto-generated catch block
           e.printStackTrace();
@@ -838,9 +946,9 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
   public void removeNotificationListener(ObjectName name, NotificationListener listener,
       NotificationFilter filter, Object handback) throws InstanceNotFoundException,
       ListenerNotFoundException, IOException {
-    f.write("Appel a la methode removeNotificationListener(ObjectName name,NotificationListener listener,NotificationFilter filter,Object handback) \n ");
-    System.out
-        .println("********************Appel a la methode removeNotificationListener(ObjectName name,NotificationListener listener,NotificationFilter filter,Object handback)");
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : void removeNotificationListener(ObjectName name, NotificationListener listener,NotificationFilter filter, Object handback)");
+      }
     Object keyRestored = null;
     value--;
     AddNotificationListenerStored objectAddNotificationListenerStored = new AddNotificationListenerStored(
@@ -854,25 +962,28 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
       pairKeyListener = it.next();
       if (pairKeyListener.getValue().equals(objectAddNotificationListenerStored)) {
         keyRestored = pairKeyListener.getKey();
-        System.out.println("la clé a ete touvé !! key = " + keyRestored);
-        System.out
-            .println("------------->    keyRestored de removeNotificationListener(ObjectName name,NotificationListener listener)  : "
-                + keyRestored);
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
+          logger.log(BasicLevel.DEBUG, "Value of the KeyRestored of removeNotificationListener(ObjectName name,NotificationListener listener) : "+keyRestored );
+          }
         it.remove();// remove(keyRestored);
-        System.out.println("Contenu de la hashTableNotificationListener : " + hashTableNotificationListener);
-        System.out.println("***----> l'objet objectAddNotificationListenerStored"
-            + hashTableNotificationListener.get(keyRestored)
-            + " a ete supprimé de la hashTableNotificationListener ");
-        System.out.println("------------->    keyRestored : " + keyRestored);
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
+          logger.log(BasicLevel.DEBUG, "New Content of  hashTableNotificationListener after calling the method removeNotificationListener(ObjectName name, NotificationListener listener,NotificationFilter filter, Object handback) : "+hashTableNotificationListener);
+          }
+
         RemoveNotificationListener1 removeNotificationListener1 = new RemoveNotificationListener1(name,
             filter, keyRestored);
         try {
           Requestor requestor;
           requestor = (Requestor) poolRequestors.allocRequestor();
-          System.out.println("********* * * * Jai pris le requestor numero : " + requestor.toString());
-          System.out.println("****** * * * Connexion : " + requestor.connection.toString());
+          if (logger.isLoggable(BasicLevel.DEBUG)) {
+            logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+            logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+          }
           requestor.doRequete(removeNotificationListener1);
-          System.out.println("Requete RemoveNotificationListener envoyéeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
+          poolRequestors.freeRequestor(requestor);
+          if (logger.isLoggable(BasicLevel.DEBUG)) {
+            logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+          }
           break; // The MBean must have a listener that exactly matches the
                  // given listener, filter, and handback parameters. If there is
                  // more than one such listener, only one is removed.
@@ -888,21 +999,24 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
   public MBeanInfo getMBeanInfo(ObjectName name) throws InstanceNotFoundException, IntrospectionException,
       ReflectionException, IOException {
     Requestor requestor = null;
-    f.write("Appel a la methode getMBeanInfo(ObjectName name) \n ");
-    System.out.println("Appel a la methode getMBeanInfo() \n ");
-    System.out.println("thread appelant : " + Thread.currentThread().getName());
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : MBeanInfo getMBeanInfo(ObjectName name)");
+      }
     GetMBeanInfo getMBeanInfo = new GetMBeanInfo(name);
-    System.out.println("paramètre de getMBeanInfo name = " + name);
     MBeanInfo mbeanInfoResult = null;
     try {
       // clientJms.doRequete(getMBeanInfo);
       requestor = (Requestor) poolRequestors.allocRequestor();
-      System.out.println("********* * * * Jai pris le requestor numero : " + requestor.toString());
-      System.out.println("****** * * * Connexion : " + requestor.connection.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+        logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+      }
       requestor.doRequete(getMBeanInfo);
       mbeanInfoResult = (MBeanInfo) requestor.doReceive().getObject();
       poolRequestors.freeRequestor(requestor);
-      System.out.println("********* * * * J'ai libere le requestor numero : " + requestor.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+      }
       return mbeanInfoResult;
     } catch (JMSException e) {
       // TODO Auto-generated catch block
@@ -914,18 +1028,23 @@ public class MBeanServerConnectionDelegate implements MBeanServerConnection {
   public boolean isInstanceOf(ObjectName name, String className) throws InstanceNotFoundException,
       IOException {
     Requestor requestor = null;
-    f.write("Appel a la methode isInstanceOf(ObjectName name,String className) \n ");
-    System.out.println("Appel a la methode isInstanceOf(ObjectName name,String className)");
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Call of the method : boolean isInstanceOf(ObjectName name, String className)");
+      }
     IsInstanceOf isInstanceOf = new IsInstanceOf(name, className);
     Boolean booleanResults = false;
     try {
       requestor = (Requestor) poolRequestors.allocRequestor();
-      System.out.println("****** * * * Connexion : " + requestor.connection.toString());
-      System.out.println("********* * * * Jai pris le requestor numero : " + requestor.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" was taken" );
+        logger.log(BasicLevel.DEBUG, "The Connection is : "+requestor.connection.getClass().getName() );
+      }
       requestor.doRequete(isInstanceOf);
       booleanResults = (Boolean) requestor.doReceive().getObject();
       poolRequestors.freeRequestor(requestor);
-      System.out.println("********* * * * J'ai libere le requestor numero : " + requestor.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor : "+requestor.getClass().getName()+" has been released" );
+      }
       return booleanResults;
     } catch (JMSException e) {
       // TODO Auto-generated catch block

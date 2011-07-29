@@ -38,6 +38,10 @@ import javax.naming.NamingException;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.TemporaryQueue;
 import org.objectweb.joram.client.jms.admin.AdminException;
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
+
+import fr.dyade.aaa.common.Debug;
 
 /**
  * A <b>Requestor </b> a requestor allows to do one or many JMS requetes to the
@@ -49,6 +53,7 @@ import org.objectweb.joram.client.jms.admin.AdminException;
  */
 
 public class Requestor implements MessageListener {
+  private static final Logger logger = Debug.getLogger(Requestor.class.getName());
   private static Topic topic;
   private static Queue QReponse, QRequete;
   static String[] signatureMethode;
@@ -65,7 +70,6 @@ public class Requestor implements MessageListener {
   TemporaryQueue queueTemporaire;
   AttributeList attributesList;
   Queue queueNotification;
-  Boolean notificationRecu = false;
   Connection connection;
 
   public Requestor(Connection connection) {
@@ -147,29 +151,23 @@ public class Requestor implements MessageListener {
     NotificationAndKey notificationAndKey = null;
     try {
       notificationAndKey = (NotificationAndKey) ((ObjectMessage) message).getObject();
-      System.out.println("NotificationAndKey = " + notificationAndKey.toString());
     } catch (JMSException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    System.out.println("--> L'objet NotificationAndKey contenant la notification et le handback a ete recu!");
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "The NotificationAndKey object containing notification and handback,  was received.");
+    }
     AddNotificationListenerStored objectAddNotificationListenerStored = (AddNotificationListenerStored) hashTableNotificationListener
         .get(notificationAndKey.handback);
-    System.out.println("--> L'objet objectAddNotificationListenerStored a été recupere");
-    // System.out.println("--> On recupere le handback");
-    // Object handBackRecovered =
-    // hashTableNotificationContext.get(notificationAndKey.handback);
-    // System.out.println("--> On recupere le listener");
-    // NotificationListener notificationListenerRecovered =
-    // (NotificationListener)
-    // hashTableNotificationListener.get(notificationAndKey.handback);
-    // notificationListenerRecovered.handleNotification(notificationAndKey.notification,
-    // handBackRecovered);
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "The object objectAddNotificationListenerStored,  was recovered. ");
+    }
     ((NotificationListener) objectAddNotificationListenerStored.listener).handleNotification(
         notificationAndKey.notification, objectAddNotificationListenerStored.handback);
-    System.out.println("La Notification a été faite");
-    System.out.println("NotiffffffffffffEndddddddddddddddddddddd!!!");
-    notificationRecu = true;
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "Notification has been received by the listener : "+objectAddNotificationListenerStored.listener);
+    }
 
   }
 
@@ -192,11 +190,10 @@ public class Requestor implements MessageListener {
       ObjectMessage message = session.createObjectMessage();
       message.setObject((Serializable) o);
       message = initializationPropertiesOfMessageSending(message, "Connecteur", "toto", queueTemporaire);
-      // message.setStringProperty("Connecteur", "toto");
-      // message.setJMSReplyTo(queueTemporaire);
-      System.out.println("QueueTemporaire : " + queueTemporaire.toString());
       producer.send(message);
-      System.out.println("Requete envoye");
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The  Requestor "+this.getClass().getName()+"sent his requete");
+      }
 
     } catch (Exception e) {
       // TODO: handle exception
@@ -237,7 +234,9 @@ public class Requestor implements MessageListener {
     try {
       message.setStringProperty(key, connectorName);
       message.setJMSReplyTo(ReplyTo);
-      System.out.println("QueueTemporaire : " + ReplyTo.toString());
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The temporary Queue of the Requestor "+this.getClass().getName()+"is : "+ReplyTo.getClass().getName());
+      }
     } catch (JMSException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -265,18 +264,17 @@ public class Requestor implements MessageListener {
       messageRecu = (ObjectMessage) consumer.receive();
       if (messageRecu.getObject() != null && !(messageRecu.getObject() instanceof MBeanInfo)
           && !(messageRecu.getObject() instanceof NotificationAndKey)) {
-        System.out.println("MessageRecu");
-        System.out.println(messageRecu.getObject().toString());
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
+          logger.log(BasicLevel.DEBUG, "The message "+messageRecu.getObject().toString()+" was received by the Requestor "+this.getClass().getName());
+        }
       }
       if (messageRecu.getObject() instanceof AttributeList) {
         attributesList = (AttributeList) messageRecu.getObject();
-        System.out.println(attributesList.toString());
       }
     } catch (JMSException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    System.out.println("Thread retour : " + Thread.currentThread().getName().toString());
 
     return messageRecu;
 
@@ -301,10 +299,10 @@ public class Requestor implements MessageListener {
       ObjectMessage message = session.createObjectMessage();
       message.setObject((Serializable) objectAddNotificationListener);
       initializationPropertiesOfMessageSending(message, "Connecteur", "toto", queueNotification);
-      System.out.println("Queue Notification : " + queueNotification.toString());
-      System.out
-          .println("***********************************************************Requete de notification envoye");
       producer.send(message);
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "The Requestor: "+this.getClass().getName()+" have subscribed to the notifications");
+      }
 
     } catch (JMSException e) {
       // TODO Auto-generated catch block
