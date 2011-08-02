@@ -389,6 +389,7 @@
     <antcall target="bridge.test4.1"/>
     <antcall target="bridge.test5.2"/>
     <antcall target="bridge.test6.2"/>
+    <antcall target="bridge.test7"/>
   </target>
 
   <target name="tests.schedqueue"
@@ -4427,6 +4428,18 @@
         <param name="jvmadminArgs" value="-DautomaticRequest=true"/>
       </antcall>
   </target>
+  
+  <target name="bridge.test7" depends="init.a3props,compile"
+          description=" --> distribute to 2 JMS servers">
+    <antcall target="test.run" inheritAll="true">
+      <param name="className" value="joram.bridge.BridgeTest7"/>
+      <param name="testid" value="bridge.test7"/>
+      <param name="jndiconf" value="bridge/jndi.properties"/>
+      <param name="a3conf" value="bridge/a3servers2.xml"/>
+      <param name="jvmargs" value=""/>
+    </antcall>
+  </target>
+
 
   <!-- end bridge test -->
 
