@@ -22,56 +22,55 @@
  */
 package org.objectweb.joram.mom.dest.jms;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
-import javax.jms.Session;
-import javax.jms.XAConnection;
-import javax.jms.XAConnectionFactory;
-import javax.jms.XASession;
-import javax.transaction.xa.XAException;
-import javax.transaction.xa.XAResource;
-import javax.transaction.xa.Xid;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NameNotFoundException;
+import javax.naming.NamingException;
 
-import org.objectweb.joram.client.jms.XidImpl;
+import org.objectweb.joram.mom.dest.jms.JMSAcquisition.JmsListener;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
+import fr.dyade.aaa.agent.AgentServer;
 import fr.dyade.aaa.common.Daemon;
 import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.util.management.MXWrapper;
 
-public class JMSModule implements ExceptionListener {
+public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBean {
 
   private static final Logger logger = Debug.getLogger(JMSModule.class.getName());
 
   /** <code>true</code> if the module is fully usable. */
-  protected boolean usable = true;
+  protected transient boolean notUsable = false;
 
   /** Message explaining why the module is not usable. */
-  protected String notUsableMessage;
+  protected transient String notUsableMessage;
 
   /** Daemon used for the reconnection process. */
-  protected ReconnectionDaemon reconnectionDaemon;
-
-  /** serializable object for synchronization */
-  protected Object lock = new String();
-
-  /** Indicates to use an XAConnection. Default is false. */
-  protected boolean isXA = false;
+  protected transient ReconnectionDaemon reconnectionDaemon;
 
   /** Connection to the foreign JMS server. */
-  protected Connection cnx;
+  protected transient volatile Connection cnx;
 
-  /** Session with the foreign JMS destination. */
-  protected Session session;
-
-  /** XAResource */
-  protected XAResource xaRes = null;
+  /**
+   * @return the cnx
+   */
+  public Connection getCnx() {
+    return cnx;
+  }
 
   /** User identification for connecting to the foreign JMS server. */
   protected String userName = null;
@@ -88,58 +87,48 @@ public class JMSModule implements ExceptionListener {
   /** ConnectionFactory JNDI name. */
   protected String cnxFactName;
 
-  /** Destination JNDI name. */
-  protected String destName;
+  /**
+   * @return the cnxFactName
+   */
+  public String getCnxFactName() {
+    return cnxFactName;
+  }
 
-  /** Foreign JMS destination object. */
-  protected Destination dest = null;
+  /**
+   * @return the user name
+   */
+  public String getUserName() {
+    return userName;
+  }
 
   /** JMS clientID field. */
   protected String clientID = null;
 
   /** Connection factory object for connecting to the foreign JMS server. */
-  protected ConnectionFactory cnxFact = null;
+  protected transient ConnectionFactory cnxFact = null;
 
-  public void init(Properties properties) {
+  public JMSModule(String cnxFactoryName, String jndiFactoryClass, String jndiUrl, String user,
+      String password, String clientID) {
     if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "<init>(" + properties + ')');
+      logger.log(BasicLevel.DEBUG, "<init>");
     }
 
-    jndiFactory = properties.getProperty("jndiFactory");
-    jndiUrl = properties.getProperty("jndiUrl");
+    this.jndiFactory = jndiFactoryClass;
+    this.jndiUrl = jndiUrl;
 
-    cnxFactName = properties.getProperty("connectionFactoryName");
+    this.cnxFactName = cnxFactoryName;
     if (cnxFactName == null) {
       throw new IllegalArgumentException("Missing ConnectionFactory JNDI name.");
     }
 
-    destName = properties.getProperty("destinationName");
-    if (destName == null) {
-      throw new IllegalArgumentException("Missing Destination JNDI name.");
-    }
+    this.userName = user;
+    this.password = password;
 
-    String userName = properties.getProperty("userName");
-    String password = properties.getProperty("password");
+    this.clientID = clientID;
 
-    if (userName != null && password != null) {
-      this.userName = userName;
-      this.password = password;
-    }
-
-    clientID = properties.getProperty("clientId");
-
-    isXA = Boolean.valueOf(properties.getProperty("useXAConnection", "false")).booleanValue();
-
-    try {
-      connect();
-    } catch (JMSException exc) {
-      if (logger.isLoggable(BasicLevel.ERROR)) {
-        logger.log(BasicLevel.ERROR, "Not usable: ", exc);
-      }
-    }
   }
 
-  public void close() {
+  public void stopLiveConnection() {
     if (logger.isLoggable(BasicLevel.DEBUG)) {
       logger.log(BasicLevel.DEBUG, "close()");
     }
@@ -172,6 +161,14 @@ public class JMSModule implements ExceptionListener {
       } catch (JMSException exc) {
       }
     }
+
+    try {
+      MXWrapper.unregisterMBean(getMBeanName());
+    } catch (Exception exc) {
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "unregisterMBean", exc);
+      }
+    }
   }
 
   /**
@@ -182,13 +179,15 @@ public class JMSModule implements ExceptionListener {
    * @exception javax.jms.JMSException
    *              If the needed JMS resources can't be created.
    */
-  private void connect() throws JMSException {
-    if (!usable) {
-      throw new IllegalStateException(notUsableMessage);
-    }
-
+  public void startLiveConnection() {
     if (logger.isLoggable(BasicLevel.DEBUG)) {
       logger.log(BasicLevel.DEBUG, "connect()");
+    }
+    if (notUsable) {
+      if (logger.isLoggable(BasicLevel.ERROR)) {
+        logger.log(BasicLevel.ERROR, "Not usable: " + notUsableMessage);
+      }
+      return;
     }
 
     // Creating the module's daemons.
@@ -197,6 +196,63 @@ public class JMSModule implements ExceptionListener {
     StartupDaemon startup = new StartupDaemon();
     startup.start();
 
+    try {
+      MXWrapper.registerMBean(this, getMBeanName());
+    } catch (Exception e) {
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "registerMBean", e);
+      }
+    }
+
+  }
+
+  protected Object retrieveJndiObject(String jndiName) throws Exception {
+
+    Context jndiCtx = null;
+    ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
+
+    try {
+      jndiCtx = getInitialContext();
+      return jndiCtx.lookup(jndiName);
+
+    } catch (Exception exc) {
+      throw exc;
+    } finally {
+      // Closing the JNDI context.
+      if (jndiCtx != null) {
+        jndiCtx.close();
+      }
+      Thread.currentThread().setContextClassLoader(oldClassLoader);
+    }
+  }
+
+  protected Context getInitialContext() throws IOException, NamingException {
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "getInitialContext() - Load jndi.properties file");
+    }
+    Context jndiCtx;
+    Properties props = new Properties();
+    InputStream in = Class.class.getResourceAsStream("/jndi.properties");
+    
+    if (in == null) {
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "jndi.properties not found.");
+      }
+    } else {
+      props.load(in);
+    }
+
+    // Override jndi.properties with properties given at initialization if present
+    if (jndiFactory != null) {
+      props.setProperty(Context.INITIAL_CONTEXT_FACTORY, jndiFactory);
+    }
+    if (jndiUrl != null) {
+      props.setProperty(Context.PROVIDER_URL, jndiUrl);
+    }
+
+    Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+    jndiCtx = new InitialContext(props);
+    return jndiCtx;
   }
 
   /**
@@ -225,48 +281,6 @@ public class JMSModule implements ExceptionListener {
     if (logger.isLoggable(BasicLevel.DEBUG)) {
       logger.log(BasicLevel.DEBUG, "doConnect: cnx=" + cnx);
     }
-
-    session = cnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-  }
-
-  /**
-   * Opens a XA connection with the foreign JMS server and creates the XA JMS
-   * resources for interacting with the foreign JMS destination.
-   * 
-   * @exception JMSException
-   *              If the needed JMS resources could not be created.
-   */
-  protected void doXAConnect() throws JMSException {
-    if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "doXAConnect()");
-    }
-
-    if (userName != null && password != null) {
-      cnx = ((XAConnectionFactory) cnxFact).createXAConnection(userName, password);
-    } else {
-      cnx = ((XAConnectionFactory) cnxFact).createXAConnection();
-    }
-    cnx.setExceptionListener(this);
-
-    if (clientID != null) {
-      cnx.setClientID(clientID);
-    }
-
-    cnx.start();
-    if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "doXAConnect: cnx=" + cnx);
-    }
-
-    session = ((XAConnection) cnx).createXASession();
-
-    xaRes = ((XASession) session).getXAResource();
-
-    if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "doXAConnect: res=" + xaRes);
-    }
-
-    // Recover if needed.
-    new XARecoverDaemon(xaRes).start();
   }
 
   /**
@@ -279,11 +293,33 @@ public class JMSModule implements ExceptionListener {
     if (logger.isLoggable(BasicLevel.WARN)) {
       logger.log(BasicLevel.WARN, "onException(" + exc + ')');
     }
-    reconnectionDaemon.reconnect();
+    for (Iterator<JmsListener> listener = listeners.iterator(); listener.hasNext();) {
+      JmsListener type = listener.next();
+      type.onException(exc);
+    }
+    listeners.clear();
+    reconnectionDaemon.start();
   }
 
-  protected void connectionDone() {
-    // Nothing to do;
+  public boolean isConnectionOpen() {
+    return cnx != null && !reconnectionDaemon.isRunning();
+  }
+
+  public String getState() {
+    if (isConnectionOpen()) {
+      return "OK";
+    }
+    return "FAILING";
+  }
+
+  private String getMBeanName() {
+    StringBuilder strbuf = new StringBuilder();
+
+    strbuf.append("JMS#").append(AgentServer.getServerId());
+    strbuf.append(':');
+    strbuf.append("type=Connections,name=").append(cnxFactName);
+
+    return strbuf.toString();
   }
 
   /**
@@ -305,60 +341,31 @@ public class JMSModule implements ExceptionListener {
       if (logmon.isLoggable(BasicLevel.DEBUG)) {
         logmon.log(BasicLevel.DEBUG, "run()");
       }
-
-      javax.naming.Context jndiCtx = null;
-      ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
       try {
         canStop = true;
 
-        // Administered objects still to be retrieved: getting them from
-        // JNDI.
-        if (cnxFact == null || dest == null) {
-
-          Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
-
-          if (jndiFactory == null || jndiUrl == null) {
-            jndiCtx = new javax.naming.InitialContext();
-          } else {
-            java.util.Hashtable env = new java.util.Hashtable();
-            env.put(javax.naming.Context.INITIAL_CONTEXT_FACTORY, jndiFactory);
-            env.put(javax.naming.Context.PROVIDER_URL, jndiUrl);
-            jndiCtx = new javax.naming.InitialContext(env);
-          }
-          cnxFact = (ConnectionFactory) jndiCtx.lookup(cnxFactName);
-          dest = (Destination) jndiCtx.lookup(destName);
-
-          if (logmon.isLoggable(BasicLevel.DEBUG)) {
-            logmon.log(BasicLevel.DEBUG, "run: factory=" + cnxFact + ", destination=" + dest);
-          }
-
+        if (cnxFact == null) {
+          // Administered objects still to be retrieved: getting them from JNDI.
+          cnxFact = (ConnectionFactory) retrieveJndiObject(cnxFactName);
         }
         try {
-          if (isXA) {
-            doXAConnect();
-          } else {
-            doConnect();
-          }
-          if (usable) {
-            connectionDone();
-          }
-
+          doConnect();
         } catch (AbstractMethodError exc) {
-          usable = false;
+          notUsable = true;
           notUsableMessage = "Retrieved administered objects types not "
               + "compatible with the 'unified' communication " + " mode: " + exc;
           if (logmon.isLoggable(BasicLevel.DEBUG)) {
             logmon.log(BasicLevel.DEBUG, "Exception:: notUsableMessage=" + notUsableMessage, exc);
           }
         } catch (ClassCastException exc) {
-          usable = false;
+          notUsable = true;
           notUsableMessage = "Retrieved administered objects types not "
               + "compatible with the chosen communication mode: " + exc;
           if (logmon.isLoggable(BasicLevel.DEBUG)) {
             logmon.log(BasicLevel.DEBUG, "Exception:: notUsableMessage=" + notUsableMessage, exc);
           }
         } catch (JMSSecurityException exc) {
-          usable = false;
+          notUsable = true;
           notUsableMessage = "Provided user identification does not allow "
               + "to connect to the foreign JMS server: " + exc;
           if (logmon.isLoggable(BasicLevel.DEBUG)) {
@@ -368,32 +375,39 @@ public class JMSModule implements ExceptionListener {
           if (logmon.isLoggable(BasicLevel.DEBUG)) {
             logmon.log(BasicLevel.DEBUG, "Exception:: ", exc);
           }
-          reconnectionDaemon.reconnect();
+          reconnectionDaemon.start();
         } catch (Throwable exc) {
-          usable = false;
+          notUsable = true;
           notUsableMessage = "" + exc;
           if (logmon.isLoggable(BasicLevel.DEBUG)) {
             logmon.log(BasicLevel.DEBUG, "Exception:: notUsableMessage=" + notUsableMessage, exc);
           }
         }
-      } catch (javax.naming.NameNotFoundException exc) {
-        usable = false;
+      } catch (NameNotFoundException exc) {
         if (cnxFact == null) {
           notUsableMessage = "Could not retrieve ConnectionFactory [" + cnxFactName + "] from JNDI: " + exc;
-        } else if (dest == null) {
-          notUsableMessage = "Could not retrieve Destination [" + destName + "] from JNDI: " + exc;
         }
+        reconnectionDaemon.start();
+        if (logmon.isLoggable(BasicLevel.DEBUG)) {
+          logmon.log(BasicLevel.DEBUG, "Exception:: notUsableMessage=" + notUsableMessage, exc);
+        }
+      } catch (javax.naming.NoInitialContextException exc) {
+        notUsable = true;
+        notUsableMessage = "Initial context not available: " + exc;
         if (logmon.isLoggable(BasicLevel.DEBUG)) {
           logmon.log(BasicLevel.DEBUG, "Exception:: notUsableMessage=" + notUsableMessage, exc);
         }
       } catch (javax.naming.NamingException exc) {
-        usable = false;
         notUsableMessage = "Could not access JNDI: " + exc;
         if (logmon.isLoggable(BasicLevel.DEBUG)) {
           logmon.log(BasicLevel.DEBUG, "Exception:: notUsableMessage=" + notUsableMessage, exc);
         }
+        reconnectionDaemon.start();
+        if (logmon.isLoggable(BasicLevel.DEBUG)) {
+          logmon.log(BasicLevel.DEBUG, "Exception:: notUsableMessage=" + notUsableMessage, exc);
+        }
       } catch (ClassCastException exc) {
-        usable = false;
+        notUsable = true;
         notUsableMessage = "Error while retrieving administered objects "
             + "through JNDI possibly because of missing " + "foreign JMS client libraries in classpath: "
             + exc;
@@ -401,19 +415,12 @@ public class JMSModule implements ExceptionListener {
           logmon.log(BasicLevel.DEBUG, "Exception:: notUsableMessage=" + notUsableMessage, exc);
         }
       } catch (Exception exc) {
-        usable = false;
+        notUsable = true;
         notUsableMessage = "Error while retrieving administered objects " + "through JNDI: " + exc;
         if (logmon.isLoggable(BasicLevel.DEBUG)) {
           logmon.log(BasicLevel.DEBUG, "Exception:: notUsableMessage=" + notUsableMessage, exc);
         }
       } finally {
-        Thread.currentThread().setContextClassLoader(oldClassLoader);
-        // Closing the JNDI context.
-        try {
-          jndiCtx.close();
-        } catch (Exception exc) {
-        }
-
         finish();
       }
     }
@@ -456,19 +463,6 @@ public class JMSModule implements ExceptionListener {
       }
     }
 
-    /** Notifies the daemon to start reconnecting. */
-    protected void reconnect() {
-      if (logmon.isLoggable(BasicLevel.DEBUG)) {
-        logmon.log(BasicLevel.DEBUG, "reconnect() running=" + running);
-      }
-
-      if (running) {
-        return;
-      }
-
-      start();
-    }
-
     /** The daemon's loop. */
     public void run() {
       if (logmon.isLoggable(BasicLevel.DEBUG)) {
@@ -480,7 +474,6 @@ public class JMSModule implements ExceptionListener {
 
       try {
         while (running) {
-          canStop = true;
 
           attempts++;
 
@@ -492,21 +485,34 @@ public class JMSModule implements ExceptionListener {
             interval = interval3;
           }
 
+          canStop = true;
           try {
+            if (logmon.isLoggable(BasicLevel.DEBUG)) {
+              logmon.log(BasicLevel.DEBUG, "attempt " + attempts + ", wait=" + interval);
+            }
             Thread.sleep(interval);
-            if (isXA) {
-              doXAConnect();
-            } else {
-              doConnect();
+
+            if (logmon.isLoggable(BasicLevel.DEBUG)) {
+              logmon.log(BasicLevel.DEBUG, "connect...");
             }
-            if (usable) {
-              connectionDone();
+            canStop = false;
+
+            if (cnxFact == null) {
+              // Administered objects still to be retrieved: getting them from JNDI.
+              cnxFact = (ConnectionFactory) retrieveJndiObject(cnxFactName);
             }
+            doConnect();
 
           } catch (Exception exc) {
+            if (logmon.isLoggable(BasicLevel.DEBUG)) {
+              logmon.log(BasicLevel.DEBUG, "connection failed, continue... " + exc.getMessage());
+            }
             continue;
           }
-          canStop = false;
+
+          if (logmon.isLoggable(BasicLevel.DEBUG)) {
+            logmon.log(BasicLevel.DEBUG, "Connected using " + cnxFactName + " connection factory.");
+          }
           break;
         }
       } finally {
@@ -516,6 +522,7 @@ public class JMSModule implements ExceptionListener {
 
     /** Shuts the daemon down. */
     public void shutdown() {
+      interrupt();
     }
 
     /** Releases the daemon's resources. */
@@ -523,72 +530,13 @@ public class JMSModule implements ExceptionListener {
     }
   }
 
-  protected class XARecoverDaemon extends Daemon {
-    private XAResource resource = null;
+  private transient List<JmsListener> listeners;
 
-    /** Constructs a <code>XARecoverDaemon</code> thread. */
-    protected XARecoverDaemon(XAResource resource) {
-      super("XARecoverDaemon", logger);
-      this.resource = resource;
-      if (logmon.isLoggable(BasicLevel.DEBUG)) {
-        logmon.log(BasicLevel.DEBUG, "XARecoverDaemon<init>");
-      }
+  public void addExceptionListener(JmsListener listener) {
+    if (listeners == null) {
+      listeners = new ArrayList<JmsListener>();
     }
-
-    /** Releases the daemon's resources. */
-    protected void close() {
-    }
-
-    /** Shuts the daemon down. */
-    protected void shutdown() {
-    }
-
-    /** The daemon's loop. */
-    public void run() {
-      if (logmon.isLoggable(BasicLevel.DEBUG)) {
-        logmon.log(BasicLevel.DEBUG, "run()");
-      }
-
-      synchronized (lock) {
-        Xid xid = new XidImpl(new byte[0], 1, Long.toString(System.currentTimeMillis()).getBytes());
-        if (logmon.isLoggable(BasicLevel.DEBUG)) {
-          logmon.log(BasicLevel.DEBUG, "run: xid = " + xid);
-        }
-
-        try {
-          resource.start(xid, XAResource.TMNOFLAGS);
-        } catch (XAException exc) {
-          if (logmon.isLoggable(BasicLevel.WARN)) {
-            logmon.log(BasicLevel.WARN, "Exception:: XA can't start resource : " + resource, exc);
-          }
-        }
-
-        try {
-          Xid[] xids = resource.recover(XAResource.TMNOFLAGS);
-          if (logmon.isLoggable(BasicLevel.DEBUG)) {
-            logmon.log(BasicLevel.DEBUG, "run: XA xid.length=" + xids.length);
-          }
-          // if needed recover this resource, and commit.
-          for (int i = 0; i < xids.length; i++) {
-            if (logmon.isLoggable(BasicLevel.INFO)) {
-              logmon
-                  .log(BasicLevel.INFO, "XARecoverDaemon : commit this " + xids[i].getGlobalTransactionId());
-            }
-            resource.commit(xids[i], false);
-            if (logmon.isLoggable(BasicLevel.DEBUG)) {
-              logmon.log(BasicLevel.DEBUG, "run: XA commit xid=" + xids[i]);
-            }
-          }
-
-          // ended the recover.
-          resource.end(xid, XAResource.TMSUCCESS);
-        } catch (XAException e) {
-          if (logmon.isLoggable(BasicLevel.DEBUG)) {
-            logmon.log(BasicLevel.DEBUG, "Exception:: run", e);
-          }
-        }
-      }
-    }
+    listeners.add(listener);
   }
 
 }

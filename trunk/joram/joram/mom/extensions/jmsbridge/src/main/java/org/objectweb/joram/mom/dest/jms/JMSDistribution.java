@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,14 +22,17 @@
  */
 package org.objectweb.joram.mom.dest.jms;
 
-import javax.jms.IllegalStateException;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
+import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
-import javax.transaction.xa.XAException;
-import javax.transaction.xa.XAResource;
-import javax.transaction.xa.Xid;
+import javax.jms.Session;
 
-import org.objectweb.joram.client.jms.XidImpl;
 import org.objectweb.joram.mom.dest.DistributionHandler;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -37,99 +40,142 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Debug;
 
-public class JMSDistribution extends JMSModule implements DistributionHandler {
+/**
+ * Distribution handler for the JMS distribution bridge.
+ */
+public class JMSDistribution implements DistributionHandler {
 
   private static final Logger logger = Debug.getLogger(JMSDistribution.class.getName());
 
-  /** Producer object. */
-  protected MessageProducer producer;
+  private static final String DESTINATION_NAME_PROP = "jms.DestinationName";
+
+  private static final String UPDATE_PERIOD_PROP = "jms.ConnectionUpdatePeriod";
+
+  private static final String ROUTING_PROP = "jms.Routing";
+
+  // LRU (Least Recently Used) Map.
+  private LinkedHashMap<String, SessionAndProducer> sessions = new LinkedHashMap<String, SessionAndProducer>(
+      16, 0.75f, true);
+
+  private List<String> connectionNames = null;
+
+  /** Destination JNDI name. */
+  private String destName;
+
+  private long lastUpdate = 0;
+  
+  private long updatePeriod = 5000L;
+
+  public void init(Properties properties) {
+    destName = properties.getProperty(DESTINATION_NAME_PROP);
+    if (destName == null) {
+      throw new IllegalArgumentException("Missing Destination JNDI name.");
+    }
+    try {
+      if (properties.containsKey(UPDATE_PERIOD_PROP)) {
+        updatePeriod = Long.parseLong(properties.getProperty(UPDATE_PERIOD_PROP));
+      }
+    } catch (NumberFormatException nfe) {
+      logger.log(BasicLevel.ERROR, "Property " + UPDATE_PERIOD_PROP
+          + "could not be parsed properly, use default value.", nfe);
+    }
+    if (properties.containsKey(ROUTING_PROP)) {
+      connectionNames = JMSConnectionService.convertToList(properties.getProperty(ROUTING_PROP));
+    }
+  }
 
   public void distribute(Message message) throws Exception {
-    if (!usable) {
-      throw new IllegalStateException(notUsableMessage);
-    }
 
-    if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "send(" + message + ')');
-    }
+    List<String> connectionNames = this.connectionNames;
 
-    synchronized (lock) {
-      Xid xid = null;
-      if (isXA) {
-        xid = new XidImpl(new byte[0], 1, message.id.getBytes());
-        if (logger.isLoggable(BasicLevel.DEBUG)) {
-          logger.log(BasicLevel.DEBUG, "send: xid=" + xid);
-        }
-
-        try {
-          xaRes.start(xid, XAResource.TMNOFLAGS);
-        } catch (XAException e) {
-          if (logger.isLoggable(BasicLevel.WARN)) {
-            logger.log(BasicLevel.WARN, "Exception:: XA can't start resource : " + xaRes, e);
-          }
-        }
+    if (message.properties != null) {
+      Object customRouting = message.properties.get(ROUTING_PROP);
+      if (customRouting != null && customRouting instanceof String) {
+        connectionNames = JMSConnectionService.convertToList((String) customRouting);
       }
+    }
 
-      producer.send(org.objectweb.joram.client.jms.Message.wrapMomMessage(null, message));
-
+    // Update sessions if necessary
+    long now = System.currentTimeMillis();
+    if (now - lastUpdate > updatePeriod) {
       if (logger.isLoggable(BasicLevel.DEBUG)) {
-        logger.log(BasicLevel.DEBUG, "send: " + producer + " send.");
+        logger.log(BasicLevel.DEBUG, "Updating sessions.");
       }
-
-      if (isXA) {
-        try {
-          xaRes.end(xid, XAResource.TMSUCCESS);
+      List<JMSModule> connections = JMSConnectionService.getInstance().getConnections();
+      for (final JMSModule connection : connections) {
+        if (!sessions.containsKey(connection.getCnxFactName())) {
           if (logger.isLoggable(BasicLevel.DEBUG)) {
-            logger.log(BasicLevel.DEBUG, "send: XA end " + xaRes);
+            logger.log(BasicLevel.DEBUG, connection.getCnxFactName()
+                + ": New connection factory available for distribution.");
           }
-        } catch (XAException e) {
-          throw new JMSException("resource end(...) failed: " + xaRes + " :: " + e.getMessage());
-        }
-        try {
-          int ret = xaRes.prepare(xid);
-          if (ret == XAResource.XA_OK) {
-            xaRes.commit(xid, false);
-          }
-          if (logger.isLoggable(BasicLevel.DEBUG)) {
-            logger.log(BasicLevel.DEBUG, "send: XA commit " + xaRes);
-          }
-        } catch (XAException e) {
           try {
-            xaRes.rollback(xid);
+            Session session = connection.getCnx().createSession(false, Session.AUTO_ACKNOWLEDGE);
+            Destination dest = (Destination) connection.retrieveJndiObject(destName);
+            MessageProducer producer = session.createProducer(dest);
+            sessions.put(connection.getCnxFactName(), new SessionAndProducer(session, producer));
+          } catch (Exception exc) {
             if (logger.isLoggable(BasicLevel.DEBUG)) {
-              logger.log(BasicLevel.DEBUG, "send: XA rollback " + xaRes);
+              logger.log(BasicLevel.DEBUG, "Connection is not usable.", exc);
             }
-          } catch (XAException e1) {
           }
-          throw new JMSException("XA resource rollback(" + xid + ") failed: " + xaRes + " :: "
-              + e.getMessage());
         }
+      }
+      lastUpdate = now;
+    }
+
+    // Send the message
+    Iterator<Map.Entry<String, SessionAndProducer>> iter = sessions.entrySet().iterator();
+    while (iter.hasNext()) {
+      Map.Entry<String, SessionAndProducer> entry = iter.next();
+      try {
+        SessionAndProducer session = entry.getValue();
+        String cnxName = entry.getKey();
+        if (connectionNames != null && !connectionNames.contains(cnxName)) {
+          continue;
+        }
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
+          logger.log(BasicLevel.DEBUG, "Sending message on " + session.producer.getDestination() + " using "
+              + cnxName);
+        }
+        session.producer.send(org.objectweb.joram.client.jms.Message.wrapMomMessage(null, message));
+        sessions.get(cnxName); // Access the used connection to update the LRU map
+        return;
+      } catch (JMSException exc) {
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
+          logger.log(BasicLevel.DEBUG, "Session is not usable, remove from table.", exc);
+        }
+        iter.remove();
       }
     }
+
+    throw new Exception("Message could not be sent, no usable channel found.");
   }
 
-  /**
-   * Opens a connection with the foreign JMS server and creates the JMS
-   * resources for interacting with the foreign JMS destination.
-   * 
-   * @exception JMSException
-   *              If the needed JMS resources could not be created.
-   */
-  protected void doConnect() throws JMSException {
-    super.doConnect();
-    producer = session.createProducer(dest);
+  public void close() {
+    for (SessionAndProducer session : sessions.values()) {
+      try {
+        session.producer.close();
+        session.session.close();
+      } catch (JMSException exc) {
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
+          logger.log(BasicLevel.DEBUG, "Error while stopping JmsDistribution.", exc);
+        }
+      }
+    }
+    sessions.clear();
   }
   
-  /**
-   * Opens a XA connection with the foreign JMS server and creates the XA JMS
-   * resources for interacting with the foreign JMS destination.
-   * 
-   * @exception JMSException
-   *              If the needed JMS resources could not be created.
-   */
-  protected void doXAConnect() throws JMSException {
-    super.doXAConnect();
-    producer = session.createProducer(dest);
+  private class SessionAndProducer {
+
+    Session session;
+
+    MessageProducer producer;
+
+    public SessionAndProducer(Session session, MessageProducer producer) {
+      super();
+      this.session = session;
+      this.producer = producer;
+    }
   }
 
 }
