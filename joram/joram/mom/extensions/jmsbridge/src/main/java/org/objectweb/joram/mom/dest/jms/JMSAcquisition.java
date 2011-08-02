@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,215 +22,322 @@
  */
 package org.objectweb.joram.mom.dest.jms;
 
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
+import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageFormatException;
 import javax.jms.MessageListener;
 import javax.jms.Queue;
+import javax.jms.Session;
 import javax.jms.Topic;
-import javax.transaction.xa.XAException;
-import javax.transaction.xa.XAResource;
-import javax.transaction.xa.Xid;
 
-import org.objectweb.joram.client.jms.XidImpl;
 import org.objectweb.joram.mom.dest.AcquisitionDaemon;
 import org.objectweb.joram.mom.dest.ReliableTransmitter;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
+import fr.dyade.aaa.common.Daemon;
 import fr.dyade.aaa.common.Debug;
 
-public class JMSAcquisition extends JMSModule implements AcquisitionDaemon, MessageListener {
+/**
+ * Acquisition daemon for the JMS acquisition bridge.
+ */
+public class JMSAcquisition implements AcquisitionDaemon {
 
-  private static final Logger logger = Debug.getLogger(JMSDistribution.class.getName());
+  private static final Logger logger = Debug.getLogger(JMSAcquisition.class.getName());
 
-  /** Consumer object. */
-  protected MessageConsumer consumer;
+  private static final String DESTINATION_NAME_PROP = "jms.DestinationName";
 
-  /** Selector for filtering messages. */
-  protected String selector;
+  private static final String UPDATE_PERIOD_PROP = "jms.ConnectionUpdatePeriod";
+
+  private static final String ROUTING_PROP = "jms.Routing";
+  
+  private static final String DURABLE_SUBSCRIPTION_PROP = "jms.DurableSubscriptionName";
+
+  private static ConnectionUpdater connectionUpdater;
 
   private ReliableTransmitter transmitter;
 
+  // Use a vector as it is used by 2 different threads
+  private Map<String, Session> sessions = new Hashtable<String, Session>();
+
+  /** If routing prop has been set, it defines a list of connection to use. */
+  private List<String> connectionNames = null;
+
+  private volatile boolean closing = false;
+
+  /** The JNDI name of the foreign JMS destination. */
+  private String destName;
+
+  /** Foreign JMS destination object. */
+  private Destination dest = null;
+
+  /** Selector for filtering messages. */
+  protected String selector;
+  
+  private String durableSubscriptionName = null;
+
   public void start(Properties properties, ReliableTransmitter transmitter) {
-    super.init(properties);
-    if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "<init>(" + properties + ')');
-    }
     this.transmitter = transmitter;
-    selector = properties.getProperty("selector");
+
+    destName = properties.getProperty(DESTINATION_NAME_PROP);
+    if (destName == null) {
+      throw new IllegalArgumentException("Missing Destination JNDI name.");
+    }
+
+    long updatePeriod = 5000L;
+    try {
+      if (properties.containsKey(UPDATE_PERIOD_PROP)) {
+        updatePeriod = Long.parseLong(properties.getProperty(UPDATE_PERIOD_PROP));
+      }
+    } catch (NumberFormatException nfe) {
+      logger.log(BasicLevel.ERROR, "Property " + UPDATE_PERIOD_PROP
+          + "could not be parsed properly, use default value.", nfe);
+    }
+
+    connectionNames = null;
+    if (properties.containsKey(ROUTING_PROP)) {
+      connectionNames = JMSConnectionService.convertToList(properties.getProperty(ROUTING_PROP));
+    }
+
+    durableSubscriptionName = null;
+    if (properties.containsKey(DURABLE_SUBSCRIPTION_PROP)) {
+      durableSubscriptionName = properties.getProperty(DURABLE_SUBSCRIPTION_PROP);
+    }
+
+    if (connectionUpdater == null) {
+      connectionUpdater = new ConnectionUpdater(updatePeriod);
+    }
+    connectionUpdater.addUpdateListener(this);
   }
 
   public void stop() {
-    super.close();
     if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "close()");
-    }
-    unsetMessageListener();
-  }
-
-  /**
-   * Sets a message listener on the foreign JMS destination.
-   * 
-   * @exception javax.jms.IllegalStateException
-   *              If the module state does not allow to set a listener.
-   */
-  protected void connectionDone() {
-
-    if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "setMessageListener()");
+      logger.log(BasicLevel.DEBUG, "Stop JMSAcquisition.");
     }
 
-    try {
-      try {
-        if (dest instanceof Queue) {
-          consumer = session.createConsumer(dest, selector);
-        } else {
-          consumer = session.createDurableSubscriber((Topic) dest, "JMSAcquisition", selector, false);
-        }
-        if (logger.isLoggable(BasicLevel.DEBUG)) {
-          logger.log(BasicLevel.DEBUG, "setConsumer: consumer=" + consumer);
-        }
-
-      } catch (JMSException exc) {
-        throw exc;
-      } catch (Exception exc) {
-        throw new JMSException("JMS resources do not allow to create consumer: " + exc);
-      }
-      consumer.setMessageListener(this);
-      cnx.start();
-    } catch (JMSException exc) {
-    }
-  }
-
-  /**
-   * Unsets the set message listener on the foreign JMS destination.
-   */
-  private void unsetMessageListener() {
-    if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "unsetMessageListener()");
-    }
-
-    try {
-      cnx.stop();
-      consumer.setMessageListener(null);
-      if (logger.isLoggable(BasicLevel.DEBUG)) {
-        logger.log(BasicLevel.DEBUG, "unsetConsumer()");
-      }
-      try {
-        if (dest instanceof Topic) {
-          session.unsubscribe("JMSAcquisition");
-        }
-
-        consumer.close();
-      } catch (Exception exc) {
-      }
-
-      consumer = null;
-    } catch (JMSException exc) {
-    }
-  }
-
-  /**
-   * Implements the {@link MessageListener} interface for processing the
-   * asynchronous deliveries coming from the foreign JMS server.
-   */
-  public void onMessage(javax.jms.Message jmsMessage) {
-    if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "onMessage(" + jmsMessage + ')');
-    }
-    try {
-      Xid xid = null;
-      synchronized (lock) {
+    connectionUpdater.removeUpdateListener(this);
+    
+    closing = true;
+    synchronized (sessions) {
+      for (Session session : sessions.values()) {
         try {
-          if (isXA) {
-            xid = new XidImpl(new byte[0], 1, Long.toString(System.currentTimeMillis()).getBytes());
-            if (logger.isLoggable(BasicLevel.DEBUG)) {
-              logger.log(BasicLevel.DEBUG, "onMessage: xid=" + xid);
-            }
+          session.close();
+        } catch (JMSException exc) {
+          if (logger.isLoggable(BasicLevel.DEBUG)) {
+            logger.log(BasicLevel.DEBUG, "Error while stopping JmsAcquisition.", exc);
+          }
+        }
+      }
+      sessions.clear();
+    }
+  }
 
-            try {
-              xaRes.start(xid, XAResource.TMNOFLAGS);
-            } catch (XAException e) {
-              if (logger.isLoggable(BasicLevel.WARN)) {
-                logger.log(BasicLevel.WARN, "Exception onMessage:: XA can't start resource : " + xaRes,
-                    e);
+  /**
+   * Create a new JMS consumer for each connection available.
+   */
+  public void updateConnections(List<JMSModule> connections) {
+    for (JMSModule connection : connections) {
+      if (!sessions.containsKey(connection.getCnxFactName())) {
+        if (connectionNames == null || connectionNames.contains(connection.getCnxFactName())) {
+          if (logger.isLoggable(BasicLevel.DEBUG)) {
+            logger.log(BasicLevel.DEBUG,
+                "Creating a new consumer for connection: " + connection.getCnxFactName());
+          }
+          try {
+            dest = (Destination) connection.retrieveJndiObject(destName);
+  
+            Session session = connection.getCnx().createSession(false, Session.AUTO_ACKNOWLEDGE);
+            MessageConsumer consumer;
+            if (dest instanceof Queue) {
+              consumer = session.createConsumer(dest, selector);
+            } else {
+              if (durableSubscriptionName != null) {
+                consumer = session.createDurableSubscriber((Topic) dest, durableSubscriptionName, selector, false);
+              } else {
+                consumer = session.createConsumer(dest, selector);
               }
             }
+            if (logger.isLoggable(BasicLevel.DEBUG)) {
+              logger.log(BasicLevel.DEBUG, "setConsumer: consumer=" + consumer);
+            }
+  
+            JmsListener listener = new JmsListener(session, connection.getCnxFactName());
+            consumer.setMessageListener(listener);
+            connection.getCnx().start();
+            connection.addExceptionListener(listener);
+            sessions.put(connection.getCnxFactName(), session);
+          } catch (Exception e) {
+            logger.log(BasicLevel.ERROR,
+                "Error while starting consumer on connection: " + connection.getCnxFactName(), e);
           }
+        }
+      }
+    }
+  }
+
+  class JmsListener implements MessageListener {
+
+    private String name;
+
+    private Session session;
+
+    public JmsListener(Session session, String name) {
+      this.session = session;
+      this.name = name;
+    }
+
+    /**
+     * Implements the {@link MessageListener} interface for processing the
+     * asynchronous deliveries coming from the foreign JMS server.
+     */
+    public void onMessage(javax.jms.Message jmsMessage) {
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "onMessage(" + jmsMessage + ')');
+      }
+      try {
+        try {
+
           org.objectweb.joram.client.jms.Message clientMessage = org.objectweb.joram.client.jms.Message
               .convertJMSMessage(jmsMessage);
           Message momMessage = clientMessage.getMomMsg();
 
           transmitter.transmit(momMessage, jmsMessage.getJMSMessageID());
 
-          if (isXA) {
-            try {
-              xaRes.end(xid, XAResource.TMSUCCESS);
-              if (logger.isLoggable(BasicLevel.DEBUG)) {
-                logger.log(BasicLevel.DEBUG, "onMessage: XA end " + xaRes);
-              }
-            } catch (XAException e) {
-              if (logger.isLoggable(BasicLevel.DEBUG)) {
-                logger.log(BasicLevel.DEBUG, "Exception onMessage:: XA resource end(...) failed: "
-                    + xaRes, e);
-              }
-              throw new JMSException("onMessage: XA resource end(...) failed: " + xaRes + " :: "
-                  + e.getMessage());
-            }
-            try {
-              int ret = xaRes.prepare(xid);
-              if (ret == XAResource.XA_OK) {
-                xaRes.commit(xid, false);
-              }
-              if (logger.isLoggable(BasicLevel.DEBUG)) {
-                logger.log(BasicLevel.DEBUG, "onMessage: XA commit " + xaRes);
-              }
-            } catch (XAException e) {
-              if (logger.isLoggable(BasicLevel.DEBUG)) {
-                logger.log(BasicLevel.DEBUG, "Exception onMessage:: XA resource rollback(" + xid + ")", e);
-              }
-              try {
-                xaRes.rollback(xid);
-                if (logger.isLoggable(BasicLevel.DEBUG)) {
-                  logger.log(BasicLevel.DEBUG, "onMessage: XA rollback " + xaRes);
-                }
-              } catch (XAException e1) {
-              }
-              throw new JMSException("onMessage: XA resource rollback(" + xid + ") failed: " + xaRes
-                  + " :: " + e.getMessage());
-            }
-
-          } else {
-            if (logger.isLoggable(BasicLevel.DEBUG)) {
-              logger.log(BasicLevel.DEBUG, "onMessage: commit.");
-            }
-            session.commit();
+          if (logger.isLoggable(BasicLevel.DEBUG)) {
+            logger.log(BasicLevel.DEBUG, "onMessage: commit.");
           }
+          session.commit();
 
         } catch (MessageFormatException conversionExc) {
           // Conversion error: denying the message.
-          if (isXA) {
-            try {
-              xaRes.rollback(xid);
-              if (logger.isLoggable(BasicLevel.DEBUG)) {
-                logger.log(BasicLevel.DEBUG, "run: XA rollback " + xaRes);
-              }
-            } catch (XAException e1) {
-            }
-          } else {
-            session.rollback();
-            if (logger.isLoggable(BasicLevel.DEBUG)) {
-              logger.log(BasicLevel.DEBUG, "Exception:: onMessage: rollback.");
-            }
+
+          session.rollback();
+          if (logger.isLoggable(BasicLevel.DEBUG)) {
+            logger.log(BasicLevel.DEBUG, "Exception:: onMessage: rollback.");
           }
         }
+      } catch (JMSException exc) {
+        // Commit or rollback failed: nothing to do.
       }
-    } catch (JMSException exc) {
-      // Commit or rollback failed: nothing to do.
+    }
+
+    public void onException(JMSException exception) {
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, name + ": Consumer error for session " + session);
+      }
+      if (!closing) {
+        sessions.remove(name);
+      }
+    }
+
+  }
+
+  /**
+   * Daemon used to periodically update the pool of connections known by the
+   * acquisition destinations.
+   */
+  private static class ConnectionUpdater extends Daemon {
+
+    private List<JMSAcquisition> listeners = new ArrayList<JMSAcquisition>();
+
+    private long period;
+
+    /** Constructs a <code>ConnectionUpdater</code> thread. */
+    protected ConnectionUpdater(long updatePeriod) {
+      super("JMS_ConnectionUpdater", logger);
+      setDaemon(false);
+      period = updatePeriod;
+      if (logmon.isLoggable(BasicLevel.DEBUG)) {
+        logmon.log(BasicLevel.DEBUG, "ConnectionUpdater<init>");
+      }
+    }
+
+    /** The daemon's loop. */
+    public void run() {
+      if (logmon.isLoggable(BasicLevel.DEBUG)) {
+        logmon.log(BasicLevel.DEBUG, "run()");
+      }
+
+      try {
+        boolean firstTime = true;
+        while (running) {
+          if (logmon.isLoggable(BasicLevel.DEBUG)) {
+            logmon.log(BasicLevel.DEBUG, "update connections in " + period + " ms");
+          }
+
+          canStop = true;
+          if (firstTime) {
+            firstTime = false;
+          } else {
+            try {
+              Thread.sleep(period);
+            } catch (InterruptedException exc) {
+              if (logmon.isLoggable(BasicLevel.DEBUG)) {
+                logmon.log(BasicLevel.DEBUG, "Thread interrupted.");
+              }
+              continue;
+            }
+          }
+          canStop = false;
+
+          if (logmon.isLoggable(BasicLevel.DEBUG)) {
+            logmon.log(BasicLevel.DEBUG, "update connections");
+          }
+
+          List<JMSModule> currentConnections = JMSConnectionService.getInstance().getConnections();
+
+          synchronized (listeners) {
+            if (listeners.size() == 0) {
+              stop();
+            }
+            for (JMSAcquisition listener : listeners) {
+              listener.updateConnections(currentConnections);
+            }
+          }
+
+        }
+      } finally {
+        finish();
+      }
+    }
+
+    /** Shuts the daemon down. */
+    public void shutdown() {
+      interrupt();
+    }
+
+    /** Releases the daemon's resources. */
+    public void close() {
+    }
+
+    protected void addUpdateListener(JMSAcquisition listener) {
+      synchronized (listeners) {
+        listeners.add(listener);
+        if (listeners.size() == 1) {
+          start();
+        }
+      }
+
+      List<JMSModule> existingConnections = JMSConnectionService.getInstance().getConnections();
+      listener.updateConnections(existingConnections);
+
+    }
+
+    protected void removeUpdateListener(JMSAcquisition listener) {
+      synchronized (listeners) {
+        listeners.remove(listener);
+        if (listeners.size() == 0) {
+          stop();
+        }
+      }
     }
   }
 
