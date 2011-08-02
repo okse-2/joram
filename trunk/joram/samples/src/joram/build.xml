@@ -29,6 +29,7 @@
     <path id="felix.class.path">
       <pathelement path="${java.class.path}/"/>
       <fileset file="${felix.dir}/felix.jar"/>
+      <pathelement path="${run.dir}"/>
     </path>
     <property name="felix.class.path" refid="felix.class.path"/>  	
   </target>
@@ -55,7 +56,8 @@
            deprecation="${deprecation}"
            optimize="${optimize}"
            nowarn="${nowarn}"
-           verbose="${verbose}">
+           verbose="${verbose}"
+           includeantruntime="false">
       <classpath refid="project.class.path"/>
       <include name="**/*.java"/>
     </javac>
