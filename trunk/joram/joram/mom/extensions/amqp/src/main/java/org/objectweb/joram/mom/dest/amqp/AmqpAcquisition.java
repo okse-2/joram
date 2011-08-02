@@ -24,10 +24,10 @@ package org.objectweb.joram.mom.dest.amqp;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Vector;
 
 import org.objectweb.joram.mom.dest.AcquisitionDaemon;
 import org.objectweb.joram.mom.dest.ReliableTransmitter;
@@ -62,11 +62,13 @@ public class AmqpAcquisition implements AcquisitionDaemon {
 
   private ReliableTransmitter transmitter;
 
-  // Use a vector as it is used by 2 different threads
-  private List<Channel> channels = new Vector<Channel>();
+  // Use a hashtable as it is used by 2 different threads
+  private Map<String, Channel> channels = new Hashtable<String, Channel>();
 
+  /** If routing prop has been set, it defines a list of connection to use. */
   private List<String> connectionNames = null;
 
+  /** The name of the foreign AMQP queue. */
   private String amqpQueue = null;
 
   private volatile boolean closing = false;
@@ -89,6 +91,7 @@ public class AmqpAcquisition implements AcquisitionDaemon {
           + "could not be parsed properly, use default value.", nfe);
     }
 
+    connectionNames = null;
     if (properties.containsKey(ROUTING_PROP)) {
       connectionNames = AmqpConnectionService.convertToList(properties.getProperty(ROUTING_PROP));
     }
@@ -108,7 +111,7 @@ public class AmqpAcquisition implements AcquisitionDaemon {
     
     closing = true;
     synchronized (channels) {
-      for (Channel channel : channels) {
+      for (Channel channel : channels.values()) {
         try {
           channel.close();
         } catch (IOException exc) {
@@ -124,22 +127,24 @@ public class AmqpAcquisition implements AcquisitionDaemon {
   /**
    * Create a new AMQP consumer for each connection available.
    */
-  public void onNewConnections(List<LiveServerConnection> connections) {
+  public void updateConnections(List<LiveServerConnection> connections) {
     for (LiveServerConnection connection : connections) {
-      if (connectionNames == null || connectionNames.contains(connection.getName())) {
-        if (logger.isLoggable(BasicLevel.DEBUG)) {
-          logger.log(BasicLevel.DEBUG, "Creating a new consumer on queue " + amqpQueue + " for connection "
-              + connection.getName());
-        }
-        try {
-          Channel chan = connection.getConnection().createChannel();
-          chan.queueDeclarePassive(amqpQueue);
-          AmqpConsumer consumer = new AmqpConsumer(chan, connection.getName());
-          chan.basicConsume(amqpQueue, false, consumer);
-          channels.add(chan);
-        } catch (Exception e) {
-          logger.log(BasicLevel.ERROR,
-              "Error while starting consumer on connection: " + connection.getName(), e);
+      if (!channels.containsKey(connection.getName())) {
+        if (connectionNames == null || connectionNames.contains(connection.getName())) {
+          if (logger.isLoggable(BasicLevel.DEBUG)) {
+            logger.log(BasicLevel.DEBUG, "Creating a new consumer on queue " + amqpQueue + " for connection "
+                + connection.getName());
+          }
+          try {
+            Channel chan = connection.getConnection().createChannel();
+            chan.queueDeclarePassive(amqpQueue);
+            AmqpConsumer consumer = new AmqpConsumer(chan, connection.getName());
+            chan.basicConsume(amqpQueue, false, consumer);
+            channels.put(connection.getName(), chan);
+          } catch (Exception e) {
+            logger.log(BasicLevel.ERROR,
+                "Error while starting consumer on connection: " + connection.getName(), e);
+          }
         }
       }
     }
@@ -220,7 +225,7 @@ public class AmqpAcquisition implements AcquisitionDaemon {
         logger.log(BasicLevel.DEBUG, name + ": Consumer error for connection " + getChannel().getConnection());
       }
       if (!closing) {
-        channels.remove(getChannel());
+        channels.remove(name);
       }
     }
 
@@ -232,15 +237,13 @@ public class AmqpAcquisition implements AcquisitionDaemon {
    */
   private static class ConnectionUpdater extends Daemon {
 
-    private List<LiveServerConnection> connections = new ArrayList<LiveServerConnection>();
-
     private List<AmqpAcquisition> listeners = new ArrayList<AmqpAcquisition>();
 
     private long period;
 
     /** Constructs a <code>ConnectionUpdater</code> thread. */
     protected ConnectionUpdater(long updatePeriod) {
-      super("ConnectionUpdater", logger);
+      super("AMQP_ConnectionUpdater", logger);
       setDaemon(false);
       period = updatePeriod;
       if (logmon.isLoggable(BasicLevel.DEBUG)) {
@@ -282,19 +285,14 @@ public class AmqpAcquisition implements AcquisitionDaemon {
 
           List<LiveServerConnection> currentConnections = AmqpConnectionService.getInstance().getConnections();
 
-          List<LiveServerConnection> newConnections = new ArrayList<LiveServerConnection>(currentConnections);
-          newConnections.removeAll(connections);
-
           synchronized (listeners) {
             if (listeners.size() == 0) {
               stop();
             }
             for (AmqpAcquisition listener : listeners) {
-              listener.onNewConnections(newConnections);
+              listener.updateConnections(currentConnections);
             }
           }
-
-          connections = currentConnections;
 
         }
       } finally {
@@ -309,7 +307,6 @@ public class AmqpAcquisition implements AcquisitionDaemon {
 
     /** Releases the daemon's resources. */
     public void close() {
-      connections.clear();
     }
 
     protected void addUpdateListener(AmqpAcquisition listener) {
@@ -319,9 +316,9 @@ public class AmqpAcquisition implements AcquisitionDaemon {
           start();
         }
       }
-      List<LiveServerConnection> existingConnections;
-      existingConnections = new ArrayList<LiveServerConnection>(connections);
-      listener.onNewConnections(existingConnections);
+
+      List<LiveServerConnection> currentConnections = AmqpConnectionService.getInstance().getConnections();
+      listener.updateConnections(currentConnections);
 
     }
 
