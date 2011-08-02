@@ -8,7 +8,7 @@
     <service class="fr.dyade.aaa.agent.AdminProxy" args="7890"/>
     <service class="org.objectweb.joram.mom.proxies.ConnectionManager" args="root root"/>
     <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" args="16010"/>
-    <service class="org.objectweb.joram.mom.dest.jms.JmsConnectionService" args="foreignCF"/>
+    <service class="org.objectweb.joram.mom.dest.jms.JMSConnectionService" args="foreignCF"/>
   </server>
 
   <server id="1" name="S1" hostname="localhost">
