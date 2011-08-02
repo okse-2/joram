@@ -65,16 +65,8 @@ public class DistributionAdmin {
 
       // Setting the bridge properties
       Properties prop = new Properties();
-      // Foreign QueueConnectionFactory JNDI name: foreignCF
-      prop.setProperty("connectionFactoryName", "foreignCF");
       // Foreign Queue JNDI name: foreignDest
-      prop.setProperty("destinationName", "foreignQueue");
-      // automaticRequest
-      String autoReq = System.getProperty("automaticRequest", "false");
-      prop.setProperty("automaticRequest", autoReq);
-
-      prop.setProperty("jndiFactory", "fr.dyade.aaa.jndi2.client.NamingContextFactory");
-      prop.setProperty("jndiUrl", "scn://localhost:16400");
+      prop.setProperty("jms.DestinationName", "foreignQueue");
 
       prop.setProperty("distribution.className", JMSDistribution.class.getName());
 
@@ -85,13 +77,8 @@ public class DistributionAdmin {
 
       // Setting the bridge properties
       prop = new Properties();
-      // Foreign QueueConnectionFactory JNDI name: foreignCF
-      prop.setProperty("connectionFactoryName", "foreignCF");
       // Foreign Queue JNDI name: foreignDest
-      prop.setProperty("destinationName", "foreignTopic");
-
-      prop.setProperty("jndiFactory", "fr.dyade.aaa.jndi2.client.NamingContextFactory");
-      prop.setProperty("jndiUrl", "scn://localhost:16400");
+      prop.setProperty("jms.DestinationName", "foreignTopic");
 
       prop.setProperty("distribution.className", JMSDistribution.class.getName());
 
