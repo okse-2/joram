@@ -113,7 +113,8 @@ public class SCAdminOSGi implements SCAdminItf {
     argv.add(javapath);
 
     argv.add("-classpath");
-    argv.add(felixbin.getAbsolutePath());
+    argv.add("." + File.pathSeparatorChar + felixbin.getAbsolutePath());
+    
     if (jvmargs != null) {
       for (int i = 0; i < jvmargs.length; i++)
         argv.add(jvmargs[i]);
