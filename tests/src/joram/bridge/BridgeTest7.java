@@ -57,9 +57,11 @@ public class BridgeTest7 extends TestCase {
       startAgentServer((short) 0);
       startAgentServer((short) 1);
       startAgentServer((short) 2);
-      Thread.sleep(8000);
 
+      Thread.sleep(8000);
       admin();
+      Thread.sleep(1000);
+
       System.out.println("admin config ok");
 
       javax.naming.Context jndiCtx = new javax.naming.InitialContext();
@@ -108,13 +110,13 @@ public class BridgeTest7 extends TestCase {
       }
 
       for (int i = 1; i < 6; i++) {
-        msg = (TextMessage) foreignCons1.receive();
+        msg = (TextMessage) foreignCons1.receive(5000);
         assertNotNull(msg);
         System.out.println("Consumer 1: receive msg = " + msg.getText());
       }
 
       for (int i = 1; i < 6; i++) {
-        msg = (TextMessage) foreignCons2.receive();
+        msg = (TextMessage) foreignCons2.receive(5000);
         assertNotNull(msg);
         System.out.println("Consumer 2: receive msg = " + msg.getText());
       }
