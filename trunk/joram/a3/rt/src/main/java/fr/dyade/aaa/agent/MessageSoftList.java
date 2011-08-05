@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -82,11 +82,7 @@ public class MessageSoftList {
 
     public Object next() {
       MessageSoftRef msgRef = (MessageSoftRef) iterator.next();
-      Message msg = msgRef.getMessage();
-      if (msg == null) {
-        msg = msgRef.loadMessage();
-      }
-      return msg;
+      return msgRef.loadMessage();
     }
 
     public void remove() {
@@ -165,14 +161,13 @@ public class MessageSoftList {
         ack = null;
       } else if (msgToSendlist.size() > 0) {
         MessageSoftRef msgRef = (MessageSoftRef) msgToSendlist.first();
-        msg = msgRef.getMessage();
-        if (msg == null) {
-          msg = msgRef.loadMessage();
-        }
-        if (msg.not.expiration > 0 && msg.not.expiration < System.currentTimeMillis()) {
+
+        if (msgRef.isExpired(System.currentTimeMillis())) {
           msgToSendlist.remove(msgRef);
-          removeExpired(msg);
-          msg = null;
+          removeExpired(msgRef);
+          return null;
+        } else {
+          msg = msgRef.loadMessage();
         }
       }
     } else {
@@ -184,11 +179,33 @@ public class MessageSoftList {
         if (msg.not.expiration > 0 && msg.not.expiration < System.currentTimeMillis()) {
           msgToSendlist.remove(msg);
           removeExpired(msg);
-          msg = null;
+          return null;
         }
       }
     }
     return msg;
+  }
+
+  /**
+   * Removes the expired message, if needed an ExpiredNot is sent to the
+   * deadNotificationAgentId specified.
+   * 
+   * @param msg
+   *          The message to remove.
+   */
+  private void removeExpired(MessageSoftRef msgRef) {
+    if (msgRef.getDeadNotAgentId() != null) {
+      Message msg = msgRef.loadMessage();
+      removeExpired(msg);
+    } else {
+      try {
+        AgentServer.getTransaction().begin();
+        msgRef.delete();
+        AgentServer.getTransaction().commit(true);
+      } catch (Exception exc) {
+        logmon.log(BasicLevel.ERROR, "exception when deleting expired msg#" + msgRef.getStamp(), exc);
+      }
+    }
   }
 
   /**
@@ -226,8 +243,7 @@ public class MessageSoftList {
 
       AgentServer.getTransaction().commit(true);
     } catch (Exception exc) {
-      if (logmon.isLoggable(BasicLevel.WARN))
-        logmon.log(BasicLevel.WARN, "exception in removeExpired msg#" + msg.getStamp(), exc);
+      logmon.log(BasicLevel.ERROR, "exception in removeExpired msg#" + msg.getStamp(), exc);
     }
   }
 
@@ -306,11 +322,37 @@ public class MessageSoftList {
 
   /**
    * Resets all messages waiting for an acknowledge: they are placed back at the
-   * beginning of the list respecting their stamp order.
+   * beginning of the list respecting their stamp order.<br>
+   * Furthermore, expired messages are removed from the list.
    */
   public synchronized void reset() {
     msgToSendlist.addAll(msgSentlist);
     msgSentlist.clear();
+    
+    long currentTime = System.currentTimeMillis();
+    if (persistent) {
+      for (Iterator iterator = msgToSendlist.iterator(); iterator.hasNext();) {
+        MessageSoftRef msgRef = (MessageSoftRef) iterator.next();
+        if (msgRef.isExpired(currentTime)) {
+          iterator.remove();
+          if (msgRef.getDeadNotAgentId() != null) {
+            Message msg = msgRef.loadMessage();
+            removeExpired(msg);
+          } else {
+            msgRef.delete();
+          }
+        }
+      }
+    } else {
+      for (Iterator iterator = msgToSendlist.iterator(); iterator.hasNext();) {
+        Message msg = (Message) iterator.next();
+        if (msg.not.expiration > 0 && msg.not.expiration < currentTime) {
+          iterator.remove();
+          removeExpired(msg);
+        }
+      }
+    }
+
   }
 
   /**
