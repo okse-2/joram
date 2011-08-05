@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -374,11 +374,7 @@ final class MessageVector implements MessageQueue {
 
     int idx = (first + index)%data.length;
     if (persistent) {
-      Message msg = ((MessageSoftRef) data[idx]).getMessage();
-      if (msg == null) {
-        msg = ((MessageSoftRef) data[idx]).loadMessage();
-      }
-      return msg;
+      return ((MessageSoftRef) data[idx]).loadMessage();
     }
     
     return (Message) data[idx];
