@@ -39,6 +39,8 @@ import org.objectweb.joram.mom.notifications.ExceptionReply;
 import org.objectweb.joram.mom.notifications.FwdAdminRequestNot;
 import org.objectweb.joram.mom.notifications.GetRightsReplyNot;
 import org.objectweb.joram.mom.notifications.GetRightsRequestNot;
+import org.objectweb.joram.mom.notifications.PingNot;
+import org.objectweb.joram.mom.notifications.PongNot;
 import org.objectweb.joram.mom.notifications.RequestGroupNot;
 import org.objectweb.joram.mom.notifications.WakeUpNot;
 import org.objectweb.joram.mom.proxies.SendRepliesNot;
@@ -225,6 +227,10 @@ public abstract class Destination extends Agent implements DestinationMBean {
           super.react(from, not);
         }
       } else if (not instanceof WakeUpNot) {
+        if (logger.isLoggable(BasicLevel.DEBUG)) {
+          logger.log(BasicLevel.ERROR, "wakeupnot received: current task=" + task + " update="
+              + ((WakeUpNot) not).update);
+        }
         setNoSave();
         if (task == null || ((WakeUpNot) not).update) {
           doSetPeriod(getPeriod());
@@ -232,10 +238,13 @@ public abstract class Destination extends Agent implements DestinationMBean {
         if (getPeriod() > 0) {
           wakeUpNot((WakeUpNot) not);
         }
-      } else if (not instanceof FwdAdminRequestNot)
+      } else if (not instanceof FwdAdminRequestNot) {
         handleAdminRequestNot(from, (FwdAdminRequestNot) not);
-      else
+      } else if (not instanceof PingNot) {
+        Channel.sendTo(from, new PongNot());
+      } else {
         throw new UnknownNotificationException(not.getClass().getName());
+      }
     } catch (MomException exc) {
       // MOM Exceptions are sent to the requester.
       if (logger.isLoggable(BasicLevel.WARN))
@@ -384,8 +393,10 @@ public abstract class Destination extends Agent implements DestinationMBean {
    *               value (ignore 0).
    */
   public void setPeriod(long period) {
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "setPeriod " + period + ", old was " + this.period);
+    }
     if (this.period != period) {
-      // Schedule the task.
       WakeUpNot not = new WakeUpNot();
       not.update = true;
       forward(getId(), not);
