@@ -33,6 +33,7 @@ import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Vector;
 
@@ -68,7 +69,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
   WatchDog watchDog = null;
 
   /** Synchronized vector of active (i.e. connected) sessions. */
-  Vector activeSessions;
+  List activeSessions;
 
   /**
    * Defines if the streams between servers are compressed or not.
@@ -754,7 +755,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
           canStop = false;
           if (! running) break;
 
-          // Send the message: Get a sender in the pool and gives the message to transmit.
+          // Send the message: Get the sender of the session dedicated to the correct server.
           // It must be done in an unique operation to avoid the release of the sender between
           // the getSender and the Sender.send methods.
           try {
@@ -900,17 +901,12 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
                   this.logmon.log(BasicLevel.DEBUG, this.getName() + ", waits message.");
                 wait();
                 if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                  this.logmon.log(BasicLevel.DEBUG, this.getName() + ", trace1.");
-                if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                  this.logmon.log(BasicLevel.DEBUG, this.getName() + ", trace2.");
+                  this.logmon.log(BasicLevel.DEBUG, this.getName() + ", wait finished cleanly. Go on.");
               }
             } catch (InterruptedException e) {
               if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                this.logmon.log(BasicLevel.DEBUG, this.getName() + ", trace3.");
+                this.logmon.log(BasicLevel.DEBUG, this.getName() + ", wait interrupted. Continue waiting if running.");
               continue;
-            } finally {
-              if (this.logmon.isLoggable(BasicLevel.DEBUG))
-                this.logmon.log(BasicLevel.DEBUG, this.getName() + ", trace4.");
             }
           }
           
@@ -1565,13 +1561,11 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
           }
         } catch (IOException exc) {
           if (logmon.isLoggable(BasicLevel.WARN))
-            logmon.log(BasicLevel.WARN,
-                     getName() + ", exception in sending message " + msg, exc);
+            logmon.log(BasicLevel.WARN, getName() + ", exception in sending message " + msg, exc);
         } catch (NullPointerException exc) {
           // The stream is closed
           if (logmon.isLoggable(BasicLevel.WARN))
-          logmon.log(BasicLevel.WARN,
-                     getName() + ", exception in sending message " + msg);
+            logmon.log(BasicLevel.WARN, getName() + ", exception in sending message " + msg, exc);
         }
       }
     }
