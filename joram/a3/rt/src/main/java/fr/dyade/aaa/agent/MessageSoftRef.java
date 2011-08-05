@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -61,9 +61,25 @@ public final class MessageSoftRef {
    */
   private String messageId;
 
+  /**
+   * The expiration date of the notification hold by the message, if any.
+   */
+  private long expiration;
+
+  /**
+   * The agent responsible of treating the notification when it expires. It is
+   * useful to avoid reloading messages from disk before deleting them if the
+   * field is empty.
+   */
+  private AgentId deadNotAgentId;
+
   MessageSoftRef(Message msg) {
     this.softRef = new SoftReference(msg);
     this.stamp = msg.stamp;
+    if (msg.not != null) {
+      this.expiration = msg.not.expiration;
+      this.deadNotAgentId = msg.not.deadNotificationAgentId;
+    }
     if (msg.isPersistent()) {
       name = msg.toStringId();
       if (msg.not.detachable && !msg.not.detached) {
@@ -75,13 +91,30 @@ public final class MessageSoftRef {
   }
 
   /**
+   * Tests whether the message has expired.
+   * 
+   * @param time the current time.
+   * @return true if the message has expired.
+   */
+  public boolean isExpired(long time) {
+    return expiration > 0 && expiration < time;
+  }
+
+  /**
+   * Returns the agent responsible of treating the notification when it expires.
+   */
+  public AgentId getDeadNotAgentId() {
+    return deadNotAgentId;
+  }
+
+  /**
    * Returns this reference message's referent. If the message has been swap out
    * it returns null.
    * 
    * @return The message to which this reference refers.
    */
   public Message getMessage() {
-    return null != ref ? ref : (Message) softRef.get();
+    return ref == null ? (Message) softRef.get() : ref;
   }
 
   /**
@@ -95,26 +128,25 @@ public final class MessageSoftRef {
   }
 
   /**
-   * Loads from disk this reference message's referent if the message has been
-   * swapped out. It should be called only after a getMessage returning null.
-   * The SoftReference is renewed to avoid reloading the message from disk each
-   * time this method is called.
+   * Returns the message to which this reference refers, loading it from disk if
+   * the message has been swapped out. If loading from disk is done, the
+   * SoftReference is renewed to avoid reloading the message each time this
+   * method is called.
    * 
    * @return The message to which this reference refers.
    */
   public Message loadMessage() throws TransactionError {
-    if (ref != null)
-      return ref;
-
-    Message msg;
-    try {
-      msg = Message.load(name);
-      softRef = new SoftReference(msg);
-      if (logmon.isLoggable(BasicLevel.DEBUG))
-        logmon.log(BasicLevel.DEBUG, "SoftReference: reload from disk " + msg);
-    } catch (Exception exc) {
-      logmon.log(BasicLevel.ERROR, "SoftReference: Can't load message " + name, exc);
-      throw new TransactionError(exc);
+    Message msg = getMessage();
+    if (msg == null) {
+      try {
+        msg = Message.load(name);
+        softRef = new SoftReference(msg);
+        if (logmon.isLoggable(BasicLevel.DEBUG))
+          logmon.log(BasicLevel.DEBUG, "SoftReference: reload from disk " + msg);
+      } catch (Exception exc) {
+        logmon.log(BasicLevel.ERROR, "SoftReference: Can't load message " + name, exc);
+        throw new TransactionError(exc);
+      }
     }
     return msg;
   }
