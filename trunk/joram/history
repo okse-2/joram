@@ -1,3 +1,18 @@
++==============================================================================
+| 2011/08/05 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Add new AliasQueue destination: this queue forwards messages to another Joram
+destination, holding messages when the destination is unreachable and pinging
+it to forward accumulated messages when link is restored.
+ +==============================================================================
+| 2011/08/02 | Guillaume Surrel - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ New version of the JMS acquisition/distribution bridge, mimicking the AMQP
+bridge:
+- New JMSConnectionService handling connections to the foreign JMS servers
+- Acquisition and distribution destinations can use all these connections or a
+subset of them using "jms.Routing" property.
+- XA has been removed
 ###############################################################################
 # 2011/07/13 | Joram 5.6.0 tag.
 ###############################################################################
@@ -26,7 +41,7 @@ component (the incoming component still connected).
  Adds root mechanism to create 'alias' destinations based on acquisition and
 distribution destinations.
 +==============================================================================
-| 2011/05/30 | Guillaume Surrel - ScalAgent Distributed Technologies 
+| 2011/06/15 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Adds a persistence mechanism for AMQP connections pool (AMQP acquisition and
 distribution destinations).
