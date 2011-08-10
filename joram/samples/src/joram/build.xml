@@ -1123,6 +1123,17 @@
     </java>
   </target>
 
+  <!-- Runs the performance sample consumer on queue -->
+  <target name="perfs_cons_qx" depends="simple_init"
+    description="--> Starts the PERFS consumer">
+    <java classname="perfs.Consumer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-DNbMaxMessage=200000" />
+      <arg line="queue"/>
+    </java>
+  </target>
+
   <!-- Runs the performance sample producer: send 50.000 transient messages on topic -->
   <target name="perfs_prod_t1" depends="simple_init"
     description="--> Starts the PERFS producer">
