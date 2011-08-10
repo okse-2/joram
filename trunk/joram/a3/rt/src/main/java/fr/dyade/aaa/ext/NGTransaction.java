@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -36,7 +36,6 @@ import java.util.Map.Entry;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
-import fr.dyade.aaa.common.Configuration;
 import fr.dyade.aaa.common.Debug;
 import fr.dyade.aaa.util.AbstractTransaction;
 import fr.dyade.aaa.util.Operation;
@@ -66,8 +65,7 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
    *  This value can be adjusted for a particular server by setting
    * <code>Transaction.LogMemoryCapacity</code> specific property.
    * <p>
-   *  This property can be fixed only from <code>java</code> launching
-   * command, or through System.property method.
+   *  This property can be set only at first launching.
    */
   static int LogMemoryCapacity = 4096;
 
@@ -94,8 +92,7 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
    *  This value can be adjusted (Mb) for a particular server by setting
    * <code>Transaction.MaxLogFileSize</code> specific property.
    * <p>
-   *  This property can be fixed only from <code>java</code> launching
-   * command, or through System.property method.
+   *  This property can be set only at first launching.
    */
   static int MaxLogFileSize = 16 * Mb;
 
@@ -132,11 +129,10 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
    *  This value can be adjusted for a particular server by setting
    * <code>Transaction.NbLogFile</code> specific property.
    * <p>
-   *  This property can be fixed only from <code>java</code> launching
-   * command, or through System.property method.
+   *  This property can be set only at first launching.
    */
   static int nbLogFile = 4;
-
+  
   /**
    * Returns the number of rolled log files.
    * 
@@ -145,26 +141,50 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
   public final int getNbLogFiles() {
     return nbLogFile;
   }
-  
-  /** If true every write in the log file is synced to disk. */
-  boolean syncOnWrite = false;
 
   /**
-   * @return the syncOnWrite
+   *  Minimum number of 'live' objects in a disk log before a garbage, by
+   * default 64.
+   *  This value can be adjusted for a particular server by setting
+   * <code>Transaction.minObjInLog</code> specific property.
+   * <p>
+   *  This property can be set only at first launching.
+   */
+  static int minObjInLog = 64;
+  
+  /**
+   *  If true every write in the log file is synced to disk, by default
+   * false. This value can be adjusted for a particular server by setting
+   * <code>Transaction.SyncOnWrite</code> specific property.
+   * <p>
+   *  This property can be set only at first launching.
+   */
+  boolean syncOnWrite = false;
+  
+  /**
+   * @return the syncOnWrite value.
    */
   public boolean isSyncOnWrite() {
     return syncOnWrite;
   }
 
   /**
+   *  If true use a lock file to avoid multiples activation of Transaction
+   * component. This value can be adjusted for a particular server by setting
+   * <code>Transaction.UseLockFile</code> specific property.
+   * <p>
+   *  This property can be set only at first launching.
+   */
+  boolean useLockFile = true;
+
+  /**
    *  Number of pooled operation, by default 1000.
    *  This value can be adjusted for a particular server by setting
    * <code>Transaction.LogThresholdOperation</code> specific property.
    * <p>
-   *  This property can be fixed only from <code>java</code> launching
-   * command, or through System.property method.
+   *  This property can be set only at first launching.
    */
-  static int LogThresholdOperation = 1000;
+  int LogThresholdOperation = 1000;
 
   /**
    * Returns the pool size for <code>operation</code> objects, by default 1000.
@@ -226,8 +246,7 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
    * <code>Transaction.RepositoryImpl</code> specific property. By default its value
    * is "fr.dyade.aaa.util.FileRepository".
    * <p>
-   *  This property can be fixed only from <code>java</code> launching
-   * command, or through System.property method.
+   *  This property can be set only at first launching.
    */
   String repositoryImpl = "fr.dyade.aaa.util.FileRepository";
 
@@ -283,17 +302,18 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
   public NGTransaction() {}
 
   public final void initRepository() throws IOException {
-    LogMemoryCapacity = Configuration.getInteger("Transaction.LogMemoryCapacity", LogMemoryCapacity).intValue();
-    MaxLogFileSize = Configuration.getInteger("Transaction.MaxLogFileSize", MaxLogFileSize / Mb).intValue() * Mb;
-    nbLogFile = Configuration.getInteger("Transaction.NbLogFile", nbLogFile).intValue();
-
-    LogThresholdOperation = Configuration.getInteger("Transaction.LogThresholdOperation", LogThresholdOperation).intValue();
+    LogMemoryCapacity = getInteger("Transaction.LogMemoryCapacity", LogMemoryCapacity).intValue();
+    MaxLogFileSize = getInteger("Transaction.MaxLogFileSize", MaxLogFileSize / Mb).intValue() * Mb;
+    nbLogFile = getInteger("Transaction.NbLogFile", nbLogFile).intValue();
+    minObjInLog = getInteger("Transaction.minObjInLog", minObjInLog).intValue();
+    
+    LogThresholdOperation = getInteger("Transaction.LogThresholdOperation", LogThresholdOperation).intValue();
     Operation.initPool(LogThresholdOperation);
 
     try {
-      repositoryImpl = Configuration.getProperty("Transaction.RepositoryImpl", repositoryImpl);
+      repositoryImpl = getProperty("Transaction.RepositoryImpl", repositoryImpl);
       repository = (Repository) Class.forName(repositoryImpl).newInstance();
-      repository.init(dir);
+      repository.init(this, dir);
     } catch (ClassNotFoundException exc) {
       logmon.log(BasicLevel.FATAL,
                  "NTransaction, cannot initializes the repository ", exc);
@@ -308,8 +328,10 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
       throw new IOException(exc.getMessage());
     }
     
-    syncOnWrite = Boolean.getBoolean("Transaction.SyncOnWrite");
-    logManager = new LogManager(dir, repository, syncOnWrite);
+    syncOnWrite = getBoolean("Transaction.SyncOnWrite");
+    useLockFile = getBoolean("Transaction.UseLockFile");
+
+    logManager = new LogManager(dir, repository, useLockFile, syncOnWrite);
   }
 
   /**
@@ -489,11 +511,11 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
     }
 
     setPhase(FINALIZE);
-    try {
-      logManager.garbage();
-    } catch (IOException exc) {
-      logmon.log(BasicLevel.WARN, "NTransaction, can't garbage log files", exc);
-    }
+//    try {
+//      logManager.garbage();
+//    } catch (IOException exc) {
+//      logmon.log(BasicLevel.WARN, "NTransaction, can't garbage log files", exc);
+//    }
     setPhase(FREE);
 
     if (logmon.isLoggable(BasicLevel.INFO)) {
@@ -594,12 +616,12 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
     
     private String mode;
     
-    LogManager(File dir, Repository repository, boolean syncOnWrite) throws IOException {
+    LogManager(File dir, Repository repository,
+               boolean useLockFile, boolean syncOnWrite) throws IOException {
       super(4 * Kb);
       this.repository = repository;
       
-      boolean UseLockFile = Configuration.getBoolean("Transaction.UseLockFile");
-      if (UseLockFile) {
+      if (useLockFile) {
         lockFile = new File(dir, LockPathname);
         if (! lockFile.createNewFile()) {
           logmon.log(BasicLevel.FATAL,
@@ -878,7 +900,10 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
       ctxlog.clear();
       
       for (int i=0; i<nbLogFile; i++) {
-        if ((logFile[i] != null) && (logFile[i].logCounter == 0)) {
+        if (logFile[i] == null) continue;
+
+        if ((logFile[i].logCounter == 0) ||
+            ((i != (logidx%nbLogFile)) && (logFile[i].logCounter < minObjInLog))) {
           // The related log file is no longer useful, cleans it in order to speed up the
           // restart after a crash.
           if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -1026,25 +1051,70 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
       return list;
     }
 
-    /**
-     * Reports all logged operations on disk.
-     */
-    private final void garbage() throws IOException {
-      if (logmon.isLoggable(BasicLevel.DEBUG)) {
-        logmon.log(BasicLevel.DEBUG, "log -> " + log.size());
-        for (int i=0; i<logFile.length; i++) {
-          if (logFile[i] != null)
-            logmon.log(BasicLevel.FATAL, "logCounter[" + logFile[i].logidx + "]=" + logFile[i].logCounter);
-        }
-
-        for (Enumeration<Operation> e = log.elements(); e.hasMoreElements();) {
-          Operation op = e.nextElement();
-          logmon.log(BasicLevel.DEBUG, op);
-        }
+//    /**
+//     * Reports all logged operations on disk.
+//     */
+//    private final void garbage() throws IOException {
+//      if (logmon.isLoggable(BasicLevel.DEBUG)) {
+//        logmon.log(BasicLevel.DEBUG, "log -> " + log.size());
+//        for (int i=0; i<logFile.length; i++) {
+//          if (logFile[i] != null)
+//            logmon.log(BasicLevel.FATAL, "logCounter[" + logFile[i].logidx + "]=" + logFile[i].logCounter);
+//        }
+//
+//        for (Enumeration<Operation> e = log.elements(); e.hasMoreElements();) {
+//          Operation op = e.nextElement();
+//          logmon.log(BasicLevel.DEBUG, op);
+//        }
+//      }
+//
+//      for (int i=0; i<nbLogFile; i++)
+//        garbage(logFile[i]);
+//    }
+    
+    public String logCounters() {
+      StringBuffer strbuf = new StringBuffer();
+      for (int i=0; i<logFile.length; i++) {
+        if (logFile[i] == null) continue;
+        strbuf.append("log#").append(logFile[i].logidx).append(" -> ").append(logFile[i].logCounter).append('\n');
       }
+      return strbuf.toString();
+    }
 
-      for (int i=0; i<nbLogFile; i++)
-        garbage(logFile[i]);
+    public String logContent(int idx) {
+      LogFile logf = logFile[idx%nbLogFile];
+      if (logf == null) return null;
+
+      StringBuffer strbuf = new StringBuffer();
+
+      strbuf.append("counter=").append(logf.logCounter).append('\n');
+
+      Iterator<Operation> iterator = log.values().iterator();
+
+      try {
+        while (true) {
+          Operation op = iterator.next();
+
+          if (op.logidx != logf.logidx) continue;
+
+          if (op.type == Operation.SAVE) {
+            strbuf.append("SAVE ");
+          } else if (op.type == Operation.CREATE) {
+            strbuf.append("CREATE ");
+          } else if (op.type == Operation.DELETE) {
+            strbuf.append("DELETE ");
+          } else {
+            strbuf.append("OP(").append(op.type).append(") ");
+          }
+          strbuf.append(op.dirName).append('/').append(op.name).append('\n');
+        }
+      } catch (NoSuchElementException exc) {}
+
+      return strbuf.toString();
+    }
+    
+    private final void garbage(int idx) throws IOException {
+      garbage(logFile[idx%nbLogFile]);
     }
     
     /**
@@ -1105,7 +1175,7 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
         logf.close();
 
         // Rename the log for a future use
-        logf.renameTo(logf.logidx + nbLogFile);
+        logf.renameTo();
         // Cleans the log file array
         logFile[logf.logidx%nbLogFile] = null;
       }
@@ -1120,12 +1190,12 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
     }
 
     void stop() {
-      try {
-        garbage();
-      } catch (IOException exc) {
-        // TODO Auto-generated catch block
-        exc.printStackTrace();
-      }
+//      try {
+//        garbage();
+//      } catch (IOException exc) {
+//        // TODO Auto-generated catch block
+//        exc.printStackTrace();
+//      }
       
       if ((lockFile != null) && (! lockFile.delete())) {
         logmon.log(BasicLevel.FATAL,
@@ -1186,6 +1256,9 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
 
     File dir;
     
+    /** Maximum index of existing log files */
+    static int maxUsedIdx = -1;
+    
     /**
      *  Creates a random access file stream to read from and to write to the file specified
      * by the File argument.
@@ -1196,12 +1269,14 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
      */
     public LogFile(File dir, int logidx, String mode) throws FileNotFoundException {
       super(new File(dir, "log#" + logidx), mode);
+      if (logidx > maxUsedIdx) maxUsedIdx = logidx;
       this.logidx = logidx;
       this.dir = dir;
     }
 
-    public void renameTo(int newidx) {
-      new File(dir, "log#" + logidx).renameTo(new File(dir, "log#" + newidx));
+    public void renameTo() {
+      new File(dir, "log#" + logidx).renameTo(new File(dir, "log#" + maxUsedIdx));
+      maxUsedIdx += 1;
     }
   }
   
@@ -1227,6 +1302,23 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
     strbuf.append(')');
     
     return strbuf.toString();
+  }
+
+  public String logCounters() {
+    return logManager.logCounters();
+  }
+  
+  public String logContent(int idx) throws IOException {
+    begin();
+    String res = logManager.logContent(idx);
+    commit(true);
+    return res;
+  }
+
+  public void garbage(int idx) throws IOException {
+    begin();
+    logManager.garbage(idx);
+    commit(true);
   }
 }
 
