@@ -58,6 +58,33 @@
     </s1>
    
     <s1 name="Latest News">
+      <s2 name="July 13, 2011: JORAM 5.6.0 release is available.">
+      <p>This release introduces some improvements and bug fixes, essentially:</p>
+      <ul>
+        <li>Changes on JCA connector enabling Joram to be started as a JOnAS OSGi service.</li>
+        <li>Evolves AMQP acquisition and distribution destinations:<ul>
+          <li>Adds persistence to distribution queues for messages that can't be
+          distributed. The queue tries to send the messages regularly.</li>
+          <li>Adds a persistence mechanism for AMQP connections pool (AMQP acquisition and
+          distribution destinations).</li>
+          <li>Fix NPE in AMQP distribution destination when amqp.Routing property is not
+          correctly set.</li>
+          <li>Fix possible NPE in JMS module for acquisition and distribution JMS bridge
+          destinations.</li>
+        </ul></li>
+        <li>Fix a potential issue in PoolNetwork when a connection is initiated by a bad
+        component (the incoming component still connected).</li>
+        <li>Adds samples configurations for Derby and NGT Transaction components.</li>
+        <li>Adds samples configurations and clients for HttpNetwork Network components.</li>
+        <li>Updates performance sample.</li>
+      </ul>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>,
+      and in Maven repository.</p>
+      <p>It is tagged in SVN (JORAM_5_6_0), the complete list of changes can be viewed either in
+      <a href="dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
+      </s2>
+
       <s2 name="March 28, 2011: JORAM 5.5.0 release is available.">
       <p>This release introduces some improvements and bug fixes, essentially:</p>
       <ul>
