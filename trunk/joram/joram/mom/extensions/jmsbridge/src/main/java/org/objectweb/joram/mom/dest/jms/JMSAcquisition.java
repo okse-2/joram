@@ -60,6 +60,8 @@ public class JMSAcquisition implements AcquisitionDaemon {
   private static final String ROUTING_PROP = "jms.Routing";
   
   private static final String DURABLE_SUBSCRIPTION_PROP = "jms.DurableSubscriptionName";
+  
+  private static final String SELECTOR_PROP = "jms.Selector";
 
   private static ConnectionUpdater connectionUpdater;
 
@@ -110,6 +112,11 @@ public class JMSAcquisition implements AcquisitionDaemon {
     durableSubscriptionName = null;
     if (properties.containsKey(DURABLE_SUBSCRIPTION_PROP)) {
       durableSubscriptionName = properties.getProperty(DURABLE_SUBSCRIPTION_PROP);
+    }
+
+    selector = null;
+    if (properties.containsKey(SELECTOR_PROP)) {
+      selector = properties.getProperty(SELECTOR_PROP);
     }
 
     if (connectionUpdater == null) {
