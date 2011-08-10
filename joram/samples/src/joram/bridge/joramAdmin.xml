@@ -24,13 +24,9 @@
 
   <Queue name="bridgeQueue" serverId="1"
          className="org.objectweb.joram.mom.dest.DistributionQueue">
-    <property name="jndiFactory" value="fr.dyade.aaa.jndi2.client.NamingContextFactory"/>
-    <property name="jndiUrl" value="scn://localhost:16400"/>
-    <property name="connectionFactoryName" value="cf"/>
-    <property name="destinationName" value="queue"/>
+    <property name="jms.DestinationName" value="queue"/>
     <property name="distribution.className" value="org.objectweb.joram.mom.dest.jms.JMSDistribution"/>
   
-    <freeReader/>
     <freeWriter/>
     
     <jndi name="bridgeQueue"/>
@@ -38,10 +34,7 @@
   
   <Topic name="bridgeTopic" serverId="1"
          className="org.objectweb.joram.mom.dest.AcquisitionTopic">
-    <property name="jndiFactory" value="fr.dyade.aaa.jndi2.client.NamingContextFactory"/>
-    <property name="jndiUrl" value="scn://localhost:16400"/>
-    <property name="connectionFactoryName" value="cf"/>
-    <property name="destinationName" value="topic"/>
+    <property name="jms.DestinationName" value="topic"/>
     <property name="acquisition.className" value="org.objectweb.joram.mom.dest.jms.JMSAcquisition"/>
   
     <freeReader/>
