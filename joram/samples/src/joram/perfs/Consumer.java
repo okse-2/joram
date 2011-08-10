@@ -42,7 +42,8 @@ public class Consumer implements MessageListener {
   static ConnectionFactory cf = null;
 
   static int NbMsgPerRound = 10000;
-
+  static int NbMaxMessage = -1;
+  
   static boolean durable = false;
   static boolean transacted = true;
   static boolean dupsOk = true;
@@ -68,7 +69,8 @@ public class Consumer implements MessageListener {
     implicitAck = getBoolean("implicitAck", implicitAck);
 
     NbMsgPerRound = Integer.getInteger("NbMsgPerRound", NbMsgPerRound).intValue();
-
+    NbMaxMessage = Integer.getInteger("NbMaxMessage", NbMaxMessage).intValue();
+    
     InitialContext ictx = new InitialContext();
     Destination dest = (Destination) ictx.lookup(args[0]);
     ConnectionFactory cf = (ConnectionFactory) ictx.lookup("cf");
@@ -101,16 +103,24 @@ public class Consumer implements MessageListener {
       } else {
         consumer = session.createConsumer(dest);
       }
-      consumer.setMessageListener(new Consumer());
+      Consumer listener = new Consumer();
+      consumer.setMessageListener(listener);
       cnx.start();
 
-      System.in.read();
+      if (NbMaxMessage == -1) {
+        System.in.read();
+      } else {
+        do {
+          Thread.sleep(1000L);
+        } while (listener.counter < NbMaxMessage);
+      }
     } finally {
+      consumer.close();
       if (durable && dest instanceof Topic) {
-        consumer.close();
         session.unsubscribe("dursub");
       }
     }
+    if (transacted) session.commit();
     cnx.close();
   }
 
