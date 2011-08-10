@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,7 +37,7 @@ public interface Repository {
   /**
    * Initializes the repository.
    */
-  public void init(File dir) throws IOException;
+  public void init(Transaction transaction, File dir) throws IOException;
 
   /**
    * Gets a list of persistent objects that name corresponds to prefix.

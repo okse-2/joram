@@ -27,7 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 
-public final class NullTransaction implements Transaction, NullTransactionMBean {
+public final class NullTransaction extends BaseTransaction implements NullTransactionMBean {
   protected long startTime = 0L;
 
   /**

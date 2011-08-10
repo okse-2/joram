@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -170,23 +170,23 @@ public final class MySqlDBRepository implements Repository {
    * Initializes the repository.
    * Opens the connection, evntually creates the database and tables.
    */
-  public void init(File dir)  throws IOException {
+  public void init(Transaction transaction, File dir)  throws IOException {
     this.dir = dir;
 
     try {
       Class.forName(driver).newInstance();
-//       conn = DriverManager.getConnection(connurl + new File(dir, "JoramDB").getPath() + ";shutdown=true;server.no_system_exit=true", "sa", "");
+      //       conn = DriverManager.getConnection(connurl + new File(dir, "JoramDB").getPath() + ";shutdown=true;server.no_system_exit=true", "sa", "");
       Properties props = new Properties();
       /*
       props.put("user", "user1");
       props.put("password", "user1");
-      */
+       */
       props.put("user", user);
       props.put("password", pass);
 
       /*
       conn = DriverManager.getConnection(connurl + new File(dir, "JoramDB").getPath() + ";create=true", props);
-      */
+       */
       // conn = DriverManager.getConnection(connurl, props); // MySQL (the database must exist and start seperately)
       conn = getConnection();
       conn.setAutoCommit(false);
@@ -204,21 +204,21 @@ public final class MySqlDBRepository implements Repository {
       // Creating a statement lets us issue commands against the connection.
       Statement s = conn.createStatement();
       // We create the table.
-//         s.execute("create cached table JoramDB(name VARCHAR PRIMARY KEY, content VARBINARY(256))");
+      //         s.execute("create cached table JoramDB(name VARCHAR PRIMARY KEY, content VARBINARY(256))");
       /*
       s.execute("CREATE TABLE JoramDB (name VARCHAR(256), content LONG VARCHAR FOR BIT DATA, PRIMARY KEY(name))");
-      */
+       */
       s.execute("CREATE TABLE JoramDB (name VARCHAR(256), content longblob, primary key(name))"); // MySQL
       s.close();
       conn.commit();
     } catch (SQLException sqle) {
-        String exceptionString = sqle.toString();
-        if (exceptionString.indexOf("CREATE command denied") == -1)
-        {
-            sqle.printStackTrace();
-        }
+      String exceptionString = sqle.toString();
+      if (exceptionString.indexOf("CREATE command denied") == -1)
+      {
+        sqle.printStackTrace();
+      }
     } catch (Exception e) {
-        e.printStackTrace();
+      e.printStackTrace();
     }
 
     try {
