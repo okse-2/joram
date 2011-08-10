@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,7 +33,6 @@ import java.util.TimerTask;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
-import fr.dyade.aaa.common.Configuration;
 import fr.dyade.aaa.common.Debug;
 
 /**
@@ -58,8 +57,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
    *  This value can be adjusted for a particular server by setting
    * <code>NTLogMemoryCapacity</code> specific property.
    * <p>
-   *  This property can be fixed only from <code>java</code> launching
-   * command, or through System.property method.
+   *  This property can be set only at first launching.
    */
   static int LogMemoryCapacity = 4096;
 
@@ -77,8 +75,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
    *  This value can be adjusted (Kb) for a particular server by setting
    * <code>NTLogMemorySize</code> specific property.
    * <p>
-   *  This property can be fixed only from <code>java</code> launching
-   * command, or through System.property method.
+   *  This property can be set only at first launching.
    */
   static int MaxLogMemorySize = 2048 * Kb;
 
@@ -115,8 +112,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
    *  This value can be adjusted (Mb) for a particular server by setting
    * <code>NTLogFileSize</code> specific property.
    * <p>
-   *  This property can be fixed only from <code>java</code> launching
-   * command, or through System.property method.
+   *  This property can be set only at first launching.
    */
   static int MaxLogFileSize = 16 * Mb;
 
@@ -158,12 +154,20 @@ public final class NTransaction extends AbstractTransaction implements NTransact
   }
 
   /**
+   *  If true use a lock file to avoid multiples activation of Transaction
+   * component. This value can be adjusted for a particular server by setting
+   * <code>Transaction.minObjInLog</code> specific property.
+   * <p>
+   *  This property can be set only at first launching.
+   */
+  boolean useLockFile = true;
+
+  /**
    *  Number of pooled operation, by default 1000.
    *  This value can be adjusted for a particular server by setting
    * <code>NTLogThresholdOperation</code> specific property.
    * <p>
-   *  This property can be fixed only from <code>java</code> launching
-   * command, or through System.property method.
+   *  This property can be set only at first launching.
    */
   static int LogThresholdOperation = 1000;
 
@@ -293,8 +297,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
    * <code>NTRepositoryImpl</code> specific property. By default its value
    * is "fr.dyade.aaa.util.FileRepository".
    * <p>
-   *  This property can be fixed only from <code>java</code> launching
-   * command, or through System.property method.
+   *  This property can be set only at first launching.
    */
   String repositoryImpl = "fr.dyade.aaa.util.FileRepository";
 
@@ -361,17 +364,17 @@ public final class NTransaction extends AbstractTransaction implements NTransact
   }
 
   public final void initRepository() throws IOException {
-    LogMemoryCapacity = Configuration.getInteger("NTLogMemoryCapacity", LogMemoryCapacity).intValue();
-    MaxLogFileSize = Configuration.getInteger("NTLogFileSize", MaxLogFileSize / Mb).intValue() * Mb;
-    MaxLogMemorySize = Configuration.getInteger("NTLogMemorySize", MaxLogMemorySize / Kb).intValue() * Kb;
+    LogMemoryCapacity = getInteger("NTLogMemoryCapacity", LogMemoryCapacity).intValue();
+    MaxLogFileSize = getInteger("NTLogFileSize", MaxLogFileSize / Mb).intValue() * Mb;
+    MaxLogMemorySize = getInteger("NTLogMemorySize", MaxLogMemorySize / Kb).intValue() * Kb;
 
-    LogThresholdOperation = Configuration.getInteger("NTLogThresholdOperation", LogThresholdOperation).intValue();
+    LogThresholdOperation = getInteger("NTLogThresholdOperation", LogThresholdOperation).intValue();
     Operation.initPool(LogThresholdOperation);
 
     try {
       repositoryImpl = System.getProperty("NTRepositoryImpl", repositoryImpl);
       repository = (Repository) Class.forName(repositoryImpl).newInstance();
-      repository.init(dir);
+      repository.init(this, dir);
     } catch (ClassNotFoundException exc) {
       logmon.log(BasicLevel.FATAL,
                  "NTransaction, cannot initializes the repository ", exc);
@@ -386,12 +389,13 @@ public final class NTransaction extends AbstractTransaction implements NTransact
       throw new IOException(exc.getMessage());
     }
     
-    syncOnWrite = Boolean.getBoolean("NTSyncOnWrite");
-    logFile = new LogFile(dir, repository, syncOnWrite);
+    syncOnWrite = getBoolean("NTSyncOnWrite");
+    useLockFile = getBoolean("NTNoLockFile");
+    logFile = new LogFile(dir, repository, useLockFile, syncOnWrite);
     
     // Be careful, setGarbageDelay and garbageAsync use logFile !!
-    setGarbageDelay(Configuration.getInteger("NTGarbageDelay", getGarbageDelay()).intValue());
-    garbageAsync(Configuration.getBoolean("NTAsyncGarbage"));
+    setGarbageDelay(getInteger("NTGarbageDelay", getGarbageDelay()).intValue());
+    garbageAsync(getBoolean("NTAsyncGarbage"));
   }
 
   /**
@@ -736,12 +740,12 @@ public final class NTransaction extends AbstractTransaction implements NTransact
     
     private String mode;
 
-    LogFile(File dir, Repository repository, boolean syncOnWrite) throws IOException {
+    LogFile(File dir, Repository repository,
+            boolean useLockFile, boolean syncOnWrite) throws IOException {
       super(4 * Kb);
       this.repository = repository;
 
-      boolean nolock = Boolean.getBoolean("NTNoLockFile");
-      if (! nolock) {
+      if (! useLockFile) {
         lockFile = new File(dir, LockPathname);
         if (! lockFile.createNewFile()) {
           logmon.log(BasicLevel.FATAL,

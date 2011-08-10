@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -52,17 +52,70 @@ public interface Transaction {
    * @throws IOException
    */
   void init(String path) throws IOException;
+  
+  /**
+   * Searches for the property with the specified key in the specific Transaction
+   * property list. If the key is not found in this property list, the Configuration
+   * property list is then checked.
+   * The method returns <code>null</code> if the property is not found.
+   *
+   * @param   key   the property key.
+   * @return  the value corresponding to the specified key value.
+   */
+  String getProperty(String key);
+  
+  /**
+   * Searches for the property with the specified key in the specific Transaction
+   * property list. If the key is not found in this property list, the Configuration
+   * property list is then checked. The method returns the default value argument
+   * if the property is not found.
+   *
+   * @param   key            the property key.
+   * @param   defaultValue   a default value.
+   *
+   * @return  the value corresponding to the specified key value.
+   */
+  String getProperty(String key, String defaultValue);
+  
+  /**
+   * Determines the integer value of the property with the specified name.
+   * 
+   * @param key
+   *          property name.
+   * @return the Integer value of the property.
+   */
+  Integer getInteger(String key);
+
+  /**
+   * Determines the integer value of the property with the specified name.
+   * 
+   * @param key
+   *          property name.
+   * @param value
+   *          a default value.
+   * @return the Integer value of the property.
+   */
+  Integer getInteger(String key, int value);
+  
+  /**
+   * Returns <code>true</code> if and only if the corresponding property exists
+   * and is equal to the string {@code "true"}.
+   *
+   * @param   name   the property name.
+   * @return  the <code>boolean</code> value of the property.
+   */
+  boolean getBoolean(String key);
 
   /**
    * Returns the transaction state.
    * @return the transaction state.
    */
-  public int getPhase();
+  int getPhase();
   /**
    * Returns a string representation of the transaction state.
    * @return the string representation of the transaction state.
    */
-  public String getPhaseInfo();
+  String getPhaseInfo();
 
   /**
    *  Start a transaction validation, the validation phase needs 3 phases: begin, commit

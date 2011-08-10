@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -38,8 +38,6 @@ import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import fr.dyade.aaa.common.Configuration;
-
 /**
  *  The JTransaction class implements a transactionnal storage.
  *  This implementation is simple but inefficient, its main advantage is
@@ -47,7 +45,7 @@ import fr.dyade.aaa.common.Configuration;
  *
  * @see Transaction
  */
-public final class JTransaction implements Transaction, JTransactionMBean {
+public final class JTransaction extends BaseTransaction implements JTransactionMBean {
   protected long startTime = 0L;
 
   /**
@@ -110,9 +108,11 @@ public final class JTransaction implements Transaction, JTransactionMBean {
       if (dos != null) dos.close();
     }
 
-    LogThresholdOperation = Configuration.getInteger("LogThresholdOperation", LogThresholdOperation).intValue();
+    loadProperties(dir);
+    LogThresholdOperation = getInteger("LogThresholdOperation", LogThresholdOperation).intValue();
     Operation.initPool(LogThresholdOperation);
-
+    saveProperties(dir);
+    
     // Read the log, then...
     int oldPhase = FREE;
 

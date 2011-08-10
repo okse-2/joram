@@ -22,6 +22,8 @@
  */
 package fr.dyade.aaa.ext;
 
+import java.io.IOException;
+
 import fr.dyade.aaa.util.TransactionMBean;
 
 /**
@@ -161,4 +163,10 @@ public interface NGTransactionMBean extends TransactionMBean {
    * @return The number of load operation from repository.
    */
   public int getNbLoadedObjects();
+  
+  public String logCounters();
+  
+  public String logContent(int idx) throws IOException;
+  
+  public void garbage(int idx) throws IOException;
 }

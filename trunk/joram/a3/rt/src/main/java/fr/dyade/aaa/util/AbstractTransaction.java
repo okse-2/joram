@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,9 +32,6 @@ import java.io.Serializable;
 import java.util.Hashtable;
 
 import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
-
-import fr.dyade.aaa.common.Debug;
 
 /**
  *  The AbstractTransaction class implements the common part of the Transaction
@@ -43,10 +40,7 @@ import fr.dyade.aaa.common.Debug;
  *
  * @see Transaction
  */
-public abstract class AbstractTransaction implements Transaction {
-  // Logging monitor
-  protected static Logger logmon = null;
-
+public abstract class AbstractTransaction extends BaseTransaction {
   protected long startTime = 0L;
 
   /**
@@ -57,7 +51,7 @@ public abstract class AbstractTransaction implements Transaction {
   public long getStartTime() {
     return startTime;
   }
-  
+
   public AbstractTransaction() {}
   
   // State of the transaction monitor.
@@ -106,7 +100,6 @@ public abstract class AbstractTransaction implements Transaction {
   public final void init(String path) throws IOException {
     phase = INIT;
 
-    logmon = Debug.getLogger(Transaction.class.getName());
     if (logmon.isLoggable(BasicLevel.INFO))
       logmon.log(BasicLevel.INFO, "Transaction, init():");
 
@@ -129,7 +122,9 @@ public abstract class AbstractTransaction implements Transaction {
       if (ldos != null) ldos.close();
     }
 
+    loadProperties(dir);
     initRepository();
+    saveProperties(dir);
     
     perThreadContext = new ThreadLocal() {
       protected synchronized Object initialValue() {

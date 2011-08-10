@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,8 +27,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-
-import fr.dyade.aaa.common.Configuration;
 
 /**
  *  This class allows to use a filesystem directory as repository with the
@@ -105,9 +103,9 @@ public final class FileRepository implements Repository {
    * Initializes the repository.
    * Nothing to do.
    */
-  public void init(File dir)  throws IOException {
+  public void init(Transaction transaction, File dir)  throws IOException {
     this.dir = dir;
-    useFileOutputStream = Configuration.getBoolean("FileRepository.useRandomAccessFile");
+    useFileOutputStream = transaction.getBoolean("FileRepository.useRandomAccessFile");
   }
 
   /**
