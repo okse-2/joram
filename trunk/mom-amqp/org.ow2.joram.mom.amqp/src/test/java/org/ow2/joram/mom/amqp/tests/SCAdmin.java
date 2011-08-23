@@ -24,6 +24,8 @@ package org.ow2.joram.mom.amqp.tests;
 
 import java.io.File;
 
+import org.ow2.joram.mom.amqp.MetaData;
+
 /**
  * Simplified Admin interface used to manage the start and the stop of non
  * collocated AgentServers.
@@ -38,7 +40,7 @@ public interface SCAdmin {
 
   public static final String RUNNING_DIR = System.getProperty("user.dir") + "/target/run";
 
-  public static final String JORAM_VERSION = "5.6.0";
+  public static final String JORAM_VERSION = MetaData.joram_version;
 
   /**
    * Starts a new AgentServer.
