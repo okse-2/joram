@@ -78,7 +78,7 @@ public class AMQPConnectionListener extends Daemon {
   /**
    * The implementation version of the broker.
    */
-  public static final String JORAM_AMQP_VERSION = "1.1-SNAPSHOT";
+  public static final String JORAM_AMQP_VERSION = MetaData.version;
 
   /**
    * The message locale that the server supports. The locale defines the
