@@ -17,21 +17,30 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Djamel-Eddine Boumchedda
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
-package jmx.remote.jms;
+package org.ow2.joram.jmxconnector.shared;
 
-import java.awt.Component;
-import javax.swing.JOptionPane;
+import java.io.Serializable;
+
+import javax.management.Notification;
+import javax.management.ObjectName;
 
 /**
- * JDialog to Show the error
+ * Class used to send Notification from server to client.
  */
-public class ShowMessageInformations {
-
-  public ShowMessageInformations(Component parentComponent, Object message, String titleOfMessage,
-      int messageType) {
-
-    JOptionPane.showMessageDialog(parentComponent, message, titleOfMessage, messageType);
+public class NotificationDesc implements Serializable {
+  public ObjectName name;
+  public Notification not;
+  
+  /**
+   * Initializes a new <code>NotificationDesc</code> object
+   * @param name
+   * @param not
+   */
+  public NotificationDesc(ObjectName name, Notification not) {
+    this.name = name;
+    this.not = not;
   }
 }

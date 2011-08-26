@@ -17,21 +17,23 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Djamel-Eddine Boumchedda
+ * Initial developer(s): ScalAgent Distributed Technologies
  */
-package jmx.remote.jms;
+package org.ow2.joram.jmxconnector.shared;
 
-import java.awt.Component;
-import javax.swing.JOptionPane;
+import java.io.Serializable;
+import javax.management.ObjectName;
 
 /**
- * JDialog to Show the error
+ * <b>AddNotificationListener</b> is the object that is sent by a requestor who
+ * wishes to appeal JMX addNotificationListener.
  */
-public class ShowMessageInformations {
+public class AddNotificationListener implements Serializable {
+  public ObjectName name;
+  public String qname;
 
-  public ShowMessageInformations(Component parentComponent, Object message, String titleOfMessage,
-      int messageType) {
-
-    JOptionPane.showMessageDialog(parentComponent, message, titleOfMessage, messageType);
+  public AddNotificationListener(ObjectName name, String qname) {
+    this.name = name;
+    this.qname = qname;
   }
 }
