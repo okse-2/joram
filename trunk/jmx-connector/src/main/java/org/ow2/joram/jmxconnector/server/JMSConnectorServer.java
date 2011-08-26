@@ -282,9 +282,9 @@ public class JMSConnectorServer extends JMXConnectorServer implements MessageLis
     } catch (Exception exc) {
       logger.log(BasicLevel.ERROR,
                  "JMSConnectorServer.onMessage: error handling request: " + request, exc);
-      // TODO(AF): Send an error reply to free the requestor
-      // reply = new ExceptionReply(exc);
-      return;
+      
+      // Send an error reply containing the exception to free the requestor
+      reply = exc;
     }
 
     ObjectMessage replyMsg = null;

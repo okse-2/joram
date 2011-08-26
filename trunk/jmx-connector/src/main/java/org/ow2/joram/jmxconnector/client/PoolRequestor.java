@@ -50,6 +50,8 @@ public class PoolRequestor {
     try {
       requestor = allocRequestor();
       reply = requestor.request(request);
+      if (reply instanceof Throwable)
+        throw new IOException((Throwable) reply);
     } catch (JMSException exc) {
       exc.printStackTrace();
       throw new IOException(exc);
