@@ -18,20 +18,23 @@
  * USA.
  *
  * Initial developer(s): Djamel-Eddine Boumchedda
+ * 
  */
-package jmx.remote.jms;
+package org.ow2.joram.jmxconnector.shared;
 
-import java.awt.Component;
-import javax.swing.JOptionPane;
+import java.io.Serializable;
+import javax.management.ObjectName;
 
 /**
- * JDialog to Show the error
+ * <b>GetMBeanInfo</b> is the object that is sent by a requestor who wishes to
+ * appeal JMX getMBeanInfo(ObjectName n).
+ * 
+ * @author Djamel-Eddine Boumchedda
  */
-public class ShowMessageInformations {
+public class GetMBeanInfo implements Serializable {
+  public ObjectName name;
 
-  public ShowMessageInformations(Component parentComponent, Object message, String titleOfMessage,
-      int messageType) {
-
-    JOptionPane.showMessageDialog(parentComponent, message, titleOfMessage, messageType);
+  public GetMBeanInfo(ObjectName n) {
+    name = n;
   }
 }

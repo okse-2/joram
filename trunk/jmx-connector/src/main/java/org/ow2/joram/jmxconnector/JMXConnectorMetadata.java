@@ -17,21 +17,19 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): Djamel-Eddine Boumchedda
+ * Initial developer(s): ScalAgent Distributed Technologies
+ * Contributor(s): 
  */
-package jmx.remote.jms;
-
-import java.awt.Component;
-import javax.swing.JOptionPane;
+package org.ow2.joram.jmxconnector;
 
 /**
- * JDialog to Show the error
+ *
  */
-public class ShowMessageInformations {
-
-  public ShowMessageInformations(Component parentComponent, Object message, String titleOfMessage,
-      int messageType) {
-
-    JOptionPane.showMessageDialog(parentComponent, message, titleOfMessage, messageType);
-  }
+public class JMXConnectorMetadata {
+  public final static String JMS_SERVER_PACKAGE = JMXConnectorMetadata.class.getPackage().getName();
+  /**
+   * Default value of the URL of the Joram server used by the instantiated
+   * connector: <code>service:jmx:jms:///tcp://localhost:16010</code>.
+   */
+  public final static String DefaultURL = "service:jmx:jms://localhost:16010";
 }

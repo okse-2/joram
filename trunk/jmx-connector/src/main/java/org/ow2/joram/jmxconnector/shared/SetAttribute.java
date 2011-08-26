@@ -18,20 +18,26 @@
  * USA.
  *
  * Initial developer(s): Djamel-Eddine Boumchedda
+ * 
  */
-package jmx.remote.jms;
+package org.ow2.joram.jmxconnector.shared;
 
-import java.awt.Component;
-import javax.swing.JOptionPane;
+import java.io.Serializable;
+import javax.management.ObjectName;
+import javax.management.Attribute;
 
 /**
- * JDialog to Show the error
+ * <b>SetAttribute</b> is the object that is sent by a requestor who wishes to
+ * appeal JMX setAttribute(ObjectName name, Attribute attribute).
+ * 
+ * @author Djamel-Eddine Boumchedda
  */
-public class ShowMessageInformations {
+public class SetAttribute implements Serializable {
+  public ObjectName name;
+  public Attribute attribute;
 
-  public ShowMessageInformations(Component parentComponent, Object message, String titleOfMessage,
-      int messageType) {
-
-    JOptionPane.showMessageDialog(parentComponent, message, titleOfMessage, messageType);
+  public SetAttribute(ObjectName n, Attribute at) {
+    name = n;
+    attribute = at;
   }
 }

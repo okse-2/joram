@@ -18,20 +18,16 @@
  * USA.
  *
  * Initial developer(s): Djamel-Eddine Boumchedda
+ * 
  */
-package jmx.remote.jms;
+package org.ow2.joram.jmxconnector.shared;
 
-import java.awt.Component;
-import javax.swing.JOptionPane;
+import java.io.Serializable;
 
 /**
- * JDialog to Show the error
+ * <b>GetDomains</b> is the object that is sent by a requestor who wishes to
+ * appeal JMX getDomains().
+ * 
+ * @author Djamel-Eddine Boumchedda
  */
-public class ShowMessageInformations {
-
-  public ShowMessageInformations(Component parentComponent, Object message, String titleOfMessage,
-      int messageType) {
-
-    JOptionPane.showMessageDialog(parentComponent, message, titleOfMessage, messageType);
-  }
-}
+public class GetDomains implements Serializable {}

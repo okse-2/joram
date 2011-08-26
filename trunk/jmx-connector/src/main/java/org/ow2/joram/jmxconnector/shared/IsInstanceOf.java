@@ -18,20 +18,26 @@
  * USA.
  *
  * Initial developer(s): Djamel-Eddine Boumchedda
+ * 
  */
-package jmx.remote.jms;
+package org.ow2.joram.jmxconnector.shared;
 
-import java.awt.Component;
-import javax.swing.JOptionPane;
+import java.io.Serializable;
+
+import javax.management.ObjectName;
 
 /**
- * JDialog to Show the error
+ * <b>IsInstanceOf</b> is the object that is sent by a requestor who wishes to
+ * appeal JMX IsInstanceOf(ObjectName name, String className).
+ * 
+ * @author Djamel-Eddine Boumchedda
  */
-public class ShowMessageInformations {
+public class IsInstanceOf implements Serializable {
+  public ObjectName name;
+  public String className;
 
-  public ShowMessageInformations(Component parentComponent, Object message, String titleOfMessage,
-      int messageType) {
-
-    JOptionPane.showMessageDialog(parentComponent, message, titleOfMessage, messageType);
+  public IsInstanceOf(ObjectName name, String className) {
+    this.name = name;
+    this.className = className;
   }
 }
