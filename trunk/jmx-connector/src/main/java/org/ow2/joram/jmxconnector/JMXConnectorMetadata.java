@@ -23,9 +23,12 @@
 package org.ow2.joram.jmxconnector;
 
 /**
- *
+ * Metadatas needed by the Joram JMS/JMX connector.
  */
 public class JMXConnectorMetadata {
+  /**
+   * Package of the connector (needed by the JMX connector factory).
+   */
   public final static String JMS_SERVER_PACKAGE = JMXConnectorMetadata.class.getPackage().getName();
   /**
    * Default value of the URL of the Joram server used by the instantiated
