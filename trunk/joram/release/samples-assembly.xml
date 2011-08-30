@@ -192,6 +192,15 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
+        <include>org.objectweb.joram:joram-tools-jasp</include>
+      </includes>
+      <unpack>false</unpack>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>/ship/bundle</outputDirectory>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useStrictFiltering>true</useStrictFiltering>
+      <includes>
         <include>org.apache.felix:org.apache.felix.shell</include>
       </includes>
       <unpack>false</unpack>
