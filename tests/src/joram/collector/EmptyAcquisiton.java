@@ -22,6 +22,7 @@
  */
 package joram.collector;
 
+import java.io.IOException;
 import java.util.Properties;
 
 import org.objectweb.joram.mom.dest.AcquisitionDaemon;
@@ -38,7 +39,12 @@ public class EmptyAcquisiton implements AcquisitionDaemon {
 		this.transmitter = transmitter;
 		Message message = new Message();
 		message.setProperty("collector.status", "start");
-		message.setText("EmptyAcquisiton.start");
+		try {
+	    message.setText("EmptyAcquisiton.start");
+    } catch (IOException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+    }
 		transmitter.transmit(message, message.id);
 	}
 
@@ -48,7 +54,12 @@ public class EmptyAcquisiton implements AcquisitionDaemon {
 	public void stop() {
 		Message message = new Message();
 		message.setProperty("collector.status", "stop");
-		message.setText("EmptyAcquisiton.stop");
+		try {
+	    message.setText("EmptyAcquisiton.stop");
+    } catch (IOException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+    }
 		if (transmitter != null)
 			transmitter.transmit(message, message.id);
 	}
