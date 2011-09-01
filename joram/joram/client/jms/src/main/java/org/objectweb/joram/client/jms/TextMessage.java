@@ -23,7 +23,10 @@
  */
 package org.objectweb.joram.client.jms;
 
+import java.io.IOException;
+
 import javax.jms.JMSException;
+import javax.jms.MessageFormatException;
 import javax.jms.MessageNotWriteableException;
 
 /**
@@ -56,21 +59,30 @@ public final class TextMessage extends Message implements javax.jms.TextMessage 
    *
    * @exception MessageNotWriteableException  When trying to set the text
    *              if the message body is read-only.
+   * @exception MessageFormatException If the text serialization fails.
    */
-  public void setText(String text) throws MessageNotWriteableException {
+  public void setText(String text) throws MessageNotWriteableException, MessageFormatException {
     if (RObody)
       throw new MessageNotWriteableException("Can't set a text as the message body is read-only.");
 
-    momMsg.setText(text);
+    try {
+	    momMsg.setText(text);
+    } catch (IOException e) {
+    	throw new MessageFormatException("The text serialization failed: " + e);
+    }
   }
 
   /**
    * Returns the text body of the message.
    * API method.
    *
-   * @exception JMSException  Actually never thrown.
+   * @exception JMSException  In case of a problem when getting the body.
    */
   public String getText() throws JMSException {
-    return momMsg.getText();
+    try {
+	    return momMsg.getText();
+    } catch (Exception e) {
+    	throw new MessageFormatException("Error while deserializing the text body : " + e);
+    }
   }
 }
