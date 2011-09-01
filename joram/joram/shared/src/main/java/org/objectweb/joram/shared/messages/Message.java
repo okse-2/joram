@@ -215,24 +215,102 @@ public final class Message implements Cloneable, Serializable, Streamable {
   public transient  int deliveryCount = 0;
 
   /**
-   * Sets a String as the body of the message.
+   * convert serializable object to byte[]
+   * 
+   * @param object the serializable object
+   * @return the byte array
+   * @throws IOException In case of error 
    */
-  public void setText(String text) {
-    if (text == null) {
-      body = null;
-    } else {
-      body = text.getBytes();
-    }
+  private byte[] toBytes(Serializable object) throws IOException {
+  	if (object == null)
+  		return null;
+  	ByteArrayOutputStream baos = null;
+  	ObjectOutputStream oos = null;
+  	try {
+  		baos = new ByteArrayOutputStream();
+  		oos = new ObjectOutputStream(baos);
+  		oos.writeObject(object);
+  		oos.flush();
+  		return baos.toByteArray();
+  	} finally {
+  		if (oos != null)
+  			oos.close();
+  		if (baos != null)
+  			baos.close();
+  	}
+  }
+  
+  /**
+   * convert byte[] to serializable object 
+   * 
+   * @param body the byte array
+   * @return the serializable object
+   * @throws Exception In case of error
+   */
+  private Serializable fromBytes(byte[] body) throws Exception {
+  	if (body == null) 
+  		return null;
+
+  	ByteArrayInputStream bais = null;
+  	ObjectInputStream ois = null;
+  	Object obj = null;
+  	try {
+  		try {
+  			bais = new ByteArrayInputStream(body);
+  			ois = new ObjectInputStream(bais);
+  			obj = ois.readObject();
+  		} catch (ClassNotFoundException cnfexc) {
+  			// Could not build serialized object: reason could be linked to 
+  			// class loaders hierarchy in an application server.
+  			class Specialized_OIS extends ObjectInputStream {
+  				Specialized_OIS(InputStream is) throws IOException {
+  					super(is);
+  				}
+
+  				protected Class resolveClass(ObjectStreamClass osc) throws IOException, ClassNotFoundException {
+  					String n = osc.getName();
+  					return Class.forName(n, false, Thread.currentThread().getContextClassLoader());
+  				}
+  			}
+
+  			bais = new ByteArrayInputStream(body);
+  			ois = new Specialized_OIS(bais);
+  			obj = ois.readObject(); 
+  		}
+  	} catch (Exception exc) {
+  		if (logger.isLoggable(BasicLevel.ERROR))
+  			logger.log(BasicLevel.ERROR, "ERROR: fromBytes(body)", exc);
+  		// Don't forget to rethrow the Exception
+  		throw exc;
+  	} finally {
+  		try {
+  			ois.close();
+  		} catch (Exception e) {}
+  		try {
+  			bais.close();
+  		} catch (Exception e) {}
+  	}
+
+  	return (Serializable) obj;
+  }
+  
+  /**
+   * Sets a String as the body of the message.
+   * @throws IOException In case of an error while setting the text
+   */
+  public void setText(String text) throws IOException {
+  	body = toBytes(text);
   }
 
   /**
    * Returns the text body of the message.
+   * @throws Exception In case of an error while getting the text
    */
-  public String getText() {
+  public String getText() throws Exception {
     if (body == null) {
       return null;
     }
-    return new String(body);
+    return (String) fromBytes(body);
   }
 
   /**
@@ -242,18 +320,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
    */
   public void setObject(Serializable object) throws IOException {
     type = Message.OBJECT;
-
-    if (object == null) {
-      body = null;
-    } else {
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      ObjectOutputStream oos = new ObjectOutputStream(baos);
-      oos.writeObject(object);
-      oos.flush();
-      body = baos.toByteArray();
-      oos.close();
-      baos.close();
-    }
+    body = toBytes(object);
   }
 
   /**
@@ -263,50 +330,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
    */
   public Serializable getObject() throws Exception {
     // TODO (AF): May be, we should verify that it is an Object message!!
-    if (body == null) return null;
-
-    ByteArrayInputStream bais = null;
-    ObjectInputStream ois = null;
-    Object obj = null;
-    
-    try {
-      try {
-        bais = new ByteArrayInputStream(body);
-        ois = new ObjectInputStream(bais);
-        obj = ois.readObject();
-      } catch (ClassNotFoundException cnfexc) {
-        // Could not build serialized object: reason could be linked to 
-        // class loaders hierarchy in an application server.
-        class Specialized_OIS extends ObjectInputStream {
-          Specialized_OIS(InputStream is) throws IOException {
-            super(is);
-          }
-
-          protected Class resolveClass(ObjectStreamClass osc) throws IOException, ClassNotFoundException {
-            String n = osc.getName();
-            return Class.forName(n, false, Thread.currentThread().getContextClassLoader());
-          }
-        }
-
-        bais = new ByteArrayInputStream(body);
-        ois = new Specialized_OIS(bais);
-        obj = ois.readObject(); 
-      }
-    } catch (Exception exc) {
-      if (logger.isLoggable(BasicLevel.ERROR))
-        logger.log(BasicLevel.ERROR, "ERROR: getObject()", exc);
-      // Don't forget to rethrow the Exception
-      throw exc;
-    } finally {
-      try {
-        ois.close();
-      } catch (Exception e) {}
-      try {
-        bais.close();
-      } catch (Exception e) {}
-    }
-
-    return (Serializable) obj;
+    return fromBytes(body);
   }
 
   /**
