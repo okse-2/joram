@@ -491,7 +491,13 @@ public final class Message implements Serializable, MessageView {
   }
 
   public String getText() {
-    return msg.getText();
+    try {
+	    return msg.getText();
+    } catch (Exception e) {
+    	if (logger.isLoggable(BasicLevel.WARN))
+        logger.log(BasicLevel.WARN, "getText()", e);
+	    return null;
+    }
   }
 
   public boolean isRedelivered() {
