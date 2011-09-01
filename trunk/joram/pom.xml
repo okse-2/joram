@@ -163,7 +163,7 @@
   
   <properties>
     <!-- joram protocol -->
-    <joram.protocol>56</joram.protocol>
+    <joram.protocol>57</joram.protocol>
     <!--  dependencies versions -->
     <ow2.version>1.1</ow2.version>
     <mail.version>1.4.1</mail.version>
