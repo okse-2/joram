@@ -141,10 +141,13 @@ public class BaseTestCase {
     return errors.size();
   }
 
+  static int asserts = 0;
+  
   /**
    * Asserts that a condition is true.
    */
   static public void assertTrue(String message, boolean condition) {
+    asserts++;
     if (!condition) fail(message);
   }
 
@@ -159,6 +162,7 @@ public class BaseTestCase {
    * Asserts that a condition is false.
    */
   static public void assertFalse(String message, boolean condition) {
+    asserts++;
     if (condition) fail(message);
   }
 
@@ -174,6 +178,7 @@ public class BaseTestCase {
    */
   static public void assertEquals(String message,
                                   Object expected, Object actual) {
+    asserts++;
     if (expected == null && actual == null)
       return;
     if (expected != null && expected.equals(actual))
@@ -195,6 +200,7 @@ public class BaseTestCase {
   static public void assertEquals(String message,
                                   double expected, double actual,
                                   double delta) {
+    asserts++;
     if (Double.isInfinite(expected)) {
       if (!(expected == actual))
         failNotEquals(message, new Double(expected), new Double(actual));
@@ -219,6 +225,7 @@ public class BaseTestCase {
   static public void assertEquals(String message,
                                   float expected, float actual,
                                   float delta) {
+    asserts++;
     if (Float.isInfinite(expected)) {
       if (!(expected == actual))
         failNotEquals(message, new Float(expected), new Float(actual));
@@ -329,12 +336,13 @@ public class BaseTestCase {
    * Asserts that two byte[] are equal.
    */
   static public void assertEquals(byte[] tab1, byte[] tab2, int size) {
-      boolean ok=true;
-      for(int j=0; j< size && ok==true;j++)
-	  if(tab1[j]!=tab2[j]){
-	      failNotEquals(null, tab1[j], tab2[j]);
-	      ok=false;
-	  }
+    asserts++;
+    boolean ok=true;
+    for(int j=0; j< size && ok==true;j++)
+      if(tab1[j]!=tab2[j]){
+        failNotEquals(null, tab1[j], tab2[j]);
+        ok=false;
+      }
   } 
 
   /**
@@ -370,12 +378,14 @@ public class BaseTestCase {
    */
   static public void assertSame(String message,
                                 Object expected, Object actual) {
+    asserts++;
     if (expected == actual)
       return;
     failNotSame(message, expected, actual);
   }
 
   static boolean isGzip(File file) {
+    asserts++;
     String name = file.getName();
     int idx = name.lastIndexOf('.');
     if (idx == -1) return false;
@@ -448,6 +458,7 @@ public class BaseTestCase {
    * Asserts that two files are same content.
    */
   static public void assertFileSameContent(String message, String expected, String actual) {
+    asserts++;
     boolean ok = true;
     File file1 =null;
     File file2 =null;
@@ -477,6 +488,7 @@ public class BaseTestCase {
   }
 
   public static boolean isSameContent(File file1, File file2) {
+    asserts++;
     BufferedReader f1 = null;
     RandomAccessFile f2 = null;
     long l2= 0;
@@ -537,6 +549,7 @@ public class BaseTestCase {
    */
   static public void assertFileIdentical(String message,
                                          String expected, String actual) {
+    asserts++;
     boolean ok = true;
     File file1 =null;
     File file2 =null;
@@ -576,6 +589,7 @@ public class BaseTestCase {
    * Asserts that a file exists.
    */
   static public void assertFileExist(String message, String expected) {
+    asserts++;
     File file =null;
 
     String formatted = "";
@@ -752,20 +766,22 @@ public class BaseTestCase {
     if ((current.failures != null) || (current.errors != null)) {
       if (current.summary)
         System.err.println("TEST \"" + current.name + "\" FAILED" +
+                           ", asserts: " + asserts +
                            ", failures: " + current.failureCount() +
                            ", errors: " + current.errorCount() + ", [" +
                            (current.endDate - current.startDate) + "].");
       if (current.writer != null)
         current.writer.println("TEST \"" + current.name + "\" FAILED" +
+                               ", asserts: " + asserts +
                                ", failures: " + current.failureCount() +
                                ", errors: " + current.errorCount() + ", [" +
                                (current.endDate - current.startDate) + "].");
     } else {
       if (current.summary)
-        System.err.println("TEST \"" + current.name + "\" OK [" +
+        System.err.println("TEST \"" + current.name + "\" OK [" + asserts + ", " +
                            (current.endDate - current.startDate) + "].");
       if (current.writer != null)
-        current.writer.println("TEST \"" + current.name + "\" OK [" +
+        current.writer.println("TEST \"" + current.name + "\" OK [" + asserts + ", " +
                                (current.endDate - current.startDate) + "].");
     }
     if (msg != null) {
