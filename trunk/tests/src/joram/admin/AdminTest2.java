@@ -215,7 +215,7 @@ public class AdminTest2 extends TestCase {
     assertFalse("Useless DMQId attribute", h.containsKey("DMQId"));
 //    System.out.println(h);
     
-    // Create a topic and configure it
+    // Verify the topic configuration
     Topic topicX = Topic.create(sid, "topic");
     assertTrue("Bad topic", topic.equals(topicX));
     readers = topicX.getReaders();
