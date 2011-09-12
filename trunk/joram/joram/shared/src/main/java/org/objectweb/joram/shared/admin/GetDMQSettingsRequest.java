@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,28 +32,36 @@ import fr.dyade.aaa.common.stream.StreamUtil;
  * A <code>Monitor_GetDMQSettings</code> instance requests the DMQ settings
  * of a server, a user or a destination.
  */
-public class GetDMQSettingsRequest extends AdminRequest {
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
-  /** Identifier of the target queue or user. */
-  private String target = null;
+public class GetDMQSettingsRequest extends DestinationAdminRequest {
+  /** subscription name */
+  private String subName = null;
 
   /**
    * Constructs a <code>Monitor_GetDMQSettings</code> instance.
    *
-   * @param target  Identifier of the target destination or user, if NullId default
+   * @param destId  Identifier of the target destination or user, if NullId default
    *                server setting are requested..
    */
-  public GetDMQSettingsRequest(String target) {
-    this.target = target;
+  public GetDMQSettingsRequest(String destId) {
+    super(destId);
   }
 
   public GetDMQSettingsRequest() { }
-  
-  /** Returns the identifier of the target destination or user. */
-  public String getTarget() {
-    return target;
+
+  /**
+   * Constructs a <code>Monitor_GetDMQSettings</code> instance.
+   *
+   * @param destId  Identifier of the destination.
+   * @param subName Subscription name.
+   */
+  public GetDMQSettingsRequest(String destId, String subName) {
+    super(destId);
+    this.subName = subName;
+  }
+
+  /** Returns SubName */
+  public String getSubName() {
+    return subName;
   }
   
   protected int getClassId() {
@@ -61,10 +69,12 @@ public class GetDMQSettingsRequest extends AdminRequest {
   }
   
   public void readFrom(InputStream is) throws IOException {
-    target = StreamUtil.readStringFrom(is);
+    super.readFrom(is);
+    subName = StreamUtil.readStringFrom(is);
   }
 
   public void writeTo(OutputStream os) throws IOException {
-    StreamUtil.writeTo(target, os);
+    super.writeTo(os);
+    StreamUtil.writeTo(subName, os);
   }
 }

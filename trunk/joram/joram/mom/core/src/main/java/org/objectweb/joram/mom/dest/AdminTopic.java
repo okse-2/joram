@@ -1236,7 +1236,7 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
   private void doProcess(GetDMQSettingsRequest request,
                          AgentId replyTo,
                          String msgId) throws UnknownServerException {
-    AgentId targetId = AgentId.fromString(request.getTarget());
+    AgentId targetId = AgentId.fromString(request.getDestId());
     
     if (targetId.isNullId()) {
       // Get the default DMQ setting
