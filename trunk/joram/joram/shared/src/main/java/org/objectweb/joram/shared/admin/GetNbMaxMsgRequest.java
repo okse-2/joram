@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -33,10 +33,6 @@ import fr.dyade.aaa.common.stream.StreamUtil;
  * NbMaxMsg of the destination.
  */
 public class GetNbMaxMsgRequest extends DestinationAdminRequest {
-
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
   /** subscription name */
   private String subName = null;
   
