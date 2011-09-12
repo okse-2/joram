@@ -413,21 +413,6 @@ public class User extends AdministeredObject implements UserMBean {
   public void setDMQId(String dmqId) throws ConnectException, AdminException {
     doRequest(new SetDMQRequest(proxyId, dmqId));
   }
-
-  /**
-   * Admin method setting a given value as the threshold for this user.
-   * <p>
-   * The request fails if the user is deleted server side.
-   *
-   * @param threshold  The threshold value to be set (-1 for unsetting
-   *                   previous value).
-   *
-   * @exception ConnectException  If the connection fails.
-   * @exception AdminException  If the request fails.
-   */
-  public void setThreshold(int threshold) throws ConnectException, AdminException {
-    doRequest(new SetThresholdRequest(proxyId, threshold));
-  }
   
   /**
    * Monitoring method returning the dead message queue of this user,
@@ -465,6 +450,38 @@ public class User extends AdministeredObject implements UserMBean {
     return reply.getDMQName();
   }
 
+  /**
+   * Admin method setting a given value as the threshold for this user.
+   * <p>
+   * The request fails if the user is deleted server side.
+   *
+   * @param threshold  The threshold value to be set (-1 for unsetting
+   *                   previous value).
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void setThreshold(int threshold) throws ConnectException, AdminException {
+    doRequest(new SetThresholdRequest(proxyId, threshold));
+  }
+  
+  /**
+   * Admin method setting a given value as the threshold for a particular
+   * subscription of this user.
+   * <p>
+   * The request fails if the user is deleted server side.
+   *
+   * @param subname    The subscription name.
+   * @param threshold  The threshold value to be set (-1 for unsetting
+   *                   previous value).
+   *
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public void setThreshold(String subname, int threshold) throws ConnectException, AdminException {
+    doRequest(new SetThresholdRequest(proxyId, subname, threshold));
+  }
+
   /** 
    * Returns the threshold for this user, -1 if not set.
    * <p>
@@ -477,7 +494,25 @@ public class User extends AdministeredObject implements UserMBean {
     GetDMQSettingsRequest request = new GetDMQSettingsRequest(proxyId);
     GetDMQSettingsReply reply = (GetDMQSettingsReply) doRequest(request);
 
-      return reply.getThreshold();
+    return reply.getThreshold();
+  }
+
+  /** 
+   * Returns the threshold for a particular subscription of this user,
+   * -1 if not set.
+   * <p>
+   * The request fails if the user is deleted server side.
+   *
+   * @param subname The subscription name.
+   * 
+   * @exception ConnectException  If the connection fails.
+   * @exception AdminException  If the request fails.
+   */
+  public int getThreshold(String subname) throws ConnectException, AdminException {
+    GetDMQSettingsRequest request = new GetDMQSettingsRequest(proxyId, subname);
+    GetDMQSettingsReply reply = (GetDMQSettingsReply) doRequest(request);
+
+    return reply.getThreshold();
   }
 
   /**
