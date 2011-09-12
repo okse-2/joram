@@ -1,4 +1,13 @@
 +==============================================================================
+| 2011/09/12 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Allows to get/set DMQ settings individually for user susbcriptions.
++==============================================================================
+| 2011/08/10 | Andre Freyssinet - ScalAgent Distributed Technologies 
++------------+-----------------------------------------------------------------
+ Handling of persistent properties at Transaction level.
+ Enhancements in NGTransaction component.
++==============================================================================
 | 2011/08/05 | Guillaume Surrel - ScalAgent Distributed Technologies 
 +------------+-----------------------------------------------------------------
  Add new AliasQueue destination: this queue forwards messages to another Joram
