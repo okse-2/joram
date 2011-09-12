@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2003 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2011 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -82,8 +82,45 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    */
   private int threshold = -1;
 
+  /**
+   * Returns the threshold above which messages are considered undeliverable
+   * because constantly denied.
+   * 
+   * @return  the threshold if set; -1 otherwise.
+   */
+  public int getThreshold() {
+    return threshold;
+  }
+  
+  /** Sets the subscription's threshold value. */
+  public void setThreshold(int threshold) {
+    this.threshold = threshold;
+    save();
+  }
+
   /** Max number of Message stored in the queue (-1 no limit). */
   protected int nbMaxMsg = -1;
+
+  /**
+   * Returns the maximum number of message for the subscription.
+   * If the limit is unset the method returns -1.
+   *
+   * @return the maximum number of message for subscription if set;
+   *       -1 otherwise.
+   */
+  public int getNbMaxMsg() {
+    return nbMaxMsg;
+  }
+
+  /**
+   * Sets the maximum number of message for the subscription.
+   *
+   * @param nbMaxMsg the maximum number of message for subscription (-1 set
+   *         no limit).
+   */
+  public void setNbMaxMsg(int nbMaxMsg) {
+    this.nbMaxMsg = nbMaxMsg;
+  }
 
   /** Vector of identifiers of the messages to deliver. */
   private List messageIds;
@@ -256,27 +293,6 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   /** Returns <code>true</code> if the subscription is active. */
   public boolean getActive() {
     return active;
-  }
-
-  /**
-   * Returns the maximum number of message for the subscription.
-   * If the limit is unset the method returns -1.
-   *
-   * @return the maximum number of message for subscription if set;
-   *	     -1 otherwise.
-   */
-  public int getNbMaxMsg() {
-    return nbMaxMsg;
-  }
-
-  /**
-   * Sets the maximum number of message for the subscription.
-   *
-   * @param nbMaxMsg the maximum number of message for subscription (-1 set
-   *		     no limit).
-   */
-  public void setNbMaxMsg(int nbMaxMsg) {
-    this.nbMaxMsg = nbMaxMsg;
   }
 
   /**
@@ -466,13 +482,6 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     this.dmqId = dmqId;
     save();
   }
-
-  /** Sets the subscription's threshold value. */
-  void setThreshold(int threshold) {
-    this.threshold = threshold;
-    save();
-  }
-
   
   /**
    * Browses messages and keeps those which will have to be delivered

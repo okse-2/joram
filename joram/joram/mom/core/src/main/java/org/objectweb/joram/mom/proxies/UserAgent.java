@@ -2687,15 +2687,31 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       doReact((ClearSubscription) adminRequest, not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
     } else if (adminRequest instanceof GetNbMaxMsgRequest) {
       GetNbMaxMsgRequest request = (GetNbMaxMsgRequest) adminRequest;
+      
       int nbMaxMsg = -1;
-      ClientSubscription sub = (ClientSubscription) subsTable.get(request.getSubName());
-      if (sub != null)
-        nbMaxMsg = sub.getNbMaxMsg();
-
+      if (request.getSubName() == null) {
+        nbMaxMsg = this.nbMaxMsg;
+      } else {
+        ClientSubscription sub = (ClientSubscription) subsTable.get(request.getSubName());
+        if (sub != null)
+          nbMaxMsg = sub.getNbMaxMsg();
+      }
       replyToTopic(new GetNumberReply(nbMaxMsg), not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
     } else if (adminRequest instanceof GetDMQSettingsRequest) {
-      replyToTopic(new GetDMQSettingsReply((dmqId != null) ? dmqId.toString() : null, threshold),
-          not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
+      String subName = ((GetDMQSettingsRequest) adminRequest).getSubName();
+
+      String dmq = (dmqId != null) ? dmqId.toString() : null;
+      int threshold = -1;
+      if (subName == null) {
+        threshold = this.threshold;
+      } else {
+        ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
+        if (sub != null) {
+          threshold = sub.getThreshold();
+        }
+      }
+      replyToTopic(new GetDMQSettingsReply(dmq, threshold),
+                   not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
     } else if (adminRequest instanceof SetDMQRequest) {
       setSave();
       
@@ -2710,11 +2726,26 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       replyToTopic(new AdminReply(true, null), not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
     } else if (adminRequest instanceof SetThresholdRequest) {
       setSave(); // state change, so save.
-      threshold = ((SetThresholdRequest) adminRequest).getThreshold();
-      for (Iterator subs = subsTable.values().iterator(); subs.hasNext();)
-        ((ClientSubscription) subs.next()).setThreshold(threshold);
+      int threshold = ((SetThresholdRequest) adminRequest).getThreshold();
+      
+      AdminReply reply = null;
+      String subName = ((SetThresholdRequest) adminRequest).getSubName();
+      if (subName == null) {
+        // Set the default value for new subscriptions of this user
+        this.threshold = threshold;
+        reply = new AdminReply(true, null);
+      } else {
+        // Set the given subscription
+        ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
+        if (sub != null) {
+          sub.setThreshold(threshold);
+          reply = new AdminReply(true, null);
+        } else {
+          reply = new AdminReply(AdminReply.NAME_UNKNOWN, "Subscription unknow: " + subName);
+        }
+      }
 
-      replyToTopic(new AdminReply(true, null), not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
+      replyToTopic(reply, not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
     } else if (adminRequest instanceof SetNbMaxMsgRequest) {
       setSave(); // state change, so save.
       int nbMaxMsg = ((SetNbMaxMsgRequest) adminRequest).getNbMaxMsg();
@@ -2722,9 +2753,9 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       AdminReply reply = null;
       String subName = ((SetNbMaxMsgRequest) adminRequest).getSubName();
       if (subName == null) {
-        // Set the default subscription of this user
+        // Set the default value for new subscriptions of this user
         this.nbMaxMsg = nbMaxMsg;
-        reply =new AdminReply(true, null);
+        reply = new AdminReply(true, null);
       } else {
         // Set the given subscription
         ClientSubscription sub = (ClientSubscription) subsTable.get(subName);

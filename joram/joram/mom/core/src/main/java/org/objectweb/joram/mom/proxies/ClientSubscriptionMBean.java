@@ -84,6 +84,14 @@ public interface ClientSubscriptionMBean {
    * Returns <code>true</code> if the subscription is active.
    */
   public boolean getActive();
+  
+  /**
+   * Returns the threshold above which messages are considered undeliverable
+   * because constantly denied.
+   * 
+   * @return  the threshold if set; -1 otherwise.
+   */
+  public int getThreshold();
 
   /**
    * Returns the maximum number of message for the subscription. If the limit is
