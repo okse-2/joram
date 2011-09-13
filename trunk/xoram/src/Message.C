@@ -53,7 +53,7 @@ Message::Message() {
   toId = (char*) NULL;
   replyToId = (char*) NULL;
   correlationId = (char*) NULL;
-  optionalHeader = (Properties*) NULL;
+  jmsType = (char*) NULL;
   properties = (Properties*) NULL;
   body = (byte*) NULL;
   //replyToType = Destination::NOTYPE;
@@ -63,14 +63,10 @@ Message::Message() {
 
 Message::~Message() {
   if(DEBUG)
-    printf("~Message(): properties = 0x%x, optionalHeader = 0x%x\n", properties, optionalHeader);
+    printf("~Message(): properties = 0x%x", properties);
   if (properties != NULL) {
     delete properties;
     properties = (Properties*) NULL;
-  }
-  if (optionalHeader != NULL) {
-    delete optionalHeader;
-    optionalHeader = (Properties*) NULL;
   }
   if (id != (char*) NULL) {
     delete id;
@@ -397,6 +393,7 @@ Message* Message::clone() {
   clone->replyToId = replyToId;
   clone->replyToType = replyToType;
   clone->correlationId = correlationId;
+  clone->jmsType = jmsType;
 
   if (body != (byte*) NULL) {
     //    throw NotYetImplementedException();
@@ -406,9 +403,6 @@ Message* Message::clone() {
     clone->length = length;
     clone->body = body;
     //    System.arraycopy(body, 0, clone.body, 0, body.length);
-  }
-  if (optionalHeader != (Properties*) NULL) {
-    clone->optionalHeader = (Properties*) optionalHeader->clone();
   }
   if (properties != (Properties*) NULL) {
     clone->properties = (Properties*) properties->clone();
@@ -428,32 +422,37 @@ Message* Message::clone() {
  * @param os the stream to write the object to
  */
 void Message::writeTo(OutputStream* os) throw (IOException) {
-  int b = 0;
-
-  os->writeInt(type);					// AF: Should be a byte
-
-  os->writeProperties(optionalHeader);			// Should be null !!
-  os->writeProperties(properties);			// Should be null !!
-
+  
   os->writeString(id);
-  os->writeInt(priority);				// AF: Should be a byte
   os->writeString(toId);
   os->writeByte(toType);
-
-  os->writeLong(expiration);
-  os->writeString(replyToId);
-  os->writeByte(replyToType);
   os->writeLong(timestamp);
-  os->writeString(correlationId);
-  os->writeInt(deliveryCount);
+  
+  short b = 0;
+  b = b | (type != SIMPLE ? typeFlag : 0);
+  b = b | (replyToId != NULL ? replyToIdFlag : 0);
+  b = b | (replyToType != 0 ? replyToTypeFlag : 0);
+  b = b | (properties != NULL ? propertiesFlag : 0);
+  b = b | (priority != 4 ? priorityFlag : 0);
+  b = b | (expiration != 0 ? expirationFlag : 0);
+  b = b | (correlationId != NULL ? correlationIdFlag : 0);
+  b = b | (deliveryCount != 0 ? deliveryCountFlag : 0);
+  b = b | (jmsType != NULL ? jmsTypeFlag : 0);
+  b = b | (redelivered ? redeliveredFlag : 0);
+  b = b | (persistent ? persistentFlag : 0);
+  
+  os->writeShort(b);
+  
+  if (type != SIMPLE) { os->writeInt(type); }					// AF: Should be a byte
+  if (replyToId != NULL) { os->writeString(replyToId); }
+  if (replyToType != 0) { os->writeByte(replyToType); }
+  if (properties != NULL) { os->writeProperties(properties); }			// Should be null !!
+  if (priority != 4) { os->writeInt(priority); }				// AF: Should be a byte
+  if (expiration != 0) { os->writeLong(expiration); }
+  if (correlationId != NULL) { os->writeString(correlationId); }
+  if (deliveryCount != 0) { os->writeInt(deliveryCount); }
+  if (jmsType != NULL) { os->writeString(jmsType); }
 
-  b = b | (redelivered?redeliveredFlag:0);
-  b = b | (persistent?persistentFlag:0);
-/*   b = b | (deletedDest?deletedDestFlag:0); */
-/*   b = b | (expired?expiredFlag:0); */
-/*   b = b | (notWriteable?notWriteableFlag:0); */
-/*   b = b | (undeliverable?undeliverableFlag:0); */
-  os->writeInt(b);					// AF: Should be a byte
   os->writeByteArray(body, length);
 }
 
@@ -464,29 +463,29 @@ void Message::writeTo(OutputStream* os) throw (IOException) {
  * @param is the stream to read data from in order to restore the object
  */
 void Message::readFrom(InputStream* is) throw (IOException) {
-  is->readInt(&type);
-  optionalHeader = is->readProperties();
-  properties = is->readProperties();
+
   is->readString(&id);
-  is->readInt(&priority);
   is->readString(&toId);
   is->readByte(&toType);
-  is->readLong(&expiration);
-  is->readString(&replyToId);
-  is->readByte(&replyToType);
   is->readLong(&timestamp);
-  is->readString(&correlationId);
-  is->readInt(&deliveryCount);
-
-  int b;
-  is->readInt(&b);
+  
+  short b;
+  is->readShort(&b);
+  
+  if (b & typeFlag) { is->readInt(&type); }
+  if (b & replyToIdFlag) { is->readString(&replyToId); }
+  if (b & replyToTypeFlag) { is->readByte(&replyToType); }
+  if (b & propertiesFlag) { properties = is->readProperties(); }
+  if (b & priorityFlag) { is->readInt(&priority); }
+  if (b & expirationFlag) { is->readLong(&expiration); }
+  if (b & correlationIdFlag) { is->readString(&correlationId); }
+  if (b & deliveryCountFlag) { is->readInt(&deliveryCount); }
+  if (b & jmsTypeFlag) { is->readString(&jmsType); }
   redelivered = ((b & redeliveredFlag) != 0);
   persistent = ((b & persistentFlag) != 0);
-  /*   deletedDest = ((b & deletedDestFlag) != 0); */
-  /*   expired = ((b & expiredFlag) != 0); */
-  /*   notWriteable = ((b & notWriteableFlag) != 0); */
-  /*   undeliverable = ((b & undeliverableFlag) != 0); */
+
   length = is->readByteArray(&body);
+  
 }
 
 /**

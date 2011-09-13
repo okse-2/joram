@@ -150,18 +150,28 @@ class Message : Streamable {
 
   /** The correlation identifier field. */
   char* correlationId;
+  
+  /**
+   * The JMSType header field contains a message type identifier supplied by a
+   * client when a message is sent.
+   */
+  char* jmsType;
 
   Properties* properties;
-  Properties* optionalHeader; // TODO: Useless
 
   void checkPropertyName(char* name) throw (MessageFormatException);
 
-  const static int redeliveredFlag =   0x00000004;
-  const static int persistentFlag =    0x00000008;
-  const static int deletedDestFlag =   0x00000010;
-  const static int expiredFlag =       0x00000020;
-  const static int notWriteableFlag =  0x00000040;
-  const static int undeliverableFlag = 0x00000080;
+  const static short typeFlag = 0x0001;
+  const static short replyToIdFlag = 0x0002;
+  const static short replyToTypeFlag = 0x0004;
+  const static short propertiesFlag = 0x0008;
+  const static short priorityFlag = 0x0010;
+  const static short expirationFlag = 0x0020;
+  const static short correlationIdFlag = 0x0040;
+  const static short deliveryCountFlag = 0x0080;
+  const static short jmsTypeFlag = 0x0100;
+  const static short redeliveredFlag = 0x0200;
+  const static short persistentFlag = 0x0400;
 
  public:
   /**
