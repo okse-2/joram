@@ -104,10 +104,9 @@ public class test6 extends TestCase {
             System.out.println("crash");
             TestCase.crashAgentServer(test6.ServerPing);
           }
-          // Wait in order to prevent WAIT status on TCP connection
-          Thread.sleep(2000L);
           // Start server#1
           TestCase.startAgentServer(test6.ServerPing, new String[] { "-DNTNoLockFile=true" });
+          Thread.sleep(2000L);
           nbStopTask++;
           if (nbStopTask > 20)
             endTest();
