@@ -155,7 +155,7 @@ class TcpChannel : public Channel {
 
     clock_gettime(CLOCK_REALTIME, &ts);
     time = ((long long)ts.tv_sec) *1000;
-    time += ts.tv_nsec /1000;
+    time += ts.tv_nsec /1000000;
 
     return time;
   }
@@ -187,7 +187,7 @@ class TcpChannel : public Channel {
     in = new InputStream();
 
     // Joram magic number: should be defined in another way..
-    byte magic[] = {'J', 'O', 'R', 'A', 'M', 5, 5, 55};
+    byte magic[] = {'J', 'O', 'R', 'A', 'M', 5, 7, 57};
 
     // Writes the Joram magic number
     if (out->writeBuffer(magic, 8) ==-1) throw IOException();
@@ -1462,7 +1462,7 @@ long long currentTimeMillis() {
 
   clock_gettime(CLOCK_REALTIME, &ts);
   time = ts.tv_sec *1000;
-  time += ts.tv_nsec /1000;
+  time += ts.tv_nsec /1000000;
 
   return time;
 }
