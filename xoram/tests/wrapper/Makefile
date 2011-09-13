@@ -3,14 +3,14 @@ INCDIR = ../../src
 
 ###############################
 # i86-cygwin
-CCOPT = -g -I../../src
-LDFLAGS = -g
-LIBXORAM = libxoram.dll
+# CCOPT = -g -I../../src
+# LDFLAGS = -g
+# LIBXORAM = libxoram.dll
 ###############################
-# i86-linux
-#CCOPT = -g -I../../src
-#LDFLAGS = -lrt
-#LIBXORAM = libxoram.so
+i86-linux
+CCOPT = -g -I../../src
+LDFLAGS = -lrt
+LIBXORAM = libxoram.so
 ###############################
 
 CC = gcc $(CCOPT) 
