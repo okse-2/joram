@@ -148,6 +148,13 @@
 <!--        </includes>-->
 <!--      </resource>-->
 <!--    </resources>-->
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-ssh</artifactId>
+        <version>1.0</version>
+      </extension>
+    </extensions> 
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
