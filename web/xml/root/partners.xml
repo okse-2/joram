@@ -37,7 +37,7 @@
       </s2>
     </s1>
 	
-    <s1 name="Sponsors">
+    <s1 name="Sponsors and main user">
     <table>
     <tr>
       <td align="center" valign="middle">
@@ -61,8 +61,8 @@
         <ul>
           <li>Clustering facilities,</li>
           <li>High Availability Joram Server,</li>
-          <li>JMS bridge,</li>
-          <li>WebLogic resources adapter.</li>
+          <li>AMQP and JMS bridge,</li>
+          <li>WebSphere and WebLogic resources adapter.</li>
         </ul>
       </td>
     </tr>
@@ -94,7 +94,18 @@
       </ul>
       </td>
     </tr>
-        
+      
+    <tr>
+      <td align="center" valign="middle">
+      <a href="http://www.thalesgroup.com/">
+      <img src="images/partners/logo_thales.gif" alt="THALES logo" border="0" height="60" width="266"/></a>
+      </td>
+      <td>
+      <p>Thales Services SAS  uses Joram for its <a href="http://cct.cnes.fr/cct22/infos/documents/Supervision/s05_PHOEBUS_CCT.PPT">Phoebus</a>
+      product line, a generic tool for monitoring ground segment for spacecraft.</p>
+      </td>
+    </tr>
+    
     </table>		
     </s1>
 
