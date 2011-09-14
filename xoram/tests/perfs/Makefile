@@ -18,6 +18,7 @@ LD = g++ $(CCOPT) $(LDFLAGS)
 
 clean:
 	rm -f *.exe *.o *~
+	rm -f test1 test2 test3 test4 test5
 
 tests: test1 test2 test3 test4 test5
 
