@@ -17,7 +17,8 @@ CC = g++ $(CCOPT)
 LD = g++ $(CCOPT) $(LDFLAGS)
 
 clean:
-	rm -f *.exe *.o *~ 
+	rm -f *.exe *.o *~
+	rm -f testdaemon testsynchro testvector testxqueue testxstream testproperties
 
 tests: testdaemon testsynchro testvector testxqueue testxstream testproperties
 
@@ -38,6 +39,6 @@ testxstream:	TestXStream.o
 
 testproperties:	TestProperties.o 
 	$(LD) -o testproperties TestProperties.o -L$(LIBDIR) -lxoram
-	
+
 .C.o:
 		$(CC) -o $*.o -c $*.C
