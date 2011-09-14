@@ -21,6 +21,7 @@
  * Initial developer(s):  ScalAgent Distributed Technologies
  * Contributor(s):
  */
+#include <stdio.h>
 #include <pthread.h>
 #include <time.h>
 #include "Synchronized.H"
@@ -32,6 +33,7 @@ Synchronized::Synchronized() {
 }
 
 Synchronized::~Synchronized() {
+  if(DEBUG) printf("~Synchronized()\n");
   pthread_mutex_destroy(&mutex);
   pthread_cond_destroy(&cond);
 }
