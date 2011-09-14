@@ -382,6 +382,8 @@ RequestMultiplexer::RequestMultiplexer(Connection* cnx,
 RequestMultiplexer::~RequestMultiplexer() {
   if(DEBUG)
     printf("~RequestMultiplexer(): requestsTable = 0x%x, exceptionListener = 0x%x\n", requestsTable, exceptionListener);
+  cnx = (Connection*) NULL;
+  channel = (Channel*) NULL;
   if (requestsTable != (Vector<ReplyListener>*) NULL) {
     delete requestsTable;
     requestsTable = (Vector<ReplyListener>*) NULL;
@@ -552,7 +554,7 @@ Requestor::Requestor(RequestMultiplexer* mtpx) : Synchronized() {
 
 Requestor::~Requestor() {
   if(DEBUG)
-    printf("~Requestor(): req = 0x%x, reply = 0x%x\n", req, reply);
+    printf("~Requestor(): req = 0x%x, reply = 0x%x, mtpx = 0x%x\n", req, reply, mtpx);
   if (req != (AbstractRequest*) NULL) {
     delete req;
     req = (AbstractRequest*) NULL;
@@ -561,10 +563,8 @@ Requestor::~Requestor() {
     delete reply;
     reply = (AbstractReply*) NULL;
   }
-  if (mtpx != (RequestMultiplexer*) NULL) {
-    delete mtpx;
-    mtpx = (RequestMultiplexer*) NULL;
-  }
+  // Be careful the RequestMultiplexer is part of the Connection !!
+  mtpx = (RequestMultiplexer*) NULL;
 }
 
 AbstractReply* Requestor::request(AbstractRequest* req) {
@@ -1029,6 +1029,8 @@ Session::Session(Connection* cnx,
   consumers = new Vector<MessageConsumer>();
   producers = new Vector<MessageProducer>();
 
+  pendingMessageConsumer = (MessageConsumer*) NULL;
+
   if(DEBUG)
     printf("<= Session(): cnx = 0x%x, ident = 0x%x, consumers = 0x%x, producers = 0x%x, mtpx= 0x%x, requestor = 0x%x, receiveRequestor = 0x%x\n", cnx, ident, consumers, producers, mtpx, requestor, receiveRequestor);
 
@@ -1057,10 +1059,8 @@ Session::~Session() {
     delete producers;
     producers = (Vector<MessageProducer>*) NULL;
   }
-  if (pendingMessageConsumer != (MessageConsumer*) NULL) {
-    delete pendingMessageConsumer;
-    pendingMessageConsumer = (MessageConsumer*) NULL;
-  }
+  // pendingMessageConsumer if exist is already closed and freed as part of consumers vector.
+  pendingMessageConsumer = (MessageConsumer*) NULL;
   if (receiveRequestor != (Requestor*) NULL) {
     delete receiveRequestor;
     receiveRequestor = (Requestor*) NULL;
@@ -1579,11 +1579,14 @@ Message* Session::receive(long timeOut1, long timeOut2,
             delete reply;
             reply = (ConsumerMessages*) NULL;
 
+            pendingMessageConsumer = (MessageConsumer*) NULL;
             return msg;
           } else {
+            pendingMessageConsumer = (MessageConsumer*) NULL;
             return (Message*) NULL;
           }
         } else {
+          pendingMessageConsumer = (MessageConsumer*) NULL;
           return (Message*) NULL;
         }
 /*       } */
@@ -1591,6 +1594,7 @@ Message* Session::receive(long timeOut1, long timeOut2,
 /*       singleThreadOfControl = -1; */
       pendingMessageConsumer = (MessageConsumer*) NULL;
     }
+    pendingMessageConsumer = (MessageConsumer*) NULL;
 }
 
 void Session::addConsumer(MessageConsumer* cons) {
