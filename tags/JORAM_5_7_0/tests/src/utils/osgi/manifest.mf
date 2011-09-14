@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: JORAM :: Test Util classes
+Bundle-SymbolicName: fr.dyade.aaa.agent
+Export-Package: utils
+Import-Package: com.scalagent.jmx,
+ fr.dyade.aaa.agent,
+ fr.dyade.aaa.common,
+ fr.dyade.aaa.common.net,
+ fr.dyade.aaa.util.management,
+ org.objectweb.util.monolog,
+ org.objectweb.util.monolog.api
+Bundle-Description: Joram Agent Server
+Bundle-Vendor: Scalagent D.T.

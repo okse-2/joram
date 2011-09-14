@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+
+<!DOCTYPE document SYSTEM '../../common/dtd/objectweb.dtd'>
+
+<document>
+  <properties>
+    <author email="joram-team@ow2.org">JORAM team</author>
+    <title>Home Page</title>
+    <filename>index.xml</filename>
+    <pathtoroot>.</pathtoroot>
+  </properties>
+
+  <body>
+    <s1 name="JORAM: Java (TM) Open Reliable Asynchronous Messaging">
+
+    <table border="0" width="100%">
+  	<tr>
+	    <td align="left" rowspan="2">
+	      <img src="images/joram.png" alt="JORAM Logo" height="140" width="300" border="0" hspace="2"/>
+      </td>
+	    <td align="center"></td>
+	    <td align="right"><script type="text/javascript" src="http://www.ohloh.net/p/4238/widgets/project_thin_badge.js"></script></td>
+	  </tr>
+  	<tr>
+	    <td align="center"></td>
+	    <td align="left">
+	      <p>JORAM has been made available for download since May 2000.<br></br>
+        As a standalone software, JORAM has been downloaded more than 100,000 times.</p>
+	    </td>
+	  </tr>
+    </table>
+    
+    </s1>
+      
+    <s1 name="Introduction">
+      
+      <p><strong>JORAM</strong> incorporates a 100% pure Java implementation of <strong>JMS 1.1</strong>
+      (Java Message Service API released by Sun Microsystem, Inc.) specification.<br></br>
+      It provides access to a really distributed MOM (Message Oriented Middleware), built on top of the
+      <a href="http://www.scalagent.com/">ScalAgent D.T.</a> agents based platform.</p>
+      
+      <p>JORAM is a mature project started in 1999, it is an <strong>open source</strong> software released under
+      the <strong>LGPL</strong> license since May 2000.<br></br>
+      It provides a production ready distributed MOM already used within many critical operational applications.</p>
+
+      <p>Joram is now designed with an OSGi<sup>TM</sup> based services architecture to provide a dynamically adaptable
+      messaging server:</p>
+      <ul>
+        <li>The Joram server can be launched as a set of OSGi bundles (it is always possible to launch the server as
+        a classic Java program).</li>
+        <li>Additional services can be started, stopped, reconfigured: Command line interface, Web console, etc.</li>
+      </ul>
+
+      <p>Stable versions of JORAM are JMS 1.1 certified. Moreover JORAM is used by JOnAS to undergo the Java EE 5 certification,
+      and has passed all tests concerning JMS 1.1 certification in this J2EE TCK.<br></br>
+      Professional Support is available from <a href="http://www.scalagent.com/spip.php?article313">Scalagent D.T.</a>.</p>
+ 
+    </s1>
+   
+    <s1 name="Latest News">
+      <s2 name="July 13, 2011: JORAM 5.6.0 release is available.">
+      <p>This release introduces some improvements and bug fixes, essentially:</p>
+      <ul>
+        <li>Changes on JCA connector enabling Joram to be started as a JOnAS OSGi service.</li>
+        <li>Evolves AMQP acquisition and distribution destinations:<ul>
+          <li>Adds persistence to distribution queues for messages that can't be
+          distributed. The queue tries to send the messages regularly.</li>
+          <li>Adds a persistence mechanism for AMQP connections pool (AMQP acquisition and
+          distribution destinations).</li>
+          <li>Fix NPE in AMQP distribution destination when amqp.Routing property is not
+          correctly set.</li>
+          <li>Fix possible NPE in JMS module for acquisition and distribution JMS bridge
+          destinations.</li>
+        </ul></li>
+        <li>Fix a potential issue in PoolNetwork when a connection is initiated by a bad
+        component (the incoming component still connected).</li>
+        <li>Adds samples configurations for Derby and NGT Transaction components.</li>
+        <li>Adds samples configurations and clients for HttpNetwork Network components.</li>
+        <li>Updates performance sample.</li>
+      </ul>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>,
+      and in Maven repository.</p>
+      <p>It is tagged in SVN (JORAM_5_6_0), the complete list of changes can be viewed either in
+      <a href="dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
+      </s2>
+
+      <s2 name="March 28, 2011: JORAM 5.5.0 release is available.">
+      <p>This release introduces some improvements and bug fixes, essentially:</p>
+      <ul>
+        <li>Implementation of an AMQP bridge mechanism based on acquisition / distribution
+        destinations. The implementation allows load-balancing and fail-over through
+        multiples AMQP providers.
+        A detailed description is available in section 4.6.10 of the
+        <a href="doc/Joram-en.pdf">user's guide</a>.</li>
+        <li>Achievement of an interception mechanism for processing messages in the MOM.
+        Interceptors can be located on destinations and on connection in/out channels.
+        A detailed description is available in section 3.5 of the
+				<a href="doc/Joram-en.pdf">user's guide</a>.</li>
+        <li>Implementation of a recovery mechanism for the JCA connector with automatic reconnection.</li>
+        <li>Enhancements on clustering destinations.</li>
+        <li>Configuration for the default syncOnWrite mechanism on persistence handling.</li>
+        <li>Bug fix: Removes useless timeout during JNDI service stop.</li>
+      </ul>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>,
+      and in Maven repository.</p>
+      <p>This version is bundled in Jonas 5.2.</p>
+      <p>It is tagged in SVN (JORAM_5_5_0), the complete list of changes can be viewed either in
+      <a href="dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
+      </s2>
+
+      <s2 name="October 27, 2010: JORAM 5.4.0 release is available.">
+      <p>This release introduces some improvements and bug fixes, essentially:</p>
+      <ul>
+        <li>Design of an extension framework for JMS destinations. In a first time it
+				defines 2 destinations for acquisition (create JMS message from external data)
+				and distribution (create external data from JMS message) and a simple interface
+				to implement for acquisition and distribution modules.</li>
+        <li>Implementation of Acquisition and Distribution modules are provided to replace
+        Collector, Mail, Monitoring and JMS bridge destinations.</li>
+        <li>Implementation of a STOMP proxy allowing Joram access through STOMP protocol.</li>
+        <li>Possibility to create or retrieve destinations using symbolic name through
+        Session.create[Queue|Topic].</li>
+        <li>Adds many monitoring and statistics JMX attributes.</li>
+        <li>Numerous changes in administration offering better functionnalities and
+        performances.</li>
+        <li>Bug fix: in the JMS bridge, previously the use of receiveNoWait cause a NPE in
+				server and an infinite wait for the client.</li>
+        <li>Bug fix: Potential client blocking when sending a message with a TTL to a local
+        destination (A cause of this problem can be a bad clock synchronization).</li>
+      </ul>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven
+      repository.</p>
+      <p>It is tagged in SVN (JORAM_5_4_0), the complete list of changes can be viewed either in
+      <a href="dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
+      </s2>
+
+      <s2 name="May 18, 2010: JORAM Architecture Designer plugin 1.0.0 is available">
+      <p>The first official release of Joram Architecture Designer plugin for Eclipse is available
+      for <a href="http://joram.ow2.org/download/index.html">download</a> (package JORAM_DESIGNER at
+      the end of the page). A brief PDF installation guide is available for download.</p>
+      <p>As described in the <a href="http://joram.ow2.org/doc/tutorials.html">tutorial</a> the designer
+      allows to graphically build a Joram distributed architecture. It produces <code>a3servers.xml</code>
+      and <code>joramAdmin.xml</code> configuration files. Now, it allows to automatically deploy the
+      designed configuration using <a href="http://fdf.gforge.inria.fr/">DeployWare</a>.</p>
+      <p>This release is tagged in SVN (JORAM_DESIGNER_1_0_0).</p>
+      </s2>
+
+      <s2 name="May 10, 2010: JORAM in OW2 Open Source Cloudware Initiative.">
+      <p>Last week, OW2 Consortium members Bull, Orange and INRIA had announced the OW2 Open Source Cloudware Initiative
+      at the Solutions Datacenter Management and Cloud Computing trade show in Paris. The bedrock of the OSC Initiative
+      includes the following open source OW2 projects: CLIF, Entropy, JASMINe, JOnAS, and <strong>JORAM</strong> to provide
+      the capability for on-demand JavaEE autonomic server provisioning according to demand fluctuations and ProActive for
+      complementary heterogeneous capacity management.</p>
+      <p>See the Cloudware Initiative Press Release in
+      <a href="http://www.ow2.org/xwiki/bin/download/Cloud/WebHome/OW2CloudInitiative%2DPR%2Dlong%2DenV3.6.pdf">English</a> and in
+      <a href="http://www.ow2.org/xwiki/bin/download/Cloud/WebHome/OW2CloudInitiative%2DPR%2Dlong%2Dfrv3.6.pdf">French</a></p>
+      </s2>
+
+      <s2 name="May 07, 2010: JORAM 5.3.1 maintenance release is available.">
+      <p>This release introduces some improvements and bug fixes, essentially:</p>
+      <ul>
+        <li>A reworked PoolNetwork component with one Sender by NetSession. This optimizes
+        performances and fixes various synchronization issues. Furthermore, SoftReferences
+        are now used in the PoolNetwork to avoid memory errors when messages accumulate in
+        the network.</li>
+        <li>Interceptors can now be configured for managed connection factories.</li>
+        <li>Bug fixes in JMS bridge allowing anew the use of persistent server (a configuration
+        parameter is now required to enable XAConnection).</li>
+			  <li>Bug fix about destination using Timer. These destinations are now locked in memory
+        and the Timer tasks are handled depending of the agent life-cycle.</li>
+        <li>Potential bug fix in heart-beat handling. Previously an exception in HeartBeatTask.start
+        method caused an Engine stop.</li>
+        <li>Potential bug fix avoiding deadlock in AdminModule.stopServer of local server.</li>
+        <li>Changes configuration properties naming for NGTransaction.</li>
+      </ul>
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven
+      repository.</p>
+      <p>It is tagged in SVN (JORAM_5_3_1), the complete list of changes can be viewed either in
+      <a href="dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
+      </s2>
+    
+      <s2 name="March 09, 2010: Joram successfully passes performance and scalability tests for SM&amp;C.">
+      <p>The CNES implementation of a new generation of Spacecraft Monitoring and Control system (CCSDS SM&amp;C stantard)
+      foresee to use Joram as underlying communication middleware. Performance and scalability tests have been conducted
+      successfully to validate this future usage of Joram.</p>
+      <p>Credits to HP &amp; <a href="http://www.oxalya.com">Oxalya</a> and their Minalogic partnership for their support
+      in granting access to the 'virtual nodes' cluster.</p>
+      </s2>
+
+      <s2 name="March 05, 2010: Tutorials about OSGi and architecture designer are available.">
+      <p>Two new tutorials are available describing new features available in Joram 5.3. The first one describes
+      briefly the capabilities of the OSGi implementation of the Joram server, the second one introduces the Joram's
+      architecture designer (see <a href="doc/tutorials.html">tutorials</a>).</p>
+      </s2>
+          
+      <s2 name="February 22, 2010: JORAM 5.3.0 is released">
+      <p>This version is available for <a href="http://joram.ow2.org/download/index.html">download</a>, and in Maven
+      repository.</p>
+      <p>Joram is now designed with an OSGi<sup>TM</sup> based services architecture to provide a dynamically adaptable
+      messaging server:</p>
+      <ul>
+        <li>The Joram server can be launched as a set of OSGi bundles (it is always possible to launch the server as
+        a classic Java program).</li>
+        <li>Additional services can be started, stopped, reconfigured: Command line interface, Web console, etc.</li>
+      </ul>
+      <p>This release also introduces some improvements and bug fixes, essentially:</p>
+      <ul>
+        <li>Update Joram security JAAS implementation.</li>
+        <li>Implements either implicit (periodic) or explicit behavior for monitoring topics.</li>
+        <li>Implements monitoring queue.</li>
+			  <li>The Destination.getStatistics method now returns all the convertible JMX attributes of this destination.</li>
+        <li>Fix a possible incomplete closure of PoolSender, and possible NPE.</li>
+        <li>JMX monitoring extensions.</li>
+        <li>Fix potential issues using clustered destination.</li>
+        <li>No longer use Joram's implementation of timer.</li>
+      </ul>
+      <p>It is tagged in SVN (JORAM_5_3_0), the complete list of changes can be viewed either in
+      <a href="dev/versions.html">code updates</a> or in
+      <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
+      </s2>
+      
+      <s2 name="January 25, 2010: joram-commits@ow2.org">
+      <p>A new mailing-list is now available, it allows to follow all the modifications on the Joram's SVN.</p>
+      <p>You can subscribe at <a href="http://mail.ow2.org/wws/arc/joram-commits">joram-commits@ow2.org</a>.</p>
+      </s2>
+            
+	    <s2 name="December 2nd and 3rd, 2009: JORAM Training Session, Grenoble, France">
+	      <p>A two-day training session about JORAM is scheduled in Grenoble; it will be delivered in french language.</p>
+	      <p>The session is entitled "Design and Deploy a Distributed JORAM Messaging System".</p>
+	      <p>This training session is targeted at architects and system designers that intend to integrate  the JORAM component
+	      within a global distributed solution. It includes a significant part of  experimentations and case studies based on
+	      real-world application scenarios.</p>
+	      <p>The session is conducted by ScalAgent Distributed Technologies, the leading developer of the JORAM component. We
+	      offer to share our expertise through a training session aiming at providing the key knowledge to use and deploy a JORAM
+	      system that fits your own requirements. This two-day session details the design principles of JORAM and describes the
+	      best practices that will enable to take advantage of its advanced properties for complex networked environments.</p>
+	      <p>Detailed information about this training session is available online
+	      <a href="http://www.scalagent.com/spip.php?article314 ">(PDF, in french only)</a></p>
+      </s2>
+       
+      <s2 name="October 16, 2009: Joram Snapshot are now available">
+      <p>The latest development snapshots are now available from
+      <a href="http://bamboo.ow2.org/artifact/JORAM-ANT/JOB1/build-latest/Releases/release/target">Continuous Integration Build Tool</a>.
+      This will be built automatically from the current development code after each change in the SVN code base.</p>
+      <p>If you need quickly a fix for a particular bug, you may be able to find a fixed Joram release here well
+      before the fix makes it into the next release version. On the other hand, these snapshots might sometimes
+      be unstable.</p>
+      </s2>
+			
+      <s2 name="January 18, 2006">
+        <p>JORAM is acknowledged as the best open source MOM implementation, according to
+        <a href="http://java.sys-con.com/node/171304">JDJ's readers</a>, challenging
+        proprietary products from IBM, Sun and TIBCO.</p>
+      </s2>
+
+	    <s2 name="September 26th, 2005: JORAM Survey Synthesis">
+	      <p>A synthesis of the JORAM Survey is available <a href="http://www.scalagent.com/IMG/pdf/050926-JORAM_Survey-Synthesis-2.pdf">here</a>.</p>
+ 	      <p>Several users have expressed their need for various forms of services (support, consulting, training, etc.).
+        Therefore we would like to remind that a description of professional services on JORAM is available 
+        <a href="http://www.scalagent.com/spip.php?article41">here</a>.
+        Do not hesitate to contact us for any further question you may have on JORAM :
+        <a href="mailto:contact@scalagent.com">contact@scalagent.com</a>.</p>
+      </s2>
+
+      <subtitle><a href="history.html">All the News</a></subtitle>
+    </s1>
+
+  </body>
+</document>
