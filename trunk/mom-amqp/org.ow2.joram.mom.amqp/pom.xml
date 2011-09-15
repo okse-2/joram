@@ -21,7 +21,7 @@
   <properties>
     <joram.version>5.6.0</joram.version>
     <version.filter.value>${project.version}</version.filter.value>
-    <paxexamversion>2.1.0</paxexamversion>
+    <paxexamversion>2.2.0</paxexamversion>
     <maven.bundle.plugin.version>2.3.5</maven.bundle.plugin.version>
   </properties>
 
