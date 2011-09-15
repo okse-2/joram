@@ -11,7 +11,7 @@ import org.ops4j.pax.exam.ExamSystem;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.TestContainer;
 import org.ops4j.pax.exam.options.SystemPropertyOption;
-import org.ops4j.pax.exam.spi.container.PaxExamRuntime;
+import org.ops4j.pax.exam.spi.PaxExamRuntime;
 import org.ow2.joram.mom.amqp.AMQPConnectionListener;
 import org.ow2.joram.mom.amqp.tests.SCAdmin;
 
