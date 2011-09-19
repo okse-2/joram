@@ -1079,7 +1079,7 @@
   </target>
 
   <!-- **************************************************
-       * Performance Sample (Topic)
+       * Performance Sample
        ************************************************** -->
 
   <!-- Runs the performance sample administration code -->
@@ -1173,11 +1173,55 @@
     <java classname="perfs.Consumer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-DSubDurable=true" />
+      <jvmarg line="-DSubDurable=true"/>
       <arg line="topic"/>
     </java>
   </target>
-  
+
+  <!-- **************************************************
+       * JMX Connector Sample
+       ************************************************** -->
+
+  <!-- Runs the JMX connector sample administration code -->
+  <target name="jmxconnector_admin" depends="simple_init"
+    description="--> Launches the JMX Connector admin">
+    <java classname="jmxconnector.JMXConnectorAdmin" failonerror="no" fork="yes" dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    </java>
+  </target>
+ 
+  <!-- Runs the JMX connector Hello sample -->
+  <target name="jmxconnector_hello" depends="simple_init"
+    description="--> Starts the JMX Connector Hello sample">
+    <java classname="jmxconnector.Hello" failonerror="no" fork="yes" dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+    	<jvmarg value="-javaagent:../../../jmx-connector/target/joram-jmx-connector-0.1.0-SNAPSHOT.jar"/>
+    	<jvmarg line="-Dorg.ow2.joram.jmxconnector.server.url=service:jmx:jms://localhost:16010/Hello"/>
+    </java>
+  </target>
+	
+  <!-- Runs the JMX connector Client sample -->
+  <target name="jmxconnector_client" depends="simple_init"
+    description="--> Starts the JMX Connector Client sample">
+    <java classname="jmxconnector.JMXConnectorClient" failonerror="no" fork="yes" dir="${run.dir}">
+      <classpath>
+        <pathelement location="../../../../jmx-connector/target/joram-jmx-connector-0.1.0-SNAPSHOT.jar"/>
+        <pathelement path="${project.class.path}"/>
+      </classpath>
+    </java>
+  </target>
+	
+  <!-- Runs the JMX connector Test sample -->
+  <target name="jmxconnector_test" depends="simple_init"
+    description="--> Starts the JMX Connector Test sample">
+    <java classname="jmxconnector.JMXConnectorTest" failonerror="no" fork="yes" dir="${run.dir}">
+      <classpath>
+        <pathelement location="../../../../jmx-connector/target/joram-jmx-connector-0.1.0-SNAPSHOT.jar"/>
+        <pathelement path="${project.class.path}"/>
+      </classpath>
+    </java>
+  </target>
+
  <!-- **************************************************
       * Cron sample
       ************************************************** -->
