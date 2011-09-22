@@ -77,24 +77,35 @@ public class JoramHelper {
   /**
    * Instantiating the destination class or retrieving the destination.
    * 
-   * @param destNane      destination name
+   * @param destName      destination name
    * @param adminId       other admin (null for TopicAdmin)
    * @param destClassName destination class name
    * @param type          destination type
    * @param properties    destination properties
-   * @param fromClassName 
-   * @param jndiLookup    true lookup in jndi
-   * @param jndiRebind    true re-bind destination in jndi
+   * @param freerw        destination rights for reading and writing
    * @return destination AgentId
    * @throws Exception
    */
-  public final static AgentId createDestination(
-      String destName,
-      AgentId adminId,
-      String destClassName,
-      byte type,
-      Properties properties,
-      boolean freerw) throws Exception {
+  public final static AgentId createDestination(String destName, AgentId adminId, String destClassName,
+      byte type, Properties properties, boolean freerw) throws Exception {
+    return createDestination(destName, adminId, destClassName, type, properties, freerw, freerw);
+  }
+
+  /**
+   * Instantiating the destination class or retrieving the destination.
+   * 
+   * @param destName      destination name
+   * @param adminId       other admin (null for TopicAdmin)
+   * @param destClassName destination class name
+   * @param type          destination type
+   * @param properties    destination properties
+   * @param freer        destination rights for reading
+   * @param freew        destination rights for writing
+   * @return destination AgentId
+   * @throws Exception
+   */
+  public final static AgentId createDestination(String destName, AgentId adminId, String destClassName,
+      byte type, Properties properties, boolean freer, boolean freew) throws Exception {
     AgentId destId = null;
     StringBuffer strbuf = new StringBuffer();
     DestinationDesc destDesc = null;
@@ -113,13 +124,15 @@ public class JoramHelper {
       logger.log(BasicLevel.DEBUG, "JoramHelper.createDestination info = " + strbuf.toString());
     strbuf.setLength(0);     
 
-    if (freerw) {
+    if (freer) {
       try {
         AdminTopic.setRightAndSave(new SetReader(null, destId.toString()), null, "-1");
       } catch (Exception exc) {
         if (logger.isLoggable(BasicLevel.ERROR))
           logger.log(BasicLevel.ERROR, "JoramHelper.createDestination, Cannot set FreeReader", exc);
       }
+    }
+    if (freew) {
       try {
         AdminTopic.setRightAndSave(new SetWriter(null, destId.toString()), null, "-1");
       } catch (Exception exc) {
