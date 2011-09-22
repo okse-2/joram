@@ -27,6 +27,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.ref.SoftReference;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -509,7 +510,11 @@ public final class Message implements Serializable, MessageView {
     if (msg.properties == null) {
       return null;
     }
-    msg.properties.copyInto(props);
+    Enumeration enu = msg.properties.keys();
+    while (enu.hasMoreElements()) {
+      String key = (String) enu.nextElement();
+      props.put(key, msg.properties.get(key).toString());
+    }
     return props;
   }
 }
