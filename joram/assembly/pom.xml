@@ -7,21 +7,20 @@
   <name>JORAM :: assembly</name>
   <url>http://maven.apache.org</url>
   <description>Provides a Joram assembly target.</description>
-  
+
   <parent>
-	  <groupId>org.objectweb.joram</groupId>
-		<artifactId>parent</artifactId>
-		<version>5.8.0-SNAPSHOT</version>
-	</parent>
-       
+    <groupId>org.objectweb.joram</groupId>
+    <artifactId>parent</artifactId>
+    <version>5.8.0-SNAPSHOT</version>
+  </parent>
+
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.2-beta-5</version>
         <executions>
-          <!-- ============= joram-osgi =====================-->
+          <!-- ============= joram-osgi ===================== -->
           <execution>
             <id>joram-osgi</id>
             <phase>package</phase>
@@ -41,7 +40,7 @@
     </plugins>
   </build>
 
-  <dependencies>  
+  <dependencies>
     <dependency>
       <groupId>org.apache.geronimo.specs</groupId>
       <artifactId>geronimo-jms_1.1_spec</artifactId>
@@ -53,7 +52,7 @@
     <dependency>
       <groupId>org.objectweb.joram</groupId>
       <artifactId>jcup</artifactId>
-    </dependency> 
+    </dependency>
     <dependency>
       <groupId>org.objectweb.joram</groupId>
       <artifactId>joram-shared</artifactId>
@@ -65,12 +64,6 @@
       <artifactId>joram-mom-core</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
-    </dependency>
-    <dependency>
-      <groupId>org.objectweb.joram</groupId>
-      <artifactId>joram-client</artifactId>
-      <version>${project.version}</version>
-      <type>pom</type>
     </dependency>
     <dependency>
       <groupId>org.objectweb.joram</groupId>
@@ -113,12 +106,6 @@
       <artifactId>jndi-client</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
-    </dependency>
-    <dependency>
-      <groupId>org.objectweb.joram</groupId>
-      <artifactId>joram-mom-extensions</artifactId>
-      <version>${project.version}</version>
-      <type>pom</type>
     </dependency>
     <dependency>
       <groupId>org.objectweb.joram</groupId>
@@ -182,7 +169,7 @@
       <artifactId>org.apache.felix.main</artifactId>
       <version>${felix.main.version}</version>
     </dependency>
-    
+
     <dependency>
       <groupId>javax.activation</groupId>
       <artifactId>activation</artifactId>
@@ -221,5 +208,5 @@
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
-  </dependencies>  
+  </dependencies>
 </project>
