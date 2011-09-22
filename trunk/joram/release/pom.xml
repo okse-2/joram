@@ -385,12 +385,6 @@
     </dependency>
     <dependency>
       <groupId>org.objectweb.joram</groupId>
-      <artifactId>joram-client</artifactId>
-      <version>${project.version}</version>
-      <type>pom</type>
-    </dependency>
-    <dependency>
-      <groupId>org.objectweb.joram</groupId>
       <artifactId>joram-client-jms</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
@@ -430,12 +424,6 @@
       <artifactId>jndi-client</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
-    </dependency>
-    <dependency>
-      <groupId>org.objectweb.joram</groupId>
-      <artifactId>joram-mom-extensions</artifactId>
-      <version>${project.version}</version>
-      <type>pom</type>
     </dependency>
     <dependency>
       <groupId>org.objectweb.joram</groupId>
