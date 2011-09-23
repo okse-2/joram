@@ -1,6 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.objectweb.joram</groupId>
   <artifactId>webconsole-admin</artifactId>
   <packaging>war</packaging>
   <name>JORAM :: webconsole :: administration</name>
@@ -21,31 +20,31 @@
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-servlet</artifactId>
-      <version>2.1.1</version>
+      <version>${gwt.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
-      <version>2.1.1</version>
+      <version>${gwt.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.smartgwt</groupId>
       <artifactId>smartgwt</artifactId>
-      <version>2.4</version>
+      <version>${smartgwt.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.google.code.gwt-log</groupId>
       <artifactId>gwt-log</artifactId>
-      <version>3.0.4</version>
+      <version>${gwt-log.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>com.google.gwt</groupId>
+      <groupId>com.google.gwt.google-apis</groupId>
       <artifactId>gwt-visualization</artifactId>
-      <version>1.1.0</version>
+      <version>${gwt-visualization.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -63,7 +62,7 @@
     <dependency>
       <groupId>org.ow2.easybeans.osgi</groupId>
       <artifactId>easybeans-osgi-annotations</artifactId>
-      <version>1.2.1</version>
+      <version>1.2.2</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
@@ -83,7 +82,19 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
-        <version>2.1.0-1</version>
+        <version>${gwt-maven-plugin.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-user</artifactId>
+            <version>${gwt.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-dev</artifactId>
+            <version>${gwt.version}</version>
+          </dependency>
+        </dependencies>
         <executions>
           <execution>
             <configuration>
@@ -97,7 +108,6 @@
         <configuration>
           <module>com.scalagent.AdminJoram</module>
           <runTarget>AdminJoram.html</runTarget>
-          <copyWebapp>true</copyWebapp>
         </configuration>
       </plugin>
 
@@ -133,8 +143,8 @@
             <supportedProjectType>war</supportedProjectType>
           </supportedProjectTypes>
           <instructions>
-            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-            <Bundle-ClassPath>WEB-INF/classes, WEB-INF/lib/gwt-servlet-2.1.1.jar, .</Bundle-ClassPath>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <Bundle-ClassPath>WEB-INF/classes, WEB-INF/lib/gwt-servlet-${gwt.version}.jar, .</Bundle-ClassPath>
             <Private-Package>*</Private-Package>
             <Import-Package>
               !com.google.gwt.*,
@@ -150,9 +160,39 @@
 
       </plugin>
     </plugins>
+    <pluginManagement>
+      <plugins>
+        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-bundle-plugin</artifactId>
+                    <versionRange>[2.1.0,)</versionRange>
+                    <goals>
+                      <goal>manifest</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 
   <repositories>
+    <!-- For smartgwt -->
     <repository>
       <id>smartclient</id>
       <name>smartclient.com</name>
@@ -166,8 +206,8 @@
     </repository>
     <repository>
       <!-- For gwt-visualization -->
-      <id>gwt-maven-rewraps</id>
-      <url>http://gwt-maven-rewraps.googlecode.com/hg/</url>
+      <id>eclipse-sonatype</id>
+      <url>http://maven.eclipse.org/nexus/content/repositories/Sonatype/</url>
     </repository>
   </repositories>
 
