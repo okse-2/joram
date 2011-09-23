@@ -77,14 +77,12 @@ public class JoramAdminOSGi extends JoramAdmin implements ServiceTrackerCustomiz
     throw new Exception("Joram ConnectionManager not found.");
   }
 
-  public void start(AdminListener listener) {
-    super.start(listener);
+  public void start() {
     serviceTracker = new ServiceTracker(context, filter, this);
     serviceTracker.open();
   }
 
   public void stop() {
-    super.stop();
     serviceTracker.close();
   }
 
