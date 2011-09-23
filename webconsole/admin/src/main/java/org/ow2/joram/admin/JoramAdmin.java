@@ -23,36 +23,39 @@
 package org.ow2.joram.admin;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
-import org.objectweb.joram.mom.dest.AdminTopicMBean;
+import org.objectweb.joram.mom.dest.Queue;
 import org.objectweb.joram.mom.dest.QueueMBean;
+import org.objectweb.joram.mom.dest.Topic;
 import org.objectweb.joram.mom.dest.TopicMBean;
 import org.objectweb.joram.mom.proxies.ClientSubscriptionMBean;
 import org.objectweb.joram.mom.proxies.UserAgentMBean;
+import org.objectweb.joram.mom.util.JoramHelper;
+import org.objectweb.joram.shared.DestinationConstants;
 
 import fr.dyade.aaa.agent.EngineMBean;
 import fr.dyade.aaa.agent.NetworkMBean;
 
 public abstract class JoramAdmin {
 
-  private AdminListener listener;
+  protected Map<String, QueueMBean> queues = new HashMap<String, QueueMBean>();
+  protected Map<String, TopicMBean> topics = new HashMap<String, TopicMBean>();
+  protected Map<String, UserAgentMBean> users = new HashMap<String, UserAgentMBean>();
+  protected Map<String, ClientSubscriptionMBean> subscriptions = new HashMap<String, ClientSubscriptionMBean>();
 
-  private AdminTopicMBean adminTopic;
+  protected List<NetworkMBean> networks = new ArrayList<NetworkMBean>();
 
-  private List<NetworkMBean> networks = new ArrayList<NetworkMBean>();
-
-  private EngineMBean engine;
+  protected EngineMBean engine;
 
   public abstract boolean connect(String login, String password) throws Exception;
 
-  public void start(AdminListener listener) {
-    this.listener = listener;
-  }
+  public abstract void start();
 
-  public void stop() {
-    adminTopic = null;
-  }
+  public abstract void stop();
 
   public abstract void disconnect();
 
@@ -139,11 +142,19 @@ public abstract class JoramAdmin {
    */
   public boolean createNewTopic(String name, String DMQ, String destination, long period,
       boolean freeReading, boolean freeWriting) {
-    if (adminTopic != null) {
-      adminTopic.createTopic(name);
-      return true;
+    try {
+      Properties props = null;
+      if (period != 0) {
+        props = new Properties();
+        props.setProperty("period", Long.toString(period));
+      }
+      JoramHelper.createDestination(name, null, Topic.class.getName(), DestinationConstants.TOPIC_TYPE,
+          props, freeReading, freeWriting);
+    } catch (Exception exc) {
+      exc.printStackTrace();
+      return false;
     }
-    return false;
+    return true;
   }
 
   /**
@@ -195,15 +206,12 @@ public abstract class JoramAdmin {
    * @return Create successful
    */
   public boolean createNewUser(String name, String password, long period) {
-    if (adminTopic != null) {
-      try {
-        adminTopic.createUser(name, password);
-      } catch (Exception exc) {
-        return false;
-      }
-      return true;
+    try {
+      JoramHelper.createUser(name, password);
+    } catch (Exception exc) {
+      return false;
     }
-    return false;
+    return true;
   }
 
   /**
@@ -255,11 +263,19 @@ public abstract class JoramAdmin {
    */
   public boolean createNewQueue(String name, String DMQ, String destination, long period, int threshold,
       int nbMaxMsg, boolean freeReading, boolean freeWriting) {
-    if (adminTopic != null) {
-      adminTopic.createQueue(name);
-      return true;
+    try {
+      Properties props = null;
+      if (period != 0) {
+        props = new Properties();
+        props.setProperty("period", Long.toString(period));
+      }
+      JoramHelper.createDestination(name, null, Queue.class.getName(), DestinationConstants.QUEUE_TYPE,
+          props, freeReading, freeWriting);
+    } catch (Exception exc) {
+      exc.printStackTrace();
+      return false;
     }
-    return false;
+    return true;
   }
 
   /**
@@ -402,18 +418,35 @@ public abstract class JoramAdmin {
     return infos;
   }
 
+  public Map<String, QueueMBean> getQueues() {
+    return queues;
+  }
+
+  public Map<String, TopicMBean> getTopics() {
+    return topics;
+  }
+
+  public Map<String, UserAgentMBean> getUsers() {
+    return users;
+  }
+
+  public Map<String, ClientSubscriptionMBean> getSubscription() {
+    return subscriptions;
+  }
+
   public void handleAdminObjectAdded(Object obj) {
     if (obj instanceof QueueMBean) {
-      listener.onQueueAdded((QueueMBean) obj);
+      QueueMBean queue = (QueueMBean) obj;
+      queues.put(queue.getName(), queue);
     } else if (obj instanceof TopicMBean) {
-      if (obj instanceof AdminTopicMBean) {
-        adminTopic = (AdminTopicMBean) obj;
-      }
-      listener.onTopicAdded((TopicMBean) obj);
+      TopicMBean topic = (TopicMBean) obj;
+      topics.put(topic.getName(), topic);
     } else if (obj instanceof UserAgentMBean) {
-      listener.onUserAdded((UserAgentMBean) obj);
+      UserAgentMBean user = (UserAgentMBean) obj;
+      users.put(user.getName(), user);
     } else if (obj instanceof ClientSubscriptionMBean) {
-      listener.onSubscriptionAdded((ClientSubscriptionMBean) obj);
+      ClientSubscriptionMBean subscription = (ClientSubscriptionMBean) obj;
+      subscriptions.put(subscription.getName(), subscription);
     } else if (obj instanceof NetworkMBean) {
       networks.add((NetworkMBean) obj);
     } else if (obj instanceof EngineMBean) {
@@ -423,16 +456,13 @@ public abstract class JoramAdmin {
 
   public void handleAdminObjectRemoved(Object obj) {
     if (obj instanceof QueueMBean) {
-      listener.onQueueRemoved((QueueMBean) obj);
+      queues.remove(((QueueMBean) obj).getName());
     } else if (obj instanceof TopicMBean) {
-      if (obj instanceof AdminTopicMBean) {
-        adminTopic = null;
-      }
-      listener.onTopicRemoved((TopicMBean) obj);
+      topics.remove(((TopicMBean) obj).getName());
     } else if (obj instanceof UserAgentMBean) {
-      listener.onUserRemoved((UserAgentMBean) obj);
+      users.remove(((UserAgentMBean) obj).getName());
     } else if (obj instanceof ClientSubscriptionMBean) {
-      listener.onSubscriptionRemoved((ClientSubscriptionMBean) obj);
+      subscriptions.remove(((ClientSubscriptionMBean) obj).getName());
     } else if (obj instanceof NetworkMBean) {
       networks.remove(obj);
     } else if (obj instanceof EngineMBean) {
