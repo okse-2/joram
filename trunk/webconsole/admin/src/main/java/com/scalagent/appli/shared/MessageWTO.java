@@ -39,7 +39,7 @@ public class MessageWTO extends BaseWTO {
   private String text;
   private int type;
 
-  private Map properties;
+  private Map<String, String> properties;
 
   public long getExpiration() {
     return expiration;
@@ -65,7 +65,7 @@ public class MessageWTO extends BaseWTO {
     return type;
   }
 
-  public Map getProperties() {
+  public Map<String, String> getProperties() {
     return properties;
   }
 
@@ -93,7 +93,7 @@ public class MessageWTO extends BaseWTO {
     this.type = type;
   }
 
-  public void setProperties(Map properties) {
+  public void setProperties(Map<String, String> properties) {
     this.properties = properties;
   }
 
@@ -101,7 +101,7 @@ public class MessageWTO extends BaseWTO {
   }
 
   public MessageWTO(String idS, long expiration, long timestamp, int deliveryCount, int priority,
-      String text, int type, Map properties) {
+      String text, int type, Map<String, String> properties) {
     super();
     this.id = idS;
     this.expiration = expiration;
