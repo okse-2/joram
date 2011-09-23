@@ -52,7 +52,6 @@ public class MainWidget extends BaseWidget<MainPresenter> {
   private SubscriptionListWidget subscriptionWidget;
 
   Canvas cLogin;
-  Canvas cAdminPanel;
 
   VLayout applicationLayout;
   HLayout headerLayout;
@@ -146,11 +145,11 @@ public class MainWidget extends BaseWidget<MainPresenter> {
   }
 
   public void showAdminPanel() {
-    applicationLayout.addMember(cAdminPanel);
+    applicationLayout.addMember(topTabSet);
   }
 
   public void hideAdminPanel() {
-    applicationLayout.removeMember(cAdminPanel);
+    applicationLayout.removeMember(topTabSet);
   }
 
   public void createAdminPanel() {
@@ -199,7 +198,6 @@ public class MainWidget extends BaseWidget<MainPresenter> {
       }
     });
 
-    cAdminPanel = topTabSet;
   }
 
 }
