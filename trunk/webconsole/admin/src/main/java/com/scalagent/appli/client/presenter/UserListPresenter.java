@@ -28,13 +28,10 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import com.scalagent.appli.client.RPCServiceCacheClient;
 import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.command.user.DeleteUserAction;
-import com.scalagent.appli.client.command.user.DeleteUserHandler;
 import com.scalagent.appli.client.command.user.DeleteUserResponse;
 import com.scalagent.appli.client.command.user.SendEditedUserAction;
-import com.scalagent.appli.client.command.user.SendEditedUserHandler;
 import com.scalagent.appli.client.command.user.SendEditedUserResponse;
 import com.scalagent.appli.client.command.user.SendNewUserAction;
-import com.scalagent.appli.client.command.user.SendNewUserHandler;
 import com.scalagent.appli.client.command.user.SendNewUserResponse;
 import com.scalagent.appli.client.event.common.UpdateCompleteEvent;
 import com.scalagent.appli.client.event.common.UpdateCompleteHandler;
@@ -46,6 +43,7 @@ import com.scalagent.appli.client.widget.UserListWidget;
 import com.scalagent.appli.client.widget.record.UserListRecord;
 import com.scalagent.appli.shared.UserWTO;
 import com.scalagent.engine.client.BaseRPCServiceAsync;
+import com.scalagent.engine.client.command.Handler;
 import com.scalagent.engine.client.presenter.BasePresenter;
 import com.smartgwt.client.util.SC;
 
@@ -141,7 +139,7 @@ public class UserListPresenter extends
    * The form information are sent to the server.
    */
   public void createNewUser(UserWTO user) {
-    service.execute(new SendNewUserAction(user), new SendNewUserHandler(eventBus) {
+    service.execute(new SendNewUserAction(user), new Handler<SendNewUserResponse>(eventBus) {
       @Override
       public void onSuccess(SendNewUserResponse response) {
         if (response.isSuccess()) {
@@ -162,7 +160,7 @@ public class UserListPresenter extends
    * The form information are sent to the server.
    */
   public void editUser(UserWTO user) {
-    service.execute(new SendEditedUserAction(user), new SendEditedUserHandler(eventBus) {
+    service.execute(new SendEditedUserAction(user), new Handler<SendEditedUserResponse>(eventBus) {
       @Override
       public void onSuccess(SendEditedUserResponse response) {
         if (response.isSuccess()) {
@@ -183,7 +181,7 @@ public class UserListPresenter extends
    * The user name is sent to the server which delete the user.
    */
   public void deleteUser(UserWTO user) {
-    service.execute(new DeleteUserAction(user.getId()), new DeleteUserHandler(eventBus) {
+    service.execute(new DeleteUserAction(user.getId()), new Handler<DeleteUserResponse>(eventBus) {
       @Override
       public void onSuccess(DeleteUserResponse response) {
         if (response.isSuccess()) {
