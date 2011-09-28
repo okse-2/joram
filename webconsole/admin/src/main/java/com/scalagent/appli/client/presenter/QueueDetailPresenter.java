@@ -32,13 +32,10 @@ import com.scalagent.appli.client.Application;
 import com.scalagent.appli.client.RPCServiceCacheClient;
 import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.command.message.DeleteMessageAction;
-import com.scalagent.appli.client.command.message.DeleteMessageHandler;
 import com.scalagent.appli.client.command.message.DeleteMessageResponse;
 import com.scalagent.appli.client.command.message.SendEditedMessageAction;
-import com.scalagent.appli.client.command.message.SendEditedMessageHandler;
 import com.scalagent.appli.client.command.message.SendEditedMessageResponse;
 import com.scalagent.appli.client.command.message.SendNewMessageAction;
-import com.scalagent.appli.client.command.message.SendNewMessageHandler;
 import com.scalagent.appli.client.command.message.SendNewMessageResponse;
 import com.scalagent.appli.client.event.common.UpdateCompleteEvent;
 import com.scalagent.appli.client.event.common.UpdateCompleteHandler;
@@ -53,6 +50,7 @@ import com.scalagent.appli.client.widget.record.MessageListRecord;
 import com.scalagent.appli.shared.MessageWTO;
 import com.scalagent.appli.shared.QueueWTO;
 import com.scalagent.engine.client.BaseRPCServiceAsync;
+import com.scalagent.engine.client.command.Handler;
 import com.scalagent.engine.client.presenter.BasePresenter;
 import com.smartgwt.client.util.SC;
 
@@ -236,7 +234,7 @@ public class QueueDetailPresenter extends
    * The form information are sent to the server.
    */
   public void createNewMessage(MessageWTO message, String queueName) {
-    service.execute(new SendNewMessageAction(message, queueName), new SendNewMessageHandler(eventBus) {
+    service.execute(new SendNewMessageAction(message, queueName), new Handler<SendNewMessageResponse>(eventBus) {
       @Override
       public void onSuccess(SendNewMessageResponse response) {
         if (response.isSuccess()) {
@@ -257,7 +255,7 @@ public class QueueDetailPresenter extends
    * The form information are sent to the server.
    */
   public void editMessage(MessageWTO message, String queueName) {
-    service.execute(new SendEditedMessageAction(message, queueName), new SendEditedMessageHandler(eventBus) {
+    service.execute(new SendEditedMessageAction(message, queueName), new Handler<SendEditedMessageResponse>(eventBus) {
       @Override
       public void onSuccess(SendEditedMessageResponse response) {
         if (response.isSuccess()) {
@@ -280,7 +278,7 @@ public class QueueDetailPresenter extends
    */
   public void deleteMessage(MessageWTO message, QueueWTO queue) {
     service.execute(new DeleteMessageAction(message.getId(), queue.getId(), true),
-        new DeleteMessageHandler(eventBus) {
+        new Handler<DeleteMessageResponse>(eventBus) {
       @Override
       public void onSuccess(DeleteMessageResponse response) {
         if (response.isSuccess()) {

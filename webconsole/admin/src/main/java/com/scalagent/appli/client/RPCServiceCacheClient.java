@@ -33,22 +33,16 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.user.client.Timer;
 import com.scalagent.appli.client.command.info.LoadServerInfoAction;
-import com.scalagent.appli.client.command.info.LoadServerInfoHandler;
 import com.scalagent.appli.client.command.info.LoadServerInfoResponse;
 import com.scalagent.appli.client.command.message.LoadMessageAction;
-import com.scalagent.appli.client.command.message.LoadMessageHandler;
 import com.scalagent.appli.client.command.message.LoadMessageResponse;
 import com.scalagent.appli.client.command.queue.LoadQueueAction;
-import com.scalagent.appli.client.command.queue.LoadQueueHandler;
 import com.scalagent.appli.client.command.queue.LoadQueueResponse;
 import com.scalagent.appli.client.command.subscription.LoadSubscriptionAction;
-import com.scalagent.appli.client.command.subscription.LoadSubscriptionHandler;
 import com.scalagent.appli.client.command.subscription.LoadSubscriptionResponse;
 import com.scalagent.appli.client.command.topic.LoadTopicAction;
-import com.scalagent.appli.client.command.topic.LoadTopicHandler;
 import com.scalagent.appli.client.command.topic.LoadTopicResponse;
 import com.scalagent.appli.client.command.user.LoadUserAction;
-import com.scalagent.appli.client.command.user.LoadUserHandler;
 import com.scalagent.appli.client.command.user.LoadUserResponse;
 import com.scalagent.appli.client.event.common.UpdateCompleteEvent;
 import com.scalagent.appli.client.event.message.DeletedMessageEvent;
@@ -75,6 +69,7 @@ import com.scalagent.appli.shared.TopicWTO;
 import com.scalagent.appli.shared.UserWTO;
 import com.scalagent.engine.client.BaseRPCServiceAsync;
 import com.scalagent.engine.client.BaseRPCServiceCacheClient;
+import com.scalagent.engine.client.command.Handler;
 import com.scalagent.engine.shared.BaseWTO;
 
 /**
@@ -229,7 +224,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
     if (topicRequest) {
       topicRequest = false;
       LoadTopicAction action = new LoadTopicAction((topics.isEmpty()), forceUpdate);
-      RPCService.execute(action, new LoadTopicHandler(eventBus) {
+      RPCService.execute(action, new Handler<LoadTopicResponse>(eventBus) {
         @Override
         public void onSuccess(LoadTopicResponse response) {
           if (response != null) {
@@ -246,7 +241,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
     if (queueRequest) {
       queueRequest = false;
       LoadQueueAction action = new LoadQueueAction(queues.isEmpty(), forceUpdate);
-      RPCService.execute(action, new LoadQueueHandler(eventBus) {
+      RPCService.execute(action, new Handler<LoadQueueResponse>(eventBus) {
         @Override
         public void onSuccess(LoadQueueResponse response) {
           if (response != null) {
@@ -260,8 +255,8 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
   }
 
   public void retrieveMessageQueue(QueueWTO queue, boolean retrieveAll) {
-    RPCService.execute(new LoadMessageAction(queue.getId(), retrieveAll, true), new LoadMessageHandler(
-        eventBus) {
+    RPCService.execute(new LoadMessageAction(queue.getId(), retrieveAll, true),
+        new Handler<LoadMessageResponse>(eventBus) {
       @Override
       public void onSuccess(LoadMessageResponse response) {
         if (response.isSuccess()) {
@@ -275,8 +270,8 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
   }
 
   public void retrieveMessageSub(SubscriptionWTO sub, boolean retrieveAll) {
-    RPCService.execute(new LoadMessageAction(sub.getId(), retrieveAll, false), new LoadMessageHandler(
-        eventBus) {
+    RPCService.execute(new LoadMessageAction(sub.getId(), retrieveAll, false),
+        new Handler<LoadMessageResponse>(eventBus) {
       @Override
       public void onSuccess(LoadMessageResponse response) {
         if (response.isSuccess()) {
@@ -293,7 +288,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
     if (userRequest) {
       userRequest = false;
       LoadUserAction action = new LoadUserAction((users.isEmpty()), forceUpdate);
-      RPCService.execute(action, new LoadUserHandler(eventBus) {
+      RPCService.execute(action, new Handler<LoadUserResponse>(eventBus) {
         @Override
         public void onSuccess(LoadUserResponse response) {
           if (response != null) {
@@ -310,7 +305,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
     if (subRequest) {
       subRequest = false;
       LoadSubscriptionAction action = new LoadSubscriptionAction((subs.isEmpty()), forceUpdate);
-      RPCService.execute(action, new LoadSubscriptionHandler(eventBus) {
+      RPCService.execute(action, new Handler<LoadSubscriptionResponse>(eventBus) {
         @Override
         public void onSuccess(LoadSubscriptionResponse response) {
           if (response != null) {
@@ -327,7 +322,7 @@ public class RPCServiceCacheClient implements BaseRPCServiceCacheClient {
     if (servRequest) {
       servRequest = false;
       LoadServerInfoAction action = new LoadServerInfoAction(forceUpdate);
-      RPCService.execute(action, new LoadServerInfoHandler(eventBus) {
+      RPCService.execute(action, new Handler<LoadServerInfoResponse>(eventBus) {
         @Override
         public void onSuccess(LoadServerInfoResponse response) {
           if (response != null) {

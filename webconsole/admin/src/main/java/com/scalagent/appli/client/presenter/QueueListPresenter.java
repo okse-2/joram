@@ -28,19 +28,14 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import com.scalagent.appli.client.RPCServiceCacheClient;
 import com.scalagent.appli.client.RPCServiceCacheClient.HistoryData;
 import com.scalagent.appli.client.command.queue.ClearPendingMessageAction;
-import com.scalagent.appli.client.command.queue.ClearPendingMessageHandler;
 import com.scalagent.appli.client.command.queue.ClearPendingMessageResponse;
 import com.scalagent.appli.client.command.queue.ClearWaitingRequestAction;
-import com.scalagent.appli.client.command.queue.ClearWaitingRequestHandler;
 import com.scalagent.appli.client.command.queue.ClearWaitingRequestResponse;
 import com.scalagent.appli.client.command.queue.DeleteQueueAction;
-import com.scalagent.appli.client.command.queue.DeleteQueueHandler;
 import com.scalagent.appli.client.command.queue.DeleteQueueResponse;
 import com.scalagent.appli.client.command.queue.SendEditedQueueAction;
-import com.scalagent.appli.client.command.queue.SendEditedQueueHandler;
 import com.scalagent.appli.client.command.queue.SendEditedQueueResponse;
 import com.scalagent.appli.client.command.queue.SendNewQueueAction;
-import com.scalagent.appli.client.command.queue.SendNewQueueHandler;
 import com.scalagent.appli.client.command.queue.SendNewQueueResponse;
 import com.scalagent.appli.client.event.common.UpdateCompleteEvent;
 import com.scalagent.appli.client.event.common.UpdateCompleteHandler;
@@ -52,6 +47,7 @@ import com.scalagent.appli.client.widget.QueueListWidget;
 import com.scalagent.appli.client.widget.record.QueueListRecord;
 import com.scalagent.appli.shared.QueueWTO;
 import com.scalagent.engine.client.BaseRPCServiceAsync;
+import com.scalagent.engine.client.command.Handler;
 import com.scalagent.engine.client.presenter.BasePresenter;
 import com.smartgwt.client.util.SC;
 
@@ -108,7 +104,7 @@ public class QueueListPresenter extends
    * the selected queue.
    */
   public void clearPendingMessage(QueueWTO queue) {
-    service.execute(new ClearPendingMessageAction(queue.getId()), new ClearPendingMessageHandler(eventBus) {
+    service.execute(new ClearPendingMessageAction(queue.getId()), new Handler<ClearPendingMessageResponse>(eventBus) {
       @Override
       public void onSuccess(ClearPendingMessageResponse response) {
         if (response.isSuccess()) {
@@ -128,7 +124,7 @@ public class QueueListPresenter extends
    * the selected queue.
    */
   public void clearWaintingRequest(QueueWTO queue) {
-    service.execute(new ClearWaitingRequestAction(queue.getId()), new ClearWaitingRequestHandler(eventBus) {
+    service.execute(new ClearWaitingRequestAction(queue.getId()), new Handler<ClearWaitingRequestResponse>(eventBus) {
       @Override
       public void onSuccess(ClearWaitingRequestResponse response) {
         if (response.isSuccess()) {
@@ -186,7 +182,7 @@ public class QueueListPresenter extends
    * The form information are sent to the server.
    */
   public void createNewQueue(QueueWTO newQueue) {
-    service.execute(new SendNewQueueAction(newQueue), new SendNewQueueHandler(eventBus) {
+    service.execute(new SendNewQueueAction(newQueue), new Handler<SendNewQueueResponse>(eventBus) {
       @Override
       public void onSuccess(SendNewQueueResponse response) {
         if (response.isSuccess()) {
@@ -207,7 +203,7 @@ public class QueueListPresenter extends
    * The form information are sent to the server.
    */
   public void editQueue(QueueWTO queue) {
-    service.execute(new SendEditedQueueAction(queue), new SendEditedQueueHandler(eventBus) {
+    service.execute(new SendEditedQueueAction(queue), new Handler<SendEditedQueueResponse>(eventBus) {
       @Override
       public void onSuccess(SendEditedQueueResponse response) {
         if (response.isSuccess()) {
@@ -228,7 +224,7 @@ public class QueueListPresenter extends
    * The queue name is sent to the server which delete the queue.
    */
   public void deleteQueue(QueueWTO queue) {
-    service.execute(new DeleteQueueAction(queue.getId()), new DeleteQueueHandler(eventBus) {
+    service.execute(new DeleteQueueAction(queue.getId()), new Handler<DeleteQueueResponse>(eventBus) {
       @Override
       public void onSuccess(DeleteQueueResponse response) {
         if (response.isSuccess()) {
