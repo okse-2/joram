@@ -396,7 +396,7 @@ public abstract class JoramAdmin {
   }
 
   /**
-   * Delete a Queue in JORAM
+   * Delete a subscription in JORAM
    * 
    * @param subscriptionName
    *          Name of the subscription to delete
