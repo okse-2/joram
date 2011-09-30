@@ -148,6 +148,7 @@
             <Private-Package>*</Private-Package>
             <Import-Package>
               !com.google.gwt.*,
+              !com.google.web.bindery.*,
               !com.smartgwt.*,
               !com.allen_sauer.gwt.log.*,
               !org.ow2.easybeans.osgi.annotation,
