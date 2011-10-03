@@ -47,14 +47,32 @@
       </ul>
       <p>Note: This tutorial uses some features of development release of Joram.</p>
       </s2>
+      
+      <s2 name="Joram's JMX over JMS connector">
+      <p>JMX (Java Management Extensions) provides a standard framework for managing Java applications.
+      It allows the use of multiple protocols to transport its requests.</p>
+      <p>The Joram JMX/JMS connector allows JMX administration over JMS. It requires a single Joram server
+      or cluster of servers to act as the reliable hub through which management communications will travel.
+      This tutorial depicts the use of the JORAM JMX/JMS connector.</p>
+      <p>The main advantages to use JORAM JMX/JMS connector for the communication protocol are:</p>
+      <ul>
+        <li>Decoupling between management applications and distributed JMX agents.</li>
+        <li>Easy management of WAN or Cloud based applications.</li>
+        <li>Federation of MBeanServer in a single view.</li>
+        <li>Performance.</li>
+      </ul>
+      <ul>
+        <li><a href="tutorials/jmxconnector/JMXConnector.htm">1st steps</a>.</li>
+      </ul>
+      </s2>
 			
       <s2 name="Joram's configuration designer">
       <p>This tutorial introduces the design of a Joram's configuration using the Eclipse plugin:</p>
       <ul>
         <li><a href="tutorials/designer/designer1st.htm">1st steps</a>.</li>
       </ul>
-      </s2>
       <p>Note: Currently this plugin is available in SVN.</p>
+      </s2>
     </s1>
   </body>
 
