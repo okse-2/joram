@@ -58,6 +58,12 @@
     </s1>
    
     <s1 name="Latest News">
+    
+      <s2 name="October 03, 2011: JORAM JMX/JMS Connector tutorial is available.">
+      <p>A short tutorial demonstrating the use of JORAM JMX/JMS connector is available in the
+      <a href="doc/tutorials.html">tutorial</a> section.</p>
+      </s2>
+
       <s2 name="September 09, 2011: JORAM 5.7.0 release is available.">
       <p>This release introduces some improvements and bug fixes, essentially:</p>
       <ul>
@@ -72,6 +78,12 @@
       <a href="dev/versions.html">code updates</a> or in
       <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
       </s2>
+
+      <s2 name="July 13, 2011: JORAM/AMQP 1.0 is released">
+      <p>Joram team is proud to announce the final version of the implementation of the specification AMQP v0.9.1.
+      This version successfully passed interoperability testing with RabbitMQ and QPID, it is available in Maven
+      reprository.</p>
+			</s2>
 
       <s2 name="July 13, 2011: JORAM 5.6.0 release is available.">
       <p>This release introduces some improvements and bug fixes, essentially:</p>
@@ -98,6 +110,17 @@
       <p>It is tagged in SVN (JORAM_5_6_0), the complete list of changes can be viewed either in
       <a href="dev/versions.html">code updates</a> or in
       <a href="http://websvn.ow2.org/filedetails.php?repname=joram&amp;path=%2Ftrunk%2Fjoram%2Fhistory">SVN history</a>.</p>
+      </s2>
+
+      <s2 name="November 24-25, 2010: OW2 Annual Conference, Paris, France.">
+      <p>During the <a href="http://www.ow2.org/view/Events/OW2AnnualConference2010">OW2 Annual Conference</a>,
+      Serge Lacourte (<a href="www.scalagent.com">ScalAgent D.T.</a>) presents two very different Use Cases of Joram.
+      They demonstrate the ability of Joram to adapt to very different deployment environments,
+      thanks to the very high configuration capability of its architecture.</p>
+      <p>
+      The slide show is available on the OW2 web site:
+      <a href="http://www.ow2.org/xwiki/bin/download/Events2010AnnualConference/Program/JORAM-S-Lacourte.pdf">Configuration from clustering to WAN distribution with Joram</a>.
+			</p>
       </s2>
 
       <s2 name="May 18, 2010: JORAM Architecture Designer plugin 1.0.0 is available">
