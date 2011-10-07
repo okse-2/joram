@@ -13,6 +13,11 @@
   <body>
     <s1 name="JORAM History">
     
+      <s2 name="October 10, 2011: 2 new tutorials are available.">
+      <p>Two short tutorials are available in the <a href="doc/tutorials.html">tutorial</a> section. The first
+      shows the use of the web administration console of Joram and the second allows benchmarking of Joram.</p>
+      </s2>
+    
       <s2 name="October 03, 2011: JORAM JMX/JMS Connector tutorial is available.">
       <p>A short tutorial demonstrating the use of JORAM JMX/JMS connector is available in the
       <a href="doc/tutorials.html">tutorial</a> section.</p>
