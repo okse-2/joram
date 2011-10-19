@@ -4099,6 +4099,16 @@
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
+	
+	<target name="xa.test5" depends="init.a3props,compile"
+	          description=" --> test recover (kill/restart server): on send and on receive">
+	  <antcall target="test.run" inheritAll="true">
+	    <param name="className" value="joram.xa.Test5"/>
+	    <param name="jndiconf" value="xa/jndi.properties"/>
+	    <param name="a3conf" value="xa/a3servers1.xml"/>
+	    <param name="jvmargs" value=""/>
+	  </antcall>
+	</target>
 
   <!-- end test xa -->
 
