@@ -886,6 +886,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     AgentId destId;
     for (Iterator ctxs = contexts.values().iterator(); ctxs.hasNext();) {
       activeCtx = (ClientContext) ctxs.next();
+      activeCtx.setProxyAgent(this);
       ctxs.remove();
 
       // Denying the non acknowledged messages:
