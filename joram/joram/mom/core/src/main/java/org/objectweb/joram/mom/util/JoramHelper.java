@@ -78,11 +78,11 @@ public class JoramHelper {
    * Instantiating the destination class or retrieving the destination.
    * 
    * @param destName      destination name
-   * @param adminId       other admin (null for TopicAdmin)
+   * @param adminId       Agent Id. of the administrator (null for TopicAdmin)
    * @param destClassName destination class name
    * @param type          destination type
    * @param properties    destination properties
-   * @param freerw        destination rights for reading and writing
+   * @param freerw        if true rights all users can read and write the destination.
    * @return destination AgentId
    * @throws Exception
    */
@@ -90,22 +90,28 @@ public class JoramHelper {
       byte type, Properties properties, boolean freerw) throws Exception {
     return createDestination(destName, adminId, destClassName, type, properties, freerw, freerw);
   }
-
+  
   /**
    * Instantiating the destination class or retrieving the destination.
    * 
-   * @param destName      destination name
-   * @param adminId       other admin (null for TopicAdmin)
+   * @param destNane      destination name
+   * @param adminId       Agent Id. of the administrator (null for TopicAdmin)
    * @param destClassName destination class name
    * @param type          destination type
    * @param properties    destination properties
-   * @param freer        destination rights for reading
-   * @param freew        destination rights for writing
+   * @param freerw        if true rights all users can read and write the destination.
+   * @param freerw        if true rights all users can read and write the destination.
    * @return destination AgentId
    * @throws Exception
    */
-  public final static AgentId createDestination(String destName, AgentId adminId, String destClassName,
-      byte type, Properties properties, boolean freer, boolean freew) throws Exception {
+  public final static AgentId createDestination(
+      String destName,
+      AgentId adminId,
+      String destClassName,
+      byte type,
+      Properties properties,
+      boolean freeReading,
+      boolean freeWriting) throws Exception {
     AgentId destId = null;
     StringBuffer strbuf = new StringBuffer();
     DestinationDesc destDesc = null;
@@ -124,15 +130,15 @@ public class JoramHelper {
       logger.log(BasicLevel.DEBUG, "JoramHelper.createDestination info = " + strbuf.toString());
     strbuf.setLength(0);     
 
-    if (freer) {
-      try {
+    if (freeReading) {
+     try {
         AdminTopic.setRightAndSave(new SetReader(null, destId.toString()), null, "-1");
       } catch (Exception exc) {
         if (logger.isLoggable(BasicLevel.ERROR))
           logger.log(BasicLevel.ERROR, "JoramHelper.createDestination, Cannot set FreeReader", exc);
       }
     }
-    if (freew) {
+    if (freeWriting) {
       try {
         AdminTopic.setRightAndSave(new SetWriter(null, destId.toString()), null, "-1");
       } catch (Exception exc) {
