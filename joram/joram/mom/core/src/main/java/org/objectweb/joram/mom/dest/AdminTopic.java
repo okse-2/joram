@@ -553,13 +553,19 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
    * distributing them to the appropriate reactions.
    */ 
   private void processAdminRequests(AgentId replyTo,
-                            String msgId,
-                            AdminRequest request,
-                            AgentId from) {
+                                    String msgId,
+                                    AdminRequest request,
+                                    AgentId from) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, this + ".processAdminRequests(" + msgId + ',' + request + ')');
-    
+
     String info = null;
+    if (request == null) {
+      info = strbuf.append("Unexpected null request to AdminTopic on server [") .append(serverId).append("]").toString();
+      strbuf.setLength(0);
+      distributeReply(replyTo, msgId, new AdminReply(false, info));
+      return;
+    }
 
     // state change, so save.
     setSave();
@@ -625,17 +631,11 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
       if (logger.isLoggable(BasicLevel.WARN))
         logger.log(BasicLevel.WARN, exc);
 
-      if (request == null) {
-        info = strbuf.append("Unexpected request to AdminTopic on server [")
-        .append(serverId).append("]: ").append(exc.getMessage()).toString();
-        strbuf.setLength(0);
-      } else {
-        info = strbuf.append("Request [").append(request.getClass().getName())
-        .append("], sent to AdminTopic on server [").append(serverId)
-        .append("], successful [false]: ")
-        .append(exc.getMessage()).toString();
-        strbuf.setLength(0);
-      }
+      info = strbuf.append("Request [").append(request.getClass().getName())
+          .append("], sent to AdminTopic on server [").append(serverId)
+          .append("], successful [false]: ")
+          .append(exc.getMessage()).toString();
+      strbuf.setLength(0);
 
       distributeReply(replyTo, msgId, new AdminReply(false, info));
     }
@@ -1718,11 +1718,10 @@ public final class AdminTopic extends Topic implements AdminTopicMBean {
     Class clazz = Class.forName(className);
     Method method = clazz.getMethod(methodName,
         (Class[]) paramClasses.toArray(new Class[paramClasses.size()]));
-    if (Modifier.isStatic(method.getModifiers())) {
-      return method.invoke(null, paramValues.toArray());
-    } else {
+    if (! Modifier.isStatic(method.getModifiers()))
       throw new IllegalArgumentException("Specified method must be static: " + method);
-    }
+
+    return method.invoke(null, paramValues.toArray());
   }
 
   /** 
