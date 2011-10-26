@@ -3603,6 +3603,7 @@
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="noreg.Test13"/>
     </antcall>
   </target>
 
@@ -3614,6 +3615,7 @@
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
       <param name="jvmargs" value=""/>
+      <param name="testid" value="noreg.Test14"/>
     </antcall>
   </target>
 
@@ -3631,7 +3633,7 @@
       <param name="className" value="joram.noreg.Test15"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
-      <param name="testid" value="test15-1.noreg"/>
+      <param name="testid" value="noreg.test15-1"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Topic -DBaseClass=joram.noreg.TcpBaseTest"/>
     </antcall>
   </target>
@@ -3640,7 +3642,7 @@
       <param name="className" value="joram.noreg.Test15"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
-      <param name="testid" value="test15-2.noreg"/>
+      <param name="testid" value="noreg.test15-2"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Queue -DBaseClass=joram.noreg.TcpBaseTest"/>
     </antcall>
   </target>
@@ -3649,7 +3651,7 @@
       <param name="className" value="joram.noreg.Test15"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
-      <param name="testid" value="test15-3.noreg"/>
+      <param name="testid" value="noreg.test15-3"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Topic -DBaseClass=joram.noreg.ColocatedBaseTest"/>
     </antcall>
   </target>
@@ -3658,7 +3660,7 @@
       <param name="className" value="joram.noreg.Test15"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
-      <param name="testid" value="test15-4.noreg"/>
+      <param name="testid" value="noreg.test15-4"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Queue -DBaseClass=joram.noreg.ColocatedBaseTest"/>
     </antcall>
   </target>
@@ -3676,7 +3678,7 @@
       <param name="className" value="joram.noreg.Test16"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
-      <param name="testid" value="test16-1.noreg"/>
+      <param name="testid" value="noreg.test16-1"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Topic -DBaseClass=joram.noreg.TcpBaseTest"/>
     </antcall>
   </target>
@@ -3686,7 +3688,7 @@
       <param name="className" value="joram.noreg.Test16"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
-      <param name="testid" value="test16-2.noreg"/>
+      <param name="testid" value="noreg.test16-2"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Queue -DBaseClass=joram.noreg.TcpBaseTest"/>
     </antcall>
   </target>
@@ -3696,7 +3698,7 @@
       <param name="className" value="joram.noreg.Test16"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
-      <param name="testid" value="test16-3.noreg"/>
+      <param name="testid" value="noreg.test16-3"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Topic -DBaseClass=joram.noreg.ColocatedBaseTest"/>
     </antcall>
   </target>
@@ -3706,7 +3708,7 @@
       <param name="className" value="joram.noreg.Test16"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
-      <param name="testid" value="test16-4.noreg"/>
+      <param name="testid" value="noreg.test16-4"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Queue -DBaseClass=joram.noreg.ColocatedBaseTest"/>
     </antcall>
   </target>
@@ -3724,7 +3726,7 @@
       <param name="className" value="joram.noreg.Test17"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
-      <param name="testid" value="test17-1.noreg"/>
+      <param name="testid" value="noreg.test17-1"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Topic -DBaseClass=joram.noreg.TcpBaseTest"/>
     </antcall>
   </target>
@@ -3734,7 +3736,7 @@
       <param name="className" value="joram.noreg.Test17"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
-      <param name="testid" value="test17-2.noreg"/>
+      <param name="testid" value="noreg.test17-2"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Queue -DBaseClass=joram.noreg.TcpBaseTest"/>
     </antcall>
   </target>
@@ -3744,7 +3746,7 @@
       <param name="className" value="joram.noreg.Test17"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
-      <param name="testid" value="test17-3.noreg"/>
+      <param name="testid" value="noreg.test17-3"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Topic -DBaseClass=joram.noreg.ColocatedBaseTest"/>
     </antcall>
   </target>
@@ -3754,7 +3756,7 @@
       <param name="className" value="joram.noreg.Test17"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
-      <param name="testid" value="test17-4.noreg"/>
+      <param name="testid" value="noreg.test17-4"/>
       <param name="jvmargs" value="-DDestination=org.objectweb.joram.client.jms.Queue -DBaseClass=joram.noreg.ColocatedBaseTest"/>
     </antcall>
   </target>
@@ -3771,7 +3773,7 @@
       <param name="className" value="joram.noreg.Test18"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
-      <param name="testid" value="test18-1.noreg"/>
+      <param name="testid" value="noreg.test18-1"/>
       <param name="jvmargs" value="-DBaseClass=joram.noreg.TcpBaseTest"/>
     </antcall>
   </target>
@@ -3781,7 +3783,7 @@
       <param name="className" value="joram.noreg.Test18"/>
       <param name="jndiconf" value="noreg/jndi.properties"/>
       <param name="a3conf" value="noreg/a3servers1.xml"/>
-      <param name="testid" value="test18-2.noreg"/>
+      <param name="testid" value="noreg.test18-2"/>
       <param name="jvmargs" value="-DBaseClass=joram.noreg.ColocatedBaseTest"/>
     </antcall>
   </target>
@@ -4099,7 +4101,7 @@
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
-	
+
 	<target name="xa.test5" depends="init.a3props,compile"
 	          description=" --> test recover (kill/restart server): on send and on receive">
 	  <antcall target="test.run" inheritAll="true">
