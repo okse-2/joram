@@ -618,27 +618,33 @@ public final class JoramAdapter implements ResourceAdapter, JoramAdapterMBean, E
     // Execute the XML script of configuration.
     try {
       if (logger.isLoggable(BasicLevel.INFO))
-        logger.log(BasicLevel.INFO, "  - Reading the provided admin file: " + adminFileXML);
+        logger.log(BasicLevel.INFO,
+                   "JoramAdapter - Reading the provided admin file: " + adminFileXML);
       AdminModule.executeXMLAdmin(platformConfigDir, adminFileXML);
     } catch (FileNotFoundException exc) {
       if (logger.isLoggable(BasicLevel.INFO))
-        logger.log(BasicLevel.INFO, "JoramAdapter - problem during XML configuration: " + adminFileExportXML);
+        logger.log(BasicLevel.INFO,
+                   "JoramAdapter - problem during XML configuration: " + adminFileXML + " file not found.");
     } catch (Exception exc) {
       if (logger.isLoggable(BasicLevel.ERROR))
-        logger.log(BasicLevel.ERROR, "JoramAdapter - problem during XML configuration: " + adminFileExportXML, exc);
+        logger.log(BasicLevel.ERROR,
+                   "JoramAdapter - problem during XML configuration: " + adminFileXML, exc);
     }
 
     // Execute the XML script corresponding to the export of the configuration.
     try {
       if (logger.isLoggable(BasicLevel.INFO))
-        logger.log(BasicLevel.INFO, "  - Reading the provided admin file: " + adminFileExportXML);
+        logger.log(BasicLevel.INFO,
+                   "JoramAdapter - Reading the provided admin file: " + adminFileExportXML);
       AdminModule.executeXMLAdmin(platformConfigDir, adminFileExportXML);
     } catch (FileNotFoundException exc) {
       if (logger.isLoggable(BasicLevel.INFO))
-        logger.log(BasicLevel.INFO, "JoramAdapter - problem during XML configuration: " + adminFileExportXML);
+        logger.log(BasicLevel.INFO,
+                   "JoramAdapter - problem during XML configuration: " + adminFileExportXML + " file not found.");
     } catch (Exception exc) {
       if (logger.isLoggable(BasicLevel.ERROR))
-        logger.log(BasicLevel.ERROR, "JoramAdapter - problem during XML configuration: " + adminFileExportXML, exc);
+        logger.log(BasicLevel.ERROR,
+                   "JoramAdapter - problem during XML configuration: " + adminFileExportXML, exc);
     }
 
     if (logger.isLoggable(BasicLevel.INFO))
