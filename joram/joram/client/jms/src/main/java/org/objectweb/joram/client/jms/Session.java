@@ -542,6 +542,8 @@ public class Session implements javax.jms.Session {
    * <p>
    *  Default value is false, the subscription is handled synchronously so the
    * topic must be accessible.
+   * 
+   * @since JORAM 5.0.7
    */
   private boolean asyncSub = false;
 
@@ -553,6 +555,8 @@ public class Session implements javax.jms.Session {
    * topic must be accessible.
    *
    * @return true if the subscription requests are asynchronously handled.
+   * 
+   * @since JORAM 5.0.7
    */
   public boolean isAsyncSub() {
     return asyncSub;
@@ -568,6 +572,8 @@ public class Session implements javax.jms.Session {
    * topic must be accessible.
    *
    * @param asyncSub if true sets  asynchronous subscription for this session.
+   * 
+   * @since JORAM 5.0.7
    */
   public void setAsyncSub(boolean asyncSub) {
     this.asyncSub = asyncSub;
