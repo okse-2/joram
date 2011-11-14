@@ -641,10 +641,10 @@ public abstract class Destination extends Agent implements DestinationMBean {
 
     doClientMessages(from, not);
 
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // for topic performance : must send reply after process ClientMessage
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+    // For topic performance we must send reply after process ClientMessage. It results
+    // in a best flow-control of sender allowing the handling of forwarded messages before
+    // sender freeing.
+    
     if (!not.isPersistent() && !not.getAsyncSend()) {
       forward(from, new SendReplyNot(not.getClientContext(), not.getRequestId()));
     }
