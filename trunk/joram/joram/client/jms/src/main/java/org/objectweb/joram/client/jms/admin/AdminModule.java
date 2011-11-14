@@ -1504,13 +1504,15 @@ public final class AdminModule {
   }
 
   /**
-   * Sets the timeout before abortion of administration requests.
+   * Sets the timeout in ms before abortion of administration requests.
    * <p>
    * Be careful, the value can be changed prior to the connection only using
    * the <code>AdminRequestor.REQUEST_TIMEOUT_PROP</code> property.
    * 
    * @param timeOut The timeout
    * @throws ConnectException if the connection is not established.
+   * 
+   * @since 5.2.2
    */
   public static void setTimeOutToAbortRequest(long timeOut) throws ConnectException {
     if (wrapper == null)
@@ -1520,10 +1522,12 @@ public final class AdminModule {
   }
 
   /**
-   * Gets the timeout before abortion of administration requests.
+   * Gets the timeout in ms before abortion of administration requests.
    * 
    * @return the timeout
    * @throws ConnectException if the connection is not established.
+   * 
+   * @since 5.2.2
    */
   public static long getTimeOutToAbortRequest() throws ConnectException {
     if (wrapper == null)

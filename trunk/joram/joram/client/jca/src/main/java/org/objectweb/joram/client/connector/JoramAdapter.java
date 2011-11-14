@@ -1261,24 +1261,26 @@ public final class JoramAdapter implements ResourceAdapter, JoramAdapterMBean, E
 
 
   /**
-   * Gets timeout before abort a request.
+   * Gets timeout in ms before abort a request.
    * 
    * @return timeout before abort a request.
    * @throws ConnectException 
    * 
    * @see AdminModule#getTimeOutToAbortRequest()
+   * @since 5.2.2
    */
   public long getTimeOutToAbortRequest() throws ConnectException {
     return AdminModule.getTimeOutToAbortRequest();
   }
 
   /**
-   * Sets timeout before abort a request.
+   * Sets timeout in ms before abort a request.
    * 
    * @param timeOut timeout before abort a request.
    * @throws ConnectException 
    * 
    * @see AdminModule#setTimeOutToAbortRequest(long)
+   * @since 5.2.2
    */
   public void setTimeOutToAbortRequest(long timeOut) throws ConnectException {
     AdminModule.setTimeOutToAbortRequest(timeOut);
