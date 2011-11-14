@@ -107,13 +107,12 @@ public class DistributionQueue extends Queue {
       }
       if (distributionClassName == null) {
         throw new RequestException("Distribution class name not found: " + DistributionModule.CLASS_NAME
-            + " property must be set on queue creation.");
+                                   + " property must be set on queue creation.");
       }
 
       // Check the existence of the distribution class and the presence of a no-arg constructor.
       try {
-        String className = distributionClassName;
-        Class.forName(className).getConstructor();
+        Class.forName(distributionClassName).getConstructor();
       } catch (Exception exc) {
         logger.log(BasicLevel.ERROR, "DistributionQueue: error with distribution class.", exc);
         throw new RequestException(exc.getMessage());
