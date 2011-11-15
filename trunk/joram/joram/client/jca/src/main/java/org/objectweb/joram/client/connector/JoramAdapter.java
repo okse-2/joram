@@ -479,11 +479,9 @@ public final class JoramAdapter implements ResourceAdapter, JoramAdapterMBean, E
   public void setDeleteDurableSubscription(Boolean flg) {
     this.deleteDurableSubscription = flg.booleanValue();
   }
-
-  public JMXServer jmxServer;
   
   public void setJmxServer(MBeanServer jmxServer) {
-    this.jmxServer = new JMXServer(jmxServer);
+    MXWrapper.setMXServer(new JMXServer(jmxServer));
   }
 
   /** Name of the root in the MBean tree */
@@ -697,7 +695,7 @@ public final class JoramAdapter implements ResourceAdapter, JoramAdapterMBean, E
       
       // Registering MBeans...
       try {
-        jmxServer.registerMBean(this, MXWrapper.objectName(jmxRootName, "type=JoramAdapter"));
+        MXWrapper.registerMBean(this, MXWrapper.objectName(jmxRootName, "type=JoramAdapter"));
       } catch (Exception e) {
         if (logger.isLoggable(BasicLevel.WARN))
           logger.log(BasicLevel.WARN, "  - Could not register JoramAdapterMBean", e);
@@ -737,7 +735,7 @@ public final class JoramAdapter implements ResourceAdapter, JoramAdapterMBean, E
     adminDisconnect();
 
     try {
-      jmxServer.unregisterMBean(MXWrapper.objectName(jmxRootName, "type=JoramAdapter"));
+      MXWrapper.unregisterMBean(MXWrapper.objectName(jmxRootName, "type=JoramAdapter"));
     } catch (Exception e) {
       if (logger.isLoggable(BasicLevel.WARN))
         logger.log(BasicLevel.WARN, "unregisterMBean", e);
