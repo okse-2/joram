@@ -40,12 +40,14 @@ import javax.management.ObjectName;
 import org.osgi.framework.ServiceRegistration;
 
 import fr.dyade.aaa.common.osgi.Activator;
+import fr.dyade.aaa.util.management.MXServer;
 import fr.dyade.aaa.util.management.MXWrapper;
 
 /**
- * 
+ * Implementation of the MXServer interface allowing the a3rt independence
+ * from the JMX framework.
  */
-public class JMXServer {
+public class JMXServer implements MXServer {
 
   public static boolean registerAsService = false;
   
@@ -55,7 +57,6 @@ public class JMXServer {
 
   public JMXServer(MBeanServer mxserver) {
     this.mxserver = mxserver;
-    MXWrapper.setMXServer(this);
   }
 
   public JMXServer() {
