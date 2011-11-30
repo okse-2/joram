@@ -17,23 +17,23 @@
       <includes>
         <include>org.apache.geronimo.specs:geronimo-jms_1.1_spec</include>
         <include>org.objectweb.joram:jcup</include>
-        <include>org.objectweb.joram:joram-shared</include>
-        <include>org.objectweb.joram:joram-mom-core</include>
-        <include>org.objectweb.joram:joram-client-jms</include>
-        <include>org.objectweb.joram:a3-common</include>
-        <include>org.objectweb.joram:a3-rt</include>
-        <include>org.objectweb.joram:a3-osgi</include>
-        <include>org.objectweb.joram:jndi-shared</include>
-        <include>org.objectweb.joram:jndi-server</include>
-        <include>org.objectweb.joram:jndi-client</include>
+        <include>org.ow2.joram:joram-shared</include>
+        <include>org.ow2.joram:joram-mom-core</include>
+        <include>org.ow2.joram:joram-client-jms</include>
+        <include>org.ow2.joram:a3-common</include>
+        <include>org.ow2.joram:a3-rt</include>
+        <include>org.ow2.joram:a3-osgi</include>
+        <include>org.ow2.joram:jndi-shared</include>
+        <include>org.ow2.joram:jndi-server</include>
+        <include>org.ow2.joram:jndi-client</include>
         <include>org.ow2.jonas.osgi:monolog</include>
-        <include>org.objectweb.joram:joram-mom-extensions-amqp</include>
-        <include>org.objectweb.joram:joram-mom-extensions-ftp</include>
-        <include>org.objectweb.joram:joram-mom-extensions-jmsbridge</include>
-        <include>org.objectweb.joram:joram-mom-extensions-mail</include>
-        <include>org.objectweb.joram:joram-mom-extensions-collector</include>
-        <include>org.objectweb.joram:joram-mom-extensions-scheduler</include>
-        <include>org.objectweb.joram:joram-tools-jasp</include>
+        <include>org.ow2.joram:joram-mom-extensions-amqp</include>
+        <include>org.ow2.joram:joram-mom-extensions-ftp</include>
+        <include>org.ow2.joram:joram-mom-extensions-jmsbridge</include>
+        <include>org.ow2.joram:joram-mom-extensions-mail</include>
+        <include>org.ow2.joram:joram-mom-extensions-collector</include>
+        <include>org.ow2.joram:joram-mom-extensions-scheduler</include>
+        <include>org.ow2.joram:joram-tools-jasp</include>
         <include>org.apache.felix:org.apache.felix.shell</include>
         <include>org.apache.felix:org.apache.felix.shell.remote</include>
         <include>org.apache.felix:org.apache.felix.shell.tui</include>
@@ -54,7 +54,7 @@
         <include>org.ow2.jonas.osgi:monolog</include>
         <include>javax.mail:mail</include>
         <include>soap:soap</include>
-        <include>org.objectweb.joram:joram-client-jca</include>
+        <include>org.ow2.joram:joram-client-jca</include>
       </includes>
       <useProjectArtifact>false</useProjectArtifact>
       <unpack>false</unpack>
@@ -78,7 +78,7 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.objectweb.joram:conf</include>
+        <include>org.ow2.joram:conf</include>
       </includes>
       <useProjectArtifact>false</useProjectArtifact>
       <unpack>true</unpack>
@@ -90,7 +90,7 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.objectweb.joram:licenses</include>
+        <include>org.ow2.joram:licenses</include>
       </includes>
       <useProjectArtifact>false</useProjectArtifact>
       <unpack>true</unpack>
