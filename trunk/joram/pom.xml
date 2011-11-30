@@ -59,7 +59,18 @@
               <addSchema>false</addSchema>
             </configuration>
           </plugin>
-
+        </plugins>
+      </build>
+    </profile>
+    
+    <!-- Profile sign -->
+     <profile>
+      <id>sign</id>
+      <modules>
+        <module>release</module>
+      </modules>
+      <build>
+        <plugins>
           <!-- - - - - - - - - - - - - - - - - - - - - -->
           <!--  Sign all the artifacts                 -->
           <!-- - - - - - - - - - - - - - - - - - - - - -->
