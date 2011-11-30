@@ -14,7 +14,7 @@
       <outputFileNameMapping>${artifact.artifactId}.jar</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.objectweb.joram:webconsole-admin</include>
+        <include>org.ow2.joram:webconsole-admin</include>
         <include>org.apache.felix:org.apache.felix.configadmin</include>
         <include>org.ops4j.pax.web:pax-web-jetty-bundle</include>
         <include>org.ops4j.pax.web:pax-web-extender-war</include>
@@ -29,7 +29,7 @@
       <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
       <useStrictFiltering>true</useStrictFiltering>
       <includes>
-        <include>org.objectweb.joram:licenses</include>
+        <include>org.ow2.joram:licenses</include>
       </includes>
       <useProjectArtifact>false</useProjectArtifact>
       <unpack>true</unpack>
