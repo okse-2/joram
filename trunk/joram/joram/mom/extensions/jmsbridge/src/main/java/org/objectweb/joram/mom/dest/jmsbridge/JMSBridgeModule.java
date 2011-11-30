@@ -59,6 +59,7 @@ import fr.dyade.aaa.common.Daemon;
  * The <code>BridgeUnifiedModule</code> class is a bridge module based on the
  * JMS 1.1 unified semantics and classes.
  */
+@Deprecated
 public class JMSBridgeModule implements javax.jms.ExceptionListener,
                                             javax.jms.MessageListener,
                                             java.io.Serializable {
@@ -467,16 +468,20 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
       logger.log(BasicLevel.DEBUG, "close()");
 
     try {
-      consumerCnx.setExceptionListener(null);
-      producerCnx.setExceptionListener(null);
-    } catch (JMSException exc1) {
-      logger.log(BasicLevel.ERROR, "", exc1);
+    	if (consumerCnx != null)
+    		consumerCnx.setExceptionListener(null);
+    	if (producerCnx != null)
+    		producerCnx.setExceptionListener(null);
+    } catch (Exception exc1) {
+    	logger.log(BasicLevel.ERROR, "", exc1);
     }
     
     try {
-      producerCnx.stop();
-      consumerCnx.stop();
-    } catch (JMSException exc) {}
+    	if (producerCnx != null)
+    		producerCnx.stop();
+    	if (consumerCnx != null)
+    		consumerCnx.stop();
+    } catch (Exception exc) {}
 
     unsetMessageListener();
 
@@ -488,9 +493,11 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
     } catch (Exception exc) {}
 
     try {
-      producerCnx.close();
-      consumerCnx.close();
-    } catch (JMSException exc) {}
+    	if (producerCnx != null)
+    		producerCnx.close();
+    	if (consumerCnx != null)
+    		consumerCnx.close();
+    } catch (Exception exc) {}
   }
 
   /**
