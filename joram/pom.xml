@@ -2,7 +2,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.objectweb.joram</groupId>
+  <groupId>org.ow2.joram</groupId>
   <artifactId>parent</artifactId>
   <packaging>pom</packaging>
   <!-- version : major.minor.build -->
@@ -14,7 +14,7 @@
   <parent>
     <groupId>org.ow2</groupId>
     <artifactId>ow2</artifactId>
-    <version>1.1</version>
+    <version>1.3</version>
   </parent>
 
   <modules>
@@ -58,6 +58,24 @@
               <autoVersionSubmodules>true</autoVersionSubmodules>
               <addSchema>false</addSchema>
             </configuration>
+          </plugin>
+
+          <!-- - - - - - - - - - - - - - - - - - - - - -->
+          <!--  Sign all the artifacts                 -->
+          <!-- - - - - - - - - - - - - - - - - - - - - -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.1</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
@@ -114,40 +132,7 @@
     <developerConnection>scm:svn:svn+ssh://svn.forge.objectweb.org/svnroot/joram/trunk</developerConnection>
   </scm>
   
-  <repositories>
-    <repository>
-      <id>ow2</id>
-      <name>OW2 repository</name>
-      <url>http://maven.ow2.org/maven2</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>ow2-snapshot</id>
-      <name>OW2 repository</name>
-      <url>http://maven.ow2.org/maven2-snapshot</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-  </repositories>
-
   <build>
-<!--    <resources>-->
-<!--      <resource>-->
-<!--        <directory>licenses/src/main/resources</directory>-->
-<!--        <includes>-->
-<!--          <include>*</include>-->
-<!--        </includes>-->
-<!--      </resource>-->
-<!--    </resources>-->
     <extensions>
       <extension>
         <groupId>org.apache.maven.wagon</groupId>
@@ -201,6 +186,20 @@
     <url>http://joram.ow2.org/</url>
   </organization>
 
+ <!-- Who worked on this project ? -->
+  <developers>
+    <developer>
+      <id>afreyssin</id>
+      <name>Andre Freyssinet</name>
+      <email>Andre.Freyssinet@scalagent.com</email>
+    </developer>
+    <developer>
+      <id>tachker</id>
+      <name>Nicolas Tachker</name>
+      <email>nicolas.tachker@scalagent.com</email>
+    </developer>
+  </developers>
+  
   <!-- Preferred dependencies version -->
   <dependencyManagement>
     <dependencies>
