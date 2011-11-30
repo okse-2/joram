@@ -51,6 +51,7 @@ import fr.dyade.aaa.agent.Notification;
  * This topic is in fact a bridge linking JORAM and a foreign JMS server, and
  * which is accessible through the Pub/Sub communication mode.
  */
+@Deprecated
 public class JMSBridgeTopic extends Topic {
 
   /** define serialVersionUID for interoperability */

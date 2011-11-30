@@ -52,6 +52,7 @@ import fr.dyade.aaa.agent.Notification;
  * <p>
  * This queue is in fact a bridge linking JORAM and a foreign JMS server.
  */
+@Deprecated
 public class JMSBridgeQueue extends Queue {
 
   /** define serialVersionUID for interoperability */
