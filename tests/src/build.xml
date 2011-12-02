@@ -30,11 +30,6 @@
     <ant dir="jms" antfile="build.xml" target="jms.test" />
   </target>
 
-  <target name="tests.task.all" description=" --> launch all task tests">
-    <ant dir="jms" antfile="build.xml" target="clean" />
-    <ant dir="jms" antfile="build.xml" target="tests.all" />
-  </target>
-
   <target name="tests.noperf.all" description=" --> launch all no perf tests">
     <!-- ant dir="." antfile="build.xml" target="tests.a3.all" / -->
     <antcall target="tests.jndi.all" />
