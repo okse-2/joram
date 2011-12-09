@@ -22,7 +22,6 @@
  */
 package org.objectweb.joram.mom.dest;
 
-import java.io.Serializable;
 import java.util.Properties;
 
 import org.objectweb.joram.shared.messages.Message;
@@ -31,11 +30,7 @@ import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Debug;
 
-public class DistributionModule implements Serializable {
-
-  /** define serialVersionUID for interoperability */
-  private static final long serialVersionUID = 1L;
-
+public class DistributionModule {
   public static Logger logger = Debug.getLogger(DistributionModule.class.getName());
 
   /** The property name for the distribution handler class name. */
@@ -46,8 +41,7 @@ public class DistributionModule implements Serializable {
 
   public DistributionModule(String className, Properties properties) {
     try {
-      Class clazz = Class.forName(className);
-      distributionHandler = (DistributionHandler) clazz.newInstance();
+      distributionHandler = (DistributionHandler) Class.forName(className).newInstance();
     } catch (Exception exc) {
       logger.log(BasicLevel.ERROR, "DistributionModule: can't create distribution handler.", exc);
     }
@@ -70,5 +64,4 @@ public class DistributionModule implements Serializable {
   public void processMessage(Message fullMessage) throws Exception {
     distributionHandler.distribute(fullMessage);
   }
-
 }

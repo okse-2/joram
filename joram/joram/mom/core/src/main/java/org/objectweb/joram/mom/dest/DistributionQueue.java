@@ -180,6 +180,7 @@ public class DistributionQueue extends Queue {
    * wake up, and cleans the queue.
    */
   public void wakeUpNot(WakeUpNot not) {
+    // Cleans outdated waiting messages
     super.wakeUpNot(not);
     for (Iterator ite = messages.iterator(); ite.hasNext();) {
       org.objectweb.joram.mom.messages.Message msg = (org.objectweb.joram.mom.messages.Message) ite.next();
