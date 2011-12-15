@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -314,7 +314,21 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
       }
 
       if (msg.from == null) msg.from = AgentId.localId;
+
       Channel.post(msg);
+      
+//      if (AgentServer.sdf != null) {
+//        // SDF generation
+//        strbuf.append("<sendto agent=\"").append(msg.to).append("\" notification=\"").append(StringId.toStringId('N', '_', msg.getSource(), msg.getDest(), msg.getStamp())).append("\" flowid=\"0\">\n");
+//        strbuf.append("\" info=\"").append(msg.not.getClass().getSimpleName());
+//        strbuf.append("<comment>" + msg.not + "</comment>\n");
+//        strbuf.append("</sendto>\n");
+//      }
+//      
+//      // TODO (AF): Generates the appropriate code for SDF
+//      if (AgentServer.logsdf.isLoggable(BasicLevel.INFO))
+//        AgentServer.logsdf.log(BasicLevel.INFO, "");
+      
       mq.pop();
     }
     Channel.save();
@@ -849,7 +863,9 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   }
 
   protected final void stamp(Message msg) {
-    modified = true;
+    if (msg.isPersistent())
+      // If the message is transient there is no need to save the stamp counter.
+      modified = true;
     msg.source = AgentServer.getServerId();
     msg.dest = AgentServer.getServerId();
     msg.stamp = ++stamp;
@@ -861,11 +877,8 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
    * the filename change too.
    */
   public void post(Message msg) throws Exception {
-    if (msg.isPersistent()) {
-      stamp(msg);
-      msg.save();
-    }
-
+    stamp(msg);
+    msg.save();
     qin.push(msg);
   }
 
@@ -923,6 +936,8 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
 
   protected void onTimeOut() throws Exception {}
 
+//  private static StringBuffer strbuf = new StringBuffer();
+  
   /**
    * Main loop of agent server <code>Engine</code>.
    */
@@ -979,9 +994,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
                          getName() + ": Unknown agent, " + msg.to + ".react(" +
                          msg.from + ", " + msg.not + ")");
               agent = null;
-              push(AgentId.localId,
-                   msg.from,
-                   new UnknownAgent(msg.to, msg.not));
+              push(AgentId.localId, msg.from, new UnknownAgent(msg.to, msg.not));
             } catch (Exception exc) {
               //  Can't load agent then send an error notification
               // to sending agent.
@@ -1020,6 +1033,12 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
             if (logmon.isLoggable(BasicLevel.DEBUG))
               logmon.log(BasicLevel.DEBUG,
                          getName() + ": " + agent + ".react(" + msg.from + ", " + msg.not + ")");
+            
+//            if (AgentServer.sdf != null) {
+//              // SDF generation
+//              strbuf.append("<react agentName=\"").append(agent.getAgentId()).append("\" notification=\"").append(StringId.toStringId('N', '_', msg.getSource(), msg.getDest(), msg.getStamp())).append("\" logpointer=\"10\" timestamp=\"").append(System.currentTimeMillis()).append("\">\n");
+//            }
+            
             try {
               agent.react(msg.from, msg.not);
               agent.reactNb += 1;
@@ -1052,7 +1071,20 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
 
           // Commit all changes then continue.
           commit();
+          
+//          // SDF generation
+//          if (AgentServer.sdf != null) {
+//            strbuf.append("</react>");
+//            AgentServer.sdf.println(strbuf.toString());
+//            strbuf.setLength(0);
+//          }
+//          
+//          // TODO (AF): This code could throw a NPE if the agent doesn't exist!
+//          if (AgentServer.logsdf.isLoggable(BasicLevel.INFO))
+//            AgentServer.logsdf.log(BasicLevel.INFO,
+//                                   "react " + agent.getAgentId() + ' ' + StringId.toStringId('N', '_', msg.getSource(), msg.getDest(), msg.getStamp()));
 
+          // Agent profiling
           if (profiling) {
             end  = System.currentTimeMillis();
             if (agent != null)
