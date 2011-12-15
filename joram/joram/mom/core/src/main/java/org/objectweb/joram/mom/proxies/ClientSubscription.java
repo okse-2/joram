@@ -337,7 +337,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     String msgId;
     for (Iterator e = persistedMessages.iterator(); e.hasNext();) {
       message = (Message) e.next();
-      msgId = message.getIdentifier();
+      msgId = message.getId();
 
       if (messageIds.contains(msgId) || deliveredIds.containsKey(msgId)) {
         if (logger.isLoggable(BasicLevel.DEBUG))
@@ -498,7 +498,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     DMQManager dmqManager = null;
     for (Iterator e = newMessages.iterator(); e.hasNext();) {
       message = (Message) e.next();
-      msgId = message.getIdentifier();
+      msgId = message.getId();
 
       // test nbMaxMsg
       if (nbMaxMsg > 0 && nbMaxMsg <= messageIds.size()) {
@@ -699,12 +699,12 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
 
       // Putting the kept message in the vector.
       if (keptMsg != null) {
-        messageIds.remove(keptMsg.getIdentifier());
-        deliveredIds.put(keptMsg.getIdentifier(), keptMsg.getIdentifier());
+        messageIds.remove(keptMsg.getId());
+        deliveredIds.put(keptMsg.getId(), keptMsg.getId());
         save();
 
         // Setting the message's deliveryCount and denied fields.
-        deliveryAttempts = (Integer) deniedMsgs.get(keptMsg.getIdentifier());
+        deliveryAttempts = (Integer) deniedMsgs.get(keptMsg.getId());
         if (deliveryAttempts == null)
           keptMsg.setDeliveryCount(1);
         else {
@@ -715,7 +715,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
 
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger
-              .log(BasicLevel.DEBUG, this + ": message " + keptMsg.getIdentifier() + " added for delivery.");
+              .log(BasicLevel.DEBUG, this + ": message " + keptMsg.getId() + " added for delivery.");
       } else {
         i++;
       }

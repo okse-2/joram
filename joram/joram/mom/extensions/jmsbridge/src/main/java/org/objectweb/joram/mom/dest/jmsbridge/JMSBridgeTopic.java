@@ -237,12 +237,12 @@ public class JMSBridgeTopic extends Topic {
       message = new Message((org.objectweb.joram.shared.messages.Message) msgs.next());
       message.order = arrivalsCounter++;
 
-      outTable.put(message.getIdentifier(), message);
+      outTable.put(message.getId(), message);
 
       try {
         jmsModule.send(message.getFullMessage());
       } catch (Exception exc) {
-        outTable.remove(message.getIdentifier());
+        outTable.remove(message.getId());
         if (dmqManager == null) {
           dmqManager = new DMQManager(dmqId, getId());
         }
@@ -274,12 +274,12 @@ public class JMSBridgeTopic extends Topic {
     for (Iterator msgs = not.getMessages().iterator(); msgs.hasNext();) {
       message = new Message((org.objectweb.joram.shared.messages.Message) msgs.next());
       message.order = arrivalsCounter++;
-      outTable.put(message.getIdentifier(), message);
+      outTable.put(message.getId(), message);
 
       try {
         jmsModule.send(message.getFullMessage());
       } catch (Exception exc) {
-        outTable.remove(message.getIdentifier());
+        outTable.remove(message.getId());
         if (dmqManager == null) {
           dmqManager = new DMQManager(not.getDMQId(), dmqId, getId());
         }

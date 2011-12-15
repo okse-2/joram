@@ -1693,7 +1693,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       Vector messageList = consM.getMessages();
       for (int i = 0; i < messageList.size(); i++) {
         Message msg = (Message)messageList.elementAt(i);
-        sub.acknowledge(msg.getIdentifier());
+        sub.acknowledge(msg.getId());
       }
     }
 
@@ -2336,7 +2336,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
           Vector msgList = rep.getMessages();
           for (int i = 0; i < msgList.size(); i++) {
             Message msg = new Message((org.objectweb.joram.shared.messages.Message) msgList.elementAt(i));
-            String msgId = msg.getIdentifier();
+            String msgId = msg.getId();
 
             if (logger.isLoggable(BasicLevel.INFO))
               logger.log(BasicLevel.INFO, " -> denying message: " + msgId);
@@ -2376,7 +2376,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
         Vector msgList = rep.getMessages();
         for (int i = 0; i < msgList.size(); i++) {
           Message msg = new Message((org.objectweb.joram.shared.messages.Message) msgList.elementAt(i));
-          String msgId = msg.getIdentifier();
+          String msgId = msg.getId();
 
           if (logger.isLoggable(BasicLevel.INFO))
             logger.log(BasicLevel.INFO, "Denying message: " + msgId);
@@ -3082,7 +3082,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.EXPIRED);
 
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "UserAgent expired message " + message.getIdentifier());
+        logger.log(BasicLevel.DEBUG, "UserAgent expired message " + message.getId());
     }
     
     Iterator subs = subsTable.values().iterator();

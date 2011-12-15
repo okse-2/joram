@@ -271,7 +271,7 @@ public class JMSBridgeQueue extends Queue {
       message = new Message((org.objectweb.joram.shared.messages.Message) msgs.next());
       message.order = arrivalsCounter++;
 
-      outTable.put(message.getIdentifier(), message);
+      outTable.put(message.getId(), message);
 
       try {
         jmsModule.send(message.getFullMessage());
@@ -280,7 +280,7 @@ public class JMSBridgeQueue extends Queue {
           logger.log(BasicLevel.ERROR,
                      "Failing sending to remote  destination: ", exc);
 
-        outTable.remove(message.getIdentifier());
+        outTable.remove(message.getId());
         DMQManager dmqManager = new DMQManager(not.getDMQId(), dmqId, getId());
         nbMsgsSentToDMQSinceCreation++;
         dmqManager.addDeadMessage(message.getFullMessage(), MessageErrorConstants.UNEXPECTED_ERROR);
