@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
@@ -622,9 +622,7 @@ public final class AgentServer {
    * @exception Exception
    *	Probably there is no configuration defined.
    */
-  public final static
-  String getServiceArgs(short sid,
-			String classname) throws Exception {
+  public final static String getServiceArgs(short sid, String classname) throws Exception {
     return getConfig().getServiceArgs(sid, classname);
   }
 
@@ -645,9 +643,7 @@ public final class AgentServer {
    * @exception Exception
    *	Probably there is no configuration defined.
    */
-  public final static
-  String getServiceArgs(String hostname,
-			String classname) throws Exception {
+  public final static String getServiceArgs(String hostname, String classname) throws Exception {
     return getConfig().getServiceArgsHost(hostname, classname);
   }
 
@@ -1063,6 +1059,9 @@ public final class AgentServer {
       status.value = Status.INITIALIZING;
     }
 
+//    sdf = new PrintStream(new File("essai-" + sid + ".sdf"));
+//    logsdf = Debug.getLogger(AgentServer.class.getName() + ".sdf");
+    
     try {
       serverId = sid; 
 
@@ -1071,9 +1070,7 @@ public final class AgentServer {
           if (e instanceof VirtualMachineError) {
             if (logmon.isLoggable(BasicLevel.FATAL)) {
               logmon.log(BasicLevel.FATAL,
-                         "Abnormal termination for " +
-                         t.getThreadGroup().getName() + "." + t.getName(),
-                         e);
+                         "Abnormal termination for " + t.getThreadGroup().getName() + "." + t.getName(), e);
               // AF: Should be AgentServer.stop() ?
               System.exit(-1);
             }
@@ -1110,6 +1107,11 @@ public final class AgentServer {
             logmon.log(BasicLevel.FATAL, getName() + ", can't start transaction manager", exc);
             throw new Exception("Can't start transaction manager: " + exc.getMessage());
           }
+        } else {
+          // TODO (AF): We should probably return an exception as the TFC file does not
+          // exist (normally the persistancy directory should be created by the transaction
+          // initialization).
+          logmon.log(BasicLevel.ERROR, getName() + ", TFC file does not exist");
         }
       }
 
@@ -1479,7 +1481,7 @@ public final class AgentServer {
     config = getProperty(LogMonitoringTimerTask.MONITORING_CONFIG_PATH_PROPERTY,
                          LogMonitoringTimerTask.DEFAULT_MONITORING_CONFIG_PATH);
     try {
-      // if "logMonitoring.props" file exists configure a FileMonitoringTimerTask.
+      // if "logMonitoring.props" file exists configure a LogMonitoringTimerTask.
       File file = new File(config);
       if (file.exists()) {
         long period = getLong(LogMonitoringTimerTask.MONITORING_CONFIG_PERIOD_PROPERTY,
@@ -1691,6 +1693,9 @@ public final class AgentServer {
   public static final String OKSTRING = "OK";
   public static final String ERRORSTRING = "ERROR";
   public static final String ENDSTRING = "END";
+
+//  public static PrintStream sdf = null;
+//  public static Logger logsdf = null;
 
   /**
    * Main for a standard agent server.

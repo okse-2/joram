@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -59,8 +59,7 @@ public class Channel {
     consumers = new Vector();
 
     // Get the logging monitor from current server MonologLoggerFactory
-    logmon = Debug.getLogger(Debug.A3Engine +
-                             ".#" + AgentServer.getServerId());
+    logmon = Debug.getLogger(Debug.A3Engine + ".#" + AgentServer.getServerId());
     logmon.log(BasicLevel.DEBUG, toString() + " created.");
   }
 
@@ -176,8 +175,8 @@ public class Channel {
    *	error when accessing the local persistent storage
    */
   void directSendTo(AgentId from,
-		    AgentId to,
-		    Notification not) {
+                    AgentId to,
+                    Notification not) {
     MessageConsumer consumer = null;
     Message msg = null;
 
@@ -200,8 +199,25 @@ public class Channel {
     }
 
     try {
-      AgentServer.getTransaction().begin();
+      AgentServer.getTransaction().begin();      
       consumer.post(msg);
+      
+//      if (AgentServer.sdf != null) {
+//        // SDF generation
+//        StringBuffer strbuf = new StringBuffer();
+//        strbuf.append("<sendto agent=\"").append(msg.to);
+//        strbuf.append("\" notification=\"").append(StringId.toStringId('N', '_', msg.getSource(), msg.getDest(), msg.getStamp()));
+//        strbuf.append("\" info=\"").append(msg.not.getClass().getSimpleName());
+//        strbuf.append("\" flowid=\"0\">\n");
+//        strbuf.append("<comment>").append(msg.not).append("</comment>\n" + "</sendto>\n");
+//
+//        AgentServer.sdf.println(strbuf.toString());
+//      }
+//      
+//      if (AgentServer.logsdf.isLoggable(BasicLevel.INFO))
+//        AgentServer.logsdf.log(BasicLevel.INFO,
+//                             "  sendto " + msg.to + ' ' + StringId.toStringId('N', '_', msg.getSource(), msg.getDest(), msg.getStamp()));
+      
       consumer.save();
       AgentServer.getTransaction().commit(false);
       // then commit and validate the message.
