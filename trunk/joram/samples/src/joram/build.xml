@@ -1090,7 +1090,18 @@
       <classpath path="${project.class.path}"/>
     </java>
   </target>
- 
+
+  <!-- Runs the 25 performance sample producer: send 50.000 transient messages on queue -->
+  <target name="perfs_prod_qx" depends="simple_init"
+    description="--> Starts the PERFS producer with 25 clients">
+    <java classname="perfs.Producer" failonerror="no" fork="yes"
+          dir="${run.dir}">
+      <classpath path="${project.class.path}"/>
+      <jvmarg line="-DNbClient=25 -DRound=40 -DNbMsgPerRound=50 -Dmps=50 -DMsgSize=500 -DMsgTransient=false -DTransacted=false" />
+      <arg line="queue"/>
+    </java>
+  </target>
+
   <!-- Runs the performance sample producer: send 50.000 transient messages on queue -->
   <target name="perfs_prod_q1" depends="simple_init"
     description="--> Starts the PERFS producer">
@@ -1140,7 +1151,7 @@
     <java classname="perfs.Producer" failonerror="no" fork="yes"
           dir="${run.dir}">
       <classpath path="${project.class.path}"/>
-      <jvmarg line="-DRound=50 -DMsgSize=500 -DMsgTransient=true" />
+      <jvmarg line="-DRound=50 -DMsgSize=500 -Dmps=10500 -DMsgTransient=true" />
       <arg line="topic"/>
     </java>
   </target>
