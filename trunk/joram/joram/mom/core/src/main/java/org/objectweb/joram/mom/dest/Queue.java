@@ -279,7 +279,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
 
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG,
-                     "Removes expired message " + message.getIdentifier(), new Exception());
+                     "Removes expired message " + message.getId(), new Exception());
       } else {
         index++;
       }
@@ -366,7 +366,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
       
       while (! persistedMsgs.isEmpty()) {
         persistedMsg = (Message) persistedMsgs.remove(0);
-        consId = (AgentId) consumers.get(persistedMsg.getIdentifier());
+        consId = (AgentId) consumers.get(persistedMsg.getId());
         
         if (consId == null) {
           if (!addMessage(persistedMsg)) {
@@ -374,14 +374,14 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
           }
         } else if (isLocal(consId)) {
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, " -> deny " + persistedMsg.getIdentifier());
-          consumers.remove(persistedMsg.getIdentifier());
-          contexts.remove(persistedMsg.getIdentifier());
+            logger.log(BasicLevel.DEBUG, " -> deny " + persistedMsg.getId());
+          consumers.remove(persistedMsg.getId());
+          contexts.remove(persistedMsg.getId());
           if (!addMessage(persistedMsg)) {
             persistedMsg.delete();
           }
         } else {
-          deliveredMsgs.put(persistedMsg.getIdentifier(), persistedMsg);
+          deliveredMsgs.put(persistedMsg.getId(), persistedMsg);
         }
       }
     }
@@ -754,7 +754,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
     String[] res = new String[messages.size()];
     for (int i = 0; i < messages.size(); i++) {
       Message msg = (Message) messages.get(i);
-      res[i] = msg.getIdentifier();
+      res[i] = msg.getId();
     }
     replyToTopic(new GetQueueMessageIdsRep(res), replyTo, requestMsgId, replyMsgId);
   }
@@ -767,7 +767,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
 
     for (int i = 0; i < messages.size(); i++) {
       message = (Message) messages.get(i);
-      if (message.getIdentifier().equals(request.getMessageId())) break;
+      if (message.getId().equals(request.getMessageId())) break;
       message = null;
     }
 
@@ -791,7 +791,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
                                   String replyMsgId) {
     for (int i = 0; i < messages.size(); i++) {
       Message message = (Message) messages.get(i);
-      if (message.getIdentifier().equals(request.getMessageId())) {
+      if (message.getId().equals(request.getMessageId())) {
         messages.remove(i);
         message.delete();
         DMQManager dmqManager = new DMQManager(dmqId, getId());
@@ -983,7 +983,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
 
         if (logger.isLoggable(BasicLevel.WARN))
           logger.log(BasicLevel.WARN,
-                     "Message " + message.getIdentifier() + " denied.");
+                     "Message " + message.getId() + " denied.");
       }
     }
     // Sending dead messages to the DMQ, if needed:
@@ -1064,7 +1064,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
       msg.save();
       msg.releaseFullMessage();
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "Message " + msg.getIdentifier() + " stored.");
+        logger.log(BasicLevel.DEBUG, "Message " + msg.getId() + " stored.");
     }
   }
   
@@ -1080,7 +1080,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
       message.saveHeader();
       message.releaseFullMessage();
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, "Message " + message.getIdentifier() + " stored.");
+        logger.log(BasicLevel.DEBUG, "Message " + message.getId() + " stored.");
     }
   }
 
@@ -1229,10 +1229,10 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
         nbMsgsDeliverSinceCreation++;
 
         // use in sub class see ClusterQueue
-        messageDelivered(message.getIdentifier());
+        messageDelivered(message.getId());
 
         if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "Message " + message.getIdentifier());
+          logger.log(BasicLevel.DEBUG, "Message " + message.getId());
 
         lsMessages.add(message);
 
@@ -1256,7 +1256,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
     Message msg = null;
     for (Iterator ite = messages.iterator(); ite.hasNext();) {
       msg = (Message) ite.next();
-      if (msgId.equals(msg.getIdentifier()))
+      if (msgId.equals(msg.getId()))
         return msg;
     }
     return msg;
@@ -1279,7 +1279,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
     nbMsgsDeliverSinceCreation++;
 
       // use in sub class see ClusterQueue
-      messageDelivered(message.getIdentifier());
+      messageDelivered(message.getId());
 
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Message " + msgId);
@@ -1364,15 +1364,15 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
         notMsg.addMessage(message.getFullMessage());
         if (!notRec.getAutoAck()) {
           // putting the message in the delivered messages table:
-          consumers.put(message.getIdentifier(), notRec.requester);
-          contexts.put(message.getIdentifier(),
+          consumers.put(message.getId(), notRec.requester);
+          contexts.put(message.getId(),
                        new Integer(notRec.getClientContext()));
-          deliveredMsgs.put(message.getIdentifier(), message);
+          deliveredMsgs.put(message.getId(), message);
           messages.remove(message);
         }
         if (logger.isLoggable(BasicLevel.DEBUG))
           logger.log(BasicLevel.DEBUG,
-                     "Message " + message.getIdentifier() + " to " + notRec.requester +
+                     "Message " + message.getId() + " to " + notRec.requester +
                      " as reply to " + notRec.getRequestId());
       }
 

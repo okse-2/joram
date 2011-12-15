@@ -177,7 +177,7 @@ public final class Message implements Serializable, MessageView {
   }
 
   /** Returns the message identifier. */
-  public String getIdentifier() {
+  public String getId() {
     return msg.id;
   }
 
@@ -485,10 +485,6 @@ public final class Message implements Serializable, MessageView {
     msg = new org.objectweb.joram.shared.messages.Message();
     msg.readHeaderFrom(in);
     msg.body = StreamUtil.readByteArrayFrom(in);
-  }
-
-  public String getId() {
-    return msg.id;
   }
 
   public String getText() {

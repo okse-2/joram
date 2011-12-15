@@ -87,7 +87,7 @@ public class MessageJMXWrapper {
     CompositeDataSupport cds = new CompositeDataSupport(rowType, itemNames,
                                                         new Object[] {
                                                                       new Long(msg.order),
-                                                                      msg.getIdentifier(),
+                                                                      msg.getId(),
                                                                       new Integer(msg.getPriority()),
                                                                       new Long(msg.getTimestamp()),
                                                                       new Long(msg.getExpiration()),

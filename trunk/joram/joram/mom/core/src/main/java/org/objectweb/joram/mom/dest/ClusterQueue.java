@@ -329,7 +329,7 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
     for (Iterator msgs = not.getMessages().iterator(); msgs.hasNext();) {
       msg = new Message((org.objectweb.joram.shared.messages.Message) msgs.next());
       msg.order = arrivalsCounter++;
-      storeMsgIdInTimeTable(msg.getIdentifier(),
+      storeMsgIdInTimeTable(msg.getId(),
                             new Long(date));
       //storeMsgIdInVisitTable(msg.getIdentifier(), destId);
     }
@@ -564,7 +564,7 @@ public class ClusterQueue extends Queue implements ClusterQueueMBean {
   protected Message getQueueMessage(String msgId, boolean remove) {  
     Message msg = super.getQueueMessage(msgId, remove);
     if (msg != null) {
-      monitoringMsgSendToCluster(msg.getIdentifier());
+      monitoringMsgSendToCluster(msg.getId());
     }
     return msg;
   }
