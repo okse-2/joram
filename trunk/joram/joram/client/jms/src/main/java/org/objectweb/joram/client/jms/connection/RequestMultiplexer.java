@@ -22,6 +22,7 @@
  */
 package org.objectweb.joram.client.jms.connection;
 
+import java.net.SocketException;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
@@ -41,6 +42,7 @@ import org.objectweb.joram.shared.client.ConsumerMessages;
 import org.objectweb.joram.shared.client.MomExceptionReply;
 import org.objectweb.joram.shared.client.PingRequest;
 import org.objectweb.joram.shared.client.SessDenyRequest;
+import org.objectweb.joram.shared.excepts.MomException;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
@@ -267,6 +269,26 @@ public class RequestMultiplexer {
     }
     requestsTable.clear();
   }
+  
+  public void replyAllError(MomExceptionReply exc) {
+    // Create first a copy of the current keys
+    // registered into the requests table.
+    Integer[] requestIds;
+    synchronized (requestsTable) {
+      Set keySet = requestsTable.keySet();
+      requestIds = new Integer[keySet.size()];
+      keySet.toArray(requestIds);
+    }
+    for (int i = 0; i < requestIds.length; i++) {
+      ReplyListener rl = (ReplyListener) requestsTable.get(requestIds[i]);
+      // The listener may be null because the table
+      // may have been modified meanwhile.
+      if (rl != null) {
+      	rl.errorReceived(requestIds[i].intValue(), exc);
+      }
+    }
+    requestsTable.clear();
+  }
 
   /**
    * Not synchronized because it would possibly
@@ -434,7 +456,10 @@ public class RequestMultiplexer {
             // of a closure or at the same time as an independant
             // close call).
             if (! isClosed()) {
-              RequestMultiplexer.this.close();
+            	replyAllError(new MomExceptionReply(new MomException(exc.getMessage()))); //NTA tmp
+            	
+            	RequestMultiplexer.this.close();
+            	
               // The connection close() must be
               // called by another thread. Calling it with
               // this thread (demultiplexer daemon) could
