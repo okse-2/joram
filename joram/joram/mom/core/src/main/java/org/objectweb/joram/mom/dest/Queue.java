@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -1179,28 +1179,32 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
     return cm;
   }
 
-//  /**
-//   * List of message to be removed.
-//   * 
-//   * @param msgIds  List of message id.
-//   */
-//  protected void removeMessages(List msgIds) {
-//    String id = null;
-//    Iterator itMessages = msgIds.iterator();
-//    while (itMessages.hasNext()) {
-//      id = (String) itMessages.next();
-//      int i = 0;
-//      Message message = null;
-//      while (i < messages.size()) {
-//        message = (Message) messages.get(i);
-//        if (id.equals(message.getIdentifier())) {
-//          messages.remove(i);
-//          message.delete();
-//          break;
-//        }
-//      }
-//    }
-//  }
+  /**
+   * List of message to be removed from messages vector.
+   * No message.delete() call.
+   * 
+   * @param msgIds  List of message id.
+   */
+  protected void removeMessages(List msgIds) {
+  	if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG, "Queue.removeMessages(" + msgIds + ')');
+    String id = null;
+    Iterator itMessages = msgIds.iterator();
+    while (itMessages.hasNext()) {
+      id = (String) itMessages.next();
+      int i = 0;
+      Message message = null;
+      while (i < messages.size()) {
+        message = (Message) messages.get(i);
+        if (id.equals(message.getId())) {
+          messages.remove(i);
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG, "Queue.removeMessages msgId = " + id);
+          break;
+        }
+      }
+    }
+  }
 
   /**
    * get messages, if it's possible.
@@ -1275,19 +1279,19 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
 
     Message message =  getMomMessage(msgId);
     if (checkDelivery(message.getHeaderMessage())) {
-    message.incDeliveryCount();
-    nbMsgsDeliverSinceCreation++;
+    	message.incDeliveryCount();
+    	nbMsgsDeliverSinceCreation++;
 
       // use in sub class see ClusterQueue
       messageDelivered(message.getId());
 
-    if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Message " + msgId);
+    	if (logger.isLoggable(BasicLevel.DEBUG))
+    		logger.log(BasicLevel.DEBUG, "Message " + msgId);
 
-    if (remove) {
-      messages.remove(message);
-      message.delete();
-    }
+    	if (remove) {
+    		messages.remove(message);
+    		message.delete();
+    	}
     }
     return message;
   }
@@ -1520,6 +1524,13 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
                                 MessageErrorConstants.EXPIRED);
     }
     dmqManager.sendToDMQ();
+  }
+
+	public String getTxName(String msgId) {
+		Message momMsg = getMomMessage(msgId);
+		if (momMsg != null)
+			return momMsg.getTxName();
+	  return null;
   }
 
 }
