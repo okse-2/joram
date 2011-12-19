@@ -85,7 +85,9 @@ public class JMSDistribution implements DistributionHandler {
   }
 
   public void distribute(Message message) throws Exception {
-
+  	if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "JMSDistribution.distribute(" + message + ')');
+  	}
     List<String> connectionNames = this.connectionNames;
 
     if (message.properties != null) {
@@ -94,7 +96,10 @@ public class JMSDistribution implements DistributionHandler {
         connectionNames = JMSConnectionService.convertToList((String) customRouting);
       }
     }
-
+    if (logger.isLoggable(BasicLevel.DEBUG)) {
+      logger.log(BasicLevel.DEBUG, "JMSDistribution.distribute: connectionNames = " + connectionNames);
+    }
+      
     // Update sessions if necessary
     long now = System.currentTimeMillis();
     if (now - lastUpdate > updatePeriod) {
@@ -102,6 +107,9 @@ public class JMSDistribution implements DistributionHandler {
         logger.log(BasicLevel.DEBUG, "Updating sessions.");
       }
       List<JMSModule> connections = JMSConnectionService.getInstance().getConnections();
+      if (logger.isLoggable(BasicLevel.DEBUG)) {
+        logger.log(BasicLevel.DEBUG, "JMSDistribution.distribute: connections = " + connections);
+      }
       for (final JMSModule connection : connections) {
         if (!sessions.containsKey(connection.getCnxFactName())) {
           if (logger.isLoggable(BasicLevel.DEBUG)) {
@@ -137,7 +145,12 @@ public class JMSDistribution implements DistributionHandler {
           logger.log(BasicLevel.DEBUG, "Sending message on " + session.producer.getDestination() + " using "
               + cnxName);
         }
-        session.producer.send(org.objectweb.joram.client.jms.Message.wrapMomMessage(null, message));
+        if (session.isJoramSession()) {
+        	// convert a Joram message because this message is modified on session send.
+        	// And if we have an exception we must keep the original message.
+        	session.producer.send(org.objectweb.joram.client.jms.Message.convertJMSMessage(org.objectweb.joram.client.jms.Message.wrapMomMessage(null, message)));
+        } else
+        	session.producer.send(org.objectweb.joram.client.jms.Message.wrapMomMessage(null, message));
         sessions.get(cnxName); // Access the used connection to update the LRU map
         return;
       } catch (JMSException exc) {
@@ -148,7 +161,7 @@ public class JMSDistribution implements DistributionHandler {
       }
     }
 
-    throw new Exception("Message could not be sent, no usable channel found.");
+    throw new Exception("Message could not be sent, no usable connection/session found.");
   }
 
   public void close() {
@@ -175,6 +188,10 @@ public class JMSDistribution implements DistributionHandler {
       super();
       this.session = session;
       this.producer = producer;
+    }
+    
+    public boolean isJoramSession() {
+    	return (session instanceof org.objectweb.joram.client.jms.Session);
     }
   }
 
