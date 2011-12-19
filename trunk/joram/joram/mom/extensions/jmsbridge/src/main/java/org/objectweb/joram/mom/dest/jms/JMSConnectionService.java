@@ -70,7 +70,7 @@ public class JMSConnectionService {
   }
 
   /**
-   * Removes the live connection to the specified AMQP server.
+   * Removes the live connection to the specified JMS server.
    * 
    * @param name the name identifying the server
    */
@@ -125,11 +125,11 @@ public class JMSConnectionService {
   }
 
   /**
-   * Stops all connections to AMQP servers.
+   * Stops all connections to JMSBridge servers.
    */
   public static void stopService() {
     if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "Stopping AmqpConnectionHandler service.");
+      logger.log(BasicLevel.DEBUG, "Stopping JMSConnectionService service.");
     }
     getInstance().stop();
   }
