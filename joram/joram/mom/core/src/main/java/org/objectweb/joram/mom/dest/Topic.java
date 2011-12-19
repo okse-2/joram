@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -697,5 +697,10 @@ public class Topic extends Destination implements TopicMBean {
 
   public long getNbMsgsReceiveSinceCreation() {
     return nbMsgsReceiveSinceCreation;
+  }
+
+	public String getTxName(String msgId) {
+	  // TODO Auto-generated method stub
+	  return null;
   }
 }
