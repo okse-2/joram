@@ -88,7 +88,7 @@ import fr.dyade.aaa.util.management.MXWrapper;
  * The <code>Destination</code> class implements the common behavior of
  * MOM destinations.
  */
-public abstract class Destination extends Agent implements DestinationMBean {
+public abstract class Destination extends Agent implements DestinationMBean, TxDestination {
 
   public static Logger logger = Debug.getLogger(Destination.class.getName());
   
