@@ -24,6 +24,8 @@ package org.objectweb.joram.mom.dest;
 
 import java.util.Properties;
 
+import org.objectweb.joram.shared.excepts.MessageValueException;
+import org.objectweb.joram.shared.messages.ConversionHelper;
 import org.objectweb.joram.shared.messages.Message;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -38,6 +40,8 @@ public class DistributionModule {
 
   /** Holds the distribution logic. */
   private DistributionHandler distributionHandler;
+  
+  private boolean isAsyncDistribution = false;
 
   public DistributionModule(String className, Properties properties) {
     try {
@@ -55,6 +59,12 @@ public class DistributionModule {
     if (distributionHandler != null) {
       distributionHandler.init(properties);
     }
+    
+    if (properties.containsKey(DistributionQueue.ASYNC_DISTRIBUTION_OPTION)) {
+    	try {
+    		isAsyncDistribution = ConversionHelper.toBoolean(properties.get(DistributionQueue.ASYNC_DISTRIBUTION_OPTION));
+    	} catch (MessageValueException exc) {	}
+    }
   }
   
   public void close() {
@@ -62,6 +72,18 @@ public class DistributionModule {
   }
 
   public void processMessage(Message fullMessage) throws Exception {
-    distributionHandler.distribute(fullMessage);
+  	if (logger.isLoggable(BasicLevel.DEBUG)) {
+  		logger.log(BasicLevel.DEBUG, "DistributionModule.processMessage(" + fullMessage.id + ") isAsyncDistribution = " + isAsyncDistribution);
+  	}
+  	if (!isAsyncDistribution) {
+  		distributionHandler.distribute(fullMessage);
+  	} else {
+  		// the message are send by distributionDaemon.
+  		throw new Exception("async distribution is on.");
+  	}
+  }
+
+  public DistributionHandler getDistributionHandler() {
+  	return distributionHandler;
   }
 }
