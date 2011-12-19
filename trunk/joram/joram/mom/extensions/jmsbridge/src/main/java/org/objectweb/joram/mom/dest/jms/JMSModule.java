@@ -181,7 +181,7 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
    */
   public void startLiveConnection() {
     if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "connect()");
+      logger.log(BasicLevel.DEBUG, "startLiveConnection()");
     }
     if (notUsable) {
       if (logger.isLoggable(BasicLevel.ERROR)) {
@@ -290,15 +290,18 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
    * Reacts by launching a reconnection process.
    */
   public void onException(JMSException exc) {
-    if (logger.isLoggable(BasicLevel.WARN)) {
-      logger.log(BasicLevel.WARN, "onException(" + exc + ')');
-    }
-    for (Iterator<JmsListener> listener = listeners.iterator(); listener.hasNext();) {
-      JmsListener type = listener.next();
-      type.onException(exc);
-    }
-    listeners.clear();
-    reconnectionDaemon.start();
+  	if (logger.isLoggable(BasicLevel.WARN)) {
+  		logger.log(BasicLevel.WARN, "JMSModule.onException(" + exc + ')');
+  	}
+
+  	if (listeners != null) {
+  		for (Iterator<JmsListener> listener = listeners.iterator(); listener.hasNext();) {
+  			JmsListener type = listener.next();
+  			type.onException(exc);
+  		}
+  		listeners.clear();
+  	}
+  	reconnectionDaemon.start();
   }
 
   public boolean isConnectionOpen() {
@@ -466,7 +469,7 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
     /** The daemon's loop. */
     public void run() {
       if (logmon.isLoggable(BasicLevel.DEBUG)) {
-        logmon.log(BasicLevel.DEBUG, "run()");
+        logmon.log(BasicLevel.DEBUG, "ReconnectionDaemon.run()");
       }
 
       int attempts = 0;
@@ -488,12 +491,12 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
           canStop = true;
           try {
             if (logmon.isLoggable(BasicLevel.DEBUG)) {
-              logmon.log(BasicLevel.DEBUG, "attempt " + attempts + ", wait=" + interval);
+              logmon.log(BasicLevel.DEBUG, "ReconnectionDaemon: attempt " + attempts + ", wait=" + interval);
             }
             Thread.sleep(interval);
 
             if (logmon.isLoggable(BasicLevel.DEBUG)) {
-              logmon.log(BasicLevel.DEBUG, "connect...");
+              logmon.log(BasicLevel.DEBUG, "ReconnectionDaemon: connect...");
             }
             canStop = false;
 
@@ -505,13 +508,13 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
 
           } catch (Exception exc) {
             if (logmon.isLoggable(BasicLevel.DEBUG)) {
-              logmon.log(BasicLevel.DEBUG, "connection failed, continue... " + exc.getMessage());
+              logmon.log(BasicLevel.DEBUG, "ReconnectionDaemon: connection failed, continue... " + exc.getMessage());
             }
             continue;
           }
 
           if (logmon.isLoggable(BasicLevel.DEBUG)) {
-            logmon.log(BasicLevel.DEBUG, "Connected using " + cnxFactName + " connection factory.");
+            logmon.log(BasicLevel.DEBUG, "ReconnectionDaemon: Connected using " + cnxFactName + " connection factory.");
           }
           break;
         }
