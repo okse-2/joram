@@ -33,6 +33,7 @@ import org.objectweb.joram.shared.client.ConsumerSetListRequest;
 import org.objectweb.joram.shared.client.ConsumerUnsetListRequest;
 import org.objectweb.joram.shared.client.ConsumerAckRequest;
 import org.objectweb.joram.shared.client.ActivateConsumerRequest;
+import org.objectweb.joram.shared.client.MomExceptionReply;
 import org.objectweb.joram.client.jms.connection.ReplyListener;
 import org.objectweb.joram.client.jms.connection.AbortedRequestException;
 import org.objectweb.joram.client.jms.connection.RequestMultiplexer;
@@ -404,6 +405,10 @@ abstract class MessageConsumerListener implements ReplyListener {
   public abstract void pushMessages(ConsumerMessages cm) throws JMSException;
   
   public void replyAborted(int requestId) {
+    // Nothing to do.
+  }
+  
+  public void errorReceived(int requestId, MomExceptionReply exc) {
     // Nothing to do.
   }
 
