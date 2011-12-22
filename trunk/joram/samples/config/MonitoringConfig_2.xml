@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MonitoringTimerTasks>
+	<Task>
+  	<type type = "fr.dyade.aaa.common.monitoring.LogMonitoringTimerTask" />
+ 		<period period = "30000"/>
+ 		<taskProps objectName = "logname" 	
+ 							 attribute  = "com.scalagent.monitoring" /> 
+ 		<taskProps objectName = "level" 		 
+ 							 attribute  = "BasicLevel.WARN" />
+ 		<taskProps objectName = "msg" 			  
+ 							 attribute  = "JMX Monitoring " />
+ 		<taskProps objectName = "name" 			 
+ 							 attribute  = "Monitoring#2" />
+ 		<attsProps objectName = "MonitoringService:cons=Monitoring#2"
+		 					 attribute  = "Period" />
+ 		<attsProps objectName = "AgentServer:server=AgentServer#2,cons=Transaction"
+						 	 attribute  = "Persistent" />
+ 		<attsProps objectName = "Joram#2:type=Destination,name=queue"
+						 	 attribute  = "NbMsgsReceiveSinceCreation,PendingMessageCount" />
+	 	<attsProps objectName = "Joram#2:type=User,*"
+					 	 	 attribute  = "NbMsgsDeliveredSinceCreation,NbMsgsSentToDMQSinceCreation,PendingMessageCount" />
+	</Task>
+</MonitoringTimerTasks>

@@ -70,7 +70,7 @@
     <copy file="${conf.dir}/a3debug.cfg" todir="${run.dir}/server${sid}"/>
     <copy file="${a3.conf}" tofile="${run.dir}/server${sid}/a3servers.xml"/>
     <copy file="${osgi.conf}" tofile="${run.dir}/server${sid}/config.properties"/>
-    <!-- copy file="${conf.dir}/fileMonitoring.props" todir="${run.dir}/server${sid}"/ -->
+    <copy file="${monit.conf}" tofile="${run.dir}/server${sid}/MonitoringConfig.xml"/>
   </target>
 
   <target name="simple_init" depends="init">
@@ -94,7 +94,8 @@
     <antcall target="server">
       <param name="sid" value="0"/>
       <param name="a3.conf" value="${conf.dir}/centralized_a3servers.xml"/>
-      <param name="osgi.conf" value="${conf.dir}/config.properties"/>    	
+      <param name="osgi.conf" value="${conf.dir}/config.properties"/>
+      <param name="monit.conf" value="${conf.dir}/MonitoringConfig_0.xml"/>
     </antcall>
   </target>
   
@@ -155,7 +156,8 @@
     <antcall target="server">
       <param name="sid" value="0"/>
       <param name="a3.conf" value="${conf.dir}/distributed_a3servers.xml"/>
-      <param name="osgi.conf" value="${conf.dir}/config_min.properties"/>    	
+      <param name="osgi.conf" value="${conf.dir}/config_min.properties"/>   
+    	<param name="monit.conf" value="${conf.dir}/MonitoringConfig_0.xml"/>
     </antcall>
   </target>
 	
@@ -164,7 +166,8 @@
     <antcall target="server">
       <param name="sid" value="1"/>
       <param name="a3.conf" value="${conf.dir}/distributed_a3servers.xml"/>
-      <param name="osgi.conf" value="${conf.dir}/config_min.properties"/>    	
+      <param name="osgi.conf" value="${conf.dir}/config_min.properties"/>   
+    	<param name="monit.conf" value="${conf.dir}/MonitoringConfig_1.xml"/>
     </antcall>
   </target>
 	
@@ -173,7 +176,8 @@
     <antcall target="server">
       <param name="sid" value="2"/>
       <param name="a3.conf" value="${conf.dir}/distributed_a3servers.xml"/>
-      <param name="osgi.conf" value="${conf.dir}/config_min.properties"/>    	
+      <param name="osgi.conf" value="${conf.dir}/config_min.properties"/>  
+    	<param name="monit.conf" value="${conf.dir}/MonitoringConfig_2.xml"/>
     </antcall>
   </target>
 	

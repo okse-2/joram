@@ -28,8 +28,12 @@ import java.util.Timer;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
+import com.scalagent.monitoring.*;
+
+import fr.dyade.aaa.common.Debug;
+
 /**
- * The <code>FileMonitoringTimerTask</code> class allows to periodically watch JMX attributes
+ * The <code>LogMonitoringTimerTask</code> class allows to periodically watch JMX attributes
  * and write the corresponding values in the logging mechanism.
  */
 public class LogMonitoringTimerTask extends MonitoringTimerTask {
@@ -155,6 +159,23 @@ public class LogMonitoringTimerTask extends MonitoringTimerTask {
 
     start(timer);
   }
+  
+  /**
+   * Initializes the <code>LogMonitoringTimerTask</code> component.
+   * 
+   */
+  public LogMonitoringTimerTask() {
+    super(MonitoringSaxWrapper.period, MonitoringSaxWrapper.monitoredAttsProps);
+    
+    this.monitoringLogger = Debug.getLogger(MonitoringSaxWrapper.initTaskProps.getProperty("logname"));
+    this.msg = MonitoringSaxWrapper.initTaskProps.getProperty("msg");
+    this.level = getLevel(MonitoringSaxWrapper.initTaskProps.getProperty("level"));
+    
+    strbuf = new StringBuffer();
+
+    Timer timer = Monitoring.getTimer();
+    start(timer);
+  }
 
   /**
    * Initialize the record for the current collect time.
@@ -192,5 +213,35 @@ public class LogMonitoringTimerTask extends MonitoringTimerTask {
       monitoringLogger.log(level, strbuf.toString());
 
     strbuf.setLength(0);
+  }
+  
+  /**
+   * Return the int value of the String BasicLevel
+   * 
+   * @param levelName	The name of the BasicLevel
+   */
+	protected int getLevel(String levelName) {
+		int level = DEFAULT_MONITORING_RESULT_LEVEL;
+
+		try {
+			level = Integer.parseInt(levelName);
+		} catch (Exception e) {
+			if (levelName.equals("BasicLevel.DEBUG"))
+				level = BasicLevel.DEBUG;
+			else if (levelName.equals("BasicLevel.ERROR"))
+				level = BasicLevel.ERROR;
+			else if (levelName.equals("BasicLevel.FATAL"))
+				level = BasicLevel.FATAL;
+			else if (levelName.equals("BasicLevel.INFO"))
+				level = BasicLevel.INFO;
+			else if (levelName.equals("BasicLevel.INHERIT"))
+				level = BasicLevel.INHERIT;
+			else if (levelName.equals("BasicLevel.WARN"))
+				level = BasicLevel.WARN;
+			else
+				logger.log(BasicLevel.ERROR,
+						"LogMonitoringTimerTask getLevel: bad levelName " + levelName);
+	  }
+	  return level;
   }
 }
