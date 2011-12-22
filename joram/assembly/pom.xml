@@ -149,6 +149,12 @@
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
+     <dependency>
+      <groupId>org.ow2.joram</groupId>
+      <artifactId>sadt-monitoring</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+    </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.shell</artifactId>

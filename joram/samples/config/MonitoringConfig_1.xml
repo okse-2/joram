@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MonitoringTimerTasks>
+	<Task>
+		<type type = "fr.dyade.aaa.common.monitoring.FileMonitoringTimerTask" />
+		<period period = "30000" />
+		<resultPath path = "monitoringStats.csv" />
+		<taskProps objectName = "name" 
+							 attribute  = "Monitoring#1" />
+		<attsProps objectName = "AgentServer:server=AgentServer#1,cons=Transaction"
+						 	 attribute  = "Persistent" />
+		<attsProps objectName = "MonitoringService:cons=Monitoring#1"
+						 	 attribute  = "Period" />
+ 		<attsProps objectName = "Joram#1:type=Destination,name=queue"
+						 	 attribute  = "NbMsgsReceiveSinceCreation,
+						 							 	 PendingMessageCount,				 							 
+						 								 NbMsgsDeliverSinceCreation,
+ 						 							 	 NbMsgsSentToDMQSinceCreation" />
+ 		<attsProps objectName = "Joram#1:type=Destination,name=topic"
+						 	 attribute  = "NbMsgsDeliverSinceCreation,
+ 						 								 NbMsgsReceiveSinceCreation,
+						 							 	 NbMsgsSentToDMQSinceCreation" />
+	</Task>
+</MonitoringTimerTasks>

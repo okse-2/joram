@@ -65,7 +65,7 @@ public abstract class MonitoringTimerTask extends java.util.TimerTask implements
    */
   public MonitoringTimerTask(long period, Properties attlist) {
     this.period = period;
-    this.attlist = attlist;
+    this.attlist = (Properties)attlist.clone();
   }
   
   /**

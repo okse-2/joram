@@ -34,6 +34,7 @@
         <include>org.ow2.joram:joram-mom-extensions-collector</include>
         <include>org.ow2.joram:joram-mom-extensions-scheduler</include>
         <include>org.ow2.joram:joram-tools-jasp</include>
+        <include>org.ow2.joram:sadt-monitoring</include>
         <include>org.apache.felix:org.apache.felix.shell</include>
         <include>org.apache.felix:org.apache.felix.shell.remote</include>
         <include>org.apache.felix:org.apache.felix.shell.tui</include>

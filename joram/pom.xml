@@ -23,6 +23,7 @@
     <module>joram</module>
     <module>licenses</module>
     <module>conf</module>
+    <module>scalagent/monitoring</module>
     <module>assembly</module>
     <module>samples</module>
   </modules>
