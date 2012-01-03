@@ -65,8 +65,19 @@ public abstract class MonitoringTimerTask extends java.util.TimerTask implements
    */
   public MonitoringTimerTask(long period, Properties attlist) {
     this.period = period;
-    this.attlist = (Properties)attlist.clone();
+    this.attlist = attlist;
   }
+  
+  /**
+   * Initializes the <code>MonitoringTimerTask</code> component.
+   * 
+   * @param period  Period value of the resulting task
+   * @param attlist List of JMX attributes to periodically watch.
+   */
+  public MonitoringTimerTask() {
+  }
+  
+  public abstract void init(Timer timer, long period, Properties attlist, Properties taskProps);
   
   /**
    * Starts the resulting task.
