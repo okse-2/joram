@@ -23,16 +23,16 @@
 package fr.dyade.aaa.common.monitoring;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Calendar;
+import java.util.Properties;
 import java.util.Random;
 import java.util.Timer;
 import java.lang.Math;
 import javax.swing.*;
-
-import com.scalagent.monitoring.Monitoring;
-import com.scalagent.monitoring.MonitoringSaxWrapper;
 
 /**
  * The <code>WindowMonitoringTimerTask</code> class allows to periodically watch
@@ -43,21 +43,28 @@ public class WindowMonitoringTimerTask extends MonitoringTimerTask {
 	StringBuffer strbuf = null;
 	JTextArea textArea;
 	JTextField attField, addMbeanField, delMbeanField;
+	Graphics graph;
 
+	/**
+	 * Instantiates the <code>WindowMonitoringTimerTask</code> component.
+	 * 
+	 */
+	public WindowMonitoringTimerTask() {}
+	
 	/**
 	 * Initializes the <code>WindowMonitoringTimerTask</code> component.
 	 * 
-	 */
-	public WindowMonitoringTimerTask() {
-		super(MonitoringSaxWrapper.period, MonitoringSaxWrapper.monitoredAttsProps);
+	 */	
+	public void init(Timer timer, long period, Properties attlist, Properties taskProps){
+  	super.period = period;
+  	super.attlist = (Properties)attlist.clone();
+  	
+  	strbuf = new StringBuffer();
 
-		strbuf = new StringBuffer();
+		GUI(taskProps.getProperty("name"), 100, 100);
 
-		GUI(MonitoringSaxWrapper.initTaskProps.getProperty("name"), 100, 100);
-
-		Timer timer = Monitoring.getTimer();
 		start(timer);
-	}
+  }
 
 	/**
 	 * Initialize the record for the current collect time. For the
@@ -114,17 +121,18 @@ public class WindowMonitoringTimerTask extends MonitoringTimerTask {
 	 */
 	protected void GUI(String title, int x, int y) {
 		JFrame mainWindow;
-		JScrollPane scrollPane;
+		JScrollPane scrollText, scrollAction;
 		JPanel actionPanel;
 		JButton addButton, delButton;
 		JLabel addAttLabel, addMbeanLabel, delMbeanLabel;
 		ActionListener addListener, delListener;
 		Random rand = new Random();
+		
 
 		// set monitored values area
 		textArea = new JTextArea();
-		scrollPane = new JScrollPane(textArea);
-		scrollPane.setBorder(BorderFactory.createCompoundBorder(
+		scrollText = new JScrollPane(textArea);
+		scrollText.setBorder(BorderFactory.createCompoundBorder(
 				BorderFactory.createEmptyBorder(2, 2, 2, 2),
 				BorderFactory.createEtchedBorder()));
 
@@ -162,44 +170,48 @@ public class WindowMonitoringTimerTask extends MonitoringTimerTask {
 
 		// set action panel
 		actionPanel = new JPanel();
-		GroupLayout layout = new GroupLayout(actionPanel);
-		actionPanel.setLayout(layout);
-		layout.setAutoCreateGaps(true);
-		layout.setAutoCreateContainerGaps(true);
+		actionPanel.setPreferredSize(new Dimension(480,80));
+		scrollAction = new JScrollPane(actionPanel);
+		
+		GroupLayout actionLayout = new GroupLayout(actionPanel);
+		actionPanel.setLayout(actionLayout);
+		actionLayout.setAutoCreateGaps(true);
+		actionLayout.setAutoCreateContainerGaps(true);
 
-		layout.setHorizontalGroup(layout
+		actionLayout.setHorizontalGroup(actionLayout
 				.createSequentialGroup()
 				.addGroup(
-						layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+						actionLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
 								.addComponent(addButton).addComponent(delButton))
 				.addGroup(
-						layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+						actionLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
 								.addComponent(addMbeanLabel).addComponent(delMbeanLabel))
 				.addGroup(
-						layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+						actionLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
 								.addComponent(addMbeanField).addComponent(delMbeanField))
 				.addComponent(addAttLabel).addComponent(attField));
 
-		layout.setVerticalGroup(layout
+		actionLayout.setVerticalGroup(actionLayout
 				.createSequentialGroup()
 				.addGroup(
-						layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						actionLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
 								.addComponent(addButton).addComponent(addMbeanLabel)
 								.addComponent(addMbeanField).addComponent(addAttLabel)
 								.addComponent(attField))
 				.addGroup(
-						layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						actionLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
 								.addComponent(delButton).addComponent(delMbeanLabel)
 								.addComponent(delMbeanField)));
 
-		layout.linkSize(addButton, delButton);
-
+		actionLayout.linkSize(addButton, delButton);
+		actionLayout.linkSize(addMbeanField, delMbeanField, attField);
+		
 		// set main window
 		mainWindow = new JFrame(title);
-		mainWindow.getContentPane().add(scrollPane, BorderLayout.CENTER);
-		mainWindow.getContentPane().add(actionPanel, BorderLayout.NORTH);
+		mainWindow.getContentPane().add(scrollAction, BorderLayout.NORTH);
+		mainWindow.getContentPane().add(scrollText, BorderLayout.CENTER);
 		mainWindow.setLocation(x, Math.abs(rand.nextInt(y)));
-		mainWindow.setSize(500, 200);
+		mainWindow.setSize(500, 400);
 		mainWindow.setVisible(true);
 	}
 }

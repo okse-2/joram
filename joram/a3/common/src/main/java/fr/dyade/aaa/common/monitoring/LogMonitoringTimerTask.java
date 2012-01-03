@@ -28,8 +28,6 @@ import java.util.Timer;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 
-import com.scalagent.monitoring.*;
-
 import fr.dyade.aaa.common.Debug;
 
 /**
@@ -161,19 +159,25 @@ public class LogMonitoringTimerTask extends MonitoringTimerTask {
   }
   
   /**
+   * Instantiates the <code>LogMonitoringTimerTask</code> component.
+   * 
+   */
+  public LogMonitoringTimerTask() {}
+  
+  /**
    * Initializes the <code>LogMonitoringTimerTask</code> component.
    * 
    */
-  public LogMonitoringTimerTask() {
-    super(MonitoringSaxWrapper.period, MonitoringSaxWrapper.monitoredAttsProps);
-    
-    this.monitoringLogger = Debug.getLogger(MonitoringSaxWrapper.initTaskProps.getProperty("logname"));
-    this.msg = MonitoringSaxWrapper.initTaskProps.getProperty("msg");
-    this.level = getLevel(MonitoringSaxWrapper.initTaskProps.getProperty("level"));
+  public void init(Timer timer, long period, Properties attlist, Properties taskProps){
+  	super.period = period;
+  	super.attlist = (Properties)attlist.clone();
+  	
+  	this.monitoringLogger = Debug.getLogger(taskProps.getProperty("logname"));
+    this.msg = taskProps.getProperty("msg");
+    this.level = getLevel(taskProps.getProperty("level"));
     
     strbuf = new StringBuffer();
 
-    Timer timer = Monitoring.getTimer();
     start(timer);
   }
 
@@ -211,7 +215,6 @@ public class LogMonitoringTimerTask extends MonitoringTimerTask {
     
     if (monitoringLogger.isLoggable(level))
       monitoringLogger.log(level, strbuf.toString());
-
     strbuf.setLength(0);
   }
   

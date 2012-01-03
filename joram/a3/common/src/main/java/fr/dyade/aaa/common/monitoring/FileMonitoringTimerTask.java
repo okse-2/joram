@@ -30,8 +30,6 @@ import java.util.Timer;
 
 import org.objectweb.util.monolog.api.BasicLevel;
 
-import com.scalagent.monitoring.*;
-
 /**
  * The <code>FileMonitoringTimerTask</code> class allows to periodically watch JMX attributes
  * and store the corresponding values to a file in CSV format.
@@ -120,14 +118,20 @@ public class FileMonitoringTimerTask extends MonitoringTimerTask {
   }
   
   /**
+   * Instantiates the <code>FileMonitoringTimerTask</code> component.
+   *
+   */
+  public FileMonitoringTimerTask() {}
+  
+  /**
    * Initializes the <code>FileMonitoringTimerTask</code> component.
    *
    */
-  public FileMonitoringTimerTask() {
-	super(MonitoringSaxWrapper.period, MonitoringSaxWrapper.monitoredAttsProps);
-	  
-    timer = Monitoring.getTimer();
-    String path = MonitoringSaxWrapper.resultPath;
+  public void init(Timer timer, long period, Properties attlist, Properties taskProps){
+  	super.period = period;
+  	super.attlist = (Properties)attlist.clone();
+
+    String path = taskProps.getProperty("resultPath");
     
     try {
         writer = new FileWriter(path, true);
