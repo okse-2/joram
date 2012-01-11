@@ -28,6 +28,7 @@
         <include>org.ow2.joram:jndi-client</include>
         <include>org.ow2.jonas.osgi:monolog</include>
         <include>org.ow2.joram:joram-mom-extensions-amqp</include>
+        <include>commons-io:commons-io</include>
         <include>org.ow2.joram:joram-mom-extensions-ftp</include>
         <include>org.ow2.joram:joram-mom-extensions-jmsbridge</include>
         <include>org.ow2.joram:joram-mom-extensions-mail</include>
