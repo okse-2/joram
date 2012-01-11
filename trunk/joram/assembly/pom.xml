@@ -114,6 +114,10 @@
       <type>jar</type>
     </dependency>
     <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.ow2.joram</groupId>
       <artifactId>joram-mom-extensions-ftp</artifactId>
       <version>${project.version}</version>

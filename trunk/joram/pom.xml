@@ -23,7 +23,6 @@
     <module>joram</module>
     <module>licenses</module>
     <module>conf</module>
-    
     <module>assembly</module>
     <module>samples</module>
   </modules>
@@ -191,6 +190,7 @@
     <!-- to prevent [WARNING] Using platform encoding -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <stomp.version>1.0</stomp.version>
+    <commons-io.version>1.4</commons-io.version>
   </properties>
 
   <organization>
@@ -296,6 +296,11 @@
         <artifactId>stompconnect</artifactId>
         <version>${stomp.version}</version>
         <type>jar</type>
+      </dependency>
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>${commons-io.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
