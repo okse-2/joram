@@ -28,28 +28,39 @@
     </tr>
     </table>
     </s1>
-
-    <s1 name="Thanks">
-      <s2 name="YourKit">
-        <p>Thanks to the people at <a href="http://www.yourkit.com/">YourKit</a> for providing us a free license
-        for their <a href="http://www.yourkit.com/">Java profiler</a>. It will be very useful in optimizing future
-        releases of Joram.</p>
-      </s2>
+    
+    <s1 name="Collaborations">
+    <table>	
+    <tr>
+      <td align="center" valign="middle">
+      <a href="http://www.ujf-grenoble.fr/">
+      <img src="images/partners/logo-UJF-couleur-droite.gif" alt="UJF Grenoble 1 logo" border="0" height="137" width="300"/></a>
+      </td>
+      <td>
+      <p>The <a href="http://www.ujf-grenoble.fr/">Joseph Fourier university</a> and the
+      <a href="http://www.liglab.fr">LIG Lab</a> have strong collaborations with Scalagent
+      concerning JORAM. The current research collaborations concern the following topics:</p>
+      <ul>
+        <li>The performance evaluation of JORAM on a private cloud,</li>
+        <li>The design and implementation of an auto-scalable cloud messaging service,</li>
+        <li>JORAM improvement.</li>
+      </ul>
+      <p>The LIG lab and ScalAgent are currently involved in the ANR INFRA ctrl-green and in the
+      FSN OpenCloudWare.</p>
+      <p>UJF/LIG contact: Noel De Palma</p>
+      </td>
+      <td align="center" valign="middle">
+      <a href="http://www.ujf-grenoble.fr/">
+      <img src="images/partners/logo_lig.jpg" alt="LIG logo" border="0" height="121" width="104"/></a>
+      </td>
+    </tr>
+    
+    </table>
     </s1>
+    
 	
     <s1 name="Sponsors and main user">
     <table>
-    <tr>
-      <td align="center" valign="middle">
-      <a href="http://www.cnes.fr/">
-      <img src="images/partners/CNES2.png" alt="CNES logo" border="0" height="49" width="140"/></a>
-      </td>
-      <td>
-      <p>The french space agency (<a href="http://www.cnes.fr">CNES</a>) uses Joram as main transport for its
-      new generation of Space Monitoring and Control (SM&amp;C) middleware.</p>
-      </td>
-    </tr>
-
     <tr>
       <td align="center" valign="middle">
       <a href="http://www.rd.francetelecom.com/">
@@ -67,6 +78,17 @@
       </td>
     </tr>
     
+    <tr>
+      <td align="center" valign="middle">
+      <a href="http://www.cnes.fr/">
+      <img src="images/partners/CNES2.png" alt="CNES logo" border="0" height="49" width="140"/></a>
+      </td>
+      <td>
+      <p>The french space agency (<a href="http://www.cnes.fr">CNES</a>) uses Joram as main transport for its
+      new generation of Space Monitoring and Control (SM&amp;C) middleware.</p>
+      </td>
+    </tr>
+
     <tr>
       <td align="center" valign="middle">
       <a href="http://www.bull.com/">
@@ -107,6 +129,14 @@
     </tr>
     
     </table>		
+    </s1>
+
+    <s1 name="Thanks">
+      <s2 name="YourKit">
+        <p>Thanks to the people at <a href="http://www.yourkit.com/">YourKit</a> for providing us a free license
+        for their <a href="http://www.yourkit.com/">Java profiler</a>. It will be very useful in optimizing future
+        releases of Joram.</p>
+      </s2>
     </s1>
 
     <s1 name="Initial partners">
