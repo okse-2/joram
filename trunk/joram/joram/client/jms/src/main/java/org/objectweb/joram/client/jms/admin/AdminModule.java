@@ -1592,32 +1592,40 @@ public final class AdminModule {
     if (wrapper == null)
       throw new ConnectException("Administration connection is closed.");
 
-    if (parameterTypes == null && (args != null && args.length > 0)) {
-      throw new AdminException("Parameter types array is null while args array is not null or empty.");
-    }
-    if (args == null && (parameterTypes != null && parameterTypes.length > 0)) {
-      throw new AdminException("Args array is null while parameter types array is not null or empty.");
-    }
-    if (parameterTypes != null && args != null && parameterTypes.length != args.length) {
-      throw new AdminException("Parameter types array size do not match args array size.");
-    }
-    Properties props = new Properties();
-    props.setProperty(AdminCommandConstant.INVOKE_CLASS_NAME, className);
-    props.setProperty(AdminCommandConstant.INVOKE_METHOD_NAME, methodName);
-    if (parameterTypes != null) {
-      for (int i = 0; i < parameterTypes.length; i++) {
-        props.setProperty(AdminCommandConstant.INVOKE_METHOD_ARG + i, parameterTypes[i].getName());
-        if (args[i] != null) {
-          props.setProperty(AdminCommandConstant.INVOKE_METHOD_ARG_VALUE + i, args[i].toString());
-        }
-      }
-    }
-    AdminCommandReply reply = null;
-    reply = (AdminCommandReply) wrapper.processAdmin(DestinationConstants.getNullId(serverId),
-          AdminCommandConstant.CMD_INVOKE_STATIC, props);
-    if (reply.getProp() == null) {
-      return null;
-    }
-    return reply.getProp().getProperty(AdminCommandConstant.INVOKE_METHOD_RESULT);
+   return wrapper.invokeStaticServerMethod(serverId, className, methodName, parameterTypes, args);
+  }
+  
+  /**
+   * Adds an AMQP server and starts a live connection with it, accessible via
+   * the host and port provided. A server is uniquely identified by the given
+   * name. Adding an existing server won't do anything.
+   * 
+   * @param serverId the serverId
+   * @param urls the amqp url list identifying the servers separate by space.
+   * ex: amqp://user:pass@localhost:1234/#serv1 amqp://user:pass@localhost:5678/#serv2
+   * 
+   * @return the result of the method
+   * @throws ConnectException If the connection fails.
+   * @throws AdminException If the invocation can't be done or fails
+   */
+  public static String addAMQPBridgeConnection(int serverId, String urls) throws ConnectException, AdminException {
+  	if (wrapper == null)
+      throw new ConnectException("Administration connection is closed.");
+  	return wrapper.addAMQPBridgeConnection(serverId, urls);
+  }
+  
+  /**
+   * Removes the live connection to the specified AMQP server.
+   * 
+   * @param serverId the serverId
+   * @param names the name identifying the server or list of name separate by space
+   * @return the result of the method
+   * @throws ConnectException If the connection fails.
+   * @throws AdminException If the invocation can't be done or fails
+   */
+  public static String deleteAMQPBridgeConnection(int serverId, String names) throws ConnectException, AdminException {
+  	if (wrapper == null)
+      throw new ConnectException("Administration connection is closed.");
+  	return wrapper.deleteAMQPBridgeConnection(serverId, names);
   }
 }
