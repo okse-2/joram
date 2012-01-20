@@ -22,7 +22,7 @@
  All Rights Reserved.
 -->
 
-<!ELEMENT JoramAdmin (AdminModule | ConnectionFactory | User | Destination | Queue | Topic | DMQueue | Cluster | Server | InitialContext)*>
+<!ELEMENT JoramAdmin (AdminModule | ConnectionFactory | User | Destination | Queue | Topic | DMQueue | Cluster | Server | InitialContext | AMQPBridgeConnection)*>
 <!ATTLIST JoramAdmin name CDATA "default">
 
 <!ELEMENT AdminModule (connect | collocatedConnect)*>
@@ -144,3 +144,8 @@
 
 <!ELEMENT Cluster (Queue | Topic | reader | writer | freeReader | freeWriter | jndi)*>
 <!ATTLIST Cluster>
+
+<!ELEMENT AMQPBridgeConnection EMPTY>
+<!ATTLIST AMQPBridgeConnection
+        serverId  CDATA #IMPLIED
+        urls CDATA #REQUIRED>
