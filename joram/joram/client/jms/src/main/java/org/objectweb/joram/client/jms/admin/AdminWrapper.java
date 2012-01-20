@@ -36,6 +36,8 @@ import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.shared.DestinationConstants;
 import org.objectweb.joram.shared.admin.AddDomainRequest;
 import org.objectweb.joram.shared.admin.AddServerRequest;
+import org.objectweb.joram.shared.admin.AdminCommandConstant;
+import org.objectweb.joram.shared.admin.AdminCommandReply;
 import org.objectweb.joram.shared.admin.AdminReply;
 import org.objectweb.joram.shared.admin.AdminRequest;
 import org.objectweb.joram.shared.admin.AdminCommandRequest;
@@ -1116,5 +1118,92 @@ public class AdminWrapper {
       throw new ConnectException("Admin connection not established.");
 
     requestor.abort();
+  }
+  
+  /**
+   * Invokes the specified static method with the specified parameters on the
+   * chosen server. The parameters types of the invoked method must be java
+   * primitive types, the java objects wrapping them or String type.
+   * 
+   * @param serverId the identifier of the server.
+   * @param className the name of the class holding the static method
+   * @param methodName the name of the invoked method
+   * @param parameterTypes the list of parameters
+   * @param args the arguments used for the method call
+   * @return the result of the invoked method after applying
+   *         {@link Object#toString()} method
+   * @throws ConnectException If the connection fails.
+   * @throws AdminException If the invocation can't be done or fails
+   */
+  public String invokeStaticServerMethod(int serverId, String className, String methodName,
+      Class[] parameterTypes, Object[] args) throws ConnectException, AdminException {
+
+    if (parameterTypes == null && (args != null && args.length > 0)) {
+      throw new AdminException("Parameter types array is null while args array is not null or empty.");
+    }
+    if (args == null && (parameterTypes != null && parameterTypes.length > 0)) {
+      throw new AdminException("Args array is null while parameter types array is not null or empty.");
+    }
+    if (parameterTypes != null && args != null && parameterTypes.length != args.length) {
+      throw new AdminException("Parameter types array size do not match args array size.");
+    }
+    Properties props = new Properties();
+    props.setProperty(AdminCommandConstant.INVOKE_CLASS_NAME, className);
+    props.setProperty(AdminCommandConstant.INVOKE_METHOD_NAME, methodName);
+    if (parameterTypes != null) {
+      for (int i = 0; i < parameterTypes.length; i++) {
+        props.setProperty(AdminCommandConstant.INVOKE_METHOD_ARG + i, parameterTypes[i].getName());
+        if (args[i] != null) {
+          props.setProperty(AdminCommandConstant.INVOKE_METHOD_ARG_VALUE + i, args[i].toString());
+        }
+      }
+    }
+    AdminCommandReply reply = null;
+    reply = (AdminCommandReply) processAdmin(DestinationConstants.getNullId(serverId),
+          AdminCommandConstant.CMD_INVOKE_STATIC, props);
+    if (reply.getProp() == null) {
+      return null;
+    }
+    return reply.getProp().getProperty(AdminCommandConstant.INVOKE_METHOD_RESULT);
+  }
+  
+  /**
+   * Adds an AMQP server and starts a live connection with it, accessible via
+   * the host and port provided. A server is uniquely identified by the given
+   * name. Adding an existing server won't do anything.
+   * 
+   * @param serverId the serverId
+   * @param urls the amqp url list identifying the servers separate by space.
+   * ex: amqp://user:pass@localhost:1234/#serv1 amqp://user:pass@localhost:5678/#serv2
+   * 
+   * @return the result of the method
+   * @throws ConnectException If the connection fails.
+   * @throws AdminException If the invocation can't be done or fails
+   */
+  public String addAMQPBridgeConnection(int serverId, String urls) throws ConnectException, AdminException {
+  	return invokeStaticServerMethod(
+  			serverId,
+  			"org.objectweb.joram.mom.dest.amqp.AmqpConnectionService",
+  			"addServer",
+  			new Class[] { String.class },
+  			new Object[] { urls });
+  }
+  
+  /**
+   * Removes the live connection to the specified AMQP server.
+   * 
+   * @param serverId the serverId
+   * @param names the name identifying the server or list of name separate by space
+   * @return the result of the method
+   * @throws ConnectException If the connection fails.
+   * @throws AdminException If the invocation can't be done or fails
+   */
+  public String deleteAMQPBridgeConnection(int serverId, String names) throws ConnectException, AdminException {
+  	return invokeStaticServerMethod(
+  			serverId,
+  			"org.objectweb.joram.mom.dest.amqp.AmqpConnectionService",
+  			"deleteServer",
+  			new Class[] { String.class },
+  			new Object[] { names });
   }
 }
