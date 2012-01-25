@@ -40,7 +40,7 @@ import framework.TestCase;
 
 
 /**
- * Test the fonctioning of asynchronous and synchronous subscrption. 
+ * Test the functioning of asynchronous and synchronous subscription. 
  * Using a Topic.
  */
 public class Sub extends TestCase {
@@ -77,7 +77,7 @@ public class Sub extends TestCase {
         boolean asyncSub = (i==0);
         System.out.println("\nTest with asyncSub = " + asyncSub);
         ((org.objectweb.joram.client.jms.Session) session).setAsyncSub(asyncSub);
-        Thread subTheard = new Thread(new Runnable() {
+        Thread subThread = new Thread(new Runnable() {
           public void run() {
             // subscribe
             MessageConsumer sub;
@@ -89,16 +89,16 @@ public class Sub extends TestCase {
             }
           }
         });
-        subTheard.start();
+        subThread.start();
 
         Thread.sleep(1000);
-        if (subTheard.isAlive()) {
+        if (subThread.isAlive()) {
           System.out.println("createConsumer lock... (wait 10s).");
           Thread.sleep(10000);
-          if (subTheard.isAlive() && asyncSub) {
+          if (subThread.isAlive() && asyncSub) {
             fail("test failed asyncSub = " + asyncSub);
           }
-          subTheard.interrupt();
+          subThread.interrupt();
           System.out.println("createConsumer interrupt.");
         }
       }
