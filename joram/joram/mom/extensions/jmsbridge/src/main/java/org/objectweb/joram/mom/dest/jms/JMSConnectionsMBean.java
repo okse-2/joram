@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2011 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,10 +30,11 @@ public interface JMSConnectionsMBean {
    * identified by the name of the connection factory. Adding an existing server
    * won't do anything.
    * 
+   * @param name the name identifying the server
    * @param cnxFactoryName the name identifying the connection factory on the
    *          JNDI server
    */
-  public void addServer(String cnxFactoryName);
+  public void addServer(String name, String cnxFactoryName);
 
   /**
    * Adds a JMS server and starts a live connection with it, accessible using
@@ -41,12 +42,13 @@ public interface JMSConnectionsMBean {
    * identified by the name of the connection factory. Adding an existing server
    * won't do anything.
    * 
+   * @param name the name identifying the server
    * @param cnxFactoryName the name identifying the connection factory on the
    *          JNDI server
    * @param jndiFactoryClass the JNDI connection factory class name
    * @param jndiUrl the JNDI URL
    */
-  public void addServer(String cnxFactoryName, String jndiFactoryClass, String jndiUrl);
+  public void addServer(String name, String cnxFactoryName, String jndiFactoryClass, String jndiUrl);
 
   /**
    * Adds a JMS server and starts a live connection with it, accessible using
@@ -54,6 +56,7 @@ public interface JMSConnectionsMBean {
    * identified by the name of the connection factory. Adding an existing server
    * won't do anything.
    * 
+   * @param name the name identifying the server
    * @param cnxFactoryName the name identifying the connection factory on the
    *          JNDI server
    * @param jndiFactoryClass the JNDI connection factory class name
@@ -61,7 +64,7 @@ public interface JMSConnectionsMBean {
    * @param user user name
    * @param password user password
    */
-  public void addServer(String cnxFactoryName, String jndiFactoryClass, String jndiUrl, String user,
+  public void addServer(String name, String cnxFactoryName, String jndiFactoryClass, String jndiUrl, String user,
       String password);
 
   /**
@@ -70,6 +73,7 @@ public interface JMSConnectionsMBean {
    * identified by the name of the connection factory. Adding an existing server
    * won't do anything.
    * 
+   * @param name the name identifying the server
    * @param cnxFactoryName the name identifying the connection factory on the
    *          JNDI server
    * @param jndiFactoryClass the JNDI connection factory class name
@@ -78,7 +82,7 @@ public interface JMSConnectionsMBean {
    * @param password user password
    * @param clientID the client identifier for this connection
    */
-  public void addServer(String cnxFactoryName, String jndiFactoryClass, String jndiUrl, String user,
+  public void addServer(String name, String cnxFactoryName, String jndiFactoryClass, String jndiUrl, String user,
       String password, String clientID);
 
   /**
