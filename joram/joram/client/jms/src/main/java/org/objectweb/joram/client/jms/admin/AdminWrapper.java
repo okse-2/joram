@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -1169,12 +1169,12 @@ public class AdminWrapper {
   
   /**
    * Adds an AMQP server and starts a live connection with it, accessible via
-   * the host and port provided. A server is uniquely identified by the given
+   * the url provided. A server is uniquely identified by the given
    * name. Adding an existing server won't do anything.
    * 
    * @param serverId the serverId
    * @param urls the amqp url list identifying the servers separate by space.
-   * ex: amqp://user:pass@localhost:1234/#serv1 amqp://user:pass@localhost:5678/#serv2
+   * ex: amqp://user:pass@localhost:5672/?name=serv1 amqp://user:pass@localhost:5678/?name=serv2
    * 
    * @return the result of the method
    * @throws ConnectException If the connection fails.
@@ -1202,6 +1202,46 @@ public class AdminWrapper {
   	return invokeStaticServerMethod(
   			serverId,
   			"org.objectweb.joram.mom.dest.amqp.AmqpConnectionService",
+  			"deleteServer",
+  			new Class[] { String.class },
+  			new Object[] { names });
+  }
+  
+  /**
+   * Adds a JMS server and starts a live connection with it, accessible via
+   * the url provided. A server is uniquely identified by the given
+   * name. Adding an existing server won't do anything.
+   * 
+   * @param serverId the serverId
+   * @param urls the jms url list identifying the servers separate by space.
+   * ex: jndi_url/?name=cnx1&cf=cfName&jndiFactoryClass=com.xxx.yyy&user=user1&pass=pass1&clientID=clientID 
+   * 
+   * @return the result of the method
+   * @throws ConnectException If the connection fails.
+   * @throws AdminException If the invocation can't be done or fails
+   */
+  public String addJMSBridgeConnection(int serverId, String urls) throws ConnectException, AdminException {
+  	return invokeStaticServerMethod(
+  			serverId,
+  			"org.objectweb.joram.mom.dest.jms.JMSConnectionService",
+  			"addServer",
+  			new Class[] { String.class },
+  			new Object[] { urls });
+  }
+  
+  /**
+   * Removes the live connection to the specified AMQP server.
+   * 
+   * @param serverId the serverId
+   * @param names the name identifying the server or list of name separate by space
+   * @return the result of the method
+   * @throws ConnectException If the connection fails.
+   * @throws AdminException If the invocation can't be done or fails
+   */
+  public String deleteJMSPBridgeConnection(int serverId, String names) throws ConnectException, AdminException {
+  	return invokeStaticServerMethod(
+  			serverId,
+  			"org.objectweb.joram.mom.dest.jms.JMSConnectionService",
   			"deleteServer",
   			new Class[] { String.class },
   			new Object[] { names });

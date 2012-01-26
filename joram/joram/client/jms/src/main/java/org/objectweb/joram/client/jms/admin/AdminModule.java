@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -1597,12 +1597,12 @@ public final class AdminModule {
   
   /**
    * Adds an AMQP server and starts a live connection with it, accessible via
-   * the host and port provided. A server is uniquely identified by the given
+   * the url provided. A server is uniquely identified by the given
    * name. Adding an existing server won't do anything.
    * 
    * @param serverId the serverId
    * @param urls the amqp url list identifying the servers separate by space.
-   * ex: amqp://user:pass@localhost:1234/#serv1 amqp://user:pass@localhost:5678/#serv2
+   * ex: amqp://user:pass@localhost:5672/?name=serv1 amqp://user:pass@localhost:5678/?name=serv2
    * 
    * @return the result of the method
    * @throws ConnectException If the connection fails.
@@ -1627,5 +1627,39 @@ public final class AdminModule {
   	if (wrapper == null)
       throw new ConnectException("Administration connection is closed.");
   	return wrapper.deleteAMQPBridgeConnection(serverId, names);
+  }
+  
+  /**
+   * Adds a JMS server and starts a live connection with it, accessible via
+   * the url provided. A server is uniquely identified by the given
+   * name. Adding an existing server won't do anything.
+   * 
+   * @param serverId the serverId
+   * @param urls the jms url list identifying the servers separate by space.
+   * ex: jndi_url/?name=cnx1&cf=cfName&jndiFactoryClass=com.xxx.yyy&user=user1&pass=pass1&clientID=clientID 
+   * 
+   * @return the result of the method
+   * @throws ConnectException If the connection fails.
+   * @throws AdminException If the invocation can't be done or fails
+   */
+  public static String addJMSBridgeConnection(int serverId, String urls) throws ConnectException, AdminException {
+  	if (wrapper == null)
+      throw new ConnectException("Administration connection is closed.");
+  	return wrapper.addJMSBridgeConnection(serverId, urls);
+  }
+  
+  /**
+   * Removes the live connection to the specified AMQP server.
+   * 
+   * @param serverId the serverId
+   * @param names the name identifying the server or list of name separate by space
+   * @return the result of the method
+   * @throws ConnectException If the connection fails.
+   * @throws AdminException If the invocation can't be done or fails
+   */
+  public static String deleteJMSPBridgeConnection(int serverId, String names) throws ConnectException, AdminException {
+  	if (wrapper == null)
+      throw new ConnectException("Administration connection is closed.");
+  	return wrapper.deleteJMSPBridgeConnection(serverId, names);
   }
 }
