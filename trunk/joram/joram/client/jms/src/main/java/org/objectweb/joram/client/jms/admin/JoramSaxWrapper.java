@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2005 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2005 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -146,7 +146,9 @@ public class JoramSaxWrapper extends DefaultHandler {
   static final String ELT_OUT_INTERCEPTORS="outInterceptors";
   static final String ELT_INTERCEPTOR="interceptor";
   /** Syntaxic name for AMQP bridge connection element */
-  static final String ELT_AMQ_PBRIDGE_CNX = "AMQPBridgeConnection";
+  static final String ELT_AMQP_BRIDGE_CNX = "AMQPBridgeConnection";
+  /** Syntaxic name for JMS bridge connection element */
+  static final String ELT_JMS_BRIDGE_CNX = "JMSBridgeConnection";
   
   /** Syntaxic name for name attribute */
   static final String ATT_NAME = "name";
@@ -686,7 +688,7 @@ public class JoramSaxWrapper extends DefaultHandler {
           } else {
         	  throw new SAXException("Element \"" + rawName + "\" must provide \"" + ATT_CLASSNAME + "\" attribute. ");
           }
-      } else if (rawName.equals(ELT_AMQ_PBRIDGE_CNX)) {
+      } else if (rawName.equals(ELT_AMQP_BRIDGE_CNX)) {
       	String urls = atts.getValue(ATT_URLS);
       	try {
           String value = atts.getValue(ATT_SERVERID);
@@ -703,6 +705,28 @@ public class JoramSaxWrapper extends DefaultHandler {
         }
         try {
         	getWrapper().addAMQPBridgeConnection(serverId, urls);
+        } catch (ConnectException exc) {
+          throw new SAXException("error invokeStaticServerMethod: " + exc.getMessage());
+        } catch (AdminException exc) {
+          throw new SAXException("error invokeStaticServerMethod: " + exc.getMessage());
+        }
+      } else if (rawName.equals(ELT_JMS_BRIDGE_CNX)) {
+      	String urls = atts.getValue(ATT_URLS);
+      	try {
+          String value = atts.getValue(ATT_SERVERID);
+          if (value == null)
+            serverId =  getWrapper().getLocalServerId();
+          else
+            serverId = Integer.parseInt(value);
+        } catch (NumberFormatException exc) {
+          throw new SAXException("bad value for serverId: " + atts.getValue(ATT_SERVERID));
+        } catch (ConnectException exc) {
+          throw new SAXException("error getting serverId: " + exc.getMessage());
+        } catch (AdminException exc) {
+          throw new SAXException("error getting serverId: " + exc.getMessage());
+        }
+        try {
+        	getWrapper().addJMSBridgeConnection(serverId, urls);
         } catch (ConnectException exc) {
           throw new SAXException("error invokeStaticServerMethod: " + exc.getMessage());
         } catch (AdminException exc) {
@@ -1112,7 +1136,9 @@ public class JoramSaxWrapper extends DefaultHandler {
           //NOTHING-TO-DO
         } else if (rawName.equals(ELT_INTERCEPTOR)){
           //NOTHING-TO-DO
-        } else if (rawName.equals(ELT_AMQ_PBRIDGE_CNX)){
+        } else if (rawName.equals(ELT_AMQP_BRIDGE_CNX)){
+          //NOTHING-TO-DO
+        } else if (rawName.equals(ELT_JMS_BRIDGE_CNX)){
           //NOTHING-TO-DO
         } else {
           throw new SAXException("unknown element \"" + rawName + "\"");
