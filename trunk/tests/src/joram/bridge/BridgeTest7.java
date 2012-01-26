@@ -198,13 +198,16 @@ public class BridgeTest7 extends TestCase {
     jndiCtx.close();
 
     // Add the 2 foreign server JMS connections
-    AdminModule.invokeStaticServerMethod("org.objectweb.joram.mom.dest.jms.JMSConnectionService",
-        "addServer", new Class[] { String.class, String.class, String.class }, new Object[] { "cfS1",
-            "fr.dyade.aaa.jndi2.client.NamingContextFactory", "scn://localhost:16401" });
+//    AdminModule.invokeStaticServerMethod("org.objectweb.joram.mom.dest.jms.JMSConnectionService",
+//        "addServer", new Class[] { String.class, String.class, String.class }, new Object[] { "cfS1",
+//            "fr.dyade.aaa.jndi2.client.NamingContextFactory", "scn://localhost:16401" });
+//
+//    AdminModule.invokeStaticServerMethod("org.objectweb.joram.mom.dest.jms.JMSConnectionService",
+//        "addServer", new Class[] { String.class, String.class, String.class }, new Object[] { "cfS2",
+//            "fr.dyade.aaa.jndi2.client.NamingContextFactory", "scn://localhost:16402" });
 
-    AdminModule.invokeStaticServerMethod("org.objectweb.joram.mom.dest.jms.JMSConnectionService",
-        "addServer", new Class[] { String.class, String.class, String.class }, new Object[] { "cfS2",
-            "fr.dyade.aaa.jndi2.client.NamingContextFactory", "scn://localhost:16402" });
+    AdminModule.addJMSBridgeConnection(0, "scn://localhost:16401/?name=cnx1&cf=cfS1&jndiFactoryClass=fr.dyade.aaa.jndi2.client.NamingContextFactory");
+    AdminModule.addJMSBridgeConnection(0, "scn://localhost:16402/?name=cnx2&cf=cfS2&jndiFactoryClass=fr.dyade.aaa.jndi2.client.NamingContextFactory");
 
     AdminModule.disconnect();
     System.out.println("Admin closed.");
