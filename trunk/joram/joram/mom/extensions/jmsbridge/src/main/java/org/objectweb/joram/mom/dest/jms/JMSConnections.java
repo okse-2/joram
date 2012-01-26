@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2011 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -64,29 +64,34 @@ public class JMSConnections implements JMSConnectionsMBean {
   }
 
   /** {@inheritDoc} */
-  public void addServer(String cnxFactoryName) {
-    addServer(cnxFactoryName, null, null);
+  public void addServer(String name, String cnxFactoryName) {
+    addServer(name, cnxFactoryName, null, null);
   }
 
   /** {@inheritDoc} */
-  public void addServer(String cnxFactoryName, String jndiFactoryClass, String jndiUrl) {
-    addServer(cnxFactoryName, jndiFactoryClass, jndiUrl, null, null);
+  public void addServer(String name, String cnxFactoryName, String jndiFactoryClass, String jndiUrl) {
+    addServer(name, cnxFactoryName, jndiFactoryClass, jndiUrl, null, null);
   }
 
   /** {@inheritDoc} */
-  public void addServer(String cnxFactoryName, String jndiFactoryClass, String jndiUrl, String user,
+  public void addServer(String name, String cnxFactoryName, String jndiFactoryClass, String jndiUrl, String user,
       String password) {
-    addServer(cnxFactoryName, jndiFactoryClass, jndiUrl, user, password, null);
+    addServer(name, cnxFactoryName, jndiFactoryClass, jndiUrl, user, password, null);
   }
 
   /** {@inheritDoc} */
-  public void addServer(String cnxFactoryName, String jndiFactoryClass, String jndiUrl, String user,
+  public void addServer(String name, String cnxFactoryName, String jndiFactoryClass, String jndiUrl, String user,
       String password, String clientID) {
+  	if (logger.isLoggable(BasicLevel.DEBUG)) {
+			logger.log(BasicLevel.DEBUG, "JMSConnection.addServer(" + name + ", " + 
+					cnxFactoryName + ", " + jndiFactoryClass + ", " + jndiUrl + ", " + user + ", ****, " + clientID + ')');
+  	}
+			
     synchronized (servers) {
-      if (!servers.containsKey(cnxFactoryName)) {
+      if (!servers.containsKey(name)) {
         JMSModule cnx = new JMSModule(cnxFactoryName, jndiFactoryClass, jndiUrl, user, password, clientID);
         cnx.startLiveConnection();
-        servers.put(cnxFactoryName, cnx);
+        servers.put(name, cnx);
       }
     }
     try {
@@ -104,6 +109,9 @@ public class JMSConnections implements JMSConnectionsMBean {
 
   /** {@inheritDoc} */
   public void deleteServer(String name) {
+  	if (logger.isLoggable(BasicLevel.DEBUG)) {
+			logger.log(BasicLevel.DEBUG, "JMSConnection.deleteServer(" + name + ')');
+  	}
     synchronized (servers) {
       JMSModule cnx = servers.remove(name);
       if (cnx != null) {
