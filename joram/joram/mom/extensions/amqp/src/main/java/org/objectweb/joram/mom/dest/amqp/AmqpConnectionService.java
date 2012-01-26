@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2011 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -91,7 +91,7 @@ public class AmqpConnectionService {
    * name. Adding an existing server won't do anything.
    * 
    * @param urls the amqp url list identifying the servers separate by space.
-   * ex: amqp://user:pass@localhost:1234/#serv1 amqp://user:pass@localhost:5678/#serv2
+   * ex: amqp://user:pass@localhost:5672/?name=serv1 amqp://user:pass@localhost:5678/?name=serv2
    * serv1 and serv2 are the name identifying the server.
    */
   public static void addServer(String urls) {
@@ -99,7 +99,7 @@ public class AmqpConnectionService {
 			logger.log(BasicLevel.DEBUG, "AmqpConnectionService.addServer(" + urls + ')');
 		}
   	
-  	StringTokenizer tk = new StringTokenizer(urls, " ");
+  	StringTokenizer tk = new StringTokenizer(urls);
   	while (tk.hasMoreTokens()) {
   		URL url = null;
   		try {
@@ -133,9 +133,12 @@ public class AmqpConnectionService {
   		if (port < 0)
   			port = ConnectionFactory.DEFAULT_AMQP_PORT;
 
-  		name = url.getRef();
-  		if (name == null)
-  			name = "default";
+  		String query = url.getQuery();
+  		if (query != null) {
+  			int index = query.indexOf('=');
+  			if (index > 0)
+  				name = query.substring(index+1, query.length());
+  		}
 
   		if (logger.isLoggable(BasicLevel.DEBUG)) {
   			logger.log(BasicLevel.DEBUG, "AmqpConnectionService.addServer(" + name + ", " + host + ", " + port + ", " + userName + ')');
