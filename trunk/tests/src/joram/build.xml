@@ -227,6 +227,7 @@
     <antcall target="client.close2"/>
     <antcall target="client.close3"/>
     <antcall target="client.close4"/>
+    <antcall target="client.close5"/>
     <antcall target="client.rqueue"/>
     <antcall target="client.tmpq"/>
     <antcall target="client.recover"/>
@@ -392,6 +393,9 @@
     <antcall target="bridge.test5.2"/>
     <antcall target="bridge.test6.2"/>
     <antcall target="bridge.test7"/>
+  	<antcall target="bridge.asynctest"/>
+  	<!-- antcall target="bridge.asyncexctest"/ -->
+    <antcall target="bridge.acquisitiontest"/>
   </target>
 
   <target name="tests.schedqueue"
@@ -510,6 +514,7 @@
           description=" --> launch all distribution tests">
     <antcall target="distribution.test1"/>
     <antcall target="distribution.test2"/>
+  	<antcall target="distribution.test3"/>
   </target>
 	
   <target name="tests.pool"
@@ -1866,6 +1871,21 @@
       <param name="args" value=""/>
     </antcall>
   </target>
+	
+	<target name="client.close5" depends="init.a3props,compile"
+	          description=" --> producer send messages when kill server (interceptor).">
+	    <antcall target="test.run" inheritAll="true">
+	      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+	      <param name="className" value="joram.client.ConnectionClose5"/>
+	      <param name="testid" value="client.close5"/>
+	      <param name="jndiconf" value="client/jndi.properties"/>
+	      <param name="a3conf" value="client/a3servers.xml"/>
+	      <param name="jvmargs" value=""/>
+	      <param name="args" value=""/>
+	    	<param name="manifest.mf" value="joram/client/manifest.mf"/>
+	    	<param name="include.classes" value="joram/client/Exit*.class"/>
+	    </antcall>
+	  </target>
 
   <target name="client.test5" depends="init.a3props,compile"
           description=" --> three tests, an anticipated connection, connection stop,  connection close  .">
@@ -4504,6 +4524,48 @@
       <param name="jvmargs" value=""/>
     </antcall>
   </target>
+	
+	<target name="bridge.asynctest" depends="init.a3props,compile"
+	          description=" --> producer on bridge queue and subscriber on foreign queue with slow interceptor">
+	      <antcall target="test.run" inheritAll="true">
+	        <param name="testid" value="bridge.asynctest"/>
+	        <param name="className" value="joram.bridge.AsyncBridgeTest"/>
+	        <param name="jndiconf" value="bridge/jndi.properties"/>
+	        <param name="a3conf" value="bridge/a3servers3.xml"/>
+	        <param name="jvmargs" value=""/>
+	        <param name="jvmadminArgs" value=""/>
+	      	<param name="manifest.mf" value="joram/bridge/manifest.mf"/>
+	      	<param name="include.classes" value="joram/bridge/Slow*.class"/>
+	      </antcall>
+	  </target>
+	
+	<target name="bridge.asyncexctest" depends="init.a3props,compile"
+		          description=" --> producer on bridge queue and subscriber on foreign queue with slow interceptor stop/restart server">
+	  <antcall target="test.run" inheritAll="true">
+		  <param name="testid" value="bridge.asyncexctest"/>
+		  <param name="className" value="joram.bridge.AsyncBridgeExceptionTest"/>
+		  <param name="jndiconf" value="bridge/jndi.properties"/>
+		  <param name="a3conf" value="bridge/a3servers3.xml"/>
+		  <param name="jvmargs" value=""/>
+		  <param name="jvmadminArgs" value=""/>
+		  <param name="manifest.mf" value="joram/bridge/manifest.mf"/>
+		  <param name="include.classes" value="joram/bridge/Slow*.class"/>
+		</antcall>
+	</target>
+		
+  <target name="bridge.acquisitiontest" depends="init.a3props,compile"
+	        description=" --> producer on foreign queue and subscriber on joram queue with slow interceptor stop/restart server">
+    <antcall target="test.run" inheritAll="true">
+      <param name="testid" value="bridge.acquisitiontest"/>
+      <param name="className" value="joram.bridge.BridgeAcquisitionTest"/>
+      <param name="jndiconf" value="bridge/jndi.properties"/>
+      <param name="a3conf" value="bridge/a3servers3.xml"/>
+      <param name="jvmargs" value=""/>
+      <param name="jvmadminArgs" value=""/>
+      <param name="manifest.mf" value="joram/bridge/manifest.mf"/>
+      <param name="include.classes" value="joram/bridge/Slow*.class"/>
+    </antcall>
+  </target>
 
 
   <!-- end bridge test -->
@@ -5615,5 +5677,19 @@
       <param name="include.classes" value="joram/distribution/*Handler*.class"/>
     </antcall>
   </target>
+	
+	<target name="distribution.test3" depends="init.a3props,compile"
+	          description=" --> test distribution async mode (ON and OFF) on a distribution Queue">
+	    <antcall target="test.run" inheritAll="true">
+	      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+	      <param name="className" value="joram.distribution.DistributionTest3"/>
+	      <param name="a3conf" value="distribution/a3servers.xml"/>
+	    	<param name="jvmargs" value="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,address=5000,suspend=n"/>
+	      <param name="testid" value="distribution.test3"/>
+	      <param name="args" value=""/>
+	      <param name="manifest.mf" value="joram/distribution/manifest.mf"/>
+	      <param name="include.classes" value="joram/distribution/*Handler*.class"/>
+	    </antcall>
+	  </target>
   
 </project>
