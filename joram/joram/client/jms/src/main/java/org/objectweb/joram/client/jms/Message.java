@@ -808,6 +808,8 @@ public class Message implements javax.jms.Message {
    * @exception JMSException  If an error occurs while building the message.
    */
   static public Message convertJMSMessage(javax.jms.Message jmsMsg) throws JMSException {
+    if (jmsMsg == null) return null;
+    
     Message joramMsg = null;
     if (jmsMsg instanceof javax.jms.TextMessage) {
       joramMsg = new TextMessage();
