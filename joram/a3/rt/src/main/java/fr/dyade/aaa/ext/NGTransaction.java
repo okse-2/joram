@@ -1275,8 +1275,8 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
     }
 
     public void renameTo() {
-      new File(dir, "log#" + logidx).renameTo(new File(dir, "log#" + maxUsedIdx));
       maxUsedIdx += 1;
+      new File(dir, "log#" + logidx).renameTo(new File(dir, "log#" + maxUsedIdx));
     }
   }
   
