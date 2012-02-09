@@ -1212,7 +1212,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     }
     
     /**
-     * Returns the number of waiting messages in the enfgine.
+     * Returns the number of waiting messages in the engine.
      * 
      * @see fr.dyade.aaa.common.AverageLoadTask#countActiveTasks()
      */
