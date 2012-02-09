@@ -140,8 +140,8 @@ public class Sub2 extends TestCase {
 		  error(exc);
 	  } finally {
 		  System.out.println("Server stop");
-		  stopAgentServer((short) 0);
-      stopAgentServer((short) 1);
+		  killAgentServer((short) 0);
+      killAgentServer((short) 1);
 		  endTest();
 	  }
   }
