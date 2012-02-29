@@ -135,7 +135,7 @@ public class FileMonitoringTimerTask extends MonitoringTimerTask {
     
     try {
         writer = new FileWriter(path, true);
-      } catch (IOException exc) {
+      } catch (Exception exc) {
         logger.log(BasicLevel.ERROR,
                    "FileMonitoringTimerTask.<init>, cannot open file \"" + path + "\"", exc);
       }
