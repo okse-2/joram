@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2008 CSSI
  *
  * This library is free software; you can redistribute it and/or
@@ -620,7 +620,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     ServerSocket listen = null;
 
     WakeOnConnection(String name, Logger logmon) throws IOException {
-      super(name + ".wakeOnConnection");
+      super(name + ".wakeOnConnection", logmon);
       // Create the listen socket in order to verify the port availability.
       listen = createServerSocket();
       // Overload logmon definition in Daemon
@@ -696,7 +696,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
 
   final class Dispatcher extends Daemon {
     Dispatcher(String name, Logger logmon) {
-      super(name + ".dispatcher");
+      super(name + ".dispatcher", logmon);
       // Overload logmon definition in Daemon
       this.logmon = logmon;
     }
@@ -783,7 +783,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     private Object lock;
 
     WatchDog(String name, Logger logmon) {
-      super(name + ".watchdog");
+      super(name + ".watchdog", logmon);
       lock = new Object();
       // Overload logmon definition in Daemon
       this.logmon = logmon;
@@ -851,7 +851,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     NetSession session = null;
     
     Sender(NetSession session, String name, Logger logmon) {
-      super(name + ".sender");
+      super(name + ".sender", logmon);
       // Overload logmon definition in Daemon
       this.logmon = logmon;
       this.session = session;

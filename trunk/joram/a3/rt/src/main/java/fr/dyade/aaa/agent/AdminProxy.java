@@ -31,6 +31,8 @@ import org.objectweb.util.monolog.api.Logger;
 import fr.dyade.aaa.agent.conf.A3CML;
 import fr.dyade.aaa.agent.conf.A3CMLConfig;
 import fr.dyade.aaa.common.Daemon;
+import fr.dyade.aaa.common.Debug;
+import fr.dyade.aaa.util.Transaction;
 
 /**
  * A <code>AdminProxy</code> service provides a TCP service allowing remote
@@ -63,7 +65,7 @@ public class AdminProxy {
   AdminMonitor monitors[] = null;
   ServerSocket listen = null;
 
-  static Logger xlogmon = null;
+  static Logger xlogmon = Debug.getLogger(AdminProxy.class.getName());;
 
   /**
    * Initializes the package as a well known service.
@@ -90,24 +92,17 @@ public class AdminProxy {
       nbm = 1;
     }
 
-    // Get the logging monitor from current server MonologMonitorFactory
-    xlogmon = Debug.getLogger(Debug.A3Service + ".AdminProxy" +
-                              ".#" + AgentServer.getServerId());
-
     if (proxy != null) {
       xlogmon.log(BasicLevel.ERROR,
-                  "AdminProxy#" + AgentServer.getServerId() +
-      ": already initialized.");
-      throw new Exception("AdminProxy" + ".#" + AgentServer.getServerId() +
-      ": already initialized.");
+                  "AdminProxy#" + AgentServer.getServerId() + ": already initialized.");
+      throw new Exception("AdminProxy" + ".#" + AgentServer.getServerId() + ": already initialized.");
     }
 
     try {
       proxy = new AdminProxy();
     } catch (IOException exc) {
       xlogmon.log(BasicLevel.ERROR,
-                  "AdminProxy#" + AgentServer.getServerId() +
-                  ", can't get listen port", exc);
+                  "AdminProxy#" + AgentServer.getServerId() + ", can't get listen port", exc);
       throw exc;
     }
     start();
@@ -136,8 +131,7 @@ public class AdminProxy {
 
     monitors = new AdminMonitor[nbm];
     for (int i=0; i<monitors.length; i++) {
-      monitors[i] = new AdminMonitor("AdminProxy#" +
-                                     AgentServer.getServerId() + '.' + i);
+      monitors[i] = new AdminMonitor("AdminProxy#" + AgentServer.getServerId() + '.' + i, xlogmon);
     }
   }
 
@@ -214,9 +208,8 @@ public class AdminProxy {
     /**
      * Constructor.
      */
-    protected AdminMonitor(String name) {
-      // Get the logging monitor from AdminProxy (overload Daemon setup)
-      super(name, AdminProxy.xlogmon);
+    protected AdminMonitor(String name, Logger logger) {
+      super(name, logger);
       this.setThreadGroup(AgentServer.getThreadGroup());
     }
 
@@ -341,7 +334,7 @@ public class AdminProxy {
 
             try {
               // finds variable
-              Class varClass = Class.forName(varClassName);
+              Class<?> varClass = Class.forName(varClassName);
               Field var = varClass.getDeclaredField(varName);
               // sets variable according to its type
               String varType = var.getType().getName();
@@ -386,7 +379,7 @@ public class AdminProxy {
 
             try {
               // finds variable
-              Class varClass = Class.forName(varClassName);
+              Class<?> varClass = Class.forName(varClassName);
               Field var = varClass.getDeclaredField(varName);
               // get the variable value
               Object value = var.get(null);

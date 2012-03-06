@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -739,7 +739,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
   protected class StartupDaemon extends Daemon {
     /** Constructs a <code>StartupDaemon</code> thread. */
     protected StartupDaemon() {
-      super(agentId.toString() + ":StartupDaemon");
+      super(agentId.toString() + ":StartupDaemon", logger);
       setDaemon(false);
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "StartupDaemon<init> " + agentId);
@@ -890,7 +890,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
 
     /** Constructs a <code>ReconnectionDaemon</code> thread. */
     protected ReconnectionDaemon() {
-      super(agentId.toString() + ":ReconnectionDaemon");
+      super(agentId.toString() + ":ReconnectionDaemon", logger);
       setDaemon(false);
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "ReconnectionDaemon<init> " + agentId);
@@ -982,7 +982,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
 
     /** Constructs a <code>ReceiverDaemon</code> thread. */
     protected ConsumerDaemon() {
-      super(agentId.toString() + ":ConsumerDaemon");
+      super(agentId.toString() + ":ConsumerDaemon", logger);
       setDaemon(false);
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "ConsumerDaemon<init> " + agentId);
@@ -1167,7 +1167,7 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
     
     /** Constructs a <code>XARecoverDaemon</code> thread. */
     protected XARecoverDaemon(XAResource resource) {
-      super(agentId.toString() + ":XARecoverDaemon");
+      super(agentId.toString() + ":XARecoverDaemon", logger);
       this.resource = resource;
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, "XARecoverDaemon<init> " + agentId);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -859,7 +859,7 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
     private boolean force = false;
 
     WatchDog(String name, Logger logmon) {
-      super(name + ".watchdog");
+      super(name + ".watchdog", logmon);
       lock = new Object();
       // Overload logmon definition in Daemon
       this.logmon = logmon;
