@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -168,7 +168,7 @@ public class SimpleNetwork extends StreamNetwork {
     NetworkOutputStream nos = null;
 
     NetServerOut(String name, Logger logmon) {
-      super(name + ".NetServerOut");
+      super(name + ".NetServerOut", logmon);
       // Overload logmon definition in Daemon
       this.logmon = logmon;
       this.setThreadGroup(AgentServer.getThreadGroup());
@@ -396,7 +396,7 @@ public class SimpleNetwork extends StreamNetwork {
     ServerSocket listen = null;
 
     NetServerIn(String name, Logger logmon) throws IOException {
-      super(name + ".NetServerIn");
+      super(name + ".NetServerIn", logmon);
       // Create the listen socket in order to verify the port availability.
       listen = createServerSocket();
       // Overload logmon definition in Daemon

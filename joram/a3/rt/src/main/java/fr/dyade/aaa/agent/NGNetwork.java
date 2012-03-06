@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 - 2005 ScalAgent Distributed Technologies
+ * Copyright (C) 2003 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -244,7 +244,7 @@ public class NGNetwork extends StreamNetwork {
 
   final class Dispatcher extends Daemon {
     Dispatcher(String name, Logger logmon) {
-      super(name + ".dispatcher");
+      super(name + ".dispatcher", logmon);
       // Overload logmon definition in Daemon
       this.logmon = logmon;
     }
@@ -288,7 +288,7 @@ public class NGNetwork extends StreamNetwork {
 
   final class NetServer extends Daemon {
     NetServer(String name, Logger logmon) throws IOException {
-      super(name + ".NetServer");
+      super(name + ".NetServer", logmon);
       // Overload logmon definition in Daemon
       this.logmon = logmon;
 

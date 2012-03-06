@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -22,13 +22,15 @@
  */
 package org.objectweb.joram.client.jms.connection;
 
-import java.net.SocketException;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
+
+import org.objectweb.util.monolog.api.BasicLevel;
+import org.objectweb.util.monolog.api.Logger;
 
 import javax.jms.IllegalStateException;
 import javax.jms.InvalidDestinationException;
@@ -43,8 +45,6 @@ import org.objectweb.joram.shared.client.MomExceptionReply;
 import org.objectweb.joram.shared.client.PingRequest;
 import org.objectweb.joram.shared.client.SessDenyRequest;
 import org.objectweb.joram.shared.excepts.MomException;
-import org.objectweb.util.monolog.api.BasicLevel;
-import org.objectweb.util.monolog.api.Logger;
 
 import fr.dyade.aaa.common.Debug;
 
@@ -437,7 +437,7 @@ public class RequestMultiplexer {
       // The real name is set later when
       // the proxy id and connection id are known
       // see setDemultiplexerDaemonName()
-      super("Connection#?");
+      super("Connection#?", logger);
     }
 
     public void run() {
