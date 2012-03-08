@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -70,11 +70,11 @@ public class AcquisitionModule implements ReliableTransmitter {
       throw new Exception("AcquisitionHandler class not defined: use " + CLASS_NAME
           + " property to chose acquisition class.");
     }
-    Class clazz = Class.forName(className);
+    Class<?> clazz = Class.forName(className);
     boolean isDaemon = false;
     boolean isHandler = false;
     while (clazz != null) {
-      Class[] interfaces = clazz.getInterfaces();
+      Class<?>[] interfaces = clazz.getInterfaces();
       for (int i = 0; i < interfaces.length; i++) {
         if (interfaces[i].equals(AcquisitionDaemon.class)) {
           isDaemon = true;
@@ -152,7 +152,7 @@ public class AcquisitionModule implements ReliableTransmitter {
     this.destination = destination;
 
     try {
-      Class clazz = Class.forName(className);
+      Class<?> clazz = Class.forName(className);
       acquisitionHandler = clazz.newInstance();
 
       if (acquisitionHandler instanceof AcquisitionDaemon) {
