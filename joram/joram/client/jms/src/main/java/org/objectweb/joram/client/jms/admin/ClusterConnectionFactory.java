@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2007 France Telecom
  *
  * This library is free software; you can redistribute it and/or
@@ -202,7 +202,7 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
       strbuf.append("CF#").append(i).append(".class");
       String classname = (String) ref.get(strbuf.toString()).getContent();
       try {
-        Class clazz = Class.forName(classname);
+        Class<?> clazz = Class.forName(classname);
         ConnectionFactory cf = (ConnectionFactory) clazz.newInstance();
         strbuf.setLength(0);
         strbuf.append("CF#").append(i);
@@ -275,7 +275,7 @@ public class ClusterConnectionFactory extends org.objectweb.joram.client.jms.adm
       strbuf.append("CF#").append(i).append(".class");
       String classname = (String) h.get(strbuf.toString());
       try {
-        Class clazz = Class.forName(classname);
+        Class<?> clazz = Class.forName(classname);
         ConnectionFactory cf = (ConnectionFactory) clazz.newInstance();
 
         strbuf.setLength(0);

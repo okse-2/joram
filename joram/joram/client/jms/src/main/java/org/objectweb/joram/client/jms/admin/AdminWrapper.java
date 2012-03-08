@@ -1136,7 +1136,7 @@ public class AdminWrapper {
    * @throws AdminException If the invocation can't be done or fails
    */
   public String invokeStaticServerMethod(int serverId, String className, String methodName,
-      Class[] parameterTypes, Object[] args) throws ConnectException, AdminException {
+      Class<?>[] parameterTypes, Object[] args) throws ConnectException, AdminException {
 
     if (parameterTypes == null && (args != null && args.length > 0)) {
       throw new AdminException("Parameter types array is null while args array is not null or empty.");

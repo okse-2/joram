@@ -1567,8 +1567,10 @@ public final class AdminModule {
    * @throws ConnectException If the connection fails.
    * @throws AdminException If the invocation can't be done or fails
    */
-  public static String invokeStaticServerMethod(String className, String methodName, Class[] parameterTypes,
-      Object[] args) throws ConnectException, AdminException {
+  public static String invokeStaticServerMethod(String className,
+                                                String methodName,
+                                                Class<?>[] parameterTypes,
+                                                Object[] args) throws ConnectException, AdminException {
     return invokeStaticServerMethod(getLocalServerId(), className, methodName, parameterTypes, args);
   }
 
@@ -1587,8 +1589,11 @@ public final class AdminModule {
    * @throws ConnectException If the connection fails.
    * @throws AdminException If the invocation can't be done or fails
    */
-  public static String invokeStaticServerMethod(int serverId, String className, String methodName,
-      Class[] parameterTypes, Object[] args) throws ConnectException, AdminException {
+  public static String invokeStaticServerMethod(int serverId,
+                                                String className,
+                                                String methodName,
+                                                Class<?>[] parameterTypes,
+                                                Object[] args) throws ConnectException, AdminException {
     if (wrapper == null)
       throw new ConnectException("Administration connection is closed.");
 
