@@ -1507,7 +1507,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     } else { // Existing durable subscription...
       cSub = (ClientSubscription) subsTable.get(subName);
 
-      if (cSub.getActive())
+      if (cSub.getActive() > 0)
         throw new StateException("The durable subscription " + subName + " has already been activated.");
 
       // Updated topic: updating the subscription to the previous topic.
@@ -1690,16 +1690,16 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     ConsumerMessages consM = sub.deliver();
 
     if (consM != null && req.getReceiveAck()) {
+      // Immediate acknowledge
       Vector messageList = consM.getMessages();
       for (int i = 0; i < messageList.size(); i++) {
-        Message msg = (Message)messageList.elementAt(i);
+        Message msg = (Message) messageList.elementAt(i);
         sub.acknowledge(msg.getId());
       }
     }
 
-    // Nothing to deliver but immediate delivery request: building an empty
-    // reply.
     if (consM == null && req.getTimeToLive() == -1) {
+      // Nothing to deliver but immediate delivery request: building an empty reply.
       if (logger.isLoggable(BasicLevel.DEBUG))
         logger.log(BasicLevel.DEBUG, " -> immediate delivery");
       sub.unsetReceiver();
@@ -1822,7 +1822,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       if (sub == null)
         return;
 
-      Vector ids = new Vector();
+      Vector<String> ids = new Vector<String>();
       ids.add(req.getId());
       sub.deny(ids.iterator());
 
@@ -1935,8 +1935,8 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     String subName;
     ClientSubscription sub;
     ConsumerMessages consM;
-    for (Enumeration subs = req.getSubs(); subs.hasMoreElements();) {
-      subName = (String) subs.nextElement();
+    for (Enumeration<String> subs = req.getSubs(); subs.hasMoreElements();) {
+      subName = subs.nextElement();
       sub = (ClientSubscription) subsTable.get(subName);
       if (sub != null) {
         sub.deny(req.getSubIds(subName).iterator());
@@ -2209,6 +2209,23 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
     String subName = req.getTarget();
     ClientSubscription sub = (ClientSubscription) subsTable.get(subName);
     sub.setActive(req.getActivate());
+
+    if (sub.getActive() > 0 ) {
+      ConsumerMessages consM = sub.deliver();
+      
+      if (consM != null) {
+        try {
+          setCtx(sub.getContextId());
+          if (activeCtx.getActivated())
+            doReply(consM);
+          else
+            activeCtx.addPendingDelivery(consM);
+        } catch (StateException pE) {
+          // The context is lost: nothing to do.
+        }
+      }
+    }
+
   }
   
   private void doReact(int key, CommitRequest req) {
@@ -2482,7 +2499,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       if (sub == null) continue;
 
       // If the subscription is active, launching a delivery sequence.
-      if (sub.getActive()) {
+      if (sub.getActive() > 0 ) {
         ConsumerMessages consM = sub.deliver();
         
         if (consM != null) {

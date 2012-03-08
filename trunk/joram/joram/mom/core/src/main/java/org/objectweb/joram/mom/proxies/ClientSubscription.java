@@ -144,8 +144,9 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    */
   private transient boolean noFiltering;
 
-  /** <code>true</code> if the subscription is active. */
-  private transient boolean active;
+  /** Give the maximum number of messages per request if the subscription is active,
+   * 0 if the subscription is passive. */
+  private transient int active;
   /**
    * Identifier of the request requesting messages, either the listener's
    * request, or a "receive" request.
@@ -170,6 +171,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   /** the number of delivered messages */
   protected long nbMsgsDeliveredSinceCreation = 0;
 
+  private int DEFAULT_MAX_NUMBER_OF_MSG_PER_REQUEST = 100;
+  
   /**
    * Constructs a <code>ClientSubscription</code> instance.
    *
@@ -217,7 +220,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
 
     noFiltering = (! noLocal) && (selector == null || selector.equals(""));
 
-    active = true;
+    active = DEFAULT_MAX_NUMBER_OF_MSG_PER_REQUEST;
     requestId = -1;
     toListener = false;
 
@@ -291,7 +294,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   }
 
   /** Returns <code>true</code> if the subscription is active. */
-  public boolean getActive() {
+  public int getActive() {
     return active;
   }
 
@@ -391,7 +394,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
 
     noFiltering = (! noLocal) && (selector == null || selector.equals(""));
 
-    active = true;
+    active = DEFAULT_MAX_NUMBER_OF_MSG_PER_REQUEST;
     requestId = -1;
     toListener = false;
     
@@ -409,7 +412,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
 
     unsetListener();
     unsetReceiver();
-    active = false;
+    active = 0;
    
     // Denying all delivered messages:
     deny(deliveredIds.keySet().iterator(), false);
@@ -422,7 +425,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
       logger.log(BasicLevel.DEBUG, this + ": deactivated.");
   }
 
-  void setActive(boolean active) {
+  void setActive(int active) {
     this.active = active;
   }
 
@@ -539,8 +542,8 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    */
   ConsumerMessages deliver() {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "ClientSubscription[" + proxyId + ',' + topicId + ',' + name
-          + "].deliver()");
+      logger.log(BasicLevel.DEBUG,
+                 "ClientSubscription[" + proxyId + ',' + topicId + ',' + name + "].deliver()");
 
     // Returning null if no request exists:
     if (requestId == -1)
@@ -549,8 +552,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
      // Returning null if a "receive" request has expired:
     if (!toListener && requestExpTime > 0 && System.currentTimeMillis() >= requestExpTime) {
       if (logger.isLoggable(BasicLevel.DEBUG))
-        logger.log(BasicLevel.DEBUG, this + ": receive request " + requestId
-            + " expired.");
+        logger.log(BasicLevel.DEBUG, this + ": receive request " + requestId + " expired.");
       requestId = -1;
       requestExpTime = 0;
       return null;
@@ -566,7 +568,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     DMQManager dmqManager = null;
 
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, " -> messageIds.size() = " + messageIds.size());
+      logger.log(BasicLevel.DEBUG, "deliver -> messageIds.size() = " + messageIds.size());
     
     // Delivering to a listener.
     if (toListener) {
@@ -576,10 +578,10 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
         save();
         message = (Message) messagesTable.get(id);
 
-        // Message still exists.
         if (message != null) {
-          // Delivering it if valid.
+          // Message still exists.
           if (message.isValid(System.currentTimeMillis())) {
+            // Delivering it if valid.
             deliveredIds.put(id, id);
 
             // Setting the message's deliveryCount and denied fields.
@@ -597,8 +599,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
             else {
               insertionIndex = 0;
               while (insertionIndex < deliverables.size()) {
-                prior =
-                  ((Message) deliverables.get(insertionIndex)).getPriority();
+                prior = ((Message) deliverables.get(insertionIndex)).getPriority();
                 if (prior >= message.getPriority())
                   insertionIndex++;
                 else
@@ -767,7 +768,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
   /**
    * Denies messages.
    */
-  void deny(Iterator denies) {
+  void deny(Iterator<String> denies) {
     deny(denies, true);
   }
 
@@ -779,7 +780,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
    *          when denies iterates over deliveredIds map keys, to avoid a
    *          ConcurrentModificationException.
    */
-  private void deny(Iterator denies, boolean remove) {
+  private void deny(Iterator<String> denies, boolean remove) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, this + ".deny(" + denies + ')');
     String id;
@@ -1012,7 +1013,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     subRequestId = in.readInt();
     noLocal = in.readBoolean();
     noFiltering = in.readBoolean();
-    active = in.readBoolean();
+    active = in.readInt();
     requestId = in.readInt();
     toListener = in.readBoolean();
     requestExpTime = in.readLong();
@@ -1027,7 +1028,7 @@ class ClientSubscription implements ClientSubscriptionMBean, Serializable {
     out.writeInt(subRequestId);
     out.writeBoolean(noLocal);
     out.writeBoolean(noFiltering);
-    out.writeBoolean(active);
+    out.writeInt(active);
     out.writeInt(requestId);
     out.writeBoolean(toListener);
     out.writeLong(requestExpTime);
