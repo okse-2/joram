@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -631,12 +631,10 @@ public abstract class Agent implements AgentMBean, Serializable {
    * @param role  the destination <code>MultiplRole</code>.
    * @param not   the notification to send.
    */
-  protected final void
-  sendTo(RoleMultiple role, Notification not) {
+  protected final void sendTo(RoleMultiple role, Notification not) {
     if (role == null) return;
-    Enumeration to = role.getListeners();
-    if (to == null)
-      return;
+    Enumeration<AgentId> to = role.getListeners();
+    if (to == null) return;
     while (to.hasMoreElements())
       sendTo((AgentId) to.nextElement(), not);
   }

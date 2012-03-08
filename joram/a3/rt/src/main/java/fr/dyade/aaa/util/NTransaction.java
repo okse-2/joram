@@ -520,7 +520,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
   private final byte[] getFromLog(String dirName, String name) throws IOException {
     // First searches in the logs a new value for the object.
     Object key = OperationKey.newKey(dirName, name);
-    byte[] buf = getFromLog(((Context) perThreadContext.get()).getLog(), key);
+    byte[] buf = getFromLog(perThreadContext.get().getLog(), key);
     if (buf != null) return buf;
     
     if ((buf = getFromLog(logFile.log, key)) != null) {
@@ -558,9 +558,9 @@ public final class NTransaction extends AbstractTransaction implements NTransact
 
     Object key = OperationKey.newKey(dirName, name);
 
-    Hashtable log = ((Context) perThreadContext.get()).getLog();
+    Hashtable<Object, Operation> log = perThreadContext.get().getLog();
     Operation op = Operation.alloc(Operation.DELETE, dirName, name);
-    Operation old = (Operation) log.put(key, op);
+    Operation old = log.put(key, op);
     if (old != null) {
       if (old.type == Operation.CREATE) op.type = Operation.NOOP;
       old.free();
@@ -574,7 +574,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG, "NTransaction, commit(" + release + ')');
     
-    Hashtable log = ((Context) perThreadContext.get()).getLog();
+    Hashtable<Object, Operation> log = perThreadContext.get().getLog();
     if (! log.isEmpty()) {
       logFile.commit(log);
       log.clear();
@@ -689,7 +689,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
     /**
      * Log of all operations already committed but not reported on disk.
      */
-    Hashtable log = null;
+    Hashtable<Object, Operation> log = null;
     /** log file */
     RandomAccessFile logFile = null; 
 
@@ -763,7 +763,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
       else
         mode = "rw";
       
-      log = new Hashtable(LogMemoryCapacity);
+      log = new Hashtable<Object, Operation>(LogMemoryCapacity);
 
       //  Search for old log file, then apply all committed operation,
       // finally cleans it.
@@ -798,12 +798,12 @@ public final class NTransaction extends AbstractTransaction implements NTransact
                 byte buf[] = new byte[logFile.readInt()];
                 logFile.readFully(buf);
                 op = Operation.alloc(optype, dirName, name, buf);
-                Operation old = (Operation) log.put(key, op);
+                Operation old = log.put(key, op);
                 if (old != null) old.free();
               } else {
                 // Operation.DELETE
                 op = Operation.alloc(optype, dirName, name);
-                Operation old = (Operation) log.put(key, op);
+                Operation old = log.put(key, op);
                 if (old != null) {
                   if (old.type == Operation.CREATE) op.type = Operation.NOOP;
                   old.free();
@@ -881,15 +881,15 @@ public final class NTransaction extends AbstractTransaction implements NTransact
     /**
      * Reports all buffered operations in logs.
      */
-    void commit(Hashtable ctxlog) throws IOException {
+    void commit(Hashtable<Object, Operation> ctxlog) throws IOException {
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG, "NTransaction.LogFile.commit()");
 
       commitCount += 1;
       
       Operation op = null;
-      for (Enumeration e = ctxlog.elements(); e.hasMoreElements(); ) {
-        op = (Operation) e.nextElement();
+      for (Enumeration<Operation> e = ctxlog.elements(); e.hasMoreElements(); ) {
+        op = e.nextElement();
         if (op.type == Operation.NOOP) continue;
 
 //      if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -958,8 +958,8 @@ public final class NTransaction extends AbstractTransaction implements NTransact
       garbageCount += 1;
 
       Operation op = null;
-      for (Enumeration e = log.elements(); e.hasMoreElements(); ) {
-        op = (Operation) e.nextElement();
+      for (Enumeration<Operation> e = log.elements(); e.hasMoreElements(); ) {
+        op = e.nextElement();
 
         if ((op.type == Operation.SAVE) || (op.type == Operation.CREATE)) {
           if (logmon.isLoggable(BasicLevel.DEBUG))

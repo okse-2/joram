@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2007 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -35,15 +35,11 @@ import java.util.Vector;
  * The class does not handle duplicates in the list.
  */
 public class RoleMultiple implements Serializable {
-
-
-
-  /**
-   * 
-   */
+  /** Define serialVersionUID for interoperability. */
   private static final long serialVersionUID = 1L;
+  
   private String name;
-  private Vector list = null;
+  private Vector<AgentId> list = null;
 
   public RoleMultiple() {}
 
@@ -60,7 +56,7 @@ public class RoleMultiple implements Serializable {
    */
   public void addListener(AgentId target) {
     if (list == null)
-      list = new Vector();
+      list = new Vector<AgentId>();
     list.addElement(target);
   }
 
@@ -73,8 +69,8 @@ public class RoleMultiple implements Serializable {
     for (int i = list.size(); i-- > 0;) {
       AgentId id = (AgentId) list.elementAt(i);
       if (target.equals(id)) {
-	list.removeElement(id);
-	break;
+        list.removeElement(id);
+        break;
       }
     }
   }
@@ -85,7 +81,7 @@ public class RoleMultiple implements Serializable {
    * There is no synchronization as we assume this object is manipulated
    * from the enclosing agent reaction.
    */
-  public Enumeration getListeners() {
+  public Enumeration<AgentId> getListeners() {
     if (list == null)
       return null;
     return list.elements();

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002 - 2008 ScalAgent Distributed Technologies 
+ * Copyright (C) 2002 - 2012 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -372,7 +372,7 @@ public class A3CML {
                                         AgentServer.DEFAULT_CFG_NAME);
     String wrpCName = System.getProperty(AgentServer.A3CMLWRP_PROPERTY, 
                                          AgentServer.DEFAULT_A3CMLWRP);
-    Class wrpClass = Class.forName(wrpCName);
+    Class<?> wrpClass = Class.forName(wrpCName);
 
     A3CMLWrapper wrapper = (A3CMLWrapper) wrpClass.newInstance();
     A3CMLConfig a3config = null;

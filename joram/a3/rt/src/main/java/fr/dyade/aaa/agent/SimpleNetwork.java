@@ -180,7 +180,7 @@ public class SimpleNetwork extends StreamNetwork {
 
     public void run() {
       Message msg = null;
-      Set servers = new HashSet();
+      Set<ServerDesc> servers = new HashSet<ServerDesc>();
       try {
         try {
           nos = new NetworkOutputStream();

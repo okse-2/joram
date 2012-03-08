@@ -354,12 +354,12 @@ public class NGNetwork extends StreamNetwork {
 
           // Get list of selection keys with pending events, then process
           // each key
-          Set keys = selector.selectedKeys();
-          for(Iterator it = keys.iterator(); it.hasNext(); ) {
+          Set<SelectionKey> keys = selector.selectedKeys();
+          for(Iterator<SelectionKey> it = keys.iterator(); it.hasNext(); ) {
             if (! running) break;
 
             // Get the selection key
-            SelectionKey key = (SelectionKey) it.next();
+            SelectionKey key = it.next();
             // Remove it from the list to indicate that it is being processed
             it.remove();
 
@@ -368,11 +368,7 @@ public class NGNetwork extends StreamNetwork {
                          getName() + "(1): " + key + " -> " + key.interestOps());
 
             logmon.log(BasicLevel.DEBUG,
-                       getName() + ":" +
-                       key.isValid() +
-                       key.isAcceptable() +
-                       key.isReadable() +
-                       key.isWritable());
+                       getName() + ":" + key.isValid() + key.isAcceptable() + key.isReadable() + key.isWritable());
             try {
               // Check if it's a connection request
               if (key.isAcceptable()) {

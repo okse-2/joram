@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies 
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,15 +32,15 @@ public class A3CMLCluster implements Serializable {
   public short sid = -1;
   public String name = null;
   public String jvmArgs = null;
-  public Hashtable servers = null;
-  public Hashtable properties = null;
+  public Hashtable<Short, A3CMLServer> servers = null;
+  public Hashtable<String, A3CMLProperty> properties = null;
 
   public A3CMLCluster(short sid,
                       String name) throws Exception {
     this.sid = sid;
     this.name = name;
-    this.properties = new Hashtable();
-    this.servers = new Hashtable();
+    this.properties = new Hashtable<String, A3CMLProperty>();
+    this.servers = new Hashtable<Short, A3CMLServer>();
   }
 
   /**
@@ -108,8 +108,8 @@ public class A3CMLCluster implements Serializable {
    * 		 	If the server does not exist.
    */
   public short getServerIdByName(String name) throws UnknownServerException {
-    for (Enumeration s = servers.elements(); s.hasMoreElements(); ) {
-      A3CMLServer server = (A3CMLServer) s.nextElement();
+    for (Enumeration<A3CMLServer> s = servers.elements(); s.hasMoreElements(); ) {
+      A3CMLServer server = s.nextElement();
       if (server.name.equals(name)) return server.sid;
     }
     throw new UnknownServerException("Unknown server " + name);
@@ -154,8 +154,8 @@ public class A3CMLCluster implements Serializable {
    * 		 	If the server does not exist.
    */
   public final A3CMLServer getServer(String name) throws UnknownServerException {
-    for (Enumeration s = servers.elements(); s.hasMoreElements(); ) {
-      A3CMLServer server = (A3CMLServer) s.nextElement();
+    for (Enumeration<A3CMLServer> s = servers.elements(); s.hasMoreElements(); ) {
+      A3CMLServer server = s.nextElement();
       if (server.name.equals(name)) return server;
     }
     throw new UnknownServerException("Unknown server id for server " + name);

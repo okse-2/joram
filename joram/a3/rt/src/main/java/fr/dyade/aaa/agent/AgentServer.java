@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Properties;
 import java.util.Timer;
 
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -48,8 +47,6 @@ import fr.dyade.aaa.agent.conf.A3CMLProperty;
 import fr.dyade.aaa.agent.conf.A3CMLServer;
 import fr.dyade.aaa.agent.conf.A3CMLService;
 import fr.dyade.aaa.common.Configuration;
-import fr.dyade.aaa.common.monitoring.FileMonitoringTimerTask;
-import fr.dyade.aaa.common.monitoring.LogMonitoringTimerTask;
 import fr.dyade.aaa.common.monitoring.MonitoringTimerTask;
 import fr.dyade.aaa.util.Transaction;
 import fr.dyade.aaa.util.management.MXWrapper;
@@ -314,7 +311,7 @@ public final class AgentServer {
    * Static references to all messages consumers initialized in this
    * agent server (including <code>Engine</code>).
    */
-  private static Hashtable consumers = null;
+  private static Hashtable<String, MessageConsumer> consumers = null;
 
   public static void addConsumer(String domain, MessageConsumer cons) throws Exception {
     if (consumers.containsKey(domain))
@@ -329,7 +326,7 @@ public final class AgentServer {
     }
   }
 
-  static Enumeration getConsumers() {
+  static Enumeration<MessageConsumer> getConsumers() {
     if (consumers == null)
       return null;
     return consumers.elements();
@@ -545,11 +542,11 @@ public final class AgentServer {
     return servers.remove(sid);
   }
 
-  public static Enumeration elementsServerDesc() {
+  public static Enumeration<ServerDesc> elementsServerDesc() {
     return servers.elements();
   }
 
-  public static Enumeration getServersIds() {
+  public static Enumeration<Short> getServersIds() {
     return servers.keys();
   }
 
@@ -669,9 +666,8 @@ public final class AgentServer {
     // Creates all the local MessageConsumer.
     createConsumers(root);
     
-    for (Enumeration s = getConfig().servers.elements();
-         s.hasMoreElements();) {
-      A3CMLServer server = (A3CMLServer) s.nextElement();
+    for (Enumeration<A3CMLServer> s = getConfig().servers.elements(); s.hasMoreElements();) {
+      A3CMLServer server = s.nextElement();
       if (server.sid == root.sid) continue;
 
       ServerDesc desc = createServerDesc(server);
@@ -679,13 +675,11 @@ public final class AgentServer {
     }
 
     // for clusters
-    for (Enumeration c = getConfig().clusters.elements();
-         c.hasMoreElements();) {
-      A3CMLCluster cluster = (A3CMLCluster) c.nextElement();
+    for (Enumeration<A3CMLCluster> c = getConfig().clusters.elements(); c.hasMoreElements();) {
+      A3CMLCluster cluster = c.nextElement();
 
-      for (Enumeration s = cluster.servers.elements();
-           s.hasMoreElements();) {
-        A3CMLServer server = (A3CMLServer) s.nextElement();
+      for (Enumeration<A3CMLServer> s = cluster.servers.elements(); s.hasMoreElements();) {
+        A3CMLServer server = s.nextElement();
         if (server.sid == root.sid) continue;
 
         ServerDesc desc = servers.get(server.sid);
@@ -716,7 +710,7 @@ public final class AgentServer {
   }
 
   private static void createConsumers(A3CMLServer root) throws Exception {
-    consumers = new Hashtable();
+    consumers = new Hashtable<String, MessageConsumer>();
 
     // Creates the local MessageConsumer: the Engine.
     engine = Engine.newInstance();
@@ -734,8 +728,8 @@ public final class AgentServer {
     }
 
     // Search all directly accessible domains.
-    for (Enumeration n = root.networks.elements(); n.hasMoreElements();) {
-      A3CMLNetwork network = (A3CMLNetwork) n.nextElement();
+    for (Enumeration<A3CMLNetwork> n = root.networks.elements(); n.hasMoreElements();) {
+      A3CMLNetwork network = n.nextElement();
 
       A3CMLDomain domain = getConfig().getDomain(network.domain);
       // Creates the corresponding MessageConsumer.
@@ -800,9 +794,8 @@ public final class AgentServer {
     if (server.services != null) {
       ServiceDesc services[]  = new ServiceDesc[server.services.size()];
       int idx = 0;
-      for (Enumeration x = server.services.elements();
-           x.hasMoreElements();) {
-        A3CMLService service = (A3CMLService) x.nextElement();
+      for (Enumeration<A3CMLService> x = server.services.elements(); x.hasMoreElements();) {
+        A3CMLService service = x.nextElement();
         services[idx++] = new ServiceDesc(service.classname, service.args);
       }
       desc.services = services;
@@ -814,8 +807,8 @@ public final class AgentServer {
 
     // add global properties
     if (a3config.properties != null) {
-      for (Enumeration e = a3config.properties.elements(); e.hasMoreElements();) {
-        A3CMLProperty p = (A3CMLProperty) e.nextElement();
+      for (Enumeration<A3CMLProperty> e = a3config.properties.elements(); e.hasMoreElements();) {
+        A3CMLProperty p = e.nextElement();
         Configuration.putProperty(p.name, p.value);
 
         if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -833,9 +826,9 @@ public final class AgentServer {
       if (cluster != null 
           && cluster.properties != null 
           && cluster.properties.size() > 0) {
-        Enumeration e = cluster.properties.elements();
+        Enumeration<A3CMLProperty> e = cluster.properties.elements();
         do {
-          A3CMLProperty p = (A3CMLProperty) e.nextElement();
+          A3CMLProperty p = e.nextElement();
           Configuration.putProperty(p.name, p.value);
 
           if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -852,9 +845,9 @@ public final class AgentServer {
 
     // add server properties
     if (server != null && server.properties != null) {
-      Enumeration e = server.properties.elements();
+      Enumeration<A3CMLProperty> e = server.properties.elements();
       do {
-        A3CMLProperty p = (A3CMLProperty) e.nextElement();
+        A3CMLProperty p = e.nextElement();
         Configuration.putProperty(p.name, p.value);
 
         if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -957,10 +950,10 @@ public final class AgentServer {
     }
 
     // Remove all consumers Mbean
-    Enumeration e = getConsumers();
+    Enumeration<MessageConsumer> e = getConsumers();
     if (e != null) {
       for (; e.hasMoreElements();) {
-        MessageConsumer cons = (MessageConsumer) e.nextElement();
+        MessageConsumer cons = e.nextElement();
         try {
           MXWrapper.unregisterMBean("AgentServer", "server=" + getName() + ",cons=" + cons.getName());
         } catch (Exception exc) {
@@ -1093,8 +1086,7 @@ public final class AgentServer {
           try {
             dis = new DataInputStream(new FileInputStream(tfc));
             String tname = dis.readUTF();
-            Class tclass = Class.forName(tname);
-            transaction = (Transaction) tclass.newInstance();
+            transaction = (Transaction) Class.forName(tname).newInstance();
           } catch (Exception exc) {
             logmon.log(BasicLevel.FATAL, getName() + ", can't instantiate transaction manager", exc);
             throw new Exception("Can't instantiate transaction manager");
@@ -1342,8 +1334,8 @@ public final class AgentServer {
 
     // Now we can start all networks.
     if (consumers != null) {
-      for (Enumeration c=AgentServer.getConsumers(); c.hasMoreElements(); ) {
-        MessageConsumer cons = (MessageConsumer) c.nextElement();
+      for (Enumeration<MessageConsumer> c=AgentServer.getConsumers(); c.hasMoreElements(); ) {
+        MessageConsumer cons = c.nextElement();
         if (cons != null) {
           try {
             if (! (cons instanceof Engine)) {
@@ -1400,8 +1392,8 @@ public final class AgentServer {
 
       // Now we can start all message consumers.
       if (consumers != null) {
-        for (Enumeration c=AgentServer.getConsumers(); c.hasMoreElements(); ) {
-          MessageConsumer cons = (MessageConsumer) c.nextElement();
+        for (Enumeration<MessageConsumer> c=AgentServer.getConsumers(); c.hasMoreElements(); ) {
+          MessageConsumer cons = c.nextElement();
           if (cons != null) {
             try {
               if ((jgroups == null) || (cons instanceof Engine)) {
@@ -1556,8 +1548,8 @@ public final class AgentServer {
 
       // Stop all message consumers.
       if (consumers != null) {
-        for (Enumeration c=AgentServer.getConsumers(); c.hasMoreElements(); ) {
-          MessageConsumer cons = (MessageConsumer) c.nextElement();
+        for (Enumeration<MessageConsumer> c=AgentServer.getConsumers(); c.hasMoreElements(); ) {
+          MessageConsumer cons = c.nextElement();
           if (cons != null) {
             if (logmon.isLoggable(BasicLevel.DEBUG))
               logmon.log(BasicLevel.DEBUG,
