@@ -99,7 +99,7 @@ abstract class MessageConsumerListener implements ReplyListener {
 
   private int status;
 
-  private Vector messagesToAck;
+  private Vector<String> messagesToAck;
   
   /**
    * The number of messages which are in queue (Session.qin)
@@ -160,7 +160,7 @@ abstract class MessageConsumerListener implements ReplyListener {
     this.topicPassivationThreshold = topicPassivationThreshold;
     this.topicAckBufferMax = topicAckBufferMax;
     rm = reqMultiplexer;
-    messagesToAck = new Vector(0);
+    messagesToAck = new Vector<String>(0);
     requestId = -1;
     messageCount = 0;
     topicMsgInputPassivated = false;
@@ -428,13 +428,11 @@ abstract class MessageConsumerListener implements ReplyListener {
     return targetName;
   }
 
-  
-  protected void activateListener(
-      Message msg, MessageListener listener, int ackMode) 
-    throws JMSException {
+  protected void activateListener(Message msg,
+                                  MessageListener listener,
+                                  int ackMode) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG,
-                 "MessageConsumerListener.onMessage(" +  msg + ')');
+      logger.log(BasicLevel.DEBUG, "MessageConsumerListener.onMessage(" +  msg + ')');
     
     // Consume one message
     decreaseMessageCount(ackMode);
@@ -454,26 +452,27 @@ abstract class MessageConsumerListener implements ReplyListener {
     } 
   }
   
-  public abstract void onMessage(
-      Message msg, MessageListener listener, int ackMode) 
-    throws JMSException;
+  public abstract void onMessage(Message msg,
+                                 MessageListener listener,
+                                 int ackMode) throws JMSException;
   
   /**
-   * Called by Session (standard JMS, mono-threaded
+   * Called by Session (standard JMS, mono-threaded)
    */
   public void onMessage(Message msg, int ackMode) throws JMSException {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "MessageConsumerListener.onMessage(" + msg + ')');
+    
     if (listener != null) {
-        synchronized (this) {
-          if (status == Status.RUN) {
-            setStatus(Status.ON_MSG);
-          } else {
-            // Notify threads trying to close the listener.
+      synchronized (this) {
+        if (status == Status.RUN) {
+          setStatus(Status.ON_MSG);
+        } else {
+          // Notify threads trying to close the listener.
           notifyAll();
-            throw new javax.jms.IllegalStateException("Message listener closed");
-          }
+          throw new javax.jms.IllegalStateException("Message listener closed");
         }
+      }
 
       try {
         activateListener(msg, listener, ackMode);
@@ -508,12 +507,11 @@ abstract class MessageConsumerListener implements ReplyListener {
   }
 
   void activateMessageInput() throws JMSException {
-    rm.sendRequest(
-      new ActivateConsumerRequest(targetName, true));
+    rm.sendRequest(new ActivateConsumerRequest(targetName,
+                                               topicPassivationThreshold - topicActivationThreshold));
   }
 
   void passivateMessageInput() throws JMSException {
-    rm.sendRequest(
-      new ActivateConsumerRequest(targetName, false));
+    rm.sendRequest(new ActivateConsumerRequest(targetName, 0));
   }
 }

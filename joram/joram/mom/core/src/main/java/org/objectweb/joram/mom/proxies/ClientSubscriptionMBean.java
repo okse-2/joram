@@ -81,9 +81,10 @@ public interface ClientSubscriptionMBean {
   public boolean getDurable();
 
   /**
-   * Returns <code>true</code> if the subscription is active.
+   * Returns the maximum number of messages per request if the subscription is active,
+   * 0 if the subscription is inactive.
    */
-  public boolean getActive();
+  public int getActive();
   
   /**
    * Returns the threshold above which messages are considered undeliverable
