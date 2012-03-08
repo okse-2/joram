@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2006 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -817,8 +817,8 @@ public final class JoramAdapter implements ResourceAdapter, JoramAdapterMBean, E
 
     boolean transacted = false;
     try {
-      Class listenerClass = Class.forName("javax.jms.MessageListener");
-      Class[] parameters = { Class.forName("javax.jms.Message") };
+      Class<?> listenerClass = Class.forName("javax.jms.MessageListener");
+      Class<?>[] parameters = { Class.forName("javax.jms.Message") };
       Method meth = listenerClass.getMethod("onMessage", parameters);
       transacted = endpointFactory.isDeliveryTransacted(meth);
     } catch (Exception exc) {
