@@ -30,7 +30,7 @@ public interface MXServer {
   
   public Object getAttribute(String objectName, String attribute) throws Exception;
     
-  public List getAttributeNames(String objectName) throws Exception;
+  public List<String> getAttributeNames(String objectName) throws Exception;
   
-  public Set queryNames(String objectName) throws Exception;
+  public Set<String> queryNames(String objectName) throws Exception;
 }
