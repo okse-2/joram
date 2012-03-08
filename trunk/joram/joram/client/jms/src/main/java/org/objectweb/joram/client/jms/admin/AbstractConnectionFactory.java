@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2007 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2007 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2007 France Telecom R&D
  *
  * This library is free software; you can redistribute it and/or
@@ -122,7 +122,7 @@ public abstract class AbstractConnectionFactory extends AdministeredObject {
       if (!isSetIdentityClassName) {
         identityClassName = System.getProperty("org.objectweb.joram.Identity", SimpleIdentity.class.getName());
       }
-      Class clazz = Class.forName(identityClassName);
+      Class<?> clazz = Class.forName(identityClassName);
       identity = (Identity) clazz.newInstance();
       identity.setIdentity(user, passwd);
       if (logger.isLoggable(BasicLevel.DEBUG))

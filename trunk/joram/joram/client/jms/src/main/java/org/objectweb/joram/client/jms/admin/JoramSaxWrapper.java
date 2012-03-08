@@ -829,8 +829,8 @@ public class JoramSaxWrapper extends DefaultHandler {
           identityClass = null;
         } else if (rawName.equals(ELT_TCP)) {
           try {
-            Class clazz = Class.forName(className);
-            Class [] classParams = {new String().getClass(),
+            Class<?> clazz = Class.forName(className);
+            Class<?>[] classParams = {new String().getClass(),
                                     Integer.TYPE,
                                     new String().getClass()};
             Method methode = clazz.getMethod("create", classParams);
@@ -843,7 +843,7 @@ public class JoramSaxWrapper extends DefaultHandler {
           }
         } else if (rawName.equals(ELT_LOCAL)) {
           try {
-            Class clazz = Class.forName(className);
+            Class<?> clazz = Class.forName(className);
             Method methode = clazz.getMethod("create", new Class[0]);
             obj = methode.invoke(null, new Object[0]);
           } catch (Throwable exc) {
@@ -853,8 +853,8 @@ public class JoramSaxWrapper extends DefaultHandler {
           }
         } else if (rawName.equals(ELT_HATCP)) {
           try {
-            Class clazz = Class.forName(className);
-            Class [] classParams = {new String().getClass(),
+            Class<?> clazz = Class.forName(className);
+            Class<?>[] classParams = {new String().getClass(),
                                     new String().getClass()};
             Method methode = clazz.getMethod("create",classParams);
             Object[] objParams = {url,reliableClass};
@@ -866,7 +866,7 @@ public class JoramSaxWrapper extends DefaultHandler {
           }
         } else if (rawName.equals(ELT_HALOCAL)) {
           try {
-            Class clazz = Class.forName(className);
+            Class<?> clazz = Class.forName(className);
             Method methode = clazz.getMethod("create", new Class[0]);
             obj = methode.invoke(null, new Object[0]);
           } catch (Throwable exc) {
@@ -876,8 +876,8 @@ public class JoramSaxWrapper extends DefaultHandler {
           }
         } else if (rawName.equals(ELT_SOAP)) {
           try {
-            Class clazz = Class.forName(className);
-            Class [] classParams = {new String().getClass(),
+            Class<?> clazz = Class.forName(className);
+            Class<?>[] classParams = {new String().getClass(),
                                     Integer.TYPE,
                                     Integer.TYPE};
             Method methode = clazz.getMethod("create", classParams);
