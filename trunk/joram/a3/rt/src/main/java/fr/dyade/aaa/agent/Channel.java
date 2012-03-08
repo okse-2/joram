@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -44,7 +44,7 @@ public class Channel {
    */
   static Channel newInstance() throws Exception {
     String cname = AgentServer.getProperty("Channel", "fr.dyade.aaa.agent.Channel");
-    Class cclass = Class.forName(cname);
+    Class<?> cclass = Class.forName(cname);
     channel = (Channel) cclass.newInstance();
     return channel;
   }
@@ -56,14 +56,14 @@ public class Channel {
    * subclasses).
    */
   protected Channel() {
-    consumers = new Vector();
+    consumers = new Vector<MessageConsumer>();
 
     // Get the logging monitor from current server MonologLoggerFactory
     logmon = Debug.getLogger(Debug.A3Engine + ".#" + AgentServer.getServerId());
     logmon.log(BasicLevel.DEBUG, toString() + " created.");
   }
 
-  static Vector consumers = null;
+  static Vector<MessageConsumer> consumers = null;
 
   /**
    * Sends a notification to an agent. It may be used anywhere,

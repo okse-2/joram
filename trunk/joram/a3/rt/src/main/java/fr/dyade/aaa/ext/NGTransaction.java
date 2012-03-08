@@ -422,7 +422,7 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
   private final synchronized byte[] getFromLog(String dirName, String name) throws IOException {
     // First searches in the current transaction log a new value for the object.
     Object key = OperationKey.newKey(dirName, name);
-    byte[] buf = getFromLog(((Context) perThreadContext.get()).getLog(), key);
+    byte[] buf = getFromLog(perThreadContext.get().getLog(), key);
     if (buf != null) return buf;
     
     // Then search in the log files and repository.
@@ -454,9 +454,9 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
 
     Object key = OperationKey.newKey(dirName, name);
 
-    Hashtable log = ((Context) perThreadContext.get()).getLog();
+    Hashtable<Object, Operation> log = perThreadContext.get().getLog();
     Operation op = Operation.alloc(Operation.DELETE, dirName, name);
-    Operation old = (Operation) log.put(key, op);
+    Operation old = log.put(key, op);
     if (old != null) {
       if (old.type == Operation.CREATE) op.type = Operation.NOOP;
       old.free();
@@ -473,7 +473,7 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
     // TODO (AF): Only the call to logManager.commit and the phase change needs to
     // be synchronized..
     
-    Hashtable log = ((Context) perThreadContext.get()).getLog();
+    Hashtable<Object, Operation> log = perThreadContext.get().getLog();
     if (! log.isEmpty()) {
       logManager.commit(log);
       log.clear();

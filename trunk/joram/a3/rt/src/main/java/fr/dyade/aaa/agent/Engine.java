@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -125,7 +125,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   /** This table is used to maintain a list of agents already in memory
    * using the AgentId as primary key.
    */
-  Hashtable agents;
+  Hashtable<AgentId, Agent> agents;
   /** Virtual time counter use in FIFO swap-in/swap-out mechanisms. */
   long now = 0;
   /** Maximum number of memory loaded agents. */
@@ -187,7 +187,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   }
 
   /** Vector containing id's of all fixed agents. */
-  Vector fixedAgentIdList = null;
+  Vector<AgentId> fixedAgentIdList = null;
 
   /**
    * Returns the number of fixed agents.
@@ -267,7 +267,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     String cname = "fr.dyade.aaa.agent.Engine";
     cname = AgentServer.getProperty("Engine", cname);
 
-    Class eclass = Class.forName(cname);
+    Class<?> eclass = Class.forName(cname);
     return (Engine) eclass.newInstance();
   }
 
@@ -377,15 +377,15 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   void init() throws Exception {
     // Before any agent may be used, the environment, including the hash table,
     // must be initialized.
-    agents = new Hashtable();
+    agents = new Hashtable<AgentId, Agent>();
     try {
       // Creates or initializes AgentFactory, then loads and initializes
       // all fixed agents.
-      fixedAgentIdList = (Vector) AgentServer.getTransaction().load(getName() + ".fixed");
+      fixedAgentIdList = (Vector<AgentId>) AgentServer.getTransaction().load(getName() + ".fixed");
       if (fixedAgentIdList == null) {
         // It's the first launching of this engine, in other case there is
         // at least the factory in fixedAgentIdList.
-        fixedAgentIdList = new Vector();
+        fixedAgentIdList = new Vector<AgentId>();
         // Creates factory
         AgentFactory factory = new AgentFactory(AgentId.factoryId);
         createAgent(AgentId.factoryId, factory);
@@ -421,8 +421,8 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     logmon.log(BasicLevel.DEBUG, getName() + ", ends");
     Agent[] ag = new Agent[agents.size()];
     int i = 0;
-    for (Enumeration e = agents.elements() ; e.hasMoreElements() ;) {
-      ag[i++] = (Agent) e.nextElement();
+    for (Enumeration<Agent> e = agents.elements() ; e.hasMoreElements() ;) {
+      ag[i++] = e.nextElement();
     }
     for (i--; i>=0; i--) {
       if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -546,8 +546,8 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     long deadline = now - NbMaxAgents;
     Agent[] ag = new Agent[agents.size()];
     int i = 0;
-    for (Enumeration e = agents.elements() ; e.hasMoreElements() ;) {
-      ag[i++] = (Agent) e.nextElement();
+    for (Enumeration<Agent> e = agents.elements() ; e.hasMoreElements() ;) {
+      ag[i++] = e.nextElement();
     }
     for (i--; i>=0; i--) {
       if ((ag[i].last <= deadline) && (!ag[i].fixed)) {
@@ -604,8 +604,8 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   AgentId[] getLoadedAgentIdlist() {
     AgentId list[] = new AgentId[agents.size()];
     int i = 0;
-    for (Enumeration e = agents.elements(); e.hasMoreElements() ;)
-      list[i++] = ((Agent) e.nextElement()).id;
+    for (Enumeration<Agent> e = agents.elements(); e.hasMoreElements() ;)
+      list[i++] = e.nextElement().id;
     return list;
   }
 

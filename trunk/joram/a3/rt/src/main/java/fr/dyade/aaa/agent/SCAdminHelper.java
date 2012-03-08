@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,7 +30,7 @@ import org.objectweb.util.monolog.api.Logger;
 
 public class SCAdminHelper {
   /** Hashtable that contain all <code>Process</code> of running AgentServer */
-  protected Hashtable ASP = null;
+  protected Hashtable<Short, Process> ASP = null;
 
   protected Logger logmon = null;
 
@@ -38,7 +38,7 @@ public class SCAdminHelper {
     // Get the logging monitor from current server MonologMonitorFactory
     logmon = Debug.getLogger("fr.dyade.aaa.agent.SCAdmin");
 
-    ASP = new Hashtable();
+    ASP = new Hashtable<Short, Process>();
   }
 
   /**
@@ -159,7 +159,7 @@ public class SCAdminHelper {
       "java").getPath();
     String classpath = System.getProperty("java.class.path");
 
-    Vector argv = new Vector();
+    Vector<String> argv = new Vector<String>();
     argv.addElement(javapath);
     argv.addElement("-classpath");
     argv.addElement(classpath);

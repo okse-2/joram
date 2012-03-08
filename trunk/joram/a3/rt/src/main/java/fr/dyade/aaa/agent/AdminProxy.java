@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -32,7 +32,6 @@ import fr.dyade.aaa.agent.conf.A3CML;
 import fr.dyade.aaa.agent.conf.A3CMLConfig;
 import fr.dyade.aaa.common.Daemon;
 import fr.dyade.aaa.common.Debug;
-import fr.dyade.aaa.util.Transaction;
 
 /**
  * A <code>AdminProxy</code> service provides a TCP service allowing remote
@@ -418,9 +417,8 @@ public class AdminProxy {
                            tab[j]);
           }
         } else if (cmd.equals(LIST_MCONS)) {
-          for (Enumeration c=AgentServer.getConsumers();
-          c.hasMoreElements(); ) {
-            MessageConsumer cons = (MessageConsumer) c.nextElement();
+          for (Enumeration<MessageConsumer> c=AgentServer.getConsumers(); c.hasMoreElements(); ) {
+            MessageConsumer cons = c.nextElement();
             writer.println("+----------------------------------------");
             writer.println(cons);
           }
@@ -430,9 +428,8 @@ public class AdminProxy {
             // start the identified consumer.
             domain = st.nextToken();
           }
-          for (Enumeration c=AgentServer.getConsumers();
-          c.hasMoreElements(); ) {
-            MessageConsumer cons = (MessageConsumer) c.nextElement();
+          for (Enumeration<MessageConsumer> c=AgentServer.getConsumers(); c.hasMoreElements(); ) {
+            MessageConsumer cons = c.nextElement();
 
             if (((domain == null) || domain.equals(cons.getName()))) {
               try {
@@ -451,9 +448,8 @@ public class AdminProxy {
             // stop the identified consumer.
             domain = st.nextToken();
           }
-          for (Enumeration c=AgentServer.getConsumers();
-          c.hasMoreElements(); ) {
-            MessageConsumer cons = (MessageConsumer) c.nextElement();
+          for (Enumeration<MessageConsumer> c=AgentServer.getConsumers(); c.hasMoreElements(); ) {
+            MessageConsumer cons = c.nextElement();
 
             if (((domain == null) || domain.equals(cons.getName()))) {
               cons.stop();

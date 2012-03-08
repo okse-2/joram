@@ -69,7 +69,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
   WatchDog watchDog = null;
 
   /** Synchronized vector of active (i.e. connected) sessions. */
-  List activeSessions;
+  List<NetSession> activeSessions;
 
   /**
    * Defines if the streams between servers are compressed or not.
@@ -406,9 +406,9 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       }
 
       if (nbMaxCnx != -1) {
-        activeSessions = new Vector(nbMaxCnx);
+        activeSessions = new Vector<NetSession>(nbMaxCnx);
       } else {
-        activeSessions = new Vector(servers.length - 1);
+        activeSessions = new Vector<NetSession>(servers.length - 1);
       }
 
       wakeOnConnection.start();

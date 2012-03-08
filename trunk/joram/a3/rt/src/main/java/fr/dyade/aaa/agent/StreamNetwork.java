@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - France Telecom R&D
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
@@ -288,8 +288,8 @@ public abstract class StreamNetwork extends Network {
     if (server == null)
       throw new ConnectException("Cannot connect to null server");
     
-    for (Enumeration e = server.getSockAddrs(); e.hasMoreElements();) {
-      SocketAddress sa = (SocketAddress) e.nextElement();
+    for (Enumeration<SocketAddress> e = server.getSockAddrs(); e.hasMoreElements();) {
+      SocketAddress sa = e.nextElement();
 
       if (this.logmon.isLoggable(BasicLevel.DEBUG))
         this.logmon.log(BasicLevel.DEBUG,

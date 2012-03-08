@@ -54,7 +54,7 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
   private NetServerOut netServerOut = null;
 
   /** An hashtable linking a socket address to some information about datagrams sent/received/acked */
-  private Hashtable serversInfo = new Hashtable();
+  private Hashtable<SocketAddress, ServerInfo> serversInfo = new Hashtable<SocketAddress, ServerInfo>();
   
   WatchDog watchDog = null;
 
@@ -135,7 +135,7 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
     MessageBuilder messageIncomingBuilder;
     
     /** A FIFO list to store sent messages waiting to be acked. */
-    LinkedList messagesToAck = new LinkedList();
+    LinkedList<MessageAndIndex> messagesToAck = new LinkedList<MessageAndIndex>();
     
     /** Tells if the server responded to the handshake message. */
     boolean handshaken = false; 
@@ -254,9 +254,9 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
     }
 
     protected void shutdown() {
-      Enumeration enumSrvInfo = serversInfo.elements();
+      Enumeration<ServerInfo> enumSrvInfo = serversInfo.elements();
       while (enumSrvInfo.hasMoreElements()) {
-        ServerInfo srvInfo = (ServerInfo) enumSrvInfo.nextElement();
+        ServerInfo srvInfo = enumSrvInfo.nextElement();
         if (srvInfo.messageIncomingBuilder != null) {
           srvInfo.messageIncomingBuilder.shutdown();
         }
@@ -456,12 +456,12 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
           MessageAndIndex msgi = (MessageAndIndex) srvInfo.messagesToAck.getFirst();
           diff = msgi.index - 2;
         }
-        Iterator iterMessages = srvInfo.messagesToAck.iterator();
+        Iterator<MessageAndIndex> iterMessages = srvInfo.messagesToAck.iterator();
         MessageAndIndex msgi = null;
         
         long currentTimeMillis = System.currentTimeMillis();
         while (iterMessages.hasNext()) {
-          msgi = (MessageAndIndex) iterMessages.next();
+          msgi = iterMessages.next();
           
           if ((msgi.msg.not.expiration > 0L)
               && (msgi.msg.not.expiration < currentTimeMillis)) {
@@ -897,12 +897,12 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
               break;
             }
 
-            Enumeration enuAddr = serversInfo.keys();
+            Enumeration<SocketAddress> enuAddr = serversInfo.keys();
             long currentTimeMillis = System.currentTimeMillis();
             
             while (enuAddr.hasMoreElements()) {
-              SocketAddress addr = (SocketAddress) enuAddr.nextElement();
-              ServerInfo servInfo = (ServerInfo) serversInfo.get(addr);
+              SocketAddress addr = enuAddr.nextElement();
+              ServerInfo servInfo = serversInfo.get(addr);
               
               synchronized (servInfo.lock) {
                 
@@ -974,10 +974,10 @@ public class UDPNetwork extends Network implements UDPNetworkMBean {
                 }
 
                 // Re-send the messages
-                Iterator iterMessages = servInfo.messagesToAck.iterator();
+                Iterator<MessageAndIndex> iterMessages = servInfo.messagesToAck.iterator();
                 while (iterMessages.hasNext()) {
                   try {
-                    MessageAndIndex msgi = (MessageAndIndex) iterMessages.next();
+                    MessageAndIndex msgi = iterMessages.next();
                     netServerOut.reSendMessageOutputStream.writeMessage(servInfo, addr, msgi.index,
                         msgi.msg, currentTimeMillis);
                     if (this.logmon.isLoggable(BasicLevel.DEBUG)) {

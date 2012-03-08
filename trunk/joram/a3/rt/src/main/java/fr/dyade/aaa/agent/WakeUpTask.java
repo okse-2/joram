@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2009 - 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,7 +37,7 @@ public class WakeUpTask extends TimerTask {
   private static final Logger logger = Debug.getLogger(WakeUpTask.class.getName());
 
   private AgentId destId;
-  private Class wakeUpNot;
+  private Class<?> wakeUpNot;
   private boolean schedule;
 
   /**
@@ -49,7 +49,7 @@ public class WakeUpTask extends TimerTask {
    *          the notification which will be sent to the agent
    * @param period  period to wake up.
    */
-  public WakeUpTask(AgentId id, Class wakeUpNotClass, long period) {
+  public WakeUpTask(AgentId id, Class<?> wakeUpNotClass, long period) {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Create new wake up task, period=" + period);
     schedule = false;
