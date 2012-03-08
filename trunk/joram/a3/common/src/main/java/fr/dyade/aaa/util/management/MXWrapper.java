@@ -74,13 +74,13 @@ public final class MXWrapper {
     return null;
   }
 
-  public static Set queryNames(String objectName) throws Exception {
+  public static Set<String> queryNames(String objectName) throws Exception {
     if (mxserver != null)
       return mxserver.queryNames(objectName);
     return null;
   }
 
-  public static List getAttributeNames(String mBean) throws Exception {
+  public static List<String> getAttributeNames(String mBean) throws Exception {
     if (mxserver != null)
       return mxserver.getAttributeNames(mBean);
     return null;

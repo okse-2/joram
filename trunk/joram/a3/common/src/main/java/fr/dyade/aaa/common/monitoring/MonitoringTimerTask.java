@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -122,7 +122,7 @@ public abstract class MonitoringTimerTask extends java.util.TimerTask implements
     while (mbeans.hasMoreElements()) {
       String name = (String) mbeans.nextElement();
 
-      Set mBeans = null;
+      Set<String> mBeans = null;
       try {
         mBeans = MXWrapper.queryNames(name);
       } catch (Exception exc) {
@@ -130,7 +130,7 @@ public abstract class MonitoringTimerTask extends java.util.TimerTask implements
       }
 
       if (mBeans != null) {
-        for (Iterator iterator = mBeans.iterator(); iterator.hasNext();) {
+        for (Iterator<String> iterator = mBeans.iterator(); iterator.hasNext();) {
           String mBean = (String) iterator.next();
           StringTokenizer st = new StringTokenizer((String) attlist.get(name), ",");
           while (st.hasMoreTokens()) {
@@ -138,7 +138,7 @@ public abstract class MonitoringTimerTask extends java.util.TimerTask implements
             if (token.equals("*")) {
               // Get all mbean's attributes
               try {
-                List attributes = MXWrapper.getAttributeNames(mBean);
+                List<String> attributes = MXWrapper.getAttributeNames(mBean);
                 if (attributes != null) {
                   for (int i = 0; i < attributes.size(); i++) {
                     String attname = (String) attributes.get(i);

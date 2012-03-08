@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 - 2009 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 BULL
  * Copyright (C) 1996 - 2000 INRIA
  *
@@ -38,14 +38,13 @@ import java.util.Vector;
  * the <code>start()</code> method.
  */
 public class Queue implements Serializable {
-
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
   /**
    * The list holding queue elements.
    */
-  private List elements = new Vector();
+  private List<Object> elements = new Vector<Object>();
 
   /**
    * <code>true</code> if a producer called the <code>stop()</code>
