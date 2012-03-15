@@ -34,11 +34,12 @@ import framework.TestCase;
 
 
 /**
- * Test :
- *    
+ * Test: producer on foreign queue, consumer on bridge queue
+ *  - sends 10 messages on foreign server, receives them on bridge destination
+ *  - stops then restarts the foreign server
+ *  - sends anew 10 messages on foreign server, receives them on bridge destination
  */
 public class BridgeTest extends TestCase {
-
 
   public static void main(String[] args) {
     new BridgeTest().run();
@@ -47,20 +48,18 @@ public class BridgeTest extends TestCase {
   public void run() {
     try {
       System.out.println("servers start");
-      startAgentServer((short)0);
-      startAgentServer((short)1);
+      startAgentServer((short)0, new String[]{"-DNTNoLockFile=true"});
+      startAgentServer((short)1, new String[]{"-DNTNoLockFile=true"});
       Thread.sleep(8000);
       // admin();
-      System.out.println("admin config ok");
-
 
       javax.naming.Context jndiCtx = new javax.naming.InitialContext();  
       Destination foreignDest = (Destination) jndiCtx.lookup("foreignQueue");
       ConnectionFactory foreignCF = (ConnectionFactory) jndiCtx.lookup("foreignCF");
-
       Destination joramDest = (Destination) jndiCtx.lookup("joramQueue");
       ConnectionFactory joramCF = (ConnectionFactory) jndiCtx.lookup("joramCF");
       jndiCtx.close();
+      System.out.println("admin config ok");
 
       Connection foreignCnx = foreignCF.createConnection();
       Session foreignSess = foreignCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -73,19 +72,26 @@ public class BridgeTest extends TestCase {
       joramCnx.start(); 
 
       TextMessage foreignMsg = foreignSess.createTextMessage();
-
       for (int i = 1; i < 11; i++) {
         foreignMsg.setText("Foreign message number " + i);
         System.out.println("send msg = " + foreignMsg.getText());
         foreignSender.send(foreignMsg);
       }
 
+      int nbmsg = 0;
       TextMessage msg;
       for (int i = 1; i < 11; i++) { 
-        msg=(TextMessage) joramCons.receive();
+        msg=(TextMessage) joramCons.receive(5000);
+        if (msg != null) {
+          nbmsg += 1;
+        } else {
+          assertTrue("Message not received", false);
+          break;
+        }
         System.out.println("receive msg = " + msg.getText());
         assertEquals("Foreign message number "+i,msg.getText());
       }
+      assertEquals(10, nbmsg);
       
       msg=(TextMessage) joramCons.receiveNoWait();
       assertTrue(msg == null);
@@ -102,7 +108,52 @@ public class BridgeTest extends TestCase {
         assertEquals(foreignMsg.getText(), msg.getText());
 
       foreignCnx.close();
-      joramCnx.close();
+      stopAgentServer((short)1);
+      System.out.println("Bridge server stopped.");
+      
+      startAgentServer((short)1, new String[]{"-DNTNoLockFile=true"});
+      System.out.println("Bridge server started.");
+      Thread.sleep(5000);
+      
+      foreignCnx = foreignCF.createConnection();
+      foreignSess = foreignCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      foreignSender = foreignSess.createProducer(foreignDest);
+      foreignCnx.start();
+
+      foreignMsg = foreignSess.createTextMessage();
+      for (int i = 1; i < 11; i++) {
+        foreignMsg.setText("Foreign message number " + i);
+        System.out.println("send msg = " + foreignMsg.getText());
+        foreignSender.send(foreignMsg);
+      }
+
+//      killAgentServer((short)0);
+//      System.out.println("Joram server stopped.");
+//      startAgentServer((short)0, new File("."), new String[]{"-DNTNoLockFile=true"});
+//      System.out.println("Joram server started.");
+//      Thread.sleep(10000);
+//
+//      joramCnx = joramCF.createConnection();
+//      joramSess = joramCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+//      joramCons = joramSess.createConsumer(joramDest);
+//      joramCnx.start(); 
+
+      for (int i = 1; i < 11; i++) { 
+        msg=(TextMessage) joramCons.receive(5000);
+        if (msg != null) {
+          nbmsg += 1;
+        } else {
+          assertTrue("Message not received", false);
+          break;
+        }
+        System.out.println("receive msg = " + msg.getText());
+        assertEquals("Foreign message number "+i,msg.getText());
+      }
+      
+      assertEquals(20, nbmsg);
+
+      foreignCnx.close();
+      joramCnx.close();      
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);

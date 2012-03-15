@@ -34,11 +34,16 @@ import framework.TestCase;
 
 
 /**
- * Test :
- *    
+ * Test: producer on bridge queue and consumer on foreign queue
+ *  - sends 10 messages on Joram server, receives them on foreign destination
+ *  - stops then restarts the foreign server
+ *  - sends anew 10 messages on Joram server, receives them on foreign destination
+ *  - stops the foreign server
+ *  - sends 10 messages on Joram server
+ *  - starts the foreign server
+ *  - receives them on foreign destination
  */
 public class BridgeTest4 extends TestCase {
-
 
   public static void main(String[] args) {
     new BridgeTest4().run();
@@ -47,20 +52,18 @@ public class BridgeTest4 extends TestCase {
   public void run() {
     try {
       System.out.println("servers start");
-      startAgentServer((short)0);
-      startAgentServer((short)1);
+      startAgentServer((short)0, new String[]{"-DNTNoLockFile=true"});
+      startAgentServer((short)1, new String[]{"-DNTNoLockFile=true"});
       Thread.sleep(8000);
-      //admin();
-      System.out.println("admin config ok");
-
 
       javax.naming.Context jndiCtx = new javax.naming.InitialContext();  
       Destination foreignDest = (Destination) jndiCtx.lookup("foreignQueue");
       ConnectionFactory foreignCF = (ConnectionFactory) jndiCtx.lookup("foreignCF");
-
       Destination joramDest = (Destination) jndiCtx.lookup("joramQueue");
       ConnectionFactory joramCF = (ConnectionFactory) jndiCtx.lookup("joramCF");
       jndiCtx.close();
+      
+      System.out.println("admin config ok");
 
       Connection foreignCnx = foreignCF.createConnection();
       Session foreignSess = foreignCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -80,16 +83,88 @@ public class BridgeTest4 extends TestCase {
         joramSender.send(msg);
       }
 
-
+      int nbmsg = 0;
       for (int i = 1; i < 11; i++) { 
-        msg=(TextMessage) foreignCons.receive();
+        msg=(TextMessage) foreignCons.receive(5000);
+        if (msg != null) {
+          nbmsg += 1;
+        } else {
+          assertTrue("Message not received", false);
+          break;
+        }
         System.out.println("receive msg = " + msg.getText());
         assertEquals("Joram message number "+i,msg.getText());
       }
+      assertEquals(10, nbmsg);
+
+      foreignCnx.close();
+      stopAgentServer((short)1);
+      System.out.println("Bridge server stopped.");
+      
+      startAgentServer((short)1, new String[]{"-DNTNoLockFile=true"});
+      System.out.println("Bridge server started.");
+      Thread.sleep(5000);
+      
+      foreignCnx = foreignCF.createConnection();
+      foreignSess = foreignCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      foreignCons = foreignSess.createConsumer(foreignDest);
+      foreignCnx.start();
+
+      msg = joramSess.createTextMessage();
+      for (int i = 11; i < 21; i++) {
+        msg.setText("Joram message number " + i);
+        System.out.println("send msg = " + msg.getText());
+        joramSender.send(msg);
+      }
+      
+      for (int i = 11; i < 21; i++) { 
+        msg=(TextMessage) foreignCons.receive(5000);
+        if (msg != null) {
+          nbmsg += 1;
+        } else {
+          assertTrue("Message not received", false);
+          break;
+        }
+        System.out.println("receive msg = " + msg.getText());
+        assertEquals("Joram message number "+i,msg.getText());
+      }
+      assertEquals(20, nbmsg);
+
+      foreignCnx.close();
+      stopAgentServer((short)1);
+      System.out.println("Bridge server stopped.");
+
+      msg = joramSess.createTextMessage();
+      for (int i = 21; i < 31; i++) {
+        msg.setText("Joram message number " + i);
+        System.out.println("send msg = " + msg.getText());
+        joramSender.send(msg);
+      }
+      
+      startAgentServer((short)1, new String[]{"-DNTNoLockFile=true"});
+      System.out.println("Bridge server started.");
+      Thread.sleep(5000);
+      
+      foreignCnx = foreignCF.createConnection();
+      foreignSess = foreignCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      foreignCons = foreignSess.createConsumer(foreignDest);
+      foreignCnx.start();
+      
+      for (int i = 21; i < 31; i++) { 
+        msg=(TextMessage) foreignCons.receive(5000);
+        if (msg != null) {
+          nbmsg += 1;
+        } else {
+          assertTrue("Message not received", false);
+          break;
+        }
+        System.out.println("receive msg = " + msg.getText());
+        assertEquals("Joram message number "+i,msg.getText());
+      }
+      assertEquals(30, nbmsg);
 
       foreignCnx.close();
       joramCnx.close();
-
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);
