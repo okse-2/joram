@@ -452,10 +452,12 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
           }
         }
       } catch (javax.jms.JMSException exc) {
-        // Connection failure? Keeping the message for later delivery.
+        // Connection failure? Keeps the message for later delivery.
         qout.add(message);
-        if (logger.isLoggable(BasicLevel.DEBUG))
-          logger.log(BasicLevel.DEBUG, "send: Exception qout=" + qout);
+        // Try to reconnect?
+        onException(exc);
+        if (logger.isLoggable(BasicLevel.WARN))
+          logger.log(BasicLevel.WARN, "send: Exception qout=" + qout);
       }
     }
   }
@@ -1055,9 +1057,9 @@ public class JMSBridgeModule implements javax.jms.ExceptionListener,
           }
         }
       } catch (JMSException exc) {
-        // Connection loss?
-      }
-      finally {
+        // Connection loss? Try to reconnect?
+        onException(exc);
+      } finally {
         finish();
       }
     }
