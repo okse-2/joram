@@ -29,17 +29,21 @@ import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
+import javax.jms.Topic;
 
 import framework.TestCase;
 
-
 /**
- * Test :
- *    
+ * Test: publisher on bridge topic and subscriber on foreign topic
+ *  - sends 10 messages on Joram server, receives them on foreign destination
+ *  - stops then restarts the foreign server
+ *  - sends anew 10 messages on Joram server, receives them on foreign destination
+ *  - stops the foreign server
+ *  - sends 10 messages on Joram server
+ *  - starts the foreign server
+ *  - receives them on foreign destination
  */
-
 public class BridgeTest3 extends TestCase {
-
 
   public static void main(String[] args) {
     new BridgeTest3().run();
@@ -48,48 +52,115 @@ public class BridgeTest3 extends TestCase {
   public void run() {
     try {
       System.out.println("servers start");
-      startAgentServer((short)0);
-
-      startAgentServer((short)1);
+      startAgentServer((short)0, new String[]{"-DNTNoLockFile=true"});
+      startAgentServer((short)1, new String[]{"-DNTNoLockFile=true"});
       Thread.sleep(8000);
-      System.out.println("admin config ok");
 
       javax.naming.Context jndiCtx = new javax.naming.InitialContext();
       Destination joramDest = (Destination) jndiCtx.lookup("joramTopic");
       ConnectionFactory joramCF = (ConnectionFactory) jndiCtx.lookup("joramCF");
-
       Destination foreignDest = (Destination) jndiCtx.lookup("foreignTopic");
       ConnectionFactory foreignCF = (ConnectionFactory) jndiCtx.lookup("foreignCF");
       jndiCtx.close();
+      
+      System.out.println("admin config ok");
 
       Connection joramCnx = joramCF.createConnection();
       Session joramSess = joramCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
       MessageProducer joramSender = joramSess.createProducer(joramDest);
 
-
       Connection foreignCnx = foreignCF.createConnection();
       Session foreignSess = foreignCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      MessageConsumer foreignCons = foreignSess.createConsumer(foreignDest);
-      //  foreignCons.setMessageListener(new MsgListenerBT3("topic foreign"));
+      MessageConsumer foreignCons = foreignSess.createDurableSubscriber((Topic) foreignDest, "durable");
       foreignCnx.start();
       joramCnx.start();
 
       TextMessage msg = joramSess.createTextMessage();
-
       for (int i = 1; i < 11; i++) {
         msg.setText("Joram message number " + i);
         System.out.println("send msg = " + msg.getText());
         joramSender.send(msg);
       }
 
+      int nbmsg = 0;
       for (int i = 1; i < 11; i++) { 
-        msg=(TextMessage) foreignCons.receive();
+        msg=(TextMessage) foreignCons.receive(5000);
+        if (msg != null) {
+          nbmsg += 1;
+        } else {
+          assertTrue("Message not received", false);
+          break;
+        }
         System.out.println("receive msg = " + msg.getText());
         assertEquals("Joram message number "+i,msg.getText());
       }
+      assertEquals(10, nbmsg);
 
+      foreignCnx.close();
+      stopAgentServer((short)1);
+      System.out.println("Bridge server stopped.");
+      
+      startAgentServer((short)1, new String[]{"-DNTNoLockFile=true"});
+      System.out.println("Bridge server started.");
+      Thread.sleep(5000);
+      
+      foreignCnx = foreignCF.createConnection();
+      foreignSess = foreignCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      foreignCons = foreignSess.createDurableSubscriber((Topic) foreignDest, "durable");
+      foreignCnx.start();
 
-      Thread.sleep(3000);
+      msg = joramSess.createTextMessage();
+      for (int i = 11; i < 21; i++) {
+        msg.setText("Joram message number " + i);
+        System.out.println("send msg = " + msg.getText());
+        joramSender.send(msg);
+      }
+      
+      for (int i = 11; i < 21; i++) { 
+        msg=(TextMessage) foreignCons.receive(5000);
+        if (msg != null) {
+          nbmsg += 1;
+        } else {
+          assertTrue("Message not received", false);
+          break;
+        }
+        System.out.println("receive msg = " + msg.getText());
+        assertEquals("Joram message number "+i,msg.getText());
+      }
+      assertEquals(20, nbmsg);
+
+      foreignCnx.close();
+      stopAgentServer((short)1);
+      System.out.println("Bridge server stopped.");
+
+      msg = joramSess.createTextMessage();
+      for (int i = 21; i < 31; i++) {
+        msg.setText("Joram message number " + i);
+        System.out.println("send msg = " + msg.getText());
+        joramSender.send(msg);
+      }
+      
+      startAgentServer((short)1, new String[]{"-DNTNoLockFile=true"});
+      System.out.println("Bridge server started.");
+      Thread.sleep(5000);
+      
+      foreignCnx = foreignCF.createConnection();
+      foreignSess = foreignCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      foreignCons = foreignSess.createDurableSubscriber((Topic) foreignDest, "durable");
+      foreignCnx.start();
+      
+      for (int i = 21; i < 31; i++) { 
+        msg=(TextMessage) foreignCons.receive(5000);
+        if (msg != null) {
+          nbmsg += 1;
+        } else {
+          assertTrue("Message not received", false);
+          break;
+        }
+        System.out.println("receive msg = " + msg.getText());
+        assertEquals("Joram message number "+i,msg.getText());
+      }
+      assertEquals(30, nbmsg);
 
       foreignCnx.close();
       joramCnx.close();

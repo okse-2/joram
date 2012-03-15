@@ -35,10 +35,14 @@ import javax.jms.TextMessage;
 
 import framework.TestCase;
 
-
 /**
- * Test :
- *    
+ * Test: publisher on foreign topic and subscriber on bridge topic
+ *  - sends 10 messages on foreign server, receives them on bridge destination
+ *  - sends 10 messages on foreign server, receives them on bridge destination through
+ *  a listener
+ *  - stops then restarts the foreign server
+ *  - sends anew 10 messages on foreign server, receives them on bridge destination through
+ *  a listener
  */
 
 class MsgListenerb implements MessageListener {
@@ -71,19 +75,19 @@ public class BridgeTest2 extends TestCase {
 
   public void run() {
     try {
-      startAgentServer((short)0);
-      startAgentServer((short)1);
+      startAgentServer((short)0, new String[]{"-DNTNoLockFile=true"});
+      startAgentServer((short)1, new String[]{"-DNTNoLockFile=true"});
       //admin();
       Thread.sleep(8000);
-      System.out.println("admin config ok");
 
       javax.naming.Context jndiCtx = new javax.naming.InitialContext();
       Destination joramDest = (Destination) jndiCtx.lookup("joramTopic");
       ConnectionFactory joramCF = (ConnectionFactory) jndiCtx.lookup("joramCF");
-
       Destination foreignDest = (Destination) jndiCtx.lookup("foreignTopic");
       ConnectionFactory foreignCF = (ConnectionFactory) jndiCtx.lookup("foreignCF"); 
       jndiCtx.close();
+
+      System.out.println("admin config ok");
 
       Connection joramCnx = joramCF.createConnection();
       Session joramSess = joramCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -91,7 +95,7 @@ public class BridgeTest2 extends TestCase {
       joramCnx.start();  
 
       Connection foreignCnx = foreignCF.createConnection();
-      Session foreignSess = foreignCnx.createSession(true, 0);
+      Session foreignSess = foreignCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
       MessageProducer foreignSender = foreignSess.createProducer(foreignDest);
 
       TextMessage foreignMsg = foreignSess.createTextMessage();
@@ -102,14 +106,20 @@ public class BridgeTest2 extends TestCase {
         foreignSender.send(foreignMsg);
       }
 
-      foreignSess.commit();
-
+      int nbmsg = 0;
       TextMessage msg;
       for (int i = 1; i < 11; i++) { 
-        msg=(TextMessage)joramCons.receive();
+        msg=(TextMessage) joramCons.receive(5000);
+        if (msg != null) {
+          nbmsg += 1;
+        } else {
+          assertTrue("Message not received", false);
+          break;
+        }
         System.out.println("receive msg = " + msg.getText());
         assertEquals("topic Foreign message number "+i,msg.getText());
       }
+      assertEquals(10, nbmsg);
 
       // Using a message listener :
       MsgListenerb listener = new MsgListenerb("topic joram");
@@ -121,13 +131,31 @@ public class BridgeTest2 extends TestCase {
         foreignSender.send(foreignMsg);
       }
 
-      foreignSess.commit();
-
       Thread.sleep(2000);
-
       assertEquals(10, listener.count);
 
-      // System.in.read();
+      foreignCnx.close();
+      stopAgentServer((short)1);
+      System.out.println("Bridge server stopped.");
+      
+      startAgentServer((short)1, new String[]{"-DNTNoLockFile=true"});
+      System.out.println("Bridge server started.");
+      Thread.sleep(5000);
+      
+      foreignCnx = foreignCF.createConnection();
+      foreignSess = foreignCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      foreignSender = foreignSess.createProducer(foreignDest);
+      foreignCnx.start();
+      for (int i = 11; i < 21; i++) {
+        foreignMsg.setText("topic Foreign message number " + i);
+        System.out.println("send msg = " + foreignMsg.getText());
+        foreignSender.send(foreignMsg);
+      }
+
+      Thread.sleep(2000);
+      assertEquals(10, nbmsg);
+      assertEquals(20, listener.count);
+
       joramCnx.close();
       foreignCnx.close();
     } catch (Throwable exc) {
