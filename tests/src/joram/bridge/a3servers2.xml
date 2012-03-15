@@ -2,7 +2,7 @@
 
 <config>
   <domain name="D1" network="fr.dyade.aaa.agent.SimpleNetwork" />
-  <property name="Transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+  <property name="Transaction" value="fr.dyade.aaa.util.NTransaction"/>
 
   <!-- The bridge server. -->
   <server id="0" name="S0" hostname="localhost">
