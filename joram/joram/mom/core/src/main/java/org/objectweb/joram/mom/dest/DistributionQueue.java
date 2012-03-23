@@ -311,8 +311,7 @@ public class DistributionQueue extends Queue {
         
         if (distributionDaemon != null) {
         	synchronized (distributionDaemon) {
-        		// wakeup the daemon, because
-        		// the distributionDaemon can wait 
+        		// Wakeup the daemon, because the distributionDaemon can wait 
         		// after a distribution exception
         		distributionDaemon.notify();
         	}
