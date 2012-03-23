@@ -1192,7 +1192,7 @@ public final class AgentServer {
         AgentId.init();
       } catch (ClassNotFoundException exc) {
         logmon.log(BasicLevel.FATAL,
-                   getName() + ", can't initialize AgentId", exc);
+                   getName() + ", can't initialize AgentId, bad classpath", exc);
         throw new Exception("Can't initialize AgentId, bad classpath");
       } catch (IOException exc) {
         logmon.log(BasicLevel.FATAL,
@@ -1329,6 +1329,7 @@ public final class AgentServer {
     }
   }
 
+  // TODO (AF): Used only with JGroups !!
   static String startConsumers() throws Exception {
     StringBuffer errBuf = null;
 
@@ -1346,8 +1347,7 @@ public final class AgentServer {
             errBuf.append(cons.getName()).append(": ");
             errBuf.append(exc.getMessage()).append('\n');
             logmon.log(BasicLevel.FATAL,
-                       getName() +
-                       ", problem during " + cons.getName() + " starting", exc);
+                       getName() + ", problem during " + cons.getName() + " starting", exc);
           }
         }
       }
@@ -1386,8 +1386,8 @@ public final class AgentServer {
         }
       } catch (Exception exc) {
         logmon.log(BasicLevel.FATAL,
-                   getName() + ", can't initialize services", exc);
-        throw new Exception("Can't initialize services: " + exc.getMessage());
+                   getName() + ", can't start services", exc);
+        throw new Exception("Can't start services: " + exc.getMessage());
       }
 
       // Now we can start all message consumers.
@@ -1404,8 +1404,7 @@ public final class AgentServer {
               errBuf.append(cons.getName()).append(": ");
               errBuf.append(exc.getMessage()).append('\n');
               logmon.log(BasicLevel.FATAL,
-                         getName() +
-                         ", problem during " + cons.getName() + " starting", exc);
+                         getName() + ", problem during " + cons.getName() + " starting", exc);
             }
           }
         }

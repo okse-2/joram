@@ -401,7 +401,7 @@ public class NGNetwork extends StreamNetwork {
                     logmon.log(BasicLevel.DEBUG, getName() + " writable");
                   cnx.write();
                 } else  if (cnx.sendlist.size() > 0) {
-                  logmon.log(BasicLevel.FATAL, getName() + " force");
+//                  logmon.log(BasicLevel.FATAL, getName() + " force");
                   key.interestOps(key.channel().validOps());
                 }
               }
@@ -421,7 +421,7 @@ public class NGNetwork extends StreamNetwork {
           }
         }
       } catch (Throwable exc) {
-        logmon.log(BasicLevel.FATAL, getName(), exc);
+        logmon.log(BasicLevel.FATAL, getName() + "Unrecoverable error", exc);
       }
     }
   }
@@ -1144,7 +1144,7 @@ public class NGNetwork extends StreamNetwork {
     }
 
     public synchronized Message nextMessage() {
-      logmon.log(BasicLevel.FATAL, getName() + ", nextMessage:" + toString());
+//      logmon.log(BasicLevel.FATAL, getName() + ", nextMessage:" + toString());
 
       if ((current +1) < elementCount)
         return elementData[++current];
@@ -1172,7 +1172,7 @@ public class NGNetwork extends StreamNetwork {
      * @param   msg   the component to be added.
      */
     public synchronized void addMessage(Message msg) {
-      logmon.log(BasicLevel.FATAL, getName() + ", addMessage:" + toString());
+//      logmon.log(BasicLevel.FATAL, getName() + ", addMessage:" + toString());
 
       if ((elementCount + 1) > elementData.length) {
         Message oldData[] = elementData;
@@ -1183,7 +1183,7 @@ public class NGNetwork extends StreamNetwork {
     }
 
     public synchronized void removeCurrent() {
-      logmon.log(BasicLevel.FATAL, getName() + ", removeCurrent:" + toString());
+//      logmon.log(BasicLevel.FATAL, getName() + ", removeCurrent:" + toString());
 
       if (elementCount > (current +1)) {
         System.arraycopy(elementData, current +1,
@@ -1204,7 +1204,7 @@ public class NGNetwork extends StreamNetwork {
     public synchronized Message removeMessage(int stamp) {
       Message msg = null;
 
-      logmon.log(BasicLevel.FATAL, getName() + ", removeMessage:" + toString());
+//      logmon.log(BasicLevel.FATAL, getName() + ", removeMessage:" + toString());
 
       for (int index=0 ; index<elementCount ; index++) {
         msg = elementData[index];

@@ -315,11 +315,11 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       }
 
     } catch (Exception exc) {
-      logmon.log(BasicLevel.FATAL, getName() + " addServer failed", exc);
+      logmon.log(BasicLevel.ERROR, getName() + ", addServer failed", exc);
     }
     
     if (logmon.isLoggable(BasicLevel.DEBUG))
-      logmon.log(BasicLevel.DEBUG, getName() + " addServer ok");
+      logmon.log(BasicLevel.DEBUG, getName() + ", addServer ok");
   }
 
   /**
@@ -366,7 +366,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       }
 
     } catch (Exception exc) {
-      logmon.log(BasicLevel.FATAL, getName() + " delServer failed", exc);
+      logmon.log(BasicLevel.ERROR, getName() + " delServer failed", exc);
     }
     
     if (logmon.isLoggable(BasicLevel.DEBUG))
@@ -441,10 +441,9 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     for (int i=0; i<sessions.length; i++) {
       if (sessions[i] != null) {
         try {
-          MXWrapper.unregisterMBean("AgentServer",
-                                    getMBeanName(sessions[i].sid));
+          MXWrapper.unregisterMBean("AgentServer", getMBeanName(sessions[i].sid));
         } catch (Exception exc) {
-          logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
+          logmon.log(BasicLevel.WARN, getName() + " jmx failed", exc);
         }
         if (sessions[i].isRunning()) {
           sessions[i].stop();
