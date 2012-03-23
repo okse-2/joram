@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2004 France Telecom R&D
  * Copyright (C) 2003 - 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
@@ -1303,7 +1303,7 @@ public final class UserAgent extends Agent implements UserAgentMBean, BagSeriali
       // Sending the exception to the client:
       doReply(new MomExceptionReply(request.getRequestId(), mE));
     } catch (Exception exc) {
-      logger.log(BasicLevel.FATAL, this + " - unexpected error during request: " + request, exc);
+      logger.log(BasicLevel.ERROR, this + " - unexpected error during request: " + request, exc);
 
       // Sending the exception to the client:
       doReply(new MomExceptionReply(request.getRequestId(), new MomException(exc.getMessage())));
