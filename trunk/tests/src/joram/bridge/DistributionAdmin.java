@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -39,6 +39,9 @@ public class DistributionAdmin {
 
   public void run() {
     try {
+      boolean async = Boolean.getBoolean("async");
+      System.out.println("async=" + async);
+      
       AdminModule.connect("root", "root", 60);
       javax.naming.Context jndiCtx = new javax.naming.InitialContext();
 
@@ -66,7 +69,10 @@ public class DistributionAdmin {
       // Setting the bridge properties
       Properties prop = new Properties();
       // Foreign Queue JNDI name: foreignDest
+      prop.setProperty("period", "1000");      
       prop.setProperty("jms.DestinationName", "foreignQueue");
+      prop.setProperty("jms.ConnectionUpdatePeriod", "1000");
+      prop.put("distribution.async", "" + async);
 
       prop.setProperty("distribution.className", JMSDistribution.class.getName());
 
@@ -78,7 +84,10 @@ public class DistributionAdmin {
       // Setting the bridge properties
       prop = new Properties();
       // Foreign Queue JNDI name: foreignDest
+      prop.setProperty("period", "1000");      
       prop.setProperty("jms.DestinationName", "foreignTopic");
+      prop.setProperty("jms.ConnectionUpdatePeriod", "1000");
+      prop.put("distribution.async", "" + async);
 
       prop.setProperty("distribution.className", JMSDistribution.class.getName());
 

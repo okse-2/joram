@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2008 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,6 +31,9 @@ import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import org.objectweb.joram.mom.dest.jms.JMSDistribution;
 
+/**
+ * Test JMS distribution module: Queue->Topic and Topic->Queue.
+ */
 public class DistributionCrossAdmin {
 
   public static void main(String[] args) {
@@ -66,7 +69,10 @@ public class DistributionCrossAdmin {
       // Setting the bridge properties
       Properties prop = new Properties();
       // Foreign Queue JNDI name: foreignDest
+      prop.setProperty("period", "1000");      
       prop.setProperty("jms.DestinationName", "foreignTopic");
+      prop.setProperty("jms.ConnectionUpdatePeriod", "1000");
+      prop.put("distribution.async", "false");
 
       prop.setProperty("distribution.className", JMSDistribution.class.getName());
 
@@ -78,7 +84,10 @@ public class DistributionCrossAdmin {
       // Setting the bridge properties
       prop = new Properties();
       // Foreign Queue JNDI name: foreignDest
+      prop.setProperty("period", "1000");      
       prop.setProperty("jms.DestinationName", "foreignQueue");
+      prop.setProperty("jms.ConnectionUpdatePeriod", "1000");
+      prop.put("distribution.async", "false");
 
       prop.setProperty("distribution.className", JMSDistribution.class.getName());
 
