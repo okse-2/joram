@@ -222,8 +222,7 @@ public class DistributionTopic extends Topic {
 
   	if (distributionDaemon != null) {
   		synchronized (distributionDaemon) {
-  			// wakeup the daemon, because
-    		// the distributionDaemon can wait 
+  			// wakeup the daemon, because the distributionDaemon can wait 
     		// after a distribution exception
   			distributionDaemon.notify();
   		}
