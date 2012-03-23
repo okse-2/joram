@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -107,10 +107,10 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
   /** Connection factory object for connecting to the foreign JMS server. */
   protected transient ConnectionFactory cnxFact = null;
 
-  public JMSModule(String cnxFactoryName, String jndiFactoryClass, String jndiUrl, String user,
-      String password, String clientID) {
+  public JMSModule(String cnxFactoryName, String jndiFactoryClass, String jndiUrl,
+                   String user, String password, String clientID) {
     if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "<init>");
+      logger.log(BasicLevel.DEBUG, "JMSModule.<init>");
     }
 
     this.jndiFactory = jndiFactoryClass;
@@ -130,14 +130,14 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
 
   public void stopLiveConnection() {
     if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "close()");
+      logger.log(BasicLevel.DEBUG, "JMSModule.stopLiveConnection()");
     }
 
     if (cnx != null) {
       try {
         cnx.setExceptionListener(null);
-      } catch (JMSException exc1) {
-        logger.log(BasicLevel.ERROR, "", exc1);
+      } catch (JMSException exc) {
+        logger.log(BasicLevel.WARN, "JMSModule.stopLiveConnection", exc);
       }
     }
 
@@ -145,6 +145,7 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
       try {
         cnx.stop();
       } catch (JMSException exc) {
+        logger.log(BasicLevel.WARN, "JMSModule.stopLiveConnection", exc);
       }
     }
 
@@ -152,6 +153,7 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
       try {
         reconnectionDaemon.stop();
       } catch (Exception exc) {
+        logger.log(BasicLevel.WARN, "JMSModule.stopLiveConnection", exc);
       }
     }
 
@@ -159,6 +161,7 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
       try {
         cnx.close();
       } catch (JMSException exc) {
+        logger.log(BasicLevel.WARN, "JMSModule.stopLiveConnection", exc);
       }
     }
 
@@ -181,11 +184,11 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
    */
   public void startLiveConnection() {
     if (logger.isLoggable(BasicLevel.DEBUG)) {
-      logger.log(BasicLevel.DEBUG, "startLiveConnection()");
+      logger.log(BasicLevel.DEBUG, "JMSModule.startLiveConnection()");
     }
     if (notUsable) {
       if (logger.isLoggable(BasicLevel.ERROR)) {
-        logger.log(BasicLevel.ERROR, "Not usable: " + notUsableMessage);
+        logger.log(BasicLevel.ERROR, "JMSModule.startLiveConnection, not usable: " + notUsableMessage);
       }
       return;
     }
@@ -477,7 +480,6 @@ public class JMSModule implements ExceptionListener, Serializable, JMSModuleMBea
 
       try {
         while (running) {
-
           attempts++;
 
           if (attempts <= attempts1) {
