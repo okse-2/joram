@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -92,7 +92,6 @@ import fr.dyade.aaa.common.Debug;
  * basically storing messages and delivering them upon clients requests.
  */
 public class Queue extends Destination implements QueueMBean, BagSerializer {
-
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
@@ -164,6 +163,9 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
   public void react(AgentId from, Notification not) throws Exception {
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "Queue.react(" + from + ',' + not + ')');
+
+    // set agent no save (this is the default).
+    setNoSave();
 
     try {
       if (not instanceof ReceiveRequest)
@@ -299,6 +301,54 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
     return 0;
   }
 
+//  /**
+//   * This task allow to compute the average load of the queue.
+//   */
+//  transient QueueAverageLoadTask averageLoadTask = null;
+//  
+//  /**
+//   * Returns the load averages for the last minute.
+//   * @return the load averages for the last minute.
+//   */
+//  public float getAverageLoad1() {
+//    return (averageLoadTask==null)?0:averageLoadTask.getAverageLoad1();
+//  }
+//
+//  /**
+//   * Returns the load averages for the past 5 minutes.
+//   * @return the load averages for the past 5 minutes.
+//   */
+//  public float getAverageLoad5() {
+//    return (averageLoadTask==null)?0:averageLoadTask.getAverageLoad5();
+//  }
+//  
+//  /**
+//   * Returns the load averages for the past 15 minutes.
+//   * @return the load averages for the past 15 minutes.
+//   */
+//  public float getAverageLoad15() {
+//    return (averageLoadTask==null)?0:averageLoadTask.getAverageLoad15();
+//  }
+//
+//  class QueueAverageLoadTask extends AverageLoadTask {
+//    Queue queue = null;
+//    
+//    public QueueAverageLoadTask(Timer timer, Queue queue) {
+//      this.queue = queue;
+//      start(timer);
+//    }
+//    
+//    /**
+//     * Returns the number of waiting messages in the engine.
+//     * 
+//     * @see fr.dyade.aaa.common.AverageLoadTask#countActiveTasks()
+//     */
+//    @Override
+//    protected long countActiveTasks() {
+//      return queue.getPendingMessageCount();
+//    }
+//  }
+  
   /** Table holding the delivered messages before acknowledgment. */
   protected transient Map deliveredMsgs;
 
@@ -348,12 +398,14 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
    * 
    * @param firstTime		true when first called by the factory
    */
-  public void initialize(boolean firstTime) {
+  protected void initialize(boolean firstTime) {
     cleanWaitingRequest(System.currentTimeMillis());
 
     receiving = false;
     messages = new Vector();
     deliveredMsgs = new Hashtable();
+    
+//    averageLoadTask = new QueueAverageLoadTask(AgentServer.getTimer(), this);
 
     if (firstTime) return;
 
@@ -385,6 +437,16 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
         }
       }
     }
+  }
+
+  /**
+   * Finalizes the destination before it is garbaged.
+   * 
+   * @param lastime true if the destination is deleted
+   */
+  protected void finalize(boolean lastTime) {
+//    averageLoadTask.cancel();
+//    averageLoadTask = null;
   }
 
   /**
@@ -915,7 +977,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
 
         msg.order = arrivalsCounter++;
         storeMessage(msg);
-        setSave();
+        if (msg.isPersistent()) setSave();
       }
     }
 

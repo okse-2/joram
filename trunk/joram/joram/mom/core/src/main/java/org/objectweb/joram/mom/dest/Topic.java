@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2003 - 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -168,8 +168,14 @@ public class Topic extends Destination implements TopicMBean {
    * 
    * @param firstTime		true when first called by the factory
    */
-  public void initialize(boolean firstTime) {
-  }
+  public void initialize(boolean firstTime) {}
+
+  /**
+   * Finalizes the destination before it is garbaged.
+   * 
+   * @param lastime true if the destination is deleted
+   */
+  protected void finalize(boolean lastTime) {}
 
   /**
    * Returns a string representation of this destination.
