@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2011 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.jms.Connection;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
@@ -88,8 +89,8 @@ public class JMSDistribution implements DistributionHandler {
   	if (logger.isLoggable(BasicLevel.DEBUG)) {
       logger.log(BasicLevel.DEBUG, "JMSDistribution.distribute(" + message + ')');
   	}
+  	
     List<String> connectionNames = this.connectionNames;
-
     if (message.properties != null) {
       Object customRouting = message.properties.get(ROUTING_PROP);
       if (customRouting != null && customRouting instanceof String) {
@@ -110,17 +111,29 @@ public class JMSDistribution implements DistributionHandler {
       if (logger.isLoggable(BasicLevel.DEBUG)) {
         logger.log(BasicLevel.DEBUG, "JMSDistribution.distribute: connections = " + connections);
       }
+            
       for (final JMSModule connection : connections) {
-        if (!sessions.containsKey(connection.getCnxFactName())) {
-          if (logger.isLoggable(BasicLevel.DEBUG)) {
-            logger.log(BasicLevel.DEBUG, connection.getCnxFactName()
-                + ": New connection factory available for distribution.");
+        SessionAndProducer sap = sessions.get(connection.getCnxFactName());
+        if (sap != null) {
+          // Verify that the connection still valid
+          if (sap.connection != connection.getCnx())  {
+            if (logger.isLoggable(BasicLevel.DEBUG))
+              logger.log(BasicLevel.DEBUG,
+                         "JMSDistribution.distribute: remove outdated connection " + connection.getCnxFactName());
+            sessions.remove(connection.getCnxFactName());
+            sap = null;
           }
+        }
+        
+        if (sap == null) { // !sessions.containsKey(connection.getCnxFactName()))
+          if (logger.isLoggable(BasicLevel.DEBUG))
+            logger.log(BasicLevel.DEBUG,
+                       connection.getCnxFactName() + ": New connection factory available for distribution.");
           try {
             Session session = connection.getCnx().createSession(false, Session.AUTO_ACKNOWLEDGE);
             Destination dest = (Destination) connection.retrieveJndiObject(destName);
             MessageProducer producer = session.createProducer(dest);
-            sessions.put(connection.getCnxFactName(), new SessionAndProducer(session, producer));
+            sessions.put(connection.getCnxFactName(), new SessionAndProducer(connection.getCnx(), session, producer));
           } catch (Exception exc) {
             if (logger.isLoggable(BasicLevel.DEBUG)) {
               logger.log(BasicLevel.DEBUG, "Connection is not usable.", exc);
@@ -142,8 +155,7 @@ public class JMSDistribution implements DistributionHandler {
           continue;
         }
         if (logger.isLoggable(BasicLevel.DEBUG)) {
-          logger.log(BasicLevel.DEBUG, "Sending message on " + session.producer.getDestination() + " using "
-              + cnxName);
+          logger.log(BasicLevel.DEBUG, "Sending message using " + cnxName);
         }
         if (session.isJoramSession()) {
         	// convert a Joram message because this message is modified on session send.
@@ -157,9 +169,15 @@ public class JMSDistribution implements DistributionHandler {
         if (logger.isLoggable(BasicLevel.DEBUG)) {
           logger.log(BasicLevel.DEBUG, "Session is not usable, remove from table.", exc);
         }
+        // TODO (AF): We should indicate that the corresponding connection is no longer
+        // available calling JMSModule.onException().
         iter.remove();
       }
     }
+
+    if (logger.isLoggable(BasicLevel.DEBUG))
+      logger.log(BasicLevel.DEBUG,
+                 "Message could not be sent, no usable connection/session found.");
 
     throw new Exception("Message could not be sent, no usable connection/session found.");
   }
@@ -179,13 +197,13 @@ public class JMSDistribution implements DistributionHandler {
   }
   
   private class SessionAndProducer {
-
+    Connection connection;
     Session session;
-
     MessageProducer producer;
 
-    public SessionAndProducer(Session session, MessageProducer producer) {
+    public SessionAndProducer(Connection connection, Session session, MessageProducer producer) {
       super();
+      this.connection = connection;
       this.session = session;
       this.producer = producer;
     }
