@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 1996 - 2000 Dyade
  *
  * This library is free software; you can redistribute it and/or
@@ -174,10 +174,23 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
     }
   }
 
-  /** Finalizes the agent before it is garbaged. */
+  /**
+   * Initializes the destination.
+   * 
+   * @param firstTime true when first called by the factory
+   */
+  protected abstract void initialize(boolean firstTime);
+
+  /**
+   * Finalizes the agent before it is garbaged.
+   * 
+   * @param lastime true if the destination is deleted
+   */
   public void agentFinalize(boolean lastTime) {
-    if (task != null)
-      task.cancel();
+    if (task != null) task.cancel();
+    
+    finalize(lastTime);
+    
     try {
       MXWrapper.unregisterMBean(getMBeanName());
     } catch (Exception exc) {
@@ -186,6 +199,13 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
     }
     super.agentFinalize(lastTime);
   }
+
+  /**
+   * Finalizes the destination before it is garbaged.
+   * 
+   * @param lastime true if the destination is deleted
+   */
+  protected abstract void finalize(boolean lastTime);
 
   public String getMBeanName() {
     StringBuffer strbuf = new StringBuffer();
@@ -228,8 +248,8 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
         }
       } else if (not instanceof WakeUpNot) {
         if (logger.isLoggable(BasicLevel.DEBUG)) {
-          logger.log(BasicLevel.ERROR, "wakeupnot received: current task=" + task + " update="
-              + ((WakeUpNot) not).update);
+          logger.log(BasicLevel.DEBUG,
+                     "wakeupnot received: current task=" + task + " update=" + ((WakeUpNot) not).update);
         }
         setNoSave();
         if (task == null || ((WakeUpNot) not).update) {
@@ -360,13 +380,6 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
       }
     }
   }
-
-  /**
-   * Initializes the destination.
-   * 
-   * @param firstTime true when first called by the factory
-   */
-  protected abstract void initialize(boolean firstTime);
 
   protected boolean isLocal(AgentId id) {
     return (getId().getTo() == id.getTo());
