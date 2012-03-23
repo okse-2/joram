@@ -56,6 +56,8 @@ public class BridgeTest3 extends TestCase {
       startAgentServer((short)1, new String[]{"-DNTNoLockFile=true"});
       Thread.sleep(8000);
 
+      boolean async = Boolean.getBoolean("async");
+
       javax.naming.Context jndiCtx = new javax.naming.InitialContext();
       Destination joramDest = (Destination) jndiCtx.lookup("joramTopic");
       ConnectionFactory joramCF = (ConnectionFactory) jndiCtx.lookup("joramCF");
@@ -109,6 +111,8 @@ public class BridgeTest3 extends TestCase {
       foreignCons = foreignSess.createDurableSubscriber((Topic) foreignDest, "durable");
       foreignCnx.start();
 
+      Thread.sleep(5000);
+      
       msg = joramSess.createTextMessage();
       for (int i = 11; i < 21; i++) {
         msg.setText("Joram message number " + i);
@@ -154,13 +158,16 @@ public class BridgeTest3 extends TestCase {
         if (msg != null) {
           nbmsg += 1;
         } else {
-          assertTrue("Message not received", false);
+          assertTrue("Message not received", !async);
           break;
         }
         System.out.println("receive msg = " + msg.getText());
         assertEquals("Joram message number "+i,msg.getText());
       }
-      assertEquals(30, nbmsg);
+      if (async)
+        assertEquals(30, nbmsg);
+      else
+        assertEquals(20, nbmsg);
 
       foreignCnx.close();
       joramCnx.close();
