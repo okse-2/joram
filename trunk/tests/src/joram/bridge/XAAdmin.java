@@ -29,23 +29,19 @@ import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
-import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
-
 
 /**
- * Administers an agent server for the bridge sample.
+ * Administration code for the bridge sample using XA connections.
  */
 public class XAAdmin {
   public static void main(String[] args) throws Exception {
-    System.out.println();
     System.out.println("XA Bridge administration...");
 
     AdminModule.connect("root", "root", 60);
+    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     
     User.create("anonymous", "anonymous", 0);
     User.create("anonymous", "anonymous", 1);
-    
-    javax.naming.Context jndiCtx = new javax.naming.InitialContext();
     
     // create The foreign destination and connectionFactory
     Queue foreignQueue = Queue.create(1, "foreignQueue");
@@ -70,12 +66,13 @@ public class XAAdmin {
     Properties prop = new Properties();
     // Foreign QueueConnectionFactory JNDI name: foreignCF
     prop.setProperty("connectionFactoryName", "foreignCF");
+   prop.setProperty("useXAConnection", "true");
     // Foreign Queue JNDI name: foreignDest
     prop.setProperty("destinationName", "foreignQueue");
     // automaticRequest
     String autoReq = System.getProperty("automaticRequest", "false");
     prop.setProperty("automaticRequest", autoReq);
-
+    
     prop.setProperty("jndiFactory", "fr.dyade.aaa.jndi2.client.NamingContextFactory");
     prop.setProperty("jndiUrl", "scn://localhost:16400");
 
@@ -91,6 +88,7 @@ public class XAAdmin {
     prop = new Properties();
     // Foreign QueueConnectionFactory JNDI name: foreignCF
     prop.setProperty("connectionFactoryName", "foreignCF");
+    prop.setProperty("useXAConnection", "true");
     // Foreign Queue JNDI name: foreignDest
     prop.setProperty("destinationName", "foreignTopic");
     
