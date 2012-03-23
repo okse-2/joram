@@ -749,10 +749,8 @@ public final class NTransaction extends AbstractTransaction implements NTransact
         lockFile = new File(dir, LockPathname);
         if (! lockFile.createNewFile()) {
           logmon.log(BasicLevel.FATAL,
-                     "NTransaction.init(): " +
-                     "Either the server is already running, " + 
-                     "either you have to remove lock file: " +
-                     lockFile.getAbsolutePath());
+                     "NTransaction.init(): Either the server is already running, " + 
+                     "either you have to remove lock file: " + lockFile.getAbsolutePath());
           throw new IOException("Transaction already running.");
         }
         lockFile.deleteOnExit();
@@ -1016,8 +1014,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
 
       if ((lockFile != null) && (! lockFile.delete())) {
         logmon.log(BasicLevel.FATAL,
-                   "NTransaction.LogFile, - can't delete lockfile: " +
-                   lockFile.getAbsolutePath());
+                   "NTransaction.LogFile, - can't delete lockfile: " + lockFile.getAbsolutePath());
       }
 
       if (logmon.isLoggable(BasicLevel.DEBUG))
