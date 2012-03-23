@@ -196,7 +196,7 @@ public class SCAdminClassic implements SCAdminItf {
       }
       try {
         socket = new Socket("localhost", server.telnetPort);
-        daemon = new TelnetReaderDaemon(socket.getInputStream());
+        daemon = new TelnetReaderDaemon(socket.getInputStream(), logmon);
         daemon.start();
 
         socket.getOutputStream().write("halt\n".getBytes());
@@ -229,7 +229,7 @@ public class SCAdminClassic implements SCAdminItf {
     }
     try {
       socket = new Socket("localhost", telnetPort);
-      daemon = new TelnetReaderDaemon(socket.getInputStream());
+      daemon = new TelnetReaderDaemon(socket.getInputStream(), logmon);
       daemon.start();
 
       socket.getOutputStream().write("halt\n".getBytes());
@@ -257,8 +257,8 @@ public class SCAdminClassic implements SCAdminItf {
 
     private InputStreamReader reader;
 
-    protected TelnetReaderDaemon(InputStream stream) {
-      super("TelnetReaderDaemon");
+    protected TelnetReaderDaemon(InputStream stream, Logger logger) {
+      super("TelnetReaderDaemon", logger);
       this.reader = new InputStreamReader(stream);
     }
 
