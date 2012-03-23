@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2007 ScalAgent Distributed Technologies
+ * Copyright (C)  2007 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s):Badolle Fabien (ScalAgent D.T.)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
 package joram.bridge;
@@ -32,17 +32,12 @@ import javax.jms.TextMessage;
 
 import framework.TestCase;
 
-
 /**
- * Test :
- *    
+ * Test: producer on bridge queue and subscriber on foreign topic
+ *  - Sends 10 messages.
+ *  - Receives 10 messages.
  */
-
-
-
 public class BridgeTest5 extends TestCase {
-
-
   public static void main(String[] args) {
     new BridgeTest5().run();
   }
@@ -68,7 +63,6 @@ public class BridgeTest5 extends TestCase {
       Session joramSess = joramCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
       MessageProducer joramSender = joramSess.createProducer(joramDest);
 
-
       Connection foreignCnx = foreignCF.createConnection();
       Session foreignSess = foreignCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
       MessageConsumer foreignCons = foreignSess.createConsumer(foreignDest);
@@ -89,7 +83,6 @@ public class BridgeTest5 extends TestCase {
         System.out.println("receive msg = " + msg.getText());
         assertEquals("Joram message number "+i,msg.getText());
       }
-
 
       Thread.sleep(3000);
 
