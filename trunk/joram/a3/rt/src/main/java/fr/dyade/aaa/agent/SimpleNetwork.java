@@ -66,8 +66,7 @@ public class SimpleNetwork extends StreamNetwork {
                         this.getName() + ", ackMsg(...) done.");
     } catch (Exception exc) {
       this.logmon.log(BasicLevel.FATAL,
-                      this.getName() + ", ackMsg unrecoverable exception",
-                      exc);
+                      this.getName() + ", ackMsg unrecoverable exception", exc);
     }
   }
 

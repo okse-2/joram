@@ -1095,7 +1095,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     } catch (Throwable exc) {
       //  There is an unrecoverable exception during the transaction
       // we must exit from server.
-      logmon.log(BasicLevel.FATAL, getName() + ": Fatal error", exc);
+      logmon.log(BasicLevel.FATAL, getName() + ": Transaction problem", exc);
       canStop = false;
       // Stop the AgentServer
       AgentServer.stop(false);
