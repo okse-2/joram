@@ -43,7 +43,7 @@ public class JMSConnections implements JMSConnectionsMBean {
 
   private static final Logger logger = Debug.getLogger(JMSConnections.class.getName());
 
-  static final String SAVE_FILE_NAME = "Jms_Cnx";
+  static final String SAVE_FILE_NAME = "JmsCnx";
 
   private Map<String, JMSModule> servers = new HashMap<String, JMSModule>();
 
