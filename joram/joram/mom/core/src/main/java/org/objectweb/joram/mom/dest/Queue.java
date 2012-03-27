@@ -1595,4 +1595,13 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
 	  return null;
   }
 
+	// Flow Control related fields
+	protected fr.dyade.aaa.common.stream.Properties getStats() {
+	  fr.dyade.aaa.common.stream.Properties stats = new fr.dyade.aaa.common.stream.Properties();
+	  
+		stats.put("NbMsgsDeliverSinceCreation", nbMsgsDeliverSinceCreation);
+		stats.put("PendingMessageCount", getPendingMessageCount());
+		
+		return stats;
+	}
 }

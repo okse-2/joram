@@ -217,6 +217,8 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
     return strbuf.toString();
   }
 
+  abstract fr.dyade.aaa.common.stream.Properties getStats();
+  
   /**
    * Distributes the received notifications to the appropriate reactions.
    * 
@@ -261,7 +263,7 @@ public abstract class Destination extends Agent implements DestinationMBean, TxD
       } else if (not instanceof FwdAdminRequestNot) {
         handleAdminRequestNot(from, (FwdAdminRequestNot) not);
       } else if (not instanceof PingNot) {
-        Channel.sendTo(from, new PongNot());
+        Channel.sendTo(from, new PongNot(getStats()));
       } else {
         throw new UnknownNotificationException(not.getClass().getName());
       }

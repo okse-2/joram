@@ -1,6 +1,7 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2001 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2001 - 2012 ScalAgent Distributed Technologies
+ * Copyright (C) 2012 Universite Joseph Fourier
  * Copyright (C) 2004 Bull SA
  * Copyright (C) 1996 - 2000 Dyade
  *
@@ -32,11 +33,13 @@ import javax.jms.JMSException;
 
 import org.objectweb.joram.client.jms.admin.AdminException;
 import org.objectweb.joram.client.jms.admin.AdminModule;
+import org.objectweb.joram.shared.admin.AddRemoteDestination;
 import org.objectweb.joram.shared.admin.ClearQueue;
 import org.objectweb.joram.shared.admin.ClusterAdd;
 import org.objectweb.joram.shared.admin.ClusterLeave;
 import org.objectweb.joram.shared.admin.ClusterList;
 import org.objectweb.joram.shared.admin.ClusterListReply;
+import org.objectweb.joram.shared.admin.DelRemoteDestination;
 import org.objectweb.joram.shared.admin.DeleteQueueMessage;
 import org.objectweb.joram.shared.admin.GetDMQSettingsReply;
 import org.objectweb.joram.shared.admin.GetDMQSettingsRequest;
@@ -531,6 +534,28 @@ public class Queue extends Destination implements javax.jms.Queue, QueueMBean {
    */
   public void registerAsDefaultDMQ(int serverId) throws ConnectException, AdminException {
     getWrapper().setDefaultDMQId(serverId, getName());
+  }
+
+  /**
+   * Adds a destination to an alias queue's destinations' list.
+   * 
+   * @param destId
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public void addRemoteDestination(String newId) throws ConnectException, AdminException {
+	  doRequest(new AddRemoteDestination(agentId, newId));
+  }
+
+  /**
+   * Removes a destination from an alias queue's destinations' list.
+   * 
+   * @param destId
+   * @throws ConnectException
+   * @throws AdminException
+   */
+  public void delRemoteDestination(String newId) throws ConnectException, AdminException {
+	  doRequest(new DelRemoteDestination(agentId, newId));
   }
   
 //  /**
