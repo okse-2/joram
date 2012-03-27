@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2007 ScalAgent Distributed Technologies
+ * Copyright (C)  2007 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s):Badolle Fabien (ScalAgent D.T.)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
 package joram.bridge;
@@ -31,7 +31,6 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import framework.TestCase;
-
 
 /**
  * Test: producer on foreign queue, consumer on bridge queue
@@ -153,7 +152,7 @@ public class BridgeTest extends TestCase {
       assertEquals(20, nbmsg);
 
       foreignCnx.close();
-      joramCnx.close();      
+      joramCnx.close();
     } catch (Throwable exc) {
       exc.printStackTrace();
       error(exc);

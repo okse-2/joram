@@ -37,10 +37,7 @@ import framework.TestCase;
  * Test :
  *    
  */
-
 public class XABridgeTest2 extends TestCase {
-
-
   public static void main(String[] args) {
     new XABridgeTest2().run();
   }
@@ -61,33 +58,36 @@ public class XABridgeTest2 extends TestCase {
       Destination joramDest = (Destination) jndiCtx.lookup("joramTopic");
       ConnectionFactory joramCF = (ConnectionFactory) jndiCtx.lookup("joramCF");
       jndiCtx.close();
+      
       Connection joramCnx = joramCF.createConnection();
       Session joramSess = joramCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
       MessageConsumer joramCons = joramSess.createConsumer(joramDest);
+      joramCnx.start();
 
       Connection foreignCnx = foreignCF.createXAConnection();
       Session foreignSess = foreignCnx.createSession(true, 0);
       MessageProducer foreignSender = foreignSess.createProducer(foreignDest);
-      joramCnx.start();
-      TextMessage foreignMsg = foreignSess.createTextMessage();
+      foreignCnx.start();
 
+      TextMessage foreignMsg = foreignSess.createTextMessage();
       for (int i = 1; i < 11; i++) {
-        foreignMsg.setText("topic Foreign message number " + i);
+        foreignMsg.setText("Foreign message number " + i);
         System.out.println("send msg = " + foreignMsg.getText());
         foreignSender.send(foreignMsg);
       }
       foreignSess.commit();
 
-
-
       TextMessage msg;
       for (int i = 1; i < 11; i++) { 
-        msg=(TextMessage)joramCons.receive();
-        System.out.println("receive msg = " + msg.getText());
-        assertEquals("topic Foreign message number "+i,msg.getText());
+        msg=(TextMessage) joramCons.receive(5000L);
+        if (msg != null) {
+          System.out.println("receive msg = " + msg.getText());
+          assertEquals("Foreign message number "+i,msg.getText());
+        } else {
+          System.out.println("receive no message");
+          assertTrue(false);
+        }
       }
-
-
 
       foreignCnx.close();
       joramCnx.close();
