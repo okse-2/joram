@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2007 ScalAgent Distributed Technologies
+ * Copyright (C)  2007 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -39,14 +39,12 @@ import javax.transaction.xa.Xid;
 import org.objectweb.joram.client.jms.XidImpl;
 
 import framework.TestCase;
+
 /**
  * Test :
  *    
  */
-
 public class XABridgeTest1 extends TestCase {
-
-
   public static void main(String[] args) {
     new XABridgeTest1().run();
   }
@@ -66,8 +64,8 @@ public class XABridgeTest1 extends TestCase {
 
       Destination joramDest = (Destination) jndiCtx.lookup("joramQueue");
       ConnectionFactory joramCF = (ConnectionFactory) jndiCtx.lookup("joramCF");
-
       jndiCtx.close();
+      
       Connection joramCnx = joramCF.createConnection();
       Session joramSess = joramCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
       MessageConsumer joramCons = joramSess.createConsumer(joramDest);
@@ -77,12 +75,12 @@ public class XABridgeTest1 extends TestCase {
       XASession foreignSess = foreignCnx.createXASession();
       MessageProducer foreignSender = foreignSess.createProducer(foreignDest);
       XAResource producerRes = foreignSess.getXAResource();
-
+      foreignCnx.start();
+      
       Xid xid = new XidImpl(new byte[0], 1, new String(""+System.currentTimeMillis()).getBytes());
       producerRes.start(xid, XAResource.TMNOFLAGS);
 
       TextMessage foreignMsg = foreignSess.createTextMessage();
-
       for (int i = 1; i < 11; i++) {
         foreignMsg.setText("Foreign message number " + i);
         System.out.println("send msg = " + foreignMsg.getText());
@@ -93,16 +91,18 @@ public class XABridgeTest1 extends TestCase {
       producerRes.prepare(xid);
       producerRes.commit(xid, false);
 
-
       TextMessage msg;
       for (int i = 1; i < 11; i++) { 
-        msg=(TextMessage)joramCons .receive();
-        System.out.println("receive msg = " + msg.getText());
-        assertEquals("Foreign message number "+i,msg.getText());
+        msg=(TextMessage) joramCons.receive(5000L);
+        if (msg != null) {
+          System.out.println("receive msg = " + msg.getText());
+          assertEquals("Foreign message number "+i,msg.getText());
+        } else {
+          System.out.println("receive no message");
+          assertTrue(false);
+        }
       }
-
-
-
+      
       foreignCnx.close();
       joramCnx.close();
     } catch (Throwable exc) {

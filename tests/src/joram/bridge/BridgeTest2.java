@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C)  2007 ScalAgent Distributed Technologies
+ * Copyright (C)  2007 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s):Badolle Fabien (ScalAgent D.T.)
+ * Initial developer(s): ScalAgent Distributed Technologies
  * Contributor(s): 
  */
 package joram.bridge;
@@ -48,10 +48,9 @@ import framework.TestCase;
 class MsgListenerb implements MessageListener {
   String who;
   int count;
-  public MsgListenerb(String who) {
-    System.out.println("creation");
+  public MsgListenerb(String who, int idx) {
     this.who = who;
-    count=0;
+    count=idx;
   }
 
   public void onMessage(Message msg) {
@@ -122,30 +121,9 @@ public class BridgeTest2 extends TestCase {
       assertEquals(10, nbmsg);
 
       // Using a message listener :
-      MsgListenerb listener = new MsgListenerb("topic joram");
+      MsgListenerb listener = new MsgListenerb("topic joram", 10);
       joramCons.setMessageListener(listener);
 
-      for (int i = 1; i < 11; i++) {
-        foreignMsg.setText("topic Foreign message number " + i);
-        System.out.println("send msg = " + foreignMsg.getText());
-        foreignSender.send(foreignMsg);
-      }
-
-      Thread.sleep(2000);
-      assertEquals(10, listener.count);
-
-      foreignCnx.close();
-      stopAgentServer((short)1);
-      System.out.println("Bridge server stopped.");
-      
-      startAgentServer((short)1, new String[]{"-DNTNoLockFile=true"});
-      System.out.println("Bridge server started.");
-      Thread.sleep(5000);
-      
-      foreignCnx = foreignCF.createConnection();
-      foreignSess = foreignCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-      foreignSender = foreignSess.createProducer(foreignDest);
-      foreignCnx.start();
       for (int i = 11; i < 21; i++) {
         foreignMsg.setText("topic Foreign message number " + i);
         System.out.println("send msg = " + foreignMsg.getText());
@@ -153,8 +131,29 @@ public class BridgeTest2 extends TestCase {
       }
 
       Thread.sleep(2000);
-      assertEquals(10, nbmsg);
       assertEquals(20, listener.count);
+
+      foreignCnx.close();
+      stopAgentServer((short)1);
+      System.out.println("Foreign server stopped.");
+      
+      startAgentServer((short)1, new String[]{"-DNTNoLockFile=true"});
+      System.out.println("Foeign server started.");
+      Thread.sleep(5000);
+      
+      foreignCnx = foreignCF.createConnection();
+      foreignSess = foreignCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
+      foreignSender = foreignSess.createProducer(foreignDest);
+      foreignCnx.start();
+      for (int i = 21; i < 31; i++) {
+        foreignMsg.setText("topic Foreign message number " + i);
+        System.out.println("send msg = " + foreignMsg.getText());
+        foreignSender.send(foreignMsg);
+      }
+
+      Thread.sleep(2000);
+      assertEquals(10, nbmsg);
+      assertEquals(30, listener.count);
 
       joramCnx.close();
       foreignCnx.close();

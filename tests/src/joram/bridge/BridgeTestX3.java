@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  * USA.
  *
- * Initial developer(s): ScalAgent Distributed Technologies
+ * Initial developer(s):Badolle Fabien (ScalAgent D.T.)
  * Contributor(s): 
  */
 package joram.bridge;
@@ -40,18 +40,14 @@ import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
 import framework.TestCase;
 
 /**
- * Test: Use 2 bridge queues to send and receive messages through a foreign queue.
- *  - Sends 10 messages.
- *  - Receives 10 messages.
- *  - Stops the foreign server.
- *  - Sends 60 messages.
- *  - Starts the foreign server.
- *  - Receives the messages sent.
- *  - Sends 10 more messages and receives it.
+ * Test: Use 2 bridge queues to send and receive a message through a foreign queue.
+ *  - sends 1 message then receive it
+ *  - stops then restarts the foreign server
+ *  - try to receive anew the message
  */
-public class BridgeTest8 extends TestCase {
+public class BridgeTestX3 extends TestCase {
   public static void main(String[] args) {
-    new BridgeTest8().run();
+    new BridgeTestX3().run();
   }
 
   public void run() {
@@ -79,7 +75,7 @@ public class BridgeTest8 extends TestCase {
         // bind foreign destination and connectionFactory
         jndiCtx.rebind("foreignQueue", foreignQueue);
         jndiCtx.rebind("foreignCF", foreignCF);
-      
+
         // Setting the bridge properties
         Properties prop = new Properties();
         // Foreign QueueConnectionFactory JNDI name: foreignCF
@@ -91,8 +87,8 @@ public class BridgeTest8 extends TestCase {
 
         // Creating a Queue "IN" bridge on server 0:
         Queue joramInQueue = Queue.create(0, "BridgeInQueue",
-                "org.objectweb.joram.mom.dest.jmsbridge.JMSBridgeQueue",
-                prop);
+                                          "org.objectweb.joram.mom.dest.jmsbridge.JMSBridgeQueue",
+                                          prop);
         joramInQueue.setFreeReading();
         joramInQueue.setFreeWriting();
         System.out.println("joramInQueue = " + joramInQueue);
@@ -108,12 +104,12 @@ public class BridgeTest8 extends TestCase {
 
         // Creating a Queue "OUT" bridge on server 0:
         Queue joramOutQueue = Queue.create(0, "BridgeOutQueue",
-                "org.objectweb.joram.mom.dest.jmsbridge.JMSBridgeQueue",
-                prop);
+                                           "org.objectweb.joram.mom.dest.jmsbridge.JMSBridgeQueue",
+                                           prop);
         joramOutQueue.setFreeReading();
         joramOutQueue.setFreeWriting();
         System.out.println("joramOutQueue = " + joramOutQueue);
-      
+
         javax.jms.ConnectionFactory joramCF = TcpConnectionFactory.create("localhost", 16010);
 
         jndiCtx.rebind("joramInQueue", joramInQueue);
@@ -135,7 +131,7 @@ public class BridgeTest8 extends TestCase {
       Destination joramOutDest = (Destination) jndiCtx.lookup("joramOutQueue");
       ConnectionFactory joramCF = (ConnectionFactory) jndiCtx.lookup("joramCF");
       jndiCtx.close();
-      
+
       Connection joramCnx = joramCF.createConnection();
       Session joramSess = joramCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
       MessageConsumer joramCons = joramSess.createConsumer(joramInDest);
@@ -143,90 +139,32 @@ public class BridgeTest8 extends TestCase {
       joramCnx.start(); 
 
       TextMessage msgOut = joramSess.createTextMessage();
-      for (int i = 1; i < 11; i++) {
-        msgOut.setText("Message number " + i);
-        System.out.println("send msg = " + msgOut.getText());
-        joramProd.send(msgOut);
+      msgOut.setText("Message number " + 1);
+      System.out.println("send msg = " + msgOut.getText());
+      joramProd.send(msgOut);
+
+      TextMessage msgIn;
+      msgIn=(TextMessage) joramCons.receive(5000);
+      if (msgIn == null) {
+        assertTrue("Message not received", false);
+      } else {
+        System.out.println("receive msg = " + msgIn.getText());
+        assertEquals("Message number " + 1, msgIn.getText());
       }
 
-      int nbmsg = 0;
-      TextMessage msgIn;
-      for (int i = 1; i < 11; i++) { 
-        msgIn=(TextMessage) joramCons.receive(5000);
-        if (msgIn != null) {
-          nbmsg += 1;
-        } else {
-          assertTrue("Message not received", false);
-          break;
-        }
-        System.out.println("receive msg = " + msgIn.getText());
-        assertEquals("Message number " + i, msgIn.getText());
-      }
-      assertEquals(10, nbmsg);
-      
+      Thread.sleep(2000L); // Wait for acknowledge avoiding to deliver anew the message
       stopAgentServer((short)1);
       System.out.println("Bridge server stopped.");
-      Thread.sleep(30000);
-      
-      int nbMsgDuringStop = 60;
-      msgOut = joramSess.createTextMessage();
-      for (int i = 0; i < nbMsgDuringStop; i++) {
-        msgOut.setText("Message sent during stop, number " + i);
-        System.out.println("send msg = " + msgOut.getText());
-        joramProd.send(msgOut);
-        Thread.sleep(1000);
-      }
-
       startAgentServer((short)1, new String[]{"-DNTNoLockFile=true"});
       System.out.println("Bridge server started.");
       Thread.sleep(5000);
 
-      for (int i = 0; i < nbMsgDuringStop; i++) { 
-        msgIn=(TextMessage) joramCons.receive(5000);
-        if (msgIn != null) {
-          nbmsg += 1;
-        } else {
-          assertTrue("Message not received", false);
-          break;
-        }
+      msgIn=(TextMessage) joramCons.receive(5000);
+      if (msgIn != null) {
         System.out.println("receive msg = " + msgIn.getText());
-        assertEquals("Message sent during stop, number " + i, msgIn.getText());
-      }
-      assertEquals(nbMsgDuringStop+10, nbmsg);
-
-      Thread.sleep(5000);
-
-      msgOut = joramSess.createTextMessage();
-      for (int i = 1; i < 11; i++) {
-        msgOut.setText("Message sent after start, number " + i);
-        System.out.println("send msg = " + msgOut.getText());
-        joramProd.send(msgOut);
+        assertTrue("Message received", false);
       }
 
-//      killAgentServer((short)0);
-//      System.out.println("Joram server stopped.");
-//      startAgentServer((short)0, new File("."), new String[]{"-DNTNoLockFile=true"});
-//      System.out.println("Joram server started.");
-//      Thread.sleep(10000);
-//
-//      joramCnx = joramCF.createConnection();
-//      joramSess = joramCnx.createSession(false, Session.AUTO_ACKNOWLEDGE);
-//      joramCons = joramSess.createConsumer(joramDest);
-//      joramCnx.start(); 
-
-      for (int i = 1; i < 11; i++) { 
-        msgIn=(TextMessage) joramCons.receive(5000);
-        if (msgIn != null) {
-          nbmsg += 1;
-        } else {
-          assertTrue("Message not received", false);
-          break;
-        }
-        System.out.println("receive msg = " + msgIn.getText());
-        assertEquals("Message sent after start, number " + i, msgIn.getText());
-      }
-      assertEquals(nbMsgDuringStop+20, nbmsg);
-      
       joramCnx.close();      
     } catch (Throwable exc) {
       exc.printStackTrace();

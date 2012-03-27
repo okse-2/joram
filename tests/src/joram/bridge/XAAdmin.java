@@ -29,6 +29,7 @@ import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminModule;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.tcp.TcpConnectionFactory;
+import org.objectweb.joram.client.jms.tcp.XATcpConnectionFactory;
 
 /**
  * Administration code for the bridge sample using XA connections.
