@@ -709,4 +709,9 @@ public class Topic extends Destination implements TopicMBean {
 	  // TODO Auto-generated method stub
 	  return null;
   }
+	
+	// Flow Control related fields
+  protected fr.dyade.aaa.common.stream.Properties getStats() {
+    return null;
+  }
 }
