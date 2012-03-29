@@ -33,4 +33,45 @@
     <module>admin</module>
     <module>assembly</module>
   </modules>
+  
+  <!-- Source code management -->
+  <scm>
+    <connection>scm:svn:svn://svn.forge.objectweb.org/svnroot/joram/trunk</connection>
+    <developerConnection>scm:svn:svn+ssh://svn.forge.objectweb.org/svnroot/joram/trunk</developerConnection>
+  </scm>
+  
+  <build>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-ssh</artifactId>
+        <version>1.0</version>
+      </extension>
+    </extensions> 
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  
+  <!-- Who worked on this project ? -->
+  <developers>
+    <developer>
+      <id>afreyssin</id>
+      <name>Andre Freyssinet</name>
+      <email>Andre.Freyssinet@scalagent.com</email>
+    </developer>
+    <developer>
+      <id>tachker</id>
+      <name>Nicolas Tachker</name>
+      <email>nicolas.tachker@scalagent.com</email>
+    </developer>
+  </developers>
 </project>
