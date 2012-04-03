@@ -1,6 +1,5 @@
 package alias;
 
-import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.FileHandler;
@@ -31,7 +30,7 @@ public class ElasticityLoop {
 	public static final int maxCapThreshold = 500;
 
 	/** Limit under which we remove unnecessary workers. */ 
-	public static final int minCapThreshold = 10;
+	public static final int minCapThreshold = 50;
 
 	/** Period of our elasticity loop in milliseconds. */
 	public static final Integer loopPeriod = 2000;
@@ -151,6 +150,16 @@ public class ElasticityLoop {
 			e.printStackTrace();
 			logger.log(Level.SEVERE, "Couldn't monitor the workers.");
 		}
+
+		String loadStr = "";
+		String rateStr = "";
+		for(int i = 0; i < activeWorkers.size(); i++) {
+			loadStr = loadStr + " " + loads.get(i);
+			rateStr = rateStr + " " + rates.get(i);
+		}
+
+		logger.log(Level.FINE,"Monitored loads:" + loadStr);
+		logger.log(Level.FINE,"Monitored rates:" + rateStr);
 	}
 
 	/**
@@ -178,14 +187,14 @@ public class ElasticityLoop {
 			if (toRemove >= 0) {
 				rates.set(activeWorkers.indexOf(toRemove), toRemoveRate);
 				toRemove = -1;
+				logger.log(Level.INFO,"Cancelled scaling down plan.");
 			}
 			return false;
 		}
 
 		//Should initiate plan.
-		if (activeWorkers.size() > 1 && toRemove >= 0 && underloaded == activeWorkers.size()) {
+		if (activeWorkers.size() > 1 && toRemove < 0 && underloaded == activeWorkers.size()) {
 			toRemove = electWorkerToRemove();
-			logger.log(Level.INFO, "Scaling down elected worker: " + toRemove);
 			toRemoveAge = 0;
 			toRemoveRate = rates.get(toRemove);
 		}
@@ -193,11 +202,8 @@ public class ElasticityLoop {
 		//Plan can continue.
 		if (toRemove >= 0) {
 			if (++toRemoveAge > (100/downRate)) {
-				rates.set(toRemove, toRemoveRate*(100-downRate*toRemoveAge)/100);
-				logger.log(Level.INFO,"Trying to remove extra worker, " + toRemoveAge);
-			} else {
 				Queue worker = activeWorkers.remove(toRemove);
-				idleWorkers.add(worker);
+				idleWorkers.add(0,worker);
 				rates.remove(toRemove);
 				loads.remove(toRemove);
 				delivered.remove(toRemove);
@@ -210,12 +216,16 @@ public class ElasticityLoop {
 						e.printStackTrace();
 						logger.log(Level.SEVERE, "Couldn't delete a remote destination from producers.");
 					}
-				logger.log(Level.INFO, "Removed extra worker successfully.");
-				
 				toRemove = -1;
+				logger.log(Level.INFO, "Removed extra worker successfully.");
+
+			} else {
+				rates.set(toRemove, toRemoveRate*(100-downRate*toRemoveAge)/100);
+				logger.log(Level.INFO,"Trying to remove extra worker, " + toRemoveAge);
 			}
 			return true;	
 		}
+
 		return false;
 	}
 
@@ -224,12 +234,10 @@ public class ElasticityLoop {
 	 * @return true if scaling up is achieved.
 	 */
 	private static boolean testScaleUp() {
-		if (overloaded != activeWorkers.size())
+		if (overloaded < activeWorkers.size() || idleWorkers.size() == 0)
 			return false;
 
-		if (idleWorkers.size() == 0)
-			return false;
-
+		
 		int toAdd = electWorkerToAdd();
 		Queue worker = idleWorkers.remove(toAdd);
 		activeWorkers.add(worker);
@@ -243,7 +251,7 @@ public class ElasticityLoop {
 				producers.get(i).addRemoteDestination(worker.getName());
 			} catch (Exception e) {
 				e.printStackTrace();
-				logger.log(Level.SEVERE, "Couldn't add a new remote destination to producer.");
+				logger.log(Level.SEVERE, "Couldn't send weights to a producer.");
 			}
 
 		logger.log(Level.INFO,"Added new worker successfully.");
@@ -256,25 +264,28 @@ public class ElasticityLoop {
 	private static void regulateRates() {
 		if (overloaded == 0)
 			return;
-
+		
+		String rateStr = ""; 
 		for(int i = 0; i < activeWorkers.size(); i++) {
 			if (loads.get(i) > maxCapThreshold)
 				rates.set(i,rates.get(i)*(100-downRate)/100);
+			rateStr = rateStr + " " + rates.get(i);
 		}
+		logger.log(Level.FINE,"Regulated rates:" + rateStr);
 	}
 
 	/**
-	 * Computes weights and send them to producers.
+	 * Computes weights and sends them to producers.
 	 */
 	private static void sendWeights() {
 		int[] weights = new int[activeWorkers.size()];
-		
+
 		if (minRate <= 0)
 			minRate = 1;
 
 		int base  = (int)Math.pow(10.0,Math.floor(Math.log10(minRate)));
-		logger.log(Level.INFO,"Weights computation, base: " + base);
 
+		String weightStr = "";
 		for (int i = 0; i < activeWorkers.size(); i++) { 	
 			int weight = (int)Math.round((double)rates.get(i)/(double)base);
 
@@ -282,16 +293,20 @@ public class ElasticityLoop {
 				weight = 1;
 
 			weights[i] = weight;
-			logger.log(Level.INFO,"Weights computation, computed: " + weights[i] + " for: " + i);
+			weightStr = weightStr + " " + weight;
 		}
+
+		logger.log(Level.FINE,"Computed weights:" + weightStr);
+
 		//Notify producers.
-		for(int i = 0; i < producers.size(); i++)
-			try {
+		try {
+			for(int i = 0; i < producers.size(); i++)
+
 				producers.get(i).sendDestinationsWeights(weights);
-			} catch (Exception e) {
-				e.printStackTrace();
-				logger.log(Level.SEVERE, "Couldn't add a new remote destination to producer.");
-			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.log(Level.SEVERE, "Couldn't send weights to a producer.");
+		}
 	}
 
 	public static void main(String args[]) throws Exception {
@@ -307,7 +322,7 @@ public class ElasticityLoop {
 
 			long startTime = System.currentTimeMillis();
 			AdminModule.connect("root", "root", 60);
-			
+
 			monitorWorkers();
 
 			if(!testScaleDown())
@@ -315,7 +330,7 @@ public class ElasticityLoop {
 					regulateRates();
 
 			sendWeights();
-			
+
 			AdminModule.disconnect();
 			correction = System.currentTimeMillis() - startTime;
 		} while (!stopLoop);
