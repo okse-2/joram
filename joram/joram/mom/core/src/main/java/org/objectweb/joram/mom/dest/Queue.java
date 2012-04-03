@@ -61,6 +61,7 @@ import org.objectweb.joram.shared.admin.ClearQueue;
 import org.objectweb.joram.shared.admin.DeleteQueueMessage;
 import org.objectweb.joram.shared.admin.GetDMQSettingsReply;
 import org.objectweb.joram.shared.admin.GetDMQSettingsRequest;
+import org.objectweb.joram.shared.admin.GetDeliveredMessages;
 import org.objectweb.joram.shared.admin.GetNbMaxMsgRequest;
 import org.objectweb.joram.shared.admin.GetNumberReply;
 import org.objectweb.joram.shared.admin.GetPendingMessages;
@@ -805,6 +806,11 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
                    not.getReplyTo(),
                    not.getRequestMsgId(),
                    not.getReplyMsgId());
+    } else if (adminRequest instanceof GetDeliveredMessages) {
+        replyToTopic(new GetNumberReply((int)nbMsgsDeliverSinceCreation),
+                not.getReplyTo(),
+                not.getRequestMsgId(),
+                not.getReplyMsgId());
     } else {
       super.handleAdminRequestNot(from, not);
     }
