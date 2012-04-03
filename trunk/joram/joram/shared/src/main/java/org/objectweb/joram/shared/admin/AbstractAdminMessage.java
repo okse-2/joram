@@ -147,6 +147,8 @@ public abstract class AbstractAdminMessage implements Externalizable, Streamable
   protected final static int CMD_ADMIN_REPLY = 96;
   protected final static int ADD_REMOTE_DEST = 97;
   protected final static int DEL_REMOTE_DEST = 98;
+  protected final static int MONITOR_GET_DELIVERED_MESSAGES = 99;
+  protected final static int SND_DEST_WEIGHTS = 100;
 
   protected int classid;
 
@@ -250,6 +252,8 @@ public abstract class AbstractAdminMessage implements Externalizable, Streamable
     AdminCommandReply.class.getName(),
     AddRemoteDestination.class.getName(),
     DelRemoteDestination.class.getName(),
+    GetDeliveredMessages.class.getName(),
+    SendDestinationsWeights.class.getName(),
   };
   
   protected abstract int getClassId();

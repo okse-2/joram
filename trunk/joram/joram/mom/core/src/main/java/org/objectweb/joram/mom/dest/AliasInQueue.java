@@ -35,6 +35,7 @@ import org.objectweb.joram.mom.notifications.WakeUpNot;
 
 import org.objectweb.joram.shared.admin.AdminReply;
 import org.objectweb.joram.shared.admin.AdminRequest;
+import org.objectweb.joram.shared.admin.SendDestinationsWeights;
 import org.objectweb.joram.shared.excepts.RequestException;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -177,15 +178,15 @@ public class AliasInQueue extends Queue {
 	}
 
 	protected void doUnknownAgent(UnknownAgent uA) {
-	  // TODO (AF): We should remove the bad destination from the destination list.
+		// TODO (AF): We should remove the bad destination from the destination list.
 		if (uA.not instanceof ClientMessages) {
 			logger.log(BasicLevel.ERROR, "Remote agent refers to an unknown agent.");
 
 			nbMsgsDeliverSinceCreation -= ((ClientMessages) uA.not).getMessageCount();
 			addClientMessages(((ClientMessages) uA.not));
 		} else if (uA.not instanceof PingNot) {
-      logger.log(BasicLevel.ERROR, "Unknown agent. '" + REMOTE_AGENT_OPTION
-                 + "' property refers to an unknown agent.");
+			logger.log(BasicLevel.ERROR, "Unknown agent. '" + REMOTE_AGENT_OPTION
+					+ "' property refers to an unknown agent.");
 		} else {
 			super.doUnknownAgent(uA);
 		}
@@ -207,25 +208,25 @@ public class AliasInQueue extends Queue {
 		AgentId dest;
 		int index;
 
-//		if (adminRequest instanceof SetRemoteDestination) {
-//			setSave(); // state change, so save.
-//
-//			dest = AgentId.fromString(((SetRemoteDestination) adminRequest).getNewId());
-//			index = destinations.indexOf(dest);
-//			if (index == -1) {
-//				destinations.add(dest);
-//				metrics.add(new Long(0l));
-//				weights.add(new Long(1l));
-//
-//				currentDestination = destinations.size() - 1;
-//				//loadBalancing = false;
-//			} else {
-//				currentDestination = index;
-//			}
-//
-//			replyToTopic(new AdminReply(true, null),
-//			             not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
-//		} else 
+		//		if (adminRequest instanceof SetRemoteDestination) {
+		//			setSave(); // state change, so save.
+		//
+		//			dest = AgentId.fromString(((SetRemoteDestination) adminRequest).getNewId());
+		//			index = destinations.indexOf(dest);
+		//			if (index == -1) {
+		//				destinations.add(dest);
+		//				metrics.add(new Long(0l));
+		//				weights.add(new Long(1l));
+		//
+		//				currentDestination = destinations.size() - 1;
+		//				//loadBalancing = false;
+		//			} else {
+		//				currentDestination = index;
+		//			}
+		//
+		//			replyToTopic(new AdminReply(true, null),
+		//			             not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
+		//		} else 
 		if (adminRequest instanceof AddRemoteDestination) {
 			setSave(); // state change, so save.
 
@@ -236,32 +237,41 @@ public class AliasInQueue extends Queue {
 				weights.add(new Long(1l));
 			}
 			replyToTopic(new AdminReply(true, null),
-			             not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());			
+					not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());			
 		} else if (adminRequest instanceof DelRemoteDestination) {
-		  // The AQ should have at least one remote destination
-		  if (destinations.size() > 1) {
-		    setSave(); // state change, so save.
+			// The AQ should have at least one remote destination
+			if (destinations.size() > 1) {
+				setSave(); // state change, so save.
 
-		    dest = AgentId.fromString(((DelRemoteDestination) adminRequest).getNewId());
-		    index = destinations.indexOf(dest);
+				dest = AgentId.fromString(((DelRemoteDestination) adminRequest).getNewId());
+				index = destinations.indexOf(dest);
 
-		    if (index != -1) {
-		      destinations.remove(index);
-		      metrics.remove(index);
-		      weights.remove(index);
+				if (index != -1) {
+					destinations.remove(index);
+					metrics.remove(index);
+					weights.remove(index);
 
-		      if (currentDestination > index) {
-		        currentDestination--;
-		      } else if (currentDestination == destinations.size()) {
-		        currentDestination = 0;
-		      }
-		    }
-		    replyToTopic(new AdminReply(true, null),
-		                 not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
-		  } else {
-		    replyToTopic(new AdminReply(AdminReply.ILLEGAL_STATE, "Can't remove last destination"),
-		                 not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
-		  }
+					if (currentDestination > index) {
+						currentDestination--;
+					} else if (currentDestination == destinations.size()) {
+						currentDestination = 0;
+					}
+				}
+				replyToTopic(new AdminReply(true, null),
+						not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
+			} else {
+				replyToTopic(new AdminReply(AdminReply.ILLEGAL_STATE, "Can't remove last destination"),
+						not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
+			}
+		} else if (adminRequest instanceof SendDestinationsWeights) {
+			setSave(); // state change, so save.
+			
+			int[] newWeights = ((SendDestinationsWeights) adminRequest).getWeights();
+			for (int i = 0; i < destinations.size(); i++)
+				weights.set(i,(long)newWeights[i]);
+			
+			replyToTopic(new AdminReply(true, null),
+					not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
 		} else {
 			super.handleAdminRequestNot(from, not);
 		}
@@ -283,7 +293,7 @@ public class AliasInQueue extends Queue {
 	private void sendNot(Notification not) {
 		Channel.sendTo(destinations.get(currentDestination),not);
 		currentDestination = (currentDestination + 1) % destinations.size();
-		
+
 		if (--weightLeft == 0) {
 			currentDestination = (currentDestination + 1) % destinations.size();
 			weightLeft = weights.get(currentDestination); 
@@ -302,12 +312,12 @@ public class AliasInQueue extends Queue {
 		oldmetrics.set(dest, newmetrics.get(dest));
 		Long x1 = (Long) not.get("NbMsgsDeliverSinceCreation");
 		if (x1 != null)
-		  newmetrics.set(dest, x1.longValue());
+			newmetrics.set(dest, x1.longValue());
 		metrics.set(dest, newmetrics.get(dest) - oldmetrics.get(dest));
-    Long x2 = (Long) not.get("PendingMessageCount");
-    long pending = 0L;
-    if (x2 != null)
-      pending = x2.longValue();
+		Long x2 = (Long) not.get("PendingMessageCount");
+		long pending = 0L;
+		if (x2 != null)
+			pending = x2.longValue();
 		logger.log(BasicLevel.ERROR,"Pending: " + pending + " from: " + dest);
 		// Correction (consider only 80% of the actual reception rate) 
 		if (pending > pendingMessagesThreshold) {
