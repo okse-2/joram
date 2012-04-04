@@ -33,7 +33,7 @@ public class ElasticityLoop {
 	public static final int minCapThreshold = 50;
 
 	/** Period of our elasticity loop in milliseconds. */
-	public static final Integer loopPeriod = 2000;
+	public static final Integer loopPeriod = 10000;
 
 	/** Rate at which reception rates are decreased (a percentage) */
 	private static int downRate = 20;
@@ -185,7 +185,7 @@ public class ElasticityLoop {
 		//Plan should be cancelled.
 		if (overloaded > 0) {
 			if (toRemove >= 0) {
-				rates.set(activeWorkers.indexOf(toRemove), toRemoveRate);
+				rates.set(toRemove, toRemoveRate);
 				toRemove = -1;
 				logger.log(Level.INFO,"Cancelled scaling down plan.");
 			}
@@ -197,6 +197,7 @@ public class ElasticityLoop {
 			toRemove = electWorkerToRemove();
 			toRemoveAge = 0;
 			toRemoveRate = rates.get(toRemove);
+			logger.log(Level.INFO,"Elected worker to remove: " + toRemove);
 		}
 
 		//Plan can continue.
@@ -267,8 +268,11 @@ public class ElasticityLoop {
 		
 		String rateStr = ""; 
 		for(int i = 0; i < activeWorkers.size(); i++) {
-			if (loads.get(i) > maxCapThreshold)
+			if (loads.get(i) > maxCapThreshold) {
 				rates.set(i,rates.get(i)*(100-downRate)/100);
+				if (rates.get(i) < minRate)
+					minRate = rates.get(i);
+			}
 			rateStr = rateStr + " " + rates.get(i);
 		}
 		logger.log(Level.FINE,"Regulated rates:" + rateStr);
@@ -333,6 +337,7 @@ public class ElasticityLoop {
 
 			AdminModule.disconnect();
 			correction = System.currentTimeMillis() - startTime;
+			logger.log(Level.FINE,"Iteration took: " + correction);
 		} while (!stopLoop);
 	}
 }

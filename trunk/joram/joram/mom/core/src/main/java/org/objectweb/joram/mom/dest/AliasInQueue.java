@@ -267,8 +267,13 @@ public class AliasInQueue extends Queue {
 			setSave(); // state change, so save.
 			
 			int[] newWeights = ((SendDestinationsWeights) adminRequest).getWeights();
-			for (int i = 0; i < destinations.size(); i++)
+			String weightStr = "";
+			for (int i = 0; i < destinations.size(); i++) {
+				weightStr = weightStr + " " + newWeights[i];
 				weights.set(i,(long)newWeights[i]);
+			}
+			
+			logger.log(BasicLevel.ERROR,"Received weights:" + weightStr);
 			
 			replyToTopic(new AdminReply(true, null),
 					not.getReplyTo(), not.getRequestMsgId(), not.getReplyMsgId());
@@ -292,8 +297,6 @@ public class AliasInQueue extends Queue {
 
 	private void sendNot(Notification not) {
 		Channel.sendTo(destinations.get(currentDestination),not);
-		currentDestination = (currentDestination + 1) % destinations.size();
-
 		if (--weightLeft == 0) {
 			currentDestination = (currentDestination + 1) % destinations.size();
 			weightLeft = weights.get(currentDestination); 

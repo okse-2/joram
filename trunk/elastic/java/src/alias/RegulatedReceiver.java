@@ -31,70 +31,69 @@ import javax.naming.*;
  * Receives rounds of messages from a given queue.
  */
 public class RegulatedReceiver {
-	
+
 	static class ReceiveRound extends Thread {
 		public void run() {
-			
+
 			done = false;
-			
-			for(int j = 0; j < Constants.RG_REC_LOAD; j++) {
+			for(int j = 0; j < 100; j++) {
 				try {
 					receiver.receive();
 				} catch (Exception e) {}
 			}
-			
+
 			done = true;
 		}
 	}
-	
+
 	static ReceiveRound rr;
 	static boolean done = false;
 	static int number;
 	static MessageConsumer receiver = null;
-	
-	
+
+
 	static Context ictx = null;
 
 	public static void main (String argv[]) throws Exception {
 		number = Integer.parseInt(argv[0]);
 		System.out.println("[RegulatedReceiver " + number + "]\tStarted...");
-		
+
 		ictx = new InitialContext();
 		ConnectionFactory cnxF = (ConnectionFactory) ictx.lookup("cf" + number);
 		Queue dest = (Queue) ictx.lookup("remote" + number);
 		ictx.close();
-		
+
 		Connection cnx = cnxF.createConnection();
 		Session session = cnx.createSession(false,Session.AUTO_ACKNOWLEDGE);
 		receiver = session.createConsumer(dest);
 
-		long start, wait, rstart;
-		
+		long wait, rstart;
+
 		//(new Inverse()).start();
-		
+
 		cnx.start();
-		start = System.currentTimeMillis();
 		for(int i = 1; true; i++) {
 			rstart = System.currentTimeMillis();
 			rr = new ReceiveRound();
 			rr.start();
-			rr.join(Constants.TIMEOUT);
-			if (!done)
-				break;
-			
+			rr.join(Constants.TIME_UNIT);
+
+
 			System.out.println("[RegulatedReceiver " + number + "]\t" + i + "\t" 
 					+ (System.currentTimeMillis() - rstart) );
-			
-			wait = start + Constants.TIME_UNIT*i - System.currentTimeMillis();
-			if (wait > 0)
-				Thread.sleep(wait);
-			
+
+			if (done) {
+				wait = rstart + Constants.TIME_UNIT - System.currentTimeMillis();
+				if (wait > 0)
+					Thread.sleep(wait);
+			}
 		}
-		
+		/*
 		long duration = System.currentTimeMillis() - Constants.TIMEOUT - start;
 		System.out.println("[RegulatedReceiver " + number + "]\tT\t" + duration);
 		cnx.close();
 		System.out.println("[RegulatedReceiver " + number + "]\tDone.");
+		*/
 	}
-		
+
 }

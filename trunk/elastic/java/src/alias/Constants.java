@@ -10,9 +10,6 @@ public class Constants {
 	static final int MSG_PER_ROUND = 1000;
 	
 	
-	static final int RG_ROUNDS = 300;
-	static final int RG_SND_LOAD = 100;
-	static final int RG_REC_LOAD = 120;
-	static final int TIMEOUT = 1000000;
+	static final int RG_RND_NUMBER = 500;
 	static final int TIME_UNIT = 1000;
 }
