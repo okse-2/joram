@@ -85,7 +85,7 @@ public abstract class MonitoringTimerTask extends java.util.TimerTask implements
    * @param timer Timer to use to schedule the resulting task.
    */
   protected final void start(Timer timer) {
-    timer.scheduleAtFixedRate(this, period, period);
+    timer.scheduleAtFixedRate(this, 0, period);
   }
   
   /**
