@@ -14,6 +14,7 @@ cd ../../test
 rm -rf joram/classes joram/ship
 cp -rf ../java/classes joram
 cp -rf ../../joram/ship joram
+cp bundles/* joram/ship/bundle
 
 echo "DEPLOYING VMS.."
 for i in {0..2}
@@ -38,6 +39,6 @@ ssh vm1 "nohup joram/bin/client.sh alias.RegulatedReceiver 1 > receiver1.log &"
 ssh vm1 "nohup joram/bin/client.sh alias.RegulatedReceiver 2 > receiver2.log &"
 ssh vm2 "nohup joram/bin/client.sh alias.RegulatedReceiver 3 > receiver3.log &"
 ssh vm2 "nohup joram/bin/client.sh alias.RegulatedReceiver 4 > receiver4.log &"
-ssh vm0 "nohup joram/bin/client.sh alias.ElasticityLoop > elasticity.log &"
+ssh vm0 "nohup joram/bin/client.sh alias.ElasticityLoop &> elasticity.log &"
 ssh vm0 "nohup joram/bin/client.sh alias.RegulatedSender > sender.log &"
 echo "DONE."
