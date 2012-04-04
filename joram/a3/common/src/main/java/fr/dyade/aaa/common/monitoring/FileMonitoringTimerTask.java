@@ -124,14 +124,19 @@ public class FileMonitoringTimerTask extends MonitoringTimerTask {
   public FileMonitoringTimerTask() {}
   
   /**
+   * Pathname of the result file.
+   */
+  public String path = null;
+  
+  /**
    * Initializes the <code>FileMonitoringTimerTask</code> component.
    *
    */
   public void init(Timer timer, long period, Properties attlist, Properties taskProps){
   	super.period = period;
-  	super.attlist = (Properties)attlist.clone();
+  	super.attlist = (Properties) attlist.clone();
 
-    String path = taskProps.getProperty("resultPath");
+    path = taskProps.getProperty("resultPath");
     
     try {
         writer = new FileWriter(path, true);
@@ -195,4 +200,17 @@ public class FileMonitoringTimerTask extends MonitoringTimerTask {
     strbuf.setLength(0);
   }
 
+  /**
+   * Close the result file, be careful you have to call this method only if the
+   * monitoring task is stopped.
+   */
+  public void close() {
+    try {
+      writer.flush();
+      writer.close();
+    } catch (IOException exc) {
+      logger.log(BasicLevel.ERROR,
+                 "FileMonitoringTimerTask.close, cannot close file.", exc);
+    }
+  }
 }
