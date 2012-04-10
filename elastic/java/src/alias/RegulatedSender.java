@@ -31,7 +31,7 @@ public class RegulatedSender {
 	static Context ictx = null;
 
 	public static int computeLoad(int round) {
-		int unit = 90; 
+		/*int unit = 90; 
 		if (round < 100)
 			return unit;
 		if (round < 200)
@@ -41,8 +41,13 @@ public class RegulatedSender {
 		if (round < 400)
 			return unit*2;
 		
-		return unit;
+		return unit;*/
+		if (round < 600)
+			return round / 2;
+		if (round < 800)
+			return 300;
 		
+		return 300 - (round - 800) / 2; 
 	}
 	
 	public static void main(String argv[]) throws Exception {
@@ -69,7 +74,7 @@ public class RegulatedSender {
 		int load;
 		cnx.start();
 		start = System.currentTimeMillis();
-		for(int i = 0; i < Constants.RG_RND_NUMBER; i++) {
+		for(int i = 0; i < 1400; i++) {
 			load = computeLoad(i);
 			for(int j = 0; j < load; j++) {
 				sender.send(message);
