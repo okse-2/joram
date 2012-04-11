@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,9 +22,7 @@
  */
 package org.objectweb.joram.mom.dest;
 
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -34,31 +32,27 @@ import org.objectweb.joram.shared.messages.Message;
 public class MonitoringAcquisition implements AcquisitionHandler {
 
   /** The various elements to monitor. */
-  private Vector elements = new Vector();
+  private Vector<MonitoringElement> elements = new Vector<MonitoringElement>();
 
   public void retrieve(ReliableTransmitter transmitter) throws Exception {
     Message message = new Message();
     MonitoringHelper.getJMXValues(message, elements);
-    List list = new ArrayList(1);
-    list.add(message);
-    transmitter.transmit(list, null);
+    transmitter.transmit(message, null);
   }
 
   public void setProperties(Properties properties) {
     if (properties != null) {
       elements.clear();
-      Enumeration e = properties.keys();
+      Enumeration<Object> e = properties.keys();
       while (e.hasMoreElements()) {
         String name = (String) e.nextElement();
         String attributes = ConversionHelper.toString(properties.get(name));
         elements.add(new MonitoringElement(name, attributes));
       }
     }
-
   }
 
   public void close() {
     // Nothing to do
   }
-  
 }
