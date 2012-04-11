@@ -850,6 +850,7 @@ public class Message implements javax.jms.Message {
     joramMsg.setJMSReplyTo(jmsMsg.getJMSReplyTo());
     joramMsg.setJMSType(jmsMsg.getJMSType());
     joramMsg.setJMSMessageID(jmsMsg.getJMSMessageID());
+    joramMsg.setJMSExpiration(jmsMsg.getJMSExpiration());
 
     Enumeration names = jmsMsg.getPropertyNames();
     if (names != null) {
