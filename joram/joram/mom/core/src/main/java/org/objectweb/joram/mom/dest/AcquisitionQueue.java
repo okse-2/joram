@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2010 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2010 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -39,7 +39,6 @@ import fr.dyade.aaa.common.Debug;
  * using an {@link AcquisitionModule}.
  */
 public class AcquisitionQueue extends Queue implements AcquisitionQueueMBean {
-
   /** define serialVersionUID for interoperability */
   private static final long serialVersionUID = 1L;
 
