@@ -257,7 +257,7 @@ public class AcquisitionModule implements ReliableTransmitter {
       } catch (MessageValueException exc) {
         logger.log(BasicLevel.ERROR, "AcquisitionModule: can't parse defined period property.");
       }
-      props.remove(PERIOD);
+//      props.remove(PERIOD);
     }
     if (!isDaemon && period > 0) {
       if (logger.isLoggable(BasicLevel.DEBUG)) {
@@ -273,8 +273,9 @@ public class AcquisitionModule implements ReliableTransmitter {
         isPersistencySet = true;
       } catch (MessageValueException exc) {
         logger.log(BasicLevel.ERROR, "AcquisitionModule: can't parse defined message persistence property.");
+        props.remove(PERSISTENT_PROPERTY);
       }
-      props.remove(PERSISTENT_PROPERTY);
+//      props.remove(PERSISTENT_PROPERTY);
     }
 
     if (props.containsKey(PRIORITY_PROPERTY)) {
@@ -284,7 +285,7 @@ public class AcquisitionModule implements ReliableTransmitter {
       } catch (MessageValueException exc) {
         logger.log(BasicLevel.ERROR, "AcquisitionModule: can't parse defined message priority property.");
       }
-      props.remove(PRIORITY_PROPERTY);
+//      props.remove(PRIORITY_PROPERTY);
     }
 
     if (props.containsKey(EXPIRATION_PROPERTY)) {
@@ -294,7 +295,7 @@ public class AcquisitionModule implements ReliableTransmitter {
       } catch (MessageValueException exc) {
         logger.log(BasicLevel.ERROR, "AcquisitionModule: can't parse defined message expiration property.");
       }
-      props.remove(EXPIRATION_PROPERTY);
+//      props.remove(EXPIRATION_PROPERTY);
     }
 
     if (props.containsKey(CLASS_NAME)
@@ -439,17 +440,47 @@ public class AcquisitionModule implements ReliableTransmitter {
     }
   }
 
+  /**
+   * Transmits a message to the MOM in a reliable way: if the message is
+   * persistent it has been persisted when the method returns and therefore
+   * can be safely acknowledged.
+   * The message ID is used to avoid duplicates if a server crash happens right
+   * after transmitting the message and before it has been acknowledged. It can
+   * be <code>null</code> if such duplicates are tolerated.
+   * 
+   * @param message
+   *          the message to transmit
+   * @param messageId
+   *          the unique ID of the transmitted message
+   * 
+   * @see ReliableTransmitter
+   */
   public void transmit(Message message, String messageId) {
     if (message != null) {
-      Channel.sendTo(destination.getId(), new AcquisitionNot(new ClientMessages(-1, -1, message),
-          isPersistent, messageId));
+      Channel.sendTo(destination.getId(),
+                     new AcquisitionNot(new ClientMessages(-1, -1, message), message.persistent, messageId));
     }
   }
 
-  public void transmit(List messages, String messagesId) {
+  /**
+   * Transmits a list of messages to the MOM in a reliable way: if persistent
+   * is set to true the messages have been persisted when the method returns and
+   * therefore can be safely acknowledged.
+   * The ID is used to avoid duplicates if a server crash happens right after
+   * transmitting the messages and before they have been acknowledged. It can be
+   * <code>null</code> if such duplicates are tolerated.
+   * 
+   * @param messages
+   *          the messages to transmit
+   * @param messagesId
+   *          a unique ID for the list of transmitted messages.
+   * 
+   * @see ReliableTransmitter
+   */
+  public void transmit(List messages, boolean persistent, String messagesId) {
     if (messages != null && messages.size() > 0) {
-      Channel.sendTo(destination.getId(), new AcquisitionNot(new ClientMessages(-1, -1, messages),
-          isPersistent, messagesId));
+      Channel.sendTo(destination.getId(),
+                     new AcquisitionNot(new ClientMessages(-1, -1, messages), persistent, messagesId));
     }
   }
 
