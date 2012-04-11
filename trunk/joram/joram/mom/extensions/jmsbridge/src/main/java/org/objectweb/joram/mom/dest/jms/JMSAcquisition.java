@@ -211,7 +211,6 @@ public class JMSAcquisition implements AcquisitionDaemon {
       }
       try {
         try {
-
           org.objectweb.joram.client.jms.Message clientMessage = org.objectweb.joram.client.jms.Message.convertJMSMessage(jmsMessage);
           Message momMessage = clientMessage.getMomMsg();
 
