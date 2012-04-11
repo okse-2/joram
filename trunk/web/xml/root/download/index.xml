@@ -23,7 +23,7 @@
 	    <ul>
       <li><code>joram-release-5.*.zip</code>, including JORAM libraries and the JORAM samples sources;</li>
       <li><code>joram-release-5.*-src.zip</code>, including JORAM sources;</li>
-	    <li><code>joram-release-5.*-doc.tgz</code>, including JORAM javadoc;</li>
+	    <li><code>joram-release-5.*-javadoc.jar</code>, including JORAM javadoc;</li>
       <li><code>joram-jca-jonas-5.*.rar</code>, JCA Adapter for Jonas;</li>
       <li><code>joram-jca-remote-5.*.rar</code>, the resource adapter for a collocated JORAM server within any J2EE compliant 
 	    	application server.</li>
@@ -62,7 +62,9 @@
       be unstable.</p>
       <p>The JavaDoc of the version in development is generated each day at 00:00 AM CEST, it is available at:
 	    <a href="http://bamboo.ow2.org/artifact/JORAM-ANT/JOB1/build-latest/JavaDoc/target/apidocs/index.html">here</a>.</p>
-      
+      <p>Joram nightly builds (snapshots) are also available from the
+      <a href="http://repository.ow2.org/nexus/index.html#nexus-search;quick~joram">OW2 Maven repository</a>:
+      http://repository.ow2.org/nexus, GroupId is org.ow2.joram</p>
       </s2>
       
       <s2 name="JORAM SVN code base">
@@ -104,6 +106,7 @@
 	      	<li>joram-mom-extensions-collector,</li>
 	        <li>joram-mom-extensions-ftp,</li>
 	        <li>joram-mom-extensions-jmsbridge,</li>
+	        <li>joram-mom-extensions-amqp,</li>
 	        <li>joram-mom-extensions-mail,</li>
 	        <li>joram-mom-extensions-scheduler</li>
 	      </ul></li>
