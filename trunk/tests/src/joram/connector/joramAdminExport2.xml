@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 <JoramAdmin>
   <AdminModule>
-    <collocatedConnect name="root" password="root"/>
+    <connect host="localhost" port="17010"
+             name="root" password="root"/>
   </AdminModule>
   
   <Queue name="anotherQueue">
