@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - 2006 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -24,9 +24,6 @@
  */
 package org.objectweb.joram.client.connector;
 
-import java.util.Iterator;
-import java.util.Set;
-
 import javax.jms.IllegalStateException;
 import javax.jms.JMSException;
 import javax.jms.JMSSecurityException;
@@ -39,11 +36,8 @@ import javax.resource.ResourceException;
 import javax.resource.spi.CommException;
 import javax.resource.spi.ConnectionManager;
 import javax.resource.spi.ConnectionRequestInfo;
-import javax.resource.spi.ManagedConnection;
 import javax.resource.spi.SecurityException;
-import javax.security.auth.Subject;
 
-import org.objectweb.joram.client.jms.admin.AbstractConnectionFactory;
 import org.objectweb.joram.client.jms.ha.local.XAHALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.local.XAQueueHALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.XAHATcpConnectionFactory;
@@ -96,261 +90,114 @@ public class ManagedQueueConnectionFactoryImpl extends ManagedConnectionFactoryI
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createConnectionFactory()");
 
     OutboundConnectionFactory factory =
-      new OutboundQueueConnectionFactory(this,
-                                         DefaultConnectionManager.getRef());
+      new OutboundQueueConnectionFactory(this, DefaultConnectionManager.getRef());
 
     Reference ref =
       new Reference(factory.getClass().getName(),
                     "org.objectweb.joram.client.connector.ObjectFactoryImpl",
                     null);
-    ref.add(new StringRefAddr("hostName", hostName));
-    ref.add(new StringRefAddr("serverPort", "" + serverPort));
-    ref.add(new StringRefAddr("userName", userName));
-    ref.add(new StringRefAddr("password", password));
-    ref.add(new StringRefAddr("identityClass", identityClass));
+    ref.add(new StringRefAddr("hostName", getHostName()));
+    ref.add(new StringRefAddr("serverPort", "" + getServerPort()));
+    ref.add(new StringRefAddr("userName", getUserName()));
+    ref.add(new StringRefAddr("password", getPassword()));
+    ref.add(new StringRefAddr("identityClass", getIdentityClass()));
+
 
     factory.setReference(ref);
     return factory;
   }
 
-  /**
-   * Creates a new PTP physical connection to the underlying JORAM server,
-   * and returns a <code>ManagedConnectionImpl</code> instance for a
-   * managed environment.
-   *
-   * @param subject        Security data, not taken into account.
-   * @param cxRequest      User identification data, may be <code>null</code>.
-   *
-   * @exception CommException          If the JORAM server is not reachable.
-   * @exception SecurityException      If the connecting is not allowed.
-   * @exception IllegalStateException  If the central Joram adapter state is
-   *                                    invalid.
-   * @exception ResourceException      If the provided user info is invalid,
-   *                                   or if connecting fails for any other
-   *                                   reason.
-   */
-  public ManagedConnection
-      createManagedConnection(Subject subject,
-                              ConnectionRequestInfo cxRequest)
-    throws ResourceException {
+  @Override
+  protected XAConnectionFactory createFactory(ConnectionRequestInfo cxRequest) throws ResourceException {
+  	XAConnectionFactory factory = null;
 
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                    this + " createManagedConnection(" + subject +
-                                    ", " + cxRequest + ")");
+  	String hostName = getHostName();
+  	int serverPort = getServerPort();
+  	if (isCollocated()) {
+  		hostName = "localhost";
+  		serverPort = -1;
+  	}
 
-    String userName;
-    String password;
-    String identityClass;
+  	if (isHa()) {
+  		if (isCollocated()) {
+  			if (getHAURL() != null) {
+  				if (cxRequest instanceof QueueConnectionRequest) {
+  					factory = XAQueueHATcpConnectionFactory.create(getHAURL());
+  				} else {
+  					factory = XAHATcpConnectionFactory.create(getHAURL());
+  				}
+  			} else {          
+  				if (cxRequest instanceof QueueConnectionRequest) {
+  					factory = XAQueueHALocalConnectionFactory.create();
+  				} else {
+  					factory = XAHALocalConnectionFactory.create();
+  				}
+  			}
+  		} else {
+  			String urlHa = "hajoram://" + hostName + ":" + serverPort;
+  			if (cxRequest instanceof QueueConnectionRequest) {
+  				factory = XAQueueHATcpConnectionFactory.create(urlHa);
+  			} else {
+  				factory = XAHATcpConnectionFactory.create(urlHa);
+  			}
+  		}
+  	} else {
+  		if (isCollocated()) {
+  			if (cxRequest instanceof QueueConnectionRequest) {
+  				factory = XAQueueLocalConnectionFactory.create();
+  			} else {
+  				factory = XALocalConnectionFactory.create();
+  			}
+  		} else {
+  			if (cxRequest instanceof QueueConnectionRequest) {
+  				factory = XAQueueTcpConnectionFactory.create(hostName, serverPort);
+  			} else {
+  				factory = XATcpConnectionFactory.create(hostName, serverPort);
+  			}
+  		}
+  	}
 
-    String hostName = this.hostName;
-    int serverPort = this.serverPort;
-
-    // For XA recovery, connecting to the JORAM server with the default user
-    // identity.
-    if (cxRequest == null) {
-      userName = this.userName;
-      password = this.password;
-      identityClass = this.identityClass; 
-    }
-    else {
-      if (! (cxRequest instanceof ConnectionRequest)) {
-          if (out != null)
-              out.print("Provided ConnectionRequestInfo instance is not a JORAM object.");
-        throw new ResourceException("Provided ConnectionRequestInfo instance "
-                                    + "is not a JORAM object.");
-      }
-
-      userName = ((ConnectionRequest) cxRequest).getUserName();
-      password = ((ConnectionRequest) cxRequest).getPassword();
-      identityClass = ((ConnectionRequest) cxRequest).getIdentityClass();
-    }
-
-    XAConnection cnx = null;
-
-    if (collocated) {
-        hostName = "localhost";
-        serverPort = -1;
-    }
-
-    try {
-
-        if (isHa) {
-          if (collocated) {
-            if (ra.haURL != null) {
-              if (cxRequest instanceof QueueConnectionRequest) {
-                XAQueueConnectionFactory factory = XAQueueHATcpConnectionFactory.create(ra.haURL);
-                setParameters(factory);
-                ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
-                cnx = factory.createXAQueueConnection(userName, password);
-              } else {
-                XAConnectionFactory factory = XAHATcpConnectionFactory.create(ra.haURL);
-                setParameters(factory);
-                ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
-                cnx = factory.createXAConnection(userName, password);
-              }
-            } else {          
-              if (cxRequest instanceof QueueConnectionRequest) {
-                XAQueueConnectionFactory factory = XAQueueHALocalConnectionFactory.create();
-                setParameters(factory);
-                ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
-                cnx = factory.createXAQueueConnection(userName, password);
-              } else {
-                XAConnectionFactory factory = XAHALocalConnectionFactory.create();
-                setParameters(factory);
-                cnx = factory.createXAConnection(userName, password);
-              }
-            }
-          } else {
-            String urlHa = "hajoram://" + hostName + ":" + serverPort;
-            if (cxRequest instanceof QueueConnectionRequest) {
-              XAQueueConnectionFactory factory = XAQueueHATcpConnectionFactory.create(urlHa);
-              setParameters(factory);
-              ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
-              cnx = factory.createXAQueueConnection(userName, password);
-            } else {
-              XAConnectionFactory factory = XAHATcpConnectionFactory.create(urlHa);
-              setParameters(factory);
-              ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
-              cnx = factory.createXAConnection(userName, password);
-            }
-          }
-        } else {
-            if (collocated) {
-                if (cxRequest instanceof QueueConnectionRequest) {
-                    XAQueueConnectionFactory factory = XAQueueLocalConnectionFactory.create();
-                    setParameters(factory);
-                    ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
-                    cnx = factory.createXAQueueConnection(userName, password);
-                } else {
-                    XAConnectionFactory factory = XALocalConnectionFactory.create();
-                    setParameters(factory);
-                    ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
-                    cnx = factory.createXAConnection(userName, password);
-                }
-            } else {
-                if (cxRequest instanceof QueueConnectionRequest) {
-                    XAQueueConnectionFactory factory = XAQueueTcpConnectionFactory.create(hostName, serverPort);
-                    setParameters(factory);
-                    ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
-                    cnx = factory.createXAQueueConnection(userName, password);
-                } else {
-                    XAConnectionFactory factory = XATcpConnectionFactory.create(hostName, serverPort);
-                    setParameters(factory);
-                    ((AbstractConnectionFactory) factory).setIdentityClassName(identityClass);
-                    cnx = factory.createXAConnection(userName, password);
-                }
-            }
-        }
-
-        if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-            AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createManagedConnection cnx = " + cnx);
-
-    } catch (IllegalStateException exc) {
-        if (out != null)
-            out.print("Could not access the JORAM server: " + exc);
-      throw new CommException("Could not access the JORAM server: " + exc);
-    } catch (JMSSecurityException exc) {
-        if (out != null)
-            out.print("Invalid user identification: " + exc);
-      throw new SecurityException("Invalid user identification: " + exc);
-    } catch (JMSException exc) {
-        if (out != null)
-            out.print("Failed connecting process: " + exc);
-      throw new ResourceException("Failed connecting process: " + exc);
-    }
-
-    ManagedConnection managedCx = new ManagedConnectionImpl(ra,
-                                                            cnx,
-                                                            hostName,
-                                                            serverPort,
-                                                            userName);
-    managedCx.setLogWriter(out);
-
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                    this + " createManagedConnection managedCx = " + managedCx);
-
-    return managedCx;
+  	if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
+  		AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createFactory factory = " + factory);
+  	
+  	return factory;
   }
 
-  /**
-   * Finds a matching connection from the candidate set of connections and
-   * returns a <code>ManagedConnectionImpl</code> instance.
-   *
-   * @param connectionSet  Set of connections to test.
-   * @param subject        Security data, not taken into account.
-   * @param cxRequest      User identification data, may be <code>null</code>.
-   *
-   * @exception ResourceException  If the provided connection request info is
-   *                               invalid.
-   */
-  public ManagedConnection matchManagedConnections(Set connectionSet, Subject subject,
-      ConnectionRequestInfo cxRequest) throws ResourceException {
-
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                    this + " matchManagedConnections(" + connectionSet +
-                                    ", " + subject + ", " + cxRequest + ")");
-
-    String userName;
-    String mode = "Unified";
-
-    // No user identification provided, using the default one.
-    if (cxRequest == null)
-      userName = this.userName;
-    else {
-      if (! (cxRequest instanceof ConnectionRequest)) {
-          if (out != null)
-              out.print("Provided ConnectionRequestInfo instance is not a JORAM object.");
-        throw new ResourceException("Provided ConnectionRequestInfo instance "
-                                    + "is not a JORAM object.");
-      }
-
-      userName = ((ConnectionRequest) cxRequest).getUserName();
-
-      if (cxRequest instanceof QueueConnectionRequest)
-        mode = "PTP";
-    }
-
-    String hostName = this.hostName;
-    int serverPort = this.serverPort;
-
-    if (collocated) {
-        hostName = "localhost";
-        serverPort = -1;
-    }
-
-    ManagedConnectionImpl managedCx = null;
-    boolean matching = false;
-
-    Iterator it = connectionSet.iterator();
-    while (! matching && it.hasNext()) {
-      try {
-        managedCx = (ManagedConnectionImpl) it.next();
-        matching = managedCx.matches(hostName, serverPort, userName, mode);
-      }
-      catch (ClassCastException exc) {}
-    }
-
-    if (matching) {
+  @Override
+  protected XAConnection createXAConnection(XAConnectionFactory factory, String userName, String password) throws ResourceException {
+  	XAConnection cnx = null;
+ 	 try {
+ 		 if (factory instanceof XAQueueConnectionFactory)
+ 			 cnx = ((XAQueueConnectionFactory) factory).createXAQueueConnection(userName, password);
+ 		 else
+ 			 cnx = factory.createXAConnection(userName, password);
       if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
         AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                      this + " matchManagedConnections match " + managedCx);
-      managedCx.setLogWriter(out);
-      return managedCx;
+                                      this + " createXAConnection cnx = " + cnx);
+    } catch (IllegalStateException exc) {
+      if (out != null)
+        out.print("Could not access the JORAM server: " + exc);
+      throw new CommException("Could not access the JORAM server: " + exc);
+    } catch (JMSSecurityException exc) {
+      if (out != null)
+        out.print("Invalid user identification: " + exc);
+      throw new SecurityException("Invalid user identification: " + exc);
+    } catch (JMSException exc) {
+      if (out != null)
+        out.print("Failed connecting process: " + exc);
+      throw new ResourceException("Failed connecting process: " + exc);
     }
-    return null;
+    return cnx;
   }
-
+  	
   /** Returns a code depending on the managed factory configuration. */
   public int hashCode() {
-    return ("PTP:"
-            + hostName
-            + ":"
-            + serverPort
-            + "-"
-            + userName).hashCode();
+  	return ("PTP:"
+  			+ getHostName()
+  			+ ":"
+  			+ getServerPort()
+  			+ "-"
+  			+ getUserName()).hashCode();
   }
 
   /** Compares managed factories according to their configuration. */
@@ -358,16 +205,6 @@ public class ManagedQueueConnectionFactoryImpl extends ManagedConnectionFactoryI
     if (! (o instanceof ManagedQueueConnectionFactoryImpl))
       return false;
 
-    ManagedConnectionFactoryImpl other = (ManagedConnectionFactoryImpl) o;
-
-    boolean res =
-      hostName.equals(other.hostName)
-      && serverPort == other.serverPort
-      && userName.equals(other.userName);
-
-    if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
-      AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG,
-                                    this + " equals = " + res);
-    return res;
+    return super.equals(o);
   }
 }

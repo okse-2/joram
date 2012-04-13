@@ -1,5 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -126,6 +127,7 @@ class InboundConsumer implements javax.jms.ServerSessionPool
     this.cnx = cnx;
     this.transacted = transacted;
     this.ackMode = ackMode;
+    this.closeDurSub = closeDurSub;
 
     if (maxWorks < 0) maxWorks = 0;
     this.maxWorks = maxWorks;

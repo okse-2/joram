@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2004 - Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -131,16 +131,9 @@ public class DefaultConnectionManager
   private void setFactoryParameters(AbstractConnectionFactory factory , ManagedConnectionFactoryImpl mcf) {
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, 
-                                    this + " setFactoryParameters(" + factory + "," + mcf + ")");   
-    factory.getParameters().connectingTimer = mcf.getConnectingTimer();
-    factory.getParameters().cnxPendingTimer = mcf.getCnxPendingTimer();
-    factory.getParameters().txPendingTimer = mcf.getTxPendingTimer();
-    factory.getParameters().asyncSend = mcf.isAsyncSend();
-    factory.getParameters().multiThreadSync = mcf.isMultiThreadSync();
-    factory.getParameters().multiThreadSyncDelay = mcf.getMultiThreadSyncDelay();
-    factory.getParameters().outLocalAddress = mcf.getOutLocalAddress();
-    factory.getParameters().outLocalPort = mcf.getOutLocalPort().intValue();
+                                    this + " setFactoryParameters(" + factory + "," + mcf + ")"); 
     
+    mcf.setParameters(factory);
   }
 
   /**
