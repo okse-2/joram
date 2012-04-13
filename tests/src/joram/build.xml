@@ -579,6 +579,10 @@
     <available file="${joramAdmin}" type="file" 
                property="joramAdmin.available"/>
     <antcall target="cpJoramAdmin" inheritAll="true"/>
+  	
+  	<available file="${joramAdminExport}" type="file" 
+  	           property="joramAdminExport.available"/>
+  	<antcall target="cpJoramAdminExport" inheritAll="true"/>
 
     <available file="${jndiconf}" type="file"
                property="jndi.available"/>
@@ -608,6 +612,10 @@
     <copy file="${joramAdmin}" tofile="${test.dir}/joramAdmin.xml"/>
   </target>
 
+	<target name="cpJoramAdminExport" if="joramAdminExport.available">
+	  <copy file="${joramAdminExport}" tofile="${test.dir}/joramAdminExport.xml"/>
+	</target>
+	
   <target name="cpJndi" if="jndi.available">
     <copy file="${jndiconf}" tofile="${test.dir}/jndi.properties"/>
   </target>
@@ -4934,7 +4942,6 @@
     <antcall target="jca.test1.2"/>
     <antcall target="jca.test1.3"/>
     <antcall target="jca.test1.4"/>
-    <antcall target="jca.test1.5"/>
   </target>
 
   <target name="jca.test1.1" depends="init.a3props,compile"
@@ -4947,6 +4954,7 @@
       <param name="a3conf" value="connector/a3servers.xml"/>
       <param name="jndiconf" value="connector/jndi.properties"/>
       <param name="joramAdmin" value="connector/joramAdmin1.xml"/>
+    	<param name="joramAdminExport" value="connector/joramAdminExport.xml"/>
     </antcall>
   </target>
 
@@ -4960,6 +4968,7 @@
       <param name="a3conf" value="connector/a3servers.xml"/>
       <param name="jndiconf" value="connector/jndi.properties"/>
       <param name="joramAdmin" value="connector/joramAdmin2.xml"/>
+    	<param name="joramAdminExport" value="connector/joramAdminExport.xml"/>
     </antcall>
   </target>
 
@@ -4973,6 +4982,7 @@
       <param name="a3conf" value="connector/a3servers.xml"/>
       <param name="jndiconf" value="connector/jndi.properties"/>
       <param name="joramAdmin" value="connector/joramAdmin3.xml"/>
+    	<param name="joramAdminExport" value="connector/joramAdminExport.xml"/>
     </antcall>
   </target>
 	
@@ -4985,20 +4995,8 @@
       <param name="args" value=""/>
       <param name="a3conf" value="connector/a3servers.xml"/>
       <param name="jndiconf" value="connector/jndi.properties"/>
-      <param name="joramAdmin" value="connector/joramAdmin1.xml"/>
-    </antcall>
-  </target>
-	
-  <target name="jca.test1.5" depends="init.a3props,compile"
-          description=" --> test joram connector (remote server)">
-    <antcall target="jca.test.run" inheritAll="true">
-      <param name="className" value="joram.connector.ConnectorTest1"/>
-      <param name="testid" value="jca.test1.5"/>
-      <param name="jvmargs" value="-Dcolocated=false"/>
-      <param name="args" value=""/>
-      <param name="a3conf" value="connector/a3servers.xml"/>
-      <param name="jndiconf" value="connector/jndi.properties"/>
       <param name="joramAdmin" value="connector/joramAdmin3.xml"/>
+    	<param name="joramAdminExport" value="connector/joramAdminExport2.xml"/>
     </antcall>
   </target>
 	
@@ -5011,6 +5009,7 @@
       <param name="a3conf" value="connector/a3servers.xml"/>
       <param name="jndiconf" value="connector/jndi.properties"/>
       <param name="joramAdmin" value="connector/joramAdmin4.xml"/>
+    	<param name="joramAdminExport" value="connector/joramAdminExport.xml"/>
     </antcall>
   </target>
 
