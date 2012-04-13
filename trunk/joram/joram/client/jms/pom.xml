@@ -81,6 +81,8 @@
               org.objectweb.util.monolog,
               org.objectweb.util.monolog.api,
               org.osgi.framework,
+              org.osgi.service.cm,
+              org.osgi.util.tracker,
               org.xml.sax,
               org.xml.sax.helpers</Import-Package>
             <Export-Package>org.objectweb.joram.client.jms,
@@ -92,6 +94,7 @@
               org.objectweb.joram.client.jms.local,
               org.objectweb.joram.client.jms.soap,
               org.objectweb.joram.client.jms.tcp</Export-Package>
+              <DynamicImport-Package>*</DynamicImport-Package>
           </instructions>
         </configuration>
       </plugin>
