@@ -191,6 +191,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <stomp.version>1.0</stomp.version>
     <commons-io.version>1.4</commons-io.version>
+    <ow2-util-substitution.version>1.0.32</ow2-util-substitution.version>
   </properties>
 
   <organization>
@@ -302,6 +303,11 @@
         <artifactId>commons-io</artifactId>
         <version>${commons-io.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.ow2.bundles</groupId>
+        <artifactId>ow2-util-substitution</artifactId>
+        <version>${ow2-util-substitution.version}</version>
+    </dependency>
     </dependencies>
   </dependencyManagement>
 
