@@ -17,6 +17,7 @@
     <module>common</module>
     <module>rt</module>
     <module>osgi</module>
+    <module>services</module>
   </modules>
 
 </project>
