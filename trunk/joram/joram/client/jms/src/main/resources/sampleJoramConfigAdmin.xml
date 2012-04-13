@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ JORAM: Java(TM) Open Reliable Asynchronous Messaging
+ Copyright (C) 2012 ScalAgent Distributed Technologies
+
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or any later version.
+
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+ USA.
+-->
+<configadmin xmlns="http://jonas.ow2.org/ns/configadmin/1.0">
+
+  <!-- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jonas.ow2.org/ns/configadmin/1.0 
+    configadmin-1.0.xsd" -->
+
+  <configuration pid="fr.dyade.aaa.agent.services.A3ManagedService">
+    <property name="sid">0</property>
+    <property name="storage">${jonas.base}/work/s0</property>
+    <property name="pathToConf">${jonas.base}/conf</property>
+    <!--  properties  -->
+    <property name="Transaction">fr.dyade.aaa.util.NTransaction</property>
+    <property name="NTNoLockFile">true</property>
+  </configuration>
+
+  <factory-configuration pid="org.objectweb.joram.client.osgi.DestinationMSF">
+    <property name="adminWrapper">ra</property>
+    <property name="serverId">0</property>
+    <property name="name">sampleQueue</property>
+    <property name="className">org.objectweb.joram.mom.dest.Queue</property>
+    <!--  properties  -->
+    <!-- property name="readers">user1 user2</property -->
+    <!-- property name="writers">user1 user2</property -->
+    <property name="freeReading">true</property>
+    <property name="freeWriting">true</property>
+    <property name="jndiName">sampleQueue</property>
+  </factory-configuration>
+
+  <factory-configuration pid="org.objectweb.joram.client.osgi.DestinationMSF">
+    <property name="adminWrapper">ra</property>
+    <property name="serverId">0</property>
+    <property name="name">sampleTopic</property>
+    <property name="className">org.objectweb.joram.mom.dest.Topic</property>
+    <!--  properties  -->
+    <property name="freeReading">true</property>
+    <property name="freeWriting">true</property>
+    <property name="jndiName">sampleTopic</property>
+  </factory-configuration>
+
+  <factory-configuration pid="org.objectweb.joram.client.osgi.UserMSF">
+    <property name="adminWrapper">ra</property>
+    <property name="serverId">0</property>
+    <property name="name">anonymous</property>
+    <property name="password">anonymous</property>
+    <!--  properties  -->
+  </factory-configuration>
+
+  <factory-configuration pid="org.objectweb.joram.client.osgi.ConnectionFactoryMSF">
+    <property name="className">org.objectweb.joram.client.jms.tcp.TcpConnectionFactory</property>
+    <property name="host">localhost</property>
+    <property name="port">16010</property>
+    <property name="jndiName">JCF</property>
+    <!--  properties  -->
+  </factory-configuration>
+
+  <factory-configuration pid="org.objectweb.joram.client.osgi.ConnectionFactoryMSF">
+    <property name="className">org.objectweb.joram.client.jms.tcp.TcpConnectionFactory</property>
+    <property name="host">localhost</property>
+    <property name="port">16010</property>
+    <property name="jndiName">JQCF</property>
+    <!--  properties  -->
+  </factory-configuration>
+
+  <factory-configuration pid="org.objectweb.joram.client.osgi.ConnectionFactoryMSF">
+    <property name="className">org.objectweb.joram.client.jms.tcp.TcpConnectionFactory</property>
+    <property name="host">localhost</property>
+    <property name="port">16010</property>
+    <property name="jndiName">JTCF</property>
+    <!--  properties  -->
+  </factory-configuration>
+
+  <factory-configuration pid="org.objectweb.joram.client.osgi.ConnectionFactoryMSF">
+    <property name="className">org.objectweb.joram.client.jms.tcp.TcpConnectionFactory</property>
+    <property name="host">localhost</property>
+    <property name="port">16010</property>
+    <property name="jndiName">scn:comp/cf</property>
+    <!--  properties  -->
+  </factory-configuration>
+
+</configadmin>
+
