@@ -75,11 +75,11 @@ public interface JoramAdapterMBean {
   public Short getServerId();
 
   /**
-   * Returns the name of the Joram server.
+   * Returns the name of the resource adapter.
    * 
-   * @return The name of the Joram server.
+   * @return The name of the resource adapter.
    */
-  public String getServerName();
+  public String getName();
 
   /**
    * Returns the location of the Joram server.
@@ -95,19 +95,19 @@ public interface JoramAdapterMBean {
    */
   public Integer getServerPort();
 
-  /**
-   * Returns <code>true</code> if the Joram server is persistent.
-   * 
-   * @return <code>true</code> if the Joram server is persistent.
-   */
-  public Boolean getPersistentPlatform();
+//  /**
+//   * Returns <code>true</code> if the Joram server is persistent.
+//   * 
+//   * @return <code>true</code> if the Joram server is persistent.
+//   */
+//  public Boolean getPersistentPlatform();
 
   /**
    * Returns <code>true</code> if the Joram server is collocated.
    * 
    * @return <code>true</code> if the Joram server is collocated.
    */
-  public Boolean getCollocatedServer();
+  public Boolean getCollocated();
 
 
   /**
@@ -117,20 +117,20 @@ public interface JoramAdapterMBean {
    */
   public Integer getConnectingTimer();
 
-  /**
-   * Duration in seconds during which a JMS transacted (non XA) session might
-   * be pending; above that duration the session is rolled back and closed;
-   * the 0 value means "no timer".
-   */
-  public Integer getTxPendingTimer();
-
-  /**
-   * Period in milliseconds between two ping requests sent by the client
-   * connection to the server; if the server does not receive any ping
-   * request during more than 2 * cnxPendingTimer, the connection is
-   * considered as dead and processed as required.
-   */
-  public Integer getCnxPendingTimer();
+//  /**
+//   * Duration in seconds during which a JMS transacted (non XA) session might
+//   * be pending; above that duration the session is rolled back and closed;
+//   * the 0 value means "no timer".
+//   */
+//  public Integer getTxPendingTimer();
+//
+//  /**
+//   * Period in milliseconds between two ping requests sent by the client
+//   * connection to the server; if the server does not receive any ping
+//   * request during more than 2 * cnxPendingTimer, the connection is
+//   * considered as dead and processed as required.
+//   */
+//  public Integer getCnxPendingTimer();
 
   /**
    * Sets timeout before abort a request.
@@ -421,7 +421,7 @@ public interface JoramAdapterMBean {
    * 
    * @param name Name of created connection factory.
    */
-  public void createCF(String name);
+  public void createCF(String name) throws Exception;
 
   /**
    * Creates a non managed PTP connection factory and binds it to JNDI.

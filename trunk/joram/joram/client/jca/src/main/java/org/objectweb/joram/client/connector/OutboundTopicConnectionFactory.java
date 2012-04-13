@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2004 - 2008 ScalAgent Distributed Technologies
+ * Copyright (C) 2004 - 2012 ScalAgent Distributed Technologies
  * Copyright (C) 2004 Bull SA
  *
  * This library is free software; you can redistribute it and/or
@@ -70,7 +70,7 @@ public class OutboundTopicConnectionFactory extends OutboundConnectionFactory im
     if (AdapterTracing.dbgAdapter.isLoggable(BasicLevel.DEBUG))
       AdapterTracing.dbgAdapter.log(BasicLevel.DEBUG, this + " createTopicConnection()");
     
-    return createTopicConnection(mcf.userName, mcf.password);
+    return createTopicConnection(mcf.getUserName(), mcf.getPassword());
   }
 
   /**

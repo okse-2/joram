@@ -43,44 +43,20 @@
           <groupId>commons-dbcp</groupId>
           <artifactId>commons-dbcp</artifactId>
         </exclusion>
-        <exclusion>
-          <groupId>org.ow2.joram</groupId>
-          <artifactId>a3-common</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.ow2.joram</groupId>
-          <artifactId>a3-rt</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.ow2.joram</groupId>
-          <artifactId>joram-mom</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.ow2.joram</groupId>
-          <artifactId>joram-mom-core</artifactId>
-        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
       <groupId>org.ow2.joram</groupId>
       <artifactId>jndi-client</artifactId>
       <version>${project.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.ow2.joram</groupId>
-          <artifactId>a3-common</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.ow2.jonas.osgi</groupId>
       <artifactId>monolog</artifactId>
-        <exclusions>
-          <exclusion>
-            <groupId>org.objectweb.monolog</groupId>
-            <artifactId>monolog</artifactId>
-          </exclusion>
-        </exclusions>
-    </dependency>  
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi</artifactId>
+    </dependency>
   </dependencies>
 </project>

@@ -1,0 +1,14 @@
+ You can set in each activationSpec some properties :
+  use @ActivationConfigProperty(propertyName and propertyValue)
+  or xml activationspec description
+
+Properties:
+- Collocated
+- HostName
+- ServerPort
+- ConnectingTimer
+- CnxPendingTimer
+- TxPendingTimer
+- queueMessageReadMax
+- topicAckBufferMax
+- DeleteDurableSubscription

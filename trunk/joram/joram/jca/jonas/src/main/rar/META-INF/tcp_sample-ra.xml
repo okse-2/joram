@@ -18,10 +18,9 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
  USA.
 -->
-<connector
-  xmlns="http://java.sun.com/xml/ns/j2ee"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee
+
+<connector xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
   http://java.sun.com/xml/ns/j2ee/connector_1_5.xsd"
   version="1.5">
   <description>J2EE 1.4 Resource Adapter for the JORAM JMS messaging platform</description>
@@ -46,19 +45,18 @@
     <config-property> 
       <config-property-name>Collocated</config-property-name> 
       <config-property-type>java.lang.Boolean</config-property-type> 
-      <config-property-value>true</config-property-value> 
+      <config-property-value>false</config-property-value> 
     </config-property>
-    <!-- if Collocated = false set host and port value -->
-    <!-- <config-property> -->
-    <!-- <config-property-name>HostName</config-property-name> -->
-    <!-- <config-property-type>java.lang.String</config-property-type> -->
-    <!-- <config-property-value>localhost</config-property-value> -->
-    <!-- </config-property> -->
-    <!-- <config-property> -->
-    <!-- <config-property-name>ServerPort</config-property-name> -->
-    <!-- <config-property-type>java.lang.Integer</config-property-type> -->
-    <!-- <config-property-value>16010</config-property-value> -->
-    <!-- </config-property> -->    
+    <config-property> 
+      <config-property-name>HostName</config-property-name> 
+      <config-property-type>java.lang.String</config-property-type> 
+      <config-property-value>localhost</config-property-value> 
+    </config-property> 
+    <config-property> 
+      <config-property-name>ServerPort</config-property-name> 
+      <config-property-type>java.lang.Integer</config-property-type> 
+      <config-property-value>16010</config-property-value> 
+    </config-property>     
     <config-property>
       <config-property-name>RootName</config-property-name>
       <config-property-type>java.lang.String</config-property-type>
@@ -80,36 +78,36 @@
       <config-property-value>60</config-property-value>
     </config-property>
 
-    <!-- start JoramServer -->
-    <config-property> 
-      <config-property-name>StartJoramServer</config-property-name> 
-      <config-property-type>java.lang.Boolean</config-property-type> 
-      <config-property-value>true</config-property-value> 
-    </config-property> 
-    <config-property> 
-      <config-property-name>PlatformConfigDir</config-property-name> 
-      <config-property-type>java.lang.String</config-property-type> 
-      <config-property-value>./conf</config-property-value> 
-    </config-property> 
-    <config-property> 
-     <config-property-name>ServerId</config-property-name> 
-     <config-property-type>java.lang.Short</config-property-type> 
-     <config-property-value>0</config-property-value> 
-     </config-property> 
-     <config-property> 
-     <config-property-name>Storage</config-property-name> 
-     <config-property-type>java.lang.String</config-property-type> 
-     <config-property-value>./s0</config-property-value> 
-     </config-property> 
+    <!-- uncomment if you want start a collocated JoramServer -->
+    <!-- <config-property> -->
+    <!-- <config-property-name>StartJoramServer</config-property-name> -->
+    <!-- <config-property-type>java.lang.Boolean</config-property-type> -->
+    <!-- <config-property-value>true</config-property-value> -->
+    <!-- </config-property> -->
+    <!-- <config-property> -->
+    <!-- <config-property-name>PlatformConfigDir</config-property-name> -->
+    <!-- <config-property-type>java.lang.String</config-property-type> -->
+    <!-- <config-property-value>/home/user/jonas.base/conf</config-property-value> -->
+    <!-- </config-property> -->
+    <!-- <config-property> -->
+    <!-- <config-property-name>ServerId</config-property-name> -->
+    <!-- <config-property-type>java.lang.Short</config-property-type> -->
+    <!-- <config-property-value>0</config-property-value> -->
+    <!-- </config-property> -->
+    <!-- <config-property> -->
+    <!-- <config-property-name>Storage</config-property-name> -->
+    <!-- <config-property-type>java.lang.String</config-property-type> -->
+    <!-- <config-property-value>/home/user/jonas.base/work/s0</config-property-value> -->
+    <!-- </config-property> -->
 
-    <!-- administered the Joram server with the joramAdmin.xml -->
-    <config-property> 
-      <config-property-name>AdminFileXML</config-property-name> 
-      <config-property-type>java.lang.String</config-property-type> 
-      <config-property-value>joramAdmin.xml</config-property-value> 
-    </config-property> 
+    <!-- uncomment if you want administered the Joram server with the joramAdmin.xml -->
+    <!-- <config-property> -->
+    <!-- <config-property-name>AdminFileXML</config-property-name> -->
+    <!-- <config-property-type>java.lang.String</config-property-type> -->
+    <!-- <config-property-value>joramAdmin.xml</config-property-value> -->
+    <!-- </config-property> -->
 
-    <!-- OutBound -->
+    <!-- OutBound definitions -->
     <outbound-resourceadapter>
 
       <!-- OutBound : managed connection factory -->
@@ -133,19 +131,18 @@
         <config-property>
           <config-property-name>Collocated</config-property-name>
           <config-property-type>java.lang.Boolean</config-property-type>
-          <config-property-value>true</config-property-value>
+          <config-property-value>false</config-property-value>
         </config-property>
-        <!-- if Collocated = false set host and port value -->
-<!--        <config-property>-->
-<!--          <config-property-name>HostName</config-property-name>-->
-<!--          <config-property-type>java.lang.String</config-property-type>-->
-<!--          <config-property-value>localhost</config-property-value>-->
-<!--        </config-property>-->
-<!--        <config-property>-->
-<!--          <config-property-name>ServerPort</config-property-name>-->
-<!--          <config-property-type>java.lang.Integer</config-property-type>-->
-<!--          <config-property-value>16010</config-property-value>-->
-<!--        </config-property>-->
+        <config-property>
+          <config-property-name>HostName</config-property-name>
+          <config-property-type>java.lang.String</config-property-type>
+          <config-property-value>localhost</config-property-value>
+        </config-property>
+        <config-property>
+          <config-property-name>ServerPort</config-property-name>
+          <config-property-type>java.lang.Integer</config-property-type>
+          <config-property-value>16010</config-property-value>
+        </config-property>
         <config-property>
           <config-property-name>OutInterceptors</config-property-name>
           <config-property-type>java.lang.String</config-property-type>
@@ -198,7 +195,6 @@
         <connection-impl-class>org.objectweb.joram.client.connector.OutboundConnection</connection-impl-class>
       </connection-definition>
       
-      
       <!-- OutBound : managed Queue connection factory -->
       <connection-definition>
         <managedconnectionfactory-class>org.objectweb.joram.client.connector.ManagedQueueConnectionFactoryImpl</managedconnectionfactory-class>
@@ -220,19 +216,18 @@
         <config-property>
           <config-property-name>Collocated</config-property-name>
           <config-property-type>java.lang.Boolean</config-property-type>
-          <config-property-value>true</config-property-value>
+          <config-property-value>false</config-property-value>
         </config-property>
-        <!-- if Collocated = false set host and port value -->
-<!--        <config-property>-->
-<!--          <config-property-name>HostName</config-property-name>-->
-<!--          <config-property-type>java.lang.String</config-property-type>-->
-<!--          <config-property-value>localhost</config-property-value>-->
-<!--        </config-property>-->
-<!--        <config-property>-->
-<!--          <config-property-name>ServerPort</config-property-name>-->
-<!--          <config-property-type>java.lang.Integer</config-property-type>-->
-<!--          <config-property-value>16010</config-property-value>-->
-<!--        </config-property>-->
+        <config-property>
+          <config-property-name>HostName</config-property-name>
+          <config-property-type>java.lang.String</config-property-type>
+          <config-property-value>localhost</config-property-value>
+        </config-property>
+        <config-property>
+          <config-property-name>ServerPort</config-property-name>
+          <config-property-type>java.lang.Integer</config-property-type>
+          <config-property-value>16010</config-property-value>
+        </config-property>
         <config-property>
           <config-property-name>OutInterceptors</config-property-name>
           <config-property-type>java.lang.String</config-property-type>
@@ -296,19 +291,18 @@
         <config-property>
           <config-property-name>Collocated</config-property-name>
           <config-property-type>java.lang.Boolean</config-property-type>
-          <config-property-value>true</config-property-value>
+          <config-property-value>false</config-property-value>
         </config-property>
-        <!-- if Collocated = false set host and port value -->
-<!--        <config-property>-->
-<!--          <config-property-name>HostName</config-property-name>-->
-<!--          <config-property-type>java.lang.String</config-property-type>-->
-<!--          <config-property-value>localhost</config-property-value>-->
-<!--        </config-property>-->
-<!--        <config-property>-->
-<!--          <config-property-name>ServerPort</config-property-name>-->
-<!--          <config-property-type>java.lang.Integer</config-property-type>-->
-<!--          <config-property-value>16010</config-property-value>-->
-<!--        </config-property>-->
+        <config-property>
+          <config-property-name>HostName</config-property-name>
+          <config-property-type>java.lang.String</config-property-type>
+          <config-property-value>localhost</config-property-value>
+        </config-property>
+        <config-property>
+          <config-property-name>ServerPort</config-property-name>
+          <config-property-type>java.lang.Integer</config-property-type>
+          <config-property-value>16010</config-property-value>
+        </config-property>
         <config-property>
           <config-property-name>OutInterceptors</config-property-name>
           <config-property-type>java.lang.String</config-property-type>
@@ -354,6 +348,7 @@
       <transaction-support>XATransaction</transaction-support>
       <reauthentication-support>false</reauthentication-support>
     </outbound-resourceadapter>
+
 
     <!-- InBound -->
     <inbound-resourceadapter>
