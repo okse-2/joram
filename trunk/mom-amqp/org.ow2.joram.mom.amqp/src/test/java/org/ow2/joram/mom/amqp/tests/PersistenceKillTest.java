@@ -123,7 +123,7 @@ public class PersistenceKillTest extends BaseTst {
             System.out.println("Consumer connection broken. Reconnect.");
             while (!receiverConnection.isConnectionOpen()) {
               try {
-                Thread.sleep(100);
+                Thread.sleep(10000);
               } catch (InterruptedException exc) {
                 exc.printStackTrace();
               }
@@ -154,7 +154,9 @@ public class PersistenceKillTest extends BaseTst {
           System.out.println("Kill server");
           admin.killAgentServer((short) 0);
 
+          Thread.sleep(5000);
           admin.startAgentServer((short) 0);
+          System.out.println("server restarted.");
         } catch (Exception exc) {
           exc.printStackTrace();
         }
