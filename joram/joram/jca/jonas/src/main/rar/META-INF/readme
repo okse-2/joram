@@ -3,12 +3,26 @@
   or xml activationspec description
 
 Properties:
-- Collocated
-- HostName
-- ServerPort
-- ConnectingTimer
+- AcknowledgeMode
 - CnxPendingTimer
-- TxPendingTimer
-- queueMessageReadMax
-- topicAckBufferMax
+- Collocated
+- ConnectingTimer
 - DeleteDurableSubscription
+- Destination
+- DestinationType
+- HostName
+- IdentityClass
+- MaxMessages
+- MaxNumberOfWorks
+- MessageSelector
+- Name
+- Password
+- QueueMessageReadMax
+- ServerPort
+- SubscriptionDurability
+- SubscriptionName
+- TopicAckBufferMax
+- TopicActivationThreshold
+- TopicPassivationThreshold
+- TxPendingTimer
+- UserName
