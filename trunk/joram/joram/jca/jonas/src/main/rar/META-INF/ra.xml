@@ -78,7 +78,12 @@
       <config-property-type>java.lang.Integer</config-property-type>
       <config-property-value>60</config-property-value>
     </config-property>
-
+    <config-property>
+      <config-property-name>AdminFileXML</config-property-name>
+      <config-property-type>java.lang.String</config-property-type>
+      <config-property-value>joramAdmin.xml</config-property-value>
+    </config-property>
+    
     <!-- uncomment if you want start JoramServer -->
     <!-- <config-property> -->
     <!-- <config-property-name>StartJoramServer</config-property-name> -->
@@ -99,13 +104,6 @@
     <!-- <config-property-name>Storage</config-property-name> -->
     <!-- <config-property-type>java.lang.String</config-property-type> -->
     <!-- <config-property-value>/home/user/jonas.base/work/s0</config-property-value> -->
-    <!-- </config-property> -->
-
-    <!-- uncomment if you want administered the Joram server with the joramAdmin.xml -->
-    <!-- <config-property> -->
-    <!-- <config-property-name>AdminFileXML</config-property-name> -->
-    <!-- <config-property-type>java.lang.String</config-property-type> -->
-    <!-- <config-property-value>joramAdmin.xml</config-property-value> -->
     <!-- </config-property> -->
 
     <!-- OutBound -->
