@@ -116,7 +116,7 @@ public class ClientMessages extends AbstractRequestNot {
     } else {
       if (messages == null) {
         messages = new ArrayList();
-        messages.add(this.message);
+        messages.add(message);
         message = null;
       }
       if (this.getExpiration() != 0L && (msg.expiration > this.getExpiration() || msg.expiration == 0L)) {
@@ -141,9 +141,10 @@ public class ClientMessages extends AbstractRequestNot {
   /** Returns the messages. */
   public List getMessages() {
     if (messages == null) {
-      messages = new ArrayList();
+      ArrayList<Message> msgs = new ArrayList<Message>();
       if (message != null)
-        messages.add(message);
+        msgs.add(message);
+      return msgs;
     }
     return messages;
   }
