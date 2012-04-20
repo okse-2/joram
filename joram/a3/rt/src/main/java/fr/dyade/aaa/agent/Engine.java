@@ -1032,7 +1032,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
           if (agent != null) {
             if (logmon.isLoggable(BasicLevel.DEBUG))
               logmon.log(BasicLevel.DEBUG,
-                         getName() + ": " + agent + ".react(" + msg.from + ", " + msg.not + ")");
+                         getName() + ": " + agent + ".react(" + msg.from + ", " + msg.getStamp() + ", " + msg.not + ")");
             
 //            if (AgentServer.sdf != null) {
 //              // SDF generation
