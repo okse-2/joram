@@ -156,7 +156,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
   /**
    *  If true use a lock file to avoid multiples activation of Transaction
    * component. This value can be adjusted for a particular server by setting
-   * <code>Transaction.minObjInLog</code> specific property.
+   * <code>Transaction.UseLockFile</code> specific property.
    * <p>
    *  This property can be set only at first launching.
    */
@@ -390,7 +390,11 @@ public final class NTransaction extends AbstractTransaction implements NTransact
     }
     
     syncOnWrite = getBoolean("NTSyncOnWrite");
-    useLockFile = getBoolean("NTNoLockFile");
+    if (getBoolean("NTNoLockFile"))
+      logmon.log(BasicLevel.ERROR,
+                 "NTransaction, no longer use NTNoLockFile property, use Transaction.UseLockFile.");
+    useLockFile = getBoolean("Transaction.UseLockFile");
+    
     logFile = new LogFile(dir, repository, useLockFile, syncOnWrite);
     
     // Be careful, setGarbageDelay and garbageAsync use logFile !!
@@ -745,7 +749,7 @@ public final class NTransaction extends AbstractTransaction implements NTransact
       super(4 * Kb);
       this.repository = repository;
 
-      if (! useLockFile) {
+      if (useLockFile) {
         lockFile = new File(dir, LockPathname);
         if (! lockFile.createNewFile()) {
           logmon.log(BasicLevel.FATAL,
