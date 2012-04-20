@@ -49,7 +49,28 @@ public class AmqpDistribution implements DistributionHandler {
 
   private static final Logger logger = Debug.getLogger(AmqpDistribution.class.getName());
 
+  /** the name of the queue to declare */
   private static final String QUEUE_NAME_PROP = "amqp.QueueName";
+  /**
+   * True if we are declaring a queue passively; i.e., check if it exists.
+   * Default value is true.
+   */
+  private static final String QUEUE_PASSIVE_PROP = "amqp.Queue.DeclarePassive";
+  /**
+   * True if we are declaring an exclusive queue (restricted to this connection).
+   * Default value is false.
+   */
+  private static final String QUEUE_EXCLUSIVE_PROP = "amqp.Queue.DeclareExclusive";
+  /**
+   * True if we are declaring a durable queue (the queue will survive a server restart).
+   * Default value is true.
+   */
+  private static final String QUEUE_DURABLE_PROP = "amqp.Queue.DeclareDurable";
+  /**
+   * True if we are declaring an autodelete queue (server will delete it when no longer in use).
+   * Default value is false.
+   */
+  private static final String QUEUE_AUTODELETE_PROP = "amqp.Queue.DeclareAutoDelete";
 
   private static final String UPDATE_PERIOD_PROP = "amqp.ConnectionUpdatePeriod";
 
@@ -62,6 +83,11 @@ public class AmqpDistribution implements DistributionHandler {
 
   private String amqpQueue = null;
 
+  private boolean amqpQueuePassive = true;
+  private boolean amqpQueueExclusive = true;
+  private boolean amqpQueueDurable = true;
+  private boolean amqpQueueAutoDelete = true;
+
   private long lastUpdate = 0;
   
   private long updatePeriod = 5000L;
@@ -71,6 +97,12 @@ public class AmqpDistribution implements DistributionHandler {
     if (amqpQueue == null) {
       logger.log(BasicLevel.ERROR, "The amqp queue name property " + QUEUE_NAME_PROP + " must be specified.");
     }
+
+    amqpQueuePassive = Boolean.parseBoolean(properties.getProperty(QUEUE_PASSIVE_PROP, "true"));
+    amqpQueueExclusive = Boolean.parseBoolean(properties.getProperty(QUEUE_EXCLUSIVE_PROP, "false"));
+    amqpQueueDurable = Boolean.parseBoolean(properties.getProperty(QUEUE_DURABLE_PROP, "true"));
+    amqpQueueAutoDelete = Boolean.parseBoolean(properties.getProperty(QUEUE_AUTODELETE_PROP, "false"));
+    
     try {
       if (properties.containsKey(UPDATE_PERIOD_PROP)) {
         updatePeriod = Long.parseLong(properties.getProperty(UPDATE_PERIOD_PROP));
@@ -79,6 +111,7 @@ public class AmqpDistribution implements DistributionHandler {
       logger.log(BasicLevel.ERROR, "Property " + UPDATE_PERIOD_PROP
           + "could not be parsed properly, use default value.", nfe);
     }
+    
     if (properties.containsKey(ROUTING_PROP)) {
       connectionNames = AmqpConnectionService.convertToList(properties.getProperty(ROUTING_PROP));
     }
@@ -126,9 +159,13 @@ public class AmqpDistribution implements DistributionHandler {
             logger.log(BasicLevel.DEBUG, connection.getName() + ": New channel available for distribution.");
           }
           try {
-            Channel chan = connection.getConnection().createChannel();
-            chan.queueDeclarePassive(amqpQueue);
-            channels.put(connection.getName(), chan);
+            Channel channel = connection.getConnection().createChannel();
+            if (amqpQueuePassive) {
+              channel.queueDeclarePassive(amqpQueue);
+            } else {
+              channel.queueDeclare(amqpQueue, amqpQueueDurable, amqpQueueExclusive, amqpQueueAutoDelete, null);
+            }
+            channels.put(connection.getName(), channel);
           } catch (IOException exc) {
             if (logger.isLoggable(BasicLevel.DEBUG)) {
               logger.log(BasicLevel.DEBUG, "Channel is not usable.", exc);
