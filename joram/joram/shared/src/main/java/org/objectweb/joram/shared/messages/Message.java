@@ -1,6 +1,6 @@
 /*
  * JORAM: Java(TM) Open Reliable Asynchronous Messaging
- * Copyright (C) 2006 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2006 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -139,7 +139,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
 
   /**
    * The message priority from 0 to 9, 9 being the highest.
-   * By default, the priority is 4?
+   * By default, the priority is 4.
    */
   public transient int priority = DEFAULT_PRIORITY;
  
@@ -482,7 +482,6 @@ public final class Message implements Cloneable, Serializable, Streamable {
     if (correlationId != null) { StreamUtil.writeTo(correlationId, os); }
     if (deliveryCount != 0) { StreamUtil.writeTo(deliveryCount, os); }
     if (jmsType != null) { StreamUtil.writeTo(jmsType, os); }
-
   }
 
   /**
@@ -508,6 +507,7 @@ public final class Message implements Cloneable, Serializable, Streamable {
     if ((s & replyToIdFlag) != 0) { replyToId = StreamUtil.readStringFrom(is); }
     if ((s & replyToTypeFlag) != 0) { replyToType = StreamUtil.readByteFrom(is); }
     if ((s & propertiesFlag) != 0) { properties = StreamUtil.readPropertiesFrom(is); }
+    priority = DEFAULT_PRIORITY;
     if ((s & priorityFlag) != 0) { priority = StreamUtil.readIntFrom(is); }
     if ((s & expirationFlag) != 0) { expiration = StreamUtil.readLongFrom(is); }
     if ((s & corrrelationIdFlag) != 0) { correlationId = StreamUtil.readStringFrom(is); }
@@ -515,7 +515,6 @@ public final class Message implements Cloneable, Serializable, Streamable {
     if ((s & jmsTypeFlag) != 0) { jmsType = StreamUtil.readStringFrom(is); }
     redelivered = (s & redeliveredFlag) != 0;
     persistent = (s & persistentFlag) != 0;
-
   }
 
   /**
