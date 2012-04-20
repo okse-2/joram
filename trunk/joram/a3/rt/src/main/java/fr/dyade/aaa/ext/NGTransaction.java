@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2011 ScalAgent Distributed Technologies
+ * Copyright (C) 2009 - 2012 ScalAgent Distributed Technologies
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -652,17 +652,21 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
       } else if (list.length == 0) {
         logidx = 0;
       } else {
-        //  Recovery of log files..
-        Arrays.sort(list);
+        // Recovery of log files..
+        // Be careful, sort the log according to their index.
+        int idx[] = new int[list.length];
         for (int i=0; i<list.length; i++) {
-          logmon.log(BasicLevel.WARN, "NGTransaction.LogManager, rebuilds index: " + list[i]);
+          idx[i] = Integer.parseInt(list[i].substring(4));
+        }
+        Arrays.sort(idx);
+        for (int i=0; i<idx.length; i++) {
+          logmon.log(BasicLevel.WARN, "NGTransaction.LogManager, rebuilds index: log#" + idx[i]);
           
-          int idx = Integer.parseInt(list[i].substring(4));
           // Fix the log index to the lower index, it is needed if all log files
           // are garbaged.
-          if (logidx == -1) logidx = idx;
+          if (logidx == -1) logidx = idx[i];
           try {
-            LogFile logf = new LogFile(dir, idx, mode);
+            LogFile logf = new LogFile(dir, idx[i], mode);
             int optype = logf.read();
             if (optype == Operation.END) {
               // The log is empty
@@ -671,9 +675,9 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
             }
             
             // The index of current log is the bigger index of log with 'live' operations. 
-            logidx = idx;
+            logidx = idx[i];
             logFile[logidx%nbLogFile] = logf;
-            // current if fixed after the log reading
+            // current is fixed after the log reading
 
             while (optype == Operation.COMMIT) {
               String dirName;
@@ -693,17 +697,23 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
 
                 Object key = OperationKey.newKey(dirName, name);
 
-                byte buf[] = null;
+//                byte buf[] = null;
                 if ((optype == Operation.SAVE) || (optype == Operation.CREATE)) {
-                  buf = new byte[logFile[logidx%nbLogFile].readInt()];
-                  logFile[logidx%nbLogFile].readFully(buf);
+                  // TODO (AF): Fix a potential bug if there is a crash during a garbage.
+                  // A newly created object can be saved in repository then not deleted.
+                  // May be we can test if the corresponding file exist.
+                  optype = Operation.SAVE;
+                  
+//                  buf = new byte[logFile[logidx%nbLogFile].readInt()];
+//                  logFile[logidx%nbLogFile].readFully(buf);
 
-//                  logFile[logidx%nbLogFile].skipBytes(logFile[logidx%nbLogFile].readInt());
+                  logFile[logidx%nbLogFile].skipBytes(logFile[logidx%nbLogFile].readInt());
                 }
 
                 if (Debug.debug && logmon.isLoggable(BasicLevel.DEBUG))
                   logmon.log(BasicLevel.DEBUG,
-                             "NGTransaction.LogManager, OPERATION=" + optype + ", " + name + " buf=" + Arrays.toString(buf));
+                             "NGTransaction.LogManager, OPERATION=" + optype + ", " + name);
+//                           "NGTransaction.LogManager, OPERATION=" + optype + ", " + name + " buf=" + Arrays.toString(buf));
                 
                 Operation old = log.get(key);
                 if (old != null) {
@@ -743,7 +753,7 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
                         old.logptr = ptr;
                       }
                     }
-                  } else if (old.type == Operation.DELETE) { 
+                  } else if (old.type == Operation.DELETE) {
                     if ((optype == Operation.CREATE) || (optype == Operation.SAVE)) {
                       // The resulting operation is a save 
                       old.type = Operation.SAVE;
