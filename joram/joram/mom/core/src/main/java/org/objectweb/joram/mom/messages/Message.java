@@ -418,7 +418,7 @@ public final class Message implements Serializable, MessageView {
   /** Loads all persisted messages. */
   public static Vector loadAll(String msgTxname) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "MessagePersistenceModule.loadAll() " + msgTxname);
+      logger.log(BasicLevel.DEBUG, "Message.loadAll() " + msgTxname);
 
     Vector messages = new Vector();
 
@@ -434,7 +434,7 @@ public final class Message implements Serializable, MessageView {
           msg.txname = names[i];
 
           if (logger.isLoggable(BasicLevel.DEBUG))
-            logger.log(BasicLevel.DEBUG, "loadAll: names[" + i + "] = " + msg);
+            logger.log(BasicLevel.DEBUG, "loadAll: names[" + i + "] = " + msg.txname);
           messages.add(msg);
         } catch (Exception exc) {
           logger.log(BasicLevel.ERROR, "Message named [" + names[i] + "] could not be loaded", exc);
