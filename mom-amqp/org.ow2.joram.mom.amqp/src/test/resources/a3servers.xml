@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <config>
-  <property name="Transaction" value="fr.dyade.aaa.util.NTransaction"/>
+  <property name="Transaction" value="fr.dyade.aaa.ext.NGTransaction"/>
   <property name="AMQP.heartbeat" value="10"/>
   
   <server id="0" name="s0" hostname="localhost">
