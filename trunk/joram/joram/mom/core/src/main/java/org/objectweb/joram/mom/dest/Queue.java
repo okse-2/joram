@@ -1223,6 +1223,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
 
   /**
    * Get a client message contain <code>nb</code> messages.
+   * Only used in ClusterQueue.
    *  
    * @param nb        number of messages returned in ClientMessage.
    * @param selector  jms selector
@@ -1299,6 +1300,9 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
           checkDelivery(message.getHeaderMessage())) {
         message.incDeliveryCount();
         nbMsgsDeliverSinceCreation++;
+
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "Queue.getMessages() -> " + j + ',' + message.getId());
 
         // use in sub class see ClusterQueue
         messageDelivered(message.getId());
@@ -1512,7 +1516,7 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
    */
   public void addClientMessages(ClientMessages clientMsgs) {
     if (logger.isLoggable(BasicLevel.DEBUG))
-      logger.log(BasicLevel.DEBUG, "Queue.storeClientMessage(" + clientMsgs + ')');
+      logger.log(BasicLevel.DEBUG, "Queue.addClientMessage(" + clientMsgs + ')');
     
     if (clientMsgs != null) {
       Message msg;
@@ -1521,6 +1525,9 @@ public class Queue extends Destination implements QueueMBean, BagSerializer {
         msg = new Message((org.objectweb.joram.shared.messages.Message) msgs.next());
         msg.order = arrivalsCounter++;
         
+        if (logger.isLoggable(BasicLevel.DEBUG))
+          logger.log(BasicLevel.DEBUG, "Queue.addClientMessage() -> " + msg.getId() + ',' + msg.order);
+
         if (interceptorsAvailable()) {
         	// get the shared message
         	org.objectweb.joram.shared.messages.Message message = msg.getFullMessage();
