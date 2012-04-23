@@ -240,6 +240,11 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
     return (int) ((logManager.garbageTime *100) / (System.currentTimeMillis() - startTime));
   }
 
+  public void resetGarbageRatio() {
+    logManager.garbageTime = 0L;
+    startTime = System.currentTimeMillis();
+  }
+  
   /**
    *  The Repository classname implementation.
    *  This value can be set for a particular server by setting the
@@ -602,7 +607,7 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
     /**
      * Date of last garbage.
      */
-    long lastGarbageTime = 0L;
+    long lastGarbageDate = 0L;
     
     /** Coherence lock filename */
     static private final String LockPathname = "lock";
@@ -1190,13 +1195,12 @@ public final class NGTransaction extends AbstractTransaction implements NGTransa
         logFile[logf.logidx%nbLogFile] = null;
       }
       
-      long end = System.currentTimeMillis();
-      lastGarbageTime = end;
-      garbageTime += end - start;
+      lastGarbageDate = System.currentTimeMillis();
+      garbageTime += lastGarbageDate - start;
 
       if (logmon.isLoggable(BasicLevel.DEBUG))
         logmon.log(BasicLevel.DEBUG,
-                   "NTransaction.LogFile.garbage() - end: " + (end - start));
+                   "NTransaction.LogFile.garbage() - end: " + (lastGarbageDate - start));
     }
 
     void stop() {
