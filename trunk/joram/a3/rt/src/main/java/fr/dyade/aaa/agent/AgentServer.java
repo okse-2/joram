@@ -216,11 +216,6 @@ public final class AgentServer {
    */
   public final static String DEFAULT_A3CMLWRP = "fr.dyade.aaa.agent.conf.A3CMLSaxWrapper";
 
-  /** Task for file monitoring if configured. */
-  private static MonitoringTimerTask fileMonitoringTimerTask = null;
-  /** Task for log monitoring if configured. */
-  private static MonitoringTimerTask logMonitoringTimerTask = null;
-
   static ThreadGroup tgroup = null;
 
   public static ThreadGroup getThreadGroup() {
@@ -250,6 +245,10 @@ public final class AgentServer {
     return engine.thread;
   }
 
+  public static void resetEngineAverageLoad() {
+    getEngine().resetAverageLoad();
+  }
+  
   /**
    * Returns the load averages for the last minute.
    * @return the load averages for the last minute.
@@ -1380,7 +1379,7 @@ public final class AgentServer {
         if (jgroups == null) {
           ServiceManager.start();
           // with osgi, ServiceManager start asynchronously, we can't save here.
-         // ServiceManager.save(); //NTA
+          // ServiceManager.save(); //NTA
           logmon.log(BasicLevel.INFO,
                      getName() + ", ServiceManager started");
         }
@@ -1530,14 +1529,6 @@ public final class AgentServer {
     }
 
     try {
-      if (fileMonitoringTimerTask != null)
-        fileMonitoringTimerTask.cancel();
-      fileMonitoringTimerTask = null;
-      
-      if (logMonitoringTimerTask != null)
-        logMonitoringTimerTask.cancel();
-      logMonitoringTimerTask = null;
-      
       if (timer != null)
         timer.cancel();
       timer = null;

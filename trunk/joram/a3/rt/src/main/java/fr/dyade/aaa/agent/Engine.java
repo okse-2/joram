@@ -1182,6 +1182,11 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   
   EngineAverageLoadTask averageLoadTask = null;
   
+  public void resetAverageLoad() {
+    if (averageLoadTask != null)
+      averageLoadTask.reset();
+  }
+
   /**
    * Returns the load averages for the last minute.
    * @return the load averages for the last minute.
