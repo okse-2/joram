@@ -43,8 +43,9 @@ import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.Topic;
 import org.objectweb.joram.client.jms.admin.AdminException;
+import org.objectweb.joram.client.jms.admin.AdminItf;
 import org.objectweb.joram.client.jms.admin.AdminModule;
-import org.objectweb.joram.client.jms.admin.AdminWrapper;
+import org.objectweb.joram.client.jms.admin.JoramAdmin;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.client.jms.ha.local.HALocalConnectionFactory;
 import org.objectweb.joram.client.jms.ha.tcp.HATcpConnectionFactory;
@@ -85,7 +86,7 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
   /** The duration of admin connection before change state.*/
   private long adminDurationState = 0;
   
-  private AdminWrapper wrapper = null;
+  private JoramAdmin wrapper = null;
   private ServerDesc serverDesc = null;
   private ServiceRegistration registration;
 
@@ -192,7 +193,10 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
     this.serverId = serverId.shortValue();
   }
 
-  /** the persistence directory of the JORAM server to start. */
+  /** 
+   * the persistence directory of the JORAM server to start,
+   * needed when StartJoramServer is set to true. 
+   */
   private String storage = "s0";
 
   public String getStorage() {
@@ -227,7 +231,7 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
   /**
    * Path to the directory containing JORAM's configuration files
    * (<code>a3servers.xml</code>, <code>a3debug.cfg</code>
-   * and admin file), needed when starting the collocated JORAM server.
+   * and admin file), needed when StartJoramServer is set to true.
    */
   private String platformConfigDir;
 
@@ -340,8 +344,18 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
   	int i = 0;
   	while (AgentServer.getStatus() != AgentServer.Status.STARTED) {
   		try {
-  			if (i == 10)
-  				throw new ResourceAdapterInternalException("AgentServer not start: " + AgentServer.getStatusInfo());
+  			if (i == 10) {
+  				StringBuffer buff = new StringBuffer();
+  				buff.append("\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+  				buff.append("\nThe Joram collocated server is not started !");
+  				buff.append("\nA Joram running server is required to start the resource adapter."); 
+  				buff.append("\nThe Joram server status is : " + AgentServer.getStatusInfo() + "\n");
+  				buff.append("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n");
+  				if (logger.isLoggable(BasicLevel.ERROR))
+  	  			logger.log(BasicLevel.ERROR, buff.toString());
+  				throw new ResourceAdapterInternalException(buff.toString());
+  			}
+  			//TODO set/get timer
   			Thread.sleep(1000);
   			i++;
   		} catch (InterruptedException e) {
@@ -534,7 +548,7 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
       cf.setIdentityClassName(identityClass);
       Connection cnx = cf.createConnection(rootName, rootPasswd);
       cnx.start();
-      wrapper = new AdminWrapper(cnx);
+      wrapper = new JoramAdmin(cnx);
       if (logger.isLoggable(BasicLevel.DEBUG))
   			logger.log(BasicLevel.DEBUG, "adminConnect: wrapper = " + wrapper);
 
@@ -548,7 +562,7 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
       		props.setProperty("user", rootName);
 
       		registration =  Activator.context.registerService(
-      				AdminWrapper.class.getName(),
+      				AdminItf.class.getName(),
       				wrapper,
       				props);
       		if (logger.isLoggable(BasicLevel.DEBUG))
@@ -565,7 +579,7 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
       
       // Registering MBeans...
       try {
-        MXWrapper.registerMBean(this, MXWrapper.objectName(jmxRootName, "type=JoramAdapter"));
+        MXWrapper.registerMBean(this, getMBeanName());
       } catch (Exception e) {
         if (logger.isLoggable(BasicLevel.WARN))
           logger.log(BasicLevel.WARN, "  - Could not register JoramAdapterMBean", e);
@@ -583,6 +597,14 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
 		}
   }
 
+  public String getMBeanName() {
+    StringBuffer strbuf = new StringBuffer();
+    strbuf.append(jmxRootName).append("#").append(name);
+    strbuf.append(':');
+    strbuf.append("type=JoramAdapter");
+    return strbuf.toString();
+  }
+  
   void adminDisconnect() {
   	//unregister wrapper as a service
   	if (registration != null)
@@ -614,7 +636,7 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
   	adminDisconnect();
 
   	try {
-  		MXWrapper.unregisterMBean(MXWrapper.objectName(jmxRootName, "type=JoramAdapter"));
+  		MXWrapper.unregisterMBean(getMBeanName());
   	} catch (Exception e) {
   		if (logger.isLoggable(BasicLevel.WARN))
   			logger.log(BasicLevel.WARN, "unregisterMBean", e);
@@ -786,16 +808,6 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
   }
 
   /**
-   * Unset the default dead message queue for the local server.
-   * 
-   * @throws ConnectException
-   * @throws AdminException
-   */
-  public void resetDefaultDMQ() throws ConnectException, AdminException {
-    wrapper.setDefaultDMQ(null);
-  }
-
-  /**
    * Unset the default dead message queue for the given server.
    * 
    * @param serverId Unique identifier of the given server.
@@ -884,7 +896,7 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
     String[] names = new String[destinations.length];
     
     for (int i=0; i<destinations.length; i++) {
-      names[i] = destinations[i].registerMBean(jmxRootName);
+      names[i] = destinations[i].registerMBean(jmxRootName+"#"+name);
     }
     return names;
   }
@@ -1086,7 +1098,7 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
     String[] names = new String[users.length];
     
     for (int i=0; i<users.length; i++) {
-      names[i] = users[i].registerMBean(jmxRootName);
+      names[i] = users[i].registerMBean(jmxRootName+"#"+name);
     }
     return names;
   }
@@ -1315,7 +1327,7 @@ public final class JoramAdapter extends JoramResourceAdapter implements JoramAda
    * 
    * @return the admin wrapper of this resource adapter.
    */
-  public AdminWrapper getWrapper() {
+  public JoramAdmin getWrapper() {
   	return wrapper;
   }
 }
