@@ -91,7 +91,7 @@ public class JoramResourceAdapter implements ResourceAdapter, ExceptionListener,
   }
 
   /** Name of the root in the MBean tree */
-  protected static String jmxRootName = "joramClient";
+  protected static String jmxRootName = "JoramAdapter";
 
   /** Names of the bound objects. */
   private Vector<String> boundNames;
