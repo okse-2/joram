@@ -25,7 +25,7 @@ package org.objectweb.joram.client.osgi;
 import java.util.HashMap;
 
 import org.objectweb.joram.client.jms.admin.AdminException;
-import org.objectweb.joram.client.jms.admin.AdminWrapper;
+import org.objectweb.joram.client.jms.admin.AdminItf;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
 import org.osgi.framework.BundleContext;
@@ -40,7 +40,7 @@ public class AdminWrapperHelper {
 	public static final Logger logmon = Debug.getLogger(AdminWrapperHelper.class.getName());
 	private static HashMap<AdminStruct, AdminWrapperTracker> wrapperTrackers = new HashMap<AdminStruct, AdminWrapperTracker>();
   
-  public static AdminWrapper getWrapper(BundleContext bundleContext, AdminStruct adminStruct) throws AdminException {
+  public static AdminItf getWrapper(BundleContext bundleContext, AdminStruct adminStruct) throws AdminException {
   	if (adminStruct == null) 
   		throw new AdminException("The admin struct is null.");
   	

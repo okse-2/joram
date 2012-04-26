@@ -34,7 +34,7 @@ import javax.jms.InvalidDestinationException;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminException;
-import org.objectweb.joram.client.jms.admin.AdminWrapper;
+import org.objectweb.joram.client.jms.admin.AdminItf;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -136,7 +136,7 @@ public class DestinationMSF implements ManagedServiceFactory {
     return value != null && value.length() > 0;
   }
   
-  private Destination createDestination(AdminWrapper wrapper,
+  private Destination createDestination(AdminItf wrapper,
   		int serverId, 
   		String name, 
   		String className, 
@@ -152,7 +152,7 @@ public class DestinationMSF implements ManagedServiceFactory {
   		throw new AdminException("Unknown className : " + className);
   }
   
-  private User getUser(AdminWrapper wrapper, String user, int serverId) throws ConnectException, AdminException {
+  private User getUser(AdminItf wrapper, String user, int serverId) throws ConnectException, AdminException {
   	User[] users = wrapper.getUsers(serverId);
   	for (int i = 0; i < users.length; i++) {
   		if (users[i].getName().equals(user))
@@ -161,7 +161,7 @@ public class DestinationMSF implements ManagedServiceFactory {
   	return null;
   }
   
-  private void setRight(AdminWrapper wrapper,
+  private void setRight(AdminItf wrapper,
   		Destination dest, 
   		int serverId, 
   		boolean freeReading, 
@@ -223,7 +223,7 @@ public class DestinationMSF implements ManagedServiceFactory {
   	}
   }
 
-  private void setDestinationDMQ(AdminWrapper wrapper, Destination dest, String dmq, int dmqSid) throws ConnectException, AdminException {
+  private void setDestinationDMQ(AdminItf wrapper, Destination dest, String dmq, int dmqSid) throws ConnectException, AdminException {
   	if (logmon.isLoggable(BasicLevel.DEBUG))
   		logmon.log(BasicLevel.DEBUG, "setDestinationDMQ(" + wrapper + ", " + dest + ", " + dmq + ", " +  + dmqSid +')');
   	Destination[] destinations = wrapper.getDestinations(dmqSid);
@@ -264,7 +264,7 @@ public class DestinationMSF implements ManagedServiceFactory {
   		String adminHost = (String) properties.get(ADMIN_HOST);
   		String adminPort = (String) properties.get(ADMIN_PORT);
   		String adminUser = (String) properties.get(ADMIN_USERNAME);
-  		AdminWrapper wrapper = AdminWrapperHelper.getWrapper(bundleContext, new AdminStruct(wrapperName, adminHost, adminPort, adminUser));
+  		AdminItf wrapper = AdminWrapperHelper.getWrapper(bundleContext, new AdminStruct(wrapperName, adminHost, adminPort, adminUser));
   		
   		int sid = 0;
   		String name = (String) properties.get(NAME);

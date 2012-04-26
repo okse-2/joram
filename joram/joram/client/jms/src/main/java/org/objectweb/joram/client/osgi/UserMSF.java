@@ -31,7 +31,7 @@ import java.util.Properties;
 import org.objectweb.joram.client.jms.Destination;
 import org.objectweb.joram.client.jms.Queue;
 import org.objectweb.joram.client.jms.admin.AdminException;
-import org.objectweb.joram.client.jms.admin.AdminWrapper;
+import org.objectweb.joram.client.jms.admin.AdminItf;
 import org.objectweb.joram.client.jms.admin.User;
 import org.objectweb.joram.shared.security.SimpleIdentity;
 import org.objectweb.util.monolog.api.BasicLevel;
@@ -132,7 +132,7 @@ public class UserMSF implements ManagedServiceFactory {
     return value != null && value.length() > 0;
   }
   
-  private void setUserDMQ(AdminWrapper wrapper, User user, String dmq, int dmqSid) throws ConnectException, AdminException {
+  private void setUserDMQ(AdminItf wrapper, User user, String dmq, int dmqSid) throws ConnectException, AdminException {
   	if (logmon.isLoggable(BasicLevel.DEBUG))
   		logmon.log(BasicLevel.DEBUG, "setUserDMQ(" + wrapper + ", " + user + ", " + dmq + ", " +  + dmqSid +')');
   	Destination[] destinations = wrapper.getDestinations(dmqSid);
@@ -163,7 +163,7 @@ public class UserMSF implements ManagedServiceFactory {
   		String adminHost = (String) properties.get(ADMIN_HOST);
   		String adminPort = (String) properties.get(ADMIN_PORT);
   		String adminUser = (String) properties.get(ADMIN_USERNAME);
-  		AdminWrapper wrapper = AdminWrapperHelper.getWrapper(bundleContext, new AdminStruct(wrapperName, adminHost, adminPort, adminUser));
+  		AdminItf wrapper = AdminWrapperHelper.getWrapper(bundleContext, new AdminStruct(wrapperName, adminHost, adminPort, adminUser));
 
   		if (user == null) {
   			String name = (String) properties.get(NAME);
