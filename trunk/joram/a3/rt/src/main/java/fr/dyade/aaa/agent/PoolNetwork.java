@@ -305,6 +305,13 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
       sessions[idx] = new NetSession(getName(), id);
       sessions[idx].init();
 
+      try {
+        MXWrapper.registerMBean(new NetSessionWrapper(this, id),
+                                "AgentServer", getMBeanName(id));
+      } catch (Exception exc) {
+        logmon.log(BasicLevel.WARN, getName() + ".addServer - jmx failed: " + getMBeanName(id), exc);
+      }
+
       if (logmon.isLoggable(BasicLevel.DEBUG)) {
         StringBuffer strbuf = new StringBuffer();
         strbuf.append(getName()).append(" after addServer:");
@@ -340,6 +347,12 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
     // First we have to verify that the server is defined.
     // Be careful, this test is already done in superclass.
     if (index(id) < 0) return;
+
+    try {
+      MXWrapper.unregisterMBean("AgentServer", getMBeanName(id));
+    } catch (Exception exc) {
+      logmon.log(BasicLevel.WARN, getName() + ".delServer - jmx failed: " + getMBeanName(id), exc);
+    }
 
     try {
       super.delServer(id);
@@ -400,7 +413,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
             MXWrapper.registerMBean(new NetSessionWrapper(this, servers[i]),
                                     "AgentServer", getMBeanName(servers[i]));
           } catch (Exception exc) {
-            logmon.log(BasicLevel.ERROR, getName() + " jmx failed", exc);
+            logmon.log(BasicLevel.WARN, getName() + ".start - jmx failed: " + getMBeanName(servers[i]), exc);
           }
         }
       }
@@ -443,7 +456,7 @@ public class PoolNetwork extends StreamNetwork implements PoolNetworkMBean {
         try {
           MXWrapper.unregisterMBean("AgentServer", getMBeanName(sessions[i].sid));
         } catch (Exception exc) {
-          logmon.log(BasicLevel.WARN, getName() + " jmx failed", exc);
+          logmon.log(BasicLevel.WARN, getName() + ".stop - jmx failed: " + getMBeanName(sessions[i].sid), exc);
         }
         if (sessions[i].isRunning()) {
           sessions[i].stop();
