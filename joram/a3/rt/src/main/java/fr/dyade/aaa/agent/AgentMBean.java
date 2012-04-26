@@ -64,11 +64,29 @@ public interface AgentMBean {
   public int getReactNb();
   
   /**
+   * Returns true if the agent profiling is on.
+   * 
+   * @see fr.dyade.aaa.agent.EngineMBean#isAgentProfiling()
+   */
+  public boolean isAgentProfiling();
+  
+  /**
+   * Sets the agent profiling.
+   * If true, the cumulative time of reaction and commit is kept for each agent.
+   * 
+   * @see fr.dyade.aaa.agent.EngineMBean#setAgentProfiling(boolean)
+   */
+  public void setAgentProfiling(boolean agentProfiling);
+  
+  
+  /**
+   * Returns the total reaction time calculated for this agent.
    * @return the reactTime
    */
   public long getReactTime();
-  
+
   /**
+   * Returns the total commit time calculated for this agent.
    * @return the commitTime
    */
   public long getCommitTime();
