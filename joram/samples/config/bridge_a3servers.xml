@@ -7,7 +7,7 @@
     <service class="org.objectweb.joram.mom.proxies.tcp.TcpProxyService" args="16011" />
     
     <!-- Service handling the connection to the foreign JMS server using "cf" connection factory -->
-    <service class="org.objectweb.joram.mom.dest.jms.JMSConnectionService" args="cf" />
+    <service class="org.objectweb.joram.mom.dest.jms.JMSConnectionService" args="scn://localhost:16400/?name=cnx%26cf=cf%26jndiFactoryClass=fr.dyade.aaa.jndi2.client.NamingContextFactory" />
   </server>
 
 </config>
