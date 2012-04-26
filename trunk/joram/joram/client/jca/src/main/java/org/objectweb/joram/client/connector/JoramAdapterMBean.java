@@ -180,14 +180,6 @@ public interface JoramAdapterMBean {
   public String getDefaultDMQId(short serverId) throws ConnectException, AdminException;
 
   /**
-   * Unset the default dead message queue for the local server.
-   * 
-   * @throws ConnectException
-   * @throws AdminException
-   */
-  public void resetDefaultDMQ() throws ConnectException, AdminException;
-
-  /**
    * Unset the default dead message queue for the given server.
    * 
    * @param serverId Unique identifier of the hiven server.
@@ -440,7 +432,7 @@ public interface JoramAdapterMBean {
   /**
    * Path to the directory containing JORAM's configuration files
    * (<code>a3servers.xml</code>, <code>a3debug.cfg</code>
-   * and admin file), needed when starting the collocated JORAM server.
+   * and admin file), needed when StartJoramServer is set to true.
    */
   public String getPlatformConfigDir();
 
@@ -502,4 +494,34 @@ public interface JoramAdapterMBean {
    * @exception AdminException  If the request fails.
    */
   public String getConfiguration() throws ConnectException, AdminException;
+  
+  /**
+   * The persistence directory of the JORAM server to start,
+   * needed when StartJoramServer is set to true.
+   * 
+   * @return the persistence directory.
+   */
+  public String getStorage();
+  
+  /** 
+   * The Joram resource adapter jndi name.
+   * 
+   * @return the Joram resource adapter jndi name. 
+   */
+  public String getJndiName();
+  
+  /** 
+   * login name for administrator. 
+   */
+  public String getRootName();
+  
+  /** 
+   * Identity class needed for authentication 
+   */
+  public String getIdentityClass();
+  
+  /** 
+   * true if the resource adapter start the JoramServer 
+   */
+  public Boolean getStartJoramServer();
 }
