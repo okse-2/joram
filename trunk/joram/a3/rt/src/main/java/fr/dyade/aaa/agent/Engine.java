@@ -951,7 +951,6 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
         while (isRunning) {
           agent = null;
           canStop = true;
-          profiling = agentProfiling;
 
           // Get a notification, then execute the right reaction.
           try {
@@ -1026,6 +1025,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
             }
           }
 
+          profiling = agentProfiling || agent.agentProfiling;
           if (profiling) {
             start = System.currentTimeMillis();
           }

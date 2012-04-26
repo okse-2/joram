@@ -85,6 +85,30 @@ public abstract class Agent implements AgentMBean, Serializable {
     return reactNb;
   }
 
+  /**
+   * Boolean value indicating if the agent profiling is on.
+   * If true, the cumulative time of reaction and commit is kept for this agent.
+   */
+  public boolean agentProfiling = false;
+  
+  /**
+   * Returns true if the agent profiling is on.
+   * 
+   * @see fr.dyade.aaa.agent.EngineMBean#isAgentProfiling()
+   */
+  public boolean isAgentProfiling() {
+    return this.agentProfiling;
+  }
+  
+  /**
+   * Sets the agent profiling.
+   * 
+   * @see fr.dyade.aaa.agent.EngineMBean#setAgentProfiling(boolean)
+   */
+  public void setAgentProfiling(boolean agentProfiling) {
+    this.agentProfiling = agentProfiling;
+  }
+
   transient long reactTime = 0L;
 
   /**
