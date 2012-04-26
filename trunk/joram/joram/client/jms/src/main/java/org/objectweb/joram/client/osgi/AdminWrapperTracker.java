@@ -22,6 +22,7 @@
  */
 package org.objectweb.joram.client.osgi;
 
+import org.objectweb.joram.client.jms.admin.AdminItf;
 import org.objectweb.joram.client.jms.admin.AdminWrapper;
 import org.objectweb.util.monolog.api.BasicLevel;
 import org.objectweb.util.monolog.api.Logger;
@@ -46,7 +47,7 @@ public class AdminWrapperTracker {
 	public AdminWrapperTracker(final BundleContext bundleContext, String name, String host, String port, String user) throws InvalidSyntaxException {
 		StringBuffer buff = new StringBuffer();
 		buff.append("(&");
-		buff.append("(").append(Constants.OBJECTCLASS).append("=").append(AdminWrapper.class.getName()).append(")");
+		buff.append("(").append(Constants.OBJECTCLASS).append("=").append(AdminItf.class.getName()).append(")");
 		if (name != null)
 			buff.append("(").append(NAME).append("=").append(name).append(")");
 		if (host != null)
@@ -64,10 +65,10 @@ public class AdminWrapperTracker {
 		serviceTracker.open();
   }
 	
-	public AdminWrapper getAdminWrapper() {
-		AdminWrapper wrapper = null;
+	public AdminItf getAdminWrapper() {
+	  AdminItf wrapper = null;
     try {
-	    wrapper = (AdminWrapper) serviceTracker.waitForService(30000);
+	    wrapper = (AdminItf) serviceTracker.waitForService(30000);
     } catch (InterruptedException e) {
     	if (logmon.isLoggable(BasicLevel.DEBUG))
     		logmon.log(BasicLevel.DEBUG, "AdminWrapperTracker.getAdminWrapper", e);    	
