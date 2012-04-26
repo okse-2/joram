@@ -77,7 +77,7 @@ import fr.dyade.aaa.common.Debug;
  * connection to a given JORAM server, and provides administration and
  * monitoring methods at a server/platform level.
  */
-public class AdminWrapper {
+public class AdminWrapper implements AdminItf {
   /** The description of the server the module is connected to. */
   private Server server = null;
   
