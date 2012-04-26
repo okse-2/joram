@@ -477,8 +477,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
       addFixedAgentId(agent.getId());
     }
     if (agent.logmon == null)
-      agent.logmon = Debug.getLogger(fr.dyade.aaa.agent.Debug.A3Agent +
-                                     ".#" + AgentServer.getServerId());
+      agent.logmon = Debug.getLogger(Agent.class.getName());
     agent.save();
 
     // Memorize the agent creation and ...
@@ -543,36 +542,41 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     if (logmon.isLoggable(BasicLevel.DEBUG))
       logmon.log(BasicLevel.DEBUG,
                  getName() + ", garbage: " + agents.size() + '/' + NbMaxAgents + '+' + fixedAgentIdList.size() + ' ' + now);
+    
     long deadline = now - NbMaxAgents;
     Agent[] ag = new Agent[agents.size()];
     int i = 0;
     for (Enumeration<Agent> e = agents.elements() ; e.hasMoreElements() ;) {
       ag[i++] = e.nextElement();
     }
-    for (i--; i>=0; i--) {
-      if ((ag[i].last <= deadline) && (!ag[i].fixed)) {
-        if (logmon.isLoggable(BasicLevel.DEBUG))
-          logmon.log(BasicLevel.DEBUG,
-                     "Agent" + ag[i].id + " [" + ag[i].name + "] garbaged");
-        agents.remove(ag[i].id);
-        try {
-          // Set current agent running in order to allow from field fixed
-          // for sendTo during agentFinalize (We assume that only Engine
-          // use this method).
-          agent = ag[i];
-          ag[i].agentFinalize(false);
-        } catch (Exception exc) {
-          logmon.log(BasicLevel.ERROR,
-                     "Agent" + ag[i].id + " [" + ag[i].name + "] error during agentFinalize", exc);
-        } finally {
-          agent = null;
+    
+    Agent old = agent;
+    try {
+      for (i--; i>=0; i--) {
+        if ((ag[i].last <= deadline) && (!ag[i].fixed)) {
+          if (logmon.isLoggable(BasicLevel.DEBUG))
+            logmon.log(BasicLevel.DEBUG,
+                       "Agent" + ag[i].id + " [" + ag[i].name + "] garbaged");
+          agents.remove(ag[i].id);
+          try {
+            // Set current agent running in order to allow from field fixed
+            // for sendTo during agentFinalize (We assume that only Engine
+            // use this method).
+            agent = ag[i];
+            ag[i].agentFinalize(false);
+            agent = old;
+          } catch (Exception exc) {
+            logmon.log(BasicLevel.ERROR,
+                       "Agent" + ag[i].id + " [" + ag[i].name + "] error during agentFinalize", exc);
+          }
+          ag[i] = null;
         }
-        ag[i] = null;
       }
+    } finally {
+      agent = old;
     }
 
-    logmon.log(BasicLevel.DEBUG,
-               getName() + ", garbage: " + agents.size());
+    logmon.log(BasicLevel.DEBUG, getName() + ", garbage: " + agents.size());
   }
 
   /**
@@ -691,6 +695,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
   throws IOException, ClassNotFoundException, Exception {
     Agent ag = null;
     if ((ag = Agent.load(id)) != null) {
+      Agent old = agent;
       try {
         // Set current agent running in order to allow from field fixed
         // for sendTo during agentInitialize (We assume that only Engine
@@ -698,13 +703,14 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
         agent = ag;
         ag.agentInitialize(false);
       } catch (Throwable exc) {
-        agent = null;
         // AF: May be we have to delete the agent or not to allow
         // reaction on it.
         logmon.log(BasicLevel.ERROR,
                    getName() + "Can't initialize Agent" + ag.id + " [" + ag.name + "]",
                    exc);
         throw new Exception(getName() + "Can't initialize Agent" + ag.id);
+      } finally {
+        agent = old;
       }
       if (ag.logmon == null)
         ag.logmon = Debug.getLogger(fr.dyade.aaa.agent.Debug.A3Agent +
@@ -1050,8 +1056,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
               }
             } catch (Exception exc) {
               logmon.log(BasicLevel.ERROR,
-                         getName() + ": Uncaught exception during react, " +
-                         agent + ".react(" + msg.from + ", " + msg.not + ")",
+                         getName() + ": Uncaught exception during react, " + agent + ".react(" + msg.from + ", " + msg.not + ")",
                          exc);
               switch (recoveryPolicy) {
               case RP_EXC_NOT:
