@@ -951,7 +951,7 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
     try {
       long start = 0L;
       long end = 0L;
-      boolean profiling;
+      boolean profiling = agentProfiling;
       
       main_loop:
         while (isRunning) {
@@ -1031,14 +1031,15 @@ class Engine implements Runnable, MessageConsumer, EngineMBean {
             }
           }
 
-          profiling = agentProfiling || agent.agentProfiling;
-          if (profiling) {
-            start = System.currentTimeMillis();
-          }
           if (agent != null) {
             if (logmon.isLoggable(BasicLevel.DEBUG))
               logmon.log(BasicLevel.DEBUG,
                          getName() + ": " + agent + ".react(" + msg.from + ", " + msg.getStamp() + ", " + msg.not + ")");
+            
+            profiling = agentProfiling || agent.agentProfiling;
+            if (profiling) {
+              start = System.currentTimeMillis();
+            }
             
 //            if (AgentServer.sdf != null) {
 //              // SDF generation
