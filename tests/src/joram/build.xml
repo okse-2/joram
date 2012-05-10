@@ -5823,16 +5823,56 @@
 	
 	<target name="distribution.test3" depends="init.a3props,compile"
 	          description=" --> test distribution async mode (ON and OFF) on a distribution Queue">
+	  <antcall target="test.run" inheritAll="true">
+	    <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+	    <param name="className" value="joram.distribution.DistributionTest3"/>
+	    <param name="a3conf" value="distribution/a3servers.xml"/>
+	  	<param name="jvmargs" value="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,address=5000,suspend=n"/>
+	    <param name="testid" value="distribution.test3"/>
+	    <param name="args" value=""/>
+	    <param name="manifest.mf" value="joram/distribution/manifest.mf"/>
+	    <param name="include.classes" value="joram/distribution/*Handler*.class"/>
+	  </antcall>
+	</target>
+	
+	<!-- amqp test -->
+	<target name="amqp.pkill" depends="init.a3props,compile"
+	        description=" --> test AMQP Persistence Kill">
 	    <antcall target="test.run" inheritAll="true">
 	      <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
-	      <param name="className" value="joram.distribution.DistributionTest3"/>
-	      <param name="a3conf" value="distribution/a3servers.xml"/>
-	    	<param name="jvmargs" value="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,address=5000,suspend=n"/>
-	      <param name="testid" value="distribution.test3"/>
+	      <param name="testid" value="amqp.PersistenceKillTest"/>
+	      <param name="className" value="joram.amqp.PersistenceKillTest"/>
+	      <param name="jndiconf" value=""/>
+	      <param name="a3conf" value="amqp/a3servers.xml"/>
+	      <param name="jvmargs" value=""/>
 	      <param name="args" value=""/>
-	      <param name="manifest.mf" value="joram/distribution/manifest.mf"/>
-	      <param name="include.classes" value="joram/distribution/*Handler*.class"/>
 	    </antcall>
 	  </target>
+	
+	<target name="amqp.simple" depends="init.a3props,compile"
+	        description=" --> test AMQP Persistence simple">
+	  <antcall target="test.run" inheritAll="true">
+		  <param name="transaction" value="fr.dyade.aaa.util.NTransaction"/>
+		  <param name="testid" value="amqp.PersistenceSimpleTest"/>
+		  <param name="className" value="joram.amqp.PersistenceSimpleTest"/>
+		  <param name="jndiconf" value=""/>
+		  <param name="a3conf" value="amqp/a3servers.xml"/>
+		  <param name="jvmargs" value=""/>
+		  <param name="args" value=""/>
+		</antcall>
+  </target>
+	
+	<target name="amqp.queue" depends="init.a3props,compile"
+		          description=" --> test AMQP queue declaration">
+		    <antcall target="test.run" inheritAll="true">
+		      <param name="transaction" value="fr.dyade.aaa.util.NullTransaction"/>
+		      <param name="testid" value="amqp.QueueTest"/>
+		      <param name="className" value="joram.amqp.QueueTest"/>
+		      <param name="jndiconf" value=""/>
+		      <param name="a3conf" value="amqp/a3servers.xml"/>
+		      <param name="jvmargs" value=""/>
+		      <param name="args" value=""/>
+		    </antcall>
+		  </target>
   
 </project>
