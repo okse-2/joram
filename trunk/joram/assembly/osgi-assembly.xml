@@ -39,6 +39,7 @@
         <include>org.apache.felix:org.apache.felix.shell.remote</include>
         <include>org.apache.felix:org.apache.felix.shell.tui</include>
         <include>org.osgi:org.osgi.compendium</include>
+        <include>org.ow2.joram:joram-mom-amqp</include>
       </includes>
       <useProjectArtifact>false</useProjectArtifact>
       <unpack>false</unpack>
