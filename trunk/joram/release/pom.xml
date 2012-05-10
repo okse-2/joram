@@ -111,6 +111,11 @@
                 </artifactItem>
                 <artifactItem>
                   <groupId>org.ow2.joram</groupId>
+                  <artifactId>joram-mom-amqp</artifactId>
+                  <version>${joram.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.ow2.joram</groupId>
                   <artifactId>jndi-client</artifactId>
                   <version>${joram.version}</version>
                 </artifactItem>
@@ -212,6 +217,11 @@
                     <artifactItem>
                       <groupId>org.ow2.joram</groupId>
                       <artifactId>joram-mom-core</artifactId>
+                      <version>${joram.version}</version>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.ow2.joram</groupId>
+                      <artifactId>joram-mom-amqp</artifactId>
                       <version>${joram.version}</version>
                     </artifactItem>
                     <artifactItem>
@@ -379,6 +389,12 @@
     <dependency>
       <groupId>org.ow2.joram</groupId>
       <artifactId>joram-mom-core</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.ow2.joram</groupId>
+      <artifactId>joram-mom-amqp</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>

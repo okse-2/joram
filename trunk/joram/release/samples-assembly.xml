@@ -33,6 +33,7 @@
         <include>org.objectweb.joram:jcup</include>
         <include>org.ow2.joram:joram-shared</include>
         <include>org.ow2.joram:joram-mom-core</include>
+        <include>org.ow2.joram:joram-mom-amqp</include>
         <include>org.ow2.joram:joram-client-jms</include>
         <include>org.ow2.joram:a3-common</include>
         <include>org.ow2.joram:a3-rt</include>
