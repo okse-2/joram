@@ -17,5 +17,6 @@
   <modules>
   	<module>core</module>
   	<module>extensions</module>
+    <module>amqp</module>
   </modules>
 </project>
