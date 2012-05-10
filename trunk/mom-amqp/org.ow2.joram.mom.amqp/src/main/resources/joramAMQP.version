@@ -1,2 +1,0 @@
-joram.amqp.version = ${version.filter.value}
-joram.version = ${joram.version}
