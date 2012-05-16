@@ -40,7 +40,7 @@ public class MessageWTOConverter {
    */
   public static MessageWTO getMessageWTO(MessageView msg) {
 
-    MessageWTO result = new MessageWTO(msg.getId(), msg.getExpiration(), msg.getTimestamp(),
+    MessageWTO result = new MessageWTO(msg.getIdentifier(), msg.getExpiration(), msg.getTimestamp(),
         msg.getDeliveryCount(), msg.getPriority(), msg.getText(), msg.getType(), msg.getProperties());
 
     return result;
