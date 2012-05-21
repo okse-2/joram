@@ -79,6 +79,7 @@ public class MultiSessionConsumer extends MessageConsumerListener
       boolean queueMode,
       boolean durable,
       String selector,
+      String destName,
       String targetName,
       ServerSessionPool sessionPool,
       int queueMessageReadMax, 
@@ -87,7 +88,7 @@ public class MultiSessionConsumer extends MessageConsumerListener
       RequestMultiplexer reqMultiplexer,
       Connection connection,
       int maxMessages) {
-    super(queueMode, durable, selector, targetName, 
+    super(queueMode, durable, selector, destName, targetName, 
         null, queueMessageReadMax,
         topicActivationThreshold,
         topicPassivationThreshold, topicAckBufferMax,
@@ -95,7 +96,7 @@ public class MultiSessionConsumer extends MessageConsumerListener
     if (logger.isLoggable(BasicLevel.DEBUG))
       logger.log(BasicLevel.DEBUG, "MultiSessionConsumer.<init>(" +
           queueMode + ',' + durable + ',' + selector + ',' + 
-          targetName + ',' + sessionPool + ',' +
+          destName + ',' + targetName + ',' + sessionPool + ',' +
           queueMessageReadMax + ',' +
           topicActivationThreshold + ',' + topicPassivationThreshold + ',' +
           topicAckBufferMax + ',' + 
